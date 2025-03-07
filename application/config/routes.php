@@ -52,8 +52,3 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['default_controller'] = 'Home';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
-// $route['Super/Kementerian'] = 'Super/Kementerian';
-// $route['KelolaInstansi'] = 'KelolaInstansi/index'; // Halaman utama
-// $route['KelolaInstansi/restore_page'] = 'KelolaInstansi/restore_page'; // Halaman restore
-// $route['Super/DeleteKementerian/(:num)'] = 'Super/DeleteKementerian/$1'; 
-// $route['Super/RestoreKementerian'] = 'Super/RestoreKementerian';
