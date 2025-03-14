@@ -150,32 +150,16 @@
             </div>
         </div>
     </div>
-    <!-- jquery
-		============================================ -->
-    <script src="../js/vendor/jquery-1.12.4.min.js"></script>
-    <!-- bootstrap JS
-		============================================ -->
+    <script src="../js/vendor/jquery-1.12.4.min.js"></script>>
     <script src="../js/bootstrap.min.js"></script>
-    <!-- wow JS
-		============================================ -->
     <script src="../js/wow.min.js"></script>
-    <!-- price-slider JS
-		============================================ -->
     <script src="../js/jquery-price-slider.js"></script>
-    <!-- owl.carousel JS
-		============================================ -->
     <script src="../js/owl.carousel.min.js"></script>
-    <!-- scrollUp JS
-		============================================ -->
     <script src="../js/jquery.scrollUp.min.js"></script>
-    <!-- meanmenu JS
-		============================================ -->
     <script src="../js/meanmenu/jquery.meanmenu.js"></script>
     <script src="../js/scrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
     <script src="../js/data-table/jquery.dataTables.min.js"></script>
     <script src="../js/data-table/data-table-act.js"></script>
-    <!-- main JS
-		============================================ -->
 	<script src="../js/main.js"></script>
     <script>
         var BaseURL = '<?=base_url()?>'
