@@ -83,4 +83,51 @@ class Super extends CI_Controller {
       echo 'Gagal Hapus Data!';
     }
   }
+
+    public function Isu() {
+        $Header['Halaman'] = 'Isu';
+        $Data['Isu'] = $this->db->select('isu_strategis.*, kementerian.NamaKementerian')
+                                ->from('isu_strategis')
+                                ->join('kementerian', 'kementerian.Id = isu_strategis.KementerianId')
+                                ->get()->result_array();
+        $Data['Kementerian'] = $this->db->get('kementerian')->result_array();
+        $this->load->view('Super/header', $Header);
+        $this->load->view('Super/isu', $Data);
+    }
+
+    public function GetIsu($Id) {
+        echo json_encode($this->db->get_where('isu_strategis', array('Id' => $Id))->row_array());
+    }
+
+    public function InputIsu() {
+        $this->db->insert('isu_strategis', $_POST);
+        if ($this->db->affected_rows()) {
+            echo '1';
+        } else {
+            echo 'Gagal Menyimpan Data!';
+        }
+    }
+
+    public function EditIsu() {
+        $this->db->where('Id', $_POST['Id']);
+        $this->db->update('isu_strategis', $_POST);
+        if ($this->db->affected_rows()) {
+            echo '1';
+        } else {
+            echo 'Gagal Update Data!';
+        }
+    }
+
+    public function DeleteIsu($Id) {
+      $this->db->where('Id', $Id);
+      $this->db->delete('isu_strategis');
+      if ($this->db->affected_rows()) {
+          echo '1'; 
+      } else {
+          echo 'Gagal Menghapus Data!';
+      }
+  }
 }
+
+
+
