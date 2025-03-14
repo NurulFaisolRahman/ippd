@@ -138,4 +138,43 @@ class Admin extends CI_Controller {
       echo 'Gagal Hapus Data!';
     }
   }
+  
+  public function Cascading() {
+    $Header['Halaman'] = 'Cascading';
+    // Hanya ambil data yang belum dihapus (deleted_at IS NULL)
+    $Data['Cascading'] = $this->db->where('deleted_at IS NULL')->get('cascading')->result_array();
+    $Data['Instansi'] = $this->db->get('akun_instansi')->result_array();
+    $this->load->view('Admin/header', $Header);
+    $this->load->view('Admin/Cascading', $Data);
+}
+
+public function TambahCascading() {
+    $data = [
+        'indikator_tujuan' => $this->input->post('indikator_tujuan'),
+        'indikator_sasaran' => $this->input->post('indikator_sasaran'),
+        'pd_penanggung_jawab' => implode(', ', $this->input->post('pd_penanggung_jawab')),
+        'pd_penunjang' => implode(', ', $this->input->post('pd_penunjang')),
+    ];
+    $this->db->insert('cascading', $data);
+    echo $this->db->affected_rows() ? '1' : '0';
+}
+
+public function EditCascading() {
+    $id = $this->input->post('id');
+    $data = [
+        'indikator_tujuan' => $this->input->post('indikator_tujuan'),
+        'indikator_sasaran' => $this->input->post('indikator_sasaran'),
+        'pd_penanggung_jawab' => implode(', ', $this->input->post('pd_penanggung_jawab')),
+        'pd_penunjang' => implode(', ', $this->input->post('pd_penunjang')),
+    ];
+    $this->db->where('id', $id)->update('cascading', $data);
+    echo $this->db->affected_rows() ? '1' : '0';
+}
+
+public function HapusCascading() {
+    $id = $this->input->post('id');
+    // Update deleted_at untuk soft delete
+    $this->db->where('id', $id)->update('cascading', ['deleted_at' => date('Y-m-d H:i:s')]);
+    echo $this->db->affected_rows() ? '1' : '0';
+}
 }

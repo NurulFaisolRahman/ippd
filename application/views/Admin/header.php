@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="../css/responsive.css">
+    
 </head>
 
 <body>
@@ -41,8 +42,10 @@
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <ul class="nav nav-tabs notika-menu-wrap menu-it-icon-pro">
                         <li <?=$Halaman == 'AkunInstansi' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#AkunInstansi"><i class="notika-icon notika-form"></i> <b>AKUN INSTANSI</b></a></li>
+                        <li <?=$Halaman == 'Cascading' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#Cascading"><i class="notika-icon notika-house"></i> <b>CASCADING</b></a></li>
                         <li <?=$Halaman == 'RPJPN2025' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#RPJPN2025"><i class="notika-icon notika-house"></i> <b>RPJPN 2025</b></a></li>
                     </ul>
+        
                     <div class="tab-content custom-menu-content">
                         <div id="RPJPN2025" class="tab-pane in <?=$Halaman == 'RPJPN2025' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
                             <ul class="notika-main-menu-dropdown">
@@ -57,6 +60,13 @@
                                 </li>
                                 <li>
                                     <a href="<?=base_url('Admin/Sasaran')?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="Cascading" class="tab-pane in <?=$Halaman == 'Cascading' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
+                            <ul class="notika-main-menu-dropdown">
+                                <li>
+                                    <a href="<?=base_url('Admin/Cascading')?>"><i class="notika-icon notika-form"></i> <b>Menejemen Cascading</b></a>
                                 </li>
                             </ul>
                         </div>
