@@ -4,10 +4,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Admin extends CI_Controller {
 	
 
-	// public function __construct() {
-  //       parent::__construct();
+	public function __construct() {
+		parent::__construct();
+		date_default_timezone_set("Asia/Jakarta");
   //       $this->load->database(); // Memuat database
-  //   }
+    }
 
 	/**
 	 * Index Page for this controller.
@@ -141,15 +142,20 @@ class Admin extends CI_Controller {
   
   public function Cascading() {
     $Header['Halaman'] = 'Cascading';
-    // Hanya ambil data yang belum dihapus (deleted_at IS NULL)
-    $Data['Cascading'] = $this->db->where('deleted_at IS NULL')->get('cascading')->result_array();
+	$Data['Cascading'] = $this->db->select('cascading.*, misi.Misi')
+                                ->from('cascading')
+                                ->join('misi', 'misi.Id = cascading.misi_id')
+                                ->get()->result_array();
+    // $Data['Cascading'] = $this->db->where('deleted_at IS NULL')->get('cascading')->result_array();
     $Data['Instansi'] = $this->db->get('akun_instansi')->result_array();
+    $Data['Misi'] = $this->db->get('misi')->result_array(); // Ambil data misi dari database
     $this->load->view('Admin/header', $Header);
     $this->load->view('Admin/Cascading', $Data);
 }
 
 public function TambahCascading() {
     $data = [
+		'misi_id' => $this->input->post('misi_id'),
         'indikator_tujuan' => $this->input->post('indikator_tujuan'),
         'indikator_sasaran' => $this->input->post('indikator_sasaran'),
         'pd_penanggung_jawab' => implode(', ', $this->input->post('pd_penanggung_jawab')),
@@ -162,6 +168,7 @@ public function TambahCascading() {
 public function EditCascading() {
     $id = $this->input->post('id');
     $data = [
+		'misi_id' => $this->input->post('misi_id'),
         'indikator_tujuan' => $this->input->post('indikator_tujuan'),
         'indikator_sasaran' => $this->input->post('indikator_sasaran'),
         'pd_penanggung_jawab' => implode(', ', $this->input->post('pd_penanggung_jawab')),
