@@ -89,6 +89,7 @@ class Super extends CI_Controller {
         $Data['Isu'] = $this->db->select('isu_strategis.*, kementerian.NamaKementerian')
                                 ->from('isu_strategis')
                                 ->join('kementerian', 'kementerian.Id = isu_strategis.KementerianId')
+                                ->where('isu_strategis.deleted_at IS NULL')
                                 ->get()->result_array();
         $Data['Kementerian'] = $this->db->get('kementerian')->result_array();
         $this->load->view('Super/header', $Header);
@@ -99,34 +100,50 @@ class Super extends CI_Controller {
         echo json_encode($this->db->get_where('isu_strategis', array('Id' => $Id))->row_array());
     }
 
+    
     public function InputIsu() {
-        $this->db->insert('isu_strategis', $_POST);
-        if ($this->db->affected_rows()) {
-            echo '1';
-        } else {
-            echo 'Gagal Menyimpan Data!';
-        }
+      $ListIsuStrategis = array();
+      foreach ($_POST['NamaIsu'] as $key => $value) {
+        $Temp['KementerianId'] = $_POST['KementerianId'];
+        $Temp['Tahun'] = $_POST['Tahun'];
+        $Temp['NamaIsu'] = $value;
+        array_push($ListIsuStrategis,$Temp);
+      }
+      $this->db->insert_batch('isu_strategis', $ListIsuStrategis);
+      if ($this->db->affected_rows()) {
+          echo '1';
+      } else {
+          echo 'Gagal Menyimpan Data!';
+      }
     }
 
     public function EditIsu() {
-        $this->db->where('Id', $_POST['Id']);
-        $this->db->update('isu_strategis', $_POST);
-        if ($this->db->affected_rows()) {
-            echo '1';
-        } else {
-            echo 'Gagal Update Data!';
-        }
-    }
-
-    public function DeleteIsu($Id) {
-      $this->db->where('Id', $Id);
-      $this->db->delete('isu_strategis');
+      
+      $_POST['updated_at'] = date('Y-m-d H:i:s');
+  
+      $this->db->where('Id', $_POST['Id']);
+      $this->db->update('isu_strategis', $_POST);
+  
       if ($this->db->affected_rows()) {
           echo '1'; 
       } else {
-          echo 'Gagal Menghapus Data!';
+          echo 'Gagal Update Data!';
       }
   }
+
+  public function DeleteIsu($Id) {
+    $data = array(
+        'deleted_at' => date('Y-m-d H:i:s')
+    );
+    $this->db->where('Id', $Id);
+    $this->db->update('isu_strategis', $data);
+    if ($this->db->affected_rows() > 0) {
+        echo '1';
+    } else {
+        echo "Gagal Menghapus Data !";
+    }
+}
+  
 }
 
 

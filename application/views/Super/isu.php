@@ -168,7 +168,7 @@
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
                                                 <input type="hidden" class="form-control input-sm" id="Id"> 
-                                                <textarea class="form-control" rows="3" id="namaIsu" wrap="off"></textarea> 
+                                                <input type="text" class="form-control input-sm" id="namaIsu">
                                             </div>
                                         </div>
                                     </div>
@@ -208,7 +208,7 @@
         
         $("#Input").click(function() {
             var IsuStrategis = { 
-                NamaIsu: $("#NamaIsu").val(),
+                NamaIsu: $("#NamaIsu").val().split("\n"),
                 KementerianId: $("#KementerianId").val(),
                 Tahun: $("#Tahun").val()
             };
