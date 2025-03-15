@@ -31,7 +31,9 @@
                                 <?php $No = 1; foreach ($Cascading as $key) { ?>
                                 <tr>
                                     <td style="vertical-align: middle;" class="text-center"><?= $No++ ?></td>
-                                    <td style="vertical-align: middle;"><?= $key['Misi'] ?></td>
+                                    <td style="vertical-align: middle;">
+                                        <?= $key['Misi'] ?> Tahun: <?= $key['tahun'] ?> <!-- Gabungkan Misi dan Tahun -->
+                                    </td>
                                     <td style="vertical-align: middle;"><?= $key['indikator_tujuan'] ?></td>
                                     <td style="vertical-align: middle;"><?= str_replace("\n", ", ", $key['indikator_sasaran']) ?></td>
                                     <td style="vertical-align: middle;"><?= $key['pd_penanggung_jawab'] ?></td>
@@ -47,7 +49,8 @@
                                                     data-pd-penanggung-jawab="<?= $key['pd_penanggung_jawab'] ?>" 
                                                     data-pd-penunjang="<?= $key['pd_penunjang'] ?>">
                                                 <i class="notika-icon notika-edit"></i> <!-- Ikon Edit -->
-                                            </button>
+                                            </button><br><br>
+                                            
 
                                             <!-- Tombol Hapus -->
                                             <button class="btn btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" 
@@ -77,15 +80,15 @@
             </div>
             <div class="modal-body">
                 <form id="FormTambahCascading">
-                    <div class="form-group">
-                        <label for="Misi">Misi</label>
-                        <select class="form-control" id="Misi" name="misi_id" required>
-                            <option value="">Pilih Misi</option>
-                            <?php foreach ($Misi as $misi) { ?>
-                                <option value="<?= $misi['Id'] ?>"><?= $misi['Misi'] ?></option>
-                            <?php } ?>
-                        </select>
-                    </div>
+                <div class="form-group">
+                    <label for="Misi">Misi</label>
+                    <select class="form-control" id="Misi" name="misi" required>
+                        <option value="">Pilih Misi</option>
+                        <?php foreach ($Misi as $misi) { ?>
+                            <option value="<?= $misi['Misi'] ?>"><?= $misi['Misi'] ?> Tahun: <?= $misi['Tahun'] ?></option>
+                        <?php } ?>
+                    </select>
+                </div>
                     <div class="form-group">
                         <label for="IndikatorTujuan">Indikator Tujuan (IKU)</label>
                         <textarea class="form-control" id="IndikatorTujuan" name="indikator_tujuan" rows="3" required></textarea>
@@ -132,10 +135,10 @@
                     <input type="hidden" id="EditId" name="id">
                     <div class="form-group">
                         <label for="EditMisi">Misi</label>
-                        <select class="form-control" id="EditMisi" name="misi_id" required>
+                        <select class="form-control" id="EditMisi" name="misi" required>
                             <option value="">Pilih Misi</option>
                             <?php foreach ($Misi as $misi) { ?>
-                                <option value="<?= $misi['Id'] ?>"><?= $misi['Misi'] ?></option>
+                                <option value="<?= $misi['Misi'] ?>"><?= $misi['Misi'] ?> Tahun: <?= $misi['Tahun'] ?></option>
                             <?php } ?>
                         </select>
                     </div>
