@@ -10,99 +10,187 @@
   <meta content="" name="description">
   <meta content="" name="keywords">
 
-	<!-- Favicons -->
-	<link href="img/favicon.ico" rel="icon">
-  <!-- <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon"> -->
+  <!-- Favicons -->
+  <link href="img/favicon.ico" rel="icon">
 
-	<!-- Google Fonts -->
-	<link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Jost:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Jost:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
 
   <!-- Vendor CSS Files -->
-	<!-- <link href="<?=base_url('')?>" rel="stylesheet"> -->
-	<link href="assets/vendor/aos/aos.css" rel="stylesheet">
-	<link href="assets/signin/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+  <link href="assets/signin/css/bootstrap.min.css" rel="stylesheet">
   <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-	<link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
-	<link href="assets/vendor/remixicon/remixicon.css" rel="stylesheet">
+  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+  <link href="assets/vendor/remixicon/remixicon.css" rel="stylesheet">
   <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
 
-	<!-- Template Main CSS File -->
-	<link href="assets/css/style.css" rel="stylesheet">
-	<link href="assets/signin/fonts/icomoon/style.css" rel="stylesheet">
-	<link href="assets/signin/css/owl.carousel.min.css" rel="stylesheet">
-	<!-- <link href="assets/signin/css/style.css" rel="stylesheet"> -->
+  <!-- Template Main CSS File -->
+  <link href="assets/css/style.css" rel="stylesheet">
+  <link href="assets/signin/fonts/icomoon/style.css" rel="stylesheet">
+  <link href="assets/signin/css/owl.carousel.min.css" rel="stylesheet">
 
-  <!-- =======================================================
-  * Template Name: Arsha - v4.3.0
-  * Template URL: https://bootstrapmade.com/arsha-free-bootstrap-html-template-corporate/
-  * Author: BootstrapMade.com
-  * License: https://bootstrapmade.com/license/
-  ======================================================== -->
+  <style>
+     body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      color: black;
+      background: url('assets/img/bglogin.jpg') no-repeat center center fixed;
+      background-size: cover;
+      height: 100vh;
+    }
+    .bglogin {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+	.card {
+      background: rgb(255, 255, 255); /* Transparansi 20% */
+      border-radius: 15px;
+      backdrop-filter: blur(10px); /* Efek blur */
+      border: 1px solid rgba(255, 255, 255, 0.2); /* Border transparan */
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      padding: 2rem;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    .form-control {
+      border-radius: 25px;
+      padding: 10px 20px;
+      background: rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: black;
+    }
+    .form-control:focus {
+      background: rgba(0, 0, 0, 0.2);
+      border-color: rgba(0, 0, 0, 0.4);
+      box-shadow: none;
+    }
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    .btn {
+      border-radius: 25px;
+      padding: 10px 20px;
+      transition: all 0.3s ease;
+      background: #ff4c4c;
+      border: none;
+      color: white;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(255, 76, 76, 0.4);
+    }
+    .input-group-text {
+      background: rgba(0, 0, 0, 0.1);
+      border: rgba(0, 0, 0, 0.2);
+      color: black;
+      border-radius: 25px 0 0 25px;
+    }
+    h3 {
+      font-family: 'Poppins', sans-serif;
+    }
+    .header-text {
+      text-align: center;
+      margin-bottom: auto;
+      margin-top: auto;
+      font-size: 3rem;
+      color: white;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    .header-text  {
+      color:rgb(0, 0, 0);
+    }
+    .image-container {
+      width: 50%;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .image-container img {
+      border-radius: 15px;
+      width: 100%; /* Lebar gambar mengikuti container */
+      height: auto; /* Tinggi disesuaikan secara proporsional */
+      max-height: 500px; /* Maksimum tinggi gambar */
+      object-fit: cover; /* Memastikan gambar menutupi area tanpa distorsi */
+      
+    }
+    /* Menyamakan tinggi gambar dengan card form login */
+    .row {
+      align-items: stretch; /* Memastikan kedua kolom memiliki tinggi yang sama */
+    }
+    .col-md-6 {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
 </head>
 
 <body>
 
-  <!-- ======= Header ======= -->
-  <header id="header" class="fixed-top ">
-    <div class="container d-flex align-items-center">
-			<nav id="navbar" class="navbar" style="display: none;">
-				<ul>
-					<li><a class="nav-link scrollto" href="#about">About</a></li>
-				</ul>
-			</nav>
-    </div>
-  </header><!-- End Header -->
-
-  <!-- ======= Hero Section ======= -->
-  <section id="hero" class="d-flex align-items-center">
-
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-6 d-flex flex-column justify-content-center pt-4 pt-lg-0 order-2 order-lg-1" data-aos="fade-up" data-aos-delay="200">
-          <h1>Better Solutions For Your Governance</h1>
-          <!-- <h2>We are team of talented designers making websites with Bootstrap</h2> -->
-          <div class="d-flex justify-content-center justify-content-lg-start">
-            <a href="#login" class="btn-get-started">Get Started</a>
-            <!-- <a href="https://www.youtube.com/watch?v=jDDaplaOz7Q" class="glightbox btn-watch-video"><i class="bi bi-play-circle"></i><span>Watch Video</span></a> -->
+  <main id="main">
+    <section id="login" class="bglogin">
+      <div class="container" data-aos="fade-down">
+        <div class="header-text">
+          Better Solution For Your Governance
+        </div>
+		<br>
+        <div class="row">
+          <!-- Gambar Statis di Sebelah Kiri -->
+          <div class="col-md-6 image-container">
+            <img src="assets/img/hero-img.png" alt="Gambar Statis">
+          </div>
+          <!-- Form Login di Sebelah Kanan -->
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <div class="mb-4 text-center ">
+                  <h3 style="color:black;"><b>LOGIN</b></h3>
+                </div>
+                <div class="form-group first">
+                  <label for="Username"><b>Username</b></label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                    <input type="text" class="form-control" id="Username" autocomplete="off">
+                  </div>
+                </div>
+                <div class="form-group last">
+                  <label for="Password"><b>Password</b></label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                    <input type="password" class="form-control" id="Password" autocomplete="off">
+                  </div>
+                </div>
+                <button class="btn btn-block" id="Login"><b>Login</b></button>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="col-lg-6 order-1 order-lg-2 hero-img" data-aos="zoom-in" data-aos-delay="200">
-          <img src="assets/img/hero-img.png" class="img-fluid animated" alt="">
-        </div>
       </div>
-		</div>
-	</section>
+    </section>
+  </main>
 
-	<main id="main">
-		<section id="login" style="height: 100vh;" class="cta">
-			<div class="container" data-aos="fade-up">
-				<div class="row d-flex align-items-center mt-4">
-					<div class="col-md-6">
-						<img src="assets/img/why-us.png" alt="Image" class="img-fluid">
-					</div>
-					<div class="col-md-6 contents">
-						<div class="row justify-content-center">
-							<div class="col-md-8">
-								<div class="mb-4">
-								<h3><b>SIGN IN ACCOUNT</b></h3>
-							</div>
-							<div class="form-group first">
-								<label for="Username" class="text-white"><b>Username</b></label>
-								<input type="text" class="form-control form-control-sm font-weight-bold" id="Username" autocomplete="off">
-							</div>
-							<div class="form-group last">
-								<label for="Password" class="text-white"><b>Password</b></label>
-								<input type="password" class="form-control form-control-sm font-weight-bold" id="Password" autocomplete="off">
-							</div>
-							<button class="btn text-white btn-block bg-danger" id="Login"><b>SIGN IN</b></button>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</section>
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+
+  <!-- Template Main JS File -->
+  <script src="assets/js/main.js"></script>
+
+</body>
+
+</html>
+
+		
 		<section id="services" class="services section-bg">
       <div class="container" data-aos="fade-up">
 
