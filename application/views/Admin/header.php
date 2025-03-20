@@ -41,9 +41,9 @@
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <ul class="nav nav-tabs notika-menu-wrap menu-it-icon-pro">
-                        <li <?=$Halaman == 'AkunInstansi' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#AkunInstansi"><i class="notika-icon notika-form"></i> <b>AKUN INSTANSI</b></a></li>
-                        <li <?=$Halaman == 'Cascading' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#Cascading"><i class="notika-icon notika-house"></i> <b>CASCADING</b></a></li>
                         <li <?=$Halaman == 'RPJPN2025' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#RPJPN2025"><i class="notika-icon notika-house"></i> <b>RPJPN 2025</b></a></li>
+                        <li <?=$Halaman == 'AkunInstansi' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#AkunInstansi"><i class="notika-icon notika-support"></i> <b>INSTANSI</b></a></li>
+                        <li <?=$Halaman == 'Cascading' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#Cascading"><i class="notika-icon notika-form"></i> <b>CASCADING</b></a></li>
                     </ul>
         
                     <div class="tab-content custom-menu-content">

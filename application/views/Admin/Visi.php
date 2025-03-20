@@ -5,12 +5,10 @@
                     <div class="data-table-list">
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
-                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputVisi"><i class="notika-icon notika-house"></i> <b>Input Visi</b></button>
+                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputVisi"><i class="notika-icon notika-edit"></i> <b>Input Visi</b></button>
                             </div>
-                                <!-- <h2>Basic Example</h2>
-                                <p>It's just that simple. Turn your simple table into a sophisticated data table and offer your users a nice experience and great features without any effort.</p> -->
-                            </div>
-                            <div class="table-responsive">
+                        </div>
+                        <div class="table-responsive">
                             <table id="data-table-basic" class="table table-striped">
                                 <thead>
                                     <tr>
@@ -28,7 +26,8 @@
                                         <td style="vertical-align: middle;"><?=$key['Tahun']?></td>
                                         <td>
                                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                                <button class="btn btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['Visi'].'|'.$key['Tahun']?>"><i class="notika-icon notika-next"></i></button>
+                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['Visi'].'|'.$key['Tahun']?>"><i class="notika-icon notika-next"></i></button>
+                                                <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -42,7 +41,7 @@
         </div>
     </div>
     <div class="modal fade" id="ModalInputVisi" role="dialog">
-        <div class="modal-dialog modal-large" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
+        <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -59,7 +58,7 @@
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <input type="text" class="form-control input-sm" id="Tahun">
+                                                    <input type="text" class="form-control input-sm" id="Tahun" placeholder="Input Hanya Angka">
                                                 </div>
                                             </div>
                                         </div>
@@ -73,7 +72,7 @@
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <textarea class="form-control" rows="3" id="Visi"></textarea>
+                                                    <textarea class="form-control" rows="3" id="Visi" placeholder="Input Disini"></textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -96,7 +95,7 @@
         </div>
     </div>
     <div class="modal fade" id="ModalEditVisi" role="dialog">
-        <div class="modal-dialog modal-large" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
+        <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -164,6 +163,7 @@
     <script>
         var BaseURL = '<?=base_url()?>'
         jQuery(document).ready(function($) {
+            
             $("#Input").click(function() {
                 if (isNaN($("#Tahun").val()) || $("#Tahun").val() == "") {
                     alert('Input Tahun Belum Benar!')
@@ -208,6 +208,17 @@
                         }
                     })                         
                 }
+            })
+
+            $(".Hapus").click(function() {
+                var Visi = { Id: $(this).attr('Hapus') }
+                $.post(BaseURL+"Admin/HapusVisi", Visi).done(function(Respon) {
+                    if (Respon == '1') {
+                        window.location = BaseURL+"Admin/Visi"
+                    } else {
+                        alert(Respon)
+                    }
+                })                         
             })
         })  
     </script>

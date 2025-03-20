@@ -6,7 +6,7 @@
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
                                 <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputKementerian">
-                                    <i class="notika-icon notika-plus"></i> <b>Tambah Kementerian</b>
+                                    <i class="notika-icon notika-edit"></i> <b>Input Kementerian</b>
                                 </button>
                             </div>
                         </div>
@@ -26,8 +26,8 @@
                                         <td style="vertical-align: middle;"><?= $key['NamaKementerian'] ?></td>
                                         <td>
                                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                                <button class="btn btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['NamaKementerian'].'|'.$key['Alamat']?>"><i class="notika-icon notika-next"></i></button>
-                                                <button class="btn btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
+                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['NamaKementerian']?>"><i class="notika-icon notika-next"></i></button>
+                                                <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -43,7 +43,7 @@
     <!-- Data Table area End-->
     <!-- Modal Input Kementerian -->
     <div class="modal fade" id="ModalInputKementerian" role="dialog">
-        <div class="modal-dialog modal-large" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
+        <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">×</button>

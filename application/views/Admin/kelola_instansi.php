@@ -28,8 +28,8 @@
                                         <td style="vertical-align: middle;"><?=$key['password']?></td>
                                         <td>
                                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                                <button class="btn btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['id'].'|'.$key['nama'].'|'.$key['password']?>"><i class="notika-icon notika-edit"></i></button>
-                                                <button class="btn btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['id']?>"><i class="notika-icon notika-trash"></i></button>
+                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['id'].'|'.$key['nama'].'|'.$key['password']?>"><i class="notika-icon notika-edit"></i></button>
+                                                <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['id']?>"><i class="notika-icon notika-trash"></i></button>
                                             </div>
                                         </td>
                                     </tr>

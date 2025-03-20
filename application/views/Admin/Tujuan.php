@@ -7,8 +7,6 @@
                             <div class="button-icon-btn sm-res-mg-t-30">
                                 <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputTujuan"><i class="notika-icon notika-edit"></i> <b>Input Tujuan</b></button>
                             </div>
-                            <!-- <h2>Basic Example</h2>
-                            <p>It's just that simple. Turn your simple table into a sophisticated data table and offer your users a nice experience and great features without any effort.</p> -->
                         </div>
                         <div class="table-responsive">
                             <table id="data-table-basic" class="table table-striped">
@@ -28,7 +26,8 @@
                                         <td style="vertical-align: middle;"><?=$key['Tahun']?></td>
                                         <td>
                                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                            <button class="btn btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['Tujuan'].'|'.$key['Tahun']?>"><i class="notika-icon notika-next"></i></button>
+                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['Tahun'].'|'.$key['IdMisi'].'|'.$key['_Tujuan'].'|'.$key['Tujuan']?>"><i class="notika-icon notika-next"></i></button>
+                                                <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -56,13 +55,13 @@
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <input type="text" class="form-control input-sm" id="Tahun">
+                                                    <input type="text" class="form-control input-sm" id="Tahun" placeholder="Input Hanya Angka">
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-example-int form-horizental">
+                                <!-- <div class="form-example-int form-horizental">
                                     <div class="form-group">
                                         <div class="row">
                                             <div class="col-lg-2">
@@ -75,18 +74,36 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </div> -->
                                 <?php $Tujuan = explode("<br/>",$VMTS[0]['Tujuan']); ?>
+                                <div class="form-example-int form-horizental">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-lg-2">
+                                                <label class="hrzn-fm"><b>Misi</b></label>
+                                            </div>
+                                            <div class="col-lg-9">
+                                                <div class="nk-int-st">
+                                                    <select class="form-control" id="IdMisi">
+                                                        <?php foreach ($Misi as $k) { ?>
+                                                            <option value="<?=$k['Id']?>"><?=$k['Misi']?></option>
+                                                        <?php } ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div id="ListInputTujuan">
                                     <div class="form-example-int form-horizental">
                                         <div class="form-group">
                                             <div class="row">
                                                 <div class="col-lg-2">
-                                                    <label class="hrzn-fm"><b>Tujuan 1</b></label>
+                                                    <label class="hrzn-fm"><b>Tujuan</b></label>
                                                 </div>
                                                 <div class="col-lg-9">
                                                     <div class="nk-int-st">
-                                                        <textarea class="form-control" rows="3" id="Tujuan1"></textarea>
+                                                        <textarea class="form-control" rows="3" id="Tujuan" placeholder="Input Tujuan dari Misi Yang Dipilih"></textarea>
                                                     </div>
                                                 </div>
                                             </div>
@@ -101,7 +118,7 @@
                                                 <div class="col-lg-9">
                                                     <div class="nk-int-st">
                                                         <?php foreach ($Tujuan as $key => $value) { ?>
-                                                        <label><input style="margin-top: 10px;" type="checkbox"> <?=$value?></label><br>
+                                                            <label><input style="margin-top: 10px;" type="checkbox" name="_Tujuan" value="<?=$value?>"> <?=$value?></label><br>
                                                         <?php } ?>
                                                     </div>
                                                 </div>
@@ -126,7 +143,7 @@
         </div>
     </div>
     <div class="modal fade" id="ModalEditTujuan" role="dialog">
-        <div class="modal-dialog modal-large" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
+        <div class="modal-dialog modal-large" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);overflow-y: auto;max-height: 600px;">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -144,7 +161,7 @@
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
                                                     <input type="hidden" class="form-control input-sm" id="Id">
-                                                    <input type="text" class="form-control input-sm" id="tahun">
+                                                    <input type="text" class="form-control input-sm" id="_Tahun">
                                                 </div>
                                             </div>
                                         </div>
@@ -154,11 +171,47 @@
                                     <div class="form-group">
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Tujuan</b></label>
+                                                <label class="hrzn-fm"><b>Misi</b></label>
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <textarea class="form-control" rows="3" id="misi" wrap="off"></textarea>
+                                                    <select class="form-control" id="_IdMisi">
+                                                        <?php foreach ($Misi as $k) { ?>
+                                                            <option value="<?=$k['Id']?>"><?=$k['Misi']?></option>
+                                                        <?php } ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="ListInputTujuan">
+                                    <div class="form-example-int form-horizental">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-lg-2">
+                                                    <label class="hrzn-fm"><b>Tujuan</b></label>
+                                                </div>
+                                                <div class="col-lg-9">
+                                                    <div class="nk-int-st">
+                                                        <textarea class="form-control" rows="3" id="_Tujuan" placeholder="Input Tujuan dari Misi Yang Dipilih"></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-example-int form-horizental">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-lg-2">
+                                                    <label class="hrzn-fm"><b>Tujuan RPJPN</b></label>
+                                                </div>
+                                                <div class="col-lg-9">
+                                                    <div class="nk-int-st">
+                                                        <?php foreach ($Tujuan as $key => $value) { ?>
+                                                            <label><input style="margin-top: 10px;" type="checkbox" name="Tujuan_" value="<?=$value?>"> <?=$value?></label><br>
+                                                        <?php } ?>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -180,88 +233,46 @@
             </div>
         </div>
     </div>
-    <!-- jquery
-		============================================ -->
     <script src="../js/vendor/jquery-1.12.4.min.js"></script>
-    <!-- bootstrap JS
-		============================================ -->
     <script src="../js/bootstrap.min.js"></script>
-    <!-- wow JS
-		============================================ -->
     <script src="../js/wow.min.js"></script>
-    <!-- price-slider JS
-		============================================ -->
     <script src="../js/jquery-price-slider.js"></script>
-    <!-- owl.carousel JS
-		============================================ -->
     <script src="../js/owl.carousel.min.js"></script>
-    <!-- scrollUp JS
-		============================================ -->
     <script src="../js/jquery.scrollUp.min.js"></script>
-    <!-- meanmenu JS
-		============================================ -->
     <script src="../js/meanmenu/jquery.meanmenu.js"></script>
-    <!-- counterup JS
-		============================================ -->
-    <!-- <script src="../js/counterup/jquery.counterup.min.js"></script>
-    <script src="../js/counterup/waypoints.min.js"></script>
-    <script src="../js/counterup/counterup-active.js"></script> -->
-    <!-- mCustomScrollbar JS
-		============================================ -->
     <script src="../js/scrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
-    <!-- sparkline JS
-		============================================ -->
-    <!-- <script src="../js/sparkline/jquery.sparkline.min.js"></script>
-    <script src="../js/sparkline/sparkline-active.js"></script> -->
-    <!-- flot JS
-		============================================ -->
-    <!-- <script src="../js/flot/jquery.flot.js"></script>
-    <script src="../js/flot/jquery.flot.resize.js"></script>
-    <script src="../js/flot/flot-active.js"></script> -->
-    <!-- knob JS
-		============================================ -->
-    <!-- <script src="../js/knob/jquery.knob.js"></script>
-    <script src="../js/knob/jquery.appear.js"></script>
-    <script src="../js/knob/knob-active.js"></script> -->
-    <!--  Chat JS
-		============================================ -->
-    <!-- <script src="../js/chat/jquery.chat.js"></script> -->
-    <!--  todo JS
-		============================================ -->
-    <!-- <script src="../js/todo/jquery.todo.js"></script> -->
-	<!--  wave JS
-		============================================ -->
-    <!-- <script src="../js/wave/waves.min.js"></script>
-    <script src="../js/wave/wave-active.js"></script> -->
-    <!-- plugins JS
-		============================================ -->
-    <!-- <script src="../js/plugins.js"></script> -->
-    <!-- Data Table JS
-		============================================ -->
     <script src="../js/data-table/jquery.dataTables.min.js"></script>
     <script src="../js/data-table/data-table-act.js"></script>
-    <!-- main JS
-    ============================================ -->
     <script src="../js/main.js"></script>
     <script>
         var BaseURL = '<?=base_url()?>'
         jQuery(document).ready(function($) {
-            $("#JumlahTujuan").change(function (){
-                var JumlahTujuan = $("#JumlahTujuan").val()
-                var ListTujuan = ''
-                for (let i = 1; i <= JumlahTujuan; i++) {
-                    ListTujuan += '<div class="form-example-int form-horizental"><div class="form-group"><div class="row"><div class="col-lg-2"><label class="hrzn-fm"><b>Tujuan '+i+'</b></label></div><div class="col-lg-9"><div class="nk-int-st"><textarea class="form-control" rows="3" id="Tujuan'+i+'"></textarea></div></div></div></div></div><div class="form-example-int form-horizental"><div class="form-group"><div class="row"><div class="col-lg-2"><label class="hrzn-fm"><b>Tujuan RPJPN</b></label></div><div class="col-lg-9"><div class="nk-int-st"><?php foreach ($Tujuan as $key => $value) { ?><label><input style="margin-top: 10px;" type="checkbox"> <?=$value?></label><br><?php } ?></div></div></div></div></div>'
-                }
-                $("#ListInputTujuan").html(ListTujuan)
-            })
+            
+            // $("#JumlahTujuan").change(function (){
+            //     var JumlahTujuan = $("#JumlahTujuan").val()
+            //     var ListTujuan = ''
+            //     for (let i = 1; i <= JumlahTujuan; i++) {
+            //         ListTujuan += '<div class="form-example-int form-horizental"><div class="form-group"><div class="row"><div class="col-lg-2"><label class="hrzn-fm"><b>Tujuan '+i+'</b></label></div><div class="col-lg-9"><div class="nk-int-st"><textarea class="form-control" rows="3" id="Tujuan'+i+'"></textarea></div></div></div></div></div><div class="form-example-int form-horizental"><div class="form-group"><div class="row"><div class="col-lg-2"><label class="hrzn-fm"><b>Tujuan RPJPN</b></label></div><div class="col-lg-9"><div class="nk-int-st"><?php foreach ($Tujuan as $key => $value) { ?><label><input style="margin-top: 10px;" type="checkbox"> <?=$value?></label><br><?php } ?></div></div></div></div></div>'
+            //     }
+            //     $("#ListInputTujuan").html(ListTujuan)
+            // })
+
             $("#Input").click(function() {
+                var Tampung = []
+                $.each($("input[name='_Tujuan']:checked"), function(){
+                    Tampung.push($(this).val())
+                })
                 if (isNaN($("#Tahun").val()) || $("#Tahun").val() == "") {
                     alert('Input Tahun Belum Benar!')
                 } else if ($("#Tujuan").val() == "") {
                     alert('Input Tujuan Belum Benar!')
+                } else if (!Tampung.length) {
+                    alert("Mohon Checklist Tujuan RPJPN!")
                 } else {
-                    var Tujuan = { Tujuan: $("#Tujuan").val(),
-                                Tahun: $("#Tahun").val() }
+                    var Tujuan = { IdMisi: $("#IdMisi").val(),
+                                   _Tujuan: Tampung.join("$"),
+                                   Tujuan: $("#Tujuan").val(),
+                                   Tahun: $("#Tahun").val() }
                     $.post(BaseURL+"Admin/InputTujuan", Tujuan).done(function(Respon) {
                         if (Respon == '1') {
                             window.location = BaseURL+"Admin/Tujuan"
@@ -276,20 +287,33 @@
                 var Data = $(this).attr('Edit')
                 var Pisah = Data.split("|");
                 $("#Id").val(Pisah[0])
-                $("#misi").val(Pisah[1])
-                $("#tahun").val(Pisah[2])
+                $("#_Tahun").val(Pisah[1])
+                $("#_IdMisi").val(Pisah[2])
+                $("#_Tujuan").val(Pisah[4])
+                $("input[name='Tujuan_']").prop('checked', false);
+                Pisah[3].split("$").forEach(function(m) {
+                    $("input[name='Tujuan_'][value='" + m + "']").prop('checked', true);
+                });
                 $('#ModalEditTujuan').modal("show")
             })
 
             $("#Edit").click(function() {
-                if (isNaN($("#tahun").val())) {
+                var Tampung = []
+                $.each($("input[name='Tujuan_']:checked"), function(){
+                    Tampung.push($(this).val())
+                })
+                if (isNaN($("#_Tahun").val()) || $("#_Tahun").val() == "") {
                     alert('Input Tahun Belum Benar!')
-                } else if ($("#visi").val() == "") {
+                } else if ($("#_Tujuan").val() == "") {
                     alert('Input Tujuan Belum Benar!')
+                } else if (!Tampung.length) {
+                    alert("Mohon Checklist Tujuan RPJPN!")
                 } else {
-                    var Tujuan = { Tujuan: $("#misi").val(),
-                                Id: $("#Id").val(), 
-                                Tahun: $("#tahun").val() }
+                    var Tujuan = { Id: $("#Id").val(),
+                                   IdMisi: $("#_IdMisi").val(),
+                                   Tujuan: $("#_Tujuan").val(),
+                                   _Tujuan: Tampung.join("$"),
+                                   Tahun: $("#_Tahun").val() }
                     $.post(BaseURL+"Admin/EditTujuan", Tujuan).done(function(Respon) {
                         if (Respon == '1') {
                             window.location = BaseURL+"Admin/Tujuan"
@@ -298,6 +322,17 @@
                         }
                     })                         
                 }
+            })
+
+            $(".Hapus").click(function() {
+                var Tujuan = { Id: $(this).attr('Hapus') }
+                $.post(BaseURL+"Admin/HapusTujuan", Tujuan).done(function(Respon) {
+                    if (Respon == '1') {
+                        window.location = BaseURL+"Admin/Tujuan"
+                    } else {
+                        alert(Respon)
+                    }
+                })                         
             })
         })
     </script>

@@ -22,22 +22,16 @@
                                     </tr>
                                 </thead>
                             <tbody>
-                <?php $No = 1; foreach ($Isu as $key) { 
-                    $isuList = explode("\n", $key['NamaIsu']); 
-                    $formattedIsu = "";
-                    foreach ($isuList as $index => $isu) {
-                        $formattedIsu .= ($index + 1) . ". " . trim($isu) . "<br>"; 
-                    }
-                ?>
+                <?php $No = 1; foreach ($Isu as $key) { ?>
                 <tr>
                     <td style="vertical-align: middle;" class="text-center"><?=$No++?></td>
                     <td style="vertical-align: middle;"><?=$key['NamaKementerian']?></td>
-                    <td style="vertical-align: top;"><?=$formattedIsu?></td>
+                    <td style="vertical-align: top;"><?=$key['NamaIsu']?></td>
                     <td style="vertical-align: middle;"><?=$key['Tahun']?></td>
                     <td style="vertical-align: middle;"> 
                         <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                            <button class="btn btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id']?>"><i class="notika-icon notika-edit"></i></button>
-                            <button class="btn btn-danger danger-icon-notika btn-reco-mg btn-button-mg Delete" Delete="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
+                            <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id']?>"><i class="notika-icon notika-edit"></i></button>
+                            <button class="btn btn-sm btn-danger danger-icon-notika btn-reco-mg btn-button-mg Delete" Delete="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
                         </div>
                     </td>
                 </tr>
@@ -250,15 +244,15 @@
         });
 
         $(document).on("click", ".Delete", function() {
-    var Id = $(this).attr('Delete'); 
-    $.post(BaseURL + "Super/DeleteIsu/" + Id).done(function(Respon) {
-        if (Respon == '1') {
-            window.location = BaseURL + "Super/Isu"; 
-        } else {
-            alert("Gagal menghapus data!"); 
-        }
-    });
-});
+            var Id = $(this).attr('Delete'); 
+            $.post(BaseURL + "Super/DeleteIsu/" + Id).done(function(Respon) {
+                if (Respon == '1') {
+                    window.location = BaseURL + "Super/Isu"; 
+                } else {
+                    alert("Gagal menghapus data!"); 
+                }
+            });
+        });
     });
 
 </script>

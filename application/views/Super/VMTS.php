@@ -31,7 +31,7 @@
                                         <td style="vertical-align: middle;"><?=$key['Tahun']?></td>
                                         <td>
                                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                                <button class="btn btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id']?>"><i class="notika-icon notika-next"></i></button>
+                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id']?>"><i class="notika-icon notika-next"></i></button>
                                             </div>
                                         </td>
                                     </tr>

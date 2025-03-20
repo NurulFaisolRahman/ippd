@@ -42,7 +42,7 @@
                                         <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
 
                                             <!-- Tombol Edit -->
-                                            <button class="btn btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" 
+                                            <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" 
                                                     data-id="<?= $key['id'] ?>" 
                                                     data-indikator-tujuan="<?= $key['indikator_tujuan'] ?>" 
                                                     data-indikator-sasaran="<?= $key['indikator_sasaran'] ?>" 
@@ -53,7 +53,7 @@
                                             
 
                                             <!-- Tombol Hapus -->
-                                            <button class="btn btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" 
+                                            <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" 
                                                     data-id="<?= $key['id'] ?>">
                                                 <i class="notika-icon notika-trash"></i> <!-- Ikon Hapus -->
                                             </button>

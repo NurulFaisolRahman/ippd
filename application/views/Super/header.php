@@ -42,7 +42,6 @@
                     <ul class="nav nav-tabs notika-menu-wrap menu-it-icon-pro">
                         <li <?=$Halaman == 'VMTS' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#VMTS"><i class="notika-icon notika-form"></i> <b>VMTS</b></a></li>
                         <li <?=$Halaman == 'Kementerian' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#Kementerian"><i class="notika-icon notika-house"></i> <b>Kementerian</b></a></li>
-                        <li <?=$Halaman == 'Isu' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#Isu"><i class="notika-icon notika-house"></i> <b>Isu Strategis</b></a></li>
 
                     </ul>
                     <div class="tab-content custom-menu-content">
@@ -58,10 +57,6 @@
                                 <li>
                                     <a href="<?=base_url('Super/Kementerian')?>"><i class="notika-icon notika-form"></i> <b>Kelola Kementerian</b></a>
                                 </li>
-                            </ul>
-                        </div>
-                        <div id="Isu" class="tab-pane in <?=$Halaman == 'Isu' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
-                            <ul class="notika-main-menu-dropdown">
                                 <li>
                                     <a href="<?=base_url('Super/Isu')?>"><i class="notika-icon notika-form"></i> <b>Isu Strategis</b></a>
                                 </li>
