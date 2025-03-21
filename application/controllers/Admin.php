@@ -8,8 +8,9 @@ class Admin extends CI_Controller {
     date_default_timezone_set("Asia/Jakarta");
   }
 
-  public function GetVMTS($Id){
-    echo json_encode($this->db->get_where('vmts', array('Id' => $Id))->row_array());
+  public function GetSasaran(){
+    $Id = $this->input->post('id');
+    echo json_encode($this->db->get_where('sasaran', array('IdTujuan' => $Id))->result_array());
 	}
 
 	public function Visi(){
@@ -194,68 +195,40 @@ class Admin extends CI_Controller {
   
   public function Cascading() {
     $Header['Halaman'] = 'Cascading';
-    
-    // Ambil data cascading dengan join ke tabel misi
-    $Data['Cascading'] = $this->db->select('cascading.*, misi.Misi, misi.tahun') // Tambahkan kolom tahun
-                                  ->from('cascading')
-                                  ->join('misi', 'misi.Misi = cascading.misi') // Sesuaikan dengan kolom yang baru
-                                  ->get()->result_array();
-    
-    // Ambil data instansi dan misi
+    $Data['Cascading'] = $this->db->where('deleted_at IS NULL')->get('cascading')->result_array();
+    $Data['Tujuan'] = $this->db->query('SELECT * FROM `tujuan` WHERE tujuan.deleted_at IS NULL AND tujuan.Id IN (SELECT sasaran.IdTujuan FROM `sasaran`)')->result_array();
+    $IdTujuan = $this->db->limit(1)->get('sasaran')->row_array()['IdTujuan'];
+    $Data['Sasaran'] = $this->db->where('IdTujuan = ' . $IdTujuan . ' AND deleted_at IS NULL')->get('sasaran')->result_array();
     $Data['Instansi'] = $this->db->get('akun_instansi')->result_array();
-    $Data['Misi'] = $this->db->get('misi')->result_array(); // Ambil data misi dari database
-    
-    // Load view
     $this->load->view('Admin/header', $Header);
     $this->load->view('Admin/Cascading', $Data);
 }
 
 public function TambahCascading() {
-    // Ambil tahun dari tabel misi berdasarkan misi yang dipilih
-    $misi = $this->input->post('misi');
-    $tahun = $this->db->select('tahun')
-                       ->from('misi')
-                       ->where('Misi', $misi)
-                       ->get()
-                       ->row_array()['tahun'];
-
-    // Simpan data cascading dengan nama misi dan tahun
-    $data = [
-        'misi' => $misi, // Simpan nama misi
-        'tahun' => $tahun, // Simpan tahun
-        'indikator_tujuan' => $this->input->post('indikator_tujuan'),
-        'indikator_sasaran' => $this->input->post('indikator_sasaran'),
-        'pd_penanggung_jawab' => implode(', ', $this->input->post('pd_penanggung_jawab')),
-        'pd_penunjang' => implode(', ', $this->input->post('pd_penunjang')),
-    ];
-    
-    $this->db->insert('cascading', $data);
-    echo $this->db->affected_rows() ? '1' : '0';
+  $data = [
+      'IdTujuan' => $this->input->post('Tujuan'), // Simpan ID tujuan
+      'IdSasaran' => $this->input->post('Sasaran'), // Simpan ID Sasaran
+      'indikator_tujuan' => $this->input->post('indikator_tujuan'),
+      'indikator_sasaran' => $this->input->post('indikator_sasaran'),
+      'pd_penanggung_jawab' => implode(', ', $this->input->post('pd_penanggung_jawab')),
+      'pd_penunjang' => implode(', ', $this->input->post('pd_penunjang')),
+  ];
+  $this->db->insert('cascading', $data);
+  echo $this->db->affected_rows() ? '1' : '0';
 }
 
 public function EditCascading() {
-    $id = $this->input->post('id');
-
-    // Ambil tahun dari tabel misi berdasarkan misi yang dipilih
-    $misi = $this->input->post('misi');
-    $tahun = $this->db->select('tahun')
-                       ->from('misi')
-                       ->where('Misi', $misi)
-                       ->get()
-                       ->row_array()['tahun'];
-
-    // Update data cascading dengan nama misi dan tahun
-    $data = [
-        'misi' => $misi, // Simpan nama misi
-        'tahun' => $tahun, // Simpan tahun
-        'indikator_tujuan' => $this->input->post('indikator_tujuan'),
-        'indikator_sasaran' => $this->input->post('indikator_sasaran'),
-        'pd_penanggung_jawab' => implode(', ', $this->input->post('pd_penanggung_jawab')),
-        'pd_penunjang' => implode(', ', $this->input->post('pd_penunjang')),
-    ];
-    
-    $this->db->where('id', $id)->update('cascading', $data);
-    echo $this->db->affected_rows() ? '1' : '0';
+  $id = $this->input->post('id');
+  $data = [
+      'IdTujuan' => $this->input->post('EditTujuan'), // Simpan ID tujuan
+      'IdSasaran' => $this->input->post('EditSasaran'), // Simpan ID Sasaran
+      'indikator_tujuan' => $this->input->post('indikator_tujuan'),
+      'indikator_sasaran' => $this->input->post('indikator_sasaran'),
+      'pd_penanggung_jawab' => implode(', ', $this->input->post('pd_penanggung_jawab')),
+      'pd_penunjang' => implode(', ', $this->input->post('pd_penunjang')),
+  ];
+  $this->db->where('id', $id)->update('cascading', $data);
+  echo $this->db->affected_rows() ? '1' : '0';
 }
 
 public function HapusCascading() {

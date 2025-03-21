@@ -113,13 +113,22 @@
       align-items: center;
       justify-content: center;
     }
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-20px);
+      }
+    }
+
     .image-container img {
       border-radius: 15px;
       width: 100%; /* Lebar gambar mengikuti container */
       height: auto; /* Tinggi disesuaikan secara proporsional */
       max-height: 500px; /* Maksimum tinggi gambar */
       object-fit: cover; /* Memastikan gambar menutupi area tanpa distorsi */
-      
+      animation: float 2s ease-in-out infinite;
     }
     /* Menyamakan tinggi gambar dengan card form login */
     .row {
@@ -135,53 +144,62 @@
 
 <body>
 
-  <!-- ======= Header ======= -->
-  <header id="header" class="fixed-top ">
-    <div class="container d-flex align-items-center">
-			<nav id="navbar" class="navbar" style="display: none;">
-				<ul>
-					<li><a class="nav-link scrollto" href="#about">About</a></li>
-				</ul>
-			</nav>
-    </div>
-  </header><!-- End Header -->
-
-  <!-- ======= Hero Section ======= -->
-  <section id="hero" class="d-flex align-items-center">
-
-    <div class="container">
-      <div class="row">
-				<h2 class="text-white"><b>Better Solutions For Your Governance</b></h2>
-        <div class="col-lg-6 d-flex flex-column justify-content-center" data-aos="fade-up" data-aos-delay="200">
-          <!-- </div> -->
-					<div class="row d-flex align-items-center mb-5">
-						<div class="col-md-12 contents">
-							<div class="row justify-content-center">
-								<div class="col-md-8">
-									<div class="mb-0">
-								</div>
-								<div class="form-group first">
-									<label for="Username" class="text-white"><b>Username</b></label>
-									<input type="text" class="form-control form-control-sm font-weight-bold" id="Username" autocomplete="off">
-								</div>
-								<div class="form-group last">
-									<label for="Password" class="text-white"><b>Password</b></label>
-									<input type="password" class="form-control form-control-sm font-weight-bold" id="Password" autocomplete="off">
-								</div>
-								<button class="btn text-white btn-block bg-danger" id="Login"><b>SIGN IN</b></button>
-								</div>
-							</div>
-						</div>
-					</div>
+<main id="main">
+    <section id="login" class="bglogin">
+      <div class="container" data-aos="fade-down">
+        <div class="header-text">
+          Better Solution For Your Governance
         </div>
-        <div class="col-lg-6 order-1 order-lg-2 hero-img" data-aos="zoom-in" data-aos-delay="200">
-          <img src="assets/img/hero-img.png" class="img-fluid animated" alt="">
+		<br>
+        <div class="row">
+          <!-- Gambar Statis di Sebelah Kiri -->
+          <div class="col-md-6 image-container">
+            <img src="assets/img/hero-img.png" alt="Gambar Statis">
+          </div>
+          <!-- Form Login di Sebelah Kanan -->
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <div class="mb-4 text-center ">
+                  <h3 style="color:black;"><b>LOGIN</b></h3>
+                </div>
+                <div class="form-group first">
+                  <label for="Username"><b>Username</b></label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                    <input type="text" class="form-control" id="Username" autocomplete="off">
+                  </div>
+                </div>
+                <div class="form-group last">
+                  <label for="Password"><b>Password</b></label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                    <input type="password" class="form-control" id="Password" autocomplete="off">
+                  </div>
+                </div>
+                <button class="btn btn-block" id="Login"><b>Login</b></button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-		</div>
-	</section>
+    </section>
+  </main>
 
-	<main id="main">
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+
+  <!-- Template Main JS File -->
+  <script src="assets/js/main.js"></script>
+
+</body>
+
+</html>
+
+		
 		<section id="services" class="services section-bg">
       <div class="container" data-aos="fade-up">
 
@@ -326,49 +344,47 @@
 	<!-- Template Main JS File -->
 	<script src="assets/js/main.js"></script>
 	<script>
-		var BaseURL = '<?=base_url()?>'
-		jQuery(document).ready(function($) {
+    var BaseURL = '<?=base_url()?>'
+    jQuery(document).ready(function($) {
+      // Fungsi untuk melakukan login
+      function performLogin() {
+        var Login = { 
+          Username: $("#Username").val(),
+          Password: $("#Password").val() 
+        };
+        $.post(BaseURL + "Home/Login", Login).done(function(Respon) {
+          if (Respon == '1') {
+            if ($("#Username").val() == 'admin') {
+              window.location = BaseURL + "Super/VMTS";	
+            } else {
+              window.location = BaseURL + "Admin/Visi";
+            }
+          } else {
+            alert(Respon);
+          }
+        });
+      }
 
-			$('#Username').keypress(function(event){
-				var keycode = (event.keyCode ? event.keyCode : event.which);
-				if(keycode == '13'){
-					event.preventDefault();
-					document.getElementById("Login").click();  
-				}
-			});
+      // Event listener untuk tombol "Login"
+      $("#Login").click(function() {
+        performLogin();
+      });
 
-			$('#Password').keypress(function(event){
-				var keycode = (event.keyCode ? event.keyCode : event.which);
-				if(keycode == '13'){
-					event.preventDefault();
-					document.getElementById("Login").click();  
-				}
-			});
+      // Event listener untuk tombol "Enter" pada input field
+      $("#Username, #Password").keypress(function(event) {
+        if (event.which == 13) { // 13 adalah kode untuk tombol "Enter"
+          performLogin();
+        }
+      });
+    });
 
-			$("#Login").click(function() {
-				var Login = { Username: $("#Username").val(),
-											Password: $("#Password").val() }
-				$.post(BaseURL+"Home/Login", Login).done(function(Respon) {
-					if (Respon == '1') {
-						if ($("#Username").val() == 'admin') {
-							window.location = BaseURL+"Super/VMTS"	
-						} else {
-							window.location = BaseURL+"Admin/Visi"
-						}
-					} else {
-						alert(Respon)
-					}
-				})                         
-			})
-		})
-
-		$(window).on('hashchange', function() {
-			setTimeout(function() {
-				if (window.location.hash) {
-					history.replaceState('', document.title, window.location.href.split('#')[0]);
-				}
-			}, 100);
-		});
-	</script>
+    $(window).on('hashchange', function() {
+      setTimeout(function() {
+        if (window.location.hash) {
+          history.replaceState('', document.title, window.location.href.split('#')[0]);
+        }
+      }, 100);
+    });
+  </script>
 </body>
 </html>
