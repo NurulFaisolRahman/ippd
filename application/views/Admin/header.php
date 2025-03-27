@@ -1,5 +1,5 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed');?>
-<!doctype html>
+<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<!DOCTYPE html>
 <html class="no-js" lang="en">
 <head>
     <meta charset="utf-8">
@@ -17,15 +17,15 @@
     <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="../css/responsive.css">
-    
 </head>
 
 <body>
+    <!-- Header Top Area -->
     <div class="header-top-area">
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                    <h3 style="color: white;margin-top: 10px;">Admin</h3>
+                    <h3 style="color: white; margin-top: 10px;">Admin</h3>
                 </div>
                 <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12">
                     <div class="header-top-menu">
@@ -36,44 +36,60 @@
             </div>
         </div>
     </div>
+
+    <!-- Main Menu Area -->
     <div class="main-menu-area mg-tb-40">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <ul class="nav nav-tabs notika-menu-wrap menu-it-icon-pro">
-                        <li <?=$Halaman == 'RPJPN2025' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#RPJPN2025"><i class="notika-icon notika-house"></i> <b>RPJPN 2025</b></a></li>
-                        <li <?=$Halaman == 'AkunInstansi' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#AkunInstansi"><i class="notika-icon notika-support"></i> <b>INSTANSI</b></a></li>
-                        <li <?=$Halaman == 'Cascading' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#Cascading"><i class="notika-icon notika-form"></i> <b>CASCADING</b></a></li>
+                        <li <?php echo ($Halaman == 'RPJPN2025') ? 'class="active"' : ''; ?>>
+                            <a data-toggle="tab" href="#RPJPN2025"><i class="notika-icon notika-house"></i> <b>RPJPN 2025</b></a>
+                        </li>
+                        <li <?php echo ($Halaman == 'AkunInstansi') ? 'class="active"' : ''; ?>>
+                            <a data-toggle="tab" href="#AkunInstansi"><i class="notika-icon notika-support"></i> <b>INSTANSI</b></a>
+                        </li>
+                        <li <?php echo ($Halaman == 'Cascading') ? 'class="active"' : ''; ?>>
+                            <a data-toggle="tab" href="#Cascading"><i class="notika-icon notika-form"></i> <b>CASCADING</b></a>
+                        </li>
                     </ul>
-        
+
                     <div class="tab-content custom-menu-content">
-                        <div id="RPJPN2025" class="tab-pane in <?=$Halaman == 'RPJPN2025' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
+                        <!-- RPJPN 2025 Tab -->
+                        <div id="RPJPN2025" class="tab-pane in <?php echo ($Halaman == 'RPJPN2025') ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
                             <ul class="notika-main-menu-dropdown">
                                 <li>
-                                    <a href="<?=base_url('Admin/Visi')?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
+                                    <a href="<?= base_url('Admin/Visi') ?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Admin/Misi')?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
+                                    <a href="<?= base_url('Admin/Misi') ?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Admin/Tujuan')?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
+                                    <a href="<?= base_url('Admin/Tujuan') ?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Admin/Sasaran')?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
+                                    <a href="<?= base_url('Admin/Sasaran') ?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
                                 </li>
                             </ul>
                         </div>
-                        <div id="Cascading" class="tab-pane in <?=$Halaman == 'Cascading' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
+
+                        <!-- Cascading Tab -->
+                        <div id="Cascading" class="tab-pane in <?php echo ($Halaman == 'Cascading') ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
                             <ul class="notika-main-menu-dropdown">
                                 <li>
-                                    <a href="<?=base_url('Admin/Cascading')?>"><i class="notika-icon notika-form"></i> <b>Menejemen Cascading</b></a>
+                                    <a href="<?= base_url('Admin/Iku') ?>"><i class="notika-icon notika-form"></i> <b>IKU</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?= base_url('Admin/Ikd') ?>"><i class="notika-icon notika-form"></i> <b>IKD</b></a>
                                 </li>
                             </ul>
                         </div>
-                        <div id="AkunInstansi" class="tab-pane in <?=$Halaman == 'AkunInstansi' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
+
+                        <!-- Akun Instansi Tab -->
+                        <div id="AkunInstansi" class="tab-pane in <?php echo ($Halaman == 'AkunInstansi') ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
                             <ul class="notika-main-menu-dropdown">
                                 <li>
-                                    <a href="<?=base_url('Admin/AkunInstansi')?>"><i class="notika-icon notika-form"></i> <b>Daftar Instansi</b></a>
+                                    <a href="<?= base_url('Admin/AkunInstansi') ?>"><i class="notika-icon notika-form"></i> <b>Daftar Instansi</b></a>
                                 </li>
                             </ul>
                         </div>
