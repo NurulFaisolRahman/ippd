@@ -8,148 +8,316 @@ class Admin extends CI_Controller {
     date_default_timezone_set("Asia/Jakarta");
   }
 
+  public function VisiRPJPD(){
+		$Header['Halaman'] = 'RPJPD';
+		$Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjpd")->result_array();
+		$this->load->view('Admin/header',$Header);
+		$this->load->view('Admin/VisiRPJPD',$Data);
+	}
+
+  public function InputVisiRPJPD(){  
+    $this->db->insert('visirpjpd',$_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Menyimpan Data!';
+    }
+	}
+	
+	public function EditVisiRPJPD(){  
+		$this->db->where('Id',$_POST['Id']); 
+		$this->db->update('visirpjpd', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Update Data!';
+    }
+  }
+
+  public function HapusVisiRPJPD(){  
+		$_POST['deleted_at'] = date('Y-m-d H:i:s');
+		$this->db->where('Id',$_POST['Id'])->update('visirpjpd', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Hapus Data!';
+    }
+  }
+
+  public function MisiRPJPD(){
+		$Header['Halaman'] = 'RPJPD';
+    $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjpd")->result_array();
+    $Data['_Misi'] = $this->db->where("deleted_at IS NULL")->get("misirpjpn")->result_array();
+		$Data['Misi'] = $this->db->query("SELECT v.*,m.* FROM visirpjpd as v, misirpjpd as m WHERE m._Id = v.Id AND m.deleted_at IS NULL")->result_array();
+		$this->load->view('Admin/header',$Header);
+		$this->load->view('Admin/MisiRPJPD',$Data);
+	}
+
+  public function InputMisiRPJPD(){  
+    $this->db->insert('misirpjpd',$_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Menyimpan Data!';
+    }
+	}
+	
+	public function EditMisiRPJPD(){  
+		$this->db->where('Id',$_POST['Id']); 
+		$this->db->update('misirpjpd', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Update Data!';
+    }
+  }
+
+  public function HapusMisiRPJPD(){  
+		$_POST['deleted_at'] = date('Y-m-d H:i:s');
+		$this->db->where('Id',$_POST['Id'])->update('misirpjpd', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Hapus Data!';
+    }
+  }
+
+  public function TujuanRPJPD(){
+		$Header['Halaman'] = 'RPJPD';
+    $Data['Misi'] = $this->db->where("deleted_at IS NULL")->get("misirpjpd")->result_array();
+    $Data['_Tujuan'] = $this->db->where("deleted_at IS NULL")->get("Tujuanrpjpn")->result_array();
+		$Data['Tujuan'] = $this->db->query("SELECT v.*,m.Misi,t.* FROM visirpjpd as v, misirpjpd as m, tujuanrpjpd as t WHERE t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL")->result_array();
+		$this->load->view('Admin/header',$Header);
+		$this->load->view('Admin/TujuanRPJPD',$Data);
+	}
+
+  public function InputTujuanRPJPD(){  
+    $this->db->insert('tujuanrpjpd',$_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Menyimpan Data!';
+    }
+	}
+	
+	public function EditTujuanRPJPD(){  
+		$this->db->where('Id',$_POST['Id']); 
+		$this->db->update('tujuanrpjpd', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Update Data!';
+    }
+  }
+
+  public function HapusTujuanRPJPD(){  
+		$_POST['deleted_at'] = date('Y-m-d H:i:s');
+		$this->db->where('Id',$_POST['Id'])->update('tujuanrpjpd', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Hapus Data!';
+    }
+  }
+
+  public function SasaranRPJPD(){
+		$Header['Halaman'] = 'RPJPD';
+    $Data['Tujuan'] = $this->db->where("deleted_at IS NULL")->get("Tujuanrpjpd")->result_array();
+    $Data['_Sasaran'] = $this->db->where("deleted_at IS NULL")->get("Sasaranrpjpn")->result_array();
+		$Data['Sasaran'] = $this->db->query("SELECT v.*,t.Tujuan,s.* FROM visirpjpd as v, misirpjpd as m, tujuanrpjpd as t, sasaranrpjpd as s WHERE s._Id = t.Id AND t._Id = m.Id AND m._Id = v.Id AND s.deleted_at IS NULL")->result_array();
+		$this->load->view('Admin/header',$Header);
+		$this->load->view('Admin/SasaranRPJPD',$Data);
+	}
+
+  public function InputSasaranRPJPD(){  
+    $this->db->insert('sasaranrpjpd',$_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Menyimpan Data!';
+    }
+	}
+	
+	public function EditSasaranRPJPD(){  
+		$this->db->where('Id',$_POST['Id']); 
+		$this->db->update('sasaranrpjpd', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Update Data!';
+    }
+  }
+
+  public function HapusSasaranRPJPD(){  
+		$_POST['deleted_at'] = date('Y-m-d H:i:s');
+		$this->db->where('Id',$_POST['Id'])->update('sasaranrpjpd', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Hapus Data!';
+    }
+  }
+
+  public function VisiRPJMD(){
+		$Header['Halaman'] = 'RPJMD';
+		$Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjmd")->result_array();
+		$this->load->view('Admin/header',$Header);
+		$this->load->view('Admin/VisiRPJMD',$Data);
+	}
+
+  public function InputVisiRPJMD(){  
+    $this->db->insert('visirpjmd',$_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Menyimpan Data!';
+    }
+	}
+	
+	public function EditVisiRPJMD(){  
+		$this->db->where('Id',$_POST['Id']); 
+		$this->db->update('visirpjmd', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Update Data!';
+    }
+  }
+
+  public function HapusVisiRPJMD(){  
+		$_POST['deleted_at'] = date('Y-m-d H:i:s');
+		$this->db->where('Id',$_POST['Id'])->update('visirpjmd', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Hapus Data!';
+    }
+  }
+
+  public function MisiRPJMD(){
+		$Header['Halaman'] = 'RPJMD';
+    $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjmd")->result_array();
+    $Data['_Misi'] = $this->db->where("deleted_at IS NULL")->get("misirpjmn")->result_array();
+		$Data['Misi'] = $this->db->query("SELECT v.*,m.* FROM visirpjmd as v, misirpjmd as m WHERE m._Id = v.Id AND m.deleted_at IS NULL")->result_array();
+		$this->load->view('Admin/header',$Header);
+		$this->load->view('Admin/MisiRPJMD',$Data);
+	}
+
+  public function InputMisiRPJMD(){  
+    $this->db->insert('misirpjmd',$_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Menyimpan Data!';
+    }
+	}
+	
+	public function EditMisiRPJMD(){  
+		$this->db->where('Id',$_POST['Id']); 
+		$this->db->update('misirpjmd', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Update Data!';
+    }
+  }
+
+  public function HapusMisiRPJMD(){  
+		$_POST['deleted_at'] = date('Y-m-d H:i:s');
+		$this->db->where('Id',$_POST['Id'])->update('misirpjmd', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Hapus Data!';
+    }
+  }
+
+  public function TujuanRPJMD(){
+		$Header['Halaman'] = 'RPJMD';
+    $Data['Misi'] = $this->db->where("deleted_at IS NULL")->get("misirpjmd")->result_array();
+    $Data['_Tujuan'] = $this->db->where("deleted_at IS NULL")->get("tujuanrpjmn")->result_array();
+		$Data['Tujuan'] = $this->db->query("SELECT v.*,m.Misi,t.* FROM visirpjmd as v, misirpjmd as m, tujuanrpjmd as t WHERE t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL")->result_array();
+		$this->load->view('Admin/header',$Header);
+		$this->load->view('Admin/TujuanRPJMD',$Data);
+	}
+
+  public function InputTujuanRPJMD(){  
+    $this->db->insert('tujuanrpjmd',$_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Menyimpan Data!';
+    }
+	}
+	
+	public function EditTujuanRPJMD(){  
+		$this->db->where('Id',$_POST['Id']); 
+		$this->db->update('tujuanrpjmd', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Update Data!';
+    }
+  }
+
+  public function HapusTujuanRPJMD(){  
+		$_POST['deleted_at'] = date('Y-m-d H:i:s');
+		$this->db->where('Id',$_POST['Id'])->update('tujuanrpjmd', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Hapus Data!';
+    }
+  }
+
+  public function SasaranRPJMD(){
+		$Header['Halaman'] = 'RPJMD';
+    $Data['Tujuan'] = $this->db->where("deleted_at IS NULL")->get("Tujuanrpjmd")->result_array();
+    $Data['_Sasaran'] = $this->db->where("deleted_at IS NULL")->get("sasaranrpjmn")->result_array();
+		$Data['Sasaran'] = $this->db->query("SELECT v.*,t.Tujuan,s.* FROM visirpjmd as v, misirpjmd as m, tujuanrpjmd as t, sasaranrpjmd as s WHERE s._Id = t.Id AND t._Id = m.Id AND m._Id = v.Id AND s.deleted_at IS NULL")->result_array();
+		$this->load->view('Admin/header',$Header);
+		$this->load->view('Admin/SasaranRPJMD',$Data);
+	}
+
+  public function InputSasaranRPJMD(){  
+    $this->db->insert('sasaranrpjmd',$_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Menyimpan Data!';
+    }
+	}
+	
+	public function EditSasaranRPJMD(){  
+		$this->db->where('Id',$_POST['Id']); 
+		$this->db->update('sasaranrpjmd', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Update Data!';
+    }
+  }
+
+  public function HapusSasaranRPJMD(){  
+		$_POST['deleted_at'] = date('Y-m-d H:i:s');
+		$this->db->where('Id',$_POST['Id'])->update('sasaranrpjmd', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Hapus Data!';
+    }
+  }
+
   public function GetSasaran(){
     $Id = $this->input->post('id');
     echo json_encode($this->db->get_where('sasaran', array('IdTujuan' => $Id))->result_array());
 	}
 
-	public function Visi(){
-		$Header['Halaman'] = 'RPJPN2025';
-		$Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visi")->result_array();
+  public function Instansi() {
+    $Header['Halaman'] = 'AkunInstansi';
+		$Data['Akun'] = $this->db->query("SELECT * FROM `akun_instansi` WHERE deleted_at IS NULL")->result_array();
 		$this->load->view('Admin/header',$Header);
-		$this->load->view('Admin/Visi',$Data);
-	}
-
-  public function EditVisi(){  
-		$this->db->where('Id',$_POST['Id'])->update('visi', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Update Data!';
-    }
-	}
-
-  public function HapusVisi(){  
-		$_POST['deleted_at'] = date('Y-m-d H:i:s');
-		$this->db->where('Id',$_POST['Id'])->update('visi', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Hapus Data!';
-    }
-  }
-
-	public function Misi(){
-		$Header['Halaman'] = 'RPJPN2025';
-    $Data['Misi'] = $this->db->where("deleted_at IS NULL")->get("misi")->result_array();
-		$Data['VMTS'] = $this->db->get("vmts")->result_array();
-		$this->load->view('Admin/header',$Header);
-		$this->load->view('Admin/Misi',$Data);
-	}
-
-  public function InputMisi(){  
-    $this->db->insert('misi',$_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Menyimpan Data!';
-    }
-	}
-	
-	public function EditMisi(){  
-		$this->db->where('Id',$_POST['Id']); 
-		$this->db->update('misi', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Update Data!';
-    }
-  }
-
-  public function HapusMisi(){  
-		$_POST['deleted_at'] = date('Y-m-d H:i:s');
-		$this->db->where('Id',$_POST['Id'])->update('misi', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Hapus Data!';
-    }
-  }
-
-	public function Tujuan(){
-		$Header['Halaman'] = 'RPJPN2025';
-    $Data['Misi'] = $this->db->where("deleted_at IS NULL")->get("misi")->result_array();
-    $Data['Tujuan'] = $this->db->where("deleted_at IS NULL")->get("tujuan")->result_array();
-		$Data['VMTS'] = $this->db->get("vmts")->result_array();
-		$this->load->view('Admin/header',$Header);
-		$this->load->view('Admin/Tujuan',$Data);
-	}
-
-  public function InputTujuan(){  
-    $this->db->insert('tujuan',$_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Menyimpan Data!';
-    }
-	}
-	
-	public function EditTujuan(){  
-		$this->db->where('Id',$_POST['Id']); 
-		$this->db->update('tujuan', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Update Data!';
-    }
-  }
-
-  public function HapusTujuan(){  
-		$_POST['deleted_at'] = date('Y-m-d H:i:s');
-		$this->db->where('Id',$_POST['Id'])->update('tujuan', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Hapus Data!';
-    }
-  }
-
-	public function Sasaran(){
-		$Header['Halaman'] = 'RPJPN2025';
-    $Data['Tujuan'] = $this->db->where("deleted_at IS NULL")->get("tujuan")->result_array();
-    $Data['Sasaran'] = $this->db->where("deleted_at IS NULL")->get("sasaran")->result_array();
-		$Data['VMTS'] = $this->db->get("vmts")->result_array();
-		$this->load->view('Admin/header',$Header);
-		$this->load->view('Admin/Sasaran',$Data);
-	}
-
-  public function InputSasaran(){  
-    $this->db->insert('sasaran',$_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Menyimpan Data!';
-    }
-	}
-	
-	public function EditSasaran(){  
-		$this->db->where('Id',$_POST['Id']); 
-		$this->db->update('sasaran', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Update Data!';
-    }
-  }
-
-  public function HapusSasaran(){  
-		$_POST['deleted_at'] = date('Y-m-d H:i:s');
-		$this->db->where('Id',$_POST['Id'])->update('sasaran', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Hapus Data!';
-    }
+		$this->load->view('Admin/kelola_instansi',$Data);
   }
 
 	public function AkunInstansi() {
@@ -202,7 +370,7 @@ class Admin extends CI_Controller {
     $Data['Instansi'] = $this->db->get('akun_instansi')->result_array();
     $this->load->view('Admin/header', $Header);
     $this->load->view('Admin/Cascading', $Data);
-}
+  }
 
 public function TambahCascading() {
   $data = [

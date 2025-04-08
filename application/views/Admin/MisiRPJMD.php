@@ -5,17 +5,17 @@
                     <div class="data-table-list">
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
-                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputMisi"><i class="notika-icon notika-form"></i> <b>Input Misi</b></button>
+                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputMisi"><i class="notika-icon notika-edit"></i> <b>Input Misi</b></button>
                             </div>
                         </div>
                         <div class="table-responsive">
                             <table id="data-table-basic" class="table table-striped">
                                 <thead>
                                     <tr>
-                                        <th class="text-center">No</th>
-                                        <th>Misi</th>
-                                        <th>Tahun</th>
-                                        <th>Edit</th>
+                                        <th style="width: 10%;" class="text-center">No</th>
+                                        <th style="width: 70%;">Misi</th>
+                                        <th style="width: 10%;">Periode</th>
+                                        <th style="width: 10%;" class="text-center">Edit</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -23,10 +23,10 @@
                                     <tr>
                                         <td style="vertical-align: middle;" class="text-center"><?=$No++?></td>
                                         <td style="vertical-align: middle;"><?=$key['Misi']?></td>
-                                        <td style="vertical-align: middle;"><?=$key['Tahun']?></td>
-                                        <td>
+                                        <td style="vertical-align: middle;"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></td>
+                                        <td class="text-center">
                                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['Tahun'].'|'.$key['Misi'].'|'.$key['_Misi']?>"><i class="notika-icon notika-next"></i></button>
+                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['_Id'].'|'.$key['Misi'].'|'.$key['Id_']?>"><i class="notika-icon notika-next"></i></button>
                                                 <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
                                             </div>
                                         </td>
@@ -41,66 +41,48 @@
         </div>
     </div>
     <div class="modal fade" id="ModalInputMisi" role="dialog">
-        <div class="modal-dialog modal-large" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);overflow-y: auto;max-height: 600px;">
+        <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);overflow-x: hidden;overflow-y: auto;max-height: 550px;">
             <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-lg-12">
-                            <div class="form-example-wrap" style="padding: 5px;">
+                            <div class="form-example-wrap">
                                 <div class="form-example-int form-horizental">
                                     <div class="form-group">
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Tahun</b></label>
+                                                <label class="hrzn-fm"><b>Visi</b></label>
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <input type="text" class="form-control input-sm" id="Tahun" placeholder="Input Hanya Angka">
+                                                    <select class="form-control" id="IdVisi">
+                                                        <?php foreach ($Visi as $key) { ?>
+                                                            <option value="<?=$key['Id']?>"><?=$key['Visi']?></option>
+                                                        <?php } ?>
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                                <!-- <div class="form-example-int form-horizental">
-                                    <div class="form-group">
-                                        <div class="row">
+                                        <div class="row" style="margin-top: 9px;">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Jumlah Misi</b></label>
+                                                <label class="hrzn-fm"><b>Misi</b></label>
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <input type="number" class="form-control input-sm" id="JumlahMisi" min="1" max="9" value="1">
+                                                    <textarea class="form-control" rows="3" id="Misi" placeholder="Input Misi"></textarea>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                </div> -->
-                                <?php $Misi = explode("<br/>",$VMTS[0]['Misi']); ?>
-                                <div id="ListInputMisi">
-                                    <div class="form-example-int form-horizental">
-                                        <div class="form-group">
                                             <div class="row">
                                                 <div class="col-lg-2">
-                                                    <label class="hrzn-fm"><b>Misi</b></label>
+                                                    <label class="hrzn-fm"><b>Misi RPJMN</b></label>
                                                 </div>
                                                 <div class="col-lg-9">
-                                                    <div class="nk-int-st">
-                                                        <textarea class="form-control" rows="3" id="Misi" placeholder="Input Disini"></textarea>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-example-int form-horizental">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-lg-2">
-                                                    <label class="hrzn-fm"><b>Misi RPJPN</b></label>
-                                                </div>
-                                                <div class="col-lg-9">
-                                                    <div class="nk-int-st">
-                                                        <?php foreach ($Misi as $key => $value) { ?>
-                                                            <label><input style="margin-top: 10px;" type="checkbox" name="_Misi" value="<?=$value?>"> <?=$value?></label><br>
+                                                    <div class="nk-int-st text-justify">
+                                                        <?php foreach ($_Misi as $key) { ?>
+                                                            <label><input style="margin-top: 10px;" type="checkbox" name="_Misi" value="<?=$key['Id']?>"> <?=$key['Misi']?></label><br>
                                                         <?php } ?>
                                                     </div>
                                                 </div>
@@ -125,7 +107,7 @@
         </div>
     </div>
     <div class="modal fade" id="ModalEditMisi" role="dialog">
-        <div class="modal-dialog modal-large" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
+        <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);overflow-x: hidden;overflow-y: auto;max-height: 550px;">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -133,46 +115,42 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-lg-12">
-                            <div class="form-example-wrap" style="padding: 5px;">
+                            <div class="form-example-wrap">
                                 <div class="form-example-int form-horizental">
                                     <div class="form-group">
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Tahun</b></label>
+                                                <label class="hrzn-fm"><b>Visi</b></label>
+                                                <input type="hidden" class="form-control input-sm" id="Id">
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <input type="hidden" class="form-control input-sm" id="Id">
-                                                    <input type="text" class="form-control input-sm" id="_Tahun">
+                                                    <select class="form-control" id="_IdVisi">
+                                                        <?php foreach ($Visi as $key) { ?>
+                                                            <option value="<?=$key['Id']?>"><?=$key['Visi']?></option>
+                                                        <?php } ?>
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                                <div class="form-example-int form-horizental">
-                                    <div class="form-group">
-                                        <div class="row">
+                                        <div class="row" style="margin-top: 9px;">
                                             <div class="col-lg-2">
                                                 <label class="hrzn-fm"><b>Misi</b></label>
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <textarea class="form-control" rows="3" id="_Misi" wrap="off"></textarea>
+                                                    <textarea class="form-control" rows="3" id="_Misi" placeholder="Input Misi"></textarea>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                                <div class="form-example-int form-horizental">
-                                    <div class="form-group">
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Misi RPJPN</b></label>
+                                                <label class="hrzn-fm"><b>Misi RPJMN</b></label>
                                             </div>
                                             <div class="col-lg-9">
-                                                <div class="nk-int-st">
-                                                    <?php foreach ($Misi as $key => $value) { ?>
-                                                        <label><input style="margin-top: 10px;" type="checkbox" name="Misi_" value="<?=$value?>"> <?=$value?></label><br>
+                                                <div class="nk-int-st text-justify">
+                                                    <?php foreach ($_Misi as $key) { ?>
+                                                        <label><input style="margin-top: 10px;" type="checkbox" name="Misi_" value="<?=$key['Id']?>"> <?=$key['Misi']?></label><br>
                                                     <?php } ?>
                                                 </div>
                                             </div>
@@ -210,33 +188,22 @@
         var BaseURL = '<?=base_url()?>'
         jQuery(document).ready(function($) {
 
-            // $("#JumlahMisi").change(function (){
-            //     var JumlahMisi = $("#JumlahMisi").val()
-            //     var ListMisi = ''
-            //     for (let i = 1; i <= JumlahMisi; i++) {
-            //         ListMisi += '<div class="form-example-int form-horizental"><div class="form-group"><div class="row"><div class="col-lg-2"><label class="hrzn-fm"><b>Misi '+i+'</b></label></div><div class="col-lg-9"><div class="nk-int-st"><textarea class="form-control" rows="3" id="Misi'+i+'" placeholder="Input Disini"></textarea></div></div></div></div></div><div class="form-example-int form-horizental"><div class="form-group"><div class="row"><div class="col-lg-2"><label class="hrzn-fm"><b>Misi RPJPN</b></label></div><div class="col-lg-9"><div class="nk-int-st"><?php foreach ($Misi as $key => $value) { ?><label><input style="margin-top: 10px;" type="checkbox" name="_Misi'+i+'"> <?=$value?></label><br><?php } ?></div></div></div></div></div>'
-            //     }
-            //     $("#ListInputMisi").html(ListMisi)
-            // })
-
             $("#Input").click(function() {
                 var Tampung = []
                 $.each($("input[name='_Misi']:checked"), function(){
                     Tampung.push($(this).val())
                 })
-                if (isNaN($("#Tahun").val()) || $("#Tahun").val() == "") {
-                    alert('Input Tahun Belum Benar!')
-                } else if ($("#Misi").val() == "") {
+                if ($("#Misi").val() == "") {
                     alert('Input Misi Belum Benar!')
                 } else if (!Tampung.length) {
-                    alert("Mohon Checklist Misi RPJPN!")
+                    alert("Mohon Checklist Misi RPJMN!")
                 } else {
-                    var Misi = { Misi: $("#Misi").val(),
-                                 _Misi: Tampung.join("$"),
-                                 Tahun: $("#Tahun").val() }
-                    $.post(BaseURL+"Admin/InputMisi", Misi).done(function(Respon) {
+                    var Misi = { _Id    : $("#IdVisi").val(),
+                                 Id_    : Tampung.join("$"),
+                                 Misi   : $("#Misi").val() }
+                    $.post(BaseURL+"Admin/InputMisiRPJMD", Misi).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Admin/Misi"
+                            window.location = BaseURL+"Admin/MisiRPJMD"
                         } else {
                             alert(Respon)
                         }
@@ -248,7 +215,7 @@
                 var Data = $(this).attr('Edit')
                 var Pisah = Data.split("|");
                 $("#Id").val(Pisah[0])
-                $("#_Tahun").val(Pisah[1])
+                $("#_IdVisi").val(Pisah[1])
                 $("#_Misi").val(Pisah[2])
                 $("input[name='Misi_']").prop('checked', false);
                 Pisah[3].split("$").forEach(function(m) {
@@ -262,20 +229,18 @@
                 $.each($("input[name='Misi_']:checked"), function(){
                     Tampung.push($(this).val())
                 })
-                if (isNaN($("#_Tahun").val()) || $("#_Tahun").val() == "") {
-                    alert('Input Tahun Belum Benar!')
-                } else if ($("#_Misi").val() == "") {
+                if ($("#_Misi").val() == "") {
                     alert('Input Misi Belum Benar!')
                 } else if (!Tampung.length) {
-                    alert("Mohon Checklist Misi RPJPN!")
+                    alert("Mohon Checklist Misi RPJMN!")
                 } else {
-                    var Misi = { Id: $("#Id").val(),
-                                 Misi: $("#_Misi").val(),
-                                 _Misi: Tampung.join("$"),
-                                 Tahun: $("#_Tahun").val() }
-                    $.post(BaseURL+"Admin/EditMisi", Misi).done(function(Respon) {
+                    var Misi = { Id     : $("#Id").val(),
+                                 _Id    : $("#_IdVisi").val(),
+                                 Id_    : Tampung.join("$"),
+                                 Misi   : $("#_Misi").val() }
+                    $.post(BaseURL+"Admin/EditMisiRPJMD", Misi).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Admin/Misi"
+                            window.location = BaseURL+"Admin/MisiRPJMD"
                         } else {
                             alert(Respon)
                         }
@@ -285,9 +250,9 @@
 
             $(".Hapus").click(function() {
                 var Misi = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"Admin/HapusMisi", Misi).done(function(Respon) {
+                $.post(BaseURL+"Admin/HapusMisiRPJMD", Misi).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Admin/Misi"
+                        window.location = BaseURL+"Admin/MisiRPJMD"
                     } else {
                         alert(Respon)
                     }

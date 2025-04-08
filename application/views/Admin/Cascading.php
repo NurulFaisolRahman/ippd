@@ -30,21 +30,21 @@
                                     <td style="vertical-align: middle;" class="text-center"><?= $No++ ?></td>
                                     <td style="vertical-align: middle;"><?= $key['indikator_tujuan'] ?></td>
                                     <td style="vertical-align: middle;"><?= str_replace("\n", ", ", $key['indikator_sasaran']) ?></td>
-                                    <td style="vertical-align: middle;"><?= $key['pd_penanggung_jawab'] ?></td>
-                                    <td style="vertical-align: middle;"><?= $key['pd_penunjang'] ?></td>
+                                    <td style="vertical-align: middle text-wrap;"><?= $key['pd_penanggung_jawab'] ?></td>
+                                    <td style="vertical-align: middle text-wrap;"><?= $key['pd_penunjang'] ?></td>
                                     <td>
                                         <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
                                             <!-- Tombol Edit -->
                                             <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" 
-        data-id="<?= $key['id'] ?>" 
-        data-tujuan="<?= $key['IdTujuan'] ?>" 
-        data-sasaran="<?= $key['IdSasaran'] ?>" 
-        data-indikator-tujuan="<?= $key['indikator_tujuan'] ?>" 
-        data-indikator-sasaran="<?= $key['indikator_sasaran'] ?>" 
-        data-pd-penanggung-jawab="<?= $key['pd_penanggung_jawab'] ?>" 
-        data-pd-penunjang="<?= $key['pd_penunjang'] ?>">
-    <i class="notika-icon notika-edit"></i>
-</button>
+                                                data-id="<?= $key['id'] ?>" 
+                                                data-tujuan="<?= $key['IdTujuan'] ?>" 
+                                                data-sasaran="<?= $key['IdSasaran'] ?>" 
+                                                data-indikator-tujuan="<?= $key['indikator_tujuan'] ?>" 
+                                                data-indikator-sasaran="<?= $key['indikator_sasaran'] ?>" 
+                                                data-pd-penanggung-jawab="<?= $key['pd_penanggung_jawab'] ?>" 
+                                                data-pd-penunjang="<?= $key['pd_penunjang'] ?>">
+                                            <i class="notika-icon notika-edit"></i>
+                                        </button>
 
                                             <br><br>
                                             

@@ -19,9 +19,10 @@
 
   <!-- Vendor CSS Files -->
   <link href="assets/vendor/aos/aos.css" rel="stylesheet">
-  <link href="assets/signin/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="assets/signin/css/bootstrap.min.css" rel="stylesheet"> -->
   <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <!-- <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet"> -->
   <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
   <link href="assets/vendor/remixicon/remixicon.css" rel="stylesheet">
   <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
@@ -29,7 +30,7 @@
   <!-- Template Main CSS File -->
   <link href="assets/css/style.css" rel="stylesheet">
   <link href="assets/signin/fonts/icomoon/style.css" rel="stylesheet">
-  <link href="assets/signin/css/owl.carousel.min.css" rel="stylesheet">
+  <!-- <link href="assets/signin/css/owl.carousel.min.css" rel="stylesheet"> -->
 
   <style>
      body {
@@ -210,34 +211,34 @@
 
         <div class="row">
           <div class="col-xl-3 col-md-6" data-aos="zoom-in" data-aos-delay="100">
-            <div class="icon-box">
+            <div class="icon-box border border-primary" style="height: 200px;">
 							<!-- <div class="icon"><i class="bx bxl-dribbble"></i></div> -->
-							<h4 class="text-center font-weight-bold text-danger">Nusantara :</h4>
-							<p class="text-center font-weight-bold text-primary">Negara Kepulauan Yang Memiliki Ketangguhan Politik, Ekonomi, Keamanan Nasional dan Budaya/Peradaban Bahari Sebagai Poros Maritim Dunia</p>
+							<h4 class="text-center text-danger"><b>Nusantara :</b></h4>
+							<p class="text-center text-primary"><b>Negara Kepulauan Yang Memiliki Ketangguhan Politik, Ekonomi, Keamanan Nasional dan Budaya/Peradaban Bahari Sebagai Poros Maritim Dunia</b></p>
             </div>
           </div>
 
           <div class="col-xl-3 col-md-6" data-aos="zoom-in" data-aos-delay="200">
-            <div class="icon-box">
+            <div class="icon-box border border-primary" style="height: 200px;">
 							<!-- <div class="icon"><i class="bx bx-file"></i></div> -->
-							<h4 class="text-center font-weight-bold text-danger">Berdaulat :</a></h4>
-              <p class="text-center font-weight-bold text-primary">Ketahanan, Kesatuan, Mandiri, Aman</p>
+							<h4 class="text-center text-danger"><b>Berdaulat :</b></a></h4>
+              <p class="text-center text-primary"><b>Ketahanan, Kesatuan, Mandiri, Aman</b></p>
             </div>
           </div>
 
           <div class="col-xl-3 col-md-6" data-aos="zoom-in" data-aos-delay="300">
-            <div class="icon-box">
+            <div class="icon-box border border-primary" style="height: 200px;">
 							<!-- <div class="icon"><i class="bx bx-tachometer"></i></div> -->
-							<h4 class="text-center font-weight-bold text-danger">Maju :</h4>
-              <p class="text-center font-weight-bold text-primary">Berdaya, Modern, Tangguh, Inovatif, Adil</p>
+							<h4 class="text-center text-danger"><b>Maju :</b></h4>
+              <p class="text-center text-primary"><b>Berdaya, Modern, Tangguh, Inovatif, Adil</b></p>
             </div>
           </div>
 
           <div class="col-xl-3 col-md-6" data-aos="zoom-in" data-aos-delay="400">
-            <div class="icon-box">
+            <div class="icon-box border border-primary" style="height: 200px;">
               <!-- <div class="icon"><i class="bx bx-layer"></i></div> -->
-              <h4 class="text-center font-weight-bold text-danger">Berkelanjutan :</h4>
-              <p class="text-center font-weight-bold text-primary">Lestari dan Seimbang Antara Pembangunan Ekonomi, Sosial, dan Lingkungan</p>
+              <h4 class="text-center text-danger"><b>Berkelanjutan :</b></h4>
+              <p class="text-center text-primary"><b>Lestari dan Seimbang Antara Pembangunan Ekonomi, Sosial, dan Lingkungan</b></p>
             </div>
           </div>
 
@@ -257,67 +258,67 @@
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis aute irure dolor in reprehenderit
               </p> -->
             </div>
-
+            
             <div class="accordion-list">
-              <ul>
+              <ul class="border border-primary">
                 <li>
-                  <a data-bs-toggle="collapse" class="collapse text-danger font-weight-bold" data-bs-target="#accordion-list-1"><span>01</span> Mewujudkan transformasi sosial</a>
+                  <a data-bs-toggle="collapse" class="collapse text-danger" data-bs-target="#accordion-list-1"><span>01</span> <b>Mewujudkan transformasi sosial</b></a>
                   <div id="accordion-list-1" class="collapse" data-bs-parent=".accordion-list">
-										<p style="margin-left: 32px;" class="text-info">T1. Kesehatan untuk semua</p>
-										<p style="margin-left: 32px;" class="text-info">T2. Pendidikan berkualitas yang merata</p>
-										<p style="margin-left: 32px;" class="text-info">T3. Perlindungan sosial yang adaptif</p>
+										<p style="margin-left: 32px;" class="text-warning">T1. Kesehatan untuk semua</p>
+										<p style="margin-left: 32px;" class="text-warning">T2. Pendidikan berkualitas yang merata</p>
+										<p style="margin-left: 32px;" class="text-warning">T3. Perlindungan sosial yang adaptif</p>
                   </div>
 								</li>
 								<li>
-                  <a data-bs-toggle="collapse" class="collapse text-danger font-weight-bold" data-bs-target="#accordion-list-2"><span>02</span> Mewujudkan transformasi ekonomi</a>
+                  <a data-bs-toggle="collapse" class="collapse text-danger" data-bs-target="#accordion-list-2"><span>02</span> <b>Mewujudkan transformasi ekonomi</b></a>
                   <div id="accordion-list-2" class="collapse" data-bs-parent=".accordion-list">
-										<p style="margin-left: 32px;" class="text-info">T4. Iptek, inovasi dan produktivitas ekonomi</p>
-										<p style="margin-left: 32px;" class="text-info">T5. Penerapan ekonomi hijau</p>
-										<p style="margin-left: 32px;" class="text-info">T6. Transformasi digital</p>
-										<p style="margin-left: 32px;" class="text-info">T7. Integrasi ekonomi domestik dan global</p>
-										<p style="margin-left: 32px;" class="text-info">T8. Perkotaan dan perdesaan sebagai pusat pertumbuhan ekonomi</p>
+										<p style="margin-left: 32px;" class="text-warning">T4. Iptek, inovasi dan produktivitas ekonomi</p>
+										<p style="margin-left: 32px;" class="text-warning">T5. Penerapan ekonomi hijau</p>
+										<p style="margin-left: 32px;" class="text-warning">T6. Transformasi digital</p>
+										<p style="margin-left: 32px;" class="text-warning">T7. Integrasi ekonomi domestik dan global</p>
+										<p style="margin-left: 32px;" class="text-warning">T8. Perkotaan dan perdesaan sebagai pusat pertumbuhan ekonomi</p>
                   </div>
 								</li>
 								<li>
-                  <a data-bs-toggle="collapse" class="collapse text-danger font-weight-bold" data-bs-target="#accordion-list-3"><span>03</span> Mewujudkan transformasi tata kelola</a>
+                  <a data-bs-toggle="collapse" class="collapse text-danger" data-bs-target="#accordion-list-3"><span>03</span> <b>Mewujudkan transformasi tata kelola</b></a>
                   <div id="accordion-list-3" class="collapse" data-bs-parent=".accordion-list">
-										<p style="margin-left: 32px;" class="text-info">T9. Regulasi dan tata kelola yang berintegritas dan adaptif</p>
+										<p style="margin-left: 32px;" class="text-warning">T9. Regulasi dan tata kelola yang berintegritas dan adaptif</p>
                   </div>
 								</li>
 								<li>
-                  <a data-bs-toggle="collapse" class="collapse text-danger font-weight-bold" data-bs-target="#accordion-list-4"><span>04</span> Memantapkan supremasi hukum, stabilitas dan kepemimpinan</a>
+                  <a data-bs-toggle="collapse" class="collapse text-danger" data-bs-target="#accordion-list-4"><span>04</span> <b>Memantapkan supremasi hukum, stabilitas dan kepemimpinan</b></a>
                   <div id="accordion-list-4" class="collapse" data-bs-parent=".accordion-list">
-										<p style="margin-left: 32px;" class="text-info">T10. Hukum berkeadilan, keamanan nasional tangguh dan demokrasi substansial</p>
-										<p style="margin-left: 32px;" class="text-info">T11. Stabilitas ekonomi makro</p>
-										<p style="margin-left: 32px;" class="text-info">T12. Ketangguhan diplomasi dan pertahanan berdaya gentar kawasan</p>
+										<p style="margin-left: 32px;" class="text-warning">T10. Hukum berkeadilan, keamanan nasional tangguh dan demokrasi substansial</p>
+										<p style="margin-left: 32px;" class="text-warning">T11. Stabilitas ekonomi makro</p>
+										<p style="margin-left: 32px;" class="text-warning">T12. Ketangguhan diplomasi dan pertahanan berdaya gentar kawasan</p>
                   </div>
 								</li>
 								<li>
-                  <a data-bs-toggle="collapse" class="collapse text-danger font-weight-bold" data-bs-target="#accordion-list-5"><span>05</span> Memantapkan ketahanan sosial budaya dan ekologi</a>
+                  <a data-bs-toggle="collapse" class="collapse text-danger" data-bs-target="#accordion-list-5"><span>05</span> <b>Memantapkan ketahanan sosial budaya dan ekologi</b></a>
                   <div id="accordion-list-5" class="collapse" data-bs-parent=".accordion-list">
-										<p style="margin-left: 32px;" class="text-info">T13. Beragama maslahat dan berkebudayaan maju</p>
-										<p style="margin-left: 32px;" class="text-info">T14. Keluarga berkualitas, kesetaraan gender dan masyarakat inklusif</p>
-										<p style="margin-left: 32px;" class="text-info">T15. Lingkungan hidup berkualitas</p>
-										<p style="margin-left: 32px;" class="text-info">T16. Berketahanan energi, air dan kemandirian pangan</p>
-										<p style="margin-left: 32px;" class="text-info">T17. Resiliensi terhadap bencana dan perubahan iklim</p>
+										<p style="margin-left: 32px;" class="text-warning">T13. Beragama maslahat dan berkebudayaan maju</p>
+										<p style="margin-left: 32px;" class="text-warning">T14. Keluarga berkualitas, kesetaraan gender dan masyarakat inklusif</p>
+										<p style="margin-left: 32px;" class="text-warning">T15. Lingkungan hidup berkualitas</p>
+										<p style="margin-left: 32px;" class="text-warning">T16. Berketahanan energi, air dan kemandirian pangan</p>
+										<p style="margin-left: 32px;" class="text-warning">T17. Resiliensi terhadap bencana dan perubahan iklim</p>
                   </div>
 								</li>
 								<li>
-                  <a data-bs-toggle="collapse" class="collapse text-danger font-weight-bold" data-bs-target="#accordion-list-6"><span>06</span> Mewujudkan transformasi sosial</a>
+                  <a data-bs-toggle="collapse" class="collapse text-danger" data-bs-target="#accordion-list-6"><span>06</span> <b>Mewujudkan transformasi sosial</b></a>
                   <div id="accordion-list-6" class="collapse" data-bs-parent=".accordion-list">
-										<!-- <p style="margin-left: 32px;" class="text-info">T1</p> -->
+										<!-- <p style="margin-left: 32px;" class="text-warning">T1</p> -->
                   </div>
                 </li>
 								<li>
-                  <a data-bs-toggle="collapse" class="collapse text-danger font-weight-bold" data-bs-target="#accordion-list-7"><span>07</span> Mewujudkan transformasi sosial</a>
+                  <a data-bs-toggle="collapse" class="collapse text-danger" data-bs-target="#accordion-list-7"><span>07</span> <b>Mewujudkan transformasi sosial</b></a>
                   <div id="accordion-list-7" class="collapse" data-bs-parent=".accordion-list">
-										<!-- <p style="margin-left: 32px;" class="text-info">T1</p> -->
+										<!-- <p style="margin-left: 32px;" class="text-warning">T1</p> -->
                   </div>
                 </li>
 								<li>
-                  <a data-bs-toggle="collapse" class="collapse text-danger font-weight-bold" data-bs-target="#accordion-list-8"><span>08</span> Mewujudkan transformasi sosial</a>
+                  <a data-bs-toggle="collapse" class="collapse text-danger" data-bs-target="#accordion-list-8"><span>08</span> <b>Mewujudkan transformasi sosial</b></a>
                   <div id="accordion-list-8" class="collapse" data-bs-parent=".accordion-list">
-										<!-- <p style="margin-left: 32px;" class="text-info">T1</p> -->
+										<!-- <p style="margin-left: 32px;" class="text-warning">T1</p> -->
                   </div>
                 </li>
               </ul>

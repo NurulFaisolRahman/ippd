@@ -12,10 +12,10 @@
                             <table id="data-table-basic" class="table table-striped">
                                 <thead>
                                     <tr>
-                                        <th class="text-center">No</th>
-                                        <th>Visi</th>
-                                        <th>Tahun</th>
-                                        <th>Edit</th>
+                                        <th style="width: 10%;" class="text-center">No</th>
+                                        <th style="width: 70%;">Visi</th>
+                                        <th style="width: 10%;">Periode</th>
+                                        <th style="width: 10%;" class="text-center">Edit</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -23,10 +23,10 @@
                                     <tr>
                                         <td style="vertical-align: middle;" class="text-center"><?=$No++?></td>
                                         <td style="vertical-align: middle;"><?=$key['Visi']?></td>
-                                        <td style="vertical-align: middle;"><?=$key['Tahun']?></td>
-                                        <td>
+                                        <td style="vertical-align: middle;"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></td>
+                                        <td class="text-center">
                                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['Visi'].'|'.$key['Tahun']?>"><i class="notika-icon notika-next"></i></button>
+                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['Visi'].'|'.$key['TahunMulai'].'|'.$key['TahunAkhir']?>"><i class="notika-icon notika-next"></i></button>
                                                 <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
                                             </div>
                                         </td>
@@ -49,16 +49,21 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-lg-12">
-                            <div class="form-example-wrap" style="padding: 5px;">
+                            <div class="form-example-wrap">
                                 <div class="form-example-int form-horizental">
                                     <div class="form-group">
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Tahun</b></label>
+                                                <label class="hrzn-fm"><b>Periode</b></label>
                                             </div>
-                                            <div class="col-lg-9">
+                                            <div class="col-lg-5">
                                                 <div class="nk-int-st">
-                                                    <input type="text" class="form-control input-sm" id="Tahun" placeholder="Input Hanya Angka">
+                                                    <input type="text" class="form-control input-sm" id="TahunMulai" placeholder="Tahun Mulai">
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-5">
+                                                <div class="nk-int-st">
+                                                    <input type="text" class="form-control input-sm" id="TahunAkhir" placeholder="Tahun Akhir">
                                                 </div>
                                             </div>
                                         </div>
@@ -72,7 +77,7 @@
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <textarea class="form-control" rows="3" id="Visi" placeholder="Input Disini"></textarea>
+                                                    <textarea class="form-control" rows="3" id="Visi" placeholder="Input Visi"></textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -108,12 +113,17 @@
                                     <div class="form-group">
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Tahun</b></label>
+                                                <label class="hrzn-fm"><b>Periode</b></label>
+                                                <input type="hidden" class="form-control input-sm" id="Id">
                                             </div>
-                                            <div class="col-lg-9">
+                                            <div class="col-lg-5">
                                                 <div class="nk-int-st">
-                                                    <input type="hidden" class="form-control input-sm" id="Id">
-                                                    <input type="text" class="form-control input-sm" id="tahun">
+                                                    <input type="text" class="form-control input-sm" id="_TahunMulai" placeholder="Tahun Mulai">
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-5">
+                                                <div class="nk-int-st">
+                                                    <input type="text" class="form-control input-sm" id="_TahunAkhir" placeholder="Tahun Akhir">
                                                 </div>
                                             </div>
                                         </div>
@@ -127,7 +137,7 @@
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <textarea class="form-control" rows="3" id="visi" wrap="off"></textarea>
+                                                    <textarea class="form-control" rows="3" id="_Visi" wrap="off"></textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -165,16 +175,19 @@
         jQuery(document).ready(function($) {
             
             $("#Input").click(function() {
-                if (isNaN($("#Tahun").val()) || $("#Tahun").val() == "") {
-                    alert('Input Tahun Belum Benar!')
+                if (isNaN($("#TahunMulai").val()) || $("#TahunMulai").val() == "" || $("#TahunMulai").val().length != 4) {
+                    alert('Input Tahun Mulai Belum Benar!')
+                } else if (isNaN($("#TahunAkhir").val()) || $("#TahunAkhir").val() == "" || $("#TahunAkhir").val().length != 4) {
+                    alert('Input Tahun Akhir Belum Benar!')
                 } else if ($("#Visi").val() == "") {
                     alert('Input Visi Belum Benar!')
                 } else {
-                    var Visi = { Visi: $("#Visi").val(),
-                                Tahun: $("#Tahun").val() }
-                    $.post(BaseURL+"Admin/InputVisi", Visi).done(function(Respon) {
+                    var Visi = { Visi       : $("#Visi").val(),
+                                 TahunMulai : $("#TahunMulai").val(),
+                                 TahunAkhir : $("#TahunAkhir").val() }
+                    $.post(BaseURL+"Admin/InputVisiRPJPD", Visi).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Admin/Visi"
+                            window.location = BaseURL+"Admin/VisiRPJPD"
                         } else {
                             alert(Respon)
                         }
@@ -186,23 +199,27 @@
                 var Data = $(this).attr('Edit')
                 var Pisah = Data.split("|");
                 $("#Id").val(Pisah[0])
-                $("#visi").val(Pisah[1])
-                $("#tahun").val(Pisah[2])
+                $("#_Visi").val(Pisah[1])
+                $("#_TahunMulai").val(Pisah[2])
+                $("#_TahunAkhir").val(Pisah[3])
                 $('#ModalEditVisi').modal("show")
             })
 
             $("#Edit").click(function() {
-                if (isNaN($("#tahun").val())) {
-                    alert('Input Tahun Belum Benar!')
-                } else if ($("#visi").val() == "") {
+                if (isNaN($("#_TahunMulai").val()) || $("#_TahunMulai").val() == "" || $("#_TahunMulai").val().length != 4) {
+                    alert('Input Tahun Mulai Belum Benar!')
+                } else if (isNaN($("#_TahunAkhir").val()) || $("#_TahunAkhir").val() == "" || $("#_TahunAkhir").val().length != 4) {
+                    alert('Input Tahun Akhir Belum Benar!')
+                } else if ($("#_Visi").val() == "") {
                     alert('Input Visi Belum Benar!')
                 } else {
-                    var Visi = { Visi: $("#visi").val(),
-                                Id: $("#Id").val(), 
-                                Tahun: $("#tahun").val() }
-                    $.post(BaseURL+"Admin/EditVisi", Visi).done(function(Respon) {
+                    var Visi = { Id         : $("#Id").val(),
+                                 Visi       : $("#_Visi").val(),
+                                 TahunMulai : $("#_TahunMulai").val(),
+                                 TahunAkhir : $("#_TahunAkhir").val() }
+                    $.post(BaseURL+"Admin/EditVisiRPJPD", Visi).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Admin/Visi"
+                            window.location = BaseURL+"Admin/VisiRPJPD"
                         } else {
                             alert(Respon)
                         }
@@ -212,9 +229,9 @@
 
             $(".Hapus").click(function() {
                 var Visi = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"Admin/HapusVisi", Visi).done(function(Respon) {
+                $.post(BaseURL+"Admin/HapusVisiRPJPD", Visi).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Admin/Visi"
+                        window.location = BaseURL+"Admin/VisiRPJPD"
                     } else {
                         alert(Respon)
                     }
