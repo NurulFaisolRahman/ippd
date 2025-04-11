@@ -86,6 +86,15 @@
                                 <li>
                                     <a href="<?=base_url('Super/Isu')?>"><i class="notika-icon notika-form"></i> <b>Isu Strategis</b></a>
                                 </li>
+                                <li>
+                                    <a href="<?=base_url('Super/SPM')?>"><i class="notika-icon notika-form"></i> <b>Standar Penjaminan Mutu</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/proyek_strategis')?>"><i class="notika-icon notika-form"></i> <b>Proyek Strategis</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/program_strategis')?>"><i class="notika-icon notika-form"></i> <b>Program Strategis</b></a>
+                                </li>
                             </ul>
                         </div>
                     </div>

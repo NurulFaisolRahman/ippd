@@ -30,11 +30,15 @@ class Home extends CI_Controller {
 		else {
 			$Akun = $User->result_array();
 			if (password_verify($_POST['Password'], $Akun[0]['Password'])) {
-        // if ($Akun[0]['Level'] == 1) {
+        if ($Akun[0]['Username'] == 'admin') {
           $Session = array('Admin' => true);
           $this->session->set_userdata($Session);
           echo '1';
-        // } 
+        } else {
+          $Session = array('KodeWilayah' => $Akun[0]['KodeWilayah']);
+          $this->session->set_userdata($Session);
+          echo '1';
+        } 
 			} else {
 				echo "Password Salah!";
 			}

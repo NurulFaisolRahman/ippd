@@ -5,7 +5,7 @@
                     <div class="data-table-list">
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
-                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputAkunInstansi"><i class="notika-icon notika-form"></i> <b>Tambah Akun</b></button>
+                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputInstansi"><i class="notika-icon notika-edit"></i> <b>Tambah Instansi</b></button>
                             </div>
                                 <!-- <h2>Basic Example</h2>
                                 <p>It's just that simple. Turn your simple table into a sophisticated data table and offer your users a nice experience and great features without any effort.</p> -->
@@ -17,7 +17,7 @@
                                         <th class="text-center">No</th>
                                         <th>Username</th>
                                         <th>Password (Hashed)</th>
-                                        <th>Aksi</th>
+                                        <th class="text-center">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -26,7 +26,7 @@
                                         <td style="vertical-align: middle;" class="text-center"><?=$No++?></td>
                                         <td style="vertical-align: middle;"><?=$key['nama']?></td>
                                         <td style="vertical-align: middle;"><?=$key['password']?></td>
-                                        <td>
+                                        <td class="text-center">
                                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
                                                 <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['id'].'|'.$key['nama'].'|'.$key['password']?>"><i class="notika-icon notika-edit"></i></button>
                                                 <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['id']?>"><i class="notika-icon notika-trash"></i></button>
@@ -42,7 +42,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="ModalInputAkunInstansi" role="dialog">
+    <div class="modal fade" id="ModalInputInstansi" role="dialog">
         <div class="modal-dialog modal-sm" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
             <div class="modal-content">
                 <div class="modal-header">
@@ -96,7 +96,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="ModalEditAkunInstansi" role="dialog">
+    <div class="modal fade" id="ModalEditInstansi" role="dialog">
         <div class="modal-dialog modal-sm" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
             <div class="modal-content">
                 <div class="modal-header">
@@ -151,30 +151,13 @@
             </div>
         </div>
     </div>
-    <!-- jquery
-		============================================ -->
-        <script src="../js/vendor/jquery-1.12.4.min.js"></script>
-    <!-- bootstrap JS
-		============================================ -->
+    <script src="../js/vendor/jquery-1.12.4.min.js"></script>
     <script src="../js/bootstrap.min.js"></script>
-    <!-- wow JS
-		============================================ -->
     <script src="../js/wow.min.js"></script>
-    <!-- price-slider JS
-		============================================ -->
     <script src="../js/jquery-price-slider.js"></script>
-    <!-- owl.carousel JS
-		============================================ -->
     <script src="../js/owl.carousel.min.js"></script>
-    <!-- scrollUp JS
-		============================================ -->
     <script src="../js/jquery.scrollUp.min.js"></script>
-    <!-- meanmenu JS
-		============================================ -->
     <script src="../js/meanmenu/jquery.meanmenu.js"></script>
-    <!-- meanmenu JS
-		============================================ -->
-        <script src="../js/meanmenu/jquery.meanmenu.js"></script>
     <script src="../js/scrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
     <script src="../js/data-table/jquery.dataTables.min.js"></script>
     <script src="../js/data-table/data-table-act.js"></script>
@@ -190,9 +173,9 @@
                 } else {
                     var Akun = { nama: $("#Username").val(),
                                  password: $("#Password").val() }
-                    $.post(BaseURL+"Admin/InputAkunInstansi", Akun).done(function(Respon) {
+                    $.post(BaseURL+"Admin/InputInstansi", Akun).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Admin/AkunInstansi"
+                            window.location.reload()
                         } else {
                             alert(Respon)
                         }
@@ -205,7 +188,7 @@
                 var Pisah = Data.split("|");
                 $("#Id").val(Pisah[0])
                 $("#_Username").val(Pisah[1])
-                $('#ModalEditAkunInstansi').modal("show")
+                $('#ModalEditInstansi').modal("show")
             })
 
             $("#Edit").click(function() {
@@ -215,9 +198,9 @@
                     var Akun = { id: $("#Id").val(), 
                                  nama: $("#_Username").val(),
                                  password: $("#_Password").val() }
-                    $.post(BaseURL+"Admin/EditAkunInstansi", Akun).done(function(Respon) {
+                    $.post(BaseURL+"Admin/EditInstansi", Akun).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Admin/AkunInstansi"
+                            window.location.reload()
                         } else {
                             alert(Respon)
                         }
@@ -227,9 +210,9 @@
 
             $(".Hapus").click(function() {
                 var Akun = { id: $(this).attr('Hapus') }
-                $.post(BaseURL+"Admin/HapusAkunInstansi", Akun).done(function(Respon) {
+                $.post(BaseURL+"Admin/HapusInstansi", Akun).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Admin/AkunInstansi"
+                        window.location.reload()
                     } else {
                         alert(Respon)
                     }

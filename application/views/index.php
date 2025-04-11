@@ -356,9 +356,9 @@
         $.post(BaseURL + "Home/Login", Login).done(function(Respon) {
           if (Respon == '1') {
             if ($("#Username").val() == 'admin') {
-              window.location = BaseURL + "Super/VMTS";	
+              window.location = BaseURL + "Super/VisiRPJPN";	
             } else {
-              window.location = BaseURL + "Admin/Visi";
+              window.location = BaseURL + "Admin/VisiRPJPD";
             }
           } else {
             alert(Respon);

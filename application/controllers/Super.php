@@ -420,7 +420,116 @@ class Super extends CI_Controller {
         echo "Gagal Menghapus Data !";
     }
   }
+
+  public function SPM() {
+    $Header['Halaman'] = 'Kementerian';
+    $Data['SPM'] = $this->db->query("SELECT * FROM `SPM` WHERE deleted_at IS NULL")->result_array();
+    $this->load->view('Super/header',$Header);
+    $this->load->view('Super/SPM', $Data);
+  }
+
+  public function InputSPM(): void {
+    $this->db->insert('SPM', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Input Data!';
+    }
+  }
+
+  public function UpdateSPM() {
+      $this->db->where('Id', $_POST['Id']);
+      $this->db->update('SPM', $_POST);
+      if ($this->db->affected_rows()){
+        echo '1';
+      } else {
+        echo 'Gagal Update Data!';
+      }
+  }
+
+  public function DeleteSPM(){  
+    $_POST['deleted_at'] = date('Y-m-d H:i:s');
+    $this->db->where('Id',$_POST['Id']); 
+    $this->db->update('SPM', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Hapus Data!';
+    }
+  }
   
+  public function proyek_strategis() {
+    $Header['Halaman'] = 'Kementerian';
+    $Data['proyek_strategis'] = $this->db->query("SELECT * FROM `Proyek_strategis` WHERE deleted_at IS NULL")->result_array();
+    $this->load->view('Super/header',$Header);
+    $this->load->view('Super/proyek_strategis', $Data);
+  }
+
+  public function Inputproyek_strategis() {
+    $this->db->insert('proyek_strategis', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Input Data!';
+    }
+  }
+
+  public function Updateproyek_strategis() {
+    $this->db->where('Id', $_POST['Id']);
+    $this->db->update('proyek_strategis', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Update Data!';
+    }
+  }
+
+  public function Deleteproyek_strategis() {  
+    $_POST['deleted_at'] = date('Y-m-d H:i:s');
+    $this->db->where('Id', $_POST['Id']); 
+    $this->db->update('proyek_strategis', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Hapus Data!';
+    }
+  }
+
+  public function program_strategis() {
+    $Header['Halaman'] = 'Kementerian';
+    $Data['program_strategis'] = $this->db->query("SELECT * FROM `program_strategis` WHERE deleted_at IS NULL")->result_array();
+    $this->load->view('Super/header',$Header);
+    $this->load->view('Super/program_strategis', $Data);
+  }
+  public function Inputprogram_strategis() {
+    $this->db->insert('program_strategis', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Input Data!';
+    }
+  }
+
+  public function Updateprogram_strategis() {
+    $this->db->where('Id', $_POST['Id']);
+    $this->db->update('program_strategis', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Update Data!';
+    }
+  }
+
+  public function Deleteprogram_strategis() {  
+    $_POST['deleted_at'] = date('Y-m-d H:i:s');
+    $this->db->where('Id', $_POST['Id']); 
+    $this->db->update('program_strategis', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Hapus Data!';
+    }
+  }
 }
 
 
