@@ -111,23 +111,23 @@
                         <label>Target Tahunan</label>
                         <div class="row">
                             <div class="col-md-2">
-                                <label>Tahun 2023</label>
+                                <label>Tahun 1</label>
                                 <input  class="form-control" name="target_1" placeholder="Angka" >
                             </div>
                             <div class="col-md-2">
-                                <label>Tahun 2024</label>
+                                <label>Tahun 2</label>
                                 <input  class="form-control" name="target_2" placeholder="Angka">
                             </div>
                             <div class="col-md-2">
-                                <label>Tahun 2025</label>
+                                <label>Tahun 3</label>
                                 <input  class="form-control" name="target_3" placeholder="Angka">
                             </div>
                             <div class="col-md-2">
-                                <label>Tahun 2026</label>
+                                <label>Tahun 4</label>
                                 <input class="form-control" name="target_4" placeholder="Angka" >
                             </div>
                             <div class="col-md-2">
-                                <label>Tahun 2027</label>
+                                <label>Tahun 5</label>
                                 <input  class="form-control" name="target_5" placeholder="Angka" >
                             </div>
                         </div>

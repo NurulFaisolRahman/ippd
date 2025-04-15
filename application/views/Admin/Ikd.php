@@ -11,92 +11,129 @@
                         </div>
                     </div>
                     <div class="table-responsive">
-                        <table id="data-table-basic" class="table table-striped">
+                        <table id="data-table-basic" class="table table-striped" style="table-layout: fixed;">
                             <thead>
                                 <tr>
-                                    <th class="text-center">No</th>
-                                    <th>Sasaran</th>
-                                    <th>Indikator Sasaran (IKD)</th>
-                                    <th class="text-center">PD Penanggung Jawab</th>
-                                    <th class="text-center">PD Penunjang</th>
-                                    <th class="text-center">Target <br><small>Tahun 1</small></th>
-                                    <th class="text-center">Target <br><small>Tahun 2</small></th>
-                                    <th class="text-center">Target <br><small>Tahun 3</small></th>
-                                    <th class="text-center">Target <br><small>Tahun 4</small></th>
-                                    <th class="text-center">Target <br><small>Tahun 5</small></th>
-                                    <th style="width: 10%;" class="text-center">Aksi</th>
+                                    <th width="5%" class="text-center">No</th>
+                                    <th width="15%">Sasaran</th>
+                                    <th width="15%">Indikator Sasaran</th>
+                                    <th width="12%" class="text-center">PD Penanggung Jawab</th>
+                                    <th width="12%" class="text-center">PD Penunjang</th>
+                                    <th width="6%" class="text-center">Target <br><small>Tahun 1</small></th>
+                                    <th width="6%" class="text-center">Target <br><small>Tahun 2</small></th>
+                                    <th width="6%" class="text-center">Target <br><small>Tahun 3</small></th>
+                                    <th width="6%" class="text-center">Target <br><small>Tahun 4</small></th>
+                                    <th width="6%" class="text-center">Target <br><small>Tahun 5</small></th>
+                                    <th width="10%" class="text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php $No = 1; foreach ($Ikd as $key) { ?>
                                 <tr>
-                                    <td style="vertical-align: middle;" class="text-center"><?= $No++ ?></td>
-                                    <td style="vertical-align: middle;">
+                                    <td class="text-center" style="vertical-align: top;"><?= $No++ ?></td>
+                                    <td style="vertical-align: top;">
                                         <?php
                                         $sasaran = $this->db->where('Id', $key['IdSasaran'])->get('sasaranrpjmd')->row_array();
                                         echo $sasaran ? $sasaran['Sasaran'] : '-';
                                         ?>
                                     </td>
-                                    <td style="vertical-align: middle;"><?= $key['indikator_sasaran'] ?></td>
-                                    <td style="vertical-align: middle;" class="text-center">
-                                    <button class="btn btn-sm btn-success amber-icon-notika btn-reco-mg btn-button-mg TambahPj" 
-                                                title="Tambah PD Penanggung Jawab"
-                                                data-id="<?= $key['id'] ?>">
-                                            <i class="notika-icon notika-plus-symbol"></i>
-                                        </button>
-                                        <?php if (!empty($key['pd_penanggung_jawab'])): ?>
-                                            <button class="btn btn-sm btn-primary amber-icon-notika btn-reco-mg btn-button-mg Pic" 
-                                                    title="Edit PD Penanggung Jawab"
-                                                    Pic="<?=$key['id'].'|'.$key['pd_penanggung_jawab']?>">
-                                                <i class="notika-icon notika-support"></i>
-                                            </button>
-                                        <?php endif; ?>
+                                    <td style="vertical-align: top;"><?= $key['indikator_sasaran'] ?></td>
+                                    
+                                    <!-- Kolom PD Penanggung Jawab -->
+                                    <td style="vertical-align: top;">
+                                        <div style="display: flex; flex-direction: column; height: 100%;">
+                                            <div style="display: flex; justify-content: center; gap: 5px; margin-bottom: 5px;">
+                                                <button class="btn btn-sm btn-success TambahPj" 
+                                                        title="Tambah PD Penanggung Jawab"
+                                                        data-id="<?= $key['id'] ?>"
+                                                        style="width: 30px; height: 30px; padding: 0;">
+                                                    <i class="fa fa-plus"></i>
+                                                </button>
+                                                <?php if (!empty($key['pd_penanggung_jawab'])): ?>
+                                                <button class="btn btn-sm btn-primary Pic" 
+                                                        title="Edit PD Penanggung Jawab"
+                                                        Pic="<?=$key['id'].'|'.$key['pd_penanggung_jawab']?>"
+                                                        style="width: 30px; height: 30px; padding: 0;">
+                                                    <i class="fa fa-edit"></i>
+                                                </button>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div style="flex-grow: 1; overflow: auto; text-align: start;">
+                                                <?php if (!empty($key['pd_penanggung_jawab'])): ?>
+                                                    <?php 
+                                                    $penanggungJawab = explode(',', $key['pd_penanggung_jawab']);
+                                                    foreach ($penanggungJawab as $pj): 
+                                                    ?>
+                                                        <div style="padding: 2px 0; white-space: nowrap;"><?= $pj ?></div>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
                                     </td>
-                                    <td style="vertical-align: middle;" class="text-center">
-                                    <button class="btn btn-sm btn-success amber-icon-notika btn-reco-mg btn-button-mg TambahPn" 
-                                                title="Tambah PD Penunjang"
-                                                data-id="<?= $key['id'] ?>">
-                                            <i class="notika-icon notika-plus-symbol"></i>
-                                        </button>
-                                        <?php if (!empty($key['pd_penunjang'])): ?>
-                                            <button class="btn btn-sm btn-primary amber-icon-notika btn-reco-mg btn-button-mg Pis" 
-                                                    title="Edit PD Penunjang"
-                                                    Pis="<?=$key['id'].'|'.$key['pd_penunjang']?>">
-                                                <i class="notika-icon notika-support"></i>
-                                            </button>
-                                        <?php endif; ?>
+                                    
+                                    <!-- Kolom PD Penunjang -->
+                                    <td style="vertical-align: top;">
+                                        <div style="display: flex; flex-direction: column; height: 100%;">
+                                            <div style="display: flex; justify-content: center; gap: 5px; margin-bottom: 5px;">
+                                                <button class="btn btn-sm btn-success TambahPn" 
+                                                        title="Tambah PD Penunjang"
+                                                        data-id="<?= $key['id'] ?>"
+                                                        style="width: 30px; height: 30px; padding: 0;">
+                                                    <i class="fa fa-plus"></i>
+                                                </button>
+                                                <?php if (!empty($key['pd_penunjang'])): ?>
+                                                <button class="btn btn-sm btn-primary Pis" 
+                                                        title="Edit PD Penunjang"
+                                                        Pis="<?=$key['id'].'|'.$key['pd_penunjang']?>"
+                                                        style="width: 30px; height: 30px; padding: 0;">
+                                                    <i class="fa fa-edit"></i>
+                                                </button>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div style="flex-grow: 1; overflow: auto; text-align: start;">
+                                                <?php if (!empty($key['pd_penunjang'])): ?>
+                                                    <?php 
+                                                    $penunjang = explode(',', $key['pd_penunjang']);
+                                                    foreach ($penunjang as $pn): 
+                                                    ?>
+                                                        <div style="padding: 2px 0; white-space: nowrap;"><?= $pn ?></div>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
                                     </td>
-                                    <td style="vertical-align: middle;" class="text-center">
+                                    
+                                    <!-- Kolom Target -->
+                                    <td class="text-center" style="vertical-align: middle;">
                                         <?= is_numeric($key['target_1']) && floor($key['target_1']) == $key['target_1'] ? (int)$key['target_1'] : '-' ?>
                                     </td>
-                                    <td style="vertical-align: middle;" class="text-center">
+                                    <td class="text-center" style="vertical-align: middle;">
                                         <?= is_numeric($key['target_2']) && floor($key['target_2']) == $key['target_2'] ? (int)$key['target_2'] : '-' ?>
                                     </td>
-                                    <td style="vertical-align: middle;" class="text-center">
+                                    <td class="text-center" style="vertical-align: middle;">
                                         <?= is_numeric($key['target_3']) && floor($key['target_3']) == $key['target_3'] ? (int)$key['target_3'] : '-' ?>
                                     </td>
-                                    <td style="vertical-align: middle;" class="text-center">
+                                    <td class="text-center" style="vertical-align: middle;">
                                         <?= is_numeric($key['target_4']) && floor($key['target_4']) == $key['target_4'] ? (int)$key['target_4'] : '-' ?>
                                     </td>
-                                    <td style="vertical-align: middle;" class="text-center">
+                                    <td class="text-center" style="vertical-align: middle;">
                                         <?= is_numeric($key['target_5']) && floor($key['target_5']) == $key['target_5'] ? (int)$key['target_5'] : '-' ?>
                                     </td>
-                                    <td class="text-center">
-                                        <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
+                                    
+                                <!-- Kolom Aksi -->
+                                    <td class="text-center" style="vertical-align: middle;">
+                                        <div style="display: flex; justify-content: center; gap: 5px;">
                                             <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" 
                                                     data-id="<?= $key['id'] ?>" 
                                                     data-sasaran="<?= $key['IdSasaran'] ?>" 
                                                     data-indikator-sasaran="<?= $key['indikator_sasaran'] ?>"
-                                                    data-target1="<?= $key['target_1'] ?? '' ?>"
-                                                    data-target2="<?= $key['target_2'] ?? '' ?>"
-                                                    data-target3="<?= $key['target_3'] ?? '' ?>"
-                                                    data-target4="<?= $key['target_4'] ?? '' ?>"
-                                                    data-target5="<?= $key['target_5'] ?? '' ?>">
-                                                <i class="notika-icon notika-edit"></i>
+                                                    style="width: 36px; height: 36px; padding: 0; border-radius: 50%;">
+                                                <i class="fa fa-edit" style="font-size: 15px;"></i>
                                             </button>
                                             <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" 
-                                                    data-id="<?= $key['id'] ?>">
-                                                <i class="notika-icon notika-trash"></i>
+                                                    data-id="<?= $key['id'] ?>"
+                                                    style="width: 36px; height: 36px; padding: 0; border-radius: 50%;">
+                                                <i class="notika-icon notika-trash" style="font-size: 15px;"></i>
                                             </button>
                                         </div>
                                     </td>
@@ -104,7 +141,7 @@
                                 <?php } ?>
                             </tbody>
                         </table>
-                    </div>
+                    </div>  
                 </div>
             </div>
         </div>
@@ -373,8 +410,13 @@
 <script>
     var BaseURL = '<?= base_url() ?>';
     var instansiOptions = <?php echo json_encode($Instansi); ?>;
-
+    
     $(document).ready(function() {
+        // Inisialisasi variabel untuk menyimpan data input terakhir
+        // Mencoba mendapatkan data dari localStorage jika ada
+        var storedData = localStorage.getItem('ikdLastInputData');
+        var lastInputData = storedData ? JSON.parse(storedData) : {};
+        
         // Function to add new PD Penanggung Jawab dropdown
         $(document).on('click', '.btn-add-pj', function() {
             var newRow = $('<div class="form-group pj-row">' +
@@ -465,20 +507,35 @@
             var id = $(this).data('id');
             var IdSasaran = $(this).data('sasaran');
             var indikatorSasaran = $(this).data('indikator-sasaran');
-            var target1 = $(this).data('target1');
-            var target2 = $(this).data('target2');
-            var target3 = $(this).data('target3');
-            var target4 = $(this).data('target4');
-            var target5 = $(this).data('target5');
+            
+            // Mengambil data target dari baris tabel atau dari lastInputData jika tersedia
+            var target1, target2, target3, target4, target5;
+            
+            if (lastInputData[id]) {
+                // Menggunakan nilai terakhir yang diinput oleh user
+                target1 = lastInputData[id].target_1;
+                target2 = lastInputData[id].target_2;
+                target3 = lastInputData[id].target_3;
+                target4 = lastInputData[id].target_4;
+                target5 = lastInputData[id].target_5;
+            } else {
+                // Mengambil nilai dari elemen tabel sebagai fallback
+                var rowCells = $(this).closest('tr').find('td');
+                target1 = rowCells.eq(5).text().trim() !== '-' ? parseInt(rowCells.eq(5).text().trim()) : '';
+                target2 = rowCells.eq(6).text().trim() !== '-' ? parseInt(rowCells.eq(6).text().trim()) : '';
+                target3 = rowCells.eq(7).text().trim() !== '-' ? parseInt(rowCells.eq(7).text().trim()) : '';
+                target4 = rowCells.eq(8).text().trim() !== '-' ? parseInt(rowCells.eq(8).text().trim()) : '';
+                target5 = rowCells.eq(9).text().trim() !== '-' ? parseInt(rowCells.eq(9).text().trim()) : '';
+            }
 
             $("#EditId").val(id);
             $("#EditSasaran").val(IdSasaran);
             $("#EditIndikatorSasaran").val(indikatorSasaran);
-            $("#EditTarget1").val(target1 ? parseInt(target1) : '');
-            $("#EditTarget2").val(target2 ? parseInt(target2) : '');
-            $("#EditTarget3").val(target3 ? parseInt(target3) : '');
-            $("#EditTarget4").val(target4 ? parseInt(target4) : '');
-            $("#EditTarget5").val(target5 ? parseInt(target5) : '');
+            $("#EditTarget1").val(target1);
+            $("#EditTarget2").val(target2);
+            $("#EditTarget3").val(target3);
+            $("#EditTarget4").val(target4);
+            $("#EditTarget5").val(target5);
 
             $("#ModalEditIkd").modal('show');
         });
@@ -486,11 +543,45 @@
         $("#FormEditIkd").submit(function(e) {
             e.preventDefault();
             if(validateIntegerInputs('FormEditIkd')) {
+                // Menyimpan nilai terakhir yang diinput
+                var id = $("#EditId").val();
+                lastInputData[id] = {
+                    target_1: $("#EditTarget1").val(),
+                    target_2: $("#EditTarget2").val(),
+                    target_3: $("#EditTarget3").val(),
+                    target_4: $("#EditTarget4").val(),
+                    target_5: $("#EditTarget5").val()
+                };
+                
+                // Menyimpan ke localStorage untuk persistensi data
+                localStorage.setItem('ikdLastInputData', JSON.stringify(lastInputData));
+                
                 $.post(BaseURL + "Admin/EditIkd", $(this).serialize()).done(function(res) {
                     if (res == '1') {
                         window.location.reload();
                     } else {
                         alert("Gagal mengupdate data: " + res);
+                    }
+                });
+            }
+        });
+
+        // Hapus IKD
+        $(".Hapus").click(function() {
+            if(confirm("Apakah Anda yakin ingin menghapus data ini?")) {
+                var id = $(this).data('id');
+                
+                // Menghapus data input terakhir jika ID dihapus
+                if (lastInputData[id]) {
+                    delete lastInputData[id];
+                    localStorage.setItem('ikdLastInputData', JSON.stringify(lastInputData));
+                }
+                
+                $.post(BaseURL + "Admin/HapusIkd", { id: id }).done(function(res) {
+                    if (res == '1') {
+                        window.location.reload();
+                    } else {
+                        alert("Gagal menghapus data: " + res);
                     }
                 });
             }
