@@ -390,41 +390,54 @@ class Admin extends CI_Controller {
     }
   }
   
-  public function IKU() {
-    $Header['Halaman'] = 'Cascading';
-    $Data['Iku'] = $this->db->where('deleted_at IS NULL AND kodewilayah = '.$_SESSION['KodeWilayah'])->get('iku')->result_array();
-    $Data['Tujuan'] = $this->db->where('deleted_at IS NULL AND kodewilayah = '.$_SESSION['KodeWilayah'])->get('tujuanrpjmd')->result_array();
-    $this->load->view('Admin/header', $Header);
-    $this->load->view('Admin/Iku', $Data);
-}
+   public function IKU() {
+        $Header['Halaman'] = 'Cascading';
+        $Data['Iku'] = $this->db->where('deleted_at IS NULL AND kodewilayah = '.$_SESSION['KodeWilayah'])->get('iku')->result_array();
+        $Data['Tujuan'] = $this->db->where('deleted_at IS NULL AND kodewilayah = '.$_SESSION['KodeWilayah'])->get('tujuanrpjmd')->result_array();
+        $this->load->view('Admin/header', $Header);
+        $this->load->view('Admin/Iku', $Data);
+    }
 
-public function TambahIku() {
-    $data = [
-        'kodewilayah' => $_SESSION['KodeWilayah'],
-        'IdTujuan' => $this->input->post('Tujuan'),
-        'indikator_tujuan' => $this->input->post('indikator_tujuan'),
-        // 'created_at' and 'updated_at' are handled by MySQL
-    ];
-    $this->db->insert('iku', $data);
-    echo $this->db->affected_rows() ? '1' : '0';
-}
+    public function TambahIku() {
+        $data = [
+            'kodewilayah' => $_SESSION['KodeWilayah'],
+            'IdTujuan' => $this->input->post('Tujuan'),
+            'indikator_tujuan' => $this->input->post('indikator_tujuan'),
+            'target_1' => $this->input->post('target_1') ? (int)$this->input->post('target_1') : null,
+            'target_2' => $this->input->post('target_2') ? (int)$this->input->post('target_2') : null,
+            'target_3' => $this->input->post('target_3') ? (int)$this->input->post('target_3') : null,
+            'target_4' => $this->input->post('target_4') ? (int)$this->input->post('target_4') : null,
+            'target_5' => $this->input->post('target_5') ? (int)$this->input->post('target_5') : null
+        ];
+        
+        $this->db->insert('iku', $data);
+        echo $this->db->affected_rows() ? '1' : '0';
+    }
 
-public function EditIku() {
-    $id = $this->input->post('id');
-    $data = [
-        'IdTujuan' => $this->input->post('EditTujuan'),
-        'indikator_tujuan' => $this->input->post('indikator_tujuan'),
-        // 'updated_at' is handled by MySQL
-    ];
-    $this->db->where('id', $id)->update('iku', $data);
-    echo $this->db->affected_rows() ? '1' : '0';
-}
+    public function EditIku() {
+        $id = $this->input->post('id');
+        $data = [
+            'IdTujuan' => $this->input->post('EditTujuan'),
+            'indikator_tujuan' => $this->input->post('indikator_tujuan'),
+            'target_1' => $this->input->post('target_1') ? (int)$this->input->post('target_1') : null,
+            'target_2' => $this->input->post('target_2') ? (int)$this->input->post('target_2') : null,
+            'target_3' => $this->input->post('target_3') ? (int)$this->input->post('target_3') : null,
+            'target_4' => $this->input->post('target_4') ? (int)$this->input->post('target_4') : null,
+            'target_5' => $this->input->post('target_5') ? (int)$this->input->post('target_5') : null,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        $this->db->where('id', $id)->update('iku', $data);
+        echo $this->db->affected_rows() ? '1' : '0';
+    }
 
-public function HapusIku() {
-    $id = $this->input->post('id');
-    $this->db->where('id', $id)->update('iku', ['deleted_at' => date('Y-m-d H:i:s')]);
-    echo $this->db->affected_rows() ? '1' : '0';
-}
+    public function HapusIku() {
+        $id = $this->input->post('id');
+        $this->db->where('id', $id)->update('iku', [
+            'deleted_at' => date('Y-m-d H:i:s')
+        ]);
+        echo $this->db->affected_rows() ? '1' : '0';
+    }
 
 public function IKD() {
   $Header['Halaman'] = 'Cascading'; // Set to Cascading to keep tab active
@@ -440,8 +453,13 @@ public function TambahIkd() {
       'kodewilayah' => $_SESSION['KodeWilayah'],
       'IdSasaran' => $this->input->post('Sasaran'),
       'indikator_sasaran' => $this->input->post('indikator_sasaran'),
-      // pd_penanggung_jawab and pd_penunjang will be added later via TambahPd
+      'target_1' => $this->input->post('target_1') ? (int)$this->input->post('target_1') : null,
+      'target_2' => $this->input->post('target_2') ? (int)$this->input->post('target_2') : null,
+      'target_3' => $this->input->post('target_3') ? (int)$this->input->post('target_3') : null,
+      'target_4' => $this->input->post('target_4') ? (int)$this->input->post('target_4') : null,
+      'target_5' => $this->input->post('target_5') ? (int)$this->input->post('target_5') : null
   ];
+  
   $this->db->insert('ikd', $data);
   echo $this->db->affected_rows() ? '1' : '0';
 }
@@ -451,7 +469,14 @@ public function EditIkd() {
   $data = [
       'IdSasaran' => $this->input->post('EditSasaran'),
       'indikator_sasaran' => $this->input->post('indikator_sasaran'),
+      'target_1' => $this->input->post('target_1') ? (int)$this->input->post('target_1') : null,
+      'target_2' => $this->input->post('target_2') ? (int)$this->input->post('target_2') : null,
+      'target_3' => $this->input->post('target_3') ? (int)$this->input->post('target_3') : null,
+      'target_4' => $this->input->post('target_4') ? (int)$this->input->post('target_4') : null,
+      'target_5' => $this->input->post('target_5') ? (int)$this->input->post('target_5') : null,
+      'updated_at' => date('Y-m-d H:i:s')
   ];
+  
   $this->db->where('id', $id)->update('ikd', $data);
   echo $this->db->affected_rows() ? '1' : '0';
 }
@@ -462,56 +487,69 @@ public function HapusIkd() {
   echo $this->db->affected_rows() ? '1' : '0';
 }
 
+// In Admin.php controller
+
 public function TambahPd() {
-  $id = $this->input->post('id');
-  
-  // Fetch the existing record
-  $existing = $this->db->where('id', $id)->get('ikd')->row_array();
-  
-  // Get existing PD values (if any) and split into arrays
-  $existingPenanggungJawab = !empty($existing['pd_penanggung_jawab']) ? explode(', ', $existing['pd_penanggung_jawab']) : [];
-  $existingPenunjang = !empty($existing['pd_penunjang']) ? explode(', ', $existing['pd_penunjang']) : [];
-  
-  // Get new selections from the form (single value)
-  $newPenanggungJawabInput = $this->input->post('pd_penanggung_jawab');
-  $newPenunjangInput = $this->input->post('pd_penunjang');
-  
-  // Handle PD Penanggung Jawab
-  if ($newPenanggungJawabInput && $newPenanggungJawabInput !== '') {
-      $newPenanggungJawab = [$newPenanggungJawabInput]; // Treat "Semua Instansi Terkait" as a single value
-  } else {
-      $newPenanggungJawab = [];
+  try {
+      // Validate input
+      $id = $this->input->post('id', true);
+      if (empty($id) || !is_numeric($id)) {
+          throw new Exception('Invalid ID');
+      }
+
+      // Get existing data
+      $existing = $this->db->where('id', $id)->get('ikd')->row_array();
+      if (!$existing) {
+          throw new Exception('Data not found');
+      }
+
+      // Prepare update data
+      $updateData = ['updated_at' => date('Y-m-d H:i:s')];
+      
+      // Check which PD type we're adding
+      if ($this->input->post('pd_penanggung_jawab')) {
+          $penanggungJawab = $this->input->post('pd_penanggung_jawab', true);
+          $existingPJ = !empty($existing['pd_penanggung_jawab']) ? explode(',', $existing['pd_penanggung_jawab']) : [];
+          
+          if (!in_array($penanggungJawab, $existingPJ)) {
+              $existingPJ[] = $penanggungJawab;
+              $updateData['pd_penanggung_jawab'] = implode(',', array_filter($existingPJ));
+          }
+      } elseif ($this->input->post('pd_penunjang')) {
+          $penunjang = $this->input->post('pd_penunjang', true);
+          $existingPN = !empty($existing['pd_penunjang']) ? explode(',', $existing['pd_penunjang']) : [];
+          
+          if (!in_array($penunjang, $existingPN)) {
+              $existingPN[] = $penunjang;
+              $updateData['pd_penunjang'] = implode(',', array_filter($existingPN));
+          }
+      } else {
+          throw new Exception('No PD type specified');
+      }
+
+      // Update the database
+      $this->db->where('id', $id)->update('ikd', $updateData);
+
+      if ($this->db->affected_rows() > 0) {
+          echo '1';
+      } else {
+          throw new Exception('No changes made');
+      }
+  } catch (Exception $e) {
+      log_message('error', 'Error adding PD: ' . $e->getMessage());
+      echo $e->getMessage();
   }
-  
-  // Handle PD Penunjang
-  if ($newPenunjangInput && $newPenunjangInput !== '') {
-      $newPenunjang = [$newPenunjangInput]; // Treat "Semua Instansi Terkait" as a single value
-  } else {
-      $newPenunjang = [];
-  }
-  
-  // Merge existing and new values, avoiding duplicates
-  $updatedPenanggungJawab = array_unique(array_merge($existingPenanggungJawab, $newPenanggungJawab));
-  $updatedPenunjang = array_unique(array_merge($existingPenunjang, $newPenunjang));
-  
-  // Prepare data for update
-  $data = [
-      'pd_penanggung_jawab' => implode(', ', array_filter($updatedPenanggungJawab)), // Remove empty values and join
-      'pd_penunjang' => implode(', ', array_filter($updatedPenunjang)), // Remove empty values and join
-  ];
-  
-  // Update the database
-  $this->db->where('id', $id)->update('ikd', $data);
-  echo $this->db->affected_rows() ? '1' : '0';
 }
-  public function EditPDIKD(){  
-		$this->db->where('id',$_POST['id']); 
-		$this->db->update('ikd', $_POST);
-    if ($this->db->affected_rows()){
+
+// Keep the existing EditPDIKD method as is
+public function EditPDIKD() {  
+  $this->db->where('id', $_POST['id']); 
+  $this->db->update('ikd', $_POST);
+  if ($this->db->affected_rows()) {
       echo '1';
-    } else {
+  } else {
       echo 'Gagal Update Data!';
-    }
   }
+}
 
 }
