@@ -60,6 +60,9 @@
                                 <li>
                                     <a href="<?=base_url('Super/SasaranRPJPN')?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
                                 </li>
+                                <li>
+                                    <a href="<?=base_url('Super/TahapanRPJPN')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
+                                </li>
                             </ul>
                         </div>
                         <div id="RPJMN" class="tab-pane in <?=$Halaman == 'RPJMN' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
@@ -75,6 +78,9 @@
                                 </li>
                                 <li>
                                     <a href="<?=base_url('Super/SasaranRPJMN')?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/TahapanRPJMN')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
                                 </li>
                             </ul>
                         </div>

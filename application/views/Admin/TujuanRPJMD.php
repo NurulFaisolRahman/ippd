@@ -1,11 +1,11 @@
-    <div class="data-table-area">
+<div class="data-table-area">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <div class="data-table-list">
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
-                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputTujuan"><i class="notika-icon notika-edit"></i> <b>Input Tujuan</b></button>
+                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputTujuan"><i class="notika-icon notika-edit"></i> <b>Input Tujuan RPJMD</b></button>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -13,8 +13,8 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 10%;" class="text-center">No</th>
-                                        <th style="width: 35%;">Misi</th>
-                                        <th style="width: 35%;">Tujuan</th>
+                                        <th style="width: 35%;">Misi RPJMD</th>
+                                        <th style="width: 35%;">Tujuan RPJMD</th>
                                         <th style="width: 10%;">Periode</th>
                                         <th style="width: 10%;" class="text-center">Edit</th>
                                     </tr>
@@ -28,7 +28,7 @@
                                         <td style="vertical-align: middle;"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></td>
                                         <td class="text-center">
                                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['_Id'].'|'.$key['Tujuan'].'|'.$key['Id_']?>"><i class="notika-icon notika-next"></i></button>
+                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['Tujuan'].'|'.$key['IdVisi'].'|'.$key['IdMisi'].'|'.$key['Id_']?>"><i class="notika-icon notika-next"></i></button>
                                                 <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
                                             </div>
                                         </td>
@@ -56,25 +56,36 @@
                                     <div class="form-group">
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Misi</b></label>
+                                                <label class="hrzn-fm"><b>Periode RPJMD</b></label>
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <select class="form-control" id="IdMisi">
-                                                        <?php foreach ($Misi as $key) { ?>
-                                                            <option value="<?=$key['Id']?>"><?=$key['Misi']?></option>
+                                                    <select class="form-control" id="Periode">
+                                                        <option value="">Pilih Periode</option>
+                                                        <?php foreach ($Visi as $key) { ?>
+                                                            <option value="<?=$key['Id']?>"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></option>
                                                         <?php } ?>
                                                     </select>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="row" style="margin-top: 9px;">
+                                        <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Tujuan</b></label>
+                                                <label class="hrzn-fm"><b>Misi RPJMD</b></label>
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <textarea class="form-control" rows="3" id="Tujuan" placeholder="Input Tujuan"></textarea>
+                                                    <select class="form-control" id="IdMisi"></select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-top: 9px;">
+                                            <div class="col-lg-2">
+                                                <label class="hrzn-fm"><b>Tujuan RPJMD</b></label>
+                                            </div>
+                                            <div class="col-lg-9">
+                                                <div class="nk-int-st">
+                                                    <textarea class="form-control" rows="3" id="Tujuan" placeholder="Input Tujuan RPJMD"></textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -122,26 +133,36 @@
                                     <div class="form-group">
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Misi</b></label>
-                                                <input type="hidden" class="form-control input-sm" id="Id">
+                                                <label class="hrzn-fm"><b>Periode RPJMD</b></label>
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <select class="form-control" id="_IdMisi">
-                                                        <?php foreach ($Misi as $key) { ?>
-                                                            <option value="<?=$key['Id']?>"><?=$key['Misi']?></option>
+                                                    <select class="form-control" id="_Periode">
+                                                        <?php foreach ($Visi as $key) { ?>
+                                                            <option value="<?=$key['Id']?>"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></option>
                                                         <?php } ?>
                                                     </select>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="row" style="margin-top: 9px;">
+                                        <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Tujuan</b></label>
+                                                <label class="hrzn-fm"><b>Misi RPJMD</b></label>
+                                                <input type="hidden" class="form-control input-sm" id="Id">
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <textarea class="form-control" rows="3" id="_Tujuan" placeholder="Input Tujuan"></textarea>
+                                                    <select class="form-control" id="_IdMisi"></select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-top: 9px;">
+                                            <div class="col-lg-2">
+                                                <label class="hrzn-fm"><b>Tujuan RPJMD</b></label>
+                                            </div>
+                                            <div class="col-lg-9">
+                                                <div class="nk-int-st">
+                                                    <textarea class="form-control" rows="3" id="_Tujuan" placeholder="Input Tujuan RPJMD"></textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -190,12 +211,44 @@
         var BaseURL = '<?=base_url()?>'
         jQuery(document).ready(function($) {
 
+            $("#Periode").change(function(){
+                if ($("#Periode").val() == "") {
+                    alert("Mohon Input Periode")
+                } else {
+                    $.post(BaseURL+"Admin/GetMisiRPJMD", {Id : $("#Periode").val()}).done(function(Respon) {
+                        var Data = JSON.parse(Respon)
+                        var Misi = ''
+                        for (let i = 0; i < Data.length; i++) {
+                            Misi += '<option value="'+Data[i].Id+'">'+Data[i].Misi+'</option>'
+                        }
+                        $("#IdMisi").html(Misi)
+                    })                         
+                }
+            });
+
+            $("#_Periode").change(function(){
+                if ($("#_Periode").val() == "") {
+                    alert("Mohon Input Periode")
+                } else {
+                    $.post(BaseURL+"Admin/GetMisiRPJMD", {Id : $("#_Periode").val()}).done(function(Respon) {
+                        var Data = JSON.parse(Respon)
+                        var Misi = ''
+                        for (let i = 0; i < Data.length; i++) {
+                            Misi += '<option value="'+Data[i].Id+'">'+Data[i].Misi+'</option>'
+                        }
+                        $("#_IdMisi").html(Misi)
+                    })                         
+                }
+            });
+
             $("#Input").click(function() {
                 var Tampung = []
                 $.each($("input[name='_Tujuan']:checked"), function(){
                     Tampung.push($(this).val())
                 })
-                if ($("#Tujuan").val() == "") {
+                if ($("#Periode").val() == "") {
+                    alert("Mohon Input Periode")
+                } else if ($("#Tujuan").val() == "") {
                     alert('Input Tujuan Belum Benar!')
                 } else if (!Tampung.length) {
                     alert("Mohon Checklist Tujuan RPJMN!")
@@ -217,10 +270,19 @@
                 var Data = $(this).attr('Edit')
                 var Pisah = Data.split("|");
                 $("#Id").val(Pisah[0])
-                $("#_IdMisi").val(Pisah[1])
-                $("#_Tujuan").val(Pisah[2])
+                $("#_Tujuan").val(Pisah[1])
+                $("#_Periode").val(Pisah[2])
+                $.post(BaseURL+"Admin/GetMisiRPJMD", {Id : $("#_Periode").val()}).done(function(Respon) {
+                    var Data = JSON.parse(Respon)
+                    var Misi = ''
+                    for (let i = 0; i < Data.length; i++) {
+                        Misi += '<option value="'+Data[i].Id+'">'+Data[i].Misi+'</option>'
+                    }
+                    $("#_IdMisi").html(Misi)
+                    $("#_IdMisi").val(Pisah[3])
+                })
                 $("input[name='Tujuan_']").prop('checked', false);
-                Pisah[3].split("$").forEach(function(m) {
+                Pisah[4].split("$").forEach(function(m) {
                     $("input[name='Tujuan_'][value='" + m + "']").prop('checked', true);
                 });
                 $('#ModalEditTujuan').modal("show")
@@ -231,7 +293,9 @@
                 $.each($("input[name='Tujuan_']:checked"), function(){
                     Tampung.push($(this).val())
                 })
-                if ($("#_Tujuan").val() == "") {
+                if ($("#_Periode").val() == "") {
+                    alert("Mohon Input Periode")
+                } else if ($("#_Tujuan").val() == "") {
                     alert('Input Tujuan Belum Benar!')
                 } else if (!Tampung.length) {
                     alert("Mohon Checklist Tujuan RPJMN!")
@@ -250,7 +314,7 @@
                 }
             })
 
-            $(".Hapus").click(function() {
+            $('#data-table-basic tbody').on('click', '.Hapus', function () {
                 var Tujuan = { Id: $(this).attr('Hapus') }
                 $.post(BaseURL+"Admin/HapusTujuanRPJMD", Tujuan).done(function(Respon) {
                     if (Respon == '1') {

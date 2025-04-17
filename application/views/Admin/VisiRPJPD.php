@@ -1,11 +1,11 @@
-    <div class="data-table-area">
+<div class="data-table-area">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <div class="data-table-list">
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
-                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputVisi"><i class="notika-icon notika-edit"></i> <b>Input Visi</b></button>
+                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputVisi"><i class="notika-icon notika-edit"></i> <b>Input Visi RPJPD</b></button>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -13,7 +13,7 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 10%;" class="text-center">No</th>
-                                        <th style="width: 70%;">Visi</th>
+                                        <th style="width: 70%;">Visi RPJPD</th>
                                         <th style="width: 10%;">Periode</th>
                                         <th style="width: 10%;" class="text-center">Edit</th>
                                     </tr>
@@ -54,7 +54,7 @@
                                     <div class="form-group">
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Periode</b></label>
+                                                <label class="hrzn-fm"><b>Periode RPJPD</b></label>
                                             </div>
                                             <div class="col-lg-5">
                                                 <div class="nk-int-st">
@@ -73,11 +73,11 @@
                                     <div class="form-group">
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Visi</b></label>
+                                                <label class="hrzn-fm"><b>Visi RPJPD</b></label>
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <textarea class="form-control" rows="3" id="Visi" placeholder="Input Visi"></textarea>
+                                                    <textarea class="form-control" rows="3" id="Visi" placeholder="Input Visi RPJPD"></textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -113,7 +113,7 @@
                                     <div class="form-group">
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Periode</b></label>
+                                                <label class="hrzn-fm"><b>Periode RPJPD</b></label>
                                                 <input type="hidden" class="form-control input-sm" id="Id">
                                             </div>
                                             <div class="col-lg-5">
@@ -133,7 +133,7 @@
                                     <div class="form-group">
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Visi</b></label>
+                                                <label class="hrzn-fm"><b>Visi RPJPD</b></label>
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
@@ -227,7 +227,7 @@
                 }
             })
 
-            $(".Hapus").click(function() {
+            $('#data-table-basic tbody').on('click', '.Hapus', function () {
                 var Visi = { Id: $(this).attr('Hapus') }
                 $.post(BaseURL+"Admin/HapusVisiRPJPD", Visi).done(function(Respon) {
                     if (Respon == '1') {

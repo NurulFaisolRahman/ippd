@@ -5,7 +5,7 @@
                     <div class="data-table-list">
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
-                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputSasaran"><i class="notika-icon notika-edit"></i> <b>Input Sasaran</b></button>
+                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputSasaran"><i class="notika-icon notika-edit"></i> <b>Input Sasaran RPJPN</b></button>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -28,7 +28,7 @@
                                         <td style="vertical-align: middle;"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></td>
                                         <td class="text-center">
                                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['_Id'].'|'.$key['Sasaran']?>"><i class="notika-icon notika-next"></i></button>
+                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['Sasaran'].'|'.$key['IdVisi'].'|'.$key['IdTujuan']?>"><i class="notika-icon notika-next"></i></button>
                                                 <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
                                             </div>
                                         </td>
@@ -51,42 +51,51 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-lg-12">
-                            <div class="form-example-wrap">
-                                <div class="form-example-int form-horizental">
-                                    <div class="form-group">
-                                        <div class="row">
-                                            <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Tujuan</b></label>
-                                            </div>
-                                            <div class="col-lg-9">
-                                                <div class="nk-int-st">
-                                                    <select class="form-control" id="IdTujuan">
-                                                        <?php foreach ($Tujuan as $key) { ?>
-                                                            <option value="<?=$key['Id']?>"><?=$key['Tujuan']?></option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
+                            <div class="form-example-int form-horizental">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Periode RPJPN</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <select class="form-control" id="Periode">
+                                                    <option value="">Pilih Periode</option>
+                                                    <?php foreach ($Visi as $key) { ?>
+                                                        <option value="<?=$key['Id']?>"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></option>
+                                                    <?php } ?>
+                                                </select>
                                             </div>
                                         </div>
-                                        <div class="row" style="margin-top: 9px;">
-                                            <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Sasaran</b></label>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Tujuan RPJPN</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <select class="form-control" id="IdTujuan"></select>
                                             </div>
-                                            <div class="col-lg-9">
-                                                <div class="nk-int-st">
-                                                    <textarea class="form-control" rows="3" id="Sasaran" placeholder="Input Sasaran"></textarea>
-                                                </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Sasaran RPJPN</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <textarea class="form-control" rows="3" id="Sasaran" placeholder="Input Sasaran RPJPN"></textarea>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-example-int">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                        </div>
-                                        <div class="col-lg-9">
-                                            <button class="btn btn-success notika-btn-success" id="Input"><b>SIMPAN</b></button>
-                                        </div>
+                            </div>
+                            <div class="form-example-int">
+                                <div class="row">
+                                    <div class="col-lg-2">
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <button class="btn btn-success notika-btn-success" id="Input"><b>SIMPAN</b></button>
                                     </div>
                                 </div>
                             </div>
@@ -105,43 +114,51 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-lg-12">
-                            <div class="form-example-wrap">
-                                <div class="form-example-int form-horizental">
-                                    <div class="form-group">
-                                        <div class="row">
-                                            <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Tujuan</b></label>
-                                                <input type="hidden" class="form-control input-sm" id="Id">
-                                            </div>
-                                            <div class="col-lg-9">
-                                                <div class="nk-int-st">
-                                                    <select class="form-control" id="_IdTujuan">
-                                                        <?php foreach ($Tujuan as $key) { ?>
-                                                            <option value="<?=$key['Id']?>"><?=$key['Tujuan']?></option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
+                            <div class="form-example-int form-horizental">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Periode RPJPN</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <select class="form-control" id="_Periode">
+                                                    <?php foreach ($Visi as $key) { ?>
+                                                        <option value="<?=$key['Id']?>"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></option>
+                                                    <?php } ?>
+                                                </select>
                                             </div>
                                         </div>
-                                        <div class="row" style="margin-top: 9px;">
-                                            <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Sasaran</b></label>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Tujuan RPJPN</b></label>
+                                            <input type="hidden" class="form-control input-sm" id="Id">
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <select class="form-control" id="_IdTujuan"></select>
                                             </div>
-                                            <div class="col-lg-9">
-                                                <div class="nk-int-st">
-                                                    <textarea class="form-control" rows="3" id="_Sasaran" placeholder="Input Sasaran"></textarea>
-                                                </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Sasaran RPJPN</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <textarea class="form-control" rows="3" id="_Sasaran" placeholder="Input Sasaran RPJPN"></textarea>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-example-int">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                        </div>
-                                        <div class="col-lg-9">
-                                            <button class="btn btn-success notika-btn-success" id="Edit"><b>Update</b></button>
-                                        </div>
+                            </div>
+                            <div class="form-example-int">
+                                <div class="row">
+                                    <div class="col-lg-2">
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <button class="btn btn-success notika-btn-success" id="Edit"><b>Update</b></button>
                                     </div>
                                 </div>
                             </div>
@@ -166,8 +183,40 @@
         var BaseURL = '<?=base_url()?>'
         jQuery(document).ready(function($) {
 
+            $("#Periode").change(function(){
+                if ($("#Periode").val() == "") {
+                    alert("Mohon Input Periode")
+                } else {
+                    $.post(BaseURL+"Super/GetTujuanRPJPN", {Id : $("#Periode").val()}).done(function(Respon) {
+                        var Data = JSON.parse(Respon)
+                        var Tujuan = ''
+                        for (let i = 0; i < Data.length; i++) {
+                            Tujuan += '<option value="'+Data[i].Id+'">'+Data[i].Tujuan+'</option>'
+                        }
+                        $("#IdTujuan").html(Tujuan)
+                    })                         
+                }
+            });
+
+            $("#_Periode").change(function(){
+                if ($("#Periode").val() == "") {
+                    alert("Mohon Input Periode")
+                } else {
+                    $.post(BaseURL+"Super/GetTujuanRPJPN", {Id : $("#_Periode").val()}).done(function(Respon) {
+                        var Data = JSON.parse(Respon)
+                        var Tujuan = ''
+                        for (let i = 0; i < Data.length; i++) {
+                            Tujuan += '<option value="'+Data[i].Id+'">'+Data[i].Tujuan+'</option>'
+                        }
+                        $("#_IdTujuan").html(Tujuan)
+                    })                         
+                }
+            });
+
             $("#Input").click(function() {
-                if ($("#Sasaran").val() == "") {
+                if ($("#Periode").val() == "") {
+                    alert("Mohon Input Periode")
+                } else if ($("#Sasaran").val() == "") {
                     alert('Input Sasaran Belum Benar!')
                 } else {
                     var Sasaran = { _Id     : $("#IdTujuan").val(),
@@ -186,13 +235,24 @@
                 var Data = $(this).attr('Edit')
                 var Pisah = Data.split("|");
                 $("#Id").val(Pisah[0])
-                $("#_IdTujuan").val(Pisah[1])
-                $("#_Sasaran").val(Pisah[2])
+                $("#_Sasaran").val(Pisah[1])
+                $("#_Periode").val(Pisah[2])
+                $.post(BaseURL+"Super/GetTujuanRPJPN", {Id : $("#_Periode").val()}).done(function(Respon) {
+                    var Data = JSON.parse(Respon)
+                    var Tujuan = ''
+                    for (let i = 0; i < Data.length; i++) {
+                        Tujuan += '<option value="'+Data[i].Id+'">'+Data[i].Tujuan+'</option>'
+                    }
+                    $("#_IdTujuan").html(Tujuan)
+                    $("#_IdTujuan").val(Pisah[3])
+                })                         
                 $('#ModalEditSasaran').modal("show")
             })
 
             $("#Edit").click(function() {
-                if ($("#_Sasaran").val() == "") {
+                if ($("#_Periode").val() == "") {
+                    alert("Mohon Input Periode")
+                } else if ($("#_Sasaran").val() == "") {
                     alert('Input Sasaran Belum Benar!')
                 } else {
                     var Sasaran = { Id      : $("#Id").val(),
@@ -208,7 +268,7 @@
                 }
             })
 
-            $(".Hapus").click(function() {
+            $('#data-table-basic tbody').on('click', '.Hapus', function () {
                 var Sasaran = { Id: $(this).attr('Hapus') }
                 $.post(BaseURL+"Super/HapusSasaranRPJPN", Sasaran).done(function(Respon) {
                     if (Respon == '1') {
