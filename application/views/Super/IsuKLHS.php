@@ -5,8 +5,8 @@
                 <div class="data-table-list">
                     <div class="basic-tb-hd">
                         <div class="button-icon-btn sm-res-mg-t-30">
-                            <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputSPM">
-                                <i class="notika-icon notika-edit"></i> <b>Input SPM</b>
+                            <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputIsuKLHS">
+                                <i class="notika-icon notika-edit"></i> <b>Input Isu KLHS</b>
                             </button>
                         </div>
                     </div>
@@ -16,21 +16,21 @@
                                 <tr>
                                     <th class="text-center">No</th>
                                     <th>Nama Kementerian</th>
-                                    <th>Nama SPM</th>
+                                    <th>Nama Isu KLHS</th>
                                     <th>Periode</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php $No = 1; foreach ($SPM as $key) { ?>
+                                <?php $No = 1; foreach ($IsuKLHS as $key) { ?>
                                 <tr>
                                     <td style="vertical-align: middle;" class="text-center"><?= $No++ ?></td>
                                     <td style="vertical-align: middle;"><?= $key['NamaKementerian'] ?></td>
-                                    <td style="vertical-align: middle;"><?= $key['NamaSPM'] ?></td>
+                                    <td style="vertical-align: middle;"><?= $key['NamaIsuKLHS'] ?></td>
                                     <td style="vertical-align: middle;"><?= $key['TahunMulai'] . ' - ' . $key['TahunAkhir'] ?></td>
                                     <td>
                                         <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                            <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?= $key['Id'] . '|' . $key['IdKementerian'] . '|' . $key['NamaSPM'] . '|' . $key['TahunMulai'] . '|' . $key['TahunAkhir'] ?>"><i class="notika-icon notika-next"></i></button>
+                                            <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?= $key['Id'] . '|' . $key['IdKementerian'] . '|' . $key['NamaIsuKLHS'] . '|' . $key['TahunMulai'] . '|' . $key['TahunAkhir'] ?>"><i class="notika-icon notika-next"></i></button>
                                             <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?= $key['Id'] ?>"><i class="notika-icon notika-trash"></i></button>
                                         </div>
                                     </td>
@@ -45,8 +45,8 @@
     </div>
 </div>
 
-<!-- Modal Input SPM -->
-<div class="modal fade" id="ModalInputSPM" role="dialog">
+<!-- Modal Input Isu KLHS -->
+<div class="modal fade" id="ModalInputIsuKLHS" role="dialog">
     <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
         <div class="modal-content">
             <div class="modal-header">
@@ -98,11 +98,11 @@
                                 <div class="form-group">
                                     <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Nama SPM</b></label>
+                                            <label class="hrzn-fm"><b>Nama Isu KLHS</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="NamaSPM">
+                                                <input type="text" class="form-control input-sm" id="NamaIsuKLHS">
                                             </div>
                                         </div>
                                     </div>
@@ -112,7 +112,7 @@
                                 <div class="row">
                                     <div class="col-lg-2"></div>
                                     <div class="col-lg-9">
-                                        <button class="btn btn-success notika-btn-success" id="InputSPM"><b>SIMPAN</b></button>
+                                        <button class="btn btn-success notika-btn-success" id="InputIsuKLHS"><b>SIMPAN</b></button>
                                     </div>
                                 </div>
                             </div>
@@ -124,8 +124,8 @@
     </div>
 </div>
 
-<!-- Modal Edit SPM -->
-<div class="modal fade" id="ModalEditSPM" role="dialog">
+<!-- Modal Edit Isu KLHS -->
+<div class="modal fade" id="ModalEditIsuKLHS" role="dialog">
     <div class="modal-dialog modal-large" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
         <div class="modal-content">
             <div class="modal-header">
@@ -177,12 +177,12 @@
                                 <div class="form-group">
                                     <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Nama SPM</b></label>
+                                            <label class="hrzn-fm"><b>Nama Isu KLHS</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
                                                 <input type="hidden" id="EditId">
-                                                <input type="text" class="form-control input-sm" id="EditNamaSPM">
+                                                <input type="text" class="form-control input-sm" id="EditNamaIsuKLHS">
                                             </div>
                                         </div>
                                     </div>
@@ -192,7 +192,7 @@
                                 <div class="row">
                                     <div class="col-lg-2"></div>
                                     <div class="col-lg-9">
-                                        <button class="btn btn-success notika-btn-success" id="UpdateSPM"><b>UPDATE</b></button>
+                                        <button class="btn btn-success notika-btn-success" id="UpdateIsuKLHS"><b>UPDATE</b></button>
                                     </div>
                                 </div>
                             </div>
@@ -219,8 +219,8 @@
 <script>
     var BaseURL = '<?= base_url() ?>';
     jQuery(document).ready(function($) {
-        // Input SPM
-        $("#InputSPM").click(function() {
+        // Input Isu KLHS
+        $("#InputIsuKLHS").click(function() {
             if ($("#IdKementerian").val() === "") {
                 alert('Pilih Kementerian terlebih dahulu!');
                 return;
@@ -228,16 +228,16 @@
                 alert('Input Tahun Mulai Belum Benar!');
             } else if (isNaN($("#TahunAkhir").val()) || $("#TahunAkhir").val() == "" || $("#TahunAkhir").val().length != 4) {
                 alert('Input Tahun Akhir Belum Benar!');
-            } else if ($("#NamaSPM").val() == "") {
-                alert('Input SPM Belum Benar!');
+            } else if ($("#NamaIsuKLHS").val() == "") {
+                alert('Input Isu KLHS Belum Benar!');
             } else {
                 var Data = {
                     IdKementerian: $("#IdKementerian").val(),
-                    NamaSPM: $("#NamaSPM").val(),
+                    NamaIsuKLHS: $("#NamaIsuKLHS").val(),
                     TahunMulai: $("#TahunMulai").val(),
                     TahunAkhir: $("#TahunAkhir").val()
                 };
-                $.post(BaseURL + "Super/InputSPM", Data).done(function(Respon) {
+                $.post(BaseURL + "Super/InputIsuKLHS", Data).done(function(Respon) {
                     if (Respon == '1') {
                         window.location.reload();
                     } else {
@@ -247,34 +247,34 @@
             }
         });
 
-        // Edit SPM
+        // Edit Isu KLHS
         $(document).on("click", ".Edit", function() {
             var Data = $(this).attr('Edit');
             var Pisah = Data.split("|");
             $("#EditId").val(Pisah[0]);
             $("#EditIdKementerian").val(Pisah[1]);
-            $("#EditNamaSPM").val(Pisah[2]);
+            $("#EditNamaIsuKLHS").val(Pisah[2]);
             $("#EditTahunMulai").val(Pisah[3]);
             $("#EditTahunAkhir").val(Pisah[4]);
-            $('#ModalEditSPM').modal("show");
+            $('#ModalEditIsuKLHS').modal("show");
         });
 
-        // Update SPM
-        $("#UpdateSPM").click(function() {
+        // Update Isu KLHS
+        $("#UpdateIsuKLHS").click(function() {
             if ($("#EditIdKementerian").val() === "") {
                 alert('Pilih Kementerian terlebih dahulu!');
                 return;
-            } else if ($("#EditNamaSPM").val() == "") {
-                alert('Input Nama SPM Belum Benar!');
+            } else if ($("#EditNamaIsuKLHS").val() == "") {
+                alert('Input Nama Isu KLHS Belum Benar!');
             } else {
                 var Data = {
                     Id: $("#EditId").val(),
                     IdKementerian: $("#EditIdKementerian").val(),
-                    NamaSPM: $("#EditNamaSPM").val(),
+                    NamaIsuKLHS: $("#EditNamaIsuKLHS").val(),
                     TahunMulai: $("#EditTahunMulai").val(),
                     TahunAkhir: $("#EditTahunAkhir").val()
                 };
-                $.post(BaseURL + "Super/UpdateSPM", Data).done(function(Respon) {
+                $.post(BaseURL + "Super/UpdateIsuKLHS", Data).done(function(Respon) {
                     if (Respon == '1') {
                         window.location.reload();
                     } else {
@@ -284,18 +284,16 @@
             }
         });
 
-        // Delete SPM
+        // Delete Isu KLHS
         $(".Hapus").click(function() {
-            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-                var Id = { Id: $(this).attr('Hapus') };
-                $.post(BaseURL + "Super/DeleteSPM", Id).done(function(Respon) {
-                    if (Respon == '1') {
-                        window.location.reload();
-                    } else {
-                        alert(Respon);
-                    }
-                });
-            }
+            var Id = { Id: $(this).attr('Hapus') };
+            $.post(BaseURL + "Super/DeleteIsuKLHS", Id).done(function(Respon) {
+                if (Respon == '1') {
+                    window.location.reload();
+                } else {
+                    alert(Respon);
+                }
+            });
         });
     });
 </script>

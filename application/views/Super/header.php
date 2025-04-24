@@ -43,6 +43,8 @@
                         <li <?=$Halaman == 'RPJPN' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#RPJPN"><i class="notika-icon notika-form"></i> <b>RPJPN</b></a></li>
                         <li <?=$Halaman == 'RPJMN' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#RPJMN"><i class="notika-icon notika-form"></i> <b>RPJMN</b></a></li>
                         <li <?=$Halaman == 'Kementerian' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#Kementerian"><i class="notika-icon notika-house"></i> <b>Kementerian</b></a></li>
+                        <li <?=$Halaman == 'Isu' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#Isu"><i class="notika-icon notika-house"></i> <b>Isu</b></a></li>
+
 
                     </ul>
                     <div class="tab-content custom-menu-content">
@@ -90,17 +92,33 @@
                                     <a href="<?=base_url('Super/Kementerian')?>"><i class="notika-icon notika-form"></i> <b>Kelola Kementerian</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Super/Isu')?>"><i class="notika-icon notika-form"></i> <b>Isu Strategis</b></a>
+                                    <a href="<?=base_url('Super/SPM')?>"><i class="notika-icon notika-form"></i> <b>Standar Pelayanan Minimal</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Super/SPM')?>"><i class="notika-icon notika-form"></i> <b>Standar Penjaminan Mutu</b></a>
+                                    <a href="<?=base_url('Super/ProgramStrategis')?>"><i class="notika-icon notika-form"></i> <b>Program Strategis</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Super/proyek_strategis')?>"><i class="notika-icon notika-form"></i> <b>Proyek Strategis</b></a>
+                                    <a href="<?=base_url('Super/ProyekStrategis')?>"><i class="notika-icon notika-form"></i> <b>Proyek Strategis</b></a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="Isu" class="tab-pane in <?=$Halaman == 'Isu' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
+                            <ul class="notika-main-menu-dropdown">
+                                <li>
+                                    <a href="<?=base_url('Super/PermasalahanPokok')?>"><i class="notika-icon notika-form"></i> <b>Permasalahan Pokok</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Super/program_strategis')?>"><i class="notika-icon notika-form"></i> <b>Program Strategis</b></a>
+                                    <a href="<?=base_url('Super/IsuKLHS')?>"><i class="notika-icon notika-form"></i> <b>Isu KLHS</b></a>
                                 </li>
+                                <li>
+                                    <a href="<?=base_url('Super/IsuGlobal')?>"><i class="notika-icon notika-form"></i> <b>Isu Global</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/IsuNasional')?>"><i class="notika-icon notika-form"></i> <b>Isu Nasional</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/IsuStrategis')?>"><i class="notika-icon notika-form"></i> <b>Isu Strategis</b></a>
+                                </li>   
                             </ul>
                         </div>
                     </div>
