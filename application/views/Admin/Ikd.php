@@ -17,6 +17,7 @@
                                     <th width="5%" class="text-center">No</th>
                                     <th width="15%">Sasaran</th>
                                     <th width="15%">Indikator Sasaran</th>
+                                    <th width="10%" class="text-center">Periode</th>
                                     <th width="12%" class="text-center">PD Penanggung Jawab</th>
                                     <th width="12%" class="text-center">PD Penunjang</th>
                                     <th width="6%" class="text-center">Target <br><small>Tahun 1</small></th>
@@ -38,6 +39,9 @@
                                         ?>
                                     </td>
                                     <td style="vertical-align: top;"><?= $key['indikator_sasaran'] ?></td>
+                                    <td style="vertical-align: top;" class="text-center">
+                                        <?= $key['tahun_mulai'] ?> - <?= $key['tahun_akhir'] ?>
+                                    </td>
                                     
                                     <!-- Kolom PD Penanggung Jawab -->
                                     <td style="vertical-align: top;">
@@ -120,13 +124,20 @@
                                         <?= is_numeric($key['target_5']) && floor($key['target_5']) == $key['target_5'] ? (int)$key['target_5'] : '-' ?>
                                     </td>
                                     
-                                <!-- Kolom Aksi -->
+                                    <!-- Kolom Aksi -->
                                     <td class="text-center" style="vertical-align: middle;">
                                         <div style="display: flex; justify-content: center; gap: 5px;">
                                             <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" 
                                                     data-id="<?= $key['id'] ?>" 
                                                     data-sasaran="<?= $key['IdSasaran'] ?>" 
                                                     data-indikator-sasaran="<?= $key['indikator_sasaran'] ?>"
+                                                    data-tahunmulai="<?= $key['tahun_mulai'] ?>"
+                                                    data-tahunakhir="<?= $key['tahun_akhir'] ?>"
+                                                    data-target1="<?= $key['target_1'] ?>"
+                                                    data-target2="<?= $key['target_2'] ?>"
+                                                    data-target3="<?= $key['target_3'] ?>"
+                                                    data-target4="<?= $key['target_4'] ?>"
+                                                    data-target5="<?= $key['target_5'] ?>"
                                                     style="width: 36px; height: 36px; padding: 0; border-radius: 50%;">
                                                 <i class="fa fa-edit" style="font-size: 15px;"></i>
                                             </button>
@@ -157,43 +168,58 @@
             </div>
             <div class="modal-body">
                 <form id="FormTambahIkd">
+                    <!-- Tahun Filter Dropdown -->
                     <div class="form-group">
-                        <label for="Sasaran">Sasaran</label>
-                        <select class="form-control" id="Sasaran" name="Sasaran" required>
-                            <?php foreach ($Sasaran as $sasaran) { ?>
-                                <option value="<?= $sasaran['Id'] ?>"><?= $sasaran['Sasaran'] ?></option>
+                        <label for="TahunFilter">Periode Tahun</label>
+                        <select class="form-control" id="TahunFilter" name="TahunFilter" required>
+                            <option value="" selected disabled>-- Pilih Tahun --</option>
+                            <?php foreach ($Periods as $period) { ?>
+                                <option value="<?= $period['TahunMulai'].'-'.$period['TahunAkhir'] ?>">
+                                    <?= $period['TahunMulai'].' - '.$period['TahunAkhir'] ?>
+                                </option>
                             <?php } ?>
                         </select>
                     </div>
+
+                    <!-- Dropdown Sasaran -->
+                    <div class="form-group">
+                        <label for="Sasaran">Sasaran</label>
+                        <select class="form-control" id="Sasaran" name="Sasaran" required disabled>
+                            <option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>
+                        </select>
+                    </div>
+
                     <div class="form-group">
                         <label for="IndikatorSasaran">Indikator Sasaran (IKD)</label>
                         <textarea class="form-control" id="IndikatorSasaran" name="indikator_sasaran" rows="3" required></textarea>
                     </div>
+
                     <div class="form-group">
                         <label>Target Tahunan</label>
                         <div class="row">
                             <div class="col-md-2">
                                 <label>Tahun 1</label>
-                                <input  class="form-control" name="target_1" placeholder="Angka">
+                                <input type="number" class="form-control" name="target_1" placeholder="Angka">
                             </div>
                             <div class="col-md-2">
                                 <label>Tahun 2</label>
-                                <input  class="form-control" name="target_2" placeholder="Angka">
+                                <input type="number" class="form-control" name="target_2" placeholder="Angka">
                             </div>
                             <div class="col-md-2">
                                 <label>Tahun 3</label>
-                                <input  class="form-control" name="target_3" placeholder="Angka">
+                                <input type="number" class="form-control" name="target_3" placeholder="Angka">
                             </div>
                             <div class="col-md-2">
                                 <label>Tahun 4</label>
-                                <input  class="form-control" name="target_4" placeholder="Angka">
+                                <input type="number" class="form-control" name="target_4" placeholder="Angka">
                             </div>
                             <div class="col-md-2">
                                 <label>Tahun 5</label>
-                                <input  class="form-control" name="target_5" placeholder="Angka">
+                                <input type="number" class="form-control" name="target_5" placeholder="Angka">
                             </div>
                         </div>
                     </div>
+
                     <button type="submit" class="btn btn-success">Simpan</button>
                 </form>
             </div>
@@ -211,43 +237,59 @@
             <div class="modal-body">
                 <form id="FormEditIkd">
                     <input type="hidden" id="EditId" name="id">
+
+                    <!-- Periode Dropdown -->
                     <div class="form-group">
-                        <label for="EditSasaran">Sasaran</label>
-                        <select class="form-control" id="EditSasaran" name="EditSasaran" required>
-                            <?php foreach ($Sasaran as $sasaran) { ?>
-                                <option value="<?= $sasaran['Id'] ?>"><?= $sasaran['Sasaran'] ?></option>
+                        <label for="EditPeriode">Periode Tahun</label>
+                        <select class="form-control" id="EditPeriode" name="periode" required>
+                            <option value="" selected disabled>-- Pilih Tahun --</option>
+                            <?php foreach ($Periods as $period) { ?>
+                                <option value="<?= $period['TahunMulai'].'-'.$period['TahunAkhir'] ?>">
+                                    <?= $period['TahunMulai'].' - '.$period['TahunAkhir'] ?>
+                                </option>
                             <?php } ?>
                         </select>
                     </div>
+
+                    <!-- Dropdown Sasaran -->
+                    <div class="form-group">
+                        <label for="EditSasaran">Sasaran</label>
+                        <select class="form-control" id="EditSasaran" name="EditSasaran" required disabled>
+                            <option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>
+                        </select>
+                    </div>
+
                     <div class="form-group">
                         <label for="EditIndikatorSasaran">Indikator Sasaran (IKD)</label>
                         <textarea class="form-control" id="EditIndikatorSasaran" name="indikator_sasaran" rows="3" required></textarea>
                     </div>
+
                     <div class="form-group">
                         <label>Target Tahunan</label>
                         <div class="row">
                             <div class="col-md-2">
                                 <label>Tahun 1</label>
-                                <input  class="form-control" id="EditTarget1" name="target_1">
+                                <input type="number" class="form-control" id="EditTarget1" name="target_1">
                             </div>
                             <div class="col-md-2">
                                 <label>Tahun 2</label>
-                                <input  class="form-control" id="EditTarget2" name="target_2">
+                                <input type="number" class="form-control" id="EditTarget2" name="target_2">
                             </div>
                             <div class="col-md-2">
                                 <label>Tahun 3</label>
-                                <input  class="form-control" id="EditTarget3" name="target_3">
+                                <input type="number" class="form-control" id="EditTarget3" name="target_3">
                             </div>
                             <div class="col-md-2">
                                 <label>Tahun 4</label>
-                                <input  class="form-control" id="EditTarget4" name="target_4">
+                                <input type="number" class="form-control" id="EditTarget4" name="target_4">
                             </div>
                             <div class="col-md-2">
                                 <label>Tahun 5</label>
-                                <input  class="form-control" id="EditTarget5" name="target_5">
+                                <input type="number" class="form-control" id="EditTarget5" name="target_5">
                             </div>
                         </div>
                     </div>
+
                     <button type="submit" class="btn btn-success">Simpan</button>
                 </form>
             </div>
@@ -412,6 +454,7 @@
     var instansiOptions = <?php echo json_encode($Instansi); ?>;
     
     $(document).ready(function() {
+        
         // Inisialisasi variabel untuk menyimpan data input terakhir
         // Mencoba mendapatkan data dari localStorage jika ada
         var storedData = localStorage.getItem('ikdLastInputData');
@@ -487,104 +530,149 @@
             });
             return options;
         }
-
-        // Tambah IKD
-        $("#FormTambahIkd").submit(function(e) {
-            e.preventDefault();
-            if(validateIntegerInputs('FormTambahIkd')) {
-                $.post(BaseURL + "Admin/TambahIkd", $(this).serialize()).done(function(res) {
-                    if (res == '1') {
-                        window.location.reload();
-                    } else {
-                        alert("Gagal menyimpan data: " + res);
+        // Load sasaran when tahun filter changes
+        $('#TahunFilter').change(function() {
+            if ($(this).val()) {
+                $('#Sasaran').prop('disabled', false);
+                $('#Sasaran').html('<option value="">-- Pilih Sasaran --</option>');
+                
+                var tahunRange = $(this).val().split('-');
+                var tahunMulai = tahunRange[0];
+                var tahunAkhir = tahunRange[1];
+                
+                $.ajax({
+                    url: BaseURL + 'Admin/GetSasaranByPeriod',
+                    type: 'POST',
+                    data: {
+                        tahun_mulai: tahunMulai,
+                        tahun_akhir: tahunAkhir
+                    },
+                    success: function(response) {
+                        var data = JSON.parse(response);
+                        $.each(data, function(key, value) {
+                            $('#Sasaran').append('<option value="' + value.Id + '">' + value.Sasaran + '</option>');
+                        });
                     }
                 });
+            } else {
+                $('#Sasaran').prop('disabled', true);
+                $('#Sasaran').html('<option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>');
             }
         });
 
-        // Edit IKD
+        // Edit IKD - Load data
         $(".Edit").click(function() {
             var id = $(this).data('id');
             var IdSasaran = $(this).data('sasaran');
             var indikatorSasaran = $(this).data('indikator-sasaran');
-            
-            // Mengambil data target dari baris tabel atau dari lastInputData jika tersedia
-            var target1, target2, target3, target4, target5;
-            
-            if (lastInputData[id]) {
-                // Menggunakan nilai terakhir yang diinput oleh user
-                target1 = lastInputData[id].target_1;
-                target2 = lastInputData[id].target_2;
-                target3 = lastInputData[id].target_3;
-                target4 = lastInputData[id].target_4;
-                target5 = lastInputData[id].target_5;
-            } else {
-                // Mengambil nilai dari elemen tabel sebagai fallback
-                var rowCells = $(this).closest('tr').find('td');
-                target1 = rowCells.eq(5).text().trim() !== '-' ? parseInt(rowCells.eq(5).text().trim()) : '';
-                target2 = rowCells.eq(6).text().trim() !== '-' ? parseInt(rowCells.eq(6).text().trim()) : '';
-                target3 = rowCells.eq(7).text().trim() !== '-' ? parseInt(rowCells.eq(7).text().trim()) : '';
-                target4 = rowCells.eq(8).text().trim() !== '-' ? parseInt(rowCells.eq(8).text().trim()) : '';
-                target5 = rowCells.eq(9).text().trim() !== '-' ? parseInt(rowCells.eq(9).text().trim()) : '';
-            }
+            var target1 = $(this).data('target1');
+            var target2 = $(this).data('target2');
+            var target3 = $(this).data('target3');
+            var target4 = $(this).data('target4');
+            var target5 = $(this).data('target5');
+            var tahunMulai = $(this).data('tahunmulai');
+            var tahunAkhir = $(this).data('tahunakhir');
 
+            // Reset form first
             $("#EditId").val(id);
-            $("#EditSasaran").val(IdSasaran);
+            $("#EditPeriode").val('');
+            $("#EditSasaran").html('<option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>');
+            $("#EditSasaran").prop('disabled', true);
             $("#EditIndikatorSasaran").val(indikatorSasaran);
-            $("#EditTarget1").val(target1);
-            $("#EditTarget2").val(target2);
-            $("#EditTarget3").val(target3);
-            $("#EditTarget4").val(target4);
-            $("#EditTarget5").val(target5);
+            $("#EditTarget1").val(target1 || '');
+            $("#EditTarget2").val(target2 || '');
+            $("#EditTarget3").val(target3 || '');
+            $("#EditTarget4").val(target4 || '');
+            $("#EditTarget5").val(target5 || '');
 
+            // Set the period value and trigger change
+            $("#EditPeriode").val(tahunMulai + '-' + tahunAkhir).trigger('change');
+            
+            // Setelah sasaran di-load, set nilai sasaran yang dipilih
+            var checkSasaranExist = setInterval(function() {
+                if($('#EditSasaran option[value="'+IdSasaran+'"]').length > 0) {
+                    $('#EditSasaran').val(IdSasaran);
+                    clearInterval(checkSasaranExist);
+                }
+            }, 100);
+            
+            // Show modal
             $("#ModalEditIkd").modal('show');
         });
 
-        $("#FormEditIkd").submit(function(e) {
-            e.preventDefault();
-            if(validateIntegerInputs('FormEditIkd')) {
-                // Menyimpan nilai terakhir yang diinput
-                var id = $("#EditId").val();
-                lastInputData[id] = {
-                    target_1: $("#EditTarget1").val(),
-                    target_2: $("#EditTarget2").val(),
-                    target_3: $("#EditTarget3").val(),
-                    target_4: $("#EditTarget4").val(),
-                    target_5: $("#EditTarget5").val()
-                };
+        // Handle period change in edit modal (IKD)
+        $('#EditPeriode').change(function() {
+            if ($(this).val()) {
+                // Enable dropdown sasaran
+                $('#EditSasaran').prop('disabled', false);
                 
-                // Menyimpan ke localStorage untuk persistensi data
-                localStorage.setItem('ikdLastInputData', JSON.stringify(lastInputData));
+                // Kosongkan dan tambah opsi default
+                $('#EditSasaran').html('<option value="">-- Pilih Sasaran --</option>');
                 
-                $.post(BaseURL + "Admin/EditIkd", $(this).serialize()).done(function(res) {
-                    if (res == '1') {
-                        window.location.reload();
-                    } else {
-                        alert("Gagal mengupdate data: " + res);
+                // Load sasaran berdasarkan periode
+                var tahunRange = $(this).val().split('-');
+                var tahunMulai = tahunRange[0];
+                var tahunAkhir = tahunRange[1];
+                
+                $.ajax({
+                    url: BaseURL + 'Admin/GetSasaranByPeriod',
+                    type: 'POST',
+                    data: {
+                        tahun_mulai: tahunMulai,
+                        tahun_akhir: tahunAkhir
+                    },
+                    success: function(response) {
+                        var data = JSON.parse(response);
+                        if(data.length > 0) {
+                            $.each(data, function(key, value) {
+                                $('#EditSasaran').append('<option value="' + value.Id + '">' + value.Sasaran + '</option>');
+                            });
+                        } else {
+                            $('#EditSasaran').html('<option value="" selected disabled>-- Tidak ada sasaran untuk periode ini --</option>');
+                            $('#EditSasaran').prop('disabled', true);
+                        }
                     }
                 });
+            } else {
+                // Jika tidak ada periode yang dipilih, disable dropdown sasaran
+                $('#EditSasaran').prop('disabled', true);
+                $('#EditSasaran').html('<option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>');
             }
         });
 
-        // Hapus IKD
-        $(".Hapus").click(function() {
-            if(confirm("Apakah Anda yakin ingin menghapus data ini?")) {
-                var id = $(this).data('id');
-                
-                // Menghapus data input terakhir jika ID dihapus
-                if (lastInputData[id]) {
-                    delete lastInputData[id];
-                    localStorage.setItem('ikdLastInputData', JSON.stringify(lastInputData));
-                }
-                
-                $.post(BaseURL + "Admin/HapusIkd", { id: id }).done(function(res) {
+        // Edit IKD form submission
+        $("#FormEditIkd").submit(function(e) {
+            e.preventDefault();
+            
+            // Validasi form
+            if ($('#EditPeriode').val() === "" || $('#EditPeriode').val() === null) {
+                alert('Silakan pilih periode tahun terlebih dahulu!');
+                return false;
+            }
+            if ($('#EditSasaran').val() === "" || $('#EditSasaran').val() === null) {
+                alert('Silakan pilih sasaran terlebih dahulu!');
+                return false;
+            }
+            if ($('#EditIndikatorSasaran').val() === "") {
+                alert('Silakan isi indikator sasaran!');
+                return false;
+            }
+
+            $.ajax({
+                url: BaseURL + "Admin/EditIkd",
+                type: "POST",
+                data: $(this).serialize(),
+                success: function(res) {
                     if (res == '1') {
                         window.location.reload();
                     } else {
-                        alert("Gagal menghapus data: " + res);
+                        alert(res || "Gagal mengupdate data!");
                     }
-                });
-            }
+                },
+                error: function(xhr) {
+                    alert("Terjadi kesalahan: " + xhr.statusText);
+                }
+            });
         });
 
         // Hapus IKD
