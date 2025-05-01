@@ -60,14 +60,14 @@
                                 <div class="form-group">
                                     <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Kementerian</b></label>
+                                            <label class="hrzn-fm"><b>Periode</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <select class="form-control" id="IdKementerian">
-                                                    <option value="">-- Pilih Kementerian --</option>
-                                                    <?php foreach ($Kementerian as $kementerian) { ?>
-                                                        <option value="<?= $kementerian['Id'] ?>"><?= $kementerian['NamaKementerian'] ?></option>
+                                                <select class="form-control" id="Periode">
+                                                    <option value="">-- Pilih Periode --</option>
+                                                    <?php foreach ($Periode as $periode) { ?>
+                                                        <option value="<?= $periode['TahunMulai'] . '|' . $periode['TahunAkhir'] ?>"><?= $periode['TahunMulai'] . ' - ' . $periode['TahunAkhir'] ?></option>
                                                     <?php } ?>
                                                 </select>
                                             </div>
@@ -79,16 +79,13 @@
                                 <div class="form-group">
                                     <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Periode</b></label>
+                                            <label class="hrzn-fm"><b>Kementerian</b></label>
                                         </div>
-                                        <div class="col-lg-5">
+                                        <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="TahunMulai" placeholder="Tahun Mulai">
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-5">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="TahunAkhir" placeholder="Tahun Akhir">
+                                                <select class="form-control" id="IdKementerian">
+                                                    <option value="">-- Pilih Kementerian --</option>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
@@ -139,14 +136,14 @@
                                 <div class="form-group">
                                     <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Kementerian</b></label>
+                                            <label class="hrzn-fm"><b>Periode</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <select class="form-control" id="EditIdKementerian">
-                                                    <option value="">-- Pilih Kementerian --</option>
-                                                    <?php foreach ($Kementerian as $kementerian) { ?>
-                                                        <option value="<?= $kementerian['Id'] ?>"><?= $kementerian['NamaKementerian'] ?></option>
+                                                <select class="form-control" id="EditPeriode">
+                                                    <option value="">-- Pilih Periode --</option>
+                                                    <?php foreach ($Periode as $periode) { ?>
+                                                        <option value="<?= $periode['TahunMulai'] . '|' . $periode['TahunAkhir'] ?>"><?= $periode['TahunMulai'] . ' - ' . $periode['TahunAkhir'] ?></option>
                                                     <?php } ?>
                                                 </select>
                                             </div>
@@ -158,16 +155,13 @@
                                 <div class="form-group">
                                     <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Periode</b></label>
+                                            <label class="hrzn-fm"><b>Kementerian</b></label>
                                         </div>
-                                        <div class="col-lg-5">
+                                        <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="EditTahunMulai" placeholder="Tahun Mulai">
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-5">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="EditTahunAkhir" placeholder="Tahun Akhir">
+                                                <select class="form-control" id="EditIdKementerian">
+                                                    <option value="">-- Pilih Kementerian --</option>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
@@ -219,23 +213,58 @@
 <script>
     var BaseURL = '<?= base_url() ?>';
     jQuery(document).ready(function($) {
+        // Function to populate Kementerian dropdown
+        function populateKementerian(selectElement, data, selectedId = '') {
+            selectElement.html('<option value="">-- Pilih Kementerian --</option>');
+            $.each(data, function(index, item) {
+                var selected = (item.Id == selectedId) ? 'selected' : '';
+                selectElement.append('<option value="' + item.Id + '" ' + selected + '>' + item.NamaKementerian + '</option>');
+            });
+        }
+
+        // Input Modal: Populate Kementerian based on Periode
+        $("#Periode").change(function() {
+            var periode = $(this).val();
+            if (periode) {
+                var [TahunMulai, TahunAkhir] = periode.split('|');
+                $.post(BaseURL + "Super/GetKementerianByPeriode", { TahunMulai: TahunMulai, TahunAkhir: TahunAkhir }, function(data) {
+                    populateKementerian($("#IdKementerian"), JSON.parse(data));
+                });
+            } else {
+                $("#IdKementerian").html('<option value="">-- Pilih Kementerian --</option>');
+            }
+        });
+
+        // Edit Modal: Populate Kementerian based on Periode
+        $("#EditPeriode").change(function() {
+            var periode = $(this).val();
+            if (periode) {
+                var [TahunMulai, TahunAkhir] = periode.split('|');
+                $.post(BaseURL + "Super/GetKementerianByPeriode", { TahunMulai: TahunMulai, TahunAkhir: TahunAkhir }, function(data) {
+                    populateKementerian($("#EditIdKementerian"), JSON.parse(data), $("#EditIdKementerian").val());
+                });
+            } else {
+                $("#EditIdKementerian").html('<option value="">-- Pilih Kementerian --</option>');
+            }
+        });
+
         // Input Isu Strategis
         $("#InputIsuStrategis").click(function() {
-            if ($("#IdKementerian").val() === "") {
+            if ($("#Periode").val() === "") {
+                alert('Pilih Periode terlebih dahulu!');
+                return;
+            } else if ($("#IdKementerian").val() === "") {
                 alert('Pilih Kementerian terlebih dahulu!');
                 return;
-            } else if (isNaN($("#TahunMulai").val()) || $("#TahunMulai").val() == "" || $("#TahunMulai").val().length != 4) {
-                alert('Input Tahun Mulai Belum Benar!');
-            } else if (isNaN($("#TahunAkhir").val()) || $("#TahunAkhir").val() == "" || $("#TahunAkhir").val().length != 4) {
-                alert('Input Tahun Akhir Belum Benar!');
             } else if ($("#NamaIsuStrategis").val() == "") {
                 alert('Input Isu Strategis Belum Benar!');
             } else {
+                var [TahunMulai, TahunAkhir] = $("#Periode").val().split('|');
                 var Data = {
                     IdKementerian: $("#IdKementerian").val(),
                     NamaIsuStrategis: $("#NamaIsuStrategis").val(),
-                    TahunMulai: $("#TahunMulai").val(),
-                    TahunAkhir: $("#TahunAkhir").val()
+                    TahunMulai: TahunMulai,
+                    TahunAkhir: TahunAkhir
                 };
                 $.post(BaseURL + "Super/InputIsuStrategis", Data).done(function(Respon) {
                     if (Respon == '1') {
@@ -254,25 +283,29 @@
             $("#EditId").val(Pisah[0]);
             $("#EditIdKementerian").val(Pisah[1]);
             $("#EditNamaIsuStrategis").val(Pisah[2]);
-            $("#EditTahunMulai").val(Pisah[3]);
-            $("#EditTahunAkhir").val(Pisah[4]);
+            // Set Periode dropdown and trigger Kementerian population
+            $("#EditPeriode").val(Pisah[3] + '|' + Pisah[4]).trigger('change');
             $('#ModalEditIsuStrategis').modal("show");
         });
 
         // Update Isu Strategis
         $("#UpdateIsuStrategis").click(function() {
-            if ($("#EditIdKementerian").val() === "") {
+            if ($("#EditPeriode").val() === "") {
+                alert('Pilih Periode terlebih dahulu!');
+                return;
+            } else if ($("#EditIdKementerian").val() === "") {
                 alert('Pilih Kementerian terlebih dahulu!');
                 return;
             } else if ($("#EditNamaIsuStrategis").val() == "") {
                 alert('Input Nama Isu Strategis Belum Benar!');
             } else {
+                var [TahunMulai, TahunAkhir] = $("#EditPeriode").val().split('|');
                 var Data = {
                     Id: $("#EditId").val(),
                     IdKementerian: $("#EditIdKementerian").val(),
                     NamaIsuStrategis: $("#EditNamaIsuStrategis").val(),
-                    TahunMulai: $("#EditTahunMulai").val(),
-                    TahunAkhir: $("#EditTahunAkhir").val()
+                    TahunMulai: TahunMulai,
+                    TahunAkhir: TahunAkhir
                 };
                 $.post(BaseURL + "Super/UpdateIsuStrategis", Data).done(function(Respon) {
                     if (Respon == '1') {
@@ -286,14 +319,14 @@
 
         // Delete Isu Strategis
         $(".Hapus").click(function() {
-            var Id = { Id: $(this).attr('Hapus') };
-            $.post(BaseURL + "Super/DeleteIsuStrategis", Id).done(function(Respon) {
-                if (Respon == '1') {
-                    window.location.reload();
-                } else {
-                    alert(Respon);
-                }
-            });
-        });
+                var Misi = { Id: $(this).attr('Hapus') }
+                $.post(BaseURL+"Super/DeleteIsuStrategis", Misi).done(function(Respon) {
+                    if (Respon == '1') {
+                        window.location = BaseURL+"Super/IsuStrategis"
+                    } else {
+                        alert(Respon)
+                    }
+                })                         
+            })
     });
 </script>
