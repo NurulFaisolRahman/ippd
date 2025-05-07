@@ -285,7 +285,7 @@
         });
 
         // Hapus IKU
-        $(".Hapus").click(function() {
+        $('#data-table-basic tbody').on('click', '.Hapus', function () {
             if(confirm("Apakah Anda yakin ingin menghapus data ini?")) {
                 var id = $(this).data('id');
                 $.post(BaseURL + "Admin/HapusIku", { id: id }).done(function(res) {

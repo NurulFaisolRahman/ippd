@@ -567,6 +567,27 @@
         });
 
         // Hapus IKD
+        $('#data-table-basic tbody').on('click', '.Hapus', function () {
+            if(confirm("Apakah Anda yakin ingin menghapus data ini?")) {
+                var id = $(this).data('id');
+                
+                // Menghapus data input terakhir jika ID dihapus
+                if (lastInputData[id]) {
+                    delete lastInputData[id];
+                    localStorage.setItem('ikdLastInputData', JSON.stringify(lastInputData));
+                }
+                
+                $.post(BaseURL + "Admin/HapusIkd", { id: id }).done(function(res) {
+                    if (res == '1') {
+                        window.location.reload();
+                    } else {
+                        alert("Gagal menghapus data: " + res);
+                    }
+                });
+            }
+        });
+
+        // Hapus IKD
         $(".Hapus").click(function() {
             if(confirm("Apakah Anda yakin ingin menghapus data ini?")) {
                 var id = $(this).data('id');
