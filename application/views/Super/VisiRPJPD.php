@@ -13,7 +13,8 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 10%;" class="text-center">No</th>
-                                        <th style="width: 70%;">Visi RPJPD</th>
+                                        <th style="width: 15%;">Provinsi </th>
+                                        <th style="width: 55%;">Visi RPJPD</th>
                                         <th style="width: 10%;">Periode</th>
                                         <th style="width: 10%;" class="text-center">Edit</th>
                                     </tr>
@@ -22,11 +23,12 @@
                                     <?php $No = 1; foreach ($Visi as $key) { ?>
                                     <tr>
                                         <td style="vertical-align: middle;" class="text-center"><?=$No++?></td>
+                                        <td style="vertical-align: middle;"><?=$key['Nama']?></td>
                                         <td style="vertical-align: middle;"><?=$key['Visi']?></td>
                                         <td style="vertical-align: middle;"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></td>
                                         <td class="text-center">
                                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['Visi'].'|'.$key['TahunMulai'].'|'.$key['TahunAkhir']?>"><i class="notika-icon notika-next"></i></button>
+                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['Visi'].'|'.$key['TahunMulai'].'|'.$key['TahunAkhir'].'|'.$key['KodeWilayah']?>"><i class="notika-icon notika-next"></i></button>
                                                 <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
                                             </div>
                                         </td>
@@ -49,6 +51,25 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-lg-12">
+                            <div class="form-example-int form-horizental">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Provinsi</b></label>
+                                        </div>
+                                        <div style="margin-bottom: 5px;" class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <select class="form-control" id="Provinsi">
+                                                    <option value="">Pilih Provinsi</option>
+                                                    <?php foreach ($Provinsi as $key) { ?>
+                                                        <option value="<?=$key['Kode']?>"><?=$key['Nama']?></option>
+                                                    <?php } ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="form-example-int form-horizental">
                                 <div class="form-group">
                                     <div class="row">
@@ -106,6 +127,25 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-lg-12">
+                            <div class="form-example-int form-horizental">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Provinsi</b></label>
+                                        </div>
+                                        <div style="margin-bottom: 5px;" class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <select class="form-control" id="_Provinsi">
+                                                    <option value="">Pilih Provinsi</option>
+                                                    <?php foreach ($Provinsi as $key) { ?>
+                                                        <option value="<?=$key['Kode']?>"><?=$key['Nama']?></option>
+                                                    <?php } ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="form-example-int form-horizental">
                                 <div class="form-group">
                                     <div class="row">
@@ -171,7 +211,9 @@
         jQuery(document).ready(function($) {
             
             $("#Input").click(function() {
-                if (isNaN($("#TahunMulai").val()) || $("#TahunMulai").val() == "" || $("#TahunMulai").val().length != 4) {
+                if ($("#Provinsi").val() == "") {
+                    alert('Input Provinsi Belum Benar!')
+                } else if (isNaN($("#TahunMulai").val()) || $("#TahunMulai").val() == "" || $("#TahunMulai").val().length != 4) {
                     alert('Input Tahun Mulai Belum Benar!')
                 } else if (isNaN($("#TahunAkhir").val()) || $("#TahunAkhir").val() == "" || $("#TahunAkhir").val().length != 4) {
                     alert('Input Tahun Akhir Belum Benar!')
@@ -179,6 +221,7 @@
                     alert('Input Visi Belum Benar!')
                 } else {
                     var Visi = { Visi       : $("#Visi").val(),
+                                 KodeWilayah : $("#Provinsi").val(),
                                  TahunMulai : $("#TahunMulai").val(),
                                  TahunAkhir : $("#TahunAkhir").val() }
                     $.post(BaseURL+"Super/InputVisiRPJPD", Visi).done(function(Respon) {
@@ -198,11 +241,14 @@
                 $("#_Visi").val(Pisah[1])
                 $("#_TahunMulai").val(Pisah[2])
                 $("#_TahunAkhir").val(Pisah[3])
+                $("#_Provinsi").val(Pisah[4])
                 $('#ModalEditVisi').modal("show")
             })
 
             $("#Edit").click(function() {
-                if (isNaN($("#_TahunMulai").val()) || $("#_TahunMulai").val() == "" || $("#_TahunMulai").val().length != 4) {
+                if ($("#_Provinsi").val() == "") {
+                    alert('Input Provinsi Belum Benar!')
+                } else if (isNaN($("#_TahunMulai").val()) || $("#_TahunMulai").val() == "" || $("#_TahunMulai").val().length != 4) {
                     alert('Input Tahun Mulai Belum Benar!')
                 } else if (isNaN($("#_TahunAkhir").val()) || $("#_TahunAkhir").val() == "" || $("#_TahunAkhir").val().length != 4) {
                     alert('Input Tahun Akhir Belum Benar!')
@@ -211,6 +257,7 @@
                 } else {
                     var Visi = { Id         : $("#Id").val(),
                                  Visi       : $("#_Visi").val(),
+                                 KodeWilayah : $("#_Provinsi").val(),
                                  TahunMulai : $("#_TahunMulai").val(),
                                  TahunAkhir : $("#_TahunAkhir").val() }
                     $.post(BaseURL+"Super/EditVisiRPJPD", Visi).done(function(Respon) {

@@ -13,8 +13,7 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 10%;" class="text-center">No</th>
-                                        <th style="width: 35%;">Visi RPJMD</th>
-                                        <th style="width: 35%;">Misi RPJMD</th>
+                                        <th style="width: 70%;">Misi RPJMD</th>
                                         <th style="width: 10%;">Periode</th>
                                         <th style="width: 10%;" class="text-center">Edit</th>
                                     </tr>
@@ -23,12 +22,11 @@
                                     <?php $No = 1; foreach ($Misi as $key) { ?>
                                     <tr>
                                         <td style="vertical-align: middle;" class="text-center"><?=$No++?></td>
-                                        <td style="vertical-align: middle;"><?=$key['Visi']?></td>
                                         <td style="vertical-align: middle;"><?=$key['Misi']?></td>
                                         <td style="vertical-align: middle;"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></td>
                                         <td class="text-center">
                                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['_Id'].'|'.$key['Misi'].'|'.$key['Id_']?>"><i class="notika-icon notika-next"></i></button>
+                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['_Id'].'|'.$key['Misi'].'|'.$key['Id_'].'|'.$key['IdP']?>"><i class="notika-icon notika-next"></i></button>
                                                 <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
                                             </div>
                                         </td>
@@ -56,9 +54,9 @@
                                     <div class="form-group">
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Periode RPJMD</b></label>
+                                                <label class="hrzn-fm"><b>Periode</b></label>
                                             </div>
-                                            <div class="col-lg-9">
+                                            <div style="margin-bottom: 5px;" class="col-lg-9">
                                                 <div class="nk-int-st">
                                                     <select class="form-control" id="Periode">
                                                         <option value="">Pilih Periode</option>
@@ -91,7 +89,43 @@
                                         </div>
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Periode RPJMN</b></label>
+                                                <label class="hrzn-fm"><b>Periode</b></label>
+                                            </div>
+                                            <div class="col-lg-9">
+                                                <div class="nk-int-st">
+                                                    <select class="form-control" id="PeriodeRPJMDP">
+                                                        <option value="">Pilih Periode</option>
+                                                        <?php foreach ($VisiRPJMDP as $key) { ?>
+                                                            <option value="<?=$key['Id']?>"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></option>
+                                                        <?php } ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-lg-2">
+                                                <label class="hrzn-fm"><b>Misi RPJMD Provinsi</b></label>
+                                            </div>
+                                            <div style="margin-top: 3px;" class="col-lg-9">
+                                                <div class="accordion-stn">
+                                                    <div class="panel-group" data-collapse-color="nk-green" id="AccrodionMisiRPJMDP" role="tablist" aria-multiselectable="true">
+                                                        <div class="panel panel-collapse notika-accrodion-cus">
+                                                            <div class="panel-heading" role="tab">
+                                                                <b><a data-toggle="collapse" data-parent="#AccrodionMisiRPJMDP" href="#MisiRPJMDP-one" aria-expanded="true">Pilih Misi RPJMD</a></b>
+                                                            </div>
+                                                            <div id="MisiRPJMDP-one" class="collapse in" role="tabpanel">
+                                                                <div class="panel-body" style="padding-top: 0px;">
+                                                                    <div class="nk-int-st text-justify" id="MisiRPJMDP"></div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-lg-2">
+                                                <label class="hrzn-fm"><b>Periode</b></label>
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
@@ -110,12 +144,12 @@
                                             </div>
                                             <div style="margin-top: 3px;" class="col-lg-9">
                                                 <div class="accordion-stn">
-                                                    <div class="panel-group" data-collapse-color="nk-green" id="accordionGreen" role="tablist" aria-multiselectable="true">
+                                                    <div class="panel-group" data-collapse-color="nk-green" id="AccrodionMisiRPJMN" role="tablist" aria-multiselectable="true">
                                                         <div class="panel panel-collapse notika-accrodion-cus">
                                                             <div class="panel-heading" role="tab">
-                                                                <b><a data-toggle="collapse" data-parent="#accordionGreen" href="#accordionGreen-one" aria-expanded="true">Pilih Misi RPJMN</a></b>
+                                                                <b><a data-toggle="collapse" data-parent="#AccrodionMisiRPJMN" href="#MisiRPJMN-one" aria-expanded="true">Pilih Misi RPJMN</a></b>
                                                             </div>
-                                                            <div id="accordionGreen-one" class="collapse in" role="tabpanel">
+                                                            <div id="MisiRPJMN-one" class="collapse in" role="tabpanel">
                                                                 <div class="panel-body" style="padding-top: 0px;">
                                                                     <div class="nk-int-st text-justify" id="MisiRPJMN"></div>
                                                                 </div>
@@ -157,9 +191,9 @@
                                     <div class="form-group">
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Periode RPJMD</b></label>
+                                                <label class="hrzn-fm"><b>Periode</b></label>
                                             </div>
-                                            <div class="col-lg-9">
+                                            <div style="margin-bottom: 5px;" class="col-lg-9">
                                                 <div class="nk-int-st">
                                                     <select class="form-control" id="_Periode">
                                                         <?php foreach ($Visi as $key) { ?>
@@ -192,7 +226,43 @@
                                         </div>
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Periode RPJMN</b></label>
+                                                <label class="hrzn-fm"><b>Periode</b></label>
+                                            </div>
+                                            <div class="col-lg-9">
+                                                <div class="nk-int-st">
+                                                    <select class="form-control" id="PeriodeRPJMDP_">
+                                                        <option value="">Pilih Periode</option>
+                                                        <?php foreach ($VisiRPJMDP as $key) { ?>
+                                                            <option value="<?=$key['Id']?>"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></option>
+                                                        <?php } ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-lg-2">
+                                                <label class="hrzn-fm"><b>Misi RPJMD Provinsi</b></label>
+                                            </div>
+                                            <div style="margin-top: 3px;" class="col-lg-9">
+                                                <div class="accordion-stn">
+                                                    <div class="panel-group" data-collapse-color="nk-green" id="AccrodionMisiRPJMDP_" role="tablist" aria-multiselectable="true">
+                                                        <div class="panel panel-collapse notika-accrodion-cus">
+                                                            <div class="panel-heading" role="tab">
+                                                                <b><a data-toggle="collapse" data-parent="#AccrodionMisiRPJMDP_" href="#_MisiRPJMDP" aria-expanded="true">Pilih Misi RPJMD</a></b>
+                                                            </div>
+                                                            <div id="_MisiRPJMDP" class="collapse in" role="tabpanel">
+                                                                <div class="panel-body" style="padding-top: 0px;">
+                                                                    <div class="nk-int-st text-justify" id="MisiRPJMDP_"></div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-lg-2">
+                                                <label class="hrzn-fm"><b>Periode</b></label>
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
@@ -211,12 +281,12 @@
                                             </div>
                                             <div style="margin-top: 3px;" class="col-lg-9">
                                                 <div class="accordion-stn">
-                                                    <div class="panel-group" data-collapse-color="nk-green" id="accordionGreen" role="tablist" aria-multiselectable="true">
+                                                    <div class="panel-group" data-collapse-color="nk-green" id="AccrodionMisiRPJMN_" role="tablist" aria-multiselectable="true">
                                                         <div class="panel panel-collapse notika-accrodion-cus">
                                                             <div class="panel-heading" role="tab">
-                                                                <b><a data-toggle="collapse" data-parent="#accordionGreen" href="#accordionGreen-two" aria-expanded="true">Pilih Misi RPJMN</a></b>
+                                                                <b><a data-toggle="collapse" data-parent="#AccrodionMisiRPJMN_" href="#_MisiRPJMN" aria-expanded="true">Pilih Misi RPJMN</a></b>
                                                             </div>
-                                                            <div id="accordionGreen-two" class="collapse in" role="tabpanel">
+                                                            <div id="_MisiRPJMN" class="collapse in" role="tabpanel">
                                                                 <div class="panel-body" style="padding-top: 0px;">
                                                                     <div class="nk-int-st text-justify" id="MisiRPJMN_"></div>
                                                                 </div>
@@ -319,22 +389,61 @@
                 }
             });
 
+            $("#PeriodeRPJMDP").change(function(){
+                if ($("#PeriodeRPJMDP").val() == "") {
+                    alert("Mohon Input Periode RPJMD Provinsi")
+                } else {
+                    $.post(BaseURL+"Admin/GetMisiRPJMDP", {Id : $("#PeriodeRPJMDP").val()}).done(function(Respon) {
+                        var Data = JSON.parse(Respon)
+                        var Misi = ''
+                        for (let i = 0; i < Data.length; i++) {
+                            Misi += '<label><input style="margin-top: 10px;" type="checkbox" name="_MisiRPJMDP" value="'+Data[i].Id+'"> '+Data[i].Misi+'</label><br>'
+                        }
+                        $("#MisiRPJMDP").html(Misi)
+                    })                         
+                }
+            });
+
+            $("#PeriodeRPJMDP_").change(function(){
+                if ($("#PeriodeRPJMDP_").val() == "") {
+                    alert("Mohon Input Periode RPJMD Provinsi")
+                } else {
+                    $.post(BaseURL+"Admin/GetMisiRPJMDP", {Id : $("#PeriodeRPJMDP_").val()}).done(function(Respon) {
+                        var Data = JSON.parse(Respon)
+                        var Misi = ''
+                        for (let i = 0; i < Data.length; i++) {
+                            Misi += '<label><input style="margin-top: 10px;" type="checkbox" name="Misi_RPJMDP" value="'+Data[i].Id+'"> '+Data[i].Misi+'</label><br>'
+                        }
+                        $("#MisiRPJMDP_").html(Misi)
+                    })                         
+                }
+            });
+
             $("#Input").click(function() {
-                var Tampung = []
+                var RPJMDP = []
+                $.each($("input[name='_MisiRPJMDP']:checked"), function(){
+                    RPJMDP.push($(this).val())
+                })
+                var RPJMN = []
                 $.each($("input[name='_Misi']:checked"), function(){
-                    Tampung.push($(this).val())
+                    RPJMN.push($(this).val())
                 })
                 if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else if ($("#Misi").val() == "") {
                     alert('Input Misi Belum Benar!')
+                } else if ($("#PeriodeRPJMDP").val() == "") {
+                    alert("Mohon Input Periode RPJMD Provinsi")
+                } else if (!RPJMDP.length) {
+                    alert("Mohon Checklist Misi RPJMN!")
                 } else if ($("#PeriodeRPJMN").val() == "") {
                     alert("Mohon Input Periode RPJMN")
-                } else if (!Tampung.length) {
+                } else if (!RPJMN.length) {
                     alert("Mohon Checklist Misi RPJMN!")
                 } else {
                     var Misi = { _Id    : $("#IdVisi").val(),
-                                 Id_    : Tampung.join("$"),
+                                 Id_    : RPJMN.join("$"),
+                                 IdP    : RPJMDP.join("$"),
                                  Misi   : $("#Misi").val() }
                     $.post(BaseURL+"Admin/InputMisiRPJMD", Misi).done(function(Respon) {
                         if (Respon == '1') {
@@ -376,27 +485,52 @@
                             $("input[name='Misi_'][value='" + m + "']").prop('checked', true)
                         })
                     })
+                }) 
+                $.post(BaseURL+"Admin/GetVisiRPJMDP", {Id : Pisah[4].split("$")[0]}).done(function(Respon) {
+                    var Data = JSON.parse(Respon)
+                    $("#PeriodeRPJMDP_").val(Data[0].IdVisi)
+                    $.post(BaseURL+"Admin/GetMisiRPJMDP", {Id : $("#PeriodeRPJMDP_").val()}).done(function(Respon) {
+                        var Data = JSON.parse(Respon)
+                        var Misi = ''
+                        for (let i = 0; i < Data.length; i++) {
+                            Misi += '<label><input style="margin-top: 10px;" type="checkbox" name="Misi_RPJMDP" value="'+Data[i].Id+'"> '+Data[i].Misi+'</label><br>'
+                        }
+                        $("#MisiRPJMDP_").html(Misi)
+                        $("input[name='Misi_RPJMDP']").prop('checked', false);
+                        Pisah[4].split("$").forEach(function(m) {
+                            $("input[name='Misi_RPJMDP'][value='" + m + "']").prop('checked', true)
+                        })
+                    })
                 })                         
                 $('#ModalEditMisi').modal("show")
             })
 
             $("#Edit").click(function() {
-                var Tampung = []
+                var RPJMDP = []
+                $.each($("input[name='Misi_RPJMDP']:checked"), function(){
+                    RPJMDP.push($(this).val())
+                })
+                var RPJMN = []
                 $.each($("input[name='Misi_']:checked"), function(){
-                    Tampung.push($(this).val())
+                    RPJMN.push($(this).val())
                 })
                 if ($("#_Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else if ($("#_Misi").val() == "") {
                     alert('Input Misi Belum Benar!')
+                } else if ($("#PeriodeRPJMDP_").val() == "") {
+                    alert("Mohon Input Periode RPJMD Provinsi")
+                } else if (!RPJMDP.length) {
+                    alert("Mohon Checklist Misi RPJMN!")
                 } else if ($("#PeriodeRPJMN_").val() == "") {
                     alert("Mohon Input Periode RPJMN")
-                } else if (!Tampung.length) {
+                } else if (!RPJMN.length) {
                     alert("Mohon Checklist Misi RPJMN!")
                 } else {
                     var Misi = { Id     : $("#Id").val(),
                                  _Id    : $("#_IdVisi").val(),
-                                 Id_    : Tampung.join("$"),
+                                 Id_    : RPJMN.join("$"),
+                                 IdP    : RPJMDP.join("$"),
                                  Misi   : $("#_Misi").val() }
                     $.post(BaseURL+"Admin/EditMisiRPJMD", Misi).done(function(Respon) {
                         if (Respon == '1') {

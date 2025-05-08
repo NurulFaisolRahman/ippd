@@ -137,7 +137,7 @@
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <textarea class="form-control" rows="3" id="_Visi" wrap="off"></textarea>
+                                                    <textarea class="form-control" rows="3" id="_Visi"></textarea>
                                                 </div>
                                             </div>
                                         </div>

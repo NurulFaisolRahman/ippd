@@ -17,6 +17,7 @@
                                     <th class="text-center">No</th>
                                     <th>Tujuan</th>
                                     <th>Indikator Tujuan (IKU)</th>
+                                    <th class="text-center">Periode</th>
                                     <th class="text-center">Target <br><small>Tahun 1</small></th>
                                     <th class="text-center">Target <br><small>Tahun 2</small></th>
                                     <th class="text-center">Target <br><small>Tahun 3</small></th>
@@ -36,6 +37,9 @@
                                         ?>
                                     </td>
                                     <td style="vertical-align: middle;"><?= $key['indikator_tujuan'] ?></td>
+                                    <td style="vertical-align: middle;" class="text-start">
+                                        <?= $key['tahun_mulai'] ?> - <?= $key['tahun_akhir'] ?>
+                                    </td>
                                     <td style="vertical-align: middle;" class="text-center" align="center">
                                         <?= is_numeric($key['target_1']) && floor($key['target_1']) == $key['target_1'] ? (int)$key['target_1'] : '-' ?>
                                     </td>
@@ -61,7 +65,9 @@
                                                     data-target2="<?= $key['target_2'] ?? '' ?>"
                                                     data-target3="<?= $key['target_3'] ?? '' ?>"
                                                     data-target4="<?= $key['target_4'] ?? '' ?>"
-                                                    data-target5="<?= $key['target_5'] ?? '' ?>">
+                                                    data-target5="<?= $key['target_5'] ?? '' ?>"
+                                                    data-tahunmulai="<?= $key['tahun_mulai'] ?>"
+                                                    data-tahunakhir="<?= $key['tahun_akhir'] ?>">
                                                 <i class="notika-icon notika-edit"></i>
                                             </button>
                                             <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus"
@@ -90,13 +96,24 @@
             </div>
             <div class="modal-body">
                 <form id="FormTambahIku">
-                    <!-- Dropdown Tujuan -->
+                    <!-- Tahun Filter Dropdown dengan opsi default -->
+                    <div class="form-group">
+                        <label for="TahunFilter">Periode Tahun</label>
+                        <select class="form-control" id="TahunFilter" name="TahunFilter" required>
+                            <option value="" selected disabled>-- Pilih Tahun --</option>
+                            <?php foreach ($Periods as $period) { ?>
+                                <option value="<?= $period['TahunMulai'].'-'.$period['TahunAkhir'] ?>">
+                                    <?= $period['TahunMulai'].' - '.$period['TahunAkhir'] ?>
+                                </option>
+                            <?php } ?>
+                        </select>
+                    </div>
+
+                    <!-- Dropdown Tujuan (akan diisi via AJAX) -->
                     <div class="form-group">
                         <label for="Tujuan">Tujuan</label>
-                        <select class="form-control" id="Tujuan" name="Tujuan" required>
-                            <?php foreach ($Tujuan as $tujuan) { ?>
-                                <option value="<?= $tujuan['Id'] ?>"><?= $tujuan['Tujuan'] ?></option>
-                            <?php } ?>
+                        <select class="form-control" id="Tujuan" name="Tujuan" required disabled>
+                            <option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>
                         </select>
                     </div>
 
@@ -112,23 +129,23 @@
                         <div class="row">
                             <div class="col-md-2">
                                 <label>Tahun 1</label>
-                                <input  class="form-control" name="target_1" placeholder="Angka" >
+                                <input type="number" class="form-control" name="target_1" placeholder="Angka">
                             </div>
                             <div class="col-md-2">
                                 <label>Tahun 2</label>
-                                <input  class="form-control" name="target_2" placeholder="Angka">
+                                <input type="number" class="form-control" name="target_2" placeholder="Angka">
                             </div>
                             <div class="col-md-2">
                                 <label>Tahun 3</label>
-                                <input  class="form-control" name="target_3" placeholder="Angka">
+                                <input type="number" class="form-control" name="target_3" placeholder="Angka">
                             </div>
                             <div class="col-md-2">
                                 <label>Tahun 4</label>
-                                <input class="form-control" name="target_4" placeholder="Angka" >
+                                <input type="number" class="form-control" name="target_4" placeholder="Angka">
                             </div>
                             <div class="col-md-2">
                                 <label>Tahun 5</label>
-                                <input  class="form-control" name="target_5" placeholder="Angka" >
+                                <input type="number" class="form-control" name="target_5" placeholder="Angka">
                             </div>
                         </div>
                     </div>
@@ -151,17 +168,28 @@
                 <form id="FormEditIku">
                     <input type="hidden" id="EditId" name="id">
 
-                    <!-- Dropdown Tujuan -->
+                    <!-- Periode Dropdown -->
                     <div class="form-group">
-                        <label for="EditTujuan">Tujuan</label>
-                        <select class="form-control" id="EditTujuan" name="EditTujuan" required>
-                            <?php foreach ($Tujuan as $tujuan) { ?>
-                                <option value="<?= $tujuan['Id'] ?>"><?= $tujuan['Tujuan'] ?></option>
+                        <label for="EditPeriode">Periode Tahun</label>
+                        <select class="form-control" id="EditPeriode" name="periode" required>
+                            <option value="" selected disabled>-- Pilih Tahun --</option>
+                            <?php foreach ($Periods as $period) { ?>
+                                <option value="<?= $period['TahunMulai'].'-'.$period['TahunAkhir'] ?>">
+                                    <?= $period['TahunMulai'].' - '.$period['TahunAkhir'] ?>
+                                </option>
                             <?php } ?>
                         </select>
                     </div>
 
-                    <!-- Indikator Tujuan (IKU) -->
+                    <!-- Dropdown Tujuan -->
+                    <div class="form-group">
+                        <label for="EditTujuan">Tujuan</label>
+                        <select class="form-control" id="EditTujuan" name="EditTujuan" required disabled>
+                            <option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>
+                        </select>
+                    </div>
+
+                    <!-- Indikator Tujuan -->
                     <div class="form-group">
                         <label for="EditIndikatorTujuan">Indikator Tujuan (IKU)</label>
                         <textarea class="form-control" id="EditIndikatorTujuan" name="indikator_tujuan" rows="3" required></textarea>
@@ -172,24 +200,24 @@
                         <label>Target Tahunan</label>
                         <div class="row">
                             <div class="col-md-2">
-                                <label>Tahun 2023</label>
-                                <input  class="form-control" id="EditTarget1" name="target_1" >
+                                <label>Tahun 1</label>
+                                <input type="number" class="form-control" id="EditTarget1" name="target_1">
                             </div>
                             <div class="col-md-2">
-                                <label>Tahun 2024</label>
-                                <input  class="form-control" id="EditTarget2" name="target_2" >
+                                <label>Tahun 2</label>
+                                <input type="number" class="form-control" id="EditTarget2" name="target_2">
                             </div>
                             <div class="col-md-2">
-                                <label>Tahun 2025</label>
-                                <input  class="form-control" id="EditTarget3" name="target_3">
+                                <label>Tahun 3</label>
+                                <input type="number" class="form-control" id="EditTarget3" name="target_3">
                             </div>
                             <div class="col-md-2">
-                                <label>Tahun 2026</label>
-                                <input  class="form-control" id="EditTarget4" name="target_4" >
+                                <label>Tahun 4</label>
+                                <input type="number" class="form-control" id="EditTarget4" name="target_4">
                             </div>
                             <div class="col-md-2">
-                                <label>Tahun 2027</label>
-                                <input  class="form-control" id="EditTarget5" name="target_5" >
+                                <label>Tahun 5</label>
+                                <input type="number" class="form-control" id="EditTarget5" name="target_5">
                             </div>
                         </div>
                     </div>
@@ -217,34 +245,158 @@
 <script>
     var BaseURL = '<?= base_url() ?>';
 
-    function formatNumber(num) {
-        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
-
-    // Remove commas and convert to number
-    function parseNumber(str) {
-        return str ? parseFloat(str.replace(/,/g, '')) : null;
-    }
-
     $(document).ready(function() {
-
-        
-        // Tambah IKU
-        $("#FormTambahIku").submit(function(e) {
-            e.preventDefault();
-            // Validate all targets are integers
-            if(validateIntegerInputs('FormTambahIku')) {
-                $.post(BaseURL + "Admin/TambahIku", $(this).serialize()).done(function(res) {
-                    if (res == '1') {
-                        window.location.reload();
-                    } else {
-                        alert("Gagal menyimpan data!");
+        // Ketika periode tahun dipilih (Tambah)
+        $('#TahunFilter').change(function() {
+            if ($(this).val()) {
+                // Enable dropdown tujuan
+                $('#Tujuan').prop('disabled', false);
+                
+                // Kosongkan dan tambah opsi default
+                $('#Tujuan').html('<option value="">-- Pilih Tujuan --</option>');
+                
+                // Load tujuan berdasarkan periode
+                var tahunRange = $(this).val().split('-');
+                var tahunMulai = tahunRange[0];
+                var tahunAkhir = tahunRange[1];
+                
+                $.ajax({
+                    url: BaseURL + 'Admin/GetTujuanByPeriod',
+                    type: 'POST',
+                    data: {
+                        tahun_mulai: tahunMulai,
+                        tahun_akhir: tahunAkhir
+                    },
+                    success: function(response) {
+                        var data = JSON.parse(response);
+                        if(data.length > 0) {
+                            $.each(data, function(key, value) {
+                                $('#Tujuan').append('<option value="' + value.Id + '">' + value.Tujuan + '</option>');
+                            });
+                        } else {
+                            $('#Tujuan').html('<option value="" selected disabled>-- Tidak ada tujuan untuk periode ini --</option>');
+                            $('#Tujuan').prop('disabled', true);
+                        }
                     }
                 });
+            } else {
+                // Jika tidak ada periode yang dipilih, disable dropdown tujuan
+                $('#Tujuan').prop('disabled', true);
+                $('#Tujuan').html('<option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>');
             }
         });
 
-        // Edit IKU
+        // Ketika periode tahun dipilih (Edit)
+        $('#EditPeriode').change(function() {
+            if ($(this).val()) {
+                // Enable dropdown tujuan
+                $('#EditTujuan').prop('disabled', false);
+                
+                // Kosongkan dan tambah opsi default
+                $('#EditTujuan').html('<option value="">-- Pilih Tujuan --</option>');
+                
+                // Load tujuan berdasarkan periode
+                var tahunRange = $(this).val().split('-');
+                var tahunMulai = tahunRange[0];
+                var tahunAkhir = tahunRange[1];
+                
+                $.ajax({
+                    url: BaseURL + 'Admin/GetTujuanByPeriod',
+                    type: 'POST',
+                    data: {
+                        tahun_mulai: tahunMulai,
+                        tahun_akhir: tahunAkhir
+                    },
+                    success: function(response) {
+                        var data = JSON.parse(response);
+                        if(data.length > 0) {
+                            $.each(data, function(key, value) {
+                                $('#EditTujuan').append('<option value="' + value.Id + '">' + value.Tujuan + '</option>');
+                            });
+                        } else {
+                            $('#EditTujuan').html('<option value="" selected disabled>-- Tidak ada tujuan untuk periode ini --</option>');
+                            $('#EditTujuan').prop('disabled', true);
+                        }
+                    }
+                });
+            } else {
+                // Jika tidak ada periode yang dipilih, disable dropdown tujuan
+                $('#EditTujuan').prop('disabled', true);
+                $('#EditTujuan').html('<option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>');
+            }
+        });
+
+        // Validasi sebelum submit (Tambah)
+        $("#FormTambahIku").submit(function(e) {
+            e.preventDefault();
+            
+            // Validasi form
+            if ($('#TahunFilter').val() === "" || $('#TahunFilter').val() === null) {
+                alert('Silakan pilih periode tahun terlebih dahulu!');
+                return false;
+            }
+            if ($('#Tujuan').val() === "" || $('#Tujuan').val() === null) {
+                alert('Silakan pilih tujuan terlebih dahulu!');
+                return false;
+            }
+            if ($('#IndikatorTujuan').val() === "") {
+                alert('Silakan isi indikator tujuan!');
+                return false;
+            }
+
+            $.ajax({
+                url: BaseURL + "Admin/TambahIku",
+                type: "POST",
+                data: $(this).serialize(),
+                success: function(res) {
+                    if (res == '1') {
+                        window.location.reload();
+                    } else {
+                        alert(res || "Gagal menyimpan data!");
+                    }
+                },
+                error: function(xhr) {
+                    alert("Terjadi kesalahan: " + xhr.statusText);
+                }
+            });
+        });
+
+        // Validasi sebelum submit (Edit)
+        $("#FormEditIku").submit(function(e) {
+            e.preventDefault();
+            
+            // Validasi form
+            if ($('#EditPeriode').val() === "" || $('#EditPeriode').val() === null) {
+                alert('Silakan pilih periode tahun terlebih dahulu!');
+                return false;
+            }
+            if ($('#EditTujuan').val() === "" || $('#EditTujuan').val() === null) {
+                alert('Silakan pilih tujuan terlebih dahulu!');
+                return false;
+            }
+            if ($('#EditIndikatorTujuan').val() === "") {
+                alert('Silakan isi indikator tujuan!');
+                return false;
+            }
+
+            $.ajax({
+                url: BaseURL + "Admin/EditIku",
+                type: "POST",
+                data: $(this).serialize(),
+                success: function(res) {
+                    if (res == '1') {
+                        window.location.reload();
+                    } else {
+                        alert(res || "Gagal mengupdate data!");
+                    }
+                },
+                error: function(xhr) {
+                    alert("Terjadi kesalahan: " + xhr.statusText);
+                }
+            });
+        });
+
+        // Edit button click handler
         $(".Edit").click(function() {
             var id = $(this).data('id');
             var IdTujuan = $(this).data('tujuan');
@@ -254,34 +406,34 @@
             var target3 = $(this).data('target3');
             var target4 = $(this).data('target4');
             var target5 = $(this).data('target5');
+            var tahunMulai = $(this).data('tahunmulai');
+            var tahunAkhir = $(this).data('tahunakhir');
 
-            // Set nilai form edit
+            // Reset form first
             $("#EditId").val(id);
-            $("#EditTujuan").val(IdTujuan);
+            $("#EditPeriode").val('');
+            $("#EditTujuan").html('<option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>');
+            $("#EditTujuan").prop('disabled', true);
             $("#EditIndikatorTujuan").val(indikatorTujuan);
-            $("#EditTarget1").val(target1 ? parseInt(target1) : '');
-            $("#EditTarget2").val(target2 ? parseInt(target2) : '');
-            $("#EditTarget3").val(target3 ? parseInt(target3) : '');
-            $("#EditTarget4").val(target4 ? parseInt(target4) : '');
-            $("#EditTarget5").val(target5 ? parseInt(target5) : '');
+            $("#EditTarget1").val(target1 || '');
+            $("#EditTarget2").val(target2 || '');
+            $("#EditTarget3").val(target3 || '');
+            $("#EditTarget4").val(target4 || '');
+            $("#EditTarget5").val(target5 || '');
 
-            // Tampilkan modal edit
+            // Set the period value and trigger change
+            $("#EditPeriode").val(tahunMulai + '-' + tahunAkhir).trigger('change');
+            
+            // Setelah tujuan di-load, set nilai tujuan yang dipilih
+            var checkTujuanExist = setInterval(function() {
+                if($('#EditTujuan option[value="'+IdTujuan+'"]').length > 0) {
+                    $('#EditTujuan').val(IdTujuan);
+                    clearInterval(checkTujuanExist);
+                }
+            }, 100);
+            
+            // Show modal
             $("#ModalEditIku").modal('show');
-        });
-
-        // Submit Edit IKU
-        $("#FormEditIku").submit(function(e) {
-            e.preventDefault();
-            // Validate all targets are integers
-            if(validateIntegerInputs('FormEditIku')) {
-                $.post(BaseURL + "Admin/EditIku", $(this).serialize()).done(function(res) {
-                    if (res == '1') {
-                        window.location.reload();
-                    } else {
-                        alert("Gagal mengupdate data!");
-                    }
-                });
-            }
         });
 
         // Hapus IKU
@@ -295,20 +447,6 @@
                         alert("Gagal menghapus data!");
                     }
                 });
-            }
-        });
-
-        // Function to validate integer inputs
-        function validateIntegerInputs(formId) {
-            var isValid = true;
-            $('#' + formId + ' input[type="number"]').each(function() {
-                if(this.value && !Number.isInteger(parseFloat(this.value))) {
-                    alert('Harap masukkan angka bulat untuk semua target!');
-                    isValid = false;
-                    return false; // break out of loop
-                }
             });
-            return isValid;
-        }
     });
 </script>

@@ -43,43 +43,56 @@
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <ul class="nav nav-tabs notika-menu-wrap menu-it-icon-pro">
-                        <li <?=$Halaman == 'RPJPD' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#RPJPD"><i class="notika-icon notika-house"></i> <b>RPJPD</b></a></li>
-                        <li <?=$Halaman == 'RPJMD' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#RPJMD"><i class="notika-icon notika-house"></i> <b>RPJMD</b></a></li>
-                        <li <?=$Halaman == 'Cascading' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#Cascading"><i class="notika-icon notika-form"></i> <b>CASCADING</b></a></li>
+                        <li <?= $Halaman == 'RPJPD' ? 'class="active"' : '' ?>>
+                            <a data-toggle="tab" href="#RPJPD"><i class="notika-icon notika-house"></i> <b>RPJPD</b></a>
+                        </li>
+                        <li <?= $Halaman == 'RPJMD' ? 'class="active"' : '' ?>>
+                            <a data-toggle="tab" href="#RPJMD"><i class="notika-icon notika-edit"></i> <b>RPJMD</b></a>
+                        </li>
+                        <li <?= $Halaman == 'Cascading' ? 'class="active"' : '' ?>>
+                            <a data-toggle="tab" href="#Cascading"><i class="notika-icon notika-form"></i> <b>CASCADING</b></a>
+                        </li>
+                        <li <?= $Halaman == 'Isudaerah' ? 'class="active"' : '' ?>>
+                            <a data-toggle="tab" href="#Isudaerah"><i class="notika-icon notika-house"></i> <b>ISU DAERAH</b></a>
+                        </li>
                     </ul>
+                    
                     <div class="tab-content custom-menu-content">
-                        <div id="RPJPD" class="tab-pane in <?=$Halaman == 'RPJPD' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
+                        <!-- RPJPD Tab Content -->
+                        <div id="RPJPD" class="tab-pane in <?= $Halaman == 'RPJPD' ? 'active' : '' ?> notika-tab-menu-bg animated flipInX">
                             <ul class="notika-main-menu-dropdown">
                                 <li>
-                                    <a href="<?=base_url('Admin/VisiRPJPD')?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
+                                    <a href="<?= base_url('Admin/VisiRPJPD') ?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Admin/MisiRPJPD')?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
+                                    <a href="<?= base_url('Admin/MisiRPJPD') ?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Admin/TujuanRPJPD')?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
+                                    <a href="<?= base_url('Admin/TujuanRPJPD') ?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Admin/SasaranRPJPD')?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
+                                    <a href="<?= base_url('Admin/SasaranRPJPD') ?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
                                 </li>
                                 <li>
                                     <a href="<?=base_url('Admin/TahapanRPJPD')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
                                 </li>
                             </ul>
                         </div>
-                        <div id="RPJMD" class="tab-pane in <?=$Halaman == 'RPJMD' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
+                        
+                        <!-- RPJMD Tab Content -->
+                        <div id="RPJMD" class="tab-pane in <?= $Halaman == 'RPJMD' ? 'active' : '' ?> notika-tab-menu-bg animated flipInX">
                             <ul class="notika-main-menu-dropdown">
                                 <li>
-                                    <a href="<?=base_url('Admin/VisiRPJMD')?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
+                                    <a href="<?= base_url('Admin/VisiRPJMD') ?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Admin/MisiRPJMD')?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
+                                    <a href="<?= base_url('Admin/MisiRPJMD') ?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Admin/TujuanRPJMD')?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
+                                    <a href="<?= base_url('Admin/TujuanRPJMD') ?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Admin/SasaranRPJMD')?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
+                                    <a href="<?= base_url('Admin/SasaranRPJMD') ?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
                                 </li>
                                 <li>
                                     <a href="<?=base_url('Admin/TahapanRPJMD')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
@@ -87,11 +100,11 @@
                             </ul>
                         </div>
 
-                        <!-- Akun Cascading Tab -->
-                        <div id="Cascading" class="tab-pane in <?php echo ($Halaman == 'Cascading') ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
+                        <!-- Cascading Tab Content -->
+                        <div id="Cascading" class="tab-pane in <?= $Halaman == 'Cascading' ? 'active' : '' ?> notika-tab-menu-bg animated flipInX">
                             <ul class="notika-main-menu-dropdown">
                                 <li>
-                                    <a href="<?= base_url('Admin/Instansi') ?>"><i class="notika-icon notika-form"></i> <b>Instansi</b></a>
+                                    <a href="<?= base_url('Admin/Instansi') ?>"><i class="notika-icon notika-form"></i> <b>Daftar Instansi</b></a>
                                 </li>
                                 <li>
                                     <a href="<?= base_url('Admin/IKU') ?>"><i class="notika-icon notika-form"></i> <b>IKU</b></a>
@@ -101,6 +114,23 @@
                                 </li>
                             </ul>
                         </div>
+
+                        <!-- Isu Daerah Tab Content -->
+                        <div id="Isudaerah" class="tab-pane in <?= $Halaman == 'Isudaerah' ? 'active' : '' ?> notika-tab-menu-bg animated flipInX">
+                            <ul class="notika-main-menu-dropdown">
+                                <li>
+                                    <a href="<?= base_url('Admin/PermasalahanPokok') ?>"><i class="notika-icon notika-house"></i> <b>Permasalahan Pokok</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?= base_url('Admin/IsuKLHS') ?>"><i class="notika-icon notika-house"></i> <b>Isu KLHS Daerah</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?= base_url('Admin/IsuStrategisDaerah') ?>"><i class="notika-icon notika-house"></i> <b>Isu Strategis Daerah</b></a>
+                                </li>
+                            </ul>
+                            
+                        </div>
+
                     </div>
                 </div>
             </div>

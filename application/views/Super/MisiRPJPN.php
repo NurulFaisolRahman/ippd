@@ -13,8 +13,7 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 10%;" class="text-center">No</th>
-                                        <th style="width: 35%;">Visi RPJPN</th>
-                                        <th style="width: 35%;">Misi RPJPN</th>
+                                        <th style="width: 70%;">Misi RPJPN</th>
                                         <th style="width: 10%;">Periode</th>
                                         <th style="width: 10%;" class="text-center">Edit</th>
                                     </tr>
@@ -23,7 +22,6 @@
                                     <?php $No = 1; foreach ($Misi as $key) { ?>
                                     <tr>
                                         <td style="vertical-align: middle;" class="text-center"><?=$No++?></td>
-                                        <td style="vertical-align: middle;"><?=$key['Visi']?></td>
                                         <td style="vertical-align: middle;"><?=$key['Misi']?></td>
                                         <td style="vertical-align: middle;"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></td>
                                         <td class="text-center">

@@ -15,7 +15,6 @@
                             <thead>
                                 <tr>
                                     <th class="text-center">No</th>
-                                    <th>Nama Kementerian</th>
                                     <th>Nama Isu KLHS</th>
                                     <th>Periode</th>
                                     <th>Aksi</th>
@@ -25,12 +24,11 @@
                                 <?php $No = 1; foreach ($IsuKLHS as $key) { ?>
                                 <tr>
                                     <td style="vertical-align: middle;" class="text-center"><?= $No++ ?></td>
-                                    <td style="vertical-align: middle;"><?= $key['NamaKementerian'] ?></td>
                                     <td style="vertical-align: middle;"><?= $key['NamaIsuKLHS'] ?></td>
                                     <td style="vertical-align: middle;"><?= $key['TahunMulai'] . ' - ' . $key['TahunAkhir'] ?></td>
                                     <td>
                                         <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                            <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?= $key['Id'] . '|' . $key['IdKementerian'] . '|' . $key['NamaIsuKLHS'] . '|' . $key['TahunMulai'] . '|' . $key['TahunAkhir'] ?>"><i class="notika-icon notika-next"></i></button>
+                                            <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?= $key['Id'] . '|' . $key['NamaIsuKLHS'] . '|' . $key['TahunMulai'] . '|' . $key['TahunAkhir'] ?>"><i class="notika-icon notika-next"></i></button>
                                             <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?= $key['Id'] ?>"><i class="notika-icon notika-trash"></i></button>
                                         </div>
                                     </td>
@@ -64,28 +62,16 @@
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <select class="form-control" id="Periode">
-                                                    <option value="">-- Pilih Periode --</option>
-                                                    <?php foreach ($Periode as $periode) { ?>
-                                                        <option value="<?= $periode['TahunMulai'] . '|' . $periode['TahunAkhir'] ?>"><?= $periode['TahunMulai'] . ' - ' . $periode['TahunAkhir'] ?></option>
+                                                <select class="form-control" id="PeriodeRPJMD">
+                                                    <option value="">-- Pilih Periode RPJMD --</option>
+                                                    <?php foreach ($Periods as $period) { ?>
+                                                        <option value="<?= $period['TahunMulai'] ?>-<?= $period['TahunAkhir'] ?>">
+                                                            <?= $period['TahunMulai'] ?> - <?= $period['TahunAkhir'] ?>
+                                                        </option>
                                                     <?php } ?>
                                                 </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Kementerian</b></label>
-                                        </div>
-                                        <div class="col-lg-9">
-                                            <div class="nk-int-st">
-                                                <select class="form-control" id="IdKementerian">
-                                                    <option value="">-- Pilih Kementerian --</option>
-                                                </select>
+                                                <input type="hidden" id="TahunMulai">
+                                                <input type="hidden" id="TahunAkhir">
                                             </div>
                                         </div>
                                     </div>
@@ -99,7 +85,8 @@
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="NamaIsuKLHS">
+                                                <br>
+                                                <input type="text" class="form-control input-sm" id="NamaIsuKLHS" style="color: #000;">
                                             </div>
                                         </div>
                                     </div>
@@ -140,28 +127,16 @@
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <select class="form-control" id="EditPeriode">
-                                                    <option value="">-- Pilih Periode --</option>
-                                                    <?php foreach ($Periode as $periode) { ?>
-                                                        <option value="<?= $periode['TahunMulai'] . '|' . $periode['TahunAkhir'] ?>"><?= $periode['TahunMulai'] . ' - ' . $periode['TahunAkhir'] ?></option>
+                                                <select class="form-control" id="EditPeriodeRPJMD">
+                                                    <option value="">-- Pilih Periode RPJMD --</option>
+                                                    <?php foreach ($Periods as $period) { ?>
+                                                        <option value="<?= $period['TahunMulai'] ?>-<?= $period['TahunAkhir'] ?>">
+                                                            <?= $period['TahunMulai'] ?> - <?= $period['TahunAkhir'] ?>
+                                                        </option>
                                                     <?php } ?>
                                                 </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Kementerian</b></label>
-                                        </div>
-                                        <div class="col-lg-9">
-                                            <div class="nk-int-st">
-                                                <select class="form-control" id="EditIdKementerian">
-                                                    <option value="">-- Pilih Kementerian --</option>
-                                                </select>
+                                                <input type="hidden" id="EditTahunMulai">
+                                                <input type="hidden" id="EditTahunAkhir">
                                             </div>
                                         </div>
                                     </div>
@@ -176,7 +151,7 @@
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
                                                 <input type="hidden" id="EditId">
-                                                <input type="text" class="form-control input-sm" id="EditNamaIsuKLHS">
+                                                <input type="text" class="form-control input-sm" id="EditNamaIsuKLHS" style="color: #000;">
                                             </div>
                                         </div>
                                     </div>
@@ -198,7 +173,6 @@
     </div>
 </div>
 
-<!-- Scripts -->
 <script src="<?= base_url('js/vendor/jquery-1.12.4.min.js'); ?>"></script>
 <script src="<?= base_url('js/bootstrap.min.js'); ?>"></script>
 <script src="<?= base_url('js/wow.min.js'); ?>"></script>
@@ -212,129 +186,134 @@
 <script src="<?= base_url('js/main.js'); ?>"></script>
 <script>
     var BaseURL = '<?= base_url() ?>';
-    jQuery(document).ready(function($) {
-        // Function to populate Kementerian dropdown
-        function populateKementerian(selectElement, tahunMulai, tahunAkhir, selectedId = '') {
-            if (tahunMulai && tahunAkhir) {
-                $.post(BaseURL + "Super/GetKementerianByPeriode", {
-                    TahunMulai: tahunMulai,
-                    TahunAkhir: tahunAkhir
-                }, function(response) {
-                    var kementerian = JSON.parse(response);
-                    selectElement.empty().append('<option value="">-- Pilih Kementerian --</option>');
-                    $.each(kementerian, function(index, item) {
-                        var isSelected = (item.Id == selectedId) ? 'selected' : '';
-                        selectElement.append('<option value="' + item.Id + '" ' + isSelected + '>' + item.NamaKementerian + '</option>');
-                    });
-                });
-            } else {
-                selectElement.empty().append('<option value="">-- Pilih Kementerian --</option>');
-            }
+    
+    // Set tahun saat periode dipilih (Input)
+    $("#PeriodeRPJMD").change(function() {
+        if ($(this).val()) {
+            var years = $(this).val().split('-');
+            $("#TahunMulai").val(years[0]);
+            $("#TahunAkhir").val(years[1]);
         }
-
-        // Periode change handler for Input modal
-        $("#Periode").change(function() {
-            var periode = $(this).val();
-            if (periode) {
-                var [tahunMulai, tahunAkhir] = periode.split('|');
-                populateKementerian($("#IdKementerian"), tahunMulai, tahunAkhir);
-            } else {
-                $("#IdKementerian").empty().append('<option value="">-- Pilih Kementerian --</option>');
-            }
-        });
-
-        // Periode change handler for Edit modal
-        $("#EditPeriode").change(function() {
-            var periode = $(this).val();
-            if (periode) {
-                var [tahunMulai, tahunAkhir] = periode.split('|');
-                populateKementerian($("#EditIdKementerian"), tahunMulai, tahunAkhir);
-            } else {
-                $("#EditIdKementerian").empty().append('<option value="">-- Pilih Kementerian --</option>');
-            }
-        });
-
-        // Input Isu KLHS
-        $("#InputIsuKLHS").click(function() {
-            if ($("#Periode").val() === "") {
-                alert('Pilih Periode terlebih dahulu!');
-                return;
-            } else if ($("#IdKementerian").val() === "") {
-                alert('Pilih Kementerian terlebih dahulu!');
-                return;
-            } else if ($("#NamaIsuKLHS").val() === "") {
-                alert('Input Nama Isu KLHS Belum Benar!');
-                return;
-            } else {
-                var [TahunMulai, TahunAkhir] = $("#Periode").val().split('|');
-                var Data = {
-                    IdKementerian: $("#IdKementerian").val(),
-                    NamaIsuKLHS: $("#NamaIsuKLHS").val(),
-                    TahunMulai: TahunMulai,
-                    TahunAkhir: TahunAkhir
-                };
-                $.post(BaseURL + "Super/InputIsuKLHS", Data).done(function(Respon) {
-                    if (Respon == '1') {
-                        window.location.reload();
-                    } else {
-                        alert(Respon);
-                    }
-                });
-            }
-        });
-
-        // Edit Isu KLHS
-        $(document).on("click", ".Edit", function() {
-            var Data = $(this).attr('Edit');
-            var Pisah = Data.split("|");
-            $("#EditId").val(Pisah[0]);
-            $("#EditNamaIsuKLHS").val(Pisah[2]);
-            var periode = Pisah[3] + '|' + Pisah[4];
-            $("#EditPeriode").val(periode);
-            populateKementerian($("#EditIdKementerian"), Pisah[3], Pisah[4], Pisah[1]);
-            $('#ModalEditIsuKLHS').modal("show");
-        });
-
-        // Update Isu KLHS
-        $("#UpdateIsuKLHS").click(function() {
-            if ($("#EditPeriode").val() === "") {
-                alert('Pilih Periode terlebih dahulu!');
-                return;
-            } else if ($("#EditIdKementerian").val() === "") {
-                alert('Pilih Kementerian terlebih dahulu!');
-                return;
-            } else if ($("#EditNamaIsuKLHS").val() === "") {
-                alert('Input Nama Isu KLHS Belum Benar!');
-                return;
-            } else {
-                var [TahunMulai, TahunAkhir] = $("#EditPeriode").val().split('|');
-                var Data = {
-                    Id: $("#EditId").val(),
-                    IdKementerian: $("#EditIdKementerian").val(),
-                    NamaIsuKLHS: $("#EditNamaIsuKLHS").val(),
-                    TahunMulai: TahunMulai,
-                    TahunAkhir: TahunAkhir
-                };
-                $.post(BaseURL + "Super/UpdateIsuKLHS", Data).done(function(Respon) {
-                    if (Respon == '1') {
-                        window.location.reload();
-                    } else {
-                        alert(Respon);
-                    }
-                });
-            }
-        });
-
-        // Delete Isu KLHS
-        $(".Hapus").click(function() {
-                var Misi = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"Super/DeleteIsuKLHS", Misi).done(function(Respon) {
-                    if (Respon == '1') {
-                        window.location = BaseURL+"Super/IsuKLHS"
-                    } else {
-                        alert(Respon)
-                    }
-                })                         
-            })
     });
+
+    // Set tahun saat periode dipilih (Edit)
+    $("#EditPeriodeRPJMD").change(function() {
+        if ($(this).val()) {
+            var years = $(this).val().split('-');
+            $("#EditTahunMulai").val(years[0]);
+            $("#EditTahunAkhir").val(years[1]);
+        }
+    });
+
+    // Input Isu KLHS
+$("#InputIsuKLHS").click(function() {
+    if ($("#PeriodeRPJMD").val() === "") {
+        alert('Pilih Periode RPJMD terlebih dahulu!');
+        return;
+    } else if ($("#NamaIsuKLHS").val() === "") {
+        alert('Nama Isu KLHS harus diisi!');
+        return;
+    } else {
+        var Data = {
+            PeriodeRPJMD: $("#PeriodeRPJMD").val(),
+            NamaIsuKLHS: $("#NamaIsuKLHS").val()
+        };
+        $.post(BaseURL + "Admin/InputIsuKLHS", Data).done(function(Respon) {
+            if (Respon == '1') {
+                // Reset form input
+                $("#PeriodeRPJMD").val('').trigger('change');
+                $("#NamaIsuKLHS").val('');
+                $("#TahunMulai").val('');
+                $("#TahunAkhir").val('');
+                
+                // Tutup modal
+                $('#ModalInputIsuKLHS').modal('hide');
+                
+                // Reload data
+                window.location.reload();
+            } else {
+                alert(Respon);
+            }
+        });
+    }
+});
+
+    // Edit Isu KLHS
+    $(document).on("click", ".Edit", function() {
+        var Data = $(this).attr('Edit').split("|");
+        $("#EditId").val(Data[0]);
+        $("#EditNamaIsuKLHS").val(Data[1]);
+        $("#EditPeriodeRPJMD").val(Data[2] + '-' + Data[3]);
+        $("#EditTahunMulai").val(Data[2]);
+        $("#EditTahunAkhir").val(Data[3]);
+        $('#ModalEditIsuKLHS').modal("show");
+    });
+
+    // Update Isu KLHS
+$("#UpdateIsuKLHS").click(function() {
+    if ($("#EditPeriodeRPJMD").val() === "") {
+        alert('Pilih Periode RPJMD terlebih dahulu!');
+        return;
+    } else if ($("#EditNamaIsuKLHS").val() === "") {
+        alert('Nama Isu KLHS harus diisi!');
+        return;
+    } else {
+        var Data = {
+            Id: $("#EditId").val(),
+            EditPeriodeRPJMD: $("#EditPeriodeRPJMD").val(),
+            NamaIsuKLHS: $("#EditNamaIsuKLHS").val()
+        };
+        $.post(BaseURL + "Admin/UpdateIsuKLHS", Data).done(function(Respon) {
+            if (Respon == '1') {
+                // Reset form edit
+                $("#EditPeriodeRPJMD").val('').trigger('change');
+                $("#EditNamaIsuKLHS").val('');
+                $("#EditTahunMulai").val('');
+                $("#EditTahunAkhir").val('');
+                
+                // Tutup modal
+                $('#ModalEditIsuKLHS').modal('hide');
+                
+                // Reload data
+                window.location.reload();
+            } else {
+                alert(Respon);
+            }
+        });
+    }
+});
+
+    // Hapus Isu KLHS
+    $(".Hapus").click(function() {
+        
+            var Id = { Id: $(this).attr('Hapus') };
+            $.post(BaseURL + "Admin/DeleteIsuKLHS", Id).done(function(Respon) {
+                if (Respon == '1') {
+                    window.location.reload();
+                } else {
+                    alert(Respon);
+                }
+            });
+        }
+    );
+
+    // Reset form saat modal ditutup
+    $('#ModalInputIsuKLHS').on('hidden.bs.modal', function () {
+    $("#PeriodeRPJMD").val('').trigger('change');
+    $("#NamaIsuKLHS").val('');
+});
+
+$('#ModalEditIsuKLHS').on('hidden.bs.modal', function () {
+    $("#EditPeriodeRPJMD").val('').trigger('change');
+    $("#EditNamaIsuKLHS").val('');
+});
 </script>
+
+<style>
+    .form-control, .form-control option {
+        color: #000 !important;
+    }
+    .modal-content {
+        color: #000;
+    }
+</style>

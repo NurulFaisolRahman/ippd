@@ -129,7 +129,7 @@
                         <div id="Kementerian" class="tab-pane in <?=$Halaman == 'Kementerian' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
                             <ul class="notika-main-menu-dropdown">
                                 <li>
-                                    <a href="<?=base_url('Super/Kementerian')?>"><i class="notika-icon notika-form"></i> <b>Kelola Kementerian</b></a>
+                                    <a href="<?=base_url('Super/Kementerian')?>"><i class="notika-icon notika-form"></i> <b>Daftar Kementerian</b></a>
                                 </li>
                                 <li>
                                     <a href="<?=base_url('Super/SPM')?>"><i class="notika-icon notika-form"></i> <b>Standar Pelayanan Minimal</b></a>

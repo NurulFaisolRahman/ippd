@@ -13,8 +13,8 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 10%;" class="text-center">No</th>
-                                        <th style="width: 35%;">Tujuan</th>
-                                        <th style="width: 35%;">Sasaran</th>
+                                        <th style="width: 15%;">Provinsi</th>
+                                        <th style="width: 55%;">Sasaran RPJMD</th>
                                         <th style="width: 10%;">Periode</th>
                                         <th style="width: 10%;" class="text-center">Edit</th>
                                     </tr>
@@ -23,12 +23,12 @@
                                     <?php $No = 1; foreach ($Sasaran as $key) { ?>
                                     <tr>
                                         <td style="vertical-align: middle;" class="text-center"><?=$No++?></td>
-                                        <td style="vertical-align: middle;"><?=$key['Tujuan']?></td>
+                                        <td style="vertical-align: middle;"><?=$key['Nama']?></td>
                                         <td style="vertical-align: middle;"><?=$key['Sasaran']?></td>
                                         <td style="vertical-align: middle;"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></td>
                                         <td class="text-center">
                                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['Sasaran'].'|'.$key['IdVisi'].'|'.$key['IdTujuan']?>"><i class="notika-icon notika-next"></i></button>
+                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['_Id'].'|'.$key['Sasaran'].'|'.$key['KodeWilayah']?>"><i class="notika-icon notika-next"></i></button>
                                                 <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
                                             </div>
                                         </td>
@@ -55,16 +55,26 @@
                                 <div class="form-group">
                                     <div class="row">
                                         <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Provinsi</b></label>
+                                        </div>
+                                        <div style="margin-bottom: 5px;" class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <select class="form-control" id="Provinsi">
+                                                    <option value="">Pilih Provinsi</option>
+                                                    <?php foreach ($Provinsi as $key) { ?>
+                                                        <option value="<?=$key['Kode']?>"><?=$key['Nama']?></option>
+                                                    <?php } ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-2">
                                             <label class="hrzn-fm"><b>Periode RPJMD</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <select class="form-control" id="Periode">
-                                                    <option value="">Pilih Periode</option>
-                                                    <?php foreach ($Visi as $key) { ?>
-                                                        <option value="<?=$key['Id']?>"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></option>
-                                                    <?php } ?>
-                                                </select>
+                                                <select class="form-control" id="Periode"></select>
                                             </div>
                                         </div>
                                     </div>
@@ -118,15 +128,26 @@
                                 <div class="form-group">
                                     <div class="row">
                                         <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Provinsi</b></label>
+                                        </div>
+                                        <div style="margin-bottom: 5px;" class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <select class="form-control" id="_Provinsi">
+                                                    <option value="">Pilih Provinsi</option>
+                                                    <?php foreach ($Provinsi as $key) { ?>
+                                                        <option value="<?=$key['Kode']?>"><?=$key['Nama']?></option>
+                                                    <?php } ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-2">
                                             <label class="hrzn-fm"><b>Periode RPJMD</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <select class="form-control" id="_Periode">
-                                                    <?php foreach ($Visi as $key) { ?>
-                                                        <option value="<?=$key['Id']?>"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></option>
-                                                    <?php } ?>
-                                                </select>
+                                                <select class="form-control" id="_Periode"></select>
                                             </div>
                                         </div>
                                     </div>
@@ -141,7 +162,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row">
+                                    <div class="row" style="margin-top: 9px;">
                                         <div class="col-lg-2">
                                             <label class="hrzn-fm"><b>Sasaran RPJMD</b></label>
                                         </div>
@@ -183,6 +204,46 @@
         var BaseURL = '<?=base_url()?>'
         jQuery(document).ready(function($) {
 
+            $("#Provinsi").change(function(){
+                if ($("#Provinsi").val() == "") {
+                    alert("Mohon Input Provinsi")
+                } else {
+                    $.post(BaseURL+"Super/GetProvinsiRPJMD", {Id : $("#Provinsi").val()}).done(function(Respon) {
+                        var Data = JSON.parse(Respon)
+                        var Periode = '<option value="">Pilih Periode</option>'
+                        if (Data.length > 0) {
+                            for (let i = 0; i < Data.length; i++) {
+                                Periode += '<option value="'+Data[i].Id+'">'+Data[i].TahunMulai+' - '+Data[i].TahunAkhir+'</option>'
+                            }    
+                        } else {
+                            alert("Belum Ada Data Provinsi Tersebut")
+                        }
+                        $("#Periode").html(Periode)
+                        $("#IdTujuan").html("")
+                    })                         
+                }
+            });
+
+            $("#_Provinsi").change(function(){
+                if ($("#_Provinsi").val() == "") {
+                    alert("Mohon Input Provinsi")
+                } else {
+                    $.post(BaseURL+"Super/GetProvinsiRPJMD", {Id : $("#_Provinsi").val()}).done(function(Respon) {
+                        var Data = JSON.parse(Respon)
+                        var Periode = '<option value="">Pilih Periode</option>'
+                        if (Data.length > 0) {
+                            for (let i = 0; i < Data.length; i++) {
+                                Periode += '<option value="'+Data[i].Id+'">'+Data[i].TahunMulai+' - '+Data[i].TahunAkhir+'</option>'
+                            }    
+                        } else {
+                            alert("Belum Ada Data Provinsi Tersebut")
+                        }
+                        $("#_Periode").html(Periode)
+                        $("#_IdTujuan").html("")
+                    })                         
+                }
+            });
+
             $("#Periode").change(function(){
                 if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
@@ -199,7 +260,7 @@
             });
 
             $("#_Periode").change(function(){
-                if ($("#Periode").val() == "") {
+                if ($("#_Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
                     $.post(BaseURL+"Super/GetTujuanRPJMD", {Id : $("#_Periode").val()}).done(function(Respon) {
@@ -214,13 +275,16 @@
             });
 
             $("#Input").click(function() {
-                if ($("#Periode").val() == "") {
+                if ($("#Provinsi").val() == "") {
+                    alert('Input Provinsi Belum Benar!')
+                } else if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else if ($("#Sasaran").val() == "") {
                     alert('Input Sasaran Belum Benar!')
                 } else {
-                    var Sasaran = { _Id     : $("#IdTujuan").val(),
-                                    Sasaran : $("#Sasaran").val() }
+                    var Sasaran = { _Id   : $("#IdTujuan").val(),
+                                 KodeWilayah : $("#Provinsi").val(),
+                                 Sasaran   : $("#Sasaran").val() }
                     $.post(BaseURL+"Super/InputSasaranRPJMD", Sasaran).done(function(Respon) {
                         if (Respon == '1') {
                             window.location = BaseURL+"Super/SasaranRPJMD"
@@ -235,29 +299,43 @@
                 var Data = $(this).attr('Edit')
                 var Pisah = Data.split("|");
                 $("#Id").val(Pisah[0])
-                $("#_Sasaran").val(Pisah[1])
-                $("#_Periode").val(Pisah[2])
-                $.post(BaseURL+"Super/GetTujuanRPJMD", {Id : $("#_Periode").val()}).done(function(Respon) {
+                $("#_Provinsi").val(Pisah[3])
+                $("#_Sasaran").val(Pisah[2])
+                $.post(BaseURL+"Super/GetProvinsiRPJMD", {Id : $("#_Provinsi").val()}).done(function(Respon) {
                     var Data = JSON.parse(Respon)
-                    var Tujuan = ''
+                    var Periode = ''
                     for (let i = 0; i < Data.length; i++) {
-                        Tujuan += '<option value="'+Data[i].Id+'">'+Data[i].Tujuan+'</option>'
+                        var Tujuan = '<option value="">Pilih Periode</option>'
+                        Periode += '<option value="'+Data[i].Id+'">'+Data[i].TahunMulai+' - '+Data[i].TahunAkhir+'</option>'
                     }
-                    $("#_IdTujuan").html(Tujuan)
-                    $("#_IdTujuan").val(Pisah[3])
-                })
+                    $("#_Periode").html(Periode)   
+                    $("#_Periode").val(Pisah[1])
+                    $.post(BaseURL+"Super/GetTujuanRPJMD", {Id : $("#_Periode").val()}).done(function(Respon) {
+                        var Data = JSON.parse(Respon)
+                        var Tujuan = ''
+                        for (let i = 0; i < Data.length; i++) {
+                            Tujuan += '<option value="'+Data[i].Id+'">'+Data[i].Tujuan+'</option>'
+                        }
+                        $("#_IdTujuan").html(Tujuan)
+                        $("#_IdTujuan").val(Pisah[1])
+                    })
+                })                         
+                
                 $('#ModalEditSasaran').modal("show")
             })
 
             $("#Edit").click(function() {
-                if ($("#_Periode").val() == "") {
-                    alert("Mohon Input Periode")
+                if ($("#_Provinsi").val() == "") {
+                    alert("Input Provinsi Belum Benar")
+                } else if ($("#_Periode").val() == "") {
+                    alert("Input Periode Belum Benar")
                 } else if ($("#_Sasaran").val() == "") {
                     alert('Input Sasaran Belum Benar!')
                 } else {
-                    var Sasaran = { Id      : $("#Id").val(),
-                                    _Id     : $("#_IdTujuan").val(),
-                                    Sasaran : $("#_Sasaran").val() }
+                    var Sasaran = { Id   : $("#Id").val(),
+                                 _Id   : $("#_IdTujuan").val(),
+                                 KodeWilayah : $("#_Provinsi").val(),
+                                 Sasaran   : $("#_Sasaran").val() }
                     $.post(BaseURL+"Super/EditSasaranRPJMD", Sasaran).done(function(Respon) {
                         if (Respon == '1') {
                             window.location = BaseURL+"Super/SasaranRPJMD"
