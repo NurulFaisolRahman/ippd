@@ -975,8 +975,147 @@ public function IsuStrategisDaerah() {
   ", array($_SESSION['KodeWilayah']));
   
   $Data['IsuStrategis'] = $query->result_array();
+
+// Get Permasalahan Pokok
+$query = $this->db->query(
+  "SELECT * FROM Permasalahanpokokdaerah 
+   WHERE KodeWilayah = ? AND deleted_at IS NULL",
+  array($_SESSION['KodeWilayah'])
+);
+$Data['PermasalahanPokok'] = $query->result_array();
+
+// Get Isu KLHS
+$query = $this->db->query(
+  "SELECT * FROM IsuKLHS 
+   WHERE KodeWilayah = ? AND deleted_at IS NULL",
+  array($_SESSION['KodeWilayah'])
+);
+$Data['IsuKLHS'] = $query->result_array();
+
   $this->load->view('Admin/header', $Header);
   $this->load->view('Admin/IsuStrategisDaerah', $Data);
+}
+
+public function TambahPermasalahanPokokIsuStrategis() {
+  try {
+      $id = $this->input->post('id', TRUE);
+      $permasalahanPokok = $this->input->post('permasalahan_pokok', TRUE);
+
+      if (empty($id) || !is_numeric($id)) {
+          throw new Exception('ID tidak valid');
+      }
+      if (empty($permasalahanPokok)) {
+          throw new Exception('Permasalahan Pokok harus diisi');
+      }
+
+      // Get existing data
+      $existing = $this->db->where('Id', $id)->get('IsuStrategisDaerah')->row_array();
+      if (!$existing) {
+          throw new Exception('Data Isu Strategis tidak ditemukan');
+      }
+
+      // Combine with existing Permasalahan Pokok
+      $existingPP = !empty($existing['permasalahan_pokok']) ? explode(',', $existing['permasalahan_pokok']) : [];
+      $newPP = explode(',', $permasalahanPokok);
+      $combinedPP = array_unique(array_merge($existingPP, $newPP));
+      $updateData = [
+          'permasalahan_pokok' => implode(',', $combinedPP),
+          'updated_at' => date('Y-m-d H:i:s')
+      ];
+
+      $this->db->where('Id', $id)->update('IsuStrategisDaerah', $updateData);
+      echo $this->db->affected_rows() ? '1' : 'Tidak ada perubahan';
+  } catch (Exception $e) {
+      log_message('error', 'Error adding Permasalahan Pokok: ' . $e->getMessage());
+      echo $e->getMessage();
+  }
+}
+
+public function EditPermasalahanPokokIsuStrategis() {
+  try {
+      $id = $this->input->post('id', TRUE);
+      $permasalahanPokok = $this->input->post('permasalahan_pokok', TRUE);
+
+      if (empty($id) || !is_numeric($id)) {
+          throw new Exception('ID tidak valid');
+      }
+
+      $existing = $this->db->where('Id', $id)->get('IsuStrategisDaerah')->row_array();
+      if (!$existing) {
+          throw new Exception('Data Isu Strategis tidak ditemukan');
+      }
+
+      $updateData = [
+          'permasalahan_pokok' => $permasalahanPokok,
+          'updated_at' => date('Y-m-d H:i:s')
+      ];
+
+      $this->db->where('Id', $id)->update('IsuStrategisDaerah', $updateData);
+      echo $this->db->affected_rows() ? '1' : 'Gagal Update Data';
+  } catch (Exception $e) {
+      log_message('error', 'Error editing Permasalahan Pokok: ' . $e->getMessage());
+      echo $e->getMessage();
+  }
+}
+
+public function TambahIsuKLHSIsuStrategis() {
+  try {
+      $id = $this->input->post('id', TRUE);
+      $isuKLHS = $this->input->post('isu_klhs', TRUE);
+
+      if (empty($id) || !is_numeric($id)) {
+          throw new Exception('ID tidak valid');
+      }
+      if (empty($isuKLHS)) {
+          throw new Exception('Isu KLHS harus diisi');
+      }
+
+      $existing = $this->db->where('Id', $id)->get('IsuStrategisDaerah')->row_array();
+      if (!$existing) {
+          throw new Exception('Data Isu Strategis tidak ditemukan');
+      }
+
+      $existingKLHS = !empty($existing['isu_klhs']) ? explode(',', $existing['isu_klhs']) : [];
+      $newKLHS = explode(',', $isuKLHS);
+      $combinedKLHS = array_unique(array_merge($existingKLHS, $newKLHS));
+      $updateData = [
+          'isu_klhs' => implode(',', $combinedKLHS),
+          'updated_at' => date('Y-m-d H:i:s')
+      ];
+
+      $this->db->where('Id', $id)->update('IsuStrategisDaerah', $updateData);
+      echo $this->db->affected_rows() ? '1' : 'Tidak ada perubahan';
+  } catch (Exception $e) {
+      log_message('error', 'Error adding Isu KLHS: ' . $e->getMessage());
+      echo $e->getMessage();
+  }
+}
+
+public function EditIsuKLHSIsuStrategis() {
+  try {
+      $id = $this->input->post('id', TRUE);
+      $isuKLHS = $this->input->post('isu_klhs', TRUE);
+
+      if (empty($id) || !is_numeric($id)) {
+          throw new Exception('ID tidak valid');
+      }
+
+      $existing = $this->db->where('Id', $id)->get('IsuStrategisDaerah')->row_array();
+      if (!$existing) {
+          throw new Exception('Data Isu Strategis tidak ditemukan');
+      }
+
+      $updateData = [
+          'isu_klhs' => $isuKLHS,
+          'updated_at' => date('Y-m-d H:i:s')
+      ];
+
+      $this->db->where('Id', $id)->update('IsuStrategisDaerah', $updateData);
+      echo $this->db->affected_rows() ? '1' : 'Gagal Update Data';
+  } catch (Exception $e) {
+      log_message('error', 'Error editing Isu KLHS: ' . $e->getMessage());
+      echo $e->getMessage();
+  }
 }
 
 public function InputIsuStrategis() {
