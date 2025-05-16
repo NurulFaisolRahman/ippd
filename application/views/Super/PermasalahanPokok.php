@@ -15,8 +15,8 @@
                             <thead>
                                 <tr>
                                     <th class="text-center">No</th>
-                                    <th>Nama Kementerian</th>
-                                    <th>Nama Permasalahan Pokok</th>
+                                    <th>Kementerian</th>
+                                    <th>Permasalahan Pokok</th>
                                     <th>Periode</th>
                                     <th>Aksi</th>
                                 </tr>

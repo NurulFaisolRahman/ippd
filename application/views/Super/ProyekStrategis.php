@@ -16,9 +16,9 @@
                             <thead>
                                 <tr>
                                     <th class="text-center">No</th>
-                                    <th>Nama Kementerian</th>
-                                    <th>Nama Program</th>
-                                    <th>Nama Proyek</th>
+                                    <th>Kementerian</th>
+                                    <th>Program Strategis</th>
+                                    <th>Proyek Strategis</th>
                                     <th class="text-center">Periode</th>
                                     <th class="text-center">Target <br><small>Tahun 1</small></th>
                                     <th class="text-center">Target <br><small>Tahun 2</small></th>
