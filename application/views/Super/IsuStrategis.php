@@ -18,10 +18,10 @@
                                         <th width="5%" class="text-center">No</th>
                                         <th width="15%">Kementerian</th>
                                         <th width="15%">Isu Strategis</th>
-                                        <th width="20%">Permasalahan Pokok</th> <!-- Kolom baru -->
-                                        <th width="20%">Isu KLHS</th>
-                                        <th width="20%">Isu Global</th>
-                                        <th width="20%">Isu Nasional</th>
+                                        <th width="15%">Permasalahan Pokok</th> <!-- Kolom baru -->
+                                        <th width="15%">Isu KLHS</th>
+                                        <th width="15%">Isu Global</th>
+                                        <th width="15%">Isu Nasional</th>
                                         <th width="10%">Periode</th>
                                         <th width="10%">Aksi</th>
                                     </tr>

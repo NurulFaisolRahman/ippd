@@ -11,6 +11,18 @@ class Admin extends CI_Controller {
     date_default_timezone_set("Asia/Jakarta");
   }
 
+  public function GetVisiRPJPDP(){
+    echo json_encode($this->db->query("SELECT v.Id as IdVisi,m.* FROM visirpjpdp as v, misirpjpdp as m WHERE m.Id = ".$_POST['Id']." AND m.deleted_at IS NULL")->result_array());
+	}
+
+  public function GetVisiRPJPN(){
+    echo json_encode($this->db->query("SELECT v.Id as IdVisi,m.* FROM visirpjpn as v, misirpjpn as m WHERE m.Id = ".$_POST['Id']." AND m.deleted_at IS NULL")->result_array());
+	}
+
+  public function GetVisiRPJPD(){
+    echo json_encode($this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("visirpjpd")->result_array());
+	}
+
   public function VisiRPJPD(){
 		$Header['Halaman'] = 'RPJPD';
 		$Data['Visi'] = $this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND deleted_at IS NULL")->get("visirpjpd")->result_array();
@@ -48,10 +60,27 @@ class Admin extends CI_Controller {
     }
   }
 
+  public function GetMisiRPJPDP(){
+    echo json_encode($this->db->where("KodeWilayah = ".substr($_SESSION['KodeWilayah'],0,2)." AND _Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("misirpjpdp")->result_array());
+	}
+
+  public function GetMisiRPJPN(){
+    echo json_encode($this->db->query("SELECT v.*,m.* FROM visirpjpn as v, misirpjpn as m WHERE m._Id = ".$_POST['Id']." AND m.deleted_at IS NULL")->result_array());
+	}
+
+  public function GetPeriodeMisiRPJPD(){
+    echo json_encode($this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("misirpjpd")->result_array());
+	}
+
+  public function GetMisiRPJPD(){
+    echo json_encode($this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND _Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("misirpjpd")->result_array());
+	}
+
   public function MisiRPJPD(){
 		$Header['Halaman'] = 'RPJPD';
+    $Data['VisiRPJPDP'] = $this->db->where("KodeWilayah = ".substr($_SESSION['KodeWilayah'],0,2)." AND deleted_at IS NULL")->get("visirpjpdp")->result_array();
+    $Data['VisiRPJPN'] = $this->db->where("deleted_at IS NULL")->get("visirpjpn")->result_array();
     $Data['Visi'] = $this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND deleted_at IS NULL")->get("visirpjpd")->result_array();
-    $Data['_Misi'] = $this->db->where("deleted_at IS NULL")->get("misirpjpn")->result_array();
 		$Data['Misi'] = $this->db->query("SELECT v.*,m.* FROM visirpjpd as v, misirpjpd as m WHERE m._Id = v.Id AND m.deleted_at IS NULL AND m.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array();
 		$this->load->view('Admin/header',$Header);
 		$this->load->view('Admin/MisiRPJPD',$Data);
@@ -87,11 +116,28 @@ class Admin extends CI_Controller {
     }
   }
 
+  public function GetTujuanRPJPDP(){
+    echo json_encode($this->db->where("KodeWilayah = ".substr($_SESSION['KodeWilayah'],0,2)." AND _Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("tujuanrpjpdp")->result_array());
+	}
+
+  public function GetTujuanRPJPN(){
+    echo json_encode($this->db->query("SELECT t.* FROM visirpjmn as v, misirpjpn as m, tujuanrpjpn as t WHERE v.Id = ".$_POST['Id']." AND t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL")->result_array());
+	}
+
+  public function GetPeriodeTujuanRPJPD(){
+    echo json_encode($this->db->query("SELECT v.Id as IdVisi FROM visirpjpd as v, misirpjpd as m, tujuanrpjpd as t WHERE t._Id = ".$_POST['Id']." AND t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL AND t.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array());
+	}
+
+  public function GetTujuanRPJPD(){
+    echo json_encode($this->db->query("SELECT t.* FROM visirpjpd as v, misirpjpd as m, tujuanrpjpd as t WHERE v.Id = ".$_POST['Id']." AND t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL AND t.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array());
+	}
+
   public function TujuanRPJPD(){
 		$Header['Halaman'] = 'RPJPD';
-    $Data['Misi'] = $this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND deleted_at IS NULL")->get("misirpjpd")->result_array();
-    $Data['_Tujuan'] = $this->db->where("deleted_at IS NULL")->get("Tujuanrpjpn")->result_array();
-		$Data['Tujuan'] = $this->db->query("SELECT v.*,m.Misi,t.* FROM visirpjpd as v, misirpjpd as m, tujuanrpjpd as t WHERE t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL AND t.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array();
+    $Data['VisiRPJPDP'] = $this->db->where("KodeWilayah = ".substr($_SESSION['KodeWilayah'],0,2)." AND deleted_at IS NULL")->get("visirpjpdp")->result_array();
+    $Data['VisiRPJPN'] = $this->db->where("deleted_at IS NULL")->get("visirpjmn")->result_array();
+    $Data['Visi'] = $this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND deleted_at IS NULL")->get("visirpjpd")->result_array();
+		$Data['Tujuan'] = $this->db->query("SELECT v.Id as IdVisi,v.TahunMulai,v.TahunAkhir,m.Id as IdMisi,m.Misi,t.* FROM visirpjpd as v, misirpjpd as m, tujuanrpjpd as t WHERE t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL AND t.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array();
 		$this->load->view('Admin/header',$Header);
 		$this->load->view('Admin/TujuanRPJPD',$Data);
 	}
@@ -126,11 +172,28 @@ class Admin extends CI_Controller {
     }
   }
 
+  public function GetSasaranRPJPDP(){
+    echo json_encode($this->db->where("KodeWilayah = ".substr($_SESSION['KodeWilayah'],0,2)." AND _Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("sasaranrpjpdp")->result_array());
+	}
+
+  public function GetSasaranRPJPN(){
+    echo json_encode($this->db->query("SELECT s.* FROM visirpjpn as v, misirpjpn as m, tujuanrpjpn as t, sasaranrpjpn as s WHERE s._Id = t.Id AND t._Id = m.Id AND m._Id = v.Id AND s.deleted_at IS NULL")->result_array());
+	}
+
+  public function GetPeriodeSasaranRPJPD(){
+    echo json_encode($this->db->query("SELECT v.Id as IdVisi FROM visirpjpd as v, misirpjpd as m, tujuanrpjpd as t WHERE t._Id = ".$_POST['Id']." AND t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL AND t.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array());
+	}
+
+  public function GetSasaranRPJPD(){
+    echo json_encode($this->db->query("SELECT t.* FROM visirpjpd as v, misirpjpd as m, tujuanrpjpd as t WHERE v.Id = ".$_POST['Id']." AND t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL AND t.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array());
+	}
+
   public function SasaranRPJPD(){
 		$Header['Halaman'] = 'RPJPD';
-    $Data['Tujuan'] = $this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND deleted_at IS NULL")->get("Tujuanrpjpd")->result_array();
-    $Data['_Sasaran'] = $this->db->where("deleted_at IS NULL")->get("Sasaranrpjpn")->result_array();
-		$Data['Sasaran'] = $this->db->query("SELECT v.*,t.Tujuan,s.* FROM visirpjpd as v, misirpjpd as m, tujuanrpjpd as t, sasaranrpjpd as s WHERE s._Id = t.Id AND t._Id = m.Id AND m._Id = v.Id AND s.deleted_at IS NULL AND s.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array();
+    $Data['VisiRPJPDP'] = $this->db->where("KodeWilayah = ".substr($_SESSION['KodeWilayah'],0,2)." AND deleted_at IS NULL")->get("visirpjpdp")->result_array();
+    $Data['VisiRPJMN'] = $this->db->where("deleted_at IS NULL")->get("visirpjpn")->result_array();
+    $Data['Visi'] = $this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND deleted_at IS NULL")->get("visirpjpd")->result_array();
+		$Data['Sasaran'] = $this->db->query("SELECT v.Id as IdVisi,v.TahunMulai,v.TahunAkhir,t.Id as IdTujuan,t.Tujuan,s.* FROM visirpjpd as v, misirpjpd as m, tujuanrpjpd as t, sasaranrpjpd as s WHERE s._Id = t.Id AND t._Id = m.Id AND m._Id = v.Id AND s.deleted_at IS NULL AND s.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array();
 		$this->load->view('Admin/header',$Header);
 		$this->load->view('Admin/SasaranRPJPD',$Data);
 	}
@@ -164,6 +227,54 @@ class Admin extends CI_Controller {
       echo 'Gagal Hapus Data!';
     }
   }
+
+  public function TahapanRPJPD(){
+		$Header['Halaman'] = 'RPJPD';
+		$Data['Tahapan'] = $this->db->where("deleted_at IS NULL")->get("tahapanrpjpd")->result_array();
+		$this->load->view('Admin/header',$Header);
+		$this->load->view('Admin/TahapanRPJPD',$Data);
+	}
+
+  public function InputTahapanRPJPD(){  
+    $this->db->insert('tahapanrpjpd',$_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Menyimpan Data!';
+    }
+	}
+	
+	public function EditTahapanRPJPD(){  
+		$this->db->where('Id',$_POST['Id']); 
+		$this->db->update('tahapanrpjpd', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Update Data!';
+    }
+  }
+
+  public function HapusTahapanRPJPD(){  
+		$_POST['deleted_at'] = date('Y-m-d H:i:s');
+		$this->db->where('Id',$_POST['Id'])->update('tahapanrpjpd', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Hapus Data!';
+    }
+  }
+
+  public function GetVisiRPJMDP(){
+    echo json_encode($this->db->query("SELECT v.Id as IdVisi,m.* FROM visirpjmdp as v, misirpjmdp as m WHERE m.Id = ".$_POST['Id']." AND m.deleted_at IS NULL")->result_array());
+	}
+
+  public function GetVisiRPJMN(){
+    echo json_encode($this->db->query("SELECT v.Id as IdVisi,m.* FROM visirpjmn as v, misirpjmn as m WHERE m.Id = ".$_POST['Id']." AND m.deleted_at IS NULL")->result_array());
+	}
+
+  public function GetVisiRPJMD(){
+    echo json_encode($this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("visirpjmd")->result_array());
+	}
 
   public function VisiRPJMD(){
 		$Header['Halaman'] = 'RPJMD';
@@ -202,10 +313,27 @@ class Admin extends CI_Controller {
     }
   }
 
+  public function GetMisiRPJMDP(){
+    echo json_encode($this->db->where("KodeWilayah = ".substr($_SESSION['KodeWilayah'],0,2)." AND _Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("misirpjmdp")->result_array());
+	}
+
+  public function GetMisiRPJMN(){
+    echo json_encode($this->db->query("SELECT v.*,m.* FROM visirpjmn as v, misirpjmn as m WHERE m._Id = ".$_POST['Id']." AND m.deleted_at IS NULL")->result_array());
+	}
+
+  public function GetPeriodeMisiRPJMD(){
+    echo json_encode($this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("misirpjmd")->result_array());
+	}
+
+  public function GetMisiRPJMD(){
+    echo json_encode($this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND _Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("misirpjmd")->result_array());
+	}
+
   public function MisiRPJMD(){
 		$Header['Halaman'] = 'RPJMD';
+    $Data['VisiRPJMDP'] = $this->db->where("KodeWilayah = ".substr($_SESSION['KodeWilayah'],0,2)." AND deleted_at IS NULL")->get("visirpjmdp")->result_array();
+    $Data['VisiRPJMN'] = $this->db->where("deleted_at IS NULL")->get("visirpjmn")->result_array();
     $Data['Visi'] = $this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND deleted_at IS NULL")->get("visirpjmd")->result_array();
-    $Data['_Misi'] = $this->db->where("deleted_at IS NULL")->get("misirpjmn")->result_array();
 		$Data['Misi'] = $this->db->query("SELECT v.*,m.* FROM visirpjmd as v, misirpjmd as m WHERE m._Id = v.Id AND m.deleted_at IS NULL AND m.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array();
 		$this->load->view('Admin/header',$Header);
 		$this->load->view('Admin/MisiRPJMD',$Data);
@@ -241,11 +369,28 @@ class Admin extends CI_Controller {
     }
   }
 
+  public function GetTujuanRPJMDP(){
+    echo json_encode($this->db->where("KodeWilayah = ".substr($_SESSION['KodeWilayah'],0,2)." AND _Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("tujuanrpjmdp")->result_array());
+	}
+
+  public function GetTujuanRPJMN(){
+    echo json_encode($this->db->query("SELECT t.* FROM visirpjmn as v, misirpjmn as m, tujuanrpjmn as t WHERE v.Id = ".$_POST['Id']." AND t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL")->result_array());
+	}
+
+  public function GetPeriodeTujuanRPJMD(){
+    echo json_encode($this->db->query("SELECT v.Id as IdVisi FROM visirpjmd as v, misirpjmd as m, tujuanrpjmd as t WHERE t._Id = ".$_POST['Id']." AND t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL AND t.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array());
+	}
+
+  public function GetTujuanRPJMD(){
+    echo json_encode($this->db->query("SELECT t.* FROM visirpjmd as v, misirpjmd as m, tujuanrpjmd as t WHERE v.Id = ".$_POST['Id']." AND t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL AND t.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array());
+	}
+
   public function TujuanRPJMD(){
 		$Header['Halaman'] = 'RPJMD';
-    $Data['Misi'] = $this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND deleted_at IS NULL")->get("misirpjmd")->result_array();
-    $Data['_Tujuan'] = $this->db->where("deleted_at IS NULL")->get("tujuanrpjmn")->result_array();
-		$Data['Tujuan'] = $this->db->query("SELECT v.*,m.Misi,t.* FROM visirpjmd as v, misirpjmd as m, tujuanrpjmd as t WHERE t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL AND t.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array();
+    $Data['VisiRPJMDP'] = $this->db->where("KodeWilayah = ".substr($_SESSION['KodeWilayah'],0,2)." AND deleted_at IS NULL")->get("visirpjmdp")->result_array();
+    $Data['VisiRPJMN'] = $this->db->where("deleted_at IS NULL")->get("visirpjmn")->result_array();
+    $Data['Visi'] = $this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND deleted_at IS NULL")->get("visirpjmd")->result_array();
+		$Data['Tujuan'] = $this->db->query("SELECT v.Id as IdVisi,v.TahunMulai,v.TahunAkhir,m.Id as IdMisi,m.Misi,t.* FROM visirpjmd as v, misirpjmd as m, tujuanrpjmd as t WHERE t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL AND t.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array();
 		$this->load->view('Admin/header',$Header);
 		$this->load->view('Admin/TujuanRPJMD',$Data);
 	}
@@ -280,11 +425,28 @@ class Admin extends CI_Controller {
     }
   }
 
+  public function GetSasaranRPJMDP(){
+    echo json_encode($this->db->where("KodeWilayah = ".substr($_SESSION['KodeWilayah'],0,2)." AND _Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("sasaranrpjmdp")->result_array());
+	}
+
+  public function GetSasaranRPJMN(){
+    echo json_encode($this->db->query("SELECT s.* FROM visirpjmn as v, misirpjmn as m, tujuanrpjmn as t, sasaranrpjmn as s WHERE s._Id = t.Id AND t._Id = m.Id AND m._Id = v.Id AND s.deleted_at IS NULL")->result_array());
+	}
+
+  public function GetPeriodeSasaranRPJMD(){
+    echo json_encode($this->db->query("SELECT v.Id as IdVisi FROM visirpjmd as v, misirpjmd as m, tujuanrpjmd as t WHERE t._Id = ".$_POST['Id']." AND t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL AND t.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array());
+	}
+
+  public function GetSasaranRPJMD(){
+    echo json_encode($this->db->query("SELECT t.* FROM visirpjmd as v, misirpjmd as m, tujuanrpjmd as t WHERE v.Id = ".$_POST['Id']." AND t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL AND t.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array());
+	}
+
   public function SasaranRPJMD(){
 		$Header['Halaman'] = 'RPJMD';
-    $Data['Tujuan'] = $this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND deleted_at IS NULL")->get("Tujuanrpjmd")->result_array();
-    $Data['_Sasaran'] = $this->db->where("deleted_at IS NULL")->get("sasaranrpjmn")->result_array();
-		$Data['Sasaran'] = $this->db->query("SELECT v.*,t.Tujuan,s.* FROM visirpjmd as v, misirpjmd as m, tujuanrpjmd as t, sasaranrpjmd as s WHERE s._Id = t.Id AND t._Id = m.Id AND m._Id = v.Id AND s.deleted_at IS NULL AND s.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array();
+    $Data['VisiRPJMDP'] = $this->db->where("KodeWilayah = ".substr($_SESSION['KodeWilayah'],0,2)." AND deleted_at IS NULL")->get("visirpjmdp")->result_array();
+    $Data['VisiRPJMN'] = $this->db->where("deleted_at IS NULL")->get("visirpjmn")->result_array();
+    $Data['Visi'] = $this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND deleted_at IS NULL")->get("visirpjmd")->result_array();
+		$Data['Sasaran'] = $this->db->query("SELECT v.Id as IdVisi,v.TahunMulai,v.TahunAkhir,t.Id as IdTujuan,t.Tujuan,s.* FROM visirpjmd as v, misirpjmd as m, tujuanrpjmd as t, sasaranrpjmd as s WHERE s._Id = t.Id AND t._Id = m.Id AND m._Id = v.Id AND s.deleted_at IS NULL AND s.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array();
 		$this->load->view('Admin/header',$Header);
 		$this->load->view('Admin/SasaranRPJMD',$Data);
 	}
@@ -323,6 +485,42 @@ class Admin extends CI_Controller {
     $Id = $this->input->post('id');
     echo json_encode($this->db->get_where('sasaran', array('IdTujuan' => $Id))->result_array());
 	}
+
+  public function TahapanRPJMD(){
+		$Header['Halaman'] = 'RPJMD';
+		$Data['Tahapan'] = $this->db->where("deleted_at IS NULL")->get("tahapanrpjmd")->result_array();
+		$this->load->view('Admin/header',$Header);
+		$this->load->view('Admin/TahapanRPJMD',$Data);
+	}
+
+  public function InputTahapanRPJMD(){  
+    $this->db->insert('tahapanrpjmd',$_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Menyimpan Data!';
+    }
+	}
+	
+	public function EditTahapanRPJMD(){  
+		$this->db->where('Id',$_POST['Id']); 
+		$this->db->update('tahapanrpjmd', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Update Data!';
+    }
+  }
+
+  public function HapusTahapanRPJMD(){  
+		$_POST['deleted_at'] = date('Y-m-d H:i:s');
+		$this->db->where('Id',$_POST['Id'])->update('tahapanrpjmd', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Hapus Data!';
+    }
+  }
 
 	public function Instansi() {
 		$Header['Halaman'] = 'Cascading';
@@ -777,8 +975,147 @@ public function IsuStrategisDaerah() {
   ", array($_SESSION['KodeWilayah']));
   
   $Data['IsuStrategis'] = $query->result_array();
+
+// Get Permasalahan Pokok
+$query = $this->db->query(
+  "SELECT * FROM Permasalahanpokokdaerah 
+   WHERE KodeWilayah = ? AND deleted_at IS NULL",
+  array($_SESSION['KodeWilayah'])
+);
+$Data['PermasalahanPokok'] = $query->result_array();
+
+// Get Isu KLHS
+$query = $this->db->query(
+  "SELECT * FROM IsuKLHS 
+   WHERE KodeWilayah = ? AND deleted_at IS NULL",
+  array($_SESSION['KodeWilayah'])
+);
+$Data['IsuKLHS'] = $query->result_array();
+
   $this->load->view('Admin/header', $Header);
   $this->load->view('Admin/IsuStrategisDaerah', $Data);
+}
+
+public function TambahPermasalahanPokokIsuStrategis() {
+  try {
+      $id = $this->input->post('id', TRUE);
+      $permasalahanPokok = $this->input->post('permasalahan_pokok', TRUE);
+
+      if (empty($id) || !is_numeric($id)) {
+          throw new Exception('ID tidak valid');
+      }
+      if (empty($permasalahanPokok)) {
+          throw new Exception('Permasalahan Pokok harus diisi');
+      }
+
+      // Get existing data
+      $existing = $this->db->where('Id', $id)->get('IsuStrategisDaerah')->row_array();
+      if (!$existing) {
+          throw new Exception('Data Isu Strategis tidak ditemukan');
+      }
+
+      // Combine with existing Permasalahan Pokok
+      $existingPP = !empty($existing['permasalahan_pokok']) ? explode(',', $existing['permasalahan_pokok']) : [];
+      $newPP = explode(',', $permasalahanPokok);
+      $combinedPP = array_unique(array_merge($existingPP, $newPP));
+      $updateData = [
+          'permasalahan_pokok' => implode(',', $combinedPP),
+          'updated_at' => date('Y-m-d H:i:s')
+      ];
+
+      $this->db->where('Id', $id)->update('IsuStrategisDaerah', $updateData);
+      echo $this->db->affected_rows() ? '1' : 'Tidak ada perubahan';
+  } catch (Exception $e) {
+      log_message('error', 'Error adding Permasalahan Pokok: ' . $e->getMessage());
+      echo $e->getMessage();
+  }
+}
+
+public function EditPermasalahanPokokIsuStrategis() {
+  try {
+      $id = $this->input->post('id', TRUE);
+      $permasalahanPokok = $this->input->post('permasalahan_pokok', TRUE);
+
+      if (empty($id) || !is_numeric($id)) {
+          throw new Exception('ID tidak valid');
+      }
+
+      $existing = $this->db->where('Id', $id)->get('IsuStrategisDaerah')->row_array();
+      if (!$existing) {
+          throw new Exception('Data Isu Strategis tidak ditemukan');
+      }
+
+      $updateData = [
+          'permasalahan_pokok' => $permasalahanPokok,
+          'updated_at' => date('Y-m-d H:i:s')
+      ];
+
+      $this->db->where('Id', $id)->update('IsuStrategisDaerah', $updateData);
+      echo $this->db->affected_rows() ? '1' : 'Gagal Update Data';
+  } catch (Exception $e) {
+      log_message('error', 'Error editing Permasalahan Pokok: ' . $e->getMessage());
+      echo $e->getMessage();
+  }
+}
+
+public function TambahIsuKLHSIsuStrategis() {
+  try {
+      $id = $this->input->post('id', TRUE);
+      $isuKLHS = $this->input->post('isu_klhs', TRUE);
+
+      if (empty($id) || !is_numeric($id)) {
+          throw new Exception('ID tidak valid');
+      }
+      if (empty($isuKLHS)) {
+          throw new Exception('Isu KLHS harus diisi');
+      }
+
+      $existing = $this->db->where('Id', $id)->get('IsuStrategisDaerah')->row_array();
+      if (!$existing) {
+          throw new Exception('Data Isu Strategis tidak ditemukan');
+      }
+
+      $existingKLHS = !empty($existing['isu_klhs']) ? explode(',', $existing['isu_klhs']) : [];
+      $newKLHS = explode(',', $isuKLHS);
+      $combinedKLHS = array_unique(array_merge($existingKLHS, $newKLHS));
+      $updateData = [
+          'isu_klhs' => implode(',', $combinedKLHS),
+          'updated_at' => date('Y-m-d H:i:s')
+      ];
+
+      $this->db->where('Id', $id)->update('IsuStrategisDaerah', $updateData);
+      echo $this->db->affected_rows() ? '1' : 'Tidak ada perubahan';
+  } catch (Exception $e) {
+      log_message('error', 'Error adding Isu KLHS: ' . $e->getMessage());
+      echo $e->getMessage();
+  }
+}
+
+public function EditIsuKLHSIsuStrategis() {
+  try {
+      $id = $this->input->post('id', TRUE);
+      $isuKLHS = $this->input->post('isu_klhs', TRUE);
+
+      if (empty($id) || !is_numeric($id)) {
+          throw new Exception('ID tidak valid');
+      }
+
+      $existing = $this->db->where('Id', $id)->get('IsuStrategisDaerah')->row_array();
+      if (!$existing) {
+          throw new Exception('Data Isu Strategis tidak ditemukan');
+      }
+
+      $updateData = [
+          'isu_klhs' => $isuKLHS,
+          'updated_at' => date('Y-m-d H:i:s')
+      ];
+
+      $this->db->where('Id', $id)->update('IsuStrategisDaerah', $updateData);
+      echo $this->db->affected_rows() ? '1' : 'Gagal Update Data';
+  } catch (Exception $e) {
+      log_message('error', 'Error editing Isu KLHS: ' . $e->getMessage());
+      echo $e->getMessage();
+  }
 }
 
 public function InputIsuStrategis() {

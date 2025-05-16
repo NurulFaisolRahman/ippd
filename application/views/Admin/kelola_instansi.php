@@ -208,7 +208,7 @@
                 }
             })
 
-            $(".Hapus").click(function() {
+            $('#data-table-basic tbody').on('click', '.Hapus', function () {
                 var Akun = { id: $(this).attr('Hapus') }
                 $.post(BaseURL+"Admin/HapusInstansi", Akun).done(function(Respon) {
                     if (Respon == '1') {

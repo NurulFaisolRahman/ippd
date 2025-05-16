@@ -42,6 +42,8 @@
                     <ul class="nav nav-tabs notika-menu-wrap menu-it-icon-pro">
                         <li <?=$Halaman == 'RPJPN' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#RPJPN"><i class="notika-icon notika-form"></i> <b>RPJPN</b></a></li>
                         <li <?=$Halaman == 'RPJMN' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#RPJMN"><i class="notika-icon notika-form"></i> <b>RPJMN</b></a></li>
+                        <li <?=$Halaman == 'RPJPD' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#RPJPD"><i class="notika-icon notika-form"></i> <b>RPJPD</b></a></li>
+                        <li <?=$Halaman == 'RPJMD' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#RPJMD"><i class="notika-icon notika-form"></i> <b>RPJMD</b></a></li>
                         <li <?=$Halaman == 'Kementerian' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#Kementerian"><i class="notika-icon notika-house"></i> <b>Kementerian</b></a></li>
                         <li <?=$Halaman == 'Isu' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#Isu"><i class="notika-icon notika-house"></i> <b>Isu</b></a></li>
 
@@ -62,6 +64,9 @@
                                 <li>
                                     <a href="<?=base_url('Super/SasaranRPJPN')?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
                                 </li>
+                                <li>
+                                    <a href="<?=base_url('Super/TahapanRPJPN')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
+                                </li>
                             </ul>
                         </div>
                         <div id="RPJMN" class="tab-pane in <?=$Halaman == 'RPJMN' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
@@ -77,6 +82,47 @@
                                 </li>
                                 <li>
                                     <a href="<?=base_url('Super/SasaranRPJMN')?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/TahapanRPJMN')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="RPJPD" class="tab-pane in <?=$Halaman == 'RPJPD' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
+                            <ul class="notika-main-menu-dropdown">
+                                <li>
+                                    <a href="<?=base_url('Super/VisiRPJPD')?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/MisiRPJPD')?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/TujuanRPJPD')?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/SasaranRPJPD')?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/TahapanRPJPD')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="RPJMD" class="tab-pane in <?=$Halaman == 'RPJMD' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
+                            <ul class="notika-main-menu-dropdown">
+                                <li>
+                                    <a href="<?=base_url('Super/VisiRPJMD')?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/MisiRPJMD')?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/TujuanRPJMD')?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/SasaranRPJMD')?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/TahapanRPJMD')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
                                 </li>
                             </ul>
                         </div>

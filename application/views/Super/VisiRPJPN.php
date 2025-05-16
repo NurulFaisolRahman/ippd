@@ -5,7 +5,7 @@
                     <div class="data-table-list">
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
-                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputVisi"><i class="notika-icon notika-edit"></i> <b>Input Visi</b></button>
+                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputVisi"><i class="notika-icon notika-edit"></i> <b>Input Visi RPJPN</b></button>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -13,7 +13,7 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 10%;" class="text-center">No</th>
-                                        <th style="width: 70%;">Visi</th>
+                                        <th style="width: 70%;">Visi RPJPN</th>
                                         <th style="width: 10%;">Periode</th>
                                         <th style="width: 10%;" class="text-center">Edit</th>
                                     </tr>
@@ -49,47 +49,45 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-lg-12">
-                            <div class="form-example-wrap">
-                                <div class="form-example-int form-horizental">
-                                    <div class="form-group">
-                                        <div class="row">
-                                            <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Periode</b></label>
-                                            </div>
-                                            <div class="col-lg-5">
-                                                <div class="nk-int-st">
-                                                    <input type="text" class="form-control input-sm" id="TahunMulai" placeholder="Tahun Mulai">
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-5">
-                                                <div class="nk-int-st">
-                                                    <input type="text" class="form-control input-sm" id="TahunAkhir" placeholder="Tahun Akhir">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-example-int form-horizental">
-                                    <div class="form-group">
-                                        <div class="row">
-                                            <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Visi</b></label>
-                                            </div>
-                                            <div class="col-lg-9">
-                                                <div class="nk-int-st">
-                                                    <textarea class="form-control" rows="3" id="Visi" placeholder="Input Visi"></textarea>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-example-int">
+                            <div class="form-example-int form-horizental">
+                                <div class="form-group">
                                     <div class="row">
                                         <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Periode RPJPN</b></label>
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <div class="nk-int-st">
+                                                <input type="text" class="form-control input-sm" id="TahunMulai" placeholder="Tahun Mulai">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <div class="nk-int-st">
+                                                <input type="text" class="form-control input-sm" id="TahunAkhir" placeholder="Tahun Akhir">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-example-int form-horizental">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Visi RPJPN</b></label>
                                         </div>
                                         <div class="col-lg-9">
-                                            <button class="btn btn-success notika-btn-success" id="Input"><b>SIMPAN</b></button>
+                                            <div class="nk-int-st">
+                                                <textarea class="form-control" rows="3" id="Visi" placeholder="Input Visi RPJPN"></textarea>
+                                            </div>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-example-int">
+                                <div class="row">
+                                    <div class="col-lg-2">
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <button class="btn btn-success notika-btn-success" id="Input"><b>SIMPAN</b></button>
                                     </div>
                                 </div>
                             </div>
@@ -108,48 +106,46 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-lg-12">
-                            <div class="form-example-wrap" style="padding: 5px;">
-                                <div class="form-example-int form-horizental">
-                                    <div class="form-group">
-                                        <div class="row">
-                                            <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Periode</b></label>
-                                                <input type="hidden" class="form-control input-sm" id="Id">
-                                            </div>
-                                            <div class="col-lg-5">
-                                                <div class="nk-int-st">
-                                                    <input type="text" class="form-control input-sm" id="_TahunMulai" placeholder="Tahun Mulai">
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-5">
-                                                <div class="nk-int-st">
-                                                    <input type="text" class="form-control input-sm" id="_TahunAkhir" placeholder="Tahun Akhir">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-example-int form-horizental">
-                                    <div class="form-group">
-                                        <div class="row">
-                                            <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Visi</b></label>
-                                            </div>
-                                            <div class="col-lg-9">
-                                                <div class="nk-int-st">
-                                                    <textarea class="form-control" rows="3" id="_Visi" wrap="off"></textarea>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-example-int">
+                            <div class="form-example-int form-horizental">
+                                <div class="form-group">
                                     <div class="row">
                                         <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Periode RPJPN</b></label>
+                                            <input type="hidden" class="form-control input-sm" id="Id">
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <div class="nk-int-st">
+                                                <input type="text" class="form-control input-sm" id="_TahunMulai" placeholder="Tahun Mulai">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <div class="nk-int-st">
+                                                <input type="text" class="form-control input-sm" id="_TahunAkhir" placeholder="Tahun Akhir">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-example-int form-horizental">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Visi RPJPN</b></label>
                                         </div>
                                         <div class="col-lg-9">
-                                            <button class="btn btn-success notika-btn-success" id="Edit"><b>Update</b></button>
+                                            <div class="nk-int-st">
+                                                <textarea class="form-control" rows="3" id="_Visi" placeholder="Input Visi RPJPN"></textarea>
+                                            </div>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-example-int">
+                                <div class="row">
+                                    <div class="col-lg-2">
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <button class="btn btn-success notika-btn-success" id="Edit"><b>Update</b></button>
                                     </div>
                                 </div>
                             </div>
@@ -227,7 +223,7 @@
                 }
             })
 
-            $(".Hapus").click(function() {
+            $('#data-table-basic tbody').on('click', '.Hapus', function () {
                 var Visi = { Id: $(this).attr('Hapus') }
                 $.post(BaseURL+"Super/HapusVisiRPJPN", Visi).done(function(Respon) {
                     if (Respon == '1') {

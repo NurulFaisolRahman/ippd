@@ -1,11 +1,11 @@
-    <div class="data-table-area">
+<div class="data-table-area">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <div class="data-table-list">
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
-                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputMisi"><i class="notika-icon notika-edit"></i> <b>Input Misi</b></button>
+                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputMisi"><i class="notika-icon notika-edit"></i> <b>Input Misi RPJMN</b></button>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -13,7 +13,7 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 10%;" class="text-center">No</th>
-                                        <th style="width: 70%;">Misi</th>
+                                        <th style="width: 70%;">Misi RPJMN</th>
                                         <th style="width: 10%;">Periode</th>
                                         <th style="width: 10%;" class="text-center">Edit</th>
                                     </tr>
@@ -49,42 +49,51 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-lg-12">
-                            <div class="form-example-wrap">
-                                <div class="form-example-int form-horizental">
-                                    <div class="form-group">
-                                        <div class="row">
-                                            <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Visi</b></label>
-                                            </div>
-                                            <div class="col-lg-9">
-                                                <div class="nk-int-st">
-                                                    <select class="form-control" id="IdVisi">
-                                                        <?php foreach ($Visi as $key) { ?>
-                                                            <option value="<?=$key['Id']?>"><?=$key['Visi']?></option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
+                            <div class="form-example-int form-horizental">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Periode RPJMN</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <select class="form-control" id="Periode">
+                                                    <option value="">Pilih Periode</option>
+                                                    <?php foreach ($Visi as $key) { ?>
+                                                        <option value="<?=$key['Id']?>"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></option>
+                                                    <?php } ?>
+                                                </select>
                                             </div>
                                         </div>
-                                        <div class="row" style="margin-top: 9px;">
-                                            <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Misi</b></label>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Visi RPJMN</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <select class="form-control" id="IdVisi" disabled></select>
                                             </div>
-                                            <div class="col-lg-9">
-                                                <div class="nk-int-st">
-                                                    <textarea class="form-control" rows="3" id="Misi" placeholder="Input Misi"></textarea>
-                                                </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Misi RPJMN</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <textarea class="form-control" rows="3" id="Misi" placeholder="Input Misi RPJMN"></textarea>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-example-int">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                        </div>
-                                        <div class="col-lg-9">
-                                            <button class="btn btn-success notika-btn-success" id="Input"><b>SIMPAN</b></button>
-                                        </div>
+                            </div>
+                            <div class="form-example-int">
+                                <div class="row">
+                                    <div class="col-lg-2">
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <button class="btn btn-success notika-btn-success" id="Input"><b>SIMPAN</b></button>
                                     </div>
                                 </div>
                             </div>
@@ -103,43 +112,51 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-lg-12">
-                            <div class="form-example-wrap">
-                                <div class="form-example-int form-horizental">
-                                    <div class="form-group">
-                                        <div class="row">
-                                            <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Visi</b></label>
-                                                <input type="hidden" class="form-control input-sm" id="Id">
-                                            </div>
-                                            <div class="col-lg-9">
-                                                <div class="nk-int-st">
-                                                    <select class="form-control" id="_IdVisi">
-                                                        <?php foreach ($Visi as $key) { ?>
-                                                            <option value="<?=$key['Id']?>"><?=$key['Visi']?></option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
+                            <div class="form-example-int form-horizental">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Periode RPJMN</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <select class="form-control" id="_Periode">
+                                                    <?php foreach ($Visi as $key) { ?>
+                                                        <option value="<?=$key['Id']?>"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></option>
+                                                    <?php } ?>
+                                                </select>
                                             </div>
                                         </div>
-                                        <div class="row" style="margin-top: 9px;">
-                                            <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Misi</b></label>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Visi RPJMN</b></label>
+                                            <input type="hidden" class="form-control input-sm" id="Id">
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <select class="form-control" id="_IdVisi" disabled></select>
                                             </div>
-                                            <div class="col-lg-9">
-                                                <div class="nk-int-st">
-                                                    <textarea class="form-control" rows="3" id="_Misi" placeholder="Input Misi"></textarea>
-                                                </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Misi RPJMN</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <textarea class="form-control" rows="3" id="_Misi" placeholder="Input Misi RPJMN"></textarea>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-example-int">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                        </div>
-                                        <div class="col-lg-9">
-                                            <button class="btn btn-success notika-btn-success" id="Edit"><b>Update</b></button>
-                                        </div>
+                            </div>
+                            <div class="form-example-int">
+                                <div class="row">
+                                    <div class="col-lg-2">
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <button class="btn btn-success notika-btn-success" id="Edit"><b>Update</b></button>
                                     </div>
                                 </div>
                             </div>
@@ -164,8 +181,40 @@
         var BaseURL = '<?=base_url()?>'
         jQuery(document).ready(function($) {
 
+            $("#Periode").change(function(){
+                if ($("#Periode").val() == "") {
+                    alert("Mohon Input Periode")
+                } else {
+                    $.post(BaseURL+"Super/GetVisiRPJMN", {Id : $("#Periode").val()}).done(function(Respon) {
+                        var Data = JSON.parse(Respon)
+                        var Visi = ''
+                        for (let i = 0; i < Data.length; i++) {
+                            Visi += '<option value="'+Data[i].Id+'">'+Data[i].Visi+'</option>'
+                        }
+                        $("#IdVisi").html(Visi)
+                    })                         
+                }
+            });
+
+            $("#_Periode").change(function(){
+                if ($("#_Periode").val() == "") {
+                    alert("Mohon Input Periode")
+                } else {
+                    $.post(BaseURL+"Super/GetVisiRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
+                        var Data = JSON.parse(Respon)
+                        var Visi = ''
+                        for (let i = 0; i < Data.length; i++) {
+                            Visi += '<option value="'+Data[i].Id+'">'+Data[i].Visi+'</option>'
+                        }
+                        $("#_IdVisi").html(Visi)
+                    })                         
+                }
+            });
+
             $("#Input").click(function() {
-                if ($("#Misi").val() == "") {
+                if ($("#Periode").val() == "") {
+                    alert("Mohon Input Periode")
+                } else if ($("#Misi").val() == "") {
                     alert('Input Misi Belum Benar!')
                 } else {
                     var Misi = { _Id   : $("#IdVisi").val(),
@@ -184,13 +233,24 @@
                 var Data = $(this).attr('Edit')
                 var Pisah = Data.split("|");
                 $("#Id").val(Pisah[0])
-                $("#_IdVisi").val(Pisah[1])
+                $("#_Periode").val(Pisah[1])
+                $.post(BaseURL+"Super/GetVisiRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
+                    var Data = JSON.parse(Respon)
+                    var Visi = ''
+                    for (let i = 0; i < Data.length; i++) {
+                        Visi += '<option value="'+Data[i].Id+'">'+Data[i].Visi+'</option>'
+                    }
+                    $("#_IdVisi").html(Visi)
+                    $("#_IdVisi").val(Pisah[1])
+                })
                 $("#_Misi").val(Pisah[2])
                 $('#ModalEditMisi').modal("show")
             })
 
             $("#Edit").click(function() {
-                if ($("#_Misi").val() == "") {
+                if ($("#_Periode").val() == "") {
+                    alert("Mohon Input Periode")
+                } else if ($("#_Misi").val() == "") {
                     alert('Input Misi Belum Benar!')
                 } else {
                     var Misi = { Id   : $("#Id").val(),
@@ -206,7 +266,7 @@
                 }
             })
 
-            $(".Hapus").click(function() {
+            $('#data-table-basic tbody').on('click', '.Hapus', function () {
                 var Misi = { Id: $(this).attr('Hapus') }
                 $.post(BaseURL+"Super/HapusMisiRPJMN", Misi).done(function(Respon) {
                     if (Respon == '1') {
