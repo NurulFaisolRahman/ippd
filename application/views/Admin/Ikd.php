@@ -663,65 +663,6 @@
                 type: "POST",
                 data: $(this).serialize(),
                 success: function(res) {
-        $("#FormEditIkd").submit(function(e) {
-            e.preventDefault();
-            if(validateIntegerInputs('FormEditIkd')) {
-                // Menyimpan nilai terakhir yang diinput
-                var id = $("#EditId").val();
-                lastInputData[id] = {
-                    target_1: $("#EditTarget1").val(),
-                    target_2: $("#EditTarget2").val(),
-                    target_3: $("#EditTarget3").val(),
-                    target_4: $("#EditTarget4").val(),
-                    target_5: $("#EditTarget5").val()
-                };
-                
-                // Menyimpan ke localStorage untuk persistensi data
-                localStorage.setItem('ikdLastInputData', JSON.stringify(lastInputData));
-                
-                $.post(BaseURL + "Admin/EditIkd", $(this).serialize()).done(function(res) {
-                    if (res == '1') {
-                        window.location.reload();
-                    } else {
-                        alert("Gagal mengupdate data: " + res);
-                    }
-                });
-            }
-        });
-
-        // Hapus IKD
-        $('#data-table-basic tbody').on('click', '.Hapus', function () {
-            if(confirm("Apakah Anda yakin ingin menghapus data ini?")) {
-                var id = $(this).data('id');
-                
-                // Menghapus data input terakhir jika ID dihapus
-                if (lastInputData[id]) {
-                    delete lastInputData[id];
-                    localStorage.setItem('ikdLastInputData', JSON.stringify(lastInputData));
-                }
-                
-                $.post(BaseURL + "Admin/HapusIkd", { id: id }).done(function(res) {
-                    if (res == '1') {
-                        window.location.reload();
-                    } else {
-                        alert("Gagal menghapus data: " + res);
-                    }
-                });
-            }
-        });
-
-        // Hapus IKD
-        $(".Hapus").click(function() {
-            if(confirm("Apakah Anda yakin ingin menghapus data ini?")) {
-                var id = $(this).data('id');
-                
-                // Menghapus data input terakhir jika ID dihapus
-                if (lastInputData[id]) {
-                    delete lastInputData[id];
-                    localStorage.setItem('ikdLastInputData', JSON.stringify(lastInputData));
-                }
-                
-                $.post(BaseURL + "Admin/HapusIkd", { id: id }).done(function(res) {
                     if (res == '1') {
                         window.location.reload();
                     } else {
