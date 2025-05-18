@@ -824,6 +824,18 @@ public function EditPDIKD() {
   }
 }
 
+public function GetKementerian(){
+  echo json_encode($this->db->query("SELECT * FROM kementerian WHERE TahunMulai = ".$_POST['TahunMulai']." AND deleted_at IS NULL")->result_array());
+}
+
+public function GetPermasalahanPokokNasional(){
+  echo json_encode($this->db->query("SELECT * FROM permasalahan_pokok WHERE IdKementerian = ".$_POST['Id']." AND deleted_at IS NULL")->result_array());
+}
+
+public function GetPeriodePermasalahanPokokNasional(){
+  echo json_encode($this->db->query("SELECT kementerian.* FROM permasalahan_pokok,kementerian WHERE kementerian.Id=permasalahan_pokok.IdKementerian AND kementerian.deleted_at IS NULL AND permasalahan_pokok.Id = ".$_POST['Id'])->result_array());
+}
+
     // Halaman Permasalahan Pokok
     public function PermasalahanPokok() {
       $Header['Halaman'] = 'Isudaerah';
@@ -843,7 +855,14 @@ public function EditPDIKD() {
           WHERE KodeWilayah = ? AND deleted_at IS NULL
       ", array($_SESSION['KodeWilayah']));
       $Data['PermasalahanPokok'] = $query->result_array();
-      
+
+      $Data['PeriodePermasalahanPokokNasional'] = $this->db->query("SELECT DISTINCT TahunMulai,TahunAkhir,deleted_at FROM kementerian WHERE deleted_at IS NULL")->result_array();
+      $ListKementerian = $this->db->query("SELECT kementerian.NamaKementerian,permasalahan_pokok.* FROM permasalahan_pokok,kementerian WHERE kementerian.Id=permasalahan_pokok.IdKementerian AND permasalahan_pokok.deleted_at IS NULL")->result_array();
+      $Data['Kementerian'] = $Data['Permasalahan'] = array();
+      foreach ($ListKementerian as $key) {
+        $Data['Kementerian'][$key['Id']] = $key['NamaKementerian'];
+        $Data['Permasalahan'][$key['Id']] = $key['NamaPermasalahanPokok'];
+      }
       $this->load->view('Admin/header', $Header);
       $this->load->view('Admin/PermasalahanPokok', $Data);
   }
@@ -854,6 +873,7 @@ public function EditPDIKD() {
       
       $data = array(
           'NamaPermasalahanPokok' => $this->input->post('NamaPermasalahanPokok'),
+          '_Id' => $this->input->post('_Id'),
           'TahunMulai' => $periode[0],
           'TahunAkhir' => $periode[1],
           'KodeWilayah' => $_SESSION['KodeWilayah'],
@@ -870,6 +890,7 @@ public function EditPDIKD() {
       
       $data = array(
           'NamaPermasalahanPokok' => $this->input->post('NamaPermasalahanPokok'),
+          '_Id' => $this->input->post('_Id'),
           'TahunMulai' => $periode[0],
           'TahunAkhir' => $periode[1],
           'updated_at' => date('Y-m-d H:i:s')
@@ -889,6 +910,18 @@ public function EditPDIKD() {
       $this->db->where('Id', $this->input->post('Id'));
       $this->db->update('Permasalahanpokokdaerah', $data);
       echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
+  }
+
+  public function GetKementerianIsu(){
+    echo json_encode($this->db->query("SELECT * FROM kementerian WHERE TahunMulai = ".$_POST['TahunMulai']." AND deleted_at IS NULL")->result_array());
+  }
+  
+  public function GetIsuKLHSNasional(){
+    echo json_encode($this->db->query("SELECT * FROM isu_klhs WHERE IdKementerian = ".$_POST['Id']." AND deleted_at IS NULL")->result_array());
+  }
+  
+  public function GetPeriodeIsuKLHSNasional(){
+    echo json_encode($this->db->query("SELECT kementerian.* FROM isu_klhs,kementerian WHERE kementerian.Id=isu_klhs.IdKementerian AND kementerian.deleted_at IS NULL AND isu_klhs.Id = ".$_POST['Id'])->result_array());
   }
 
   public function IsuKLHS() {
@@ -911,6 +944,14 @@ public function EditPDIKD() {
     ", array($_SESSION['KodeWilayah']));
     
     $Data['IsuKLHS'] = $query->result_array();
+
+    $Data['PeriodeIsuKLHSNasional'] = $this->db->query("SELECT DISTINCT TahunMulai,TahunAkhir,deleted_at FROM kementerian WHERE deleted_at IS NULL")->result_array();
+      $ListKementerian = $this->db->query("SELECT kementerian.NamaKementerian,isu_klhs.* FROM isu_klhs,kementerian WHERE kementerian.Id=isu_klhs.IdKementerian AND isu_klhs.deleted_at IS NULL")->result_array();
+      $Data['Kementerian'] = $Data['Isu'] = array();
+      foreach ($ListKementerian as $key) {
+        $Data['Kementerian'][$key['Id']] = $key['NamaKementerian'];
+        $Data['Isu'][$key['Id']] = $key['NamaIsuKLHS'];
+      }
     $this->load->view('Admin/header', $Header);
     $this->load->view('Admin/IsuKLHS', $Data);
 }
@@ -920,6 +961,7 @@ public function InputIsuKLHS() {
     
     $data = array(
         'NamaIsuKLHS' => $this->input->post('NamaIsuKLHS'),
+        '_Id' => $this->input->post('_Id'),
         'TahunMulai' => $periode[0],
         'TahunAkhir' => $periode[1],
         'KodeWilayah' => $_SESSION['KodeWilayah'],
@@ -935,6 +977,7 @@ public function UpdateIsuKLHS() {
     
     $data = array(
         'NamaIsuKLHS' => $this->input->post('NamaIsuKLHS'),
+        '_Id' => $this->input->post('_Id'),
         'TahunMulai' => $periode[0],
         'TahunAkhir' => $periode[1],
         'updated_at' => date('Y-m-d H:i:s')
@@ -953,6 +996,18 @@ public function DeleteIsuKLHS() {
     $this->db->where('Id', $this->input->post('Id'));
     $this->db->update('IsuKLHS', $data);
     echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
+}
+
+public function GetKementerianStrategis(){
+  echo json_encode($this->db->query("SELECT * FROM kementerian WHERE TahunMulai = ".$_POST['TahunMulai']." AND deleted_at IS NULL")->result_array());
+}
+
+public function GetIsuStrategisNasional(){
+  echo json_encode($this->db->query("SELECT * FROM isu_strategis WHERE IdKementerian = ".$_POST['Id']." AND deleted_at IS NULL")->result_array());
+}
+
+public function GetPeriodeIsuStrategisNasional(){
+  echo json_encode($this->db->query("SELECT kementerian.* FROM isu_strategis,kementerian WHERE kementerian.Id=isu_strategis.IdKementerian AND kementerian.deleted_at IS NULL AND isu_strategis.Id = ".$_POST['Id'])->result_array());
 }
 
 public function IsuStrategisDaerah() {
@@ -975,6 +1030,14 @@ public function IsuStrategisDaerah() {
   ", array($_SESSION['KodeWilayah']));
   
   $Data['IsuStrategis'] = $query->result_array();
+
+  $Data['PeriodeIsuStrategisNasional'] = $this->db->query("SELECT DISTINCT TahunMulai,TahunAkhir,deleted_at FROM kementerian WHERE deleted_at IS NULL")->result_array();
+      $ListKementerian = $this->db->query("SELECT kementerian.NamaKementerian,isu_strategis.* FROM isu_strategis,kementerian WHERE kementerian.Id=isu_strategis.IdKementerian AND isu_strategis.deleted_at IS NULL")->result_array();
+      $Data['Kementerian'] = $Data['Isu'] = array();
+      foreach ($ListKementerian as $key) {
+        $Data['Kementerian'][$key['Id']] = $key['NamaKementerian'];
+        $Data['Isu'][$key['Id']] = $key['NamaIsuStrategis'];
+      }
 
 // Get Permasalahan Pokok
 $query = $this->db->query(
@@ -1123,6 +1186,7 @@ public function InputIsuStrategis() {
   
   $data = array(
       'NamaIsuStrategis' => $this->input->post('NamaIsuStrategis'),
+      '_Id' => $this->input->post('_Id'),
       'TahunMulai' => $periode[0],
       'TahunAkhir' => $periode[1],
       'KodeWilayah' => $_SESSION['KodeWilayah'],
@@ -1138,6 +1202,7 @@ public function UpdateIsuStrategis() {
   
   $data = array(
       'NamaIsuStrategis' => $this->input->post('NamaIsuStrategis'),
+      '_Id' => $this->input->post('_Id'),
       'TahunMulai' => $periode[0],
       'TahunAkhir' => $periode[1],
       'updated_at' => date('Y-m-d H:i:s')
