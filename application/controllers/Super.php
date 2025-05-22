@@ -933,7 +933,7 @@ public function GetIsuByPeriode() {
     echo json_encode($Data);
 }
 
-public function GetPermasalahanPokokByPeriode() {
+public function GetPermasalahanByPeriode() {
     $TahunMulai = $this->input->post('TahunMulai');
     $TahunAkhir = $this->input->post('TahunAkhir');
     
@@ -942,7 +942,6 @@ public function GetPermasalahanPokokByPeriode() {
     $this->db->where('deleted_at', NULL);
     $Data = $this->db->get('permasalahan_pokok')->result_array();
     
-    header('Content-Type: application/json');
     echo json_encode($Data);
 }
 
@@ -973,7 +972,7 @@ public function GetIsuByIds() {
     }
 }
 
-public function GetPermasalahanPokokByIds() {
+public function GetPermasalahanByIds() {
     $Ids = $this->input->post('Ids');
     $TahunMulai = $this->input->post('TahunMulai');
     $TahunAkhir = $this->input->post('TahunAkhir');
@@ -984,7 +983,6 @@ public function GetPermasalahanPokokByIds() {
     $this->db->where_in('Id', explode(',', $Ids));
     $Data = $this->db->get('permasalahan_pokok')->result_array();
     
-    header('Content-Type: application/json');
     echo json_encode($Data);
 }
 
@@ -1117,6 +1115,26 @@ public function UpdateIsuNasionalForStrategis() {
     echo $this->db->affected_rows() ? '1' : 'Gagal Update Isu Nasional!';
 }
 
+public function UpdatePermasalahanForStrategis() {
+    $this->load->library('form_validation');
+    $this->form_validation->set_rules('Id', 'ID Isu', 'required');
+    
+    if ($this->form_validation->run() == FALSE) {
+        echo validation_errors();
+        return;
+    }
+    
+    $IdPermasalahanPokok = $this->input->post('IdPermasalahanPokok') ? array_filter($this->input->post('IdPermasalahanPokok')) : [];
+    
+    $data = [
+        'IdPermasalahanPokok' => implode(',', $IdPermasalahanPokok),
+        'edited_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->where('Id', $this->input->post('Id'));
+    $this->db->update('isu_strategis', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Update Permasalahan Pokok!';
+}
 
 public function DeleteIsuStrategis() {
     $this->load->library('form_validation');
@@ -1131,6 +1149,7 @@ public function DeleteIsuStrategis() {
     $this->db->update('isu_strategis', ['deleted_at' => date('Y-m-d H:i:s')]);
     echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
 }
+
 public function SPM() {
   $Header['Halaman'] = 'Kementerian';
   
