@@ -1935,9 +1935,9 @@ jQuery(document).ready(function($) {
     // Handle Detail Permasalahan Pokok
     $(document).on('click', '.DetailPermasalahan', function() {
         var id = $(this).data('id');
-        var permasalahanIds = $(this).data('permasalahan');
-        var TahunMulai = $(this).data('tahunmulai');
-        var TahunAkhir = $(this).data('tahunakhir');
+        var permasalahanIds = $(this).data('permasalahanpokok');
+        var TahunMulai = $(this).data('TahunMulai');
+        var TahunAkhir = $(this).data('TahunAkhir');
         
         if (permasalahanIds) {
             $.post(BaseURL + "Super/GetPermasalahanByIds", { 
