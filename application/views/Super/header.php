@@ -67,6 +67,9 @@
                                 <li>
                                     <a href="<?=base_url('Super/TahapanRPJPN')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
                                 </li>
+                                <li>
+                                    <a href="<?=base_url('Super/IUPRPJPN')?>"><i class="notika-icon notika-bar-chart"></i> <b>IUP RPJPN</b></a>
+                                </li>
                             </ul>
                         </div>
                         <div id="RPJMN" class="tab-pane in <?=$Halaman == 'RPJMN' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
@@ -85,6 +88,9 @@
                                 </li>
                                 <li>
                                     <a href="<?=base_url('Super/TahapanRPJMN')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/IUPRPJMN')?>"><i class="notika-icon notika-bar-chart"></i> <b>IUP RPJMN</b></a>
                                 </li>
                             </ul>
                         </div>
@@ -105,6 +111,9 @@
                                 <li>
                                     <a href="<?=base_url('Super/TahapanRPJPD')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
                                 </li>
+                                <li>
+                                    <a href="<?=base_url('Super/IUPRPJPD')?>"><i class="notika-icon notika-bar-chart"></i> <b>IUP RPJPD</b></a>
+                                </li>
                             </ul>
                         </div>
                         <div id="RPJMD" class="tab-pane in <?=$Halaman == 'RPJMD' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
@@ -123,6 +132,9 @@
                                 </li>
                                 <li>
                                     <a href="<?=base_url('Super/TahapanRPJMD')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/IUPRPJMD')?>"><i class="notika-icon notika-bar-chart"></i> <b>IUP RPJMD</b></a>
                                 </li>
                             </ul>
                         </div>

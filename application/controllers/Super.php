@@ -169,7 +169,8 @@ class Super extends CI_Controller {
 
   public function TahapanRPJPN(){
 		$Header['Halaman'] = 'RPJPN';
-		$Data['Tahapan'] = $this->db->where("deleted_at IS NULL")->get("tahapanrpjpn")->result_array();
+    $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjpn")->result_array();
+		$Data['Tahapan'] = $this->db->query("SELECT v.*,t.* FROM visirpjpn as v, tahapanrpjpn as t WHERE t._Id = v.Id AND t.deleted_at IS NULL")->result_array();
 		$this->load->view('Super/header',$Header);
 		$this->load->view('Super/TahapanRPJPN',$Data);
 	}
@@ -205,7 +206,8 @@ class Super extends CI_Controller {
 
   public function TahapanRPJMN(){
 		$Header['Halaman'] = 'RPJMN';
-		$Data['Tahapan'] = $this->db->where("deleted_at IS NULL")->get("tahapanrpjmn")->result_array();
+    $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjmn")->result_array();
+		$Data['Tahapan'] = $this->db->query("SELECT v.*,t.* FROM visirpjmn as v, tahapanrpjmn as t WHERE t._Id = v.Id AND t.deleted_at IS NULL")->result_array();
 		$this->load->view('Super/header',$Header);
 		$this->load->view('Super/TahapanRPJMN',$Data);
 	}
@@ -564,7 +566,8 @@ class Super extends CI_Controller {
 
   public function TahapanRPJPD(){
 		$Header['Halaman'] = 'RPJPD';
-		$Data['Tahapan'] = $this->db->where("deleted_at IS NULL")->get("tahapanrpjpdp")->result_array();
+    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
+    $Data['Tahapan'] = $this->db->query("SELECT v.*,t.*,k.* FROM visirpjpdp as v,tahapanrpjpdp as t, kodewilayah as k WHERE t._Id = v.Id AND t.KodeWilayah = k.Kode AND t.deleted_at IS NULL")->result_array();
 		$this->load->view('Super/header',$Header);
 		$this->load->view('Super/TahapanRPJPD',$Data);
 	}
@@ -764,7 +767,8 @@ class Super extends CI_Controller {
 
   public function TahapanRPJMD(){
 		$Header['Halaman'] = 'RPJMD';
-		$Data['Tahapan'] = $this->db->where("deleted_at IS NULL")->get("tahapanrpjmdp")->result_array();
+    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
+    $Data['Tahapan'] = $this->db->query("SELECT v.*,t.*,k.* FROM visirpjmdp as v,tahapanrpjmdp as t, kodewilayah as k WHERE t._Id = v.Id AND t.KodeWilayah = k.Kode AND t.deleted_at IS NULL")->result_array();
 		$this->load->view('Super/header',$Header);
 		$this->load->view('Super/TahapanRPJMD',$Data);
 	}
@@ -791,6 +795,154 @@ class Super extends CI_Controller {
   public function HapusTahapanRPJMD(){  
 		$_POST['deleted_at'] = date('Y-m-d H:i:s');
 		$this->db->where('Id',$_POST['Id'])->update('tahapanrpjmdp', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Hapus Data!';
+    }
+  }
+
+  public function IUPRPJPN(){
+		$Header['Halaman'] = 'RPJPN';
+    $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjpn")->result_array();
+		$Data['IUP'] = $this->db->query("SELECT v.*,t.* FROM visirpjpn as v, iuprpjpn as t WHERE t._Id = v.Id AND t.deleted_at IS NULL")->result_array();
+		$this->load->view('Super/header',$Header);
+		$this->load->view('Super/IUPRPJPN',$Data);
+	}
+
+  public function InputIUPRPJPN(){  
+    $this->db->insert('iuprpjpn',$_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Menyimpan Data!';
+    }
+	}
+	
+	public function EditIUPRPJPN(){  
+		$this->db->where('Id',$_POST['Id']); 
+		$this->db->update('iuprpjpn', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Update Data!';
+    }
+  }
+
+  public function HapusIUPRPJPN(){  
+		$_POST['deleted_at'] = date('Y-m-d H:i:s');
+		$this->db->where('Id',$_POST['Id'])->update('iuprpjpn', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Hapus Data!';
+    }
+  }
+
+  public function IUPRPJMN(){
+		$Header['Halaman'] = 'RPJMN';
+    $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjmn")->result_array();
+		$Data['IUP'] = $this->db->query("SELECT v.*,t.* FROM visirpjmn as v, iuprpjmn as t WHERE t._Id = v.Id AND t.deleted_at IS NULL")->result_array();
+		$this->load->view('Super/header',$Header);
+		$this->load->view('Super/IUPRPJMN',$Data);
+	}
+
+  public function InputIUPRPJMN(){  
+    $this->db->insert('iuprpjmn',$_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Menyimpan Data!';
+    }
+	}
+	
+	public function EditIUPRPJMN(){  
+		$this->db->where('Id',$_POST['Id']); 
+		$this->db->update('iuprpjmn', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Update Data!';
+    }
+  }
+
+  public function HapusIUPRPJMN(){  
+		$_POST['deleted_at'] = date('Y-m-d H:i:s');
+		$this->db->where('Id',$_POST['Id'])->update('iuprpjmn', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Hapus Data!';
+    }
+  }
+
+  public function IUPRPJPD(){
+		$Header['Halaman'] = 'RPJPD';
+    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
+    $Data['IUP'] = $this->db->query("SELECT v.*,i.*,k.* FROM visirpjpdp as v,iuprpjpdp as i, kodewilayah as k WHERE i._Id = v.Id AND i.KodeWilayah = k.Kode AND i.deleted_at IS NULL")->result_array();
+		$this->load->view('Super/header',$Header);
+		$this->load->view('Super/IUPRPJPD',$Data);
+	}
+
+  public function InputIUPRPJPD(){  
+    $this->db->insert('iuprpjpdp',$_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Menyimpan Data!';
+    }
+	}
+	
+	public function EditIUPRPJPD(){  
+		$this->db->where('Id',$_POST['Id']); 
+		$this->db->update('iuprpjpdp', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Update Data!';
+    }
+  }
+
+  public function HapusIUPRPJPD(){  
+		$_POST['deleted_at'] = date('Y-m-d H:i:s');
+		$this->db->where('Id',$_POST['Id'])->update('iuprpjpdp', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Hapus Data!';
+    }
+  }
+
+  public function IUPRPJMD(){
+		$Header['Halaman'] = 'RPJMD';
+    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
+    $Data['IUP'] = $this->db->query("SELECT v.*,i.*,k.* FROM visirpjmdp as v,iuprpjmdp as i, kodewilayah as k WHERE i._Id = v.Id AND i.KodeWilayah = k.Kode AND i.deleted_at IS NULL")->result_array();
+		$this->load->view('Super/header',$Header);
+		$this->load->view('Super/IUPRPJMD',$Data);
+	} 
+
+  public function InputIUPRPJMD(){  
+    $this->db->insert('iuprpjmdp',$_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Menyimpan Data!';
+    }
+	}
+	
+	public function EditIUPRPJMD(){  
+		$this->db->where('Id',$_POST['Id']); 
+		$this->db->update('iuprpjmdp', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Update Data!';
+    }
+  }
+
+  public function HapusIUPRPJMD(){  
+		$_POST['deleted_at'] = date('Y-m-d H:i:s');
+		$this->db->where('Id',$_POST['Id'])->update('iuprpjmdp', $_POST);
     if ($this->db->affected_rows()){
       echo '1';
     } else {

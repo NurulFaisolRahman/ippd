@@ -319,8 +319,7 @@
                         $("#_IdVisi").html(Visi)
                         $("#_IdVisi").val(Pisah[1])
                     })
-                })                         
-                
+                })
                 $('#ModalEditMisi').modal("show")
             })
 

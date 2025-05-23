@@ -824,6 +824,18 @@ public function EditPDIKD() {
   }
 }
 
+public function GetKementerian(){
+  echo json_encode($this->db->query("SELECT * FROM kementerian WHERE TahunMulai = ".$_POST['TahunMulai']." AND deleted_at IS NULL")->result_array());
+}
+
+public function GetPermasalahanPokokNasional(){
+  echo json_encode($this->db->query("SELECT * FROM permasalahan_pokok WHERE IdKementerian = ".$_POST['Id']." AND deleted_at IS NULL")->result_array());
+}
+
+public function GetPeriodePermasalahanPokokNasional(){
+  echo json_encode($this->db->query("SELECT kementerian.* FROM permasalahan_pokok,kementerian WHERE kementerian.Id=permasalahan_pokok.IdKementerian AND kementerian.deleted_at IS NULL AND permasalahan_pokok.Id = ".$_POST['Id'])->result_array());
+}
+
     // Halaman Permasalahan Pokok
     public function PermasalahanPokok() {
       $Header['Halaman'] = 'Isudaerah';
@@ -843,7 +855,14 @@ public function EditPDIKD() {
           WHERE KodeWilayah = ? AND deleted_at IS NULL
       ", array($_SESSION['KodeWilayah']));
       $Data['PermasalahanPokok'] = $query->result_array();
-      
+
+      $Data['PeriodePermasalahanPokokNasional'] = $this->db->query("SELECT DISTINCT TahunMulai,TahunAkhir,deleted_at FROM kementerian WHERE deleted_at IS NULL")->result_array();
+      $ListKementerian = $this->db->query("SELECT kementerian.NamaKementerian,permasalahan_pokok.* FROM permasalahan_pokok,kementerian WHERE kementerian.Id=permasalahan_pokok.IdKementerian AND permasalahan_pokok.deleted_at IS NULL")->result_array();
+      $Data['Kementerian'] = $Data['Permasalahan'] = array();
+      foreach ($ListKementerian as $key) {
+        $Data['Kementerian'][$key['Id']] = $key['NamaKementerian'];
+        $Data['Permasalahan'][$key['Id']] = $key['NamaPermasalahanPokok'];
+      }
       $this->load->view('Admin/header', $Header);
       $this->load->view('Admin/PermasalahanPokok', $Data);
   }
@@ -854,6 +873,7 @@ public function EditPDIKD() {
       
       $data = array(
           'NamaPermasalahanPokok' => $this->input->post('NamaPermasalahanPokok'),
+          '_Id' => $this->input->post('_Id'),
           'TahunMulai' => $periode[0],
           'TahunAkhir' => $periode[1],
           'KodeWilayah' => $_SESSION['KodeWilayah'],

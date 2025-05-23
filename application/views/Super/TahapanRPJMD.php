@@ -13,7 +13,8 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 10%;" class="text-center">No</th>
-                                        <th style="width: 70%;">Tahapan RPJMD</th>
+                                        <th style="width: 15%;">Provinsi</th>
+                                        <th style="width: 55%;">Tahapan RPJMD</th>
                                         <th style="width: 10%;">Periode</th>
                                         <th style="width: 10%;" class="text-center">Edit</th>
                                     </tr>
@@ -22,11 +23,12 @@
                                     <?php $No = 1; foreach ($Tahapan as $key) { ?>
                                     <tr>
                                         <td style="vertical-align: middle;" class="text-center"><?=$No++?></td>
+                                        <td style="vertical-align: middle;"><?=$key['Nama']?></td>
                                         <td style="vertical-align: middle;"><?=$key['Tahapan']?></td>
                                         <td style="vertical-align: middle;"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></td>
                                         <td class="text-center">
                                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['Tahapan'].'|'.$key['TahunMulai'].'|'.$key['TahunAkhir']?>"><i class="notika-icon notika-next"></i></button>
+                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['_Id'].'|'.$key['Tahapan'].'|'.$key['KodeWilayah']?>"><i class="notika-icon notika-next"></i></button>
                                                 <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
                                             </div>
                                         </td>
@@ -53,30 +55,46 @@
                                 <div class="form-group">
                                     <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Periode</b></label>
+                                            <label class="hrzn-fm"><b>Provinsi</b></label>
                                         </div>
-                                        <div class="col-lg-5">
+                                        <div style="margin-bottom: 5px;" class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="TahunMulai" placeholder="Tahun Mulai">
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-5">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="TahunAkhir" placeholder="Tahun Akhir">
+                                                <select class="form-control" id="Provinsi">
+                                                    <option value="">Pilih Provinsi</option>
+                                                    <?php foreach ($Provinsi as $key) { ?>
+                                                        <option value="<?=$key['Kode']?>"><?=$key['Nama']?></option>
+                                                    <?php } ?>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
                                     <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Tahapan</b></label>
+                                            <label class="hrzn-fm"><b>Periode RPJMD</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <textarea class="form-control" rows="3" id="Tahapan" placeholder="Input Tahapan"></textarea>
+                                                <select class="form-control" id="Periode"></select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Visi RPJMD</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <select class="form-control" id="IdVisi"></select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Tahapan RPJMD</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <textarea class="form-control" rows="3" id="Tahapan" placeholder="Input Tahapan RPJMD"></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -110,31 +128,47 @@
                                 <div class="form-group">
                                     <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Periode</b></label>
-                                            <input type="hidden" class="form-control input-sm" id="Id">
+                                            <label class="hrzn-fm"><b>Provinsi</b></label>
                                         </div>
-                                        <div class="col-lg-5">
+                                        <div style="margin-bottom: 5px;" class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="_TahunMulai" placeholder="Tahun Mulai">
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-5">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="_TahunAkhir" placeholder="Tahun Akhir">
+                                                <select class="form-control" id="_Provinsi">
+                                                    <option value="">Pilih Provinsi</option>
+                                                    <?php foreach ($Provinsi as $key) { ?>
+                                                        <option value="<?=$key['Kode']?>"><?=$key['Nama']?></option>
+                                                    <?php } ?>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
                                     <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Tahapan</b></label>
+                                            <label class="hrzn-fm"><b>Periode RPJMD</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <textarea class="form-control" rows="3" id="_Tahapan" placeholder="Input Tahapan"></textarea>
+                                                <select class="form-control" id="_Periode"></select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Visi RPJMD</b></label>
+                                            <input type="hidden" class="form-control input-sm" id="Id">
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <select class="form-control" id="_IdVisi" disabled></select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Tahapan RPJMD</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <textarea class="form-control" rows="3" id="_Tahapan" placeholder="Input Tahapan RPJMD"></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -155,7 +189,7 @@
             </div>
         </div>
     </div>
-    <script src="../js/vendor/jquery-1.12.4.min.js"></script>>
+    <script src="../js/vendor/jquery-1.12.4.min.js"></script>
     <script src="../js/bootstrap.min.js"></script>
     <script src="../js/wow.min.js"></script>
     <script src="../js/jquery-price-slider.js"></script>
@@ -165,22 +199,92 @@
     <script src="../js/scrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
     <script src="../js/data-table/jquery.dataTables.min.js"></script>
     <script src="../js/data-table/data-table-act.js"></script>
-	<script src="../js/main.js"></script>
+    <script src="../js/main.js"></script>
     <script>
         var BaseURL = '<?=base_url()?>'
         jQuery(document).ready(function($) {
-            
+
+            $("#Provinsi").change(function(){
+                if ($("#Provinsi").val() == "") {
+                    alert("Mohon Input Provinsi")
+                } else {
+                    $.post(BaseURL+"Super/GetProvinsiRPJMD", {Id : $("#Provinsi").val()}).done(function(Respon) {
+                        var Data = JSON.parse(Respon)
+                        var Periode = '<option value="">Pilih Periode</option>'
+                        if (Data.length > 0) {
+                            for (let i = 0; i < Data.length; i++) {
+                                Periode += '<option value="'+Data[i].Id+'">'+Data[i].TahunMulai+' - '+Data[i].TahunAkhir+'</option>'
+                            }    
+                        } else {
+                            alert("Belum Ada Data Provinsi Tersebut")
+                        }
+                        $("#Periode").html(Periode)
+                        $("#IdVisi").html("")
+                    })                         
+                }
+            });
+
+            $("#_Provinsi").change(function(){
+                if ($("#_Provinsi").val() == "") {
+                    alert("Mohon Input Provinsi")
+                } else {
+                    $.post(BaseURL+"Super/GetProvinsiRPJMD", {Id : $("#_Provinsi").val()}).done(function(Respon) {
+                        var Data = JSON.parse(Respon)
+                        var Periode = '<option value="">Pilih Periode</option>'
+                        if (Data.length > 0) {
+                            for (let i = 0; i < Data.length; i++) {
+                                Periode += '<option value="'+Data[i].Id+'">'+Data[i].TahunMulai+' - '+Data[i].TahunAkhir+'</option>'
+                            }    
+                        } else {
+                            alert("Belum Ada Data Provinsi Tersebut")
+                        }
+                        $("#_Periode").html(Periode)
+                        $("#_IdVisi").html("")
+                    })                         
+                }
+            });
+
+            $("#Periode").change(function(){
+                if ($("#Periode").val() == "") {
+                    alert("Mohon Input Periode")
+                } else {
+                    $.post(BaseURL+"Super/GetVisiRPJMD", {Id : $("#Periode").val()}).done(function(Respon) {
+                        var Data = JSON.parse(Respon)
+                        var Visi = ''
+                        for (let i = 0; i < Data.length; i++) {
+                            Visi += '<option value="'+Data[i].Id+'">'+Data[i].Visi+'</option>'
+                        }
+                        $("#IdVisi").html(Visi)
+                    })                         
+                }
+            });
+
+            $("#_Periode").change(function(){
+                if ($("#_Periode").val() == "") {
+                    alert("Mohon Input Periode")
+                } else {
+                    $.post(BaseURL+"Super/GetVisiRPJMD", {Id : $("#_Periode").val()}).done(function(Respon) {
+                        var Data = JSON.parse(Respon)
+                        var Visi = ''
+                        for (let i = 0; i < Data.length; i++) {
+                            Visi += '<option value="'+Data[i].Id+'">'+Data[i].Visi+'</option>'
+                        }
+                        $("#_IdVisi").html(Visi)
+                    })                         
+                }
+            });
+
             $("#Input").click(function() {
-                if (isNaN($("#TahunMulai").val()) || $("#TahunMulai").val() == "" || $("#TahunMulai").val().length != 4) {
-                    alert('Input Tahun Mulai Belum Benar!')
-                } else if (isNaN($("#TahunAkhir").val()) || $("#TahunAkhir").val() == "" || $("#TahunAkhir").val().length != 4) {
-                    alert('Input Tahun Akhir Belum Benar!')
+                if ($("#Provinsi").val() == "") {
+                    alert('Input Provinsi Belum Benar!')
+                } else if ($("#Periode").val() == "") {
+                    alert("Mohon Input Periode")
                 } else if ($("#Tahapan").val() == "") {
                     alert('Input Tahapan Belum Benar!')
                 } else {
-                    var Tahapan = { Tahapan       : $("#Tahapan").val(),
-                                 TahunMulai : $("#TahunMulai").val(),
-                                 TahunAkhir : $("#TahunAkhir").val() }
+                    var Tahapan = { _Id   : $("#IdVisi").val(),
+                                    KodeWilayah : $("#Provinsi").val(),
+                                    Tahapan   : $("#Tahapan").val() }
                     $.post(BaseURL+"Super/InputTahapanRPJMD", Tahapan).done(function(Respon) {
                         if (Respon == '1') {
                             window.location = BaseURL+"Super/TahapanRPJMD"
@@ -195,24 +299,42 @@
                 var Data = $(this).attr('Edit')
                 var Pisah = Data.split("|");
                 $("#Id").val(Pisah[0])
-                $("#_Tahapan").val(Pisah[1])
-                $("#_TahunMulai").val(Pisah[2])
-                $("#_TahunAkhir").val(Pisah[3])
+                $("#_Provinsi").val(Pisah[3])
+                $.post(BaseURL+"Super/GetProvinsiRPJMD", {Id : $("#_Provinsi").val()}).done(function(Respon) {
+                    var Data = JSON.parse(Respon)
+                    var Periode = ''
+                    for (let i = 0; i < Data.length; i++) {
+                        var Visi = '<option value="">Pilih Periode</option>'
+                        Periode += '<option value="'+Data[i].Id+'">'+Data[i].TahunMulai+' - '+Data[i].TahunAkhir+'</option>'
+                    }
+                    $("#_Periode").html(Periode)   
+                    $("#_Periode").val(Pisah[1])
+                    $.post(BaseURL+"Super/GetVisiRPJMD", {Id : $("#_Periode").val()}).done(function(Respon) {
+                        var Data = JSON.parse(Respon)
+                        var Visi = ''
+                        for (let i = 0; i < Data.length; i++) {
+                            Visi += '<option value="'+Data[i].Id+'">'+Data[i].Visi+'</option>'
+                        }
+                        $("#_IdVisi").html(Visi)
+                        $("#_IdVisi").val(Pisah[1])
+                    })
+                })
+                $("#_Tahapan").val(Pisah[2])
                 $('#ModalEditTahapan').modal("show")
             })
 
             $("#Edit").click(function() {
-                if (isNaN($("#_TahunMulai").val()) || $("#_TahunMulai").val() == "" || $("#_TahunMulai").val().length != 4) {
-                    alert('Input Tahun Mulai Belum Benar!')
-                } else if (isNaN($("#_TahunAkhir").val()) || $("#_TahunAkhir").val() == "" || $("#_TahunAkhir").val().length != 4) {
-                    alert('Input Tahun Akhir Belum Benar!')
+                if ($("#_Provinsi").val() == "") {
+                    alert('Input Provinsi Belum Benar!')
+                } else if ($("#_Periode").val() == "") {
+                    alert("Mohon Input Periode")
                 } else if ($("#_Tahapan").val() == "") {
                     alert('Input Tahapan Belum Benar!')
                 } else {
-                    var Tahapan = { Id         : $("#Id").val(),
-                                 Tahapan       : $("#_Tahapan").val(),
-                                 TahunMulai : $("#_TahunMulai").val(),
-                                 TahunAkhir : $("#_TahunAkhir").val() }
+                    var Tahapan = { Id   : $("#Id").val(),
+                                 _Id   : $("#_IdVisi").val(),
+                                 KodeWilayah : $("#_Provinsi").val(),
+                                 Tahapan   : $("#_Tahapan").val() }
                     $.post(BaseURL+"Super/EditTahapanRPJMD", Tahapan).done(function(Respon) {
                         if (Respon == '1') {
                             window.location = BaseURL+"Super/TahapanRPJMD"
@@ -233,7 +355,7 @@
                     }
                 })                         
             })
-        })  
+        })
     </script>
 </body>
 

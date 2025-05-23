@@ -26,7 +26,7 @@
                                         <td style="vertical-align: middle;"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></td>
                                         <td class="text-center">
                                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['Tahapan'].'|'.$key['TahunMulai'].'|'.$key['TahunAkhir']?>"><i class="notika-icon notika-next"></i></button>
+                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['_Id'].'|'.$key['Tahapan']?>"><i class="notika-icon notika-next"></i></button>
                                                 <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
                                             </div>
                                         </td>
@@ -53,30 +53,36 @@
                                 <div class="form-group">
                                     <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Periode</b></label>
-                                        </div>
-                                        <div class="col-lg-5">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="TahunMulai" placeholder="Tahun Mulai">
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-5">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="TahunAkhir" placeholder="Tahun Akhir">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Tahapan</b></label>
+                                            <label class="hrzn-fm"><b>Periode RPJMN</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <textarea class="form-control" rows="3" id="Tahapan" placeholder="Input Tahapan"></textarea>
+                                                <select class="form-control" id="Periode">
+                                                    <option value="">Pilih Periode</option>
+                                                    <?php foreach ($Visi as $key) { ?>
+                                                        <option value="<?=$key['Id']?>"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></option>
+                                                    <?php } ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Visi RPJMN</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <select class="form-control" id="IdVisi" disabled></select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Tahapan RPJMN</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <textarea class="form-control" rows="3" id="Tahapan" placeholder="Input Tahapan RPJMN"></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -110,31 +116,36 @@
                                 <div class="form-group">
                                     <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Periode</b></label>
-                                            <input type="hidden" class="form-control input-sm" id="Id">
-                                        </div>
-                                        <div class="col-lg-5">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="_TahunMulai" placeholder="Tahun Mulai">
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-5">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="_TahunAkhir" placeholder="Tahun Akhir">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Tahapan</b></label>
+                                            <label class="hrzn-fm"><b>Periode RPJMN</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <textarea class="form-control" rows="3" id="_Tahapan" placeholder="Input Tahapan"></textarea>
+                                                <select class="form-control" id="_Periode">
+                                                    <?php foreach ($Visi as $key) { ?>
+                                                        <option value="<?=$key['Id']?>"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></option>
+                                                    <?php } ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Visi RPJMN</b></label>
+                                            <input type="hidden" class="form-control input-sm" id="Id">
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <select class="form-control" id="_IdVisi" disabled></select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Tahapan RPJMN</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <textarea class="form-control" rows="3" id="_Tahapan" placeholder="Input Tahapan RPJMN"></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -155,7 +166,7 @@
             </div>
         </div>
     </div>
-    <script src="../js/vendor/jquery-1.12.4.min.js"></script>>
+    <script src="../js/vendor/jquery-1.12.4.min.js"></script>
     <script src="../js/bootstrap.min.js"></script>
     <script src="../js/wow.min.js"></script>
     <script src="../js/jquery-price-slider.js"></script>
@@ -165,22 +176,49 @@
     <script src="../js/scrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
     <script src="../js/data-table/jquery.dataTables.min.js"></script>
     <script src="../js/data-table/data-table-act.js"></script>
-	<script src="../js/main.js"></script>
+    <script src="../js/main.js"></script>
     <script>
         var BaseURL = '<?=base_url()?>'
         jQuery(document).ready(function($) {
-            
+
+            $("#Periode").change(function(){
+                if ($("#Periode").val() == "") {
+                    alert("Mohon Input Periode")
+                } else {
+                    $.post(BaseURL+"Super/GetVisiRPJMN", {Id : $("#Periode").val()}).done(function(Respon) {
+                        var Data = JSON.parse(Respon)
+                        var Visi = ''
+                        for (let i = 0; i < Data.length; i++) {
+                            Visi += '<option value="'+Data[i].Id+'">'+Data[i].Visi+'</option>'
+                        }
+                        $("#IdVisi").html(Visi)
+                    })                         
+                }
+            });
+
+            $("#_Periode").change(function(){
+                if ($("#_Periode").val() == "") {
+                    alert("Mohon Input Periode")
+                } else {
+                    $.post(BaseURL+"Super/GetVisiRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
+                        var Data = JSON.parse(Respon)
+                        var Visi = ''
+                        for (let i = 0; i < Data.length; i++) {
+                            Visi += '<option value="'+Data[i].Id+'">'+Data[i].Visi+'</option>'
+                        }
+                        $("#_IdVisi").html(Visi)
+                    })                         
+                }
+            });
+
             $("#Input").click(function() {
-                if (isNaN($("#TahunMulai").val()) || $("#TahunMulai").val() == "" || $("#TahunMulai").val().length != 4) {
-                    alert('Input Tahun Mulai Belum Benar!')
-                } else if (isNaN($("#TahunAkhir").val()) || $("#TahunAkhir").val() == "" || $("#TahunAkhir").val().length != 4) {
-                    alert('Input Tahun Akhir Belum Benar!')
+                if ($("#Periode").val() == "") {
+                    alert("Mohon Input Periode")
                 } else if ($("#Tahapan").val() == "") {
                     alert('Input Tahapan Belum Benar!')
                 } else {
-                    var Tahapan = { Tahapan       : $("#Tahapan").val(),
-                                 TahunMulai : $("#TahunMulai").val(),
-                                 TahunAkhir : $("#TahunAkhir").val() }
+                    var Tahapan = { _Id   : $("#IdVisi").val(),
+                                 Tahapan   : $("#Tahapan").val() }
                     $.post(BaseURL+"Super/InputTahapanRPJMN", Tahapan).done(function(Respon) {
                         if (Respon == '1') {
                             window.location = BaseURL+"Super/TahapanRPJMN"
@@ -195,24 +233,29 @@
                 var Data = $(this).attr('Edit')
                 var Pisah = Data.split("|");
                 $("#Id").val(Pisah[0])
-                $("#_Tahapan").val(Pisah[1])
-                $("#_TahunMulai").val(Pisah[2])
-                $("#_TahunAkhir").val(Pisah[3])
+                $("#_Periode").val(Pisah[1])
+                $.post(BaseURL+"Super/GetVisiRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
+                    var Data = JSON.parse(Respon)
+                    var Visi = ''
+                    for (let i = 0; i < Data.length; i++) {
+                        Visi += '<option value="'+Data[i].Id+'">'+Data[i].Visi+'</option>'
+                    }
+                    $("#_IdVisi").html(Visi)
+                    $("#_IdVisi").val(Pisah[1])
+                })
+                $("#_Tahapan").val(Pisah[2])
                 $('#ModalEditTahapan').modal("show")
             })
 
             $("#Edit").click(function() {
-                if (isNaN($("#_TahunMulai").val()) || $("#_TahunMulai").val() == "" || $("#_TahunMulai").val().length != 4) {
-                    alert('Input Tahun Mulai Belum Benar!')
-                } else if (isNaN($("#_TahunAkhir").val()) || $("#_TahunAkhir").val() == "" || $("#_TahunAkhir").val().length != 4) {
-                    alert('Input Tahun Akhir Belum Benar!')
+                if ($("#_Periode").val() == "") {
+                    alert("Mohon Input Periode")
                 } else if ($("#_Tahapan").val() == "") {
                     alert('Input Tahapan Belum Benar!')
                 } else {
-                    var Tahapan = { Id         : $("#Id").val(),
-                                 Tahapan       : $("#_Tahapan").val(),
-                                 TahunMulai : $("#_TahunMulai").val(),
-                                 TahunAkhir : $("#_TahunAkhir").val() }
+                    var Tahapan = { Id   : $("#Id").val(),
+                                 _Id   : $("#_IdVisi").val(),
+                                 Tahapan   : $("#_Tahapan").val() }
                     $.post(BaseURL+"Super/EditTahapanRPJMN", Tahapan).done(function(Respon) {
                         if (Respon == '1') {
                             window.location = BaseURL+"Super/TahapanRPJMN"
@@ -233,7 +276,7 @@
                     }
                 })                         
             })
-        })  
+        })
     </script>
 </body>
 

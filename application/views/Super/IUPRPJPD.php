@@ -5,7 +5,7 @@
                     <div class="data-table-list">
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
-                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputTahapan"><i class="notika-icon notika-edit"></i> <b>Input Tahapan RPJPD</b></button>
+                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputIUP"><i class="notika-icon notika-edit"></i> <b>Input IUP RPJPD</b></button>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -13,22 +13,28 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 10%;" class="text-center">No</th>
-                                        <th style="width: 15%;">Provinsi</th>
-                                        <th style="width: 55%;">Tahapan RPJPD</th>
+                                        <th style="width: 10%;">Provinsi</th>    
+                                        <th style="width: 30%;">IUP RPJPD</th>
+                                        <th style="width: 10%;">Baseline</th>
+                                        <th style="width: 10%;">Target Awal</th>
+                                        <th style="width: 10%;">Target Akhir</th>
                                         <th style="width: 10%;">Periode</th>
                                         <th style="width: 10%;" class="text-center">Edit</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php $No = 1; foreach ($Tahapan as $key) { ?>
+                                    <?php $No = 1; foreach ($IUP as $key) { ?>
                                     <tr>
                                         <td style="vertical-align: middle;" class="text-center"><?=$No++?></td>
                                         <td style="vertical-align: middle;"><?=$key['Nama']?></td>
-                                        <td style="vertical-align: middle;"><?=$key['Tahapan']?></td>
+                                        <td style="vertical-align: middle;"><?=$key['IUP']?></td>
+                                        <td style="vertical-align: middle;"><?=$key['Baseline']?></td>
+                                        <td style="vertical-align: middle;"><?=$key['TargetAwal']?></td>
+                                        <td style="vertical-align: middle;"><?=$key['TargetAkhir']?></td>
                                         <td style="vertical-align: middle;"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></td>
                                         <td class="text-center">
                                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['_Id'].'|'.$key['Tahapan'].'|'.$key['KodeWilayah']?>"><i class="notika-icon notika-next"></i></button>
+                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['_Id'].'|'.$key['IUP'].'|'.$key['Baseline'].'|'.$key['TargetAwal'].'|'.$key['TargetAkhir'].'|'.$key['KodeWilayah']?>"><i class="notika-icon notika-next"></i></button>
                                                 <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
                                             </div>
                                         </td>
@@ -42,7 +48,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="ModalInputTahapan" role="dialog">
+    <div class="modal fade" id="ModalInputIUP" role="dialog">
         <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
             <div class="modal-content">
                 <div class="modal-header">
@@ -90,11 +96,41 @@
                                     </div>
                                     <div class="row" style="margin-top: 9px;">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Tahapan RPJPD</b></label>
+                                            <label class="hrzn-fm"><b>IUP RPJPD</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <textarea class="form-control" rows="3" id="Tahapan" placeholder="Input Tahapan RPJPD"></textarea>
+                                                <textarea class="form-control" rows="3" id="IUP" placeholder="Input IUP RPJPD"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Baseline</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <input type="text" class="form-control input-sm" id="Baseline">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Target Awal</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <input type="text" class="form-control input-sm" id="TargetAwal">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Target Akhir</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <input type="text" class="form-control input-sm" id="TargetAkhir">
                                             </div>
                                         </div>
                                     </div>
@@ -115,7 +151,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="ModalEditTahapan" role="dialog">
+    <div class="modal fade" id="ModalEditIUP" role="dialog">
         <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
             <div class="modal-content">
                 <div class="modal-header">
@@ -158,17 +194,47 @@
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <select class="form-control" id="_IdVisi" disabled></select>
+                                                <select class="form-control" id="_IdVisi"></select>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row" style="margin-top: 9px;">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Tahapan RPJPD</b></label>
+                                            <label class="hrzn-fm"><b>IUP RPJPD</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <textarea class="form-control" rows="3" id="_Tahapan" placeholder="Input Tahapan RPJPD"></textarea>
+                                                <textarea class="form-control" rows="3" id="_IUP" placeholder="Input IUP RPJPD"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Baseline</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <input type="text" class="form-control input-sm" id="_Baseline">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Target Awal</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <input type="text" class="form-control input-sm" id="_TargetAwal">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Target Akhir</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <input type="text" class="form-control input-sm" id="_TargetAkhir">
                                             </div>
                                         </div>
                                     </div>
@@ -279,15 +345,24 @@
                     alert('Input Provinsi Belum Benar!')
                 } else if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
-                } else if ($("#Tahapan").val() == "") {
-                    alert('Input Tahapan Belum Benar!')
+                } else if ($("#IUP").val() == "") {
+                    alert('Input IUP Belum Benar!')
+                } else if ($("#Baseline").val() == "") {
+                    alert('Input Baseline Belum Benar!')
+                } else if ($("#TargetAwal").val() == "") {
+                    alert('Input Target Awal Belum Benar!')
+                } else if ($("#TargetAkhir").val() == "") {
+                    alert('Input Target Akhir Belum Benar!')
                 } else {
-                    var Tahapan = { _Id   : $("#IdVisi").val(),
-                                    KodeWilayah : $("#Provinsi").val(),
-                                    Tahapan   : $("#Tahapan").val() }
-                    $.post(BaseURL+"Super/InputTahapanRPJPD", Tahapan).done(function(Respon) {
+                    var IUP = { _Id   : $("#IdVisi").val(),
+                                KodeWilayah : $("#Provinsi").val(),
+                                IUP   : $("#IUP").val(),
+                                Baseline   : $("#Baseline").val(),
+                                TargetAwal   : $("#TargetAwal").val(),
+                                TargetAkhir   : $("#TargetAkhir").val() }
+                    $.post(BaseURL+"Super/InputIUPRPJPD", IUP).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Super/TahapanRPJPD"
+                            window.location = BaseURL+"Super/IUPRPJPD"
                         } else {
                             alert(Respon)
                         }
@@ -299,7 +374,7 @@
                 var Data = $(this).attr('Edit')
                 var Pisah = Data.split("|");
                 $("#Id").val(Pisah[0])
-                $("#_Provinsi").val(Pisah[3])
+                $("#_Provinsi").val(Pisah[6])
                 $.post(BaseURL+"Super/GetProvinsiRPJPD", {Id : $("#_Provinsi").val()}).done(function(Respon) {
                     var Data = JSON.parse(Respon)
                     var Periode = ''
@@ -319,8 +394,11 @@
                         $("#_IdVisi").val(Pisah[1])
                     })
                 })
-                $("#_Tahapan").val(Pisah[2])
-                $('#ModalEditTahapan').modal("show")
+                $("#_IUP").val(Pisah[2])
+                $("#_Baseline").val(Pisah[3])
+                $("#_TargetAwal").val(Pisah[4])
+                $("#_TargetAkhir").val(Pisah[5])
+                $('#ModalEditIUP').modal("show")
             })
 
             $("#Edit").click(function() {
@@ -328,16 +406,25 @@
                     alert('Input Provinsi Belum Benar!')
                 } else if ($("#_Periode").val() == "") {
                     alert("Mohon Input Periode")
-                } else if ($("#_Tahapan").val() == "") {
-                    alert('Input Tahapan Belum Benar!')
+                } else if ($("#_IUP").val() == "") {
+                    alert('Input IUP Belum Benar!')
+                } else if ($("#_Baseline").val() == "") {
+                    alert('Input Baseline Belum Benar!')
+                } else if ($("#_TargetAwal").val() == "") {
+                    alert('Input Target Awal Belum Benar!')
+                } else if ($("#_TargetAkhir").val() == "") {
+                    alert('Input Target Akhir Belum Benar!')
                 } else {
-                    var Tahapan = { Id   : $("#Id").val(),
-                                 _Id   : $("#_IdVisi").val(),
-                                 KodeWilayah : $("#_Provinsi").val(),
-                                 Tahapan   : $("#_Tahapan").val() }
-                    $.post(BaseURL+"Super/EditTahapanRPJPD", Tahapan).done(function(Respon) {
+                    var IUP = { Id   : $("#Id").val(),
+                                _Id   : $("#_IdVisi").val(),
+                                KodeWilayah : $("#_Provinsi").val(),
+                                IUP   : $("#_IUP").val(),
+                                Baseline   : $("#_Baseline").val(),
+                                TargetAwal   : $("#_TargetAwal").val(),
+                                TargetAkhir   : $("#_TargetAkhir").val() }
+                    $.post(BaseURL+"Super/EditIUPRPJPD", IUP).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Super/TahapanRPJPD"
+                            window.location = BaseURL+"Super/IUPRPJPD"
                         } else {
                             alert(Respon)
                         }
@@ -346,10 +433,10 @@
             })
 
             $('#data-table-basic tbody').on('click', '.Hapus', function () {
-                var Tahapan = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"Super/HapusTahapanRPJPD", Tahapan).done(function(Respon) {
+                var IUP = { Id: $(this).attr('Hapus') }
+                $.post(BaseURL+"Super/HapusIUPRPJPD", IUP).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Super/TahapanRPJPD"
+                        window.location = BaseURL+"Super/IUPRPJPD"
                     } else {
                         alert(Respon)
                     }

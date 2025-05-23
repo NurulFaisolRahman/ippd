@@ -320,7 +320,6 @@
                         $("#_IdMisi").val(Pisah[1])
                     })
                 })                         
-                
                 $('#ModalEditTujuan').modal("show")
             })
 
