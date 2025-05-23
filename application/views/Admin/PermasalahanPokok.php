@@ -15,9 +15,9 @@
                             <thead>
                                 <tr>
                                     <th class="text-center">No</th>
-                                    <th>Permasalahan Pokok</th>
-                                    <th>Permasalahan Pokok Nasional</th>
-                                    <th>Kemeneterian</th>
+                                    <th>Nama Permasalahan Pokok</th>
+                                    <th>Permasalahan Nasional</th>
+                                    <th>Kementerian</th>
                                     <th>Periode</th>
                                     <th>Aksi</th>
                                 </tr>
@@ -49,10 +49,17 @@
                                     <td style="vertical-align: middle;"><?= $key['TahunMulai'] . ' - ' . $key['TahunAkhir'] ?></td>
                                     <td>
                                         <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                            <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?= $key['Id'] . '|' . $key['NamaPermasalahanPokok'] . '|' . $key['TahunMulai'] . '|' . $key['TahunAkhir'] . '|' . $key['_Id'] ?>">
-                                                <i class="notika-icon notika-edit"></i>
+                                            <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg EditPermasalahan" 
+                                                    data-id="<?= $key['Id'] ?>" 
+                                                    data-nama="<?= $key['NamaPermasalahanPokok'] ?>" 
+                                                    data-tahunmulai="<?= $key['TahunMulai'] ?>" 
+                                                    data-tahunakhir="<?= $key['TahunAkhir'] ?>"
+                                                    data-periode="<?= $key['TahunMulai'] . '-' . $key['TahunAkhir'] ?>"
+                                                    data-kementerian="<?= explode("$",$key['_Id'])[0] ?>"
+                                                    data-permasalahan="<?= $key['_Id'] ?>">
+                                                <i class="notika-icon notika-next"></i>
                                             </button>
-                                            <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?= $key['Id'] ?>">
+                                            <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg HapusPermasalahan" data-id="<?= $key['Id'] ?>">
                                                 <i class="notika-icon notika-trash"></i>
                                             </button>
                                         </div>
@@ -83,12 +90,12 @@
                                 <div class="form-group">
                                     <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Periode </b></label>
+                                            <label class="hrzn-fm"><b>Periode</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <select class="form-control" id="PeriodeRPJMD"data-style="btn-default" style="color: #000 !important;">
-                                                    <option value="">-- Pilih Periode --</option>
+                                                <select class="form-control" id="PeriodeRPJMD">
+                                                    <option value="">-- Pilih Periode RPJMD --</option>
                                                     <?php foreach ($Periods as $period) { ?>
                                                         <option value="<?= $period['TahunMulai'] ?>-<?= $period['TahunAkhir'] ?>">
                                                             <?= $period['TahunMulai'] ?> - <?= $period['TahunAkhir'] ?>
@@ -106,12 +113,70 @@
                                 <div class="form-group">
                                     <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Nama Permasalahan Pokok</b></label>
+                                            <label class="hrzn-fm"><b>Nama Permasalahan</b></label>
                                         </div>
                                         <div class="col-lg-9">
-                                            <br>
                                             <div class="nk-int-st">
-                                            <input type="text" class="form-control input-sm" id="NamaPermasalahanPokok" style="color: #000;">
+                                                <br>
+                                                <input type="text" class="form-control input-sm" id="NamaPermasalahanPokok" style="color: #000;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-example-int form-horizental">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Periode Nasional</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <select class="form-control" id="PeriodePermasalahanPokokNasional" style="color: #000 !important;">
+                                                    <option value="">-- Pilih Periode --</option>
+                                                    <?php foreach ($PeriodePermasalahanPokokNasional as $key) { ?>
+                                                        <option value="<?= $key['TahunMulai'] ?>">
+                                                            <?= $key['TahunMulai'] ?> - <?= $key['TahunAkhir'] ?>
+                                                        </option>
+                                                    <?php } ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-example-int form-horizental">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Kementerian</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <select class="form-control" id="Kementerian" style="color: #000 !important;">
+                                                    <option value="">-- Pilih Kementerian --</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-2">
+                                    <label class="hrzn-fm"><b>Permasalahan Nasional</b></label>
+                                </div>
+                                <div style="margin-top: 3px;" class="col-lg-9">
+                                    <div class="accordion-stn">
+                                        <div class="panel-group" data-collapse-color="nk-green" id="AccrodionPermasalahanNasional" role="tablist" aria-multiselectable="true">
+                                            <div class="panel panel-collapse notika-accrodion-cus">
+                                                <div class="panel-heading" role="tab">
+                                                    <b><a data-toggle="collapse" data-parent="#AccrodionPermasalahanNasional" href="#PilihPermasalahanNasional" aria-expanded="true">Pilih Permasalahan</a></b>
+                                                </div>
+                                                <div id="PilihPermasalahanNasional" class="collapse in" role="tabpanel">
+                                                    <div class="panel-body" style="padding-top: 0px;">
+                                                        <div class="nk-int-st text-justify" id="ListPermasalahanNasional"></div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -209,8 +274,8 @@
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <select class="form-control" id="EditPeriodeRPJMD" data-style="btn-default" style="color: #000 !important;">
-                                                    <option value="">-- Pilih Periode  --</option>
+                                                <select class="form-control" id="EditPeriodeRPJMD">
+                                                    <option value="">-- Pilih Periode RPJMD --</option>
                                                     <?php foreach ($Periods as $period) { ?>
                                                         <option value="<?= $period['TahunMulai'] ?>-<?= $period['TahunAkhir'] ?>">
                                                             <?= $period['TahunMulai'] ?> - <?= $period['TahunAkhir'] ?>
@@ -228,12 +293,11 @@
                                 <div class="form-group">
                                     <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Nama Permasalahan Pokok</b></label>
+                                            <label class="hrzn-fm"><b>Nama Permasalahan</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
                                                 <input type="hidden" id="EditId">
-                                                <br>
                                                 <input type="text" class="form-control input-sm" id="EditNamaPermasalahanPokok" style="color: #000;">
                                             </div>
                                         </div>
@@ -244,15 +308,15 @@
                                 <div class="form-group">
                                     <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Periode </b></label>
+                                            <label class="hrzn-fm"><b>Periode Nasional</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <select class="form-control" id="EditPeriodePermasalahanPokokNasional"data-style="btn-default" style="color: #000 !important;">
+                                                <select class="form-control" id="EditPeriodePermasalahanNasional" style="color: #000 !important;">
                                                     <option value="">-- Pilih Periode --</option>
                                                     <?php foreach ($PeriodePermasalahanPokokNasional as $key) { ?>
                                                         <option value="<?= $key['TahunMulai'] ?>">
-                                                            <?=$key['TahunMulai'] ?> - <?= $key['TahunAkhir'] ?>
+                                                            <?= $key['TahunMulai'] ?> - <?= $key['TahunAkhir'] ?>
                                                         </option>
                                                     <?php } ?>
                                                 </select>
@@ -269,7 +333,8 @@
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <select class="form-control" id="EditKementerian" data-style="btn-default" style="color: #000 !important;">
+                                                <select class="form-control" id="EditKementerian" style="color: #000 !important;">
+                                                    <option value="">-- Pilih Kementerian --</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -278,18 +343,18 @@
                             </div>
                             <div class="row">
                                 <div class="col-lg-2">
-                                    <label class="hrzn-fm"><b>Permasalahan Pokok Nasional</b></label>
+                                    <label class="hrzn-fm"><b>Permasalahan Nasional</b></label>
                                 </div>
                                 <div style="margin-top: 3px;" class="col-lg-9">
                                     <div class="accordion-stn">
-                                        <div class="panel-group" data-collapse-color="nk-green" id="EditAccrodionPermasalahanPokokNasional" role="tablist" aria-multiselectable="true">
+                                        <div class="panel-group" data-collapse-color="nk-green" id="EditAccrodionPermasalahanNasional" role="tablist" aria-multiselectable="true">
                                             <div class="panel panel-collapse notika-accrodion-cus">
                                                 <div class="panel-heading" role="tab">
-                                                    <b><a data-toggle="collapse" data-parent="#EditAccrodionPermasalahanPokokNasional" href="#EditPilihPermasalahanPokokNasional" aria-expanded="true">Pilih Permasalahan</a></b>
+                                                    <b><a data-toggle="collapse" data-parent="#EditAccrodionPermasalahanNasional" href="#EditPilihPermasalahanNasional" aria-expanded="true">Pilih Permasalahan</a></b>
                                                 </div>
-                                                <div id="EditPilihPermasalahanPokokNasional" class="collapse in" role="tabpanel">
+                                                <div id="EditPilihPermasalahanNasional" class="collapse in" role="tabpanel">
                                                     <div class="panel-body" style="padding-top: 0px;">
-                                                        <div class="nk-int-st text-justify" id="EditListPermasalahanPokokNasional"></div>
+                                                        <div class="nk-int-st text-justify" id="EditListPermasalahanNasional"></div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -313,7 +378,6 @@
     </div>
 </div>
 
-<!-- Scripts -->
 <script src="<?= base_url('js/vendor/jquery-1.12.4.min.js'); ?>"></script>
 <script src="<?= base_url('js/bootstrap.min.js'); ?>"></script>
 <script src="<?= base_url('js/wow.min.js'); ?>"></script>
@@ -327,171 +391,224 @@
 <script src="<?= base_url('js/main.js'); ?>"></script>
 <script>
     var BaseURL = '<?= base_url() ?>';
-    
+
+    // Input Form Functions
     $("#PeriodePermasalahanPokokNasional").change(function(){
-        if ($("#PeriodePermasalahanPokokNasional").val() == "") {
-            alert("Mohon Input Periode")
+        if ($(this).val() == "") {
+            $("#Kementerian").html('<option value="">-- Pilih Kementerian --</option>');
+            $("#ListPermasalahanNasional").html('');
         } else {
-            $.post(BaseURL+"Admin/GetKementerian", {TahunMulai : $("#PeriodePermasalahanPokokNasional").val()}).done(function(Respon) {
-                var Data = JSON.parse(Respon)
-                var Kementerian = '<option value=""> --Pilih Kementerian-- </option>'
+            $.post(BaseURL+"Admin/GetKementerian", {TahunMulai: $(this).val()}).done(function(Respon) {
+                var Data = JSON.parse(Respon);
+                var Kementerian = '<option value="">-- Pilih Kementerian --</option>';
                 for (let i = 0; i < Data.length; i++) {
-                    Kementerian += '<option value="'+Data[i].Id+'">'+Data[i].NamaKementerian+'</option>'
+                    Kementerian += '<option value="'+Data[i].Id+'">'+Data[i].NamaKementerian+'</option>';
                 }
-                $("#Kementerian").html(Kementerian)
-            })                         
+                $("#Kementerian").html(Kementerian);
+            });                         
         }
     });
 
     $("#Kementerian").change(function(){
-        if ($("#Kementerian").val() == "") {
-            alert("Mohon Input Periode")
+        if ($(this).val() == "") {
+            $("#ListPermasalahanNasional").html('');
         } else {
-            $.post(BaseURL+"Admin/GetPermasalahanPokokNasional", {Id : $("#Kementerian").val()}).done(function(Respon) {
-                var Data = JSON.parse(Respon)
-                var Permasalahan = ''
+            $.post(BaseURL+"Admin/GetPermasalahanPokokNasional", {Id: $(this).val()}).done(function(Respon) {
+                var Data = JSON.parse(Respon);
+                var Permasalahan = '';
                 for (let i = 0; i < Data.length; i++) {
-                    Permasalahan += '<label><input style="margin-top: 10px;" type="checkbox" name="Permasalahan" value="'+Data[i].Id+'"> '+Data[i].NamaPermasalahanPokok+'</label><br>'
+                    Permasalahan += '<label><input style="margin-top: 10px;" type="checkbox" name="Permasalahan" value="'+Data[i].Id+'"> '+Data[i].NamaPermasalahanPokok+'</label><br>';
                 }
-                $("#ListPermasalahanPokokNasional").html(Permasalahan)
-            })                         
+                $("#ListPermasalahanNasional").html(Permasalahan);
+            });                         
         }
     });
 
-    // Set tahun saat memilih periode
+    // Edit Form Functions
+    $("#EditPeriodePermasalahanNasional").change(function(){
+        if ($(this).val() == "") {
+            $("#EditKementerian").html('<option value="">-- Pilih Kementerian --</option>');
+            $("#EditListPermasalahanNasional").html('');
+        } else {
+            $.post(BaseURL+"Admin/GetKementerian", {TahunMulai: $(this).val()}).done(function(Respon) {
+                var Data = JSON.parse(Respon);
+                var Kementerian = '<option value="">-- Pilih Kementerian --</option>';
+                for (let i = 0; i < Data.length; i++) {
+                    Kementerian += '<option value="'+Data[i].Id+'">'+Data[i].NamaKementerian+'</option>';
+                }
+                $("#EditKementerian").html(Kementerian);
+            });                         
+        }
+    });
+
+    $("#EditKementerian").change(function(){
+        if ($(this).val() == "") {
+            $("#EditListPermasalahanNasional").html('');
+        } else {
+            $.post(BaseURL+"Admin/GetPermasalahanPokokNasional", {Id: $(this).val()}).done(function(Respon) {
+                var Data = JSON.parse(Respon);
+                var Permasalahan = '';
+                for (let i = 0; i < Data.length; i++) {
+                    Permasalahan += '<label><input style="margin-top: 10px;" type="checkbox" name="EditPermasalahan" value="'+Data[i].Id+'"> '+Data[i].NamaPermasalahanPokok+'</label><br>';
+                }
+                $("#EditListPermasalahanNasional").html(Permasalahan);
+                
+                // Check previously selected items
+                var selectedPermasalahan = $("#EditPermasalahanData").val().split("$");
+                $("input[name='EditPermasalahan']").each(function() {
+                    if(selectedPermasalahan.includes($(this).val())) {
+                        $(this).prop('checked', true);
+                    }
+                });
+            });                         
+        }
+    });
+
+    // Set tahun saat periode dipilih (Input)
     $("#PeriodeRPJMD").change(function() {
         if ($(this).val()) {
             var years = $(this).val().split('-');
             $("#TahunMulai").val(years[0]);
             $("#TahunAkhir").val(years[1]);
-        } else {
-            $("#TahunMulai").val('');
-            $("#TahunAkhir").val('');
         }
     });
 
-    // Set tahun saat edit periode dipilih
+    // Set tahun saat periode dipilih (Edit)
     $("#EditPeriodeRPJMD").change(function() {
         if ($(this).val()) {
             var years = $(this).val().split('-');
             $("#EditTahunMulai").val(years[0]);
             $("#EditTahunAkhir").val(years[1]);
-        } else {
-            $("#EditTahunMulai").val('');
-            $("#EditTahunAkhir").val('');
         }
     });
 
     // Input Permasalahan Pokok
     $("#InputPermasalahanPokok").click(function() {
-        var PermasalahanPokokNasional = []
+        var PermasalahanNasional = [];
         $.each($("input[name='Permasalahan']:checked"), function(){
-            PermasalahanPokokNasional.push($(this).val())
-        })
+            PermasalahanNasional.push($(this).val());
+        });
+        
         if ($("#PeriodeRPJMD").val() === "") {
             alert('Pilih Periode RPJMD terlebih dahulu!');
             return;
         } else if ($("#NamaPermasalahanPokok").val() === "") {
             alert('Nama Permasalahan Pokok harus diisi!');
             return;
-        } else if ($("#PeriodePermasalahanPokokNasional").val() === "") {
-            alert('Pilih Periode Kementerian!');
+        } else if (!PermasalahanNasional.length) {
+            alert("Pilih minimal satu Permasalahan Nasional!");
             return;
-        } else if ($("#Kementerian").val() === "") {
-            alert('Pilih Kementerian!');
-            return;
-        } else if (!PermasalahanPokokNasional.length) {
-            alert("Mohon Checklist Permasalahan Pokok Nasional!")
-        } else {
-            var Data = {
-                PeriodeRPJMD: $("#PeriodeRPJMD").val(),
-                NamaPermasalahanPokok: $("#NamaPermasalahanPokok").val(),
-                _Id    : PermasalahanPokokNasional.join("$"),
-            };
-            $.post(BaseURL + "Admin/InputPermasalahanPokok", Data).done(function(Respon) {
-                if (Respon == '1') {
-                    window.location.reload();
-                } else {
-                    alert(Respon);
-                }
-            });
         }
+        
+        var Data = {
+            PeriodeRPJMD: $("#PeriodeRPJMD").val(),
+            NamaPermasalahanPokok: $("#NamaPermasalahanPokok").val(),
+            _Id: PermasalahanNasional.join("$")
+        };
+        
+        $.post(BaseURL + "Admin/InputPermasalahanPokok", Data).done(function(Respon) {
+            if (Respon == '1') {
+                // Reset form input
+                $("#PeriodeRPJMD").val('').trigger('change');
+                $("#NamaPermasalahanPokok").val('');
+                $("#TahunMulai").val('');
+                $("#TahunAkhir").val('');
+                $("#PeriodePermasalahanPokokNasional").val('');
+                $("#Kementerian").html('<option value="">-- Pilih Kementerian --</option>');
+                $("#ListPermasalahanNasional").html('');
+                
+                // Tutup modal
+                $('#ModalInputPermasalahanPokok').modal('hide');
+                
+                // Reload data
+                window.location.reload();
+            } else {
+                alert(Respon);
+            }
+        });
     });
 
     // Edit Permasalahan Pokok
-    $(document).on("click", ".Edit", function() {
-        var Data = $(this).attr('Edit');
-        var Pisah = Data.split("|");
-        $("#EditId").val(Pisah[0]);
-        $("#EditNamaPermasalahanPokok").val(Pisah[1]);
-        $("#EditPeriodeRPJMD").val(Pisah[2] + '-' + Pisah[3]);
-        $("#EditTahunMulai").val(Pisah[2]);
-        $("#EditTahunAkhir").val(Pisah[3]);
-        console.log(Pisah[4])
-        $.post(BaseURL+"Admin/GetPeriodePermasalahanPokokNasional", {Id : Pisah[4].split("$")[0]}).done(function(Respon) {
-            var Data = JSON.parse(Respon)
-            $("#EditPeriodePermasalahanPokokNasional").val(Data[0].TahunMulai);
-            $.post(BaseURL+"Admin/GetKementerian", {TahunMulai : $("#EditPeriodePermasalahanPokokNasional").val()}).done(function(Respon) {
-                var _Data = JSON.parse(Respon)
-                var Kementerian = '<option value=""> --Pilih Kementerian-- </option>'
-                for (let i = 0; i < _Data.length; i++) {
-                    Kementerian += '<option value="'+_Data[i].Id+'">'+_Data[i].NamaKementerian+'</option>'
-                }
-                $("#EditKementerian").html(Kementerian)
-                $("#EditKementerian").val(Data[0].Id)
-                $.post(BaseURL+"Admin/GetPermasalahanPokokNasional", {Id : $("#EditKementerian").val()}).done(function(Respon) {
-                    var Data_ = JSON.parse(Respon)
-                    var Permasalahan = ''
-                    for (let i = 0; i < Data_.length; i++) {
-                        Permasalahan += '<label><input style="margin-top: 10px;" type="checkbox" name="EditPermasalahan" value="'+Data_[i].Id+'"> '+Data_[i].NamaPermasalahanPokok+'</label><br>'
-                    }
-                    $("#EditListPermasalahanPokokNasional").html(Permasalahan)
-                    Pisah[4].split("$").forEach(function(m) {
-                        $("input[name='EditPermasalahan'][value='" + m + "']").prop('checked', true)
-                    })
-                })     
-            })     
-        }) 
+    $(document).on("click", ".EditPermasalahan", function() {
+        // Get all data attributes
+        var id = $(this).data('id');
+        var nama = $(this).data('nama');
+        var tahunmulai = $(this).data('tahunmulai');
+        var tahunakhir = $(this).data('tahunakhir');
+        var periode = $(this).data('periode');
+        var kementerian = $(this).data('kementerian');
+        var permasalahan = $(this).data('permasalahan');
+        
+        // Set basic form values
+        $("#EditId").val(id);
+        $("#EditNamaPermasalahanPokok").val(nama);
+        $("#EditPeriodeRPJMD").val(periode);
+        $("#EditTahunMulai").val(tahunmulai);
+        $("#EditTahunAkhir").val(tahunakhir);
+        
+        // Store the permasalahan data in a hidden field for later use
+        $('<input>').attr({
+            type: 'hidden',
+            id: 'EditPermasalahanData',
+            value: permasalahan
+        }).appendTo('body');
+        
+        // Get additional data for Kementerian and Permasalahan
+        $.post(BaseURL + "Admin/GetPeriodePermasalahanPokokNasional", {Id: kementerian}).done(function(Respon) {
+            var Data = JSON.parse(Respon)[0];
+            if(Data) {
+                // Set periode nasional
+                $("#EditPeriodePermasalahanNasional").val(Data.TahunMulai).trigger('change');
+                
+                // After Kementerian loads, set the value
+                setTimeout(function() {
+                    $("#EditKementerian").val(kementerian).trigger('change');
+                }, 500);
+            }
+        });
+        
         $('#ModalEditPermasalahanPokok').modal("show");
     });
 
     // Update Permasalahan Pokok
     $("#UpdatePermasalahanPokok").click(function() {
-    if ($("#EditPeriodeRPJMD").val() === "") {
-        alert('Pilih Periode RPJMD terlebih dahulu!');
-        return;
-    } else if ($("#EditNamaPermasalahanPokok").val() === "") {
-        alert('Nama Permasalahan Pokok harus diisi!');
-        return;
-    } else {
+        var PermasalahanNasional = [];
+        $.each($("input[name='EditPermasalahan']:checked"), function(){
+            PermasalahanNasional.push($(this).val());
+        });
+        
+        if ($("#EditPeriodeRPJMD").val() === "") {
+            alert('Pilih Periode RPJMD terlebih dahulu!');
+            return;
+        } else if ($("#EditNamaPermasalahanPokok").val() === "") {
+            alert('Nama Permasalahan Pokok harus diisi!');
+            return;
+        } else if (!PermasalahanNasional.length) {
+            alert("Pilih minimal satu Permasalahan Nasional!");
+            return;
+        }
+        
         var Data = {
             Id: $("#EditId").val(),
             EditPeriodeRPJMD: $("#EditPeriodeRPJMD").val(),
-            NamaPermasalahanPokok: $("#EditNamaPermasalahanPokok").val()
+            NamaPermasalahanPokok: $("#EditNamaPermasalahanPokok").val(),
+            _Id: PermasalahanNasional.join("$")
         };
+        
         $.post(BaseURL + "Admin/UpdatePermasalahanPokok", Data).done(function(Respon) {
             if (Respon == '1') {
-                // Reset form edit
-                $("#EditPeriodeRPJMD").val('').trigger('change');
-                $("#EditNamaPermasalahanPokok").val('');
-                $("#EditTahunMulai").val('');
-                $("#EditTahunAkhir").val('');
-                
-                // Tutup modal edit
                 $('#ModalEditPermasalahanPokok').modal('hide');
-                
-                // Reload data tabel (opsi 1)
                 window.location.reload();
-                } else {
-                    alert(Respon);
-                }
-            });
-        }
+            } else {
+                alert(Respon);
+            }
+        });
     });
 
     // Hapus Permasalahan Pokok
-    $(document).on("click", ".Hapus", function() {
-            var Id = { Id: $(this).attr('Hapus') };
+    $(".HapusPermasalahan").click(function() {
+        if(confirm("Apakah Anda yakin ingin menghapus data ini?")) {
+            var Id = { Id: $(this).data('id') };
             $.post(BaseURL + "Admin/DeletePermasalahanPokok", Id).done(function(Respon) {
                 if (Respon == '1') {
                     window.location.reload();
@@ -499,5 +616,46 @@
                     alert(Respon);
                 }
             });
-        });
+        }
+    });
+
+    // Reset form saat modal ditutup
+    $('#ModalInputPermasalahanPokok').on('hidden.bs.modal', function () {
+        $("#PeriodeRPJMD").val('').trigger('change');
+        $("#NamaPermasalahanPokok").val('');
+        $("#PeriodePermasalahanPokokNasional").val('');
+        $("#Kementerian").html('<option value="">-- Pilih Kementerian --</option>');
+        $("#ListPermasalahanNasional").html('');
+    });
+
+    $('#ModalEditPermasalahanPokok').on('hidden.bs.modal', function () {
+        $("#EditPeriodeRPJMD").val('').trigger('change');
+        $("#EditNamaPermasalahanPokok").val('');
+        $("#EditPeriodePermasalahanNasional").val('');
+        $("#EditKementerian").html('<option value="">-- Pilih Kementerian --</option>');
+        $("#EditListPermasalahanNasional").html('');
+        $("#EditPermasalahanData").remove();
+    });
 </script>
+
+<style>
+    .form-control, .form-control option {
+        color: #000 !important;
+    }
+    .modal-content {
+        color: #000;
+    }
+    .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+        margin-left: 10px;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>

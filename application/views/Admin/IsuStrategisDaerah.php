@@ -16,9 +16,11 @@
                                 <tr>
                                     <th width="5%" class="text-center">No</th>
                                     <th width="20%">Nama Isu Strategis</th>
+                                    <th width="10%" class="text-center">Isu Strategis Nasional</th>
+                                    <th width="10%" class="text-center">Kementrian</th>
                                     <th width="10%" class="text-center">Periode</th>
-                                    <th width="25%" class="text-center">Permasalahan Pokok Daerah</th>
-                                    <th width="25%" class="text-center">Isu KLHS Daerah</th>
+                                    <th width="15%" class="text-center">Permasalahan Pokok Daerah</th>
+                                    <th width="15%" class="text-center">Isu KLHS Daerah</th>
                                     <th width="15%" class="text-center">Aksi</th>
                                 </tr>
                             </thead>
@@ -27,6 +29,25 @@
                                 <tr>
                                     <td class="text-center" style="vertical-align: top;"><?= $No++ ?></td>
                                     <td style="vertical-align: top;"><?= $key['NamaIsuStrategis'] ?></td>
+                                    <td style="vertical-align: middle;">
+                                        <div class="accordion-stn">
+                                            <div class="panel-group" data-collapse-color="nk-green" id="Accrodion<?=$No?>" role="tablist" aria-multiselectable="true">
+                                                <div class="panel panel-collapse notika-accrodion-cus">
+                                                    <div class="panel-heading" role="tab">
+                                                        <b><a data-toggle="collapse" data-parent="#Accrodion<?=$No?>" href="#_Accrodion<?=$No?>" aria-expanded="true">Lihat Isu </a></b>
+                                                    </div>
+                                                    <div id="_Accrodion<?=$No?>" class="collapse" role="tabpanel">
+                                                        <div class="panel-body" style="padding-top: 0px;">
+                                                            <?php $_Id = explode("$",$key['_Id']); foreach ($_Id as $x) { ?>
+                                                                <div class="nk-int-st text-justify"><?= $Isu[$x] ?></div>
+                                                            <?php } ?>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="vertical-align: middle;"><?= $Kementerian[explode("$",$key['_Id'])[0]] ?></td>
                                     <td class="text-center" style="vertical-align: top;"><?= $key['TahunMulai'] . ' - ' . $key['TahunAkhir'] ?></td>
                                     
                                     <!-- Kolom Permasalahan Pokok Daerah -->
@@ -42,7 +63,8 @@
                                                 <?php if (!empty($key['permasalahan_pokok'])): ?>
                                                 <button class="btn btn-sm btn-primary EditPP" 
                                                         title="Edit Permasalahan Pokok"
-                                                        data-pp="<?= $key['Id'] . '|' . $key['permasalahan_pokok'] ?>"
+                                                        data-id="<?= $key['Id'] ?>"
+                                                        data-pp="<?= htmlspecialchars($key['permasalahan_pokok']) ?>"
                                                         style="width: 30px; height: 30px; padding: 0;">
                                                     <i class="fa fa-edit"></i>
                                                 </button>
@@ -74,7 +96,8 @@
                                                 <?php if (!empty($key['isu_klhs'])): ?>
                                                 <button class="btn btn-sm btn-primary EditKLHS" 
                                                         title="Edit Isu KLHS"
-                                                        data-klhs="<?= $key['Id'] . '|' . $key['isu_klhs'] ?>"
+                                                        data-id="<?= $key['Id'] ?>"
+                                                        data-klhs="<?= htmlspecialchars($key['isu_klhs']) ?>"
                                                         style="width: 30px; height: 30px; padding: 0;">
                                                     <i class="fa fa-edit"></i>
                                                 </button>
@@ -101,6 +124,9 @@
                                                     data-nama="<?= htmlspecialchars($key['NamaIsuStrategis']) ?>" 
                                                     data-tahunmulai="<?= $key['TahunMulai'] ?>" 
                                                     data-tahunakhir="<?= $key['TahunAkhir'] ?>"
+                                                    data-periode="<?= $key['TahunMulai'] . '-' . $key['TahunAkhir'] ?>"
+                                                    data-kementerian="<?= explode("$",$key['_Id'])[0] ?>"
+                                                    data-isu="<?= $key['_Id'] ?>"
                                                     style="width: 36px; height: 36px; padding: 0; border-radius: 50%;">
                                                 <i class="notika-icon notika-next" style="font-size: 15px;"></i>
                                             </button>
@@ -169,11 +195,69 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="form-example-int form-horizental">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Periode Nasional</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <select class="form-control" id="PeriodeIsuStrategisNasional" style="color: #000 !important;">
+                                                    <option value="">-- Pilih Periode --</option>
+                                                    <?php foreach ($PeriodeIsuStrategisNasional as $key) { ?>
+                                                        <option value="<?= $key['TahunMulai'] ?>">
+                                                            <?=$key['TahunMulai'] ?> - <?= $key['TahunAkhir'] ?>
+                                                        </option>
+                                                    <?php } ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-example-int form-horizental">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Kementerian</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <select class="form-control" id="Kementerian" style="color: #000 !important;">
+                                                    <option value="">-- Pilih Kementerian --</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-2">
+                                    <label class="hrzn-fm"><b>Isu Strategis Nasional</b></label>
+                                </div>
+                                <div style="margin-top: 3px;" class="col-lg-9">
+                                    <div class="accordion-stn">
+                                        <div class="panel-group" data-collapse-color="nk-green" id="AccrodionIsuStrategisNasional" role="tablist" aria-multiselectable="true">
+                                            <div class="panel panel-collapse notika-accrodion-cus">
+                                                <div class="panel-heading" role="tab">
+                                                    <b><a data-toggle="collapse" data-parent="#AccrodionIsuStrategisNasional" href="#PilihIsuStrategisNasional" aria-expanded="true">Pilih Isu</a></b>
+                                                </div>
+                                                <div id="PilihIsuStrategisNasional" class="collapse in" role="tabpanel">
+                                                    <div class="panel-body" style="padding-top: 0px;">
+                                                        <div class="nk-int-st text-justify" id="ListIsuStrategisNasional"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="form-example-int">
                                 <div class="row">
                                     <div class="col-lg-2"></div>
                                     <div class="col-lg-9">
-                                        <button class="btn btn-success notika-btn-success" id="InputIsuStrategis"><b>SIMPAN</b></button>
+                                    <button class="btn btn-success notika-btn-success" id="InputIsuStrategis"><b>SIMPAN</b></button>
                                     </div>
                                 </div>
                             </div>
@@ -187,7 +271,7 @@
 
 <!-- Modal Edit Isu Strategis -->
 <div class="modal fade" id="ModalEditIsuStrategis" role="dialog">
-    <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
+    <div class="modal-dialog modal-large" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Edit Isu Strategis</h5>
@@ -213,6 +297,8 @@
                                                         </option>
                                                     <?php } ?>
                                                 </select>
+                                                <input type="hidden" id="EditTahunMulai">
+                                                <input type="hidden" id="EditTahunAkhir">
                                             </div>
                                         </div>
                                     </div>
@@ -228,6 +314,64 @@
                                             <div class="nk-int-st">
                                                 <input type="hidden" id="EditId" name="EditId">
                                                 <input type="text" class="form-control input-sm" id="EditNamaIsuStrategis" name="EditNamaIsuStrategis" style="color: #000;" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-example-int form-horizental">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Periode Nasional</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <select class="form-control" id="EditPeriodeIsuStrategisNasional" style="color: #000 !important;">
+                                                    <option value="">-- Pilih Periode --</option>
+                                                    <?php foreach ($PeriodeIsuStrategisNasional as $key) { ?>
+                                                        <option value="<?= $key['TahunMulai'] ?>">
+                                                            <?=$key['TahunMulai'] ?> - <?= $key['TahunAkhir'] ?>
+                                                        </option>
+                                                    <?php } ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-example-int form-horizental">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label class="hrzn-fm"><b>Kementerian</b></label>
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <div class="nk-int-st">
+                                                <select class="form-control" id="EditKementerian" style="color: #000 !important;">
+                                                    <option value="">-- Pilih Kementerian --</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-2">
+                                    <label class="hrzn-fm"><b>Isu Strategis Nasional</b></label>
+                                </div>
+                                <div style="margin-top: 3px;" class="col-lg-9">
+                                    <div class="accordion-stn">
+                                        <div class="panel-group" data-collapse-color="nk-green" id="EditAccrodionIsuStrategisNasional" role="tablist" aria-multiselectable="true">
+                                            <div class="panel panel-collapse notika-accrodion-cus">
+                                                <div class="panel-heading" role="tab">
+                                                    <b><a data-toggle="collapse" data-parent="#EditAccrodionIsuStrategisNasional" href="#EditPilihIsuStrategisNasional" aria-expanded="true">Pilih Isu</a></b>
+                                                </div>
+                                                <div id="EditPilihIsuStrategisNasional" class="collapse in" role="tabpanel">
+                                                    <div class="panel-body" style="padding-top: 0px;">
+                                                        <div class="nk-int-st text-justify" id="EditListIsuStrategisNasional"></div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -427,88 +571,20 @@
             return options;
         }
 
-        // Add new Permasalahan Pokok dropdown
-        $(document).on('click', '.btn-add-pp', function() {
-            var newRow = $('<div class="form-group pp-row">' +
-                '<div class="row">' +
-                '<div class="col-md-10">' +
-                '<select class="form-control pp-select" name="permasalahan_pokok[]" required>' +
-                '<option value="">Pilih Permasalahan Pokok</option>' +
-                getPermasalahanPokokOptions() +
-                '</select>' +
-                '</div>' +
-                '<div class="col-md-2" style="padding-top: 7px;">' +
-                '<button type="button" class="btn btn-danger btn-remove-pp">' +
-                '<i class="notika-icon notika-trash"></i>' +
-                '</button>' +
-                '</div>' +
-                '</div>' +
-                '</div>');
-            $('#pp-container').append(newRow);
-        });
-
-        // Add new Isu KLHS dropdown
-        $(document).on('click', '.btn-add-klhs', function() {
-            var newRow = $('<div class="form-group klhs-row">' +
-                '<div class="row">' +
-                '<div class="col-md-10">' +
-                '<select class="form-control klhs-select" name="isu_klhs[]" required>' +
-                '<option value="">Pilih Isu KLHS</option>' +
-                getIsuKLHSOptions() +
-                '</select>' +
-                '</div>' +
-                '<div class="col-md-2" style="padding-top: 7px;">' +
-                '<button type="button" class="btn btn-danger btn-remove-klhs">' +
-                '<i class="notika-icon notika-trash"></i>' +
-                '</button>' +
-                '</div>' +
-                '</div>' +
-                '</div>');
-            $('#klhs-container').append(newRow);
-        });
-
-        // Remove Permasalahan Pokok dropdown
-        $(document).on('click', '.btn-remove-pp', function() {
-            if ($('.pp-row').length > 1) {
-                $(this).closest('.pp-row').remove();
+        // Load Kementerian based on selected periode
+        $("#PeriodeIsuStrategisNasional").change(function(){
+            if ($(this).val() == "") {
+                $("#Kementerian").html('<option value="">-- Pilih Kementerian --</option>');
+                $("#ListIsuStrategisNasional").html('');
             } else {
-                alert('Minimal harus ada satu Permasalahan Pokok');
-            }
-        });
-
-        // Remove Isu KLHS dropdown
-        $(document).on('click', '.btn-remove-klhs', function() {
-            if ($('.klhs-row').length > 1) {
-                $(this).closest('.klhs-row').remove();
-            } else {
-                alert('Minimal harus ada satu Isu KLHS');
-            }
-        });
-
-        // Input Isu Strategis
-        $("#InputIsuStrategis").click(function() {
-            if ($("#PeriodeRPJMD").val() === "") {
-                alert('Pilih Periode RPJMD terlebih dahulu!');
-                return;
-            } else if ($("#NamaIsuStrategis").val() === "") {
-                alert('Nama Isu Strategis harus diisi!');
-                return;
-            } else {
-                var Data = {
-                    PeriodeRPJMD: $("#PeriodeRPJMD").val(),
-                    NamaIsuStrategis: $("#NamaIsuStrategis").val(),
-                    '<?= $this->security->get_csrf_token_name() ?>': '<?= $this->security->get_csrf_hash() ?>'
-                };
-                $.post(BaseURL + "Admin/InputIsuStrategis", Data)
+                $.post(BaseURL+"Admin/GetKementerianStrategis", {TahunMulai: $(this).val()})
                     .done(function(Respon) {
-                        if (Respon == '1') {
-                            $('#ModalInputIsuStrategis').modal('hide');
-                            $("#PeriodeRPJMD").val('');
-                            $("#NamaIsuStrategis").val('');
-                            window.location.reload();
-                        } else {
-                            alert(Respon);
+                        var Data = JSON.parse(Respon);
+                        var Kementerian = '<option value="">-- Pilih Kementerian --</option>';
+                        for (let i = 0; i < Data.length; i++) {
+                            Kementerian += '<option value="'+Data[i].Id+'">'+Data[i].NamaKementerian+'</option>';
                         }
+                        $("#Kementerian").html(Kementerian);
                     })
                     .fail(function(xhr, status, error) {
                         alert("Terjadi kesalahan: " + error);
@@ -516,54 +592,223 @@
             }
         });
 
+        // Load Isu Strategis Nasional based on selected Kementerian
+        $("#Kementerian").change(function(){
+            if ($(this).val() == "") {
+                $("#ListIsuStrategisNasional").html('');
+            } else {
+                $.post(BaseURL+"Admin/GetIsuStrategisNasional", {Id: $(this).val()})
+                    .done(function(Respon) {
+                        var Data = JSON.parse(Respon);
+                        var Isu = '';
+                        for (let i = 0; i < Data.length; i++) {
+                            Isu += '<label><input style="margin-top: 10px;" type="checkbox" name="Isu" value="'+Data[i].Id+'"> '+Data[i].NamaIsuStrategis+'</label><br>';
+                        }
+                        $("#ListIsuStrategisNasional").html(Isu);
+                    })
+                    .fail(function(xhr, status, error) {
+                        alert("Terjadi kesalahan: " + error);
+                    });
+            }
+        });
+
+        // Edit Form Functions
+        $("#EditPeriodeIsuStrategisNasional").change(function(){
+            if ($(this).val() == "") {
+                $("#EditKementerian").html('<option value="">-- Pilih Kementerian --</option>');
+                $("#EditListIsuStrategisNasional").html('');
+            } else {
+                $.post(BaseURL+"Admin/GetKementerianStrategis", {TahunMulai: $(this).val()})
+                    .done(function(Respon) {
+                        var Data = JSON.parse(Respon);
+                        var Kementerian = '<option value="">-- Pilih Kementerian --</option>';
+                        for (let i = 0; i < Data.length; i++) {
+                            Kementerian += '<option value="'+Data[i].Id+'">'+Data[i].NamaKementerian+'</option>';
+                        }
+                        $("#EditKementerian").html(Kementerian);
+                    })
+                    .fail(function(xhr, status, error) {
+                        alert("Terjadi kesalahan: " + error);
+                    });
+            }
+        });
+
+        $("#EditKementerian").change(function(){
+            if ($(this).val() == "") {
+                $("#EditListIsuStrategisNasional").html('');
+            } else {
+                $.post(BaseURL+"Admin/GetIsuStrategisNasional", {Id: $(this).val()})
+                    .done(function(Respon) {
+                        var Data = JSON.parse(Respon);
+                        var Isu = '';
+                        for (let i = 0; i < Data.length; i++) {
+                            Isu += '<label><input style="margin-top: 10px;" type="checkbox" name="EditIsu" value="'+Data[i].Id+'"> '+Data[i].NamaIsuStrategis+'</label><br>';
+                        }
+                        $("#EditListIsuStrategisNasional").html(Isu);
+                        
+                        // Check previously selected items
+                        var selectedIsu = $("#EditIsuData").val().split("$");
+                        $("input[name='EditIsu']").each(function() {
+                            if(selectedIsu.includes($(this).val())) {
+                                $(this).prop('checked', true);
+                            }
+                        });
+                    })
+            }
+        });
+
+        // Set tahun saat periode dipilih (Input)
+        $("#PeriodeRPJMD").change(function() {
+            if ($(this).val()) {
+                var years = $(this).val().split('-');
+                $("#TahunMulai").val(years[0]);
+                $("#TahunAkhir").val(years[1]);
+            }
+        });
+
+        // Set tahun saat periode dipilih (Edit)
+        $("#EditPeriodeRPJMD").change(function() {
+            if ($(this).val()) {
+                var years = $(this).val().split('-');
+                $("#EditTahunMulai").val(years[0]);
+                $("#EditTahunAkhir").val(years[1]);
+            }
+        });
+
+        // Input Isu Strategis
+        $("#InputIsuStrategis").click(function() {
+            var IsuStrategisNasional = [];
+            $.each($("input[name='Isu']:checked"), function(){
+                IsuStrategisNasional.push($(this).val());
+            });
+            
+            if ($("#PeriodeRPJMD").val() === "") {
+                alert('Pilih Periode RPJMD terlebih dahulu!');
+                return;
+            } else if ($("#NamaIsuStrategis").val() === "") {
+                alert('Nama Isu Strategis harus diisi!');
+                return;
+            } else if (!IsuStrategisNasional.length) {
+                alert("Pilih minimal satu Isu Strategis Nasional!");
+                return;
+            }
+            
+            var Data = {
+                PeriodeRPJMD: $("#PeriodeRPJMD").val(),
+                NamaIsuStrategis: $("#NamaIsuStrategis").val(),
+                _Id: IsuStrategisNasional.join("$"),
+                '<?= $this->security->get_csrf_token_name() ?>': '<?= $this->security->get_csrf_hash() ?>'
+            };
+            
+            $.post(BaseURL + "Admin/InputIsuStrategis", Data)
+                .done(function(Respon) {
+                    if (Respon == '1') {
+                        $('#ModalInputIsuStrategis').modal('hide');
+                        $("#PeriodeRPJMD").val('');
+                        $("#NamaIsuStrategis").val('');
+                        window.location.reload();
+                    } else {
+                        alert(Respon);
+                    }
+                })
+                .fail(function(xhr, status, error) {
+                    alert("Terjadi kesalahan: " + error);
+                });
+        });
+
         // Edit Isu Strategis
         $(document).on("click", ".Edit", function() {
+            // Get all data attributes
             var id = $(this).data('id');
             var nama = $(this).data('nama');
-            var tahunMulai = $(this).data('tahunmulai');
-            var tahunAkhir = $(this).data('tahunakhir');
+            var tahunmulai = $(this).data('tahunmulai');
+            var tahunakhir = $(this).data('tahunakhir');
+            var periode = $(this).data('periode');
+            var kementerian = $(this).data('kementerian');
+            var isu = $(this).data('isu');
+            
+            // Set basic form values
             $("#EditId").val(id);
             $("#EditNamaIsuStrategis").val(nama);
-            $("#EditPeriodeRPJMD").val(tahunMulai + '-' + tahunAkhir);
+            $("#EditPeriodeRPJMD").val(periode);
+            $("#EditTahunMulai").val(tahunmulai);
+            $("#EditTahunAkhir").val(tahunakhir);
+            
+            // Store the isu data in a hidden field for later use
+            $('<input>').attr({
+                type: 'hidden',
+                id: 'EditIsuData',
+                value: isu
+            }).appendTo('body');
+            
+            // Get additional data for Kementerian and Isu
+            $.post(BaseURL + "Admin/GetPeriodeIsuStrategisNasional", {Id: kementerian})
+                .done(function(Respon) {
+                    var Data = JSON.parse(Respon)[0];
+                    if(Data) {
+                        // Set periode nasional
+                        $("#EditPeriodeIsuStrategisNasional").val(Data.TahunMulai).trigger('change');
+                        
+                        // After Kementerian loads, set the value
+                        setTimeout(function() {
+                            $("#EditKementerian").val(kementerian).trigger('change');
+                        }, 500);
+                    }
+                })
+                .fail(function(xhr, status, error) {
+                    alert("Terjadi kesalahan: " + error);
+                });
+            
             $('#ModalEditIsuStrategis').modal("show");
         });
 
         // Update Isu Strategis
         $("#UpdateIsuStrategis").click(function() {
+            var IsuStrategisNasional = [];
+            $.each($("input[name='EditIsu']:checked"), function(){
+                IsuStrategisNasional.push($(this).val());
+            });
+            
             if ($("#EditPeriodeRPJMD").val() === "") {
                 alert('Pilih Periode RPJMD terlebih dahulu!');
                 return;
             } else if ($("#EditNamaIsuStrategis").val() === "") {
                 alert('Nama Isu Strategis harus diisi!');
                 return;
-            } else {
-                var Data = {
-                    Id: $("#EditId").val(),
-                    EditPeriodeRPJMD: $("#EditPeriodeRPJMD").val(),
-                    NamaIsuStrategis: $("#EditNamaIsuStrategis").val(),
-                    '<?= $this->security->get_csrf_token_name() ?>': '<?= $this->security->get_csrf_hash() ?>'
-                };
-                $.post(BaseURL + "Admin/UpdateIsuStrategis", Data)
-                    .done(function(Respon) {
-                        if (Respon == '1') {
-                            $('#ModalEditIsuStrategis').modal('hide');
-                            $("#EditPeriodeRPJMD").val('');
-                            $("#EditNamaIsuStrategis").val('');
-                            window.location.reload();
-                        } else {
-                            alert(Respon);
-                        }
-                    })
-                    .fail(function(xhr, status, error) {
-                          alert("Terjadi kesalahan: " + error);
-                    });
+            } else if (!IsuStrategisNasional.length) {
+                alert("Pilih minimal satu Isu Strategis Nasional!");
+                return;
             }
+            
+            var Data = {
+                Id: $("#EditId").val(),
+                EditPeriodeRPJMD: $("#EditPeriodeRPJMD").val(),
+                NamaIsuStrategis: $("#EditNamaIsuStrategis").val(),
+                _Id: IsuStrategisNasional.join("$"),
+                '<?= $this->security->get_csrf_token_name() ?>': '<?= $this->security->get_csrf_hash() ?>'
+            };
+            
+            $.post(BaseURL + "Admin/UpdateIsuStrategis", Data)
+                .done(function(Respon) {
+                    if (Respon == '1') {
+                        $('#ModalEditIsuStrategis').modal('hide');
+                        window.location.reload();
+                    } else {
+                        alert(Respon);
+                    }
+                })
+                .fail(function(xhr, status, error) {
+                    alert("Terjadi kesalahan: " + error);
+                });
         });
 
         // Hapus Isu Strategis
         $(document).on("click", ".Hapus", function() {
             if (confirm("Apakah Anda yakin ingin menghapus isu strategis ini?")) {
-                var Id = { Id: $(this).data('id'), '<?= $this->security->get_csrf_token_name() ?>': '<?= $this->security->get_csrf_hash() ?>' };
+                var Id = { 
+                    Id: $(this).data('id'), 
+                    '<?= $this->security->get_csrf_token_name() ?>': '<?= $this->security->get_csrf_hash() ?>' 
+                };
                 $.post(BaseURL + "Admin/DeleteIsuStrategis", Id)
                     .done(function(Respon) {
                         if (Respon == '1') {
@@ -601,6 +846,35 @@
             $("#ModalTambahPP").modal('show');
         });
 
+        // Add new Permasalahan Pokok dropdown
+        $(document).on('click', '.btn-add-pp', function() {
+            var newRow = $('<div class="form-group pp-row">' +
+                '<div class="row">' +
+                '<div class="col-md-10">' +
+                '<select class="form-control pp-select" name="permasalahan_pokok[]" required>' +
+                '<option value="">Pilih Permasalahan Pokok</option>' +
+                getPermasalahanPokokOptions() +
+                '</select>' +
+                '</div>' +
+                '<div class="col-md-2" style="padding-top: 7px;">' +
+                '<button type="button" class="btn btn-danger btn-remove-pp">' +
+                '<i class="notika-icon notika-trash"></i>' +
+                '</button>' +
+                '</div>' +
+                '</div>' +
+                '</div>');
+            $('#pp-container').append(newRow);
+        });
+
+        // Remove Permasalahan Pokok dropdown
+        $(document).on('click', '.btn-remove-pp', function() {
+            if ($('.pp-row').length > 1) {
+                $(this).closest('.pp-row').remove();
+            } else {
+                alert('Minimal harus ada satu Permasalahan Pokok');
+            }
+        });
+
         $("#FormTambahPP").submit(function(e) {
             e.preventDefault();
             var formData = $(this).serializeArray();
@@ -613,6 +887,7 @@
             formData = formData.filter(item => item.name !== 'permasalahan_pokok[]');
             formData.push({name: 'permasalahan_pokok', value: ppValues.join(',')});
             formData.push({name: '<?= $this->security->get_csrf_token_name() ?>', value: '<?= $this->security->get_csrf_hash() ?>'});
+            
             $.post(BaseURL + "Admin/TambahPermasalahanPokokIsuStrategis", $.param(formData))
                 .done(function(res) {
                     if (res == '1') {
@@ -649,6 +924,35 @@
             $("#ModalTambahKLHS").modal('show');
         });
 
+        // Add new Isu KLHS dropdown
+        $(document).on('click', '.btn-add-klhs', function() {
+            var newRow = $('<div class="form-group klhs-row">' +
+                '<div class="row">' +
+                '<div class="col-md-10">' +
+                '<select class="form-control klhs-select" name="isu_klhs[]" required>' +
+                '<option value="">Pilih Isu KLHS</option>' +
+                getIsuKLHSOptions() +
+                '</select>' +
+                '</div>' +
+                '<div class="col-md-2" style="padding-top: 7px;">' +
+                '<button type="button" class="btn btn-danger btn-remove-klhs">' +
+                '<i class="notika-icon notika-trash"></i>' +
+                '</button>' +
+                '</div>' +
+                '</div>' +
+                '</div>');
+            $('#klhs-container').append(newRow);
+        });
+
+        // Remove Isu KLHS dropdown
+        $(document).on('click', '.btn-remove-klhs', function() {
+            if ($('.klhs-row').length > 1) {
+                $(this).closest('.klhs-row').remove();
+            } else {
+                alert('Minimal harus ada satu Isu KLHS');
+            }
+        });
+
         $("#FormTambahKLHS").submit(function(e) {
             e.preventDefault();
             var formData = $(this).serializeArray();
@@ -661,6 +965,7 @@
             formData = formData.filter(item => item.name !== 'isu_klhs[]');
             formData.push({name: 'isu_klhs', value: klhsValues.join(',')});
             formData.push({name: '<?= $this->security->get_csrf_token_name() ?>', value: '<?= $this->security->get_csrf_hash() ?>'});
+            
             $.post(BaseURL + "Admin/TambahIsuKLHSIsuStrategis", $.param(formData))
                 .done(function(res) {
                     if (res == '1') {
@@ -676,12 +981,14 @@
 
         // Edit Permasalahan Pokok
         $(document).on("click", ".EditPP", function() {
-            var data = $(this).data('pp').split("|");
-            $("#IdPP").val(data[0]);
-            var ppList = data[1].split(",");
+            var id = $(this).data('id');
+            var pp = $(this).data('pp');
+            $("#IdPP").val(id);
+            var ppList = pp.split(",");
             var list = '';
-            ppList.forEach(function(pp) {
-                list += '<label><input style="margin-top: 10px;" type="checkbox" checked name="PP" value="' + pp + '"> ' + pp + '</label><br>';
+            permasalahanPokokOptions.forEach(function(option) {
+                var checked = ppList.includes(option.nama) ? 'checked' : '';
+                list += '<label><input style="margin-top: 10px;" type="checkbox" name="PP" value="' + option.nama + '" ' + checked + '> ' + option.nama + '</label><br>';
             });
             $("#ListPP").html(list);
             $("#ModalEditPP").modal('show');
@@ -712,12 +1019,14 @@
 
         // Edit Isu KLHS
         $(document).on("click", ".EditKLHS", function() {
-            var data = $(this).data('klhs').split("|");
-            $("#IdKLHS").val(data[0]);
-            var klhsList = data[1].split(",");
+            var id = $(this).data('id');
+            var klhs = $(this).data('klhs');
+            $("#IdKLHS").val(id);
+            var klhsList = klhs.split(",");
             var list = '';
-            klhsList.forEach(function(klhs) {
-                list += '<label><input style="margin-top: 10px;" type="checkbox" checked name="KLHS" value="' + klhs + '"> ' + klhs + '</label><br>';
+            isuKLHSOptions.forEach(function(option) {
+                var checked = klhsList.includes(option.nama) ? 'checked' : '';
+                list += '<label><input style="margin-top: 10px;" type="checkbox" name="KLHS" value="' + option.nama + '" ' + checked + '> ' + option.nama + '</label><br>';
             });
             $("#ListKLHS").html(list);
             $("#ModalEditKLHS").modal('show');
@@ -746,16 +1055,22 @@
                 });
         });
 
-        // Reset modals
+        // Reset modals when closed
         $('#ModalInputIsuStrategis').on('hidden.bs.modal', function() {
             $("#PeriodeRPJMD").val('');
             $("#NamaIsuStrategis").val('');
+            $("#PeriodeIsuStrategisNasional").val('');
+            $("#Kementerian").html('<option value="">-- Pilih Kementerian --</option>');
+            $("#ListIsuStrategisNasional").html('');
         });
 
         $('#ModalEditIsuStrategis').on('hidden.bs.modal', function() {
             $("#EditPeriodeRPJMD").val('');
             $("#EditNamaIsuStrategis").val('');
-            $("#EditId").val('');
+            $("#EditPeriodeIsuStrategisNasional").val('');
+            $("#EditKementerian").html('<option value="">-- Pilih Kementerian --</option>');
+            $("#EditListIsuStrategisNasional").html('');
+            $("#EditIsuData").remove();
         });
 
         $('#ModalTambahPP').on('hidden.bs.modal', function() {
@@ -767,6 +1082,16 @@
             $("#klhs-container").html('');
             $("#KLHSId").val('');
         });
+
+        $('#ModalEditPP').on('hidden.bs.modal', function() {
+            $("#ListPP").html('');
+            $("#IdPP").val('');
+        });
+
+        $('#ModalEditKLHS').on('hidden.bs.modal', function() {
+            $("#ListKLHS").html('');
+            $("#IdKLHS").val('');
+        });
     });
 </script>
 
@@ -776,5 +1101,18 @@
     }
     .modal-content {
         color: #000;
+    }
+    .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+        margin-left: 10px;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
     }
 </style>

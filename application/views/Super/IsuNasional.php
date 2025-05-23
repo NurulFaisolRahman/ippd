@@ -16,8 +16,8 @@
                             <thead>
                                 <tr>
                                     <th class="text-center">No</th>
-                                    <th>Nama Kementerian</th>
-                                    <th>Nama Isu Nasional</th>
+                                    <th>Kementerian</th>
+                                    <th>Isu Nasional</th>
                                     <th>Periode</th>
                                     <th>Aksi</th>
                                 </tr>

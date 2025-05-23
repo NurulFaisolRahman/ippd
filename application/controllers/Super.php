@@ -987,55 +987,178 @@ public function UpdateKementerian() {
         return;
     }
 
-    $data = [
-        'NamaKementerian' => $this->input->post('NamaKementerian'),
-        'TahunMulai' => $TahunMulai,
-        'TahunAkhir' => $TahunAkhir,
-        'edited_at' => date('Y-m-d H:i:s')
-    ];
-    $this->db->where('Id', $this->input->post('Id'));
-    $this->db->update('kementerian', $data);
-    echo $this->db->affected_rows() ? '1' : 'Gagal Update Data!';
-}
+      $data = [
+          'NamaKementerian' => $this->input->post('NamaKementerian'),
+          'TahunMulai' => $TahunMulai,
+          'TahunAkhir' => $TahunAkhir,
+          'edited_at' => date('Y-m-d H:i:s')
+      ];
+      $this->db->where('Id', $this->input->post('Id'));
+      $this->db->update('kementerian', $data);
+      echo $this->db->affected_rows() ? '1' : 'Gagal Update Data!';
+  }
 
-public function DeleteKementerian() {
-    $data = [
-        'deleted_at' => date('Y-m-d H:i:s')
-    ];
-    $this->db->where('Id', $this->input->post('Id'));
-    $this->db->update('kementerian', $data);
-    echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
-}
+  public function DeleteKementerian() {
+      $data = [
+          'deleted_at' => date('Y-m-d H:i:s')
+      ];
+      $this->db->where('Id', $this->input->post('Id'));
+      $this->db->update('kementerian', $data);
+      echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
+  }
 
-  public function IsuStrategis() {
+ public function IsuStrategis() {
     $Header['Halaman'] = 'Isu';
     
-    // Query dengan JOIN ke tabel kementerian untuk Isu Strategis
     $Data['IsuStrategis'] = $this->db->query("
-        SELECT ist.*, k.NamaKementerian 
+        SELECT 
+            ist.*, 
+            IFNULL(k.NamaKementerian, '-') AS NamaKementerian,
+            (SELECT GROUP_CONCAT(NamaIsuKLHS SEPARATOR ', ') 
+             FROM isu_klhs 
+             WHERE FIND_IN_SET(Id, ist.IdIsuKLHS)) AS NamaIsuKLHS,
+            (SELECT GROUP_CONCAT(NamaIsuGlobal SEPARATOR ', ') 
+             FROM isu_global 
+             WHERE FIND_IN_SET(Id, ist.IdIsuGlobal)) AS NamaIsuGlobal,
+            (SELECT GROUP_CONCAT(NamaIsuNasional SEPARATOR ', ') 
+             FROM isu_nasional 
+             WHERE FIND_IN_SET(Id, ist.IdIsuNasional)) AS NamaIsuNasional,
+            (SELECT GROUP_CONCAT(NamaPermasalahanPokok SEPARATOR ', ') 
+             FROM permasalahan_pokok 
+             WHERE FIND_IN_SET(Id, ist.IdPermasalahanPokok)) AS NamaPermasalahanPokok
         FROM isu_strategis ist
         LEFT JOIN kementerian k ON ist.IdKementerian = k.Id
         WHERE ist.deleted_at IS NULL
+        GROUP BY ist.Id
+        ORDER BY ist.TahunMulai DESC, ist.TahunAkhir DESC
     ")->result_array();
     
-    // Ambil data kementerian untuk dropdown
-    $Data['Kementerian'] = $this->db->get_where('kementerian', ['deleted_at' => NULL])->result_array();
-    
-    // Ambil data periode unik dari kementerian
     $Data['Periode'] = $this->db->query("
         SELECT DISTINCT TahunMulai, TahunAkhir
         FROM kementerian
         WHERE deleted_at IS NULL
-        ORDER BY TahunMulai ASC
+        UNION
+        SELECT DISTINCT TahunMulai, TahunAkhir
+        FROM isu_strategis
+        WHERE deleted_at IS NULL
+        UNION
+        SELECT DISTINCT TahunMulai, TahunAkhir
+        FROM permasalahan_pokok
+        WHERE deleted_at IS NULL
+        ORDER BY TahunMulai DESC, TahunAkhir DESC
     ")->result_array();
     
     $this->load->view('Super/header', $Header);
     $this->load->view('Super/IsuStrategis', $Data);
 }
 
+public function GetKementerianByPeriode() {
+    $TahunMulai = $this->input->post('TahunMulai');
+    $TahunAkhir = $this->input->post('TahunAkhir');
+    
+    $this->db->where('TahunMulai', $TahunMulai);
+    $this->db->where('TahunAkhir', $TahunAkhir);
+    $this->db->where('deleted_at', NULL);
+    $Kementerian = $this->db->get('kementerian')->result_array();
+    
+    echo json_encode($Kementerian);
+}
+
+public function GetIsuByPeriode() {
+    $TahunMulai = $this->input->post('TahunMulai');
+    $TahunAkhir = $this->input->post('TahunAkhir');
+    $Jenis = $this->input->post('Jenis');
+    
+    $table = '';
+    switch($Jenis) {
+        case 'KLHS': $table = 'isu_klhs'; break;
+        case 'Global': $table = 'isu_global'; break;
+        case 'Nasional': $table = 'isu_nasional'; break;
+        default: echo json_encode([]); return;
+    }
+    
+    $this->db->where('TahunMulai', $TahunMulai);
+    $this->db->where('TahunAkhir', $TahunAkhir);
+    $this->db->where('deleted_at', NULL);
+    $Data = $this->db->get($table)->result_array();
+    
+    echo json_encode($Data);
+}
+
+public function GetPermasalahanByPeriode() {
+    $TahunMulai = $this->input->post('TahunMulai');
+    $TahunAkhir = $this->input->post('TahunAkhir');
+    
+    $this->db->where('TahunMulai', $TahunMulai);
+    $this->db->where('TahunAkhir', $TahunAkhir);
+    $this->db->where('deleted_at', NULL);
+    $Data = $this->db->get('permasalahan_pokok')->result_array();
+    
+    echo json_encode($Data);
+}
+
+public function GetIsuByIds() {
+    $Ids = $this->input->post('Ids');
+    $Jenis = $this->input->post('Jenis');
+    $TahunMulai = $this->input->post('TahunMulai');
+    $TahunAkhir = $this->input->post('TahunAkhir');
+    
+    $table = '';
+    switch($Jenis) {
+        case 'KLHS': $table = 'isu_klhs'; break;
+        case 'Global': $table = 'isu_global'; break;
+        case 'Nasional': $table = 'isu_nasional'; break;
+        default: echo json_encode([]); return;
+    }
+    
+    if ($Ids) {
+        $this->db->where('TahunMulai', $TahunMulai);
+        $this->db->where('TahunAkhir', $TahunAkhir);
+        $this->db->where('deleted_at', NULL);
+        $this->db->where_in('Id', explode(',', $Ids));
+        $Data = $this->db->get($table)->result_array();
+        
+        echo json_encode($Data);
+    } else {
+        echo json_encode([]);
+    }
+}
+
+public function GetPermasalahanByIds() {
+    $Ids = $this->input->post('Ids');
+    $TahunMulai = $this->input->post('TahunMulai');
+    $TahunAkhir = $this->input->post('TahunAkhir');
+    
+    $this->db->where('TahunMulai', $TahunMulai);
+    $this->db->where('TahunAkhir', $TahunAkhir);
+    $this->db->where('deleted_at', NULL);
+    $this->db->where_in('Id', explode(',', $Ids));
+    $Data = $this->db->get('permasalahan_pokok')->result_array();
+    
+    echo json_encode($Data);
+}
+
 public function InputIsuStrategis() {
+    $this->load->library('form_validation');
+    $this->form_validation->set_rules('IdKementerian', 'Kementerian', 'required');
+    $this->form_validation->set_rules('NamaIsuStrategis', 'Nama Isu Strategis', 'required');
+    
+    if ($this->form_validation->run() == FALSE) {
+        echo validation_errors();
+        return;
+    }
+    
+    $IdIsuKLHS = $this->input->post('IdIsuKLHS') ? array_filter($this->input->post('IdIsuKLHS')) : [];
+    $IdIsuGlobal = $this->input->post('IdIsuGlobal') ? array_filter($this->input->post('IdIsuGlobal')) : [];
+    $IdIsuNasional = $this->input->post('IdIsuNasional') ? array_filter($this->input->post('IdIsuNasional')) : [];
+    $IdPermasalahanPokok = $this->input->post('IdPermasalahanPokok') ? array_filter($this->input->post('IdPermasalahanPokok')) : [];
+    
     $data = [
         'IdKementerian' => $this->input->post('IdKementerian'),
+        'IdIsuKLHS' => implode(',', $IdIsuKLHS),
+        'IdIsuGlobal' => implode(',', $IdIsuGlobal),
+        'IdIsuNasional' => implode(',', $IdIsuNasional),
+        'IdPermasalahanPokok' => implode(',', $IdPermasalahanPokok),
         'NamaIsuStrategis' => $this->input->post('NamaIsuStrategis'),
         'TahunMulai' => $this->input->post('TahunMulai'),
         'TahunAkhir' => $this->input->post('TahunAkhir'),
@@ -1047,10 +1170,29 @@ public function InputIsuStrategis() {
 }
 
 public function UpdateIsuStrategis() {
+    $this->load->library('form_validation');
+    $this->form_validation->set_rules('Id', 'ID Isu', 'required');
+    $this->form_validation->set_rules('IdKementerian', 'Kementerian', 'required');
+    $this->form_validation->set_rules('NamaIsuStrategis', 'Nama Isu Strategis', 'required');
+    $this->form_validation->set_rules('TahunMulai', 'Tahun Mulai', 'required');
+    $this->form_validation->set_rules('TahunAkhir', 'Tahun Akhir', 'required');
+    
+    if ($this->form_validation->run() == FALSE) {
+        echo validation_errors();
+        return;
+    }
+    
+    $IdIsuKLHS = $this->input->post('IdIsuKLHS') ? array_filter($this->input->post('IdIsuKLHS')) : [];
+    $IdIsuGlobal = $this->input->post('IdIsuGlobal') ? array_filter($this->input->post('IdIsuGlobal')) : [];
+    $IdIsuNasional = $this->input->post('IdIsuNasional') ? array_filter($this->input->post('IdIsuNasional')) : [];
+    $IdPermasalahanPokok = $this->input->post('IdPermasalahanPokok') ? array_filter($this->input->post('IdPermasalahanPokok')) : [];
+    
     $data = [
-        'IdKementerian'
-
-=> $this->input->post('IdKementerian'),
+        'IdKementerian' => $this->input->post('IdKementerian'),
+        'IdIsuKLHS' => implode(',', $IdIsuKLHS),
+        'IdIsuGlobal' => implode(',', $IdIsuGlobal),
+        'IdIsuNasional' => implode(',', $IdIsuNasional),
+        'IdPermasalahanPokok' => implode(',', $IdPermasalahanPokok),
         'NamaIsuStrategis' => $this->input->post('NamaIsuStrategis'),
         'TahunMulai' => $this->input->post('TahunMulai'),
         'TahunAkhir' => $this->input->post('TahunAkhir'),
@@ -1062,31 +1204,103 @@ public function UpdateIsuStrategis() {
     echo $this->db->affected_rows() ? '1' : 'Gagal Update Data!';
 }
 
-public function DeleteIsuStrategis() {
-    $_POST['deleted_at'] = date('Y-m-d H:i:s');
-    $this->db->where('Id', $_POST['Id']);
-    $this->db->update('isu_strategis', $_POST);
-    if ($this->db->affected_rows()) {
-        echo '1';
-    } else {
-        echo 'Gagal Hapus Data!';
+public function UpdateIsuKLHSForStrategis() {
+    $this->load->library('form_validation');
+    $this->form_validation->set_rules('Id', 'ID Isu', 'required');
+    
+    if ($this->form_validation->run() == FALSE) {
+        echo validation_errors();
+        return;
     }
+    
+    $IdIsuKLHS = $this->input->post('IdIsuKLHS') ? array_filter($this->input->post('IdIsuKLHS')) : [];
+    
+    $data = [
+        'IdIsuKLHS' => implode(',', $IdIsuKLHS),
+        'edited_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->where('Id', $this->input->post('Id'));
+    $this->db->update('isu_strategis', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Update Isu KLHS!';
 }
 
-// New method to fetch Kementerian by period
-public function GetKementerianByPeriode() {
-    $TahunMulai = $this->input->post('TahunMulai');
-    $TahunAkhir = $this->input->post('TahunAkhir');
+public function UpdateIsuGlobalForStrategis() {
+    $this->load->library('form_validation');
+    $this->form_validation->set_rules('Id', 'ID Isu', 'required');
     
-    $Kementerian = $this->db->query("
-        SELECT Id, NamaKementerian
-        FROM kementerian
-        WHERE TahunMulai = ? AND TahunAkhir = ? AND deleted_at IS NULL
-    ", [$TahunMulai, $TahunAkhir])->result_array();
+    if ($this->form_validation->run() == FALSE) {
+        echo validation_errors();
+        return;
+    }
     
-    echo json_encode($Kementerian);
+    $IdIsuGlobal = $this->input->post('IdIsuGlobal') ? array_filter($this->input->post('IdIsuGlobal')) : [];
+    
+    $data = [
+        'IdIsuGlobal' => implode(',', $IdIsuGlobal),
+        'edited_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->where('Id', $this->input->post('Id'));
+    $this->db->update('isu_strategis', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Update Isu Global!';
 }
 
+public function UpdateIsuNasionalForStrategis() {
+    $this->load->library('form_validation');
+    $this->form_validation->set_rules('Id', 'ID Isu', 'required');
+    
+    if ($this->form_validation->run() == FALSE) {
+        echo validation_errors();
+        return;
+    }
+    
+    $IdIsuNasional = $this->input->post('IdIsuNasional') ? array_filter($this->input->post('IdIsuNasional')) : [];
+    
+    $data = [
+        'IdIsuNasional' => implode(',', $IdIsuNasional),
+        'edited_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->where('Id', $this->input->post('Id'));
+    $this->db->update('isu_strategis', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Update Isu Nasional!';
+}
+
+public function UpdatePermasalahanForStrategis() {
+    $this->load->library('form_validation');
+    $this->form_validation->set_rules('Id', 'ID Isu', 'required');
+    
+    if ($this->form_validation->run() == FALSE) {
+        echo validation_errors();
+        return;
+    }
+    
+    $IdPermasalahanPokok = $this->input->post('IdPermasalahanPokok') ? array_filter($this->input->post('IdPermasalahanPokok')) : [];
+    
+    $data = [
+        'IdPermasalahanPokok' => implode(',', $IdPermasalahanPokok),
+        'edited_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->where('Id', $this->input->post('Id'));
+    $this->db->update('isu_strategis', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Update Permasalahan Pokok!';
+}
+
+public function DeleteIsuStrategis() {
+    $this->load->library('form_validation');
+    $this->form_validation->set_rules('Id', 'ID Isu', 'required');
+    
+    if ($this->form_validation->run() == FALSE) {
+        echo validation_errors();
+        return;
+    }
+    
+    $this->db->where('Id', $this->input->post('Id'));
+    $this->db->update('isu_strategis', ['deleted_at' => date('Y-m-d H:i:s')]);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
+}
 
 public function SPM() {
   $Header['Halaman'] = 'Kementerian';
@@ -1164,165 +1378,221 @@ public function DeleteSPM() {
 
 
 public function ProyekStrategis() {
-  $Header['Halaman'] = 'Kementerian';
-  
-  // Query dengan JOIN ke tabel kementerian dan program_strategis
-  $Data['Proyek'] = $this->db->query("
-      SELECT p.*, k.NamaKementerian, ps.NamaProgram
-      FROM proyek_strategis p
-      LEFT JOIN kementerian k ON p.IdKementerian = k.Id
-      LEFT JOIN program_strategis ps ON p.IdProgramStrategis = ps.Id
-      WHERE p.deleted_at IS NULL
-  ")->result_array();
-  
-  // Ambil data kementerian untuk dropdown
-  $Data['Kementerian'] = $this->db->get_where('kementerian', ['deleted_at' => NULL])->result_array();
-  
-  // Ambil data periode unik dari kementerian
-  $Data['Periode'] = $this->db->query("
-      SELECT DISTINCT TahunMulai, TahunAkhir 
-      FROM kementerian 
-      WHERE deleted_at IS NULL
-      ORDER BY TahunMulai DESC
-  ")->result_array();
-  
-  $this->load->view('Super/header', $Header);
-  $this->load->view('Super/ProyekStrategis', $Data);
+    $Header['Halaman'] = 'Kementerian';
+    
+    // Get proyek data with kementerian, program, and location information
+    $Data['Proyek'] = $this->db->query("
+        SELECT p.*, 
+               k.NamaKementerian, 
+               ps.NamaProgram,
+               COALESCE(p.NamaProvinsi, ps_prov.Nama, '-') AS NamaProvinsi,
+               COALESCE(p.NamaKota, ps_kota.Nama, '-') AS NamaKota,
+               COALESCE(p.KodeWilayah, ps.KodeWilayah) AS KodeWilayah,
+               COALESCE(p.KodeKota, ps.KodeKota) AS KodeKota
+        FROM proyek_strategis p
+        LEFT JOIN kementerian k ON p.IdKementerian = k.Id
+        LEFT JOIN program_strategis ps ON p.IdProgramStrategis = ps.Id
+        LEFT JOIN kodewilayah ps_prov ON ps.KodeWilayah = ps_prov.Kode AND LENGTH(ps_prov.Kode) = 2
+        LEFT JOIN kodewilayah ps_kota ON ps.KodeKota = ps_kota.Kode
+        WHERE p.deleted_at IS NULL
+        ORDER BY p.TahunMulai DESC, p.TahunAkhir DESC
+    ")->result_array();
+    
+    // Get provinces for dropdown
+    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
+    // Get kementerian for dropdown
+    $Data['Kementerian'] = $this->db->get_where('kementerian', ['deleted_at' => NULL])->result_array();
+    
+    // Get unique periods from kementerian
+    $Data['Periode'] = $this->db->query("
+        SELECT DISTINCT TahunMulai, TahunAkhir
+        FROM kementerian
+        WHERE deleted_at IS NULL
+        ORDER BY TahunMulai
+    ")->result_array();
+    
+    $this->load->view('Super/header', $Header);
+    $this->load->view('Super/ProyekStrategis', $Data);
 }
 
 public function GetProgramByKementerianAndPeriode() {
-  $TahunMulai = $this->input->post('TahunMulai');
-  $TahunAkhir = $this->input->post('TahunAkhir');
-  $IdKementerian = $this->input->post('IdKementerian');
-  $data = $this->db->query("
-      SELECT Id, NamaProgram 
-      FROM program_strategis 
-      WHERE IdKementerian = ? 
-      AND TahunMulai = ? 
-      AND TahunAkhir = ? 
-      AND deleted_at IS NULL
-  ", [$IdKementerian, $TahunMulai, $TahunAkhir])->result_array();
-  echo json_encode($data);
+    $TahunMulai = $this->input->post('TahunMulai');
+    $TahunAkhir = $this->input->post('TahunAkhir');
+    $IdKementerian = $this->input->post('IdKementerian');
+    
+    $data = $this->db->query("
+        SELECT ps.Id, ps.NamaProgram, 
+               COALESCE(kw_prov.Nama, '-') AS NamaProvinsi,
+               COALESCE(kw_kota.Nama, '-') AS NamaKota,
+               ps.KodeWilayah, ps.KodeKota
+        FROM program_strategis ps
+        LEFT JOIN kodewilayah kw_prov ON ps.KodeWilayah = kw_prov.Kode AND LENGTH(kw_prov.Kode) = 2
+        LEFT JOIN kodewilayah kw_kota ON ps.KodeKota = kw_kota.Kode
+        WHERE ps.IdKementerian = ? 
+        AND ps.TahunMulai = ? 
+        AND ps.TahunAkhir = ? 
+        AND ps.deleted_at IS NULL
+    ", [$IdKementerian, $TahunMulai, $TahunAkhir])->result_array();
+    
+    echo json_encode($data);
 }
 
+
+
 public function InputProyek() {
-  $data = [
-      'IdKementerian' => $this->input->post('IdKementerian'),
-      'IdProgramStrategis' => $this->input->post('IdProgramStrategis'),
-      'NamaProyek' => $this->input->post('NamaProyek'),
-      'TahunMulai' => $this->input->post('TahunMulai'),
-      'TahunAkhir' => $this->input->post('TahunAkhir'),
-      'TargetTahun1' => $this->input->post('TargetTahun1'),
-      'TargetTahun2' => $this->input->post('TargetTahun2'),
-      'TargetTahun3' => $this->input->post('TargetTahun3'),
-      'TargetTahun4' => $this->input->post('TargetTahun4'),
-      'TargetTahun5' => $this->input->post('TargetTahun5'),
-      'created_at' => date('Y-m-d H:i:s')
-  ];
-  
-  $this->db->insert('proyek_strategis', $data);
-  echo $this->db->affected_rows() ? '1' : 'Gagal Input Data!';
+    // Get program data to include location if not overridden
+    $program = $this->db->get_where('program_strategis', ['Id' => $this->input->post('IdProgramStrategis')])->row();
+    
+    $data = [
+        'IdKementerian' => $this->input->post('IdKementerian'),
+        'IdProgramStrategis' => $this->input->post('IdProgramStrategis'),
+        'KodeWilayah' => $this->input->post('KodeWilayah') ?: $program->KodeWilayah,
+        'KodeKota' => $this->input->post('KodeKota') ?: $program->KodeKota,
+        'NamaProvinsi' => $this->input->post('NamaProvinsi') ?: null,
+        'NamaKota' => $this->input->post('NamaKota') ?: null,
+        'NamaProyek' => $this->input->post('NamaProyek'),
+        'TahunMulai' => $this->input->post('TahunMulai'),
+        'TahunAkhir' => $this->input->post('TahunAkhir'),
+        'TargetTahun1' => $this->input->post('TargetTahun1'),
+        'TargetTahun2' => $this->input->post('TargetTahun2'),
+        'TargetTahun3' => $this->input->post('TargetTahun3'),
+        'TargetTahun4' => $this->input->post('TargetTahun4'),
+        'TargetTahun5' => $this->input->post('TargetTahun5'),
+        'created_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->insert('proyek_strategis', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Input Data!';
 }
 
 public function UpdateProyek() {
-  $data = [
-      'IdKementerian' => $this->input->post('IdKementerian'),
-      'IdProgramStrategis' => $this->input->post('IdProgramStrategis'),
-      'NamaProyek' => $this->input->post('NamaProyek'),
-      'TahunMulai' => $this->input->post('TahunMulai'),
-      'TahunAkhir' => $this->input->post('TahunAkhir'),
-      'TargetTahun1' => $this->input->post('TargetTahun1'),
-      'TargetTahun2' => $this->input->post('TargetTahun2'),
-      'TargetTahun3' => $this->input->post('TargetTahun3'),
-      'TargetTahun4' => $this->input->post('TargetTahun4'),
-      'TargetTahun5' => $this->input->post('TargetTahun5'),
-      'edited_at' => date('Y-m-d H:i:s')
-  ];
-  
-  $this->db->where('Id', $this->input->post('Id'));
-  $this->db->update('proyek_strategis', $data);
-  echo $this->db->affected_rows() ? '1' : 'Gagal Update Data!';
+    $data = [
+        'IdKementerian' => $this->input->post('IdKementerian'),
+        'IdProgramStrategis' => $this->input->post('IdProgramStrategis'),
+        'KodeWilayah' => $this->input->post('KodeWilayah'),
+        'KodeKota' => $this->input->post('KodeKota'),
+        'NamaProvinsi' => $this->input->post('NamaProvinsi'),
+        'NamaKota' => $this->input->post('NamaKota'),
+        'NamaProyek' => $this->input->post('NamaProyek'),
+        'TahunMulai' => $this->input->post('TahunMulai'),
+        'TahunAkhir' => $this->input->post('TahunAkhir'),
+        'TargetTahun1' => $this->input->post('TargetTahun1'),
+        'TargetTahun2' => $this->input->post('TargetTahun2'),
+        'TargetTahun3' => $this->input->post('TargetTahun3'),
+        'TargetTahun4' => $this->input->post('TargetTahun4'),
+        'TargetTahun5' => $this->input->post('TargetTahun5'),
+        'edited_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->where('Id', $this->input->post('Id'));
+    $this->db->update('proyek_strategis', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Update Data!';
 }
 
 public function DeleteProyek() {
-  $data = ['deleted_at' => date('Y-m-d H:i:s')];
-  $this->db->where('Id', $this->input->post('Id'));
-  $this->db->update('proyek_strategis', $data);
-  echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
+    $data = ['deleted_at' => date('Y-m-d H:i:s')];
+    $this->db->where('Id', $this->input->post('Id'));
+    $this->db->update('proyek_strategis', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
 }
 
 
 public function ProgramStrategis() {
-  $Header['Halaman'] = 'Kementerian';
+    $Header['Halaman'] = 'Kementerian';
+    
+    // Get program data with province and kementerian information
+    $Data['Program'] = $this->db->query("
+    SELECT ps.Id, ps.IdKementerian, ps.NamaProgram, ps.KodeWilayah, ps.KodeKota, 
+           ps.TahunMulai, ps.TahunAkhir, ps.TargetTahun1, ps.TargetTahun2, 
+           ps.TargetTahun3, ps.TargetTahun4, ps.TargetTahun5,
+           k.NamaKementerian, 
+           COALESCE(kw_prov.Nama, '-') AS NamaProvinsi,
+           COALESCE(kw_kota.Nama, '-') AS NamaKota
+    FROM program_strategis ps
+    LEFT JOIN kementerian k ON ps.IdKementerian = k.Id
+    LEFT JOIN kodewilayah kw_prov ON ps.KodeWilayah = kw_prov.Kode AND LENGTH(kw_prov.Kode) = 2
+    LEFT JOIN kodewilayah kw_kota ON ps.KodeKota = kw_kota.Kode
+    WHERE ps.deleted_at IS NULL
+    ORDER BY ps.TahunMulai DESC, ps.TahunAkhir DESC
+")->result_array();
   
-  // Query dengan JOIN ke tabel kementerian
-  $Data['Program'] = $this->db->query("
-      SELECT p.*, k.NamaKementerian 
-      FROM program_strategis p
-      LEFT JOIN kementerian k ON p.IdKementerian = k.Id
-      WHERE p.deleted_at IS NULL
-  ")->result_array();
-  
-  // Ambil data kementerian untuk dropdown
-  $Data['Kementerian'] = $this->db->get_where('kementerian', ['deleted_at' => NULL])->result_array();
-  
-  // Ambil data periode unik dari kementerian
-  $Data['Periode'] = $this->db->query("
-      SELECT DISTINCT TahunMulai, TahunAkhir
-      FROM kementerian
-      WHERE deleted_at IS NULL
-      ORDER BY TahunMulai
-  ")->result_array();
-  
-  $this->load->view('Super/header', $Header);
-  $this->load->view('Super/ProgramStrategis', $Data);
+    
+    // Get provinces for dropdown
+    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
+    // Get kementerian for dropdown
+    $Data['Kementerian'] = $this->db->get_where('kementerian', ['deleted_at' => NULL])->result_array();
+    
+    // Get unique periods from kementerian
+    $Data['Periode'] = $this->db->query("
+        SELECT DISTINCT TahunMulai, TahunAkhir
+        FROM kementerian
+        WHERE deleted_at IS NULL
+        ORDER BY TahunMulai
+    ")->result_array();
+    
+    $this->load->view('Super/header', $Header);
+    $this->load->view('Super/ProgramStrategis', $Data);
+}
+
+public function GetKotaByProvinsi() {
+    $kode_provinsi = $this->input->post('kode_provinsi');
+    $kota = $this->db->where("Kode LIKE '$kode_provinsi.__'")
+                    ->where('LENGTH(REPLACE(Kode, \'.\', \'\')) = 4')
+                    ->order_by('Nama')
+                    ->get('kodewilayah')
+                    ->result_array();
+    echo json_encode($kota);
 }
 
 public function InputProgram() {
-  $data = [
-      'IdKementerian' => $this->input->post('IdKementerian'),
-      'NamaProgram' => $this->input->post('NamaProgram'),
-      'TahunMulai' => $this->input->post('TahunMulai'),
-      'TahunAkhir' => $this->input->post('TahunAkhir'),
-      'TargetTahun1' => $this->input->post('TargetTahun1'),
-      'TargetTahun2' => $this->input->post('TargetTahun2'),
-      'TargetTahun3' => $this->input->post('TargetTahun3'),
-      'TargetTahun4' => $this->input->post('TargetTahun4'),
-      'TargetTahun5' => $this->input->post('TargetTahun5'),
-      'created_at' => date('Y-m-d H:i:s')
-  ];
-  
-  $this->db->insert('program_strategis', $data);
-  echo $this->db->affected_rows() ? '1' : 'Gagal Input Data!';
+    $data = [
+        'IdKementerian' => $this->input->post('IdKementerian'),
+        'KodeWilayah' => $this->input->post('KodeWilayah'),
+        'KodeKota' => $this->input->post('KodeKota'),
+        'NamaProgram' => $this->input->post('NamaProgram'),
+        'TahunMulai' => $this->input->post('TahunMulai'),
+        'TahunAkhir' => $this->input->post('TahunAkhir'),
+        'TargetTahun1' => $this->input->post('TargetTahun1'),
+        'TargetTahun2' => $this->input->post('TargetTahun2'),
+        'TargetTahun3' => $this->input->post('TargetTahun3'),
+        'TargetTahun4' => $this->input->post('TargetTahun4'),
+        'TargetTahun5' => $this->input->post('TargetTahun5'),
+        'created_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->insert('program_strategis', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Input Data!';
 }
 
 public function UpdateProgram() {
-  $data = [
-      'IdKementerian' => $this->input->post('IdKementerian'),
-      'NamaProgram' => $this->input->post('NamaProgram'),
-      'TahunMulai' => $this->input->post('TahunMulai'),
-      'TahunAkhir' => $this->input->post('TahunAkhir'),
-      'TargetTahun1' => $this->input->post('TargetTahun1'),
-      'TargetTahun2' => $this->input->post('TargetTahun2'),
-      'TargetTahun3' => $this->input->post('TargetTahun3'),
-      'TargetTahun4' => $this->input->post('TargetTahun4'),
-      'TargetTahun5' => $this->input->post('TargetTahun5'),
-      'edited_at' => date('Y-m-d H:i:s')
-  ];
-  
-  $this->db->where('Id', $this->input->post('Id'));
-  $this->db->update('program_strategis', $data);
-  echo $this->db->affected_rows() ? '1' : 'Gagal Update Data!';
+    $data = [
+        'IdKementerian' => $this->input->post('IdKementerian'),
+        'KodeWilayah' => $this->input->post('KodeWilayah'),
+        'KodeKota' => $this->input->post('KodeKota'),
+        'NamaProgram' => $this->input->post('NamaProgram'),
+        'TahunMulai' => $this->input->post('TahunMulai'),
+        'TahunAkhir' => $this->input->post('TahunAkhir'),
+        'TargetTahun1' => $this->input->post('TargetTahun1'),
+        'TargetTahun2' => $this->input->post('TargetTahun2'),
+        'TargetTahun3' => $this->input->post('TargetTahun3'),
+        'TargetTahun4' => $this->input->post('TargetTahun4'),
+        'TargetTahun5' => $this->input->post('TargetTahun5'),
+        'edited_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->where('Id', $this->input->post('Id'));
+    $this->db->update('program_strategis', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Update Data!';
 }
+
+
 
 public function DeleteProgram() {
-  $data = ['deleted_at' => date('Y-m-d H:i:s')];
-  $this->db->where('Id', $this->input->post('Id'));
-  $this->db->update('program_strategis', $data);
-  echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
+    $data = ['deleted_at' => date('Y-m-d H:i:s')];
+    $this->db->where('Id', $this->input->post('Id'));
+    $this->db->update('program_strategis', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
 }
-
-
     public function PermasalahanPokok() {
       $Header['Halaman'] = 'Isu';
       
