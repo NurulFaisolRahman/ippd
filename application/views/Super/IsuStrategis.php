@@ -169,7 +169,7 @@
                                             <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" 
                                                     data-edit="<?= $key['Id'] . '|' . $key['IdKementerian'] . '|' . $key['NamaIsuStrategis'] . '|' . $key['IdIsuKLHS'] . '|' . $key['IdIsuGlobal'] . '|' . $key['IdIsuNasional'] . '|' . $key['TahunMulai'] . '|' . $key['TahunAkhir'] ?>"
                                                     style="width: 36px; height: 36px; padding: 0; border-radius: 50%;">
-                                                <i class="notika-icon notika-next"></i>
+                                                <i class="notika-icon notika-edit"></i>
                                             </button>
                                             <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" 
                                                     data-hapus="<?= $key['Id'] ?>"

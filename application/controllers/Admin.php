@@ -713,6 +713,63 @@ public function GetSasaranByPeriod() {
   echo json_encode($query->result_array());
 }
 
+public function TambahIsuStrategis() {
+    try {
+        $id = $this->input->post('id', TRUE);
+        $isuStrategis = $this->input->post('isu_strategis', TRUE);
+
+        if (empty($id) || !is_numeric($id)) {
+            throw new Exception('ID tidak valid');
+        }
+        if (empty($isuStrategis)) {
+            throw new Exception('Isu Strategis harus diisi');
+        }
+
+        // Get existing data
+        $existing = $this->db->where('id', $id)->get('ikd')->row_array();
+        if (!$existing) {
+            throw new Exception('Data IKD tidak ditemukan');
+        }
+
+        // Combine with existing Isu Strategis
+        $existingIsu = !empty($existing['isu_strategis']) ? explode(',', $existing['isu_strategis']) : [];
+        $newIsu = explode(',', $isuStrategis);
+        $combinedIsu = array_unique(array_merge($existingIsu, $newIsu));
+        $updateData = [
+            'isu_strategis' => implode(',', $combinedIsu),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        $this->db->where('id', $id)->update('ikd', $updateData);
+        echo $this->db->affected_rows() ? '1' : 'Tidak ada perubahan';
+    } catch (Exception $e) {
+        log_message('error', 'Error adding Isu Strategis: ' . $e->getMessage());
+        echo $e->getMessage();
+    }
+}
+
+public function EditIsuStrategis() {
+    try {
+        $id = $this->input->post('id', TRUE);
+        $isuStrategis = $this->input->post('isu_strategis', TRUE);
+
+        if (empty($id) || !is_numeric($id)) {
+            throw new Exception('ID tidak valid');
+        }
+
+        $updateData = [
+            'isu_strategis' => $isuStrategis,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        $this->db->where('id', $id)->update('ikd', $updateData);
+        echo $this->db->affected_rows() ? '1' : 'Gagal Update Data';
+    } catch (Exception $e) {
+        log_message('error', 'Error editing Isu Strategis: ' . $e->getMessage());
+        echo $e->getMessage();
+    }
+}
+
 public function TambahIkd() {
   $period = explode('-', $this->input->post('TahunFilter'));
   

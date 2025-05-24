@@ -57,7 +57,7 @@
                                                     data-target5="<?= $key['TargetTahun5'] ?>"
                                                     data-provinsi="<?= $key['KodeWilayah'] ?? '' ?>"
                                                     data-kota="<?= $key['KodeKota'] ?? '' ?>">
-                                                <i class="notika-icon notika-next"></i>
+                                                <i class="notika-icon notika-edit"></i>
                                             </button>
                                             <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" 
                                                     data-id="<?= $key['Id'] ?>">

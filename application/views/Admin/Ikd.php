@@ -20,6 +20,7 @@
                                     <th width="10%" class="text-center">Periode</th>
                                     <th width="12%" class="text-center">PD Penanggung Jawab</th>
                                     <th width="12%" class="text-center">PD Penunjang</th>
+                                    <th width="12%" class="text-center">Isu Strategis Daerah</th>
                                     <th width="6%" class="text-center">Target <br><small>Tahun 1</small></th>
                                     <th width="6%" class="text-center">Target <br><small>Tahun 2</small></th>
                                     <th width="6%" class="text-center">Target <br><small>Tahun 3</small></th>
@@ -102,6 +103,43 @@
                                                     ?>
                                                         <div style="padding: 2px 0; white-space: nowrap;"><?= $pn ?></div>
                                                     <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <!-- In the table body (add this after the PD Penunjang cell) -->
+                                    <td style="vertical-align: top;">
+                                        <div style="display: flex; flex-direction: column; height: 100%;">
+                                            <div style="display: flex; justify-content: center; gap: 5px; margin-bottom: 5px;">
+                                                <button class="btn btn-sm btn-success TambahIsu" 
+                                                        title="Tambah Isu Strategis"
+                                                        data-id="<?= $key['id'] ?>"
+                                                        style="width: 30px; height: 30px; padding: 0;">
+                                                    <i class="fa fa-plus"></i>
+                                                </button>
+                                                <?php if (!empty($key['isu_strategis'])): ?>
+                                                <button class="btn btn-sm btn-primary EditIsu" 
+                                                        title="Edit Isu Strategis"
+                                                        data-isi="<?=$key['id'].'|'.$key['isu_strategis']?>"
+                                                        style="width: 30px; height: 30px; padding: 0;">
+                                                    <i class="fa fa-edit"></i>
+                                                </button>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div style="flex-grow: 1; overflow: auto; text-align: start;">
+                                                <?php if (!empty($key['isu_strategis'])): ?>
+                                                    <?php 
+                                                    $isuStrategis = explode(',', $key['isu_strategis']);
+                                                    foreach ($isuStrategis as $isu): 
+                                                        $isuData = $this->db->where('Id', $isu)->get('isustrategisdaerah')->row_array();
+                                                        if($isuData):
+                                                    ?>
+                                                        <div style="padding: 2px 0; white-space: nowrap;"><?= $isuData['NamaIsuStrategis'] ?></div>
+                                                    <?php 
+                                                        endif;
+                                                    endforeach; 
+                                                    ?>
                                                 <?php endif; ?>
                                             </div>
                                         </div>
@@ -292,6 +330,84 @@
 
                     <button type="submit" class="btn btn-success">Simpan</button>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tambah Isu Strategis -->
+<div class="modal fade" id="ModalTambahIsu" role="dialog">
+    <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Tambah Isu Strategis Daerah</h4>
+            </div>
+            <div class="modal-body">
+                <form id="FormTambahIsu">
+                    <input type="hidden" id="IsuId" name="id">
+                    <div id="isu-container">
+                        <div class="form-group isu-row">
+                            <div class="row">
+                                <div class="col-md-10">
+                                    <label>Isu Strategis Daerah</label>
+                                    <select class="form-control isu-select" name="isu_strategis[]" required>
+                                        <option value="">Pilih Isu Strategis</option>
+                                        <?php 
+                                        $allIsu = $this->db->where('KodeWilayah', $_SESSION['KodeWilayah'])
+                                                          ->where('deleted_at IS NULL')
+                                                          ->get('isustrategisdaerah')
+                                                          ->result_array();
+                                        foreach ($allIsu as $isu): ?>
+                                            <option value="<?= $isu['Id'] ?>"><?= $isu['NamaIsuStrategis'] ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="col-md-2" style="padding-top: 25px;">
+                                    <button type="button" class="btn btn-success btn-add-isu">
+                                        <i class="notika-icon notika-plus-symbol"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success">Simpan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit Isu Strategis -->
+<div class="modal fade" id="ModalEditIsu" role="dialog">
+    <div class="modal-dialog modal-sm" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Edit Isu Strategis Daerah</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-example-wrap">
+                    <div class="form-example-int form-horizental">
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="nk-int-st text-justify">
+                                        <input type="hidden" class="form-control input-sm" id="IdIKDIsu">
+                                        <div id="ListIsu"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-example-int">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <button class="btn btn-success" id="EditIsu">Simpan</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -844,6 +960,137 @@
                 }
             });
         });
+
+        function getIsuStrategisOptions() {
+                var options = '';
+                <?php 
+                $allIsu = $this->db->where('KodeWilayah', $_SESSION['KodeWilayah'])
+                                ->where('deleted_at IS NULL')
+                                ->get('isustrategisdaerah')
+                                ->result_array();
+                foreach ($allIsu as $isu): ?>
+                    options += '<option value="<?= $isu['Id'] ?>"><?= $isu['NamaIsuStrategis'] ?></option>';
+                <?php endforeach; ?>
+                return options;
+            }
+
+            // Add new Isu Strategis dropdown
+            $(document).on('click', '.btn-add-isu', function() {
+                var newRow = $('<div class="form-group isu-row">' +
+                    '<div class="row">' +
+                    '<div class="col-md-10">' +
+                    '<select class="form-control isu-select" name="isu_strategis[]" required>' +
+                    '<option value="">Pilih Isu Strategis</option>' +
+                    getIsuStrategisOptions() +
+                    '</select>' +
+                    '</div>' +
+                    '<div class="col-md-2" style="padding-top: 7px;">' +
+                    '<button type="button" class="btn btn-danger btn-remove-isu">' +
+                    '<i class="notika-icon notika-trash"></i>' +
+                    '</button>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>');
+                
+                $('#isu-container').append(newRow);
+            });
+
+            // Remove Isu Strategis dropdown
+            $(document).on('click', '.btn-remove-isu', function() {
+                if($('.isu-row').length > 1) {
+                    $(this).closest('.isu-row').remove();
+                } else {
+                    alert('Minimal harus ada satu Isu Strategis');
+                }
+            });
+
+            // Tambah Isu Strategis button click
+            $(".TambahIsu").click(function() {
+                var id = $(this).data('id');
+                $("#IsuId").val(id);
+                $("#isu-container").html('<div class="form-group isu-row">' +
+                    '<div class="row">' +
+                    '<div class="col-md-10">' +
+                    '<label>Isu Strategis Daerah</label>' +
+                    '<select class="form-control isu-select" name="isu_strategis[]" required>' +
+                    '<option value="">Pilih Isu Strategis</option>' +
+                    getIsuStrategisOptions() +
+                    '</select>' +
+                    '</div>' +
+                    '<div class="col-md-2" style="padding-top: 25px;">' +
+                    '<button type="button" class="btn btn-success btn-add-isu">' +
+                    '<i class="notika-icon notika-plus-symbol"></i>' +
+                    '</button>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>');
+                $("#ModalTambahIsu").modal('show');
+            });
+
+            // Form submission for adding Isu Strategis
+            $("#FormTambahIsu").submit(function(e) {
+                e.preventDefault();
+                var formData = $(this).serializeArray();
+                // Combine multiple Isu selections into comma-separated string
+                var isuValues = [];
+                $('select[name="isu_strategis[]"]').each(function() {
+                    if($(this).val()) {
+                        isuValues.push($(this).val());
+                    }
+                });
+                
+                // Replace array with combined string
+                formData = formData.filter(item => item.name !== 'isu_strategis[]');
+                formData.push({name: 'isu_strategis', value: isuValues.join(',')});
+                
+                $.post(BaseURL + "Admin/TambahIsuStrategis", $.param(formData)).done(function(res) {
+                    if (res == '1') {
+                        window.location.reload();
+                    } else {
+                        alert("Gagal menambahkan Isu Strategis: " + res);
+                    }
+                });
+            });
+
+            // Edit Isu Strategis button click
+            $(".EditIsu").click(function() {
+                var Data = $(this).attr('data-isi').split("|");
+                $("#IdIKDIsu").val(Data[0]);
+                var Pisah = Data[1].split(",");
+                var List = '';
+                
+                <?php 
+                $allIsu = $this->db->where('KodeWilayah', $_SESSION['KodeWilayah'])
+                                ->where('deleted_at IS NULL')
+                                ->get('isustrategisdaerah')
+                                ->result_array();
+                foreach ($allIsu as $isu): ?>
+                    var isChecked = Pisah.includes("<?= $isu['Id'] ?>") ? 'checked' : '';
+                    List += '<label><input style="margin-top: 10px;" type="checkbox" '+isChecked+' name="Isu" value="<?= $isu['Id'] ?>"> <?= $isu['NamaIsuStrategis'] ?></label><br>';    
+                <?php endforeach; ?>
+                
+                $("#ListIsu").html(List);
+                $("#ModalEditIsu").modal('show');
+            });
+
+            // Save edited Isu Strategis
+            $("#EditIsu").click(function() {
+                var Tampung = [];
+                $.each($("input[name='Isu']:checked"), function(){
+                    Tampung.push($(this).val());
+                });
+                var Isu = {
+                    id: $("#IdIKDIsu").val(),
+                    isu_strategis: Tampung.join(",")
+                };
+                $.post(BaseURL + "Admin/EditIsuStrategis", Isu).done(function(Respon) {
+                    if (Respon == '1') {
+                        window.location.reload();
+                    } else {
+                        alert(Respon);
+                    }
+                });
+            });                             
 
         // Function to validate integer inputs
         function validateIntegerInputs(formId) {
