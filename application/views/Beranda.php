@@ -82,7 +82,6 @@
             font-weight: bold;
         }
         
-        
         .calendar-weekday {
             font-weight: 600;
             color: #4b5563;
@@ -164,10 +163,166 @@
         .institution-feature i {
             color: #10b981;
         }
+        
+        /* Navbar Styles */
+        .navbar {
+            background-color:#20c997;
+            padding: 1rem 2rem;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .navbar-brand {
+            color: white;
+            font-weight: bold;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .navbar-brand i {
+            margin-right: 0.5rem;
+        }
+        
+        .navbar-menu {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .navbar-item {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+            padding: 0.5rem 0;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-item:hover {
+            color: white;
+        }
+        
+        .navbar-item.active {
+            color: white;
+        }
+        
+        .navbar-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: white;
+        }
+        
+        /* Dropdown Styles */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            top: 100%;
+            left: 0;
+        }
+        
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        
+        .dropdown-item {
+            color: #4b5563;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            display: block;
+            transition: all 0.3s ease;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f3f4f6;
+            color: #20c997;
+        }
+        
+        /* Logout Button */
+        .logout-btn {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .logout-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .logout-btn i {
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 
 <body class="bg-gray-50 font-sans">
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="Beranda" class="navbar-brand">
+                <i class="fas fa-chart-line"></i>
+                IPPD
+            </a>
+            <div class="navbar-menu">
+                <a href="#" class="navbar-item active">Kementerian</a>
+                <div class="dropdown">
+                    <a href="#" class="navbar-item">Nasional <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
+                    <div class="dropdown-content">
+                        <a href="#" class="dropdown-item">RPJPN</a>
+                        <a href="#" class="dropdown-item">RPJMN</a>
+                        <a href="#" class="dropdown-item">RPJPD</a>
+                        <a href="#" class="dropdown-item">RPJMD</a>
+                        <a href="#" class="dropdown-item">Isu Nasional</a>
+                    </div>
+                </div>
+                <a href="#" class="navbar-item">Daerah</a>
+                 <div class="dropdown">
+                    <a href="#" class="navbar-item">Daerah <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
+                    <div class="dropdown-content">
+                        <a href="#" class="dropdown-item">RPJPD</a>
+                        <a href="#" class="dropdown-item">RPJMD</a>
+                        <a href="#" class="dropdown-item">Cascading</a>
+                        <a href="#" class="dropdown-item">Isu Daerah</a>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
     <div class="container mx-auto px-4 py-8 max-w-6xl">
         <!-- Header -->
         <div class="text-start mb-10">
@@ -176,8 +331,6 @@
             </h1>
         </div>
 
-        
-        
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
             <!-- User Account Card -->
@@ -258,7 +411,7 @@
         </div>
     </div>
 
-     <script>
+    <script>
         // Bar Chart Configuration
         const ctx = document.getElementById('accountChart').getContext('2d');
         new Chart(ctx, {
@@ -396,6 +549,22 @@
             currentDate.setMonth(currentDate.getMonth() + 1);
             renderCalendar(currentDate);
         });
+
+        // Navbar active item switching
+        const navbarItems = document.querySelectorAll('.navbar-item');
+        navbarItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                navbarItems.forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Logout function
+        function logout() {
+            // Redirect to logout page or clear session
+            window.location.href = '/ippd';
+        }
     </script>
 </body>
 </html>
