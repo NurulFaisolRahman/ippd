@@ -159,23 +159,18 @@
           </div>
           <!-- Form Login di Sebelah Kanan -->
           <div class="col-md-6">
-            <div class="card">
-              <div class="card-body">
-                <div class="mb-4 text-center ">
-                  <h3 style="color:black;"><b>LOGIN</b></h3>
-                </div>
-                <div class="form-group first">
-                  <label for="Username"><b>Username</b></label>
+            <div class="card p-4">
+              <div class="card-body p-0">
+                <div class="form-group mb-3 first">
                   <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
-                    <input type="text" class="form-control" id="Username" autocomplete="off">
+                    <input type="text" class="form-control form-control-sm" id="Username" autocomplete="off" placeholder="Username">
                   </div>
                 </div>
-                <div class="form-group last">
-                  <label for="Password"><b>Password</b></label>
+                <div class="form-group mb-3 last">
                   <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-                    <input type="password" class="form-control" id="Password" autocomplete="off">
+                    <input type="password" class="form-control form-control-sm" id="Password" autocomplete="off" placeholder="Password">
                   </div>
                 </div>
                 <button class="btn btn-block" id="Login"><b>Login</b></button>
@@ -346,6 +341,7 @@
 	<script src="assets/js/main.js"></script>
 	<script>
     var BaseURL = '<?=base_url()?>'
+
     jQuery(document).ready(function($) {
       // Fungsi untuk melakukan login
       function performLogin() {

@@ -97,6 +97,9 @@
                                 <li>
                                     <a href="<?=base_url('Admin/TahapanRPJMD')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
                                 </li>
+                                <li>
+                                    <a href="<?=base_url('Admin/JanjiPolitik')?>"><i class="notika-icon notika-form"></i> <b>Janji Politik</b></a>
+                                </li>
                             </ul>
                         </div>
 

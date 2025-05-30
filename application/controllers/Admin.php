@@ -230,12 +230,14 @@ class Admin extends CI_Controller {
 
   public function TahapanRPJPD(){
 		$Header['Halaman'] = 'RPJPD';
-		$Data['Tahapan'] = $this->db->where("deleted_at IS NULL")->get("tahapanrpjpd")->result_array();
+    $Data['Visi'] = $this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND deleted_at IS NULL")->get("visirpjpd")->result_array();
+		$Data['Tahapan'] = $this->db->query("SELECT v.*,t.* FROM visirpjpd as v, tahapanrpjpd as t WHERE t._Id = v.Id AND t.deleted_at IS NULL AND t.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array();
 		$this->load->view('Admin/header',$Header);
 		$this->load->view('Admin/TahapanRPJPD',$Data);
 	}
 
   public function InputTahapanRPJPD(){  
+    $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
     $this->db->insert('tahapanrpjpd',$_POST);
     if ($this->db->affected_rows()){
       echo '1';
@@ -488,12 +490,14 @@ class Admin extends CI_Controller {
 
   public function TahapanRPJMD(){
 		$Header['Halaman'] = 'RPJMD';
-		$Data['Tahapan'] = $this->db->where("deleted_at IS NULL")->get("tahapanrpjmd")->result_array();
+    $Data['Visi'] = $this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND deleted_at IS NULL")->get("visirpjmd")->result_array();
+		$Data['Tahapan'] = $this->db->query("SELECT v.*,t.* FROM visirpjmd as v, tahapanrpjmd as t WHERE t._Id = v.Id AND t.deleted_at IS NULL AND t.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array();
 		$this->load->view('Admin/header',$Header);
 		$this->load->view('Admin/TahapanRPJMD',$Data);
 	}
 
   public function InputTahapanRPJMD(){  
+    $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
     $this->db->insert('tahapanrpjmd',$_POST);
     if ($this->db->affected_rows()){
       echo '1';
@@ -515,6 +519,44 @@ class Admin extends CI_Controller {
   public function HapusTahapanRPJMD(){  
 		$_POST['deleted_at'] = date('Y-m-d H:i:s');
 		$this->db->where('Id',$_POST['Id'])->update('tahapanrpjmd', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Hapus Data!';
+    }
+  }
+
+  public function JanjiPolitik(){
+		$Header['Halaman'] = 'RPJMD';
+    $Data['Visi'] = $this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND deleted_at IS NULL")->get("visirpjmd")->result_array();
+		$Data['JanjiPolitik'] = $this->db->query("SELECT v.*,j.* FROM visirpjmd as v, janjik as j WHERE j._Id = v.Id AND j.deleted_at IS NULL AND j.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array();
+		$this->load->view('Admin/header',$Header);
+		$this->load->view('Admin/JanjiPolitik',$Data);
+	}
+
+  public function InputJanjiPolitik(){  
+    $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
+    $this->db->insert('janjik',$_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Menyimpan Data!';
+    }
+	}
+	
+	public function EditJanjiPolitik(){  
+		$this->db->where('Id',$_POST['Id']); 
+		$this->db->update('janjik', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Update Data!';
+    }
+  }
+
+  public function HapusJanjiPolitik(){  
+		$_POST['deleted_at'] = date('Y-m-d H:i:s');
+		$this->db->where('Id',$_POST['Id'])->update('janjik', $_POST);
     if ($this->db->affected_rows()){
       echo '1';
     } else {

@@ -40,16 +40,23 @@
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <ul class="nav nav-tabs notika-menu-wrap menu-it-icon-pro">
+                        <li <?=$Halaman == 'Akun' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#Akun"><i class="notika-icon notika-form"></i> <b>Akun</b></a></li>
                         <li <?=$Halaman == 'RPJPN' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#RPJPN"><i class="notika-icon notika-form"></i> <b>RPJPN</b></a></li>
                         <li <?=$Halaman == 'RPJMN' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#RPJMN"><i class="notika-icon notika-form"></i> <b>RPJMN</b></a></li>
                         <li <?=$Halaman == 'RPJPD' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#RPJPD"><i class="notika-icon notika-form"></i> <b>RPJPD</b></a></li>
                         <li <?=$Halaman == 'RPJMD' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#RPJMD"><i class="notika-icon notika-form"></i> <b>RPJMD</b></a></li>
                         <li <?=$Halaman == 'Kementerian' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#Kementerian"><i class="notika-icon notika-house"></i> <b>Kementerian</b></a></li>
                         <li <?=$Halaman == 'Isu' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#Isu"><i class="notika-icon notika-house"></i> <b>Isu</b></a></li>
-
-
+                        <li <?=$Halaman == 'Nomenklatur' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#Nomenklatur"><i class="notika-icon notika-house"></i> <b>Nomenklatur</b></a></li>
                     </ul>
                     <div class="tab-content custom-menu-content">
+                        <div id="Akun" class="tab-pane in <?=$Halaman == 'Akun' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
+                            <ul class="notika-main-menu-dropdown">
+                                <li>
+                                    <a href="<?=base_url('Super/Akun')?>"><i class="notika-icon notika-form"></i> <b>Akun</b></a>
+                                </li>
+                            </ul>
+                        </div>
                         <div id="RPJPN" class="tab-pane in <?=$Halaman == 'RPJPN' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
                             <ul class="notika-main-menu-dropdown">
                                 <li>
@@ -171,6 +178,16 @@
                                 <li>
                                     <a href="<?=base_url('Super/IsuStrategis')?>"><i class="notika-icon notika-form"></i> <b>Isu Strategis</b></a>
                                 </li>   
+                            </ul>
+                        </div>
+                        <div id="Nomenklatur" class="tab-pane in <?=$Halaman == 'Nomenklatur' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
+                            <ul class="notika-main-menu-dropdown">
+                                <li>
+                                    <a href="<?=base_url('Super/NomenklaturProvinsi')?>"><i class="notika-icon notika-form"></i> <b>Provinsi</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/NomenklaturKabupaten')?>"><i class="notika-icon notika-form"></i> <b>Kabupaten</b></a>
+                                </li>
                             </ul>
                         </div>
                     </div>

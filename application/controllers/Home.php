@@ -22,6 +22,10 @@ class Home extends CI_Controller {
 		$this->load->view('index');
 	}
 
+	// public function GetListKementerian(){
+  //   echo json_encode($this->db->where("deleted_at IS NULL")->get("kementerian")->result_array());
+	// }
+
 	public function Login(){  
     $User = $this->db->get_where('akun', array('Username' => htmlentities($_POST['Username'])));
 		if ($User->num_rows() == 0) {
@@ -31,11 +35,11 @@ class Home extends CI_Controller {
 			$Akun = $User->result_array();
 			if (password_verify($_POST['Password'], $Akun[0]['Password'])) {
         if ($Akun[0]['Username'] == 'admin') {
-          $Session = array('Admin' => true);
+          $Session = array('Admin' => true,'Kementerian' => '','Level' => 5);
           $this->session->set_userdata($Session);
           echo '1';
         } else {
-          $Session = array('KodeWilayah' => $Akun[0]['KodeWilayah']);
+          $Session = array('KodeWilayah' => $Akun[0]['KodeWilayah'],);
           $this->session->set_userdata($Session);
           echo '1';
         } 

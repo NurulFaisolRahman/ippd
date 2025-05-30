@@ -8,6 +8,63 @@ class Super extends CI_Controller {
     date_default_timezone_set("Asia/Jakarta");
   }
 
+  public function GetPeriodeKementerian(){
+    echo json_encode($this->db->query("SELECT * FROM `kementerian` GROUP BY TahunMulai")->result_array());
+	}
+
+  public function GetListKementerian(){
+    echo json_encode($this->db->where("TahunMulai = ".$_POST['TahunMulai']." AND deleted_at IS NULL")->get("kementerian")->result_array());
+	}
+
+  function GetListProvinsi(){
+    echo json_encode($this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array());
+  }
+
+  function GetListKabKota(){
+    echo json_encode($this->db->where("Kode LIKE "."'".$_POST['Kode'].".%"."' AND length(Kode) = 5")->get("kodewilayah")->result_array());
+  }
+
+  public function Akun() {
+		$Header['Halaman'] = 'Akun';
+		$Data['Akun'] = $this->db->query("SELECT * FROM `akun` WHERE Level != 0 AND deleted_at IS NULL")->result_array();
+		$this->load->view('Super/header',$Header);
+		$this->load->view('Super/Akun',$Data);
+	}
+
+  public function InputAkun(){  
+		$_POST['Password'] = password_hash($_POST['Password'], PASSWORD_DEFAULT);
+    $this->db->insert('akun',$_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Menyimpan Data!';
+    }
+	}
+	
+	public function EditAkun(){  
+		$this->db->where('Username',$_POST['Username']); 
+		if (isset($_POST['Password'])) {
+			$_POST['Password'] = password_hash($_POST['Password'], PASSWORD_DEFAULT);
+		}
+		$this->db->update('akun', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Update Data!';
+    }
+  }
+
+	public function HapusAkun(){  
+		$_POST['deleted_at'] = date('Y-m-d H:i:s');
+		$this->db->where('Username',$_POST['Username']); 
+		$this->db->update('akun', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Hapus Data!';
+    }
+  }
+
   public function VisiRPJPN(){
 		$Header['Halaman'] = 'RPJPN';
 		$Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjpn")->result_array();
@@ -950,14 +1007,28 @@ class Super extends CI_Controller {
     }
   }
 
+  public function NomenklaturProvinsi() {
+    $Header['Halaman'] = 'Nomenklatur';
+    $Data['Nomenklatur'] = $this->db->query("SELECT * FROM `nomenklaturprovinsi`")->result_array();
+    $this->load->view('Super/header', $Header);
+    $this->load->view('Super/NomenklaturProvinsi', $Data);
+  }
+
+  public function NomenklaturKabupaten() {
+    $Header['Halaman'] = 'Nomenklatur';
+    $Data['Nomenklatur'] = $this->db->query("SELECT * FROM `nomenklaturkabupaten`")->result_array();
+    $this->load->view('Super/header', $Header);
+    $this->load->view('Super/NomenklaturKabupaten', $Data);
+  }
+
   public function Kementerian() {
     $Header['Halaman'] = 'Kementerian';
     $Data['Kementerian'] = $this->db->query("SELECT * FROM `kementerian` WHERE deleted_at IS NULL")->result_array();
     $this->load->view('Super/header', $Header);
     $this->load->view('Super/Kementerian', $Data);
-}
+  }
 
-public function InputKementerian() {
+  public function InputKementerian() {
     $TahunMulai = $this->input->post('TahunMulai');
     $TahunAkhir = $this->input->post('TahunAkhir');
     
@@ -975,9 +1046,9 @@ public function InputKementerian() {
     ];
     $this->db->insert('kementerian', $data);
     echo $this->db->affected_rows() ? '1' : 'Gagal Input Data!';
-}
+  }
 
-public function UpdateKementerian() {
+  public function UpdateKementerian() {
     $TahunMulai = $this->input->post('TahunMulai');
     $TahunAkhir = $this->input->post('TahunAkhir');
     
