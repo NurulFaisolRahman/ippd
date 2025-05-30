@@ -1,3 +1,29 @@
+
+<!-- Breadcrumb -->
+<div class="breadcomb-area">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="breadcomb-list">
+                    <ul class="breadcomb-menu" style="list-style: none; padding: 0; margin: 0;">
+                        <li style="display: inline-block; margin-right: 5px;">
+                            <a href="<?= base_url('Super') ?>">Beranda</a>
+                            <span class="bread-slash" style="display: inline-block; margin: 0 5px;">/</span>
+                        </li>
+                        <li style="display: inline-block; margin-right: 5px;">
+                            <a href="<?= base_url('Super/Kementerian') ?>">Kementerian</a>
+                            <span class="bread-slash" style="display: inline-block; margin: 0 5px;">/</span>
+                        </li>
+                        <li style="display: inline-block;">
+                            <span class="bread-blk">Proyek Strategis</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="data-table-area">
     <div class="container">
         <div class="row">
@@ -5,11 +31,76 @@
                 <div class="data-table-list">
                     <div class="basic-tb-hd">
                         <div class="button-icon-btn sm-res-mg-t-30">
+                            <button type="button" class="btn btn-primary notika-btn-primary" id="FilterProyek">
+                                <i class="notika-icon notika-search"></i> 
+                                <b>Filter Data</b>
+                                <?php if ($CurrentPeriode || $CurrentKementerian): ?>
+                                    <span class="badge" style="background-color: #f44336; margin-left: 5px;">Filter Aktif</span>
+                                <?php endif; ?>
+                            </button>
                             <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputProyek">
                                 <i class="notika-icon notika-edit"></i> <b>Input Proyek Strategis</b>
                             </button>
                         </div>
                     </div>
+
+                    <!-- Modal Filter -->
+                    <div class="modal fade" id="ModalFilter" role="dialog">
+                        <div class="modal-dialog modals-default">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <h4 class="modal-title">Filter Data Proyek Strategis</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="form-example-wrap">
+                                                <div class="form-example-int">
+                                                    <div class="form-group">
+                                                        <label>Periode</label>
+                                                        <select class="form-control" id="FilterPeriode">
+                                                            <option value="">Semua Periode</option>
+                                                            <?php foreach ($Periode as $periode): ?>
+                                                                <?php 
+                                                                    $periodeValue = $periode['TahunMulai'] . '|' . $periode['TahunAkhir'];
+                                                                    $selected = ($CurrentPeriode == $periodeValue) ? 'selected' : '';
+                                                                ?>
+                                                                <option value="<?= $periodeValue ?>" <?= $selected ?>>
+                                                                    <?= $periode['TahunMulai'] ?> - <?= $periode['TahunAkhir'] ?>
+                                                                </option>
+                                                            <?php endforeach; ?>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-example-int">
+                                                    <div class="form-group">
+                                                        <label>Kementerian</label>
+                                                        <select class="form-control" id="FilterKementerianSelect" <?= empty($Kementerian) && !$CurrentKementerian ? 'disabled' : '' ?>>
+                                                            <option value="">Semua Kementerian</option>
+                                                            <?php if (!empty($Kementerian)): ?>
+                                                                <?php foreach ($Kementerian as $kementerian): ?>
+                                                                    <?php $selected = ($CurrentKementerian == $kementerian['Id']) ? 'selected' : ''; ?>
+                                                                    <option value="<?= $kementerian['Id'] ?>" <?= $selected ?>>
+                                                                        <?= $kementerian['NamaKementerian'] ?>
+                                                                    </option>
+                                                                <?php endforeach; ?>
+                                                            <?php endif; ?>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-example-int mg-t-15">
+                                                    <button class="btn btn-success notika-btn-success" id="ApplyFilter">Terapkan Filter</button>
+                                                    <button class="btn btn-danger notika-btn-danger" id="ResetFilter">Reset Filter</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="table-responsive">
                         <table id="data-table-basic" class="table table-striped">
                             <thead>
@@ -32,18 +123,18 @@
                             <tbody>
                                 <?php $No = 1; foreach ($Proyek as $key) { ?>
                                 <tr>
-                                    <td style="vertical-align: middle;" class="text-center"><?= $No++ ?></td>
-                                    <td style="vertical-align: middle;"><?= $key['NamaKementerian'] ?></td>
-                                    <td style="vertical-align: middle;"><?= $key['NamaProgram'] ?></td>
-                                    <td style="vertical-align: middle;"><?= $key['NamaProyek'] ?></td>
-                                    <td style="vertical-align: middle;"><?= $key['NamaProvinsi'] ?></td>
-                                    <td style="vertical-align: middle;"><?= $key['NamaKota'] ?></td>
-                                    <td style="vertical-align: middle;" class="text-center"><?= $key['TahunMulai'] . ' - ' . $key['TahunAkhir'] ?></td>
-                                    <td style="vertical-align: middle;" class="text-center"><?= $key['TargetTahun1'] ?></td>
-                                    <td style="vertical-align: middle;" class="text-center"><?= $key['TargetTahun2'] ?></td>
-                                    <td style="vertical-align: middle;" class="text-center"><?= $key['TargetTahun3'] ?></td>
-                                    <td style="vertical-align: middle;" class="text-center"><?= $key['TargetTahun4'] ?></td>
-                                    <td style="vertical-align: middle;" class="text-center"><?= $key['TargetTahun5'] ?></td>
+                                    <td class="text-center"><?= $No++ ?></td>
+                                    <td><?= $key['NamaKementerian'] ?></td>
+                                    <td><?= $key['NamaProgram'] ?></td>
+                                    <td><?= $key['NamaProyek'] ?></td>
+                                    <td><?= $key['NamaProvinsi'] ?></td>
+                                    <td><?= $key['NamaKota'] ?></td>
+                                    <td class="text-center"><?= $key['TahunMulai'] . ' - ' . $key['TahunAkhir'] ?></td>
+                                    <td class="text-center"><?= $key['TargetTahun1'] ?? '-' ?></td>
+                                    <td class="text-center"><?= $key['TargetTahun2'] ?? '-' ?></td>
+                                    <td class="text-center"><?= $key['TargetTahun3'] ?? '-' ?></td>
+                                    <td class="text-center"><?= $key['TargetTahun4'] ?? '-' ?></td>
+                                    <td class="text-center"><?= $key['TargetTahun5'] ?? '-' ?></td>
                                     <td>
                                         <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
                                             <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" 
@@ -58,8 +149,8 @@
                                                     data-target3="<?= $key['TargetTahun3'] ?>"
                                                     data-target4="<?= $key['TargetTahun4'] ?>"
                                                     data-target5="<?= $key['TargetTahun5'] ?>"
-                                                    data-provinsi="<?= $key['KodeWilayah'] ?? '' ?>"
-                                                    data-kota="<?= $key['KodeKota'] ?? '' ?>">
+                                                    data-namaprovinsi="<?= $key['NamaProvinsi'] ?>"
+                                                    data-namakota="<?= $key['NamaKota'] ?>">
                                                 <i class="notika-icon notika-edit"></i>
                                             </button>
                                             <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" 
@@ -81,36 +172,15 @@
 
 <!-- Modal Input Proyek Strategis -->
 <div class="modal fade" id="ModalInputProyek" role="dialog">
-    <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
+    <div class="modal-dialog modals-default">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">×</button>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title">Input Proyek Strategis</h4>
             </div>
             <div class="modal-body">
                 <form id="formInputProyek">
-                    <div class="form-example-wrap" style="padding: 5px;">
-                        <!-- Periode Dropdown -->
-                        <div class="form-group">
-                            <label>Periode</label>
-                            <select class="form-control" id="Periode" required>
-                                <option value="">-- Pilih Periode --</option>
-                                <?php foreach ($Periode as $periode) { ?>
-                                    <option value="<?= $periode['TahunMulai'] . '|' . $periode['TahunAkhir'] ?>">
-                                        <?= $periode['TahunMulai'] . ' - ' . $periode['TahunAkhir'] ?>
-                                    </option>
-                                <?php } ?>
-                            </select>
-                        </div>
-
-                        <!-- Kementerian Dropdown -->
-                        <div class="form-group">
-                            <label>Kementerian</label>
-                            <select class="form-control" id="IdKementerian" required>
-                                <option value="">-- Pilih Kementerian --</option>
-                            </select>
-                        </div>
-
+                    <div class="form-example-wrap">
                         <!-- Program Strategis Dropdown -->
                         <div class="form-group">
                             <label>Program Strategis</label>
@@ -124,7 +194,6 @@
                             <label>Provinsi</label>
                             <input type="text" class="form-control" id="ProvinsiInfo" readonly>
                         </div>
-
                         <div class="form-group">
                             <label>Kota/Kabupaten</label>
                             <input type="text" class="form-control" id="KotaInfo" readonly>
@@ -186,37 +255,19 @@
 
 <!-- Modal Edit Proyek Strategis -->
 <div class="modal fade" id="ModalEditProyek" role="dialog">
-    <div class="modal-dialog modal-large" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
+    <div class="modal-dialog modal-large">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">×</button>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title">Edit Proyek Strategis</h4>
             </div>
             <div class="modal-body">
                 <form id="formEditProyek">
                     <input type="hidden" id="EditId">
-                    <div class="form-example-wrap" style="padding: 5px;">
-                        <!-- Periode Dropdown -->
-                        <div class="form-group">
-                            <label>Periode</label>
-                            <select class="form-control" id="EditPeriode" required>
-                                <option value="">-- Pilih Periode --</option>
-                                <?php foreach ($Periode as $periode) { ?>
-                                    <option value="<?= $periode['TahunMulai'] . '|' . $periode['TahunAkhir'] ?>">
-                                        <?= $periode['TahunMulai'] . ' - ' . $periode['TahunAkhir'] ?>
-                                    </option>
-                                <?php } ?>
-                            </select>
-                        </div>
-
-                        <!-- Kementerian Dropdown -->
-                        <div class="form-group">
-                            <label>Kementerian</label>
-                            <select class="form-control" id="EditIdKementerian" required>
-                                <option value="">-- Pilih Kementerian --</option>
-                            </select>
-                        </div>
-
+                    <input type="hidden" id="EditIdKementerian">
+                    <input type="hidden" id="EditTahunMulai">
+                    <input type="hidden" id="EditTahunAkhir">
+                    <div class="form-example-wrap">
                         <!-- Program Strategis Dropdown -->
                         <div class="form-group">
                             <label>Program Strategis</label>
@@ -230,7 +281,6 @@
                             <label>Provinsi</label>
                             <input type="text" class="form-control" id="EditProvinsiInfo" readonly>
                         </div>
-
                         <div class="form-group">
                             <label>Kota/Kabupaten</label>
                             <input type="text" class="form-control" id="EditKotaInfo" readonly>
@@ -290,6 +340,7 @@
     </div>
 </div>
 
+<!-- Scripts -->
 <script src="<?= base_url('js/vendor/jquery-1.12.4.min.js'); ?>"></script>
 <script src="<?= base_url('js/bootstrap.min.js'); ?>"></script>
 <script src="<?= base_url('js/wow.min.js'); ?>"></script>
@@ -304,23 +355,31 @@
 <script>
 $(document).ready(function() {
     var BaseURL = '<?= base_url() ?>';
-    
-    // Function to populate Kementerian dropdown based on selected Periode
-    function populateKementerian(selectElement, tahunMulai, tahunAkhir, selectedId = '') {
-        if (tahunMulai && tahunAkhir) {
+    var CurrentPeriode = '<?= $CurrentPeriode ?>';
+    var CurrentKementerian = '<?= $CurrentKementerian ?>';
+
+    // Function to populate Kementerian dropdown for filter modal
+    function populateKementerian(periode, selectElement, selectedId = '') {
+        if (periode) {
             $.post(BaseURL + "Super/GetKementerianByPeriode", {
-                TahunMulai: tahunMulai,
-                TahunAkhir: tahunAkhir
+                periode: periode
             }, function(response) {
                 var kementerian = JSON.parse(response);
-                selectElement.empty().append('<option value="">-- Pilih Kementerian --</option>');
-                $.each(kementerian, function(index, item) {
-                    var isSelected = (item.Id == selectedId) ? 'selected' : '';
-                    selectElement.append('<option value="' + item.Id + '" ' + isSelected + '>' + item.NamaKementerian + '</option>');
-                });
+                selectElement.empty().append('<option value="">Semua Kementerian</option>');
+                if (kementerian.length > 0) {
+                    $.each(kementerian, function(index, item) {
+                        var isSelected = (item.Id == selectedId) ? 'selected' : '';
+                        selectElement.append('<option value="' + item.Id + '" ' + isSelected + '>' + item.NamaKementerian + '</option>');
+                    });
+                    selectElement.prop('disabled', false);
+                } else {
+                    selectElement.append('<option value="">Tidak ada kementerian</option>');
+                    selectElement.prop('disabled', true);
+                }
             });
         } else {
-            selectElement.empty().append('<option value="">-- Pilih Kementerian --</option>');
+            selectElement.empty().append('<option value="">Semua Kementerian</option>');
+            selectElement.prop('disabled', true);
         }
     }
 
@@ -334,29 +393,52 @@ $(document).ready(function() {
             }, function(response) {
                 var program = JSON.parse(response);
                 selectElement.empty().append('<option value="">-- Pilih Program Strategis --</option>');
-                
-                // For input modal
-                $('#ProvinsiInfo').val('');
-                $('#KotaInfo').val('');
-                
-                // For edit modal
-                $('#EditProvinsiInfo').val('');
-                $('#EditKotaInfo').val('');
-                
                 $.each(program, function(index, item) {
                     var isSelected = (item.Id == selectedId) ? 'selected' : '';
                     selectElement.append('<option value="' + item.Id + '" ' + isSelected + 
                                         ' data-provinsi="' + (item.KodeWilayah || '') + '"' +
                                         ' data-kota="' + (item.KodeKota || '') + '"' +
-                                        ' data-namaprovinsi="' + (item.NamaProvinsi || '') + '"' +
-                                        ' data-namakota="' + (item.NamaKota || '') + '">' + 
+                                        ' data-namaprovinsi="' + (item.NamaProvinsi || '-') + '"' +
+                                        ' data-namakota="' + (item.NamaKota || '-') + '">' + 
                                         item.NamaProgram + '</option>');
                 });
+                // Trigger change to set location info for edit modal
+                if (selectedId) {
+                    selectElement.trigger('change');
+                }
             });
         } else {
             selectElement.empty().append('<option value="">-- Pilih Program Strategis --</option>');
         }
     }
+
+    // Show filter modal
+    $("#FilterProyek").click(function() {
+        $('#ModalFilter').modal("show");
+    });
+
+    // Load Kementerian when Periode filter changes
+    $("#FilterPeriode").change(function() {
+        var periode = $(this).val();
+        populateKementerian(periode, $("#FilterKementerianSelect"));
+    });
+
+    // Apply filter
+    $("#ApplyFilter").click(function() {
+        var periode = $("#FilterPeriode").val();
+        var kementerian = $("#FilterKementerianSelect").val();
+        var url = BaseURL + "Super/ProyekStrategis?";
+        
+        if (periode) url += "periode=" + encodeURIComponent(periode) + "&";
+        if (kementerian) url += "kementerian=" + encodeURIComponent(kementerian);
+        
+        window.location.href = url;
+    });
+
+    // Reset filter
+    $("#ResetFilter").click(function() {
+        window.location.href = BaseURL + "Super/ProyekStrategis";
+    });
 
     // Program Strategis change handler for Input modal
     $("#IdProgramStrategis").change(function() {
@@ -372,70 +454,18 @@ $(document).ready(function() {
         $('#EditKotaInfo').val(selectedOption.data('namakota') || '-');
     });
 
-    // Periode change handler for Input modal
-    $("#Periode").change(function() {
-        var periode = $(this).val();
-        if (periode) {
-            var [tahunMulai, tahunAkhir] = periode.split('|');
-            populateKementerian($("#IdKementerian"), tahunMulai, tahunAkhir);
-            $("#IdProgramStrategis").empty().append('<option value="">-- Pilih Program Strategis --</option>');
-            $('#ProvinsiInfo').val('');
-            $('#KotaInfo').val('');
-        } else {
-            $("#IdKementerian").empty().append('<option value="">-- Pilih Kementerian --</option>');
-            $("#IdProgramStrategis").empty().append('<option value="">-- Pilih Program Strategis --</option>');
-            $('#ProvinsiInfo').val('');
-            $('#KotaInfo').val('');
-        }
-    });
-
-    // Kementerian change handler for Input modal
-    $("#IdKementerian").change(function() {
-        var idKementerian = $(this).val();
-        var periode = $("#Periode").val();
-        if (idKementerian && periode) {
-            var [tahunMulai, tahunAkhir] = periode.split('|');
-            populateProgramStrategis($("#IdProgramStrategis"), idKementerian, tahunMulai, tahunAkhir);
-        } else {
-            $("#IdProgramStrategis").empty().append('<option value="">-- Pilih Program Strategis --</option>');
-            $('#ProvinsiInfo').val('');
-            $('#KotaInfo').val('');
-        }
-    });
-
-    // Periode change handler for Edit modal
-    $("#EditPeriode").change(function() {
-        var periode = $(this).val();
-        if (periode) {
-            var [tahunMulai, tahunAkhir] = periode.split('|');
-            populateKementerian($("#EditIdKementerian"), tahunMulai, tahunAkhir);
-            $("#EditIdProgramStrategis").empty().append('<option value="">-- Pilih Program Strategis --</option>');
-            $('#EditProvinsiInfo').val('');
-            $('#EditKotaInfo').val('');
-        } else {
-            $("#EditIdKementerian").empty().append('<option value="">-- Pilih Kementerian --</option>');
-            $("#EditIdProgramStrategis").empty().append('<option value="">-- Pilih Program Strategis --</option>');
-            $('#EditProvinsiInfo').val('');
-            $('#EditKotaInfo').val('');
-        }
-    });
-
-    // Kementerian change handler for Edit modal
-    $("#EditIdKementerian").change(function() {
-        var idKementerian = $(this).val();
-        var periode = $("#EditPeriode").val();
-        if (idKementerian && periode) {
-            var [tahunMulai, tahunAkhir] = periode.split('|');
-            populateProgramStrategis($("#EditIdProgramStrategis"), idKementerian, tahunMulai, tahunAkhir);
-        } else {
-            $("#EditIdProgramStrategis").empty().append('<option value="">-- Pilih Program Strategis --</option>');
-            $('#EditProvinsiInfo').val('');
-            $('#EditKotaInfo').val('');
-        }
-    });
+    // Populate Program Strategis for input modal on page load if filter is active
+    if (CurrentPeriode && CurrentKementerian) {
+        var [tahunMulai, tahunAkhir] = CurrentPeriode.split('|');
+        populateProgramStrategis($("#IdProgramStrategis"), CurrentKementerian, tahunMulai, tahunAkhir);
+    }
 
     // Input Proyek Strategis
     $("#InputProyek").click(function() {
+        if (!CurrentPeriode || !CurrentKementerian) {
+            alert('Pilih Periode dan Kementerian terlebih dahulu di filter!');
+            return;
+        }
         var formValid = true;
         $("#formInputProyek [required]").each(function() {
             if (!$(this).val()) {
@@ -451,9 +481,9 @@ $(document).ready(function() {
             return;
         }
 
-        var [TahunMulai, TahunAkhir] = $("#Periode").val().split('|');
+        var [TahunMulai, TahunAkhir] = CurrentPeriode.split('|');
         var Data = {
-            IdKementerian: $("#IdKementerian").val(),
+            IdKementerian: CurrentKementerian,
             IdProgramStrategis: $("#IdProgramStrategis").val(),
             NamaProyek: $("#NamaProyek").val(),
             TahunMulai: TahunMulai,
@@ -483,23 +513,22 @@ $(document).ready(function() {
         var data = $(this).data();
         
         $("#EditId").val(data.id);
+        $("#EditIdKementerian").val(data.kementerian);
+        $("#EditTahunMulai").val(data.tahunmulai);
+        $("#EditTahunAkhir").val(data.tahunakhir);
         $("#EditNamaProyek").val(data.proyek);
-        $("#EditPeriode").val(data.tahunmulai + '|' + data.tahunakhir);
         $("#EditTargetTahun1").val(data.target1);
         $("#EditTargetTahun2").val(data.target2);
         $("#EditTargetTahun3").val(data.target3);
         $("#EditTargetTahun4").val(data.target4);
         $("#EditTargetTahun5").val(data.target5);
 
-        // Populate Kementerian based on Periode
-        populateKementerian($("#EditIdKementerian"), data.tahunmulai, data.tahunakhir, data.kementerian);
+        // Set initial location info
+        $('#EditProvinsiInfo').val(data.namaprovinsi || '-');
+        $('#EditKotaInfo').val(data.namakota || '-');
 
-        // Populate Program Strategis based on Kementerian and Periode
+        // Populate Program Strategis
         populateProgramStrategis($("#EditIdProgramStrategis"), data.kementerian, data.tahunmulai, data.tahunakhir, data.program);
-
-        // Set location info
-        $('#EditProvinsiInfo').val($(this).data('namaprovinsi') || '-');
-        $('#EditKotaInfo').val($(this).data('namakota') || '-');
 
         $('#ModalEditProyek').modal("show");
     });
@@ -521,14 +550,13 @@ $(document).ready(function() {
             return;
         }
 
-        var [TahunMulai, TahunAkhir] = $("#EditPeriode").val().split('|');
         var Data = {
             Id: $("#EditId").val(),
             IdKementerian: $("#EditIdKementerian").val(),
             IdProgramStrategis: $("#EditIdProgramStrategis").val(),
             NamaProyek: $("#EditNamaProyek").val(),
-            TahunMulai: TahunMulai,
-            TahunAkhir: TahunAkhir,
+            TahunMulai: $("#EditTahunMulai").val(),
+            TahunAkhir: $("#EditTahunAkhir").val(),
             TargetTahun1: $("#EditTargetTahun1").val() || null,
             TargetTahun2: $("#EditTargetTahun2").val() || null,
             TargetTahun3: $("#EditTargetTahun3").val() || null,
@@ -567,7 +595,8 @@ $(document).ready(function() {
                 .fail(function() {
                     alert("Terjadi kesalahan saat menghapus data");
                 });
-        }
+        
+            }
+        });
     });
-});
 </script>
