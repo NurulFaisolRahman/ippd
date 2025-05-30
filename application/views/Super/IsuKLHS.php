@@ -1,3 +1,26 @@
+<div class="breadcomb-area">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="breadcomb-list">
+                    <ul class="breadcomb-menu" style="list-style: none; padding: 0; margin: 0;">
+                        <li style="display: inline-block; margin-right: 5px;">
+                            <a href="<?= base_url('Super') ?>">Beranda</a>
+                            <span class="bread-slash" style="display: inline-block; margin: 0 5px;">/</span>
+                        </li>
+                        <li style="display: inline-block; margin-right: 5px;">
+                            <a href="<?= base_url('Super/Isu') ?>">Isu</a>
+                            <span class="bread-slash" style="display: inline-block; margin: 0 5px;">/</span>
+                        </li>
+                        <li style="display: inline-block;">
+                            <span class="bread-blk">Isu KLHS</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="data-table-area">
     <div class="container">
         <div class="row">
@@ -30,7 +53,7 @@
                                     <td style="vertical-align: middle;"><?= $key['TahunMulai'] . ' - ' . $key['TahunAkhir'] ?></td>
                                     <td>
                                         <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                            <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?= $key['Id'] . '|' . $key['IdKementerian'] . '|' . $key['NamaIsuKLHS'] . '|' . $key['TahunMulai'] . '|' . $key['TahunAkhir'] ?>"><i class="notika-icon notika-next"></i></button>
+                                            <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?= $key['Id'] . '|' . $key['IdKementerian'] . '|' . $key['NamaIsuKLHS'] . '|' . $key['TahunMulai'] . '|' . $key['TahunAkhir'] ?>"><i class="notika-icon notika-edit"></i></button>
                                             <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?= $key['Id'] ?>"><i class="notika-icon notika-trash"></i></button>
                                         </div>
                                     </td>

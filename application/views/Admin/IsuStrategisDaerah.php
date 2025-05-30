@@ -128,7 +128,7 @@
                                                     data-kementerian="<?= explode("$",$key['_Id'])[0] ?>"
                                                     data-isu="<?= $key['_Id'] ?>"
                                                     style="width: 36px; height: 36px; padding: 0; border-radius: 50%;">
-                                                <i class="notika-icon notika-next" style="font-size: 15px;"></i>
+                                                <i class="notika-icon notika-edit" style="font-size: 15px;"></i>
                                             </button>
                                             <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" 
                                                     data-id="<?= $key['Id'] ?>"

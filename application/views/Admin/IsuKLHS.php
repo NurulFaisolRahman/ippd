@@ -57,7 +57,7 @@
                                                     data-periode="<?= $key['TahunMulai'] . '-' . $key['TahunAkhir'] ?>"
                                                     data-kementerian="<?= explode("$",$key['_Id'])[0] ?>"
                                                     data-isu="<?= $key['_Id'] ?>">
-                                                <i class="notika-icon notika-next"></i>
+                                                <i class="notika-icon notika-edit"></i>
                                             </button>
                                             <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?= $key['Id'] ?>">
                                                 <i class="notika-icon notika-trash"></i>
