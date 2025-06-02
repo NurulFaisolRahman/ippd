@@ -305,7 +305,6 @@
                         <a href="#" class="dropdown-item">Isu Nasional</a>
                     </div>
                 </div>
-                <a href="#" class="navbar-item">Daerah</a>
                  <div class="dropdown">
                     <a href="#" class="navbar-item">Daerah <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
                     <div class="dropdown-content">
