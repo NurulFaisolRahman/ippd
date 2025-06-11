@@ -21,8 +21,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* Navbar Styles */
-        /* Navbar Styles */
-.navbar {
+        .navbar {
             background-color:#20c997;
             padding: 1rem 2rem;
             border-radius: 0 0 12px 12px;
@@ -71,7 +70,7 @@
             text-decoration: none;
         }
 
-        /* Dropdown Styles - Fixed Version */
+        /* Dropdown Styles */
         .dropdown {
             position: relative;
             display: inline-block;
@@ -81,24 +80,18 @@
             display: none;
             position: absolute;
             background-color: white;
-            min-width: 180px;
+            min-width: 200px;
             box-shadow: 0px 8px 20px 0px rgba(0,0,0,0.15);
-            z-index: 9999; /* Increased z-index */
+            z-index: 1001;
             border-radius: 8px;
-            overflow: hidden;
-            top: calc(100% + 5px); /* Added small gap */
+            top: 100%;
             left: 50%;
-            transform: translateX(-50%); /* Center the dropdown */
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
+            transform: translateX(-50%);
             border: 1px solid rgba(0,0,0,0.1);
         }
 
         .dropdown:hover .dropdown-content {
             display: block;
-            opacity: 1;
-            visibility: visible;
         }
 
         .dropdown-item {
@@ -108,12 +101,43 @@
             display: block;
             transition: all 0.3s ease;
             white-space: nowrap;
+            position: relative;
         }
 
         .dropdown-item:hover {
             background-color: #f3f4f6;
             color: #20c997;
-            text-decoration: none;
+        }
+
+        /* Submenu Styles */
+        .dropdown-submenu {
+            position: relative;
+        }
+
+        .dropdown-submenu > .dropdown-item:after {
+            content: "▸";
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .dropdown-submenu .dropdown-submenu-content {
+            display: none;
+            position: absolute;
+            left: 100%;
+            top: 0;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0px 8px 20px 0px rgba(0,0,0,0.15);
+            z-index: 1002;
+            border-radius: 0 8px 8px 0;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-left: none;
+        }
+
+        .dropdown-submenu:hover > .dropdown-submenu-content {
+            display: block;
         }
 
         /* Logout Button */
@@ -135,27 +159,7 @@
             background-color: rgba(255, 255, 255, 0.2);
         }
 
-        .logout-btn i {
-            font-size: 0.9rem;
-        }
-
-        /* Ensure main content doesn't get overlapped */
-        .main-content-wrapper {
-            position: relative;
-            z-index: 1;
-            margin-top: 20px; /* Add some spacing from navbar */
-        }
-
-        /* Additional fix for dropdown arrow */
-        .dropdown .navbar-item i.fa-chevron-down {
-            transition: transform 0.3s ease;
-        }
-
-        .dropdown:hover .navbar-item i.fa-chevron-down {
-            transform: rotate(180deg);
-        }
-
-        /* Mobile responsiveness */
+        /* Mobile Responsiveness */
         @media (max-width: 768px) {
             .navbar-container {
                 flex-direction: column;
@@ -169,86 +173,55 @@
             }
             
             .dropdown-content {
-                position: fixed;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 200px;
+                position: static;
+                transform: none;
+                width: 100%;
+                display: none;
+            }
+            
+            .dropdown-submenu .dropdown-submenu-content {
+                position: static;
+                border-radius: 0 0 8px 8px;
+                border-left: 1px solid rgba(0,0,0,0.1);
+                margin-left: 15px;
+                box-shadow: none;
+            }
+            
+            .dropdown.active .dropdown-content {
+                display: block;
+            }
+            
+            .dropdown-submenu.active > .dropdown-submenu-content {
+                display: block;
             }
         }
 
-        /* CSS TAMBAHAN UNTUK MENGHILANGKAN EFEK WARNA SAAT DITEKAN */
-        
-        /* Hilangkan efek warna saat navbar item ditekan/diklik */
+        /* Remove click effects */
         .navbar-item:focus,
         .navbar-item:active,
-        .navbar-item:visited {
-            color: rgba(255, 255, 255, 0.9) !important;
-            outline: none;
-            box-shadow: none;
-            background-color: transparent;
-        }
-
-        /* Hilangkan efek warna saat dropdown item ditekan/diklik */
         .dropdown-item:focus,
         .dropdown-item:active,
-        .dropdown-item:visited {
-            color: #4b5563 !important;
-            outline: none;
-            box-shadow: none;
-            background-color: transparent !important;
-        }
-
-        /* Hilangkan efek warna saat logout button ditekan */
         .logout-btn:focus,
         .logout-btn:active {
-            background-color: rgba(255, 255, 255, 0.1) !important;
             outline: none;
             box-shadow: none;
-        }
-
-        /* Hilangkan efek pada navbar brand juga */
-        .navbar-brand:focus,
-        .navbar-brand:active,
-        .navbar-brand:visited {
-            color: white !important;
-            outline: none;
-            box-shadow: none;
-            text-decoration: none;
-        }
-
-        /* Hilangkan highlight default browser */
-        .navbar-item,
-        .dropdown-item,
-        .logout-btn,
-        .navbar-brand {
-            -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-
-        /* Pastikan dropdown tetap berfungsi normal saat hover */
-        .dropdown-item:hover {
-            background-color: #f3f4f6 !important;
-            color: #20c997 !important;
-        }
-
-        .navbar-item:hover {
-            color: white !important;
-        }
-
-        .logout-btn:hover {
-            background-color: rgba(255, 255, 255, 0.2) !important;
-        }
-
-        /* Hilangkan efek pada link yang memiliki class active */
-        .navbar-item.active:focus,
-        .navbar-item.active:active {
-            color: rgba(255, 255, 255, 0.9) !important;
             background-color: transparent !important;
+        }
+
+        /* Ensure main content doesn't get overlapped */
+        .main-content-wrapper {
+            position: relative;
+            z-index: 1;
+            margin-top: 20px;
+        }
+
+        /* Additional fix for dropdown arrow */
+        .dropdown .navbar-item i.fa-chevron-down {
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown:hover .navbar-item i.fa-chevron-down {
+            transform: rotate(180deg);
         }
     </style>
 </head>
@@ -262,26 +235,119 @@
                 IPPD
             </a>
             <div class="navbar-menu">
-                <a href="#" class="navbar-item active">Kementerian</a>
+                <!-- Menu Kementerian dengan Submenu -->
+                <div class="dropdown">
+                    <a href="#" class="navbar-item active">Kementerian <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
+                    <div class="dropdown-content">
+                        <a href="<?=base_url('Super/Kementerian')?>" class="dropdown-item">Daftar Kementerian</a>
+                        <a href="<?=base_url('Super/SPM')?>" class="dropdown-item">Standar Pelayanan Minimal</a>
+                        <a href="<?=base_url('Super/ProgramStrategis')?>" class="dropdown-item">Program Strategis</a>
+                        <a href="<?=base_url('Super/ProyekStrategis')?>" class="dropdown-item">Proyek Strategis</a>
+                    </div>
+                </div>
+                
+                <!-- Menu Nasional dengan Submenu -->
                 <div class="dropdown">
                     <a href="#" class="navbar-item">Nasional <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
                     <div class="dropdown-content">
-                        <a href="#" class="dropdown-item">RPJPN</a>
-                        <a href="#" class="dropdown-item">RPJMN</a>
-                        <a href="#" class="dropdown-item">RPJPD</a>
-                        <a href="#" class="dropdown-item">RPJMD</a>
-                        <a href="#" class="dropdown-item">Isu Nasional</a>
+                        <!-- RPJPN Submenu -->
+                        <div class="dropdown-submenu">
+                            <a href="#" class="dropdown-item">RPJPN</a>
+                            <div class="dropdown-submenu-content">
+                                <a href="<?=base_url('Super/VisiRPJPN')?>" class="dropdown-item">Visi</a>
+                                <a href="<?=base_url('Super/MisiRPJPN')?>" class="dropdown-item">Misi</a>
+                                <a href="<?=base_url('Super/TujuanRPJPN')?>" class="dropdown-item">Tujuan</a>
+                                <a href="<?=base_url('Super/SasaranRPJPN')?>" class="dropdown-item">Sasaran</a>
+                                <a href="<?=base_url('Super/TahapanRPJPN')?>" class="dropdown-item">Tahapan</a>
+                                <a href="<?=base_url('Super/IUPRPJPN')?>" class="dropdown-item">IUP RPJPN</a>
+                            </div>
+                        </div>
+                        
+                        <!-- RPJMN Submenu -->
+                        <div class="dropdown-submenu">
+                            <a href="#" class="dropdown-item">RPJMN</a>
+                            <div class="dropdown-submenu-content">
+                                <a href="<?=base_url('Super/VisiRPJMN')?>" class="dropdown-item">Visi</a>
+                                <a href="<?=base_url('Super/MisiRPJMN')?>" class="dropdown-item">Misi</a>
+                                <a href="<?=base_url('Super/TujuanRPJMN')?>" class="dropdown-item">Tujuan</a>
+                                <a href="<?=base_url('Super/SasaranRPJMN')?>" class="dropdown-item">Sasaran</a>
+                                <a href="<?=base_url('Super/TahapanRPJMN')?>" class="dropdown-item">Tahapan</a>
+                                <a href="<?=base_url('Super/IUPRPJMN')?>" class="dropdown-item">IUP RPJMN</a>
+                            </div>
+                        </div>
+                        
+                        <!-- RPJPD Submenu -->
+                        <div class="dropdown-submenu">
+                            <a href="#" class="dropdown-item">RPJPD</a>
+                            <div class="dropdown-submenu-content">
+                                <a href="<?=base_url('Super/VisiRPJPD')?>" class="dropdown-item">Visi</a>
+                                <a href="<?=base_url('Super/MisiRPJPD')?>" class="dropdown-item">Misi</a>
+                                <a href="<?=base_url('Super/TujuanRPJPD')?>" class="dropdown-item">Tujuan</a>
+                                <a href="<?=base_url('Super/SasaranRPJPD')?>" class="dropdown-item">Sasaran</a>
+                                <a href="<?=base_url('Super/TahapanRPJPD')?>" class="dropdown-item">Tahapan</a>
+                                <a href="<?=base_url('Super/IUPRPJPD')?>" class="dropdown-item">IUP RPJPD</a>
+                            </div>
+                        </div>
+                        
+                        <!-- RPJMD Submenu -->
+                        <div class="dropdown-submenu">
+                            <a href="#" class="dropdown-item">RPJMD</a>
+                            <div class="dropdown-submenu-content">
+                                <a href="<?=base_url('Super/VisiRPJMD')?>" class="dropdown-item">Visi</a>
+                                <a href="<?=base_url('Super/MisiRPJMD')?>" class="dropdown-item">Misi</a>
+                                <a href="<?=base_url('Super/TujuanRPJMD')?>" class="dropdown-item">Tujuan</a>
+                                <a href="<?=base_url('Super/SasaranRPJMD')?>" class="dropdown-item">Sasaran</a>
+                                <a href="<?=base_url('Super/TahapanRPJMD')?>" class="dropdown-item">Tahapan</a>
+                                <a href="<?=base_url('Super/IUPRPJMD')?>" class="dropdown-item">IUP RPJMD</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                 <div class="dropdown">
+                
+                <!-- Menu Daerah -->
+                <div class="dropdown">
                     <a href="#" class="navbar-item">Daerah <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
                     <div class="dropdown-content">
-                        <a href="#" class="dropdown-item">RPJPD</a>
-                        <a href="#" class="dropdown-item">RPJMD</a>
-                        <a href="#" class="dropdown-item">Cascading</a>
-                        <a href="#" class="dropdown-item">Isu Daerah</a>
+                         <!-- RPJPD Submenu -->
+                        <div class="dropdown-submenu">
+                            <a href="#" class="dropdown-item">RPJPD</a>
+                            <div class="dropdown-submenu-content">
+                                <a href="<?=base_url('Admin/VisiRPJPD')?>" class="dropdown-item">Visi</a>
+                                <a href="<?=base_url('Admin/MisiRPJPD')?>" class="dropdown-item">Misi</a>
+                                <a href="<?=base_url('Admin/TujuanRPJPD')?>" class="dropdown-item">Tujuan</a>
+                                <a href="<?=base_url('Admin/SasaranRPJPD')?>" class="dropdown-item">Sasaran</a>
+                                <a href="<?=base_url('Admin/TahapanRPJPD')?>" class="dropdown-item">Tahapan</a>
+                            </div>
+                        </div>
+                        <div class="dropdown-submenu">
+                            <a href="#" class="dropdown-item">RPJMD</a>
+                            <div class="dropdown-submenu-content">
+                                <a href="<?=base_url('Admin/VisiRPJMD')?>" class="dropdown-item">Visi</a>
+                                <a href="<?=base_url('Admin/MisiRPJMD')?>" class="dropdown-item">Misi</a>
+                                <a href="<?=base_url('Admin/TujuanRPJMD')?>" class="dropdown-item">Tujuan</a>
+                                <a href="<?=base_url('Admin/SasaranRPJMD')?>" class="dropdown-item">Sasaran</a>
+                                <a href="<?=base_url('Admin/TahapanRPJMD')?>" class="dropdown-item">Tahapan</a>
+                            </div>
+                        </div>
+                        <div class="dropdown-submenu">
+                            <a href="#" class="dropdown-item">Cascading</a>
+                            <div class="dropdown-submenu-content">
+                                <a href="<?=base_url('Admin/kelola_instansi')?>" class="dropdown-item">Daftar Instansi</a>
+                                <a href="<?=base_url('Admin/Iku')?>" class="dropdown-item">IKU</a>
+                                <a href="<?=base_url('Admin/Ikd')?>" class="dropdown-item">IKD</a>
+                            </div>
+                        </div>
+                        <div class="dropdown-submenu">
+                            <a href="#" class="dropdown-item">Isu Daerah</a>
+                            <div class="dropdown-submenu-content">
+                                <a href="<?=base_url('Admin/PermasalahanPokok')?>" class="dropdown-item">Permasalahan Pokok</a>
+                                <a href="<?=base_url('Admin/IsuKLHS')?>" class="dropdown-item">Isu KLHS</a>
+                                <a href="<?=base_url('Admin/IsuStrategisDaerah')?>" class="dropdown-item">Isu Strategis</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                
                 <button class="logout-btn" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i>
                     Logout
@@ -392,11 +458,73 @@
                 </div>
             </div>
         </div>
+<script>
+        // Logout function
+        function logout() {
+            window.location.href = '/ippd';
+        }
 
-        <script>
-            // Logout function
-            function logout() {
-                // Redirect to logout page or clear session
-                window.location.href = '/ippd';
+        // Mobile menu handling
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle mobile menu clicks
+            if (window.innerWidth <= 768) {
+                document.addEventListener('click', function(e) {
+                    // Close all dropdowns if clicking outside
+                    if (!e.target.closest('.dropdown')) {
+                        document.querySelectorAll('.dropdown-content, .dropdown-submenu-content').forEach(menu => {
+                            menu.style.display = 'none';
+                        });
+                        document.querySelectorAll('.dropdown, .dropdown-submenu').forEach(item => {
+                            item.classList.remove('active');
+                        });
+                    }
+                });
+
+                // Toggle main dropdowns
+                document.querySelectorAll('.navbar-item').forEach(item => {
+                    item.addEventListener('click', function(e) {
+                        if (window.innerWidth <= 768 && this.nextElementSibling && 
+                            this.nextElementSibling.classList.contains('dropdown-content')) {
+                            e.preventDefault();
+                            const dropdown = this.closest('.dropdown');
+                            const content = dropdown.querySelector('.dropdown-content');
+                            
+                            // Close other dropdowns
+                            document.querySelectorAll('.dropdown-content, .dropdown-submenu-content').forEach(menu => {
+                                if (menu !== content) menu.style.display = 'none';
+                            });
+                            
+                            // Toggle current dropdown
+                            content.style.display = content.style.display === 'block' ? 'none' : 'block';
+                            dropdown.classList.toggle('active');
+                        }
+                    });
+                });
+
+                // Toggle submenus
+                document.querySelectorAll('.dropdown-submenu > .dropdown-item').forEach(item => {
+                    item.addEventListener('click', function(e) {
+                        if (window.innerWidth <= 768) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const submenu = this.nextElementSibling;
+                            const isVisible = submenu.style.display === 'block';
+                            
+                            // Close all submenus first
+                            document.querySelectorAll('.dropdown-submenu-content').forEach(sm => {
+                                sm.style.display = 'none';
+                            });
+                            
+                            // Toggle current submenu if it wasn't visible
+                            if (!isVisible) {
+                                submenu.style.display = 'block';
+                                this.closest('.dropdown-submenu').classList.add('active');
+                            }
+                        }
+                    });
+                });
             }
-        </script>
+        });
+    </script>
+</body>
+</html>
