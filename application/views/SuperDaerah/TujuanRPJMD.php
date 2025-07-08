@@ -5,7 +5,7 @@
                     <div class="data-table-list">
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
-                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputSasaran"><i class="notika-icon notika-edit"></i> <b>Input Sasaran RPJPD</b></button>
+                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputTujuan"><i class="notika-icon notika-edit"></i> <b>Input Tujuan RPJMD</b></button>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -13,20 +13,20 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 10%;" class="text-center">No</th>
-                                        <th style="width: 70%;">Sasaran RPJPD</th>
+                                        <th style="width: 70%;">Tujuan RPJMD</th>
                                         <th style="width: 10%;">Periode</th>
                                         <th style="width: 10%;" class="text-center">Edit</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php $No = 1; foreach ($Sasaran as $key) { ?>
+                                    <?php $No = 1; foreach ($Tujuan as $key) { ?>
                                     <tr>
                                         <td style="vertical-align: middle;" class="text-center"><?=$No++?></td>
-                                        <td style="vertical-align: middle;"><?=$key['Sasaran']?></td>
+                                        <td style="vertical-align: middle;"><?=$key['Tujuan']?></td>
                                         <td style="vertical-align: middle;"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></td>
                                         <td class="text-center">
                                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['_Id'].'|'.$key['Sasaran'].'|'.$key['Id_'].'|'.$key['IdP']?>"><i class="notika-icon notika-edit"></i></button>
+                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['_Id'].'|'.$key['Tujuan'].'|'.$key['Id_'].'|'.$key['IdP']?>"><i class="notika-icon notika-edit"></i></button>
                                                 <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
                                             </div>
                                         </td>
@@ -40,7 +40,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="ModalInputSasaran" role="dialog">
+    <div class="modal fade" id="ModalInputTujuan" role="dialog">
         <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);overflow-x: hidden;overflow-y: auto;max-height: 550px;">
             <div class="modal-content">
                 <div class="modal-header">
@@ -69,21 +69,21 @@
                                         </div>
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Tujuan RPJPD</b></label>
+                                                <label class="hrzn-fm"><b>Misi RPJMD</b></label>
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <select class="form-control" id="IdTujuan"></select>
+                                                    <select class="form-control" id="IdMisi"></select>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="row" style="margin-top: 9px;">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Sasaran RPJPD</b></label>
+                                                <label class="hrzn-fm"><b>Tujuan RPJMD</b></label>
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <textarea class="form-control" rows="3" id="Sasaran" placeholder="Input Sasaran RPJPD"></textarea>
+                                                    <textarea class="form-control" rows="3" id="Tujuan" placeholder="Input Tujuan RPJMD"></textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -93,9 +93,9 @@
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <select class="form-control" id="PeriodeRPJPDP">
+                                                    <select class="form-control" id="PeriodeRPJMDP">
                                                         <option value="">Pilih Periode</option>
-                                                        <?php foreach ($VisiRPJPDP as $key) { ?>
+                                                        <?php foreach ($VisiRPJMDP as $key) { ?>
                                                             <option value="<?=$key['Id']?>"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></option>
                                                         <?php } ?>
                                                     </select>
@@ -104,18 +104,18 @@
                                         </div>
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Sasaran RPJPD Provinsi</b></label>
+                                                <label class="hrzn-fm"><b>Tujuan RPJMD Provinsi</b></label>
                                             </div>
                                             <div style="margin-top: 3px;" class="col-lg-9">
                                                 <div class="accordion-stn">
-                                                    <div class="panel-group" data-collapse-color="nk-green" id="AccrodionSasaranRPJPDP" role="tablist" aria-multiselectable="true">
+                                                    <div class="panel-group" data-collapse-color="nk-green" id="AccrodionTujuanRPJMDP" role="tablist" aria-multiselectable="true">
                                                         <div class="panel panel-collapse notika-accrodion-cus">
                                                             <div class="panel-heading" role="tab">
-                                                                <b><a data-toggle="collapse" data-parent="#AccrodionSasaranRPJPDP" href="#SasaranRPJPDP-one" aria-expanded="true">Pilih Sasaran RPJPD</a></b>
+                                                                <b><a data-toggle="collapse" data-parent="#AccrodionTujuanRPJMDP" href="#TujuanRPJMDP-one" aria-expanded="true">Pilih Tujuan RPJMD</a></b>
                                                             </div>
-                                                            <div id="SasaranRPJPDP-one" class="collapse in" role="tabpanel">
+                                                            <div id="TujuanRPJMDP-one" class="collapse in" role="tabpanel">
                                                                 <div class="panel-body" style="padding-top: 0px;">
-                                                                    <div class="nk-int-st text-justify" id="SasaranRPJPDP"></div>
+                                                                    <div class="nk-int-st text-justify" id="TujuanRPJMDP"></div>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -129,9 +129,9 @@
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <select class="form-control" id="PeriodeRPJPN">
+                                                    <select class="form-control" id="PeriodeRPJMN">
                                                         <option value="">Pilih Periode</option>
-                                                        <?php foreach ($VisiRPJPN as $key) { ?>
+                                                        <?php foreach ($VisiRPJMN as $key) { ?>
                                                             <option value="<?=$key['Id']?>"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></option>
                                                         <?php } ?>
                                                     </select>
@@ -140,18 +140,18 @@
                                         </div>
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Sasaran RPJPN</b></label>
+                                                <label class="hrzn-fm"><b>Tujuan RPJMN</b></label>
                                             </div>
                                             <div style="margin-top: 3px;" class="col-lg-9">
                                                 <div class="accordion-stn">
-                                                    <div class="panel-group" data-collapse-color="nk-green" id="AccrodionSasaranRPJPN" role="tablist" aria-multiselectable="true">
+                                                    <div class="panel-group" data-collapse-color="nk-green" id="AccrodionTujuanRPJMN" role="tablist" aria-multiselectable="true">
                                                         <div class="panel panel-collapse notika-accrodion-cus">
                                                             <div class="panel-heading" role="tab">
-                                                                <b><a data-toggle="collapse" data-parent="#AccrodionSasaranRPJPN" href="#SasaranRPJPN-one" aria-expanded="true">Pilih Sasaran RPJPN</a></b>
+                                                                <b><a data-toggle="collapse" data-parent="#AccrodionTujuanRPJMN" href="#TujuanRPJMN-one" aria-expanded="true">Pilih Tujuan RPJMN</a></b>
                                                             </div>
-                                                            <div id="SasaranRPJPN-one" class="collapse in" role="tabpanel">
+                                                            <div id="TujuanRPJMN-one" class="collapse in" role="tabpanel">
                                                                 <div class="panel-body" style="padding-top: 0px;">
-                                                                    <div class="nk-int-st text-justify" id="SasaranRPJPN"></div>
+                                                                    <div class="nk-int-st text-justify" id="TujuanRPJMN"></div>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -177,7 +177,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="ModalEditSasaran" role="dialog">
+    <div class="modal fade" id="ModalEditTujuan" role="dialog">
         <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);overflow-x: hidden;overflow-y: auto;max-height: 550px;">
             <div class="modal-content">
                 <div class="modal-header">
@@ -205,22 +205,22 @@
                                         </div>
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Tujuan RPJPD</b></label>
+                                                <label class="hrzn-fm"><b>Misi RPJMD</b></label>
                                                 <input type="hidden" class="form-control input-sm" id="Id">
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <select class="form-control" id="_IdTujuan"></select>
+                                                    <select class="form-control" id="_IdMisi"></select>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="row" style="margin-top: 9px;">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Sasaran RPJPD</b></label>
+                                                <label class="hrzn-fm"><b>Tujuan RPJMD</b></label>
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <textarea class="form-control" rows="3" id="_Sasaran" placeholder="Input Sasaran RPJPD"></textarea>
+                                                    <textarea class="form-control" rows="3" id="_Tujuan" placeholder="Input Tujuan RPJMD"></textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -230,9 +230,9 @@
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <select class="form-control" id="PeriodeRPJPDP_">
+                                                    <select class="form-control" id="PeriodeRPJMDP_">
                                                         <option value="">Pilih Periode</option>
-                                                        <?php foreach ($VisiRPJPDP as $key) { ?>
+                                                        <?php foreach ($VisiRPJMDP as $key) { ?>
                                                             <option value="<?=$key['Id']?>"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></option>
                                                         <?php } ?>
                                                     </select>
@@ -241,18 +241,18 @@
                                         </div>
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Sasaran RPJPD Provinsi</b></label>
+                                                <label class="hrzn-fm"><b>Tujuan RPJMD Provinsi</b></label>
                                             </div>
                                             <div style="margin-top: 3px;" class="col-lg-9">
                                                 <div class="accordion-stn">
-                                                    <div class="panel-group" data-collapse-color="nk-green" id="AccrodionSasaranRPJPDP_" role="tablist" aria-multiselectable="true">
+                                                    <div class="panel-group" data-collapse-color="nk-green" id="AccrodionTujuanRPJMDP_" role="tablist" aria-multiselectable="true">
                                                         <div class="panel panel-collapse notika-accrodion-cus">
                                                             <div class="panel-heading" role="tab">
-                                                                <b><a data-toggle="collapse" data-parent="#AccrodionSasaranRPJPDP_" href="#_SasaranRPJPDP" aria-expanded="true">Pilih Sasaran RPJPD</a></b>
+                                                                <b><a data-toggle="collapse" data-parent="#AccrodionTujuanRPJMDP_" href="#_TujuanRPJMDP" aria-expanded="true">Pilih Tujuan RPJMD</a></b>
                                                             </div>
-                                                            <div id="_SasaranRPJPDP" class="collapse in" role="tabpanel">
+                                                            <div id="_TujuanRPJMDP" class="collapse in" role="tabpanel">
                                                                 <div class="panel-body" style="padding-top: 0px;">
-                                                                    <div class="nk-int-st text-justify" id="SasaranRPJPDP_"></div>
+                                                                    <div class="nk-int-st text-justify" id="TujuanRPJMDP_"></div>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -266,9 +266,9 @@
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <select class="form-control" id="PeriodeRPJPN_">
+                                                    <select class="form-control" id="PeriodeRPJMN_">
                                                         <option value="">Pilih Periode</option>
-                                                        <?php foreach ($VisiRPJPN as $key) { ?>
+                                                        <?php foreach ($VisiRPJMN as $key) { ?>
                                                             <option value="<?=$key['Id']?>"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></option>
                                                         <?php } ?>
                                                     </select>
@@ -277,18 +277,18 @@
                                         </div>
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Sasaran RPJPN</b></label>
+                                                <label class="hrzn-fm"><b>Tujuan RPJMN</b></label>
                                             </div>
                                             <div style="margin-top: 3px;" class="col-lg-9">
                                                 <div class="accordion-stn">
-                                                    <div class="panel-group" data-collapse-color="nk-green" id="AccrodionSasaranRPJPN_" role="tablist" aria-multiselectable="true">
+                                                    <div class="panel-group" data-collapse-color="nk-green" id="AccrodionTujuanRPJMN_" role="tablist" aria-multiselectable="true">
                                                         <div class="panel panel-collapse notika-accrodion-cus">
                                                             <div class="panel-heading" role="tab">
-                                                                <b><a data-toggle="collapse" data-parent="#AccrodionSasaranRPJPN_" href="#_SasaranRPJPN" aria-expanded="true">Pilih Sasaran RPJPN</a></b>
+                                                                <b><a data-toggle="collapse" data-parent="#AccrodionTujuanRPJMN_" href="#_TujuanRPJMN" aria-expanded="true">Pilih Tujuan RPJMN</a></b>
                                                             </div>
-                                                            <div id="_SasaranRPJPN" class="collapse in" role="tabpanel">
+                                                            <div id="_TujuanRPJMN" class="collapse in" role="tabpanel">
                                                                 <div class="panel-body" style="padding-top: 0px;">
-                                                                    <div class="nk-int-st text-justify" id="SasaranRPJPN_"></div>
+                                                                    <div class="nk-int-st text-justify" id="TujuanRPJMN_"></div>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -333,13 +333,13 @@
                 if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"Admin/GetTujuanRPJPD", {Id : $("#Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"SuperDaerah/GetMisiRPJMD", {Id : $("#Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
-                        var Tujuan = ''
+                        var Misi = ''
                         for (let i = 0; i < Data.length; i++) {
-                            Tujuan += '<option value="'+Data[i].Id+'">'+Data[i].Tujuan+'</option>'
+                            Misi += '<option value="'+Data[i].Id+'">'+Data[i].Misi+'</option>'
                         }
-                        $("#IdTujuan").html(Tujuan)
+                        $("#IdMisi").html(Misi)
                     })                         
                 }
             });
@@ -348,106 +348,106 @@
                 if ($("#_Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"Admin/GetTujuanRPJPD", {Id : $("#_Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"SuperDaerah/GetMisiRPJMD", {Id : $("#_Periode").val()}).done(function(Respon) {
+                        var Data = JSON.parse(Respon)
+                        var Misi = ''
+                        for (let i = 0; i < Data.length; i++) {
+                            Misi += '<option value="'+Data[i].Id+'">'+Data[i].Misi+'</option>'
+                        }
+                        $("#_IdMisi").html(Misi)
+                    })                         
+                }
+            });
+
+            $("#PeriodeRPJMN").change(function(){
+                if ($("#PeriodeRPJMN").val() == "") {
+                    alert("Mohon Input Periode RPJMN")
+                } else {
+                    $.post(BaseURL+"SuperDaerah/GetTujuanRPJMN", {Id : $("#PeriodeRPJMN").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Tujuan = ''
                         for (let i = 0; i < Data.length; i++) {
-                            Tujuan += '<option value="'+Data[i].Id+'">'+Data[i].Tujuan+'</option>'
+                            Tujuan += '<label><input style="margin-top: 10px;" type="checkbox" name="_Tujuan" value="'+Data[i].Id+'"> '+Data[i].Tujuan+'</label><br>'
                         }
-                        $("#_IdTujuan").html(Tujuan)
+                        $("#TujuanRPJMN").html(Tujuan)
                     })                         
                 }
             });
 
-            $("#PeriodeRPJPN").change(function(){
-                if ($("#PeriodeRPJPN").val() == "") {
-                    alert("Mohon Input Periode RPJPN")
+            $("#PeriodeRPJMN_").change(function(){
+                if ($("#PeriodeRPJMN_").val() == "") {
+                    alert("Mohon Input Periode RPJMN")
                 } else {
-                    $.post(BaseURL+"Admin/GetSasaranRPJPN", {Id : $("#PeriodeRPJPN").val()}).done(function(Respon) {
+                    $.post(BaseURL+"SuperDaerah/GetTujuanRPJMN", {Id : $("#PeriodeRPJMN_").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
-                        var Sasaran = ''
+                        var Tujuan = ''
                         for (let i = 0; i < Data.length; i++) {
-                            Sasaran += '<label><input style="margin-top: 10px;" type="checkbox" name="_Sasaran" value="'+Data[i].Id+'"> '+Data[i].Sasaran+'</label><br>'
+                            Tujuan += '<label><input style="margin-top: 10px;" type="checkbox" name="Tujuan_" value="'+Data[i].Id+'"> '+Data[i].Tujuan+'</label><br>'
                         }
-                        $("#SasaranRPJPN").html(Sasaran)
+                        $("#TujuanRPJMN_").html(Tujuan)
                     })                         
                 }
             });
 
-            $("#PeriodeRPJPN_").change(function(){
-                if ($("#PeriodeRPJPN_").val() == "") {
-                    alert("Mohon Input Periode RPJPN")
+            $("#PeriodeRPJMDP").change(function(){
+                if ($("#PeriodeRPJMDP").val() == "") {
+                    alert("Mohon Input Periode RPJMD Provinsi")
                 } else {
-                    $.post(BaseURL+"Admin/GetSasaranRPJPN", {Id : $("#PeriodeRPJPN_").val()}).done(function(Respon) {
+                    $.post(BaseURL+"SuperDaerah/GetTujuanRPJMDP", {Id : $("#PeriodeRPJMDP").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
-                        var Sasaran = ''
+                        var Tujuan = ''
                         for (let i = 0; i < Data.length; i++) {
-                            Sasaran += '<label><input style="margin-top: 10px;" type="checkbox" name="Sasaran_" value="'+Data[i].Id+'"> '+Data[i].Sasaran+'</label><br>'
+                            Tujuan += '<label><input style="margin-top: 10px;" type="checkbox" name="_TujuanRPJMDP" value="'+Data[i].Id+'"> '+Data[i].Tujuan+'</label><br>'
                         }
-                        $("#SasaranRPJPN_").html(Sasaran)
+                        $("#TujuanRPJMDP").html(Tujuan)
                     })                         
                 }
             });
 
-            $("#PeriodeRPJPDP").change(function(){
-                if ($("#PeriodeRPJPDP").val() == "") {
-                    alert("Mohon Input Periode RPJPD Provinsi")
+            $("#PeriodeRPJMDP_").change(function(){
+                if ($("#PeriodeRPJMDP_").val() == "") {
+                    alert("Mohon Input Periode RPJMD Provinsi")
                 } else {
-                    $.post(BaseURL+"Admin/GetSasaranRPJPDP", {Id : $("#PeriodeRPJPDP").val()}).done(function(Respon) {
+                    $.post(BaseURL+"SuperDaerah/GetTujuanRPJMDP", {Id : $("#PeriodeRPJMDP_").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
-                        var Sasaran = ''
+                        var Tujuan = ''
                         for (let i = 0; i < Data.length; i++) {
-                            Sasaran += '<label><input style="margin-top: 10px;" type="checkbox" name="_SasaranRPJPDP" value="'+Data[i].Id+'"> '+Data[i].Sasaran+'</label><br>'
+                            Tujuan += '<label><input style="margin-top: 10px;" type="checkbox" name="Tujuan_RPJMDP" value="'+Data[i].Id+'"> '+Data[i].Tujuan+'</label><br>'
                         }
-                        $("#SasaranRPJPDP").html(Sasaran)
-                    })                         
-                }
-            });
-
-            $("#PeriodeRPJPDP_").change(function(){
-                if ($("#PeriodeRPJPDP_").val() == "") {
-                    alert("Mohon Input Periode RPJPD Provinsi")
-                } else {
-                    $.post(BaseURL+"Admin/GetSasaranRPJPDP", {Id : $("#PeriodeRPJPDP_").val()}).done(function(Respon) {
-                        var Data = JSON.parse(Respon)
-                        var Sasaran = ''
-                        for (let i = 0; i < Data.length; i++) {
-                            Sasaran += '<label><input style="margin-top: 10px;" type="checkbox" name="Sasaran_RPJPDP" value="'+Data[i].Id+'"> '+Data[i].Sasaran+'</label><br>'
-                        }
-                        $("#SasaranRPJPDP_").html(Sasaran)
+                        $("#TujuanRPJMDP_").html(Tujuan)
                     })                         
                 }
             });
 
             $("#Input").click(function() {
-                var RPJPDP = []
-                $.each($("input[name='_SasaranRPJPDP']:checked"), function(){
-                    RPJPDP.push($(this).val())
+                var RPJMDP = []
+                $.each($("input[name='_TujuanRPJMDP']:checked"), function(){
+                    RPJMDP.push($(this).val())
                 })
-                var RPJPN = []
-                $.each($("input[name='_Sasaran']:checked"), function(){
-                    RPJPN.push($(this).val())
+                var RPJMN = []
+                $.each($("input[name='_Tujuan']:checked"), function(){
+                    RPJMN.push($(this).val())
                 })
                 if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
-                } else if ($("#Sasaran").val() == "") {
-                    alert('Input Sasaran Belum Benar!')
-                } else if ($("#PeriodeRPJPDP").val() == "") {
-                    alert("Mohon Input Periode RPJPD Provinsi")
-                } else if (!RPJPDP.length) {
-                    alert("Mohon Checklist Sasaran RPJPN!")
-                } else if ($("#PeriodeRPJPN").val() == "") {
-                    alert("Mohon Input Periode RPJPN")
-                } else if (!RPJPN.length) {
-                    alert("Mohon Checklist Sasaran RPJPN!")
+                } else if ($("#Tujuan").val() == "") {
+                    alert('Input Tujuan Belum Benar!')
+                } else if ($("#PeriodeRPJMDP").val() == "") {
+                    alert("Mohon Input Periode RPJMD Provinsi")
+                } else if (!RPJMDP.length) {
+                    alert("Mohon Checklist Tujuan RPJMN!")
+                } else if ($("#PeriodeRPJMN").val() == "") {
+                    alert("Mohon Input Periode RPJMN")
+                } else if (!RPJMN.length) {
+                    alert("Mohon Checklist Tujuan RPJMN!")
                 } else {
-                    var Sasaran = { _Id    : $("#IdTujuan").val(),
-                                 Id_    : RPJPN.join("$"),
-                                 IdP    : RPJPDP.join("$"),
-                                 Sasaran   : $("#Sasaran").val() }
-                    $.post(BaseURL+"Admin/InputSasaranRPJPD", Sasaran).done(function(Respon) {
+                    var Tujuan = { _Id    : $("#IdMisi").val(),
+                                 Id_    : RPJMN.join("$"),
+                                 IdP    : RPJMDP.join("$"),
+                                 Tujuan   : $("#Tujuan").val() }
+                    $.post(BaseURL+"SuperDaerah/InputTujuanRPJMD", Tujuan).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Admin/SasaranRPJPD"
+                            window.location = BaseURL+"SuperDaerah/TujuanRPJMD"
                         } else {
                             alert(Respon)
                         }
@@ -459,85 +459,85 @@
                 var Data = $(this).attr('Edit')
                 var Pisah = Data.split("|");
                 $("#Id").val(Pisah[0])
-                $.post(BaseURL+"Admin/GetPeriodeSasaranRPJPD", {Id : Pisah[1]}).done(function(Respon) {
+                $.post(BaseURL+"SuperDaerah/GetPeriodeTujuanRPJMD", {Id : Pisah[1]}).done(function(Respon) {
                     var Data = JSON.parse(Respon)
                     $("#_Periode").val(Data[0].IdVisi)
-                    $.post(BaseURL+"Admin/GetTujuanRPJPD", {Id : $("#_Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"SuperDaerah/GetMisiRPJMD", {Id : $("#_Periode").val()}).done(function(Respon) {
+                        var Data = JSON.parse(Respon)
+                        var Misi = ''
+                        for (let i = 0; i < Data.length; i++) {
+                            Misi += '<option value="'+Data[i].Id+'">'+Data[i].Misi+'</option>'
+                        }
+                        $("#_IdMisi").html(Misi)
+                        $("#_IdMisi").val(Pisah[1])
+                    })
+                })
+                $("#_Tujuan").val(Pisah[2])
+                $.post(BaseURL+"SuperDaerah/GetVisiRPJMN", {Id : Pisah[3].split("$")[0]}).done(function(Respon) {
+                    var Data = JSON.parse(Respon)
+                    $("#PeriodeRPJMN_").val(Data[0].IdVisi)
+                    $.post(BaseURL+"SuperDaerah/GetTujuanRPJMN", {Id : $("#PeriodeRPJMN_").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Tujuan = ''
                         for (let i = 0; i < Data.length; i++) {
-                            Tujuan += '<option value="'+Data[i].Id+'">'+Data[i].Tujuan+'</option>'
+                            Tujuan += '<label><input style="margin-top: 10px;" type="checkbox" name="Tujuan_" value="'+Data[i].Id+'"> '+Data[i].Tujuan+'</label><br>'
                         }
-                        $("#_IdTujuan").html(Tujuan)
-                        $("#_IdTujuan").val(Pisah[1])
-                    })
-                })
-                $("#_Sasaran").val(Pisah[2])
-                $.post(BaseURL+"Admin/GetVisiRPJPN", {Id : Pisah[3].split("$")[0]}).done(function(Respon) {
-                    var Data = JSON.parse(Respon)
-                    $("#PeriodeRPJPN_").val(Data[0].IdVisi)
-                    $.post(BaseURL+"Admin/GetSasaranRPJPN", {Id : $("#PeriodeRPJPN_").val()}).done(function(Respon) {
-                        var Data = JSON.parse(Respon)
-                        var Sasaran = ''
-                        for (let i = 0; i < Data.length; i++) {
-                            Sasaran += '<label><input style="margin-top: 10px;" type="checkbox" name="Sasaran_" value="'+Data[i].Id+'"> '+Data[i].Sasaran+'</label><br>'
-                        }
-                        $("#SasaranRPJPN_").html(Sasaran)
-                        $("input[name='Sasaran_']").prop('checked', false);
+                        $("#TujuanRPJMN_").html(Tujuan)
+                        $("input[name='Tujuan_']").prop('checked', false);
                         Pisah[3].split("$").forEach(function(m) {
-                            $("input[name='Sasaran_'][value='" + m + "']").prop('checked', true)
+                            $("input[name='Tujuan_'][value='" + m + "']").prop('checked', true)
                         })
                     })
                 }) 
-                $.post(BaseURL+"Admin/GetVisiRPJPDP", {Id : Pisah[4].split("$")[0]}).done(function(Respon) {
+                $.post(BaseURL+"SuperDaerah/GetVisiRPJMDP", {Id : Pisah[4].split("$")[0]}).done(function(Respon) {
                     var Data = JSON.parse(Respon)
-                    $("#PeriodeRPJPDP_").val(Data[0].IdVisi)
-                    $.post(BaseURL+"Admin/GetSasaranRPJPDP", {Id : $("#PeriodeRPJPDP_").val()}).done(function(Respon) {
+                    $("#PeriodeRPJMDP_").val(Data[0].IdVisi)
+                    $.post(BaseURL+"SuperDaerah/GetTujuanRPJMDP", {Id : $("#PeriodeRPJMDP_").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
-                        var Sasaran = ''
+                        var Tujuan = ''
                         for (let i = 0; i < Data.length; i++) {
-                            Sasaran += '<label><input style="margin-top: 10px;" type="checkbox" name="Sasaran_RPJPDP" value="'+Data[i].Id+'"> '+Data[i].Sasaran+'</label><br>'
+                            Tujuan += '<label><input style="margin-top: 10px;" type="checkbox" name="Tujuan_RPJMDP" value="'+Data[i].Id+'"> '+Data[i].Tujuan+'</label><br>'
                         }
-                        $("#SasaranRPJPDP_").html(Sasaran)
-                        $("input[name='Sasaran_RPJPDP']").prop('checked', false);
+                        $("#TujuanRPJMDP_").html(Tujuan)
+                        $("input[name='Tujuan_RPJMDP']").prop('checked', false);
                         Pisah[4].split("$").forEach(function(m) {
-                            $("input[name='Sasaran_RPJPDP'][value='" + m + "']").prop('checked', true)
+                            $("input[name='Tujuan_RPJMDP'][value='" + m + "']").prop('checked', true)
                         })
                     })
                 })                         
-                $('#ModalEditSasaran').modal("show")
+                $('#ModalEditTujuan').modal("show")
             })
 
             $("#Edit").click(function() {
-                var RPJPDP = []
-                $.each($("input[name='Sasaran_RPJPDP']:checked"), function(){
-                    RPJPDP.push($(this).val())
+                var RPJMDP = []
+                $.each($("input[name='Tujuan_RPJMDP']:checked"), function(){
+                    RPJMDP.push($(this).val())
                 })
-                var RPJPN = []
-                $.each($("input[name='Sasaran_']:checked"), function(){
-                    RPJPN.push($(this).val())
+                var RPJMN = []
+                $.each($("input[name='Tujuan_']:checked"), function(){
+                    RPJMN.push($(this).val())
                 })
                 if ($("#_Periode").val() == "") {
                     alert("Mohon Input Periode")
-                } else if ($("#_Sasaran").val() == "") {
-                    alert('Input Sasaran Belum Benar!')
-                } else if ($("#PeriodeRPJPDP_").val() == "") {
-                    alert("Mohon Input Periode RPJPD Provinsi")
-                } else if (!RPJPDP.length) {
-                    alert("Mohon Checklist Sasaran RPJPN!")
-                } else if ($("#PeriodeRPJPN_").val() == "") {
-                    alert("Mohon Input Periode RPJPN")
-                } else if (!RPJPN.length) {
-                    alert("Mohon Checklist Sasaran RPJPN!")
+                } else if ($("#_Tujuan").val() == "") {
+                    alert('Input Tujuan Belum Benar!')
+                } else if ($("#PeriodeRPJMDP_").val() == "") {
+                    alert("Mohon Input Periode RPJMD Provinsi")
+                } else if (!RPJMDP.length) {
+                    alert("Mohon Checklist Tujuan RPJMN!")
+                } else if ($("#PeriodeRPJMN_").val() == "") {
+                    alert("Mohon Input Periode RPJMN")
+                } else if (!RPJMN.length) {
+                    alert("Mohon Checklist Tujuan RPJMN!")
                 } else {
-                    var Sasaran = { Id     : $("#Id").val(),
-                                 _Id    : $("#_IdTujuan").val(),
-                                 Id_    : RPJPN.join("$"),
-                                 IdP    : RPJPDP.join("$"),
-                                 Sasaran   : $("#_Sasaran").val() }
-                    $.post(BaseURL+"Admin/EditSasaranRPJPD", Sasaran).done(function(Respon) {
+                    var Tujuan = { Id     : $("#Id").val(),
+                                 _Id    : $("#_IdMisi").val(),
+                                 Id_    : RPJMN.join("$"),
+                                 IdP    : RPJMDP.join("$"),
+                                 Tujuan   : $("#_Tujuan").val() }
+                    $.post(BaseURL+"SuperDaerah/EditTujuanRPJMD", Tujuan).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Admin/SasaranRPJPD"
+                            window.location = BaseURL+"SuperDaerah/TujuanRPJMD"
                         } else {
                             alert(Respon)
                         }
@@ -546,10 +546,10 @@
             })
 
             $('#data-table-basic tbody').on('click', '.Hapus', function () {
-                var Sasaran = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"Admin/HapusSasaranRPJPD", Sasaran).done(function(Respon) {
+                var Tujuan = { Id: $(this).attr('Hapus') }
+                $.post(BaseURL+"SuperDaerah/HapusTujuanRPJMD", Tujuan).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Admin/SasaranRPJPD"
+                        window.location = BaseURL+"SuperDaerah/TujuanRPJMD"
                     } else {
                         alert(Respon)
                     }

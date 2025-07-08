@@ -354,7 +354,7 @@
             if ($("#Username").val() == 'admin') {
               window.location = BaseURL + "Super/VisiRPJPN";	
             } else {
-              window.location = BaseURL + "Admin/VisiRPJPD";
+              window.location = BaseURL + "SuperDaerah/VisiRPJPD";
             }
           } else {
             alert(Respon);

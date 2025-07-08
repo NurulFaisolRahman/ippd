@@ -261,7 +261,7 @@
                 var tahunAkhir = tahunRange[1];
                 
                 $.ajax({
-                    url: BaseURL + 'Admin/GetTujuanByPeriod',
+                    url: BaseURL + 'SuperDaerah/GetTujuanByPeriod',
                     type: 'POST',
                     data: {
                         tahun_mulai: tahunMulai,
@@ -301,7 +301,7 @@
                 var tahunAkhir = tahunRange[1];
                 
                 $.ajax({
-                    url: BaseURL + 'Admin/GetTujuanByPeriod',
+                    url: BaseURL + 'SuperDaerah/GetTujuanByPeriod',
                     type: 'POST',
                     data: {
                         tahun_mulai: tahunMulai,
@@ -345,7 +345,7 @@
             }
 
             $.ajax({
-                url: BaseURL + "Admin/TambahIku",
+                url: BaseURL + "SuperDaerah/TambahIku",
                 type: "POST",
                 data: $(this).serialize(),
                 success: function(res) {
@@ -380,7 +380,7 @@
             }
 
             $.ajax({
-                url: BaseURL + "Admin/EditIku",
+                url: BaseURL + "SuperDaerah/EditIku",
                 type: "POST",
                 data: $(this).serialize(),
                 success: function(res) {
@@ -439,7 +439,7 @@
         // Hapus IKU
         $(".Hapus").click(function() {
                 var id = $(this).data('id');
-                $.post(BaseURL + "Admin/HapusIku", { id: id }).done(function(res) {
+                $.post(BaseURL + "SuperDaerah/HapusIku", { id: id }).done(function(res) {
                     if (res == '1') {
                         window.location.reload();
                     } else {

@@ -22,8 +22,8 @@
                                     <th style="width: 10%;" class="text-center">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <?php $No = 1; foreach (explode('|',)$Ikd as $key) { ?>
+                            <tbody>  
+                            <?php $No = 1; foreach (explode('|',)$Ikd as $key) { ?>
                                 <tr>
                                     <td style="vertical-align: middle;" class="text-center"><?= $No++ ?></td>
                                     <td style="vertical-align: middle;"><?= $key['indikator_sasaran'] ?></td>
