@@ -1078,46 +1078,92 @@ class Super extends CI_Controller {
       echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
   }
 
- public function IsuStrategis() {
+
+    public function IsuStrategis() {
     $Header['Halaman'] = 'Isu';
     
-    $Data['IsuStrategis'] = $this->db->query("
-        SELECT 
-            ist.*, 
-            IFNULL(k.NamaKementerian, '-') AS NamaKementerian,
-            (SELECT GROUP_CONCAT(NamaIsuKLHS SEPARATOR ', ') 
-             FROM isu_klhs 
-             WHERE FIND_IN_SET(Id, ist.IdIsuKLHS)) AS NamaIsuKLHS,
-            (SELECT GROUP_CONCAT(NamaIsuGlobal SEPARATOR ', ') 
-             FROM isu_global 
-             WHERE FIND_IN_SET(Id, ist.IdIsuGlobal)) AS NamaIsuGlobal,
-            (SELECT GROUP_CONCAT(NamaIsuNasional SEPARATOR ', ') 
-             FROM isu_nasional 
-             WHERE FIND_IN_SET(Id, ist.IdIsuNasional)) AS NamaIsuNasional,
-            (SELECT GROUP_CONCAT(NamaPermasalahanPokok SEPARATOR ', ') 
-             FROM permasalahan_pokok 
-             WHERE FIND_IN_SET(Id, ist.IdPermasalahanPokok)) AS NamaPermasalahanPokok
-        FROM isu_strategis ist
-        LEFT JOIN kementerian k ON ist.IdKementerian = k.Id
-        WHERE ist.deleted_at IS NULL
-        GROUP BY ist.Id
-        ORDER BY ist.TahunMulai DESC, ist.TahunAkhir DESC
+    // Get filter parameters
+    $periodeFilter = $this->input->get('periode');
+    $kementerianFilter = $this->input->get('kementerian');
+    
+    // Query IsuStrategis with filters
+    $this->db->select("
+        ist.*, 
+        IFNULL(k.NamaKementerian, '-') AS NamaKementerian,
+        (SELECT GROUP_CONCAT(NamaIsuKLHS SEPARATOR ', ') 
+         FROM isu_klhs 
+         WHERE FIND_IN_SET(Id, ist.IdIsuKLHS)) AS NamaIsuKLHS,
+        (SELECT GROUP_CONCAT(NamaIsuGlobal SEPARATOR ', ') 
+         FROM isu_global 
+         WHERE FIND_IN_SET(Id, ist.IdIsuGlobal)) AS NamaIsuGlobal,
+        (SELECT GROUP_CONCAT(NamaIsuNasional SEPARATOR ', ') 
+         FROM isu_nasional 
+         WHERE FIND_IN_SET(Id, ist.IdIsuNasional)) AS NamaIsuNasional,
+        (SELECT GROUP_CONCAT(NamaPermasalahanPokok SEPARATOR ', ') 
+         FROM permasalahan_pokok 
+         WHERE FIND_IN_SET(Id, ist.IdPermasalahanPokok)) AS NamaPermasalahanPokok
+    ");
+    $this->db->from('isu_strategis ist');
+    $this->db->join('kementerian k', 'ist.IdKementerian = k.Id', 'left');
+    $this->db->where('ist.deleted_at IS NULL');
+    
+    if ($periodeFilter) {
+        list($tahunMulai, $tahunAkhir) = explode('|', $periodeFilter);
+        $this->db->where('ist.TahunMulai', $tahunMulai);
+        $this->db->where('ist.TahunAkhir', $tahunAkhir);
+    }
+    
+    if ($kementerianFilter) {
+        $this->db->where('ist.IdKementerian', $kementerianFilter);
+    }
+    
+    $this->db->group_by('ist.Id');
+    $this->db->order_by('ist.TahunMulai DESC, ist.TahunAkhir DESC');
+    
+    $Data['IsuStrategis'] = $this->db->get()->result_array();
+    
+    // Get all unique periods from all related tables
+    $Data['AllPeriode'] = $this->db->query("
+        SELECT DISTINCT TahunMulai, TahunAkhir FROM kementerian WHERE deleted_at IS NULL
+        UNION
+        SELECT DISTINCT TahunMulai, TahunAkhir FROM isu_strategis WHERE deleted_at IS NULL
+        UNION
+        SELECT DISTINCT TahunMulai, TahunAkhir FROM permasalahan_pokok WHERE deleted_at IS NULL
+        UNION
+        SELECT DISTINCT TahunMulai, TahunAkhir FROM isu_klhs WHERE deleted_at IS NULL
+        UNION
+        SELECT DISTINCT TahunMulai, TahunAkhir FROM isu_global WHERE deleted_at IS NULL
+        UNION
+        SELECT DISTINCT TahunMulai, TahunAkhir FROM isu_nasional WHERE deleted_at IS NULL
+        ORDER BY TahunMulai DESC, TahunAkhir DESC
     ")->result_array();
     
+    // Get periods for input form (distinct from isu_strategis only)
     $Data['Periode'] = $this->db->query("
-        SELECT DISTINCT TahunMulai, TahunAkhir
-        FROM kementerian
-        WHERE deleted_at IS NULL
-        UNION
-        SELECT DISTINCT TahunMulai, TahunAkhir
-        FROM isu_strategis
-        WHERE deleted_at IS NULL
-        UNION
-        SELECT DISTINCT TahunMulai, TahunAkhir
-        FROM permasalahan_pokok
+        SELECT DISTINCT TahunMulai, TahunAkhir 
+        FROM isu_strategis 
         WHERE deleted_at IS NULL
         ORDER BY TahunMulai DESC, TahunAkhir DESC
     ")->result_array();
+    
+    // Get ministries based on period filter
+    if ($periodeFilter) {
+        list($tahunMulai, $tahunAkhir) = explode('|', $periodeFilter);
+        $Data['Kementerian'] = $this->db->get_where('kementerian', [
+            'TahunMulai' => $tahunMulai,
+            'TahunAkhir' => $tahunAkhir,
+            'deleted_at' => NULL
+        ])->result_array();
+    } else {
+        // Fetch all ministries if no period is selected
+        $Data['Kementerian'] = $this->db->get_where('kementerian', [
+            'deleted_at' => NULL
+        ])->result_array();
+    }
+    
+    // Store current filters
+    $Data['CurrentPeriode'] = $periodeFilter;
+    $Data['CurrentKementerian'] = $kementerianFilter;
     
     $this->load->view('Super/header', $Header);
     $this->load->view('Super/IsuStrategis', $Data);
@@ -1912,93 +1958,164 @@ public function ProgramStrategis() {
         $this->db->update('program_strategis', $data);
         echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
     }
-    public function PermasalahanPokok() {
-      $Header['Halaman'] = 'Isu';
-      
-      // Query dengan JOIN ke tabel kementerian
-      $Data['PermasalahanPokok'] = $this->db->query("
-          SELECT p.*, k.NamaKementerian 
-          FROM permasalahan_pokok p
-          LEFT JOIN kementerian k ON p.IdKementerian = k.Id
-          WHERE p.deleted_at IS NULL
-      ")->result_array();
-      
-      // Ambil data kementerian untuk dropdown
-      $Data['Kementerian'] = $this->db->get_where('kementerian', ['deleted_at' => NULL])->result_array();
-      
-      // Ambil data periode unik dari kementerian
-      $Data['Periode'] = $this->db->query("
-          SELECT DISTINCT TahunMulai, TahunAkhir 
-          FROM kementerian 
-          WHERE deleted_at IS NULL
-          ORDER BY TahunMulai DESC
-      ")->result_array();
-      
-      $this->load->view('Super/header', $Header);
-      $this->load->view('Super/PermasalahanPokok', $Data);
-  }
-
-  public function InputPermasalahanPokok() {
-      $data = [
-          'IdKementerian' => $this->input->post('IdKementerian'),
-          'NamaPermasalahanPokok' => $this->input->post('NamaPermasalahanPokok'),
-          'TahunMulai' => $this->input->post('TahunMulai'),
-          'TahunAkhir' => $this->input->post('TahunAkhir'),
-          'created_at' => date('Y-m-d H:i:s')
-      ];
-      
-      $this->db->insert('permasalahan_pokok', $data);
-      echo $this->db->affected_rows() ? '1' : 'Gagal Input Data!';
-  }
-
-  public function UpdatePermasalahanPokok() {
-      $data = [
-          'IdKementerian' => $this->input->post('IdKementerian'),
-          'NamaPermasalahanPokok' => $this->input->post('NamaPermasalahanPokok'),
-          'TahunMulai' => $this->input->post('TahunMulai'),
-          'TahunAkhir' => $this->input->post('TahunAkhir'),
-          'edited_at' => date('Y-m-d H:i:s')
-      ];
-      
-      $this->db->where('Id', $this->input->post('Id'));
-      $this->db->update('permasalahan_pokok', $data);
-      echo $this->db->affected_rows() ? '1' : 'Gagal Update Data!';
-  }
-
-  public function DeletePermasalahanPokok() {
-      $data = ['deleted_at' => date('Y-m-d H:i:s')];
-      $this->db->where('Id', $this->input->post('Id'));
-      $this->db->update('permasalahan_pokok', $data);
-      echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
-  }
-  
-  public function IsuKLHS() {
+   
+   public function PermasalahanPokok() {
     $Header['Halaman'] = 'Isu';
     
-    // Query dengan JOIN ke tabel kementerian
-    $Data['IsuKLHS'] = $this->db->query("
-        SELECT ik.*, k.NamaKementerian 
-        FROM isu_klhs ik
-        LEFT JOIN kementerian k ON ik.IdKementerian = k.Id
-        WHERE ik.deleted_at IS NULL
-    ")->result_array();
+    // Get filter parameters
+    $periodeFilter = $this->input->get('periode');
+    $kementerianFilter = $this->input->get('kementerian');
     
-    // Ambil data kementerian untuk dropdown
-    $Data['Kementerian'] = $this->db->get_where('kementerian', ['deleted_at' => NULL])->result_array();
+    // Main query with filters
+    $this->db->select('pp.*, k.NamaKementerian');
+    $this->db->from('permasalahan_pokok pp');
+    $this->db->join('kementerian k', 'pp.IdKementerian = k.Id', 'left');
+    $this->db->where('pp.deleted_at IS NULL');
     
-    // Ambil data periode unik dari kementerian
-    $Data['Periode'] = $this->db->query("
+    if ($periodeFilter) {
+        list($tahunMulai, $tahunAkhir) = explode('|', $periodeFilter);
+        $this->db->where('pp.TahunMulai', $tahunMulai);
+        $this->db->where('pp.TahunAkhir', $tahunAkhir);
+    }
+    
+    if ($kementerianFilter) {
+        $this->db->where('pp.IdKementerian', $kementerianFilter);
+    }
+    
+    $Data['PermasalahanPokok'] = $this->db->get()->result_array();
+    
+    // Get all unique periods for dropdowns
+    $Data['AllPeriode'] = $this->db->query("
         SELECT DISTINCT TahunMulai, TahunAkhir 
         FROM kementerian 
         WHERE deleted_at IS NULL
         ORDER BY TahunMulai DESC
     ")->result_array();
     
+    // Get all kementerian for input modal
+    $Data['AllKementerian'] = $this->db->get_where('kementerian', ['deleted_at' => NULL])->result_array();
+    
+    // Get kementerian based on selected periode for filter
+    if ($periodeFilter) {
+        list($tahunMulai, $tahunAkhir) = explode('|', $periodeFilter);
+        $Data['Kementerian'] = $this->db->get_where('kementerian', [
+            'TahunMulai' => $tahunMulai,
+            'TahunAkhir' => $tahunAkhir,
+            'deleted_at' => NULL
+        ])->result_array();
+    } else {
+        $Data['Kementerian'] = $this->db->get_where('kementerian', ['deleted_at' => NULL])->result_array();
+    }
+    
+    // Save current filter state
+    $Data['CurrentPeriode'] = $periodeFilter;
+    $Data['CurrentKementerian'] = $kementerianFilter;
+    
+    $this->load->view('Super/header', $Header);
+    $this->load->view('Super/PermasalahanPokok', $Data);
+}
+
+public function InputPermasalahanPokok() {
+    if (!$this->input->post('IdKementerian') || !$this->input->post('TahunMulai') || !$this->input->post('TahunAkhir')) {
+        echo 'Periode dan Kementerian harus dipilih di filter!';
+        return;
+    }
+
+    $data = [
+        'IdKementerian' => $this->input->post('IdKementerian'),
+        'NamaPermasalahanPokok' => $this->input->post('NamaPermasalahanPokok'),
+        'TahunMulai' => $this->input->post('TahunMulai'),
+        'TahunAkhir' => $this->input->post('TahunAkhir'),
+        'created_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->insert('permasalahan_pokok', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Input Data!';
+}
+
+public function UpdatePermasalahanPokok() {
+    $data = [
+        'IdKementerian' => $this->input->post('IdKementerian'),
+        'NamaPermasalahanPokok' => $this->input->post('NamaPermasalahanPokok'),
+        'TahunMulai' => $this->input->post('TahunMulai'),
+        'TahunAkhir' => $this->input->post('TahunAkhir'),
+        'edited_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->where('Id', $this->input->post('Id'));
+    $this->db->update('permasalahan_pokok', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Update Data!';
+}
+
+public function DeletePermasalahanPokok() {
+    $data = ['deleted_at' => date('Y-m-d H:i:s')];
+    $this->db->where('Id', $this->input->post('Id'));
+    $this->db->update('permasalahan_pokok', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
+}
+
+  public function IsuKLHS() {
+    $Header['Halaman'] = 'Isu';
+    
+    // Get filter parameters
+    $periodeFilter = $this->input->get('periode');
+    $kementerianFilter = $this->input->get('kementerian');
+    
+    // Main query with filters
+    $this->db->select('ik.*, k.NamaKementerian');
+    $this->db->from('isu_klhs ik');
+    $this->db->join('kementerian k', 'ik.IdKementerian = k.Id', 'left');
+    $this->db->where('ik.deleted_at IS NULL');
+    
+    if ($periodeFilter) {
+        list($tahunMulai, $tahunAkhir) = explode('|', $periodeFilter);
+        $this->db->where('ik.TahunMulai', $tahunMulai);
+        $this->db->where('ik.TahunAkhir', $tahunAkhir);
+    }
+    
+    if ($kementerianFilter) {
+        $this->db->where('ik.IdKementerian', $kementerianFilter);
+    }
+    
+    $Data['IsuKLHS'] = $this->db->get()->result_array();
+    
+    // Get all unique periods for dropdowns
+    $Data['AllPeriode'] = $this->db->query("
+        SELECT DISTINCT TahunMulai, TahunAkhir 
+        FROM kementerian 
+        WHERE deleted_at IS NULL
+        ORDER BY TahunMulai DESC
+    ")->result_array();
+    
+    // Get all kementerian for input modal
+    $Data['AllKementerian'] = $this->db->get_where('kementerian', ['deleted_at' => NULL])->result_array();
+    
+    // Get kementerian based on selected periode for filter
+    if ($periodeFilter) {
+        list($tahunMulai, $tahunAkhir) = explode('|', $periodeFilter);
+        $Data['Kementerian'] = $this->db->get_where('kementerian', [
+            'TahunMulai' => $tahunMulai,
+            'TahunAkhir' => $tahunAkhir,
+            'deleted_at' => NULL
+        ])->result_array();
+    } else {
+        $Data['Kementerian'] = [];
+    }
+    
+    // Save current filter state
+    $Data['CurrentPeriode'] = $periodeFilter;
+    $Data['CurrentKementerian'] = $kementerianFilter;
+    
     $this->load->view('Super/header', $Header);
     $this->load->view('Super/IsuKLHS', $Data);
 }
 
 public function InputIsuKLHS() {
+    if (!$this->input->post('IdKementerian') || !$this->input->post('TahunMulai') || !$this->input->post('TahunAkhir')) {
+        echo 'Periode dan Kementerian harus dipilih di filter!';
+        return;
+    }
+
     $data = [
         'IdKementerian' => $this->input->post('IdKementerian'),
         'NamaIsuKLHS' => $this->input->post('NamaIsuKLHS'),
@@ -2033,29 +2150,59 @@ public function DeleteIsuKLHS() {
 }
 
 public function IsuGlobal() {
-  $Header['Halaman'] = 'Isu';
-  
-  // Query dengan JOIN ke tabel kementerian
-  $Data['IsuGlobal'] = $this->db->query("
-      SELECT ig.*, k.NamaKementerian 
-      FROM isu_global ig
-      LEFT JOIN kementerian k ON ig.IdKementerian = k.Id
-      WHERE ig.deleted_at IS NULL
-  ")->result_array();
-  
-  // Ambil data kementerian untuk dropdown
-  $Data['Kementerian'] = $this->db->get_where('kementerian', ['deleted_at' => NULL])->result_array();
-  
-  // Ambil data periode unik dari kementerian
-  $Data['Periode'] = $this->db->query("
-      SELECT DISTINCT TahunMulai, TahunAkhir 
-      FROM kementerian 
-      WHERE deleted_at IS NULL
-      ORDER BY TahunMulai DESC
-  ")->result_array();
-  
-  $this->load->view('Super/header', $Header);
-  $this->load->view('Super/IsuGlobal', $Data);
+    $Header['Halaman'] = 'Isu';
+    
+    // Get filter parameters
+    $periodeFilter = $this->input->get('periode');
+    $kementerianFilter = $this->input->get('kementerian');
+    
+    // Main query with filters
+    $this->db->select('ig.*, k.NamaKementerian');
+    $this->db->from('isu_global ig');
+    $this->db->join('kementerian k', 'ig.IdKementerian = k.Id', 'left');
+    $this->db->where('ig.deleted_at IS NULL');
+    
+    if ($periodeFilter) {
+        list($tahunMulai, $tahunAkhir) = explode('|', $periodeFilter);
+        $this->db->where('ig.TahunMulai', $tahunMulai);
+        $this->db->where('ig.TahunAkhir', $tahunAkhir);
+    }
+    
+    if ($kementerianFilter) {
+        $this->db->where('ig.IdKementerian', $kementerianFilter);
+    }
+    
+    $Data['IsuGlobal'] = $this->db->get()->result_array();
+    
+    // Get all unique periods for dropdowns
+    $Data['AllPeriode'] = $this->db->query("
+        SELECT DISTINCT TahunMulai, TahunAkhir 
+        FROM kementerian 
+        WHERE deleted_at IS NULL
+        ORDER BY TahunMulai DESC
+    ")->result_array();
+    
+    // Get all kementerian for input modal
+    $Data['AllKementerian'] = $this->db->get_where('kementerian', ['deleted_at' => NULL])->result_array();
+    
+    // Get kementerian based on selected periode for filter
+    if ($periodeFilter) {
+        list($tahunMulai, $tahunAkhir) = explode('|', $periodeFilter);
+        $Data['Kementerian'] = $this->db->get_where('kementerian', [
+            'TahunMulai' => $tahunMulai,
+            'TahunAkhir' => $tahunAkhir,
+            'deleted_at' => NULL
+        ])->result_array();
+    } else {
+        $Data['Kementerian'] = $this->db->get_where('kementerian', ['deleted_at' => NULL])->result_array();
+    }
+    
+    // Save current filter state
+    $Data['CurrentPeriode'] = $periodeFilter;
+    $Data['CurrentKementerian'] = $kementerianFilter;
+    
+    $this->load->view('Super/header', $Header);
+    $this->load->view('Super/IsuGlobal', $Data);
 }
 
 public function InputIsuGlobal() {
@@ -2092,30 +2239,60 @@ public function DeleteIsuGlobal() {
   echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
 }
 
-public function IsuNasional(): void {
-  $Header['Halaman'] = 'Isu';
-  
-  // Query dengan JOIN ke tabel kementerian
-  $Data['IsuNasional'] = $this->db->query("
-      SELECT ina.*, k.NamaKementerian 
-      FROM isu_nasional ina
-      LEFT JOIN kementerian k ON ina.IdKementerian = k.Id
-      WHERE ina.deleted_at IS NULL
-  ")->result_array();
-  
-  // Ambil data kementerian untuk dropdown
-  $Data['Kementerian'] = $this->db->get_where('kementerian', ['deleted_at' => NULL])->result_array();
-  
-  // Ambil data periode unik dari kementerian
-  $Data['Periode'] = $this->db->query("
-      SELECT DISTINCT TahunMulai, TahunAkhir 
-      FROM kementerian 
-      WHERE deleted_at IS NULL
-      ORDER BY TahunMulai DESC
-  ")->result_array();
-  
-  $this->load->view('Super/header', $Header);
-  $this->load->view('Super/IsuNasional', $Data);
+public function IsuNasional() {
+    $Header['Halaman'] = 'Isu';
+    
+    // Get filter parameters
+    $periodeFilter = $this->input->get('periode');
+    $kementerianFilter = $this->input->get('kementerian');
+    
+    // Main query with filters
+    $this->db->select('in.*, k.NamaKementerian');
+    $this->db->from('isu_nasional in');
+    $this->db->join('kementerian k', 'in.IdKementerian = k.Id', 'left');
+    $this->db->where('in.deleted_at IS NULL');
+    
+    if ($periodeFilter) {
+        list($tahunMulai, $tahunAkhir) = explode('|', $periodeFilter);
+        $this->db->where('in.TahunMulai', $tahunMulai);
+        $this->db->where('in.TahunAkhir', $tahunAkhir);
+    }
+    
+    if ($kementerianFilter) {
+        $this->db->where('in.IdKementerian', $kementerianFilter);
+    }
+    
+    $Data['IsuNasional'] = $this->db->get()->result_array();
+    
+    // Get all unique periods for dropdowns
+    $Data['AllPeriode'] = $this->db->query("
+        SELECT DISTINCT TahunMulai, TahunAkhir 
+        FROM kementerian 
+        WHERE deleted_at IS NULL
+        ORDER BY TahunMulai DESC
+    ")->result_array();
+    
+    // Get all kementerian for input modal
+    $Data['AllKementerian'] = $this->db->get_where('kementerian', ['deleted_at' => NULL])->result_array();
+    
+    // Get kementerian based on selected periode for filter
+    if ($periodeFilter) {
+        list($tahunMulai, $tahunAkhir) = explode('|', $periodeFilter);
+        $Data['Kementerian'] = $this->db->get_where('kementerian', [
+            'TahunMulai' => $tahunMulai,
+            'TahunAkhir' => $tahunAkhir,
+            'deleted_at' => NULL
+        ])->result_array();
+    } else {
+        $Data['Kementerian'] = $this->db->get_where('kementerian', ['deleted_at' => NULL])->result_array();
+    }
+    
+    // Save current filter state
+    $Data['CurrentPeriode'] = $periodeFilter;
+    $Data['CurrentKementerian'] = $kementerianFilter;
+    
+    $this->load->view('Super/header', $Header);
+    $this->load->view('Super/IsuNasional', $Data);
 }
 
 public function InputIsuNasional() {
