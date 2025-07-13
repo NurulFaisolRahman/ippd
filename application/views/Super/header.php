@@ -358,9 +358,9 @@
     </nav>
 
     <!-- Rest of your content remains exactly the same -->
-    <div class="container mx-auto px-4 py-8 max-w-6xl">
+    <!-- <div class="container mx-auto px-4 py-8 max-w-6xl"> -->
         <!-- Tab Navigation -->
-        <div class="main-menu-area mg-tb-40">
+        <!-- <div class="main-menu-area mg-tb-40">
             <div class="container">
                 <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
@@ -518,8 +518,8 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
+        </div> -->
+    <!-- </div> -->
 
     <script>
         // Logout function

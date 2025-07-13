@@ -15,6 +15,7 @@
                                         <th style="width: 10%;" class="text-center">No</th>
                                         <th style="width: 70%;">Visi RPJPN</th>
                                         <th style="width: 10%;">Periode</th>
+                                        
                                         <th style="width: 10%;" class="text-center">Edit</th>
                                     </tr>
                                 </thead>
