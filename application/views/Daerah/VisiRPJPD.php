@@ -185,9 +185,9 @@
                     var Visi = { Visi       : $("#Visi").val(),
                                  TahunMulai : $("#TahunMulai").val(),
                                  TahunAkhir : $("#TahunAkhir").val() }
-                    $.post(BaseURL+"SuperDaerah/InputVisiRPJPD", Visi).done(function(Respon) {
+                    $.post(BaseURL+"Daerah/InputVisiRPJPD", Visi).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"SuperDaerah/VisiRPJPD"
+                            window.location = BaseURL+"Daerah/VisiRPJPD"
                         } else {
                             alert(Respon)
                         }
@@ -217,9 +217,9 @@
                                  Visi       : $("#_Visi").val(),
                                  TahunMulai : $("#_TahunMulai").val(),
                                  TahunAkhir : $("#_TahunAkhir").val() }
-                    $.post(BaseURL+"SuperDaerah/EditVisiRPJPD", Visi).done(function(Respon) {
+                    $.post(BaseURL+"Daerah/EditVisiRPJPD", Visi).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"SuperDaerah/VisiRPJPD"
+                            window.location = BaseURL+"Daerah/VisiRPJPD"
                         } else {
                             alert(Respon)
                         }
@@ -229,9 +229,9 @@
 
             $('#data-table-basic tbody').on('click', '.Hapus', function () {
                 var Visi = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"SuperDaerah/HapusVisiRPJPD", Visi).done(function(Respon) {
+                $.post(BaseURL+"Daerah/HapusVisiRPJPD", Visi).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"SuperDaerah/VisiRPJPD"
+                        window.location = BaseURL+"Daerah/VisiRPJPD"
                     } else {
                         alert(Respon)
                     }

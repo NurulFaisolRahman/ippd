@@ -333,7 +333,7 @@
                 if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"SuperDaerah/GetTujuanRPJMD", {Id : $("#Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Daerah/GetTujuanRPJMD", {Id : $("#Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Tujuan = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -348,7 +348,7 @@
                 if ($("#_Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"SuperDaerah/GetTujuanRPJMD", {Id : $("#_Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Daerah/GetTujuanRPJMD", {Id : $("#_Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Tujuan = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -363,7 +363,7 @@
                 if ($("#PeriodeRPJMN").val() == "") {
                     alert("Mohon Input Periode RPJMN")
                 } else {
-                    $.post(BaseURL+"SuperDaerah/GetSasaranRPJMN", {Id : $("#PeriodeRPJMN").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Daerah/GetSasaranRPJMN", {Id : $("#PeriodeRPJMN").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Sasaran = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -378,7 +378,7 @@
                 if ($("#PeriodeRPJMN_").val() == "") {
                     alert("Mohon Input Periode RPJMN")
                 } else {
-                    $.post(BaseURL+"SuperDaerah/GetSasaranRPJMN", {Id : $("#PeriodeRPJMN_").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Daerah/GetSasaranRPJMN", {Id : $("#PeriodeRPJMN_").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Sasaran = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -393,7 +393,7 @@
                 if ($("#PeriodeRPJMDP").val() == "") {
                     alert("Mohon Input Periode RPJMD Provinsi")
                 } else {
-                    $.post(BaseURL+"SuperDaerah/GetSasaranRPJMDP", {Id : $("#PeriodeRPJMDP").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Daerah/GetSasaranRPJMDP", {Id : $("#PeriodeRPJMDP").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Sasaran = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -408,7 +408,7 @@
                 if ($("#PeriodeRPJMDP_").val() == "") {
                     alert("Mohon Input Periode RPJMD Provinsi")
                 } else {
-                    $.post(BaseURL+"SuperDaerah/GetSasaranRPJMDP", {Id : $("#PeriodeRPJMDP_").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Daerah/GetSasaranRPJMDP", {Id : $("#PeriodeRPJMDP_").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Sasaran = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -445,9 +445,9 @@
                                  Id_    : RPJMN.join("$"),
                                  IdP    : RPJMDP.join("$"),
                                  Sasaran   : $("#Sasaran").val() }
-                    $.post(BaseURL+"SuperDaerah/InputSasaranRPJMD", Sasaran).done(function(Respon) {
+                    $.post(BaseURL+"Daerah/InputSasaranRPJMD", Sasaran).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"SuperDaerah/SasaranRPJMD"
+                            window.location = BaseURL+"Daerah/SasaranRPJMD"
                         } else {
                             alert(Respon)
                         }
@@ -459,10 +459,10 @@
                 var Data = $(this).attr('Edit')
                 var Pisah = Data.split("|");
                 $("#Id").val(Pisah[0])
-                $.post(BaseURL+"SuperDaerah/GetPeriodeSasaranRPJMD", {Id : Pisah[1]}).done(function(Respon) {
+                $.post(BaseURL+"Daerah/GetPeriodeSasaranRPJMD", {Id : Pisah[1]}).done(function(Respon) {
                     var Data = JSON.parse(Respon)
                     $("#_Periode").val(Data[0].IdVisi)
-                    $.post(BaseURL+"SuperDaerah/GetTujuanRPJMD", {Id : $("#_Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Daerah/GetTujuanRPJMD", {Id : $("#_Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Tujuan = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -473,10 +473,10 @@
                     })
                 })
                 $("#_Sasaran").val(Pisah[2])
-                $.post(BaseURL+"SuperDaerah/GetVisiRPJMN", {Id : Pisah[3].split("$")[0]}).done(function(Respon) {
+                $.post(BaseURL+"Daerah/GetVisiRPJMN", {Id : Pisah[3].split("$")[0]}).done(function(Respon) {
                     var Data = JSON.parse(Respon)
                     $("#PeriodeRPJMN_").val(Data[0].IdVisi)
-                    $.post(BaseURL+"SuperDaerah/GetSasaranRPJMN", {Id : $("#PeriodeRPJMN_").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Daerah/GetSasaranRPJMN", {Id : $("#PeriodeRPJMN_").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Sasaran = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -489,10 +489,10 @@
                         })
                     })
                 }) 
-                $.post(BaseURL+"SuperDaerah/GetVisiRPJMDP", {Id : Pisah[4].split("$")[0]}).done(function(Respon) {
+                $.post(BaseURL+"Daerah/GetVisiRPJMDP", {Id : Pisah[4].split("$")[0]}).done(function(Respon) {
                     var Data = JSON.parse(Respon)
                     $("#PeriodeRPJMDP_").val(Data[0].IdVisi)
-                    $.post(BaseURL+"SuperDaerah/GetSasaranRPJMDP", {Id : $("#PeriodeRPJMDP_").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Daerah/GetSasaranRPJMDP", {Id : $("#PeriodeRPJMDP_").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Sasaran = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -535,9 +535,9 @@
                                  Id_    : RPJMN.join("$"),
                                  IdP    : RPJMDP.join("$"),
                                  Sasaran   : $("#_Sasaran").val() }
-                    $.post(BaseURL+"SuperDaerah/EditSasaranRPJMD", Sasaran).done(function(Respon) {
+                    $.post(BaseURL+"Daerah/EditSasaranRPJMD", Sasaran).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"SuperDaerah/SasaranRPJMD"
+                            window.location = BaseURL+"Daerah/SasaranRPJMD"
                         } else {
                             alert(Respon)
                         }
@@ -547,9 +547,9 @@
 
             $('#data-table-basic tbody').on('click', '.Hapus', function () {
                 var Sasaran = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"SuperDaerah/HapusSasaranRPJMD", Sasaran).done(function(Respon) {
+                $.post(BaseURL+"Daerah/HapusSasaranRPJMD", Sasaran).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"SuperDaerah/SasaranRPJMD"
+                        window.location = BaseURL+"Daerah/SasaranRPJMD"
                     } else {
                         alert(Respon)
                     }

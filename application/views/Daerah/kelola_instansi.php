@@ -173,7 +173,7 @@
                 } else {
                     var Akun = { nama: $("#Username").val(),
                                  password: $("#Password").val() }
-                    $.post(BaseURL+"SuperDaerah/InputInstansi", Akun).done(function(Respon) {
+                    $.post(BaseURL+"Daerah/InputInstansi", Akun).done(function(Respon) {
                         if (Respon == '1') {
                             window.location.reload()
                         } else {
@@ -198,7 +198,7 @@
                     var Akun = { id: $("#Id").val(), 
                                  nama: $("#_Username").val(),
                                  password: $("#_Password").val() }
-                    $.post(BaseURL+"SuperDaerah/EditInstansi", Akun).done(function(Respon) {
+                    $.post(BaseURL+"Daerah/EditInstansi", Akun).done(function(Respon) {
                         if (Respon == '1') {
                             window.location.reload()
                         } else {
@@ -210,7 +210,7 @@
 
             $('#data-table-basic tbody').on('click', '.Hapus', function () {
                 var Akun = { id: $(this).attr('Hapus') }
-                $.post(BaseURL+"SuperDaerah/HapusInstansi", Akun).done(function(Respon) {
+                $.post(BaseURL+"Daerah/HapusInstansi", Akun).done(function(Respon) {
                     if (Respon == '1') {
                         window.location.reload()
                     } else {

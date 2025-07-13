@@ -5,7 +5,7 @@
                     <div class="data-table-list">
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
-                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputTahapan"><i class="notika-icon notika-edit"></i> <b>Input Tahapan RPJPD</b></button>
+                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputJanjiPolitik"><i class="notika-icon notika-edit"></i> <b>Input Janji Politik</b></button>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -13,20 +13,20 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 10%;" class="text-center">No</th>
-                                        <th style="width: 70%;">Tahapan RPJPD</th>
+                                        <th style="width: 70%;">Janji Politik</th>
                                         <th style="width: 10%;">Periode</th>
                                         <th style="width: 10%;" class="text-center">Edit</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php $No = 1; foreach ($Tahapan as $key) { ?>
+                                    <?php $No = 1; foreach ($JanjiPolitik as $key) { ?>
                                     <tr>
                                         <td style="vertical-align: middle;" class="text-center"><?=$No++?></td>
-                                        <td style="vertical-align: middle;"><?=$key['Tahapan']?></td>
+                                        <td style="vertical-align: middle;"><?=$key['JanjiPolitik']?></td>
                                         <td style="vertical-align: middle;"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></td>
                                         <td class="text-center">
                                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['Tahapan'].'|'.$key['_Id']?>"><i class="notika-icon notika-next"></i></button>
+                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['JanjiPolitik'].'|'.$key['_Id']?>"><i class="notika-icon notika-next"></i></button>
                                                 <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
                                             </div>
                                         </td>
@@ -40,7 +40,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="ModalInputTahapan" role="dialog">
+    <div class="modal fade" id="ModalInputJanjiPolitik" role="dialog">
         <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
             <div class="modal-content">
                 <div class="modal-header">
@@ -72,11 +72,11 @@
                                 <div class="form-group">
                                     <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Tahapan</b></label>
+                                            <label class="hrzn-fm"><b>JanjiPolitik</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <textarea class="form-control" rows="3" id="Tahapan" placeholder="Input Tahapan"></textarea>
+                                                <textarea class="form-control" rows="3" id="JanjiPolitik" placeholder="Input JanjiPolitik"></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -97,7 +97,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="ModalEditTahapan" role="dialog">
+    <div class="modal fade" id="ModalEditJanjiPolitik" role="dialog">
         <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
             <div class="modal-content">
                 <div class="modal-header">
@@ -129,12 +129,12 @@
                                 <div class="form-group">
                                     <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Tahapan</b></label>
+                                            <label class="hrzn-fm"><b>JanjiPolitik</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
                                                 <input type="hidden" class="form-control input-sm" id="Id">
-                                                <textarea class="form-control" rows="3" id="_Tahapan" placeholder="Input Tahapan"></textarea>
+                                                <textarea class="form-control" rows="3" id="_JanjiPolitik" placeholder="Input JanjiPolitik"></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -173,14 +173,14 @@
             $("#Input").click(function() {
                 if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
-                } else if ($("#Tahapan").val() == "") {
-                    alert('Input Tahapan Belum Benar!')
+                } else if ($("#JanjiPolitik").val() == "") {
+                    alert('Input JanjiPolitik Belum Benar!')
                 } else {
-                    var Tahapan = { Tahapan : $("#Tahapan").val(),
+                    var JanjiPolitik = { JanjiPolitik : $("#JanjiPolitik").val(),
                                     _Id : $("#Periode").val() }
-                    $.post(BaseURL+"SuperDaerah/InputTahapanRPJPD", Tahapan).done(function(Respon) {
+                    $.post(BaseURL+"Daerah/InputJanjiPolitik", JanjiPolitik).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"SuperDaerah/TahapanRPJPD"
+                            window.location = BaseURL+"Daerah/JanjiPolitik"
                         } else {
                             alert(Respon)
                         }
@@ -192,23 +192,23 @@
                 var Data = $(this).attr('Edit')
                 var Pisah = Data.split("|");
                 $("#Id").val(Pisah[0])
-                $("#_Tahapan").val(Pisah[1])
+                $("#_JanjiPolitik").val(Pisah[1])
                 $("#_Periode").val(Pisah[2])
-                $('#ModalEditTahapan').modal("show")
+                $('#ModalEditJanjiPolitik').modal("show")
             })
 
             $("#Edit").click(function() {
                 if ($("#_Periode").val() == "") {
                     alert("Mohon Input Periode")
-                } else if ($("#_Tahapan").val() == "") {
-                    alert('Input Tahapan Belum Benar!')
+                } else if ($("#_JanjiPolitik").val() == "") {
+                    alert('Input JanjiPolitik Belum Benar!')
                 } else {
-                    var Tahapan = { Id : $("#Id").val(),
-                                    Tahapan : $("#_Tahapan").val(),
+                    var JanjiPolitik = { Id : $("#Id").val(),
+                                    JanjiPolitik : $("#_JanjiPolitik").val(),
                                     _Id : $("#_Periode").val() }
-                    $.post(BaseURL+"SuperDaerah/EditTahapanRPJPD", Tahapan).done(function(Respon) {
+                    $.post(BaseURL+"Daerah/EditJanjiPolitik", JanjiPolitik).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"SuperDaerah/TahapanRPJPD"
+                            window.location = BaseURL+"Daerah/JanjiPolitik"
                         } else {
                             alert(Respon)
                         }
@@ -217,10 +217,10 @@
             })
 
             $('#data-table-basic tbody').on('click', '.Hapus', function () {
-                var Tahapan = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"SuperDaerah/HapusTahapanRPJPD", Tahapan).done(function(Respon) {
+                var JanjiPolitik = { Id: $(this).attr('Hapus') }
+                $.post(BaseURL+"Daerah/HapusJanjiPolitik", JanjiPolitik).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"SuperDaerah/TahapanRPJPD"
+                        window.location = BaseURL+"Daerah/JanjiPolitik"
                     } else {
                         alert(Respon)
                     }

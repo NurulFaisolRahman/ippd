@@ -5,7 +5,7 @@
                     <div class="data-table-list">
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
-                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputTahapan"><i class="notika-icon notika-edit"></i> <b>Input Tahapan RPJMD</b></button>
+                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputTahapan"><i class="notika-icon notika-edit"></i> <b>Input Tahapan RPJPD</b></button>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -13,7 +13,7 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 10%;" class="text-center">No</th>
-                                        <th style="width: 70%;">Tahapan RPJMD</th>
+                                        <th style="width: 70%;">Tahapan RPJPD</th>
                                         <th style="width: 10%;">Periode</th>
                                         <th style="width: 10%;" class="text-center">Edit</th>
                                     </tr>
@@ -178,9 +178,9 @@
                 } else {
                     var Tahapan = { Tahapan : $("#Tahapan").val(),
                                     _Id : $("#Periode").val() }
-                    $.post(BaseURL+"SuperDaerah/InputTahapanRPJMD", Tahapan).done(function(Respon) {
+                    $.post(BaseURL+"Daerah/InputTahapanRPJPD", Tahapan).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"SuperDaerah/TahapanRPJMD"
+                            window.location = BaseURL+"Daerah/TahapanRPJPD"
                         } else {
                             alert(Respon)
                         }
@@ -206,9 +206,9 @@
                     var Tahapan = { Id : $("#Id").val(),
                                     Tahapan : $("#_Tahapan").val(),
                                     _Id : $("#_Periode").val() }
-                    $.post(BaseURL+"SuperDaerah/EditTahapanRPJMD", Tahapan).done(function(Respon) {
+                    $.post(BaseURL+"Daerah/EditTahapanRPJPD", Tahapan).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"SuperDaerah/TahapanRPJMD"
+                            window.location = BaseURL+"Daerah/TahapanRPJPD"
                         } else {
                             alert(Respon)
                         }
@@ -218,9 +218,9 @@
 
             $('#data-table-basic tbody').on('click', '.Hapus', function () {
                 var Tahapan = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"SuperDaerah/HapusTahapanRPJMD", Tahapan).done(function(Respon) {
+                $.post(BaseURL+"Daerah/HapusTahapanRPJPD", Tahapan).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"SuperDaerah/TahapanRPJMD"
+                        window.location = BaseURL+"Daerah/TahapanRPJPD"
                     } else {
                         alert(Respon)
                     }

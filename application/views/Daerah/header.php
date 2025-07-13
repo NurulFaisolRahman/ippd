@@ -312,37 +312,37 @@
                         <div class="dropdown-submenu">
                             <a href="#" class="dropdown-item">RPJPD</a>
                             <div class="dropdown-submenu-content">
-                                <a href="<?=base_url('SuperDaerah/VisiRPJPD')?>" class="dropdown-item">Visi</a>
-                                <a href="<?=base_url('SuperDaerah/MisiRPJPD')?>" class="dropdown-item">Misi</a>
-                                <a href="<?=base_url('SuperDaerah/TujuanRPJPD')?>" class="dropdown-item">Tujuan</a>
-                                <a href="<?=base_url('SuperDaerah/SasaranRPJPD')?>" class="dropdown-item">Sasaran</a>
-                                <a href="<?=base_url('SuperDaerah/TahapanRPJPD')?>" class="dropdown-item">Tahapan</a>
+                                <a href="<?=base_url('Daerah/VisiRPJPD')?>" class="dropdown-item">Visi</a>
+                                <a href="<?=base_url('Daerah/MisiRPJPD')?>" class="dropdown-item">Misi</a>
+                                <a href="<?=base_url('Daerah/TujuanRPJPD')?>" class="dropdown-item">Tujuan</a>
+                                <a href="<?=base_url('Daerah/SasaranRPJPD')?>" class="dropdown-item">Sasaran</a>
+                                <a href="<?=base_url('Daerah/TahapanRPJPD')?>" class="dropdown-item">Tahapan</a>
                             </div>
                         </div>
                         <div class="dropdown-submenu">
                             <a href="#" class="dropdown-item">RPJMD</a>
                             <div class="dropdown-submenu-content">
-                                <a href="<?=base_url('SuperDaerah/VisiRPJMD')?>" class="dropdown-item">Visi</a>
-                                <a href="<?=base_url('SuperDaerah/MisiRPJMD')?>" class="dropdown-item">Misi</a>
-                                <a href="<?=base_url('SuperDaerah/TujuanRPJMD')?>" class="dropdown-item">Tujuan</a>
-                                <a href="<?=base_url('SuperDaerah/SasaranRPJMD')?>" class="dropdown-item">Sasaran</a>
-                                <a href="<?=base_url('SuperDaerah/TahapanRPJMD')?>" class="dropdown-item">Tahapan</a>
+                                <a href="<?=base_url('Daerah/VisiRPJMD')?>" class="dropdown-item">Visi</a>
+                                <a href="<?=base_url('Daerah/MisiRPJMD')?>" class="dropdown-item">Misi</a>
+                                <a href="<?=base_url('Daerah/TujuanRPJMD')?>" class="dropdown-item">Tujuan</a>
+                                <a href="<?=base_url('Daerah/SasaranRPJMD')?>" class="dropdown-item">Sasaran</a>
+                                <a href="<?=base_url('Daerah/TahapanRPJMD')?>" class="dropdown-item">Tahapan</a>
                             </div>
                         </div>
                         <div class="dropdown-submenu">
                             <a href="#" class="dropdown-item">Cascading</a>
                             <div class="dropdown-submenu-content">
-                                <a href="<?=base_url('SuperDaerah/kelola_instansi')?>" class="dropdown-item">Daftar Instansi</a>
-                                <a href="<?=base_url('SuperDaerah/Iku')?>" class="dropdown-item">IKU</a>
-                                <a href="<?=base_url('SuperDaerah/Ikd')?>" class="dropdown-item">IKD</a>
+                                <a href="<?=base_url('Daerah/kelola_instansi')?>" class="dropdown-item">Daftar Instansi</a>
+                                <a href="<?=base_url('Daerah/Iku')?>" class="dropdown-item">IKU</a>
+                                <a href="<?=base_url('Daerah/Ikd')?>" class="dropdown-item">IKD</a>
                             </div>
                         </div>
                         <div class="dropdown-submenu">
                             <a href="#" class="dropdown-item">Isu Daerah</a>
                             <div class="dropdown-submenu-content">
-                                <a href="<?=base_url('SuperDaerah/PermasalahanPokok')?>" class="dropdown-item">Permasalahan Pokok</a>
-                                <a href="<?=base_url('SuperDaerah/IsuKLHS')?>" class="dropdown-item">Isu KLHS</a>
-                                <a href="<?=base_url('SuperDaerah/IsuStrategisDaerah')?>" class="dropdown-item">Isu Strategis</a>
+                                <a href="<?=base_url('Daerah/PermasalahanPokok')?>" class="dropdown-item">Permasalahan Pokok</a>
+                                <a href="<?=base_url('Daerah/IsuKLHS')?>" class="dropdown-item">Isu KLHS</a>
+                                <a href="<?=base_url('Daerah/IsuStrategisDaerah')?>" class="dropdown-item">Isu Strategis</a>
                             </div>
                         </div>
                     </div>
@@ -383,19 +383,19 @@
                             <div id="RPJPD" class="tab-pane in <?= $Halaman == 'RPJPD' ? 'active' : '' ?> notika-tab-menu-bg animated flipInX">
                                 <ul class="notika-main-menu-dropdown">
                                     <li>
-                                        <a href="<?= base_url('SuperDaerah/VisiRPJPD') ?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
+                                        <a href="<?= base_url('Daerah/VisiRPJPD') ?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
                                     </li>
                                     <li>
-                                        <a href="<?= base_url('SuperDaerah/MisiRPJPD') ?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
+                                        <a href="<?= base_url('Daerah/MisiRPJPD') ?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
                                     </li>
                                     <li>
-                                        <a href="<?= base_url('SuperDaerah/TujuanRPJPD') ?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
+                                        <a href="<?= base_url('Daerah/TujuanRPJPD') ?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
                                     </li>
                                     <li>
-                                        <a href="<?= base_url('SuperDaerah/SasaranRPJPD') ?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
+                                        <a href="<?= base_url('Daerah/SasaranRPJPD') ?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
                                     </li>
                                     <li>
-                                        <a href="<?=base_url('SuperDaerah/TahapanRPJPD')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
+                                        <a href="<?=base_url('Daerah/TahapanRPJPD')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
                                     </li>
                                 </ul>
                             </div>
@@ -404,22 +404,22 @@
                             <div id="RPJMD" class="tab-pane in <?= $Halaman == 'RPJMD' ? 'active' : '' ?> notika-tab-menu-bg animated flipInX">
                                 <ul class="notika-main-menu-dropdown">
                                     <li>
-                                        <a href="<?= base_url('SuperDaerah/VisiRPJMD') ?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
+                                        <a href="<?= base_url('Daerah/VisiRPJMD') ?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
                                     </li>
                                     <li>
-                                        <a href="<?= base_url('SuperDaerah/MisiRPJMD') ?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
+                                        <a href="<?= base_url('Daerah/MisiRPJMD') ?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
                                     </li>
                                     <li>
-                                        <a href="<?= base_url('SuperDaerah/TujuanRPJMD') ?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
+                                        <a href="<?= base_url('Daerah/TujuanRPJMD') ?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
                                     </li>
                                     <li>
-                                        <a href="<?= base_url('SuperDaerah/SasaranRPJMD') ?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
+                                        <a href="<?= base_url('Daerah/SasaranRPJMD') ?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
                                     </li>
                                     <li>
-                                        <a href="<?=base_url('SuperDaerah/TahapanRPJMD')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
+                                        <a href="<?=base_url('Daerah/TahapanRPJMD')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
                                     </li>
                                     <li>
-                                        <a href="<?=base_url('SuperDaerah/JanjiPolitik')?>"><i class="notika-icon notika-form"></i> <b>Janji Politik</b></a>
+                                        <a href="<?=base_url('Daerah/JanjiPolitik')?>"><i class="notika-icon notika-form"></i> <b>Janji Politik</b></a>
                                     </li>
                                 </ul>
                             </div>
@@ -428,13 +428,13 @@
                             <div id="Cascading" class="tab-pane in <?= $Halaman == 'Cascading' ? 'active' : '' ?> notika-tab-menu-bg animated flipInX">
                                 <ul class="notika-main-menu-dropdown">
                                     <li>
-                                        <a href="<?= base_url('SuperDaerah/Instansi') ?>"><i class="notika-icon notika-form"></i> <b>Daftar Instansi</b></a>
+                                        <a href="<?= base_url('Daerah/Instansi') ?>"><i class="notika-icon notika-form"></i> <b>Daftar Instansi</b></a>
                                     </li>
                                     <li>
-                                        <a href="<?= base_url('SuperDaerah/IKU') ?>"><i class="notika-icon notika-form"></i> <b>IKU</b></a>
+                                        <a href="<?= base_url('Daerah/IKU') ?>"><i class="notika-icon notika-form"></i> <b>IKU</b></a>
                                     </li>
                                     <li>
-                                        <a href="<?= base_url('SuperDaerah/IKD') ?>"><i class="notika-icon notika-form"></i> <b>IKD</b></a>
+                                        <a href="<?= base_url('Daerah/IKD') ?>"><i class="notika-icon notika-form"></i> <b>IKD</b></a>
                                     </li>
                                 </ul>
                             </div>
@@ -443,13 +443,13 @@
                             <div id="Isudaerah" class="tab-pane in <?= $Halaman == 'Isudaerah' ? 'active' : '' ?> notika-tab-menu-bg animated flipInX">
                                 <ul class="notika-main-menu-dropdown">
                                     <li>
-                                        <a href="<?= base_url('SuperDaerah/PermasalahanPokok') ?>"><i class="notika-icon notika-house"></i> <b>Permasalahan Pokok</b></a>
+                                        <a href="<?= base_url('Daerah/PermasalahanPokok') ?>"><i class="notika-icon notika-house"></i> <b>Permasalahan Pokok</b></a>
                                     </li>
                                     <li>
-                                        <a href="<?= base_url('SuperDaerah/IsuKLHS') ?>"><i class="notika-icon notika-house"></i> <b>Isu KLHS Daerah</b></a>
+                                        <a href="<?= base_url('Daerah/IsuKLHS') ?>"><i class="notika-icon notika-house"></i> <b>Isu KLHS Daerah</b></a>
                                     </li>
                                     <li>
-                                        <a href="<?= base_url('SuperDaerah/IsuStrategisDaerah') ?>"><i class="notika-icon notika-house"></i> <b>Isu Strategis Daerah</b></a>
+                                        <a href="<?= base_url('Daerah/IsuStrategisDaerah') ?>"><i class="notika-icon notika-house"></i> <b>Isu Strategis Daerah</b></a>
                                     </li>
                                 </ul>
                             </div>

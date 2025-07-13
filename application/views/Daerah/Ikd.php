@@ -657,7 +657,7 @@
                 var tahunAkhir = tahunRange[1];
                 
                 $.ajax({
-                    url: BaseURL + 'SuperDaerah/GetSasaranByPeriod',
+                    url: BaseURL + 'Daerah/GetSasaranByPeriod',
                     type: 'POST',
                     data: {
                         tahun_mulai: tahunMulai,
@@ -731,7 +731,7 @@
                 var tahunAkhir = tahunRange[1];
                 
                 $.ajax({
-                    url: BaseURL + 'SuperDaerah/GetSasaranByPeriod',
+                    url: BaseURL + 'Daerah/GetSasaranByPeriod',
                     type: 'POST',
                     data: {
                         tahun_mulai: tahunMulai,
@@ -775,7 +775,7 @@
             }
 
             $.ajax({
-                url: BaseURL + "SuperDaerah/EditIkd",
+                url: BaseURL + "Daerah/EditIkd",
                 type: "POST",
                 data: $(this).serialize(),
                 success: function(res) {
@@ -795,7 +795,7 @@
         $(".Hapus").click(function() {
             if(confirm("Apakah Anda yakin ingin menghapus data ini?")) {
                 var id = $(this).data('id');
-                $.post(BaseURL + "SuperDaerah/HapusIkd", { id: id }).done(function(res) {
+                $.post(BaseURL + "Daerah/HapusIkd", { id: id }).done(function(res) {
                     if (res == '1') {
                         window.location.reload();
                     } else {
@@ -844,7 +844,7 @@
             formData = formData.filter(item => item.name !== 'pd_penanggung_jawab[]');
             formData.push({name: 'pd_penanggung_jawab', value: pdValues.join(',')});
             
-            $.post(BaseURL + "SuperDaerah/TambahPd", $.param(formData)).done(function(res) {
+            $.post(BaseURL + "Daerah/TambahPd", $.param(formData)).done(function(res) {
                 if (res == '1') {
                     window.location.reload();
                 } else {
@@ -892,7 +892,7 @@
             formData = formData.filter(item => item.name !== 'pd_penunjang[]');
             formData.push({name: 'pd_penunjang', value: pdValues.join(',')});
             
-            $.post(BaseURL + "SuperDaerah/TambahPd", $.param(formData)).done(function(res) {
+            $.post(BaseURL + "Daerah/TambahPd", $.param(formData)).done(function(res) {
                 if (res == '1') {
                     window.location.reload();
                 } else {
@@ -922,7 +922,7 @@
                 id: $("#IdIKDPic").val(),
                 pd_penanggung_jawab: Tampung.join(",")
             };
-            $.post(BaseURL + "SuperDaerah/EditPDIKD", Pic).done(function(Respon) {
+            $.post(BaseURL + "Daerah/EditPDIKD", Pic).done(function(Respon) {
                 if (Respon == '1') {
                     window.location.reload();
                 } else {
@@ -952,7 +952,7 @@
                 id: $("#IdIKDPis").val(),
                 pd_penunjang: Tampung.join(",")
             };
-            $.post(BaseURL + "SuperDaerah/EditPDIKD", Pis).done(function(Respon) {
+            $.post(BaseURL + "Daerah/EditPDIKD", Pis).done(function(Respon) {
                 if (Respon == '1') {
                     window.location.reload();
                 } else {
@@ -1043,7 +1043,7 @@
                 formData = formData.filter(item => item.name !== 'isu_strategis[]');
                 formData.push({name: 'isu_strategis', value: isuValues.join(',')});
                 
-                $.post(BaseURL + "SuperDaerah/TambahIsuStrategis", $.param(formData)).done(function(res) {
+                $.post(BaseURL + "Daerah/TambahIsuStrategis", $.param(formData)).done(function(res) {
                     if (res == '1') {
                         window.location.reload();
                     } else {
@@ -1083,7 +1083,7 @@
                     id: $("#IdIKDIsu").val(),
                     isu_strategis: Tampung.join(",")
                 };
-                $.post(BaseURL + "SuperDaerah/EditIsuStrategis", Isu).done(function(Respon) {
+                $.post(BaseURL + "Daerah/EditIsuStrategis", Isu).done(function(Respon) {
                     if (Respon == '1') {
                         window.location.reload();
                     } else {
