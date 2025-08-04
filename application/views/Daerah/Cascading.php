@@ -222,7 +222,7 @@
 
         $("#Tujuan").change(function(){
             var IdTujuan = $("#Tujuan").val()
-            $.post(BaseURL + "SuperDaerah/GetSasaran", { id: IdTujuan }).done(function(res) {
+            $.post(BaseURL + "Daerah/GetSasaran", { id: IdTujuan }).done(function(res) {
                 var Data = JSON.parse(res)
                 var Sasaran = ''
                 for (let i = 0; i < Data.length; i++) {
@@ -234,7 +234,7 @@
 
         $("#EditTujuan").change(function() {
     var IdTujuan = $("#EditTujuan").val();
-    $.post(BaseURL + "SuperDaerah/GetSasaran", { id: IdTujuan }).done(function(res) {
+    $.post(BaseURL + "Daerah/GetSasaran", { id: IdTujuan }).done(function(res) {
         var Data = JSON.parse(res);
         var Sasaran = '';
         for (let i = 0; i < Data.length; i++) {
@@ -247,7 +247,7 @@
         // Tambah Cascading
         $("#FormTambahCascading").submit(function(e) {
             e.preventDefault();
-            $.post(BaseURL + "SuperDaerah/TambahCascading", $(this).serialize()).done(function(res) {
+            $.post(BaseURL + "Daerah/TambahCascading", $(this).serialize()).done(function(res) {
                 if (res == '1') {
                     window.location.reload();
                 } else {
@@ -286,7 +286,7 @@
         $("input[name='pd_penunjang[]'][value='" + pd.trim() + "']").prop('checked', true);
     });
 
-    $.post(BaseURL + "SuperDaerah/GetSasaran", { id: IdTujuan }).done(function(res) {
+    $.post(BaseURL + "Daerah/GetSasaran", { id: IdTujuan }).done(function(res) {
         var Data = JSON.parse(res);
         var Sasaran = '';
         for (let i = 0; i < Data.length; i++) {
@@ -305,7 +305,7 @@
         // Submit Edit Cascading
         $("#FormEditCascading").submit(function(e) {
             e.preventDefault();
-            $.post(BaseURL + "SuperDaerah/EditCascading", $(this).serialize()).done(function(res) {
+            $.post(BaseURL + "Daerah/EditCascading", $(this).serialize()).done(function(res) {
                 if (res == '1') {
                     window.location.reload();
                 } else {
@@ -317,7 +317,7 @@
         // Hapus Cascading
         $(".Hapus").click(function() {
             var id = $(this).data('id');
-            $.post(BaseURL + "SuperDaerah/HapusCascading", { id: id }).done(function(res) {
+            $.post(BaseURL + "Daerah/HapusCascading", { id: id }).done(function(res) {
                 if (res == '1') {
                     window.location.reload();
                 } else {

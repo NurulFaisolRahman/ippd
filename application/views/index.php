@@ -357,7 +357,7 @@
           } else if (Respon == 2) {
             window.location = BaseURL + "Provinsi/VisiRPJPD";
           } else if (Respon == 3) {
-            window.location = BaseURL + "SuperDaerah/VisiRPJPD";
+            window.location = BaseURL + "Daerah/VisiRPJPD";
           } else {
             alert(Respon);
           }

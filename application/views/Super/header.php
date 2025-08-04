@@ -8,15 +8,15 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,700,900" rel="stylesheet">
-    <link rel="stylesheet" href="<?= base_url('css/bootstrap.min.css'); ?>">
-    <link rel="stylesheet" href="<?= base_url('css/font-awesome.min.css'); ?>">
-    <link rel="stylesheet" href="<?= base_url('css/meanmenu/meanmenu.min.css'); ?>">
-    <link rel="stylesheet" href="<?= base_url('css/wave/button.css'); ?>">
-    <link rel="stylesheet" href="<?= base_url('css/notika-custom-icon.css'); ?>">
-    <link rel="stylesheet" href="<?= base_url('css/jquery.dataTables.min.css'); ?>">
-    <link rel="stylesheet" href="<?= base_url('css/main.css'); ?>">
-    <link rel="stylesheet" href="<?= base_url('style.css'); ?>">
-    <link rel="stylesheet" href="<?= base_url('css/responsive.css'); ?>">
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/font-awesome.min.css">
+    <link rel="stylesheet" href="../css/meanmenu/meanmenu.min.css">
+    <link rel="stylesheet" href="../css/wave/button.css">
+    <link rel="stylesheet" href="../css/notika-custom-icon.css">
+    <link rel="stylesheet" href="../css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../css/responsive.css">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -82,11 +82,15 @@
             background-color: white;
             min-width: 200px;
             box-shadow: 0px 8px 20px 0px rgba(0,0,0,0.15);
-            z-index: 1001;
+            z-index: 9999;
             border-radius: 8px;
-            top: 100%;
+            overflow: hidden;
+            top: calc(100% + 5px);
             left: 50%;
             transform: translateX(-50%);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
             border: 1px solid rgba(0,0,0,0.1);
         }
 
@@ -159,7 +163,27 @@
             background-color: rgba(255, 255, 255, 0.2);
         }
 
-        /* Mobile Responsiveness */
+        .logout-btn i {
+            font-size: 0.9rem;
+        }
+
+        /* Ensure main content doesn't get overlapped */
+        .main-content-wrapper {
+            position: relative;
+            z-index: 1;
+            margin-top: 20px;
+        }
+
+        /* Additional fix for dropdown arrow */
+        .dropdown .navbar-item i.fa-chevron-down {
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown:hover .navbar-item i.fa-chevron-down {
+            transform: rotate(180deg);
+        }
+
+        /* Mobile responsiveness */
         @media (max-width: 768px) {
             .navbar-container {
                 flex-direction: column;
@@ -196,16 +220,57 @@
             }
         }
 
-        /* Remove click effects */
+        /* CSS TAMBAHAN UNTUK MENGHILANGKAN EFEK WARNA SAAT DITEKAN */
         .navbar-item:focus,
         .navbar-item:active,
+        .navbar-item:visited {
+            color: rgba(255, 255, 255, 0.9) !important;
+            outline: none;
+            box-shadow: none;
+            background-color: transparent;
+        }
+
         .dropdown-item:focus,
         .dropdown-item:active,
-        .logout-btn:focus,
-        .logout-btn:active {
+        .dropdown-item:visited {
+            color: #4b5563 !important;
             outline: none;
             box-shadow: none;
             background-color: transparent !important;
+        }
+
+        .logout-btn:focus,
+        .logout-btn:active {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+            outline: none;
+            box-shadow: none;
+        }
+
+        .navbar-brand:focus,
+        .navbar-brand:active,
+        .navbar-brand:visited {
+            color: white !important;
+            outline: none;
+            box-shadow: none;
+            text-decoration: none;
+        }
+
+        .navbar-item,
+        .dropdown-item,
+        .logout-btn,
+        .navbar-brand {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f3f4f6 !important;
+            color: #20c997 !important;
         }
 
         /* Ensure main content doesn't get overlapped */
@@ -220,8 +285,10 @@
             transition: transform 0.3s ease;
         }
 
-        .dropdown:hover .navbar-item i.fa-chevron-down {
-            transform: rotate(180deg);
+        .navbar-item.active:focus,
+        .navbar-item.active:active {
+            color: rgba(255, 255, 255, 0.9) !important;
+            background-color: transparent !important;
         }
     </style>
 </head>
@@ -272,10 +339,10 @@
                 <div class="dropdown">
                     <a href="#" class="navbar-item active">Kementerian <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
                     <div class="dropdown-content">
-                        <a href="<?=base_url('Super/Kementerian')?>" class="dropdown-item">Daftar Kementerian</a>
-                        <a href="<?=base_url('Super/SPM')?>" class="dropdown-item">Standar Pelayanan Minimal</a>
-                        <a href="<?=base_url('Super/ProgramStrategis')?>" class="dropdown-item">Program Strategis</a>
-                        <a href="<?=base_url('Super/ProyekStrategis')?>" class="dropdown-item">Proyek Strategis</a>
+                        <a href="<?=base_url('SuperNasional/Kementerian')?>" class="dropdown-item">Daftar Kementerian</a>
+                        <a href="<?=base_url('SuperNasional/SPM')?>" class="dropdown-item">Standar Pelayanan Minimum</a>
+                        <a href="<?=base_url('SuperNasional/ProyekStrategis')?>" class="dropdown-item">Proyek Strategis</a>
+                        <a href="<?=base_url('SuperNasional/ProgramStrategis')?>" class="dropdown-item">Program Strategis</a>
                     </div>
                 </div>
 
@@ -310,8 +377,6 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- Menu Daerah -->
                 <div class="dropdown">
                     <a href="#" class="navbar-item">Daerah <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
                     <div class="dropdown-content">
@@ -368,167 +433,169 @@
         <!-- Tab Navigation -->
         <!-- <div class="main-menu-area mg-tb-40">
             <div class="container">
-                <div class="row"> -->
-                    <!-- <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12"> -->
-                        <!-- <ul class="nav nav-tabs notika-menu-wrap menu-it-icon-pro">
-                            <li <?= $Halaman == 'RPJPD' ? 'class="active"' : '' ?>>
-                                <a data-toggle="tab" href="#RPJPD"><i class="notika-icon notika-house"></i> <b>RPJPD</b></a>
-                            </li>
-                            <li <?= $Halaman == 'RPJMD' ? 'class="active"' : '' ?>>
-                                <a data-toggle="tab" href="#RPJMD"><i class="notika-icon notika-edit"></i> <b>RPJMD</b></a>
-                            </li>
-                            <li <?= $Halaman == 'Cascading' ? 'class="active"' : '' ?>>
-                                <a data-toggle="tab" href="#Cascading"><i class="notika-icon notika-form"></i> <b>CASCADING</b></a>
-                            </li>
-                            <li <?= $Halaman == 'Isudaerah' ? 'class="active"' : '' ?>>
-                                <a data-toggle="tab" href="#Isudaerah"><i class="notika-icon notika-house"></i> <b>ISU DAERAH</b></a>
-                            </li>
-                        </ul> -->
-                        <!-- <div class="tab-content custom-menu-content"> -->
-                            <!-- RPJPD Tab Content -->
-                            <!-- <div id="RPJPD" class="tab-pane in <?= $Halaman == 'RPJPD' ? 'active' : '' ?> notika-tab-menu-bg animated flipInX">
-                                <ul class="notika-main-menu-dropdown">
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/VisiRPJPD') ?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/MisiRPJPD') ?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/TujuanRPJPD') ?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/SasaranRPJPD') ?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?=base_url('SuperDaerah/TahapanRPJPD')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
-                                    </li>
-                                </ul>
-                            </div> -->
-                            <!-- RPJMD Tab Content -->
-                            <!-- <div id="RPJMD" class="tab-pane in <?= $Halaman == 'RPJMD' ? 'active' : '' ?> notika-tab-menu-bg animated flipInX">
-                                <ul class="notika-main-menu-dropdown">
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/VisiRPJMD') ?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/MisiRPJMD') ?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/TujuanRPJMD') ?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/SasaranRPJMD') ?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?=base_url('SuperDaerah/TahapanRPJMD')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?=base_url('SuperDaerah/JanjiPolitik')?>"><i class="notika-icon notika-form"></i> <b>Janji Politik</b></a>
-                                    </li>
-                                </ul>
-                            </div> -->
-                            <!-- Cascading Tab Content -->
-                            <!-- <div id="Cascading" class="tab-pane in <?= $Halaman == 'Cascading' ? 'active' : '' ?> notika-tab-menu-bg animated flipInX">
-                                <ul class="notika-main-menu-dropdown">
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/Instansi') ?>"><i class="notika-icon notika-form"></i> <b>Daftar Instansi</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/IKU') ?>"><i class="notika-icon notika-form"></i> <b>IKU</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/IKD') ?>"><i class="notika-icon notika-form"></i> <b>IKD</b></a>
-                                    </li>
-                                </ul>
-                            </div> -->
-                            <!-- Isu Daerah Tab Content -->
-                            <!-- <div id="Isudaerah" class="tab-pane in <?= $Halaman == 'Isudaerah' ? 'active' : '' ?> notika-tab-menu-bg animated flipInX">
-                                <ul class="notika-main-menu-dropdown">
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/PermasalahanPokok') ?>"><i class="notika-icon notika-house"></i> <b>Permasalahan Pokok</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/IsuKLHS') ?>"><i class="notika-icon notika-house"></i> <b>Isu KLHS Daerah</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/IsuStrategisDaerah') ?>"><i class="notika-icon notika-house"></i> <b>Isu Strategis Daerah</b></a>
-                                    </li>
-                                </ul>
-                            </div> -->
-                        <!-- </div> -->
-                    <!-- </div> -->
-                <!-- </div> -->
-            <!-- </div> -->
-        <!-- </div> -->
-    <!-- </div> -->
-<script>
+                <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <ul class="nav nav-tabs notika-menu-wrap menu-it-icon-pro">
+                        <li <?=$Halaman == 'Akun' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#Akun"><i class="notika-icon notika-form"></i> <b>Akun</b></a></li>
+                        <li <?=$Halaman == 'RPJPN' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#RPJPN"><i class="notika-icon notika-form"></i> <b>RPJPN</b></a></li>
+                        <li <?=$Halaman == 'RPJMN' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#RPJMN"><i class="notika-icon notika-form"></i> <b>RPJMN</b></a></li>
+                        <li <?=$Halaman == 'RPJPD' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#RPJPD"><i class="notika-icon notika-form"></i> <b>RPJPD</b></a></li>
+                        <li <?=$Halaman == 'RPJMD' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#RPJMD"><i class="notika-icon notika-form"></i> <b>RPJMD</b></a></li>
+                        <li <?=$Halaman == 'Kementerian' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#Kementerian"><i class="notika-icon notika-house"></i> <b>Kementerian</b></a></li>
+                        <li <?=$Halaman == 'Isu' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#Isu"><i class="notika-icon notika-house"></i> <b>Isu</b></a></li>
+                        <li <?=$Halaman == 'Nomenklatur' ? 'class="active"' : ''; ?>><a data-toggle="tab" href="#Nomenklatur"><i class="notika-icon notika-house"></i> <b>Nomenklatur</b></a></li>
+                    </ul>
+                    <div class="tab-content custom-menu-content">
+                        <div id="Akun" class="tab-pane in <?=$Halaman == 'Akun' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
+                            <ul class="notika-main-menu-dropdown">
+                                <li>
+                                    <a href="<?=base_url('SuperNasional/Akun')?>"><i class="notika-icon notika-form"></i> <b>Akun</b></a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="RPJPN" class="tab-pane in <?=$Halaman == 'RPJPN' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
+                            <ul class="notika-main-menu-dropdown">
+                                <li>
+                                    <a href="<?=base_url('SuperNasional/VisiRPJPN')?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('SuperNasional/MisiRPJPN')?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('SuperNasional/TujuanRPJPN')?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('SuperNasional/SasaranRPJPN')?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('SuperNasional/TahapanRPJPN')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('SuperNasional/IUPRPJPN')?>"><i class="notika-icon notika-bar-chart"></i> <b>IUP RPJPN</b></a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="RPJMN" class="tab-pane in <?=$Halaman == 'RPJMN' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
+                            <ul class="notika-main-menu-dropdown">
+                                <li>
+                                    <a href="<?=base_url('SuperNasional/VisiRPJMN')?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('SuperNasional/MisiRPJMN')?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('SuperNasional/TujuanRPJMN')?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('SuperNasional/SasaranRPJMN')?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('SuperNasional/TahapanRPJMN')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('SuperNasional/IUPRPJMN')?>"><i class="notika-icon notika-bar-chart"></i> <b>IUP RPJMN</b></a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="RPJPD" class="tab-pane in <?=$Halaman == 'RPJPD' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
+                            <ul class="notika-main-menu-dropdown">
+                                <li>
+                                    <a href="<?=base_url('Super/VisiRPJPD')?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/MisiRPJPD')?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/TujuanRPJPD')?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/SasaranRPJPD')?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/TahapanRPJPD')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/IUPRPJPD')?>"><i class="notika-icon notika-bar-chart"></i> <b>IUP RPJPD</b></a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="RPJMD" class="tab-pane in <?=$Halaman == 'RPJMD' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
+                            <ul class="notika-main-menu-dropdown">
+                                <li>
+                                    <a href="<?=base_url('Super/VisiRPJMD')?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/MisiRPJMD')?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/TujuanRPJMD')?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/SasaranRPJMD')?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/TahapanRPJMD')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/IUPRPJMD')?>"><i class="notika-icon notika-bar-chart"></i> <b>IUP RPJMD</b></a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="Kementerian" class="tab-pane in <?=$Halaman == 'Kementerian' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
+                            <ul class="notika-main-menu-dropdown">
+                                <li>
+                                    <a href="<?=base_url('SuperNasional/Kementerian')?>"><i class="notika-icon notika-form"></i> <b>Daftar Kementerian</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('SuperNasional/SPM')?>"><i class="notika-icon notika-form"></i> <b>Standar Pelayanan Minimal</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('SuperNasional/ProgramStrategis')?>"><i class="notika-icon notika-form"></i> <b>Program Strategis</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('SuperNasional/ProyekStrategis')?>"><i class="notika-icon notika-form"></i> <b>Proyek Strategis</b></a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="Isu" class="tab-pane in <?=$Halaman == 'Isu' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
+                            <ul class="notika-main-menu-dropdown">
+                                <li>
+                                    <a href="<?=base_url('Super/PermasalahanPokok')?>"><i class="notika-icon notika-form"></i> <b>Permasalahan Pokok</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/IsuKLHS')?>"><i class="notika-icon notika-form"></i> <b>Isu KLHS</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/IsuGlobal')?>"><i class="notika-icon notika-form"></i> <b>Isu Global</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/IsuNasional')?>"><i class="notika-icon notika-form"></i> <b>Isu Nasional</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/IsuStrategis')?>"><i class="notika-icon notika-form"></i> <b>Isu Strategis</b></a>
+                                </li>   
+                            </ul>
+                        </div>
+                        <div id="Nomenklatur" class="tab-pane in <?=$Halaman == 'Nomenklatur' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
+                            <ul class="notika-main-menu-dropdown">
+                                <li>
+                                    <a href="<?=base_url('Super/NomenklaturProvinsi')?>"><i class="notika-icon notika-form"></i> <b>Provinsi</b></a>
+                                </li>
+                                <li>
+                                    <a href="<?=base_url('Super/NomenklaturKabupaten')?>"><i class="notika-icon notika-form"></i> <b>Kabupaten</b></a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
         // Logout function
         function logout() {
+            // Redirect to logout page or clear session
             window.location.href = '/ippd';
         }
-
-        // Mobile menu handling
-        document.addEventListener('DOMContentLoaded', function() {
-            // Handle mobile menu clicks
-            if (window.innerWidth <= 768) {
-                document.addEventListener('click', function(e) {
-                    // Close all dropdowns if clicking outside
-                    if (!e.target.closest('.dropdown')) {
-                        document.querySelectorAll('.dropdown-content, .dropdown-submenu-content').forEach(menu => {
-                            menu.style.display = 'none';
-                        });
-                        document.querySelectorAll('.dropdown, .dropdown-submenu').forEach(item => {
-                            item.classList.remove('active');
-                        });
-                    }
-                });
-
-                // Toggle main dropdowns
-                document.querySelectorAll('.navbar-item').forEach(item => {
-                    item.addEventListener('click', function(e) {
-                        if (window.innerWidth <= 768 && this.nextElementSibling && 
-                            this.nextElementSibling.classList.contains('dropdown-content')) {
-                            e.preventDefault();
-                            const dropdown = this.closest('.dropdown');
-                            const content = dropdown.querySelector('.dropdown-content');
-                            
-                            // Close other dropdowns
-                            document.querySelectorAll('.dropdown-content, .dropdown-submenu-content').forEach(menu => {
-                                if (menu !== content) menu.style.display = 'none';
-                            });
-                            
-                            // Toggle current dropdown
-                            content.style.display = content.style.display === 'block' ? 'none' : 'block';
-                            dropdown.classList.toggle('active');
-                        }
-                    });
-                });
-
-                // Toggle submenus
-                document.querySelectorAll('.dropdown-submenu > .dropdown-item').forEach(item => {
-                    item.addEventListener('click', function(e) {
-                        if (window.innerWidth <= 768) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            const submenu = this.nextElementSibling;
-                            const isVisible = submenu.style.display === 'block';
-                            
-                            // Close all submenus first
-                            document.querySelectorAll('.dropdown-submenu-content').forEach(sm => {
-                                sm.style.display = 'none';
-                            });
-                            
-                            // Toggle current submenu if it wasn't visible
-                            if (!isVisible) {
-                                submenu.style.display = 'block';
-                                this.closest('.dropdown-submenu').classList.add('active');
-                            }
-                        }
-                    });
-                });
-            }
-        });
     </script>
-</body>
-</html>

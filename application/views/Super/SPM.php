@@ -9,7 +9,7 @@
                             <span class="bread-slash" style="display: inline-block; margin: 0 5px;">/</span>
                         </li>
                         <li style="display: inline-block; margin-right: 5px;">
-                            <a href="<?= base_url('Super/Kementerian') ?>">Kementerian</a>
+                            <a href="<?= base_url('SuperNasional/Kementerian') ?>">Kementerian</a>
                             <span class="bread-slash" style="display: inline-block; margin: 0 5px;">/</span>
                         </li>
                         <li style="display: inline-block;">

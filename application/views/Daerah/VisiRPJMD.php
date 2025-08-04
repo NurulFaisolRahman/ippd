@@ -5,7 +5,7 @@
                     <div class="data-table-list">
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
-                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputVisi"><i class="notika-icon notika-edit"></i> <b>Input Visi RPJPD</b></button>
+                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputVisi"><i class="notika-icon notika-edit"></i> <b>Input Visi RPJMD</b></button>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -13,7 +13,7 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 10%;" class="text-center">No</th>
-                                        <th style="width: 70%;">Visi RPJPD</th>
+                                        <th style="width: 70%;">Visi RPJMD</th>
                                         <th style="width: 10%;">Periode</th>
                                         <th style="width: 10%;" class="text-center">Edit</th>
                                     </tr>
@@ -54,7 +54,7 @@
                                     <div class="form-group">
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Periode RPJPD</b></label>
+                                                <label class="hrzn-fm"><b>Periode RPJMD</b></label>
                                             </div>
                                             <div class="col-lg-5">
                                                 <div class="nk-int-st">
@@ -73,11 +73,11 @@
                                     <div class="form-group">
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Visi RPJPD</b></label>
+                                                <label class="hrzn-fm"><b>Visi RPJMD</b></label>
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <textarea class="form-control" rows="3" id="Visi" placeholder="Input Visi RPJPD"></textarea>
+                                                    <textarea class="form-control" rows="3" id="Visi" placeholder="Input Visi RPJMD"></textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -113,7 +113,7 @@
                                     <div class="form-group">
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Periode RPJPD</b></label>
+                                                <label class="hrzn-fm"><b>Periode RPJMD</b></label>
                                                 <input type="hidden" class="form-control input-sm" id="Id">
                                             </div>
                                             <div class="col-lg-5">
@@ -133,11 +133,11 @@
                                     <div class="form-group">
                                         <div class="row">
                                             <div class="col-lg-2">
-                                                <label class="hrzn-fm"><b>Visi RPJPD</b></label>
+                                                <label class="hrzn-fm"><b>Visi RPJMD</b></label>
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <textarea class="form-control" rows="3" id="_Visi" wrap="off"></textarea>
+                                                    <textarea class="form-control" rows="3" id="_Visi"></textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -185,9 +185,9 @@
                     var Visi = { Visi       : $("#Visi").val(),
                                  TahunMulai : $("#TahunMulai").val(),
                                  TahunAkhir : $("#TahunAkhir").val() }
-                    $.post(BaseURL+"SuperDaerah/InputVisiRPJPD", Visi).done(function(Respon) {
+                    $.post(BaseURL+"Daerah/InputVisiRPJMD", Visi).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"SuperDaerah/VisiRPJPD"
+                            window.location = BaseURL+"Daerah/VisiRPJMD"
                         } else {
                             alert(Respon)
                         }
@@ -217,9 +217,9 @@
                                  Visi       : $("#_Visi").val(),
                                  TahunMulai : $("#_TahunMulai").val(),
                                  TahunAkhir : $("#_TahunAkhir").val() }
-                    $.post(BaseURL+"SuperDaerah/EditVisiRPJPD", Visi).done(function(Respon) {
+                    $.post(BaseURL+"Daerah/EditVisiRPJMD", Visi).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"SuperDaerah/VisiRPJPD"
+                            window.location = BaseURL+"Daerah/VisiRPJMD"
                         } else {
                             alert(Respon)
                         }
@@ -229,9 +229,9 @@
 
             $('#data-table-basic tbody').on('click', '.Hapus', function () {
                 var Visi = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"SuperDaerah/HapusVisiRPJPD", Visi).done(function(Respon) {
+                $.post(BaseURL+"Daerah/HapusVisiRPJMD", Visi).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"SuperDaerah/VisiRPJPD"
+                        window.location = BaseURL+"Daerah/VisiRPJMD"
                     } else {
                         alert(Respon)
                     }

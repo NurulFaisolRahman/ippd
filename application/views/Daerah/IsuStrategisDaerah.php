@@ -577,7 +577,7 @@
                 $("#Kementerian").html('<option value="">-- Pilih Kementerian --</option>');
                 $("#ListIsuStrategisNasional").html('');
             } else {
-                $.post(BaseURL+"SuperDaerah/GetKementerianStrategis", {TahunMulai: $(this).val()})
+                $.post(BaseURL+"Daerah/GetKementerianStrategis", {TahunMulai: $(this).val()})
                     .done(function(Respon) {
                         var Data = JSON.parse(Respon);
                         var Kementerian = '<option value="">-- Pilih Kementerian --</option>';
@@ -597,7 +597,7 @@
             if ($(this).val() == "") {
                 $("#ListIsuStrategisNasional").html('');
             } else {
-                $.post(BaseURL+"SuperDaerah/GetIsuStrategisNasional", {Id: $(this).val()})
+                $.post(BaseURL+"Daerah/GetIsuStrategisNasional", {Id: $(this).val()})
                     .done(function(Respon) {
                         var Data = JSON.parse(Respon);
                         var Isu = '';
@@ -618,7 +618,7 @@
                 $("#EditKementerian").html('<option value="">-- Pilih Kementerian --</option>');
                 $("#EditListIsuStrategisNasional").html('');
             } else {
-                $.post(BaseURL+"SuperDaerah/GetKementerianStrategis", {TahunMulai: $(this).val()})
+                $.post(BaseURL+"Daerah/GetKementerianStrategis", {TahunMulai: $(this).val()})
                     .done(function(Respon) {
                         var Data = JSON.parse(Respon);
                         var Kementerian = '<option value="">-- Pilih Kementerian --</option>';
@@ -637,7 +637,7 @@
             if ($(this).val() == "") {
                 $("#EditListIsuStrategisNasional").html('');
             } else {
-                $.post(BaseURL+"SuperDaerah/GetIsuStrategisNasional", {Id: $(this).val()})
+                $.post(BaseURL+"Daerah/GetIsuStrategisNasional", {Id: $(this).val()})
                     .done(function(Respon) {
                         var Data = JSON.parse(Respon);
                         var Isu = '';
@@ -700,7 +700,7 @@
                 '<?= $this->security->get_csrf_token_name() ?>': '<?= $this->security->get_csrf_hash() ?>'
             };
             
-            $.post(BaseURL + "SuperDaerah/InputIsuStrategis", Data)
+            $.post(BaseURL + "Daerah/InputIsuStrategis", Data)
                 .done(function(Respon) {
                     if (Respon == '1') {
                         $('#ModalInputIsuStrategis').modal('hide');
@@ -742,7 +742,7 @@
             }).appendTo('body');
             
             // Get additional data for Kementerian and Isu
-            $.post(BaseURL + "SuperDaerah/GetPeriodeIsuStrategisNasional", {Id: kementerian})
+            $.post(BaseURL + "Daerah/GetPeriodeIsuStrategisNasional", {Id: kementerian})
                 .done(function(Respon) {
                     var Data = JSON.parse(Respon)[0];
                     if(Data) {
@@ -788,7 +788,7 @@
                 '<?= $this->security->get_csrf_token_name() ?>': '<?= $this->security->get_csrf_hash() ?>'
             };
             
-            $.post(BaseURL + "SuperDaerah/UpdateIsuStrategis", Data)
+            $.post(BaseURL + "Daerah/UpdateIsuStrategis", Data)
                 .done(function(Respon) {
                     if (Respon == '1') {
                         $('#ModalEditIsuStrategis').modal('hide');
@@ -809,7 +809,7 @@
                     Id: $(this).data('id'), 
                     '<?= $this->security->get_csrf_token_name() ?>': '<?= $this->security->get_csrf_hash() ?>' 
                 };
-                $.post(BaseURL + "SuperDaerah/DeleteIsuStrategis", Id)
+                $.post(BaseURL + "Daerah/DeleteIsuStrategis", Id)
                     .done(function(Respon) {
                         if (Respon == '1') {
                             window.location.reload();
@@ -888,7 +888,7 @@
             formData.push({name: 'permasalahan_pokok', value: ppValues.join(',')});
             formData.push({name: '<?= $this->security->get_csrf_token_name() ?>', value: '<?= $this->security->get_csrf_hash() ?>'});
             
-            $.post(BaseURL + "SuperDaerah/TambahPermasalahanPokokIsuStrategis", $.param(formData))
+            $.post(BaseURL + "Daerah/TambahPermasalahanPokokIsuStrategis", $.param(formData))
                 .done(function(res) {
                     if (res == '1') {
                         window.location.reload();
@@ -966,7 +966,7 @@
             formData.push({name: 'isu_klhs', value: klhsValues.join(',')});
             formData.push({name: '<?= $this->security->get_csrf_token_name() ?>', value: '<?= $this->security->get_csrf_hash() ?>'});
             
-            $.post(BaseURL + "SuperDaerah/TambahIsuKLHSIsuStrategis", $.param(formData))
+            $.post(BaseURL + "Daerah/TambahIsuKLHSIsuStrategis", $.param(formData))
                 .done(function(res) {
                     if (res == '1') {
                         window.location.reload();
@@ -1004,7 +1004,7 @@
                 permasalahan_pokok: ppValues.join(","),
                 '<?= $this->security->get_csrf_token_name() ?>': '<?= $this->security->get_csrf_hash() ?>'
             };
-            $.post(BaseURL + "SuperDaerah/EditPermasalahanPokokIsuStrategis", data)
+            $.post(BaseURL + "Daerah/EditPermasalahanPokokIsuStrategis", data)
                 .done(function(res) {
                     if (res == '1') {
                         window.location.reload();
@@ -1042,7 +1042,7 @@
                 isu_klhs: klhsValues.join(","),
                 '<?= $this->security->get_csrf_token_name() ?>': '<?= $this->security->get_csrf_hash() ?>'
             };
-            $.post(BaseURL + "SuperDaerah/EditIsuKLHSIsuStrategis", data)
+            $.post(BaseURL + "Daerah/EditIsuKLHSIsuStrategis", data)
                 .done(function(res) {
                     if (res == '1') {
                         window.location.reload();
