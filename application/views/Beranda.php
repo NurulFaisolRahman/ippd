@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Statistik Akun</title>
+    <title>Beranda IPPD</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -98,39 +98,8 @@
             color: #20c997;
         }
 
-        /* Submenu Styles */
-        .dropdown-submenu {
-            position: relative;
-        }
-
-        .dropdown-submenu > .dropdown-item:after {
-            content: "▸";
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        .dropdown-submenu .dropdown-submenu-content {
-            display: none;
-            position: absolute;
-            left: 100%;
-            top: 0;
-            background-color: white;
-            min-width: 200px;
-            box-shadow: 0px 8px 20px 0px rgba(0,0,0,0.15);
-            z-index: 1002;
-            border-radius: 0 8px 8px 0;
-            border: 1px solid rgba(0,0,0,0.1);
-            border-left: none;
-        }
-
-        .dropdown-submenu:hover > .dropdown-submenu-content {
-            display: block;
-        }
-
-        /* Logout Button */
-        .logout-btn {
+        /* Login Button */
+        .Login-btn {
             background-color: rgba(255, 255, 255, 0.1);
             color: white;
             border: none;
@@ -144,7 +113,7 @@
             cursor: pointer;
         }
 
-        .logout-btn:hover {
+        .Login-btn:hover {
             background-color: rgba(255, 255, 255, 0.2);
         }
 
@@ -168,19 +137,7 @@
                 display: none;
             }
             
-            .dropdown-submenu .dropdown-submenu-content {
-                position: static;
-                border-radius: 0 0 8px 8px;
-                border-left: 1px solid rgba(0,0,0,0.1);
-                margin-left: 15px;
-                box-shadow: none;
-            }
-            
             .dropdown.active .dropdown-content {
-                display: block;
-            }
-            
-            .dropdown-submenu.active > .dropdown-submenu-content {
                 display: block;
             }
         }
@@ -190,8 +147,8 @@
         .navbar-item:active,
         .dropdown-item:focus,
         .dropdown-item:active,
-        .logout-btn:focus,
-        .logout-btn:active {
+        .Login-btn:focus,
+        .Login-btn:active {
             outline: none;
             box-shadow: none;
             background-color: transparent !important;
@@ -383,120 +340,23 @@
             <div class="navbar-menu">
                 <!-- Menu Kementerian dengan Submenu -->
                 <div class="dropdown">
-                    <a href="#" class="navbar-item active">Kementerian <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
+                    <a href="#" class="navbar-item active">Laporan Sakip <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
                     <div class="dropdown-content">
-                        <a href="<?=base_url('Super/Kementerian')?>" class="dropdown-item">Daftar Kementerian</a>
-                        <a href="<?=base_url('Super/SPM')?>" class="dropdown-item">Standar Pelayanan Minimal</a>
-                        <a href="<?=base_url('Super/ProgramStrategis')?>" class="dropdown-item">Program Strategis</a>
-                        <a href="<?=base_url('Super/ProyekStrategis')?>" class="dropdown-item">Proyek Strategis</a>
+                        <a href="<?=base_url('Super/VisiRPJPN')?>" class="dropdown-item">Perancangan</a>
+                        <a href="<?=base_url('Super/SPM')?>" class="dropdown-item">Pelaporan</a>
+                        <a href="<?=base_url('Super/ProgramStrategis')?>" class="dropdown-item">Evaluasi</a>
                     </div>
                 </div>
                 
-                <!-- Menu Nasional dengan Submenu -->
-                <div class="dropdown">
-                    <a href="#" class="navbar-item">Nasional <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
-                    <div class="dropdown-content">
-                        <!-- RPJPN Submenu -->
-                        <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item">RPJPN</a>
-                            <div class="dropdown-submenu-content">
-                                <a href="<?=base_url('Super/VisiRPJPN')?>" class="dropdown-item">Visi</a>
-                                <a href="<?=base_url('Super/MisiRPJPN')?>" class="dropdown-item">Misi</a>
-                                <a href="<?=base_url('Super/TujuanRPJPN')?>" class="dropdown-item">Tujuan</a>
-                                <a href="<?=base_url('Super/SasaranRPJPN')?>" class="dropdown-item">Sasaran</a>
-                                <a href="<?=base_url('Super/TahapanRPJPN')?>" class="dropdown-item">Tahapan</a>
-                                <a href="<?=base_url('Super/IUPRPJPN')?>" class="dropdown-item">IUP RPJPN</a>
-                            </div>
-                        </div>
-                        
-                        <!-- RPJMN Submenu -->
-                        <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item">RPJMN</a>
-                            <div class="dropdown-submenu-content">
-                                <a href="<?=base_url('Super/VisiRPJMN')?>" class="dropdown-item">Visi</a>
-                                <a href="<?=base_url('Super/MisiRPJMN')?>" class="dropdown-item">Misi</a>
-                                <a href="<?=base_url('Super/TujuanRPJMN')?>" class="dropdown-item">Tujuan</a>
-                                <a href="<?=base_url('Super/SasaranRPJMN')?>" class="dropdown-item">Sasaran</a>
-                                <a href="<?=base_url('Super/TahapanRPJMN')?>" class="dropdown-item">Tahapan</a>
-                                <a href="<?=base_url('Super/IUPRPJMN')?>" class="dropdown-item">IUP RPJMN</a>
-                            </div>
-                        </div>
-                        
-                        <!-- RPJPD Submenu -->
-                        <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item">RPJPD</a>
-                            <div class="dropdown-submenu-content">
-                                <a href="<?=base_url('Super/VisiRPJPD')?>" class="dropdown-item">Visi</a>
-                                <a href="<?=base_url('Super/MisiRPJPD')?>" class="dropdown-item">Misi</a>
-                                <a href="<?=base_url('Super/TujuanRPJPD')?>" class="dropdown-item">Tujuan</a>
-                                <a href="<?=base_url('Super/SasaranRPJPD')?>" class="dropdown-item">Sasaran</a>
-                                <a href="<?=base_url('Super/TahapanRPJPD')?>" class="dropdown-item">Tahapan</a>
-                                <a href="<?=base_url('Super/IUPRPJPD')?>" class="dropdown-item">IUP RPJPD</a>
-                            </div>
-                        </div>
-                        
-                        <!-- RPJMD Submenu -->
-                        <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item">RPJMD</a>
-                            <div class="dropdown-submenu-content">
-                                <a href="<?=base_url('Super/VisiRPJMD')?>" class="dropdown-item">Visi</a>
-                                <a href="<?=base_url('Super/MisiRPJMD')?>" class="dropdown-item">Misi</a>
-                                <a href="<?=base_url('Super/TujuanRPJMD')?>" class="dropdown-item">Tujuan</a>
-                                <a href="<?=base_url('Super/SasaranRPJMD')?>" class="dropdown-item">Sasaran</a>
-                                <a href="<?=base_url('Super/TahapanRPJMD')?>" class="dropdown-item">Tahapan</a>
-                                <a href="<?=base_url('Super/IUPRPJMD')?>" class="dropdown-item">IUP RPJMD</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <!-- Kontak Menu (tanpa dropdown) -->
+                <a href="mailto:info@ippd.example.com" class="navbar-item">Kontak</a>
                 
-                <!-- Menu Daerah -->
-                <div class="dropdown">
-                    <a href="#" class="navbar-item">Daerah <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
-                    <div class="dropdown-content">
-                         <!-- RPJPD Submenu -->
-                        <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item">RPJPD</a>
-                            <div class="dropdown-submenu-content">
-                                <a href="<?=base_url('Admin/VisiRPJPD')?>" class="dropdown-item">Visi</a>
-                                <a href="<?=base_url('Admin/MisiRPJPD')?>" class="dropdown-item">Misi</a>
-                                <a href="<?=base_url('Admin/TujuanRPJPD')?>" class="dropdown-item">Tujuan</a>
-                                <a href="<?=base_url('Admin/SasaranRPJPD')?>" class="dropdown-item">Sasaran</a>
-                                <a href="<?=base_url('Admin/TahapanRPJPD')?>" class="dropdown-item">Tahapan</a>
-                            </div>
-                        </div>
-                        <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item">RPJMD</a>
-                            <div class="dropdown-submenu-content">
-                                <a href="<?=base_url('Admin/VisiRPJMD')?>" class="dropdown-item">Visi</a>
-                                <a href="<?=base_url('Admin/MisiRPJMD')?>" class="dropdown-item">Misi</a>
-                                <a href="<?=base_url('Admin/TujuanRPJMD')?>" class="dropdown-item">Tujuan</a>
-                                <a href="<?=base_url('Admin/SasaranRPJMD')?>" class="dropdown-item">Sasaran</a>
-                                <a href="<?=base_url('Admin/TahapanRPJMD')?>" class="dropdown-item">Tahapan</a>
-                            </div>
-                        </div>
-                        <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item">Cascading</a>
-                            <div class="dropdown-submenu-content">
-                                <a href="<?=base_url('Admin/kelola_instansi')?>" class="dropdown-item">Daftar Instansi</a>
-                                <a href="<?=base_url('Admin/Iku')?>" class="dropdown-item">IKU</a>
-                                <a href="<?=base_url('Admin/Ikd')?>" class="dropdown-item">IKD</a>
-                            </div>
-                        </div>
-                        <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item">Isu Daerah</a>
-                            <div class="dropdown-submenu-content">
-                                <a href="<?=base_url('Admin/PermasalahanPokok')?>" class="dropdown-item">Permasalahan Pokok</a>
-                                <a href="<?=base_url('Admin/IsuKLHS')?>" class="dropdown-item">Isu KLHS</a>
-                                <a href="<?=base_url('Admin/IsuStrategisDaerah')?>" class="dropdown-item">Isu Strategis</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <!-- Tentang Kami Menu (tanpa dropdown) -->
+                <a href="#" class="navbar-item">Tentang Kami</a>
                 
-                <button class="logout-btn" onclick="logout()">
+                <button class="Login-btn" onclick="Login()">
                     <i class="fas fa-sign-out-alt"></i>
-                    Logout
+                    Login
                 </button>
             </div>
         </div>
@@ -730,9 +590,9 @@
             renderCalendar(currentDate);
         });
 
-        // Logout function
-        function logout() {
-            // Redirect to logout page or clear session
+        // Login function
+        function Login() {
+            // Redirect to Login page or clear session
             window.location.href = '/ippd';
         }
 
@@ -743,10 +603,10 @@
                 document.addEventListener('click', function(e) {
                     // Close all dropdowns if clicking outside
                     if (!e.target.closest('.dropdown')) {
-                        document.querySelectorAll('.dropdown-content, .dropdown-submenu-content').forEach(menu => {
+                        document.querySelectorAll('.dropdown-content').forEach(menu => {
                             menu.style.display = 'none';
                         });
-                        document.querySelectorAll('.dropdown, .dropdown-submenu').forEach(item => {
+                        document.querySelectorAll('.dropdown').forEach(item => {
                             item.classList.remove('active');
                         });
                     }
@@ -762,36 +622,13 @@
                             const content = dropdown.querySelector('.dropdown-content');
                             
                             // Close other dropdowns
-                            document.querySelectorAll('.dropdown-content, .dropdown-submenu-content').forEach(menu => {
+                            document.querySelectorAll('.dropdown-content').forEach(menu => {
                                 if (menu !== content) menu.style.display = 'none';
                             });
                             
                             // Toggle current dropdown
                             content.style.display = content.style.display === 'block' ? 'none' : 'block';
                             dropdown.classList.toggle('active');
-                        }
-                    });
-                });
-
-                // Toggle submenus
-                document.querySelectorAll('.dropdown-submenu > .dropdown-item').forEach(item => {
-                    item.addEventListener('click', function(e) {
-                        if (window.innerWidth <= 768) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            const submenu = this.nextElementSibling;
-                            const isVisible = submenu.style.display === 'block';
-                            
-                            // Close all submenus first
-                            document.querySelectorAll('.dropdown-submenu-content').forEach(sm => {
-                                sm.style.display = 'none';
-                            });
-                            
-                            // Toggle current submenu if it wasn't visible
-                            if (!isVisible) {
-                                submenu.style.display = 'block';
-                                this.closest('.dropdown-submenu').classList.add('active');
-                            }
                         }
                     });
                 });

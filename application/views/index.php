@@ -350,12 +350,14 @@
           Password: $("#Password").val() 
         };
         $.post(BaseURL + "Home/Login", Login).done(function(Respon) {
-          if (Respon == '1') {
-            if ($("#Username").val() == 'admin') {
-              window.location = BaseURL + "Super/VisiRPJPN";	
-            } else {
-              window.location = BaseURL + "Admin/VisiRPJPD";
-            }
+          if (Respon == 0) {
+            window.location = BaseURL + "Nasional/VisiRPJPN";	
+          } else if (Respon == 1) {
+            window.location = BaseURL + "Super/Kementerian";
+          } else if (Respon == 2) {
+            window.location = BaseURL + "Provinsi/VisiRPJPD";
+          } else if (Respon == 3) {
+            window.location = BaseURL + "SuperDaerah/VisiRPJPD";
           } else {
             alert(Respon);
           }

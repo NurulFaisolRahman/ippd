@@ -21,71 +21,141 @@
         </div>
     </div>
 </div>
+
 <div class="data-table-area">
     <div class="container">
         <div class="row">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="data-table-list">
+                    <!-- Header with Filter Button -->
                     <div class="basic-tb-hd">
                         <div class="button-icon-btn sm-res-mg-t-30">
+                            <button type="button" class="btn btn-primary notika-btn-primary" id="FilterIsuStrategis">
+                                <i class="notika-icon notika-search"></i> 
+                                <b>Filter Data</b>
+                                <?php if ($CurrentPeriode || $CurrentKementerian): ?>
+                                    <span class="badge" style="background-color: #f44336; margin-left: 5px;">Filter Aktif</span>
+                                <?php endif; ?>
+                            </button>
                             <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputIsuStrategis">
                                 <i class="notika-icon notika-edit"></i> <b>Input Isu Strategis</b>
                             </button>
                         </div>
                     </div>
+
+                    <!-- Modal Filter -->
+                    <div class="modal fade" id="ModalFilter" role="dialog">
+                        <div class="modal-dialog modals-default">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">×</button>
+                                    <h4 class="modal-title">Filter Data Isu Strategis</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="form-example-wrap">
+                                                <div class="form-example-int">
+                                                    <div class="form-group">
+                                                        <label>Periode</label>
+                                                        <select class="form-control" id="FilterPeriode">
+                                                            <option value="">Semua Periode</option>
+                                                            <?php foreach ($AllPeriode as $periode): ?>
+                                                                <?php 
+                                                                    $periodeValue = $periode['TahunMulai'] . '|' . $periode['TahunAkhir'];
+                                                                    $selected = ($CurrentPeriode == $periodeValue) ? 'selected' : '';
+                                                                ?>
+                                                                <option value="<?= $periodeValue ?>" <?= $selected ?>>
+                                                                    <?= $periode['TahunMulai'] ?> - <?= $periode['TahunAkhir'] ?>
+                                                                </option>
+                                                            <?php endforeach; ?>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="form-example-int">
+                                                    <div class="form-group">
+                                                        <label>Kementerian</label>
+                                                        <select class="form-control" id="FilterKementerianSelect">
+                                                            <option value="">Semua Kementerian</option>
+                                                            <?php if ($CurrentPeriode && !empty($Kementerian)): ?>
+                                                                <?php foreach ($Kementerian as $kementerian): ?>
+                                                                    <?php $selected = ($CurrentKementerian == $kementerian['Id']) ? 'selected' : ''; ?>
+                                                                    <option value="<?= $kementerian['Id'] ?>" <?= $selected ?>>
+                                                                        <?= $kementerian['NamaKementerian'] ?>
+                                                                    </option>
+                                                                <?php endforeach; ?>
+                                                            <?php endif; ?>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="form-example-int mg-t-15">
+                                                    <button class="btn btn-success notika-btn-success" id="ApplyFilter">Terapkan Filter</button>
+                                                    <button class="btn btn-danger notika-btn-danger" id="ResetFilter">Reset Filter</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabel Data Isu Strategis -->
                     <div class="table-responsive">
                         <table id="data-table-basic" class="table table-striped" style="table-layout: fixed;">
                             <thead>
-                                    <tr>
-                                        <th width="5%" class="text-center">No</th>
-                                        <th width="15%">Kementerian</th>
-                                        <th width="15%">Isu Strategis</th>
-                                        <th width="15%">Permasalahan Pokok</th> <!-- Kolom baru -->
-                                        <th width="15%">Isu KLHS</th>
-                                        <th width="15%">Isu Global</th>
-                                        <th width="15%">Isu Nasional</th>
-                                        <th width="10%">Periode</th>
-                                        <th width="10%">Aksi</th>
-                                    </tr>
+                                <tr>
+                                    <th width="5%" class="text-center">No</th>
+                                    <th width="15%">Kementerian</th>
+                                    <th width="15%">Isu Strategis</th>
+                                    <th width="15%">Permasalahan Pokok</th>
+                                    <th width="15%">Isu KLHS</th>
+                                    <th width="15%">Isu Global</th>
+                                    <th width="15%">Isu Nasional</th>
+                                    <th width="10%">Periode</th>
+                                    <th width="10%">Aksi</th>
+                                </tr>
                             </thead>
                             <tbody>
-                                <?php $No = 1; foreach ($IsuStrategis as $key) { ?>
+                                <?php $No = 1; foreach ($IsuStrategis as $key): ?>
                                 <tr>
                                     <td style="vertical-align: middle;" class="text-center"><?= $No++ ?></td>
                                     <td style="vertical-align: middle;"><?= $key['NamaKementerian'] ?></td>
                                     <td style="vertical-align: middle;"><?= $key['NamaIsuStrategis'] ?></td>                     
                                     <td style="vertical-align: top;">
-                                    <div style="display: flex; flex-direction: column; height: 100%;">
-                                        <div style="display: flex; justify-content: center; gap: 5px; margin-bottom: 5px;">
-                                            <button class="btn btn-sm btn-success TambahPermasalahan" 
-                                                    title="Tambah Permasalahan Pokok"
-                                                    data-id="<?= $key['Id'] ?>"
-                                                    data-tahunmulai="<?= $key['TahunMulai'] ?>"
-                                                    data-tahunakhir="<?= $key['TahunAkhir'] ?>"
-                                                    style="width: 30px; height: 30px; padding: 0;">
-                                                <i class="fa fa-plus"></i>
-                                            </button>
-                                            <?php if (!empty($key['NamaPermasalahanPokok'])): ?>
-                                            <button class="btn btn-sm btn-info DetailPermasalahan" 
-                                                    title="Detail Permasalahan Pokok"
-                                                    data-id="<?= $key['Id'] ?>"
-                                                    data-permasalahan="<?= $key['IdPermasalahanPokok'] ?>"
-                                                    data-tahunmulai="<?= $key['TahunMulai'] ?>"
-                                                    data-tahunakhir="<?= $key['TahunAkhir'] ?>"
-                                                    style="width: 30px; height: 30px; padding: 0;">
-                                                <i class="fa fa-eye"></i>
-                                            </button>
-                                            <?php endif; ?>
+                                        <div style="display: flex; flex-direction: column; height: 100%;">
+                                            <div style="display: flex; justify-content: center; gap: 5px; margin-bottom: 5px;">
+                                                <button class="btn btn-sm btn-success TambahPermasalahan" 
+                                                        title="Tambah Permasalahan Pokok"
+                                                        data-id="<?= $key['Id'] ?>"
+                                                        data-tahunmulai="<?= $key['TahunMulai'] ?>"
+                                                        data-tahunakhir="<?= $key['TahunAkhir'] ?>"
+                                                        style="width: 30px; height: 30px; padding: 0;">
+                                                    <i class="fa fa-plus"></i>
+                                                </button>
+                                                <?php if (!empty($key['NamaPermasalahanPokok'])): ?>
+                                                <button class="btn btn-sm btn-info DetailPermasalahan" 
+                                                        title="Detail Permasalahan Pokok"
+                                                        data-id="<?= $key['Id'] ?>"
+                                                        data-permasalahan="<?= $key['IdPermasalahanPokok'] ?>"
+                                                        data-tahunmulai="<?= $key['TahunMulai'] ?>"
+                                                        data-tahunakhir="<?= $key['TahunAkhir'] ?>"
+                                                        style="width: 30px; height: 30px; padding: 0;">
+                                                    <i class="fa fa-eye"></i>
+                                                </button>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div style="flex-grow: 1; overflow: auto; text-align: start;">
+                                                <?php if (!empty($key['NamaPermasalahanPokok'])): ?>
+                                                    <?= htmlspecialchars($key['NamaPermasalahanPokok']) ?>
+                                                <?php else: ?>
+                                                    -
+                                                <?php endif; ?>
+                                            </div>
                                         </div>
-                                        <div style="flex-grow: 1; overflow: auto; text-align: start;">
-                                            <?php if (!empty($key['NamaPermasalahanPokok'])): ?>
-                                                <?= htmlspecialchars($key['NamaPermasalahanPokok']) ?>
-                                            <?php else: ?>
-                                                -
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                </td>
+                                    </td>
                                     <!-- Isu KLHS -->
                                     <td style="vertical-align: top;">
                                         <div style="display: flex; flex-direction: column; height: 100%;">
@@ -189,7 +259,7 @@
                                     <td style="vertical-align: middle;">
                                         <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
                                             <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" 
-                                                    data-edit="<?= $key['Id'] . '|' . $key['IdKementerian'] . '|' . $key['NamaIsuStrategis'] . '|' . $key['IdIsuKLHS'] . '|' . $key['IdIsuGlobal'] . '|' . $key['IdIsuNasional'] . '|' . $key['TahunMulai'] . '|' . $key['TahunAkhir'] ?>"
+                                                    data-edit="<?= $key['Id'] . '|' . $key['IdKementerian'] . '|' . $key['NamaIsuStrategis'] . '|' . $key['IdIsuKLHS'] . '|' . $key['IdIsuGlobal'] . '|' . $key['IdIsuNasional'] . '|' . $key['TahunMulai'] . '|' . $key['TahunAkhir'] . '|' . $key['IdPermasalahanPokok'] ?>"
                                                     style="width: 36px; height: 36px; padding: 0; border-radius: 50%;">
                                                 <i class="notika-icon notika-edit"></i>
                                             </button>
@@ -201,7 +271,7 @@
                                         </div>
                                     </td>
                                 </tr>
-                                <?php } ?>
+                                <?php endforeach; ?>
                             </tbody>
                         </table>
                     </div>
@@ -233,9 +303,11 @@
                                         <div class="nk-int-st">
                                             <select class="form-control" id="Periode" name="Periode" required>
                                                 <option value="">-- Pilih Periode --</option>
-                                                <?php foreach ($Periode as $periode) { ?>
-                                                    <option value="<?= $periode['TahunMulai'] . '|' . $periode['TahunAkhir'] ?>"><?= $periode['TahunMulai'] . ' - ' . $periode['TahunAkhir'] ?></option>
-                                                <?php } ?>
+                                                <?php foreach ($Periode as $periode): ?>
+                                                    <option value="<?= $periode['TahunMulai'] . '|' . $periode['TahunAkhir'] ?>">
+                                                        <?= $periode['TahunMulai'] . ' - ' . $periode['TahunAkhir'] ?>
+                                                    </option>
+                                                <?php endforeach; ?>
                                             </select>
                                         </div>
                                     </div>
@@ -260,25 +332,24 @@
                             </div>
                         </div>
                         <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Permasalahan Pokok</b></label>
-                                        </div>
-                                        <div class="col-lg-9">
-                                            <div id="permasalahan-container">
-                                                <div class="form-group permasalahan-row">
-                                                    <div class="row">
-                                                        <div class="col-md-10">
-                                                            <select class="form-control permasalahan-select" name="IdPermasalahanPokok[]">
-                                                                <option value="">-- Pilih Permasalahan Pokok --</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-md-2" style="padding-top: 25px;">
-                                                            <button type="button" class="btn btn-success btn-add-permasalahan">
-                                                                <i class="notika-icon notika-plus-symbol"></i>
-                                                            </button>
-                                                        </div>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-lg-2">
+                                        <label class="hrzn-fm"><b>Permasalahan Pokok</b></label>
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <div id="permasalahan-container">
+                                            <div class="form-group permasalahan-row">
+                                                <div class="row">
+                                                    <div class="col-md-10">
+                                                        <select class="form-control permasalahan-select" name="IdPermasalahanPokok[]">
+                                                            <option value="">-- Pilih Permasalahan Pokok --</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-2" style="padding-top: 25px;">
+                                                        <button type="button" class="btn btn-success btn-add-permasalahan">
+                                                            <i class="notika-icon notika-plus-symbol"></i>
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -286,6 +357,7 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
                         <!-- Isu KLHS -->
                         <div class="form-example-int form-horizental">
                             <div class="form-group">
@@ -427,9 +499,11 @@
                                         <div class="nk-int-st">
                                             <select class="form-control" id="EditPeriode" name="Periode" required>
                                                 <option value="">-- Pilih Periode --</option>
-                                                <?php foreach ($Periode as $periode) { ?>
-                                                    <option value="<?= $periode['TahunMulai'] . '|' . $periode['TahunAkhir'] ?>"><?= $periode['TahunMulai'] . ' - ' . $periode['TahunAkhir'] ?></option>
-                                                <?php } ?>
+                                                <?php foreach ($Periode as $periode): ?>
+                                                    <option value="<?= $periode['TahunMulai'] . '|' . $periode['TahunAkhir'] ?>">
+                                                        <?= $periode['TahunMulai'] . ' - ' . $periode['TahunAkhir'] ?>
+                                                    </option>
+                                                <?php endforeach; ?>
                                             </select>
                                         </div>
                                     </div>
@@ -738,7 +812,6 @@
     </div>
 </div>
 
-
 <!-- Scripts -->
 <script src="<?= base_url('js/vendor/jquery-1.12.4.min.js'); ?>"></script>
 <script src="<?= base_url('js/bootstrap.min.js'); ?>"></script>
@@ -753,6 +826,9 @@
 <script src="<?= base_url('js/main.js'); ?>"></script>
 <script>
 var BaseURL = '<?= base_url() ?>';
+var CurrentPeriode = '<?= $CurrentPeriode ?>';
+var CurrentKementerian = '<?= $CurrentKementerian ?>';
+
 jQuery(document).ready(function($) {
     // Function to populate dropdowns with proper error handling
     function populateDropdown(selectElement, data, selectedIds = [], defaultText = '-- Pilih --') {
@@ -777,6 +853,116 @@ jQuery(document).ready(function($) {
             .removeClass('btn-success').addClass('btn-danger');
         $(`#${containerId}`).append(newRow);
     }
+
+    // Function to populate Kementerian dropdown
+    function populateKementerian(selectElement, tahunMulai, tahunAkhir, selectedId = '') {
+        if (tahunMulai && tahunAkhir) {
+            $.post(BaseURL + "Super/GetKementerianByPeriode", {
+                TahunMulai: tahunMulai,
+                TahunAkhir: tahunAkhir
+            }, function(response) {
+                try {
+                    var kementerian = JSON.parse(response);
+                    selectElement.empty().append('<option value="">-- Pilih Kementerian --</option>');
+                    $.each(kementerian, function(index, item) {
+                        var isSelected = (item.Id == selectedId) ? 'selected' : '';
+                        selectElement.append('<option value="' + item.Id + '" ' + isSelected + '>' + item.NamaKementerian + '</option>');
+                    });
+                } catch(e) {
+                    console.error("Error parsing Kementerian data:", e);
+                    selectElement.empty().append('<option value="">-- Pilih Kementerian --</option>');
+                }
+            }).fail(function() {
+                selectElement.empty().append('<option value="">-- Pilih Kementerian --</option>');
+            });
+        } else {
+            selectElement.empty().append('<option value="">-- Pilih Kementerian --</option>');
+        }
+    }
+
+    // Function to load Kementerian for filter
+    function loadKementerianForFilter(periode, selectElement, selectedId = '') {
+        if (periode) {
+            var [tahunMulai, tahunAkhir] = periode.split('|');
+            $.post(BaseURL + "Super/GetKementerianByPeriode", {
+                TahunMulai: tahunMulai, 
+                TahunAkhir: tahunAkhir
+            }, function(response) {
+                try {
+                    var kementerian = JSON.parse(response);
+                    selectElement.empty().append('<option value="">Semua Kementerian</option>');
+                    
+                    if (kementerian.length > 0) {
+                        $.each(kementerian, function(index, item) {
+                            var isSelected = (item.Id == selectedId) ? 'selected' : '';
+                            selectElement.append('<option value="' + item.Id + '" ' + isSelected + '>' + item.NamaKementerian + '</option>');
+                        });
+                    }
+                } catch(e) {
+                    console.error("Error parsing Kementerian data:", e);
+                    selectElement.empty().append('<option value="">Semua Kementerian</option>');
+                }
+            }).fail(function() {
+                selectElement.empty().append('<option value="">Semua Kementerian</option>');
+            });
+        } else {
+            // Load all ministries if no period selected
+            $.post(BaseURL + "Super/GetKementerianByPeriode", {}, function(response) {
+                try {
+                    var kementerian = JSON.parse(response);
+                    selectElement.empty().append('<option value="">Semua Kementerian</option>');
+                    
+                    if (kementerian.length > 0) {
+                        $.each(kementerian, function(index, item) {
+                            var isSelected = (item.Id == selectedId) ? 'selected' : '';
+                            selectElement.append('<option value="' + item.Id + '" ' + isSelected + '>' + item.NamaKementerian + '</option>');
+                        });
+                    }
+                } catch(e) {
+                    console.error("Error parsing Kementerian data:", e);
+                    selectElement.empty().append('<option value="">Semua Kementerian</option>');
+                }
+            }).fail(function() {
+                selectElement.empty().append('<option value="">Semua Kementerian</option>');
+            });
+        }
+    }
+
+    // Show filter modal
+    $("#FilterIsuStrategis").click(function() {
+        $('#ModalFilter').modal("show");
+        
+        // Initialize the ministry dropdown based on current period filter
+        var currentPeriode = $("#FilterPeriode").val();
+        if (currentPeriode) {
+            loadKementerianForFilter(currentPeriode, $("#FilterKementerianSelect"), '<?= $CurrentKementerian ?>');
+        } else {
+            loadKementerianForFilter('', $("#FilterKementerianSelect"), '<?= $CurrentKementerian ?>');
+        }
+    });
+
+    // Load ministries when period filter changes
+    $("#FilterPeriode").change(function() {
+        var periode = $(this).val();
+        loadKementerianForFilter(periode, $("#FilterKementerianSelect"));
+    });
+
+    // Apply filter
+    $("#ApplyFilter").click(function() {
+        var periode = $("#FilterPeriode").val();
+        var kementerian = $("#FilterKementerianSelect").val();
+        var url = BaseURL + "Super/IsuStrategis?";
+        
+        if (periode) url += "periode=" + encodeURIComponent(periode) + "&";
+        if (kementerian) url += "kementerian=" + encodeURIComponent(kementerian);
+        
+        window.location.href = url;
+    });
+
+    // Reset filter
+    $("#ResetFilter").click(function() {
+        window.location.href = BaseURL + "Super/IsuStrategis";
+    });
 
     // Handle add button clicks
     $(document).on('click', '.btn-add-klhs', function() {
@@ -1957,9 +2143,9 @@ jQuery(document).ready(function($) {
     // Handle Detail Permasalahan Pokok
     $(document).on('click', '.DetailPermasalahan', function() {
         var id = $(this).data('id');
-        var permasalahanIds = $(this).data('permasalahanpokok');
-        var TahunMulai = $(this).data('TahunMulai');
-        var TahunAkhir = $(this).data('TahunAkhir');
+        var permasalahanIds = $(this).data('permasalahan');
+        var TahunMulai = $(this).data('tahunmulai');
+        var TahunAkhir = $(this).data('tahunakhir');
         
         if (permasalahanIds) {
             $.post(BaseURL + "Super/GetPermasalahanByIds", { 
@@ -1992,6 +2178,13 @@ jQuery(document).ready(function($) {
             $('#permasalahan-detail-container .list-group').html('<li class="list-group-item">Tidak ada data permasalahan</li>');
             $('#ModalDetailPermasalahan').modal('show');
         }
+    });
+
+    // Initialize filter state on page load
+    $(document).ready(function() {
+        <?php if ($CurrentPeriode): ?>
+            loadKementerianForFilter('<?= $CurrentPeriode ?>', $("#FilterKementerianSelect"), '<?= $CurrentKementerian ?>');
+        <?php endif; ?>
     });
 });
 </script>

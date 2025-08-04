@@ -178,9 +178,9 @@
                 } else {
                     var JanjiPolitik = { JanjiPolitik : $("#JanjiPolitik").val(),
                                     _Id : $("#Periode").val() }
-                    $.post(BaseURL+"Admin/InputJanjiPolitik", JanjiPolitik).done(function(Respon) {
+                    $.post(BaseURL+"SuperDaerah/InputJanjiPolitik", JanjiPolitik).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Admin/JanjiPolitik"
+                            window.location = BaseURL+"SuperDaerah/JanjiPolitik"
                         } else {
                             alert(Respon)
                         }
@@ -206,9 +206,9 @@
                     var JanjiPolitik = { Id : $("#Id").val(),
                                     JanjiPolitik : $("#_JanjiPolitik").val(),
                                     _Id : $("#_Periode").val() }
-                    $.post(BaseURL+"Admin/EditJanjiPolitik", JanjiPolitik).done(function(Respon) {
+                    $.post(BaseURL+"SuperDaerah/EditJanjiPolitik", JanjiPolitik).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Admin/JanjiPolitik"
+                            window.location = BaseURL+"SuperDaerah/JanjiPolitik"
                         } else {
                             alert(Respon)
                         }
@@ -218,9 +218,9 @@
 
             $('#data-table-basic tbody').on('click', '.Hapus', function () {
                 var JanjiPolitik = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"Admin/HapusJanjiPolitik", JanjiPolitik).done(function(Respon) {
+                $.post(BaseURL+"SuperDaerah/HapusJanjiPolitik", JanjiPolitik).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Admin/JanjiPolitik"
+                        window.location = BaseURL+"SuperDaerah/JanjiPolitik"
                     } else {
                         alert(Respon)
                     }

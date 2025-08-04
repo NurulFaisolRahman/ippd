@@ -34,14 +34,24 @@ class Home extends CI_Controller {
 		else {
 			$Akun = $User->result_array();
 			if (password_verify($_POST['Password'], $Akun[0]['Password'])) {
-        if ($Akun[0]['Username'] == 'admin') {
-          $Session = array('Admin' => true,'Kementerian' => '','Level' => 5);
+        if ($Akun[0]['Level'] == '0') {
+          $Session = array('Admin' => true,'Level' => $Akun[0]['Level']);
           $this->session->set_userdata($Session);
-          echo '1';
-        } else {
+          echo $Akun[0]['Level'];
+        } else if ($Akun[0]['Level'] == '1') {
+          $Session = array('Admin' => true,'Kementerian' => '','Level' => $Akun[0]['Level']);
+          $this->session->set_userdata($Session);
+          echo $Akun[0]['Level'];
+        } else if ($Akun[0]['Level'] == '2') {
+					$Session = array('Admin' => true,'Kementerian' => '','Level' => $Akun[0]['Level']);
           $Session = array('KodeWilayah' => $Akun[0]['KodeWilayah'],);
           $this->session->set_userdata($Session);
-          echo '1';
+          echo $Akun[0]['Level'];
+        } else if ($Akun[0]['Level'] == '3') {
+					$Session = array('Admin' => true,'Kementerian' => '','Level' => $Akun[0]['Level']);
+          $Session = array('KodeWilayah' => $Akun[0]['KodeWilayah'],);
+          $this->session->set_userdata($Session);
+          echo $Akun[0]['Level'];
         } 
 			} else {
 				echo "Password Salah!";

@@ -21,18 +21,86 @@
         </div>
     </div>
 </div>
+
 <div class="data-table-area">
     <div class="container">
         <div class="row">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="data-table-list">
+                    <!-- Header with Filter Button -->
                     <div class="basic-tb-hd">
                         <div class="button-icon-btn sm-res-mg-t-30">
+                            <button type="button" class="btn btn-primary notika-btn-primary" id="FilterIsuGlobal">
+                                <i class="notika-icon notika-search"></i> 
+                                <b>Filter Data</b>
+                                <?php if ($CurrentPeriode || $CurrentKementerian): ?>
+                                    <span class="badge" style="background-color: #f44336; margin-left: 5px;">Filter Aktif</span>
+                                <?php endif; ?>
+                            </button>
                             <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputIsuGlobal">
                                 <i class="notika-icon notika-edit"></i> <b>Input Isu Global</b>
                             </button>
                         </div>
                     </div>
+
+                    <!-- Modal Filter -->
+                    <div class="modal fade" id="ModalFilter" role="dialog">
+                        <div class="modal-dialog modals-default">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">×</button>
+                                    <h4 class="modal-title">Filter Data Isu Global</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="form-example-wrap">
+                                                <div class="form-example-int">
+                                                    <div class="form-group">
+                                                        <label>Periode</label>
+                                                        <select class="form-control" id="FilterPeriode">
+                                                            <option value="">Semua Periode</option>
+                                                            <?php foreach ($AllPeriode as $periode): ?>
+                                                                <?php 
+                                                                    $periodeValue = $periode['TahunMulai'] . '|' . $periode['TahunAkhir'];
+                                                                    $selected = ($CurrentPeriode == $periodeValue) ? 'selected' : '';
+                                                                ?>
+                                                                <option value="<?= $periodeValue ?>" <?= $selected ?>>
+                                                                    <?= $periode['TahunMulai'] ?> - <?= $periode['TahunAkhir'] ?>
+                                                                </option>
+                                                            <?php endforeach; ?>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="form-example-int">
+                                                    <div class="form-group">
+                                                        <label>Kementerian</label>
+                                                        <select class="form-control" id="FilterKementerianSelect">
+                                                            <option value="">Semua Kementerian</option>
+                                                            <?php foreach ($Kementerian as $kementerian): ?>
+                                                                <?php $selected = ($CurrentKementerian == $kementerian['Id']) ? 'selected' : ''; ?>
+                                                                <option value="<?= $kementerian['Id'] ?>" <?= $selected ?>>
+                                                                    <?= $kementerian['NamaKementerian'] ?>
+                                                                </option>
+                                                            <?php endforeach; ?>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="form-example-int mg-t-15">
+                                                    <button class="btn btn-success notika-btn-success" id="ApplyFilter">Terapkan Filter</button>
+                                                    <button class="btn btn-danger notika-btn-danger" id="ResetFilter">Reset Filter</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabel Data Isu Global -->
                     <div class="table-responsive">
                         <table id="data-table-basic" class="table table-striped">
                             <thead>
@@ -45,7 +113,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php $No = 1; foreach ($IsuGlobal as $key) { ?>
+                                <?php $No = 1; foreach ($IsuGlobal as $key): ?>
                                 <tr>
                                     <td style="vertical-align: middle;" class="text-center"><?= $No++ ?></td>
                                     <td style="vertical-align: middle;"><?= $key['NamaKementerian'] ?></td>
@@ -53,12 +121,17 @@
                                     <td style="vertical-align: middle;"><?= $key['TahunMulai'] . ' - ' . $key['TahunAkhir'] ?></td>
                                     <td>
                                         <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                            <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?= $key['Id'] . '|' . $key['IdKementerian'] . '|' . $key['NamaIsuGlobal'] . '|' . $key['TahunMulai'] . '|' . $key['TahunAkhir'] ?>"><i class="notika-icon notika-edit"></i></button>
-                                            <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?= $key['Id'] ?>"><i class="notika-icon notika-trash"></i></button>
+                                            <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" 
+                                                data-edit="<?= $key['Id'] . '|' . $key['IdKementerian'] . '|' . $key['NamaIsuGlobal'] . '|' . $key['TahunMulai'] . '|' . $key['TahunAkhir'] ?>">
+                                                <i class="notika-icon notika-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" data-hapus="<?= $key['Id'] ?>">
+                                                <i class="notika-icon notika-trash"></i>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
-                                <?php } ?>
+                                <?php endforeach; ?>
                             </tbody>
                         </table>
                     </div>
@@ -74,6 +147,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">×</button>
+                <h4 class="modal-title">Input Isu Global</h4>
             </div>
             <div class="modal-body">
                 <div class="row">
@@ -87,11 +161,13 @@
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <select class="form-control" id="Periode">
+                                                <select class="form-control" id="InputPeriode" required>
                                                     <option value="">-- Pilih Periode --</option>
-                                                    <?php foreach ($Periode as $periode) { ?>
-                                                        <option value="<?= $periode['TahunMulai'] . '|' . $periode['TahunAkhir'] ?>"><?= $periode['TahunMulai'] . ' - ' . $periode['TahunAkhir'] ?></option>
-                                                    <?php } ?>
+                                                    <?php foreach ($AllPeriode as $periode): ?>
+                                                        <option value="<?= $periode['TahunMulai'] . '|' . $periode['TahunAkhir'] ?>">
+                                                            <?= $periode['TahunMulai'] . ' - ' . $periode['TahunAkhir'] ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
                                                 </select>
                                             </div>
                                         </div>
@@ -106,7 +182,7 @@
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <select class="form-control" id="IdKementerian">
+                                                <select class="form-control" id="InputKementerian" required>
                                                     <option value="">-- Pilih Kementerian --</option>
                                                 </select>
                                             </div>
@@ -122,7 +198,7 @@
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="NamaIsuGlobal">
+                                                <input type="text" class="form-control input-sm" id="NamaIsuGlobal" required>
                                             </div>
                                         </div>
                                     </div>
@@ -150,6 +226,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">×</button>
+                <h4 class="modal-title">Edit Isu Global</h4>
             </div>
             <div class="modal-body">
                 <div class="row">
@@ -163,11 +240,13 @@
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <select class="form-control" id="EditPeriode">
+                                                <select class="form-control" id="EditPeriode" required>
                                                     <option value="">-- Pilih Periode --</option>
-                                                    <?php foreach ($Periode as $periode) { ?>
-                                                        <option value="<?= $periode['TahunMulai'] . '|' . $periode['TahunAkhir'] ?>"><?= $periode['TahunMulai'] . ' - ' . $periode['TahunAkhir'] ?></option>
-                                                    <?php } ?>
+                                                    <?php foreach ($AllPeriode as $periode): ?>
+                                                        <option value="<?= $periode['TahunMulai'] . '|' . $periode['TahunAkhir'] ?>">
+                                                            <?= $periode['TahunMulai'] . ' - ' . $periode['TahunAkhir'] ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
                                                 </select>
                                             </div>
                                         </div>
@@ -182,7 +261,8 @@
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <select class="form-control" id="EditIdKementerian">
+                                                <input type="hidden" id="EditId">
+                                                <select class="form-control" id="EditIdKementerian" required>
                                                     <option value="">-- Pilih Kementerian --</option>
                                                 </select>
                                             </div>
@@ -198,8 +278,7 @@
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <input type="hidden" id="EditId">
-                                                <input type="text" class="form-control input-sm" id="EditNamaIsuGlobal">
+                                                <input type="text" class="form-control input-sm" id="EditNamaIsuGlobal" required>
                                             </div>
                                         </div>
                                     </div>
@@ -235,7 +314,10 @@
 <script src="<?= base_url('js/main.js'); ?>"></script>
 <script>
     var BaseURL = '<?= base_url() ?>';
-    jQuery(document).ready(function($) {
+    var CurrentPeriode = '<?= $CurrentPeriode ?>';
+    var CurrentKementerian = '<?= $CurrentKementerian ?>';
+
+    $(document).ready(function() {
         // Function to populate Kementerian dropdown
         function populateKementerian(selectElement, tahunMulai, tahunAkhir, selectedId = '') {
             if (tahunMulai && tahunAkhir) {
@@ -256,13 +338,13 @@
         }
 
         // Periode change handler for Input modal
-        $("#Periode").change(function() {
+        $("#InputPeriode").change(function() {
             var periode = $(this).val();
             if (periode) {
                 var [tahunMulai, tahunAkhir] = periode.split('|');
-                populateKementerian($("#IdKementerian"), tahunMulai, tahunAkhir);
+                populateKementerian($("#InputKementerian"), tahunMulai, tahunAkhir);
             } else {
-                $("#IdKementerian").empty().append('<option value="">-- Pilih Kementerian --</option>');
+                $("#InputKementerian").empty().append('<option value="">-- Pilih Kementerian --</option>');
             }
         });
 
@@ -277,21 +359,79 @@
             }
         });
 
+        // Filter functionality
+        function loadKementerianForFilter(periode, selectElement, selectedId = '') {
+            if (periode) {
+                var [tahunMulai, tahunAkhir] = periode.split('|');
+                $.post(BaseURL + "Super/GetKementerianByPeriode", {
+                    TahunMulai: tahunMulai,
+                    TahunAkhir: tahunAkhir
+                }, function(response) {
+                    var kementerian = JSON.parse(response);
+                    selectElement.empty().append('<option value="">Semua Kementerian</option>');
+                    
+                    if (kementerian.length > 0) {
+                        $.each(kementerian, function(index, item) {
+                            var isSelected = (item.Id == selectedId) ? 'selected' : '';
+                            selectElement.append('<option value="' + item.Id + '" ' + isSelected + '>' + item.NamaKementerian + '</option>');
+                        });
+                    }
+                });
+            } else {
+                // Load all kementerian when no periode selected
+                $.getJSON(BaseURL + "Super/GetAllKementerian", function(kementerian) {
+                    selectElement.empty().append('<option value="">Semua Kementerian</option>');
+                    $.each(kementerian, function(index, item) {
+                        var isSelected = (item.Id == selectedId) ? 'selected' : '';
+                        selectElement.append('<option value="' + item.Id + '" ' + isSelected + '>' + item.NamaKementerian + '</option>');
+                    });
+                });
+            }
+        }
+
+        // Show filter modal
+        $("#FilterIsuGlobal").click(function() {
+            $('#ModalFilter').modal("show");
+        });
+
+        // Load ministries when period filter changes
+        $("#FilterPeriode").change(function() {
+            var periode = $(this).val();
+            loadKementerianForFilter(periode, $("#FilterKementerianSelect"));
+        });
+
+        // Apply filter
+        $("#ApplyFilter").click(function() {
+            var periode = $("#FilterPeriode").val();
+            var kementerian = $("#FilterKementerianSelect").val();
+            var url = BaseURL + "Super/IsuGlobal?";
+            
+            if (periode) url += "periode=" + encodeURIComponent(periode) + "&";
+            if (kementerian) url += "kementerian=" + encodeURIComponent(kementerian);
+            
+            window.location.href = url;
+        });
+
+        // Reset filter
+        $("#ResetFilter").click(function() {
+            window.location.href = BaseURL + "Super/IsuGlobal";
+        });
+
         // Input Isu Global
         $("#InputIsuGlobal").click(function() {
-            if ($("#Periode").val() === "") {
+            if ($("#InputPeriode").val() === "") {
                 alert('Pilih Periode terlebih dahulu!');
                 return;
-            } else if ($("#IdKementerian").val() === "") {
+            } else if ($("#InputKementerian").val() === "") {
                 alert('Pilih Kementerian terlebih dahulu!');
                 return;
             } else if ($("#NamaIsuGlobal").val() === "") {
                 alert('Input Nama Isu Global Belum Benar!');
                 return;
             } else {
-                var [TahunMulai, TahunAkhir] = $("#Periode").val().split('|');
+                var [TahunMulai, TahunAkhir] = $("#InputPeriode").val().split('|');
                 var Data = {
-                    IdKementerian: $("#IdKementerian").val(),
+                    IdKementerian: $("#InputKementerian").val(),
                     NamaIsuGlobal: $("#NamaIsuGlobal").val(),
                     TahunMulai: TahunMulai,
                     TahunAkhir: TahunAkhir
@@ -308,13 +448,12 @@
 
         // Edit Isu Global
         $(document).on("click", ".Edit", function() {
-            var Data = $(this).attr('Edit');
-            var Pisah = Data.split("|");
-            $("#EditId").val(Pisah[0]);
-            $("#EditNamaIsuGlobal").val(Pisah[2]);
-            var periode = Pisah[3] + '|' + Pisah[4];
+            var Data = $(this).data('edit').split("|");
+            $("#EditId").val(Data[0]);
+            $("#EditNamaIsuGlobal").val(Data[2]);
+            var periode = Data[3] + '|' + Data[4];
             $("#EditPeriode").val(periode);
-            populateKementerian($("#EditIdKementerian"), Pisah[3], Pisah[4], Pisah[1]);
+            populateKementerian($("#EditIdKementerian"), Data[3], Data[4], Data[1]);
             $('#ModalEditIsuGlobal').modal("show");
         });
 
@@ -349,15 +488,25 @@
         });
 
         // Delete Isu Global
-        $(".Hapus").click(function() {
-                var Misi = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"Super/DeleteIsuGlobal", Misi).done(function(Respon) {
+        $(document).on("click", ".Hapus", function() {
+            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                var Id = { Id: $(this).data('hapus') };
+                $.post(BaseURL + "Super/DeleteIsuGlobal", Id).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Super/IsuGlobal"
+                        window.location.reload();
                     } else {
-                        alert(Respon)
+                        alert(Respon);
                     }
-                })                         
-            })
+                });
+            }
+        });
+
+        // Initialize filter state on page load
+        <?php if ($CurrentPeriode): ?>
+            loadKementerianForFilter('<?= $CurrentPeriode ?>', $("#FilterKementerianSelect"), '<?= $CurrentKementerian ?>');
+        <?php else: ?>
+            // Load all kementerian if no periode filter
+            loadKementerianForFilter('', $("#FilterKementerianSelect"), '<?= $CurrentKementerian ?>');
+        <?php endif; ?>
     });
 </script>

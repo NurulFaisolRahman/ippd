@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Super extends CI_Controller {
+class Provinsi extends CI_Controller {
 
   public function __construct() {
 		parent::__construct();
@@ -27,8 +27,8 @@ class Super extends CI_Controller {
   public function Akun() {
 		$Header['Halaman'] = 'Akun';
 		$Data['Akun'] = $this->db->query("SELECT * FROM `akun` WHERE Level != 0 AND deleted_at IS NULL")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/Akun',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/Akun',$Data);
 	}
 
   public function InputAkun(){  
@@ -68,8 +68,8 @@ class Super extends CI_Controller {
   public function VisiRPJPN(){
 		$Header['Halaman'] = 'RPJPN';
 		$Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjpn")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/VisiRPJPN',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/VisiRPJPN',$Data);
 	}
 
   public function InputVisiRPJPN(){  
@@ -109,8 +109,8 @@ class Super extends CI_Controller {
 		$Header['Halaman'] = 'RPJPN';
     $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjpn")->result_array();
 		$Data['Misi'] = $this->db->query("SELECT v.*,m.* FROM visirpjpn as v, misirpjpn as m WHERE m._Id = v.Id AND m.deleted_at IS NULL")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/MisiRPJPN',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/MisiRPJPN',$Data);
 	}
 
   public function InputMisiRPJPN(){  
@@ -150,8 +150,8 @@ class Super extends CI_Controller {
 		$Header['Halaman'] = 'RPJPN';
     $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjpn")->result_array();
 		$Data['Tujuan'] = $this->db->query("SELECT v.Id as IdVisi,v.TahunMulai,v.TahunAkhir,m.Id as IdMisi,m.Misi,t.* FROM visirpjpn as v, misirpjpn as m, tujuanrpjpn as t WHERE t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/TujuanRPJPN',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/TujuanRPJPN',$Data);
 	}
 
   public function InputTujuanRPJPN(){  
@@ -191,8 +191,8 @@ class Super extends CI_Controller {
 		$Header['Halaman'] = 'RPJPN';
     $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjpn")->result_array();
 		$Data['Sasaran'] = $this->db->query("SELECT v.Id as IdVisi,v.TahunMulai,v.TahunAkhir,t.Id as IdTujuan,t.Tujuan,s.* FROM visirpjpn as v, misirpjpn as m, tujuanrpjpn as t, sasaranrpjpn as s WHERE s._Id = t.Id AND t._Id = m.Id AND m._Id = v.Id AND s.deleted_at IS NULL")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/SasaranRPJPN',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/SasaranRPJPN',$Data);
 	}
 
   public function InputSasaranRPJPN(){  
@@ -228,8 +228,8 @@ class Super extends CI_Controller {
 		$Header['Halaman'] = 'RPJPN';
     $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjpn")->result_array();
 		$Data['Tahapan'] = $this->db->query("SELECT v.*,t.* FROM visirpjpn as v, tahapanrpjpn as t WHERE t._Id = v.Id AND t.deleted_at IS NULL")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/TahapanRPJPN',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/TahapanRPJPN',$Data);
 	}
 
   public function InputTahapanRPJPN(){  
@@ -265,8 +265,8 @@ class Super extends CI_Controller {
 		$Header['Halaman'] = 'RPJMN';
     $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjmn")->result_array();
 		$Data['Tahapan'] = $this->db->query("SELECT v.*,t.* FROM visirpjmn as v, tahapanrpjmn as t WHERE t._Id = v.Id AND t.deleted_at IS NULL")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/TahapanRPJMN',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/TahapanRPJMN',$Data);
 	}
 
   public function InputTahapanRPJMN(){  
@@ -301,8 +301,8 @@ class Super extends CI_Controller {
   public function VisiRPJMN(){
 		$Header['Halaman'] = 'RPJMN';
 		$Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjmn")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/VisiRPJMN',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/VisiRPJMN',$Data);
 	}
 
   public function InputVisiRPJMN(){  
@@ -342,8 +342,8 @@ class Super extends CI_Controller {
 		$Header['Halaman'] = 'RPJMN';
     $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjmn")->result_array();
 		$Data['Misi'] = $this->db->query("SELECT v.*,m.* FROM visirpjmn as v, misirpjmn as m WHERE m._Id = v.Id AND m.deleted_at IS NULL")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/MisiRPJMN',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/MisiRPJMN',$Data);
 	}
 
   public function InputMisiRPJMN(){  
@@ -383,8 +383,8 @@ class Super extends CI_Controller {
 		$Header['Halaman'] = 'RPJMN';
     $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjmn")->result_array();
 		$Data['Tujuan'] = $this->db->query("SELECT v.Id as IdVisi,v.TahunMulai,v.TahunAkhir,m.Id as IdMisi,m.Misi,t.* FROM visirpjmn as v, misirpjmn as m, tujuanrpjmn as t WHERE t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/TujuanRPJMN',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/TujuanRPJMN',$Data);
 	}
 
   public function InputTujuanRPJMN(){  
@@ -424,8 +424,8 @@ class Super extends CI_Controller {
 		$Header['Halaman'] = 'RPJMN';
     $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjmn")->result_array();
 		$Data['Sasaran'] = $this->db->query("SELECT v.Id as IdVisi,v.TahunMulai,v.TahunAkhir,t.Id as IdTujuan,t.Tujuan,s.* FROM visirpjmn as v, misirpjmn as m, tujuanrpjmn as t, sasaranrpjmn as s WHERE s._Id = t.Id AND t._Id = m.Id AND m._Id = v.Id AND s.deleted_at IS NULL")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/SasaranRPJMN',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/SasaranRPJMN',$Data);
 	}
 
   public function InputSasaranRPJMN(){  
@@ -461,8 +461,8 @@ class Super extends CI_Controller {
 		$Header['Halaman'] = 'RPJPD';
     $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
     $Data['Visi'] = $this->db->query("SELECT v.*,k.* FROM visirpjpdp as v, kodewilayah as k WHERE v.KodeWilayah = k.Kode AND v.deleted_at IS NULL")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/VisiRPJPD',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/VisiRPJPD',$Data);
 	}
 
   public function InputVisiRPJPD(){  
@@ -506,8 +506,8 @@ class Super extends CI_Controller {
 		$Header['Halaman'] = 'RPJPD';
     $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
     $Data['Misi'] = $this->db->query("SELECT v.*,m.*,k.* FROM visirpjpdp as v,misirpjpdp as m, kodewilayah as k WHERE m._Id = v.Id AND m.KodeWilayah = k.Kode AND m.deleted_at IS NULL")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/MisiRPJPD',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/MisiRPJPD',$Data);
 	}
 
   public function InputMisiRPJPD(){  
@@ -547,8 +547,8 @@ class Super extends CI_Controller {
 		$Header['Halaman'] = 'RPJPD';
     $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
     $Data['Tujuan'] = $this->db->query("SELECT v.Id as IdVisi,v.TahunMulai,v.TahunAkhir,m.Id as IdMisi,m.Misi,t.*,k.* FROM visirpjpdp as v,misirpjpdp as m,tujuanrpjpdp as t, kodewilayah as k WHERE t._Id = m.Id AND m._Id = v.Id AND v.KodeWilayah = k.Kode AND t.deleted_at IS NULL")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/TujuanRPJPD',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/TujuanRPJPD',$Data);
 	}
 
   public function InputTujuanRPJPD(){  
@@ -588,8 +588,8 @@ class Super extends CI_Controller {
 		$Header['Halaman'] = 'RPJPD';
     $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
     $Data['Sasaran'] = $this->db->query("SELECT v.Id as IdVisi,v.TahunMulai,v.TahunAkhir,t.Id as IdTujuan,t.Tujuan,s.*,k.* FROM visirpjpdp as v,misirpjpdp as m,tujuanrpjpdp as t,sasaranrpjpdp as s, kodewilayah as k WHERE s._Id = t.Id AND t._Id = m.Id AND m._Id = v.Id AND v.KodeWilayah = k.Kode AND s.deleted_at IS NULL")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/SasaranRPJPD',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/SasaranRPJPD',$Data);
 	}
 
   public function InputSasaranRPJPD(){  
@@ -625,8 +625,8 @@ class Super extends CI_Controller {
 		$Header['Halaman'] = 'RPJPD';
     $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
     $Data['Tahapan'] = $this->db->query("SELECT v.*,t.*,k.* FROM visirpjpdp as v,tahapanrpjpdp as t, kodewilayah as k WHERE t._Id = v.Id AND t.KodeWilayah = k.Kode AND t.deleted_at IS NULL")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/TahapanRPJPD',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/TahapanRPJPD',$Data);
 	}
 
   public function InputTahapanRPJPD(){  
@@ -662,8 +662,8 @@ class Super extends CI_Controller {
 		$Header['Halaman'] = 'RPJMD';
     $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
     $Data['Visi'] = $this->db->query("SELECT v.*,k.* FROM visirpjmdp as v, kodewilayah as k WHERE v.KodeWilayah = k.Kode AND v.deleted_at IS NULL")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/VisiRPJMD',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/VisiRPJMD',$Data);
 	}
 
   public function InputVisiRPJMD(){  
@@ -707,8 +707,8 @@ class Super extends CI_Controller {
 		$Header['Halaman'] = 'RPJMD';
     $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
     $Data['Misi'] = $this->db->query("SELECT v.*,m.*,k.* FROM visirpjmdp as v,misirpjmdp as m, kodewilayah as k WHERE m._Id = v.Id AND m.KodeWilayah = k.Kode AND m.deleted_at IS NULL")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/MisiRPJMD',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/MisiRPJMD',$Data);
 	}
 
   public function InputMisiRPJMD(){  
@@ -748,8 +748,8 @@ class Super extends CI_Controller {
 		$Header['Halaman'] = 'RPJMD';
     $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
     $Data['Tujuan'] = $this->db->query("SELECT v.Id as IdVisi,v.TahunMulai,v.TahunAkhir,m.Id as IdMisi,m.Misi,t.*,k.* FROM visirpjmdp as v,misirpjmdp as m,tujuanrpjmdp as t, kodewilayah as k WHERE t._Id = m.Id AND m._Id = v.Id AND v.KodeWilayah = k.Kode AND t.deleted_at IS NULL")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/TujuanRPJMD',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/TujuanRPJMD',$Data);
 	}
 
   public function InputTujuanRPJMD(){  
@@ -789,8 +789,8 @@ class Super extends CI_Controller {
 		$Header['Halaman'] = 'RPJMD';
     $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
     $Data['Sasaran'] = $this->db->query("SELECT v.Id as IdVisi,v.TahunMulai,v.TahunAkhir,t.Id as IdTujuan,t.Tujuan,s.*,k.* FROM visirpjmdp as v,misirpjmdp as m,tujuanrpjmdp as t,sasaranrpjmdp as s, kodewilayah as k WHERE s._Id = t.Id AND t._Id = m.Id AND m._Id = v.Id AND v.KodeWilayah = k.Kode AND s.deleted_at IS NULL")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/SasaranRPJMD',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/SasaranRPJMD',$Data);
 	}
 
   public function InputSasaranRPJMD(){  
@@ -826,8 +826,8 @@ class Super extends CI_Controller {
 		$Header['Halaman'] = 'RPJMD';
     $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
     $Data['Tahapan'] = $this->db->query("SELECT v.*,t.*,k.* FROM visirpjmdp as v,tahapanrpjmdp as t, kodewilayah as k WHERE t._Id = v.Id AND t.KodeWilayah = k.Kode AND t.deleted_at IS NULL")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/TahapanRPJMD',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/TahapanRPJMD',$Data);
 	}
 
   public function InputTahapanRPJMD(){  
@@ -863,8 +863,8 @@ class Super extends CI_Controller {
 		$Header['Halaman'] = 'RPJPN';
     $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjpn")->result_array();
 		$Data['IUP'] = $this->db->query("SELECT v.*,t.* FROM visirpjpn as v, iuprpjpn as t WHERE t._Id = v.Id AND t.deleted_at IS NULL")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/IUPRPJPN',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/IUPRPJPN',$Data);
 	}
 
   public function InputIUPRPJPN(){  
@@ -900,8 +900,8 @@ class Super extends CI_Controller {
 		$Header['Halaman'] = 'RPJMN';
     $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjmn")->result_array();
 		$Data['IUP'] = $this->db->query("SELECT v.*,t.* FROM visirpjmn as v, iuprpjmn as t WHERE t._Id = v.Id AND t.deleted_at IS NULL")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/IUPRPJMN',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/IUPRPJMN',$Data);
 	}
 
   public function InputIUPRPJMN(){  
@@ -937,8 +937,8 @@ class Super extends CI_Controller {
 		$Header['Halaman'] = 'RPJPD';
     $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
     $Data['IUP'] = $this->db->query("SELECT v.*,i.*,k.* FROM visirpjpdp as v,iuprpjpdp as i, kodewilayah as k WHERE i._Id = v.Id AND i.KodeWilayah = k.Kode AND i.deleted_at IS NULL")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/IUPRPJPD',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/IUPRPJPD',$Data);
 	}
 
   public function InputIUPRPJPD(){  
@@ -974,8 +974,8 @@ class Super extends CI_Controller {
 		$Header['Halaman'] = 'RPJMD';
     $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
     $Data['IUP'] = $this->db->query("SELECT v.*,i.*,k.* FROM visirpjmdp as v,iuprpjmdp as i, kodewilayah as k WHERE i._Id = v.Id AND i.KodeWilayah = k.Kode AND i.deleted_at IS NULL")->result_array();
-		$this->load->view('Super/header',$Header);
-		$this->load->view('Super/IUPRPJMD',$Data);
+		$this->load->view('Provinsi/header',$Header);
+		$this->load->view('Provinsi/IUPRPJMD',$Data);
 	} 
 
   public function InputIUPRPJMD(){  
@@ -1010,22 +1010,22 @@ class Super extends CI_Controller {
   public function NomenklaturProvinsi() {
     $Header['Halaman'] = 'Nomenklatur';
     $Data['Nomenklatur'] = $this->db->query("SELECT * FROM `nomenklaturprovinsi`")->result_array();
-    $this->load->view('Super/header', $Header);
-    $this->load->view('Super/NomenklaturProvinsi', $Data);
+    $this->load->view('Provinsi/header', $Header);
+    $this->load->view('Provinsi/NomenklaturProvinsi', $Data);
   }
 
   public function NomenklaturKabupaten() {
     $Header['Halaman'] = 'Nomenklatur';
     $Data['Nomenklatur'] = $this->db->query("SELECT * FROM `nomenklaturkabupaten`")->result_array();
-    $this->load->view('Super/header', $Header);
-    $this->load->view('Super/NomenklaturKabupaten', $Data);
+    $this->load->view('Provinsi/header', $Header);
+    $this->load->view('Provinsi/NomenklaturKabupaten', $Data);
   }
 
   public function Kementerian() {
     $Header['Halaman'] = 'Kementerian';
     $Data['Kementerian'] = $this->db->query("SELECT * FROM `kementerian` WHERE deleted_at IS NULL")->result_array();
-    $this->load->view('Super/header', $Header);
-    $this->load->view('Super/Kementerian', $Data);
+    $this->load->view('Provinsi/header', $Header);
+    $this->load->view('Provinsi/Kementerian', $Data);
   }
 
   public function InputKementerian() {
@@ -1165,8 +1165,8 @@ class Super extends CI_Controller {
     $Data['CurrentPeriode'] = $periodeFilter;
     $Data['CurrentKementerian'] = $kementerianFilter;
     
-    $this->load->view('Super/header', $Header);
-    $this->load->view('Super/IsuStrategis', $Data);
+    $this->load->view('Provinsi/header', $Header);
+    $this->load->view('Provinsi/IsuStrategis', $Data);
 }
 
 public function GetKementerianByPeriode() {
@@ -1469,8 +1469,8 @@ public function DeleteIsuStrategis() {
         $Data['CurrentPeriode'] = $periodeFilter;
         $Data['CurrentKementerian'] = $kementerianFilter;
         
-        $this->load->view('Super/header', $Header);
-        $this->load->view('Super/SPM', $Data);
+        $this->load->view('Provinsi/header', $Header);
+        $this->load->view('Provinsi/SPM', $Data);
     }
 
     public function InputSPM() {
@@ -1611,8 +1611,8 @@ public function DeleteIsuStrategis() {
         $Data['CurrentPeriode'] = $periodeFilter;
         $Data['CurrentKementerian'] = $kementerianFilter;
         
-        $this->load->view('Super/header', $Header);
-        $this->load->view('Super/ProyekStrategis', $Data);
+        $this->load->view('Provinsi/header', $Header);
+        $this->load->view('Provinsi/ProyekStrategis', $Data);
     }
 
   
@@ -1805,8 +1805,8 @@ public function ProgramStrategis() {
         $Data['CurrentPeriode'] = $periodeFilter;
         $Data['CurrentKementerian'] = $kementerianFilter;
         
-        $this->load->view('Super/header', $Header);
-        $this->load->view('Super/ProgramStrategis', $Data);
+        $this->load->view('Provinsi/header', $Header);
+        $this->load->view('Provinsi/ProgramStrategis', $Data);
     }
 
 
@@ -2011,8 +2011,8 @@ public function ProgramStrategis() {
     $Data['CurrentPeriode'] = $periodeFilter;
     $Data['CurrentKementerian'] = $kementerianFilter;
     
-    $this->load->view('Super/header', $Header);
-    $this->load->view('Super/PermasalahanPokok', $Data);
+    $this->load->view('Provinsi/header', $Header);
+    $this->load->view('Provinsi/PermasalahanPokok', $Data);
 }
 
 public function InputPermasalahanPokok() {
@@ -2106,8 +2106,8 @@ public function DeletePermasalahanPokok() {
     $Data['CurrentPeriode'] = $periodeFilter;
     $Data['CurrentKementerian'] = $kementerianFilter;
     
-    $this->load->view('Super/header', $Header);
-    $this->load->view('Super/IsuKLHS', $Data);
+    $this->load->view('Provinsi/header', $Header);
+    $this->load->view('Provinsi/IsuKLHS', $Data);
 }
 
 public function InputIsuKLHS() {
@@ -2201,8 +2201,8 @@ public function IsuGlobal() {
     $Data['CurrentPeriode'] = $periodeFilter;
     $Data['CurrentKementerian'] = $kementerianFilter;
     
-    $this->load->view('Super/header', $Header);
-    $this->load->view('Super/IsuGlobal', $Data);
+    $this->load->view('Provinsi/header', $Header);
+    $this->load->view('Provinsi/IsuGlobal', $Data);
 }
 
 public function InputIsuGlobal() {
@@ -2291,8 +2291,8 @@ public function IsuNasional() {
     $Data['CurrentPeriode'] = $periodeFilter;
     $Data['CurrentKementerian'] = $kementerianFilter;
     
-    $this->load->view('Super/header', $Header);
-    $this->load->view('Super/IsuNasional', $Data);
+    $this->load->view('Provinsi/header', $Header);
+    $this->load->view('Provinsi/IsuNasional', $Data);
 }
 
 public function InputIsuNasional() {
