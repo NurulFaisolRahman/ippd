@@ -17,13 +17,12 @@
     <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="../css/responsive.css">
-     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         /* Navbar Styles */
-        /* Navbar Styles */
-.navbar {
+        .navbar {
             background-color:#20c997;
             padding: 1rem 2rem;
             border-radius: 0 0 12px 12px;
@@ -84,12 +83,12 @@
             background-color: white;
             min-width: 180px;
             box-shadow: 0px 8px 20px 0px rgba(0,0,0,0.15);
-            z-index: 9999; /* Increased z-index */
+            z-index: 9999;
             border-radius: 8px;
             overflow: hidden;
-            top: calc(100% + 5px); /* Added small gap */
+            top: calc(100% + 5px);
             left: 50%;
-            transform: translateX(-50%); /* Center the dropdown */
+            transform: translateX(-50%);
             opacity: 0;
             visibility: hidden;
             transition: all 0.3s ease;
@@ -144,7 +143,7 @@
         .main-content-wrapper {
             position: relative;
             z-index: 1;
-            margin-top: 20px; /* Add some spacing from navbar */
+            margin-top: 20px;
         }
 
         /* Additional fix for dropdown arrow */
@@ -178,8 +177,6 @@
         }
 
         /* CSS TAMBAHAN UNTUK MENGHILANGKAN EFEK WARNA SAAT DITEKAN */
-        
-        /* Hilangkan efek warna saat navbar item ditekan/diklik */
         .navbar-item:focus,
         .navbar-item:active,
         .navbar-item:visited {
@@ -189,7 +186,6 @@
             background-color: transparent;
         }
 
-        /* Hilangkan efek warna saat dropdown item ditekan/diklik */
         .dropdown-item:focus,
         .dropdown-item:active,
         .dropdown-item:visited {
@@ -199,7 +195,6 @@
             background-color: transparent !important;
         }
 
-        /* Hilangkan efek warna saat logout button ditekan */
         .logout-btn:focus,
         .logout-btn:active {
             background-color: rgba(255, 255, 255, 0.1) !important;
@@ -207,7 +202,6 @@
             box-shadow: none;
         }
 
-        /* Hilangkan efek pada navbar brand juga */
         .navbar-brand:focus,
         .navbar-brand:active,
         .navbar-brand:visited {
@@ -217,7 +211,6 @@
             text-decoration: none;
         }
 
-        /* Hilangkan highlight default browser */
         .navbar-item,
         .dropdown-item,
         .logout-btn,
@@ -231,7 +224,6 @@
             user-select: none;
         }
 
-        /* Pastikan dropdown tetap berfungsi normal saat hover */
         .dropdown-item:hover {
             background-color: #f3f4f6 !important;
             color: #20c997 !important;
@@ -245,14 +237,12 @@
             background-color: rgba(255, 255, 255, 0.2) !important;
         }
 
-        /* Hilangkan efek pada link yang memiliki class active */
         .navbar-item.active:focus,
         .navbar-item.active:active {
             color: rgba(255, 255, 255, 0.9) !important;
             background-color: transparent !important;
         }
     </style>
-
 </head>
 
 <body class="bg-gray-50 font-sans">
@@ -267,10 +257,10 @@
                 <div class="dropdown">
                     <a href="#" class="navbar-item">Kementerian <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
                     <div class="dropdown-content">
-                        <a href="<?=base_url('Super/Kementerian')?>" class="dropdown-item">Daftar Kementerian</a>
-                        <a href="<?=base_url('Super/SPM')?>" class="dropdown-item">Standar Pelayanan Minimum</a>
-                        <a href="<?=base_url('Super/ProyekStrategis')?>" class="dropdown-item">Proyek Strategis</a>
-                        <a href="<?=base_url('Super/ProggramStrategis')?>" class="dropdown-item">Program Strategis</a>
+                        <a href="<?=base_url('SuperNasional/Kementerian')?>" class="dropdown-item">Daftar Kementerian</a>
+                        <a href="<?=base_url('SuperNasional/SPM')?>" class="dropdown-item">Standar Pelayanan Minimum</a>
+                        <a href="<?=base_url('SuperNasional/ProyekStrategis')?>" class="dropdown-item">Proyek Strategis</a>
+                        <a href="<?=base_url('SuperNasional/ProgramStrategis')?>" class="dropdown-item">Program Strategis</a>
                     </div>
                 </div>
                 <div class="dropdown">
@@ -283,7 +273,7 @@
                         <a href="#" class="dropdown-item">Isu Nasional</a>
                     </div>
                 </div>
-                 <div class="dropdown">
+                <div class="dropdown">
                     <a href="#" class="navbar-item">Daerah <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
                     <div class="dropdown-content">
                         <a href="#" class="dropdown-item">RPJPD</a>
@@ -319,51 +309,51 @@
                         <div id="Akun" class="tab-pane in <?=$Halaman == 'Akun' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
                             <ul class="notika-main-menu-dropdown">
                                 <li>
-                                    <a href="<?=base_url('Super/Akun')?>"><i class="notika-icon notika-form"></i> <b>Akun</b></a>
+                                    <a href="<?=base_url('SuperNasional/Akun')?>"><i class="notika-icon notika-form"></i> <b>Akun</b></a>
                                 </li>
                             </ul>
                         </div>
                         <div id="RPJPN" class="tab-pane in <?=$Halaman == 'RPJPN' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
                             <ul class="notika-main-menu-dropdown">
                                 <li>
-                                    <a href="<?=base_url('Super/VisiRPJPN')?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
+                                    <a href="<?=base_url('SuperNasional/VisiRPJPN')?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Super/MisiRPJPN')?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
+                                    <a href="<?=base_url('SuperNasional/MisiRPJPN')?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Super/TujuanRPJPN')?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
+                                    <a href="<?=base_url('SuperNasional/TujuanRPJPN')?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Super/SasaranRPJPN')?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
+                                    <a href="<?=base_url('SuperNasional/SasaranRPJPN')?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Super/TahapanRPJPN')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
+                                    <a href="<?=base_url('SuperNasional/TahapanRPJPN')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Super/IUPRPJPN')?>"><i class="notika-icon notika-bar-chart"></i> <b>IUP RPJPN</b></a>
+                                    <a href="<?=base_url('SuperNasional/IUPRPJPN')?>"><i class="notika-icon notika-bar-chart"></i> <b>IUP RPJPN</b></a>
                                 </li>
                             </ul>
                         </div>
                         <div id="RPJMN" class="tab-pane in <?=$Halaman == 'RPJMN' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
                             <ul class="notika-main-menu-dropdown">
                                 <li>
-                                    <a href="<?=base_url('Super/VisiRPJMN')?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
+                                    <a href="<?=base_url('SuperNasional/VisiRPJMN')?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Super/MisiRPJMN')?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
+                                    <a href="<?=base_url('SuperNasional/MisiRPJMN')?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Super/TujuanRPJMN')?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
+                                    <a href="<?=base_url('SuperNasional/TujuanRPJMN')?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Super/SasaranRPJMN')?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
+                                    <a href="<?=base_url('SuperNasional/SasaranRPJMN')?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Super/TahapanRPJMN')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
+                                    <a href="<?=base_url('SuperNasional/TahapanRPJMN')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Super/IUPRPJMN')?>"><i class="notika-icon notika-bar-chart"></i> <b>IUP RPJMN</b></a>
+                                    <a href="<?=base_url('SuperNasional/IUPRPJMN')?>"><i class="notika-icon notika-bar-chart"></i> <b>IUP RPJMN</b></a>
                                 </li>
                             </ul>
                         </div>
@@ -414,16 +404,16 @@
                         <div id="Kementerian" class="tab-pane in <?=$Halaman == 'Kementerian' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
                             <ul class="notika-main-menu-dropdown">
                                 <li>
-                                    <a href="<?=base_url('Super/Kementerian')?>"><i class="notika-icon notika-form"></i> <b>Daftar Kementerian</b></a>
+                                    <a href="<?=base_url('SuperNasional/Kementerian')?>"><i class="notika-icon notika-form"></i> <b>Daftar Kementerian</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Super/SPM')?>"><i class="notika-icon notika-form"></i> <b>Standar Pelayanan Minimal</b></a>
+                                    <a href="<?=base_url('SuperNasional/SPM')?>"><i class="notika-icon notika-form"></i> <b>Standar Pelayanan Minimal</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Super/ProgramStrategis')?>"><i class="notika-icon notika-form"></i> <b>Program Strategis</b></a>
+                                    <a href="<?=base_url('SuperNasional/ProgramStrategis')?>"><i class="notika-icon notika-form"></i> <b>Program Strategis</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Super/ProyekStrategis')?>"><i class="notika-icon notika-form"></i> <b>Proyek Strategis</b></a>
+                                    <a href="<?=base_url('SuperNasional/ProyekStrategis')?>"><i class="notika-icon notika-form"></i> <b>Proyek Strategis</b></a>
                                 </li>
                             </ul>
                         </div>
@@ -462,10 +452,10 @@
         </div>
     </div>
 
-     <script>
-            // Logout function
-            function logout() {
-                // Redirect to logout page or clear session
-                window.location.href = '/ippd';
-            }
-        </script>
+    <script>
+        // Logout function
+        function logout() {
+            // Redirect to logout page or clear session
+            window.location.href = '/ippd';
+        }
+    </script>
