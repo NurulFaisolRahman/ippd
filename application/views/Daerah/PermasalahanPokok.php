@@ -1,3 +1,7 @@
+<?php $this->load->view('Daerah/sidebar'); ?>
+
+    <!-- Main Content -->
+    <div class="main-content">
 <div class="data-table-area">
     <div class="container">
         <div class="row">
