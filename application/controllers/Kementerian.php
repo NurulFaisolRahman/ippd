@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class SuperNasional extends CI_Controller {
+class Kementerian extends CI_Controller {
 
     public function __construct() {
         parent::__construct();

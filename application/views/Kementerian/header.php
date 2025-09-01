@@ -339,7 +339,7 @@
                 <div class="dropdown">
                     <a href="#" class="navbar-item active">Kementerian <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
                     <div class="dropdown-content">
-                        <a href="<?=base_url('SuperNasional/Kementerian')?>" class="dropdown-item">Daftar Kementerian</a>
+                        <a href="<?=base_url('Kementerian/Kementerian')?>" class="dropdown-item">Daftar Kementerian</a>
                         <a href="<?=base_url('SuperNasional/SPM')?>" class="dropdown-item">Standar Pelayanan Minimum</a>
                         <a href="<?=base_url('SuperNasional/ProyekStrategis')?>" class="dropdown-item">Proyek Strategis</a>
                         <a href="<?=base_url('SuperNasional/ProgramStrategis')?>" class="dropdown-item">Program Strategis</a>
