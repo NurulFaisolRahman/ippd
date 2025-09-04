@@ -1,3 +1,4 @@
+<?php $this->load->view('Kementerian/Sidebar'); ?>
 <!-- Breadcrumb -->
 <div class="breadcomb-area">
     <div class="container">
@@ -6,11 +7,11 @@
                 <div class="breadcomb-list">
                     <ul class="breadcomb-menu" style="list-style: none; padding: 0; margin: 0;">
                         <li style="display: inline-block; margin-right: 5px;">
-                            <a href="<?= base_url('Super') ?>">Home</a>
+                            <a href="<?= base_url('Beranda') ?>">Beranda</a>
                             <span class="bread-slash" style="display: inline-block; margin: 0 5px;">/</span>
                         </li>
                         <li style="display: inline-block; margin-right: 5px;">
-                            <a href="<?= base_url('Super/Kementerian') ?>">Kementerian</a>
+                            <a href="<?= base_url('Kementerian/ProgramStrategis') ?>">Kementerian</a>
                             <span class="bread-slash" style="display: inline-block; margin: 0 5px;">/</span>
                         </li>
                         <li style="display: inline-block;">
@@ -497,7 +498,7 @@ $(document).ready(function() {
     // Function to populate Kementerian dropdown
     function populateKementerian(periode, selectElement, selectedId = '') {
         if (periode) {
-            $.post(BaseURL + "Super/GetKementerianByPeriode", {
+            $.post(BaseURL + "Kementerian/GetKementerianByPeriode", {
                 periode: periode
             }, function(response) {
                 var kementerian = JSON.parse(response);
@@ -534,7 +535,7 @@ $(document).ready(function() {
     // Function to populate Kota dropdown
     function populateKota(provinsiKode, selectElement, selectedKota = '') {
         if (provinsiKode) {
-            $.post(BaseURL + "Super/GetKotaByProvinsi", { 
+            $.post(BaseURL + "Kementerian/GetKotaByProvinsi", { 
                 kode_provinsi: provinsiKode 
             }, function(response) {
                 var kotaData = JSON.parse(response);
@@ -609,7 +610,7 @@ $(document).ready(function() {
     $("#ApplyFilter").click(function() {
         var periode = $("#FilterPeriode").val();
         var kementerian = $("#FilterKementerianSelect").val();
-        var url = BaseURL + "Super/ProgramStrategis?";
+        var url = BaseURL + "Kementerian/ProgramStrategis?";
         
         if (periode) url += "periode=" + encodeURIComponent(periode) + "&";
         if (kementerian) url += "kementerian=" + encodeURIComponent(kementerian);
@@ -619,7 +620,7 @@ $(document).ready(function() {
 
     // Reset filter
     $("#ResetFilter").click(function() {
-        window.location.href = BaseURL + "Super/ProgramStrategis";
+        window.location.href = BaseURL + "Kementerian/ProgramStrategis";
     });
 
     // Input Program Strategis
@@ -644,7 +645,7 @@ $(document).ready(function() {
 
         var formData = $(this).serialize();
         
-        $.post(BaseURL + "Super/InputProgram", formData)
+        $.post(BaseURL + "Kementerian/InputProgram", formData)
             .done(function(Respon) {
                 if (Respon == '1') {
                     window.location.reload();
@@ -749,7 +750,7 @@ $(document).ready(function() {
 
         var formData = $(this).serialize();
         
-        $.post(BaseURL + "Super/UpdateProgram", formData)
+        $.post(BaseURL + "Kementerian/UpdateProgram", formData)
             .done(function(Respon) {
                 if (Respon == '1') {
                     window.location.reload();
@@ -769,7 +770,7 @@ $(document).ready(function() {
                 Id: $(this).data('id') 
             };
             
-            $.post(BaseURL + "Super/DeleteProgram", Program)
+            $.post(BaseURL + "Kementerian/DeleteProgram", Program)
                 .done(function(Respon) {
                     if (Respon == '1') {
                         window.location.reload();
@@ -862,7 +863,7 @@ $(document).ready(function() {
         e.preventDefault();
         var formData = $(this).serialize();
         
-        $.post(BaseURL + "Super/UpdateLokasiForProgram", formData)
+        $.post(BaseURL + "Kementerian/UpdateLokasiForProgram", formData)
             .done(function(Respon) {
                 if (Respon == '1') {
                     window.location.reload();
@@ -884,7 +885,7 @@ $(document).ready(function() {
         var TahunAkhir = $(this).data('tahunakhir');
         
         if (provinsiIds || kotaIds) {
-            $.post(BaseURL + "Super/GetLokasiByIds", { 
+            $.post(BaseURL + "Kementerian/GetLokasiByIds", { 
                 ProvinsiIds: provinsiIds,
                 KotaIds: kotaIds,
                 TahunMulai: TahunMulai,

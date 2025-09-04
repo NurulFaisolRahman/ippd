@@ -1,4 +1,4 @@
-
+<?php $this->load->view('Kementerian/Sidebar'); ?>
 <!-- Breadcrumb -->
 <div class="breadcomb-area">
     <div class="container">
@@ -7,11 +7,11 @@
                 <div class="breadcomb-list">
                     <ul class="breadcomb-menu" style="list-style: none; padding: 0; margin: 0;">
                         <li style="display: inline-block; margin-right: 5px;">
-                            <a href="<?= base_url('Super') ?>">Beranda</a>
+                            <a href="<?= base_url('Beranda') ?>">Beranda</a>
                             <span class="bread-slash" style="display: inline-block; margin: 0 5px;">/</span>
                         </li>
                         <li style="display: inline-block; margin-right: 5px;">
-                            <a href="<?= base_url('Super/Kementerian') ?>">Kementerian</a>
+                            <a href="<?= base_url('Kementerian/ProyekStrategis') ?>">Kementerian</a>
                             <span class="bread-slash" style="display: inline-block; margin: 0 5px;">/</span>
                         </li>
                         <li style="display: inline-block;">
@@ -361,7 +361,7 @@ $(document).ready(function() {
     // Function to populate Kementerian dropdown for filter modal
     function populateKementerian(periode, selectElement, selectedId = '') {
         if (periode) {
-            $.post(BaseURL + "Super/GetKementerianByPeriode", {
+            $.post(BaseURL + "Kementerian/GetKementerianByPeriode", {
                 periode: periode
             }, function(response) {
                 var kementerian = JSON.parse(response);
@@ -386,7 +386,7 @@ $(document).ready(function() {
     // Function to populate Program Strategis dropdown and location info
     function populateProgramStrategis(selectElement, idKementerian, tahunMulai, tahunAkhir, selectedId = '') {
         if (idKementerian && tahunMulai && tahunAkhir) {
-            $.post(BaseURL + "Super/GetProgramByKementerianAndPeriode", {
+            $.post(BaseURL + "Kementerian/GetProgramByKementerianAndPeriode", {
                 IdKementerian: idKementerian,
                 TahunMulai: tahunMulai,
                 TahunAkhir: tahunAkhir
@@ -427,7 +427,7 @@ $(document).ready(function() {
     $("#ApplyFilter").click(function() {
         var periode = $("#FilterPeriode").val();
         var kementerian = $("#FilterKementerianSelect").val();
-        var url = BaseURL + "Super/ProyekStrategis?";
+        var url = BaseURL + "Kementerian/ProyekStrategis?";
         
         if (periode) url += "periode=" + encodeURIComponent(periode) + "&";
         if (kementerian) url += "kementerian=" + encodeURIComponent(kementerian);
@@ -437,7 +437,7 @@ $(document).ready(function() {
 
     // Reset filter
     $("#ResetFilter").click(function() {
-        window.location.href = BaseURL + "Super/ProyekStrategis";
+        window.location.href = BaseURL + "Kementerian/ProyekStrategis";
     });
 
     // Program Strategis change handler for Input modal
@@ -495,7 +495,7 @@ $(document).ready(function() {
             TargetTahun5: $("#TargetTahun5").val() || null
         };
 
-        $.post(BaseURL + "Super/InputProyek", Data)
+        $.post(BaseURL + "Kementerian/InputProyek", Data)
             .done(function(Respon) {
                 if (Respon == '1') {
                     window.location.reload();
@@ -564,7 +564,7 @@ $(document).ready(function() {
             TargetTahun5: $("#EditTargetTahun5").val() || null
         };
 
-        $.post(BaseURL + "Super/UpdateProyek", Data)
+        $.post(BaseURL + "Kementerian/UpdateProyek", Data)
             .done(function(Respon) {
                 if (Respon == '1') {
                     window.location.reload();
@@ -584,7 +584,7 @@ $(document).ready(function() {
                 Id: $(this).data('id') 
             };
             
-            $.post(BaseURL + "Super/DeleteProyek", Proyek)
+            $.post(BaseURL + "Kementerian/DeleteProyek", Proyek)
                 .done(function(Respon) {
                     if (Respon == '1') {
                         window.location.reload();

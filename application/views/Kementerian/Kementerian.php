@@ -1,3 +1,4 @@
+<?php $this->load->view('Kementerian/Sidebar'); ?>
 <div class="breadcomb-area">
     <div class="container">
         <div class="row">
@@ -5,11 +6,11 @@
                 <div class="breadcomb-list">
                     <ul class="breadcomb-menu" style="list-style: none; padding: 0; margin: 0;">
                         <li style="display: inline-block; margin-right: 5px;">
-                            <a href="<?= base_url('Super') ?>">Home</a>
+                            <a href="<?= base_url('Beranda') ?>">Home</a>
                             <span class="bread-slash" style="display: inline-block; margin: 0 5px;">/</span>
                         </li>
                         <li style="display: inline-block; margin-right: 5px;">
-                            <a href="<?= base_url('Super/Isu') ?>">Kementerian</a>
+                            <a href="<?= base_url('Kementerian/Kementerian') ?>">Kementerian</a>
                             <span class="bread-slash" style="display: inline-block; margin: 0 5px;">/</span>
                         </li>
                         <li style="display: inline-block;">
@@ -220,7 +221,7 @@
                 TahunMulai: $("#TahunMulai").val(),
                 TahunAkhir: $("#TahunAkhir").val()
             };
-            $.post(BaseURL + "Super/InputKementerian", Data).done(function(Respon) {
+            $.post(BaseURL + "Kementerian/InputKementerian", Data).done(function(Respon) {
                 if (Respon === '1') {
                     window.location.reload();
                 } else {
@@ -265,7 +266,7 @@
                 TahunAkhir: $("#EditTahunAkhir").val()
             };
 
-            $.post(BaseURL + "Super/UpdateKementerian", Data).done(function(Respon) {
+            $.post(BaseURL + "Kementerian/UpdateKementerian", Data).done(function(Respon) {
                 if (Respon === '1') {
                     window.location.reload();
                 } else {
@@ -281,7 +282,7 @@
         $(".Hapus").click(function() {
             var Id = { Id: $(this).attr('Hapus') };
             console.log('DeleteKementerian Data:', Id); // Debugging
-            $.post(BaseURL + "Super/DeleteKementerian", Id).done(function(Respon) {
+            $.post(BaseURL + "Kementerian/DeleteKementerian", Id).done(function(Respon) {
                 if (Respon === '1') {
                     window.location.reload();
                 } else {

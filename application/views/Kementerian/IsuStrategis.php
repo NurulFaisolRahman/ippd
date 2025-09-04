@@ -1,3 +1,4 @@
+<?php $this->load->view('Kementerian/Sidebar'); ?>
 <div class="breadcomb-area">
     <div class="container">
         <div class="row">
@@ -5,11 +6,11 @@
                 <div class="breadcomb-list">
                     <ul class="breadcomb-menu" style="list-style: none; padding: 0; margin: 0;">
                         <li style="display: inline-block; margin-right: 5px;">
-                            <a href="<?= base_url('Super') ?>">Beranda</a>
+                            <a href="<?= base_url('Beranda') ?>">Beranda</a>
                             <span class="bread-slash" style="display: inline-block; margin: 0 5px;">/</span>
                         </li>
                         <li style="display: inline-block; margin-right: 5px;">
-                            <a href="<?= base_url('Super/Isu') ?>">Isu</a>
+                            <a href="<?= base_url('Kementerian/IsuStrategis') ?>">Isu</a>
                             <span class="bread-slash" style="display: inline-block; margin: 0 5px;">/</span>
                         </li>
                         <li style="display: inline-block;">
@@ -857,7 +858,7 @@ jQuery(document).ready(function($) {
     // Function to populate Kementerian dropdown
     function populateKementerian(selectElement, tahunMulai, tahunAkhir, selectedId = '') {
         if (tahunMulai && tahunAkhir) {
-            $.post(BaseURL + "Super/GetKementerianByPeriode", {
+            $.post(BaseURL + "Kementerian/GetKementerianByPeriode", {
                 TahunMulai: tahunMulai,
                 TahunAkhir: tahunAkhir
             }, function(response) {
@@ -884,7 +885,7 @@ jQuery(document).ready(function($) {
     function loadKementerianForFilter(periode, selectElement, selectedId = '') {
         if (periode) {
             var [tahunMulai, tahunAkhir] = periode.split('|');
-            $.post(BaseURL + "Super/GetKementerianByPeriode", {
+            $.post(BaseURL + "Kementerian/GetKementerianByPeriode", {
                 TahunMulai: tahunMulai, 
                 TahunAkhir: tahunAkhir
             }, function(response) {
@@ -907,7 +908,7 @@ jQuery(document).ready(function($) {
             });
         } else {
             // Load all ministries if no period selected
-            $.post(BaseURL + "Super/GetKementerianByPeriode", {}, function(response) {
+            $.post(BaseURL + "Kementerian/GetKementerianByPeriode", {}, function(response) {
                 try {
                     var kementerian = JSON.parse(response);
                     selectElement.empty().append('<option value="">Semua Kementerian</option>');
@@ -951,7 +952,7 @@ jQuery(document).ready(function($) {
     $("#ApplyFilter").click(function() {
         var periode = $("#FilterPeriode").val();
         var kementerian = $("#FilterKementerianSelect").val();
-        var url = BaseURL + "Super/IsuStrategis?";
+        var url = BaseURL + "Kementerian/IsuStrategis?";
         
         if (periode) url += "periode=" + encodeURIComponent(periode) + "&";
         if (kementerian) url += "kementerian=" + encodeURIComponent(kementerian);
@@ -961,7 +962,7 @@ jQuery(document).ready(function($) {
 
     // Reset filter
     $("#ResetFilter").click(function() {
-        window.location.href = BaseURL + "Super/IsuStrategis";
+        window.location.href = BaseURL + "Kementerian/IsuStrategis";
     });
 
     // Handle add button clicks
@@ -997,7 +998,7 @@ jQuery(document).ready(function($) {
             $("#TahunAkhir").val(TahunAkhir);
             
             // Load Kementerian
-            $.post(BaseURL + "Super/GetKementerianByPeriode", { 
+            $.post(BaseURL + "Kementerian/GetKementerianByPeriode", { 
                 TahunMulai: TahunMulai, 
                 TahunAkhir: TahunAkhir 
             }, function(data) {
@@ -1012,7 +1013,7 @@ jQuery(document).ready(function($) {
             });
             
             // Load Isu KLHS
-            $.post(BaseURL + "Super/GetIsuByPeriode", { 
+            $.post(BaseURL + "Kementerian/GetIsuByPeriode", { 
                 TahunMulai: TahunMulai, 
                 TahunAkhir: TahunAkhir,
                 Jenis: 'KLHS'
@@ -1030,7 +1031,7 @@ jQuery(document).ready(function($) {
             });
             
             // Load Isu Global
-            $.post(BaseURL + "Super/GetIsuByPeriode", { 
+            $.post(BaseURL + "Kementerian/GetIsuByPeriode", { 
                 TahunMulai: TahunMulai, 
                 TahunAkhir: TahunAkhir,
                 Jenis: 'Global'
@@ -1048,7 +1049,7 @@ jQuery(document).ready(function($) {
             });
             
             // Load Isu Nasional
-            $.post(BaseURL + "Super/GetIsuByPeriode", { 
+            $.post(BaseURL + "Kementerian/GetIsuByPeriode", { 
                 TahunMulai: TahunMulai, 
                 TahunAkhir: TahunAkhir,
                 Jenis: 'Nasional'
@@ -1066,7 +1067,7 @@ jQuery(document).ready(function($) {
             });
             
             // Load Permasalahan Pokok
-            $.post(BaseURL + "Super/GetPermasalahanByPeriode", { 
+            $.post(BaseURL + "Kementerian/GetPermasalahanByPeriode", { 
                 TahunMulai: TahunMulai, 
                 TahunAkhir: TahunAkhir
             }, function(data) {
@@ -1099,7 +1100,7 @@ jQuery(document).ready(function($) {
             $("#EditTahunAkhir").val(TahunAkhir);
             
             // Load Kementerian
-            $.post(BaseURL + "Super/GetKementerianByPeriode", { 
+            $.post(BaseURL + "Kementerian/GetKementerianByPeriode", { 
                 TahunMulai: TahunMulai, 
                 TahunAkhir: TahunAkhir 
             }, function(data) {
@@ -1114,7 +1115,7 @@ jQuery(document).ready(function($) {
             });
             
             // Load Isu KLHS
-            $.post(BaseURL + "Super/GetIsuByPeriode", { 
+            $.post(BaseURL + "Kementerian/GetIsuByPeriode", { 
                 TahunMulai: TahunMulai, 
                 TahunAkhir: TahunAkhir,
                 Jenis: 'KLHS'
@@ -1134,7 +1135,7 @@ jQuery(document).ready(function($) {
             });
             
             // Load Isu Global
-            $.post(BaseURL + "Super/GetIsuByPeriode", { 
+            $.post(BaseURL + "Kementerian/GetIsuByPeriode", { 
                 TahunMulai: TahunMulai, 
                 TahunAkhir: TahunAkhir,
                 Jenis: 'Global'
@@ -1154,7 +1155,7 @@ jQuery(document).ready(function($) {
             });
             
             // Load Isu Nasional
-            $.post(BaseURL + "Super/GetIsuByPeriode", { 
+            $.post(BaseURL + "Kementerian/GetIsuByPeriode", { 
                 TahunMulai: TahunMulai, 
                 TahunAkhir: TahunAkhir,
                 Jenis: 'Nasional'
@@ -1174,7 +1175,7 @@ jQuery(document).ready(function($) {
             });
             
             // Load Permasalahan Pokok
-            $.post(BaseURL + "Super/GetPermasalahanByPeriode", { 
+            $.post(BaseURL + "Kementerian/GetPermasalahanByPeriode", { 
                 TahunMulai: TahunMulai, 
                 TahunAkhir: TahunAkhir
             }, function(data) {
@@ -1216,7 +1217,7 @@ jQuery(document).ready(function($) {
         
         var formData = $(this).serialize();
         
-        $.post(BaseURL + "Super/InputIsuStrategis", formData)
+        $.post(BaseURL + "Kementerian/InputIsuStrategis", formData)
             .done(function(Respon) {
                 if (Respon == '1') {
                     window.location.reload();
@@ -1440,7 +1441,7 @@ jQuery(document).ready(function($) {
         
         var formData = $(this).serialize();
         
-        $.post(BaseURL + "Super/UpdateIsuStrategis", formData)
+        $.post(BaseURL + "Kementerian/UpdateIsuStrategis", formData)
             .done(function(Respon) {
                 if (Respon == '1') {
                     window.location.reload();
@@ -1457,7 +1458,7 @@ jQuery(document).ready(function($) {
     $(document).on("click", ".Hapus", function() {
         if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
             var Data = { Id: $(this).data('hapus') };
-            $.post(BaseURL + "Super/DeleteIsuStrategis", Data)
+            $.post(BaseURL + "Kementerian/DeleteIsuStrategis", Data)
                 .done(function(Respon) {
                     if (Respon == '1') {
                         window.location.reload();
@@ -1525,7 +1526,7 @@ jQuery(document).ready(function($) {
         }
         
         // Load Isu KLHS options
-        $.post(BaseURL + "Super/GetIsuByPeriode", { 
+        $.post(BaseURL + "Kementerian/GetIsuByPeriode", { 
             TahunMulai: TahunMulai, 
             TahunAkhir: TahunAkhir,
             Jenis: 'KLHS'
@@ -1570,7 +1571,7 @@ jQuery(document).ready(function($) {
         var TahunAkhir = $('.TambahKLHS').data('tahunakhir') || $('.EditKLHS').data('tahunakhir');
         
         if (TahunMulai && TahunAkhir) {
-            $.post(BaseURL + "Super/GetIsuByPeriode", { 
+            $.post(BaseURL + "Kementerian/GetIsuByPeriode", { 
                 TahunMulai: TahunMulai, 
                 TahunAkhir: TahunAkhir,
                 Jenis: 'KLHS'
@@ -1595,7 +1596,7 @@ jQuery(document).ready(function($) {
         e.preventDefault();
         var formData = $(this).serialize();
         
-        $.post(BaseURL + "Super/UpdateIsuKLHSForStrategis", formData)
+        $.post(BaseURL + "Kementerian/UpdateIsuKLHSForStrategis", formData)
             .done(function(Respon) {
                 if (Respon == '1') {
                     window.location.reload();
@@ -1662,7 +1663,7 @@ jQuery(document).ready(function($) {
         }
         
         // Load Isu Global options
-        $.post(BaseURL + "Super/GetIsuByPeriode", { 
+        $.post(BaseURL + "Kementerian/GetIsuByPeriode", { 
             TahunMulai: TahunMulai, 
             TahunAkhir: TahunAkhir,
             Jenis: 'Global'
@@ -1707,7 +1708,7 @@ jQuery(document).ready(function($) {
         var TahunAkhir = $('.TambahGlobal').data('tahunakhir') || $('.EditGlobal').data('tahunakhir');
         
         if (TahunMulai && TahunAkhir) {
-            $.post(BaseURL + "Super/GetIsuByPeriode", { 
+            $.post(BaseURL + "Kementerian/GetIsuByPeriode", { 
                 TahunMulai: TahunMulai, 
                 TahunAkhir: TahunAkhir,
                 Jenis: 'Global'
@@ -1732,7 +1733,7 @@ jQuery(document).ready(function($) {
         e.preventDefault();
         var formData = $(this).serialize();
         
-        $.post(BaseURL + "Super/UpdateIsuGlobalForStrategis", formData)
+        $.post(BaseURL + "Kementerian/UpdateIsuGlobalForStrategis", formData)
             .done(function(Respon) {
                 if (Respon == '1') {
                     window.location.reload();
@@ -1799,7 +1800,7 @@ jQuery(document).ready(function($) {
         }
         
         // Load Isu Nasional options
-        $.post(BaseURL + "Super/GetIsuByPeriode", { 
+        $.post(BaseURL + "Kementerian/GetIsuByPeriode", { 
             TahunMulai: TahunMulai, 
             TahunAkhir: TahunAkhir,
             Jenis: 'Nasional'
@@ -1844,7 +1845,7 @@ jQuery(document).ready(function($) {
         var TahunAkhir = $('.TambahNasional').data('tahunakhir') || $('.EditNasional').data('tahunakhir');
         
         if (TahunMulai && TahunAkhir) {
-            $.post(BaseURL + "Super/GetIsuByPeriode", { 
+            $.post(BaseURL + "Kementerian/GetIsuByPeriode", { 
                 TahunMulai: TahunMulai, 
                 TahunAkhir: TahunAkhir,
                 Jenis: 'Nasional'
@@ -1869,7 +1870,7 @@ jQuery(document).ready(function($) {
         e.preventDefault();
         var formData = $(this).serialize();
         
-        $.post(BaseURL + "Super/UpdateIsuNasionalForStrategis", formData)
+        $.post(BaseURL + "Kementerian/UpdateIsuNasionalForStrategis", formData)
             .done(function(Respon) {
                 if (Respon == '1') {
                     window.location.reload();
@@ -1936,7 +1937,7 @@ jQuery(document).ready(function($) {
         }
         
         // Load Permasalahan options
-        $.post(BaseURL + "Super/GetPermasalahanByPeriode", { 
+        $.post(BaseURL + "Kementerian/GetPermasalahanByPeriode", { 
             TahunMulai: TahunMulai, 
             TahunAkhir: TahunAkhir
         }, function(data) {
@@ -1980,7 +1981,7 @@ jQuery(document).ready(function($) {
         var TahunAkhir = $('.TambahPermasalahan').data('tahunakhir') || $('.EditPermasalahan').data('tahunakhir');
         
         if (TahunMulai && TahunAkhir) {
-            $.post(BaseURL + "Super/GetPermasalahanByPeriode", { 
+            $.post(BaseURL + "Kementerian/GetPermasalahanByPeriode", { 
                 TahunMulai: TahunMulai, 
                 TahunAkhir: TahunAkhir
             }, function(data) {
@@ -2004,7 +2005,7 @@ jQuery(document).ready(function($) {
         e.preventDefault();
         var formData = $(this).serialize();
         
-        $.post(BaseURL + "Super/UpdatePermasalahanForStrategis", formData)
+        $.post(BaseURL + "Kementerian/UpdatePermasalahanForStrategis", formData)
             .done(function(Respon) {
                 if (Respon == '1') {
                     window.location.reload();
@@ -2025,7 +2026,7 @@ jQuery(document).ready(function($) {
         var TahunAkhir = $(this).data('tahunakhir');
         
         if (klhsIds) {
-            $.post(BaseURL + "Super/GetIsuByIds", { 
+            $.post(BaseURL + "Kementerian/GetIsuByIds", { 
                 Ids: klhsIds,
                 Jenis: 'KLHS',
                 TahunMulai: TahunMulai,
@@ -2066,7 +2067,7 @@ jQuery(document).ready(function($) {
         var TahunAkhir = $(this).data('tahunakhir');
         
         if (globalIds) {
-            $.post(BaseURL + "Super/GetIsuByIds", { 
+            $.post(BaseURL + "Kementerian/GetIsuByIds", { 
                 Ids: globalIds,
                 Jenis: 'Global',
                 TahunMulai: TahunMulai,
@@ -2107,7 +2108,7 @@ jQuery(document).ready(function($) {
         var TahunAkhir = $(this).data('tahunakhir');
         
         if (nasionalIds) {
-            $.post(BaseURL + "Super/GetIsuByIds", { 
+            $.post(BaseURL + "Kementerian/GetIsuByIds", { 
                 Ids: nasionalIds,
                 Jenis: 'Nasional',
                 TahunMulai: TahunMulai,
@@ -2148,7 +2149,7 @@ jQuery(document).ready(function($) {
         var TahunAkhir = $(this).data('tahunakhir');
         
         if (permasalahanIds) {
-            $.post(BaseURL + "Super/GetPermasalahanByIds", { 
+            $.post(BaseURL + "Kementerian/GetPermasalahanByIds", { 
                 Ids: permasalahanIds,
                 TahunMulai: TahunMulai,
                 TahunAkhir: TahunAkhir

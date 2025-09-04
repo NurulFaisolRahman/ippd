@@ -340,9 +340,9 @@
                     <a href="#" class="navbar-item active">Kementerian <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
                     <div class="dropdown-content">
                         <a href="<?=base_url('Kementerian/Kementerian')?>" class="dropdown-item">Daftar Kementerian</a>
-                        <a href="<?=base_url('SuperNasional/SPM')?>" class="dropdown-item">Standar Pelayanan Minimum</a>
-                        <a href="<?=base_url('SuperNasional/ProyekStrategis')?>" class="dropdown-item">Proyek Strategis</a>
-                        <a href="<?=base_url('SuperNasional/ProgramStrategis')?>" class="dropdown-item">Program Strategis</a>
+                        <a href="<?=base_url('Kementerian/SPM')?>" class="dropdown-item">Standar Pelayanan Minimum</a>
+                        <a href="<?=base_url('Kementerian/ProyekStrategis')?>" class="dropdown-item">Proyek Strategis</a>
+                        <a href="<?=base_url('Kementerian/ProgramStrategis')?>" class="dropdown-item">Program Strategis</a>
                     </div>
                 </div>
 
@@ -449,51 +449,51 @@
                         <div id="Akun" class="tab-pane in <?=$Halaman == 'Akun' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
                             <ul class="notika-main-menu-dropdown">
                                 <li>
-                                    <a href="<?=base_url('SuperNasional/Akun')?>"><i class="notika-icon notika-form"></i> <b>Akun</b></a>
+                                    <a href="<?=base_url('Kementerian/Akun')?>"><i class="notika-icon notika-form"></i> <b>Akun</b></a>
                                 </li>
                             </ul>
                         </div>
                         <div id="RPJPN" class="tab-pane in <?=$Halaman == 'RPJPN' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
                             <ul class="notika-main-menu-dropdown">
                                 <li>
-                                    <a href="<?=base_url('SuperNasional/VisiRPJPN')?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
+                                    <a href="<?=base_url('Kementerian/VisiRPJPN')?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('SuperNasional/MisiRPJPN')?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
+                                    <a href="<?=base_url('Kementerian/MisiRPJPN')?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('SuperNasional/TujuanRPJPN')?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
+                                    <a href="<?=base_url('Kementerian/TujuanRPJPN')?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('SuperNasional/SasaranRPJPN')?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
+                                    <a href="<?=base_url('Kementerian/SasaranRPJPN')?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('SuperNasional/TahapanRPJPN')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
+                                    <a href="<?=base_url('Kementerian/TahapanRPJPN')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('SuperNasional/IUPRPJPN')?>"><i class="notika-icon notika-bar-chart"></i> <b>IUP RPJPN</b></a>
+                                    <a href="<?=base_url('Kementerian/IUPRPJPN')?>"><i class="notika-icon notika-bar-chart"></i> <b>IUP RPJPN</b></a>
                                 </li>
                             </ul>
                         </div>
                         <div id="RPJMN" class="tab-pane in <?=$Halaman == 'RPJMN' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
                             <ul class="notika-main-menu-dropdown">
                                 <li>
-                                    <a href="<?=base_url('SuperNasional/VisiRPJMN')?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
+                                    <a href="<?=base_url('Kementerian/VisiRPJMN')?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('SuperNasional/MisiRPJMN')?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
+                                    <a href="<?=base_url('Kementerian/MisiRPJMN')?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('SuperNasional/TujuanRPJMN')?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
+                                    <a href="<?=base_url('Kementerian/TujuanRPJMN')?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('SuperNasional/SasaranRPJMN')?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
+                                    <a href="<?=base_url('Kementerian/SasaranRPJMN')?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('SuperNasional/TahapanRPJMN')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
+                                    <a href="<?=base_url('Kementerian/TahapanRPJMN')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('SuperNasional/IUPRPJMN')?>"><i class="notika-icon notika-bar-chart"></i> <b>IUP RPJMN</b></a>
+                                    <a href="<?=base_url('Kementerian/IUPRPJMN')?>"><i class="notika-icon notika-bar-chart"></i> <b>IUP RPJMN</b></a>
                                 </li>
                             </ul>
                         </div>
@@ -544,35 +544,35 @@
                         <div id="Kementerian" class="tab-pane in <?=$Halaman == 'Kementerian' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
                             <ul class="notika-main-menu-dropdown">
                                 <li>
-                                    <a href="<?=base_url('SuperNasional/Kementerian')?>"><i class="notika-icon notika-form"></i> <b>Daftar Kementerian</b></a>
+                                    <a href="<?=base_url('Kementerian/Kementerian')?>"><i class="notika-icon notika-form"></i> <b>Daftar Kementerian</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('SuperNasional/SPM')?>"><i class="notika-icon notika-form"></i> <b>Standar Pelayanan Minimal</b></a>
+                                    <a href="<?=base_url('Kementerian/SPM')?>"><i class="notika-icon notika-form"></i> <b>Standar Pelayanan Minimal</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('SuperNasional/ProgramStrategis')?>"><i class="notika-icon notika-form"></i> <b>Program Strategis</b></a>
+                                    <a href="<?=base_url('Kementerian/ProgramStrategis')?>"><i class="notika-icon notika-form"></i> <b>Program Strategis</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('SuperNasional/ProyekStrategis')?>"><i class="notika-icon notika-form"></i> <b>Proyek Strategis</b></a>
+                                    <a href="<?=base_url('Kementerian/ProyekStrategis')?>"><i class="notika-icon notika-form"></i> <b>Proyek Strategis</b></a>
                                 </li>
                             </ul>
                         </div>
                         <div id="Isu" class="tab-pane in <?=$Halaman == 'Isu' ? 'active' : ''; ?> notika-tab-menu-bg animated flipInX">
                             <ul class="notika-main-menu-dropdown">
                                 <li>
-                                    <a href="<?=base_url('Super/PermasalahanPokok')?>"><i class="notika-icon notika-form"></i> <b>Permasalahan Pokok</b></a>
+                                    <a href="<?=base_url('Kementerian/PermasalahanPokok')?>"><i class="notika-icon notika-form"></i> <b>Permasalahan Pokok</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Super/IsuKLHS')?>"><i class="notika-icon notika-form"></i> <b>Isu KLHS</b></a>
+                                    <a href="<?=base_url('Kementerian/IsuKLHS')?>"><i class="notika-icon notika-form"></i> <b>Isu KLHS</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Super/IsuGlobal')?>"><i class="notika-icon notika-form"></i> <b>Isu Global</b></a>
+                                    <a href="<?=base_url('Kementerian/IsuGlobal')?>"><i class="notika-icon notika-form"></i> <b>Isu Global</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Super/IsuNasional')?>"><i class="notika-icon notika-form"></i> <b>Isu Nasional</b></a>
+                                    <a href="<?=base_url('Kementerian/IsuNasional')?>"><i class="notika-icon notika-form"></i> <b>Isu Nasional</b></a>
                                 </li>
                                 <li>
-                                    <a href="<?=base_url('Super/IsuStrategis')?>"><i class="notika-icon notika-form"></i> <b>Isu Strategis</b></a>
+                                    <a href="<?=base_url('Kementerian/IsuStrategis')?>"><i class="notika-icon notika-form"></i> <b>Isu Strategis</b></a>
                                 </li>   
                             </ul>
                         </div>

@@ -1,3 +1,4 @@
+<?php $this->load->view('Kementerian/Sidebar'); ?>
 <div class="breadcomb-area">
     <div class="container">
         <div class="row">
@@ -5,11 +6,11 @@
                 <div class="breadcomb-list">
                     <ul class="breadcomb-menu" style="list-style: none; padding: 0; margin: 0;">
                         <li style="display: inline-block; margin-right: 5px;">
-                            <a href="<?= base_url('Super') ?>">Beranda</a>
+                            <a href="<?= base_url('Beranda') ?>">Beranda</a>
                             <span class="bread-slash" style="display: inline-block; margin: 0 5px;">/</span>
                         </li>
                         <li style="display: inline-block; margin-right: 5px;">
-                            <a href="<?= base_url('Super/Isu') ?>">Isu</a>
+                            <a href="<?= base_url('Kementerian/IsuNasional') ?>">Isu</a>
                             <span class="bread-slash" style="display: inline-block; margin: 0 5px;">/</span>
                         </li>
                         <li style="display: inline-block;">
@@ -321,7 +322,7 @@
         // Function to populate Kementerian dropdown
         function populateKementerian(selectElement, tahunMulai, tahunAkhir, selectedId = '') {
             if (tahunMulai && tahunAkhir) {
-                $.post(BaseURL + "Super/GetKementerianByPeriode", {
+                $.post(BaseURL + "Kementerian/GetKementerianByPeriode", {
                     TahunMulai: tahunMulai,
                     TahunAkhir: tahunAkhir
                 }, function(response) {
@@ -363,7 +364,7 @@
         function loadKementerianForFilter(periode, selectElement, selectedId = '') {
             if (periode) {
                 var [tahunMulai, tahunAkhir] = periode.split('|');
-                $.post(BaseURL + "Super/GetKementerianByPeriode", {
+                $.post(BaseURL + "Kementerian/GetKementerianByPeriode", {
                     TahunMulai: tahunMulai,
                     TahunAkhir: tahunAkhir
                 }, function(response) {
@@ -379,7 +380,7 @@
                 });
             } else {
                 // Load all kementerian when no periode selected
-                $.getJSON(BaseURL + "Super/GetAllKementerian", function(kementerian) {
+                $.getJSON(BaseURL + "Kementerian/GetAllKementerian", function(kementerian) {
                     selectElement.empty().append('<option value="">Semua Kementerian</option>');
                     $.each(kementerian, function(index, item) {
                         var isSelected = (item.Id == selectedId) ? 'selected' : '';
@@ -404,7 +405,7 @@
         $("#ApplyFilter").click(function() {
             var periode = $("#FilterPeriode").val();
             var kementerian = $("#FilterKementerianSelect").val();
-            var url = BaseURL + "Super/IsuNasional?";
+            var url = BaseURL + "Kementerian/IsuNasional?";
             
             if (periode) url += "periode=" + encodeURIComponent(periode) + "&";
             if (kementerian) url += "kementerian=" + encodeURIComponent(kementerian);
@@ -414,7 +415,7 @@
 
         // Reset filter
         $("#ResetFilter").click(function() {
-            window.location.href = BaseURL + "Super/IsuNasional";
+            window.location.href = BaseURL + "Kementerian/IsuNasional";
         });
 
         // Input Isu Nasional
@@ -436,7 +437,7 @@
                     TahunMulai: TahunMulai,
                     TahunAkhir: TahunAkhir
                 };
-                $.post(BaseURL + "Super/InputIsuNasional", Data).done(function(Respon) {
+                $.post(BaseURL + "Kementerian/InputIsuNasional", Data).done(function(Respon) {
                     if (Respon == '1') {
                         window.location.reload();
                     } else {
@@ -477,7 +478,7 @@
                     TahunMulai: TahunMulai,
                     TahunAkhir: TahunAkhir
                 };
-                $.post(BaseURL + "Super/UpdateIsuNasional", Data).done(function(Respon) {
+                $.post(BaseURL + "Kementerian/UpdateIsuNasional", Data).done(function(Respon) {
                     if (Respon == '1') {
                         window.location.reload();
                     } else {
@@ -491,7 +492,7 @@
         $(document).on("click", ".Hapus", function() {
             if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
                 var Id = { Id: $(this).data('hapus') };
-                $.post(BaseURL + "Super/DeleteIsuNasional", Id).done(function(Respon) {
+                $.post(BaseURL + "Kementerian/DeleteIsuNasional", Id).done(function(Respon) {
                     if (Respon == '1') {
                         window.location.reload();
                     } else {
