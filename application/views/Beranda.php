@@ -98,6 +98,76 @@
             color: #20c997;
         }
 
+        /* Dropdown Styles */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0px 8px 20px 0px rgba(0,0,0,0.15);
+            z-index: 1001;
+            border-radius: 8px;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-item {
+            color: #4b5563;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            display: block;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f3f4f6;
+            color: #20c997;
+        }
+
+        /* Submenu Styles */
+        .dropdown-submenu {
+            position: relative;
+        }
+
+        .dropdown-submenu > .dropdown-item:after {
+            content: "▸";
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .dropdown-submenu .dropdown-submenu-content {
+            display: none;
+            position: absolute;
+            left: 100%;
+            top: 0;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0px 8px 20px 0px rgba(0,0,0,0.15);
+            z-index: 1002;
+            border-radius: 0 8px 8px 0;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-left: none;
+        }
+
+        .dropdown-submenu:hover > .dropdown-submenu-content {
+            display: block;
+        }
+
         /* Login Button */
         .Login-btn {
             background-color: rgba(255, 255, 255, 0.1);
@@ -337,14 +407,57 @@
                 <i class="fas fa-chart-line"></i>
                 IPPD
             </a>
+            
             <div class="navbar-menu">
                 <!-- Menu Kementerian dengan Submenu -->
                 <div class="dropdown">
                     <a href="#" class="navbar-item active">Laporan Sakip <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
                     <div class="dropdown-content">
-                        <a href="<?=base_url('Super/VisiRPJPN')?>" class="dropdown-item">Perancangan</a>
-                        <a href="<?=base_url('Super/SPM')?>" class="dropdown-item">Pelaporan</a>
-                        <a href="<?=base_url('Super/ProgramStrategis')?>" class="dropdown-item">Evaluasi</a>
+                        <div class="dropdown-submenu">
+                            <a href="#" class="dropdown-item">Perencanaan</a>
+                            <div class="dropdown-submenu-content">
+                                <a href="<?=base_url('Nasional/VisiRPJPN')?>" class="dropdown-item">Nasional</a>
+                                <a href="<?=base_url('Kementerian/Kementerian')?>" class="dropdown-item">Kementerian</a>
+                                <a href="<?=base_url('Provinsi/VisiRPJPD')?>" class="dropdown-item">Provinsi</a>
+                                <a href="<?=base_url('Daerah/VisiRPJPD')?>" class="dropdown-item">Daerah</a>
+                            </div>
+                        </div>
+                        <div class="dropdown-submenu">
+                            <a href="#" class="dropdown-item">Pengukuran</a>
+                            <div class="dropdown-submenu-content">
+                                <a href="#" class="dropdown-item">Nasional</a>
+                                <a href="#" class="dropdown-item">Kementerian</a>
+                                <a href="#" class="dropdown-item">Provinsi</a>
+                                <a href="#" class="dropdown-item">Daerah</a>
+                            </div>
+                        </div>
+                        <div class="dropdown-submenu">
+                            <a href="#" class="dropdown-item">Pelaporan</a>
+                            <div class="dropdown-submenu-content">
+                                <a href="#" class="dropdown-item">Nasional</a>
+                                <a href="#" class="dropdown-item">Kementerian</a>
+                                <a href="#" class="dropdown-item">Provinsi</a>
+                                <a href="#" class="dropdown-item">Daerah</a>
+                            </div>
+                        </div>
+                        <div class="dropdown-submenu">
+                            <a href="#" class="dropdown-item">Evaluasi</a>
+                            <div class="dropdown-submenu-content">
+                                <a href="#" class="dropdown-item">Nasional</a>
+                                <a href="#" class="dropdown-item">Kementerian</a>
+                                <a href="#" class="dropdown-item">Provinsi</a>
+                                <a href="#" class="dropdown-item">Daerah</a>
+                            </div>
+                        </div>
+                        <div class="dropdown-submenu">
+                            <a href="#" class="dropdown-item">Prestasi</a>
+                            <div class="dropdown-submenu-content">
+                                <a href="#" class="dropdown-item">Nasional</a>
+                                <a href="#" class="dropdown-item">Kementerian</a>
+                                <a href="#" class="dropdown-item">Provinsi</a>
+                                <a href="#" class="dropdown-item">Daerah</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -593,7 +706,7 @@
         // Login function
         function Login() {
             // Redirect to Login page or clear session
-            window.location.href = '/ippd';
+            window.location.href = '/ippd/Home';
         }
 
         // Mobile menu handling

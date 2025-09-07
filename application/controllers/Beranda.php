@@ -8,6 +8,9 @@ class Beranda extends CI_Controller {
     }
 
     public function index() {
+        //Hapus Semua Session
+        $this->session->sess_destroy();
+
         // Query untuk menghitung total akun
         $query_akun = $this->db->select('COUNT(*) as total_akun')
                               ->from('akun')
@@ -23,4 +26,6 @@ class Beranda extends CI_Controller {
         
         $this->load->view('Beranda', $data);
     }
+
+    
 }

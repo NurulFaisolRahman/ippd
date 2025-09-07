@@ -19,6 +19,11 @@
     <link rel="stylesheet" href="<?= base_url('css/responsive.css'); ?>">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="<?=base_url()?>css/bootstrap.min.css">
+    <link rel="stylesheet" href="<?=base_url()?>css/font-awesome.min.css">
+    <link rel="stylesheet" href="<?=base_url()?>css/notika-custom-icon.css">
+    <link rel="stylesheet" href="<?=base_url()?>css/data-table/bootstrap-table.css">
+    <link rel="stylesheet" href="<?=base_url()?>css/data-table/bootstrap-editable.css">
     <style>
         /* Navbar Styles */
         .navbar {
@@ -223,6 +228,247 @@
         .dropdown:hover .navbar-item i.fa-chevron-down {
             transform: rotate(180deg);
         }
+
+        /* Sidebar  */
+        :root {
+            --sidebar-width: 280px;
+            --sidebar-mini-width: 70px;
+            --transition-speed: 0.3s;
+        }
+
+        .menu-icon {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            color: #20c997;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar-wrapper {
+            width: var(--sidebar-width);
+            background-color: #f8f9fa;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding-top: 70px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            z-index: 999;
+            overflow-y: auto;
+            transition: all var(--transition-speed) ease;
+        }
+        
+        .sidebar-mini .sidebar-wrapper {
+            width: var(--sidebar-mini-width);
+        }
+        
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            min-height: 100vh;
+            transition: all var(--transition-speed) ease;
+        }
+        
+        .sidebar-mini .main-content {
+            margin-left: var(--sidebar-mini-width);
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            transition: all var(--transition-speed) ease;
+            border-left: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        
+        .sidebar-menu a:hover {
+            background-color: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .sidebar-menu a:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background-color: #20c997;
+            transform: scaleY(0);
+            transform-origin: bottom;
+            transition: transform var(--transition-speed) ease;
+        }
+        
+        .sidebar-menu a:hover:before {
+            transform: scaleY(1);
+        }
+        
+        .sidebar-menu .active > a {
+            border-left: 3px solid #20c997;
+            background-color: rgba(32, 201, 151, 0.1);
+        }
+        
+        .sidebar-submenu {
+            max-height: 0;
+            overflow: hidden;
+            background-color: #e9ecef;
+            padding-left: 15px;
+            transition: max-height 0.5s ease, padding var(--transition-speed) ease;
+        }
+        
+        .sidebar-submenu.show {
+            max-height: 500px; /* Adjust based on your content */
+        }
+        
+        .sidebar-submenu a {
+            padding: 10px 15px;
+            transition: all var(--transition-speed) ease;
+        }
+        
+        .sidebar-submenu a:hover {
+            padding-left: 25px;
+        }
+        
+        .sidebar-submenu .sidebar-submenu {
+            background-color: #dee2e6;
+        }
+        
+        .sidebar-submenu .sidebar-submenu a {
+            padding: 8px 15px;
+        }
+        
+        .fa-chevron-down {
+            transition: transform var(--transition-speed) ease;
+            margin-left: auto;
+        }
+        
+        /* Toggle Button */
+        .sidebar-toggle {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1000;
+            background-color: #20c997;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            border-radius: 50%;
+        }
+
+        .sidebar-toggle:hover {
+            transform: scale(1.1);
+            background-color: #1aa67d;
+        }
+        
+        
+        /* Mini Sidebar Styles */
+        .sidebar-mini .sidebar-menu span {
+            display: none;
+        }
+        
+        .sidebar-mini .sidebar-menu .fa-chevron-down {
+            display: none;
+        }
+        
+        .sidebar-mini .sidebar-submenu {
+            position: absolute;
+            left: var(--sidebar-mini-width);
+            top: 0;
+            width: 200px;
+            background-color: #f8f9fa;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            display: none !important;
+            padding-left: 0;
+            max-height: none !important;
+        }
+        
+        .sidebar-mini .sidebar-dropdown:hover .sidebar-submenu {
+            display: block !important;
+        }
+        
+        .sidebar-mini .sidebar-dropdown {
+            position: relative;
+        }
+        
+        /* Table Styles */
+        .data-table-list {
+            margin-top: 20px;
+        }
+        
+        .button-icon-btn {
+            display: flex;
+            gap: 5px;
+        }
+        
+        /* Animation for sidebar items */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .sidebar-menu li {
+            animation: fadeIn 0.5s ease forwards;
+            opacity: 0;
+        }
+        
+        /* Delay animations for each item */
+        .sidebar-menu li:nth-child(1) { animation-delay: 0.1s; }
+        .sidebar-menu li:nth-child(2) { animation-delay: 0.2s; }
+        .sidebar-menu li:nth-child(3) { animation-delay: 0.3s; }
+        .sidebar-menu li:nth-child(4) { animation-delay: 0.4s; }
+        .sidebar-menu li:nth-child(5) { animation-delay: 0.5s; }
+        
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .sidebar-wrapper {
+                transform: translateX(-100%);
+                width: var(--sidebar-width);
+            }
+            
+            .sidebar-mini .sidebar-wrapper {
+                transform: translateX(0);
+                width: var(--sidebar-mini-width);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .sidebar-mini .main-content {
+                margin-left: 0;
+            }
+            
+            .sidebar-toggle {
+                left: 15px;
+            }
+            
+            .sidebar-mini .sidebar-toggle {
+                left: calc(var(--sidebar-mini-width) - 20px);
+            }
+        }
     </style>
 </head>
 
@@ -235,237 +481,135 @@
                 IPPD
             </a>
             <div class="navbar-menu">
-                
                 <!-- Menu Nasional dengan Submenu -->
                 <div class="dropdown">
-                    <a href="#" class="navbar-item">Nasional <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
+                    <a href="#" class="navbar-item active">Laporan Sakip <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
                     <div class="dropdown-content">
-                        <!-- RPJPN Submenu -->
                         <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item">RPJPN</a>
+                            <a href="#" class="dropdown-item">Perencanaan</a>
                             <div class="dropdown-submenu-content">
-                                <a href="<?=base_url('Nasional/VisiRPJPN')?>" class="dropdown-item">Visi</a>
-                                <a href="<?=base_url('Nasional/MisiRPJPN')?>" class="dropdown-item">Misi</a>
-                                <a href="<?=base_url('Nasional/TujuanRPJPN')?>" class="dropdown-item">Tujuan</a>
-                                <a href="<?=base_url('Nasional/SasaranRPJPN')?>" class="dropdown-item">Sasaran</a>
-                                <a href="<?=base_url('Nasional/TahapanRPJPN')?>" class="dropdown-item">Tahapan</a>
-                                <a href="<?=base_url('Nasional/IUPRPJPN')?>" class="dropdown-item">IUP RPJPN</a>
+                                <a href="<?=base_url('Nasional/VisiRPJPN')?>" class="dropdown-item">Nasional</a>
+                                <a href="<?=base_url('Kementerian/Kementerian')?>" class="dropdown-item">Kementerian</a>
+                                <a href="<?=base_url('Provinsi/VisiRPJPD')?>" class="dropdown-item">Provinsi</a>
+                                <a href="<?=base_url('Daerah/VisiRPJPD')?>" class="dropdown-item">Daerah</a>
                             </div>
                         </div>
-                        
-                        <!-- RPJMN Submenu -->
                         <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item">RPJMN</a>
+                            <a href="#" class="dropdown-item">Pengukuran</a>
                             <div class="dropdown-submenu-content">
-                                <a href="<?=base_url('Nasional/VisiRPJMN')?>" class="dropdown-item">Visi</a>
-                                <a href="<?=base_url('Nasional/MisiRPJMN')?>" class="dropdown-item">Misi</a>
-                                <a href="<?=base_url('Nasional/TujuanRPJMN')?>" class="dropdown-item">Tujuan</a>
-                                <a href="<?=base_url('Nasional/SasaranRPJMN')?>" class="dropdown-item">Sasaran</a>
-                                <a href="<?=base_url('Nasional/TahapanRPJMN')?>" class="dropdown-item">Tahapan</a>
-                                <a href="<?=base_url('Nasional/IUPRPJMN')?>" class="dropdown-item">IUP RPJMN</a>
+                                <a href="#" class="dropdown-item">Nasional</a>
+                                <a href="#" class="dropdown-item">Kementerian</a>
+                                <a href="#" class="dropdown-item">Provinsi</a>
+                                <a href="#" class="dropdown-item">Daerah</a>
+                            </div>
+                        </div>
+                        <div class="dropdown-submenu">
+                            <a href="#" class="dropdown-item">Pelaporan</a>
+                            <div class="dropdown-submenu-content">
+                                <a href="#" class="dropdown-item">Nasional</a>
+                                <a href="#" class="dropdown-item">Kementerian</a>
+                                <a href="#" class="dropdown-item">Provinsi</a>
+                                <a href="#" class="dropdown-item">Daerah</a>
+                            </div>
+                        </div>
+                        <div class="dropdown-submenu">
+                            <a href="#" class="dropdown-item">Evaluasi</a>
+                            <div class="dropdown-submenu-content">
+                                <a href="#" class="dropdown-item">Nasional</a>
+                                <a href="#" class="dropdown-item">Kementerian</a>
+                                <a href="#" class="dropdown-item">Provinsi</a>
+                                <a href="#" class="dropdown-item">Daerah</a>
+                            </div>
+                        </div>
+                        <div class="dropdown-submenu">
+                            <a href="#" class="dropdown-item">Prestasi</a>
+                            <div class="dropdown-submenu-content">
+                                <a href="#" class="dropdown-item">Nasional</a>
+                                <a href="#" class="dropdown-item">Kementerian</a>
+                                <a href="#" class="dropdown-item">Provinsi</a>
+                                <a href="#" class="dropdown-item">Daerah</a>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Menu Kementerian dengan Submenu -->
-                <div class="dropdown">
-                    <a href="#" class="navbar-item active">Kementerian <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
-                    <div class="dropdown-content">
-                        <a href="<?=base_url('Super/Kementerian')?>" class="dropdown-item">Daftar Kementerian</a>
-                        <a href="<?=base_url('Super/SPM')?>" class="dropdown-item">Standar Pelayanan Minimal</a>
-                        <a href="<?=base_url('Super/ProgramStrategis')?>" class="dropdown-item">Program Strategis</a>
-                        <a href="<?=base_url('Super/ProyekStrategis')?>" class="dropdown-item">Proyek Strategis</a>
-                    </div>
-                </div>
-
-                <div class="dropdown">
-                    <a href="#" class="navbar-item">Provinsi <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
-                    <div class="dropdown-content">
-                        
-                        <!-- RPJPD Submenu -->
-                        <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item">RPJPD</a>
-                            <div class="dropdown-submenu-content">
-                                <a href="<?=base_url('Provinsi/VisiRPJPD')?>" class="dropdown-item">Visi</a>
-                                <a href="<?=base_url('Provinsi/MisiRPJPD')?>" class="dropdown-item">Misi</a>
-                                <a href="<?=base_url('Provinsi/TujuanRPJPD')?>" class="dropdown-item">Tujuan</a>
-                                <a href="<?=base_url('Provinsi/SasaranRPJPD')?>" class="dropdown-item">Sasaran</a>
-                                <a href="<?=base_url('Provinsi/TahapanRPJPD')?>" class="dropdown-item">Tahapan</a>
-                                <a href="<?=base_url('Provinsi/IUPRPJPD')?>" class="dropdown-item">IUP RPJPD</a>
-                            </div>
-                        </div>
-                        
-                        <!-- RPJMD Submenu -->
-                        <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item">RPJMD</a>
-                            <div class="dropdown-submenu-content">
-                                <a href="<?=base_url('Provinsi/VisiRPJMD')?>" class="dropdown-item">Visi</a>
-                                <a href="<?=base_url('Provinsi/MisiRPJMD')?>" class="dropdown-item">Misi</a>
-                                <a href="<?=base_url('Provinsi/TujuanRPJMD')?>" class="dropdown-item">Tujuan</a>
-                                <a href="<?=base_url('Provinsi/SasaranRPJMD')?>" class="dropdown-item">Sasaran</a>
-                                <a href="<?=base_url('Provinsi/TahapanRPJMD')?>" class="dropdown-item">Tahapan</a>
-                                <a href="<?=base_url('Provinsi/IUPRPJMD')?>" class="dropdown-item">IUP RPJMD</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <!-- Kontak Menu (tanpa dropdown) -->
+                <a href="mailto:info@ippd.example.com" class="navbar-item">Kontak</a>
                 
-                <!-- Menu Daerah -->
-                <div class="dropdown">
-                    <a href="#" class="navbar-item">Daerah <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
-                    <div class="dropdown-content">
-                         <!-- RPJPD Submenu -->
-                        <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item">RPJPD</a>
-                            <div class="dropdown-submenu-content">
-                                <a href="<?=base_url('SuperDaerah/VisiRPJPD')?>" class="dropdown-item">Visi</a>
-                                <a href="<?=base_url('SuperDaerah/MisiRPJPD')?>" class="dropdown-item">Misi</a>
-                                <a href="<?=base_url('SuperDaerah/TujuanRPJPD')?>" class="dropdown-item">Tujuan</a>
-                                <a href="<?=base_url('SuperDaerah/SasaranRPJPD')?>" class="dropdown-item">Sasaran</a>
-                                <a href="<?=base_url('SuperDaerah/TahapanRPJPD')?>" class="dropdown-item">Tahapan</a>
-                            </div>
-                        </div>
-                        <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item">RPJMD</a>
-                            <div class="dropdown-submenu-content">
-                                <a href="<?=base_url('SuperDaerah/VisiRPJMD')?>" class="dropdown-item">Visi</a>
-                                <a href="<?=base_url('SuperDaerah/MisiRPJMD')?>" class="dropdown-item">Misi</a>
-                                <a href="<?=base_url('SuperDaerah/TujuanRPJMD')?>" class="dropdown-item">Tujuan</a>
-                                <a href="<?=base_url('SuperDaerah/SasaranRPJMD')?>" class="dropdown-item">Sasaran</a>
-                                <a href="<?=base_url('SuperDaerah/TahapanRPJMD')?>" class="dropdown-item">Tahapan</a>
-                            </div>
-                        </div>
-                        <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item">Cascading</a>
-                            <div class="dropdown-submenu-content">
-                                <a href="<?=base_url('SuperDaerah/kelola_instansi')?>" class="dropdown-item">Daftar Instansi</a>
-                                <a href="<?=base_url('SuperDaerah/Iku')?>" class="dropdown-item">IKU</a>
-                                <a href="<?=base_url('SuperDaerah/Ikd')?>" class="dropdown-item">IKD</a>
-                            </div>
-                        </div>
-                        <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item">Isu Daerah</a>
-                            <div class="dropdown-submenu-content">
-                                <a href="<?=base_url('SuperDaerah/PermasalahanPokok')?>" class="dropdown-item">Permasalahan Pokok</a>
-                                <a href="<?=base_url('SuperDaerah/IsuKLHS')?>" class="dropdown-item">Isu KLHS</a>
-                                <a href="<?=base_url('SuperDaerah/IsuStrategisDaerah')?>" class="dropdown-item">Isu Strategis</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <!-- Tentang Kami Menu (tanpa dropdown) -->
+                <a href="#" class="navbar-item">Tentang Kami</a>
                 
+                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                 <button class="logout-btn" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i>
                     Logout
                 </button>
+                <?php } else { ?>
+                <button class="Login-btn" onclick="Login()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Login
+                </button>
+                <?php } ?>
             </div>
         </div>
     </nav>
+    <!-- Toggle Button -->
+    <button class="sidebar-toggle" id="sidebarToggle">
+        <i class="fa fa-bars"></i>
+    </button>
 
-    <!-- Main Content Area -->
-    <!-- <div class="container mx-auto px-4 py-8 max-w-6xl"> -->
-        <!-- Tab Navigation -->
-        <!-- <div class="main-menu-area mg-tb-40">
-            <div class="container">
-                <div class="row"> -->
-                    <!-- <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12"> -->
-                        <!-- <ul class="nav nav-tabs notika-menu-wrap menu-it-icon-pro">
-                            <li <?= $Halaman == 'RPJPD' ? 'class="active"' : '' ?>>
-                                <a data-toggle="tab" href="#RPJPD"><i class="notika-icon notika-house"></i> <b>RPJPD</b></a>
-                            </li>
-                            <li <?= $Halaman == 'RPJMD' ? 'class="active"' : '' ?>>
-                                <a data-toggle="tab" href="#RPJMD"><i class="notika-icon notika-edit"></i> <b>RPJMD</b></a>
-                            </li>
-                            <li <?= $Halaman == 'Cascading' ? 'class="active"' : '' ?>>
-                                <a data-toggle="tab" href="#Cascading"><i class="notika-icon notika-form"></i> <b>CASCADING</b></a>
-                            </li>
-                            <li <?= $Halaman == 'Isudaerah' ? 'class="active"' : '' ?>>
-                                <a data-toggle="tab" href="#Isudaerah"><i class="notika-icon notika-house"></i> <b>ISU DAERAH</b></a>
-                            </li>
-                        </ul> -->
-                        <!-- <div class="tab-content custom-menu-content"> -->
-                            <!-- RPJPD Tab Content -->
-                            <!-- <div id="RPJPD" class="tab-pane in <?= $Halaman == 'RPJPD' ? 'active' : '' ?> notika-tab-menu-bg animated flipInX">
-                                <ul class="notika-main-menu-dropdown">
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/VisiRPJPD') ?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/MisiRPJPD') ?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/TujuanRPJPD') ?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/SasaranRPJPD') ?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?=base_url('SuperDaerah/TahapanRPJPD')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
-                                    </li>
-                                </ul>
-                            </div> -->
-                            <!-- RPJMD Tab Content -->
-                            <!-- <div id="RPJMD" class="tab-pane in <?= $Halaman == 'RPJMD' ? 'active' : '' ?> notika-tab-menu-bg animated flipInX">
-                                <ul class="notika-main-menu-dropdown">
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/VisiRPJMD') ?>"><i class="notika-icon notika-house"></i> <b>Visi</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/MisiRPJMD') ?>"><i class="notika-icon notika-form"></i> <b>Misi</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/TujuanRPJMD') ?>"><i class="notika-icon notika-edit"></i> <b>Tujuan</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/SasaranRPJMD') ?>"><i class="notika-icon notika-support"></i> <b>Sasaran</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?=base_url('SuperDaerah/TahapanRPJMD')?>"><i class="notika-icon notika-app"></i> <b>Tahapan</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?=base_url('SuperDaerah/JanjiPolitik')?>"><i class="notika-icon notika-form"></i> <b>Janji Politik</b></a>
-                                    </li>
-                                </ul>
-                            </div> -->
-                            <!-- Cascading Tab Content -->
-                            <!-- <div id="Cascading" class="tab-pane in <?= $Halaman == 'Cascading' ? 'active' : '' ?> notika-tab-menu-bg animated flipInX">
-                                <ul class="notika-main-menu-dropdown">
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/Instansi') ?>"><i class="notika-icon notika-form"></i> <b>Daftar Instansi</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/IKU') ?>"><i class="notika-icon notika-form"></i> <b>IKU</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/IKD') ?>"><i class="notika-icon notika-form"></i> <b>IKD</b></a>
-                                    </li>
-                                </ul>
-                            </div> -->
-                            <!-- Isu Daerah Tab Content -->
-                            <!-- <div id="Isudaerah" class="tab-pane in <?= $Halaman == 'Isudaerah' ? 'active' : '' ?> notika-tab-menu-bg animated flipInX">
-                                <ul class="notika-main-menu-dropdown">
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/PermasalahanPokok') ?>"><i class="notika-icon notika-house"></i> <b>Permasalahan Pokok</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/IsuKLHS') ?>"><i class="notika-icon notika-house"></i> <b>Isu KLHS Daerah</b></a>
-                                    </li>
-                                    <li>
-                                        <a href="<?= base_url('SuperDaerah/IsuStrategisDaerah') ?>"><i class="notika-icon notika-house"></i> <b>Isu Strategis Daerah</b></a>
-                                    </li>
-                                </ul>
-                            </div> -->
-                        <!-- </div> -->
-                    <!-- </div> -->
-                <!-- </div> -->
-            <!-- </div> -->
-        <!-- </div> -->
-    <!-- </div> -->
+    <!-- Sidebar -->
+    <div class="sidebar-wrapper">
+        <div class="sidebar-content">
+            <ul class="sidebar-menu">
+                <br>
+                <!-- RPJMD -->
+                <div class="sidebar-dropdown">
+                    <a href="#">
+                        <i class="menu-icon fa fa-line-chart"></i>
+                        <span>RPJPN</span>
+                        <i class="fa fa-chevron-down"></i>
+                    </a>
+                    <div class="sidebar-submenu" style="display: block;">
+                        <a href="<?=base_url('Nasional/VisiRPJPN')?>">Visi</a>
+                        <a href="<?=base_url('Nasional/MisiRPJPN')?>">Misi</a>
+                        <a href="<?=base_url('Nasional/TujuanRPJPN')?>">Tujuan</a>
+                        <a href="<?=base_url('Nasional/SasaranRPJPN')?>">Sasaran</a>
+                        <a href="<?=base_url('Nasional/TahapanRPJPN')?>">Tahapan</a>
+                        <a href="<?=base_url('Nasional/IUPRPJPN')?>">IUP RPJPN</a>
+                        <br>
+                    </div>
+                </div>
+
+                <!-- RPJPD -->
+                <div class="sidebar-dropdown">
+                    <a href="#">
+                    <i class="menu-icon fa fa-area-chart"></i>
+                    <span>RPJMN</span>
+                    <i class="fa fa-chevron-down"></i>
+                    </a>
+                    <div class="sidebar-submenu">
+                        <a href="<?=base_url('Nasional/VisiRPJMN')?>">Visi</a>
+                        <a href="<?=base_url('Nasional/MisiRPJMN')?>">Misi</a>
+                        <a href="<?=base_url('Nasional/TujuanRPJMN')?>">Tujuan</a>
+                        <a href="<?=base_url('Nasional/SasaranRPJMN')?>">Sasaran</a>
+                        <a href="<?=base_url('Nasional/TahapanRPJMN')?>">Tahapan</a>
+                        <a href="<?=base_url('Nasional/IUPRPJMN')?>">IUP RPJMN</a>
+                        <br>
+                    </div>
+                </div>
+            </ul>
+        </div>
+    </div>
 <script>
-        // Logout function
+        // Log Out Clear Session in Controller Beranda
         function logout() {
             window.location.href = '/ippd';
+        }
+
+        // Redirect to Login
+        function Login() {    
+            window.location.href = '/ippd/Home';
         }
 
         // Mobile menu handling
@@ -528,6 +672,127 @@
                     });
                 });
             }
+        });
+    </script>
+    <script>
+        var BaseURL = '<?=base_url()?>';
+        
+        // Sidebar Toggle Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const body = document.body;
+            
+            // Check if sidebar state is saved in localStorage
+            if (localStorage.getItem('sidebarMini') === 'true') {
+                body.classList.add('sidebar-mini');
+            }
+            
+            // Toggle sidebar
+            sidebarToggle.addEventListener('click', function() {
+                body.classList.toggle('sidebar-mini');
+                // Save state to localStorage
+                localStorage.setItem('sidebarMini', body.classList.contains('sidebar-mini'));
+            });
+            
+            // Close all dropdowns except the active one
+            document.querySelectorAll('.sidebar-dropdown').forEach(dropdown => {
+                if (!dropdown.classList.contains('active')) {
+                    const submenu = dropdown.querySelector('.sidebar-submenu');
+                    if (submenu) {
+                        submenu.style.maxHeight = '0';
+                        submenu.style.padding = '0 15px';
+                    }
+                }
+            });
+
+            // Toggle sidebar dropdowns (for expanded sidebar)
+            document.querySelectorAll('.sidebar-dropdown > a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Only prevent default if sidebar is not minimized
+                    if (!body.classList.contains('sidebar-mini')) {
+                        e.preventDefault();
+                        
+                        const dropdown = this.parentElement;
+                        const submenu = this.nextElementSibling;
+                        
+                        // Close other dropdowns at the same level
+                        if (dropdown.parentElement.classList.contains('sidebar-menu') || 
+                            dropdown.parentElement.classList.contains('sidebar-submenu')) {
+                            const siblings = Array.from(dropdown.parentElement.children)
+                                .filter(child => child !== dropdown);
+                            
+                            siblings.forEach(sibling => {
+                                const siblingSubmenu = sibling.querySelector('.sidebar-submenu');
+                                if (siblingSubmenu) {
+                                    siblingSubmenu.style.maxHeight = '0';
+                                    siblingSubmenu.style.padding = '0 15px';
+                                }
+                                sibling.classList.remove('active');
+                                
+                                // Reset chevron icon for siblings
+                                const siblingChevron = sibling.querySelector('.fa-chevron-down');
+                                if (siblingChevron) {
+                                    siblingChevron.style.transform = 'rotate(0)';
+                                }
+                            });
+                        }
+                        
+                        // Toggle current dropdown
+                        if (submenu) {
+                            if (dropdown.classList.contains('active')) {
+                                submenu.style.maxHeight = '0';
+                                submenu.style.padding = '0 15px';
+                                dropdown.classList.remove('active');
+                            } else {
+                                submenu.style.maxHeight = submenu.scrollHeight + 'px';
+                                submenu.style.padding = '10px 15px';
+                                dropdown.classList.add('active');
+                            }
+                            
+                            // Rotate chevron icon
+                            const chevron = this.querySelector('.fa-chevron-down');
+                            if (chevron) {
+                                chevron.style.transform = dropdown.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0)';
+                            }
+                        }
+                    }
+                });
+            });
+            
+            // Highlight active menu item based on current URL
+            const currentUrl = window.location.pathname;
+            document.querySelectorAll('.sidebar-submenu a').forEach(link => {
+                if (link.getAttribute('href') === currentUrl) {
+                    link.style.color = '#20c997';
+                    link.style.fontWeight = 'bold';
+                    
+                    // Expand parent menus
+                    let parent = link.closest('.sidebar-submenu');
+                    while (parent) {
+                        parent.style.maxHeight = parent.scrollHeight + 'px';
+                        parent.style.padding = '10px 15px';
+                        const parentDropdown = parent.previousElementSibling;
+                        if (parentDropdown) {
+                            parentDropdown.style.color = '#20c997';
+                            const chevron = parentDropdown.querySelector('.fa-chevron-down');
+                            if (chevron) chevron.style.transform = 'rotate(180deg)';
+                            parentDropdown.parentElement.classList.add('active');
+                        }
+                        parent = parent.parentElement.closest('.sidebar-submenu');
+                    }
+                }
+            });
+            
+            // Add hover effect animation
+            document.querySelectorAll('.sidebar-menu a').forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateX(5px)';
+                });
+                
+                item.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateX(0)';
+                });
+            });
         });
     </script>
 </body>

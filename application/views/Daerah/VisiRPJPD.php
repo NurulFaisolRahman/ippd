@@ -18,7 +18,9 @@
                                         <th style="width: 10%;" class="text-center">No</th>
                                         <th style="width: 70%;">Visi RPJPD</th>
                                         <th style="width: 10%;">Periode</th>
+                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                                         <th style="width: 10%;" class="text-center">Edit</th>
+                                        <?php } ?>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -27,12 +29,14 @@
                                         <td style="vertical-align: middle;" class="text-center"><?=$No++?></td>
                                         <td style="vertical-align: middle;"><?=$key['Visi']?></td>
                                         <td style="vertical-align: middle;"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></td>
+                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                                         <td class="text-center">
                                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
                                                 <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['Visi'].'|'.$key['TahunMulai'].'|'.$key['TahunAkhir']?>"><i class="notika-icon notika-edit"></i></button>
                                                 <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
                                             </div>
                                         </td>
+                                        <?php } ?>
                                     </tr>
                                     <?php } ?>
                                 </tbody>

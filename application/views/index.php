@@ -353,7 +353,7 @@
           if (Respon == 0) {
             window.location = BaseURL + "Nasional/VisiRPJPN";	
           } else if (Respon == 1) {
-            window.location = BaseURL + "Super/Kementerian";
+            window.location = BaseURL + "Kementerian/Kementerian";
           } else if (Respon == 2) {
             window.location = BaseURL + "Provinsi/VisiRPJPD";
           } else if (Respon == 3) {

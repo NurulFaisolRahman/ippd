@@ -43,12 +43,12 @@ class Home extends CI_Controller {
           $this->session->set_userdata($Session);
           echo $Akun[0]['Level'];
         } else if ($Akun[0]['Level'] == '2') {
-					$Session = array('Admin' => true,'Kementerian' => '','Level' => $Akun[0]['Level']);
+					$Session = array('Admin' => true,'Provinsi' => '','Level' => $Akun[0]['Level']);
           $Session = array('KodeWilayah' => $Akun[0]['KodeWilayah'],);
           $this->session->set_userdata($Session);
           echo $Akun[0]['Level'];
         } else if ($Akun[0]['Level'] == '3') {
-					$Session = array('Admin' => true,'Kementerian' => '','Level' => $Akun[0]['Level']);
+					$Session = array('Admin' => true,'Daerah' => '','Level' => $Akun[0]['Level']);
           $Session = array('KodeWilayah' => $Akun[0]['KodeWilayah'],);
           $this->session->set_userdata($Session);
           echo $Akun[0]['Level'];
