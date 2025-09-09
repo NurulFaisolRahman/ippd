@@ -267,22 +267,6 @@
         <div class="sidebar-content">
             <ul class="sidebar-menu">
                 <br>
-                <!-- RPJMD -->
-                <div class="sidebar-dropdown">
-                    <a href="#">
-                        <i class="menu-icon fa fa-line-chart"></i>
-                        <span>RPJMD</span>
-                        <i class="fa fa-chevron-down"></i>
-                    </a>
-                    <div class="sidebar-submenu" style="display: block;">
-                        <a href="<?=base_url('Daerah/VisiRPJMD')?>">Visi</a>
-                        <a href="<?=base_url('Daerah/MisiRPJMD')?>">Misi</a>
-                        <a href="<?=base_url('Daerah/TujuanRPJMD')?>">Tujuan</a>
-                        <a href="<?=base_url('Daerah/SasaranRPJMD')?>">Sasaran</a>
-                        <a href="<?=base_url('Daerah/TahapanRPJMD')?>">Tahapan</a>
-                        <br>
-                    </div>
-                </div>
 
                 <!-- RPJPD -->
                 <div class="sidebar-dropdown">
@@ -297,6 +281,23 @@
                         <a href="<?=base_url('Daerah/TujuanRPJPD')?>">Tujuan</a>
                         <a href="<?=base_url('Daerah/SasaranRPJPD')?>">Sasaran</a>
                         <a href="<?=base_url('Daerah/TahapanRPJPD')?>">Tahapan</a>
+                        <br>
+                    </div>
+                </div>
+
+                <!-- RPJMD -->
+                <div class="sidebar-dropdown">
+                    <a href="#">
+                        <i class="menu-icon fa fa-line-chart"></i>
+                        <span>RPJMD</span>
+                        <i class="fa fa-chevron-down"></i>
+                    </a>
+                    <div class="sidebar-submenu" style="display: block;">
+                        <a href="<?=base_url('Daerah/VisiRPJMD')?>">Visi</a>
+                        <a href="<?=base_url('Daerah/MisiRPJMD')?>">Misi</a>
+                        <a href="<?=base_url('Daerah/TujuanRPJMD')?>">Tujuan</a>
+                        <a href="<?=base_url('Daerah/SasaranRPJMD')?>">Sasaran</a>
+                        <a href="<?=base_url('Daerah/TahapanRPJMD')?>">Tahapan</a>
                         <br>
                     </div>
                 </div>

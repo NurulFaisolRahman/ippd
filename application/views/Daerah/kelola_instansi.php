@@ -9,7 +9,9 @@
                     <div class="data-table-list">
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
+                                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                                 <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputInstansi"><i class="notika-icon notika-edit"></i> <b>Tambah Instansi</b></button>
+                            <?php } ?>
                             </div>
                                 <!-- <h2>Basic Example</h2>
                                 <p>It's just that simple. Turn your simple table into a sophisticated data table and offer your users a nice experience and great features without any effort.</p> -->
@@ -20,8 +22,10 @@
                                     <tr>
                                         <th class="text-center">No</th>
                                         <th>Username</th>
+                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                                         <th>Password (Hashed)</th>
                                         <th class="text-center">Aksi</th>
+                                        <?php } ?>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -29,6 +33,7 @@
                                     <tr>
                                         <td style="vertical-align: middle;" class="text-center"><?=$No++?></td>
                                         <td style="vertical-align: middle;"><?=$key['nama']?></td>
+                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                                         <td style="vertical-align: middle;"><?=$key['password']?></td>
                                         <td class="text-center">
                                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
@@ -36,6 +41,7 @@
                                                 <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['id']?>"><i class="notika-icon notika-trash"></i></button>
                                             </div>
                                         </td>
+                                        <?php } ?>
                                     </tr>
                                     <?php } ?>
                                 </tbody>
