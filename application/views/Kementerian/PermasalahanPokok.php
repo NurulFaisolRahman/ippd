@@ -38,14 +38,17 @@
                                     <span class="badge" style="background-color: #f44336; margin-left: 5px;">Filter Aktif</span>
                                 <?php endif; ?>
                             </button>
+                            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                             <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputPermasalahanPokok">
                                 <i class="notika-icon notika-edit"></i> <b>Input Permasalahan Pokok</b>
                             </button>
+                            <?php } ?>
                         </div>
                     </div>
 
                     <!-- Modal Filter -->
                     <div class="modal fade" id="ModalFilter" role="dialog">
+                        <div class="modal-dialog modals-default" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
                         <div class="modal-dialog modals-default">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -100,6 +103,7 @@
                             </div>
                         </div>
                     </div>
+                    </div>
 
                     <!-- Tabel Data Permasalahan Pokok -->
                     <div class="table-responsive">
@@ -110,7 +114,9 @@
                                     <th>Kementerian</th>
                                     <th>Permasalahan Pokok</th>
                                     <th>Periode</th>
+                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                                     <th>Aksi</th>
+                                    <?php } ?>
                                 </tr>
                             </thead>
                             <tbody>
@@ -120,6 +126,7 @@
                                     <td style="vertical-align: middle;"><?= $key['NamaKementerian'] ?></td>
                                     <td style="vertical-align: middle;"><?= $key['NamaPermasalahanPokok'] ?></td>
                                     <td style="vertical-align: middle;"><?= $key['TahunMulai'] . ' - ' . $key['TahunAkhir'] ?></td>
+                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                                     <td>
                                         <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
                                             <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" 
@@ -131,6 +138,7 @@
                                             </button>
                                         </div>
                                     </td>
+                                    <?php } ?>
                                 </tr>
                                 <?php endforeach; ?>
                             </tbody>

@@ -29,8 +29,10 @@
                 <div class="data-table-list">
                     <div class="basic-tb-hd">
                         <div class="button-icon-btn sm-res-mg-t-30">
+                            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                             <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputKementerian">
                                 <i class="notika-icon notika-edit"></i> <b>Input Kementerian</b>
+                                <?php } ?>
                             </button>
                         </div>
                     </div>
@@ -41,7 +43,9 @@
                                     <th class="text-center">No</th>
                                     <th>Kementerian</th>
                                     <th>Periode</th>
+                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                                     <th>Aksi</th>
+                                    <?php } ?>
                                 </tr>
                             </thead>
                             <tbody>
@@ -51,11 +55,13 @@
                                     <td style="vertical-align: middle;"><?= $key['NamaKementerian'] ?></td>
                                     <td style="vertical-align: middle;"><?= $key['TahunMulai'] . ' - ' . $key['TahunAkhir'] ?></td>
                                     <td>
+                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                                         <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
                                             <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?= $key['Id'] . '|' . $key['NamaKementerian'] . '|' . $key['TahunMulai'] . '|' . $key['TahunAkhir'] ?>"><i class="notika-icon notika-edit"></i></button>
                                             <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?= $key['Id'] ?>"><i class="notika-icon notika-trash"></i></button>
                                         </div>
                                     </td>
+                                    <?php } ?>
                                 </tr>
                                 <?php } ?>
                             </tbody>

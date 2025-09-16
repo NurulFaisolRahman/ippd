@@ -72,6 +72,66 @@ class Kementerian extends CI_Controller {
       echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
   }
 
+  
+    public function Main() {
+        // Get filter parameters
+        $periodeFilter = $this->input->get('periode');
+        $kementerianFilter = $this->input->get('kementerian');
+        
+        // Get all unique periods
+        $Data['AllPeriode'] = $this->db->query("
+            SELECT DISTINCT TahunMulai, TahunAkhir 
+            FROM kementerian 
+            WHERE deleted_at IS NULL
+            ORDER BY TahunMulai DESC
+        ")->result_array();
+        
+        // Get ministries based on period filter
+        if ($periodeFilter) {
+            list($tahunMulai, $tahunAkhir) = explode('|', $periodeFilter);
+            $Data['Kementerian'] = $this->db->get_where('kementerian', [
+                'TahunMulai' => $tahunMulai,
+                'TahunAkhir' => $tahunAkhir,
+                'deleted_at' => NULL
+            ])->result_array();
+        } else {
+            $Data['Kementerian'] = [];
+        }
+        
+        // Get selected ministry data if filter is applied
+        $Data['SelectedKementerian'] = [];
+        if ($kementerianFilter) {
+            $Data['SelectedKementerian'] = $this->db->get_where('kementerian', [
+                'Id' => $kementerianFilter,
+                'deleted_at' => NULL
+            ])->row_array();
+        }
+        
+        // Store current filters
+        $Data['CurrentPeriode'] = $periodeFilter;
+        $Data['CurrentKementerian'] = $kementerianFilter;
+        
+        $this->load->view('Kementerian/Main', $Data);
+    }
+
+    // AJAX function to get ministries based on selected period
+    public function get_kementerian() {
+        $periode = $this->input->post('periode');
+        
+        if ($periode) {
+            list($tahunMulai, $tahunAkhir) = explode('|', $periode);
+            $kementerian = $this->db->get_where('kementerian', [
+                'TahunMulai' => $tahunMulai,
+                'TahunAkhir' => $tahunAkhir,
+                'deleted_at' => NULL
+            ])->result_array();
+            
+            echo json_encode($kementerian);
+        } else {
+            echo json_encode([]);
+        }
+    }
+
 
     public function SPM() {
         $Header['Halaman'] = 'Kementerian';

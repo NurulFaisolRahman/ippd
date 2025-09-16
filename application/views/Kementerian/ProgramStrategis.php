@@ -38,14 +38,17 @@
                                     <span class="badge" style="background-color: #f44336; margin-left: 5px;">Filter Aktif</span>
                                 <?php endif; ?>
                             </button>
+                                     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                             <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputProgram">
                                 <i class="notika-icon notika-edit"></i> <b>Input Program Strategis</b>
                             </button>
+                                        <?php } ?>
                         </div>
                     </div>
 
                     <!-- Modal Filter -->
                     <div class="modal fade" id="ModalFilter" role="dialog">
+                     <div class="modal-dialog modal-large" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
                         <div class="modal-dialog modals-default">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -102,6 +105,7 @@
                             </div>
                         </div>
                     </div>
+                    </div>
 
                     <div class="table-responsive">
                         <table id="data-table-basic" class="table table-striped" style="table-layout: fixed;">
@@ -119,6 +123,7 @@
                                     <th width="8%" class="text-center">Target <br><small>Tahun 4</small></th>
                                     <th width="8%" class="text-center">Target <br><small>Tahun 5</small></th>
                                     <th width="10%" class="text-center">Aksi</th>
+                                
                                 </tr>
                             </thead>
                             <tbody>
@@ -130,6 +135,7 @@
                                     <td style="vertical-align: top;">
                                         <div style="display: flex; flex-direction: column; height: 100%;">
                                             <div style="display: flex; justify-content: center; gap: 5px; margin-bottom: 5px;">
+                                     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                                                 <button class="btn btn-sm btn-success TambahLokasi" 
                                                         title="Tambah Lokasi"
                                                         data-id="<?= $key['Id'] ?>"
@@ -138,6 +144,7 @@
                                                         style="width: 30px; height: 30px; padding: 0;">
                                                     <i class="fa fa-plus"></i>
                                                 </button>
+                                        <?php } ?>
                                                 <?php if (!empty($key['NamaProvinsi']) && $key['NamaProvinsi'] != '-'): ?>
                                                 <button class="btn btn-sm btn-info DetailLokasi" 
                                                         title="Detail Lokasi"
@@ -182,6 +189,7 @@
                                     <td style="vertical-align: middle;" class="text-center"><?= $key['TargetTahun5'] ?? '-' ?></td>
                                     <td style="vertical-align: middle;">
                                         <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
+                                     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                                             <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" 
                                                     data-id="<?= $key['Id'] ?>"
                                                     data-kementerian="<?= $key['IdKementerian'] ?>"
@@ -203,6 +211,7 @@
                                                     style="width: 36px; height: 36px; padding: 0; border-radius: 50%;">
                                                 <i class="notika-icon notika-trash"></i>
                                             </button>
+                                        <?php } ?>
                                         </div>
                                     </td>
                                 </tr>
@@ -218,7 +227,8 @@
 
 <!-- Modal Input Program Strategis -->
 <div class="modal fade" id="ModalInputProgram" role="dialog">
-    <div class="modal-dialog modals-default">
+                     <div class="modal-dialog modal-large" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
+    <div class="modal-dialog modals-default"><Style></Style>
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">×</button>
@@ -332,9 +342,11 @@
         </div>
     </div>
 </div>
+</div>
 
 <!-- Modal Edit Program Strategis -->
 <div class="modal fade" id="ModalEditProgram" role="dialog">
+                     <div class="modal-dialog modal-large" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
     <div class="modal-dialog modal-large">
         <div class="modal-content">
             <div class="modal-header">
@@ -428,9 +440,11 @@
         </div>
     </div>
 </div>
+</div>
 
 <!-- Modal Tambah/Edit Lokasi -->
 <div class="modal fade" id="ModalTambahLokasi" role="dialog">
+                     <div class="modal-dialog modal-large" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
     <div class="modal-dialog modals-default">
         <div class="modal-content">
             <div class="modal-header">
@@ -454,9 +468,11 @@
         </div>
     </div>
 </div>
+</div>
 
 <!-- Modal Detail Lokasi -->
 <div class="modal fade" id="ModalDetailLokasi" role="dialog">
+                     <div class="modal-dialog modal-large" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
     <div class="modal-dialog modals-default">
         <div class="modal-content">
             <div class="modal-header">
@@ -475,6 +491,7 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 
 <!-- Scripts -->

@@ -38,14 +38,17 @@
                                     <span class="badge" style="background-color: #f44336; margin-left: 5px;">Filter Aktif</span>
                                 <?php endif; ?>
                             </button>
+                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                             <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputIsuStrategis">
                                 <i class="notika-icon notika-edit"></i> <b>Input Isu Strategis</b>
                             </button>
+                            <?php } ?>
                         </div>
                     </div>
 
                     <!-- Modal Filter -->
                     <div class="modal fade" id="ModalFilter" role="dialog">
+                     <div class="modal-dialog modal-large" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
                         <div class="modal-dialog modals-default">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -101,7 +104,9 @@
                                 </div>
                             </div>
                         </div>
+                        </div>
                     </div>
+                    
 
                     <!-- Tabel Data Isu Strategis -->
                     <div class="table-responsive">
@@ -116,7 +121,9 @@
                                     <th width="15%">Isu Global</th>
                                     <th width="15%">Isu Nasional</th>
                                     <th width="10%">Periode</th>
+                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                                     <th width="10%">Aksi</th>
+                                    <?php } ?>
                                 </tr>
                             </thead>
                             <tbody>
@@ -128,6 +135,7 @@
                                     <td style="vertical-align: top;">
                                         <div style="display: flex; flex-direction: column; height: 100%;">
                                             <div style="display: flex; justify-content: center; gap: 5px; margin-bottom: 5px;">
+                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                                                 <button class="btn btn-sm btn-success TambahPermasalahan" 
                                                         title="Tambah Permasalahan Pokok"
                                                         data-id="<?= $key['Id'] ?>"
@@ -136,7 +144,9 @@
                                                         style="width: 30px; height: 30px; padding: 0;">
                                                     <i class="fa fa-plus"></i>
                                                 </button>
+                                                <?php } ?>
                                                 <?php if (!empty($key['NamaPermasalahanPokok'])): ?>
+                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                                                 <button class="btn btn-sm btn-info DetailPermasalahan" 
                                                         title="Detail Permasalahan Pokok"
                                                         data-id="<?= $key['Id'] ?>"
@@ -146,6 +156,7 @@
                                                         style="width: 30px; height: 30px; padding: 0;">
                                                     <i class="fa fa-eye"></i>
                                                 </button>
+                                                <?php } ?>
                                                 <?php endif; ?>
                                             </div>
                                             <div style="flex-grow: 1; overflow: auto; text-align: start;">
@@ -161,6 +172,7 @@
                                     <td style="vertical-align: top;">
                                         <div style="display: flex; flex-direction: column; height: 100%;">
                                             <div style="display: flex; justify-content: center; gap: 5px; margin-bottom: 5px;">
+                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                                                 <button class="btn btn-sm btn-success TambahKLHS" 
                                                         title="Tambah Isu KLHS"
                                                         data-id="<?= $key['Id'] ?>"
@@ -169,7 +181,9 @@
                                                         style="width: 30px; height: 30px; padding: 0;">
                                                     <i class="fa fa-plus"></i>
                                                 </button>
+                                                <?php } ?>
                                                 <?php if (!empty($key['NamaIsuKLHS'])): ?>
+                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                                                 <button class="btn btn-sm btn-info DetailKLHS" 
                                                         title="Detail Isu KLHS"
                                                         data-id="<?= $key['Id'] ?>"
@@ -179,6 +193,7 @@
                                                         style="width: 30px; height: 30px; padding: 0;">
                                                     <i class="fa fa-eye"></i>
                                                 </button>
+                                                <?php } ?>
                                                 <?php endif; ?>
                                             </div>
                                             <div style="flex-grow: 1; overflow: auto; text-align: start;">
@@ -194,6 +209,7 @@
                                     <td style="vertical-align: top;">
                                         <div style="display: flex; flex-direction: column; height: 100%;">
                                             <div style="display: flex; justify-content: center; gap: 5px; margin-bottom: 5px;">
+                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                                                 <button class="btn btn-sm btn-success TambahGlobal" 
                                                         title="Tambah Isu Global"
                                                         data-id="<?= $key['Id'] ?>"
@@ -202,7 +218,9 @@
                                                         style="width: 30px; height: 30px; padding: 0;">
                                                     <i class="fa fa-plus"></i>
                                                 </button>
+                                                <?php } ?>
                                                 <?php if (!empty($key['NamaIsuGlobal'])): ?>
+                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                                                 <button class="btn btn-sm btn-info DetailGlobal" 
                                                         title="Detail Isu Global"
                                                         data-id="<?= $key['Id'] ?>"
@@ -212,7 +230,9 @@
                                                         style="width: 30px; height: 30px; padding: 0;">
                                                     <i class="fa fa-eye"></i>
                                                 </button>
+                                                <?php } ?>
                                                 <?php endif; ?>
+                                                
                                             </div>
                                             <div style="flex-grow: 1; overflow: auto; text-align: start;">
                                                 <?php if (!empty($key['NamaIsuGlobal'])): ?>
@@ -227,6 +247,7 @@
                                     <td style="vertical-align: top;">
                                         <div style="display: flex; flex-direction: column; height: 100%;">
                                             <div style="display: flex; justify-content: center; gap: 5px; margin-bottom: 5px;">
+                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                                                 <button class="btn btn-sm btn-success TambahNasional" 
                                                         title="Tambah Isu Nasional"
                                                         data-id="<?= $key['Id'] ?>"
@@ -235,7 +256,9 @@
                                                         style="width: 30px; height: 30px; padding: 0;">
                                                     <i class="fa fa-plus"></i>
                                                 </button>
+                                                <?php } ?>
                                                 <?php if (!empty($key['NamaIsuNasional'])): ?>
+                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                                                 <button class="btn btn-sm btn-info DetailNasional" 
                                                         title="Detail Isu Nasional"
                                                         data-id="<?= $key['Id'] ?>"
@@ -245,6 +268,7 @@
                                                         style="width: 30px; height: 30px; padding: 0;">
                                                     <i class="fa fa-eye"></i>
                                                 </button>
+                                                <?php } ?>
                                                 <?php endif; ?>
                                             </div>
                                             <div style="flex-grow: 1; overflow: auto; text-align: start;">

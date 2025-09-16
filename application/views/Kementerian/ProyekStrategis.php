@@ -38,14 +38,17 @@
                                     <span class="badge" style="background-color: #f44336; margin-left: 5px;">Filter Aktif</span>
                                 <?php endif; ?>
                             </button>
+                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                             <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputProyek">
                                 <i class="notika-icon notika-edit"></i> <b>Input Proyek Strategis</b>
                             </button>
+                                    <?php } ?>
                         </div>
                     </div>
 
                     <!-- Modal Filter -->
                     <div class="modal fade" id="ModalFilter" role="dialog">
+                     <div class="modal-dialog modal-large" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
                         <div class="modal-dialog modals-default">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -100,6 +103,7 @@
                             </div>
                         </div>
                     </div>
+                    </div>
 
                     <div class="table-responsive">
                         <table id="data-table-basic" class="table table-striped">
@@ -117,7 +121,9 @@
                                     <th class="text-center">Target <br><small>Tahun 3</small></th>
                                     <th class="text-center">Target <br><small>Tahun 4</small></th>
                                     <th class="text-center">Target <br><small>Tahun 5</small></th>
+                                     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                                     <th>Aksi</th>
+                                    <?php } ?>
                                 </tr>
                             </thead>
                             <tbody>
@@ -135,6 +141,7 @@
                                     <td class="text-center"><?= $key['TargetTahun3'] ?? '-' ?></td>
                                     <td class="text-center"><?= $key['TargetTahun4'] ?? '-' ?></td>
                                     <td class="text-center"><?= $key['TargetTahun5'] ?? '-' ?></td>
+                                     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                                     <td>
                                         <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
                                             <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" 
@@ -158,6 +165,7 @@
                                                 <i class="notika-icon notika-trash"></i>
                                             </button>
                                         </div>
+                                    <?php } ?>
                                     </td>
                                 </tr>
                                 <?php } ?>
@@ -172,6 +180,7 @@
 
 <!-- Modal Input Proyek Strategis -->
 <div class="modal fade" id="ModalInputProyek" role="dialog">
+                     <div class="modal-dialog modal-large" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
     <div class="modal-dialog modals-default">
         <div class="modal-content">
             <div class="modal-header">
@@ -252,9 +261,11 @@
         </div>
     </div>
 </div>
+</div>
 
 <!-- Modal Edit Proyek Strategis -->
 <div class="modal fade" id="ModalEditProyek" role="dialog">
+                     <div class="modal-dialog modal-large" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
     <div class="modal-dialog modal-large">
         <div class="modal-content">
             <div class="modal-header">
@@ -338,6 +349,7 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 
 <!-- Scripts -->
