@@ -302,6 +302,18 @@
                         <br>
                     </div>
                 </div>
+
+                <div class="sidebar-dropdown">
+                    <a href="#">
+                        <i class="menu-icon fa fa-exclamation-triangle"></i>
+                        <span>Sasaran Strategis </span>
+                        <i class="fa fa-chevron-down"></i>
+                    </a>
+                    <div class="sidebar-submenu">
+                        <a href="<?=base_url('Kementerian/SasaranStrategis')?>">Sasaran Strategis</a>
+                        <br>
+                    </div>
+                </div>
             </ul>
         </div>
     </div>

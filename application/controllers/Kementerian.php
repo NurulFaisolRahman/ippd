@@ -1381,5 +1381,96 @@ public function DeleteIsuNasional() {
   echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
 }
 
+public function SasaranStrategis() {
+    $Header['Halaman'] = 'Kementerian';
+    
+    // Get filter parameters
+    $periodeFilter = $this->input->get('periode');
+    $kementerianFilter = $this->input->get('kementerian');
+    
+    // Query SasaranStrategis with filters
+    $this->db->select('ss.*, k.NamaKementerian');
+    $this->db->from('sasaran_strategis ss');
+    $this->db->join('kementerian k', 'ss.IdKementerian = k.Id', 'left');
+    $this->db->where('ss.deleted_at IS NULL');
+    
+    if ($periodeFilter) {
+        list($tahunMulai, $tahunAkhir) = explode('|', $periodeFilter);
+        $this->db->where('ss.TahunMulai', $tahunMulai);
+        $this->db->where('ss.TahunAkhir', $tahunAkhir);
+    }
+    
+    if ($kementerianFilter) {
+        $this->db->where('ss.IdKementerian', $kementerianFilter);
+    }
+    
+    $Data['SasaranStrategis'] = $this->db->get()->result_array();
+    
+    // Get all unique periods
+    $Data['AllPeriode'] = $this->db->query("
+        SELECT DISTINCT TahunMulai, TahunAkhir 
+        FROM kementerian 
+        WHERE deleted_at IS NULL
+        ORDER BY TahunMulai DESC
+    ")->result_array();
+    
+    // Get ministries based on period filter
+    if ($periodeFilter) {
+        list($tahunMulai, $tahunAkhir) = explode('|', $periodeFilter);
+        $Data['Kementerian'] = $this->db->get_where('kementerian', [
+            'TahunMulai' => $tahunMulai,
+            'TahunAkhir' => $tahunAkhir,
+            'deleted_at' => NULL
+        ])->result_array();
+    } else {
+        $Data['Kementerian'] = [];
+    }
+    
+    // Store current filters
+    $Data['CurrentPeriode'] = $periodeFilter;
+    $Data['CurrentKementerian'] = $kementerianFilter;
+    
+    $this->load->view('Kementerian/header', $Header);
+    $this->load->view('Kementerian/SasaranStrategis', $Data);
+}
+
+public function InputSasaranStrategis() {
+    if (!$this->input->post('IdKementerian') || !$this->input->post('TahunMulai') || !$this->input->post('TahunAkhir')) {
+        echo 'Periode dan Kementerian harus dipilih di filter!';
+        return;
+    }
+
+    $data = [
+        'IdKementerian' => $this->input->post('IdKementerian'),
+        'SasaranStrategis' => $this->input->post('SasaranStrategis'),
+        'IndikatorSasaranStrategis' => $this->input->post('IndikatorSasaranStrategis'),
+        'TahunMulai' => $this->input->post('TahunMulai'),
+        'TahunAkhir' => $this->input->post('TahunAkhir'),
+        'created_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->insert('sasaran_strategis', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Input Data!';
+}
+
+public function UpdateSasaranStrategis() {
+    $data = [
+        'SasaranStrategis' => $this->input->post('SasaranStrategis'),
+        'IndikatorSasaranStrategis' => $this->input->post('IndikatorSasaranStrategis'),
+        'edited_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->where('Id', $this->input->post('Id'));
+    $this->db->update('sasaran_strategis', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Update Data!';
+}
+
+public function DeleteSasaranStrategis() {
+    $data = ['deleted_at' => date('Y-m-d H:i:s')];
+    $this->db->where('Id', $this->input->post('Id'));
+    $this->db->update('sasaran_strategis', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
+}
+
 }
 
