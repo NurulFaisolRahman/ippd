@@ -1465,6 +1465,56 @@ public function EditPDIKD() {
   }
 }
 
+public function PotensiDaerah() {
+    $Header['Halaman'] = 'PotensiDaerah';
+    
+    // Ambil daftar provinsi untuk filter
+    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
+
+    // Tentukan KodeWilayah
+    $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                   (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+
+    log_message('debug', 'KodeWilayah diterima: ' . $KodeWilayah);
+
+    if ($KodeWilayah) {
+        $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+        if ($wilayah) {
+            $Data['KodeWilayah'] = $KodeWilayah;
+            $Data['NamaWilayah'] = $wilayah['Nama'];
+            
+            // Ambil data Potensi Daerah berdasarkan KodeWilayah
+            $Data['PotensiDaerah'] = $this->db->select('p.*, k.Nama')
+                ->from('potensidaerah p')
+                ->join('kodewilayah k', 'p.KodeWilayah = k.Kode', 'left')
+                ->where('p.KodeWilayah', $KodeWilayah)
+                ->where('p.deleted_at IS NULL')
+                ->get()->result_array();
+                
+            // Ambil periode dari RPJMD
+            $Data['Periods'] = $this->db->select('TahunMulai, TahunAkhir')
+                ->where('KodeWilayah', $KodeWilayah)
+                ->where('deleted_at IS NULL')
+                ->get('visirpjmd')
+                ->result_array();
+        } else {
+            $Data['KodeWilayah'] = '';
+            $Data['NamaWilayah'] = '';
+            $Data['PotensiDaerah'] = [];
+            $Data['Periods'] = [];
+            log_message('error', 'KodeWilayah ' . $KodeWilayah . ' tidak ditemukan di tabel kodewilayah');
+        }
+    } else {
+        $Data['KodeWilayah'] = '';
+        $Data['NamaWilayah'] = '';
+        $Data['PotensiDaerah'] = [];
+        $Data['Periods'] = [];
+    }
+
+    $this->load->view('Daerah/header', $Header);
+    $this->load->view('Daerah/PotensiDaerah', $Data);
+}
+
 public function GetKementerian(){
   echo json_encode($this->db->query("SELECT * FROM kementerian WHERE TahunMulai = ".$_POST['TahunMulai']." AND deleted_at IS NULL")->result_array());
 }
@@ -1723,6 +1773,11 @@ public function IsuStrategisDaerah() {
 			ORDER BY TahunMulai
 		", array($KodeWilayah));
 		$Data['Periods'] = $query->result_array();
+
+    $Data['PotensiDaerah'] = $this->db->query("
+        SELECT * FROM potensidaerah 
+        WHERE KodeWilayah = ? AND deleted_at IS NULL
+    ", array($KodeWilayah))->result_array();
 		
 		// Ambil data Isu Strategis
 		$query = $this->db->query("
@@ -1896,6 +1951,68 @@ public function EditIsuKLHSIsuStrategis() {
       log_message('error', 'Error editing Isu KLHS: ' . $e->getMessage());
       echo $e->getMessage();
   }
+}
+
+public function TambahPotensiDaerahIsuStrategis() {
+    try {
+        $id = $this->input->post('id', TRUE);
+        $potensiDaerah = $this->input->post('potensi_daerah', TRUE);
+
+        if (empty($id) || !is_numeric($id)) {
+            throw new Exception('ID tidak valid');
+        }
+        if (empty($potensiDaerah)) {
+            throw new Exception('Potensi Daerah harus diisi');
+        }
+
+        // Get existing data
+        $existing = $this->db->where('Id', $id)->get('IsuStrategisDaerah')->row_array();
+        if (!$existing) {
+            throw new Exception('Data Isu Strategis tidak ditemukan');
+        }
+
+        // Combine with existing Potensi Daerah
+        $existingPotensi = !empty($existing['potensi_daerah']) ? explode(',', $existing['potensi_daerah']) : [];
+        $newPotensi = explode(',', $potensiDaerah);
+        $combinedPotensi = array_unique(array_merge($existingPotensi, $newPotensi));
+        $updateData = [
+            'potensi_daerah' => implode(',', $combinedPotensi),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        $this->db->where('Id', $id)->update('IsuStrategisDaerah', $updateData);
+        echo $this->db->affected_rows() ? '1' : 'Tidak ada perubahan';
+    } catch (Exception $e) {
+        log_message('error', 'Error adding Potensi Daerah: ' . $e->getMessage());
+        echo $e->getMessage();
+    }
+}
+
+public function EditPotensiDaerahIsuStrategis() {
+    try {
+        $id = $this->input->post('id', TRUE);
+        $potensiDaerah = $this->input->post('potensi_daerah', TRUE);
+
+        if (empty($id) || !is_numeric($id)) {
+            throw new Exception('ID tidak valid');
+        }
+
+        $existing = $this->db->where('Id', $id)->get('IsuStrategisDaerah')->row_array();
+        if (!$existing) {
+            throw new Exception('Data Isu Strategis tidak ditemukan');
+        }
+
+        $updateData = [
+            'potensi_daerah' => $potensiDaerah,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        $this->db->where('Id', $id)->update('IsuStrategisDaerah', $updateData);
+        echo $this->db->affected_rows() ? '1' : 'Gagal Update Data';
+    } catch (Exception $e) {
+        log_message('error', 'Error editing Potensi Daerah: ' . $e->getMessage());
+        echo $e->getMessage();
+    }
 }
 
 public function InputIsuStrategis() {
