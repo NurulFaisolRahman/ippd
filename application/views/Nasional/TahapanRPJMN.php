@@ -189,7 +189,7 @@
                 if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"Super/GetVisiRPJMN", {Id : $("#Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/GetVisiRPJMN", {Id : $("#Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Visi = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -204,7 +204,7 @@
                 if ($("#_Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"Super/GetVisiRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/GetVisiRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Visi = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -223,9 +223,9 @@
                 } else {
                     var Tahapan = { _Id   : $("#IdVisi").val(),
                                  Tahapan   : $("#Tahapan").val() }
-                    $.post(BaseURL+"Super/InputTahapanRPJMN", Tahapan).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/InputTahapanRPJMN", Tahapan).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Super/TahapanRPJMN"
+                            window.location = BaseURL+"Nasional/TahapanRPJMN"
                         } else {
                             alert(Respon)
                         }
@@ -238,7 +238,7 @@
                 var Pisah = Data.split("|");
                 $("#Id").val(Pisah[0])
                 $("#_Periode").val(Pisah[1])
-                $.post(BaseURL+"Super/GetVisiRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
+                $.post(BaseURL+"Nasional/GetVisiRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
                     var Data = JSON.parse(Respon)
                     var Visi = ''
                     for (let i = 0; i < Data.length; i++) {
@@ -260,9 +260,9 @@
                     var Tahapan = { Id   : $("#Id").val(),
                                  _Id   : $("#_IdVisi").val(),
                                  Tahapan   : $("#_Tahapan").val() }
-                    $.post(BaseURL+"Super/EditTahapanRPJMN", Tahapan).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/EditTahapanRPJMN", Tahapan).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Super/TahapanRPJMN"
+                            window.location = BaseURL+"Nasional/TahapanRPJMN"
                         } else {
                             alert(Respon)
                         }
@@ -272,9 +272,9 @@
 
             $('#data-table-basic tbody').on('click', '.Hapus', function () {
                 var Tahapan = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"Super/HapusTahapanRPJMN", Tahapan).done(function(Respon) {
+                $.post(BaseURL+"Nasional/HapusTahapanRPJMN", Tahapan).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Super/TahapanRPJMN"
+                        window.location = BaseURL+"Nasional/TahapanRPJMN"
                     } else {
                         alert(Respon)
                     }

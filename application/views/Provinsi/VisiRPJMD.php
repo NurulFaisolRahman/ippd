@@ -228,9 +228,9 @@
                                  KodeWilayah : $("#Provinsi").val(),
                                  TahunMulai : $("#TahunMulai").val(),
                                  TahunAkhir : $("#TahunAkhir").val() }
-                    $.post(BaseURL+"Super/InputVisiRPJMD", Visi).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/InputVisiRPJMD", Visi).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Super/VisiRPJMD"
+                            window.location = BaseURL+"Provinsi/VisiRPJMD"
                         } else {
                             alert(Respon)
                         }
@@ -264,9 +264,9 @@
                                  KodeWilayah : $("#_Provinsi").val(),
                                  TahunMulai : $("#_TahunMulai").val(),
                                  TahunAkhir : $("#_TahunAkhir").val() }
-                    $.post(BaseURL+"Super/EditVisiRPJMD", Visi).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/EditVisiRPJMD", Visi).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Super/VisiRPJMD"
+                            window.location = BaseURL+"Provinsi/VisiRPJMD"
                         } else {
                             alert(Respon)
                         }
@@ -276,9 +276,9 @@
 
             $('#data-table-basic tbody').on('click', '.Hapus', function () {
                 var Visi = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"Super/HapusVisiRPJMD", Visi).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/HapusVisiRPJMD", Visi).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Super/VisiRPJMD"
+                        window.location = BaseURL+"Provinsi/VisiRPJMD"
                     } else {
                         alert(Respon)
                     }

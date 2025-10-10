@@ -278,7 +278,7 @@
                 if ($("#Provinsi").val() == "") {
                     alert("Mohon Input Provinsi")
                 } else {
-                    $.post(BaseURL+"Super/GetProvinsiRPJPD", {Id : $("#Provinsi").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/GetProvinsiRPJPD", {Id : $("#Provinsi").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Periode = '<option value="">Pilih Periode</option>'
                         if (Data.length > 0) {
@@ -298,7 +298,7 @@
                 if ($("#_Provinsi").val() == "") {
                     alert("Mohon Input Provinsi")
                 } else {
-                    $.post(BaseURL+"Super/GetProvinsiRPJPD", {Id : $("#_Provinsi").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/GetProvinsiRPJPD", {Id : $("#_Provinsi").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Periode = '<option value="">Pilih Periode</option>'
                         if (Data.length > 0) {
@@ -318,7 +318,7 @@
                 if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"Super/GetVisiRPJPD", {Id : $("#Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/GetVisiRPJPD", {Id : $("#Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Visi = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -333,7 +333,7 @@
                 if ($("#_Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"Super/GetVisiRPJPD", {Id : $("#_Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/GetVisiRPJPD", {Id : $("#_Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Visi = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -364,9 +364,9 @@
                                 Baseline   : $("#Baseline").val(),
                                 TargetAwal   : $("#TargetAwal").val(),
                                 TargetAkhir   : $("#TargetAkhir").val() }
-                    $.post(BaseURL+"Super/InputIUPRPJPD", IUP).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/InputIUPRPJPD", IUP).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Super/IUPRPJPD"
+                            window.location = BaseURL+"Provinsi/IUPRPJPD"
                         } else {
                             alert(Respon)
                         }
@@ -379,7 +379,7 @@
                 var Pisah = Data.split("|");
                 $("#Id").val(Pisah[0])
                 $("#_Provinsi").val(Pisah[6])
-                $.post(BaseURL+"Super/GetProvinsiRPJPD", {Id : $("#_Provinsi").val()}).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/GetProvinsiRPJPD", {Id : $("#_Provinsi").val()}).done(function(Respon) {
                     var Data = JSON.parse(Respon)
                     var Periode = ''
                     for (let i = 0; i < Data.length; i++) {
@@ -388,7 +388,7 @@
                     }
                     $("#_Periode").html(Periode)   
                     $("#_Periode").val(Pisah[1])
-                    $.post(BaseURL+"Super/GetVisiRPJPD", {Id : $("#_Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/GetVisiRPJPD", {Id : $("#_Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Visi = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -426,9 +426,9 @@
                                 Baseline   : $("#_Baseline").val(),
                                 TargetAwal   : $("#_TargetAwal").val(),
                                 TargetAkhir   : $("#_TargetAkhir").val() }
-                    $.post(BaseURL+"Super/EditIUPRPJPD", IUP).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/EditIUPRPJPD", IUP).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Super/IUPRPJPD"
+                            window.location = BaseURL+"Provinsi/IUPRPJPD"
                         } else {
                             alert(Respon)
                         }
@@ -438,9 +438,9 @@
 
             $('#data-table-basic tbody').on('click', '.Hapus', function () {
                 var IUP = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"Super/HapusIUPRPJPD", IUP).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/HapusIUPRPJPD", IUP).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Super/IUPRPJPD"
+                        window.location = BaseURL+"Provinsi/IUPRPJPD"
                     } else {
                         alert(Respon)
                     }

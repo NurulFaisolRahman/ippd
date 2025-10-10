@@ -212,7 +212,7 @@
                 if ($("#Provinsi").val() == "") {
                     alert("Mohon Input Provinsi")
                 } else {
-                    $.post(BaseURL+"Super/GetProvinsiRPJMD", {Id : $("#Provinsi").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/GetProvinsiRPJMD", {Id : $("#Provinsi").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Periode = '<option value="">Pilih Periode</option>'
                         if (Data.length > 0) {
@@ -232,7 +232,7 @@
                 if ($("#_Provinsi").val() == "") {
                     alert("Mohon Input Provinsi")
                 } else {
-                    $.post(BaseURL+"Super/GetProvinsiRPJMD", {Id : $("#_Provinsi").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/GetProvinsiRPJMD", {Id : $("#_Provinsi").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Periode = '<option value="">Pilih Periode</option>'
                         if (Data.length > 0) {
@@ -252,7 +252,7 @@
                 if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"Super/GetMisiRPJMD", {Id : $("#Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/GetMisiRPJMD", {Id : $("#Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Misi = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -267,7 +267,7 @@
                 if ($("#_Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"Super/GetMisiRPJMD", {Id : $("#_Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/GetMisiRPJMD", {Id : $("#_Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Misi = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -289,9 +289,9 @@
                     var Tujuan = { _Id   : $("#IdMisi").val(),
                                  KodeWilayah : $("#Provinsi").val(),
                                  Tujuan   : $("#Tujuan").val() }
-                    $.post(BaseURL+"Super/InputTujuanRPJMD", Tujuan).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/InputTujuanRPJMD", Tujuan).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Super/TujuanRPJMD"
+                            window.location = BaseURL+"Provinsi/TujuanRPJMD"
                         } else {
                             alert(Respon)
                         }
@@ -305,7 +305,7 @@
                 $("#Id").val(Pisah[0])
                 $("#_Provinsi").val(Pisah[3])
                 $("#_Tujuan").val(Pisah[2])
-                $.post(BaseURL+"Super/GetProvinsiRPJMD", {Id : $("#_Provinsi").val()}).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/GetProvinsiRPJMD", {Id : $("#_Provinsi").val()}).done(function(Respon) {
                     var Data = JSON.parse(Respon)
                     var Periode = ''
                     for (let i = 0; i < Data.length; i++) {
@@ -314,7 +314,7 @@
                     }
                     $("#_Periode").html(Periode)   
                     $("#_Periode").val(Pisah[1])
-                    $.post(BaseURL+"Super/GetMisiRPJMD", {Id : $("#_Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/GetMisiRPJMD", {Id : $("#_Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Misi = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -339,9 +339,9 @@
                                  _Id   : $("#_IdMisi").val(),
                                  KodeWilayah : $("#_Provinsi").val(),
                                  Tujuan   : $("#_Tujuan").val() }
-                    $.post(BaseURL+"Super/EditTujuanRPJMD", Tujuan).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/EditTujuanRPJMD", Tujuan).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Super/TujuanRPJMD"
+                            window.location = BaseURL+"Provinsi/TujuanRPJMD"
                         } else {
                             alert(Respon)
                         }
@@ -351,9 +351,9 @@
 
             $('#data-table-basic tbody').on('click', '.Hapus', function () {
                 var Tujuan = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"Super/HapusTujuanRPJMD", Tujuan).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/HapusTujuanRPJMD", Tujuan).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Super/TujuanRPJMD"
+                        window.location = BaseURL+"Provinsi/TujuanRPJMD"
                     } else {
                         alert(Respon)
                     }

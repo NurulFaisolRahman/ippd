@@ -185,9 +185,9 @@
                     var Visi = { Visi       : $("#Visi").val(),
                                  TahunMulai : $("#TahunMulai").val(),
                                  TahunAkhir : $("#TahunAkhir").val() }
-                    $.post(BaseURL+"Super/InputVisiRPJMN", Visi).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/InputVisiRPJMN", Visi).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Super/VisiRPJMN"
+                            window.location = BaseURL+"Nasional/VisiRPJMN"
                         } else {
                             alert(Respon)
                         }
@@ -217,9 +217,9 @@
                                  Visi       : $("#_Visi").val(),
                                  TahunMulai : $("#_TahunMulai").val(),
                                  TahunAkhir : $("#_TahunAkhir").val() }
-                    $.post(BaseURL+"Super/EditVisiRPJMN", Visi).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/EditVisiRPJMN", Visi).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Super/VisiRPJMN"
+                            window.location = BaseURL+"Nasional/VisiRPJMN"
                         } else {
                             alert(Respon)
                         }
@@ -229,9 +229,9 @@
 
             $('#data-table-basic tbody').on('click', '.Hapus', function () {
                 var Visi = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"Super/HapusVisiRPJMN", Visi).done(function(Respon) {
+                $.post(BaseURL+"Nasional/HapusVisiRPJMN", Visi).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Super/VisiRPJMN"
+                        window.location = BaseURL+"Nasional/VisiRPJMN"
                     } else {
                         alert(Respon)
                     }

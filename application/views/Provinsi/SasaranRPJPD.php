@@ -212,7 +212,7 @@
                 if ($("#Provinsi").val() == "") {
                     alert("Mohon Input Provinsi")
                 } else {
-                    $.post(BaseURL+"Super/GetProvinsiRPJPD", {Id : $("#Provinsi").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/GetProvinsiRPJPD", {Id : $("#Provinsi").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Periode = '<option value="">Pilih Periode</option>'
                         if (Data.length > 0) {
@@ -232,7 +232,7 @@
                 if ($("#_Provinsi").val() == "") {
                     alert("Mohon Input Provinsi")
                 } else {
-                    $.post(BaseURL+"Super/GetProvinsiRPJPD", {Id : $("#_Provinsi").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/GetProvinsiRPJPD", {Id : $("#_Provinsi").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Periode = '<option value="">Pilih Periode</option>'
                         if (Data.length > 0) {
@@ -252,7 +252,7 @@
                 if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"Super/GetTujuanRPJPD", {Id : $("#Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/GetTujuanRPJPD", {Id : $("#Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Tujuan = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -267,7 +267,7 @@
                 if ($("#_Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"Super/GetTujuanRPJPD", {Id : $("#_Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/GetTujuanRPJPD", {Id : $("#_Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Tujuan = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -289,9 +289,9 @@
                     var Sasaran = { _Id   : $("#IdTujuan").val(),
                                  KodeWilayah : $("#Provinsi").val(),
                                  Sasaran   : $("#Sasaran").val() }
-                    $.post(BaseURL+"Super/InputSasaranRPJPD", Sasaran).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/InputSasaranRPJPD", Sasaran).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Super/SasaranRPJPD"
+                            window.location = BaseURL+"Provinsi/SasaranRPJPD"
                         } else {
                             alert(Respon)
                         }
@@ -305,7 +305,7 @@
                 $("#Id").val(Pisah[0])
                 $("#_Provinsi").val(Pisah[3])
                 $("#_Sasaran").val(Pisah[2])
-                $.post(BaseURL+"Super/GetProvinsiRPJPD", {Id : $("#_Provinsi").val()}).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/GetProvinsiRPJPD", {Id : $("#_Provinsi").val()}).done(function(Respon) {
                     var Data = JSON.parse(Respon)
                     var Periode = ''
                     for (let i = 0; i < Data.length; i++) {
@@ -314,7 +314,7 @@
                     }
                     $("#_Periode").html(Periode)   
                     $("#_Periode").val(Pisah[1])
-                    $.post(BaseURL+"Super/GetTujuanRPJPD", {Id : $("#_Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/GetTujuanRPJPD", {Id : $("#_Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Tujuan = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -340,9 +340,9 @@
                                  _Id   : $("#_IdTujuan").val(),
                                  KodeWilayah : $("#_Provinsi").val(),
                                  Sasaran   : $("#_Sasaran").val() }
-                    $.post(BaseURL+"Super/EditSasaranRPJPD", Sasaran).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/EditSasaranRPJPD", Sasaran).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Super/SasaranRPJPD"
+                            window.location = BaseURL+"Provinsi/SasaranRPJPD"
                         } else {
                             alert(Respon)
                         }
@@ -352,9 +352,9 @@
 
             $('#data-table-basic tbody').on('click', '.Hapus', function () {
                 var Sasaran = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"Super/HapusSasaranRPJPD", Sasaran).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/HapusSasaranRPJPD", Sasaran).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Super/SasaranRPJPD"
+                        window.location = BaseURL+"Provinsi/SasaranRPJPD"
                     } else {
                         alert(Respon)
                     }

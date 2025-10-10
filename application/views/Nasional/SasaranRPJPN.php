@@ -13,7 +13,8 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 10%;" class="text-center">No</th>
-                                        <th style="width: 70%;">Sasaran RPJPN</th>
+                                        <th style="width: 35%;">Tujuan RPJPN</th>
+                                        <th style="width: 35%;">Sasaran RPJPN</th>
                                         <th style="width: 10%;">Periode</th>
                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                         <th style="width: 10%;" class="text-center">Edit</th>
@@ -24,6 +25,7 @@
                                     <?php $No = 1; foreach ($Sasaran as $key) { ?>
                                     <tr>
                                         <td style="vertical-align: middle;" class="text-center"><?=$No++?></td>
+                                        <td style="vertical-align: middle;"><?=$key['Tujuan']?></td>
                                         <td style="vertical-align: middle;"><?=$key['Sasaran']?></td>
                                         <td style="vertical-align: middle;"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></td>
                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
@@ -189,7 +191,7 @@
                 if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"Super/GetTujuanRPJPN", {Id : $("#Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/GetTujuanRPJPN", {Id : $("#Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Tujuan = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -204,7 +206,7 @@
                 if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"Super/GetTujuanRPJPN", {Id : $("#_Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/GetTujuanRPJPN", {Id : $("#_Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Tujuan = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -223,9 +225,9 @@
                 } else {
                     var Sasaran = { _Id     : $("#IdTujuan").val(),
                                     Sasaran : $("#Sasaran").val() }
-                    $.post(BaseURL+"Super/InputSasaranRPJPN", Sasaran).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/InputSasaranRPJPN", Sasaran).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Super/SasaranRPJPN"
+                            window.location = BaseURL+"Nasional/SasaranRPJPN"
                         } else {
                             alert(Respon)
                         }
@@ -239,7 +241,7 @@
                 $("#Id").val(Pisah[0])
                 $("#_Sasaran").val(Pisah[1])
                 $("#_Periode").val(Pisah[2])
-                $.post(BaseURL+"Super/GetTujuanRPJPN", {Id : $("#_Periode").val()}).done(function(Respon) {
+                $.post(BaseURL+"Nasional/GetTujuanRPJPN", {Id : $("#_Periode").val()}).done(function(Respon) {
                     var Data = JSON.parse(Respon)
                     var Tujuan = ''
                     for (let i = 0; i < Data.length; i++) {
@@ -260,9 +262,9 @@
                     var Sasaran = { Id      : $("#Id").val(),
                                     _Id     : $("#_IdTujuan").val(),
                                     Sasaran : $("#_Sasaran").val() }
-                    $.post(BaseURL+"Super/EditSasaranRPJPN", Sasaran).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/EditSasaranRPJPN", Sasaran).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Super/SasaranRPJPN"
+                            window.location = BaseURL+"Nasional/SasaranRPJPN"
                         } else {
                             alert(Respon)
                         }
@@ -272,9 +274,9 @@
 
             $('#data-table-basic tbody').on('click', '.Hapus', function () {
                 var Sasaran = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"Super/HapusSasaranRPJPN", Sasaran).done(function(Respon) {
+                $.post(BaseURL+"Nasional/HapusSasaranRPJPN", Sasaran).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Super/SasaranRPJPN"
+                        window.location = BaseURL+"Nasional/SasaranRPJPN"
                     } else {
                         alert(Respon)
                     }

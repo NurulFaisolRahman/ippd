@@ -255,7 +255,7 @@
                 if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"Super/GetVisiRPJMN", {Id : $("#Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/GetVisiRPJMN", {Id : $("#Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Visi = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -270,7 +270,7 @@
                 if ($("#_Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"Super/GetVisiRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/GetVisiRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Visi = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -298,9 +298,9 @@
                                 Baseline   : $("#Baseline").val(),
                                 TargetAwal   : $("#TargetAwal").val(),
                                 TargetAkhir   : $("#TargetAkhir").val() }
-                    $.post(BaseURL+"Super/InputIUPRPJMN", IUP).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/InputIUPRPJMN", IUP).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Super/IUPRPJMN"
+                            window.location = BaseURL+"Nasional/IUPRPJMN"
                         } else {
                             alert(Respon)
                         }
@@ -313,7 +313,7 @@
                 var Pisah = Data.split("|");
                 $("#Id").val(Pisah[0])
                 $("#_Periode").val(Pisah[1])
-                $.post(BaseURL+"Super/GetVisiRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
+                $.post(BaseURL+"Nasional/GetVisiRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
                     var Data = JSON.parse(Respon)
                     var Visi = ''
                     for (let i = 0; i < Data.length; i++) {
@@ -347,9 +347,9 @@
                                 Baseline   : $("#_Baseline").val(),
                                 TargetAwal   : $("#_TargetAwal").val(),
                                 TargetAkhir   : $("#_TargetAkhir").val() }
-                    $.post(BaseURL+"Super/EditIUPRPJMN", IUP).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/EditIUPRPJMN", IUP).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Super/IUPRPJMN"
+                            window.location = BaseURL+"Nasional/IUPRPJMN"
                         } else {
                             alert(Respon)
                         }
@@ -359,9 +359,9 @@
 
             $('#data-table-basic tbody').on('click', '.Hapus', function () {
                 var IUP = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"Super/HapusIUPRPJMN", IUP).done(function(Respon) {
+                $.post(BaseURL+"Nasional/HapusIUPRPJMN", IUP).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Super/IUPRPJMN"
+                        window.location = BaseURL+"Nasional/IUPRPJMN"
                     } else {
                         alert(Respon)
                     }

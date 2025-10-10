@@ -563,7 +563,7 @@
         <div class="sidebar-content">
             <ul class="sidebar-menu">
                 <br>
-                <!-- RPJMD -->
+                <!-- RPJPN -->
                 <div class="sidebar-dropdown">
                     <a href="#">
                         <i class="menu-icon fa fa-line-chart"></i>
@@ -581,7 +581,7 @@
                     </div>
                 </div>
 
-                <!-- RPJPD -->
+                <!-- RPJMN -->
                 <div class="sidebar-dropdown">
                     <a href="#">
                     <i class="menu-icon fa fa-area-chart"></i>
@@ -593,8 +593,23 @@
                         <a href="<?=base_url('Nasional/MisiRPJMN')?>">Misi</a>
                         <a href="<?=base_url('Nasional/TujuanRPJMN')?>">Tujuan</a>
                         <a href="<?=base_url('Nasional/SasaranRPJMN')?>">Sasaran</a>
+                        <a href="<?=base_url('Nasional/PrioritasNasional')?>">Prioritas Nasional</a>
                         <a href="<?=base_url('Nasional/TahapanRPJMN')?>">Tahapan</a>
                         <a href="<?=base_url('Nasional/IUPRPJMN')?>">IUP RPJMN</a>
+                        <br>
+                    </div>
+                </div>
+
+                <!-- RKP -->
+                <div class="sidebar-dropdown">
+                    <a href="#">
+                    <i class="menu-icon fa fa-area-chart"></i>
+                    <span>RKP</span>
+                    <i class="fa fa-chevron-down"></i>
+                    </a>
+                    <div class="sidebar-submenu">
+                        <a href="<?=base_url('Nasional/SasaranPrioritasNasional')?>">Sasaran Prioritas Nasional</a>
+                        <a href="<?=base_url('Nasional/SasaranPembangunanDaerah')?>">Sasaran Pembangunan Daerah</a>
                         <br>
                     </div>
                 </div>

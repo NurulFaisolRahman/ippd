@@ -13,7 +13,8 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 10%;" class="text-center">No</th>
-                                        <th style="width: 70%;">Misi RPJMN</th>
+                                        <th style="width: 35%;">Visi RPJMN</th>
+                                        <th style="width: 35%;">Misi RPJMN</th>
                                         <th style="width: 10%;">Periode</th>
                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                         <th style="width: 10%;" class="text-center">Edit</th>
@@ -24,6 +25,7 @@
                                     <?php $No = 1; foreach ($Misi as $key) { ?>
                                     <tr>
                                         <td style="vertical-align: middle;" class="text-center"><?=$No++?></td>
+                                        <td style="vertical-align: middle;"><?=$key['Visi']?></td>
                                         <td style="vertical-align: middle;"><?=$key['Misi']?></td>
                                         <td style="vertical-align: middle;"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></td>
                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
@@ -190,7 +192,7 @@
                 if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"Super/GetVisiRPJMN", {Id : $("#Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/GetVisiRPJMN", {Id : $("#Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Visi = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -205,7 +207,7 @@
                 if ($("#_Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"Super/GetVisiRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/GetVisiRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Visi = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -224,9 +226,9 @@
                 } else {
                     var Misi = { _Id   : $("#IdVisi").val(),
                                  Misi   : $("#Misi").val() }
-                    $.post(BaseURL+"Super/InputMisiRPJMN", Misi).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/InputMisiRPJMN", Misi).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Super/MisiRPJMN"
+                            window.location = BaseURL+"Nasional/MisiRPJMN"
                         } else {
                             alert(Respon)
                         }
@@ -239,7 +241,7 @@
                 var Pisah = Data.split("|");
                 $("#Id").val(Pisah[0])
                 $("#_Periode").val(Pisah[1])
-                $.post(BaseURL+"Super/GetVisiRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
+                $.post(BaseURL+"Nasional/GetVisiRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
                     var Data = JSON.parse(Respon)
                     var Visi = ''
                     for (let i = 0; i < Data.length; i++) {
@@ -261,9 +263,9 @@
                     var Misi = { Id   : $("#Id").val(),
                                  _Id   : $("#_IdVisi").val(),
                                  Misi   : $("#_Misi").val() }
-                    $.post(BaseURL+"Super/EditMisiRPJMN", Misi).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/EditMisiRPJMN", Misi).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Super/MisiRPJMN"
+                            window.location = BaseURL+"Nasional/MisiRPJMN"
                         } else {
                             alert(Respon)
                         }
@@ -273,9 +275,9 @@
 
             $('#data-table-basic tbody').on('click', '.Hapus', function () {
                 var Misi = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"Super/HapusMisiRPJMN", Misi).done(function(Respon) {
+                $.post(BaseURL+"Nasional/HapusMisiRPJMN", Misi).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Super/MisiRPJMN"
+                        window.location = BaseURL+"Nasional/MisiRPJMN"
                     } else {
                         alert(Respon)
                     }

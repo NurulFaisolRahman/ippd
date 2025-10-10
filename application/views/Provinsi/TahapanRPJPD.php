@@ -212,7 +212,7 @@
                 if ($("#Provinsi").val() == "") {
                     alert("Mohon Input Provinsi")
                 } else {
-                    $.post(BaseURL+"Super/GetProvinsiRPJPD", {Id : $("#Provinsi").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/GetProvinsiRPJPD", {Id : $("#Provinsi").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Periode = '<option value="">Pilih Periode</option>'
                         if (Data.length > 0) {
@@ -232,7 +232,7 @@
                 if ($("#_Provinsi").val() == "") {
                     alert("Mohon Input Provinsi")
                 } else {
-                    $.post(BaseURL+"Super/GetProvinsiRPJPD", {Id : $("#_Provinsi").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/GetProvinsiRPJPD", {Id : $("#_Provinsi").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Periode = '<option value="">Pilih Periode</option>'
                         if (Data.length > 0) {
@@ -252,7 +252,7 @@
                 if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"Super/GetVisiRPJPD", {Id : $("#Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/GetVisiRPJPD", {Id : $("#Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Visi = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -267,7 +267,7 @@
                 if ($("#_Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"Super/GetVisiRPJPD", {Id : $("#_Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/GetVisiRPJPD", {Id : $("#_Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Visi = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -289,9 +289,9 @@
                     var Tahapan = { _Id   : $("#IdVisi").val(),
                                     KodeWilayah : $("#Provinsi").val(),
                                     Tahapan   : $("#Tahapan").val() }
-                    $.post(BaseURL+"Super/InputTahapanRPJPD", Tahapan).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/InputTahapanRPJPD", Tahapan).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Super/TahapanRPJPD"
+                            window.location = BaseURL+"Provinsi/TahapanRPJPD"
                         } else {
                             alert(Respon)
                         }
@@ -304,7 +304,7 @@
                 var Pisah = Data.split("|");
                 $("#Id").val(Pisah[0])
                 $("#_Provinsi").val(Pisah[3])
-                $.post(BaseURL+"Super/GetProvinsiRPJPD", {Id : $("#_Provinsi").val()}).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/GetProvinsiRPJPD", {Id : $("#_Provinsi").val()}).done(function(Respon) {
                     var Data = JSON.parse(Respon)
                     var Periode = ''
                     for (let i = 0; i < Data.length; i++) {
@@ -313,7 +313,7 @@
                     }
                     $("#_Periode").html(Periode)   
                     $("#_Periode").val(Pisah[1])
-                    $.post(BaseURL+"Super/GetVisiRPJPD", {Id : $("#_Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/GetVisiRPJPD", {Id : $("#_Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
                         var Visi = ''
                         for (let i = 0; i < Data.length; i++) {
@@ -339,9 +339,9 @@
                                  _Id   : $("#_IdVisi").val(),
                                  KodeWilayah : $("#_Provinsi").val(),
                                  Tahapan   : $("#_Tahapan").val() }
-                    $.post(BaseURL+"Super/EditTahapanRPJPD", Tahapan).done(function(Respon) {
+                    $.post(BaseURL+"Provinsi/EditTahapanRPJPD", Tahapan).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Super/TahapanRPJPD"
+                            window.location = BaseURL+"Provinsi/TahapanRPJPD"
                         } else {
                             alert(Respon)
                         }
@@ -351,9 +351,9 @@
 
             $('#data-table-basic tbody').on('click', '.Hapus', function () {
                 var Tahapan = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"Super/HapusTahapanRPJPD", Tahapan).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/HapusTahapanRPJPD", Tahapan).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Super/TahapanRPJPD"
+                        window.location = BaseURL+"Provinsi/TahapanRPJPD"
                     } else {
                         alert(Respon)
                     }
