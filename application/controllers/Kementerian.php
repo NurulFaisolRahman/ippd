@@ -1404,6 +1404,7 @@ public function SasaranStrategis() {
         $this->db->where('ss.IdKementerian', $kementerianFilter);
     }
     
+    $this->db->order_by('k.NamaKementerian', 'asc');
     $Data['SasaranStrategis'] = $this->db->get()->result_array();
     
     // Get all unique periods
@@ -1443,7 +1444,13 @@ public function InputSasaranStrategis() {
     $data = [
         'IdKementerian' => $this->input->post('IdKementerian'),
         'SasaranStrategis' => $this->input->post('SasaranStrategis'),
+        'NamaIndikatorStrategis' => $this->input->post('NamaIndikatorStrategis'),
         'IndikatorSasaranStrategis' => $this->input->post('IndikatorSasaranStrategis'),
+        'NilaiTahun1' => $this->input->post('NilaiTahun1'),
+        'NilaiTahun2' => $this->input->post('NilaiTahun2'),
+        'NilaiTahun3' => $this->input->post('NilaiTahun3'),
+        'NilaiTahun4' => $this->input->post('NilaiTahun4'),
+        'NilaiTahun5' => $this->input->post('NilaiTahun5'),
         'TahunMulai' => $this->input->post('TahunMulai'),
         'TahunAkhir' => $this->input->post('TahunAkhir'),
         'created_at' => date('Y-m-d H:i:s')
@@ -1456,7 +1463,13 @@ public function InputSasaranStrategis() {
 public function UpdateSasaranStrategis() {
     $data = [
         'SasaranStrategis' => $this->input->post('SasaranStrategis'),
+        'NamaIndikatorStrategis' => $this->input->post('NamaIndikatorStrategis'),
         'IndikatorSasaranStrategis' => $this->input->post('IndikatorSasaranStrategis'),
+        'NilaiTahun1' => $this->input->post('NilaiTahun1'),
+        'NilaiTahun2' => $this->input->post('NilaiTahun2'),
+        'NilaiTahun3' => $this->input->post('NilaiTahun3'),
+        'NilaiTahun4' => $this->input->post('NilaiTahun4'),
+        'NilaiTahun5' => $this->input->post('NilaiTahun5'),
         'edited_at' => date('Y-m-d H:i:s')
     ];
     
@@ -1472,5 +1485,5 @@ public function DeleteSasaranStrategis() {
     echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
 }
 
-}
 
+}

@@ -50,7 +50,7 @@
 
                         <!-- Modal Filter -->
                         <div class="modal fade" id="ModalFilter" role="dialog">
-                            <div class="modal-dialog modals-default" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
+                            <div class="modal-dialog modals-default">
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal">×</button>
@@ -112,11 +112,17 @@
                             <table id="data-table-basic" class="table table-striped">
                                 <thead>
                                     <tr>
-                                        <th style="width: 5%;" class="text-center">No</th>
-                                        <th style="width: 15%;">Kementerian</th>
-                                        <th style="width: 25%;">Sasaran Strategis</th>
-                                        <th style="width: 40%;">Indikator Sasaran Strategis</th>
-                                        <th style="width: 10%;">Periode</th>
+                                        <th style="width: 3%;" class="text-center">No</th>
+                                        <th style="width: 12%;">Kementerian</th>
+                                        <th style="width: 15%;">Sasaran Strategis</th>
+                                        <th style="width: 15%;">Nama Indikator Strategis</th>
+                                        <th style="width: 15%;">Indikator Sasaran Strategis</th>
+                                        <th style="width: 8%;" class="text-center">Tahun 1<br><small><?= !empty($SasaranStrategis) ? $SasaranStrategis[0]['TahunMulai'] : '' ?></small></th>
+                                        <th style="width: 8%;" class="text-center">Tahun 2<br><small><?= !empty($SasaranStrategis) ? $SasaranStrategis[0]['TahunMulai'] + 1 : '' ?></small></th>
+                                        <th style="width: 8%;" class="text-center">Tahun 3<br><small><?= !empty($SasaranStrategis) ? $SasaranStrategis[0]['TahunMulai'] + 2 : '' ?></small></th>
+                                        <th style="width: 8%;" class="text-center">Tahun 4<br><small><?= !empty($SasaranStrategis) ? $SasaranStrategis[0]['TahunMulai'] + 3 : '' ?></small></th>
+                                        <th style="width: 8%;" class="text-center">Tahun 5<br><small><?= !empty($SasaranStrategis) ? $SasaranStrategis[0]['TahunMulai'] + 4 : '' ?></small></th>
+                                        <th style="width: 10%;">Periode Kementerian</th>
                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                                         <th style="width: 10%;" class="text-center">Aksi</th>
                                         <?php } ?>
@@ -128,13 +134,19 @@
                                         <td style="vertical-align: middle;" class="text-center"><?= $No++ ?></td>
                                         <td style="vertical-align: middle;"><?= $key['NamaKementerian'] ?></td>
                                         <td style="vertical-align: middle;"><?= $key['SasaranStrategis'] ?></td>
+                                        <td style="vertical-align: middle;"><?= $key['NamaIndikatorStrategis'] ?></td>
                                         <td style="vertical-align: middle;"><?= $key['IndikatorSasaranStrategis'] ?></td>
+                                        <td style="vertical-align: middle;" class="text-center"><?= number_format($key['NilaiTahun1'], 2) ?></td>
+                                        <td style="vertical-align: middle;" class="text-center"><?= number_format($key['NilaiTahun2'], 2) ?></td>
+                                        <td style="vertical-align: middle;" class="text-center"><?= number_format($key['NilaiTahun3'], 2) ?></td>
+                                        <td style="vertical-align: middle;" class="text-center"><?= number_format($key['NilaiTahun4'], 2) ?></td>
+                                        <td style="vertical-align: middle;" class="text-center"><?= number_format($key['NilaiTahun5'], 2) ?></td>
                                         <td style="vertical-align: middle;"><?= $key['TahunMulai'] . ' - ' . $key['TahunAkhir'] ?></td>                                    
                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                                         <td style="vertical-align: middle;" class="text-center">
                                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
                                                 <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" 
-                                                    data-edit="<?= $key['Id'] . '|' . $key['IdKementerian'] . '|' . $key['SasaranStrategis'] . '|' . $key['IndikatorSasaranStrategis'] . '|' . $key['TahunMulai'] . '|' . $key['TahunAkhir'] ?>">
+                                                    data-edit="<?= $key['Id'] . '|' . $key['IdKementerian'] . '|' . $key['SasaranStrategis'] . '|' . $key['NamaIndikatorStrategis'] . '|' . $key['IndikatorSasaranStrategis'] . '|' . $key['NilaiTahun1'] . '|' . $key['NilaiTahun2'] . '|' . $key['NilaiTahun3'] . '|' . $key['NilaiTahun4'] . '|' . $key['NilaiTahun5'] . '|' . $key['TahunMulai'] . '|' . $key['TahunAkhir'] ?>">
                                                     <i class="notika-icon notika-edit"></i>
                                                 </button>
                                                 <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" data-hapus="<?= $key['Id'] ?>">
@@ -156,10 +168,11 @@
 
     <!-- Modal Input Sasaran Strategis -->
     <div class="modal fade" id="ModalInputSasaranStrategis" role="dialog">
-        <div class="modal-dialog modals-default" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h4 class="modal-title">Input Sasaran Strategis</h4>
                 </div>
                 <div class="modal-body">
                     <div class="row">
@@ -173,7 +186,21 @@
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <textarea class="form-control" id="SasaranStrategis" rows="3"></textarea>
+                                                    <textarea class="form-control" id="SasaranStrategis" rows="2" placeholder="Masukkan sasaran strategis..."></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-example-int form-horizental">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-lg-3">
+                                                <label class="hrzn-fm"><b>Nama Indikator Strategis</b></label>
+                                            </div>
+                                            <div class="col-lg-9">
+                                                <div class="nk-int-st">
+                                                    <input type="text" class="form-control" id="NamaIndikatorStrategis" placeholder="Masukkan nama indikator...">
                                                 </div>
                                             </div>
                                         </div>
@@ -187,17 +214,91 @@
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <textarea class="form-control" id="IndikatorSasaranStrategis" rows="3"></textarea>
+                                                    <input type="text" class="form-control" id="IndikatorSasaranStrategis" placeholder="Masukkan indikator sasaran strategis...">
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                                
+                                <!-- Nilai Per Tahun -->
+                                <div class="form-example-int form-horizental">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-lg-3">
+                                                <label class="hrzn-fm"><b>Nilai Tahun 1</b></label>
+                                            </div>
+                                            <div class="col-lg-9">
+                                                <div class="nk-int-st">
+                                                    <input type="number" step="0.01" class="form-control" id="NilaiTahun1" placeholder="0.00">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-example-int form-horizental">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-lg-3">
+                                                <label class="hrzn-fm"><b>Nilai Tahun 2</b></label>
+                                            </div>
+                                            <div class="col-lg-9">
+                                                <div class="nk-int-st">
+                                                    <input type="number" step="0.01" class="form-control" id="NilaiTahun2" placeholder="0.00">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-example-int form-horizental">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-lg-3">
+                                                <label class="hrzn-fm"><b>Nilai Tahun 3</b></label>
+                                            </div>
+                                            <div class="col-lg-9">
+                                                <div class="nk-int-st">
+                                                    <input type="number" step="0.01" class="form-control" id="NilaiTahun3" placeholder="0.00">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-example-int form-horizental">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-lg-3">
+                                                <label class="hrzn-fm"><b>Nilai Tahun 4</b></label>
+                                            </div>
+                                            <div class="col-lg-9">
+                                                <div class="nk-int-st">
+                                                    <input type="number" step="0.01" class="form-control" id="NilaiTahun4" placeholder="0.00">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-example-int form-horizental">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-lg-3">
+                                                <label class="hrzn-fm"><b>Nilai Tahun 5</b></label>
+                                            </div>
+                                            <div class="col-lg-9">
+                                                <div class="nk-int-st">
+                                                    <input type="number" step="0.01" class="form-control" id="NilaiTahun5" placeholder="0.00">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
                                 <div class="form-example-int">
                                     <div class="row">
                                         <div class="col-lg-3"></div>
                                         <div class="col-lg-9">
                                             <button class="btn btn-success notika-btn-success" id="InputSasaranStrategis"><b>SIMPAN</b></button>
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">BATAL</button>
                                         </div>
                                     </div>
                                 </div>
@@ -211,15 +312,16 @@
 
     <!-- Modal Edit Sasaran Strategis -->
     <div class="modal fade" id="ModalEditSasaranStrategis" role="dialog">
-        <div class="modal-dialog modals-default" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h4 class="modal-title">Edit Sasaran Strategis</h4>
                 </div>
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-lg-12">
-                            <div class="form-example-wrap" style="padding: 5px;">
+                            <div class="form-example-wrap">
                                 <div class="form-example-int form-horizental">
                                     <div class="form-group">
                                         <div class="row">
@@ -232,7 +334,21 @@
                                                     <input type="hidden" id="EditIdKementerian">
                                                     <input type="hidden" id="EditTahunMulai">
                                                     <input type="hidden" id="EditTahunAkhir">
-                                                    <textarea class="form-control" id="EditSasaranStrategis" rows="3"></textarea>
+                                                    <textarea class="form-control" id="EditSasaranStrategis" rows="2"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-example-int form-horizental">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-lg-3">
+                                                <label class="hrzn-fm"><b>Nama Indikator Strategis</b></label>
+                                            </div>
+                                            <div class="col-lg-9">
+                                                <div class="nk-int-st">
+                                                    <input type="text" class="form-control" id="EditNamaIndikatorStrategis">
                                                 </div>
                                             </div>
                                         </div>
@@ -246,17 +362,91 @@
                                             </div>
                                             <div class="col-lg-9">
                                                 <div class="nk-int-st">
-                                                    <textarea class="form-control" id="EditIndikatorSasaranStrategis" rows="3"></textarea>
+                                                    <input type="text" class="form-control" id="EditIndikatorSasaranStrategis">
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                                
+                                <!-- Nilai Per Tahun -->
+                                <div class="form-example-int form-horizental">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-lg-3">
+                                                <label class="hrzn-fm"><b>Nilai Tahun 1</b></label>
+                                            </div>
+                                            <div class="col-lg-9">
+                                                <div class="nk-int-st">
+                                                    <input type="number" step="0.01" class="form-control" id="EditNilaiTahun1">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-example-int form-horizental">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-lg-3">
+                                                <label class="hrzn-fm"><b>Nilai Tahun 2</b></label>
+                                            </div>
+                                            <div class="col-lg-9">
+                                                <div class="nk-int-st">
+                                                    <input type="number" step="0.01" class="form-control" id="EditNilaiTahun2">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-example-int form-horizental">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-lg-3">
+                                                <label class="hrzn-fm"><b>Nilai Tahun 3</b></label>
+                                            </div>
+                                            <div class="col-lg-9">
+                                                <div class="nk-int-st">
+                                                    <input type="number" step="0.01" class="form-control" id="EditNilaiTahun3">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-example-int form-horizental">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-lg-3">
+                                                <label class="hrzn-fm"><b>Nilai Tahun 4</b></label>
+                                            </div>
+                                            <div class="col-lg-9">
+                                                <div class="nk-int-st">
+                                                    <input type="number" step="0.01" class="form-control" id="EditNilaiTahun4">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-example-int form-horizental">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-lg-3">
+                                                <label class="hrzn-fm"><b>Nilai Tahun 5</b></label>
+                                            </div>
+                                            <div class="col-lg-9">
+                                                <div class="nk-int-st">
+                                                    <input type="number" step="0.01" class="form-control" id="EditNilaiTahun5">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
                                 <div class="form-example-int">
                                     <div class="row">
                                         <div class="col-lg-3"></div>
                                         <div class="col-lg-9">
                                             <button class="btn btn-success notika-btn-success" id="UpdateSasaranStrategis"><b>UPDATE</b></button>
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">BATAL</button>
                                         </div>
                                     </div>
                                 </div>
@@ -345,24 +535,41 @@
                     alert('Pilih Periode dan Kementerian terlebih dahulu di filter!');
                     return;
                 }
-                if ($("#SasaranStrategis").val() === "" || $("#IndikatorSasaranStrategis").val() === "") {
-                    alert('Sasaran Strategis dan Indikator harus diisi!');
+                if ($("#SasaranStrategis").val() === "" || $("#NamaIndikatorStrategis").val() === "" || $("#IndikatorSasaranStrategis").val() === "") {
+                    alert('Sasaran Strategis, Nama Indikator, dan Indikator Sasaran Strategis harus diisi!');
                     return;
                 }
-                var [TahunMulai, TahunAkhir] = CurrentPeriode.split('|');
+                
+                var periodeParts = CurrentPeriode.split('|');
+                var TahunMulai = periodeParts[0];
+                var TahunAkhir = periodeParts[1];
+                
                 var Data = {
                     IdKementerian: CurrentKementerian,
                     SasaranStrategis: $("#SasaranStrategis").val(),
+                    NamaIndikatorStrategis: $("#NamaIndikatorStrategis").val(),
                     IndikatorSasaranStrategis: $("#IndikatorSasaranStrategis").val(),
+                    NilaiTahun1: $("#NilaiTahun1").val() || 0,
+                    NilaiTahun2: $("#NilaiTahun2").val() || 0,
+                    NilaiTahun3: $("#NilaiTahun3").val() || 0,
+                    NilaiTahun4: $("#NilaiTahun4").val() || 0,
+                    NilaiTahun5: $("#NilaiTahun5").val() || 0,
                     TahunMulai: TahunMulai,
                     TahunAkhir: TahunAkhir
                 };
+                
+                console.log('Data yang dikirim:', Data);
+                
                 $.post(BaseURL + "Kementerian/InputSasaranStrategis", Data).done(function(Respon) {
                     if (Respon == '1') {
+                        $('#ModalInputSasaranStrategis').modal('hide');
                         window.location.reload();
                     } else {
-                        alert(Respon);
+                        alert('Error: ' + Respon);
                     }
+                }).fail(function(xhr, status, error) {
+                    alert('Request failed: ' + error);
+                    console.log('Error details:', xhr.responseText);
                 });
             });
 
@@ -372,30 +579,49 @@
                 $("#EditId").val(Data[0]);
                 $("#EditIdKementerian").val(Data[1]);
                 $("#EditSasaranStrategis").val(Data[2]);
-                $("#EditIndikatorSasaranStrategis").val(Data[3]);
-                $("#EditTahunMulai").val(Data[4]);
-                $("#EditTahunAkhir").val(Data[5]);
+                $("#EditNamaIndikatorStrategis").val(Data[3]);
+                $("#EditIndikatorSasaranStrategis").val(Data[4]);
+                $("#EditNilaiTahun1").val(Data[5]);
+                $("#EditNilaiTahun2").val(Data[6]);
+                $("#EditNilaiTahun3").val(Data[7]);
+                $("#EditNilaiTahun4").val(Data[8]);
+                $("#EditNilaiTahun5").val(Data[9]);
+                $("#EditTahunMulai").val(Data[10]);
+                $("#EditTahunAkhir").val(Data[11]);
                 
                 $('#ModalEditSasaranStrategis').modal("show");
             });
 
             // Update Sasaran Strategis
             $("#UpdateSasaranStrategis").click(function() {
-                if ($("#EditSasaranStrategis").val() === "" || $("#EditIndikatorSasaranStrategis").val() === "") {
-                    alert('Sasaran Strategis dan Indikator harus diisi!');
+                if ($("#EditSasaranStrategis").val() === "" || $("#EditNamaIndikatorStrategis").val() === "" || $("#EditIndikatorSasaranStrategis").val() === "") {
+                    alert('Sasaran Strategis, Nama Indikator, dan Indikator Sasaran Strategis harus diisi!');
                     return;
                 }
                 var Data = {
                     Id: $("#EditId").val(),
                     SasaranStrategis: $("#EditSasaranStrategis").val(),
-                    IndikatorSasaranStrategis: $("#EditIndikatorSasaranStrategis").val()
+                    NamaIndikatorStrategis: $("#EditNamaIndikatorStrategis").val(),
+                    IndikatorSasaranStrategis: $("#EditIndikatorSasaranStrategis").val(),
+                    NilaiTahun1: $("#EditNilaiTahun1").val() || 0,
+                    NilaiTahun2: $("#EditNilaiTahun2").val() || 0,
+                    NilaiTahun3: $("#EditNilaiTahun3").val() || 0,
+                    NilaiTahun4: $("#EditNilaiTahun4").val() || 0,
+                    NilaiTahun5: $("#EditNilaiTahun5").val() || 0
                 };
+                
+                console.log('Data update:', Data);
+                
                 $.post(BaseURL + "Kementerian/UpdateSasaranStrategis", Data).done(function(Respon) {
                     if (Respon == '1') {
+                        $('#ModalEditSasaranStrategis').modal('hide');
                         window.location.reload();
                     } else {
-                        alert(Respon);
+                        alert('Error: ' + Respon);
                     }
+                }).fail(function(xhr, status, error) {
+                    alert('Request failed: ' + error);
+                    console.log('Error details:', xhr.responseText);
                 });
             });
 
@@ -407,10 +633,18 @@
                         if (Respon == '1') {
                             window.location.reload();
                         } else {
-                            alert(Respon);
+                            alert('Error: ' + Respon);
                         }
+                    }).fail(function(xhr, status, error) {
+                        alert('Request failed: ' + error);
+                        console.log('Error details:', xhr.responseText);
                     });
                 }
+            });
+
+            // Clear modal input when closed
+            $('#ModalInputSasaranStrategis').on('hidden.bs.modal', function () {
+                $(this).find('textarea, input').val('');
             });
         });
     </script>
