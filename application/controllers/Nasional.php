@@ -1135,6 +1135,44 @@ class Nasional extends CI_Controller {
       echo 'Gagal Hapus Data!';
     }
   }
+
+  public function IndikasiIntervensi(){
+		$Header['Halaman'] = 'RKP';
+    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
+    $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjmn")->result_array();
+		$Data['IndikasiIntervensi'] = $this->db->query("SELECT i.*,p._Id as _IdPN,p.PrioritasNasional,k.* FROM indikasi_intervensi as i, prioritas_nasional as p, kodewilayah as k WHERE i._Id=p.Id AND i.Provinsi=k.Kode AND i.deleted_at IS NULL")->result_array();
+		$this->load->view('Nasional/header',$Header);
+		$this->load->view('Nasional/IndikasiIntervensi',$Data);
+	}
+
+  public function InputIndikasiIntervensi(){  
+    $this->db->insert('indikasi_intervensi',$_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Menyimpan Data!';
+    }
+	}
+	
+	public function EditIndikasiIntervensi(){  
+		$this->db->where('Id',$_POST['Id']); 
+		$this->db->update('indikasi_intervensi', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Update Data!';
+    }
+  }
+
+  public function HapusIndikasiIntervensi(){  
+		$_POST['deleted_at'] = date('Y-m-d H:i:s');
+		$this->db->where('Id',$_POST['Id'])->update('indikasi_intervensi', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Hapus Data!';
+    }
+  }
 }
 
 

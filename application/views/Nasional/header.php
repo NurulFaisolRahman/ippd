@@ -610,6 +610,7 @@
                     <div class="sidebar-submenu">
                         <a href="<?=base_url('Nasional/SasaranPrioritasNasional')?>">Sasaran Prioritas Nasional</a>
                         <a href="<?=base_url('Nasional/SasaranPembangunanDaerah')?>">Sasaran Pembangunan Daerah</a>
+                        <a href="<?=base_url('Nasional/IndikasiIntervensi')?>">Indikasi Intervensi</a>
                         <br>
                     </div>
                 </div>
