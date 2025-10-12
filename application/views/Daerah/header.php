@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>Super Admin IPPD</title>
+    <title>Admin IPPD</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,700,900" rel="stylesheet">
@@ -234,6 +234,7 @@
                 <i class="fas fa-chart-line"></i>
                 IPPD
             </a>
+            
             <div class="navbar-menu">
                 
                 <!-- Menu Daerah dengan Submenu -->

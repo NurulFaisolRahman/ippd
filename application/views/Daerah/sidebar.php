@@ -313,6 +313,7 @@
                         <a href="<?=base_url('Daerah/Instansi')?>">Daftar Instansi</a>
                         <a href="<?=base_url('Daerah/Iku')?>">IKU</a>
                         <a href="<?=base_url('Daerah/Ikd')?>">IKD</a>
+                        <a href="<?=base_url('Daerah/cascade')?>">Cascade</a>
                         <br>
                     </div>
                 </div>
