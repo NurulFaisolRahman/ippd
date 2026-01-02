@@ -5,7 +5,7 @@
                     <div class="data-table-list">
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
-                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputTahapan"><i class="notika-icon notika-edit"></i> <b>Input Tahapan RPJMN</b></button>
+                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputPrioritasNasional"><i class="notika-icon notika-edit"></i> <b>Input Prioritas Nasional RPJMN</b></button>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -13,26 +13,26 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 10%;" class="text-center">No</th>
-                                        <th style="width: 60%;">Tahapan RPJMN</th>
+                                        <th style="width: 60%;">Prioritas Nasional RPJMN</th>
                                         <th style="width: 10%;">Periode</th>
                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                         <th style="width: 10%;" class="text-center">Edit</th>
-                                        <th style="width: 10%;" class="text-center">Sub Tahapan</th>
+                                        <th style="width: 10%;" class="text-center">Sasaran</th>
                                         <?php } ?>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php $No = 1; foreach ($Tahapan as $key) { ?>
+                                    <?php $No = 1; foreach ($PrioritasNasional as $key) { ?>
                                     <tr>
                                         <td style="vertical-align: middle;" class="text-center"><?=$No++?></td>
-                                        <td style="vertical-align: middle;"><?=$key['Tahapan']?></td>
+                                        <td style="vertical-align: middle;"><?=$key['PrioritasNasional']?></td>
                                         <td style="vertical-align: middle;"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></td>
                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
-                                        <td class="text-center">
-                                            <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['_Id'].'|'.$key['Tahapan']?>"><i class="notika-icon notika-edit"></i></button>
+                                        <td style="vertical-align: middle;" class="text-center">
+                                            <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['_Id'].'|'.$key['PrioritasNasional']?>"><i class="notika-icon notika-edit"></i></button>
                                             <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
                                         </td>
-                                        <td class="text-center">
+                                        <td style="vertical-align: middle;" class="text-center">
                                             <button class="btn btn-sm btn-primary amber-icon-notika btn-reco-mg btn-button-mg Sub"><i class="notika-icon notika-edit"></i></button>
                                         </td>
                                         <?php } ?>
@@ -46,7 +46,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="ModalInputTahapan" role="dialog">
+    <div class="modal fade" id="ModalInputPrioritasNasional" role="dialog">
         <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
             <div class="modal-content">
                 <div class="modal-header">
@@ -84,11 +84,11 @@
                                     </div>
                                     <div class="row" style="margin-top: 9px;">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Tahapan RPJMN</b></label>
+                                            <label class="hrzn-fm"><b>Prioritas Nasional RPJMN</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <textarea class="form-control" rows="3" id="Tahapan" placeholder="Input Tahapan RPJMN"></textarea>
+                                                <textarea class="form-control" rows="3" id="PrioritasNasional" placeholder="Input Prioritas Nasional RPJMN"></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -109,7 +109,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="ModalEditTahapan" role="dialog">
+    <div class="modal fade" id="ModalEditPrioritasNasional" role="dialog">
         <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
             <div class="modal-content">
                 <div class="modal-header">
@@ -147,11 +147,11 @@
                                     </div>
                                     <div class="row" style="margin-top: 9px;">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Tahapan RPJMN</b></label>
+                                            <label class="hrzn-fm"><b>Prioritas Nasional RPJMN</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <textarea class="form-control" rows="3" id="_Tahapan" placeholder="Input Tahapan RPJMN"></textarea>
+                                                <textarea class="form-control" rows="3" id="_PrioritasNasional" placeholder="Input Prioritas Nasional RPJMN"></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -220,14 +220,14 @@
             $("#Input").click(function() {
                 if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
-                } else if ($("#Tahapan").val() == "") {
-                    alert('Input Tahapan Belum Benar!')
+                } else if ($("#PrioritasNasional").val() == "") {
+                    alert('Input Prioritas Nasional Belum Benar!')
                 } else {
-                    var Tahapan = { _Id   : $("#IdVisi").val(),
-                                 Tahapan   : $("#Tahapan").val() }
-                    $.post(BaseURL+"Nasional/InputTahapanRPJMN", Tahapan).done(function(Respon) {
+                    var PrioritasNasional = { _Id   : $("#IdVisi").val(),
+                                PrioritasNasional   : $("#PrioritasNasional").val() }
+                    $.post(BaseURL+"Nasional/InputPrioritasNasionalRPJMN", PrioritasNasional).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Nasional/TahapanRPJMN"
+                            window.location = BaseURL+"Nasional/PrioritasNasionalRPJMN"
                         } else {
                             alert(Respon)
                         }
@@ -249,22 +249,22 @@
                     $("#_IdVisi").html(Visi)
                     $("#_IdVisi").val(Pisah[1])
                 })
-                $("#_Tahapan").val(Pisah[2])
-                $('#ModalEditTahapan').modal("show")
+                $("#_PrioritasNasional").val(Pisah[2])
+                $('#ModalEditPrioritasNasional').modal("show")
             })
 
             $("#Edit").click(function() {
                 if ($("#_Periode").val() == "") {
                     alert("Mohon Input Periode")
-                } else if ($("#_Tahapan").val() == "") {
-                    alert('Input Tahapan Belum Benar!')
+                } else if ($("#_PrioritasNasional").val() == "") {
+                    alert('Input PrioritasNasional Belum Benar!')
                 } else {
-                    var Tahapan = { Id   : $("#Id").val(),
+                    var PrioritasNasional = { Id   : $("#Id").val(),
                                  _Id   : $("#_IdVisi").val(),
-                                 Tahapan   : $("#_Tahapan").val() }
-                    $.post(BaseURL+"Nasional/EditTahapanRPJMN", Tahapan).done(function(Respon) {
+                                 PrioritasNasional   : $("#_PrioritasNasional").val() }
+                    $.post(BaseURL+"Nasional/EditPrioritasNasionalRPJMN", PrioritasNasional).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Nasional/TahapanRPJMN"
+                            window.location = BaseURL+"Nasional/PrioritasNasionalRPJMN"
                         } else {
                             alert(Respon)
                         }
@@ -273,10 +273,10 @@
             })
 
             $('#data-table-basic tbody').on('click', '.Hapus', function () {
-                var Tahapan = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"Nasional/HapusTahapanRPJMN", Tahapan).done(function(Respon) {
+                var PrioritasNasional = { Id: $(this).attr('Hapus') }
+                $.post(BaseURL+"Nasional/HapusPrioritasNasionalRPJMN", PrioritasNasional).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Nasional/TahapanRPJMN"
+                        window.location = BaseURL+"Nasional/PrioritasNasionalRPJMN"
                     } else {
                         alert(Respon)
                     }
@@ -284,7 +284,7 @@
             })
 
             $('#data-table-basic tbody').on('click', '.Sub', function () {
-                window.location = BaseURL+"Nasional/SubTahapanRPJMN"                   
+                window.location = BaseURL+"Nasional/SasaranPrioritasRPJMN"                   
             })
         })
     </script>

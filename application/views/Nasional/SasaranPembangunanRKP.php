@@ -5,7 +5,7 @@
                     <div class="data-table-list">
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
-                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputSasaranPembangunanDaerah"><i class="notika-icon notika-edit"></i> <b>Input Sasaran Pembangunan Daerah</b></button>
+                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputSasaranPembangunanRKP"><i class="notika-icon notika-edit"></i> <b>Input Sasaran Pembangunan Nasional</b></button>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -13,37 +13,37 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 10%;" class="text-center">No</th>
-                                        <th style="width: 10%;">Provinsi</th>
-                                        <th style="width: 10%;">Pertumbuhan Ekonomi</th>
-                                        <th style="width: 10%;">Tingkat Kemiskinan</th>
-                                        <th style="width: 10%;">Tingkat Pengangguran Terbuka</th>
-                                        <th style="width: 10%;">Indeks Modal Manusia</th>
-                                        <th style="width: 10%;">Rasio GINI</th>
-                                        <th style="width: 10%;">Intensitas Emisi GRK</th>
-                                        <th style="width: 10%;">Tahun</th>
+                                        <th style="width: 9%;">Pertumbuhan Ekonomi</th>
+                                        <th style="width: 9%;">Tingkat Kemiskinan</th>
+                                        <th style="width: 9%;">Tingkat Pengangguran Terbuka</th>
+                                        <th style="width: 9%;">Indeks Modal Manusia</th>
+                                        <th style="width: 9%;">Rasio GINI</th>
+                                        <th style="width: 9%;">Intensitas Emisi GRK</th>
+                                        <th style="width: 9%;">Nilai Tukar Petani</th>
+                                        <th style="width: 9%;">Nilai Tukar Nelayan</th>
+                                        <th style="width: 9%;">Tahun</th>
                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                         <th style="width: 10%;" class="text-center">Edit</th>
                                         <?php } ?>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php $No = 1; foreach ($SasaranPembangunanDaerah as $key) { ?>
+                                    <?php $No = 1; foreach ($SasaranPembangunanRKP as $key) { ?>
                                     <tr>
                                         <td style="vertical-align: middle;" class="text-center"><?=$No++?></td>
-                                        <td style="vertical-align: middle;"><?=$key['Nama']?></td>
                                         <td style="vertical-align: middle;"><?=$key['LPE']?></td>
                                         <td style="vertical-align: middle;"><?=$key['Kemiskinan']?></td>
                                         <td style="vertical-align: middle;"><?=$key['TPT']?></td>
                                         <td style="vertical-align: middle;"><?=$key['IMM']?></td>
                                         <td style="vertical-align: middle;"><?=$key['RasioGINI']?></td>
                                         <td style="vertical-align: middle;"><?=$key['IntensitasEmisiGRK']?></td>
+                                        <td style="vertical-align: middle;"><?=$key['NTP']?></td>
+                                        <td style="vertical-align: middle;"><?=$key['NTN']?></td>
                                         <td style="vertical-align: middle;"><?=$key['Tahun']?></td>
                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                         <td class="text-center" style="vertical-align: middle;">
-                                            <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['LPE'].'|'.$key['Kemiskinan'].'|'.$key['TPT'].'|'.$key['IMM'].'|'.$key['RasioGINI'].'|'.$key['IntensitasEmisiGRK'].'|'.$key['Tahun'].'|'.$key['Kode']?>"><i class="notika-icon notika-edit"></i></button>
-                                                <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
-                                            </div>
+                                            <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['LPE'].'|'.$key['Kemiskinan'].'|'.$key['TPT'].'|'.$key['IMM'].'|'.$key['RasioGINI'].'|'.$key['IntensitasEmisiGRK'].'|'.$key['NTP'].'|'.$key['NTN'].'|'.$key['Tahun']?>"><i class="notika-icon notika-edit"></i></button>
+                                            <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
                                         </td>
                                         <?php } ?>
                                     </tr>
@@ -56,7 +56,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="ModalInputSasaranPembangunanDaerah" role="dialog">
+    <div class="modal fade" id="ModalInputSasaranPembangunanRKP" role="dialog">
         <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
             <div class="modal-content">
                 <div class="modal-header">
@@ -75,18 +75,6 @@
                                             <div class="nk-int-st">
                                                 <input type="text" class="form-control input-sm" id="Tahun">
                                             </div>
-                                        </div>
-                                    </div>
-                                    <div class="row" style="margin-top: 9px;">
-                                        <div class="col-lg-3">
-                                            <label class="hrzn-fm"><b>Provinsi</b></label>
-                                        </div>
-                                        <div style="margin-bottom: 5px;" class="col-lg-8">
-                                            <select class="form-control" id="Provinsi">
-                                            <?php foreach ($Provinsi as $key) { ?>
-                                                <option value="<?=$key['Kode']?>"><?=$key['Nama']?></option>
-                                            <?php } ?>
-                                            </select>
                                         </div>
                                     </div>
                                     <div class="row" style="margin-top: 9px;">
@@ -149,6 +137,26 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-3">
+                                            <label class="hrzn-fm"><b>Nilai Tukar Petani</b></label>
+                                        </div>
+                                        <div class="col-lg-8">
+                                            <div class="nk-int-st">
+                                                <input type="text" class="form-control input-sm" id="NTP">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-3">
+                                            <label class="hrzn-fm"><b>Nilai Tukar Nelayan</b></label>
+                                        </div>
+                                        <div class="col-lg-8">
+                                            <div class="nk-int-st">
+                                                <input type="text" class="form-control input-sm" id="NTN">
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="form-example-int">
@@ -166,7 +174,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="ModalEditSasaranPembangunanDaerah" role="dialog">
+    <div class="modal fade" id="ModalEditSasaranPembangunanRKP" role="dialog">
         <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
             <div class="modal-content">
                 <div class="modal-header">
@@ -186,18 +194,6 @@
                                                 <input type="hidden" class="form-control input-sm" id="Id">
                                                 <input type="text" class="form-control input-sm" id="_Tahun">
                                             </div>
-                                        </div>
-                                    </div>
-                                    <div class="row" style="margin-top: 9px;">
-                                        <div class="col-lg-3">
-                                            <label class="hrzn-fm"><b>Provinsi</b></label>
-                                        </div>
-                                        <div style="margin-bottom: 5px;" class="col-lg-8">
-                                            <select class="form-control" id="_Provinsi">
-                                            <?php foreach ($Provinsi as $key) { ?>
-                                                <option value="<?=$key['Kode']?>"><?=$key['Nama']?></option>
-                                            <?php } ?>
-                                            </select>
                                         </div>
                                     </div>
                                     <div class="row" style="margin-top: 9px;">
@@ -260,6 +256,26 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-3">
+                                            <label class="hrzn-fm"><b>Nilai Tukar Petani</b></label>
+                                        </div>
+                                        <div class="col-lg-8">
+                                            <div class="nk-int-st">
+                                                <input type="text" class="form-control input-sm" id="NTP">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-3">
+                                            <label class="hrzn-fm"><b>Nilai Tukar Nelayan</b></label>
+                                        </div>
+                                        <div class="col-lg-8">
+                                            <div class="nk-int-st">
+                                                <input type="text" class="form-control input-sm" id="NTN">
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="form-example-int">
@@ -307,18 +323,23 @@
                     alert('Input Rasio GINI Belum Benar!')
                 } else if ($("#IntensitasEmisiGRK").val() == "") {
                     alert('Input Intensitas Emisi GRK Belum Benar!')
+                } else if ($("#NTP").val() == "") {
+                    alert('Input Nilai Tukar Petani Belum Benar!')
+                } else if ($("#NTN").val() == "") {
+                    alert('Input Nilai Tukar Nelayan Belum Benar!')
                 } else {
-                    var SasaranPembangunanDaerah = { Provinsi           : $("#Provinsi").val(),
-                                                     LPE                : $("#LPE").val(),
+                    var SasaranPembangunanRKP = { LPE                : $("#LPE").val(),
                                                      Kemiskinan         : $("#Kemiskinan").val(),
                                                      TPT                : $("#TPT").val(),
                                                      IMM                : $("#IMM").val(),
                                                      RasioGINI          : $("#RasioGINI").val(),
                                                      IntensitasEmisiGRK : $("#IntensitasEmisiGRK").val(),
+                                                     NTP                : $("#NTP").val(),
+                                                     NTN                : $("#NTN").val(),
                                                      Tahun              : $("#Tahun").val() }
-                    $.post(BaseURL+"Nasional/InputSasaranPembangunanDaerah", SasaranPembangunanDaerah).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/InputSasaranPembangunanRKP", SasaranPembangunanRKP).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Nasional/SasaranPembangunanDaerah"
+                            window.location = BaseURL+"Nasional/SasaranPembangunanRKP"
                         } else {
                             alert(Respon)
                         }
@@ -336,9 +357,10 @@
                 $("#_IMM").val(Pisah[4])
                 $("#_RasioGINI").val(Pisah[5])
                 $("#_IntensitasEmisiGRK").val(Pisah[6])
-                $("#_Tahun").val(Pisah[7])
-                $("#_Provinsi").val(Pisah[8])
-                $('#ModalEditSasaranPembangunanDaerah').modal("show")
+                $("#_NTP").val(Pisah[7])
+                $("#_NTN").val(Pisah[8])
+                $("#_Tahun").val(Pisah[9])
+                $('#ModalEditSasaranPembangunanRKP').modal("show")
             })
 
             $("#Edit").click(function() {
@@ -356,8 +378,12 @@
                     alert('Input Rasio GINI Belum Benar!')
                 } else if ($("#_IntensitasEmisiGRK").val() == "") {
                     alert('Input Intensitas Emisi GRK Belum Benar!')
+                } else if ($("#_NTP").val() == "") {
+                    alert('Input Nilai Tukar Petani Belum Benar!')
+                } else if ($("#_NTN").val() == "") {
+                    alert('Input Nilai Tukar Nelayan Belum Benar!')
                 } else {
-                    var SasaranPembangunanDaerah = { Id                 : $("#Id").val(),
+                    var SasaranPembangunanRKP = { Id                 : $("#Id").val(),
                                                      Provinsi           : $("#_Provinsi").val(),
                                                      LPE                : $("#_LPE").val(),
                                                      Kemiskinan         : $("#_Kemiskinan").val(),
@@ -365,10 +391,12 @@
                                                      IMM                : $("#_IMM").val(),
                                                      RasioGINI          : $("#_RasioGINI").val(),
                                                      IntensitasEmisiGRK : $("#_IntensitasEmisiGRK").val(),
+                                                     NTP                : $("#_NTP").val(),
+                                                     NTN                : $("#_NTN").val(),
                                                      Tahun              : $("#_Tahun").val() }
-                    $.post(BaseURL+"Nasional/EditSasaranPembangunanDaerah", SasaranPembangunanDaerah).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/EditSasaranPembangunanRKP", SasaranPembangunanRKP).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Nasional/SasaranPembangunanDaerah"
+                            window.location = BaseURL+"Nasional/SasaranPembangunanRKP"
                         } else {
                             alert(Respon)
                         }
@@ -377,10 +405,10 @@
             })
 
             $('#data-table-basic tbody').on('click', '.Hapus', function () {
-                var SasaranPembangunanDaerah = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"Nasional/HapusSasaranPembangunanDaerah", SasaranPembangunanDaerah).done(function(Respon) {
+                var SasaranPembangunanRKP = { Id: $(this).attr('Hapus') }
+                $.post(BaseURL+"Nasional/HapusSasaranPembangunanRKP", SasaranPembangunanRKP).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Nasional/SasaranPembangunanDaerah"
+                        window.location = BaseURL+"Nasional/SasaranPembangunanRKP"
                     } else {
                         alert(Respon)
                     }

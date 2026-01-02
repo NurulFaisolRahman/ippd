@@ -5,7 +5,7 @@
                     <div class="data-table-list">
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
-                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputPrioritasNasional"><i class="notika-icon notika-edit"></i> <b>Input Prioritas Nasional</b></button>
+                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputPembangunan"><i class="notika-icon notika-edit"></i> <b>Input Pembangunan Tahapan RPJMN</b></button>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -13,7 +13,8 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 10%;" class="text-center">No</th>
-                                        <th style="width: 70%;">Prioritas Nasional</th>
+                                        <th style="width: 30%;">Sub Tahapan RPJMN</th>
+                                        <th style="width: 40%;">Pembangunan</th>
                                         <th style="width: 10%;">Periode</th>
                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                         <th style="width: 10%;" class="text-center">Edit</th>
@@ -21,20 +22,18 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php $No = 1; foreach ($PrioritasNasional as $key) { ?>
+                                    <?php $No = 1; foreach ($Pembangunan as $key) { ?>
                                     <tr>
                                         <td style="vertical-align: middle;" class="text-center"><?=$No++?></td>
-                                        <td style="vertical-align: middle;"><?=$key['PrioritasNasional']?></td>
+                                        <td style="vertical-align: middle;"><?=$key['SubTahapan']?></td>
+                                        <td style="vertical-align: middle;"><?=$key['Pembangunan']?></td>
                                         <td style="vertical-align: middle;"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></td>
                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                         <td class="text-center">
-                                            <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['_Id'].'|'.$key['PrioritasNasional']?>"><i class="notika-icon notika-edit"></i></button>
-                                                <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
-                                            </div>
+                                            <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['IdVisi'].'|'.$key['IdSubTahapan'].'|'.$key['Pembangunan']?>"><i class="notika-icon notika-edit"></i></button>
+                                            <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
                                         </td>
                                         <?php } ?>
-                                        
                                     </tr>
                                     <?php } ?>
                                 </tbody>
@@ -45,7 +44,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="ModalInputPrioritasNasional" role="dialog">
+    <div class="modal fade" id="ModalInputPembangunan" role="dialog">
         <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
             <div class="modal-content">
                 <div class="modal-header">
@@ -53,12 +52,13 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
+                        <h2 class="text-center mt-0 pb-2">Form Input Sub Tahapan RPJMN</h2>
                         <div class="col-lg-12">
                             <div class="form-example-int form-horizental">
                                 <div class="form-group">
-                                    <div class="row">
+                                    <div class="row mb-2">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Periode RPJMN</b></label>
+                                            <label class="hrzn-fm"><b>Periode</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
@@ -73,21 +73,21 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Visi RPJMN</b></label>
+                                            <label class="hrzn-fm"><b>Sub Tahapan</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <select class="form-control" id="IdVisi" disabled></select>
+                                                <select class="form-control" id="IdSubTahapan"></select>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row" style="margin-top: 9px;">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Prioritas Nasional</b></label>
+                                            <label class="hrzn-fm"><b>Pembangunan</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <textarea class="form-control" rows="3" id="PrioritasNasional" placeholder="Input Prioritas Nasional"></textarea>
+                                                <textarea class="form-control" rows="3" id="Pembangunan" placeholder="Input Pembangunan"></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -108,7 +108,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="ModalEditPrioritasNasional" role="dialog">
+    <div class="modal fade" id="ModalEditPembangunan" role="dialog">
         <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
             <div class="modal-content">
                 <div class="modal-header">
@@ -116,16 +116,18 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
+                        <h2 class="text-center mt-0 pb-2">Form Edit Sub Tahapan RPJMN</h2>
                         <div class="col-lg-12">
                             <div class="form-example-int form-horizental">
                                 <div class="form-group">
-                                    <div class="row">
+                                    <div class="row mb-2">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Periode RPJMN</b></label>
+                                            <label class="hrzn-fm"><b>Periode</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
                                                 <select class="form-control" id="_Periode">
+                                                    <option value="">Pilih Periode</option>
                                                     <?php foreach ($Visi as $key) { ?>
                                                         <option value="<?=$key['Id']?>"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></option>
                                                     <?php } ?>
@@ -135,22 +137,22 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Visi RPJMN</b></label>
-                                            <input type="hidden" class="form-control input-sm" id="Id">
+                                            <label class="hrzn-fm"><b>Sub Tahapan</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <select class="form-control" id="_IdVisi" disabled></select>
+                                                <input type="hidden" class="form-control input-sm" id="Id">
+                                                <select class="form-control" id="_IdSubTahapan"></select>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row" style="margin-top: 9px;">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Prioritas Nasional</b></label>
+                                            <label class="hrzn-fm"><b>Pembangunan</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <textarea class="form-control" rows="3" id="_PrioritasNasional" placeholder="Input Prioritas Nasional"></textarea>
+                                                <textarea class="form-control" rows="3" id="_Pembangunan" placeholder="Edit Pembangunan"></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -161,7 +163,7 @@
                                     <div class="col-lg-2">
                                     </div>
                                     <div class="col-lg-9">
-                                        <button class="btn btn-success notika-btn-success" id="Edit"><b>Update</b></button>
+                                        <button class="btn btn-success notika-btn-success" id="Edit"><b>SIMPAN</b></button>
                                     </div>
                                 </div>
                             </div>
@@ -190,43 +192,43 @@
                 if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"Nasional/GetVisiRPJMN", {Id : $("#Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/GetSubTahapanRPJMN", {Id : $("#Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
-                        var Visi = ''
+                        var SubTahapan = ''
                         for (let i = 0; i < Data.length; i++) {
-                            Visi += '<option value="'+Data[i].Id+'">'+Data[i].Visi+'</option>'
+                            SubTahapan += '<option value="'+Data[i].Id+'">'+Data[i].SubTahapan+'</option>'
                         }
-                        $("#IdVisi").html(Visi)
+                        $("#IdSubTahapan").html(SubTahapan)
                     })                         
                 }
             });
 
             $("#_Periode").change(function(){
-                if ($("#_Periode").val() == "") {
+                if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"Nasional/GetVisiRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/GetSubTahapanRPJMN", {Id : $("#Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
-                        var Visi = ''
+                        var SubTahapan = ''
                         for (let i = 0; i < Data.length; i++) {
-                            Visi += '<option value="'+Data[i].Id+'">'+Data[i].Visi+'</option>'
+                            SubTahapan += '<option value="'+Data[i].Id+'">'+Data[i].SubTahapan+'</option>'
                         }
-                        $("#_IdVisi").html(Visi)
-                    })                         
+                        $("#_IdSubTahapan").html(SubTahapan)
+                    })
                 }
             });
 
             $("#Input").click(function() {
                 if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
-                } else if ($("#PrioritasNasional").val() == "") {
-                    alert('Input Prioritas Nasional Belum Benar!')
+                } else if ($("#Pembangunan").val() == "") {
+                    alert('Input Pembangunan Belum Benar!')
                 } else {
-                    var PrioritasNasional = { _Id   : $("#IdVisi").val(),
-                                PrioritasNasional   : $("#PrioritasNasional").val() }
-                    $.post(BaseURL+"Nasional/InputPrioritasNasional", PrioritasNasional).done(function(Respon) {
+                    var Pembangunan = { _Id   : $("#IdSubTahapan").val(),
+                                 Pembangunan   : $("#Pembangunan").val() }
+                    $.post(BaseURL+"Nasional/InputPembangunanTahapanRPJMN", Pembangunan).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Nasional/PrioritasNasional"
+                            window.location = BaseURL+"Nasional/PembangunanTahapanRPJMN"
                         } else {
                             alert(Respon)
                         }
@@ -239,31 +241,31 @@
                 var Pisah = Data.split("|");
                 $("#Id").val(Pisah[0])
                 $("#_Periode").val(Pisah[1])
-                $.post(BaseURL+"Nasional/GetVisiRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
+                $.post(BaseURL+"Nasional/GetSubTahapanRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
                     var Data = JSON.parse(Respon)
-                    var Visi = ''
+                    var SubTahapan = ''
                     for (let i = 0; i < Data.length; i++) {
-                        Visi += '<option value="'+Data[i].Id+'">'+Data[i].Visi+'</option>'
+                        SubTahapan += '<option value="'+Data[i].Id+'">'+Data[i].SubTahapan+'</option>'
                     }
-                    $("#_IdVisi").html(Visi)
-                    $("#_IdVisi").val(Pisah[1])
+                    $("#_IdSubTahapan").html(SubTahapan)
+                    $("#_IdSubTahapan").val(Pisah[2])
                 })
-                $("#_PrioritasNasional").val(Pisah[2])
-                $('#ModalEditPrioritasNasional').modal("show")
+                $("#_Pembangunan").val(Pisah[3])
+                $('#ModalEditPembangunan').modal("show")
             })
 
             $("#Edit").click(function() {
                 if ($("#_Periode").val() == "") {
                     alert("Mohon Input Periode")
-                } else if ($("#_PrioritasNasional").val() == "") {
-                    alert('Input PrioritasNasional Belum Benar!')
+                } else if ($("#_Pembangunan").val() == "") {
+                    alert('Input Pembangunan Belum Benar!')
                 } else {
-                    var PrioritasNasional = { Id   : $("#Id").val(),
-                                 _Id   : $("#_IdVisi").val(),
-                                 PrioritasNasional   : $("#_PrioritasNasional").val() }
-                    $.post(BaseURL+"Nasional/EditPrioritasNasional", PrioritasNasional).done(function(Respon) {
+                    var Pembangunan = { Id   : $("#Id").val(),
+                                 _Id   : $("#_IdSubTahapan").val(),
+                                 Pembangunan   : $("#_Pembangunan").val() }
+                    $.post(BaseURL+"Nasional/EditPembangunanTahapanRPJMN", Pembangunan).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Nasional/PrioritasNasional"
+                            window.location = BaseURL+"Nasional/PembangunanTahapanRPJMN"
                         } else {
                             alert(Respon)
                         }
@@ -272,10 +274,10 @@
             })
 
             $('#data-table-basic tbody').on('click', '.Hapus', function () {
-                var PrioritasNasional = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"Nasional/HapusPrioritasNasional", PrioritasNasional).done(function(Respon) {
+                var Pembangunan = { Id: $(this).attr('Hapus') }
+                $.post(BaseURL+"Nasional/HapusPembangunanTahapanRPJMN", Pembangunan).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Nasional/PrioritasNasional"
+                        window.location = BaseURL+"Nasional/PembangunanTahapanRPJMN"
                     } else {
                         alert(Respon)
                     }

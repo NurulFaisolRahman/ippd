@@ -5,7 +5,7 @@
                     <div class="data-table-list">
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
-                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputSasaranPembangunan"><i class="notika-icon notika-edit"></i> <b>Input Sasaran Pembangunan RKP</b></button>
+                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputKegiatanPrioritas"><i class="notika-icon notika-edit"></i> <b>Input Kegiatan Prioritas RPJMN</b></button>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -13,31 +13,29 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 10%;" class="text-center">No</th>
-                                        <th style="width: 30%;">Prioritas Nasional RKP</th>
-                                        <th style="width: 30%;">Sasaran Pembangunan RKP</th>
-                                        <th style="width: 7%;">Baseline</th>
-                                        <th style="width: 7%;">Target</th>
-                                        <th style="width: 7%;">Tahun</th>
+                                        <th style="width: 30%;">Kegiatan Prioritas RPJMN</th>
+                                        <th style="width: 30%;">Sasaran</th>
+                                        <th style="width: 10%;">Periode</th>
                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                         <th style="width: 10%;" class="text-center">Edit</th>
+                                        <th style="width: 10%;" class="text-center">Indikator</th>
                                         <?php } ?>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php $No = 1; foreach ($SasaranPembangunan as $key) { ?>
+                                    <?php $No = 1; foreach ($KegiatanPrioritas as $key) { ?>
                                     <tr>
                                         <td style="vertical-align: middle;" class="text-center"><?=$No++?></td>
-                                        <td style="vertical-align: middle;"><?=$key['PrioritasNasional']?></td>
-                                        <td style="vertical-align: middle;"><?=$key['SasaranPembangunan']?></td>
-                                        <td style="vertical-align: middle;"><?=$key['Baseline']?></td>
-                                        <td style="vertical-align: middle;"><?=$key['Target']?></td>
-                                        <td style="vertical-align: middle;"><?=$key['Tahun']?></td>
+                                        <td style="vertical-align: middle;"><?=$key['KegiatanPrioritas']?></td>
+                                        <td style="vertical-align: middle;"><?=$key['Sasaran']?></td>
+                                        <td style="vertical-align: middle;"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></td>
                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
-                                        <td class="text-center" style="vertical-align: middle;">
-                                            <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['SasaranPembangunan'].'|'.$key['IdVisi'].'|'.$key['IdPrioritasNasional'].'|'.$key['Baseline'].'|'.$key['Target'].'|'.$key['Tahun']?>"><i class="notika-icon notika-edit"></i></button>
-                                                <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
-                                            </div>
+                                        <td style="vertical-align: middle;" class="text-center">
+                                            <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['_Id'].'|'.$key['KegiatanPrioritas'].'|'.$key['Sasaran'].'|'.$key['Id_']?>"><i class="notika-icon notika-edit"></i></button>
+                                            <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
+                                        </td>
+                                        <td style="vertical-align: middle;" class="text-center">
+                                            <button class="btn btn-sm btn-primary amber-icon-notika btn-reco-mg btn-button-mg Sub"><i class="notika-icon notika-edit"></i></button>
                                         </td>
                                         <?php } ?>
                                     </tr>
@@ -50,7 +48,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="ModalInputSasaranPembangunan" role="dialog">
+    <div class="modal fade" id="ModalInputKegiatanPrioritas" role="dialog">
         <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
             <div class="modal-content">
                 <div class="modal-header">
@@ -63,7 +61,7 @@
                                 <div class="form-group">
                                     <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Periode</b></label>
+                                            <label class="hrzn-fm"><b>Periode RPJMN</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
@@ -76,53 +74,33 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row"  style="margin-top: 5px;">
+                                    <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Prioritas Nasional</b></label>
+                                            <label class="hrzn-fm"><b>Program Prioritas RPJMN</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <select class="form-control" id="IdPrioritasNasional"></select>
+                                                <select class="form-control" id="IdProgramPrioritas"></select>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row" style="margin-top: 9px;">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Sasaran Pembangunan</b></label>
+                                            <label class="hrzn-fm"><b>Kegiatan Prioritas RPJMN</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <textarea class="form-control" rows="3" id="SasaranPembangunan" placeholder="Input Sasaran Pembangunan"></textarea>
+                                                <textarea class="form-control" rows="3" id="KegiatanPrioritas" placeholder="Input Kegiatan Prioritas RPJMN"></textarea>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row" style="margin-top: 9px;">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Baseline</b></label>
+                                            <label class="hrzn-fm"><b>Sasaran</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="Baseline">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row" style="margin-top: 9px;">
-                                        <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Target</b></label>
-                                        </div>
-                                        <div class="col-lg-9">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="Target">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row" style="margin-top: 9px;">
-                                        <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Tahun</b></label>
-                                        </div>
-                                        <div class="col-lg-9">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="Tahun">
+                                                <textarea class="form-control" rows="3" id="Sasaran" placeholder="Input Sasaran"></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -143,7 +121,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="ModalEditSasaranPembangunan" role="dialog">
+    <div class="modal fade" id="ModalEditKegiatanPrioritas" role="dialog">
         <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
             <div class="modal-content">
                 <div class="modal-header">
@@ -156,7 +134,7 @@
                                 <div class="form-group">
                                     <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Periode</b></label>
+                                            <label class="hrzn-fm"><b>Periode RPJMN</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
@@ -168,54 +146,34 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row"  style="margin-top: 5px;">
+                                    <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Prioritas Nasional</b></label>
+                                            <label class="hrzn-fm"><b>Program Prioritas RPJMN</b></label>
                                             <input type="hidden" class="form-control input-sm" id="Id">
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <select class="form-control" id="_IdPrioritasNasional"></select>
+                                                <select class="form-control" id="_IdProgramPrioritas"></select>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row" style="margin-top: 9px;">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Sasaran Pembangunan</b></label>
+                                            <label class="hrzn-fm"><b>Kegiatan Prioritas RPJMN</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <textarea class="form-control" rows="3" id="_SasaranPembangunan" placeholder="Edit Sasaran Pembangunan"></textarea>
+                                                <textarea class="form-control" rows="3" id="_KegiatanPrioritas" placeholder="Input Kegiatan Prioritas RPJMN"></textarea>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row" style="margin-top: 9px;">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Baseline</b></label>
+                                            <label class="hrzn-fm"><b>Sasaran</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="_Baseline">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row" style="margin-top: 9px;">
-                                        <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Target</b></label>
-                                        </div>
-                                        <div class="col-lg-9">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="_Target">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row" style="margin-top: 9px;">
-                                        <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Tahun</b></label>
-                                        </div>
-                                        <div class="col-lg-9">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="_Tahun">
+                                                <textarea class="form-control" rows="3" id="_Sasaran" placeholder="Input Sasaran"></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -255,13 +213,13 @@
                 if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"Nasional/GetPrioritasNasional", {Id : $("#Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/GetProgramPrioritasRPJMN", {Id : $("#Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
-                        var PrioritasNasional = ''
+                        var ProgramPrioritas = ''
                         for (let i = 0; i < Data.length; i++) {
-                            PrioritasNasional += '<option value="'+Data[i].Id+'">'+Data[i].PrioritasNasional+'</option>'
+                            ProgramPrioritas += '<option value="'+Data[i].Id+'">'+Data[i].ProgramPrioritas+'</option>'
                         }
-                        $("#IdPrioritasNasional").html(PrioritasNasional)
+                        $("#IdProgramPrioritas").html(ProgramPrioritas)
                     })                         
                 }
             });
@@ -270,13 +228,13 @@
                 if ($("#_Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"Nasional/GetPrioritasNasional", {Id : $("#_Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/GetProgramPrioritasRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
-                        var PrioritasNasional = ''
+                        var ProgramPrioritas = ''
                         for (let i = 0; i < Data.length; i++) {
-                            PrioritasNasional += '<option value="'+Data[i].Id+'">'+Data[i].PrioritasNasional+'</option>'
+                            ProgramPrioritas += '<option value="'+Data[i].Id+'">'+Data[i].ProgramPrioritas+'</option>'
                         }
-                        $("#_IdPrioritasNasional").html(PrioritasNasional)
+                        $("#_IdProgramPrioritas").html(ProgramPrioritas)
                     })                         
                 }
             });
@@ -284,23 +242,18 @@
             $("#Input").click(function() {
                 if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
-                } else if ($("#SasaranPembangunan").val() == "") {
-                    alert('Input Sasaran Pembangunan Belum Benar!')
-                } else if ($("#Baseline").val() == "") {
-                    alert('Input Baseline Belum Benar!')
-                } else if ($("#Target").val() == "") {
-                    alert('Input Target Belum Benar!')
-                } else if ($("#Tahun").val() == "") {
-                    alert('Input Tahun Belum Benar!')
+                } else if ($("#KegiatanPrioritas").val() == "") {
+                    alert('Input Kegiatan Prioritas Belum Benar!')
+                } else if ($("#Sasaran").val() == "") {
+                    alert('Input Sasaran Belum Benar!')
                 } else {
-                    var SasaranPembangunan = { _Id      : $("#IdPrioritasNasional").val(),
-                                   SasaranPembangunan   : $("#SasaranPembangunan").val(),
-                                            Baseline    : $("#Baseline").val(),
-                                            Target      : $("#Target").val(),
-                                            Tahun       : $("#Tahun").val() }
-                    $.post(BaseURL+"Nasional/InputSasaranPrioritasNasional", SasaranPembangunan).done(function(Respon) {
+                    var KegiatanPrioritas = { _Id   : $("#IdProgramPrioritas").val(),
+                                Id_   : $("#Periode").val(),
+                                KegiatanPrioritas   : $("#KegiatanPrioritas").val(),
+                                Sasaran            : $("#Sasaran").val() }
+                    $.post(BaseURL+"Nasional/InputKegiatanPrioritasRPJMN", KegiatanPrioritas).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Nasional/SasaranPrioritasNasional"
+                            window.location = BaseURL+"Nasional/KegiatanPrioritasRPJMN"
                         } else {
                             alert(Respon)
                         }
@@ -312,44 +265,37 @@
                 var Data = $(this).attr('Edit')
                 var Pisah = Data.split("|");
                 $("#Id").val(Pisah[0])
-                $("#_SasaranPembangunan").val(Pisah[1])
-                $("#_Periode").val(Pisah[2])
-                $.post(BaseURL+"Nasional/GetPrioritasNasional", {Id : $("#_Periode").val()}).done(function(Respon) {
+                $("#_Periode").val(Pisah[4])
+                $.post(BaseURL+"Nasional/GetProgramPrioritasRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
                     var Data = JSON.parse(Respon)
-                    var PrioritasNasional = ''
+                    var ProgramPrioritas = ''
                     for (let i = 0; i < Data.length; i++) {
-                        PrioritasNasional += '<option value="'+Data[i].Id+'">'+Data[i].PrioritasNasional+'</option>'
+                        ProgramPrioritas += '<option value="'+Data[i].Id+'">'+Data[i].ProgramPrioritas+'</option>'
                     }
-                    $("#_IdPrioritasNasional").html(PrioritasNasional)
-                    $("#_IdPrioritasNasional").val(Pisah[3])
+                    $("#_IdProgramPrioritas").html(ProgramPrioritas)
+                    $("#_IdProgramPrioritas").val(Pisah[1])
                 })
-                $("#_Baseline").val(Pisah[4])
-                $("#_Target").val(Pisah[5])
-                $("#_Tahun").val(Pisah[6])
-                $('#ModalEditSasaranPembangunan').modal("show")
+                $("#_KegiatanPrioritas").val(Pisah[2])
+                $("#_Sasaran").val(Pisah[3])
+                $('#ModalEditKegiatanPrioritas').modal("show")
             })
 
             $("#Edit").click(function() {
                 if ($("#_Periode").val() == "") {
                     alert("Mohon Input Periode")
-                } else if ($("#_SasaranPembangunan").val() == "") {
-                    alert('Input Sasaran Pembangunan Belum Benar!')
-                } else if ($("#_Baseline").val() == "") {
-                    alert('Input Baseline Belum Benar!')
-                } else if ($("#_Target").val() == "") {
-                    alert('Input Target Belum Benar!')
-                } else if ($("#_Tahun").val() == "") {
-                    alert('Input Tahun Belum Benar!')
+                } else if ($("#_KegiatanPrioritas").val() == "") {
+                    alert('Input KegiatanPrioritas Belum Benar!')
+                } else if ($("#_Sasaran").val() == "") {
+                    alert('Input Sasaran Belum Benar!')
                 } else {
-                    var SasaranPembangunan = { Id       : $("#Id").val(),
-                                               _Id      : $("#_IdPrioritasNasional").val(),
-                                   SasaranPembangunan   : $("#_SasaranPembangunan").val(),
-                                            Baseline    : $("#_Baseline").val(),
-                                            Target      : $("#_Target").val(),
-                                            Tahun       : $("#_Tahun").val() }
-                    $.post(BaseURL+"Nasional/EditSasaranPrioritasNasional", SasaranPembangunan).done(function(Respon) {
+                    var KegiatanPrioritas = { Id   : $("#Id").val(),
+                                 _Id   : $("#_IdProgramPrioritas").val(),
+                                 Id_   : $("#_Periode").val(),
+                                 KegiatanPrioritas   : $("#_KegiatanPrioritas").val(),
+                                 Sasaran            : $("#_Sasaran").val() } 
+                    $.post(BaseURL+"Nasional/EditKegiatanPrioritasRPJMN", KegiatanPrioritas).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Nasional/SasaranPrioritasNasional"
+                            window.location = BaseURL+"Nasional/KegiatanPrioritasRPJMN"
                         } else {
                             alert(Respon)
                         }
@@ -358,14 +304,18 @@
             })
 
             $('#data-table-basic tbody').on('click', '.Hapus', function () {
-                var SasaranPembangunan = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"Nasional/HapusSasaranPrioritasNasional", SasaranPembangunan).done(function(Respon) {
+                var KegiatanPrioritas = { Id: $(this).attr('Hapus') }
+                $.post(BaseURL+"Nasional/HapusKegiatanPrioritasRPJMN", KegiatanPrioritas).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Nasional/SasaranPrioritasNasional"
+                        window.location = BaseURL+"Nasional/KegiatanPrioritasRPJMN"
                     } else {
                         alert(Respon)
                     }
                 })                         
+            })
+
+            $('#data-table-basic tbody').on('click', '.Sub', function () {
+                window.location = BaseURL+"Nasional/IndikatorSasaranKegiatanRPJMN"                   
             })
         })
     </script>

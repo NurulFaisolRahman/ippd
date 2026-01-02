@@ -593,9 +593,13 @@
                         <a href="<?=base_url('Nasional/MisiRPJMN')?>">Misi</a>
                         <a href="<?=base_url('Nasional/TujuanRPJMN')?>">Tujuan</a>
                         <a href="<?=base_url('Nasional/SasaranRPJMN')?>">Sasaran</a>
-                        <a href="<?=base_url('Nasional/PrioritasNasional')?>">Prioritas Nasional</a>
                         <a href="<?=base_url('Nasional/TahapanRPJMN')?>">Tahapan</a>
                         <a href="<?=base_url('Nasional/IUPRPJMN')?>">IUP RPJMN</a>
+                        <a href="<?=base_url('Nasional/SasaranPembangunanRPJMN')?>">Sasaran Pembangunan</a>
+                        <a href="<?=base_url('Nasional/PrioritasNasionalRPJMN')?>">Prioritas Nasional</a>
+                        <a href="<?=base_url('Nasional/ProgramPrioritasRPJMN')?>">Program Prioritas</a>
+                        <a href="<?=base_url('Nasional/KegiatanPrioritasRPJMN')?>">Kegiatan Prioritas</a>
+                        <a href="<?=base_url('Nasional/ProyekPrioritasRPJMN')?>">Proyek Prioritas</a>
                         <br>
                     </div>
                 </div>
@@ -608,9 +612,11 @@
                     <i class="fa fa-chevron-down"></i>
                     </a>
                     <div class="sidebar-submenu">
+                        <a href="<?=base_url('Nasional/TemaRKP')?>">Tema Rencana Kerja Pemerintah</a>
+                        <a href="<?=base_url('Nasional/SasaranPembangunanRKP')?>">Sasaran Pembangunan</a>
                         <a href="<?=base_url('Nasional/SasaranPrioritasNasional')?>">Sasaran Prioritas Nasional</a>
                         <a href="<?=base_url('Nasional/SasaranPembangunanDaerah')?>">Sasaran Pembangunan Daerah</a>
-                        <a href="<?=base_url('Nasional/IndikasiIntervensi')?>">Indikasi Intervensi</a>
+                        <a href="<?=base_url('Nasional/IndikasiIntervensi')?>">Indikasi Intervensi Daerah</a>
                         <br>
                     </div>
                 </div>

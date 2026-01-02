@@ -5,7 +5,7 @@
                     <div class="data-table-list">
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
-                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputTahapan"><i class="notika-icon notika-edit"></i> <b>Input Tahapan RPJMN</b></button>
+                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputProyekPrioritas"><i class="notika-icon notika-edit"></i> <b>Input Proyek Prioritas RPJMN</b></button>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -13,27 +13,25 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 10%;" class="text-center">No</th>
-                                        <th style="width: 60%;">Tahapan RPJMN</th>
+                                        <th style="width: 30%;">Kegiatan Prioritas</th>
+                                        <th style="width: 30%;">Proyek Prioritas</th>
                                         <th style="width: 10%;">Periode</th>
                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                         <th style="width: 10%;" class="text-center">Edit</th>
-                                        <th style="width: 10%;" class="text-center">Sub Tahapan</th>
                                         <?php } ?>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php $No = 1; foreach ($Tahapan as $key) { ?>
+                                    <?php $No = 1; foreach ($ProyekPrioritas as $key) { ?>
                                     <tr>
                                         <td style="vertical-align: middle;" class="text-center"><?=$No++?></td>
-                                        <td style="vertical-align: middle;"><?=$key['Tahapan']?></td>
+                                        <td style="vertical-align: middle;"><?=$key['KegiatanPrioritas']?></td>
+                                        <td style="vertical-align: middle;"><?=$key['ProyekPrioritas']?></td>
                                         <td style="vertical-align: middle;"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></td>
                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
-                                        <td class="text-center">
-                                            <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['_Id'].'|'.$key['Tahapan']?>"><i class="notika-icon notika-edit"></i></button>
+                                        <td style="vertical-align: middle;" class="text-center">
+                                            <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['_Id'].'|'.$key['ProyekPrioritas'].'|'.$key['Id_']?>"><i class="notika-icon notika-edit"></i></button>
                                             <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
-                                        </td>
-                                        <td class="text-center">
-                                            <button class="btn btn-sm btn-primary amber-icon-notika btn-reco-mg btn-button-mg Sub"><i class="notika-icon notika-edit"></i></button>
                                         </td>
                                         <?php } ?>
                                     </tr>
@@ -46,7 +44,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="ModalInputTahapan" role="dialog">
+    <div class="modal fade" id="ModalInputProyekPrioritas" role="dialog">
         <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
             <div class="modal-content">
                 <div class="modal-header">
@@ -74,21 +72,21 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Visi RPJMN</b></label>
+                                            <label class="hrzn-fm"><b>Kegiatan Prioritas RPJMN</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <select class="form-control" id="IdVisi" disabled></select>
+                                                <select class="form-control" id="IdKegiatanPrioritas"></select>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row" style="margin-top: 9px;">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Tahapan RPJMN</b></label>
+                                            <label class="hrzn-fm"><b>Proyek Prioritas RPJMN</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <textarea class="form-control" rows="3" id="Tahapan" placeholder="Input Tahapan RPJMN"></textarea>
+                                                <textarea class="form-control" rows="3" id="ProyekPrioritas" placeholder="Input Proyek Prioritas RPJMN"></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -109,7 +107,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="ModalEditTahapan" role="dialog">
+    <div class="modal fade" id="ModalEditProyekPrioritas" role="dialog">
         <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
             <div class="modal-content">
                 <div class="modal-header">
@@ -136,22 +134,22 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Visi RPJMN</b></label>
+                                            <label class="hrzn-fm"><b>Kegiatan Prioritas RPJMN</b></label>
                                             <input type="hidden" class="form-control input-sm" id="Id">
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <select class="form-control" id="_IdVisi" disabled></select>
+                                                <select class="form-control" id="_IdKegiatanPrioritas"></select>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row" style="margin-top: 9px;">
                                         <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Tahapan RPJMN</b></label>
+                                            <label class="hrzn-fm"><b>Proyek Prioritas RPJMN</b></label>
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <textarea class="form-control" rows="3" id="_Tahapan" placeholder="Input Tahapan RPJMN"></textarea>
+                                                <textarea class="form-control" rows="3" id="_ProyekPrioritas" placeholder="Input Proyek Prioritas RPJMN"></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -191,13 +189,13 @@
                 if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"Nasional/GetVisiRPJMN", {Id : $("#Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/GetKegiatanPrioritasRPJMN", {Id : $("#Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
-                        var Visi = ''
+                        var KegiatanPrioritas = ''
                         for (let i = 0; i < Data.length; i++) {
-                            Visi += '<option value="'+Data[i].Id+'">'+Data[i].Visi+'</option>'
+                            KegiatanPrioritas += '<option value="'+Data[i].Id+'">'+Data[i].KegiatanPrioritas+'</option>'
                         }
-                        $("#IdVisi").html(Visi)
+                        $("#IdKegiatanPrioritas").html(KegiatanPrioritas)
                     })                         
                 }
             });
@@ -206,13 +204,13 @@
                 if ($("#_Periode").val() == "") {
                     alert("Mohon Input Periode")
                 } else {
-                    $.post(BaseURL+"Nasional/GetVisiRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
+                    $.post(BaseURL+"Nasional/GetKegiatanPrioritasRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
                         var Data = JSON.parse(Respon)
-                        var Visi = ''
+                        var KegiatanPrioritas = ''
                         for (let i = 0; i < Data.length; i++) {
-                            Visi += '<option value="'+Data[i].Id+'">'+Data[i].Visi+'</option>'
+                            KegiatanPrioritas += '<option value="'+Data[i].Id+'">'+Data[i].KegiatanPrioritas+'</option>'
                         }
-                        $("#_IdVisi").html(Visi)
+                        $("#_IdKegiatanPrioritas").html(KegiatanPrioritas)
                     })                         
                 }
             });
@@ -220,14 +218,15 @@
             $("#Input").click(function() {
                 if ($("#Periode").val() == "") {
                     alert("Mohon Input Periode")
-                } else if ($("#Tahapan").val() == "") {
-                    alert('Input Tahapan Belum Benar!')
+                } else if ($("#ProyekPrioritas").val() == "") {
+                    alert('Input Proyek Prioritas Belum Benar!')
                 } else {
-                    var Tahapan = { _Id   : $("#IdVisi").val(),
-                                 Tahapan   : $("#Tahapan").val() }
-                    $.post(BaseURL+"Nasional/InputTahapanRPJMN", Tahapan).done(function(Respon) {
+                    var ProyekPrioritas = { _Id   : $("#IdKegiatanPrioritas").val(),
+                                Id_   : $("#Periode").val(),
+                                ProyekPrioritas   : $("#ProyekPrioritas").val() }
+                    $.post(BaseURL+"Nasional/InputProyekPrioritasRPJMN", ProyekPrioritas).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Nasional/TahapanRPJMN"
+                            window.location = BaseURL+"Nasional/ProyekPrioritasRPJMN"
                         } else {
                             alert(Respon)
                         }
@@ -239,32 +238,33 @@
                 var Data = $(this).attr('Edit')
                 var Pisah = Data.split("|");
                 $("#Id").val(Pisah[0])
-                $("#_Periode").val(Pisah[1])
-                $.post(BaseURL+"Nasional/GetVisiRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
+                $("#_Periode").val(Pisah[3])
+                $.post(BaseURL+"Nasional/GetKegiatanPrioritasRPJMN", {Id : $("#_Periode").val()}).done(function(Respon) {
                     var Data = JSON.parse(Respon)
-                    var Visi = ''
+                    var KegiatanPrioritas = ''
                     for (let i = 0; i < Data.length; i++) {
-                        Visi += '<option value="'+Data[i].Id+'">'+Data[i].Visi+'</option>'
+                        KegiatanPrioritas += '<option value="'+Data[i].Id+'">'+Data[i].KegiatanPrioritas+'</option>'
                     }
-                    $("#_IdVisi").html(Visi)
-                    $("#_IdVisi").val(Pisah[1])
+                    $("#_IdKegiatanPrioritas").html(KegiatanPrioritas)
+                    $("#_IdKegiatanPrioritas").val(Pisah[1])
                 })
-                $("#_Tahapan").val(Pisah[2])
-                $('#ModalEditTahapan').modal("show")
+                $("#_ProyekPrioritas").val(Pisah[2])
+                $('#ModalEditProyekPrioritas').modal("show")
             })
 
             $("#Edit").click(function() {
                 if ($("#_Periode").val() == "") {
                     alert("Mohon Input Periode")
-                } else if ($("#_Tahapan").val() == "") {
-                    alert('Input Tahapan Belum Benar!')
+                } else if ($("#_ProyekPrioritas").val() == "") {
+                    alert('Input ProyekPrioritas Belum Benar!')
                 } else {
-                    var Tahapan = { Id   : $("#Id").val(),
-                                 _Id   : $("#_IdVisi").val(),
-                                 Tahapan   : $("#_Tahapan").val() }
-                    $.post(BaseURL+"Nasional/EditTahapanRPJMN", Tahapan).done(function(Respon) {
+                    var ProyekPrioritas = { Id   : $("#Id").val(),
+                                 _Id   : $("#_IdKegiatanPrioritas").val(),
+                                 Id_   : $("#_Periode").val(),
+                                 ProyekPrioritas   : $("#_ProyekPrioritas").val() }
+                    $.post(BaseURL+"Nasional/EditProyekPrioritasRPJMN", ProyekPrioritas).done(function(Respon) {
                         if (Respon == '1') {
-                            window.location = BaseURL+"Nasional/TahapanRPJMN"
+                            window.location = BaseURL+"Nasional/ProyekPrioritasRPJMN"
                         } else {
                             alert(Respon)
                         }
@@ -273,18 +273,14 @@
             })
 
             $('#data-table-basic tbody').on('click', '.Hapus', function () {
-                var Tahapan = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"Nasional/HapusTahapanRPJMN", Tahapan).done(function(Respon) {
+                var ProyekPrioritas = { Id: $(this).attr('Hapus') }
+                $.post(BaseURL+"Nasional/HapusProyekPrioritasRPJMN", ProyekPrioritas).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Nasional/TahapanRPJMN"
+                        window.location = BaseURL+"Nasional/ProyekPrioritasRPJMN"
                     } else {
                         alert(Respon)
                     }
                 })                         
-            })
-
-            $('#data-table-basic tbody').on('click', '.Sub', function () {
-                window.location = BaseURL+"Nasional/SubTahapanRPJMN"                   
             })
         })
     </script>
