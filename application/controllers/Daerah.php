@@ -1053,30 +1053,57 @@ public function Instansi() {
     $this->load->view('Daerah/kelola_instansi', $Data);
 }
 	
-	public function InputInstansi(){  
+public function InputInstansi(){  
+    // Validasi tambahan untuk tahun (opsional, bisa dihapus jika tidak perlu)
+    if (empty($_POST['tahun_mulai']) || !is_numeric($_POST['tahun_mulai']) || strlen($_POST['tahun_mulai']) != 4) {
+        echo 'Tahun Mulai tidak valid!';
+        return;
+    }
+    if (empty($_POST['tahun_akhir']) || !is_numeric($_POST['tahun_akhir']) || strlen($_POST['tahun_akhir']) != 4) {
+        echo 'Tahun Akhir tidak valid!';
+        return;
+    }
+    if ($_POST['tahun_mulai'] >= $_POST['tahun_akhir']) {
+        echo 'Tahun Mulai harus lebih kecil dari Tahun Akhir!';
+        return;
+    }
+    
     $_POST['kodewilayah'] = $_SESSION['KodeWilayah'];
-		$_POST['password'] = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $_POST['password'] = password_hash($_POST['password'], PASSWORD_DEFAULT);
     $this->db->insert('akun_instansi',$_POST);
     if ($this->db->affected_rows()){
       echo '1';
     } else {
       echo 'Gagal Menyimpan Data!';
     }
-	}
-	
-	public function EditInstansi(){  
-		$this->db->where('id',$_POST['id']); 
-		if (isset($_POST['password'])) {
-			$_POST['password'] = password_hash($_POST['password'], PASSWORD_DEFAULT);
-		}
-		$this->db->update('akun_instansi', $_POST);
+}
+
+public function EditInstansi(){  
+    // Validasi tambahan untuk tahun (opsional)
+    if (!empty($_POST['tahun_mulai']) && (!is_numeric($_POST['tahun_mulai']) || strlen($_POST['tahun_mulai']) != 4)) {
+        echo 'Tahun Mulai tidak valid!';
+        return;
+    }
+    if (!empty($_POST['tahun_akhir']) && (!is_numeric($_POST['tahun_akhir']) || strlen($_POST['tahun_akhir']) != 4)) {
+        echo 'Tahun Akhir tidak valid!';
+        return;
+    }
+    if (!empty($_POST['tahun_mulai']) && !empty($_POST['tahun_akhir']) && $_POST['tahun_mulai'] >= $_POST['tahun_akhir']) {
+        echo 'Tahun Mulai harus lebih kecil dari Tahun Akhir!';
+        return;
+    }
+    
+    $this->db->where('id',$_POST['id']); 
+    if (isset($_POST['password']) && !empty($_POST['password'])) {
+        $_POST['password'] = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    }
+    $this->db->update('akun_instansi', $_POST);
     if ($this->db->affected_rows()){
       echo '1';
     } else {
       echo 'Gagal Update Data!';
     }
-  }
-
+}
 	public function HapusInstansi(){  
 		$_POST['deleted_at'] = date('Y-m-d H:i:s');
 		$this->db->where('id',$_POST['id']); 
@@ -2055,6 +2082,757 @@ public function DeleteIsuStrategis() {
   $this->db->where('Id', $this->input->post('Id'));
   $this->db->update('IsuStrategisDaerah', $data);
   echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
+}
+
+public function Cascade() {
+    $Header['Halaman'] = 'Cascading';
+    $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                   (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+
+    $Data = [];
+    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
+    
+    // PERBAIKAN: Selalu inisialisasi variabel default
+    $Data['KodeWilayah'] = $KodeWilayah;  // Bisa kosong jika belum filter
+    $Data['CascadeData'] = [];  // Array kosong jika belum ada data
+    $Data['Periods'] = [];
+    $Data['Instansi'] = [];
+
+    if ($KodeWilayah) {
+        $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+        if ($wilayah) {
+            $Data['NamaWilayah'] = $wilayah['Nama'];
+            $Data['Periods'] = $this->db->query(
+                "SELECT DISTINCT TahunMulai, TahunAkhir 
+                 FROM visirpjmd 
+                 WHERE KodeWilayah = ? 
+                 AND deleted_at IS NULL 
+                 ORDER BY TahunMulai",
+                [$KodeWilayah]
+            )->result_array();
+            
+            // Load data cascade jika wilayah valid
+            $Data['CascadeData'] = $this->db->query(
+                "SELECT c.*, 
+                        m.Id as IdMisi, 
+                        m.Misi,
+                        v.Id as IdVisi
+                 FROM cascade_indikator c
+                 LEFT JOIN misirpjmd m ON c.IdMisi = m.Id
+                 LEFT JOIN visirpjmd v ON m._Id = v.Id
+                 WHERE c.deleted_at IS NULL 
+                 AND c.kodewilayah = ?
+                 ORDER BY c.id DESC",
+                [$KodeWilayah]
+            )->result_array();
+            
+            $Data['Instansi'] = $this->db->where('deleted_at IS NULL')
+                                         ->where('kodewilayah', $KodeWilayah)
+                                         ->get('akun_instansi')
+                                         ->result_array();
+        } else {
+            $Data['NamaWilayah'] = 'Wilayah Tidak Ditemukan';
+        }
+    } else {
+        $Data['NamaWilayah'] = '';  // Atau pesan seperti 'Pilih Wilayah Terlebih Dahulu'
+    }
+
+    $this->load->view('Daerah/header', $Header);
+    $this->load->view('Daerah/cascade', $Data);
+}
+
+    // AJAX: Load visi berdasarkan periode
+    public function GetVisiByPeriod() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        $tahunMulai = $this->input->post('tahun_mulai', TRUE);
+        $tahunAkhir = $this->input->post('tahun_akhir', TRUE);
+        if (!is_numeric($tahunMulai) || !is_numeric($tahunAkhir)) {
+            echo json_encode([]);
+            return;
+        }
+        
+        $query = $this->db->query("
+            SELECT Id, Visi 
+            FROM visirpjmd 
+            WHERE TahunMulai = ? 
+            AND TahunAkhir = ?
+            AND KodeWilayah = ?
+            AND deleted_at IS NULL
+            ORDER BY Id
+        ", array($tahunMulai, $tahunAkhir, $_SESSION['KodeWilayah']));
+        
+        echo json_encode($query->result_array());
+    }
+
+    // AJAX: Load misi berdasarkan visi
+    public function GetMisiByVisi() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        $visiId = $this->input->post('visi_id', TRUE);
+        if (!is_numeric($visiId)) {
+            echo json_encode([]);
+            return;
+        }
+        
+        $query = $this->db->query("
+            SELECT m.Id, m.Misi 
+            FROM misirpjmd m
+            WHERE m._Id = ?
+            AND m.KodeWilayah = ?
+            AND m.deleted_at IS NULL
+            ORDER BY m.Id
+        ", array($visiId, $_SESSION['KodeWilayah']));
+        
+        echo json_encode($query->result_array());
+    }
+
+    // AJAX: Load tujuan berdasarkan misi (tidak berubah)
+    public function GetTujuanByMisi() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        $misiId = $this->input->post('misi_id', TRUE);
+        if (!is_numeric($misiId)) {
+            echo json_encode([]);
+            return;
+        }
+        
+        $query = $this->db->query("
+            SELECT t.Id, t.Tujuan 
+            FROM tujuanrpjmd t
+            WHERE t._Id = ?
+            AND t.KodeWilayah = ?
+            AND t.deleted_at IS NULL
+            ORDER BY t.Id
+        ", array($misiId, $_SESSION['KodeWilayah']));
+        
+        echo json_encode($query->result_array());
+    }
+
+    // AJAX: Load sasaran berdasarkan tujuan (tidak berubah)
+    public function GetSasaranByTujuan() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        $tujuanId = $this->input->post('tujuan_id', TRUE);
+        if (!is_numeric($tujuanId)) {
+            echo json_encode([]);
+            return;
+        }
+        
+        $query = $this->db->query("
+            SELECT s.Id, s.Sasaran 
+            FROM sasaranrpjmd s
+            WHERE s._Id = ?
+            AND s.KodeWilayah = ?
+            AND s.deleted_at IS NULL
+            ORDER BY s.Id
+        ", array($tujuanId, $_SESSION['KodeWilayah']));
+        
+        echo json_encode($query->result_array());
+    }
+
+    // Tambah data cascade
+    public function TambahCascade() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    // Debug data yang diterima
+    log_message('debug', 'Data POST: ' . print_r($_POST, true));
+    
+    try {
+        $period = explode('-', $this->input->post('TahunFilter', TRUE));
+        
+        // Validasi data
+        if (count($period) != 2) {
+            echo 'Periode tidak valid';
+            return;
+        }
+        
+        $data = [
+            'kodewilayah' => $_SESSION['KodeWilayah'],
+            'IdMisi' => (int)$this->input->post('Misi', TRUE),
+            'tahun_mulai' => (int)$period[0],
+            'tahun_akhir' => (int)$period[1],
+            'target_1' => $this->input->post('target_1') ? (int)$this->input->post('target_1') : null,
+            'target_2' => $this->input->post('target_2') ? (int)$this->input->post('target_2') : null,
+            'target_3' => $this->input->post('target_3') ? (int)$this->input->post('target_3') : null,
+            'target_4' => $this->input->post('target_4') ? (int)$this->input->post('target_4') : null,
+            'target_5' => $this->input->post('target_5') ? (int)$this->input->post('target_5') : null,
+            'created_at' => date('Y-m-d H:i:s')
+        ];
+        
+        log_message('debug', 'Data untuk insert: ' . print_r($data, true));
+        
+        $this->db->insert('cascade_indikator', $data);
+        
+        if ($this->db->affected_rows()) {
+            echo '1';
+        } else {
+            $error = $this->db->error();
+            log_message('error', 'Database error: ' . $error['message']);
+            echo 'Gagal menyimpan data ke database';
+        }
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error TambahCascade: ' . $e->getMessage());
+        echo 'Terjadi kesalahan sistem';
+    }
+}
+
+    // Edit data cascade
+    // Edit data cascade - Modifikasi untuk menghapus indikator jika misi berubah
+public function EditCascade() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    $id = $this->input->post('id', TRUE);
+    $period = explode('-', $this->input->post('periode', TRUE));
+    $newMisiId = (int)$this->input->post('EditMisi', TRUE);
+
+    // Validasi
+    if (!is_numeric($id)) {
+        echo 'ID tidak valid';
+        return;
+    }
+    if (count($period) != 2 || !is_numeric($period[0]) || !is_numeric($period[1])) {
+        echo 'Periode tidak valid';
+        return;
+    }
+
+    // Ambil data lama
+    $existing = $this->db->where('id', $id)->get('cascade_indikator')->row_array();
+    if (!$existing) {
+        echo 'Data tidak ditemukan';
+        return;
+    }
+
+    $oldMisiId = (int)$existing['IdMisi'];
+
+    // Jika misi berubah
+    if ($newMisiId != $oldMisiId) {
+        // Filter tujuan yang sesuai dengan misi baru
+        $validTujuanIds = $this->db->query("
+            SELECT t.Id 
+            FROM tujuanrpjmd t
+            WHERE t._Id = ? 
+            AND t.KodeWilayah = ?
+            AND t.deleted_at IS NULL
+        ", array($newMisiId, $_SESSION['KodeWilayah']))->result_array();
+        
+        $validTujuanList = array_column($validTujuanIds, 'Id');
+        
+        // Filter tujuan_ids yang masih valid
+        if (!empty($existing['tujuan_ids'])) {
+            $currentTujuanIds = explode(',', $existing['tujuan_ids']);
+            $filteredTujuanIds = array_intersect($currentTujuanIds, $validTujuanList);
+            $newTujuanIds = implode(',', $filteredTujuanIds);
+        } else {
+            $newTujuanIds = '';
+        }
+
+        // Filter sasaran berdasarkan tujuan yang masih valid
+        if (!empty($newTujuanIds)) {
+            $validSasaranIds = $this->db->query("
+                SELECT s.Id 
+                FROM sasaranrpjmd s
+                WHERE s._Id IN (" . $newTujuanIds . ") 
+                AND s.KodeWilayah = ?
+                AND s.deleted_at IS NULL
+            ", array($_SESSION['KodeWilayah']))->result_array();
+            
+            $validSasaranList = array_column($validSasaranIds, 'Id');
+            
+            // Filter sasaran_ids yang masih valid
+            if (!empty($existing['sasaran_ids'])) {
+                $currentSasaranIds = explode(',', $existing['sasaran_ids']);
+                $filteredSasaranIds = array_intersect($currentSasaranIds, $validSasaranList);
+                $newSasaranIds = implode(',', $filteredSasaranIds);
+            } else {
+                $newSasaranIds = '';
+            }
+        } else {
+            $newSasaranIds = '';
+        }
+
+        // Update dengan data yang difilter, dan kosongkan indikator (IKD)
+        $data = [
+            'IdMisi' => $newMisiId,
+            'tujuan_ids' => $newTujuanIds,
+            'sasaran_ids' => $newSasaranIds,
+            'indikator' => null,  // Hapus data IKD jika misi berubah
+            'tahun_mulai' => (int)$period[0],
+            'tahun_akhir' => (int)$period[1],
+            'target_1' => $this->input->post('target_1') ? (int)$this->input->post('target_1') : null,
+            'target_2' => $this->input->post('target_2') ? (int)$this->input->post('target_2') : null,
+            'target_3' => $this->input->post('target_3') ? (int)$this->input->post('target_3') : null,
+            'target_4' => $this->input->post('target_4') ? (int)$this->input->post('target_4') : null,
+            'target_5' => $this->input->post('target_5') ? (int)$this->input->post('target_5') : null,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+    } else {
+        // Jika misi tidak berubah, update normal tanpa memaksa indikator
+        $data = [
+            'IdMisi' => $newMisiId,
+            'tahun_mulai' => (int)$period[0],
+            'tahun_akhir' => (int)$period[1],
+            'target_1' => $this->input->post('target_1') ? (int)$this->input->post('target_1') : null,
+            'target_2' => $this->input->post('target_2') ? (int)$this->input->post('target_2') : null,
+            'target_3' => $this->input->post('target_3') ? (int)$this->input->post('target_3') : null,
+            'target_4' => $this->input->post('target_4') ? (int)$this->input->post('target_4') : null,
+            'target_5' => $this->input->post('target_5') ? (int)$this->input->post('target_5') : null,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+    }
+    
+    $this->db->where('id', $id);
+    $this->db->update('cascade_indikator', $data);
+    if ($this->db->affected_rows()) {
+        echo '1';
+    } else {
+        echo 'Gagal Update Data!';
+    }
+}
+
+    // Hapus data cascade (soft delete)
+    public function HapusCascade() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        $id = $this->input->post('id', TRUE);
+        if (!is_numeric($id)) {
+            echo '0';
+            return;
+        }
+        $this->db->where('id', $id)->update('cascade_indikator', [
+            'deleted_at' => date('Y-m-d H:i:s')
+        ]);
+        echo $this->db->affected_rows() ? '1' : '0';
+    }
+
+ // Di Controller Daerah.php - Tambahkan method baru untuk PD Cascade
+
+public function TambahPdCascade() {
+    try {
+        $id = $this->input->post('id', true);
+        $type = $this->input->post('type', true); // 'pj' atau 'pn'
+        $pd_values = $this->input->post('pd_values', true);
+
+        if (empty($id) || !is_numeric($id)) {
+            throw new Exception('Invalid ID');
+        }
+        if (empty($type) || !in_array($type, ['pj', 'pn'])) {
+            throw new Exception('Invalid PD type');
+        }
+        if (empty($pd_values)) {
+            throw new Exception('PD values harus diisi');
+        }
+
+        // Get existing data dari cascade_indikator
+        $existing = $this->db->where('id', $id)->get('cascade_indikator')->row_array();
+        if (!$existing) {
+            throw new Exception('Data Cascade tidak ditemukan');
+        }
+
+        // Prepare update data berdasarkan type
+        $updateData = ['updated_at' => date('Y-m-d H:i:s')];
+        
+        if ($type === 'pj') {
+            $existingPJ = !empty($existing['pd_penanggung_jawab']) ? explode(',', $existing['pd_penanggung_jawab']) : [];
+            $newPJ = explode(',', $pd_values);
+            $combinedPJ = array_unique(array_merge($existingPJ, $newPJ));
+            $updateData['pd_penanggung_jawab'] = implode(',', array_filter($combinedPJ));
+        } else {
+            $existingPN = !empty($existing['pd_penunjang']) ? explode(',', $existing['pd_penunjang']) : [];
+            $newPN = explode(',', $pd_values);
+            $combinedPN = array_unique(array_merge($existingPN, $newPN));
+            $updateData['pd_penunjang'] = implode(',', array_filter($combinedPN));
+        }
+
+        // Update cascade_indikator (bukan ikd)
+        $this->db->where('id', $id)->update('cascade_indikator', $updateData);
+
+        if ($this->db->affected_rows() > 0) {
+            echo '1';
+        } else {
+            throw new Exception('No changes made');
+        }
+    } catch (Exception $e) {
+        log_message('error', 'Error adding PD Cascade: ' . $e->getMessage());
+        echo $e->getMessage();
+    }
+}
+
+public function EditPDCascade() {  
+    try {
+        $id = $this->input->post('id', true);
+        $pd_penanggung_jawab = $this->input->post('pd_penanggung_jawab', true);
+        $pd_penunjang = $this->input->post('pd_penunjang', true);
+
+        if (empty($id) || !is_numeric($id)) {
+            throw new Exception('ID tidak valid');
+        }
+
+        $updateData = ['updated_at' => date('Y-m-d H:i:s')];
+        
+        // Ubah kondisi: Gunakan isset() agar bisa update ke string kosong
+        if (isset($pd_penanggung_jawab)) {
+            $updateData['pd_penanggung_jawab'] = $pd_penanggung_jawab;  // Bisa kosong untuk hapus semua
+        }
+        
+        if (isset($pd_penunjang)) {
+            $updateData['pd_penunjang'] = $pd_penunjang;  // Bisa kosong untuk hapus semua
+        }
+
+        // Update cascade_indikator
+        $this->db->where('id', $id)->update('cascade_indikator', $updateData);
+        
+        if ($this->db->affected_rows() > 0) {
+            echo '1';
+        } else {
+            echo 'Tidak ada perubahan data';
+        }
+    } catch (Exception $e) {
+        log_message('error', 'Error editing PD Cascade: ' . $e->getMessage());
+        echo $e->getMessage();
+    }
+}
+
+public function TambahTujuanCascade() {
+    try {
+        $id = $this->input->post('id', true);
+        $tujuan_ids = $this->input->post('tujuan_ids', true);
+
+        if (empty($id) || !is_numeric($id)) {
+            throw new Exception('ID tidak valid');
+        }
+        if (empty($tujuan_ids)) {
+            throw new Exception('Tujuan harus dipilih');
+        }
+
+        // Get existing data
+        $existing = $this->db->where('id', $id)->get('cascade_indikator')->row_array();
+        if (!$existing) {
+            throw new Exception('Data Cascade tidak ditemukan');
+        }
+
+        // Combine with existing tujuan_ids
+        $existingTujuan = !empty($existing['tujuan_ids']) ? explode(',', $existing['tujuan_ids']) : [];
+        $newTujuan = explode(',', $tujuan_ids);
+        $combinedTujuan = array_unique(array_merge($existingTujuan, $newTujuan));
+        
+        // Sort untuk konsistensi
+        sort($combinedTujuan);
+        
+        $newTujuanIds = implode(',', array_filter($combinedTujuan));
+        
+        // Debug logging
+        log_message('debug', 'Existing tujuan: ' . $existing['tujuan_ids']);
+        log_message('debug', 'New tujuan: ' . $tujuan_ids);
+        log_message('debug', 'Combined tujuan: ' . $newTujuanIds);
+
+        // Cek apakah ada perubahan
+        if ($existing['tujuan_ids'] === $newTujuanIds) {
+            echo '1'; // Data sama, tetap return success
+            return;
+        }
+
+        $updateData = [
+            'tujuan_ids' => $newTujuanIds,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        $this->db->where('id', $id);
+        $result = $this->db->update('cascade_indikator', $updateData);
+
+        if ($result) {
+            echo '1';
+        } else {
+            $error = $this->db->error();
+            throw new Exception('Database error: ' . $error['message']);
+        }
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error adding Tujuan Cascade: ' . $e->getMessage());
+        echo $e->getMessage();
+    }
+}
+
+  // Update EditTujuanCascade di Controller (Daerah.php)
+public function EditTujuanCascade(){  
+    try {
+        $cascadeId = $this->input->post('id', TRUE);
+        $tujuanIds = $this->input->post('tujuan_ids', TRUE);
+        $deletedTujuanIds = $this->input->post('deleted_tujuan_ids', TRUE);  // ID tujuan yang dihapus
+        
+        // Ambil data lama untuk cek
+        $existing = $this->db->where('id', $cascadeId)->get('cascade_indikator')->row_array();
+        if (!$existing) {
+            throw new Exception('Data Cascade tidak ditemukan');
+        }
+
+        $previousTujuanIds = !empty($existing['tujuan_ids']) ? explode(',', $existing['tujuan_ids']) : [];
+        
+        // Update tujuan_ids
+        $this->db->where('id', $cascadeId); 
+        $this->db->update('cascade_indikator', [
+            'tujuan_ids' => $tujuanIds,
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+        
+        // Jika ada tujuan dihapus, hapus sasaran terkait dan indikator
+        if (!empty($deletedTujuanIds)) {
+            $deletedIdsArray = explode(',', $deletedTujuanIds);
+            
+            // 1. Hapus sasaran terkait dengan tujuan yang dihapus
+            $currentSasaranIds = !empty($existing['sasaran_ids']) ? explode(',', $existing['sasaran_ids']) : [];
+            $sasaranToKeep = [];
+            $sasaranToDelete = [];
+            
+            foreach ($currentSasaranIds as $sasaranId) {
+                $sasaranData = $this->db->where('Id', $sasaranId)->get('sasaranrpjmd')->row_array();
+                if ($sasaranData) {
+                    // Jika sasaran terkait dengan tujuan yang dihapus
+                    if (in_array($sasaranData['_Id'], $deletedIdsArray)) {
+                        $sasaranToDelete[] = $sasaranId;
+                    } else {
+                        $sasaranToKeep[] = $sasaranId;
+                    }
+                }
+            }
+            
+            // Update sasaran_ids dengan yang tersisa
+            if (!empty($sasaranToDelete)) {
+                $this->db->where('id', $cascadeId); 
+                $this->db->update('cascade_indikator', [
+                    'sasaran_ids' => implode(',', $sasaranToKeep),
+                    'updated_at' => date('Y-m-d H:i:s')
+                ]);
+            }
+            
+            // 2. Hapus indikator (IKU/IKD) jika ada sasaran yang dihapus
+            if (!empty($sasaranToDelete)) {
+                $this->db->where('id', $cascadeId); 
+                $this->db->update('cascade_indikator', [
+                    'indikator' => null,  // Hapus IKU/IKD terkait
+                    'updated_at' => date('Y-m-d H:i:s')
+                ]);
+                
+                log_message('debug', 'Indikator dihapus otomatis karena tujuan/sasaran dihapus: ' . $deletedTujuanIds);
+            }
+        }
+        
+        if ($this->db->affected_rows() > 0) {
+            echo '1';
+        } else {
+            echo 'Tidak ada perubahan data';
+        }
+    } catch (Exception $e) {
+        log_message('error', 'Error EditTujuanCascade: ' . $e->getMessage());
+        echo 'Terjadi kesalahan sistem';
+    }
+}
+
+  // New methods for Sasaran Cascade (similar to Tujuan)
+
+  // Di Controller Daerah.php - GANTI method TambahSasaranCascade
+public function TambahSasaranCascade() {
+    try {
+        $id = $this->input->post('id', true);
+        $sasaran_ids = $this->input->post('sasaran_ids', true);
+
+        if (empty($id) || !is_numeric($id)) {
+            throw new Exception('ID tidak valid');
+        }
+        if (empty($sasaran_ids)) {
+            throw new Exception('Sasaran harus dipilih');
+        }
+
+        // Get existing data
+        $existing = $this->db->where('id', $id)->get('cascade_indikator')->row_array();
+        if (!$existing) {
+            throw new Exception('Data Cascade tidak ditemukan');
+        }
+
+        // Combine with existing sasaran_ids
+        $existingSasaran = !empty($existing['sasaran_ids']) ? explode(',', $existing['sasaran_ids']) : [];
+        $newSasaran = explode(',', $sasaran_ids);
+        $combinedSasaran = array_unique(array_merge($existingSasaran, $newSasaran));
+        
+        // Sort untuk konsistensi
+        sort($combinedSasaran);
+        
+        $newSasaranIds = implode(',', array_filter($combinedSasaran));
+        
+        // Debug logging
+        log_message('debug', 'Existing sasaran: ' . $existing['sasaran_ids']);
+        log_message('debug', 'New sasaran: ' . $sasaran_ids);
+        log_message('debug', 'Combined sasaran: ' . $newSasaranIds);
+
+        // Cek apakah ada perubahan
+        if ($existing['sasaran_ids'] === $newSasaranIds) {
+            echo '1'; // Data sama, tetap return success
+            return;
+        }
+
+        $updateData = [
+            'sasaran_ids' => $newSasaranIds,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        $this->db->where('id', $id);
+        $result = $this->db->update('cascade_indikator', $updateData);
+
+        if ($result) {
+            echo '1';
+        } else {
+            $error = $this->db->error();
+            throw new Exception('Database error: ' . $error['message']);
+        }
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error adding Sasaran Cascade: ' . $e->getMessage());
+        echo $e->getMessage();
+    }
+}
+
+ public function EditSasaranCascade() {
+    try {
+        $cascadeId = $this->input->post('id', TRUE);
+        $sasaranIds = $this->input->post('sasaran_ids', TRUE);
+        $deletedSasaranIds = $this->input->post('deleted_sasaran_ids', TRUE);  // Baru: ID sasaran yang dihapus
+        
+        // Ambil data lama untuk cek
+        $existing = $this->db->where('id', $cascadeId)->get('cascade_indikator')->row_array();
+        if (!$existing) {
+            throw new Exception('Data Cascade tidak ditemukan');
+        }
+
+        $previousSasaranIds = !empty($existing['sasaran_ids']) ? explode(',', $existing['sasaran_ids']) : [];
+        
+        // Update sasaran_ids
+        $this->db->where('id', $cascadeId); 
+        $this->db->update('cascade_indikator', [
+            'sasaran_ids' => $sasaranIds,
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+        
+        // Baru: Jika ada sasaran dihapus, kosongkan indikator (IKU/IKD)
+        if (!empty($deletedSasaranIds)) {
+            $this->db->where('id', $cascadeId); 
+            $this->db->update('cascade_indikator', [
+                'indikator' => null,  // Hapus IKU/IKD terkait
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+            
+            log_message('debug', 'Indikator dihapus otomatis karena sasaran dihapus: ' . $deletedSasaranIds);
+        }
+        
+        if ($this->db->affected_rows() > 0) {
+            echo '1';
+        } else {
+            echo 'Tidak ada perubahan data';
+        }
+    } catch (Exception $e) {
+        log_message('error', 'Error EditSasaranCascade: ' . $e->getMessage());
+        echo 'Terjadi kesalahan sistem';
+    }
+}
+
+public function TambahIndikatorCascade() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $id = $this->input->post('id', TRUE);
+    $indikator = $this->input->post('indikator', TRUE);
+    
+    if (empty($id) || !is_numeric($id)) {
+        echo 'ID tidak valid';
+        return;
+    }
+    if (empty($indikator)) {
+        echo 'Indikator harus diisi';
+        return;
+    }
+    
+    // Ambil data existing
+    $existing = $this->db->where('id', $id)->get('cascade_indikator')->row_array();
+    if (!$existing) {
+        echo 'Data Cascade tidak ditemukan';
+        return;
+    }
+    
+    // Jika sudah ada, append dengan newline atau replace jika kosong
+    $currentIndikator = !empty($existing['indikator']) ? $existing['indikator'] . "\n" . $indikator : $indikator;
+    
+    $this->db->where('id', $id)->update('cascade_indikator', [
+        'indikator' => trim($currentIndikator),
+        'updated_at' => date('Y-m-d H:i:s')
+    ]);
+    
+    echo $this->db->affected_rows() ? '1' : 'Gagal menambahkan indikator!';
+}
+
+// Edit Indikator Cascade
+public function EditIndikatorCascade() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $id = $this->input->post('id', TRUE);
+    $indikator = $this->input->post('indikator', TRUE);
+    
+    if (empty($id) || !is_numeric($id)) {
+        echo 'ID tidak valid';
+        return;
+    }
+    if (empty($indikator)) {
+        echo 'Indikator harus diisi';
+        return;
+    }
+    
+    $this->db->where('id', $id)->update('cascade_indikator', [
+        'indikator' => $indikator,
+        'updated_at' => date('Y-m-d H:i:s')
+    ]);
+    
+    echo $this->db->affected_rows() ? '1' : 'Gagal update indikator!';
+}
+
+// Hapus Indikator Cascade
+public function HapusIndikatorCascade() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $id = $this->input->post('id', TRUE);
+    
+    if (empty($id) || !is_numeric($id)) {
+        echo 'ID tidak valid';
+        return;
+    }
+    
+    $this->db->where('id', $id)->update('cascade_indikator', [
+        'indikator' => null,
+        'updated_at' => date('Y-m-d H:i:s')
+    ]);
+    
+    echo $this->db->affected_rows() ? '1' : 'Gagal menghapus indikator!';
 }
 
 }
