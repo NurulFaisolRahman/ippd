@@ -277,9 +277,9 @@
                     <div class="sidebar-submenu" style="display: block;">
                         <a href="<?=base_url('Kementerian/Kementerian')?>">Daftar Kementerian</a>
                         <a href="<?=base_url('Kementerian/SPM')?>">SPM</a>
+                        <a href="<?=base_url('Kementerian/SasaranStrategis')?>">Sasaran Strategis</a>
                         <a href="<?=base_url('Kementerian/ProgramStrategis')?>">Program Strategis</a>
                         <a href="<?=base_url('Kementerian/ProyekStrategis')?>">Proyek Strategis</a>
-                        
                         <br>
                     </div>
                 </div>
@@ -295,22 +295,12 @@
                     </a>
                     <div class="sidebar-submenu">
                         <a href="<?=base_url('Kementerian/PermasalahanPokok')?>">Permasalahan Pokok</a>
+                        <a href="<?=base_url('Kementerian/PotensiDaerah')?>">Potensi Daerah</a>
                         <a href="<?=base_url('Kementerian/IsuKLHS')?>">Isu KLHS</a>
-                        <a href="<?=base_url('Kementerian/IsuStrategis')?>">Isu Strategis</a>
                         <a href="<?=base_url('Kementerian/IsuGlobal')?>">Isu Global</a>
                         <a href="<?=base_url('Kementerian/IsuNasional')?>">Isu Nasional</a>
-                        <br>
-                    </div>
-                </div>
-
-                <div class="sidebar-dropdown">
-                    <a href="#">
-                        <i class="menu-icon fa fa-exclamation-triangle"></i>
-                        <span>Sasaran Strategis </span>
-                        <i class="fa fa-chevron-down"></i>
-                    </a>
-                    <div class="sidebar-submenu">
-                        <a href="<?=base_url('Kementerian/SasaranStrategis')?>">Sasaran Strategis</a>
+                        <a href="<?=base_url('Kementerian/IsuRegional')?>">Isu Regional</a>
+                        <a href="<?=base_url('Kementerian/IsuStrategis')?>">Isu Strategis</a>
                         <br>
                     </div>
                 </div>
