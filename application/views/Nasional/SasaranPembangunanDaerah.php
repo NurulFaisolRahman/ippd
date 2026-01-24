@@ -12,17 +12,20 @@
                             <table id="data-table-basic" class="table table-striped">
                                 <thead>
                                     <tr>
-                                        <th style="width: 10%;" class="text-center">No</th>
-                                        <th style="width: 10%;">Provinsi</th>
-                                        <th style="width: 10%;">Pertumbuhan Ekonomi</th>
-                                        <th style="width: 10%;">Tingkat Kemiskinan</th>
-                                        <th style="width: 10%;">Tingkat Pengangguran Terbuka</th>
-                                        <th style="width: 10%;">Indeks Modal Manusia</th>
-                                        <th style="width: 10%;">Rasio GINI</th>
-                                        <th style="width: 10%;">Intensitas Emisi GRK</th>
-                                        <th style="width: 10%;">Tahun</th>
+                                        <th style="vertical-align: middle;width: 5%;" class="text-center">No</th>
+                                        <th style="vertical-align: middle;width: 8%;">Provinsi</th>
+                                        <th style="vertical-align: middle;width: 8%;">Laju Pertumbuhan Ekonomi (%)</th>
+                                        <th style="vertical-align: middle;width: 8%;">PDRB Per Kapita (Rp Juta)</th>
+                                        <th style="vertical-align: middle;width: 8%;">Kontribusi PDRB (%)</th>
+                                        <th style="vertical-align: middle;width: 8%;">Tingkat Kemiskinan (%)</th>
+                                        <th style="vertical-align: middle;width: 8%;">Rasio GINI</th>
+                                        <th style="vertical-align: middle;width: 8%;">Indeks Modal Manusia</th>                                        
+                                        <th style="vertical-align: middle;width: 8%;">Intensitas Emisi GRK (%)</th>
+                                        <th style="vertical-align: middle;width: 8%;">Indeks Kualitas Lingkungan Hidup</th>
+                                        <th style="vertical-align: middle;width: 8%;">Tingkat Pengangguran Terbuka</th>
+                                        <th style="vertical-align: middle;width: 5%;" class="text-center">Tahun</th> 
                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
-                                        <th style="width: 10%;" class="text-center">Edit</th>
+                                        <th style="vertical-align: middle;width: 10%;" class="text-center">Edit</th>
                                         <?php } ?>
                                     </tr>
                                 </thead>
@@ -32,18 +35,19 @@
                                         <td style="vertical-align: middle;" class="text-center"><?=$No++?></td>
                                         <td style="vertical-align: middle;"><?=$key['Nama']?></td>
                                         <td style="vertical-align: middle;"><?=$key['LPE']?></td>
+                                        <td style="vertical-align: middle;"><?=$key['PDRBPerKapita']?></td>
+                                        <td style="vertical-align: middle;"><?=$key['KontribusiPDRB']?></td>
                                         <td style="vertical-align: middle;"><?=$key['Kemiskinan']?></td>
-                                        <td style="vertical-align: middle;"><?=$key['TPT']?></td>
-                                        <td style="vertical-align: middle;"><?=$key['IMM']?></td>
                                         <td style="vertical-align: middle;"><?=$key['RasioGINI']?></td>
+                                        <td style="vertical-align: middle;"><?=$key['IMM']?></td>
                                         <td style="vertical-align: middle;"><?=$key['IntensitasEmisiGRK']?></td>
-                                        <td style="vertical-align: middle;"><?=$key['Tahun']?></td>
+                                        <td style="vertical-align: middle;"><?=$key['IKLH']?></td>
+                                        <td style="vertical-align: middle;"><?=$key['TPT']?></td>
+                                        <td style="vertical-align: middle;" class="text-center"><?=$key['Tahun']?></td>
                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
-                                        <td class="text-center" style="vertical-align: middle;">
-                                            <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['LPE'].'|'.$key['Kemiskinan'].'|'.$key['TPT'].'|'.$key['IMM'].'|'.$key['RasioGINI'].'|'.$key['IntensitasEmisiGRK'].'|'.$key['Tahun'].'|'.$key['Kode']?>"><i class="notika-icon notika-edit"></i></button>
-                                                <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
-                                            </div>
+                                        <td style="vertical-align: middle;" class="text-center">
+                                            <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['LPE'].'|'.$key['PDRBPerKapita'].'|'.$key['KontribusiPDRB'].'|'.$key['Kemiskinan'].'|'.$key['RasioGINI'].'|'.$key['IMM'].'|'.$key['IntensitasEmisiGRK'].'|'.$key['IKLH'].'|'.$key['TPT'].'|'.$key['Tahun'].'|'.$key['Kode']?>"><i class="notika-icon notika-edit"></i></button>
+                                            <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" Hapus="<?=$key['Id']?>"><i class="notika-icon notika-trash"></i></button>
                                         </td>
                                         <?php } ?>
                                     </tr>
@@ -68,20 +72,20 @@
                             <div class="form-example-int form-horizental">
                                 <div class="form-group">
                                     <div class="row">
-                                        <div class="col-lg-3">
+                                        <div class="col-lg-5">
                                             <label class="hrzn-fm"><b>Tahun</b></label>
                                         </div>
-                                        <div class="col-lg-8">
+                                        <div class="col-lg-5">
                                             <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="Tahun">
+                                                <input type="text" class="form-control input-sm" id="Tahun" placeholder="input disini">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row" style="margin-top: 9px;">
-                                        <div class="col-lg-3">
+                                        <div class="col-lg-5">
                                             <label class="hrzn-fm"><b>Provinsi</b></label>
                                         </div>
-                                        <div style="margin-bottom: 5px;" class="col-lg-8">
+                                        <div style="margin-bottom: 5px;" class="col-lg-5">
                                             <select class="form-control" id="Provinsi">
                                             <?php foreach ($Provinsi as $key) { ?>
                                                 <option value="<?=$key['Kode']?>"><?=$key['Nama']?></option>
@@ -90,62 +94,92 @@
                                         </div>
                                     </div>
                                     <div class="row" style="margin-top: 9px;">
-                                        <div class="col-lg-3">
-                                            <label class="hrzn-fm"><b>Pertumbuhan Ekonomi</b></label>
+                                        <div class="col-lg-5">
+                                            <label class="hrzn-fm"><b>Laju Pertumbuhan Ekonomi</b></label>
                                         </div>
-                                        <div class="col-lg-8">
+                                        <div class="col-lg-5">
                                             <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="LPE">
+                                                <input type="text" class="form-control input-sm" placeholder="input disini" id="LPE">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row" style="margin-top: 9px;">
-                                        <div class="col-lg-3">
+                                        <div class="col-lg-5">
+                                            <label class="hrzn-fm"><b>PDRB Per Kapita</b></label>
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <div class="nk-int-st">
+                                                <input type="text" class="form-control input-sm" placeholder="input disini" id="PDRBPerKapita">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-5">
+                                            <label class="hrzn-fm"><b>Kontribusi PDRB</b></label>
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <div class="nk-int-st">
+                                                <input type="text" class="form-control input-sm" placeholder="input disini" id="KontribusiPDRB">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-5">
                                             <label class="hrzn-fm"><b>Tingkat Kemiskinan</b></label>
                                         </div>
-                                        <div class="col-lg-8">
+                                        <div class="col-lg-5">
                                             <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="Kemiskinan">
+                                                <input type="text" class="form-control input-sm" placeholder="input disini" id="Kemiskinan">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row" style="margin-top: 9px;">
-                                        <div class="col-lg-3">
-                                            <label class="hrzn-fm"><b>Tingkat Pengangguran Terbuka</b></label>
-                                        </div>
-                                        <div class="col-lg-8">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="TPT">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row" style="margin-top: 9px;">
-                                        <div class="col-lg-3">
-                                            <label class="hrzn-fm"><b>Indeks Modal Manusia</b></label>
-                                        </div>
-                                        <div class="col-lg-8">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="IMM">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row" style="margin-top: 9px;">
-                                        <div class="col-lg-3">
+                                        <div class="col-lg-5">
                                             <label class="hrzn-fm"><b>Rasio GINI</b></label>
                                         </div>
-                                        <div class="col-lg-8">
+                                        <div class="col-lg-5">
                                             <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="RasioGINI">
+                                                <input type="text" class="form-control input-sm" placeholder="input disini" id="RasioGINI">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row" style="margin-top: 9px;">
-                                        <div class="col-lg-3">
+                                        <div class="col-lg-5">
+                                            <label class="hrzn-fm"><b>Indeks Modal Manusia</b></label>
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <div class="nk-int-st">
+                                                <input type="text" class="form-control input-sm" placeholder="input disini" id="IMM">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-5">
                                             <label class="hrzn-fm"><b>Intensitas Emisi GRK</b></label>
                                         </div>
-                                        <div class="col-lg-8">
+                                        <div class="col-lg-5">
                                             <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="IntensitasEmisiGRK">
+                                                <input type="text" class="form-control input-sm" placeholder="input disini" id="IntensitasEmisiGRK">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-5">
+                                            <label class="hrzn-fm"><b>Indeks Kualitas Lingkungan Hidup</b></label>
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <div class="nk-int-st">
+                                                <input type="text" class="form-control input-sm" placeholder="input disini" id="IKLH">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-5">
+                                            <label class="hrzn-fm"><b>Tingkat Pengangguran Terbuka</b></label>
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <div class="nk-int-st">
+                                                <input type="text" class="form-control input-sm" placeholder="input disini" id="TPT">
                                             </div>
                                         </div>
                                     </div>
@@ -153,9 +187,9 @@
                             </div>
                             <div class="form-example-int">
                                 <div class="row">
-                                    <div class="col-lg-3">
+                                    <div class="col-lg-5">
                                     </div>
-                                    <div class="col-lg-8">
+                                    <div class="col-lg-5">
                                         <button class="btn btn-success notika-btn-success" id="Input"><b>SIMPAN</b></button>
                                     </div>
                                 </div>
@@ -178,21 +212,21 @@
                             <div class="form-example-int form-horizental">
                                 <div class="form-group">
                                     <div class="row">
-                                        <div class="col-lg-3">
+                                        <div class="col-lg-5">
                                             <label class="hrzn-fm"><b>Tahun</b></label>
                                         </div>
-                                        <div class="col-lg-8">
+                                        <div class="col-lg-5">
                                             <div class="nk-int-st">
                                                 <input type="hidden" class="form-control input-sm" id="Id">
-                                                <input type="text" class="form-control input-sm" id="_Tahun">
+                                                <input type="text" class="form-control input-sm" id="_Tahun" placeholder="input disini">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row" style="margin-top: 9px;">
-                                        <div class="col-lg-3">
+                                        <div class="col-lg-5">
                                             <label class="hrzn-fm"><b>Provinsi</b></label>
                                         </div>
-                                        <div style="margin-bottom: 5px;" class="col-lg-8">
+                                        <div style="margin-bottom: 5px;" class="col-lg-5">
                                             <select class="form-control" id="_Provinsi">
                                             <?php foreach ($Provinsi as $key) { ?>
                                                 <option value="<?=$key['Kode']?>"><?=$key['Nama']?></option>
@@ -201,62 +235,92 @@
                                         </div>
                                     </div>
                                     <div class="row" style="margin-top: 9px;">
-                                        <div class="col-lg-3">
-                                            <label class="hrzn-fm"><b>Pertumbuhan Ekonomi</b></label>
+                                        <div class="col-lg-5">
+                                            <label class="hrzn-fm"><b>Laju Pertumbuhan Ekonomi</b></label>
                                         </div>
-                                        <div class="col-lg-8">
+                                        <div class="col-lg-5">
                                             <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="_LPE">
+                                                <input type="text" class="form-control input-sm" placeholder="input disini" id="_LPE">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row" style="margin-top: 9px;">
-                                        <div class="col-lg-3">
+                                        <div class="col-lg-5">
+                                            <label class="hrzn-fm"><b>PDRB Per Kapita</b></label>
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <div class="nk-int-st">
+                                                <input type="text" class="form-control input-sm" placeholder="input disini" id="_PDRBPerKapita">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-5">
+                                            <label class="hrzn-fm"><b>Kontribusi PDRB</b></label>
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <div class="nk-int-st">
+                                                <input type="text" class="form-control input-sm" placeholder="input disini" id="_KontribusiPDRB">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-5">
                                             <label class="hrzn-fm"><b>Tingkat Kemiskinan</b></label>
                                         </div>
-                                        <div class="col-lg-8">
+                                        <div class="col-lg-5">
                                             <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="_Kemiskinan">
+                                                <input type="text" class="form-control input-sm" placeholder="input disini" id="_Kemiskinan">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row" style="margin-top: 9px;">
-                                        <div class="col-lg-3">
-                                            <label class="hrzn-fm"><b>Tingkat Pengangguran Terbuka</b></label>
-                                        </div>
-                                        <div class="col-lg-8">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="_TPT">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row" style="margin-top: 9px;">
-                                        <div class="col-lg-3">
-                                            <label class="hrzn-fm"><b>Indeks Modal Manusia</b></label>
-                                        </div>
-                                        <div class="col-lg-8">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="_IMM">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row" style="margin-top: 9px;">
-                                        <div class="col-lg-3">
+                                        <div class="col-lg-5">
                                             <label class="hrzn-fm"><b>Rasio GINI</b></label>
                                         </div>
-                                        <div class="col-lg-8">
+                                        <div class="col-lg-5">
                                             <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="_RasioGINI">
+                                                <input type="text" class="form-control input-sm" placeholder="input disini" id="_RasioGINI">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row" style="margin-top: 9px;">
-                                        <div class="col-lg-3">
+                                        <div class="col-lg-5">
+                                            <label class="hrzn-fm"><b>Indeks Modal Manusia</b></label>
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <div class="nk-int-st">
+                                                <input type="text" class="form-control input-sm" placeholder="input disini" id="_IMM">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-5">
                                             <label class="hrzn-fm"><b>Intensitas Emisi GRK</b></label>
                                         </div>
-                                        <div class="col-lg-8">
+                                        <div class="col-lg-5">
                                             <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="_IntensitasEmisiGRK">
+                                                <input type="text" class="form-control input-sm" placeholder="input disini" id="_IntensitasEmisiGRK">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-5">
+                                            <label class="hrzn-fm"><b>Indeks Kualitas Lingkungan Hidup</b></label>
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <div class="nk-int-st">
+                                                <input type="text" class="form-control input-sm" placeholder="input disini" id="_IKLH">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 9px;">
+                                        <div class="col-lg-5">
+                                            <label class="hrzn-fm"><b>Tingkat Pengangguran Terbuka</b></label>
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <div class="nk-int-st">
+                                                <input type="text" class="form-control input-sm" placeholder="input disini" id="_TPT">
                                             </div>
                                         </div>
                                     </div>
@@ -297,24 +361,33 @@
                     alert("Input Tahun Belum Benar!")
                 } else if ($("#LPE").val() == "") {
                     alert('Input Pertumbuhan Ekonomi Belum Benar!')
+                } else if ($("#PDRBPerKapita").val() == "") {
+                    alert('Input PDRB Per Kapita Belum Benar!')
+                } else if ($("#KontribusiPDRB").val() == "") {
+                    alert('Input Kontribusi PDRB Belum Benar!')
                 } else if ($("#Kemiskinan").val() == "") {
                     alert('Input Tingkat Kemiskinan Belum Benar!')
-                } else if ($("#TPT").val() == "") {
-                    alert('Input Tingkat Penngguran Terbuka Belum Benar!')
-                } else if ($("#IMM").val() == "") {
-                    alert('Input Indeks Modal Manusia Belum Benar!')
                 } else if ($("#RasioGINI").val() == "") {
                     alert('Input Rasio GINI Belum Benar!')
+                } else if ($("#IMM").val() == "") {
+                    alert('Input Indeks Modal Manusia Belum Benar!')
                 } else if ($("#IntensitasEmisiGRK").val() == "") {
                     alert('Input Intensitas Emisi GRK Belum Benar!')
+                } else if ($("#IKLH").val() == "") {
+                    alert('Input Indeks Kualitas Lingkungan Hidup Belum Benar!')
+                } else if ($("#TPT").val() == "") {
+                    alert('Input Tingkat Penngguran Terbuka Belum Benar!')
                 } else {
                     var SasaranPembangunanDaerah = { Provinsi           : $("#Provinsi").val(),
                                                      LPE                : $("#LPE").val(),
+                                                     PDRBPerKapita      : $("#PDRBPerKapita").val(),
+                                                     KontribusiPDRB     : $("#KontribusiPDRB").val(),
                                                      Kemiskinan         : $("#Kemiskinan").val(),
-                                                     TPT                : $("#TPT").val(),
-                                                     IMM                : $("#IMM").val(),
                                                      RasioGINI          : $("#RasioGINI").val(),
+                                                     IMM                : $("#IMM").val(),
                                                      IntensitasEmisiGRK : $("#IntensitasEmisiGRK").val(),
+                                                     IKLH               : $("#IKLH").val(),
+                                                     TPT                : $("#TPT").val(),
                                                      Tahun              : $("#Tahun").val() }
                     $.post(BaseURL+"Nasional/InputSasaranPembangunanDaerah", SasaranPembangunanDaerah).done(function(Respon) {
                         if (Respon == '1') {
@@ -331,13 +404,16 @@
                 var Pisah = Data.split("|");
                 $("#Id").val(Pisah[0])
                 $("#_LPE").val(Pisah[1])
-                $("#_Kemiskinan").val(Pisah[2])
-                $("#_TPT").val(Pisah[3])
-                $("#_IMM").val(Pisah[4])
+                $("#_PDRBPerKapita").val(Pisah[2])
+                $("#_KontribusiPDRB").val(Pisah[3])
+                $("#_Kemiskinan").val(Pisah[4])
                 $("#_RasioGINI").val(Pisah[5])
-                $("#_IntensitasEmisiGRK").val(Pisah[6])
-                $("#_Tahun").val(Pisah[7])
-                $("#_Provinsi").val(Pisah[8])
+                $("#_IMM").val(Pisah[6])
+                $("#_IntensitasEmisiGRK").val(Pisah[7])
+                $("#_IKLH").val(Pisah[8])
+                $("#_TPT").val(Pisah[9])
+                $("#_Tahun").val(Pisah[10])
+                $("#_Provinsi").val(Pisah[11])
                 $('#ModalEditSasaranPembangunanDaerah').modal("show")
             })
 
@@ -346,25 +422,34 @@
                     alert("Input Tahun Belum Benar!")
                 } else if ($("#_LPE").val() == "") {
                     alert('Input Pertumbuhan Ekonomi Belum Benar!')
+                } else if ($("#_PDRBPerKapita").val() == "") {
+                    alert('Input PDRB Per Kapita Belum Benar!')
+                } else if ($("#_KontribusiPDRB").val() == "") {
+                    alert('Input Kontribusi PDRB Belum Benar!')
                 } else if ($("#_Kemiskinan").val() == "") {
                     alert('Input Tingkat Kemiskinan Belum Benar!')
-                } else if ($("#_TPT").val() == "") {
-                    alert('Input Tingkat Penngguran Terbuka Belum Benar!')
-                } else if ($("#_IMM").val() == "") {
-                    alert('Input Indeks Modal Manusia Belum Benar!')
                 } else if ($("#_RasioGINI").val() == "") {
                     alert('Input Rasio GINI Belum Benar!')
+                } else if ($("#_IMM").val() == "") {
+                    alert('Input Indeks Modal Manusia Belum Benar!')
                 } else if ($("#_IntensitasEmisiGRK").val() == "") {
                     alert('Input Intensitas Emisi GRK Belum Benar!')
+                } else if ($("#_IKLH").val() == "") {
+                    alert('Input Indeks Kualitas Lingkungan Hidup Belum Benar!')
+                } else if ($("_TPT").val() == "") {
+                    alert('Input Tingkat Penngguran Terbuka Belum Benar!')
                 } else {
                     var SasaranPembangunanDaerah = { Id                 : $("#Id").val(),
                                                      Provinsi           : $("#_Provinsi").val(),
                                                      LPE                : $("#_LPE").val(),
+                                                     PDRBPerKapita      : $("#_PDRBPerKapita").val(),
+                                                     KontribusiPDRB     : $("#_KontribusiPDRB").val(),
                                                      Kemiskinan         : $("#_Kemiskinan").val(),
-                                                     TPT                : $("#_TPT").val(),
-                                                     IMM                : $("#_IMM").val(),
                                                      RasioGINI          : $("#_RasioGINI").val(),
+                                                     IMM                : $("#_IMM").val(),
                                                      IntensitasEmisiGRK : $("#_IntensitasEmisiGRK").val(),
+                                                     IKLH               : $("#_IKLH").val(),
+                                                     TPT                : $("#_TPT").val(),
                                                      Tahun              : $("#_Tahun").val() }
                     $.post(BaseURL+"Nasional/EditSasaranPembangunanDaerah", SasaranPembangunanDaerah).done(function(Respon) {
                         if (Respon == '1') {
