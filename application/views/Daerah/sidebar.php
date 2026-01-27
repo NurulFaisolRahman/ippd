@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="<?=base_url()?>css/notika-custom-icon.css">
     <link rel="stylesheet" href="<?=base_url()?>css/data-table/bootstrap-table.css">
     <link rel="stylesheet" href="<?=base_url()?>css/data-table/bootstrap-editable.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <!-- Custom CSS -->
     <style>
@@ -26,6 +27,14 @@
             width: 20px;
             text-align: center;
             color: #20c997;
+        }
+
+        .bi {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            color: #20c997;
+            font-size: 1.75rem;
         }
         
         /* Sidebar Styles */
@@ -268,6 +277,19 @@
             <ul class="sidebar-menu">
                 <br>
 
+                 <!-- Akun -->
+                <div class="sidebar-dropdown">
+                    <a href="#">
+                        <i class="bi bi-person-circle"></i>
+                        <span>Daftar Akun Instansi</span>
+                        <i class="fa fa-chevron-down"></i>
+                    </a>
+                    <div class="sidebar-submenu">
+                        <a href="<?=base_url('Daerah/Instansi')?>">Daftar Instansi</a>
+                        <br>
+                    </div>
+                </div>
+
                 <!-- RPJPD -->
                 <div class="sidebar-dropdown">
                     <a href="#">
@@ -310,7 +332,6 @@
                         <i class="fa fa-chevron-down"></i>
                     </a>
                     <div class="sidebar-submenu">
-                        <a href="<?=base_url('Daerah/Instansi')?>">Daftar Instansi</a>
                         <a href="<?=base_url('Daerah/Iku')?>">IKU</a>
                         <a href="<?=base_url('Daerah/Ikd')?>">IKD</a>
                         <a href="<?=base_url('Daerah/cascade')?>">Cascade</a>
@@ -321,7 +342,7 @@
                 <!-- Isu Daerah -->
                 <div class="sidebar-dropdown">
                     <a href="#">
-                        <i class="menu-icon fa fa-exclamation-triangle"></i>
+                        <i class="bi bi-briefcase-fill"></i>
                         <span>Isu Daerah</span>
                         <i class="fa fa-chevron-down"></i>
                     </a>
@@ -329,13 +350,18 @@
                         <a href="<?=base_url('Daerah/PotensiDaerah')?>">Potensi Daerah</a>
                         <a href="<?=base_url('Daerah/PermasalahanPokok')?>">Permasalahan Pokok</a>
                         <a href="<?=base_url('Daerah/IsuKLHS')?>">Isu KLHS</a>
-                        <a href="<?=base_url('Daerah/IsuStrategisDaerah')?>">Isu Strategis</a>
+                        
                         <br>
                     </div>
                 </div>
+
+               
             </ul>
         </div>
     </div>
+
+    
+
 
 
     <script>

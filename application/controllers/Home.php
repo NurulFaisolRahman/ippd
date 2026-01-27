@@ -27,33 +27,62 @@ class Home extends CI_Controller {
 	// }
 
 	public function Login(){  
-    $User = $this->db->get_where('akun', array('Username' => htmlentities($_POST['Username'])));
-		if ($User->num_rows() == 0) {
-			echo "Username Salah!";
-		}
-		else {
-			$Akun = $User->result_array();
-			if (password_verify($_POST['Password'], $Akun[0]['Password'])) {
-        if ($Akun[0]['Level'] == '0') {
-          $Session = array('Admin' => true,'Level' => $Akun[0]['Level']);
-          $this->session->set_userdata($Session);
-          echo $Akun[0]['Level'];
-        } else if ($Akun[0]['Level'] == '1') {
-          $Session = array('Admin' => true,'Kementerian' => '','Level' => $Akun[0]['Level']);
-          $this->session->set_userdata($Session);
-          echo $Akun[0]['Level'];
-        } else if ($Akun[0]['Level'] == '2') {
-					$Session = array('Admin' => true,'Provinsi' => '','Level' => $Akun[0]['Level'],'KodeWilayah' => $Akun[0]['KodeWilayah']);
-          $this->session->set_userdata($Session);
-          echo $Akun[0]['Level'];
-        } else if ($Akun[0]['Level'] == '3') {
-					$Session = array('Admin' => true,'Daerah' => '','Level' => $Akun[0]['Level'],'KodeWilayah' => $Akun[0]['KodeWilayah']);
-          $this->session->set_userdata($Session);
-          echo $Akun[0]['Level'];
-        } 
-			} else {
-				echo "Password Salah!";
-			}
-		}	
-  }
+    $username = htmlentities($_POST['Username']);
+    $password = $_POST['Password'];
+
+    // 1. Cek di tabel 'akun' (Biasanya Level 0, 1, 2, 3)
+    $User = $this->db->get_where('akun', array('Username' => $username));
+    
+    // 2. Jika tidak ada, cek di tabel 'akun_instansi' (Level 4)
+    if ($User->num_rows() == 0) {
+        // Pada akun_instansi, kita gunakan kolom 'nama' sebagai username
+        $User = $this->db->get_where('akun_instansi', array('nama' => $username));
+    }
+
+    if ($User->num_rows() == 0) {
+        echo "Username Salah!";
+    }
+    else {
+        $Akun = $User->result_array();
+        
+        // Cek password (mengantisipasi perbedaan nama kolom P kapital atau kecil)
+        $pass_db = isset($Akun[0]['Password']) ? $Akun[0]['Password'] : $Akun[0]['password'];
+
+        if (password_verify($password, $pass_db)) {
+            $level = $Akun[0]['Level'];
+
+            // Logika Session berdasarkan Level
+            if ($level == '0') {
+                $Session = array('Admin' => true, 'Level' => $level);
+                $this->session->set_userdata($Session);
+                echo $level;
+            } else if ($level == '1') {
+                $Session = array('Admin' => true, 'Kementerian' => '', 'Level' => $level);
+                $this->session->set_userdata($Session);
+                echo $level;
+            } else if ($level == '2') {
+                $Session = array('Admin' => true, 'Provinsi' => '', 'Level' => $level, 'KodeWilayah' => $Akun[0]['KodeWilayah']);
+                $this->session->set_userdata($Session);
+                echo $level;
+            } else if ($level == '3') {
+                $Session = array('Admin' => true, 'Level' => $level, 'KodeWilayah' => $Akun[0]['KodeWilayah']);
+                $this->session->set_userdata($Session);
+                echo $level;
+            } else if ($level == '4') {
+                // Sesi Khusus untuk Instansi (Tabel akun_instansi)
+                $Session = array(
+                    'Admin' => true, 
+                    'Instansi' => true, 
+                    'Level' => $level, 
+                    'KodeWilayah' => $Akun[0]['kodewilayah'], // Sesuai gambar: huruf kecil
+                    'NamaInstansi' => $Akun[0]['nama']
+                );
+                $this->session->set_userdata($Session);
+                echo $level;
+            } 
+        } else {
+            echo "Password Salah!";
+        }
+    }   
+}
 }
