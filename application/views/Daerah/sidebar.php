@@ -281,10 +281,11 @@
                 <div class="sidebar-dropdown">
                     <a href="#">
                         <i class="bi bi-person-circle"></i>
-                        <span>Daftar Akun Instansi</span>
+                        <span>Daftar Urusan & Akun </span>
                         <i class="fa fa-chevron-down"></i>
                     </a>
                     <div class="sidebar-submenu">
+                         <a href="<?=base_url('Daerah/UrusanPD')?>">Daftar Urusan</a>
                         <a href="<?=base_url('Daerah/Instansi')?>">Daftar Instansi</a>
                         <br>
                     </div>

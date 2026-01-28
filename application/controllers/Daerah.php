@@ -1021,99 +1021,150 @@ public function SasaranRPJMD() {
 
 public function Instansi() {
     $Header['Halaman'] = 'Cascading';
-    $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
-                   (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
 
-    log_message('debug', 'KodeWilayah diterima untuk Instansi: ' . $KodeWilayah);
+    // List urusan untuk dropdown
+    $Data['Urusan'] = $this->db
+        ->where('deleted_at IS NULL', null, false)
+        ->order_by('nama_urusan', 'ASC')
+        ->get('urusan_pd')
+        ->result_array();
 
-    $Data = [];
-    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
+    // List instansi
+    $Data['Akun'] = $this->db
+        ->where('deleted_at IS NULL', null, false)
+        ->order_by('id', 'DESC')
+        ->get('akun_instansi')
+        ->result_array();
 
-    if ($KodeWilayah) {
-        $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-        if ($wilayah) {
-            $Data['KodeWilayah'] = $KodeWilayah;
-            $Data['NamaWilayah'] = $wilayah['Nama'];
-            $Data['Akun'] = $this->db->query("SELECT * FROM `akun_instansi` WHERE deleted_at IS NULL AND kodewilayah = '$KodeWilayah'")->result_array();
-        } else {
-            $Data['KodeWilayah'] = '';
-            $Data['NamaWilayah'] = '';
-            $Data['Akun'] = $this->db->query("SELECT * FROM `akun_instansi` WHERE deleted_at IS NULL")->result_array();
-            log_message('error', 'KodeWilayah ' . $KodeWilayah . ' tidak ditemukan di tabel kodewilayah, menampilkan semua instansi');
-        }
-    } else {
-        $Data['KodeWilayah'] = '';
-        $Data['NamaWilayah'] = '';
-        $Data['Akun'] = $this->db->query("SELECT * FROM `akun_instansi` WHERE deleted_at IS NULL")->result_array();
-        log_message('debug', 'Tidak ada KodeWilayah, menampilkan semua instansi');
+    // Map urusan id => nama
+    $map = [];
+    foreach ($Data['Urusan'] as $u) {
+        $map[$u['id']] = $u['nama_urusan'];
     }
 
-    log_message('debug', 'Jumlah instansi: ' . count($Data['Akun']));
+    // Tambah field urusan_nama untuk tampil
+    foreach ($Data['Akun'] as &$a) {
+        $ids = [];
+        if (!empty($a['urusan_ids'])) {
+            $ids = array_filter(array_map('trim', explode(',', $a['urusan_ids'])));
+        }
+        $names = [];
+        foreach ($ids as $id) {
+            if (isset($map[$id])) $names[] = $map[$id];
+        }
+        $a['urusan_nama'] = !empty($names) ? implode(', ', $names) : '-';
+    }
+    unset($a);
+
     $this->load->view('Daerah/header', $Header);
     $this->load->view('Daerah/kelola_instansi', $Data);
 }
+
 	
-public function InputInstansi(){  
-    // Validasi tambahan untuk tahun (opsional, bisa dihapus jika tidak perlu)
-    if (empty($_POST['tahun_mulai']) || !is_numeric($_POST['tahun_mulai']) || strlen($_POST['tahun_mulai']) != 4) {
-        echo 'Tahun Mulai tidak valid!';
+public function InputInstansi() {
+
+    // validasi tahun
+    $tahunMulai = (int)$this->input->post('tahun_mulai', TRUE);
+    $tahunAkhir = (int)$this->input->post('tahun_akhir', TRUE);
+
+    if (!$tahunMulai || strlen((string)$tahunMulai) != 4) { echo 'Tahun Mulai tidak valid!'; return; }
+    if (!$tahunAkhir || strlen((string)$tahunAkhir) != 4) { echo 'Tahun Akhir tidak valid!'; return; }
+    if ($tahunMulai >= $tahunAkhir) { echo 'Tahun Mulai harus lebih kecil dari Tahun Akhir!'; return; }
+
+    // ✅ ambil urusan_ids dari form (array)
+    $urusanArr = $this->input->post('urusan_ids'); // array dari dropdown multiple
+    if (!is_array($urusanArr) || count(array_filter($urusanArr)) < 1) {
+        echo 'Urusan wajib dipilih minimal 1!';
         return;
     }
-    if (empty($_POST['tahun_akhir']) || !is_numeric($_POST['tahun_akhir']) || strlen($_POST['tahun_akhir']) != 4) {
-        echo 'Tahun Akhir tidak valid!';
+
+    // rapikan: unique + numeric + sort
+    $urusanArr = array_values(array_unique(array_filter(array_map('intval', $urusanArr))));
+    sort($urusanArr);
+
+    // cek valid urusan ada di DB
+    $validCount = $this->db->where_in('id', $urusanArr)
+        ->where('deleted_at IS NULL', null, false)
+        ->count_all_results('urusan_pd');
+
+    if ($validCount !== count($urusanArr)) {
+        echo 'Urusan tidak valid!';
         return;
     }
-    if ($_POST['tahun_mulai'] >= $_POST['tahun_akhir']) {
-        echo 'Tahun Mulai harus lebih kecil dari Tahun Akhir!';
-        return;
-    }
-    
-    $_POST['kodewilayah'] = $_SESSION['KodeWilayah'];
-    $_POST['password'] = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    $this->db->insert('akun_instansi',$_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Menyimpan Data!';
-    }
+
+    $data = [
+        'kodewilayah' => $_SESSION['KodeWilayah'],
+        'nama'        => $this->input->post('nama', TRUE),
+        'password'    => password_hash($this->input->post('password', TRUE), PASSWORD_DEFAULT),
+        'tahun_mulai' => $tahunMulai,
+        'tahun_akhir' => $tahunAkhir,
+        'Level'       => 2, // default instansi
+        'urusan_ids'  => implode(',', $urusanArr),
+        'created_at'  => date('Y-m-d H:i:s'),
+        'updated_at'  => date('Y-m-d H:i:s')
+    ];
+
+    if (trim($data['nama']) === '') { echo 'Nama instansi wajib diisi!'; return; }
+    if (trim($this->input->post('password', TRUE)) === '') { echo 'Password wajib diisi!'; return; }
+
+    $this->db->insert('akun_instansi', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Menyimpan Data!';
 }
 
-public function EditInstansi(){  
-    // Validasi tambahan untuk tahun (opsional)
-    if (!empty($_POST['tahun_mulai']) && (!is_numeric($_POST['tahun_mulai']) || strlen($_POST['tahun_mulai']) != 4)) {
-        echo 'Tahun Mulai tidak valid!';
+
+public function EditInstansi() {
+
+    $id = (int)$this->input->post('id', TRUE);
+    if ($id <= 0) { echo 'ID tidak valid!'; return; }
+
+    $tahunMulai = (int)$this->input->post('tahun_mulai', TRUE);
+    $tahunAkhir = (int)$this->input->post('tahun_akhir', TRUE);
+
+    if (!$tahunMulai || strlen((string)$tahunMulai) != 4) { echo 'Tahun Mulai tidak valid!'; return; }
+    if (!$tahunAkhir || strlen((string)$tahunAkhir) != 4) { echo 'Tahun Akhir tidak valid!'; return; }
+    if ($tahunMulai >= $tahunAkhir) { echo 'Tahun Mulai harus lebih kecil dari Tahun Akhir!'; return; }
+
+    // ✅ urusan wajib minimal 1
+    $urusanArr = $this->input->post('urusan_ids');
+    if (!is_array($urusanArr) || count(array_filter($urusanArr)) < 1) {
+        echo 'Urusan wajib dipilih minimal 1!';
         return;
     }
-    if (!empty($_POST['tahun_akhir']) && (!is_numeric($_POST['tahun_akhir']) || strlen($_POST['tahun_akhir']) != 4)) {
-        echo 'Tahun Akhir tidak valid!';
+
+    $urusanArr = array_values(array_unique(array_filter(array_map('intval', $urusanArr))));
+    sort($urusanArr);
+
+    $validCount = $this->db->where_in('id', $urusanArr)
+        ->where('deleted_at IS NULL', null, false)
+        ->count_all_results('urusan_pd');
+
+    if ($validCount !== count($urusanArr)) {
+        echo 'Urusan tidak valid!';
         return;
     }
-    if (!empty($_POST['tahun_mulai']) && !empty($_POST['tahun_akhir']) && $_POST['tahun_mulai'] >= $_POST['tahun_akhir']) {
-        echo 'Tahun Mulai harus lebih kecil dari Tahun Akhir!';
-        return;
+
+    $data = [
+        'nama'        => $this->input->post('nama', TRUE),
+        'tahun_mulai' => $tahunMulai,
+        'tahun_akhir' => $tahunAkhir,
+        'urusan_ids'  => implode(',', $urusanArr),
+        'updated_at'  => date('Y-m-d H:i:s')
+    ];
+
+    if (trim($data['nama']) === '') { echo 'Nama instansi wajib diisi!'; return; }
+
+    // password hanya jika diisi
+    $pwd = trim((string)$this->input->post('password', TRUE));
+    if ($pwd !== '') {
+        $data['password'] = password_hash($pwd, PASSWORD_DEFAULT);
     }
-    
-    $this->db->where('id',$_POST['id']); 
-    if (isset($_POST['password']) && !empty($_POST['password'])) {
-        $_POST['password'] = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    }
-    $this->db->update('akun_instansi', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Update Data!';
-    }
+
+    $this->db->where('id', $id);
+    $this->db->update('akun_instansi', $data);
+
+    echo $this->db->affected_rows() ? '1' : 'Tidak ada perubahan';
 }
-	public function HapusInstansi(){  
-		$_POST['deleted_at'] = date('Y-m-d H:i:s');
-		$this->db->where('id',$_POST['id']); 
-		$this->db->update('akun_instansi', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Hapus Data!';
-    }
-  }
+
   
 public function IKU() {
         $Header['Halaman'] = 'Cascading';
@@ -2835,6 +2886,107 @@ public function HapusIndikatorCascade() {
     echo $this->db->affected_rows() ? '1' : 'Gagal menghapus indikator!';
 }
 
+public function UrusanPD() {
+    $Header['Halaman'] = 'Daerah';
+
+    $this->db->where('deleted_at IS NULL', null, false);
+    $Data['Urusan'] = $this->db->order_by('id', 'DESC')->get('urusan_pd')->result_array();
+
+    $this->load->view('Daerah/header', $Header);
+    $this->load->view('Daerah/Urusanpd', $Data);
 }
+
+public function InputUrusanPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+
+    try {
+        $nama = trim($this->input->post('nama_urusan', TRUE));
+        if ($nama === '') {
+            throw new Exception('Nama urusan harus diisi');
+        }
+
+        $data = [
+            'nama_urusan' => $nama,
+            'created_at'  => date('Y-m-d H:i:s')
+        ];
+
+        $this->db->insert('urusan_pd', $data);
+        echo $this->db->affected_rows() ? '1' : 'Gagal menyimpan data';
+    } catch (Exception $e) {
+        log_message('error', 'InputUrusanPD: ' . $e->getMessage());
+        echo $e->getMessage();
+    }
+}
+
+public function EditUrusanPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+
+    try {
+        $id   = (int) $this->input->post('id', TRUE);
+        $nama = trim($this->input->post('nama_urusan', TRUE));
+
+        if ($id <= 0) {
+            throw new Exception('ID tidak valid');
+        }
+        if ($nama === '') {
+            throw new Exception('Nama urusan harus diisi');
+        }
+
+        // Cek data
+        $this->db->where('id', $id);
+        $this->db->where('deleted_at IS NULL', null, false);
+        $exist = $this->db->get('urusan_pd')->row_array();
+
+        if (!$exist) {
+            throw new Exception('Data urusan tidak ditemukan');
+        }
+
+        $update = [
+            'nama_urusan' => $nama,
+            'updated_at'  => date('Y-m-d H:i:s')
+        ];
+
+        $this->db->where('id', $id);
+        $this->db->update('urusan_pd', $update);
+
+        echo $this->db->affected_rows() ? '1' : 'Tidak ada perubahan data';
+    } catch (Exception $e) {
+        log_message('error', 'EditUrusanPD: ' . $e->getMessage());
+        echo $e->getMessage();
+    }
+}
+
+public function HapusUrusanPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+
+    try {
+        $id = (int) $this->input->post('id', TRUE);
+        if ($id <= 0) {
+            throw new Exception('ID tidak valid');
+        }
+
+        $this->db->where('id', $id);
+        $this->db->where('deleted_at IS NULL', null, false);
+        $this->db->update('urusan_pd', [
+            'deleted_at' => date('Y-m-d H:i:s')
+        ]);
+
+        echo $this->db->affected_rows() ? '1' : 'Gagal hapus data';
+    } catch (Exception $e) {
+        log_message('error', 'HapusUrusanPD: ' . $e->getMessage());
+        echo $e->getMessage();
+    }
+}
+}
+
 
 
