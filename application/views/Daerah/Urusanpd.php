@@ -4,10 +4,19 @@
 /* Jarak antara Show entries / Search dengan tabel */
 .dataTables_wrapper .dataTables_length,
 .dataTables_wrapper .dataTables_filter {
-    margin-bottom: 20px;
+  margin-bottom: 20px;
+}
+
+/* Style filter wilayah */
+.filter-row { display:flex; align-items:flex-end; flex-wrap:wrap; gap:10px; }
+.filter-group { display:flex; flex-direction:column; align-items:flex-start; }
+.filter-group label { font-size:14px; margin-bottom:5px; }
+.filter-select { width:260px; font-size:14px; padding:5px 8px; }
+@media (max-width:768px){
+  .filter-row{ flex-direction:column; gap:15px; }
+  .filter-select{ width:100%; }
 }
 </style>
-
 
 <div class="main-content">
   <div class="data-table-area">
@@ -15,17 +24,75 @@
       <div class="row">
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
           <div class="data-table-list">
-            <div class="basic-tb-hd">
-              <div class="button-icon-btn sm-res-mg-t-30">
-                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputUrusan">
-                  <i class="notika-icon notika-edit"></i> <b>Tambah Urusan</b>
-                </button>
+
+            <!-- FILTER PROVINSI & KAB/KOTA (MUNCUL SAAT SEBELUM LOGIN / BELUM SET KodeWilayah) -->
+            <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
+              <div class="form-example-wrap" style="margin-bottom: 20px;">
+                <div class="form-example-int form-horizental">
+                  <div class="form-group">
+                    <div class="row filter-row">
+                      <div class="col-lg-3 col-md-6">
+                        <div class="filter-group">
+                          <label for="Provinsi"><b>Provinsi</b></label>
+                          <select class="form-control filter-select" id="Provinsi">
+                            <option value="">Pilih Provinsi</option>
+                            <?php foreach ($Provinsi as $prov) { ?>
+                              <option value="<?= html_escape($prov['Kode']) ?>"
+                                <?= (!empty($KodeWilayah) && substr($KodeWilayah,0,2)==$prov['Kode']) ? 'selected' : '' ?>>
+                                <?= html_escape($prov['Nama']) ?>
+                              </option>
+                            <?php } ?>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div class="col-lg-3 col-md-6">
+                        <div class="filter-group">
+                          <label for="KabKota"><b>Kab/Kota</b></label>
+                          <select class="form-control filter-select" id="KabKota">
+                            <option value="">Pilih Kab/Kota</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div class="col-lg-2 col-md-6">
+                        <div class="filter-group" style="margin-top: 28px;">
+                          <button class="btn btn-primary notika-btn-primary btn-block" id="Filter">
+                            <b>Filter</b>
+                          </button>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-            <br>
+
+              <?php if (!empty($KodeWilayah)) { ?>
+                <?php
+                  $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+                  $nama_wilayah = $wilayah ? html_escape($wilayah['Nama']) : 'Wilayah Tidak Ditemukan';
+                ?>
+                <div class="alert alert-info" style="margin-bottom: 20px;">
+                  <strong>Wilayah terpilih:</strong> <?= $nama_wilayah ?>
+                </div>
+              <?php } ?>
+            <?php } ?>
+            <!-- END FILTER -->
+
+            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+              <div class="basic-tb-hd">
+                <div class="button-icon-btn sm-res-mg-t-30">
+                  <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputUrusan">
+                    <i class="notika-icon notika-edit"></i> <b>Tambah Urusan</b>
+                  </button>
+                </div>
+              </div>
+              <br>
+            <?php } ?>
 
             <div class="table-responsive">
-              <table id="table-urusan" class="table table-striped">
+              <table id="data-table-urusan" class="table table-striped">
                 <thead>
                   <tr>
                     <th class="text-center" style="width:80px;">ID</th>
@@ -37,23 +104,26 @@
                   <?php if (!empty($Urusan)) { ?>
                     <?php foreach ($Urusan as $row) { ?>
                       <tr>
-                        <td class="text-center" style="vertical-align: middle;"><?=$row['id']?></td>
-                        <td style="vertical-align: middle;"><?=htmlspecialchars($row['nama_urusan'], ENT_QUOTES, 'UTF-8')?></td>
+                        <td class="text-center" style="vertical-align: middle;"><?= $row['id'] ?></td>
+                        <td style="vertical-align: middle;"><?= htmlspecialchars($row['nama_urusan'], ENT_QUOTES, 'UTF-8') ?></td>
                         <td class="text-center" style="vertical-align: middle;">
                           <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                            <button
-                              class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg btn-edit"
-                              data-id="<?=$row['id']?>"
-                              data-nama="<?=htmlspecialchars($row['nama_urusan'], ENT_QUOTES, 'UTF-8')?>"
-                            >
-                              <i class="notika-icon notika-edit"></i>
-                            </button>
-                            <button
-                              class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg btn-hapus"
-                              data-id="<?=$row['id']?>"
-                            >
-                              <i class="notika-icon notika-trash"></i>
-                            </button>
+                            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                              <button
+                                class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg BtnEdit"
+                                data-id="<?= $row['id'] ?>"
+                                data-nama="<?= htmlspecialchars($row['nama_urusan'], ENT_QUOTES, 'UTF-8') ?>"
+                              >
+                                <i class="notika-icon notika-edit"></i>
+                              </button>
+
+                              <button
+                                class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg BtnHapus"
+                                data-id="<?= $row['id'] ?>"
+                              >
+                                <i class="notika-icon notika-trash"></i>
+                              </button>
+                            <?php } ?>
                           </div>
                         </td>
                       </tr>
@@ -63,23 +133,25 @@
               </table>
             </div>
 
-          </div>
+          </div><!-- /.data-table-list -->
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal Input -->
+  <!-- Modal Input Urusan -->
   <div class="modal fade" id="ModalInputUrusan" role="dialog">
-    <div class="modal-dialog modal-md" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
+    <div class="modal-dialog modal-md" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);">
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal">&times;</button>
         </div>
+
         <div class="modal-body">
           <div class="row">
             <div class="col-lg-12">
-              <div class="form-example-wrap" style="padding: 5px;">
+              <div class="form-example-wrap" style="padding:5px;">
+
                 <div class="form-example-int form-horizental">
                   <div class="form-group">
                     <div class="row">
@@ -88,7 +160,7 @@
                       </div>
                       <div class="col-lg-8">
                         <div class="nk-int-st">
-                          <input type="text" class="form-control input-sm" id="NamaUrusan">
+                          <input type="text" class="form-control input-sm" id="NamaUrusan" placeholder="Contoh: Pendidikan">
                         </div>
                       </div>
                     </div>
@@ -104,25 +176,26 @@
                   </div>
                 </div>
 
-              </div>
+              </div><!-- /.form-example-wrap -->
             </div>
           </div>
-        </div>
+        </div><!-- /.modal-body -->
       </div>
     </div>
   </div>
 
-  <!-- Modal Edit -->
+  <!-- Modal Edit Urusan -->
   <div class="modal fade" id="ModalEditUrusan" role="dialog">
-    <div class="modal-dialog modal-md" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
+    <div class="modal-dialog modal-md" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);">
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal">&times;</button>
         </div>
+
         <div class="modal-body">
           <div class="row">
             <div class="col-lg-12">
-              <div class="form-example-wrap" style="padding: 5px;">
+              <div class="form-example-wrap" style="padding:5px;">
                 <input type="hidden" id="EditId">
 
                 <div class="form-example-int form-horizental">
@@ -149,15 +222,15 @@
                   </div>
                 </div>
 
-              </div>
+              </div><!-- /.form-example-wrap -->
             </div>
           </div>
-        </div>
+        </div><!-- /.modal-body -->
       </div>
     </div>
   </div>
 
-</div>
+</div><!-- /.main-content -->
 
 <script src="../js/vendor/jquery-1.12.4.min.js"></script>
 <script src="../js/bootstrap.min.js"></script>
@@ -165,10 +238,106 @@
 <script src="../js/data-table/data-table-act.js"></script>
 
 <script>
-  var BaseURL = '<?=base_url()?>';
+  var BaseURL = '<?= base_url() ?>';
+  var CSRF_TOKEN = '<?= $this->security->get_csrf_hash() ?>';
+  var CSRF_NAME  = '<?= $this->security->get_csrf_token_name() ?>';
 
   jQuery(document).ready(function($){
-    var table = $('#table-urusan').DataTable();
+
+    $('#data-table-urusan').DataTable();
+
+    // =========================
+    // FILTER PROVINSI & KAB/KOTA
+    // =========================
+    <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
+
+      $("#Provinsi").change(function() {
+        if ($(this).val() === "") {
+          $("#KabKota").html('<option value="">Pilih Kab/Kota</option>');
+          return;
+        }
+
+        $.ajax({
+          url: BaseURL + "Daerah/GetListKabKota",
+          type: "POST",
+          data: { Kode: $(this).val(), [CSRF_NAME]: CSRF_TOKEN },
+          beforeSend: function() { $("#KabKota").prop('disabled', true); },
+          success: function(res) {
+            var Data = (typeof res === 'string') ? JSON.parse(res) : res;
+            var KabKota = '<option value="">Pilih Kab/Kota</option>';
+
+            if (Data.length > 0) {
+              for (let i = 0; i < Data.length; i++) {
+                KabKota += '<option value="' + Data[i].Kode + '">' + Data[i].Nama + '</option>';
+              }
+            } else {
+              alert("Belum Ada Data Kab/Kota");
+            }
+
+            $("#KabKota").html(KabKota).prop('disabled', false);
+          },
+          error: function() {
+            alert("Gagal memuat data Kab/Kota");
+            $("#KabKota").prop('disabled', false);
+          }
+        });
+      });
+
+      $("#Filter").click(function() {
+        if ($("#Provinsi").val() === "") return alert("Mohon Pilih Provinsi");
+        if ($("#KabKota").val() === "") return alert("Mohon Pilih Kab/Kota");
+
+        var kodeWilayah = $("#KabKota").val();
+
+        $.ajax({
+          url: BaseURL + "Daerah/SetTempKodeWilayah",
+          type: "POST",
+          data: { KodeWilayah: kodeWilayah, [CSRF_NAME]: CSRF_TOKEN },
+          beforeSend: function() { $("#Filter").prop('disabled', true).text('Memuat...'); },
+          success: function(res) {
+            if (res === '1') {
+              window.location.reload();
+            } else {
+              alert(res || "Gagal menyimpan filter wilayah!");
+              $("#Filter").prop('disabled', false).text('Filter');
+            }
+          },
+          error: function() {
+            alert("Gagal menghubungi server!");
+            $("#Filter").prop('disabled', false).text('Filter');
+          }
+        });
+      });
+
+      // Populate kab/kota on page load jika KodeWilayah sudah ada
+      <?php if (!empty($KodeWilayah)) { ?>
+        var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
+        var kodeKab  = "<?= $KodeWilayah ?>";
+        $("#Provinsi").val(kodeProv);
+
+        $.ajax({
+          url: BaseURL + "Daerah/GetListKabKota",
+          type: "POST",
+          data: { Kode: kodeProv, [CSRF_NAME]: CSRF_TOKEN },
+          success: function(res) {
+            var Data = (typeof res === 'string') ? JSON.parse(res) : res;
+            var KabKota = '<option value="">Pilih Kab/Kota</option>';
+
+            if (Data.length > 0) {
+              for (let i = 0; i < Data.length; i++) {
+                var selected = (Data[i].Kode === kodeKab) ? 'selected' : '';
+                KabKota += '<option value="' + Data[i].Kode + '" ' + selected + '>' + Data[i].Nama + '</option>';
+              }
+            }
+            $("#KabKota").html(KabKota);
+          }
+        });
+      <?php } ?>
+
+    <?php } ?>
+    // =========================
+    // END FILTER
+    // =========================
 
     // Tambah
     $("#BtnSimpan").click(function(){
@@ -178,21 +347,24 @@
         return;
       }
 
-      $.post(BaseURL + "Daerah/InputUrusanPD", { nama_urusan: nama })
-        .done(function(res){
-          if(res == '1'){
-            window.location.reload();
-          } else {
-            alert(res);
-          }
-        })
-        .fail(function(){
-          alert('Gagal request (Tambah Urusan)');
-        });
+      $.post(BaseURL + "Daerah/InputUrusanPD", {
+        nama_urusan: nama,
+        [CSRF_NAME]: CSRF_TOKEN
+      })
+      .done(function(res){
+        if(res == '1'){
+          window.location.reload();
+        } else {
+          alert(res);
+        }
+      })
+      .fail(function(){
+        alert('Gagal request (Tambah Urusan)');
+      });
     });
 
     // Buka modal edit
-    $(document).on("click", ".btn-edit", function(){
+    $(document).on("click", ".BtnEdit", function(){
       $("#EditId").val($(this).data('id'));
       $("#EditNamaUrusan").val($(this).data('nama'));
       $("#ModalEditUrusan").modal("show");
@@ -212,21 +384,25 @@
         return;
       }
 
-      $.post(BaseURL + "Daerah/EditUrusanPD", { id: id, nama_urusan: nama })
-        .done(function(res){
-          if(res == '1'){
-            window.location.reload();
-          } else {
-            alert(res);
-          }
-        })
-        .fail(function(){
-          alert('Gagal request (Edit Urusan)');
-        });
+      $.post(BaseURL + "Daerah/EditUrusanPD", {
+        id: id,
+        nama_urusan: nama,
+        [CSRF_NAME]: CSRF_TOKEN
+      })
+      .done(function(res){
+        if(res == '1'){
+          window.location.reload();
+        } else {
+          alert(res);
+        }
+      })
+      .fail(function(){
+        alert('Gagal request (Edit Urusan)');
+      });
     });
 
     // Hapus
-    $(document).on("click", ".btn-hapus", function(){
+    $(document).on("click", ".BtnHapus", function(){
       var id = $(this).data('id');
       if(!id){
         alert('ID tidak valid!');
@@ -237,18 +413,22 @@
         return;
       }
 
-      $.post(BaseURL + "Daerah/HapusUrusanPD", { id: id })
-        .done(function(res){
-          if(res == '1'){
-            window.location.reload();
-          } else {
-            alert(res);
-          }
-        })
-        .fail(function(){
-          alert('Gagal request (Hapus Urusan)');
-        });
+      $.post(BaseURL + "Daerah/HapusUrusanPD", {
+        id: id,
+        [CSRF_NAME]: CSRF_TOKEN
+      })
+      .done(function(res){
+        if(res == '1'){
+          window.location.reload();
+        } else {
+          alert(res);
+        }
+      })
+      .fail(function(){
+        alert('Gagal request (Hapus Urusan)');
+      });
     });
+
   });
 </script>
 

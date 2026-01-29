@@ -7,6 +7,62 @@
       <div class="row">
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
           <div class="data-table-list">
+
+            <!-- FILTER PROVINSI & KAB/KOTA (MUNCUL SAAT BELUM LOGIN / BELUM SET KodeWilayah) -->
+            <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
+              <div class="form-example-wrap" style="margin-bottom: 15px;">
+                <div class="form-example-int form-horizental">
+                  <div class="form-group">
+                    <div class="row filter-row">
+                      <div class="col-lg-3 col-md-6">
+                        <div class="filter-group">
+                          <label for="Provinsi"><b>Provinsi</b></label>
+                          <select class="form-control filter-select" id="Provinsi">
+                            <option value="">Pilih Provinsi</option>
+                            <?php foreach ($Provinsi as $prov) { ?>
+                              <option value="<?= html_escape($prov['Kode']) ?>"
+                                <?= (!empty($KodeWilayah) && substr($KodeWilayah,0,2)==$prov['Kode']) ? 'selected' : '' ?>>
+                                <?= html_escape($prov['Nama']) ?>
+                              </option>
+                            <?php } ?>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div class="col-lg-3 col-md-6">
+                        <div class="filter-group">
+                          <label for="KabKota"><b>Kab/Kota</b></label>
+                          <select class="form-control filter-select" id="KabKota">
+                            <option value="">Pilih Kab/Kota</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div class="col-lg-2 col-md-6">
+                        <div class="filter-group" style="margin-top: 28px;">
+                          <button class="btn btn-primary notika-btn-primary btn-block" id="FilterWilayah">
+                            <b>Filter</b>
+                          </button>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <?php if (!empty($KodeWilayah)) { ?>
+                <?php
+                  $wil = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+                  $nama_wil = $wil ? html_escape($wil['Nama']) : 'Wilayah Tidak Ditemukan';
+                ?>
+                <div class="alert alert-info" style="margin-bottom: 15px;">
+                  <strong>Wilayah terpilih:</strong> <?= $nama_wil ?>
+                </div>
+              <?php } ?>
+            <?php } ?>
+            <!-- END FILTER WILAYAH -->
+
             <div class="basic-tb-hd">
               <div class="button-icon-btn sm-res-mg-t-30">
                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
@@ -14,27 +70,33 @@
                     <i class="notika-icon notika-edit"></i> <b>Tambah Instansi</b>
                   </button>
                 <?php } ?>
-                <button type="button" class="btn btn-info notika-btn-info" id="toggleFilter">
-                  <i class="notika-icon notika-filter"></i> <b>Filter Tahun</b>
-                </button>
-              </div>
 
-              <!-- Filter Tahun -->
-              <div id="filterSection" class="filter-section" style="display:none; margin-top:10px; padding:10px; background-color:#f9f9f9; border-radius:5px;">
-                <div style="display:inline-block; margin-right:20px;">
-                  <label style="margin-right:5px;"><b>Tahun Mulai:</b></label>
-                  <select id="filterTahunMulai" style="margin-right:10px; padding:5px;">
-                    <option value="">Semua Tahun Mulai</option>
-                  </select>
+                <!-- Filter Tahun: tampil hanya jika sudah ada KodeWilayah -->
+                <div id="filterTahunWrapper" style="display:none;">
+                  <button type="button" class="btn btn-info notika-btn-info" id="toggleFilter">
+                    <i class="notika-icon notika-filter"></i> <b>Filter Tahun</b>
+                  </button>
+
+                  <!-- Filter Tahun -->
+                  <div id="filterSection" class="filter-section" style="display:none; margin-top:10px; padding:10px; background-color:#f9f9f9; border-radius:5px;">
+                    <div style="display:inline-block; margin-right:20px;">
+                      <label style="margin-right:5px;"><b>Tahun Mulai:</b></label>
+                      <select id="filterTahunMulai" style="margin-right:10px; padding:5px;">
+                        <option value="">Semua Tahun Mulai</option>
+                      </select>
+                    </div>
+                    <div style="display:inline-block; margin-right:20px;">
+                      <label style="margin-right:5px;"><b>Tahun Akhir:</b></label>
+                      <select id="filterTahunAkhir" style="margin-right:10px; padding:5px;">
+                        <option value="">Semua Tahun Akhir</option>
+                      </select>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-sm" id="applyFilter" style="padding:5px 10px;"><b>Pilih</b></button>
+                    <button type="button" class="btn btn-default btn-sm" id="clearFilter" style="padding:5px 10px; margin-left:5px;"><b>Hapus</b></button>
+                  </div>
                 </div>
-                <div style="display:inline-block; margin-right:20px;">
-                  <label style="margin-right:5px;"><b>Tahun Akhir:</b></label>
-                  <select id="filterTahunAkhir" style="margin-right:10px; padding:5px;">
-                    <option value="">Semua Tahun Akhir</option>
-                  </select>
-                </div>
-                <button type="button" class="btn btn-primary btn-sm" id="applyFilter" style="padding:5px 10px;"><b>Pilih</b></button>
-                <button type="button" class="btn btn-default btn-sm" id="clearFilter" style="padding:5px 10px; margin-left:5px;"><b>Hapus</b></button>
+                <!-- END Filter Tahun -->
+
               </div>
             </div>
 
@@ -47,7 +109,7 @@
                     <th>Urusan PD</th>
 
                     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                    <th>Password (Hashed)</th>
+                      <th>Password (Hashed)</th>
                       <th>Tahun Mulai</th>
                       <th>Tahun Akhir</th>
                       <th class="text-center">Aksi</th>
@@ -59,16 +121,14 @@
                     <tr>
                       <td class="text-center" style="vertical-align:middle;"><?=$No++?></td>
                       <td style="vertical-align:middle;"><?=$key['nama']?></td>
-                      
                       <td style="vertical-align:middle;"><?=isset($key['urusan_nama']) ? $key['urusan_nama'] : '-'?></td>
 
                       <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                       <td style="vertical-align: middle;"><?= $key['password'] ?></td>
-                        <td style="vertical-align:middle;" data-tahun-mulai="<?=$key['tahun_mulai']?>"><?=$key['tahun_mulai']?></td>
-                        <td style="vertical-align:middle;" data-tahun-akhir="<?=$key['tahun_akhir']?>"><?=$key['tahun_akhir']?></td>
+                        <td style="vertical-align: middle;"><?= $key['password'] ?></td>
+                        <td style="vertical-align:middle;"><?=$key['tahun_mulai']?></td>
+                        <td style="vertical-align:middle;"><?=$key['tahun_akhir']?></td>
                         <td class="text-center">
                           <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                            <!-- IMPORTANT: jangan kirim password hash ke frontend -->
                             <button
                               class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit"
                               data-id="<?=$key['id']?>"
@@ -320,6 +380,17 @@
 
 </div><!-- /.main-content -->
 
+<style>
+  .filter-row { display:flex; align-items:flex-end; flex-wrap:wrap; gap:10px; }
+  .filter-group { display:flex; flex-direction:column; align-items:flex-start; }
+  .filter-group label { font-size:14px; margin-bottom:5px; }
+  .filter-select { width:260px; font-size:14px; padding:5px 8px; }
+  @media (max-width:768px){
+    .filter-row{ flex-direction:column; gap:15px; }
+    .filter-select{ width:100%; }
+  }
+</style>
+
 <script src="../js/vendor/jquery-1.12.4.min.js"></script>
 <script src="../js/bootstrap.min.js"></script>
 <script src="../js/wow.min.js"></script>
@@ -334,6 +405,8 @@
 
 <script>
   var BaseURL = '<?=base_url()?>';
+  var CSRF_TOKEN = '<?= $this->security->get_csrf_hash() ?>';
+  var CSRF_NAME  = '<?= $this->security->get_csrf_token_name() ?>';
 
   // data urusan dari controller
   var URUSAN_LIST = <?= json_encode($Urusan) ?>;
@@ -357,7 +430,6 @@
   function initUrusanContainer(containerId, nameAttr, selectedIds) {
     var $c = $('#'+containerId);
     $c.html('');
-
     if (!selectedIds || selectedIds.length === 0) {
       $c.append(buildUrusanSelect(nameAttr, null));
     } else {
@@ -373,7 +445,6 @@
       var v = $(this).val();
       if (v) arr.push(v);
     });
-    // unique
     return arr.filter(function(v, i, a){ return a.indexOf(v) === i; });
   }
 
@@ -389,11 +460,111 @@
 
     var table = $('#data-table-basic').DataTable();
 
+    // tampilkan filter tahun hanya jika KodeWilayah sudah ada
+    var HAS_WILAYAH = <?= (!empty($KodeWilayah) ? 'true' : 'false') ?>;
+    if (HAS_WILAYAH) {
+      $("#filterTahunWrapper").show();
+    } else {
+      $("#filterTahunWrapper").hide();
+      $("#filterSection").hide();
+    }
+
+    // =========================
+    // FILTER PROVINSI & KAB/KOTA
+    // =========================
+    <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
+
+      $("#Provinsi").change(function() {
+        if ($(this).val() === "") {
+          $("#KabKota").html('<option value="">Pilih Kab/Kota</option>');
+          return;
+        }
+        $.ajax({
+          url: BaseURL + "Daerah/GetListKabKota",
+          type: "POST",
+          data: { Kode: $(this).val(), [CSRF_NAME]: CSRF_TOKEN },
+          beforeSend: function() { $("#KabKota").prop('disabled', true); },
+          success: function(res) {
+            var Data = (typeof res === 'string') ? JSON.parse(res) : res;
+            var KabKota = '<option value="">Pilih Kab/Kota</option>';
+            if (Data.length > 0) {
+              for (let i = 0; i < Data.length; i++) {
+                KabKota += '<option value="' + Data[i].Kode + '">' + Data[i].Nama + '</option>';
+              }
+            } else {
+              alert("Belum Ada Data Kab/Kota");
+            }
+            $("#KabKota").html(KabKota).prop('disabled', false);
+          },
+          error: function() {
+            alert("Gagal memuat data Kab/Kota");
+            $("#KabKota").prop('disabled', false);
+          }
+        });
+      });
+
+      $("#FilterWilayah").click(function() {
+        if ($("#Provinsi").val() === "") return alert("Mohon Pilih Provinsi");
+        if ($("#KabKota").val() === "") return alert("Mohon Pilih Kab/Kota");
+
+        var kodeWilayah = $("#KabKota").val();
+
+        $.ajax({
+          url: BaseURL + "Daerah/SetTempKodeWilayah",
+          type: "POST",
+          data: { KodeWilayah: kodeWilayah, [CSRF_NAME]: CSRF_TOKEN },
+          beforeSend: function() { $("#FilterWilayah").prop('disabled', true).text('Memuat...'); },
+          success: function(res) {
+            if (res === '1') {
+              window.location.reload();
+            } else {
+              alert(res || "Gagal menyimpan filter wilayah!");
+              $("#FilterWilayah").prop('disabled', false).text('Filter');
+            }
+          },
+          error: function() {
+            alert("Gagal menghubungi server!");
+            $("#FilterWilayah").prop('disabled', false).text('Filter');
+          }
+        });
+      });
+
+      // populate kab/kota ketika page load (jika $KodeWilayah ada)
+      <?php if (!empty($KodeWilayah)) { ?>
+        var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
+        var kodeKab  = "<?= $KodeWilayah ?>";
+        $("#Provinsi").val(kodeProv);
+
+        $.ajax({
+          url: BaseURL + "Daerah/GetListKabKota",
+          type: "POST",
+          data: { Kode: kodeProv, [CSRF_NAME]: CSRF_TOKEN },
+          success: function(res) {
+            var Data = (typeof res === 'string') ? JSON.parse(res) : res;
+            var KabKota = '<option value="">Pilih Kab/Kota</option>';
+            if (Data.length > 0) {
+              for (let i = 0; i < Data.length; i++) {
+                var selected = (Data[i].Kode === kodeKab) ? 'selected' : '';
+                KabKota += '<option value="' + Data[i].Kode + '" ' + selected + '>' + Data[i].Nama + '</option>';
+              }
+            }
+            $("#KabKota").html(KabKota);
+          }
+        });
+      <?php } ?>
+
+    <?php } ?>
+    // =========================
+    // END FILTER WILAYAH
+    // =========================
+
     // init dropdown urusan di modal tambah
     initUrusanContainer('urusanContainerAdd', 'urusan_ids', []);
 
-    // Toggle filter section
+    // Toggle filter tahun (hanya jika sudah ada wilayah)
     $('#toggleFilter').click(function() {
+      if (!HAS_WILAYAH) return;
+
       $('#filterSection').slideToggle(300);
       var icon = $(this).find('i');
       if (icon.hasClass('notika-filter')) {
@@ -405,7 +576,7 @@
       }
     });
 
-    // Generate opsi tahun
+    // Generate opsi tahun (boleh dibuat walau wrapper hidden)
     var currentYear = new Date().getFullYear();
     var startYear = 2000;
     var endYear = currentYear + 5;
@@ -418,7 +589,7 @@
     $('#filterTahunMulai').html(tahunMulaiOptions);
     $('#filterTahunAkhir').html(tahunAkhirOptions);
 
-    // Apply filter
+    // Apply filter tahun (berdasarkan index kolom Tahun Mulai/Akhir)
     $('#applyFilter').click(function() {
       var tahunMulai = $('#filterTahunMulai').val();
       var tahunAkhir = $('#filterTahunAkhir').val();
@@ -434,7 +605,7 @@
       table.draw();
     });
 
-    // Clear filter
+    // Clear filter tahun
     $('#clearFilter').click(function() {
       $('#filterTahunMulai').val('');
       $('#filterTahunAkhir').val('');
@@ -454,7 +625,6 @@
 
     // SIMPAN (Tambah)
     $("#Input").click(function() {
-
       var urusan = collectUrusan('urusanContainerAdd');
 
       if ($("#Username").val() == "") return alert('Input Nama Instansi belum benar!');
@@ -468,7 +638,8 @@
         password: $("#Password").val(),
         tahun_mulai: $("#TahunMulai").val(),
         tahun_akhir: $("#TahunAkhir").val(),
-        urusan_ids: urusan
+        urusan_ids: urusan,
+        [CSRF_NAME]: CSRF_TOKEN
       };
 
       $.post(BaseURL+"Daerah/InputInstansi", payload).done(function(res){
@@ -487,7 +658,7 @@
 
       $("#Id").val(id);
       $("#_Username").val(nama);
-      $("#_Password").val(""); // kosongkan agar tidak double-hash
+      $("#_Password").val("");
       $("#_TahunMulai").val(tm);
       $("#_TahunAkhir").val(ta);
 
@@ -502,7 +673,6 @@
 
     // SIMPAN (Edit)
     $("#Edit").click(function() {
-
       var urusan = collectUrusan('urusanContainerEdit');
 
       if ($("#_Username").val() == "") return alert('Input Nama Instansi belum benar!');
@@ -513,10 +683,11 @@
       var payload = {
         id: $("#Id").val(),
         nama: $("#_Username").val(),
-        password: $("#_Password").val(), // kosong => controller tidak hash ulang
+        password: $("#_Password").val(),
         tahun_mulai: $("#_TahunMulai").val(),
         tahun_akhir: $("#_TahunAkhir").val(),
-        urusan_ids: urusan
+        urusan_ids: urusan,
+        [CSRF_NAME]: CSRF_TOKEN
       };
 
       $.post(BaseURL+"Daerah/EditInstansi", payload).done(function(res){
@@ -527,8 +698,8 @@
 
     // Hapus
     $(document).on('click', '.Hapus', function () {
-      var payload = { id: $(this).data('id') };
-      $.post(BaseURL+"Daerah/HapusInstansi", payload).done(function(res){
+      if(!confirm("Yakin ingin menghapus data ini?")) return;
+      $.post(BaseURL+"Daerah/HapusInstansi", { id: $(this).data('id'), [CSRF_NAME]: CSRF_TOKEN }).done(function(res){
         if (res == '1') window.location.reload();
         else alert(res);
       });

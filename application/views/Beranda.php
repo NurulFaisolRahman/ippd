@@ -419,7 +419,7 @@
                                 <a href="<?=base_url('Nasional/VisiRPJPN')?>" class="dropdown-item">Nasional</a>
                                 <a href="<?=base_url('Kementerian/Kementerian')?>" class="dropdown-item">Kementerian</a>
                                 <a href="<?=base_url('Provinsi/VisiRPJPD')?>" class="dropdown-item">Provinsi</a>
-                                <a href="<?=base_url('Daerah/VisiRPJPD')?>" class="dropdown-item">Daerah</a>
+                                <a href="<?=base_url('Daerah/UrusanPD')?>" class="dropdown-item">Daerah</a>
                             </div>
                         </div>
                         <div class="dropdown-submenu">

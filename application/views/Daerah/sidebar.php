@@ -265,226 +265,144 @@
         }
     </style>
 </head>
-<body>
-    <!-- Toggle Button -->
-    <button class="sidebar-toggle" id="sidebarToggle">
-        <i class="fa fa-bars"></i>
-    </button>
+<!-- Sidebar -->
+<div class="sidebar-wrapper">
+    <div class="sidebar-content">
+        <ul class="sidebar-menu">
+            <br>
 
-    <!-- Sidebar -->
-    <div class="sidebar-wrapper">
-        <div class="sidebar-content">
-            <ul class="sidebar-menu">
-                <br>
-
-                 <!-- Akun -->
-                <div class="sidebar-dropdown">
-                    <a href="#">
-                        <i class="bi bi-person-circle"></i>
-                        <span>Daftar Urusan & Akun </span>
-                        <i class="fa fa-chevron-down"></i>
-                    </a>
-                    <div class="sidebar-submenu">
-                         <a href="<?=base_url('Daerah/UrusanPD')?>">Daftar Urusan</a>
-                        <a href="<?=base_url('Daerah/Instansi')?>">Daftar Instansi</a>
-                        <br>
-                    </div>
+            <li class="sidebar-dropdown">
+                <a href="#">
+                    <i class="bi bi-person-circle"></i>
+                    <span>Daftar Urusan & Akun</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Daerah/UrusanPD')?>">Daftar Urusan</a>
+                    <a href="<?=base_url('Daerah/Instansi')?>">Daftar Instansi</a>
+                    <br>
                 </div>
+            </li>
 
-                <!-- RPJPD -->
-                <div class="sidebar-dropdown">
-                    <a href="#">
+            <li class="sidebar-dropdown">
+                <a href="#">
                     <i class="menu-icon fa fa-area-chart"></i>
                     <span>RPJPD</span>
                     <i class="fa fa-chevron-down"></i>
-                    </a>
-                    <div class="sidebar-submenu">
-                        <a href="<?=base_url('Daerah/VisiRPJPD')?>">Visi</a>
-                        <a href="<?=base_url('Daerah/MisiRPJPD')?>">Misi</a>
-                        <a href="<?=base_url('Daerah/TujuanRPJPD')?>">Tujuan</a>
-                        <a href="<?=base_url('Daerah/SasaranRPJPD')?>">Sasaran</a>
-                        <a href="<?=base_url('Daerah/TahapanRPJPD')?>">Tahapan</a>
-                        <br>
-                    </div>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Daerah/VisiRPJPD')?>">Visi</a>
+                    <a href="<?=base_url('Daerah/MisiRPJPD')?>">Misi</a>
+                    <a href="<?=base_url('Daerah/TujuanRPJPD')?>">Tujuan</a>
+                    <a href="<?=base_url('Daerah/SasaranRPJPD')?>">Sasaran</a>
+                    <a href="<?=base_url('Daerah/TahapanRPJPD')?>">Tahapan</a>
+                    <br>
                 </div>
+            </li>
 
-                <!-- RPJMD -->
-                <div class="sidebar-dropdown">
-                    <a href="#">
-                        <i class="menu-icon fa fa-line-chart"></i>
-                        <span>RPJMD</span>
-                        <i class="fa fa-chevron-down"></i>
-                    </a>
-                    <div class="sidebar-submenu" style="display: block;">
-                        <a href="<?=base_url('Daerah/VisiRPJMD')?>">Visi</a>
-                        <a href="<?=base_url('Daerah/MisiRPJMD')?>">Misi</a>
-                        <a href="<?=base_url('Daerah/TujuanRPJMD')?>">Tujuan</a>
-                        <a href="<?=base_url('Daerah/SasaranRPJMD')?>">Sasaran</a>
-                        <a href="<?=base_url('Daerah/TahapanRPJMD')?>">Tahapan</a>
-                        <br>
-                    </div>
+            <li class="sidebar-dropdown">
+                <a href="#">
+                    <i class="menu-icon fa fa-line-chart"></i>
+                    <span>RPJMD</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Daerah/VisiRPJMD')?>">Visi</a>
+                    <a href="<?=base_url('Daerah/MisiRPJMD')?>">Misi</a>
+                    <a href="<?=base_url('Daerah/TujuanRPJMD')?>">Tujuan</a>
+                    <a href="<?=base_url('Daerah/SasaranRPJMD')?>">Sasaran</a>
+                    <a href="<?=base_url('Daerah/ProgramPD')?>">Program</a>
+                    <a href="<?=base_url('Daerah/TahapanRPJMD')?>">Tahapan</a>
+                    <br>
                 </div>
-                
-                <!-- Cascading -->
-                <div class="sidebar-dropdown">
-                    <a href="#">
+            </li>
+
+            <li class="sidebar-dropdown">
+                <a href="#">
                     <i class="menu-icon fa fa-sitemap"></i>
-                        <span>Cascading</span>
-                        <i class="fa fa-chevron-down"></i>
-                    </a>
-                    <div class="sidebar-submenu">
-                        <a href="<?=base_url('Daerah/Iku')?>">IKU</a>
-                        <a href="<?=base_url('Daerah/Ikd')?>">IKD</a>
-                        <a href="<?=base_url('Daerah/cascade')?>">Cascade</a>
-                        <br>
-                    </div>
+                    <span>Cascading</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Daerah/Iku')?>">IKU</a>
+                    <a href="<?=base_url('Daerah/Ikd')?>">IKD</a>
+                    <a href="<?=base_url('Daerah/cascade')?>">Cascade</a>
+                    <br>
                 </div>
-                
-                <!-- Isu Daerah -->
-                <div class="sidebar-dropdown">
-                    <a href="#">
-                        <i class="bi bi-briefcase-fill"></i>
-                        <span>Isu Daerah</span>
-                        <i class="fa fa-chevron-down"></i>
-                    </a>
-                    <div class="sidebar-submenu">
-                        <a href="<?=base_url('Daerah/PotensiDaerah')?>">Potensi Daerah</a>
-                        <a href="<?=base_url('Daerah/PermasalahanPokok')?>">Permasalahan Pokok</a>
-                        <a href="<?=base_url('Daerah/IsuKLHS')?>">Isu KLHS</a>
-                        
-                        <br>
-                    </div>
-                </div>
+            </li>
 
-               
-            </ul>
-        </div>
+            <li class="sidebar-dropdown">
+                <a href="#">
+                    <i class="bi bi-briefcase-fill"></i>
+                    <span>Isu Daerah</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Daerah/PotensiDaerah')?>">Potensi Daerah</a>
+                    <a href="<?=base_url('Daerah/PermasalahanPokok')?>">Permasalahan Pokok</a>
+                    <a href="<?=base_url('Daerah/IsuKLHS')?>">Isu KLHS</a>
+                    <br>
+                </div>
+            </li>
+
+        </ul>
     </div>
+</div>
 
-    
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const body = document.body;
 
+  function closeDropdown(li) {
+    li.classList.remove('active');
+    const submenu = li.querySelector(':scope > .sidebar-submenu');
+    if (submenu) submenu.classList.remove('show');
+    const chev = li.querySelector(':scope > a .fa-chevron-down');
+    if (chev) chev.style.transform = 'rotate(0)';
+  }
 
+  function openDropdown(li) {
+    li.classList.add('active');
+    const submenu = li.querySelector(':scope > .sidebar-submenu');
+    if (submenu) submenu.classList.add('show');
+    const chev = li.querySelector(':scope > a .fa-chevron-down');
+    if (chev) chev.style.transform = 'rotate(180deg)';
+  }
 
-    <script>
-        var BaseURL = '<?=base_url()?>';
-        
-        // Sidebar Toggle Functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const body = document.body;
-            
-            // Check if sidebar state is saved in localStorage
-            if (localStorage.getItem('sidebarMini') === 'true') {
-                body.classList.add('sidebar-mini');
-            }
-            
-            // Toggle sidebar
-            sidebarToggle.addEventListener('click', function() {
-                body.classList.toggle('sidebar-mini');
-                // Save state to localStorage
-                localStorage.setItem('sidebarMini', body.classList.contains('sidebar-mini'));
-            });
-            
-            // Close all dropdowns except the active one
-            document.querySelectorAll('.sidebar-dropdown').forEach(dropdown => {
-                if (!dropdown.classList.contains('active')) {
-                    const submenu = dropdown.querySelector('.sidebar-submenu');
-                    if (submenu) {
-                        submenu.style.maxHeight = '0';
-                        submenu.style.padding = '0 15px';
-                    }
-                }
-            });
+  // Toggle dropdown klik (hanya saat sidebar tidak mini)
+  document.querySelectorAll('.sidebar-dropdown > a').forEach(a => {
+    a.addEventListener('click', function (e) {
+      if (body.classList.contains('sidebar-mini')) return; // mini mode pakai hover
 
-            // Toggle sidebar dropdowns (for expanded sidebar)
-            document.querySelectorAll('.sidebar-dropdown > a').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    // Only prevent default if sidebar is not minimized
-                    if (!body.classList.contains('sidebar-mini')) {
-                        e.preventDefault();
-                        
-                        const dropdown = this.parentElement;
-                        const submenu = this.nextElementSibling;
-                        
-                        // Close other dropdowns at the same level
-                        if (dropdown.parentElement.classList.contains('sidebar-menu') || 
-                            dropdown.parentElement.classList.contains('sidebar-submenu')) {
-                            const siblings = Array.from(dropdown.parentElement.children)
-                                .filter(child => child !== dropdown);
-                            
-                            siblings.forEach(sibling => {
-                                const siblingSubmenu = sibling.querySelector('.sidebar-submenu');
-                                if (siblingSubmenu) {
-                                    siblingSubmenu.style.maxHeight = '0';
-                                    siblingSubmenu.style.padding = '0 15px';
-                                }
-                                sibling.classList.remove('active');
-                                
-                                // Reset chevron icon for siblings
-                                const siblingChevron = sibling.querySelector('.fa-chevron-down');
-                                if (siblingChevron) {
-                                    siblingChevron.style.transform = 'rotate(0)';
-                                }
-                            });
-                        }
-                        
-                        // Toggle current dropdown
-                        if (submenu) {
-                            if (dropdown.classList.contains('active')) {
-                                submenu.style.maxHeight = '0';
-                                submenu.style.padding = '0 15px';
-                                dropdown.classList.remove('active');
-                            } else {
-                                submenu.style.maxHeight = submenu.scrollHeight + 'px';
-                                submenu.style.padding = '10px 15px';
-                                dropdown.classList.add('active');
-                            }
-                            
-                            // Rotate chevron icon
-                            const chevron = this.querySelector('.fa-chevron-down');
-                            if (chevron) {
-                                chevron.style.transform = dropdown.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0)';
-                            }
-                        }
-                    }
-                });
-            });
-            
-            // Highlight active menu item based on current URL
-            const currentUrl = window.location.pathname;
-            document.querySelectorAll('.sidebar-submenu a').forEach(link => {
-                if (link.getAttribute('href') === currentUrl) {
-                    link.style.color = '#20c997';
-                    link.style.fontWeight = 'bold';
-                    
-                    // Expand parent menus
-                    let parent = link.closest('.sidebar-submenu');
-                    while (parent) {
-                        parent.style.maxHeight = parent.scrollHeight + 'px';
-                        parent.style.padding = '10px 15px';
-                        const parentDropdown = parent.previousElementSibling;
-                        if (parentDropdown) {
-                            parentDropdown.style.color = '#20c997';
-                            const chevron = parentDropdown.querySelector('.fa-chevron-down');
-                            if (chevron) chevron.style.transform = 'rotate(180deg)';
-                            parentDropdown.parentElement.classList.add('active');
-                        }
-                        parent = parent.parentElement.closest('.sidebar-submenu');
-                    }
-                }
-            });
-            
-            // Add hover effect animation
-            document.querySelectorAll('.sidebar-menu a').forEach(item => {
-                item.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateX(5px)';
-                });
-                
-                item.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateX(0)';
-                });
-            });
-        });
-    </script>
-</body>
+      e.preventDefault();
+      const li = this.closest('.sidebar-dropdown');
+
+      // close siblings
+      const siblings = Array.from(li.parentElement.children).filter(el => el !== li);
+      siblings.forEach(s => closeDropdown(s));
+
+      // toggle current
+      if (li.classList.contains('active')) closeDropdown(li);
+      else openDropdown(li);
+    });
+  });
+
+  // Highlight menu aktif berdasarkan URL
+  const currentPath = window.location.pathname.replace(/\/+$/, '');
+  document.querySelectorAll('.sidebar-submenu a').forEach(link => {
+    const href = link.getAttribute('href');
+    if (!href) return;
+
+    const linkPath = new URL(href, window.location.origin).pathname.replace(/\/+$/, '');
+    if (linkPath === currentPath) {
+      link.style.color = '#20c997';
+      link.style.fontWeight = 'bold';
+
+      // open parent dropdown
+      const parentLi = link.closest('.sidebar-dropdown');
+      if (parentLi) openDropdown(parentLi);
+    }
+  });
+});
+</script>
 </html>
