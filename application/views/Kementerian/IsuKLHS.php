@@ -1,313 +1,214 @@
 <?php $this->load->view('Kementerian/Sidebar'); ?>
+
+<div class="main-content">
+
+<!-- ===================== BREADCRUMB ===================== -->
 <div class="breadcomb-area">
     <div class="container">
-        <div class="row">
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                <div class="breadcomb-list">
-                    <ul class="breadcomb-menu" style="list-style: none; padding: 0; margin: 0;">
-                        <li style="display: inline-block; margin-right: 5px;">
-                            <a href="<?= base_url('Beranda') ?>">Beranda</a>
-                            <span class="bread-slash" style="display: inline-block; margin: 0 5px;">/</span>
-                        </li>
-                        <li style="display: inline-block; margin-right: 5px;">
-                            <a href="<?= base_url('Kementerian/IsuKLHS') ?>">Isu</a>
-                            <span class="bread-slash" style="display: inline-block; margin: 0 5px;">/</span>
-                        </li>
-                        <li style="display: inline-block;">
-                            <span class="bread-blk">Isu KLHS</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+        <ul class="breadcomb-menu" style="list-style:none;padding:0;margin:0">
+            <li style="display:inline-block">
+                <a href="<?= base_url('Beranda') ?>">Beranda</a>
+                <span class="bread-slash"> / </span>
+            </li>
+            <li style="display:inline-block">
+                <a href="<?= base_url('Kementerian/IsuKLHS') ?>">Isu</a>
+                <span class="bread-slash"> / </span>
+            </li>
+            <li style="display:inline-block">
+                <span class="bread-blk">Isu KLHS</span>
+            </li>
+        </ul>
     </div>
 </div>
 
+<!-- ===================== CONTENT ===================== -->
 <div class="data-table-area">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                <div class="data-table-list">
-                    <!-- Header with Filter Button -->
-                    <div class="basic-tb-hd">
-                        <div class="button-icon-btn sm-res-mg-t-30">
-                            <button type="button" class="btn btn-primary notika-btn-primary" id="FilterIsuKLHS">
-                                <i class="notika-icon notika-search"></i> 
-                                <b>Filter Data</b>
-                                <?php if ($CurrentPeriode || $CurrentKementerian): ?>
-                                    <span class="badge" style="background-color: #3dee5eff; margin-left: 5px;">Filter Aktif</span>
-                                <?php endif; ?>
-                            </button>
-                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
-                            <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputIsuKLHS">
-                                <i class="notika-icon notika-edit"></i> <b>Input Isu KLHS</b>
-                            </button>
-                            <?php } ?>
-                        </div>
-                    </div>
+<div class="container">
+<div class="row">
+<div class="col-lg-12">
 
-                    <!-- Modal Filter -->
-                    <div class="modal fade" id="ModalFilter" role="dialog">
-                     <div class="modal-dialog modal-large" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
-                        <div class="modal-dialog modals-default">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal">×</button>
-                                    <h4 class="modal-title">Filter Data Isu KLHS</h4>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="row">
-                                        <div class="col-lg-12">
-                                            <div class="form-example-wrap">
-                                                <div class="form-example-int">
-                                                    <div class="form-group">
-                                                        <label>Periode</label>
-                                                        <select class="form-control" id="FilterPeriode">
-                                                            <option value="">Semua Periode</option>
-                                                            <?php foreach ($AllPeriode as $periode): ?>
-                                                                <?php 
-                                                                    $periodeValue = $periode['TahunMulai'] . '|' . $periode['TahunAkhir'];
-                                                                    $selected = ($CurrentPeriode == $periodeValue) ? 'selected' : '';
-                                                                ?>
-                                                                <option value="<?= $periodeValue ?>" <?= $selected ?>>
-                                                                    <?= $periode['TahunMulai'] ?> - <?= $periode['TahunAkhir'] ?>
-                                                                </option>
-                                                            <?php endforeach; ?>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="form-example-int">
-                                                    <div class="form-group">
-                                                        <label>Kementerian</label>
-                                                        <select class="form-control" id="FilterKementerianSelect">
-                                                            <option value="">Semua Kementerian</option>
-                                                            <?php foreach ($Kementerian as $kementerian): ?>
-                                                                <?php $selected = ($CurrentKementerian == $kementerian['Id']) ? 'selected' : ''; ?>
-                                                                <option value="<?= $kementerian['Id'] ?>" <?= $selected ?>>
-                                                                    <?= $kementerian['NamaKementerian'] ?>
-                                                                </option>
-                                                            <?php endforeach; ?>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="form-example-int mg-t-15">
-                                                    <button class="btn btn-success notika-btn-success" id="ApplyFilter">Terapkan Filter</button>
-                                                    <button class="btn btn-danger notika-btn-danger" id="ResetFilter">Reset Filter</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    </div>
+<div class="data-table-list">
 
-                    <!-- Tabel Data Isu KLHS -->
-                    <div class="table-responsive">
-                        <table id="data-table-basic" class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th class="text-center">No</th>
-                                    <th>Kementerian</th>
-                                    <th>Isu KLHS</th>
-                                    <th>Periode</th>
-                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
-                                    <th>Aksi</th>
-                                    <?php } ?>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php $No = 1; foreach ($IsuKLHS as $key): ?>
-                                <tr>
-                                    <td style="vertical-align: middle;" class="text-center"><?= $No++ ?></td>
-                                    <td style="vertical-align: middle;"><?= $key['NamaKementerian'] ?></td>
-                                    <td style="vertical-align: middle;"><?= $key['NamaIsuKLHS'] ?></td>
-                                    <td style="vertical-align: middle;"><?= $key['TahunMulai'] . ' - ' . $key['TahunAkhir'] ?></td>
-                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
-                                    <td>
-                                        <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                            <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" 
-                                                data-edit="<?= $key['Id'] . '|' . $key['IdKementerian'] . '|' . $key['NamaIsuKLHS'] . '|' . $key['TahunMulai'] . '|' . $key['TahunAkhir'] ?>">
-                                                <i class="notika-icon notika-edit"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" data-hapus="<?= $key['Id'] ?>">
-                                                <i class="notika-icon notika-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <?php } ?>
-                                </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+<!-- ===================== INFO SESSION ===================== -->
+<?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
+<div class="alert alert-info" style="margin-bottom:15px;">
+    <i class="notika-icon notika-info"></i>
+    <b>Kementerian :</b> <?= htmlspecialchars($UserKementerianName) ?><br>
+    <b>Periode :</b> <?= htmlspecialchars($UserPeriode) ?>
+</div>
+<?php endif; ?>
+
+<!-- ===================== HEADER BUTTON ===================== -->
+<div class="basic-tb-hd">
+    <div class="button-icon-btn sm-res-mg-t-30">
+
+        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0): ?>
+        <button class="btn btn-primary notika-btn-primary" id="FilterIsuKLHS">
+            <i class="notika-icon notika-search"></i>
+            <b>Filter Data</b>
+            <?php if ($CurrentPeriode || $CurrentKementerian): ?>
+                <span class="badge" style="background:#f44336;margin-left:5px;">Aktif</span>
+            <?php endif; ?>
+        </button>
+        <?php endif; ?>
+
+        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
+        <button class="btn btn-success notika-btn-success" id="BtnInputIsuKLHS">
+            <i class="notika-icon notika-edit"></i>
+            <b>Input Isu KLHS</b>
+        </button>
+        <?php endif; ?>
+
     </div>
 </div>
 
-<!-- Modal Input Isu KLHS -->
-<div class="modal fade" id="ModalInputIsuKLHS" role="dialog">
-    <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">×</button>
-                <h4 class="modal-title">Input Isu KLHS</h4>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="form-example-wrap" style="padding: 5px;">
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Periode</b></label>
-                                        </div>
-                                        <div class="col-lg-9">
-                                            <div class="nk-int-st">
-                                                <select class="form-control" id="InputPeriode" required>
-                                                    <option value="">-- Pilih Periode --</option>
-                                                    <?php foreach ($AllPeriode as $periode): ?>
-                                                        <option value="<?= $periode['TahunMulai'] . '|' . $periode['TahunAkhir'] ?>">
-                                                            <?= $periode['TahunMulai'] . ' - ' . $periode['TahunAkhir'] ?>
-                                                        </option>
-                                                    <?php endforeach; ?>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Kementerian</b></label>
-                                        </div>
-                                        <div class="col-lg-9">
-                                            <div class="nk-int-st">
-                                                <select class="form-control" id="InputKementerian" required>
-                                                    <option value="">-- Pilih Kementerian --</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Nama Isu KLHS</b></label>
-                                        </div>
-                                        <div class="col-lg-9">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="NamaIsuKLHS" required>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-example-int">
-                                <div class="row">
-                                    <div class="col-lg-2"></div>
-                                    <div class="col-lg-9">
-                                        <button class="btn btn-success notika-btn-success" id="InputIsuKLHS"><b>SIMPAN</b></button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<!-- ===================== TABLE ===================== -->
+<div class="table-responsive">
+<table id="data-table-basic" class="table table-striped">
+<thead>
+<tr>
+    <th width="5%" class="text-center">No</th>
+
+    <?php if (!isset($_SESSION['Level']) || $_SESSION['Level'] == 0): ?>
+        <th width="25%">Kementerian</th>
+    <?php endif; ?>
+
+    <th>Isu KLHS</th>
+    <th width="18%">Periode</th>
+
+    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
+        <th width="12%" class="text-center">Aksi</th>
+    <?php endif; ?>
+</tr>
+</thead>
+
+<tbody>
+<?php if (!empty($IsuKLHS)): ?>
+<?php $no=1; foreach($IsuKLHS as $row): ?>
+<tr>
+    <td class="text-center"><?= $no++ ?></td>
+
+    <?php if (!isset($_SESSION['Level']) || $_SESSION['Level'] == 0): ?>
+        <td><?= htmlspecialchars($row['NamaKementerian']) ?></td>
+    <?php endif; ?>
+
+    <td><?= htmlspecialchars($row['NamaIsuKLHS']) ?></td>
+    <td><?= $row['TahunMulai'].' - '.$row['TahunAkhir'] ?></td>
+
+    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
+    <td class="text-center">
+        <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
+            <?php if ($row['IdKementerian'] == $_SESSION['IdKementerian']): ?>
+                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit"
+                        data-id="<?= $row['Id'] ?>"
+                        title="Edit">
+                    <i class="notika-icon notika-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus"
+                        data-id="<?= $row['Id'] ?>"
+                        title="Hapus">
+                    <i class="notika-icon notika-trash"></i>
+                </button>
+            <?php else: ?>
+                <button class="btn btn-sm btn-default amber-icon-notika btn-reco-mg btn-button-mg"
+                        disabled
+                        title="Data milik kementerian lain">
+                    <i class="notika-icon notika-lock"></i>
+                </button>
+            <?php endif; ?>
         </div>
-    </div>
+    </td>
+    <?php endif; ?>
+</tr>
+<?php endforeach; ?>
+<?php else: ?>
+<tr>
+    <td colspan="<?= isset($_SESSION['Level']) && $_SESSION['Level']==1 ? 5 : 4 ?>" class="text-center">
+        <div class="alert alert-warning">
+            <i class="notika-icon notika-info"></i>
+            Belum ada data Isu KLHS
+        </div>
+    </td>
+</tr>
+<?php endif; ?>
+</tbody>
+</table>
 </div>
 
-<!-- Modal Edit Isu KLHS -->
-<div class="modal fade" id="ModalEditIsuKLHS" role="dialog">
-    <div class="modal-dialog modal-large" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">×</button>
-                <h4 class="modal-title">Edit Isu KLHS</h4>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="form-example-wrap" style="padding: 5px;">
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Periode</b></label>
-                                        </div>
-                                        <div class="col-lg-9">
-                                            <div class="nk-int-st">
-                                                <select class="form-control" id="EditPeriode" required>
-                                                    <option value="">-- Pilih Periode --</option>
-                                                    <?php foreach ($AllPeriode as $periode): ?>
-                                                        <option value="<?= $periode['TahunMulai'] . '|' . $periode['TahunAkhir'] ?>">
-                                                            <?= $periode['TahunMulai'] . ' - ' . $periode['TahunAkhir'] ?>
-                                                        </option>
-                                                    <?php endforeach; ?>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Kementerian</b></label>
-                                        </div>
-                                        <div class="col-lg-9">
-                                            <div class="nk-int-st">
-                                                <input type="hidden" id="EditId">
-                                                <select class="form-control" id="EditIdKementerian" required>
-                                                    <option value="">-- Pilih Kementerian --</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Nama Isu KLHS</b></label>
-                                        </div>
-                                        <div class="col-lg-9">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="EditNamaIsuKLHS" required>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-example-int">
-                                <div class="row">
-                                    <div class="col-lg-2"></div>
-                                    <div class="col-lg-9">
-                                        <button class="btn btn-success notika-btn-success" id="UpdateIsuKLHS"><b>UPDATE</b></button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ===================== MODAL INPUT ===================== -->
+<?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
+<div class="modal fade" id="ModalInputIsuKLHS">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">×</button>
+    <h4 class="modal-title">Input Isu KLHS</h4>
+</div>
+<div class="modal-body">
+
+<div class="alert alert-info">
+    <b>Kementerian :</b> <?= htmlspecialchars($UserKementerianName) ?><br>
+    <b>Periode :</b> <?= htmlspecialchars($UserPeriode) ?>
+</div>
+
+<div class="form-example-wrap">
+    <div class="form-example-int form-horizental">
+        <div class="form-group">
+            <label><b>Nama Isu KLHS</b></label>
+            <textarea class="form-control" id="NamaIsuKLHS" rows="4"
+                placeholder="Tuliskan isu strategis KLHS..."></textarea>
         </div>
     </div>
+
+    <button class="btn btn-success notika-btn-success" id="InputIsuKLHS">
+        <i class="notika-icon notika-checked"></i> SIMPAN
+    </button>
+    <button class="btn btn-default" data-dismiss="modal">BATAL</button>
 </div>
+
+</div>
+</div>
+</div>
+</div>
+<?php endif; ?>
+
+<!-- ===================== MODAL EDIT ===================== -->
+<?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
+<div class="modal fade" id="ModalEditIsuKLHS">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">×</button>
+    <h4 class="modal-title">Edit Isu KLHS</h4>
+</div>
+<div class="modal-body">
+
+<input type="hidden" id="EditId">
+
+<div class="form-example-wrap">
+    <div class="form-example-int">
+        <label><b>Nama Isu KLHS</b></label>
+        <textarea class="form-control" id="EditNamaIsuKLHS" rows="4"></textarea>
+    </div>
+
+    <button class="btn btn-success notika-btn-success" id="UpdateIsuKLHS">
+        <i class="notika-icon notika-checked"></i> UPDATE
+    </button>
+    <button class="btn btn-default" data-dismiss="modal">BATAL</button>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+<?php endif; ?>
+
 
 <!-- Scripts -->
 <script src="<?= base_url('js/vendor/jquery-1.12.4.min.js'); ?>"></script>
@@ -322,200 +223,171 @@
 <script src="<?= base_url('js/data-table/data-table-act.js'); ?>"></script>
 <script src="<?= base_url('js/main.js'); ?>"></script>
 <script>
-    var BaseURL = '<?= base_url() ?>';
-    var CurrentPeriode = '<?= $CurrentPeriode ?>';
-    var CurrentKementerian = '<?= $CurrentKementerian ?>';
+$(document).ready(function () {
 
-    $(document).ready(function() {
-        // Function to populate Kementerian dropdown
-        function populateKementerian(selectElement, tahunMulai, tahunAkhir, selectedId = '') {
-            if (tahunMulai && tahunAkhir) {
-                $.post(BaseURL + "Kementerian/GetKementerianByPeriode", {
-                    TahunMulai: tahunMulai,
-                    TahunAkhir: tahunAkhir
-                }, function(response) {
-                    var kementerian = JSON.parse(response);
-                    selectElement.empty().append('<option value="">-- Pilih Kementerian --</option>');
-                    $.each(kementerian, function(index, item) {
-                        var isSelected = (item.Id == selectedId) ? 'selected' : '';
-                        selectElement.append('<option value="' + item.Id + '" ' + isSelected + '>' + item.NamaKementerian + '</option>');
-                    });
-                });
-            } else {
-                selectElement.empty().append('<option value="">-- Pilih Kementerian --</option>');
-            }
-        }
+    /* =====================================================
+     * GLOBAL
+     * ===================================================== */
+    const BaseURL = "<?= site_url() ?>";
+    const UserLevel = <?= isset($_SESSION['Level']) ? (int)$_SESSION['Level'] : -1 ?>;
 
-        // Periode change handler for Input modal
-        $("#InputPeriode").change(function() {
-            var periode = $(this).val();
-            if (periode) {
-                var [tahunMulai, tahunAkhir] = periode.split('|');
-                populateKementerian($("#InputKementerian"), tahunMulai, tahunAkhir);
-            } else {
-                $("#InputKementerian").empty().append('<option value="">-- Pilih Kementerian --</option>');
-            }
+    /* =====================================================
+     * DATATABLE (AMAN, TIDAK DOUBLE INIT)
+     * ===================================================== */
+    if (!$.fn.DataTable.isDataTable('#data-table-basic')) {
+        $('#data-table-basic').DataTable({
+            pageLength: 10,
+            order: [],
+            language: {
+                search: "Cari:",
+                lengthMenu: "Tampilkan _MENU_ data",
+                zeroRecords: "Data tidak ditemukan",
+                info: "Menampilkan _START_ - _END_ dari _TOTAL_ data",
+                paginate: {
+                    next: "Selanjutnya",
+                    previous: "Sebelumnya"
+                }
+            },
+            columnDefs: [
+                {
+                    targets: UserLevel == 1 ? [0, 4] : [0],
+                    orderable: false
+                }
+            ]
         });
+    }
 
-        // Periode change handler for Edit modal
-        $("#EditPeriode").change(function() {
-            var periode = $(this).val();
-            if (periode) {
-                var [tahunMulai, tahunAkhir] = periode.split('|');
-                populateKementerian($("#EditIdKementerian"), tahunMulai, tahunAkhir);
-            } else {
-                $("#EditIdKementerian").empty().append('<option value="">-- Pilih Kementerian --</option>');
-            }
-        });
-
-        // Filter functionality
-        function loadKementerianForFilter(periode, selectElement, selectedId = '') {
-            if (periode) {
-                var [tahunMulai, tahunAkhir] = periode.split('|');
-                $.post(BaseURL + "Kementerian/GetKementerianByPeriode", {
-                    TahunMulai: tahunMulai,
-                    TahunAkhir: tahunAkhir
-                }, function(response) {
-                    var kementerian = JSON.parse(response);
-                    selectElement.empty().append('<option value="">Semua Kementerian</option>');
-                    
-                    if (kementerian.length > 0) {
-                        $.each(kementerian, function(index, item) {
-                            var isSelected = (item.Id == selectedId) ? 'selected' : '';
-                            selectElement.append('<option value="' + item.Id + '" ' + isSelected + '>' + item.NamaKementerian + '</option>');
-                        });
-                    }
-                });
-            } else {
-                // Load all kementerian when no periode selected
-                $.getJSON(BaseURL + "Kementerian/GetAllKementerian", function(kementerian) {
-                    selectElement.empty().append('<option value="">Semua Kementerian</option>');
-                    $.each(kementerian, function(index, item) {
-                        var isSelected = (item.Id == selectedId) ? 'selected' : '';
-                        selectElement.append('<option value="' + item.Id + '" ' + isSelected + '>' + item.NamaKementerian + '</option>');
-                    });
-                });
-            }
-        }
-
-        // Show filter modal
-        $("#FilterIsuKLHS").click(function() {
-            $('#ModalFilter').modal("show");
-        });
-
-        // Load ministries when period filter changes
-        $("#FilterPeriode").change(function() {
-            var periode = $(this).val();
-            loadKementerianForFilter(periode, $("#FilterKementerianSelect"));
-        });
-
-        // Apply filter
-        $("#ApplyFilter").click(function() {
-            var periode = $("#FilterPeriode").val();
-            var kementerian = $("#FilterKementerianSelect").val();
-            var url = BaseURL + "Kementerian/IsuKLHS?";
-            
-            if (periode) url += "periode=" + encodeURIComponent(periode) + "&";
-            if (kementerian) url += "kementerian=" + encodeURIComponent(kementerian);
-            
-            window.location.href = url;
-        });
-
-        // Reset filter
-        $("#ResetFilter").click(function() {
-            window.location.href = BaseURL + "Kementerian/IsuKLHS";
-        });
-
-        // Input Isu KLHS
-        $("#InputIsuKLHS").click(function() {
-            if ($("#InputPeriode").val() === "") {
-                alert('Pilih Periode terlebih dahulu!');
-                return;
-            } else if ($("#InputKementerian").val() === "") {
-                alert('Pilih Kementerian terlebih dahulu!');
-                return;
-            } else if ($("#NamaIsuKLHS").val() === "") {
-                alert('Input Nama Isu KLHS Belum Benar!');
-                return;
-            } else {
-                var [TahunMulai, TahunAkhir] = $("#InputPeriode").val().split('|');
-                var Data = {
-                    IdKementerian: $("#InputKementerian").val(),
-                    NamaIsuKLHS: $("#NamaIsuKLHS").val(),
-                    TahunMulai: TahunMulai,
-                    TahunAkhir: TahunAkhir
-                };
-                $.post(BaseURL + "Kementerian/InputIsuKLHS", Data).done(function(Respon) {
-                    if (Respon == '1') {
-                        window.location.reload();
-                    } else {
-                        alert(Respon);
-                    }
-                });
-            }
-        });
-
-        // Edit Isu KLHS
-        $(document).on("click", ".Edit", function() {
-            var Data = $(this).data('edit').split("|");
-            $("#EditId").val(Data[0]);
-            $("#EditNamaIsuKLHS").val(Data[2]);
-            var periode = Data[3] + '|' + Data[4];
-            $("#EditPeriode").val(periode);
-            populateKementerian($("#EditIdKementerian"), Data[3], Data[4], Data[1]);
-            $('#ModalEditIsuKLHS').modal("show");
-        });
-
-        // Update Isu KLHS
-        $("#UpdateIsuKLHS").click(function() {
-            if ($("#EditPeriode").val() === "") {
-                alert('Pilih Periode terlebih dahulu!');
-                return;
-            } else if ($("#EditIdKementerian").val() === "") {
-                alert('Pilih Kementerian terlebih dahulu!');
-                return;
-            } else if ($("#EditNamaIsuKLHS").val() === "") {
-                alert('Input Nama Isu KLHS Belum Benar!');
-                return;
-            } else {
-                var [TahunMulai, TahunAkhir] = $("#EditPeriode").val().split('|');
-                var Data = {
-                    Id: $("#EditId").val(),
-                    IdKementerian: $("#EditIdKementerian").val(),
-                    NamaIsuKLHS: $("#EditNamaIsuKLHS").val(),
-                    TahunMulai: TahunMulai,
-                    TahunAkhir: TahunAkhir
-                };
-                $.post(BaseURL + "Kementerian/UpdateIsuKLHS", Data).done(function(Respon) {
-                    if (Respon == '1') {
-                        window.location.reload();
-                    } else {
-                        alert(Respon);
-                    }
-                });
-            }
-        });
-
-        // Delete Isu KLHS
-        $(document).on("click", ".Hapus", function() {
-            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-                var Id = { Id: $(this).data('hapus') };
-                $.post(BaseURL + "Kementerian/DeleteIsuKLHS", Id).done(function(Respon) {
-                    if (Respon == '1') {
-                        window.location.reload();
-                    } else {
-                        alert(Respon);
-                    }
-                });
-            }
-        });
-
-        // Initialize filter state on page load
-        <?php if ($CurrentPeriode): ?>
-            loadKementerianForFilter('<?= $CurrentPeriode ?>', $("#FilterKementerianSelect"), '<?= $CurrentKementerian ?>');
-        <?php else: ?>
-            // Load all kementerian if no periode filter
-            loadKementerianForFilter('', $("#FilterKementerianSelect"), '<?= $CurrentKementerian ?>');
-        <?php endif; ?>
+    /* =====================================================
+     * FILTER (ADMIN)
+     * ===================================================== */
+    $('#FilterIsuKLHS').on('click', function () {
+        $('#ModalFilter').modal('show');
     });
+
+    $('#FilterPeriode').on('change', function () {
+        const periode = $(this).val();
+        const select = $('#FilterKementerianSelect');
+
+        if (!periode) {
+            select.html('<option value="">Semua Kementerian</option>');
+            return;
+        }
+
+        const [tm, ta] = periode.split('|');
+
+        $.post(BaseURL + 'Kementerian/GetKementerianByPeriode', {
+            TahunMulai: tm,
+            TahunAkhir: ta
+        }, function (res) {
+            const data = JSON.parse(res);
+            select.html('<option value="">Semua Kementerian</option>');
+            data.forEach(k => {
+                select.append(`<option value="${k.Id}">${k.NamaKementerian}</option>`);
+            });
+        });
+    });
+
+    $('#ApplyFilter').on('click', function () {
+        let url = BaseURL + 'Kementerian/IsuKLHS?';
+        const periode = $('#FilterPeriode').val();
+        const kementerian = $('#FilterKementerianSelect').val();
+
+        if (periode) url += 'periode=' + encodeURIComponent(periode) + '&';
+        if (kementerian) url += 'kementerian=' + encodeURIComponent(kementerian);
+
+        window.location.href = url.replace(/&$/, '');
+    });
+
+    $('#ResetFilter').on('click', function () {
+        window.location.href = BaseURL + 'Kementerian/IsuKLHS';
+    });
+
+    /* =====================================================
+     * INPUT ISU KLHS (LEVEL 1 - SESSION)
+     * ===================================================== */
+    $('#BtnInputIsuKLHS').on('click', function () {
+        $('#NamaIsuKLHS').val('');
+        $('#ModalInputIsuKLHS').modal('show');
+    });
+
+    $('#InputIsuKLHS').on('click', function () {
+        const nama = $('#NamaIsuKLHS').val().trim();
+
+        if (!nama) {
+            alert('Nama Isu KLHS wajib diisi');
+            return;
+        }
+
+        $.post(BaseURL + 'Kementerian/InputIsuKLHS', {
+            NamaIsuKLHS: nama
+        }, function (res) {
+            const r = JSON.parse(res);
+            alert(r.message);
+            if (r.success) location.reload();
+        }).fail(function () {
+            alert('Gagal menghubungi server');
+        });
+    });
+
+    /* =====================================================
+     * EDIT ISU KLHS
+     * ===================================================== */
+    $(document).on('click', '.Edit', function () {
+        const id = $(this).data('id');
+
+        $.post(BaseURL + 'Kementerian/GetIsuKLHSById', {
+            id: id
+        }, function (res) {
+            const r = JSON.parse(res);
+            if (!r.success) {
+                alert(r.message);
+                return;
+            }
+            $('#EditId').val(r.data.Id);
+            $('#EditNamaIsuKLHS').val(r.data.NamaIsuKLHS);
+            $('#ModalEditIsuKLHS').modal('show');
+        });
+    });
+
+    $('#UpdateIsuKLHS').on('click', function () {
+        const id = $('#EditId').val();
+        const nama = $('#EditNamaIsuKLHS').val().trim();
+
+        if (!nama) {
+            alert('Nama Isu KLHS wajib diisi');
+            return;
+        }
+
+        $.post(BaseURL + 'Kementerian/UpdateIsuKLHS', {
+            Id: id,
+            NamaIsuKLHS: nama
+        }, function (res) {
+            const r = JSON.parse(res);
+            alert(r.message);
+            if (r.success) location.reload();
+        }).fail(function () {
+            alert('Gagal update data');
+        });
+    });
+
+    /* =====================================================
+     * DELETE ISU KLHS
+     * ===================================================== */
+    $(document).on('click', '.Hapus', function () {
+        const id = $(this).data('id');
+
+        if (!confirm('Yakin ingin menghapus data ini?')) return;
+
+        $.post(BaseURL + 'Kementerian/DeleteIsuKLHS', {
+            Id: id
+        }, function (res) {
+            const r = JSON.parse(res);
+            alert(r.message);
+            if (r.success) location.reload();
+        }).fail(function () {
+            alert('Gagal menghapus data');
+        });
+    });
+
+});
 </script>

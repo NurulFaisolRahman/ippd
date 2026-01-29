@@ -57,9 +57,15 @@ class Home extends CI_Controller {
                 $this->session->set_userdata($Session);
                 echo $level;
             } else if ($level == '1') {
-                $Session = array('Admin' => true, 'Kementerian' => '', 'Level' => $level);
-                $this->session->set_userdata($Session);
-                echo $level;
+    $Session = array(
+        'isLoggedIn' => true,
+        'userLevel' => 1,
+        'Level' => 1, // tetap dipertahankan kalau dipakai di tempat lain
+        'IdKementerian' => $Akun[0]['IdKementerian'], // 🔥 WAJIB ADA
+        'Username' => $Akun[0]['Username']
+    );
+    $this->session->set_userdata($Session);
+    echo $level;
             } else if ($level == '2') {
                 $Session = array('Admin' => true, 'Provinsi' => '', 'Level' => $level, 'KodeWilayah' => $Akun[0]['KodeWilayah']);
                 $this->session->set_userdata($Session);

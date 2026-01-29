@@ -10,11 +10,11 @@
                 <span class="bread-slash"> / </span>
             </li>
             <li style="display:inline-block">
-                <a href="<?= base_url('Kementerian/IsuGlobal') ?>">Isu</a>
+                <a href="<?= base_url('Kementerian/IsuRegional') ?>">Isu</a>
                 <span class="bread-slash"> / </span>
             </li>
             <li style="display:inline-block">
-                <span class="bread-blk">Isu Global</span>
+                <span class="bread-blk">Isu Regional</span>
             </li>
         </ul>
     </div>
@@ -39,7 +39,7 @@
     <div class="button-icon-btn sm-res-mg-t-30">
 
         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0): ?>
-        <button class="btn btn-primary notika-btn-primary" id="FilterIsuGlobal">
+        <button class="btn btn-primary notika-btn-primary" id="FilterIsunasional">
             <i class="notika-icon notika-search"></i>
             <b>Filter Data</b>
             <?php if (isset($CurrentPeriode) && ($CurrentPeriode || $CurrentKementerian)): ?>
@@ -49,9 +49,9 @@
         <?php endif; ?>
 
         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
-        <button class="btn btn-success notika-btn-success" id="BtnInputIsuGlobal">
+        <button class="btn btn-success notika-btn-success" id="BtnInputIsunasional">
             <i class="notika-icon notika-edit"></i>
-            <b>Input Isu Global</b>
+            <b>Input Isu Regional</b>
         </button>
         <?php endif; ?>
 
@@ -68,7 +68,7 @@
         <th width="25%">Kementerian</th>
     <?php endif; ?>
 
-    <th>Isu Global</th>
+    <th>Isu Regional</th>
     <th width="18%">Periode</th>
 
     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
@@ -78,8 +78,8 @@
 </thead>
 
 <tbody>
-<?php if (!empty($IsuGlobal)): ?>
-<?php $no=1; foreach($IsuGlobal as $row): ?>
+<?php if (!empty($IsuRegional)): ?>
+<?php $no=1; foreach($IsuRegional as $row): ?>
 <tr>
     <td class="text-center"><?= $no++ ?></td>
 
@@ -87,7 +87,7 @@
         <td><?= htmlspecialchars($row['NamaKementerian']) ?></td>
     <?php endif; ?>
 
-    <td><?= htmlspecialchars($row['NamaIsuGlobal']) ?></td>
+    <td><?= htmlspecialchars($row['NamaIsuRegional']) ?></td>
     <td><?= $row['TahunMulai'].' - '.$row['TahunAkhir'] ?></td>
 
     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
@@ -121,7 +121,7 @@
     <td colspan="<?= isset($_SESSION['Level']) && $_SESSION['Level']==1 ? 4 : 4 ?>" class="text-center">
         <div class="alert alert-warning">
             <i class="notika-icon notika-info"></i>
-            Belum ada data Isu Global
+            Belum ada data Isu Regional
         </div>
     </td>
 </tr>
@@ -137,12 +137,12 @@
 </div>
 
 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
-<div class="modal fade" id="ModalInputIsuGlobal">
+<div class="modal fade" id="ModalInputIsunasional">
 <div class="modal-dialog modal-lg">
 <div class="modal-content">
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal">×</button>
-    <h4 class="modal-title">Input Isu Global</h4>
+    <h4 class="modal-title">Input Isu Regional</h4>
 </div>
 <div class="modal-body">
 
@@ -154,13 +154,13 @@
 <div class="form-example-wrap">
     <div class="form-example-int form-horizental">
         <div class="form-group">
-            <label><b>Nama Isu Global</b></label>
-            <textarea class="form-control" id="NamaIsuGlobal" rows="4"
-                placeholder="Tuliskan isu strategis global..."></textarea>
+            <label><b>Nama Isu Regional</b></label>
+            <textarea class="form-control" id="NamaIsuRegional" rows="4"
+                placeholder="Tuliskan isu strategis Regional..."></textarea>
         </div>
     </div>
 
-    <button class="btn btn-success notika-btn-success" id="InputIsuGlobal">
+    <button class="btn btn-success notika-btn-success" id="InputIsunasional">
         <i class="notika-icon notika-checked"></i> SIMPAN
     </button>
     <button class="btn btn-default" data-dismiss="modal">BATAL</button>
@@ -173,12 +173,12 @@
 <?php endif; ?>
 
 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
-<div class="modal fade" id="ModalEditIsuGlobal">
+<div class="modal fade" id="ModalEditIsunasional">
 <div class="modal-dialog modal-lg">
 <div class="modal-content">
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal">×</button>
-    <h4 class="modal-title">Edit Isu Global</h4>
+    <h4 class="modal-title">Edit Isu Regional</h4>
 </div>
 <div class="modal-body">
 
@@ -186,11 +186,11 @@
 
 <div class="form-example-wrap">
     <div class="form-example-int">
-        <label><b>Nama Isu Global</b></label>
-        <textarea class="form-control" id="EditNamaIsuGlobal" rows="4"></textarea>
+        <label><b>Nama Isu Regional</b></label>
+        <textarea class="form-control" id="EditNamaIsunasional" rows="4"></textarea>
     </div>
 
-    <button class="btn btn-success notika-btn-success" id="UpdateIsuGlobal">
+    <button class="btn btn-success notika-btn-success" id="UpdateIsunasional">
         <i class="notika-icon notika-checked"></i> UPDATE
     </button>
     <button class="btn btn-default" data-dismiss="modal">BATAL</button>
@@ -217,7 +217,7 @@
 $(document).ready(function () {
 
     /* =====================================================
-     * GLOBAL
+     * Regional
      * ===================================================== */
     const BaseURL   = "<?= site_url() ?>";
     const UserLevel = <?= isset($_SESSION['Level']) ? (int)$_SESSION['Level'] : -1 ?>;
@@ -283,7 +283,7 @@ $(document).ready(function () {
     /* =====================================================
      * FILTER (ADMIN)
      * ===================================================== */
-    $('#FilterIsuGlobal').on('click', function () {
+    $('#FilterIsunasional').on('click', function () {
         $('#ModalFilter').modal('show');
     });
 
@@ -322,7 +322,7 @@ $(document).ready(function () {
     });
 
     $('#ApplyFilter').on('click', function () {
-        let url = BaseURL + 'Kementerian/IsuGlobal?';
+        let url = BaseURL + 'Kementerian/IsuRegional?';
 
         const periode     = $('#FilterPeriode').val();
         const kementerian = $('#FilterKementerianSelect').val();
@@ -334,32 +334,32 @@ $(document).ready(function () {
     });
 
     $('#ResetFilter').on('click', function () {
-        window.location.href = BaseURL + 'Kementerian/IsuGlobal';
+        window.location.href = BaseURL + 'Kementerian/IsuRegional';
     });
 
     /* =====================================================
-     * INPUT ISU GLOBAL (LEVEL 1)
+     * INPUT ISU Regional (LEVEL 1)
      * ===================================================== */
-    $('#BtnInputIsuGlobal').on('click', function () {
-        $('#NamaIsuGlobal').val('');
-        $('#ModalInputIsuGlobal').modal('show');
+    $('#BtnInputIsunasional').on('click', function () {
+        $('#NamaIsuRegional').val('');
+        $('#ModalInputIsunasional').modal('show');
     });
 
-    $('#InputIsuGlobal').on('click', function () {
-        const nama = $('#NamaIsuGlobal').val().trim();
+    $('#InputIsunasional').on('click', function () {
+        const nama = $('#NamaIsuRegional').val().trim();
 
         if (!nama) {
-            alert('Nama Isu Global wajib diisi');
+            alert('Nama Isu Regional wajib diisi');
             return;
         }
 
         if (nama.length < 5) {
-            alert('Nama Isu Global minimal 5 karakter');
+            alert('Nama Isu Regional minimal 5 karakter');
             return;
         }
 
-        $.post(BaseURL + 'Kementerian/InputIsuGlobal', {
-            NamaIsuGlobal: nama
+        $.post(BaseURL + 'Kementerian/InputIsunasional', {
+            NamaIsuRegional: nama
         }, function (res) {
             let r;
             try {
@@ -372,7 +372,7 @@ $(document).ready(function () {
 
             alert(r.message);
             if (r.success) {
-                $('#ModalInputIsuGlobal').modal('hide');
+                $('#ModalInputIsunasional').modal('hide');
                 location.reload();
             }
         })
@@ -393,7 +393,7 @@ $(document).on('click', '.Edit', function (e) {
     button.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
     
     $.ajax({
-        url: BaseURL + 'Kementerian/GetIsuGlobalById',
+        url: BaseURL + 'Kementerian/GetIsunasionalById',
         type: 'POST',
         dataType: 'json',
         data: { Id: id },
@@ -402,8 +402,8 @@ $(document).on('click', '.Edit', function (e) {
             
             if (response.success) {
                 $('#EditId').val(response.data.Id);
-                $('#EditNamaIsuGlobal').val(response.data.NamaIsuGlobal);
-                $('#ModalEditIsuGlobal').modal('show');
+                $('#EditNamaIsunasional').val(response.data.NamaIsuRegional);
+                $('#ModalEditIsunasional').modal('show');
             } else {
                 alert('Error: ' + response.message);
             }
@@ -417,23 +417,23 @@ $(document).on('click', '.Edit', function (e) {
 });
 
 /* =====================================================
- * UPDATE ISU GLOBAL - FIXED VERSION
+ * UPDATE ISU Regional - FIXED VERSION
  * ===================================================== */
-$(document).on('click', '#UpdateIsuGlobal', function (e) {
+$(document).on('click', '#UpdateIsunasional', function (e) {
     e.preventDefault();
     
     const id = $('#EditId').val();
-    const nama = $('#EditNamaIsuGlobal').val().trim();
+    const nama = $('#EditNamaIsunasional').val().trim();
     const button = $(this);
     
     // Validasi
     if (!nama) {
-        alert('Nama Isu Global wajib diisi');
+        alert('Nama Isu Regional wajib diisi');
         return;
     }
     
     if (nama.length < 5) {
-        alert('Nama Isu Global minimal 5 karakter');
+        alert('Nama Isu Regional minimal 5 karakter');
         return;
     }
     
@@ -442,19 +442,19 @@ $(document).on('click', '#UpdateIsuGlobal', function (e) {
     button.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
     
     $.ajax({
-        url: BaseURL + 'Kementerian/UpdateIsuGlobal',
+        url: BaseURL + 'Kementerian/UpdateIsunasional',
         type: 'POST',
         dataType: 'json',
         data: { 
             Id: id,
-            NamaIsuGlobal: nama
+            NamaIsuRegional: nama
         },
         success: function (response) {
             button.prop('disabled', false).html(originalText);
             
             alert(response.message);
             if (response.success) {
-                $('#ModalEditIsuGlobal').modal('hide');
+                $('#ModalEditIsunasional').modal('hide');
                 setTimeout(function() {
                     location.reload();
                 }, 500);
@@ -468,14 +468,14 @@ $(document).on('click', '#UpdateIsuGlobal', function (e) {
     });
 });
     /* =====================================================
-     * DELETE ISU GLOBAL
+     * DELETE ISU Regional
      * ===================================================== */
     $(document).on('click', '.Hapus', function () {
         const id = $(this).data('id');
 
         if (!confirm('Yakin ingin menghapus data ini?')) return;
 
-        $.post(BaseURL + 'Kementerian/DeleteIsuGlobal', {
+        $.post(BaseURL + 'Kementerian/DeleteIsunasional', {
             Id: id
         }, function (res) {
             let r;
@@ -499,7 +499,7 @@ $(document).on('click', '#UpdateIsuGlobal', function (e) {
     /* =====================================================
      * ERROR HANDLING UNTUK DATATABLES
      * ===================================================== */
-    // Tangkap error global
+    // Tangkap error Regional
     window.addEventListener('error', function(e) {
         if (e.message.includes('_DT_CellIndex')) {
             console.error('DataTables Cell Index Error detected');

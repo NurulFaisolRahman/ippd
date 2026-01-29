@@ -31,6 +31,8 @@
                     <!-- Header with Filter Button -->
                     <div class="basic-tb-hd">
                         <div class="button-icon-btn sm-res-mg-t-30">
+                            
+                                <?php if (!isset($_SESSION['Level']) || $_SESSION['Level'] == 0): ?>
                             <button type="button" class="btn btn-primary notika-btn-primary" id="FilterIsuStrategis">
                                 <i class="notika-icon notika-search"></i> 
                                 <b>Filter Data</b>
@@ -38,6 +40,7 @@
                                     <span class="badge" style="background-color: #f44336; margin-left: 5px;">Filter Aktif</span>
                                 <?php endif; ?>
                             </button>
+                            <?php   endif; ?>
                                  <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                             <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputIsuStrategis">
                                 <i class="notika-icon notika-edit"></i> <b>Input Isu Strategis</b>

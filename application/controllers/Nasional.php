@@ -1749,7 +1749,98 @@ class Nasional extends CI_Controller {
       echo 'Gagal Hapus Data!';
     }
   }
+
+   public function Kementerian() {
+        $Header['Halaman'] = 'Isu';
+        $Data['Kementerian'] = $this->db
+            ->where('deleted_at', NULL)
+            ->get('kementerian')
+            ->result_array();
+
+        $this->load->view('Nasional/header', $Header);
+        $this->load->view('Nasional/Kementerian', $Data);
+    }
+
+    public function InputKementerian() {
+        $TahunMulai = $this->input->post('TahunMulai');
+        $TahunAkhir = $this->input->post('TahunAkhir');
+
+        if (!is_numeric($TahunMulai) || !is_numeric($TahunAkhir) || $TahunMulai > $TahunAkhir) {
+            echo 'Tahun Mulai harus <= Tahun Akhir';
+            return;
+        }
+
+        $this->db->insert('kementerian', [
+            'NamaKementerian' => $this->input->post('NamaKementerian'),
+            'TahunMulai' => $TahunMulai,
+            'TahunAkhir' => $TahunAkhir,
+            'created_at' => date('Y-m-d H:i:s')
+        ]);
+
+        echo $this->db->affected_rows() ? '1' : 'Gagal Input';
+    }
+
+    public function UpdateKementerian()
+{
+    $Id         = $this->input->post('Id');
+    $Nama       = $this->input->post('NamaKementerian');
+    $TahunMulai = $this->input->post('TahunMulai');
+    $TahunAkhir = $this->input->post('TahunAkhir');
+
+    // VALIDASI
+    if (empty($Id)) {
+        echo 'ID tidak ditemukan';
+        return;
+    }
+
+    if (empty($Nama)) {
+        echo 'Nama Kementerian wajib diisi';
+        return;
+    }
+
+    if (!is_numeric($TahunMulai) || !is_numeric($TahunAkhir)) {
+        echo 'Tahun tidak valid';
+        return;
+    }
+
+    if ($TahunMulai > $TahunAkhir) {
+        echo 'Tahun Mulai harus <= Tahun Akhir';
+        return;
+    }
+
+    // ❗ JANGAN pakai edited_at dulu
+    $data = [
+        'NamaKementerian' => $Nama,
+        'TahunMulai'      => $TahunMulai,
+        'TahunAkhir'      => $TahunAkhir
+    ];
+
+    $this->db->where('Id', $Id);
+    $this->db->update('kementerian', $data);
+
+    // CEK ERROR DB
+    $error = $this->db->error();
+    if ($error['code'] != 0) {
+        echo 'DB ERROR: ' . $error['message'];
+        return;
+    }
+
+    echo '1';
 }
+
+
+
+
+    public function DeleteKementerian() {
+        $this->db->where('Id', $this->input->post('Id'))
+                 ->update('kementerian', [
+                     'deleted_at' => date('Y-m-d H:i:s')
+                 ]);
+
+        echo $this->db->affected_rows() ? '1' : 'Gagal Hapus';
+    }
+}
+
 
 
 

@@ -621,6 +621,18 @@
                         <br>
                     </div>
                 </div>
+
+                <div class="sidebar-dropdown">
+                    <a href="#">
+                    <i class="menu-icon fa fa-area-chart"></i>
+                    <span>Daftar Kementerian</span>
+                    <i class="fa fa-chevron-down"></i>
+                    </a>
+                    <div class="sidebar-submenu">
+                        <a href="<?=base_url('Nasional/Kementerian')?>">Daftar Kementerian</a>
+                        <br>
+                    </div>
+                </div>
             </ul>
         </div>
     </div>

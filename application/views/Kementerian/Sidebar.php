@@ -295,7 +295,6 @@
                     </a>
                     <div class="sidebar-submenu">
                         <a href="<?=base_url('Kementerian/PermasalahanPokok')?>">Permasalahan Pokok</a>
-                        <a href="<?=base_url('Kementerian/PotensiDaerah')?>">Potensi Daerah</a>
                         <a href="<?=base_url('Kementerian/IsuKLHS')?>">Isu KLHS</a>
                         <a href="<?=base_url('Kementerian/IsuGlobal')?>">Isu Global</a>
                         <a href="<?=base_url('Kementerian/IsuNasional')?>">Isu Nasional</a>

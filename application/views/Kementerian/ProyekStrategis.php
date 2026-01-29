@@ -31,6 +31,7 @@
                 <div class="data-table-list">
                     <div class="basic-tb-hd">
                         <div class="button-icon-btn sm-res-mg-t-30">
+                        <?php if (!isset($_SESSION['Level']) || $_SESSION['Level'] == 0): ?>
                             <button type="button" class="btn btn-primary notika-btn-primary" id="FilterProyek">
                                 <i class="notika-icon notika-search"></i> 
                                 <b>Filter Data</b>
@@ -38,6 +39,8 @@
                                     <span class="badge" style="background-color: #f44336; margin-left: 5px;">Filter Aktif</span>
                                 <?php endif; ?>
                             </button>
+                            
+                            <?php endif; ?>
                             <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                             <button type="button" class="btn btn-success notika-btn-success" id="BtnInputProyek">
                                 <i class="notika-icon notika-edit"></i> <b>Input Proyek Strategis</b>
@@ -716,107 +719,84 @@ $(document).ready(function() {
     }
 
     // Handle Input Proyek button click
-    $("#BtnInputProyek").click(function() {
-        if (!CurrentPeriode || !CurrentKementerian) {
-            alert('Harap pilih Periode dan Kementerian terlebih dahulu di filter!');
-            $('#ModalFilter').modal('show');
+    $("#BtnInputProyek").click(function () {
+
+    // Reset form
+    $('#formInputProyek')[0].reset();
+    $('#program-error').hide();
+    $('#nama-proyek-error').hide();
+
+    // Ambil data kementerian + periode dari SERVER
+    $.get(BaseURL + "Kementerian/GetSessionKementerian", function (res) {
+
+        var data = JSON.parse(res);
+
+        if (!data) {
+            alert('Session kementerian tidak valid');
             return;
         }
 
-        // Reset form
-        $('#formInputProyek')[0].reset();
-        $('#lokasi-container').html(`
-            <div class="form-group lokasi-row">
-                <div class="row">
-                    <div class="col-md-5">
-                        <select class="form-control provinsi-select" name="KodeWilayah[]">
-                            <option value="">Pilih Provinsi (Opsional)</option>
-                            <?php foreach ($Provinsi as $prov) { ?>
-                                <option value="<?= $prov['Kode'] ?>"><?= $prov['Nama'] ?></option>
-                            <?php } ?>
-                        </select>
-                    </div>
-                    <div class="col-md-5">
-                        <select class="form-control kota-select" name="KodeKota[]" disabled>
-                            <option value="">Pilih Kota/Kabupaten (Opsional)</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2" style="padding-top: 25px;">
-                        <button type="button" class="btn btn-success btn-add-lokasi">
-                            <i class="notika-icon notika-plus-symbol"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `);
+        // Set hidden input (opsional tapi rapi)
+        $("#InputIdKementerian").val(data.Id);
+        $("#InputTahunMulai").val(data.TahunMulai);
+        $("#InputTahunAkhir").val(data.TahunAkhir);
 
-        // Populate Program Strategis
-        var [tahunMulai, tahunAkhir] = CurrentPeriode.split('|');
-        populateProgramStrategis($("#IdProgramStrategis"), CurrentKementerian, tahunMulai, tahunAkhir);
+        // Populate program strategis
+        populateProgramStrategis(
+            $("#IdProgramStrategis"),
+            data.Id,
+            data.TahunMulai,
+            data.TahunAkhir
+        );
 
         $('#ModalInputProyek').modal('show');
     });
+});
+
+
 
     // Input Proyek Strategis
     $("#formInputProyek").submit(function(e) {
-        e.preventDefault();
-        
-        // Reset error messages
-        $('.text-danger').hide();
-        
-        // Validate form
-        var isValid = true;
-        
-        if (!$("#IdProgramStrategis").val()) {
-            $('#program-error').show();
-            isValid = false;
-        }
-        
-        if (!$("#NamaProyek").val()) {
-            $('#nama-proyek-error').show();
-            isValid = false;
-        }
-        
-        if (!isValid) {
-            alert('Harap lengkapi semua field yang wajib diisi!');
-            return;
-        }
+    e.preventDefault();
 
-        if (!CurrentPeriode || !CurrentKementerian) {
-            alert('Pilih Periode dan Kementerian terlebih dahulu di filter!');
-            return;
-        }
+    $('.text-danger').hide();
 
-        var [TahunMulai, TahunAkhir] = CurrentPeriode.split('|');
-        $("#InputIdKementerian").val(CurrentKementerian);
-        $("#InputTahunMulai").val(TahunMulai);
-        $("#InputTahunAkhir").val(TahunAkhir);
+    if (!$("#IdProgramStrategis").val()) {
+        $('#program-error').show();
+        return;
+    }
 
-        // Show loading
-        $('#BtnSubmitProyek').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
+    if (!$("#NamaProyek").val()) {
+        $('#nama-proyek-error').show();
+        return;
+    }
 
-        var formData = $(this).serialize();
-        
-        console.log("Sending data:", formData);
-        
-        $.post(BaseURL + "Kementerian/InputProyek", formData)
-            .done(function(Respon) {
-                if (Respon == '1') {
-                    alert('Proyek Strategis berhasil disimpan!');
-                    $('#ModalInputProyek').modal('hide');
-                    window.location.reload();
-                } else {
-                    alert('Error: ' + Respon);
-                }
-            })
-            .fail(function(xhr, status, error) {
-                console.error("AJAX Error:", status, error);
-                alert("Terjadi kesalahan saat mengirim data");
-            })
-            .always(function() {
-                $('#BtnSubmitProyek').prop('disabled', false).html('<i class="notika-icon notika-checked"></i> Simpan');
-            });
-    });
+    // ❌ TIDAK SET IdKementerian / TahunMulai / TahunAkhir DI JS
+    // ✅ SERVER YANG MENENTUKAN
+
+    var formData = $(this).serialize();
+
+    $('#BtnSubmitProyek')
+        .prop('disabled', true)
+        .html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
+
+    $.post(BaseURL + "Kementerian/InputProyek", formData)
+        .done(function(res) {
+            if (res == '1') {
+                alert('Proyek Strategis berhasil disimpan!');
+                $('#ModalInputProyek').modal('hide');
+                location.reload();
+            } else {
+                alert(res);
+            }
+        })
+        .always(function() {
+            $('#BtnSubmitProyek')
+                .prop('disabled', false)
+                .html('<i class="notika-icon notika-checked"></i> Simpan');
+        });
+});
+
 
     // Edit Proyek Strategis - Open Modal
     $(document).on("click", ".Edit", function() {

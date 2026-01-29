@@ -1,315 +1,207 @@
 <?php $this->load->view('Kementerian/Sidebar'); ?>
+
+<div class="main-content">
+
 <div class="breadcomb-area">
     <div class="container">
-        <div class="row">
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                <div class="breadcomb-list">
-                    <ul class="breadcomb-menu" style="list-style: none; padding: 0; margin: 0;">
-                        <li style="display: inline-block; margin-right: 5px;">
-                            <a href="<?= base_url('Beranda') ?>">Beranda</a>
-                            <span class="bread-slash" style="display: inline-block; margin: 0 5px;">/</span>
-                        </li>
-                        <li style="display: inline-block; margin-right: 5px;">
-                            <a href="<?= base_url('Kementerian/IsuNasional') ?>">Isu</a>
-                            <span class="bread-slash" style="display: inline-block; margin: 0 5px;">/</span>
-                        </li>
-                        <li style="display: inline-block;">
-                            <span class="bread-blk">Isu Nasional</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+        <ul class="breadcomb-menu" style="list-style:none;padding:0;margin:0">
+            <li style="display:inline-block">
+                <a href="<?= base_url('Beranda') ?>">Beranda</a>
+                <span class="bread-slash"> / </span>
+            </li>
+            <li style="display:inline-block">
+                <a href="<?= base_url('Kementerian/IsuNasional') ?>">Isu</a>
+                <span class="bread-slash"> / </span>
+            </li>
+            <li style="display:inline-block">
+                <span class="bread-blk">Isu nasional</span>
+            </li>
+        </ul>
     </div>
 </div>
 
 <div class="data-table-area">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                <div class="data-table-list">
-                    <!-- Header with Filter Button -->
-                    <div class="basic-tb-hd">
-                        <div class="button-icon-btn sm-res-mg-t-30">
-                            <button type="button" class="btn btn-primary notika-btn-primary" id="FilterIsuNasional">
-                                <i class="notika-icon notika-search"></i> 
-                                <b>Filter Data</b>
-                                <?php if ($CurrentPeriode || $CurrentKementerian): ?>
-                                    <span class="badge" style="background-color: #f44336; margin-left: 5px;">Filter Aktif</span>
-                                <?php endif; ?>
-                            </button>
-                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
-                            <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputIsuNasional">
-                                <i class="notika-icon notika-edit"></i> <b>Input Isu Nasional</b>
-                            </button>
-                            <?php } ?>
-                        </div>
-                    </div>
+<div class="container">
+<div class="row">
+<div class="col-lg-12">
 
-                    <!-- Modal Filter -->
-                    <div class="modal fade" id="ModalFilter" role="dialog">
-                        <div class="modal-dialog modals-default" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
-                        <div class="modal-dialog modals-default">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal">×</button>
-                                    <h4 class="modal-title">Filter Data Isu Nasional</h4>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="row">
-                                        <div class="col-lg-12">
-                                            <div class="form-example-wrap">
-                                                <div class="form-example-int">
-                                                    <div class="form-group">
-                                                        <label>Periode</label>
-                                                        <select class="form-control" id="FilterPeriode">
-                                                            <option value="">Semua Periode</option>
-                                                            <?php foreach ($AllPeriode as $periode): ?>
-                                                                <?php 
-                                                                    $periodeValue = $periode['TahunMulai'] . '|' . $periode['TahunAkhir'];
-                                                                    $selected = ($CurrentPeriode == $periodeValue) ? 'selected' : '';
-                                                                ?>
-                                                                <option value="<?= $periodeValue ?>" <?= $selected ?>>
-                                                                    <?= $periode['TahunMulai'] ?> - <?= $periode['TahunAkhir'] ?>
-                                                                </option>
-                                                            <?php endforeach; ?>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="form-example-int">
-                                                    <div class="form-group">
-                                                        <label>Kementerian</label>
-                                                        <select class="form-control" id="FilterKementerianSelect">
-                                                            <option value="">Semua Kementerian</option>
-                                                            <?php foreach ($Kementerian as $kementerian): ?>
-                                                                <?php $selected = ($CurrentKementerian == $kementerian['Id']) ? 'selected' : ''; ?>
-                                                                <option value="<?= $kementerian['Id'] ?>" <?= $selected ?>>
-                                                                    <?= $kementerian['NamaKementerian'] ?>
-                                                                </option>
-                                                            <?php endforeach; ?>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="form-example-int mg-t-15">
-                                                    <button class="btn btn-success notika-btn-success" id="ApplyFilter">Terapkan Filter</button>
-                                                    <button class="btn btn-danger notika-btn-danger" id="ResetFilter">Reset Filter</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    </div>
+<div class="data-table-list">
 
-                    <!-- Tabel Data Isu Nasional -->
-                    <div class="table-responsive">
-                        <table id="data-table-basic" class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th class="text-center">No</th>
-                                    <th>Kementerian</th>
-                                    <th>Isu Nasional</th>
-                                    <th>Periode</th>
-                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
-                                    <th>Aksi</th>
-                                    <?php } ?>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php $No = 1; foreach ($IsuNasional as $key): ?>
-                                <tr>
-                                    <td style="vertical-align: middle;" class="text-center"><?= $No++ ?></td>
-                                    <td style="vertical-align: middle;"><?= $key['NamaKementerian'] ?></td>
-                                    <td style="vertical-align: middle;"><?= $key['NamaIsuNasional'] ?></td>
-                                    <td style="vertical-align: middle;"><?= $key['TahunMulai'] . ' - ' . $key['TahunAkhir'] ?></td>
-                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
-                                    <td>
-                                        <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                            <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" 
-                                                data-edit="<?= $key['Id'] . '|' . $key['IdKementerian'] . '|' . $key['NamaIsuNasional'] . '|' . $key['TahunMulai'] . '|' . $key['TahunAkhir'] ?>">
-                                                <i class="notika-icon notika-edit"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" data-hapus="<?= $key['Id'] ?>">
-                                                <i class="notika-icon notika-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <?php } ?>
-                                </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+<?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
+<div class="alert alert-info" style="margin-bottom:15px;">
+    <i class="notika-icon notika-info"></i>
+    <b>Kementerian :</b> <?= htmlspecialchars($UserKementerianName) ?><br>
+    <b>Periode :</b> <?= htmlspecialchars($UserPeriode) ?>
+</div>
+<?php endif; ?>
+
+<div class="basic-tb-hd">
+    <div class="button-icon-btn sm-res-mg-t-30">
+
+        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0): ?>
+        <button class="btn btn-primary notika-btn-primary" id="FilterIsunasional">
+            <i class="notika-icon notika-search"></i>
+            <b>Filter Data</b>
+            <?php if (isset($CurrentPeriode) && ($CurrentPeriode || $CurrentKementerian)): ?>
+                <span class="badge" style="background:#f44336;margin-left:5px;">Aktif</span>
+            <?php endif; ?>
+        </button>
+        <?php endif; ?>
+
+        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
+        <button class="btn btn-success notika-btn-success" id="BtnInputIsunasional">
+            <i class="notika-icon notika-edit"></i>
+            <b>Input Isu nasional</b>
+        </button>
+        <?php endif; ?>
+
     </div>
 </div>
 
-<!-- Modal Input Isu Nasional -->
-<div class="modal fade" id="ModalInputIsuNasional" role="dialog">
-    <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">×</button>
-                <h4 class="modal-title">Input Isu Nasional</h4>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="form-example-wrap" style="padding: 5px;">
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Periode</b></label>
-                                        </div>
-                                        <div class="col-lg-9">
-                                            <div class="nk-int-st">
-                                                <select class="form-control" id="InputPeriode" required>
-                                                    <option value="">-- Pilih Periode --</option>
-                                                    <?php foreach ($AllPeriode as $periode): ?>
-                                                        <option value="<?= $periode['TahunMulai'] . '|' . $periode['TahunAkhir'] ?>">
-                                                            <?= $periode['TahunMulai'] . ' - ' . $periode['TahunAkhir'] ?>
-                                                        </option>
-                                                    <?php endforeach; ?>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Kementerian</b></label>
-                                        </div>
-                                        <div class="col-lg-9">
-                                            <div class="nk-int-st">
-                                                <select class="form-control" id="InputKementerian" required>
-                                                    <option value="">-- Pilih Kementerian --</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Nama Isu Nasional</b></label>
-                                        </div>
-                                        <div class="col-lg-9">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="NamaIsuNasional" required>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-example-int">
-                                <div class="row">
-                                    <div class="col-lg-2"></div>
-                                    <div class="col-lg-9">
-                                        <button class="btn btn-success notika-btn-success" id="InputIsuNasional"><b>SIMPAN</b></button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div class="table-responsive">
+<table id="data-table-basic" class="table table-striped">
+<thead>
+<tr>
+    <th width="5%" class="text-center">No</th>
+
+    <?php if (!isset($_SESSION['Level']) || $_SESSION['Level'] == 0): ?>
+        <th width="25%">Kementerian</th>
+    <?php endif; ?>
+
+    <th>Isu nasional</th>
+    <th width="18%">Periode</th>
+
+    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
+        <th width="12%" class="text-center">Aksi</th>
+    <?php endif; ?>
+</tr>
+</thead>
+
+<tbody>
+<?php if (!empty($IsuNasional)): ?>
+<?php $no=1; foreach($IsuNasional as $row): ?>
+<tr>
+    <td class="text-center"><?= $no++ ?></td>
+
+    <?php if (!isset($_SESSION['Level']) || $_SESSION['Level'] == 0): ?>
+        <td><?= htmlspecialchars($row['NamaKementerian']) ?></td>
+    <?php endif; ?>
+
+    <td><?= htmlspecialchars($row['NamaIsuNasional']) ?></td>
+    <td><?= $row['TahunMulai'].' - '.$row['TahunAkhir'] ?></td>
+
+    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
+    <td class="text-center">
+        <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
+            <?php if ($row['IdKementerian'] == $_SESSION['IdKementerian']): ?>
+                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit"
+                        data-id="<?= $row['Id'] ?>"
+                        title="Edit">
+                    <i class="notika-icon notika-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus"
+                        data-id="<?= $row['Id'] ?>"
+                        title="Hapus">
+                    <i class="notika-icon notika-trash"></i>
+                </button>
+            <?php else: ?>
+                <button class="btn btn-sm btn-default amber-icon-notika btn-reco-mg btn-button-mg"
+                        disabled
+                        title="Data milik kementerian lain">
+                    <i class="notika-icon notika-lock"></i>
+                </button>
+            <?php endif; ?>
         </div>
-    </div>
+    </td>
+    <?php endif; ?>
+</tr>
+<?php endforeach; ?>
+<?php else: ?>
+<tr>
+    <td colspan="<?= isset($_SESSION['Level']) && $_SESSION['Level']==1 ? 4 : 4 ?>" class="text-center">
+        <div class="alert alert-warning">
+            <i class="notika-icon notika-info"></i>
+            Belum ada data Isu nasional
+        </div>
+    </td>
+</tr>
+<?php endif; ?>
+</tbody>
+</table>
 </div>
 
-<!-- Modal Edit Isu Nasional -->
-<div class="modal fade" id="ModalEditIsuNasional" role="dialog">
-    <div class="modal-dialog modal-large" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">×</button>
-                <h4 class="modal-title">Edit Isu Nasional</h4>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="form-example-wrap" style="padding: 5px;">
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Periode</b></label>
-                                        </div>
-                                        <div class="col-lg-9">
-                                            <div class="nk-int-st">
-                                                <select class="form-control" id="EditPeriode" required>
-                                                    <option value="">-- Pilih Periode --</option>
-                                                    <?php foreach ($AllPeriode as $periode): ?>
-                                                        <option value="<?= $periode['TahunMulai'] . '|' . $periode['TahunAkhir'] ?>">
-                                                            <?= $periode['TahunMulai'] . ' - ' . $periode['TahunAkhir'] ?>
-                                                        </option>
-                                                    <?php endforeach; ?>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Kementerian</b></label>
-                                        </div>
-                                        <div class="col-lg-9">
-                                            <div class="nk-int-st">
-                                                <input type="hidden" id="EditId">
-                                                <select class="form-control" id="EditIdKementerian" required>
-                                                    <option value="">-- Pilih Kementerian --</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Nama Isu Nasional</b></label>
-                                        </div>
-                                        <div class="col-lg-9">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="EditNamaIsuNasional" required>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-example-int">
-                                <div class="row">
-                                    <div class="col-lg-2"></div>
-                                    <div class="col-lg-9">
-                                        <button class="btn btn-success notika-btn-success" id="UpdateIsuNasional"><b>UPDATE</b></button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
+</div>
 </div>
 
-<!-- Scripts -->
+<?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
+<div class="modal fade" id="ModalInputIsunasional">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">×</button>
+    <h4 class="modal-title">Input Isu nasional</h4>
+</div>
+<div class="modal-body">
+
+<div class="alert alert-info">
+    <b>Kementerian :</b> <?= htmlspecialchars($UserKementerianName) ?><br>
+    <b>Periode :</b> <?= htmlspecialchars($UserPeriode) ?>
+</div>
+
+<div class="form-example-wrap">
+    <div class="form-example-int form-horizental">
+        <div class="form-group">
+            <label><b>Nama Isu nasional</b></label>
+            <textarea class="form-control" id="NamaIsuNasional" rows="4"
+                placeholder="Tuliskan isu strategis nasional..."></textarea>
+        </div>
+    </div>
+
+    <button class="btn btn-success notika-btn-success" id="InputIsunasional">
+        <i class="notika-icon notika-checked"></i> SIMPAN
+    </button>
+    <button class="btn btn-default" data-dismiss="modal">BATAL</button>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+<?php endif; ?>
+
+<?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
+<div class="modal fade" id="ModalEditIsunasional">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">×</button>
+    <h4 class="modal-title">Edit Isu nasional</h4>
+</div>
+<div class="modal-body">
+
+<input type="hidden" id="EditId">
+
+<div class="form-example-wrap">
+    <div class="form-example-int">
+        <label><b>Nama Isu nasional</b></label>
+        <textarea class="form-control" id="EditNamaIsunasional" rows="4"></textarea>
+    </div>
+
+    <button class="btn btn-success notika-btn-success" id="UpdateIsunasional">
+        <i class="notika-icon notika-checked"></i> UPDATE
+    </button>
+    <button class="btn btn-default" data-dismiss="modal">BATAL</button>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+<?php endif; ?>
+
 <script src="<?= base_url('js/vendor/jquery-1.12.4.min.js'); ?>"></script>
 <script src="<?= base_url('js/bootstrap.min.js'); ?>"></script>
 <script src="<?= base_url('js/wow.min.js'); ?>"></script>
@@ -319,203 +211,305 @@
 <script src="<?= base_url('js/meanmenu/jquery.meanmenu.js'); ?>"></script>
 <script src="<?= base_url('js/scrollbar/jquery.mCustomScrollbar.concat.min.js'); ?>"></script>
 <script src="<?= base_url('js/data-table/jquery.dataTables.min.js'); ?>"></script>
-<script src="<?= base_url('js/data-table/data-table-act.js'); ?>"></script>
 <script src="<?= base_url('js/main.js'); ?>"></script>
+
 <script>
-    var BaseURL = '<?= base_url() ?>';
-    var CurrentPeriode = '<?= $CurrentPeriode ?>';
-    var CurrentKementerian = '<?= $CurrentKementerian ?>';
+$(document).ready(function () {
 
-    $(document).ready(function() {
-        // Function to populate Kementerian dropdown
-        function populateKementerian(selectElement, tahunMulai, tahunAkhir, selectedId = '') {
-            if (tahunMulai && tahunAkhir) {
-                $.post(BaseURL + "Kementerian/GetKementerianByPeriode", {
-                    TahunMulai: tahunMulai,
-                    TahunAkhir: tahunAkhir
-                }, function(response) {
-                    var kementerian = JSON.parse(response);
-                    selectElement.empty().append('<option value="">-- Pilih Kementerian --</option>');
-                    $.each(kementerian, function(index, item) {
-                        var isSelected = (item.Id == selectedId) ? 'selected' : '';
-                        selectElement.append('<option value="' + item.Id + '" ' + isSelected + '>' + item.NamaKementerian + '</option>');
-                    });
-                });
-            } else {
-                selectElement.empty().append('<option value="">-- Pilih Kementerian --</option>');
-            }
-        }
+    /* =====================================================
+     * nasional
+     * ===================================================== */
+    const BaseURL   = "<?= site_url() ?>";
+    const UserLevel = <?= isset($_SESSION['Level']) ? (int)$_SESSION['Level'] : -1 ?>;
 
-        // Periode change handler for Input modal
-        $("#InputPeriode").change(function() {
-            var periode = $(this).val();
-            if (periode) {
-                var [tahunMulai, tahunAkhir] = periode.split('|');
-                populateKementerian($("#InputKementerian"), tahunMulai, tahunAkhir);
-            } else {
-                $("#InputKementerian").empty().append('<option value="">-- Pilih Kementerian --</option>');
-            }
-        });
-
-        // Periode change handler for Edit modal
-        $("#EditPeriode").change(function() {
-            var periode = $(this).val();
-            if (periode) {
-                var [tahunMulai, tahunAkhir] = periode.split('|');
-                populateKementerian($("#EditIdKementerian"), tahunMulai, tahunAkhir);
-            } else {
-                $("#EditIdKementerian").empty().append('<option value="">-- Pilih Kementerian --</option>');
-            }
-        });
-
-        // Filter functionality
-        function loadKementerianForFilter(periode, selectElement, selectedId = '') {
-            if (periode) {
-                var [tahunMulai, tahunAkhir] = periode.split('|');
-                $.post(BaseURL + "Kementerian/GetKementerianByPeriode", {
-                    TahunMulai: tahunMulai,
-                    TahunAkhir: tahunAkhir
-                }, function(response) {
-                    var kementerian = JSON.parse(response);
-                    selectElement.empty().append('<option value="">Semua Kementerian</option>');
-                    
-                    if (kementerian.length > 0) {
-                        $.each(kementerian, function(index, item) {
-                            var isSelected = (item.Id == selectedId) ? 'selected' : '';
-                            selectElement.append('<option value="' + item.Id + '" ' + isSelected + '>' + item.NamaKementerian + '</option>');
-                        });
-                    }
-                });
-            } else {
-                // Load all kementerian when no periode selected
-                $.getJSON(BaseURL + "Kementerian/GetAllKementerian", function(kementerian) {
-                    selectElement.empty().append('<option value="">Semua Kementerian</option>');
-                    $.each(kementerian, function(index, item) {
-                        var isSelected = (item.Id == selectedId) ? 'selected' : '';
-                        selectElement.append('<option value="' + item.Id + '" ' + isSelected + '>' + item.NamaKementerian + '</option>');
-                    });
-                });
-            }
-        }
-
-        // Show filter modal
-        $("#FilterIsuNasional").click(function() {
-            $('#ModalFilter').modal("show");
-        });
-
-        // Load ministries when period filter changes
-        $("#FilterPeriode").change(function() {
-            var periode = $(this).val();
-            loadKementerianForFilter(periode, $("#FilterKementerianSelect"));
-        });
-
-        // Apply filter
-        $("#ApplyFilter").click(function() {
-            var periode = $("#FilterPeriode").val();
-            var kementerian = $("#FilterKementerianSelect").val();
-            var url = BaseURL + "Kementerian/IsuNasional?";
-            
-            if (periode) url += "periode=" + encodeURIComponent(periode) + "&";
-            if (kementerian) url += "kementerian=" + encodeURIComponent(kementerian);
-            
-            window.location.href = url;
-        });
-
-        // Reset filter
-        $("#ResetFilter").click(function() {
-            window.location.href = BaseURL + "Kementerian/IsuNasional";
-        });
-
-        // Input Isu Nasional
-        $("#InputIsuNasional").click(function() {
-            if ($("#InputPeriode").val() === "") {
-                alert('Pilih Periode terlebih dahulu!');
-                return;
-            } else if ($("#InputKementerian").val() === "") {
-                alert('Pilih Kementerian terlebih dahulu!');
-                return;
-            } else if ($("#NamaIsuNasional").val() === "") {
-                alert('Input Nama Isu Nasional Belum Benar!');
-                return;
-            } else {
-                var [TahunMulai, TahunAkhir] = $("#InputPeriode").val().split('|');
-                var Data = {
-                    IdKementerian: $("#InputKementerian").val(),
-                    NamaIsuNasional: $("#NamaIsuNasional").val(),
-                    TahunMulai: TahunMulai,
-                    TahunAkhir: TahunAkhir
-                };
-                $.post(BaseURL + "Kementerian/InputIsuNasional", Data).done(function(Respon) {
-                    if (Respon == '1') {
-                        window.location.reload();
-                    } else {
-                        alert(Respon);
-                    }
-                });
+    /* =====================================================
+     * DATATABLE - FIXED VERSION
+     * ===================================================== */
+    const tableSelector = '#data-table-basic';
+    
+    // Hapus instance DataTables yang ada jika ada
+    if ($.fn.DataTable.isDataTable(tableSelector)) {
+        $(tableSelector).DataTable().destroy();
+        $(tableSelector).find('tbody').empty(); // Kosongkan tbody untuk memastikan
+    }
+    
+    // Tunggu sejenak untuk memastikan DOM siap
+    setTimeout(function() {
+        // Inisialisasi DataTables dengan konfigurasi yang aman
+        const table = $(tableSelector).DataTable({
+            pageLength: 10,
+            autoWidth: false,
+            ordering: true,
+            order: [],
+            processing: true,
+            language: {
+                search: "Cari:",
+                lengthMenu: "Tampilkan _MENU_ data",
+                zeroRecords: "Data tidak ditemukan",
+                info: "Menampilkan _START_ - _END_ dari _TOTAL_ data",
+                infoEmpty: "Tidak ada data",
+                infoFiltered: "(difilter dari _MAX_ total data)",
+                paginate: {
+                    next: "Selanjutnya",
+                    previous: "Sebelumnya"
+                }
+            },
+            columnDefs: [
+                {
+                    targets: '_all', // Semua kolom
+                    defaultContent: '' // Default content untuk cell kosong
+                }
+            ],
+            drawCallback: function(settings) {
+                // Pastikan semua cell memiliki _DT_CellIndex
+                const api = this.api();
+                const rows = api.rows().nodes();
+                const cells = api.cells().nodes();
+                
+                // Debug log untuk melihat jika ada masalah
+                console.log('DataTables initialized successfully');
+                console.log('Total rows:', api.rows().count());
+                console.log('Total cells:', api.cells().count());
             }
         });
-
-        // Edit Isu Nasional
-        $(document).on("click", ".Edit", function() {
-            var Data = $(this).data('edit').split("|");
-            $("#EditId").val(Data[0]);
-            $("#EditNamaIsuNasional").val(Data[2]);
-            var periode = Data[3] + '|' + Data[4];
-            $("#EditPeriode").val(periode);
-            populateKementerian($("#EditIdKementerian"), Data[3], Data[4], Data[1]);
-            $('#ModalEditIsuNasional').modal("show");
+        
+        // Tambahkan event untuk cek jika ada error
+        table.on('error.dt', function(e, settings, techNote, message) {
+            console.error('DataTables error:', message);
+            console.error('Tech note:', techNote);
         });
+    }, 100);
 
-        // Update Isu Nasional
-        $("#UpdateIsuNasional").click(function() {
-            if ($("#EditPeriode").val() === "") {
-                alert('Pilih Periode terlebih dahulu!');
-                return;
-            } else if ($("#EditIdKementerian").val() === "") {
-                alert('Pilih Kementerian terlebih dahulu!');
-                return;
-            } else if ($("#EditNamaIsuNasional").val() === "") {
-                alert('Input Nama Isu Nasional Belum Benar!');
-                return;
-            } else {
-                var [TahunMulai, TahunAkhir] = $("#EditPeriode").val().split('|');
-                var Data = {
-                    Id: $("#EditId").val(),
-                    IdKementerian: $("#EditIdKementerian").val(),
-                    NamaIsuNasional: $("#EditNamaIsuNasional").val(),
-                    TahunMulai: TahunMulai,
-                    TahunAkhir: TahunAkhir
-                };
-                $.post(BaseURL + "Kementerian/UpdateIsuNasional", Data).done(function(Respon) {
-                    if (Respon == '1') {
-                        window.location.reload();
-                    } else {
-                        alert(Respon);
-                    }
-                });
-            }
-        });
-
-        // Delete Isu Nasional
-        $(document).on("click", ".Hapus", function() {
-            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-                var Id = { Id: $(this).data('hapus') };
-                $.post(BaseURL + "Kementerian/DeleteIsuNasional", Id).done(function(Respon) {
-                    if (Respon == '1') {
-                        window.location.reload();
-                    } else {
-                        alert(Respon);
-                    }
-                });
-            }
-        });
-
-        // Initialize filter state on page load
-        <?php if ($CurrentPeriode): ?>
-            loadKementerianForFilter('<?= $CurrentPeriode ?>', $("#FilterKementerianSelect"), '<?= $CurrentKementerian ?>');
-        <?php else: ?>
-            // Load all kementerian if no periode filter
-            loadKementerianForFilter('', $("#FilterKementerianSelect"), '<?= $CurrentKementerian ?>');
-        <?php endif; ?>
+    /* =====================================================
+     * FILTER (ADMIN)
+     * ===================================================== */
+    $('#FilterIsunasional').on('click', function () {
+        $('#ModalFilter').modal('show');
     });
+
+    $('#FilterPeriode').on('change', function () {
+        const periode = $(this).val();
+        const select  = $('#FilterKementerianSelect');
+
+        select.html('<option value="">Semua Kementerian</option>');
+
+        if (!periode) return;
+
+        const [tm, ta] = periode.split('|');
+
+        $.post(BaseURL + 'Kementerian/GetKementerianByPeriode', {
+            TahunMulai: tm,
+            TahunAkhir: ta
+        }, function (res) {
+            let data;
+            try {
+                data = JSON.parse(res);
+            } catch (e) {
+                console.error('Error parsing response:', e);
+                return;
+            }
+
+            if (Array.isArray(data)) {
+                data.forEach(item => {
+                    select.append(
+                        `<option value="${item.Id}">${item.NamaKementerian}</option>`
+                    );
+                });
+            }
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            console.error('AJAX Error:', textStatus, errorThrown);
+        });
+    });
+
+    $('#ApplyFilter').on('click', function () {
+        let url = BaseURL + 'Kementerian/IsuNasional?';
+
+        const periode     = $('#FilterPeriode').val();
+        const kementerian = $('#FilterKementerianSelect').val();
+
+        if (periode)     url += 'periode=' + encodeURIComponent(periode) + '&';
+        if (kementerian) url += 'kementerian=' + encodeURIComponent(kementerian);
+
+        window.location.href = url.replace(/&$/, '');
+    });
+
+    $('#ResetFilter').on('click', function () {
+        window.location.href = BaseURL + 'Kementerian/IsuNasional';
+    });
+
+    /* =====================================================
+     * INPUT ISU nasional (LEVEL 1)
+     * ===================================================== */
+    $('#BtnInputIsunasional').on('click', function () {
+        $('#NamaIsuNasional').val('');
+        $('#ModalInputIsunasional').modal('show');
+    });
+
+    $('#InputIsunasional').on('click', function () {
+        const nama = $('#NamaIsuNasional').val().trim();
+
+        if (!nama) {
+            alert('Nama Isu nasional wajib diisi');
+            return;
+        }
+
+        if (nama.length < 5) {
+            alert('Nama Isu nasional minimal 5 karakter');
+            return;
+        }
+
+        $.post(BaseURL + 'Kementerian/InputIsunasional', {
+            NamaIsuNasional: nama
+        }, function (res) {
+            let r;
+            try {
+                r = JSON.parse(res);
+            } catch (e) {
+                alert('Response server tidak valid');
+                console.error('Parse error:', e);
+                return;
+            }
+
+            alert(r.message);
+            if (r.success) {
+                $('#ModalInputIsunasional').modal('hide');
+                location.reload();
+            }
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            alert('Gagal menghubungi server: ' + textStatus);
+            console.error('AJAX Error:', errorThrown);
+        });
+    });
+
+    
+$(document).on('click', '.Edit', function (e) {
+    e.preventDefault();
+    
+    const id = $(this).data('id');
+    const button = $(this);
+    
+    // Tampilkan loading state
+    button.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
+    
+    $.ajax({
+        url: BaseURL + 'Kementerian/GetIsunasionalById',
+        type: 'POST',
+        dataType: 'json',
+        data: { Id: id },
+        success: function (response) {
+            button.prop('disabled', false).html('<i class="notika-icon notika-edit"></i>');
+            
+            if (response.success) {
+                $('#EditId').val(response.data.Id);
+                $('#EditNamaIsunasional').val(response.data.NamaIsuNasional);
+                $('#ModalEditIsunasional').modal('show');
+            } else {
+                alert('Error: ' + response.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            button.prop('disabled', false).html('<i class="notika-icon notika-edit"></i>');
+            alert('Gagal mengambil data: ' + error);
+            console.error('AJAX Error:', error);
+        }
+    });
+});
+
+/* =====================================================
+ * UPDATE ISU nasional - FIXED VERSION
+ * ===================================================== */
+$(document).on('click', '#UpdateIsunasional', function (e) {
+    e.preventDefault();
+    
+    const id = $('#EditId').val();
+    const nama = $('#EditNamaIsunasional').val().trim();
+    const button = $(this);
+    
+    // Validasi
+    if (!nama) {
+        alert('Nama Isu nasional wajib diisi');
+        return;
+    }
+    
+    if (nama.length < 5) {
+        alert('Nama Isu nasional minimal 5 karakter');
+        return;
+    }
+    
+    // Tampilkan loading state
+    const originalText = button.html();
+    button.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
+    
+    $.ajax({
+        url: BaseURL + 'Kementerian/UpdateIsunasional',
+        type: 'POST',
+        dataType: 'json',
+        data: { 
+            Id: id,
+            NamaIsuNasional: nama
+        },
+        success: function (response) {
+            button.prop('disabled', false).html(originalText);
+            
+            alert(response.message);
+            if (response.success) {
+                $('#ModalEditIsunasional').modal('hide');
+                setTimeout(function() {
+                    location.reload();
+                }, 500);
+            }
+        },
+        error: function (xhr, status, error) {
+            button.prop('disabled', false).html(originalText);
+            alert('Gagal update data: ' + error);
+            console.error('AJAX Error:', error);
+        }
+    });
+});
+    /* =====================================================
+     * DELETE ISU nasional
+     * ===================================================== */
+    $(document).on('click', '.Hapus', function () {
+        const id = $(this).data('id');
+
+        if (!confirm('Yakin ingin menghapus data ini?')) return;
+
+        $.post(BaseURL + 'Kementerian/DeleteIsunasional', {
+            Id: id
+        }, function (res) {
+            let r;
+            try {
+                r = JSON.parse(res);
+            } catch (e) {
+                alert('Response server tidak valid');
+                console.error('Parse error:', e);
+                return;
+            }
+
+            alert(r.message);
+            if (r.success) location.reload();
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            alert('Gagal menghapus data: ' + textStatus);
+            console.error('AJAX Error:', errorThrown);
+        });
+    });
+
+    /* =====================================================
+     * ERROR HANDLING UNTUK DATATABLES
+     * ===================================================== */
+    // Tangkap error nasional
+    window.addEventListener('error', function(e) {
+        if (e.message.includes('_DT_CellIndex')) {
+            console.error('DataTables Cell Index Error detected');
+            // Coba reload tanpa DataTables
+            if ($.fn.DataTable.isDataTable(tableSelector)) {
+                $(tableSelector).DataTable().destroy();
+                $(tableSelector).removeAttr('style');
+            }
+        }
+    });
+
+});
 </script>

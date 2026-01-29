@@ -1,27 +1,4 @@
-<?php $this->load->view('Kementerian/Sidebar'); ?>
-<div class="breadcomb-area">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                <div class="breadcomb-list">
-                    <ul class="breadcomb-menu" style="list-style: none; padding: 0; margin: 0;">
-                        <li style="display: inline-block; margin-right: 5px;">
-                            <a href="<?= base_url('Beranda') ?>">Home</a>
-                            <span class="bread-slash" style="display: inline-block; margin: 0 5px;">/</span>
-                        </li>
-                        <li style="display: inline-block; margin-right: 5px;">
-                            <a href="<?= base_url('Kementerian/Kementerian') ?>">Kementerian</a>
-                            <span class="bread-slash" style="display: inline-block; margin: 0 5px;">/</span>
-                        </li>
-                        <li style="display: inline-block;">
-                            <span class="bread-blk">Daftar Kementerian</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+
 <div class="data-table-area">
     <div class="container">
         <div class="row">
@@ -134,6 +111,7 @@
 </div>
 
 <!-- Modal Edit Kementerian -->
+<!-- Modal Edit Kementerian -->
 <div class="modal fade" id="ModalEditKementerian" role="dialog">
     <div class="modal-dialog modal-large" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
         <div class="modal-content">
@@ -141,53 +119,35 @@
                 <button type="button" class="close" data-dismiss="modal">×</button>
             </div>
             <div class="modal-body">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="form-example-wrap" style="padding: 5px;">
-                        <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Periode</b></label>
-                                        </div>
-                                        <div class="col-lg-5">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="EditTahunMulai" placeholder="Tahun Mulai">
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-5">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="EditTahunAkhir" placeholder="Tahun Akhir">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                            <label class="hrzn-fm"><b>Nama Kementerian</b></label>
-                                        </div>
-                                        <div class="col-lg-9">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control input-sm" id="EditNamaKementerian" placeholder="Nama Kementerian">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-example-int">
-                                <div class="row">
-                                    <div class="col-lg-2"></div>
-                                    <div class="col-lg-9">
-                                        <input type="hidden" id="EditId">
-                                        <button class="btn btn-success notika-btn-success" id="UpdateKementerian"><b>UPDATE</b></button>
-                                    </div>
-                                </div>
-                            </div>
+                <div class="form-example-wrap">
+
+                    <input type="hidden" id="EditId">
+
+                    <div class="form-group row">
+                        <label class="col-lg-3"><b>Nama Kementerian</b></label>
+                        <div class="col-lg-9">
+                            <input type="text" class="form-control" id="EditNamaKementerian">
                         </div>
                     </div>
+
+                    <div class="form-group row">
+                        <label class="col-lg-3"><b>Tahun Mulai</b></label>
+                        <div class="col-lg-9">
+                            <input type="text" class="form-control" id="EditTahunMulai" maxlength="4">
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-lg-3"><b>Tahun Akhir</b></label>
+                        <div class="col-lg-9">
+                            <input type="text" class="form-control" id="EditTahunAkhir" maxlength="4">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-success" id="UpdateKementerian">
+                        UPDATE
+                    </button>
+
                 </div>
             </div>
         </div>
@@ -227,7 +187,7 @@
                 TahunMulai: $("#TahunMulai").val(),
                 TahunAkhir: $("#TahunAkhir").val()
             };
-            $.post(BaseURL + "Kementerian/InputKementerian", Data).done(function(Respon) {
+            $.post(BaseURL + "Nasional/InputKementerian", Data).done(function(Respon) {
                 if (Respon === '1') {
                     window.location.reload();
                 } else {
@@ -240,64 +200,93 @@
         });
 
         // Edit Kementerian
-        $(document).on("click", ".Edit", function() {
-            var Data = $(this).attr('Edit');
-            var Pisah = Data.split("|");
-            $("#EditId").val(Pisah[0]);
-            $("#EditNamaKementerian").val(Pisah[1]);
-            $("#EditTahunMulai").val(Pisah[2]);
-            $("#EditTahunAkhir").val(Pisah[3]);
-            $('#ModalEditKementerian').modal("show");
-        });
+        $(document).on("click", ".Edit", function () {
 
-        $("#UpdateKementerian").click(function() {
-            if ($("#EditId").val() === "") {
-                alert('ID Kementerian tidak ditemukan!');
-                return;
-            } else if ($("#EditNamaKementerian").val() === "") {
-                alert('Input Nama Kementerian Belum Benar!');
-                return;
-            } else if (isNaN($("#EditTahunMulai").val()) || $("#EditTahunMulai").val() === "" || $("#EditTahunMulai").val().length !== 4) {
-                alert('Input Tahun Mulai Belum Benar!');
-                return;
-            } else if (isNaN($("#EditTahunAkhir").val()) || $("#EditTahunAkhir").val() === "" || $("#EditTahunAkhir").val().length !== 4) {
-                alert('Input Tahun Akhir Belum Benar!');
-                return;
-            }
+        let data = $(this).attr("Edit").split("|");
 
-            var Data = {
-                Id: $("#EditId").val(),
-                NamaKementerian: $("#EditNamaKementerian").val(),
-                TahunMulai: $("#EditTahunMulai").val(),
-                TahunAkhir: $("#EditTahunAkhir").val()
-            };
+        $("#EditId").val(data[0]);
+        $("#EditNamaKementerian").val(data[1]);
+        $("#EditTahunMulai").val(data[2]);
+        $("#EditTahunAkhir").val(data[3]);
 
-            $.post(BaseURL + "Kementerian/UpdateKementerian", Data).done(function(Respon) {
-                if (Respon === '1') {
-                    window.location.reload();
+        $("#ModalEditKementerian").modal("show");
+    });
+
+    /* =========================
+       UPDATE DATA
+    ==========================*/
+    $("#UpdateKementerian").click(function () {
+
+        let Id         = $("#EditId").val();
+        let Nama       = $("#EditNamaKementerian").val();
+        let TahunMulai = $("#EditTahunMulai").val();
+        let TahunAkhir = $("#EditTahunAkhir").val();
+
+        // VALIDASI
+        if (Id === "") {
+            alert("ID tidak ditemukan");
+            return;
+        }
+        if (Nama === "") {
+            alert("Nama kementerian wajib diisi");
+            return;
+        }
+        if (isNaN(TahunMulai) || TahunMulai.length !== 4) {
+            alert("Tahun Mulai tidak valid");
+            return;
+        }
+        if (isNaN(TahunAkhir) || TahunAkhir.length !== 4) {
+            alert("Tahun Akhir tidak valid");
+            return;
+        }
+
+        let Data = {
+            Id: Id,
+            NamaKementerian: Nama,
+            TahunMulai: TahunMulai,
+            TahunAkhir: TahunAkhir
+        };
+
+        console.log("DATA UPDATE:", Data); // DEBUG
+
+        $.ajax({
+            url: BaseURL + "Nasional/UpdateKementerian",
+            type: "POST",
+            data: Data,
+            success: function (response) {
+                console.log("RESPONSE:", response);
+
+                if (response.trim() === "1") {
+                    location.reload();
                 } else {
-                    alert(Respon);
+                    alert(response);
                 }
-            }).fail(function(xhr, status, error) {
-                alert('Error: Gagal memperbarui data. Silakan coba lagi.');
-            });
+            },
+            error: function (xhr) {
+                console.error(xhr.responseText);
+                alert("SERVER ERROR (500)");
+            }
         });
+    });
         
 
         // Delete Kementerian
-        $(".Hapus").click(function() {
-            var Id = { Id: $(this).attr('Hapus') };
-            console.log('DeleteKementerian Data:', Id); // Debugging
-            $.post(BaseURL + "Kementerian/DeleteKementerian", Id).done(function(Respon) {
-                if (Respon === '1') {
-                    window.location.reload();
-                } else {
-                    alert(Respon);
-                }
-            }).fail(function(xhr, status, error) {
-                console.error('DeleteKementerian Error:', xhr, status, error);
-                alert('Error: Gagal menghapus data. Silakan coba lagi.');
-            });
-        });
+        $(document).on("click", ".Hapus", function() {
+    var Id = { Id: $(this).attr('Hapus') };
+
+    $.post(BaseURL + "Nasional/DeleteKementerian", Id)
+    .done(function(Respon) {
+        if (Respon === '1') {
+            window.location.reload();
+        } else {
+            alert(Respon);
+        }
+    })
+    .fail(function(xhr, status, error) {
+        console.error(xhr.responseText);
+        alert('Gagal menghapus data');
     });
+});
+});
+
 </script>

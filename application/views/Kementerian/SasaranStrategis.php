@@ -33,6 +33,7 @@
                         <!-- Header with Button -->
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
+                                <?php if (!$isLoggedIn || $userLevel != 1): ?>
                                 <button type="button" class="btn btn-primary notika-btn-primary" id="FilterKementerian">
                                     <i class="notika-icon notika-search"></i> 
                                     <b>Filter Data</b>
@@ -40,6 +41,7 @@
                                         <span class="badge" style="background-color: #f44336; margin-left: 5px;">Filter Aktif</span>
                                     <?php endif; ?>
                                 </button>
+                                <?php endif; ?>
                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
                                 <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputSasaranStrategis">
                                     <i class="notika-icon notika-edit"></i> <b>Input Sasaran Strategis</b>
@@ -49,63 +51,94 @@
                         </div>
 
                         <!-- Modal Filter -->
-                        <div class="modal fade" id="ModalFilter" role="dialog">
-                            <div class="modal-dialog modals-default">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <button type="button" class="close" data-dismiss="modal">×</button>
-                                        <h4 class="modal-title">Filter Data Sasaran Strategis</h4>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="row">
-                                            <div class="col-lg-12">
-                                                <div class="form-example-wrap">
-                                                    <div class="form-example-int">
-                                                        <div class="form-group">
-                                                            <label>Periode</label>
-                                                            <select class="form-control" id="FilterPeriode">
-                                                                <option value="">Semua Periode</option>
-                                                                <?php foreach ($AllPeriode as $periode): ?>
-                                                                    <?php 
-                                                                        $periodeValue = $periode['TahunMulai'] . '|' . $periode['TahunAkhir'];
-                                                                        $selected = ($CurrentPeriode == $periodeValue) ? 'selected' : '';
-                                                                    ?>
-                                                                    <option value="<?= $periodeValue ?>" <?= $selected ?>>
-                                                                        <?= $periode['TahunMulai'] ?> - <?= $periode['TahunAkhir'] ?>
-                                                                    </option>
-                                                                <?php endforeach; ?>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div class="form-example-int">
-                                                        <div class="form-group">
-                                                            <label>Kementerian</label>
-                                                            <select class="form-control" id="FilterKementerianSelect" <?= empty($Kementerian) ? 'disabled' : '' ?>>
-                                                                <option value="">Semua Kementerian</option>
-                                                                <?php if (!empty($Kementerian)): ?>
-                                                                    <?php foreach ($Kementerian as $kementerian): ?>
-                                                                        <?php $selected = ($CurrentKementerian == $kementerian['Id']) ? 'selected' : ''; ?>
-                                                                        <option value="<?= $kementerian['Id'] ?>" <?= $selected ?>>
-                                                                            <?= $kementerian['NamaKementerian'] ?>
-                                                                        </option>
-                                                                    <?php endforeach; ?>
-                                                                <?php endif; ?>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div class="form-example-int mg-t-15">
-                                                        <button class="btn btn-success notika-btn-success" id="ApplyFilter">Terapkan Filter</button>
-                                                        <button class="btn btn-danger notika-btn-danger" id="ResetFilter">Reset Filter</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                       <!-- MODAL FILTER SASARAN STRATEGIS -->
+<div class="modal fade" id="ModalFilter" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modals-default">
+        <div class="modal-content">
+
+            <!-- HEADER -->
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h4 class="modal-title">Filter Data Sasaran Strategis</h4>
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body">
+                <div class="form-example-wrap">
+
+                    <!-- FILTER PERIODE -->
+                    <div class="form-example-int">
+                        <div class="form-group">
+                            <label><b>Periode</b></label>
+                            <select class="form-control" id="FilterPeriode">
+                                <option value="">Semua Periode</option>
+                                <?php foreach ($AllPeriode as $periode): ?>
+                                    <?php
+                                        $periodeValue = $periode['TahunMulai'] . '|' . $periode['TahunAkhir'];
+                                        $selected = ($CurrentPeriode === $periodeValue) ? 'selected' : '';
+                                    ?>
+                                    <option value="<?= $periodeValue ?>" <?= $selected ?>>
+                                        <?= $periode['TahunMulai'] ?> - <?= $periode['TahunAkhir'] ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
+                    </div>
+
+                    <!-- FILTER KEMENTERIAN -->
+                    <div class="form-example-int">
+                        <div class="form-group">
+                            <label><b>Kementerian</b></label>
+                            <select
+                                class="form-control"
+                                id="FilterKementerianSelect"
+                                <?= empty($Kementerian) ? 'disabled' : '' ?>
+                            >
+                                <option value="">Semua Kementerian</option>
+
+                                <?php if (!empty($Kementerian)): ?>
+                                    <?php foreach ($Kementerian as $k): ?>
+                                        <option
+                                            value="<?= $k['Id'] ?>"
+                                            <?= ($CurrentKementerian == $k['Id']) ? 'selected' : '' ?>
+                                        >
+                                            <?= $k['NamaKementerian'] ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+
+                            </select>
+
+                            <?php if (empty($Kementerian)): ?>
+                                <small class="text-muted">
+                                    Pilih periode terlebih dahulu untuk menampilkan kementerian
+                                </small>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <!-- BUTTON -->
+                    <div class="form-example-int mg-t-20">
+                        <button type="button"
+                            class="btn btn-success notika-btn-success"
+                            id="ApplyFilter">
+                            Terapkan Filter
+                        </button>
+
+                        <button type="button"
+                            class="btn btn-danger notika-btn-danger"
+                            id="ResetFilter">
+                            Reset Filter
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 
                         <!-- Tabel Data Sasaran Strategis -->
                         <div class="table-responsive">
@@ -530,48 +563,41 @@
             });
 
             // Input Sasaran Strategis
-            $("#InputSasaranStrategis").click(function() {
-                if (!CurrentPeriode || !CurrentKementerian) {
-                    alert('Pilih Periode dan Kementerian terlebih dahulu di filter!');
-                    return;
-                }
-                if ($("#SasaranStrategis").val() === "" || $("#NamaIndikatorStrategis").val() === "" || $("#IndikatorSasaranStrategis").val() === "") {
-                    alert('Sasaran Strategis, Nama Indikator, dan Indikator Sasaran Strategis harus diisi!');
-                    return;
-                }
-                
-                var periodeParts = CurrentPeriode.split('|');
-                var TahunMulai = periodeParts[0];
-                var TahunAkhir = periodeParts[1];
-                
-                var Data = {
-                    IdKementerian: CurrentKementerian,
-                    SasaranStrategis: $("#SasaranStrategis").val(),
-                    NamaIndikatorStrategis: $("#NamaIndikatorStrategis").val(),
-                    IndikatorSasaranStrategis: $("#IndikatorSasaranStrategis").val(),
-                    NilaiTahun1: $("#NilaiTahun1").val() || 0,
-                    NilaiTahun2: $("#NilaiTahun2").val() || 0,
-                    NilaiTahun3: $("#NilaiTahun3").val() || 0,
-                    NilaiTahun4: $("#NilaiTahun4").val() || 0,
-                    NilaiTahun5: $("#NilaiTahun5").val() || 0,
-                    TahunMulai: TahunMulai,
-                    TahunAkhir: TahunAkhir
-                };
-                
-                console.log('Data yang dikirim:', Data);
-                
-                $.post(BaseURL + "Kementerian/InputSasaranStrategis", Data).done(function(Respon) {
-                    if (Respon == '1') {
-                        $('#ModalInputSasaranStrategis').modal('hide');
-                        window.location.reload();
-                    } else {
-                        alert('Error: ' + Respon);
-                    }
-                }).fail(function(xhr, status, error) {
-                    alert('Request failed: ' + error);
-                    console.log('Error details:', xhr.responseText);
-                });
-            });
+           $("#InputSasaranStrategis").click(function(e) {
+    e.preventDefault();
+
+    if (
+        $("#SasaranStrategis").val() === "" ||
+        $("#NamaIndikatorStrategis").val() === "" ||
+        $("#IndikatorSasaranStrategis").val() === ""
+    ) {
+        alert('Sasaran Strategis, Nama Indikator, dan Indikator Sasaran Strategis harus diisi!');
+        return;
+    }
+
+    var Data = {
+        SasaranStrategis: $("#SasaranStrategis").val(),
+        NamaIndikatorStrategis: $("#NamaIndikatorStrategis").val(),
+        IndikatorSasaranStrategis: $("#IndikatorSasaranStrategis").val(),
+        NilaiTahun1: $("#NilaiTahun1").val() || 0,
+        NilaiTahun2: $("#NilaiTahun2").val() || 0,
+        NilaiTahun3: $("#NilaiTahun3").val() || 0,
+        NilaiTahun4: $("#NilaiTahun4").val() || 0,
+        NilaiTahun5: $("#NilaiTahun5").val() || 0
+    };
+
+    $.post(BaseURL + "Kementerian/InputSasaranStrategis", Data)
+        .done(function (Respon) {
+            if (Respon == '1') {
+                $('#ModalInputSasaranStrategis').modal('hide');
+                window.location.reload();
+            } else {
+                alert(Respon);
+            }
+        });
+});
+
+
 
             // Edit Sasaran Strategis
             $(document).on("click", ".Edit", function() {
