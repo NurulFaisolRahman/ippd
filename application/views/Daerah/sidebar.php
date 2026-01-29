@@ -269,7 +269,6 @@
 <div class="sidebar-wrapper">
     <div class="sidebar-content">
         <ul class="sidebar-menu">
-            <br>
 
             <li class="sidebar-dropdown">
                 <a href="#">
@@ -280,7 +279,6 @@
                 <div class="sidebar-submenu">
                     <a href="<?=base_url('Daerah/UrusanPD')?>">Daftar Urusan</a>
                     <a href="<?=base_url('Daerah/Instansi')?>">Daftar Instansi</a>
-                    <br>
                 </div>
             </li>
 
@@ -296,7 +294,6 @@
                     <a href="<?=base_url('Daerah/TujuanRPJPD')?>">Tujuan</a>
                     <a href="<?=base_url('Daerah/SasaranRPJPD')?>">Sasaran</a>
                     <a href="<?=base_url('Daerah/TahapanRPJPD')?>">Tahapan</a>
-                    <br>
                 </div>
             </li>
 
@@ -313,7 +310,7 @@
                     <a href="<?=base_url('Daerah/SasaranRPJMD')?>">Sasaran</a>
                     <a href="<?=base_url('Daerah/ProgramPD')?>">Program</a>
                     <a href="<?=base_url('Daerah/TahapanRPJMD')?>">Tahapan</a>
-                    <br>
+                  
                 </div>
             </li>
 
@@ -327,7 +324,7 @@
                     <a href="<?=base_url('Daerah/Iku')?>">IKU</a>
                     <a href="<?=base_url('Daerah/Ikd')?>">IKD</a>
                     <a href="<?=base_url('Daerah/cascade')?>">Cascade</a>
-                    <br>
+                  
                 </div>
             </li>
 
@@ -341,7 +338,7 @@
                     <a href="<?=base_url('Daerah/PotensiDaerah')?>">Potensi Daerah</a>
                     <a href="<?=base_url('Daerah/PermasalahanPokok')?>">Permasalahan Pokok</a>
                     <a href="<?=base_url('Daerah/IsuKLHS')?>">Isu KLHS</a>
-                    <br>
+            
                 </div>
             </li>
 

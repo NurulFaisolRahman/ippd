@@ -1076,8 +1076,8 @@ public function Instansi()
 
     foreach ($Data['Akun'] as &$a) {
         $ids = [];
-        if (!empty($a['urusan_ids'])) {
-            $ids = array_filter(array_map('trim', explode(',', $a['urusan_ids'])));
+        if (!empty($a['urusan_id'])) {
+            $ids = array_filter(array_map('trim', explode(',', $a['urusan_id'])));
         }
 
         $names = [];
@@ -1112,8 +1112,8 @@ public function InputInstansi() {
     if ($nama === '') { echo 'Nama instansi wajib diisi!'; return; }
     if ($pwd === '')  { echo 'Password wajib diisi!'; return; }
 
-    // urusan_ids array minimal 1
-    $urusanArr = $this->input->post('urusan_ids'); // array
+    // urusan_id array minimal 1
+    $urusanArr = $this->input->post('urusan_id'); // array
     if (!is_array($urusanArr) || count(array_filter($urusanArr)) < 1) {
         echo 'Urusan wajib dipilih minimal 1!';
         return;
@@ -1141,7 +1141,7 @@ public function InputInstansi() {
         'tahun_mulai' => $tahunMulai,
         'tahun_akhir' => $tahunAkhir,
         'Level'       => 2,
-        'urusan_ids'  => implode(',', $urusanArr),
+        'urusan_id'  => implode(',', $urusanArr),
         'created_at'  => date('Y-m-d H:i:s'),
         'updated_at'  => date('Y-m-d H:i:s')
     ];
@@ -1178,7 +1178,7 @@ public function EditInstansi() {
     if (!$exist) { echo 'Data instansi tidak ditemukan / beda wilayah!'; return; }
 
 
-    $urusanArr = $this->input->post('urusan_ids');
+    $urusanArr = $this->input->post('urusan_id');
     if (!is_array($urusanArr) || count(array_filter($urusanArr)) < 1) {
         echo 'Urusan wajib dipilih minimal 1!';
         return;
@@ -1202,7 +1202,7 @@ public function EditInstansi() {
         'nama'        => $nama,
         'tahun_mulai' => $tahunMulai,
         'tahun_akhir' => $tahunAkhir,
-        'urusan_ids'  => implode(',', $urusanArr),
+        'urusan_id'  => implode(',', $urusanArr),
         'updated_at'  => date('Y-m-d H:i:s')
     ];
 
@@ -3062,212 +3062,195 @@ public function HapusUrusanPD() {
     echo $this->db->affected_rows() ? "1" : "Gagal hapus!";
 }
 
-public function ProgramPD()
-{
-    $Header['Halaman'] = 'Daerah';
+ public function ProgramPD()
+    {
+        $Header['Halaman'] = 'Daerah';
 
-    // untuk dropdown provinsi (filter sebelum login)
-    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
+        // dropdown provinsi
+        $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
 
-    $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] :
-                   (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+        $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] :
+                       (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
 
-    log_message('debug', 'KodeWilayah diterima: ' . $KodeWilayah);
-
-    if ($KodeWilayah) {
-        $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-
-        if ($wilayah) {
-            $Data['KodeWilayah'] = $KodeWilayah;
-            $Data['NamaWilayah'] = $wilayah['Nama'];
-
-            // dropdown urusan
-            $Data['Urusan'] = $this->db
-                ->where('deleted_at IS NULL', null, false)
-                ->order_by('nama_urusan', 'ASC')
-                ->get('urusan_pd')
-                ->result_array();
-
-            // dropdown sasaran (filter kodewilayah)
-            $Data['Sasaran'] = $this->db
-                ->where('KodeWilayah', $KodeWilayah)
-                ->where('deleted_at IS NULL', null, false)
-                ->order_by('Id', 'DESC')
-                ->get('sasaranrpjmd')
-                ->result_array();
-
-            // list program pd (filter kodewilayah)
-            $Data['ProgramPD'] = $this->db->query("
-                SELECT p.*,
-                       u.nama_urusan,
-                       s.Sasaran
-                FROM program_pd p
-                LEFT JOIN urusan_pd u ON u.id = p.urusan_id
-                LEFT JOIN sasaranrpjmd s ON s.Id = p.sasaran_id
-                WHERE p.deleted_at IS NULL
-                  AND p.kodewilayah = ?
-                ORDER BY p.id DESC
-            ", [$KodeWilayah])->result_array();
-
-        } else {
-            // kode wilayah tidak ketemu
-            $Data['KodeWilayah'] = '';
-            $Data['NamaWilayah'] = '';
-            $Data['Urusan'] = [];
-            $Data['Sasaran'] = [];
-            $Data['ProgramPD'] = [];
-
-            log_message('error', 'KodeWilayah ' . $KodeWilayah . ' tidak ditemukan di tabel kodewilayah');
-        }
-    } else {
-        // belum ada filter wilayah
         $Data['KodeWilayah'] = '';
         $Data['NamaWilayah'] = '';
         $Data['Urusan'] = [];
         $Data['Sasaran'] = [];
         $Data['ProgramPD'] = [];
+
+        if ($KodeWilayah) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            if ($wilayah) {
+                $Data['KodeWilayah'] = $KodeWilayah;
+                $Data['NamaWilayah'] = $wilayah['Nama'];
+
+                // dropdown urusan
+                $Data['Urusan'] = $this->db
+                    ->where('deleted_at IS NULL', null, false)
+                    ->order_by('nama_urusan', 'ASC')
+                    ->get('urusan_pd')
+                    ->result_array();
+
+                // dropdown sasaran
+                $Data['Sasaran'] = $this->db
+                    ->where('KodeWilayah', $KodeWilayah)
+                    ->where('deleted_at IS NULL', null, false)
+                    ->order_by('Id', 'DESC')
+                    ->get('sasaranrpjmd')
+                    ->result_array();
+
+                // list program pd
+                // NOTE: urusan_id disimpan CSV, jadi nama urusan gabungan diambil pakai GROUP_CONCAT
+                $Data['ProgramPD'] = $this->db->query("
+                    SELECT 
+                        p.*,
+                        s.Sasaran,
+                        (
+                          SELECT GROUP_CONCAT(u.nama_urusan ORDER BY u.nama_urusan SEPARATOR '<br>')
+                          FROM urusan_pd u
+                          WHERE FIND_IN_SET(u.id, p.urusan_id)
+                        ) AS nama_urusan
+                    FROM program_pd p
+                    LEFT JOIN sasaranrpjmd s ON s.Id = p.sasaran_id
+                    WHERE p.deleted_at IS NULL
+                      AND p.kodewilayah = ?
+                    ORDER BY p.id DESC
+                ", [$KodeWilayah])->result_array();
+            }
+        }
+
+        $this->load->view('Daerah/header', $Header);
+        $this->load->view('Daerah/program_pd', $Data);
     }
 
-    log_message('debug', 'Jumlah provinsi: ' . count($Data['Provinsi']));
-
-    $this->load->view('Daerah/header', $Header);
-    $this->load->view('Daerah/Program_pd', $Data);
-}
-
-
-public function InputProgramPD() {
-    if (!$this->input->is_ajax_request()) {
-        show_404();
-        return;
-    }
+ public function InputProgramPD()
+{
+    if (!$this->input->is_ajax_request()) show_404();
 
     try {
-        $KodeWilayah = $_SESSION['KodeWilayah'] ?? '';
-        if ($KodeWilayah === '') throw new Exception('KodeWilayah tidak ditemukan di sesi');
 
-        $urusan_id  = (int) $this->input->post('urusan_id', TRUE);
-        $sasaran_id = (int) $this->input->post('sasaran_id', TRUE);
-        $program    = trim((string) $this->input->post('program_pd', TRUE));
+        $kodeWilayah = $_SESSION['KodeWilayah'] ?? '';
+        if (!$kodeWilayah) throw new Exception("Kode wilayah tidak ditemukan!");
 
-        if ($urusan_id <= 0) throw new Exception('Urusan wajib dipilih');
-        if ($sasaran_id <= 0) throw new Exception('Sasaran wajib dipilih');
-        if ($program === '') throw new Exception('Program PD wajib diisi');
+        $sasaran_id = (int)$this->input->post("sasaran_id", TRUE);
+        if ($sasaran_id <= 0) throw new Exception("Sasaran wajib dipilih!");
 
-        // validasi urusan ada
-        $cekUrusan = $this->db->where('id', $urusan_id)
-                              ->where('deleted_at IS NULL', null, false)
-                              ->get('urusan_pd')->num_rows();
-        if ($cekUrusan < 1) throw new Exception('Urusan tidak valid');
+        // urusan array
+        $urusanArr = $this->input->post("urusan_id");
+        if (!is_array($urusanArr) || count($urusanArr) < 1)
+            throw new Exception("Minimal pilih 1 urusan!");
 
-        // validasi sasaran ada & sesuai kodewilayah
-        $cekSasaran = $this->db->where('Id', $sasaran_id)
-                               ->where('KodeWilayah', $KodeWilayah)
-                               ->where('deleted_at IS NULL', null, false)
-                               ->get('sasaranrpjmd')->num_rows();
-        if ($cekSasaran < 1) throw new Exception('Sasaran tidak valid / bukan wilayah ini');
+        // program array
+        $programArr = $this->input->post("program_pd");
+        if (!is_array($programArr) || count($programArr) < 1)
+            throw new Exception("Minimal isi 1 program!");
 
-        $data = [
-            'kodewilayah' => $KodeWilayah,
-            'urusan_id'   => $urusan_id,
-            'sasaran_id'  => $sasaran_id,
-            'program_pd'  => $program,
-            'created_at'  => date('Y-m-d H:i:s'),
-            'updated_at'  => date('Y-m-d H:i:s'),
-        ];
+        // bersihkan urusan
+        $urusanClean = array_unique(array_map("intval", $urusanArr));
+        $urusanCSV   = implode(",", $urusanClean);
 
-        $this->db->insert('program_pd', $data);
-        echo $this->db->affected_rows() ? '1' : 'Gagal menyimpan data';
-    } catch (Exception $e) {
-        log_message('error', 'InputProgramPD: ' . $e->getMessage());
-        echo $e->getMessage();
-    }
-}
+        // gabungkan program jadi text
+        $programClean = [];
+        foreach($programArr as $p){
+            $p = trim($p);
+            if($p != '') $programClean[] = $p;
+        }
+        $programText = implode("\n", $programClean);
 
-public function EditProgramPD() {
-    if (!$this->input->is_ajax_request()) {
-        show_404();
-        return;
-    }
-
-    try {
-        $KodeWilayah = $_SESSION['KodeWilayah'] ?? '';
-        if ($KodeWilayah === '') throw new Exception('KodeWilayah tidak ditemukan di sesi');
-
-        $id         = (int) $this->input->post('id', TRUE);
-        $urusan_id  = (int) $this->input->post('urusan_id', TRUE);
-        $sasaran_id = (int) $this->input->post('sasaran_id', TRUE);
-        $program    = trim((string) $this->input->post('program_pd', TRUE));
-
-        if ($id <= 0) throw new Exception('ID tidak valid');
-        if ($urusan_id <= 0) throw new Exception('Urusan wajib dipilih');
-        if ($sasaran_id <= 0) throw new Exception('Sasaran wajib dipilih');
-        if ($program === '') throw new Exception('Program PD wajib diisi');
-
-        // pastikan record ini milik wilayah yang login
-        $existing = $this->db->where('id', $id)
-                             ->where('kodewilayah', $KodeWilayah)
-                             ->where('deleted_at IS NULL', null, false)
-                             ->get('program_pd')->row_array();
-        if (!$existing) throw new Exception('Data tidak ditemukan / bukan wilayah ini');
-
-        // validasi urusan ada
-        $cekUrusan = $this->db->where('id', $urusan_id)
-                              ->where('deleted_at IS NULL', null, false)
-                              ->get('urusan_pd')->num_rows();
-        if ($cekUrusan < 1) throw new Exception('Urusan tidak valid');
-
-        // validasi sasaran ada & sesuai kodewilayah
-        $cekSasaran = $this->db->where('Id', $sasaran_id)
-                               ->where('KodeWilayah', $KodeWilayah)
-                               ->where('deleted_at IS NULL', null, false)
-                               ->get('sasaranrpjmd')->num_rows();
-        if ($cekSasaran < 1) throw new Exception('Sasaran tidak valid / bukan wilayah ini');
-
-        $update = [
-            'urusan_id'  => $urusan_id,
-            'sasaran_id' => $sasaran_id,
-            'program_pd' => $program,
-            'updated_at' => date('Y-m-d H:i:s'),
-        ];
-
-        $this->db->where('id', $id);
-        $this->db->where('kodewilayah', $KodeWilayah);
-        $this->db->update('program_pd', $update);
-
-        echo $this->db->affected_rows() ? '1' : 'Tidak ada perubahan';
-    } catch (Exception $e) {
-        log_message('error', 'EditProgramPD: ' . $e->getMessage());
-        echo $e->getMessage();
-    }
-}
-
-public function HapusProgramPD() {
-    if (!$this->input->is_ajax_request()) {
-        show_404();
-        return;
-    }
-
-    try {
-        $KodeWilayah = $_SESSION['KodeWilayah'] ?? '';
-        if ($KodeWilayah === '') throw new Exception('KodeWilayah tidak ditemukan di sesi');
-
-        $id = (int) $this->input->post('id', TRUE);
-        if ($id <= 0) throw new Exception('ID tidak valid');
-
-        $this->db->where('id', $id);
-        $this->db->where('kodewilayah', $KodeWilayah);
-        $this->db->where('deleted_at IS NULL', null, false);
-        $this->db->update('program_pd', [
-            'deleted_at' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s'),
+        // INSERT hanya 1 baris
+        $this->db->insert("program_pd", [
+            "kodewilayah" => $kodeWilayah,
+            "sasaran_id"  => $sasaran_id,
+            "urusan_id"   => $urusanCSV,
+            "program_pd"  => $programText,
+            "created_at"  => date("Y-m-d H:i:s"),
+            "updated_at"  => date("Y-m-d H:i:s"),
         ]);
 
-        echo $this->db->affected_rows() ? '1' : '0';
-    } catch (Exception $e) {
-        log_message('error', 'HapusProgramPD: ' . $e->getMessage());
+        echo "1";
+
+    } catch(Exception $e){
         echo $e->getMessage();
     }
 }
+
+
+public function EditProgramPD()
+{
+    if (!$this->input->is_ajax_request()) show_404();
+
+    try {
+
+        $kodeWilayah = $_SESSION['KodeWilayah'] ?? '';
+        if (!$kodeWilayah) throw new Exception("Kode wilayah tidak ditemukan!");
+
+        $id = (int)$this->input->post("id", TRUE);
+        if ($id <= 0) throw new Exception("ID tidak valid!");
+
+        $sasaran_id = (int)$this->input->post("sasaran_id", TRUE);
+        if ($sasaran_id <= 0) throw new Exception("Sasaran wajib dipilih!");
+
+        $urusanArr  = $this->input->post("urusan_id");
+        $programArr = $this->input->post("program_pd");
+
+        if (!is_array($urusanArr) || count($urusanArr) < 1)
+            throw new Exception("Minimal pilih 1 urusan!");
+
+        if (!is_array($programArr) || count($programArr) < 1)
+            throw new Exception("Minimal isi 1 program!");
+
+        $urusanClean = array_unique(array_map("intval", $urusanArr));
+        $urusanCSV   = implode(",", $urusanClean);
+
+        $programClean = [];
+        foreach($programArr as $p){
+            $p = trim($p);
+            if($p != '') $programClean[] = $p;
+        }
+        $programText = implode("\n", $programClean);
+
+        // UPDATE hanya 1 row
+        $this->db->where("id", $id)
+                 ->update("program_pd", [
+                     "sasaran_id" => $sasaran_id,
+                     "urusan_id"  => $urusanCSV,
+                     "program_pd" => $programText,
+                     "updated_at" => date("Y-m-d H:i:s"),
+                 ]);
+
+        echo "1";
+
+    } catch(Exception $e){
+        echo $e->getMessage();
+    }
+}
+
+
+    public function HapusProgramPD()
+    {
+        if (!$this->input->is_ajax_request()) show_404();
+
+        try {
+            $kodeWilayah = $_SESSION['KodeWilayah'] ?? '';
+            if (!$kodeWilayah) throw new Exception("Kode wilayah tidak ditemukan!");
+
+            $id = trim((string)$this->input->post("id", TRUE));
+            if ($id === '') throw new Exception("id tidak valid!");
+
+            $this->db->where("id", $id)
+                     ->where("kodewilayah", $kodeWilayah)
+                     ->where("deleted_at IS NULL", null, false)
+                     ->update("program_pd", [
+                         "deleted_at" => date("Y-m-d H:i:s"),
+                         "updated_at" => date("Y-m-d H:i:s"),
+                     ]);
+
+            echo $this->db->affected_rows() ? "1" : "0";
+
+        } catch (Exception $e) {
+            echo $e->getMessage();
+        }
+    }
 
 }
 

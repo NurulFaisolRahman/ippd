@@ -462,8 +462,8 @@
                 </div>
                 
                 <!-- Kontak Menu (tanpa dropdown) -->
-                <a href="mailto:info@ippd.example.com" class="navbar-item">Kontak</a>
-                
+              <a href="mailto:cvideconsultan@gmail.com" target="_blank" class="navbar-item"> Kontak</a>
+
                 <!-- Tentang Kami Menu (tanpa dropdown) -->
                 <a href="#" class="navbar-item">Tentang Kami</a>
                 

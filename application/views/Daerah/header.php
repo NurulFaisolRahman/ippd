@@ -54,7 +54,6 @@
     }
 
     .sidebar-header-btn{
-      background: rgba(255,255,255,0.15);
       border: none;
       color: white;
       width: 42px;
@@ -101,7 +100,6 @@
     }
     .navbar-brand i{ margin-right:.5rem; }
 
-    /* Badge info login (tetap kiri, setelah IPPD) */
     .login-badge{
       display:inline-flex;
       align-items:center;
@@ -206,7 +204,7 @@
     }
     .logout-btn:hover{ background-color: rgba(255,255,255,0.22); }
 
-    .page-top-space{ height:82px; }
+    .page-top-space{ height:10px; }
 
     /* Mobile: tetap satu baris, menu scroll horizontal */
     @media (max-width: 768px){
@@ -260,11 +258,11 @@
 ?>
 
 
-<!-- NAVBAR -->
+
 <nav class="navbar">
   <div class="navbar-container">
 
-    <!-- KIRI: tombol + IPPD + info login -->
+
     <div class="navbar-left">
       <button id="sidebarToggle" class="sidebar-header-btn" type="button" aria-label="Toggle sidebar">
         <i class="fas fa-bars"></i>
@@ -279,14 +277,12 @@
     </div>
 
     <div class="navbar-center">
-      <a href="<?= base_url('Beranda'); ?>" class="navbar-brand">
+      <a href="<?= base_url('Daerah/UrusanPD'); ?>" class="navbar-brand">
         <i class="fas fa-chart-line"></i>
         IPPD
     </a>
-
     </div>
 
-    <!-- KANAN: menu -->
     <div class="navbar-menu">
 
       <div class="dropdown">
@@ -346,7 +342,7 @@
         </div>
       </div>
 
-      <a href="mailto:info@ippd.example.com" class="navbar-item">Kontak</a>
+      <a href="mailto:cvideconsultan@gmail.com" class="navbar-item">Kontak</a>
       <a href="#" class="navbar-item">Tentang Kami</a>
 
       <?php if (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 3) { ?>
