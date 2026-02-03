@@ -3099,23 +3099,22 @@ public function HapusUrusanPD() {
                     ->get('sasaranrpjmd')
                     ->result_array();
 
-                // list program pd
-                // NOTE: urusan_id disimpan CSV, jadi nama urusan gabungan diambil pakai GROUP_CONCAT
-                $Data['ProgramPD'] = $this->db->query("
+              $Data['ProgramPD'] = $this->db->query("
                     SELECT 
                         p.*,
                         s.Sasaran,
                         (
-                          SELECT GROUP_CONCAT(u.nama_urusan ORDER BY u.nama_urusan SEPARATOR '<br>')
-                          FROM urusan_pd u
-                          WHERE FIND_IN_SET(u.id, p.urusan_id)
+                        SELECT GROUP_CONCAT(u.nama_urusan ORDER BY u.nama_urusan SEPARATOR '<br>')
+                        FROM urusan_pd u
+                        WHERE FIND_IN_SET(u.id, p.urusan_id)
                         ) AS nama_urusan
                     FROM program_pd p
                     LEFT JOIN sasaranrpjmd s ON s.Id = p.sasaran_id
                     WHERE p.deleted_at IS NULL
-                      AND p.kodewilayah = ?
-                    ORDER BY p.id DESC
+                    AND p.kodewilayah = ?
+                    ORDER BY p.id ASC
                 ", [$KodeWilayah])->result_array();
+
             }
         }
 
@@ -3135,37 +3134,29 @@ public function HapusUrusanPD() {
         $sasaran_id = (int)$this->input->post("sasaran_id", TRUE);
         if ($sasaran_id <= 0) throw new Exception("Sasaran wajib dipilih!");
 
-        // urusan array
         $urusanArr = $this->input->post("urusan_id");
         if (!is_array($urusanArr) || count($urusanArr) < 1)
             throw new Exception("Minimal pilih 1 urusan!");
 
-        // program array
         $programArr = $this->input->post("program_pd");
         if (!is_array($programArr) || count($programArr) < 1)
             throw new Exception("Minimal isi 1 program!");
 
-        // bersihkan urusan
-        $urusanClean = array_unique(array_map("intval", $urusanArr));
-        $urusanCSV   = implode(",", $urusanClean);
+        $urusanCSV = implode(",", array_unique(array_map("intval", $urusanArr)));
 
-        // gabungkan program jadi text
-        $programClean = [];
-        foreach($programArr as $p){
+        foreach ($programArr as $p) {
             $p = trim($p);
-            if($p != '') $programClean[] = $p;
-        }
-        $programText = implode("\n", $programClean);
+            if ($p === '') continue;
 
-        // INSERT hanya 1 baris
-        $this->db->insert("program_pd", [
-            "kodewilayah" => $kodeWilayah,
-            "sasaran_id"  => $sasaran_id,
-            "urusan_id"   => $urusanCSV,
-            "program_pd"  => $programText,
-            "created_at"  => date("Y-m-d H:i:s"),
-            "updated_at"  => date("Y-m-d H:i:s"),
-        ]);
+            $this->db->insert("program_pd", [
+                "kodewilayah" => $kodeWilayah,
+                "sasaran_id"  => $sasaran_id,
+                "urusan_id"   => $urusanCSV,
+                "program_pd"  => $p,
+                "created_at"  => date("Y-m-d H:i:s"),
+                "updated_at"  => date("Y-m-d H:i:s"),
+            ]);
+        }
 
         echo "1";
 
@@ -3173,57 +3164,37 @@ public function HapusUrusanPD() {
         echo $e->getMessage();
     }
 }
+
 
 
 public function EditProgramPD()
 {
     if (!$this->input->is_ajax_request()) show_404();
 
-    try {
+    $id = (int)$this->input->post("id");
+    $sasaran_id = (int)$this->input->post("sasaran_id");
 
-        $kodeWilayah = $_SESSION['KodeWilayah'] ?? '';
-        if (!$kodeWilayah) throw new Exception("Kode wilayah tidak ditemukan!");
+    $urusanArr = $this->input->post("urusan_id");
+    $programArr = $this->input->post("program_pd");
 
-        $id = (int)$this->input->post("id", TRUE);
-        if ($id <= 0) throw new Exception("ID tidak valid!");
+    if (!$id) exit("ID tidak valid!");
+    if (!$sasaran_id) exit("Sasaran wajib!");
 
-        $sasaran_id = (int)$this->input->post("sasaran_id", TRUE);
-        if ($sasaran_id <= 0) throw new Exception("Sasaran wajib dipilih!");
+    $urusanCSV = implode(",", $urusanArr);
 
-        $urusanArr  = $this->input->post("urusan_id");
-        $programArr = $this->input->post("program_pd");
+    // karena edit hanya 1 program
+    $programText = trim($programArr[0]);
 
-        if (!is_array($urusanArr) || count($urusanArr) < 1)
-            throw new Exception("Minimal pilih 1 urusan!");
+    $this->db->where("id", $id)->update("program_pd", [
+        "sasaran_id" => $sasaran_id,
+        "urusan_id"  => $urusanCSV,
+        "program_pd" => $programText,
+        "updated_at" => date("Y-m-d H:i:s")
+    ]);
 
-        if (!is_array($programArr) || count($programArr) < 1)
-            throw new Exception("Minimal isi 1 program!");
-
-        $urusanClean = array_unique(array_map("intval", $urusanArr));
-        $urusanCSV   = implode(",", $urusanClean);
-
-        $programClean = [];
-        foreach($programArr as $p){
-            $p = trim($p);
-            if($p != '') $programClean[] = $p;
-        }
-        $programText = implode("\n", $programClean);
-
-        // UPDATE hanya 1 row
-        $this->db->where("id", $id)
-                 ->update("program_pd", [
-                     "sasaran_id" => $sasaran_id,
-                     "urusan_id"  => $urusanCSV,
-                     "program_pd" => $programText,
-                     "updated_at" => date("Y-m-d H:i:s"),
-                 ]);
-
-        echo "1";
-
-    } catch(Exception $e){
-        echo $e->getMessage();
-    }
+    echo "1";
 }
+
 
 
     public function HapusProgramPD()

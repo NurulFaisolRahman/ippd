@@ -105,10 +105,10 @@
                           <button
                             class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg BtnEdit"
                             data-id="<?= $p['id'] ?>"
-                            data-sasaran="<?= $p['sasaran_id'] ?>"
-                            data-urusan="<?= $p['urusan_id'] ?>"
-                            data-program="<?= htmlspecialchars($p['program_pd'], ENT_QUOTES) ?>"
-                          >
+                              data-sasaran="<?= $p['sasaran_id'] ?>"
+                              data-urusan="<?= $p['urusan_id'] ?>"
+                              data-program="<?= htmlspecialchars($p['program_pd'], ENT_QUOTES) ?>"
+                            >
                             <i class="notika-icon notika-edit"></i>
                           </button>
 
@@ -285,12 +285,7 @@
                     <div class="col-lg-3"><label class="hrzn-fm"><b>Program PD</b></label></div>
                     <div class="col-lg-8">
                       <div id="programContainerEdit"></div>
-                      <button type="button" class="btn btn-info btn-sm" id="btnTambahProgramEdit" style="margin-top:8px;">
-                        + Tambah Program
-                      </button>
-                      <div style="margin-top:6px; font-size:12px; color:#888;">
-                        * Minimal 1 program
-                      </div>
+                      
                     </div>
                   </div>
                 </div>
@@ -596,39 +591,32 @@ if (programs.length < 1) return alert('Minimal 1 Program PD wajib diisi!');
     // ===== BUKA EDIT =====
     // Catatan: tombol edit sekarang harus bawa data array.
     // Kalau data kamu belum array, minimal tampilkan 1 baris dulu.
-    $(document).on("click",".BtnEdit",function(){
+ $(document).on("click",".BtnEdit",function(){
 
-  $("#IdEdit").val($(this).data('id'));
-  $("#SasaranEdit").val($(this).data('sasaran'));
+  $("#IdEdit").val($(this).data("id"));
+  $("#SasaranEdit").val($(this).data("sasaran"));
 
-  // ===== URUSAN (CSV → ARRAY) =====
-  var uCsv = $(this).data('urusan'); // "1,3,7"
+  // urusan CSV -> array
+  var urusanCsv = $(this).data("urusan");
   var urusanArr = [];
 
-  if (uCsv) {
-    urusanArr = String(uCsv)
+  if (urusanCsv) {
+    urusanArr = String(urusanCsv)
       .split(",")
       .map(x => x.trim())
       .filter(x => x !== "");
   }
 
-  // ===== PROGRAM (TEXT → ARRAY) =====
-  var pText = $(this).data('program'); 
-  var programArr = [];
+  // program hanya 1 baris
+  var programText = $(this).data("program");
 
-  if (pText) {
-    programArr = String(pText)
-      .split("\n")
-      .map(x => x.trim())
-      .filter(x => x !== "");
-  }
-
-  // init modal multi-row
   initUrusan("urusanContainerEdit", urusanArr);
-  initProgram("programContainerEdit", programArr);
+  initProgram("programContainerEdit", [programText]);
 
   $("#ModalEditProgramPD").modal("show");
+
 });
+
 
 
     // ===== UPDATE (EDIT) =====
