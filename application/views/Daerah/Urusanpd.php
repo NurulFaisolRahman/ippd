@@ -1,23 +1,6 @@
 <?php $this->load->view('Daerah/sidebar'); ?>
+<?php $this->load->view('Daerah/Cssumum'); ?>
 
-<style>
-/* Jarak antara Show entries / Search dengan tabel */
-.dataTables_wrapper .dataTables_length,
-.dataTables_wrapper .dataTables_filter {
-  margin-bottom: 20px;
-}
-
-/* Style filter wilayah */
-.filter-row { display:flex; align-items:flex-end; flex-wrap:wrap; gap:10px; }
-.filter-group { display:flex; flex-direction:column; align-items:flex-start; }
-.filter-group label { font-size:14px; margin-bottom:5px; }
-.filter-select { width:260px; font-size:14px; padding:5px 8px; }
-@media (max-width:768px){
-  .filter-row{ flex-direction:column; gap:15px; }
-  .filter-select{ width:100%; }
-}
-
-</style>
 
 <div class="main-content">
   <div class="data-table-area">

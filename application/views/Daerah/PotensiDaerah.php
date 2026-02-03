@@ -1,4 +1,5 @@
 <?php $this->load->view('Daerah/sidebar'); ?>
+<?php $this->load->view('Daerah/Cssumum'); ?>
 
 <!-- Main Content -->
 <div class="main-content">
@@ -78,7 +79,7 @@
                                         <th class="text-center">No</th>
                                         <th>Nama Potensi Daerah</th>
                                         <th>Periode</th>
-                                        <th><?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>Aksi<?php } ?></th>
+                                        <th class="text-center" ><?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>Aksi<?php } ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -87,9 +88,10 @@
                                         <td style="vertical-align: middle;" class="text-center"><?= $No++ ?></td>
                                         <td style="vertical-align: middle;"><?= html_escape($key['NamaPotensiDaerah']) ?></td>
                                         <td style="vertical-align: middle;"><?= $key['TahunMulai'] . ' - ' . $key['TahunAkhir'] ?></td>
-                                        <td>
+                                        <td class="text-center align-middle">
+    
                                             <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                            <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
+                                           <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
                                                 <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg EditPotensi" 
                                                         data-id="<?= $key['Id'] ?>" 
                                                         data-nama="<?= html_escape($key['NamaPotensiDaerah']) ?>" 

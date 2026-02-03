@@ -1,4 +1,4 @@
-
+<?php $this->load->view('Daerah/Cssumum'); ?>
 <?php $this->load->view('Daerah/sidebar'); ?>
 
     <!-- Main Content -->

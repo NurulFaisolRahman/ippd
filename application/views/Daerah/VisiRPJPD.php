@@ -1,4 +1,5 @@
 <?php $this->load->view('Daerah/sidebar'); ?>
+<?php $this->load->view('Daerah/Cssumum'); ?>
 
 <div class="main-content">
     <div class="data-table-area">

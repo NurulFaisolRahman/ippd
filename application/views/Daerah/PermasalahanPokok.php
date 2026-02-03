@@ -1,4 +1,5 @@
 <?php $this->load->view('Daerah/sidebar'); ?>
+<?php $this->load->view('Daerah/Cssumum'); ?>
 
 <!-- Main Content -->
 <div class="main-content">
@@ -80,7 +81,7 @@
                                         <th>Permasalahan Nasional</th>
                                         <th>Kementerian</th>
                                         <th>Periode</th>
-                                        <th><?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>Aksi<?php } ?></th>
+                                        <th class="text-center"><?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>Aksi<?php } ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -108,7 +109,7 @@
                                         </td>
                                         <td style="vertical-align: middle;"><?= $Kementerian[explode("$",$key['_Id'])[0]] ?></td>
                                         <td style="vertical-align: middle;"><?= $key['TahunMulai'] . ' - ' . $key['TahunAkhir'] ?></td>
-                                        <td>
+                                         <td class="text-center align-middle">
                                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
                                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                                                 <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg EditPermasalahan" 

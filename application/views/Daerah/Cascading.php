@@ -1,5 +1,6 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 <?php $this->load->view('Daerah/sidebar'); ?>
+<?php $this->load->view('Daerah/Cssumum'); ?>
 
     <!-- Main Content -->
  <div class="main-content">

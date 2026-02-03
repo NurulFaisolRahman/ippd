@@ -1,4 +1,5 @@
 <?php $this->load->view('Daerah/sidebar'); ?>
+<?php $this->load->view('Daerah/Cssumum'); ?>
 
 <!-- Main Content -->
 <div class="main-content">
@@ -8,7 +9,7 @@
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
           <div class="data-table-list">
 
-            <!-- FILTER PROVINSI & KAB/KOTA (MUNCUL SAAT BELUM LOGIN / BELUM SET KodeWilayah) -->
+            <!-- FILTER PROVINSI & KAB/KOTA (MUNCUL SAAT BELUM LOGIN) -->
             <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
               <div class="form-example-wrap" style="margin-bottom: 15px;">
                 <div class="form-example-int form-horizental">
@@ -135,7 +136,7 @@
                               data-nama="<?=htmlspecialchars($key['nama'], ENT_QUOTES)?>"
                               data-tahun-mulai="<?=$key['tahun_mulai']?>"
                               data-tahun-akhir="<?=$key['tahun_akhir']?>"
-                              data-urusan-ids="<?=isset($key['urusan_ids']) ? htmlspecialchars($key['urusan_ids'], ENT_QUOTES) : ''?>"
+                              data-urusan-ids="<?=isset($key['urusan_id']) ? htmlspecialchars($key['urusan_id'], ENT_QUOTES) : ''?>"
                             >
                               <i class="notika-icon notika-edit"></i>
                             </button>
@@ -559,7 +560,7 @@
     // =========================
 
     // init dropdown urusan di modal tambah
-    initUrusanContainer('urusanContainerAdd', 'urusan_ids', []);
+    initUrusanContainer('urusanContainerAdd', 'urusan_id', []);
 
     // Toggle filter tahun (hanya jika sudah ada wilayah)
     $('#toggleFilter').click(function() {
@@ -614,10 +615,10 @@
 
     // tambah/hapus row urusan
     $(document).on('click', '#addUrusanRowAdd', function(){
-      $('#urusanContainerAdd').append(buildUrusanSelect('urusan_ids', null));
+      $('#urusanContainerAdd').append(buildUrusanSelect('urusan_id', null));
     });
     $(document).on('click', '#addUrusanRowEdit', function(){
-      $('#urusanContainerEdit').append(buildUrusanSelect('urusan_ids', null));
+      $('#urusanContainerEdit').append(buildUrusanSelect('urusan_id', null));
     });
     $(document).on('click', '.remove-urusan', function(){
       $(this).closest('.urusan-row').remove();
@@ -638,7 +639,7 @@
         password: $("#Password").val(),
         tahun_mulai: $("#TahunMulai").val(),
         tahun_akhir: $("#TahunAkhir").val(),
-        urusan_ids: urusan,
+        urusan_id: urusan,
         [CSRF_NAME]: CSRF_TOKEN
       };
 
@@ -666,7 +667,7 @@
       if (urusanIds) {
         selected = String(urusanIds).split(',').map(function(x){ return x.trim(); }).filter(Boolean);
       }
-      initUrusanContainer('urusanContainerEdit', 'urusan_ids', selected);
+      initUrusanContainer('urusanContainerEdit', 'urusan_id', selected);
 
       $('#ModalEditInstansi').modal("show");
     });
@@ -686,7 +687,7 @@
         password: $("#_Password").val(),
         tahun_mulai: $("#_TahunMulai").val(),
         tahun_akhir: $("#_TahunAkhir").val(),
-        urusan_ids: urusan,
+        urusan_id: urusan,
         [CSRF_NAME]: CSRF_TOKEN
       };
 
