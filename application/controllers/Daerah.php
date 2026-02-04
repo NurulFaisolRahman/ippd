@@ -3223,6 +3223,260 @@ public function EditProgramPD()
         }
     }
 
+public function PermasalahanPD()
+{
+
+  $Header['Halaman'] = 'Daerah';
+  // Filter wilayah: kalau session KodeWilayah ada -> pakai itu, kalau tidak pakai temp (dari SetTempKodeWilayah)
+  $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : ($this->session->userdata('TempKodeWilayah') ?? null);
+
+  $data['KodeWilayah'] = $KodeWilayah;
+
+  // Data provinsi untuk dropdown
+  $data['Provinsi'] = $this->db->where('Length(Kode)', 2)->get('kodewilayah')->result_array();
+
+  // Ambil data permasalahan sesuai wilayah (kalau ada)
+  if (!empty($KodeWilayah)) {
+    $data['PermasalahanPD'] = $this->db->where('kode_wilayah', $KodeWilayah)->order_by('id', 'DESC')->get('permasalahan_pd')->result_array();
+  } else {
+    // kalau belum pilih wilayah, tampilkan kosong (atau bisa tampilkan semua, terserah)
+    $data['PermasalahanPD'] = [];
+  }
+
+  $this->load->view('Daerah/header', $Header);
+  $this->load->view('Daerah/PermasalahanPD', $data);
+}
+
+public function InputPermasalahanPD()
+{
+  if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 3) exit('Akses ditolak');
+
+  $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : ($this->session->userdata('TempKodeWilayah') ?? null);
+
+  $masalah = trim($this->input->post('masalah', true));
+  $masalah_pokok = trim($this->input->post('masalah_pokok', true));
+  $penyebab_masalah = trim($this->input->post('penyebab_masalah', true));
+  $faktor_internal = trim($this->input->post('faktor_internal', true));
+  $faktor_external = trim($this->input->post('faktor_external', true));
+  $akar_masalah = trim($this->input->post('akar_masalah', true));
+
+  if (!$KodeWilayah) exit('Kode wilayah belum dipilih!');
+  if (!$masalah) exit('Masalah harus diisi!');
+
+  $insert = [
+    'kode_wilayah' => $KodeWilayah,
+    'masalah' => $masalah,
+    'masalah_pokok' => $masalah_pokok,
+    'penyebab_masalah' => $penyebab_masalah,
+    'faktor_internal' => $faktor_internal,
+    'faktor_external' => $faktor_external,
+    'akar_masalah' => $akar_masalah
+  ];
+
+  $this->db->insert('permasalahan_pd', $insert);
+  echo $this->db->affected_rows() > 0 ? '1' : 'Gagal simpan data';
+}
+
+public function EditPermasalahanPD()
+{
+  if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 3) exit('Akses ditolak');
+
+  $id = (int)$this->input->post('id', true);
+  if (!$id) exit('ID tidak valid!');
+
+  $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : ($this->session->userdata('TempKodeWilayah') ?? null);
+  if (!$KodeWilayah) exit('Kode wilayah belum dipilih!');
+
+  $masalah = trim($this->input->post('masalah', true));
+  $masalah_pokok = trim($this->input->post('masalah_pokok', true));
+  $penyebab_masalah = trim($this->input->post('penyebab_masalah', true));
+  $faktor_internal = trim($this->input->post('faktor_internal', true));
+  $faktor_external = trim($this->input->post('faktor_external', true));
+  $akar_masalah = trim($this->input->post('akar_masalah', true));
+
+  if (!$masalah) exit('Masalah harus diisi!');
+
+  $update = [
+    'masalah' => $masalah,
+    'masalah_pokok' => $masalah_pokok,
+    'penyebab_masalah' => $penyebab_masalah,
+    'faktor_internal' => $faktor_internal,
+    'faktor_external' => $faktor_external,
+    'akar_masalah' => $akar_masalah
+  ];
+
+  $this->db->where('id', $id);
+  $this->db->where('kode_wilayah', $KodeWilayah); // jaga supaya tidak edit wilayah lain
+  $this->db->update('permasalahan_pd', $update);
+
+  echo $this->db->affected_rows() >= 0 ? '1' : 'Gagal update data';
+}
+
+public function HapusPermasalahanPD()
+{
+  if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 3) exit('Akses ditolak');
+
+  $id = (int)$this->input->post('id', true);
+  if (!$id) exit('ID tidak valid!');
+
+  $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : ($this->session->userdata('TempKodeWilayah') ?? null);
+  if (!$KodeWilayah) exit('Kode wilayah belum dipilih!');
+
+  $this->db->where('id', $id);
+  $this->db->where('kode_wilayah', $KodeWilayah);
+  $this->db->delete('permasalahan_pd');
+
+  echo $this->db->affected_rows() > 0 ? '1' : 'Gagal hapus data';
+}
+
+
+public function IsuStrategisPD()
+{
+    $Header['Halaman'] = 'Daerah';
+
+    // dropdown provinsi untuk filter sebelum login
+    $Data['Provinsi'] = $this->db
+        ->where("Kode LIKE '__'")
+        ->order_by('Nama')
+        ->get("kodewilayah")
+        ->result_array();
+
+    // ambil kode wilayah dari session utama / temp
+    $KodeWilayah = isset($_SESSION['KodeWilayah'])
+        ? $_SESSION['KodeWilayah']
+        : (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+
+    $Data['KodeWilayah'] = $KodeWilayah;
+
+    // ambil data isu strategis
+    if (!empty($KodeWilayah)) {
+        $Data['IsuStrategis'] = $this->db
+            ->where('kodewilayah', $KodeWilayah)
+            ->where('deleted_at IS NULL', null, false)
+            ->order_by('id', 'DESC')
+            ->get('isu_strategis_pd')
+            ->result_array();
+    } else {
+        $Data['IsuStrategis'] = [];
+    }
+    
+
+    $this->load->view('Daerah/header', $Header);
+    $this->load->view('Daerah/IsuStrategisPD', $Data);
+}
+
+
+public function InputIsuStrategisPD()
+{
+
+if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 3) exit('Akses ditolak');
+    $KodeWilayah = $_SESSION['KodeWilayah'] ?? ($_SESSION['TempKodeWilayah'] ?? '');
+    if (!$KodeWilayah) {
+        echo "KodeWilayah belum dipilih!";
+        return;
+    }
+
+    $data = [
+        'kodewilayah'      => $KodeWilayah,
+        'potensi_daerah'   => $this->input->post('potensi_daerah', true),
+        'permasalahan_pd'  => $this->input->post('permasalahan_pd', true),
+        'isu_klhs'         => $this->input->post('isu_klhs', true),
+
+        'isu_global'       => $this->input->post('isu_global', true),
+        'isu_nasional'     => $this->input->post('isu_nasional', true),
+        'isu_regional'     => $this->input->post('isu_regional', true),
+
+        'isu_strategis'    => $this->input->post('isu_strategis', true),
+
+        'created_at'       => date('Y-m-d H:i:s'),
+        'updated_at'       => date('Y-m-d H:i:s'),
+    ];
+
+    $this->db->insert('isu_strategis_pd', $data);
+
+    echo $this->db->affected_rows() ? '1' : 'Gagal Menyimpan Data!';
+}
+
+public function EditIsuStrategisPD()
+{
+    if (!$this->input->is_ajax_request()) {
+        show_404(); return;
+    }
+
+    $KodeWilayah = $_SESSION['KodeWilayah'] ?? ($_SESSION['TempKodeWilayah'] ?? '');
+    if (!$KodeWilayah) {
+        echo "KodeWilayah tidak ditemukan!";
+        return;
+    }
+
+    $id = (int)$this->input->post('id', true);
+    if ($id <= 0) {
+        echo "ID tidak valid!";
+        return;
+    }
+
+    // cek data wilayah
+    $exist = $this->db
+        ->where('id', $id)
+        ->where('kodewilayah', $KodeWilayah)
+        ->where('deleted_at IS NULL', null, false)
+        ->get('isu_strategis_pd')
+        ->row_array();
+
+    if (!$exist) {
+        echo "Data tidak ditemukan / beda wilayah!";
+        return;
+    }
+
+    $data = [
+        'potensi_daerah'   => $this->input->post('potensi_daerah', true),
+        'permasalahan_pd'  => $this->input->post('permasalahan_pd', true),
+        'isu_klhs'         => $this->input->post('isu_klhs', true),
+
+        'isu_global'       => $this->input->post('isu_global', true),
+        'isu_nasional'     => $this->input->post('isu_nasional', true),
+        'isu_regional'     => $this->input->post('isu_regional', true),
+
+        'isu_strategis'    => $this->input->post('isu_strategis', true),
+
+        'updated_at'       => date('Y-m-d H:i:s'),
+    ];
+
+    $this->db->where('id', $id)->update('isu_strategis_pd', $data);
+
+    echo $this->db->affected_rows() ? '1' : 'Tidak ada perubahan';
+}
+
+public function HapusIsuStrategisPD()
+{
+    if (!$this->input->is_ajax_request()) {
+        show_404(); return;
+    }
+
+    $KodeWilayah = $_SESSION['KodeWilayah'] ?? ($_SESSION['TempKodeWilayah'] ?? '');
+    if (!$KodeWilayah) {
+        echo "KodeWilayah tidak ditemukan!";
+        return;
+    }
+
+    $id = (int)$this->input->post('id', true);
+    if ($id <= 0) {
+        echo "ID tidak valid!";
+        return;
+    }
+
+    $this->db->where('id', $id)
+        ->where('kodewilayah', $KodeWilayah)
+        ->where('deleted_at IS NULL', null, false)
+        ->update('isu_strategis_pd', [
+            'deleted_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+
+    echo $this->db->affected_rows() ? '1' : 'Gagal hapus / beda wilayah';
+}
+
+
 }
 
 

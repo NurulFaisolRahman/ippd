@@ -315,7 +315,6 @@
                     <a href="<?=base_url('Daerah/cascade')?>">Cascade</a>
                     <a href="<?=base_url('Daerah/PotensiDaerah')?>">Potensi Daerah</a>
                     <a href="<?=base_url('Daerah/PermasalahanPokok')?>">Permasalahan Pokok</a>
-                    <a href="<?=base_url('Daerah/IsuKLHS')?>">Isu KLHS</a>
                   
                 </div>
             </li>
@@ -327,7 +326,9 @@
                     <i class="fa fa-chevron-down"></i>
                 </a>
                 <div class="sidebar-submenu">
-                    <a href="<?=base_url('#')?>">Form Renstra</a>
+                    <a href="<?=base_url('Daerah/PermasalahanPD')?>">Permaslahan PD</a>
+                    <a href="<?=base_url('Daerah/IsuKLHS')?>">Isu KLHS</a>
+                    <a href="<?=base_url('Daerah/IsuStrategisPD')?>">Isu Strategis PD</a>
             
                 </div>
             </li>
