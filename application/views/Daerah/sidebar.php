@@ -310,34 +310,59 @@
                     <a href="<?=base_url('Daerah/SasaranRPJMD')?>">Sasaran</a>
                     <a href="<?=base_url('Daerah/ProgramPD')?>">Program</a>
                     <a href="<?=base_url('Daerah/TahapanRPJMD')?>">Tahapan</a>
+                    <a href="<?=base_url('Daerah/Iku')?>">IKU</a>
+                    <a href="<?=base_url('Daerah/Ikd')?>">IKD</a>
+                    <a href="<?=base_url('Daerah/cascade')?>">Cascade</a>
+                    <a href="<?=base_url('Daerah/PotensiDaerah')?>">Potensi Daerah</a>
+                    <a href="<?=base_url('Daerah/PermasalahanPokok')?>">Permasalahan Pokok</a>
+                    <a href="<?=base_url('Daerah/IsuKLHS')?>">Isu KLHS</a>
                   
+                </div>
+            </li>
+
+             <li class="sidebar-dropdown">
+                <a href="#">
+                    <i class="bi bi-briefcase-fill"></i>
+                    <span>Renstra</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('#')?>">Form Renstra</a>
+            
+                </div>
+            </li>
+
+            <li class="sidebar-dropdown">
+                <a href="#">
+                    <i class="bi bi-file-text-fill"></i>
+                    <span>RKPD</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('#')?>">Form RKPD</a>
+                </div>
+            </li>
+
+            <li class="sidebar-dropdown">
+                <a href="#">
+                    <i class="bi bi-cash"></i>
+                    <span>Anggaran</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('#')?>">RAPBD</a>
+                    <a href="<?=base_url('#')?>">APBD</a>
                 </div>
             </li>
 
             <li class="sidebar-dropdown">
                 <a href="#">
                     <i class="menu-icon fa fa-sitemap"></i>
-                    <span>Cascading</span>
+                    <span>Pohon Kinerja</span>
                     <i class="fa fa-chevron-down"></i>
                 </a>
                 <div class="sidebar-submenu">
-                    <a href="<?=base_url('Daerah/Iku')?>">IKU</a>
-                    <a href="<?=base_url('Daerah/Ikd')?>">IKD</a>
-                    <a href="<?=base_url('Daerah/cascade')?>">Cascade</a>
-                  
-                </div>
-            </li>
-
-            <li class="sidebar-dropdown">
-                <a href="#">
-                    <i class="bi bi-briefcase-fill"></i>
-                    <span>Isu Daerah</span>
-                    <i class="fa fa-chevron-down"></i>
-                </a>
-                <div class="sidebar-submenu">
-                    <a href="<?=base_url('Daerah/PotensiDaerah')?>">Potensi Daerah</a>
-                    <a href="<?=base_url('Daerah/PermasalahanPokok')?>">Permasalahan Pokok</a>
-                    <a href="<?=base_url('Daerah/IsuKLHS')?>">Isu KLHS</a>
+                    <a href="<?=base_url('#')?>">Pohon Kinerja</a>
             
                 </div>
             </li>
