@@ -92,7 +92,7 @@
                     <th rowspan="2" style="width:220px;">ISU STRATEGIS</th>
                     <th rowspan="2" style="width:120px;">AKSI</th>
                   </tr>
-                  <tr >
+                  <tr>
                     <th style="width:120px;">GLOBAL</th>
                     <th style="width:120px;">NASIONAL</th>
                     <th style="width:120px;">REGIONAL</th>
@@ -102,12 +102,27 @@
                 <tbody>
                   <?php if (!empty($IsuStrategis)) { ?>
                     <?php $no=1; foreach ($IsuStrategis as $row) { ?>
+                      <?php
+                        // Wajib: controller isi sebagai array id
+                        $permasalahan_ids = isset($row['permasalahan_ids']) && is_array($row['permasalahan_ids']) ? $row['permasalahan_ids'] : [];
+                        $klhs_ids         = isset($row['klhs_ids']) && is_array($row['klhs_ids']) ? $row['klhs_ids'] : [];
+
+                        // Untuk tampilan teks di tabel (kalau controller sudah siapkan stringnya juga, pakai itu)
+                        $permasalahan_text = isset($row['permasalahan_pd_text']) ? $row['permasalahan_pd_text'] : '';
+                        $klhs_text         = isset($row['isu_klhs_text']) ? $row['isu_klhs_text'] : '';
+                      ?>
                       <tr>
                         <td class="text-center" style="vertical-align: middle;"><?= $no++ ?></td>
 
                         <td style="vertical-align: middle;"><?= nl2br(htmlspecialchars($row['potensi_daerah'], ENT_QUOTES, 'UTF-8')) ?></td>
-                        <td style="vertical-align: middle;"><?= nl2br(htmlspecialchars($row['permasalahan_pd'], ENT_QUOTES, 'UTF-8')) ?></td>
-                        <td style="vertical-align: middle;"><?= nl2br(htmlspecialchars($row['isu_klhs'], ENT_QUOTES, 'UTF-8')) ?></td>
+
+                        <td style="vertical-align: middle;">
+                          <?= $permasalahan_text ? nl2br(htmlspecialchars($permasalahan_text, ENT_QUOTES, 'UTF-8')) : '-' ?>
+                        </td>
+
+                        <td style="vertical-align: middle;">
+                          <?= $klhs_text ? nl2br(htmlspecialchars($klhs_text, ENT_QUOTES, 'UTF-8')) : '-' ?>
+                        </td>
 
                         <td class="text-center" style="vertical-align: middle;"><?= htmlspecialchars($row['isu_global'], ENT_QUOTES, 'UTF-8') ?></td>
                         <td class="text-center" style="vertical-align: middle;"><?= htmlspecialchars($row['isu_nasional'], ENT_QUOTES, 'UTF-8') ?></td>
@@ -121,12 +136,12 @@
                               <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg BtnEdit"
                                       data-id="<?= (int)$row['id'] ?>"
                                       data-potensi="<?= htmlspecialchars($row['potensi_daerah'], ENT_QUOTES, 'UTF-8') ?>"
-                                      data-permasalahan="<?= htmlspecialchars($row['permasalahan_pd'], ENT_QUOTES, 'UTF-8') ?>"
-                                      data-klhs="<?= htmlspecialchars($row['isu_klhs'], ENT_QUOTES, 'UTF-8') ?>"
                                       data-global="<?= htmlspecialchars($row['isu_global'], ENT_QUOTES, 'UTF-8') ?>"
                                       data-nasional="<?= htmlspecialchars($row['isu_nasional'], ENT_QUOTES, 'UTF-8') ?>"
                                       data-regional="<?= htmlspecialchars($row['isu_regional'], ENT_QUOTES, 'UTF-8') ?>"
-                                      data-strategis="<?= htmlspecialchars($row['isu_strategis'], ENT_QUOTES, 'UTF-8') ?>">
+                                      data-strategis="<?= htmlspecialchars($row['isu_strategis'], ENT_QUOTES, 'UTF-8') ?>"
+                                      data-permasalahan-ids='<?= htmlspecialchars(json_encode(array_values($permasalahan_ids)), ENT_QUOTES, 'UTF-8') ?>'
+                                      data-klhs-ids='<?= htmlspecialchars(json_encode(array_values($klhs_ids)), ENT_QUOTES, 'UTF-8') ?>'>
                                 <i class="notika-icon notika-edit"></i>
                               </button>
 
@@ -166,35 +181,37 @@
             <textarea id="Potensi" class="form-control" rows="2"></textarea>
           </div>
 
+          <!-- PERMASALAHAN PD MULTI (STYLE + / TRASH) -->
           <div class="form-group">
             <label><b>Permasalahan PD</b></label>
-            <textarea id="Permasalahan" class="form-control" rows="2"></textarea>
+            <div id="WrapPermasalahanAdd"></div>
           </div>
 
+          <!-- ISU KLHS MULTI (STYLE + / TRASH) -->
           <div class="form-group">
-            <label><b>Isu KLHS</b></label>
-            <textarea id="KLHS" class="form-control" rows="2"></textarea>
+            <label><b>Isu KLHS yang relevan dengan PD</b></label>
+            <div id="WrapKLHSAdd"></div>
           </div>
 
           <div class="row">
             <div class="col-lg-4">
               <label><b>Global</b></label>
-              <input type="text" id="Global" class="form-control">
+              <input type="text" id="Global" class="form-control" placeholder="(Opsional)">
             </div>
             <div class="col-lg-4">
               <label><b>Nasional</b></label>
-              <input type="text" id="Nasional" class="form-control">
+              <input type="text" id="Nasional" class="form-control" placeholder="(Opsional)">
             </div>
             <div class="col-lg-4">
               <label><b>Regional</b></label>
-              <input type="text" id="Regional" class="form-control">
+              <input type="text" id="Regional" class="form-control" placeholder="(Opsional)">
             </div>
           </div>
 
           <br>
 
           <div class="form-group">
-            <label><b>Isu Strategis Disdagperin</b></label>
+            <label><b>Isu Strategis </b></label>
             <textarea id="Strategis" class="form-control" rows="2"></textarea>
           </div>
 
@@ -221,35 +238,37 @@
             <textarea id="EditPotensi" class="form-control" rows="2"></textarea>
           </div>
 
+          <!-- PERMASALAHAN PD MULTI (EDIT) -->
           <div class="form-group">
             <label><b>Permasalahan PD</b></label>
-            <textarea id="EditPermasalahan" class="form-control" rows="2"></textarea>
+            <div id="WrapPermasalahanEdit"></div>
           </div>
 
+          <!-- ISU KLHS MULTI (EDIT) -->
           <div class="form-group">
-            <label><b>Isu KLHS</b></label>
-            <textarea id="EditKLHS" class="form-control" rows="2"></textarea>
+            <label><b>Isu KLHS yang relevan dengan PD</b></label>
+            <div id="WrapKLHSEdit"></div>
           </div>
 
           <div class="row">
             <div class="col-lg-4">
               <label><b>Global</b></label>
-              <input type="text" id="EditGlobal" class="form-control">
+              <input type="text" id="EditGlobal" class="form-control" placeholder="(Opsional)">
             </div>
             <div class="col-lg-4">
               <label><b>Nasional</b></label>
-              <input type="text" id="EditNasional" class="form-control">
+              <input type="text" id="EditNasional" class="form-control" placeholder="(Opsional)">
             </div>
             <div class="col-lg-4">
               <label><b>Regional</b></label>
-              <input type="text" id="EditRegional" class="form-control">
+              <input type="text" id="EditRegional" class="form-control" placeholder="(Opsional)">
             </div>
           </div>
 
           <br>
 
           <div class="form-group">
-            <label><b>Isu Strategis Disdagperin</b></label>
+            <label><b>Isu Strategis </b></label>
             <textarea id="EditStrategis" class="form-control" rows="2"></textarea>
           </div>
 
@@ -261,7 +280,6 @@
 
 </div><!-- /.main-content -->
 
-
 <script src="../js/vendor/jquery-1.12.4.min.js"></script>
 <script src="../js/bootstrap.min.js"></script>
 <script src="../js/data-table/jquery.dataTables.min.js"></script>
@@ -272,10 +290,138 @@
   var CSRF_TOKEN = '<?= $this->security->get_csrf_hash() ?>';
   var CSRF_NAME  = '<?= $this->security->get_csrf_token_name() ?>';
 
+  // ====== MASTER OPTIONS (SERVER -> JS) ======
+  var OPT_PERMASALAHAN = `<?php
+    $html = '<option value="">Pilih Permasalahan PD</option>';
+    if (!empty($ListPermasalahanPD)) {
+      foreach ($ListPermasalahanPD as $p) {
+        $id = (int)$p['id'];
+        $label = isset($p['nama']) ? $p['nama'] : (isset($p['masalah']) ? $p['masalah'] : ('ID '.$id));
+        $html .= '<option value="'.$id.'">'.html_escape($label).'</option>';
+      }
+    }
+    echo $html;
+  ?>`;
+
+  var OPT_KLHS = `<?php
+    $html = '<option value="">Pilih Isu KLHS</option>';
+    if (!empty($ListIsuKLHS)) {
+      foreach ($ListIsuKLHS as $k) {
+        $id = (int)$k['id'];
+        $label = isset($k['NamaIsuKLHS']) ? $k['NamaIsuKLHS'] : (isset($k['isu']) ? $k['isu'] : ('ID '.$id));
+        $html .= '<option value="'.$id.'">'.html_escape($label).'</option>';
+      }
+    }
+    echo $html;
+  ?>`;
+
+  // ====== TEMPLATE ROW (+ / trash) ======
+  function rowSelect(type, name, optionsHtml, isFirstRow, selectedVal) {
+    var btnHtml = '';
+    if (isFirstRow) {
+      btnHtml = `
+        <button type="button" class="btn btn-success BtnAddRow" data-type="${type}"
+          style="width:46px;height:46px;border-radius:6px;display:flex;align-items:center;justify-content:center;">
+          <span style="font-size:26px;line-height:1;">+</span>
+        </button>
+      `;
+    } else {
+      btnHtml = `
+        <button type="button" class="btn btn-danger BtnRemoveRow"
+          style="width:46px;height:46px;border-radius:6px;display:flex;align-items:center;justify-content:center;">
+          <i class="notika-icon notika-trash"></i>
+        </button>
+      `;
+    }
+
+    return `
+      <div class="row RowItem" style="margin-bottom:10px;">
+        <div class="col-md-11">
+          <select class="form-control" name="${name}" style="height:46px;border-radius:6px;">
+            ${optionsHtml}
+          </select>
+        </div>
+        <div class="col-md-1" style="padding-left:0;">
+          ${btnHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  function setSelected($row, val) {
+    if (val !== null && val !== undefined && String(val) !== '') {
+      $row.find('select').val(String(val));
+    }
+  }
+
+  function initRepeater(wrapSelector, type, name, optionsHtml, selectedArr) {
+    var $wrap = $(wrapSelector);
+    $wrap.html('');
+
+    // Minimal 1 row
+    var first = $(rowSelect(type, name, optionsHtml, true, null));
+    $wrap.append(first);
+
+    // Set selected untuk row pertama jika ada
+    if (selectedArr && selectedArr.length > 0) {
+      setSelected(first, selectedArr[0]);
+    }
+
+    // Row berikutnya pakai tombol trash
+    if (selectedArr && selectedArr.length > 1) {
+      for (var i = 1; i < selectedArr.length; i++) {
+        var r = $(rowSelect(type, name, optionsHtml, false, null));
+        $wrap.append(r);
+        setSelected(r, selectedArr[i]);
+      }
+    }
+  }
+
+  function collectValues(wrapSelector) {
+    var vals = [];
+    $(wrapSelector).find('select').each(function(){
+      var v = $(this).val();
+      if (v !== null && v !== undefined && String(v).trim() !== '') {
+        vals.push(String(v));
+      }
+    });
+
+    // unique (biar tidak double)
+    var uniq = [];
+    for (var i=0;i<vals.length;i++){
+      if (uniq.indexOf(vals[i]) === -1) uniq.push(vals[i]);
+    }
+    return uniq;
+  }
+
   jQuery(document).ready(function($){
 
-    // DataTable (ID harus sama dgn table)
-    $('#data-table-isu').DataTable();
+    // DataTable
+    $('#data-table-basic').DataTable();
+
+    // ===== init repeater add modal (default 1 row)
+    initRepeater('#WrapPermasalahanAdd', 'permasalahan_add', 'permasalahan_ids[]', OPT_PERMASALAHAN, []);
+    initRepeater('#WrapKLHSAdd', 'klhs_add', 'klhs_ids[]', OPT_KLHS, []);
+
+    // ====== ADD ROW handler (global)
+    $(document).on('click', '.BtnAddRow', function(){
+      var type = $(this).data('type');
+
+      if (type === 'permasalahan_add') {
+        $('#WrapPermasalahanAdd').append($(rowSelect(type, 'permasalahan_ids[]', OPT_PERMASALAHAN, false, null)));
+      } else if (type === 'klhs_add') {
+        $('#WrapKLHSAdd').append($(rowSelect(type, 'klhs_ids[]', OPT_KLHS, false, null)));
+      } else if (type === 'permasalahan_edit') {
+        $('#WrapPermasalahanEdit').append($(rowSelect(type, 'edit_permasalahan_ids[]', OPT_PERMASALAHAN, false, null)));
+      } else if (type === 'klhs_edit') {
+        $('#WrapKLHSEdit').append($(rowSelect(type, 'edit_klhs_ids[]', OPT_KLHS, false, null)));
+      }
+    });
+
+    // ====== REMOVE ROW handler
+    $(document).on('click', '.BtnRemoveRow', function(){
+      $(this).closest('.RowItem').remove();
+    });
 
     // =========================
     // FILTER PROVINSI & KAB/KOTA
@@ -340,7 +486,6 @@
         });
       });
 
-      // Populate kab/kota on page load jika KodeWilayah sudah ada
       <?php if (!empty($KodeWilayah)) { ?>
         var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
         var kodeKab  = "<?= $KodeWilayah ?>";
@@ -370,9 +515,8 @@
     // END FILTER
     // =========================
 
-
     // =========================
-    // TAMBAH ISU
+    // TAMBAH ISU (GLOBAL/NASIONAL/REGIONAL OPSIONAL)
     // =========================
     $("#BtnSimpanIsu").click(function(){
       var potensi = $("#Potensi").val().trim();
@@ -381,10 +525,13 @@
         return;
       }
 
-      $.post(BaseURL + "Daerah/InputIsuStrategisPD", {   // <-- sesuaikan endpoint
+      var permasalahan_ids = collectValues('#WrapPermasalahanAdd');
+      var klhs_ids         = collectValues('#WrapKLHSAdd');
+
+      $.post(BaseURL + "Daerah/InputIsuStrategisPD", {
         potensi_daerah: potensi,
-        permasalahan_pd: $("#Permasalahan").val().trim(),
-        isu_klhs: $("#KLHS").val().trim(),
+        permasalahan_ids: permasalahan_ids,
+        klhs_ids: klhs_ids,
         isu_global: $("#Global").val().trim(),
         isu_nasional: $("#Nasional").val().trim(),
         isu_regional: $("#Regional").val().trim(),
@@ -403,25 +550,34 @@
       });
     });
 
-
     // =========================
-    // BUKA MODAL EDIT
+    // BUKA MODAL EDIT (load multi IDs dari data attribute JSON)
     // =========================
     $(document).on("click", ".BtnEdit", function(){
       $("#EditId").val($(this).data('id'));
       $("#EditPotensi").val($(this).data('potensi'));
-      $("#EditPermasalahan").val($(this).data('permasalahan'));
-      $("#EditKLHS").val($(this).data('klhs'));
       $("#EditGlobal").val($(this).data('global'));
       $("#EditNasional").val($(this).data('nasional'));
       $("#EditRegional").val($(this).data('regional'));
       $("#EditStrategis").val($(this).data('strategis'));
+
+      var permasalahanIdsJson = $(this).attr('data-permasalahan-ids') || '[]';
+      var klhsIdsJson         = $(this).attr('data-klhs-ids') || '[]';
+
+      var permasalahanArr = [];
+      var klhsArr = [];
+      try { permasalahanArr = JSON.parse(permasalahanIdsJson); } catch(e) { permasalahanArr = []; }
+      try { klhsArr = JSON.parse(klhsIdsJson); } catch(e) { klhsArr = []; }
+
+      // init repeater edit
+      initRepeater('#WrapPermasalahanEdit', 'permasalahan_edit', 'edit_permasalahan_ids[]', OPT_PERMASALAHAN, permasalahanArr);
+      initRepeater('#WrapKLHSEdit', 'klhs_edit', 'edit_klhs_ids[]', OPT_KLHS, klhsArr);
+
       $("#ModalEditIsu").modal("show");
     });
 
-
     // =========================
-    // UPDATE ISU
+    // UPDATE ISU (GLOBAL/NASIONAL/REGIONAL bisa diisi di edit)
     // =========================
     $("#BtnUpdateIsu").click(function(){
       var id = $("#EditId").val();
@@ -436,11 +592,14 @@
         return;
       }
 
-      $.post(BaseURL + "Daerah/EditIsuStrategisPD", {   // <-- sesuaikan endpoint
+      var permasalahan_ids = collectValues('#WrapPermasalahanEdit');
+      var klhs_ids         = collectValues('#WrapKLHSEdit');
+
+      $.post(BaseURL + "Daerah/EditIsuStrategisPD", {
         id: id,
         potensi_daerah: potensi,
-        permasalahan_pd: $("#EditPermasalahan").val().trim(),
-        isu_klhs: $("#EditKLHS").val().trim(),
+        permasalahan_ids: permasalahan_ids,
+        klhs_ids: klhs_ids,
         isu_global: $("#EditGlobal").val().trim(),
         isu_nasional: $("#EditNasional").val().trim(),
         isu_regional: $("#EditRegional").val().trim(),
@@ -459,7 +618,6 @@
       });
     });
 
-
     // =========================
     // HAPUS ISU
     // =========================
@@ -474,7 +632,7 @@
         return;
       }
 
-      $.post(BaseURL + "Daerah/HapusIsuStrategis", {  // <-- sesuaikan endpoint
+      $.post(BaseURL + "Daerah/HapusIsuStrategis", {
         id: id,
         [CSRF_NAME]: CSRF_TOKEN
       })
