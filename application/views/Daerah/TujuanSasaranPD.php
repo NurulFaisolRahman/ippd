@@ -93,7 +93,7 @@
                     <th rowspan="2" style="width:220px; text-align:center;">KETERANGAN</th>
                     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                       <th rowspan="2" style="width:120px; text-align:center;">AKSI</th>
-                      <th rowspan="2" style="width:120px; text-align:center;">Indikator</th>
+                      <th rowspan="2" style="width:120px; text-align:center;">AKSI <br>INDIKATOR</th>
                     <?php } ?>
                   </tr>
                   <tr>
@@ -149,6 +149,7 @@
 
   <!-- AKSI HEADER -->
   <td class="text-center">
+    <div class="btn-group-flex">
     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
       <button class="btn btn-info btn-sm BtnEditMaster"
   data-id="<?= (int)$m['id'] ?>"
@@ -162,10 +163,12 @@
         <i class="notika-icon notika-trash"></i>
       </button>
     <?php } ?>
+    </div>
   </td>
 
   <!-- AKSI INDIKATOR -->
   <td class="text-center">
+    <div class="btn-group-flex">
     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
       <button class="btn btn-success btn-sm BtnAddDetail" data-parent-id="<?= $m['id'] ?>">
         <i class="notika-icon bi-plus-lg"></i>
@@ -188,6 +191,7 @@
         <i class="notika-icon notika-trash"></i>
       </button>
     <?php } ?>
+    </div>
   </td>
 </tr>
 
@@ -464,6 +468,21 @@
   </div>
 
 </div><!-- /.main-content -->
+
+<style>
+  .btn-group-flex {
+  display: flex;
+  justify-content: center; /* tengah */
+  align-items: center;
+  gap: 6px; /* jarak antar tombol */
+  flex-wrap: nowrap;
+}
+
+.btn-group-flex .btn {
+  margin: 0;
+}
+
+</style>
 
 <script src="../js/vendor/jquery-1.12.4.min.js"></script>
 <script src="../js/bootstrap.min.js"></script>
