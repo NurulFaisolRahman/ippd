@@ -3947,7 +3947,7 @@ public function HapusSasaranPD()
                     foreach ($masters as &$m) {
                         if (!empty($m['details'])) {
                             usort($m['details'], function($a, $b){
-                                return (int)$b['id'] <=> (int)$a['id']; // DESC by id (terbaru dulu)
+                                return (int)$a['id'] <=> (int)$b['id']; // DESC by id (terbaru dulu)
                             });
                         }
                     }

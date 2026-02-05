@@ -91,8 +91,10 @@
                     <th rowspan="2" style="width:220px; text-align:center;">INDIKATOR</th>
                     <th colspan="6" style="text-align:center;">TARGET TAHUN</th>
                     <th rowspan="2" style="width:220px; text-align:center;">KETERANGAN</th>
-                    <th rowspan="2" style="width:120px; text-align:center;">AKSI</th>
-                    <th rowspan="2" style="width:120px; text-align:center;">Indikator</th>
+                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                      <th rowspan="2" style="width:120px; text-align:center;">AKSI</th>
+                      <th rowspan="2" style="width:120px; text-align:center;">Indikator</th>
+                    <?php } ?>
                   </tr>
                   <tr>
                     <th style="width:90px; text-align:center;">2025</th>
@@ -147,7 +149,7 @@
 
   <!-- AKSI HEADER -->
   <td class="text-center">
-    <?php if ($_SESSION['Level']==3) { ?>
+    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
       <button class="btn btn-info btn-sm BtnEditMaster"
   data-id="<?= (int)$m['id'] ?>"
   data-nspk="<?= html_escape($nspkText) ?>"
@@ -164,7 +166,7 @@
 
   <!-- AKSI INDIKATOR -->
   <td class="text-center">
-    <?php if ($_SESSION['Level']==3) { ?>
+    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
       <button class="btn btn-success btn-sm BtnAddDetail" data-parent-id="<?= $m['id'] ?>">
         <i class="notika-icon bi-plus-lg"></i>
       </button>
@@ -201,7 +203,7 @@
   <td><?= nl2br(htmlspecialchars($d['keterangan'])) ?></td>
   <td></td>
   <td class="text-center">
-    <?php if ($_SESSION['Level']==3) { ?>
+    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
       <button class="btn btn-warning btn-sm BtnEditDetail"
   data-id="<?= (int)$d['id'] ?>"
   data-parent-id="<?= (int)$m['id'] ?>"
@@ -238,7 +240,7 @@
   <td>-</td>
 
   <td class="text-center">
-    <?php if ($_SESSION['Level']==3) { ?>
+    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
       <button class="btn btn-info btn-sm BtnEditMaster"
   data-id="<?= (int)$m['id'] ?>"
   data-nspk="<?= html_escape($m['nspk']) ?>"
@@ -255,7 +257,7 @@
   </td>
 
   <td class="text-center">
-    <?php if ($_SESSION['Level']==3) { ?>
+    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
       <button class="btn btn-success btn-sm BtnAddDetail" data-parent-id="<?= $m['id'] ?>">
         <i class="notika-icon bi-plus-lg"></i>
       </button>
