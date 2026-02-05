@@ -88,15 +88,16 @@
                     <th rowspan="2" style="width:220px;">POTENSI DAERAH<br>YANG MENJADI KEWENANGAN</th>
                     <th rowspan="2" style="width:220px;">PERMASALAHAN PD</th>
                     <th rowspan="2" style="width:220px;">ISU KLHS<br>YANG RELEVAN DENGAN PD</th>
-                    <th colspan="3">ISU LINGKUNGAN DINAMIS YANG RELEVAN DENGAN PD</th>
+                    <th colspan="3" style="text-align:center;">ISU LINGKUNGAN DINAMIS YANG RELEVAN DENGAN PD</th>
                     <th rowspan="2" style="width:220px;">ISU STRATEGIS</th>
-                    <th rowspan="2" style="width:120px;">AKSI</th>
+                    <th class="text-center" rowspan="2" style="width:120px;">AKSI</th>
                   </tr>
                   <tr>
-                    <th style="width:120px;">GLOBAL</th>
-                    <th style="width:120px;">NASIONAL</th>
-                    <th style="width:120px;">REGIONAL</th>
+                    <th class="text-center" style="width:115px;">GLOBAL</th>
+                    <th class="text-center" style="width:115px;">NASIONAL</th>
+                    <th class="text-center" style="width:115px;">REGIONAL</th>
                   </tr>
+
                 </thead>
 
                 <tbody>
@@ -279,6 +280,7 @@
   </div>
 
 </div><!-- /.main-content -->
+
 
 <script src="../js/vendor/jquery-1.12.4.min.js"></script>
 <script src="../js/bootstrap.min.js"></script>

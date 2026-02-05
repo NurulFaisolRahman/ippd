@@ -326,10 +326,12 @@
                     <i class="fa fa-chevron-down"></i>
                 </a>
                 <div class="sidebar-submenu">
-                    <a href="<?=base_url('Daerah/PermasalahanPD')?>">Permaslahan PD</a>
+                    <a href="<?=base_url('Daerah/PermasalahanPD')?>">Permasalahan PD</a>
                     <a href="<?=base_url('Daerah/IsuKLHS')?>">Isu KLHS</a>
                     <a href="<?=base_url('Daerah/IsuStrategisPD')?>">Isu Strategis PD</a>
-            
+                    <a href="<?=base_url('Daerah/TujuanPD')?>">Tujuan PD</a>
+                    <a href="<?=base_url('Daerah/SasaranPD')?>">Sasaran PD</a>
+                    <a href="<?=base_url('Daerah/TujuanSasaranPD')?>">Tujuan & Sasaran PD</a>
                 </div>
             </li>
 

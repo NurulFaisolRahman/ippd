@@ -1,3 +1,4 @@
+<!-- TujuanPD.php -->
 <?php $this->load->view('Daerah/sidebar'); ?>
 <?php $this->load->view('Daerah/Cssumum'); ?>
 
@@ -14,6 +15,7 @@
                 <div class="form-example-int form-horizental">
                   <div class="form-group">
                     <div class="row filter-row">
+
                       <div class="col-lg-3 col-md-6">
                         <div class="filter-group">
                           <label for="Provinsi"><b>Provinsi</b></label>
@@ -66,8 +68,8 @@
             <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
               <div class="basic-tb-hd">
                 <div class="button-icon-btn sm-res-mg-t-30">
-                  <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputPermasalahanPD">
-                    <i class="notika-icon notika-edit"></i> <b>Tambah Permasalahan</b>
+                  <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputTujuanPD">
+                    <i class="notika-icon notika-edit"></i> <b>Tambah Tujuan PD</b>
                   </button>
                 </div>
               </div>
@@ -78,47 +80,37 @@
               <table id="data-table-basic" class="table table-striped">
                 <thead>
                   <tr>
-                    <th class="text-center" style="width:80px;">No</th>
-                    <th>Masalah Pokok</th>
-                    <th>Masalah</th>
-                    <th>Penyebab Masalah</th>
-                    <th>Internal</th>
-                    <th>External</th>
-                    <th>Akar Masalah</th>
+                    <th class="text-center" style="width:70px;">No</th>
+                    <th>Tujuan Perangkat Daerah</th>
+                    <th class="text-center" style="width:120px;">Tahun Mulai</th>
+                    <th class="text-center" style="width:120px;">Tahun Akhir</th>
                     <th class="text-center" style="width:120px;">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <?php if (!empty($PermasalahanPD)) { ?>
-                    <?php $no=1; foreach ($PermasalahanPD as $row) { ?>
+                  <?php if (!empty($TujuanPD)) { ?>
+                    <?php $no = 1; foreach ($TujuanPD as $row) { ?>
                       <tr>
                         <td class="text-center" style="vertical-align: middle;"><?= $no++ ?></td>
-                        <td style="vertical-align: middle;"><?= htmlspecialchars($row['NamaPermasalahanPokok'], ENT_QUOTES, 'UTF-8') ?></td>
-                        <td style="vertical-align: middle;"><?= htmlspecialchars($row['masalah'], ENT_QUOTES, 'UTF-8') ?></td>
-                        <td style="vertical-align: middle;"><?= htmlspecialchars($row['penyebab_masalah'], ENT_QUOTES, 'UTF-8') ?></td>
-                        <td style="vertical-align: middle;"><?= htmlspecialchars($row['faktor_internal'], ENT_QUOTES, 'UTF-8') ?></td>
-                        <td style="vertical-align: middle;"><?= htmlspecialchars($row['faktor_external'], ENT_QUOTES, 'UTF-8') ?></td>
-                        <td style="vertical-align: middle;"><?= htmlspecialchars($row['akar_masalah'], ENT_QUOTES, 'UTF-8') ?></td>
-
+                        <td style="vertical-align: middle;"><?= htmlspecialchars($row['tujuan_pd'], ENT_QUOTES, 'UTF-8') ?></td>
+                        <td class="text-center" style="vertical-align: middle;"><?= htmlspecialchars($row['tahun_mulai'], ENT_QUOTES, 'UTF-8') ?></td>
+                        <td class="text-center" style="vertical-align: middle;"><?= htmlspecialchars($row['tahun_akhir'], ENT_QUOTES, 'UTF-8') ?></td>
                         <td class="text-center" style="vertical-align: middle;">
                           <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
                             <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                               <button
                                 class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg BtnEdit"
-                                data-id="<?= (int)$row['id'] ?>"
-                                data-masalah="<?= htmlspecialchars($row['masalah'], ENT_QUOTES, 'UTF-8') ?>"
-                                data-masalah_pokok="<?= htmlspecialchars($row['masalah_pokok'], ENT_QUOTES, 'UTF-8') ?>"
-                                data-penyebab_masalah="<?= htmlspecialchars($row['penyebab_masalah'], ENT_QUOTES, 'UTF-8') ?>"
-                                data-faktor_internal="<?= htmlspecialchars($row['faktor_internal'], ENT_QUOTES, 'UTF-8') ?>"
-                                data-faktor_external="<?= htmlspecialchars($row['faktor_external'], ENT_QUOTES, 'UTF-8') ?>"
-                                data-akar_masalah="<?= htmlspecialchars($row['akar_masalah'], ENT_QUOTES, 'UTF-8') ?>"
+                                data-id="<?= $row['id'] ?>"
+                                data-tujuan="<?= htmlspecialchars($row['tujuan_pd'], ENT_QUOTES, 'UTF-8') ?>"
+                                data-tahunmulai="<?= htmlspecialchars($row['tahun_mulai'], ENT_QUOTES, 'UTF-8') ?>"
+                                data-tahunakhir="<?= htmlspecialchars($row['tahun_akhir'], ENT_QUOTES, 'UTF-8') ?>"
                               >
                                 <i class="notika-icon notika-edit"></i>
                               </button>
 
                               <button
                                 class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg BtnHapus"
-                                data-id="<?= (int)$row['id'] ?>"
+                                data-id="<?= $row['id'] ?>"
                               >
                                 <i class="notika-icon notika-trash"></i>
                               </button>
@@ -138,8 +130,8 @@
     </div>
   </div>
 
-  <!-- Modal Input Permasalahan -->
-  <div class="modal fade" id="ModalInputPermasalahanPD" role="dialog">
+  <!-- Modal Input Tujuan PD -->
+  <div class="modal fade" id="ModalInputTujuanPD" role="dialog">
     <div class="modal-dialog modal-md" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);">
       <div class="modal-content">
         <div class="modal-header">
@@ -151,24 +143,15 @@
             <div class="col-lg-12">
               <div class="form-example-wrap" style="padding:5px;">
 
-
-              <div class="form-example-int form-horizental">
+                <div class="form-example-int form-horizental">
                   <div class="form-group">
                     <div class="row">
                       <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Masalah Pokok</b></label>
+                        <label class="hrzn-fm"><b>Tujuan PD</b></label>
                       </div>
                       <div class="col-lg-8">
                         <div class="nk-int-st">
-                          <select class="form-control input-sm" id="MasalahPokok">
-                          <option value="">-- Pilih Masalah Pokok --</option>
-                          <?php foreach ($MasalahPokok as $mp) { ?>
-                            <option value="<?= (int)$mp['Id'] ?>">
-                              <?= htmlspecialchars($mp['NamaPermasalahanPokok'], ENT_QUOTES, 'UTF-8') ?>
-                            </option>
-                          <?php } ?>
-                        </select>
-
+                          <input type="text" class="form-control input-sm" id="TujuanPD" placeholder="Contoh: Meningkatkan kualitas layanan pendidikan">
                         </div>
                       </div>
                     </div>
@@ -179,27 +162,11 @@
                   <div class="form-group">
                     <div class="row">
                       <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Masalah</b></label>
+                        <label class="hrzn-fm"><b>Tahun Mulai</b></label>
                       </div>
-                      <div class="col-lg-8">
+                      <div class="col-lg-4">
                         <div class="nk-int-st">
-                          <textarea class="form-control input-sm" id="Masalah" rows="3" placeholder="Tulis masalah..."></textarea>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Penyebab Masalah</b></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div class="nk-int-st">
-                          <textarea class="form-control input-sm" id="PenyebabMasalah" rows="3" placeholder="Tulis penyebab masalah..."></textarea>
+                          <input type="number" class="form-control input-sm" id="TahunMulai" placeholder="2025">
                         </div>
                       </div>
                     </div>
@@ -210,41 +177,11 @@
                   <div class="form-group">
                     <div class="row">
                       <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Faktor Internal</b></label>
+                        <label class="hrzn-fm"><b>Tahun Akhir</b></label>
                       </div>
-                      <div class="col-lg-8">
+                      <div class="col-lg-4">
                         <div class="nk-int-st">
-                          <textarea class="form-control input-sm" id="FaktorInternal" rows="3" placeholder="Tulis faktor internal..."></textarea>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Faktor External</b></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div class="nk-int-st">
-                          <textarea class="form-control input-sm" id="FaktorExternal" rows="3" placeholder="Tulis faktor external..."></textarea>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Akar Masalah</b></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div class="nk-int-st">
-                          <textarea class="form-control input-sm" id="AkarMasalah" rows="3" placeholder="Tulis akar masalah..."></textarea>
+                          <input type="number" class="form-control input-sm" id="TahunAkhir" placeholder="2029">
                         </div>
                       </div>
                     </div>
@@ -268,8 +205,8 @@
     </div>
   </div>
 
-  <!-- Modal Edit Permasalahan -->
-  <div class="modal fade" id="ModalEditPermasalahanPD" role="dialog">
+  <!-- Modal Edit Tujuan PD -->
+  <div class="modal fade" id="ModalEditTujuanPD" role="dialog">
     <div class="modal-dialog modal-md" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);">
       <div class="modal-content">
         <div class="modal-header">
@@ -286,19 +223,11 @@
                   <div class="form-group">
                     <div class="row">
                       <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Masalah Pokok</b></label>
+                        <label class="hrzn-fm"><b>Tujuan PD</b></label>
                       </div>
                       <div class="col-lg-8">
                         <div class="nk-int-st">
-                          <select class="form-control input-sm" id="EditMasalahPokok">
-                            <option value="">-- Pilih Masalah Pokok --</option>
-                            <?php foreach ($MasalahPokok as $mp) { ?>
-                              <option value="<?= (int)$mp['Id'] ?>">
-                                <?= htmlspecialchars($mp['NamaPermasalahanPokok'], ENT_QUOTES, 'UTF-8') ?>
-                              </option>
-                            <?php } ?>
-                          </select>
-
+                          <input type="text" class="form-control input-sm" id="EditTujuanPD">
                         </div>
                       </div>
                     </div>
@@ -309,11 +238,11 @@
                   <div class="form-group">
                     <div class="row">
                       <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Masalah</b></label>
+                        <label class="hrzn-fm"><b>Tahun Mulai</b></label>
                       </div>
-                      <div class="col-lg-8">
+                      <div class="col-lg-4">
                         <div class="nk-int-st">
-                          <textarea class="form-control input-sm" id="EditMasalah" rows="3"></textarea>
+                          <input type="number" class="form-control input-sm" id="EditTahunMulai">
                         </div>
                       </div>
                     </div>
@@ -324,56 +253,11 @@
                   <div class="form-group">
                     <div class="row">
                       <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Penyebab Masalah</b></label>
+                        <label class="hrzn-fm"><b>Tahun Akhir</b></label>
                       </div>
-                      <div class="col-lg-8">
+                      <div class="col-lg-4">
                         <div class="nk-int-st">
-                          <textarea class="form-control input-sm" id="EditPenyebabMasalah" rows="3"></textarea>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Faktor Internal</b></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div class="nk-int-st">
-                          <textarea class="form-control input-sm" id="EditFaktorInternal" rows="3"></textarea>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Faktor External</b></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div class="nk-int-st">
-                          <textarea class="form-control input-sm" id="EditFaktorExternal" rows="3"></textarea>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Akar Masalah</b></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div class="nk-int-st">
-                          <textarea class="form-control input-sm" id="EditAkarMasalah" rows="3"></textarea>
+                          <input type="number" class="form-control input-sm" id="EditTahunAkhir">
                         </div>
                       </div>
                     </div>
@@ -411,10 +295,10 @@
 
   jQuery(document).ready(function($){
 
-    $('#data-table-permasalahan').DataTable();
+    $('#data-table-tujuanpd').DataTable();
 
     // =========================
-    // FILTER PROVINSI & KAB/KOTA
+    // FILTER PROVINSI & KAB/KOTA (SAMA PERSIS SEPERTI URUSANPD)
     // =========================
     <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
 
@@ -508,94 +392,90 @@
 
     // Tambah
     $("#BtnSimpan").click(function(){
-      var masalah = $("#Masalah").val().trim();
-      if(!masalah){
-        alert('Masalah harus diisi!');
+      var tujuan = $("#TujuanPD").val().trim();
+      var mulai  = $("#TahunMulai").val().trim();
+      var akhir  = $("#TahunAkhir").val().trim();
+
+      if(!tujuan){ alert('Tujuan PD harus diisi!'); return; }
+      if(!mulai){  alert('Tahun mulai harus diisi!'); return; }
+      if(!akhir){  alert('Tahun akhir harus diisi!'); return; }
+
+      if(parseInt(akhir) < parseInt(mulai)){
+        alert('Tahun akhir tidak boleh lebih kecil dari tahun mulai!');
         return;
       }
 
-      $.post(BaseURL + "Daerah/InputPermasalahanPD", {
-          masalah: masalah,
-          masalah_pokok: $("#MasalahPokok").val(), // ID
-          penyebab_masalah: $("#PenyebabMasalah").val().trim(),
-          faktor_internal: $("#FaktorInternal").val().trim(),
-          faktor_external: $("#FaktorExternal").val().trim(),
-          akar_masalah: $("#AkarMasalah").val().trim(),
-          [CSRF_NAME]: CSRF_TOKEN
-        })
+      $.post(BaseURL + "Daerah/InputTujuanPD", {
+        tujuan_pd: tujuan,
+        tahun_mulai: mulai,
+        tahun_akhir: akhir,
+        [CSRF_NAME]: CSRF_TOKEN
+      })
       .done(function(res){
         if(res == '1'){
           window.location.reload();
         } else {
-          alert(res);
+          alert(res || 'Gagal menyimpan data!');
         }
       })
       .fail(function(){
-        alert('Gagal request (Tambah Permasalahan)');
+        alert('Gagal request (Tambah Tujuan PD)');
       });
     });
 
     // Buka modal edit
     $(document).on("click", ".BtnEdit", function(){
       $("#EditId").val($(this).data('id'));
-      $("#EditMasalah").val($(this).data('masalah'));
-      $("#EditMasalahPokok").val($(this).data('masalah_pokok'));
-      $("#EditPenyebabMasalah").val($(this).data('penyebab_masalah'));
-      $("#EditFaktorInternal").val($(this).data('faktor_internal'));
-      $("#EditFaktorExternal").val($(this).data('faktor_external'));
-      $("#EditAkarMasalah").val($(this).data('akar_masalah'));
-      $("#ModalEditPermasalahanPD").modal("show");
+      $("#EditTujuanPD").val($(this).data('tujuan'));
+      $("#EditTahunMulai").val($(this).data('tahunmulai'));
+      $("#EditTahunAkhir").val($(this).data('tahunakhir'));
+      $("#ModalEditTujuanPD").modal("show");
     });
 
     // Update
     $("#BtnUpdate").click(function(){
-      var id = $("#EditId").val();
-      var masalah = $("#EditMasalah").val().trim();
+      var id     = $("#EditId").val();
+      var tujuan = $("#EditTujuanPD").val().trim();
+      var mulai  = $("#EditTahunMulai").val().trim();
+      var akhir  = $("#EditTahunAkhir").val().trim();
 
-      if(!id){
-        alert('ID tidak valid!');
+      if(!id){     alert('ID tidak valid!'); return; }
+      if(!tujuan){ alert('Tujuan PD harus diisi!'); return; }
+      if(!mulai){  alert('Tahun mulai harus diisi!'); return; }
+      if(!akhir){  alert('Tahun akhir harus diisi!'); return; }
+
+      if(parseInt(akhir) < parseInt(mulai)){
+        alert('Tahun akhir tidak boleh lebih kecil dari tahun mulai!');
         return;
       }
-      if(!masalah){
-        alert('Masalah harus diisi!');
-        return;
-      }
 
-      $.post(BaseURL + "Daerah/EditPermasalahanPD", {
+      $.post(BaseURL + "Daerah/EditTujuanPD", {
         id: id,
-        masalah: masalah,
-        masalah_pokok: $("#EditMasalahPokok").val().trim(),
-        penyebab_masalah: $("#EditPenyebabMasalah").val().trim(),
-        faktor_internal: $("#EditFaktorInternal").val().trim(),
-        faktor_external: $("#EditFaktorExternal").val().trim(),
-        akar_masalah: $("#EditAkarMasalah").val().trim(),
+        tujuan_pd: tujuan,
+        tahun_mulai: mulai,
+        tahun_akhir: akhir,
         [CSRF_NAME]: CSRF_TOKEN
       })
       .done(function(res){
         if(res == '1'){
           window.location.reload();
         } else {
-          alert(res);
+          alert(res || 'Gagal update data!');
         }
       })
       .fail(function(){
-        alert('Gagal request (Edit Permasalahan)');
+        alert('Gagal request (Edit Tujuan PD)');
       });
     });
 
     // Hapus
     $(document).on("click", ".BtnHapus", function(){
       var id = $(this).data('id');
-      if(!id){
-        alert('ID tidak valid!');
-        return;
-      }
+      if(!id){ alert('ID tidak valid!'); return; }
 
-      if(!confirm('Yakin hapus permasalahan ini?')){
-        return;
-      }
+      if(!confirm('Yakin hapus tujuan PD ini?')) return;
 
-      $.post(BaseURL + "Daerah/HapusPermasalahanPD", {
+      $.post(BaseURL + "Daerah/HapusTujuanPD", {
         id: id,
         [CSRF_NAME]: CSRF_TOKEN
       })
@@ -603,11 +483,11 @@
         if(res == '1'){
           window.location.reload();
         } else {
-          alert(res);
+          alert(res || 'Gagal hapus data!');
         }
       })
       .fail(function(){
-        alert('Gagal request (Hapus Permasalahan)');
+        alert('Gagal request (Hapus Tujuan PD)');
       });
     });
 
