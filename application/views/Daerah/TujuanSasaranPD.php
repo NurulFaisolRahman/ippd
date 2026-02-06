@@ -115,9 +115,9 @@
   $rowspan  = max(1, count($details));
 
   $nspkText        = $m['nspk'] ?? '';
-  $sasaranRelText  = $m['sasaran_relevan'] ?? '';
-  $tujuanText      = $m['tujuan'] ?? '';
-  $sasaranText     = $m['sasaran'] ?? '';
+  $sasaranRelText  = $m['sasaran_relevan_text'] ?? '';
+  $tujuanText      = $m['tujuan_text'] ?? '';
+  $sasaranText     = $m['sasaran_text'] ?? '';
 ?>
 
 <?php if (!empty($details)) { ?>
@@ -127,15 +127,15 @@
   <td rowspan="<?= $rowspan ?>" class="text-center"><?= $no++ ?></td>
 
   <td rowspan="<?= $rowspan ?>">
-    <b>NSPK:</b><br><?= nl2br(htmlspecialchars($nspkText)) ?><br><br>
-    <b>Sasaran RPJMD yang Relevan:</b><br><?= nl2br(htmlspecialchars($sasaranRelText)) ?>
+    <b>NSPK:</b><br><?= nl2br(html_escape($nspkText)) ?><br><br>
+    <b>Sasaran RPJMD yang Relevan:</b><br><?= nl2br(html_escape($sasaranRelText)) ?>
   </td>
 
-  <td rowspan="<?= $rowspan ?>"><?= nl2br(htmlspecialchars($tujuanText)) ?></td>
-  <td rowspan="<?= $rowspan ?>"><?= nl2br(htmlspecialchars($sasaranText)) ?></td>
+  <td rowspan="<?= $rowspan ?>"><?= nl2br(html_escape($tujuanText)) ?></td>
+  <td rowspan="<?= $rowspan ?>"><?= nl2br(html_escape($sasaranText)) ?></td>
 
   <!-- INDIKATOR TEXT -->
-  <td><?= nl2br(htmlspecialchars($d0['indikator'])) ?></td>
+  <td><?= nl2br(html_escape($d0['indikator'])) ?></td>
 
   <!-- TARGET -->
   <td class="text-center"><?= $d0['t2025'] ?></td>
@@ -145,7 +145,7 @@
   <td class="text-center"><?= $d0['t2029'] ?></td>
   <td class="text-center"><?= $d0['t2030'] ?></td>
 
-  <td><?= nl2br(htmlspecialchars($d0['keterangan'])) ?></td>
+  <td><?= nl2br(html_escape($d0['keterangan'])) ?></td>
 
   <!-- AKSI HEADER -->
   <td class="text-center">
@@ -170,7 +170,7 @@
   <td class="text-center">
     <div class="btn-group-flex">
     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-      <button class="btn btn-success btn-sm BtnAddDetail" data-parent-id="<?= $m['id'] ?>">
+      <button class="btn btn-success btn-sm BtnAddDetail" data-master-id="<?= $m['id'] ?>">
         <i class="notika-icon bi-plus-lg"></i>
       </button>
       <button class="btn btn-warning btn-sm BtnEditDetail"
@@ -197,14 +197,14 @@
 
 <?php for ($i=1; $i<count($details); $i++) { $d=$details[$i]; ?>
 <tr>
-  <td><?= nl2br(htmlspecialchars($d['indikator'])) ?></td>
+  <td><?= nl2br(html_escape($d['indikator'])) ?></td>
   <td class="text-center"><?= $d['t2025'] ?></td>
   <td class="text-center"><?= $d['t2026'] ?></td>
   <td class="text-center"><?= $d['t2027'] ?></td>
   <td class="text-center"><?= $d['t2028'] ?></td>
   <td class="text-center"><?= $d['t2029'] ?></td>
   <td class="text-center"><?= $d['t2030'] ?></td>
-  <td><?= nl2br(htmlspecialchars($d['keterangan'])) ?></td>
+  <td><?= nl2br(html_escape($d['keterangan'])) ?></td>
   <td></td>
   <td class="text-center">
     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
@@ -234,16 +234,17 @@
 <tr>
   <td class="text-center"><?= $no++ ?></td>
   <td>
-    <b>NSPK:</b><br><?= nl2br(htmlspecialchars($nspkText)) ?><br><br>
-    <b>Sasaran RPJMD yang Relevan:</b><br><?= nl2br(htmlspecialchars($sasaranRelText)) ?>
+    <b>NSPK:</b><br><?= nl2br(html_escape($nspkText)) ?><br><br>
+    <b>Sasaran RPJMD yang Relevan:</b><br><?= nl2br(html_escape($sasaranRelText)) ?>
   </td>
-  <td><?= nl2br(htmlspecialchars($tujuanText)) ?></td>
-  <td><?= nl2br(htmlspecialchars($sasaranText)) ?></td>
+  <td><?= nl2br(html_escape($tujuanText)) ?></td>
+  <td><?= nl2br(html_escape($sasaranText)) ?></td>
 
   <td colspan="7" class="text-center"><i>Belum ada indikator</i></td>
   <td>-</td>
 
   <td class="text-center">
+    <div class="btn-group-flex">
     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
       <button class="btn btn-info btn-sm BtnEditMaster"
   data-id="<?= (int)$m['id'] ?>"
@@ -258,11 +259,12 @@
         <i class="notika-icon notika-trash"></i>
       </button>
     <?php } ?>
+    </div>
   </td>
 
   <td class="text-center">
     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-      <button class="btn btn-success btn-sm BtnAddDetail" data-parent-id="<?= $m['id'] ?>">
+      <button class="btn btn-success btn-sm BtnAddDetail" data-master-id="<?= $m['id'] ?>">
         <i class="notika-icon bi-plus-lg"></i>
       </button>
     <?php } ?>
@@ -398,7 +400,7 @@
         </div>
 
         <div class="modal-body">
-          <input type="hidden" id="DetailParentId">
+          <input type="hidden" id="DetailMasterId">
 
           <div class="form-group">
             <label><b>Indikator</b></label>
@@ -438,7 +440,6 @@
 
         <div class="modal-body">
           <input type="hidden" id="EditDetailId">
-          <input type="hidden" id="EditDetailParentId">
 
           <div class="form-group">
             <label><b>Indikator</b></label>
@@ -678,7 +679,7 @@
     // DETAIL - OPEN ADD
     // =========================
     $(document).on("click", ".BtnAddDetail", function(){
-      $("#DetailParentId").val($(this).data('parent-id'));
+      $("#DetailMasterId").val($(this).data('master-id'));
       $("#Indikator").val('');
       $("#T2025,#T2026,#T2027,#T2028,#T2029,#T2030").val('');
       $("#Keterangan").val('');
@@ -687,29 +688,31 @@
 
     // DETAIL - SIMPAN
     $("#BtnSimpanDetail").click(function(){
-      var parentId = $("#DetailParentId").val();
-      var indikator = $("#Indikator").val().trim();
-      if(!parentId){ alert('Parent tidak valid!'); return; }
-      if(!indikator){ alert('Indikator harus diisi!'); return; }
+  var masterId  = $("#DetailMasterId").val();
+  var indikator = $("#Indikator").val().trim();
 
-      $.post(BaseURL + "Daerah/InputTujuanSasaranPD_Detail", {
-        parent_id: parentId,
-        indikator: indikator,
-        t2025: $("#T2025").val().trim(),
-        t2026: $("#T2026").val().trim(),
-        t2027: $("#T2027").val().trim(),
-        t2028: $("#T2028").val().trim(),
-        t2029: $("#T2029").val().trim(),
-        t2030: $("#T2030").val().trim(),
-        keterangan: $("#Keterangan").val().trim(),
-        [CSRF_NAME]: CSRF_TOKEN
-      }).done(function(res){
-        if(res == '1'){ window.location.reload(); }
-        else { alert(res || 'Gagal simpan indikator!'); }
-      }).fail(function(){
-        alert('Gagal request (Simpan Indikator)');
-      });
-    });
+  if(!masterId){ alert('Master tidak valid!'); return; }
+  if(!indikator){ alert('Indikator harus diisi!'); return; }
+
+  $.post(BaseURL + "Daerah/InputTujuanSasaranPD_Detail", {
+    master_id: masterId,
+    indikator: indikator,
+    t2025: $("#T2025").val().trim(),
+    t2026: $("#T2026").val().trim(),
+    t2027: $("#T2027").val().trim(),
+    t2028: $("#T2028").val().trim(),
+    t2029: $("#T2029").val().trim(),
+    t2030: $("#T2030").val().trim(),
+    keterangan: $("#Keterangan").val().trim(),
+    [CSRF_NAME]: CSRF_TOKEN
+  }).done(function(res){
+    if(res == '1') window.location.reload();
+    else alert(res || 'Gagal simpan indikator!');
+  }).fail(function(xhr){
+    alert('Request gagal: ' + xhr.status);
+  });
+});
+
 
     // DETAIL - OPEN EDIT
     $(document).on("click", ".BtnEditDetail", function(){

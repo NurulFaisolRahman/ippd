@@ -100,6 +100,7 @@
                               <button
                                 class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg BtnEdit"
                                 data-id="<?= $row['id'] ?>"
+                                data-tujuan="<?= isset($row['tujuan_pd_id']) ? $row['tujuan_pd_id'] : '' ?>"
                                 data-sasaran="<?= htmlspecialchars($row['sasaran_pd'], ENT_QUOTES, 'UTF-8') ?>"
                                 data-tahunmulai="<?= htmlspecialchars($row['tahun_mulai'], ENT_QUOTES, 'UTF-8') ?>"
                                 data-tahunakhir="<?= htmlspecialchars($row['tahun_akhir'], ENT_QUOTES, 'UTF-8') ?>"
@@ -141,6 +142,30 @@
           <div class="row">
             <div class="col-lg-12">
               <div class="form-example-wrap" style="padding:5px;">
+
+                <!-- ✅ Tambahan: Tujuan PD -->
+                <div class="form-example-int form-horizental">
+                  <div class="form-group">
+                    <div class="row">
+                      <div class="col-lg-3">
+                        <label class="hrzn-fm"><b>Tujuan PD</b></label>
+                      </div>
+                      <div class="col-lg-8">
+                        <div class="nk-int-st">
+                          <select class="form-control input-sm" id="TujuanPD">
+                            <option value="">-- Pilih Tujuan PD --</option>
+                            <?php if (!empty($TujuanPD)) { ?>
+                              <?php foreach ($TujuanPD as $t) { ?>
+                                <option value="<?= (int)$t['id'] ?>"><?= html_escape($t['tujuan_pd']) ?></option>
+                              <?php } ?>
+                            <?php } ?>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- ✅ End Tambahan -->
 
                 <div class="form-example-int form-horizental">
                   <div class="form-group">
@@ -218,6 +243,30 @@
               <div class="form-example-wrap" style="padding:5px;">
                 <input type="hidden" id="EditId">
 
+                <!-- ✅ Tambahan: Tujuan PD (Edit) -->
+                <div class="form-example-int form-horizental">
+                  <div class="form-group">
+                    <div class="row">
+                      <div class="col-lg-3">
+                        <label class="hrzn-fm"><b>Tujuan PD</b></label>
+                      </div>
+                      <div class="col-lg-8">
+                        <div class="nk-int-st">
+                          <select class="form-control input-sm" id="EditTujuanPD">
+                            <option value="">-- Pilih Tujuan PD --</option>
+                            <?php if (!empty($TujuanPD)) { ?>
+                              <?php foreach ($TujuanPD as $t) { ?>
+                                <option value="<?= (int)$t['id'] ?>"><?= html_escape($t['tujuan_pd']) ?></option>
+                              <?php } ?>
+                            <?php } ?>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- ✅ End Tambahan -->
+
                 <div class="form-example-int form-horizental">
                   <div class="form-group">
                     <div class="row">
@@ -294,7 +343,8 @@
 
   jQuery(document).ready(function($){
 
-    $('#data-table-sasaranpd').DataTable();
+    // ✅ Perbaikan: ID tabel kamu adalah data-table-basic
+    $('#data-table-basic').DataTable();
 
     // =========================
     // FILTER PROVINSI & KAB/KOTA (SAMA PERSIS SEPERTI URUSANPD)
@@ -391,10 +441,12 @@
 
     // Tambah
     $("#BtnSimpan").click(function(){
+      var tujuan = $("#TujuanPD").val();
       var sasaran = $("#SasaranPD").val().trim();
       var mulai  = $("#TahunMulai").val().trim();
       var akhir  = $("#TahunAkhir").val().trim();
 
+      if(!tujuan){ alert('Tujuan PD wajib dipilih!'); return; }
       if(!sasaran){ alert('Sasaran PD harus diisi!'); return; }
       if(!mulai){  alert('Tahun mulai harus diisi!'); return; }
       if(!akhir){  alert('Tahun akhir harus diisi!'); return; }
@@ -405,6 +457,7 @@
       }
 
       $.post(BaseURL + "Daerah/InputSasaranPD", {
+        tujuan_pd_id: tujuan,
         sasaran_pd: sasaran,
         tahun_mulai: mulai,
         tahun_akhir: akhir,
@@ -425,6 +478,7 @@
     // Buka modal edit
     $(document).on("click", ".BtnEdit", function(){
       $("#EditId").val($(this).data('id'));
+      $("#EditTujuanPD").val($(this).data('tujuan'));
       $("#EditSasaranPD").val($(this).data('sasaran'));
       $("#EditTahunMulai").val($(this).data('tahunmulai'));
       $("#EditTahunAkhir").val($(this).data('tahunakhir'));
@@ -434,11 +488,13 @@
     // Update
     $("#BtnUpdate").click(function(){
       var id     = $("#EditId").val();
+      var tujuan = $("#EditTujuanPD").val();
       var sasaran = $("#EditSasaranPD").val().trim();
       var mulai  = $("#EditTahunMulai").val().trim();
       var akhir  = $("#EditTahunAkhir").val().trim();
 
       if(!id){     alert('ID tidak valid!'); return; }
+      if(!tujuan){ alert('Tujuan PD wajib dipilih!'); return; }
       if(!sasaran){ alert('Sasaran PD harus diisi!'); return; }
       if(!mulai){  alert('Tahun mulai harus diisi!'); return; }
       if(!akhir){  alert('Tahun akhir harus diisi!'); return; }
@@ -450,6 +506,7 @@
 
       $.post(BaseURL + "Daerah/EditSasaranPD", {
         id: id,
+        tujuan_pd_id: tujuan,
         sasaran_pd: sasaran,
         tahun_mulai: mulai,
         tahun_akhir: akhir,

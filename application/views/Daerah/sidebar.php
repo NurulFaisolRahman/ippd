@@ -308,6 +308,7 @@
                     <a href="<?=base_url('Daerah/MisiRPJMD')?>">Misi</a>
                     <a href="<?=base_url('Daerah/TujuanRPJMD')?>">Tujuan</a>
                     <a href="<?=base_url('Daerah/SasaranRPJMD')?>">Sasaran</a>
+                    <a href="<?=base_url('Daerah/ArahKebijakanRPJMD')?>">Arah Kebijakan</a>
                     <a href="<?=base_url('Daerah/ProgramPD')?>">Program</a>
                     <a href="<?=base_url('Daerah/TahapanRPJMD')?>">Tahapan</a>
                     <a href="<?=base_url('Daerah/Iku')?>">IKU</a>
@@ -332,6 +333,8 @@
                     <a href="<?=base_url('Daerah/TujuanPD')?>">Tujuan PD</a>
                     <a href="<?=base_url('Daerah/SasaranPD')?>">Sasaran PD</a>
                     <a href="<?=base_url('Daerah/TujuanSasaranPD')?>">Tujuan & Sasaran PD</a>
+                    <a href="<?=base_url('Daerah/ArahKebijakanPD')?>">Strategi & Arah Kebijakan</a>
+                    <a href="<?=base_url('Daerah/NSPKOperasionalisasiPD')?>">Operasionalisasi NSPK</a>
                 </div>
             </li>
 

@@ -981,6 +981,109 @@ public function SasaranRPJMD() {
     }
   }
 
+  public function ArahKebijakanRPJMD()
+  {
+    $Header['Halaman'] = 'Daerah';
+
+    // Provinsi (filter)
+    $data['Provinsi'] = $this->db
+      ->where("Kode LIKE '__'")
+      ->get("kodewilayah")
+      ->result_array();
+
+    // Kode wilayah aktif (session tetap)
+    $KodeWilayah = $_SESSION['KodeWilayah'] ?? ($_SESSION['TempKodeWilayah'] ?? '');
+
+    $data['KodeWilayah'] = $KodeWilayah;
+
+    // dropdown sasaran rpjmd
+    $data['ListSasaranRPJMD'] = $this->db
+      ->order_by("Id", "ASC")
+      ->get("sasaranrpjmd")
+      ->result_array();
+
+    if (!empty($KodeWilayah)) {
+      $data['ArahKebijakanRPJMD'] = $this->db
+        ->select("a.*, s.Sasaran")
+        ->from("arah_kebijakan_rpjmd a")
+        ->join("sasaranrpjmd s", "s.id = a.sasaran_rpjmd_id", "left")
+        ->where("a.kode_wilayah", $KodeWilayah)
+        ->where("a.deleted_at", NULL)
+        ->order_by("a.id", "ASC")
+        ->get()
+        ->result_array();
+    } else {
+      $data['ArahKebijakanRPJMD'] = [];
+    }
+
+    $this->load->view('Daerah/header', $Header);
+    $this->load->view("Daerah/ArahKebijakanRPJMD", $data);
+  }
+
+  public function InputArahKebijakanRPJMD()
+  {
+    $KodeWilayah = $this->session->userdata("KodeWilayah");
+    if (!$KodeWilayah) {
+      $KodeWilayah = $_SESSION['KodeWilayah'] ?? ($_SESSION['TempKodeWilayah'] ?? '');
+    }
+    if (!$KodeWilayah) { echo "Wilayah belum dipilih!"; return; }
+
+    $sasaran_id = (int)$this->input->post("sasaran_rpjmd_id");
+    $strategi   = trim((string)$this->input->post("strategi"));
+    $arah       = trim((string)$this->input->post("arah_kebijakan"));
+
+    if($sasaran_id <= 0){ echo "Sasaran RPJMD wajib dipilih!"; return; }
+    if($strategi === ""){ echo "Strategi wajib diisi!"; return; }
+    if($arah === ""){ echo "Arah Kebijakan wajib diisi!"; return; }
+
+    $data = [
+      "kode_wilayah"      => $KodeWilayah,
+      "sasaran_rpjmd_id"  => $sasaran_id,
+      "strategi"          => $strategi,
+      "arah_kebijakan"    => $arah,
+      "created_at"        => date("Y-m-d H:i:s"),
+      "deleted_at"        => NULL
+    ];
+
+    $insert = $this->db->insert("arah_kebijakan_rpjmd", $data);
+    echo $insert ? "1" : "0";
+  }
+
+  public function EditArahKebijakanRPJMD()
+  {
+    $id = (int)$this->input->post("id");
+    if ($id <= 0) { echo "ID tidak valid!"; return; }
+
+    $sasaran_id = (int)$this->input->post("sasaran_rpjmd_id");
+    $strategi   = trim((string)$this->input->post("strategi"));
+    $arah       = trim((string)$this->input->post("arah_kebijakan"));
+
+    if($sasaran_id <= 0){ echo "Sasaran RPJMD wajib dipilih!"; return; }
+    if($strategi === ""){ echo "Strategi wajib diisi!"; return; }
+    if($arah === ""){ echo "Arah Kebijakan wajib diisi!"; return; }
+
+    $data = [
+      "sasaran_rpjmd_id" => $sasaran_id,
+      "strategi"         => $strategi,
+      "arah_kebijakan"   => $arah,
+      "updated_at"       => date("Y-m-d H:i:s")
+    ];
+
+    $update = $this->db->where("id", $id)->update("arah_kebijakan_rpjmd", $data);
+    echo $update ? "1" : "0";
+  }
+
+  public function HapusArahKebijakanRPJMD()
+  {
+    $id = (int)$this->input->post("id");
+    if ($id <= 0) { echo "ID tidak valid!"; return; }
+
+    $data = ["deleted_at" => date("Y-m-d H:i:s")];
+
+    $delete = $this->db->where("id", $id)->update("arah_kebijakan_rpjmd", $data);
+    echo $delete ? "1" : "0";
+  }
+
   public function JanjiPolitik(){
 		$Header['Halaman'] = 'RPJMD';
     $Data['Visi'] = $this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND deleted_at IS NULL")->get("visirpjmd")->result_array();
@@ -3743,223 +3846,225 @@ public function HapusTujuanPD()
 
 public function SasaranPD()
 {
-$Header['Halaman'] = 'Daerah';
-    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
+    $Header['Halaman'] = 'Daerah';
+
+    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")
+        ->get("kodewilayah")->result_array();
 
     $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] :
-                   (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
 
     $Data['KodeWilayah'] = $KodeWilayah;
 
-     if (!empty($KodeWilayah)) {
+    if (!empty($KodeWilayah)) {
+
+        // ============================
+        // DATA SASARAN PD
+        // ============================
         $Data['SasaranPD'] = $this->db->where([
-                                    'kode_wilayah' => $KodeWilayah,
-                                    'deleted_at'   => NULL
-                                ])
-                                ->order_by('id', 'ASC')
-                                ->get('sasaran_pd')
-                                ->result_array();
+            'kode_wilayah' => $KodeWilayah,
+            'deleted_at'   => NULL
+        ])
+            ->order_by('id', 'ASC')
+            ->get('sasaran_pd')
+            ->result_array();
+
+        // ============================
+        // DROPDOWN TUJUAN PD
+        // ============================
+        $Data['TujuanPD'] = $this->db->where([
+            'kode_wilayah' => $KodeWilayah,
+            'deleted_at'   => NULL
+        ])
+            ->order_by('id', 'ASC')
+            ->get('tujuan_pd')
+            ->result_array();
     } else {
         $Data['SasaranPD'] = [];
+        $Data['TujuanPD']  = [];
     }
 
     $this->load->view('Daerah/header', $Header);
     $this->load->view('Daerah/SasaranPD', $Data);
 }
 
+
 public function InputSasaranPD()
 {
     if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 3) {
-        echo "Akses ditolak"; return;
+        echo "Akses ditolak";
+        return;
     }
 
     $kodeWilayah = $_SESSION['KodeWilayah'] ?? null;
     if (!$kodeWilayah) {
-        echo "Kode Wilayah belum dipilih"; return;
+        echo "Kode Wilayah belum dipilih";
+        return;
     }
 
+    $tujuan  = (int)$this->input->post('tujuan_pd_id', true);
     $sasaran = trim($this->input->post('sasaran_pd', true));
-    $mulai  = (int)$this->input->post('tahun_mulai', true);
-    $akhir  = (int)$this->input->post('tahun_akhir', true);
+    $mulai   = (int)$this->input->post('tahun_mulai', true);
+    $akhir   = (int)$this->input->post('tahun_akhir', true);
 
-    if ($sasaran === '') { echo "Sasaran PD wajib diisi"; return; }
-    if ($akhir < $mulai) { echo "Tahun akhir tidak boleh lebih kecil"; return; }
+    if (!$tujuan) {
+        echo "Tujuan PD wajib dipilih";
+        return;
+    }
+
+    if ($sasaran === '') {
+        echo "Sasaran PD wajib diisi";
+        return;
+    }
+
+    if ($akhir < $mulai) {
+        echo "Tahun akhir tidak boleh lebih kecil";
+        return;
+    }
 
     $insert = $this->db->insert('sasaran_pd', [
-        'kode_wilayah' => $kodeWilayah,
+        'kode_wilayah'  => $kodeWilayah,
+        'tujuan_pd_id'  => $tujuan,
         'sasaran_pd'    => $sasaran,
-        'tahun_mulai'  => $mulai,
-        'tahun_akhir'  => $akhir,
-        'created_at'   => date('Y-m-d H:i:s')
+        'tahun_mulai'   => $mulai,
+        'tahun_akhir'   => $akhir,
+        'created_at'    => date('Y-m-d H:i:s')
     ]);
 
     echo $insert ? '1' : 'Gagal menyimpan data';
 }
 
+
 public function EditSasaranPD()
 {
     if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 3) {
-        echo "Akses ditolak"; return;
+        echo "Akses ditolak";
+        return;
     }
 
     $kodeWilayah = $_SESSION['KodeWilayah'] ?? null;
     if (!$kodeWilayah) {
-        echo "Kode Wilayah belum dipilih"; return;
+        echo "Kode Wilayah belum dipilih";
+        return;
     }
 
-    $id     = (int)$this->input->post('id', true);
+    $id      = (int)$this->input->post('id', true);
+    $tujuan  = (int)$this->input->post('tujuan_pd_id', true);
     $sasaran = trim($this->input->post('sasaran_pd', true));
-    $mulai  = (int)$this->input->post('tahun_mulai', true);
-    $akhir  = (int)$this->input->post('tahun_akhir', true);
+    $mulai   = (int)$this->input->post('tahun_mulai', true);
+    $akhir   = (int)$this->input->post('tahun_akhir', true);
 
-    if (!$id) { echo "ID tidak valid"; return; }
-    if ($sasaran === '') { echo "Sasaran PD wajib diisi"; return; }
-    if ($akhir < $mulai) { echo "Tahun akhir tidak valid"; return; }
-
-    $cek = $this->db->where([
-                    'id' => $id,
-                    'kode_wilayah' => $kodeWilayah,
-                    'deleted_at' => NULL
-                ])->get('sasaran_pd')->row();
-
-    if (!$cek) {
-        echo "Data tidak ditemukan"; return;
+    if (!$id) {
+        echo "ID tidak valid";
+        return;
     }
 
-    $update = $this->db->where('id', $id)->update('sasaran_pd', [
-        'sasaran_pd'  => $sasaran,
-        'tahun_mulai'=> $mulai,
-        'tahun_akhir'=> $akhir,
-        'updated_at' => date('Y-m-d H:i:s')
+    if (!$tujuan) {
+        echo "Tujuan PD wajib dipilih";
+        return;
+    }
+
+    if ($sasaran === '') {
+        echo "Sasaran PD wajib diisi";
+        return;
+    }
+
+    if ($akhir < $mulai) {
+        echo "Tahun akhir tidak valid";
+        return;
+    }
+
+    $update = $this->db->where([
+        'id' => $id,
+        'kode_wilayah' => $kodeWilayah,
+        'deleted_at' => NULL
+    ])->update('sasaran_pd', [
+        'tujuan_pd_id' => $tujuan,
+        'sasaran_pd'   => $sasaran,
+        'tahun_mulai'  => $mulai,
+        'tahun_akhir'  => $akhir,
+        'updated_at'   => date('Y-m-d H:i:s')
     ]);
 
     echo $update ? '1' : 'Gagal update data';
 }
 
+
 public function HapusSasaranPD()
 {
     if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 3) {
-        echo "Akses ditolak"; return;
+        echo "Akses ditolak";
+        return;
     }
 
     $kodeWilayah = $_SESSION['KodeWilayah'] ?? null;
     if (!$kodeWilayah) {
-        echo "Kode Wilayah belum dipilih"; return;
+        echo "Kode Wilayah belum dipilih";
+        return;
     }
 
     $id = (int)$this->input->post('id', true);
-    if (!$id) { echo "ID tidak valid"; return; }
+    if (!$id) {
+        echo "ID tidak valid";
+        return;
+    }
 
     $hapus = $this->db->where([
-                    'id' => $id,
-                    'kode_wilayah' => $kodeWilayah,
-                    'deleted_at' => NULL
-                ])->update('sasaran_pd', [
-                    'deleted_at' => date('Y-m-d H:i:s')
-                ]);
+        'id' => $id,
+        'kode_wilayah' => $kodeWilayah,
+        'deleted_at' => NULL
+    ])->update('sasaran_pd', [
+        'deleted_at' => date('Y-m-d H:i:s')
+    ]);
 
     echo $hapus ? '1' : 'Gagal menghapus data';
 }
 
-    public function TujuanSasaranPD()
-    {
-        $Header['Halaman'] = 'Daerah';
+public function TujuanSasaranPD()
+{
+    $Header['Halaman'] = 'Daerah';
+    $KodeWilayah = $_SESSION['KodeWilayah'] ?? '';
+    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")
+        ->get("kodewilayah")->result_array();
 
-        // Provinsi
-        $Data['Provinsi'] = $this->db
-            ->where("Kode LIKE '__'")
-            ->get("kodewilayah")
+    $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] :
+        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+
+    $Data['KodeWilayah'] = $KodeWilayah;
+
+    if (!empty($KodeWilayah)) 
+
+   $masters = $masters ?? []; 
+
+    // ===== MASTER =====
+    $masters = $this->db
+        ->select("m.*,
+            sr.Sasaran AS sasaran_relevan_text,
+            tp.tujuan_pd AS tujuan_text,
+            sp.sasaran_pd AS sasaran_text")
+        ->from("tujuansasaran_pd_master m")
+        ->join("ippd.sasaranrpjmd sr", "sr.id=m.sasaran_relevan_id", "left")
+        ->join("ippd.tujuan_pd tp", "tp.id=m.tujuan_id", "left")
+        ->join("ippd.sasaran_pd sp", "sp.id=m.sasaran_id", "left")
+        ->where("m.KodeWilayah", $KodeWilayah)
+        ->where("m.deleted_at IS NULL", null, false)
+        ->order_by("m.id", "ASC")
+        ->get()
+        ->result_array();
+
+    // ===== DETAIL =====
+    foreach ($masters as &$m) {
+        $m['details'] = $this->db
+            ->where("master_id", $m['id'])
+            ->where("deleted_at IS NULL", null, false)
+            ->order_by("id", "ASC")
+            ->get("tujuansasaran_pd_detail")
             ->result_array();
+    }
 
-        // Kode Wilayah
-        $KodeWilayah = $_SESSION['KodeWilayah']
-            ?? ($_SESSION['TempKodeWilayah'] ?? '');
+    $Data['TujuanSasaranPD'] = $masters;
 
-        $Data['KodeWilayah'] = $KodeWilayah;
-
-        /* ================= DATA TABEL ================= */
-        if ($KodeWilayah) {
-
-            $rows = $this->db
-            ->select('t.*,
-                        sr.Sasaran AS sasaran_relevan_text,
-                        tp.tujuan_pd AS tujuan_text,
-                        sp.sasaran_pd AS sasaran_text')
-            ->from('tujuansasaran_pd t')
-            ->join('ippd.sasaranrpjmd sr', 'sr.id = t.sasaran_relevan_id', 'left')
-            ->join('ippd.tujuan_pd tp',    'tp.id = t.tujuan_id',          'left')
-            ->join('ippd.sasaran_pd sp',   'sp.id = t.sasaran_id',         'left')
-            ->where('t.KodeWilayah', $KodeWilayah)
-            ->where('t.deleted_at IS NULL', null, false)
-            ->order_by('t.id', 'ASC')
-            ->get()
-            ->result_array();
-
-
-            $masters = [];
-
-            foreach ($rows as $r) {
-
-                $key = md5(
-                $r['nspk'] . '|' .
-                (int)$r['sasaran_relevan_id'] . '|' .
-                (int)$r['tujuan_id'] . '|' .
-                (int)$r['sasaran_id']
-                );
-
-
-                if (!isset($masters[$key])) {
-                    $masters[$key] = [
-                        'id' => $r['id'],
-                        'nspk' => $r['nspk'],
-
-                        // untuk tampilan di tabel
-                        'sasaran_relevan' => $r['sasaran_relevan_text'],
-                        'tujuan'          => $r['tujuan_text'],
-                        'sasaran'         => $r['sasaran_text'],
-
-                        // untuk kebutuhan edit (dropdown val)
-                        'sasaran_relevan_id' => (int)$r['sasaran_relevan_id'],
-                        'tujuan_id'          => (int)$r['tujuan_id'],
-                        'sasaran_id'         => (int)$r['sasaran_id'],
-
-                        'details' => []
-                        ];
-
-                }
-
-                if (!empty($r['indikator'])) {
-                    $masters[$key]['details'][] = [
-                        'id' => $r['id'],
-                        'indikator' => $r['indikator'],
-                        't2025' => $r['t2025'],
-                        't2026' => $r['t2026'],
-                        't2027' => $r['t2027'],
-                        't2028' => $r['t2028'],
-                        't2029' => $r['t2029'],
-                        't2030' => $r['t2030'],
-                        'keterangan' => $r['keterangan'],
-                    ];
-                }
-            }
-
-           // urutkan detail per master: terbaru dulu
-                    foreach ($masters as &$m) {
-                        if (!empty($m['details'])) {
-                            usort($m['details'], function($a, $b){
-                                return (int)$a['id'] <=> (int)$b['id']; // DESC by id (terbaru dulu)
-                            });
-                        }
-                    }
-                    unset($m);
-
-$Data['TujuanSasaranPD'] = array_values($masters);
-
-        } else {
-            $Data['TujuanSasaranPD'] = [];
-        }
-
-           // ===== DROPDOWN DATA (IPPd) =====
+    // ===== DROPDOWN DATA (IPPd) =====
                 $Data['ListSasaranRPJMD'] = $this->db
                     ->select('id, Sasaran')
                     ->order_by('id', 'ASC')
@@ -3979,195 +4084,397 @@ $Data['TujuanSasaranPD'] = array_values($masters);
                     ->result_array();
 
         // Dropdown (text)
-            
-        $this->load->view('Daerah/header', $Header);
-        $this->load->view('Daerah/TujuanSasaranPD', $Data);
-    }
 
-    /* =====================================================
-     * SIMPAN HEADER
-     * ===================================================== */
-   public function InputTujuanSasaranPD_Master()
+    
+    $this->load->view('Daerah/header', $Header);
+
+    $this->load->view("Daerah/TujuanSasaranPD", $Data);
+}
+
+public function InputTujuanSasaranPD_Master()
 {
-    $kodeWilayah = $this->session->userdata('KodeWilayah');
-    if (!$kodeWilayah) { echo 'Kode wilayah belum dipilih'; return; }
-
-    // (opsional) batasi level
-    if ((int)$this->session->userdata('Level') !== 3) { echo 'Akses ditolak'; return; }
-
-    $sasaran_relevan_id = (int)$this->input->post('sasaran_relevan_id', true);
-    $tujuan_id          = (int)$this->input->post('tujuan_id', true);
-    $sasaran_id         = (int)$this->input->post('sasaran_id', true);
+    $kodeWilayah = $this->session->userdata("KodeWilayah");
 
     $data = [
-        'KodeWilayah'        => $kodeWilayah,
-        'nspk'               => trim($this->input->post('nspk', true)),
-        'sasaran_relevan_id' => $sasaran_relevan_id,
-        'tujuan_id'          => $tujuan_id,
-        'sasaran_id'         => $sasaran_id,
-        'created_at'         => date('Y-m-d H:i:s')
+        "KodeWilayah" => $kodeWilayah,
+        "nspk" => trim($this->input->post("nspk")),
+        "sasaran_relevan_id" => $this->input->post("sasaran_relevan_id"),
+        "tujuan_id" => $this->input->post("tujuan_id"),
+        "sasaran_id" => $this->input->post("sasaran_id"),
+        "created_at" => date("Y-m-d H:i:s")
     ];
 
-    if (empty($data['nspk']) || !$sasaran_relevan_id || !$tujuan_id || !$sasaran_id) {
-        echo 'Data tidak lengkap';
+    echo $this->db->insert("tujuansasaran_pd_master", $data) ? "1" : "Gagal simpan master";
+}
+
+public function EditTujuanSasaranPD_Master()
+{
+    $id = (int)$this->input->post("id");
+
+    $data = [
+        "nspk" => trim($this->input->post("nspk")),
+        "sasaran_relevan_id" => $this->input->post("sasaran_relevan_id"),
+        "tujuan_id" => $this->input->post("tujuan_id"),
+        "sasaran_id" => $this->input->post("sasaran_id"),
+        "updated_at" => date("Y-m-d H:i:s")
+    ];
+
+    $this->db->where("id", $id)
+             ->update("tujuansasaran_pd_master", $data);
+
+    echo "1";
+}
+
+public function HapusTujuanSasaranPD_Master()
+{
+    $id = (int)$this->input->post("id");
+
+    // soft delete master
+    $this->db->where("id", $id)
+        ->update("tujuansasaran_pd_master", [
+            "deleted_at" => date("Y-m-d H:i:s")
+        ]);
+
+    // soft delete semua indikator
+    $this->db->where("master_id", $id)
+        ->update("tujuansasaran_pd_detail", [
+            "deleted_at" => date("Y-m-d H:i:s")
+        ]);
+
+    echo "1";
+}
+
+public function InputTujuanSasaranPD_Detail()
+{
+    $data = [
+        "master_id" => (int)$this->input->post("master_id"),
+
+        "indikator" => $this->input->post("indikator"),
+        "t2025" => $this->input->post("t2025"),
+        "t2026" => $this->input->post("t2026"),
+        "t2027" => $this->input->post("t2027"),
+        "t2028" => $this->input->post("t2028"),
+        "t2029" => $this->input->post("t2029"),
+        "t2030" => $this->input->post("t2030"),
+        "keterangan" => $this->input->post("keterangan"),
+
+        "created_at" => date("Y-m-d H:i:s")
+    ];
+
+    echo $this->db->insert("tujuansasaran_pd_detail", $data) ? "1" : "Gagal simpan indikator";
+}
+
+public function EditTujuanSasaranPD_Detail()
+{
+    $id = (int)$this->input->post("id");
+
+    $data = [
+        "indikator" => $this->input->post("indikator"),
+        "t2025" => $this->input->post("t2025"),
+        "t2026" => $this->input->post("t2026"),
+        "t2027" => $this->input->post("t2027"),
+        "t2028" => $this->input->post("t2028"),
+        "t2029" => $this->input->post("t2029"),
+        "t2030" => $this->input->post("t2030"),
+        "keterangan" => $this->input->post("keterangan"),
+
+        "updated_at" => date("Y-m-d H:i:s")
+    ];
+
+    $this->db->where("id", $id)
+             ->update("tujuansasaran_pd_detail", $data);
+
+    echo "1";
+}
+
+public function HapusTujuanSasaranPD_Detail()
+{
+    $id = (int)$this->input->post("id");
+
+    $this->db->where("id", $id)
+        ->update("tujuansasaran_pd_detail", [
+            "deleted_at" => date("Y-m-d H:i:s")
+        ]);
+
+    echo "1";
+}
+
+
+public function ArahKebijakanPD()
+{
+    $Header['Halaman'] = 'Daerah';
+
+    $data['Provinsi'] = $this->db
+        ->where("Kode LIKE '__'")
+        ->get("kodewilayah")
+        ->result_array();
+
+    $KodeWilayah = $_SESSION['KodeWilayah']
+        ?? ($_SESSION['TempKodeWilayah'] ?? '');
+
+    $data['KodeWilayah'] = $KodeWilayah;
+
+    $data['ListPermasalahan'] = $this->db
+        ->where("deleted_at", NULL)
+        ->get("permasalahan_pd")
+        ->result_array();
+
+    $data['ListIsuStrategis'] = $this->db
+        ->where("deleted_at", NULL)
+        ->get("isu_strategis_pd")
+        ->result_array();
+
+    $data['ListTujuanPD'] = $this->db
+        ->where("deleted_at", NULL)
+        ->get("tujuan_pd")
+        ->result_array();
+
+    $data['ListSasaranPD'] = $this->db
+        ->where("deleted_at", NULL)
+        ->get("sasaran_pd")
+        ->result_array();
+    if (!empty($KodeWilayah)) {
+
+        $data['ArahKebijakanPD'] = $this->db
+            ->select("
+                a.*,
+                p.masalah,
+                i.isu_strategis,
+                t.tujuan_pd,
+                s.sasaran_pd
+            ")
+            ->from("arah_kebijakan_pd a")
+            ->join("permasalahan_pd p", "p.id = a.permasalahan_id", "LEFT")
+            ->join("isu_strategis_pd i", "i.id = a.isu_strategis_id", "LEFT")
+            ->join("tujuan_pd t", "t.id = a.tujuan_id", "LEFT")
+            ->join("sasaran_pd s", "s.id = a.sasaran_id", "LEFT")
+            ->where("a.kode_wilayah", $KodeWilayah)
+            ->where("a.deleted_at", NULL)
+            ->order_by("a.id", "ASC")
+            ->get()
+            ->result_array();
+
+    } else {
+
+        $data['ArahKebijakanPD'] = [];
+    }
+
+    $this->load->view('Daerah/header', $Header);
+    $this->load->view("Daerah/ArahKebijakanPD", $data);
+}
+
+
+public function InputArahKebijakanPD()
+{
+    $KodeWilayah = $this->session->userdata("KodeWilayah");
+
+    if (!$KodeWilayah) {
+        echo "Wilayah belum dipilih!";
         return;
     }
 
-    echo $this->db->insert('tujuansasaran_pd', $data) ? '1' : $this->db->error()['message'];
-}
-
-
-
-    /* =====================================================
-     * UPDATE HEADER (SEMUA BARIS SATU GRUP)
-     * ===================================================== */
-    public function EditTujuanSasaranPD_Master()
-{
-    if ((int)$this->session->userdata('Level') !== 3) { echo 'Akses ditolak'; return; }
-
-    $id  = (int)$this->input->post('id');
-    $row = $this->db->where('id',$id)->get('tujuansasaran_pd')->row_array();
-    if (!$row) { echo 'Data tidak ditemukan'; return; }
-
     $data = [
-        'nspk'               => trim($this->input->post('nspk', true)),
-        'sasaran_relevan_id' => (int)$this->input->post('sasaran_relevan_id', true),
-        'tujuan_id'          => (int)$this->input->post('tujuan_id', true),
-        'sasaran_id'         => (int)$this->input->post('sasaran_id', true),
-        'updated_at'         => date('Y-m-d H:i:s')
+        "kode_wilayah"       => $KodeWilayah,
+        "permasalahan_id"    => $this->input->post("permasalahan_id"),
+        "isu_strategis_id"   => $this->input->post("isu_strategis_id"),
+        "tujuan_id"          => $this->input->post("tujuan_id"),
+        "sasaran_id"         => $this->input->post("sasaran_id"),
+        "strategi"           => $this->input->post("strategi"),
+        "arah_kebijakan"     => $this->input->post("arah_kebijakan"),
+        "created_at"         => date("Y-m-d H:i:s")
     ];
 
-    if (empty($data['nspk']) || !$data['sasaran_relevan_id'] || !$data['tujuan_id'] || !$data['sasaran_id']) {
-        echo 'Data tidak lengkap';
+    $insert = $this->db->insert("arah_kebijakan_pd", $data);
+
+    echo $insert ? "1" : "0";
+}
+
+public function EditArahKebijakanPD()
+{
+    $id = $this->input->post("id");
+
+    if (!$id) {
+        echo "ID tidak valid!";
         return;
     }
 
-    // update semua baris dalam grup lama
-    $this->db
-        ->where('KodeWilayah', $row['KodeWilayah'])
-        ->where('nspk', $row['nspk'])
-        ->where('sasaran_relevan_id', (int)$row['sasaran_relevan_id'])
-        ->where('tujuan_id', (int)$row['tujuan_id'])
-        ->where('sasaran_id', (int)$row['sasaran_id'])
-        ->update('tujuansasaran_pd', $data);
+    $data = [
+        "permasalahan_id"    => $this->input->post("permasalahan_id"),
+        "isu_strategis_id"   => $this->input->post("isu_strategis_id"),
+        "tujuan_id"          => $this->input->post("tujuan_id"),
+        "sasaran_id"         => $this->input->post("sasaran_id"),
+        "strategi"           => $this->input->post("strategi"),
+        "arah_kebijakan"     => $this->input->post("arah_kebijakan"),
+        "updated_at"         => date("Y-m-d H:i:s")
+    ];
 
-    echo '1';
+    $update = $this->db->where("id", $id)
+                       ->update("arah_kebijakan_pd", $data);
+
+    echo $update ? "1" : "0";
 }
 
 
-    /* =====================================================
-     * HAPUS HEADER
-     * ===================================================== */
-    public function HapusTujuanSasaranPD_Master()
-    {
-        if ((int)$_SESSION['Level'] !== 3) { echo 'Akses ditolak'; return; }
-
-        $id = (int)$this->input->post('id');
-        $row = $this->db->where('id',$id)->get('tujuansasaran_pd')->row_array();
-        if (!$row) { echo 'Data tidak ditemukan'; return; }
-
-        $this->db
-        ->where('KodeWilayah', $row['KodeWilayah'])
-        ->where('nspk', $row['nspk'])
-        ->where('sasaran_relevan_id', $row['sasaran_relevan_id'])
-        ->where('tujuan_id', $row['tujuan_id'])
-        ->where('sasaran_id', $row['sasaran_id'])
-        ->where('deleted_at IS NULL', null, false)
-        ->update('tujuansasaran_pd', [
-            'deleted_at' => date('Y-m-d H:i:s')
-        ]);
-
-    echo '1';
-
-    }
-
-    /* =====================================================
-     * TAMBAH INDIKATOR (BARIS BARU)
-     * ===================================================== */
-    public function InputTujuanSasaranPD_Detail()
-    {
-        if ((int)$_SESSION['Level'] !== 3) { echo 'Akses ditolak'; return; }
-
-        $parent = $this->db
-            ->where('id',(int)$this->input->post('parent_id'))
-            ->get('tujuansasaran_pd')
-            ->row_array();
-
-        if (!$parent) { echo 'Parent tidak valid'; return; }
-
-        $data = [
-            'KodeWilayah'        => $parent['KodeWilayah'],
-            'nspk'               => $parent['nspk'],
-            'sasaran_relevan_id' => (int)$parent['sasaran_relevan_id'],
-            'tujuan_id'          => (int)$parent['tujuan_id'],
-            'sasaran_id'         => (int)$parent['sasaran_id'],
-            'indikator' => $this->input->post('indikator', false),
-            't2025' => $this->input->post('t2025'),
-            't2026' => $this->input->post('t2026'),
-            't2027' => $this->input->post('t2027'),
-            't2028' => $this->input->post('t2028'),
-            't2029' => $this->input->post('t2029'),
-            't2030' => $this->input->post('t2030'),
-            'keterangan' => $this->input->post('keterangan', false),
-            'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s')
-        ];
-
-        echo $this->db->insert('tujuansasaran_pd',$data) ? '1' : 'Gagal simpan indikator';
-    }
-
-    /* =====================================================
-     * EDIT INDIKATOR
-     * ===================================================== */
-    public function EditTujuanSasaranPD_Detail()
-    {
-        if ((int)$_SESSION['Level'] !== 3) { echo 'Akses ditolak'; return; }
-
-        $id = (int)$this->input->post('id');
-
-        $data = [
-            'indikator' => $this->input->post('indikator', false),
-            't2025' => $this->input->post('t2025'),
-            't2026' => $this->input->post('t2026'),
-            't2027' => $this->input->post('t2027'),
-            't2028' => $this->input->post('t2028'),
-            't2029' => $this->input->post('t2029'),
-            't2030' => $this->input->post('t2030'),
-            'keterangan' => $this->input->post('keterangan', false),
-            'updated_at' => date('Y-m-d H:i:s')
-        ];
-
-        echo $this->db
-        ->where('id', $id)
-        ->where('deleted_at IS NULL', null, false)
-        ->update('tujuansasaran_pd', $data);
-
-    }
-
-    /* =====================================================
-     * HAPUS INDIKATOR
-     * ===================================================== */
-    public function HapusTujuanSasaranPD_Detail()
+public function HapusArahKebijakanPD()
 {
-    if ((int)$this->session->userdata('Level') !== 3) {
-        echo 'Akses ditolak'; return;
+    $id = $this->input->post("id");
+
+    if (!$id) {
+        echo "ID tidak valid!";
+        return;
     }
 
-    $id = (int)$this->input->post('id');
-    if (!$id) { echo 'ID tidak valid'; return; }
+    $delete = $this->db->where("id", $id)
+                       ->update("arah_kebijakan_pd", [
+                           "deleted_at" => date("Y-m-d H:i:s")
+                       ]);
 
-    $this->db
-        ->where('id', $id)
-        ->where('deleted_at IS NULL', null, false)
-        ->update('tujuansasaran_pd', [
-            'deleted_at' => date('Y-m-d H:i:s')
-        ]);
+    echo $delete ? "1" : "0";
+}
 
-    echo ($this->db->affected_rows() > 0) ? '1' : 'Data tidak ditemukan / sudah terhapus';
+public function NSPKOperasionalisasiPD()
+{
+    $Header['Halaman'] = 'Daerah';
+
+    // Provinsi (filter)
+    $data['Provinsi'] = $this->db
+        ->where("Kode LIKE '__'")
+        ->get("kodewilayah")
+        ->result_array();
+
+    // kode wilayah aktif
+    $KodeWilayah = $_SESSION['KodeWilayah'] ?? ($_SESSION['TempKodeWilayah'] ?? '');
+    $data['KodeWilayah'] = $KodeWilayah;
+
+    $data['ListNSPK'] = $this->db
+    ->select("id, nspk")
+    ->where("KodeWilayah", $KodeWilayah)
+    ->where("deleted_at IS NULL", null, false)
+    ->order_by("id", "ASC")
+    ->get("tujuansasaran_pd_master")
+    ->result_array();
+
+
+    // 2) Arah Kebijakan RPJMD (arah_kebijakan_rpjmd: id, arah_kebijakan)
+    $data['ListArahKebijakanRPJMD'] = $this->db
+        ->select("id, arah_kebijakan")
+        ->where("deleted_at", NULL)
+        ->order_by("id", "ASC")
+        ->get("arah_kebijakan_rpjmd")
+        ->result_array();
+
+    // 3) Arah Kebijakan Renstra PD (sesuai request: dari tabel yang sama)
+    $data['ListArahKebijakanRenstraPD'] = $this->db
+        ->select("id, arah_kebijakan")
+        ->where("deleted_at", NULL)
+        ->order_by("id", "ASC")
+        ->get("arah_kebijakan_rpjmd")
+        ->result_array();
+
+    // ==========================
+    // DATA TABLE
+    // ==========================
+    if (!empty($KodeWilayah)) {
+        $data['NSPKOperasionalisasiPD'] = $this->db
+            ->select("
+                n.*,
+                t.nspk AS nspk_text,
+                r1.arah_kebijakan AS arah_rpjmd_text,
+                r2.arah_kebijakan AS arah_renstra_text
+            ")
+            ->from("nspk_operasionalisasi_pd n")
+            ->join("tujuansasaran_pd_master t", "t.id = n.tujuansasaranpd_master_id", "left")
+            ->join("arah_kebijakan_rpjmd r1", "r1.id = n.arah_kebijakan_rpjmd_id", "left")
+            ->join("arah_kebijakan_rpjmd r2", "r2.id = n.arah_kebijakan_renstra_pd_id", "left")
+            ->where("n.kode_wilayah", $KodeWilayah)
+            ->where("n.deleted_at", NULL)
+            ->order_by("n.id", "ASC")
+            ->get()
+            ->result_array();
+    } else {
+        $data['NSPKOperasionalisasiPD'] = [];
+    }
+
+    $this->load->view('Daerah/header', $Header);
+    $this->load->view("Daerah/NSPKOperasionalisasiPD", $data);
 }
 
 
+public function InputNSPKOperasionalisasiPD()
+{
+    $KodeWilayah = $_SESSION['KodeWilayah'] ?? ($_SESSION['TempKodeWilayah'] ?? '');
+    if (empty($KodeWilayah)) { echo "Wilayah belum dipilih!"; return; }
 
+    $tujuansasaran_pd_id = (int)$this->input->post("tujuansasaran_pd_id");
+    $arah_kebijakan_rpjmd_id = (int)$this->input->post("arah_kebijakan_rpjmd_id");
+    $arah_kebijakan_renstra_pd_id = (int)$this->input->post("arah_kebijakan_renstra_pd_id");
+    $keterangan = trim((string)$this->input->post("keterangan"));
+
+    if (!$tujuansasaran_pd_id) { echo "Operasionalisasi NSPK wajib dipilih!"; return; }
+    if (!$arah_kebijakan_rpjmd_id) { echo "Arah Kebijakan RPJMD wajib dipilih!"; return; }
+    if (!$arah_kebijakan_renstra_pd_id) { echo "Arah Kebijakan Renstra PD wajib dipilih!"; return; }
+
+    // VALIDASI: pastikan NSPK milik wilayah ini & tidak terhapus
+    $cek = $this->db
+        ->where("id", $tujuansasaran_pd_id)
+        ->where("KodeWilayah", $KodeWilayah)
+        ->where("deleted_at IS NULL", null, false)
+        ->get("tujuansasaran_pd_master")
+        ->row_array();
+
+    if (!$cek) { echo "NSPK tidak valid / bukan milik wilayah ini"; return; }
+
+    $data = [
+        "kode_wilayah" => $KodeWilayah,
+        "tujuansasaranpd_master_id" => $tujuansasaran_pd_id,
+        "arah_kebijakan_rpjmd_id" => $arah_kebijakan_rpjmd_id,
+        "arah_kebijakan_renstra_pd_id" => $arah_kebijakan_renstra_pd_id,
+        "keterangan" => ($keterangan !== "") ? $keterangan : NULL,
+        "created_at" => date("Y-m-d H:i:s")
+    ];
+
+    echo $this->db->insert("nspk_operasionalisasi_pd", $data) ? "1" : "0";
+}
+
+
+public function EditNSPKOperasionalisasiPD()
+{
+    $id = (int)$this->input->post("id");
+    if (!$id) { echo "ID tidak valid!"; return; }
+
+    $tujuansasaran_pd_id = (int)$this->input->post("tujuansasaran_pd_id");
+    $arah_kebijakan_rpjmd_id = (int)$this->input->post("arah_kebijakan_rpjmd_id");
+    $arah_kebijakan_renstra_pd_id = (int)$this->input->post("arah_kebijakan_renstra_pd_id");
+    $keterangan = $this->input->post("keterangan");
+
+    if (!$tujuansasaran_pd_id) { echo "Operasionalisasi NSPK wajib dipilih!"; return; }
+    if (!$arah_kebijakan_rpjmd_id) { echo "Arah Kebijakan RPJMD wajib dipilih!"; return; }
+    if (!$arah_kebijakan_renstra_pd_id) { echo "Arah Kebijakan Renstra PD wajib dipilih!"; return; }
+
+    $data = [
+        "tujuansasaranpd_master_id" => $tujuansasaran_pd_id,
+        "arah_kebijakan_rpjmd_id" => $arah_kebijakan_rpjmd_id,
+        "arah_kebijakan_renstra_pd_id" => $arah_kebijakan_renstra_pd_id,
+        "keterangan" => $keterangan ? $keterangan : NULL,
+        "updated_at" => date("Y-m-d H:i:s")
+    ];
+
+    $update = $this->db->where("id", $id)->update("nspk_operasionalisasi_pd", $data);
+    echo $update ? "1" : "0";
+}
+
+
+public function HapusNSPKOperasionalisasiPD()
+{
+    $id = (int)$this->input->post("id");
+    if (!$id) { echo "ID tidak valid!"; return; }
+
+    $delete = $this->db->where("id", $id)->update("nspk_operasionalisasi_pd", [
+        "deleted_at" => date("Y-m-d H:i:s")
+    ]);
+
+    echo $delete ? "1" : "0";
+}
 
 }
 
