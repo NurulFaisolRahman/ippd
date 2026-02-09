@@ -72,7 +72,7 @@
                           class="btn btn-success notika-btn-success"
                           data-toggle="modal"
                           data-target="#ModalInputIsu">
-                    <i class="notika-icon notika-edit"></i> <b>Tambah Isu Strategis</b>
+                    <i class="notika-icon bi-plus-lg"></i> <b>Tambah Isu Strategis</b>
                   </button>
                 </div>
               </div>

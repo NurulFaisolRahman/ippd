@@ -310,6 +310,7 @@
                     <a href="<?=base_url('Daerah/SasaranRPJMD')?>">Sasaran</a>
                     <a href="<?=base_url('Daerah/ArahKebijakanRPJMD')?>">Arah Kebijakan</a>
                     <a href="<?=base_url('Daerah/ProgramPD')?>">Program</a>
+                    <a href="<?=base_url('Daerah/IsuKLHS')?>">Isu KLHS</a>
                     <a href="<?=base_url('Daerah/TahapanRPJMD')?>">Tahapan</a>
                     <a href="<?=base_url('Daerah/Iku')?>">IKU</a>
                     <a href="<?=base_url('Daerah/Ikd')?>">IKD</a>
@@ -317,24 +318,6 @@
                     <a href="<?=base_url('Daerah/PotensiDaerah')?>">Potensi Daerah</a>
                     <a href="<?=base_url('Daerah/PermasalahanPokok')?>">Permasalahan Pokok</a>
                   
-                </div>
-            </li>
-
-             <li class="sidebar-dropdown">
-                <a href="#">
-                    <i class="bi bi-briefcase-fill"></i>
-                    <span>Renstra</span>
-                    <i class="fa fa-chevron-down"></i>
-                </a>
-                <div class="sidebar-submenu">
-                    <a href="<?=base_url('Daerah/PermasalahanPD')?>">Permasalahan PD</a>
-                    <a href="<?=base_url('Daerah/IsuKLHS')?>">Isu KLHS</a>
-                    <a href="<?=base_url('Daerah/IsuStrategisPD')?>">Isu Strategis PD</a>
-                    <a href="<?=base_url('Daerah/TujuanPD')?>">Tujuan PD</a>
-                    <a href="<?=base_url('Daerah/SasaranPD')?>">Sasaran PD</a>
-                    <a href="<?=base_url('Daerah/TujuanSasaranPD')?>">Tujuan & Sasaran PD</a>
-                    <a href="<?=base_url('Daerah/ArahKebijakanPD')?>">Strategi & Arah Kebijakan</a>
-                    <a href="<?=base_url('Daerah/NSPKOperasionalisasiPD')?>">Operasionalisasi NSPK</a>
                 </div>
             </li>
 
@@ -346,6 +329,28 @@
                 </a>
                 <div class="sidebar-submenu">
                     <a href="<?=base_url('#')?>">Form RKPD</a>
+                </div>
+            </li>
+
+             <li class="sidebar-dropdown">
+                <a href="#">
+                    <i class="bi bi-briefcase-fill"></i>
+                    <span>Renstra</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Daerah/PermasalahanPD')?>">Permasalahan PD</a>
+                    <a href="<?=base_url('Daerah/IsuStrategisPD')?>">Isu Strategis PD</a>
+                    <a href="<?=base_url('Daerah/TujuanPD')?>">Tujuan PD</a>
+                    <a href="<?=base_url('Daerah/SasaranPD')?>">Sasaran PD</a>
+                    <a href="<?=base_url('Daerah/TujuanSasaranPD')?>">Tujuan & Sasaran PD</a>
+                    <a href="<?=base_url('Daerah/ArahKebijakanPD')?>">Strategi & Arah Kebijakan</a>
+                    <a href="<?=base_url('Daerah/NSPKOperasionalisasiPD')?>">Operasionalisasi NSPK</a>
+                    <a href="<?=base_url('Daerah/RumusanRenstraPD')?>">Rumusan Renstra PD</a>
+                    <a href="<?=base_url('Daerah/RencanaProgramPendanaan')?>">Rencana Program Pendanaan</a>
+                    <a href="<?=base_url('Daerah/SubKegiatanPrioritas')?>">Sub Kegiatan Prioritas</a>
+                    <a href="<?=base_url('Daerah/IkuPD')?>">IKU PD</a>
+                    <a href="<?=base_url('Daerah/IkkPD')?>">IKK PD</a>
                 </div>
             </li>
 

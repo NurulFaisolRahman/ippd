@@ -67,7 +67,7 @@
 
             <?php if (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 3) { ?>
               <button class="btn btn-success" data-toggle="modal" data-target="#ModalInput">
-                <i class="notika-icon notika-edit"></i> Tambah Data
+                <i class="notika-icon bi-plus-lg"></i> Tambah Data
               </button>
               <br><br>
             <?php } ?>

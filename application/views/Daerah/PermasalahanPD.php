@@ -67,7 +67,7 @@
               <div class="basic-tb-hd">
                 <div class="button-icon-btn sm-res-mg-t-30">
                   <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputPermasalahanPD">
-                    <i class="notika-icon notika-edit"></i> <b>Tambah Permasalahan</b>
+                    <i class="notika-icon bi-plus-lg"></i> <b>Tambah Permasalahan</b>
                   </button>
                 </div>
               </div>

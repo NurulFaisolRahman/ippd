@@ -72,7 +72,7 @@
                           class="btn btn-success notika-btn-success"
                           data-toggle="modal"
                           data-target="#ModalInputMaster">
-                    <i class="notika-icon notika-edit"></i> <b>Tambah NSPK & Sasaran (Header)</b>
+                    <i class="notika-icon bi-plus-lg"></i> <b>Tambah NSPK & Sasaran (Header)</b>
                   </button>
                 </div>
               </div>

@@ -68,7 +68,7 @@
               <div class="button-icon-btn sm-res-mg-t-30">
                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                   <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputInstansi">
-                    <i class="notika-icon notika-edit"></i> <b>Tambah Instansi</b>
+                    <i class="notika-icon bi-plus-lg"></i> <b>Tambah Instansi</b>
                   </button>
                 <?php } ?>
 
@@ -108,6 +108,8 @@
                     <th class="text-center">No</th>
                     <th>Nama Perangkat Daerah</th>
                     <th>Urusan PD</th>
+                    <th>Induk Kementerian</th>
+
 
                     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                       <th>Password (Hashed)</th>
@@ -124,6 +126,11 @@
                       <td style="vertical-align:middle;"><?=$key['nama']?></td>
                       <td style="vertical-align:middle;"><?=isset($key['urusan_nama']) ? $key['urusan_nama'] : '-'?></td>
 
+                      <td style="vertical-align:middle;">
+                        <?= html_escape($key['nama_kementerian'] ?? '-') ?>
+                      </td>
+
+
                       <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                         <td style="vertical-align: middle;"><?= $key['password'] ?></td>
                         <td style="vertical-align:middle;"><?=$key['tahun_mulai']?></td>
@@ -137,6 +144,7 @@
                               data-tahun-mulai="<?=$key['tahun_mulai']?>"
                               data-tahun-akhir="<?=$key['tahun_akhir']?>"
                               data-urusan-ids="<?=isset($key['urusan_id']) ? htmlspecialchars($key['urusan_id'], ENT_QUOTES) : ''?>"
+                              data-idkementerian="<?=$key['idkementerian']?>"
                             >
                               <i class="notika-icon notika-edit"></i>
                             </button>
@@ -220,6 +228,27 @@
                     </div>
                   </div>
                 </div>
+
+                <div class="form-example-int form-horizental">
+                <div class="form-group">
+                  <div class="row">
+                    <div class="col-lg-3">
+                      <label class="hrzn-fm"><b>Induk Kementerian</b></label>
+                    </div>
+                    <div class="col-lg-8">
+                    <select class="form-control input-sm" id="IdKementerianAdd">
+                        <option value="">-- Pilih Kementerian --</option>
+                        <?php foreach ($Kementerian as $k) { ?>
+                          <option value="<?= $k['username'] ?>">
+                            <?= html_escape($k['username']) ?>
+                          </option>
+                        <?php } ?>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
 
                 <div class="form-example-int form-horizental">
                   <div class="form-group">
@@ -331,6 +360,27 @@
                     </div>
                   </div>
                 </div>
+
+                <div class="form-example-int form-horizental">
+                <div class="form-group">
+                  <div class="row">
+                    <div class="col-lg-3">
+                      <label class="hrzn-fm"><b>Induk Kementerian</b></label>
+                    </div>
+                    <div class="col-lg-8">
+                      <select class="form-control input-sm" id="IdKementerianEdit">
+                        <option value="">-- Pilih Kementerian --</option>
+                        <?php foreach ($Kementerian as $k) { ?>
+                          <option value="<?= $k['username'] ?>">
+                            <?= html_escape($k['username']) ?>
+                          </option>
+                        <?php } ?>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+                
 
                 <div class="form-example-int form-horizental">
                   <div class="form-group">
@@ -635,13 +685,15 @@
       if ($("#TahunAkhir").val() == "") return alert('Input Tahun Akhir belum benar!');
 
       var payload = {
-        nama: $("#Username").val(),
-        password: $("#Password").val(),
-        tahun_mulai: $("#TahunMulai").val(),
-        tahun_akhir: $("#TahunAkhir").val(),
-        urusan_id: urusan,
-        [CSRF_NAME]: CSRF_TOKEN
-      };
+      nama: $("#Username").val(),
+      password: $("#Password").val(),
+      tahun_mulai: $("#TahunMulai").val(),
+      tahun_akhir: $("#TahunAkhir").val(),
+      urusan_id: urusan,
+      idkementerian: $("#IdKementerianAdd").val(), // 🔥 TAMBAHKAN
+      [CSRF_NAME]: CSRF_TOKEN
+    };
+
 
       $.post(BaseURL+"Daerah/InputInstansi", payload).done(function(res){
         if (res == '1') window.location.reload();
@@ -656,12 +708,14 @@
       var tm = $(this).data('tahun-mulai');
       var ta = $(this).data('tahun-akhir');
       var urusanIds = $(this).data('urusan-ids'); // string "1,2,3"
+      var idKem = $(this).data('idkementerian')
 
       $("#Id").val(id);
       $("#_Username").val(nama);
       $("#_Password").val("");
       $("#_TahunMulai").val(tm);
       $("#_TahunAkhir").val(ta);
+      $("#IdKementerian").val(idKem);
 
       var selected = [];
       if (urusanIds) {
@@ -688,6 +742,7 @@
         tahun_mulai: $("#_TahunMulai").val(),
         tahun_akhir: $("#_TahunAkhir").val(),
         urusan_id: urusan,
+        idkementerian: $("#IdKementerianEdit").val(),
         [CSRF_NAME]: CSRF_TOKEN
       };
 
