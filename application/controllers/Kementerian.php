@@ -1,3 +1,4 @@
+
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
@@ -911,92 +912,139 @@ public function DeleteProgram() {
     echo $this->db->affected_rows() ? '1' : 'Gagal menghapus data!';
 }
     
- public function IsuStrategis() {
+    public function IsuStrategis() {
     $Header['Halaman'] = 'Isu';
-    
-    // Get filter parameters
-    $periodeFilter = $this->input->get('periode');
+
+    $periodeFilter     = $this->input->get('periode');
     $kementerianFilter = $this->input->get('kementerian');
-    
-    // Query IsuStrategis with filters
+
+    /* QUERY UTAMA – PASTIKAN SELECT IdIsuRegional */
     $this->db->select("
-        ist.*, 
+        ist.*,
+        ist.IdIsuRegional,                  -- TAMBAHKAN INI agar view bisa pakai kondisi tombol detail
         IFNULL(k.NamaKementerian, '-') AS NamaKementerian,
-        (SELECT GROUP_CONCAT(NamaIsuKLHS SEPARATOR ', ') 
-         FROM isu_klhs 
-         WHERE FIND_IN_SET(Id, ist.IdIsuKLHS)) AS NamaIsuKLHS,
-        (SELECT GROUP_CONCAT(NamaIsuGlobal SEPARATOR ', ') 
-         FROM isu_global 
-         WHERE FIND_IN_SET(Id, ist.IdIsuGlobal)) AS NamaIsuGlobal,
-        (SELECT GROUP_CONCAT(NamaIsuNasional SEPARATOR ', ') 
-         FROM isu_nasional 
-         WHERE FIND_IN_SET(Id, ist.IdIsuNasional)) AS NamaIsuNasional,
-        (SELECT GROUP_CONCAT(NamaPermasalahanPokok SEPARATOR ', ') 
-         FROM permasalahan_pokok 
-         WHERE FIND_IN_SET(Id, ist.IdPermasalahanPokok)) AS NamaPermasalahanPokok
+        GROUP_CONCAT(DISTINCT ik.NamaIsuKLHS     ORDER BY ik.NamaIsuKLHS     SEPARATOR ', ') AS NamaIsuKLHS,
+        GROUP_CONCAT(DISTINCT ig.NamaIsuGlobal   ORDER BY ig.NamaIsuGlobal   SEPARATOR ', ') AS NamaIsuGlobal,
+        GROUP_CONCAT(DISTINCT ir.NamaIsuRegional ORDER BY ir.NamaIsuRegional SEPARATOR ', ') AS NamaIsuRegional,
+        GROUP_CONCAT(DISTINCT ina.NamaIsuNasional ORDER BY ina.NamaIsuNasional SEPARATOR ', ') AS NamaIsuNasional,
+        GROUP_CONCAT(DISTINCT pp.NamaPermasalahanPokok ORDER BY pp.NamaPermasalahanPokok SEPARATOR ', ') AS NamaPermasalahanPokok
     ");
+
     $this->db->from('isu_strategis ist');
-    $this->db->join('kementerian k', 'ist.IdKementerian = k.Id', 'left');
-    $this->db->where('ist.deleted_at IS NULL');
     
+    $this->db->join('kementerian k', 'ist.IdKementerian = k.Id', 'left');
+    $this->db->join('isu_klhs ik',     "FIND_IN_SET(ik.Id, ist.IdIsuKLHS) AND ik.deleted_at IS NULL", 'left');
+    $this->db->join('isu_global ig',   "FIND_IN_SET(ig.Id, ist.IdIsuGlobal) AND ig.deleted_at IS NULL", 'left');
+    $this->db->join('isu_regional ir', "FIND_IN_SET(ir.Id, ist.IdIsuRegional) AND ir.deleted_at IS NULL", 'left');
+    $this->db->join('isu_nasional ina',"FIND_IN_SET(ina.Id, ist.IdIsuNasional) AND ina.deleted_at IS NULL", 'left');
+    $this->db->join('permasalahan_pokok pp', "FIND_IN_SET(pp.Id, ist.IdPermasalahanPokok) AND pp.deleted_at IS NULL", 'left');
+
+    $this->db->where('ist.deleted_at IS NULL');
+
+    /* =====================================================
+     * RBAC: Filter berdasarkan level user
+     * ===================================================== */
+   if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) {
+        $this->db->where('ist.IdKementerian', $_SESSION['IdKementerian']);
+    } else if ($kementerianFilter) {
+        $this->db->where('ist.IdKementerian', $kementerianFilter);
+    }
+
     if ($periodeFilter) {
-        list($tahunMulai, $tahunAkhir) = explode('|', $periodeFilter);
+        [$tahunMulai, $tahunAkhir] = explode('|', $periodeFilter);
         $this->db->where('ist.TahunMulai', $tahunMulai);
         $this->db->where('ist.TahunAkhir', $tahunAkhir);
     }
-    
-    if ($kementerianFilter) {
-        $this->db->where('ist.IdKementerian', $kementerianFilter);
-    }
-    
+
     $this->db->group_by('ist.Id');
-    $this->db->order_by('ist.TahunMulai DESC, ist.TahunAkhir DESC');
-    
+    $this->db->order_by('ist.TahunMulai DESC, ist.TahunAkhir DESC, ist.created_at DESC');
+
     $Data['IsuStrategis'] = $this->db->get()->result_array();
-    
-    // Get all unique periods from all related tables
+
+    // Optional debug (hapus/comment setelah tes)
+    // log_message('debug', 'Jumlah data IsuStrategis: ' . count($Data['IsuStrategis']));
+    // echo "<pre>"; print_r($Data['IsuStrategis']); exit;
+
+    /* =====================================================
+     * DAFTAR PERIODE UNTUK DROPDOWN FILTER
+     * ===================================================== */
     $Data['AllPeriode'] = $this->db->query("
-        SELECT DISTINCT TahunMulai, TahunAkhir FROM kementerian WHERE deleted_at IS NULL
-        UNION
-        SELECT DISTINCT TahunMulai, TahunAkhir FROM isu_strategis WHERE deleted_at IS NULL
-        UNION
-        SELECT DISTINCT TahunMulai, TahunAkhir FROM permasalahan_pokok WHERE deleted_at IS NULL
-        UNION
-        SELECT DISTINCT TahunMulai, TahunAkhir FROM isu_klhs WHERE deleted_at IS NULL
-        UNION
-        SELECT DISTINCT TahunMulai, TahunAkhir FROM isu_global WHERE deleted_at IS NULL
-        UNION
-        SELECT DISTINCT TahunMulai, TahunAkhir FROM isu_nasional WHERE deleted_at IS NULL
+        SELECT DISTINCT TahunMulai, TahunAkhir 
+        FROM (
+            SELECT TahunMulai, TahunAkhir FROM kementerian WHERE deleted_at IS NULL
+            UNION
+            SELECT TahunMulai, TahunAkhir FROM isu_strategis WHERE deleted_at IS NULL
+            UNION
+            SELECT TahunMulai, TahunAkhir FROM permasalahan_pokok WHERE deleted_at IS NULL
+            UNION
+            SELECT TahunMulai, TahunAkhir FROM isu_klhs WHERE deleted_at IS NULL
+            UNION
+            SELECT TahunMulai, TahunAkhir FROM isu_global WHERE deleted_at IS NULL
+            UNION
+            SELECT TahunMulai, TahunAkhir FROM isu_nasional WHERE deleted_at IS NULL
+            UNION
+            SELECT TahunMulai, TahunAkhir FROM isu_regional WHERE deleted_at IS NULL
+        ) AS periode
+        WHERE TahunMulai IS NOT NULL AND TahunAkhir IS NOT NULL
         ORDER BY TahunMulai DESC, TahunAkhir DESC
     ")->result_array();
-    
-    // Get periods for input form (distinct from isu_strategis only)
+
     $Data['Periode'] = $this->db->query("
         SELECT DISTINCT TahunMulai, TahunAkhir 
         FROM isu_strategis 
         WHERE deleted_at IS NULL
         ORDER BY TahunMulai DESC, TahunAkhir DESC
     ")->result_array();
-    
-    // Get ministries based on period filter
-    if ($periodeFilter) {
-        list($tahunMulai, $tahunAkhir) = explode('|', $periodeFilter);
+
+    /* =====================================================
+     * DROPDOWN KEMENTERIAN (sesuai level & filter)
+     * ===================================================== */
+    if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) {
+        // User kementerian hanya lihat dirinya
         $Data['Kementerian'] = $this->db->get_where('kementerian', [
-            'TahunMulai' => $tahunMulai,
-            'TahunAkhir' => $tahunAkhir,
+            'Id' => $_SESSION['IdKementerian'],
             'deleted_at' => NULL
         ])->result_array();
     } else {
-        // Fetch all ministries if no period is selected
-        $Data['Kementerian'] = $this->db->get_where('kementerian', [
-            'deleted_at' => NULL
-        ])->result_array();
+        // Admin
+        $this->db->where('deleted_at IS NULL');
+        if ($periodeFilter) {
+            [$tahunMulai, $tahunAkhir] = explode('|', $periodeFilter);
+            $this->db->where('TahunMulai', $tahunMulai);
+            $this->db->where('TahunAkhir', $tahunAkhir);
+        }
+        $Data['Kementerian'] = $this->db->get('kementerian')->result_array();
     }
-    
-    // Store current filters
-    $Data['CurrentPeriode'] = $periodeFilter;
+
+    /* =====================================================
+     * INFO USER KEMENTERIAN (untuk tampilan header)
+     * ===================================================== */
+    $Data['UserKementerianName'] = null;
+    $Data['UserPeriode']         = null;
+    $Data['UserTahunMulai']      = null;
+    $Data['UserTahunAkhir']      = null;
+
+    if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) {
+        $k = $this->db->get_where('kementerian', [
+            'Id' => $_SESSION['IdKementerian'],
+            'deleted_at' => NULL
+        ])->row_array();
+
+        if ($k) {
+            $Data['UserKementerianName'] = $k['NamaKementerian'];
+            $Data['UserTahunMulai']      = $k['TahunMulai'];
+            $Data['UserTahunAkhir']      = $k['TahunAkhir'];
+            $Data['UserPeriode']         = $k['TahunMulai'] . '|' . $k['TahunAkhir'];
+        }
+    }
+
+    /* =====================================================
+     * SIMPAN STATUS FILTER SAAT INI
+     * ===================================================== */
+    $Data['CurrentPeriode']     = $periodeFilter;
     $Data['CurrentKementerian'] = $kementerianFilter;
-    
+
+    // Load view
     $this->load->view('Kementerian/header', $Header);
     $this->load->view('Kementerian/IsuStrategis', $Data);
 }
@@ -1013,520 +1061,583 @@ public function GetKementerianByPeriode() {
     echo json_encode($Kementerian);
 }
 
-public function GetIsuByPeriode() {
+public function GetIsuByPeriode()
+{
     $TahunMulai = $this->input->post('TahunMulai');
     $TahunAkhir = $this->input->post('TahunAkhir');
-    $Jenis = $this->input->post('Jenis');
-    
-    $table = '';
-    switch($Jenis) {
-        case 'KLHS': $table = 'isu_klhs'; break;
-        case 'Global': $table = 'isu_global'; break;
-        case 'Nasional': $table = 'isu_nasional'; break;
-        default: echo json_encode([]); return;
+    $Jenis      = $this->input->post('Jenis');
+
+    if (!$TahunMulai || !$TahunAkhir || !$Jenis) {
+        echo json_encode([]);
+        return;
     }
-    
+
+    switch ($Jenis) {
+
+        case 'KLHS':
+            $table = 'isu_klhs';
+            $nama  = 'NamaIsuKLHS';
+        break;
+
+        case 'Global':
+            $table = 'isu_global';
+            $nama  = 'NamaIsuGlobal';
+        break;
+
+        case 'Nasional':
+            $table = 'isu_nasional';
+            $nama  = 'NamaIsuNasional';
+        break;
+
+        case 'Regional':
+        $table = 'isu_regional';
+        $nama  = 'NamaIsuRegional';
+        break;
+
+        default:
+            echo json_encode([]);
+            return;
+    }
+
+    $this->db->select("Id, $nama");
+    $this->db->from($table);
     $this->db->where('TahunMulai', $TahunMulai);
     $this->db->where('TahunAkhir', $TahunAkhir);
-    $this->db->where('deleted_at', NULL);
-    $Data = $this->db->get($table)->result_array();
-    
-    echo json_encode($Data);
+    $this->db->where('deleted_at IS NULL');
+
+    $data = $this->db->get()->result_array();
+
+    header('Content-Type: application/json');
+    echo json_encode($data);
 }
 
-public function GetPermasalahanByPeriode() {
+
+
+public function GetPermasalahanByPeriode()
+{
     $TahunMulai = $this->input->post('TahunMulai');
     $TahunAkhir = $this->input->post('TahunAkhir');
-    
+
+    if (!$TahunMulai || !$TahunAkhir) {
+        echo json_encode([]);
+        return;
+    }
+
+    $this->db->select('Id, NamaPermasalahanPokok');
+    $this->db->from('permasalahan_pokok');
     $this->db->where('TahunMulai', $TahunMulai);
     $this->db->where('TahunAkhir', $TahunAkhir);
-    $this->db->where('deleted_at', NULL);
-    $Data = $this->db->get('permasalahan_pokok')->result_array();
-    
-    echo json_encode($Data);
+    $this->db->where('deleted_at IS NULL');
+
+    $data = $this->db->get()->result_array();
+
+    header('Content-Type: application/json');
+    echo json_encode($data);
 }
+
+
 
 public function GetIsuByIds() {
-    $Ids = $this->input->post('Ids');
-    $Jenis = $this->input->post('Jenis');
+
+    // hanya boleh via AJAX
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+    }
+
+    $Ids        = $this->input->post('Ids');
+    $Jenis      = $this->input->post('Jenis');
     $TahunMulai = $this->input->post('TahunMulai');
     $TahunAkhir = $this->input->post('TahunAkhir');
-    
+
+    /* =====================================
+     * PILIH TABEL
+     * ===================================== */
     $table = '';
     switch($Jenis) {
-        case 'KLHS': $table = 'isu_klhs'; break;
-        case 'Global': $table = 'isu_global'; break;
+        case 'KLHS':     $table = 'isu_klhs'; break;
+        case 'Global':   $table = 'isu_global'; break;
         case 'Nasional': $table = 'isu_nasional'; break;
-        default: echo json_encode([]); return;
-    }
-    
-    if ($Ids) {
-        $this->db->where('TahunMulai', $TahunMulai);
-        $this->db->where('TahunAkhir', $TahunAkhir);
-        $this->db->where('deleted_at', NULL);
-        $this->db->where_in('Id', explode(',', $Ids));
-        $Data = $this->db->get($table)->result_array();
-        
-        echo json_encode($Data);
-    } else {
-        echo json_encode([]);
-    }
-}
+        case 'Regional': $table = 'isu_regional'; break;
 
-public function GetPermasalahanByIds() {
-    $Ids = $this->input->post('Ids');
-    $TahunMulai = $this->input->post('TahunMulai');
-    $TahunAkhir = $this->input->post('TahunAkhir');
-    
+        default:
+            echo json_encode([]);
+            return;
+    }
+
+    if (!$Ids) {
+        echo json_encode([]);
+        return;
+    }
+
+    /* =====================================
+     * FILTER DASAR
+     * ===================================== */
     $this->db->where('TahunMulai', $TahunMulai);
     $this->db->where('TahunAkhir', $TahunAkhir);
     $this->db->where('deleted_at', NULL);
     $this->db->where_in('Id', explode(',', $Ids));
+
+    /* =====================================
+     * 🔐 RBAC FILTER (PALING PENTING)
+     * ===================================== */
+    if(isset($_SESSION['Level']) && $_SESSION['Level'] == 1){
+        $this->db->where('IdKementerian', $_SESSION['IdKementerian']);
+    }
+
+    $Data = $this->db->get($table)->result_array();
+
+    echo json_encode($Data);
+}
+
+public function GetPermasalahanByIds() {
+
+    // hanya boleh via AJAX
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+    }
+
+    $Ids        = $this->input->post('Ids');
+    $TahunMulai = $this->input->post('TahunMulai');
+    $TahunAkhir = $this->input->post('TahunAkhir');
+
+    // jika kosong langsung return
+    if (!$Ids) {
+        echo json_encode([]);
+        return;
+    }
+
+    /* =====================================
+     * FILTER DASAR
+     * ===================================== */
+    $this->db->where('TahunMulai', $TahunMulai);
+    $this->db->where('TahunAkhir', $TahunAkhir);
+    $this->db->where('deleted_at', NULL);
+    $this->db->where_in('Id', explode(',', $Ids));
+
+    /* =====================================
+     * 🔐 RBAC FILTER
+     * ===================================== */
+    if(isset($_SESSION['Level']) && $_SESSION['Level'] == 1){
+        $this->db->where('IdKementerian', $_SESSION['IdKementerian']);
+    }
+
     $Data = $this->db->get('permasalahan_pokok')->result_array();
-    
+
     echo json_encode($Data);
 }
 
 public function InputIsuStrategis() {
-    $this->load->library('form_validation');
-    $this->form_validation->set_rules('IdKementerian', 'Kementerian', 'required');
-    $this->form_validation->set_rules('NamaIsuStrategis', 'Nama Isu Strategis', 'required');
-    
-    if ($this->form_validation->run() == FALSE) {
-        echo validation_errors();
+    if (!isset($_SESSION['Level'])) {
+        echo 'Session login tidak valid';
         return;
     }
-    
-    $IdIsuKLHS = $this->input->post('IdIsuKLHS') ? array_filter($this->input->post('IdIsuKLHS')) : [];
-    $IdIsuGlobal = $this->input->post('IdIsuGlobal') ? array_filter($this->input->post('IdIsuGlobal')) : [];
-    $IdIsuNasional = $this->input->post('IdIsuNasional') ? array_filter($this->input->post('IdIsuNasional')) : [];
-    $IdPermasalahanPokok = $this->input->post('IdPermasalahanPokok') ? array_filter($this->input->post('IdPermasalahanPokok')) : [];
-    
-    $data = [
-        'IdKementerian' => $this->input->post('IdKementerian'),
-        'IdIsuKLHS' => implode(',', $IdIsuKLHS),
-        'IdIsuGlobal' => implode(',', $IdIsuGlobal),
-        'IdIsuNasional' => implode(',', $IdIsuNasional),
-        'IdPermasalahanPokok' => implode(',', $IdPermasalahanPokok),
-        'NamaIsuStrategis' => $this->input->post('NamaIsuStrategis'),
-        'TahunMulai' => $this->input->post('TahunMulai'),
-        'TahunAkhir' => $this->input->post('TahunAkhir'),
-        'created_at' => date('Y-m-d H:i:s')
-    ];
-    
-    $this->db->insert('isu_strategis', $data);
-    echo $this->db->affected_rows() ? '1' : 'Gagal Input Data!';
-}
 
-public function UpdateIsuStrategis() {
+    $IdKementerian = ($_SESSION['Level'] == 1) ? $_SESSION['IdKementerian'] : $this->input->post('IdKementerian');
+
     $this->load->library('form_validation');
-    $this->form_validation->set_rules('Id', 'ID Isu', 'required');
-    $this->form_validation->set_rules('IdKementerian', 'Kementerian', 'required');
     $this->form_validation->set_rules('NamaIsuStrategis', 'Nama Isu Strategis', 'required');
     $this->form_validation->set_rules('TahunMulai', 'Tahun Mulai', 'required');
     $this->form_validation->set_rules('TahunAkhir', 'Tahun Akhir', 'required');
-    
+
     if ($this->form_validation->run() == FALSE) {
         echo validation_errors();
         return;
     }
-    
-    $IdIsuKLHS = $this->input->post('IdIsuKLHS') ? array_filter($this->input->post('IdIsuKLHS')) : [];
-    $IdIsuGlobal = $this->input->post('IdIsuGlobal') ? array_filter($this->input->post('IdIsuGlobal')) : [];
-    $IdIsuNasional = $this->input->post('IdIsuNasional') ? array_filter($this->input->post('IdIsuNasional')) : [];
+
+    $IdIsuKLHS          = $this->input->post('IdIsuKLHS') ? array_filter($this->input->post('IdIsuKLHS')) : [];
+    $IdIsuGlobal        = $this->input->post('IdIsuGlobal') ? array_filter($this->input->post('IdIsuGlobal')) : [];
+    $IdIsuNasional      = $this->input->post('IdIsuNasional') ? array_filter($this->input->post('IdIsuNasional')) : [];
     $IdPermasalahanPokok = $this->input->post('IdPermasalahanPokok') ? array_filter($this->input->post('IdPermasalahanPokok')) : [];
-    
+    $IdIsuRegional      = $this->input->post('IdIsuRegional') ? array_filter($this->input->post('IdIsuRegional')) : [];
+
     $data = [
-        'IdKementerian' => $this->input->post('IdKementerian'),
-        'IdIsuKLHS' => implode(',', $IdIsuKLHS),
-        'IdIsuGlobal' => implode(',', $IdIsuGlobal),
-        'IdIsuNasional' => implode(',', $IdIsuNasional),
-        'IdPermasalahanPokok' => implode(',', $IdPermasalahanPokok),
-        'NamaIsuStrategis' => $this->input->post('NamaIsuStrategis'),
-        'TahunMulai' => $this->input->post('TahunMulai'),
-        'TahunAkhir' => $this->input->post('TahunAkhir'),
-        'edited_at' => date('Y-m-d H:i:s')
+        'IdKementerian'         => $IdKementerian,
+        'IdIsuKLHS'             => implode(',', $IdIsuKLHS),
+        'IdIsuGlobal'           => implode(',', $IdIsuGlobal),
+        'IdIsuNasional'         => implode(',', $IdIsuNasional),
+        'IdPermasalahanPokok'   => implode(',', $IdPermasalahanPokok),
+        'IdIsuRegional'         => implode(',', $IdIsuRegional),
+        'NamaIsuStrategis'      => $this->input->post('NamaIsuStrategis'),
+        'TahunMulai'            => $this->input->post('TahunMulai'),
+        'TahunAkhir'            => $this->input->post('TahunAkhir'),
+        'created_at'            => date('Y-m-d H:i:s')
     ];
-    
-    $this->db->where('Id', $this->input->post('Id'));
+
+    $this->db->insert('isu_strategis', $data);
+
+    echo $this->db->affected_rows() ? '1' : 'Gagal Input Data!';
+}
+
+
+public function UpdateIsuStrategis() {
+    if (!isset($_SESSION['Level'])) {
+        echo 'Session login tidak valid';
+        return;
+    }
+
+    $Id = $this->input->post('Id');
+
+    $this->db->where('Id', $Id);
+    $this->db->where('deleted_at IS NULL');
+    $row = $this->db->get('isu_strategis')->row_array();
+
+    if (!$row) {
+        echo 'Data tidak ditemukan';
+        return;
+    }
+
+    if ($_SESSION['Level'] == 1) {
+        if ($row['IdKementerian'] != $_SESSION['IdKementerian']) {
+            echo 'Akses ditolak (bukan data kementerian anda)';
+            return;
+        }
+        $IdKementerian = $_SESSION['IdKementerian'];
+    } else {
+        $IdKementerian = $this->input->post('IdKementerian');
+    }
+
+    $this->load->library('form_validation');
+    $this->form_validation->set_rules('NamaIsuStrategis', 'Nama Isu Strategis', 'required');
+    $this->form_validation->set_rules('TahunMulai', 'Tahun Mulai', 'required');
+    $this->form_validation->set_rules('TahunAkhir', 'Tahun Akhir', 'required');
+
+    if ($this->form_validation->run() == FALSE) {
+        echo validation_errors();
+        return;
+    }
+
+    $IdIsuKLHS          = $this->input->post('IdIsuKLHS') ? array_filter($this->input->post('IdIsuKLHS')) : [];
+    $IdIsuGlobal        = $this->input->post('IdIsuGlobal') ? array_filter($this->input->post('IdIsuGlobal')) : [];
+    $IdIsuNasional      = $this->input->post('IdIsuNasional') ? array_filter($this->input->post('IdIsuNasional')) : [];
+    $IdPermasalahanPokok = $this->input->post('IdPermasalahanPokok') ? array_filter($this->input->post('IdPermasalahanPokok')) : [];
+    $IdIsuRegional      = $this->input->post('IdIsuRegional') ? array_filter($this->input->post('IdIsuRegional')) : [];
+
+    $data = [
+        'IdKementerian'         => $IdKementerian,
+        'IdIsuKLHS'             => implode(',', $IdIsuKLHS),
+        'IdIsuGlobal'           => implode(',', $IdIsuGlobal),
+        'IdIsuNasional'         => implode(',', $IdIsuNasional),
+        'IdPermasalahanPokok'   => implode(',', $IdPermasalahanPokok),
+        'IdIsuRegional'         => implode(',', $IdIsuRegional),
+        'NamaIsuStrategis'      => $this->input->post('NamaIsuStrategis'),
+        'TahunMulai'            => $this->input->post('TahunMulai'),
+        'TahunAkhir'            => $this->input->post('TahunAkhir'),
+        'edited_at'             => date('Y-m-d H:i:s')
+    ];
+
+    $this->db->where('Id', $Id);
     $this->db->update('isu_strategis', $data);
+
     echo $this->db->affected_rows() ? '1' : 'Gagal Update Data!';
 }
 
+
 public function UpdateIsuKLHSForStrategis() {
-    $this->load->library('form_validation');
-    $this->form_validation->set_rules('Id', 'ID Isu', 'required');
-    
-    if ($this->form_validation->run() == FALSE) {
-        echo validation_errors();
+
+    // ================= CEK LOGIN =================
+    if(!isset($_SESSION['Level'])){
+        echo 'Session login tidak valid';
         return;
     }
-    
-    $IdIsuKLHS = $this->input->post('IdIsuKLHS') ? array_filter($this->input->post('IdIsuKLHS')) : [];
-    
+
+    $Id = $this->input->post('Id');
+
+    if(!$Id){
+        echo 'ID tidak valid';
+        return;
+    }
+
+    // ================= CEK DATA ADA =================
+    $this->db->where('Id', $Id);
+    $this->db->where('deleted_at IS NULL');
+    $row = $this->db->get('isu_strategis')->row_array();
+
+    if(!$row){
+        echo 'Data tidak ditemukan';
+        return;
+    }
+
+    // ================= RBAC =================
+    if($_SESSION['Level'] == 1){
+        if($row['IdKementerian'] != $_SESSION['IdKementerian']){
+            echo 'Akses ditolak (bukan data kementerian anda)';
+            return;
+        }
+    }
+
+    // ================= AMBIL DATA =================
+    $IdIsuKLHS = $this->input->post('IdIsuKLHS')
+        ? array_filter($this->input->post('IdIsuKLHS'))
+        : [];
+
     $data = [
         'IdIsuKLHS' => implode(',', $IdIsuKLHS),
         'edited_at' => date('Y-m-d H:i:s')
     ];
-    
-    $this->db->where('Id', $this->input->post('Id'));
+
+    // ================= UPDATE =================
+    $this->db->where('Id', $Id);
     $this->db->update('isu_strategis', $data);
+
     echo $this->db->affected_rows() ? '1' : 'Gagal Update Isu KLHS!';
 }
 
+
 public function UpdateIsuGlobalForStrategis() {
-    $this->load->library('form_validation');
-    $this->form_validation->set_rules('Id', 'ID Isu', 'required');
-    
-    if ($this->form_validation->run() == FALSE) {
-        echo validation_errors();
+
+    // ================= CEK LOGIN =================
+    if(!isset($_SESSION['Level'])){
+        echo 'Session login tidak valid';
         return;
     }
-    
-    $IdIsuGlobal = $this->input->post('IdIsuGlobal') ? array_filter($this->input->post('IdIsuGlobal')) : [];
-    
+
+    $Id = $this->input->post('Id');
+
+    if(!$Id){
+        echo 'ID tidak valid';
+        return;
+    }
+
+    // ================= CEK DATA ADA =================
+    $this->db->where('Id', $Id);
+    $this->db->where('deleted_at IS NULL');
+    $row = $this->db->get('isu_strategis')->row_array();
+
+    if(!$row){
+        echo 'Data tidak ditemukan';
+        return;
+    }
+
+    // ================= RBAC (BATASI OPD) =================
+    if($_SESSION['Level'] == 1){
+        if($row['IdKementerian'] != $_SESSION['IdKementerian']){
+            echo 'Akses ditolak (bukan data kementerian anda)';
+            return;
+        }
+    }
+
+    // ================= AMBIL DATA =================
+    $IdIsuGlobal = $this->input->post('IdIsuGlobal')
+        ? array_filter($this->input->post('IdIsuGlobal'))
+        : [];
+
     $data = [
         'IdIsuGlobal' => implode(',', $IdIsuGlobal),
         'edited_at' => date('Y-m-d H:i:s')
     ];
-    
-    $this->db->where('Id', $this->input->post('Id'));
+
+    // ================= UPDATE =================
+    $this->db->where('Id', $Id);
     $this->db->update('isu_strategis', $data);
+
     echo $this->db->affected_rows() ? '1' : 'Gagal Update Isu Global!';
 }
 
+
 public function UpdateIsuNasionalForStrategis() {
-    $this->load->library('form_validation');
-    $this->form_validation->set_rules('Id', 'ID Isu', 'required');
-    
-    if ($this->form_validation->run() == FALSE) {
-        echo validation_errors();
+
+    // ================= CEK LOGIN =================
+    if(!isset($_SESSION['Level'])){
+        echo 'Session login tidak valid';
         return;
     }
-    
-    $IdIsuNasional = $this->input->post('IdIsuNasional') ? array_filter($this->input->post('IdIsuNasional')) : [];
-    
+
+    $Id = $this->input->post('Id');
+
+    if(!$Id){
+        echo 'ID tidak valid';
+        return;
+    }
+
+    // ================= CEK DATA ADA =================
+    $this->db->where('Id', $Id);
+    $this->db->where('deleted_at IS NULL');
+    $row = $this->db->get('isu_strategis')->row_array();
+
+    if(!$row){
+        echo 'Data tidak ditemukan';
+        return;
+    }
+
+    // ================= RBAC (BATASI OPD) =================
+    if($_SESSION['Level'] == 1){
+        if($row['IdKementerian'] != $_SESSION['IdKementerian']){
+            echo 'Akses ditolak (bukan data kementerian anda)';
+            return;
+        }
+    }
+
+    // ================= AMBIL DATA =================
+    $IdIsuNasional = $this->input->post('IdIsuNasional')
+        ? array_filter($this->input->post('IdIsuNasional'))
+        : [];
+
     $data = [
         'IdIsuNasional' => implode(',', $IdIsuNasional),
         'edited_at' => date('Y-m-d H:i:s')
     ];
-    
-    $this->db->where('Id', $this->input->post('Id'));
+
+    // ================= UPDATE =================
+    $this->db->where('Id', $Id);
     $this->db->update('isu_strategis', $data);
+
     echo $this->db->affected_rows() ? '1' : 'Gagal Update Isu Nasional!';
 }
 
+
 public function UpdatePermasalahanForStrategis() {
-    $this->load->library('form_validation');
-    $this->form_validation->set_rules('Id', 'ID Isu', 'required');
-    
-    if ($this->form_validation->run() == FALSE) {
-        echo validation_errors();
+
+    // ================= CEK LOGIN =================
+    if(!isset($_SESSION['Level'])){
+        echo 'Session login tidak valid';
         return;
     }
-    
-    $IdPermasalahanPokok = $this->input->post('IdPermasalahanPokok') ? array_filter($this->input->post('IdPermasalahanPokok')) : [];
-    
+
+    $Id = $this->input->post('Id');
+
+    if(!$Id){
+        echo 'ID tidak valid';
+        return;
+    }
+
+    // ================= CEK DATA ADA =================
+    $this->db->where('Id', $Id);
+    $this->db->where('deleted_at IS NULL');
+    $row = $this->db->get('isu_strategis')->row_array();
+
+    if(!$row){
+        echo 'Data tidak ditemukan';
+        return;
+    }
+
+    // ================= RBAC (BATASI OPD) =================
+    if($_SESSION['Level'] == 1){
+        if($row['IdKementerian'] != $_SESSION['IdKementerian']){
+            echo 'Akses ditolak (bukan data kementerian anda)';
+            return;
+        }
+    }
+
+    // ================= AMBIL DATA =================
+    $IdPermasalahanPokok = $this->input->post('IdPermasalahanPokok')
+        ? array_filter($this->input->post('IdPermasalahanPokok'))
+        : [];
+
     $data = [
         'IdPermasalahanPokok' => implode(',', $IdPermasalahanPokok),
         'edited_at' => date('Y-m-d H:i:s')
     ];
-    
-    $this->db->where('Id', $this->input->post('Id'));
+
+    // ================= UPDATE =================
+    $this->db->where('Id', $Id);
     $this->db->update('isu_strategis', $data);
+
     echo $this->db->affected_rows() ? '1' : 'Gagal Update Permasalahan Pokok!';
 }
 
-public function DeleteIsuStrategis() {
-    $this->load->library('form_validation');
-    $this->form_validation->set_rules('Id', 'ID Isu', 'required');
-    
-    if ($this->form_validation->run() == FALSE) {
-        echo validation_errors();
+public function UpdateIsuRegionalForStrategis() {
+    if (!isset($_SESSION['Level'])) {
+        echo 'Session login tidak valid';
         return;
     }
-    
-    $this->db->where('Id', $this->input->post('Id'));
-    $this->db->update('isu_strategis', ['deleted_at' => date('Y-m-d H:i:s')]);
+
+    $Id = $this->input->post('Id');
+
+    if (!$Id) {
+        echo 'ID tidak valid';
+        return;
+    }
+
+    $this->db->where('Id', $Id);
+    $this->db->where('deleted_at IS NULL');
+    $row = $this->db->get('isu_strategis')->row_array();
+
+    if (!$row) {
+        echo 'Data tidak ditemukan';
+        return;
+    }
+
+    if ($_SESSION['Level'] == 1) {
+        if ($row['IdKementerian'] != $_SESSION['IdKementerian']) {
+            echo 'Akses ditolak (bukan data kementerian anda)';
+            return;
+        }
+    }
+
+    $IdIsuRegional = $this->input->post('IdIsuRegional') 
+        ? array_filter($this->input->post('IdIsuRegional')) 
+        : [];
+
+    $data = [
+        'IdIsuRegional' => implode(',', $IdIsuRegional),
+        'edited_at' => date('Y-m-d H:i:s')
+    ];
+
+    $this->db->where('Id', $Id);
+    $this->db->update('isu_strategis', $data);
+
+    echo $this->db->affected_rows() ? '1' : 'Gagal Update Isu Regional!';
+}
+
+public function DeleteIsuStrategis() {
+
+    // ================= CEK LOGIN =================
+    if(!isset($_SESSION['Level'])){
+        echo 'Session login tidak valid';
+        return;
+    }
+
+    $Id = $this->input->post('Id');
+
+    if(!$Id){
+        echo 'ID tidak valid';
+        return;
+    }
+
+    // ================= CEK DATA ADA =================
+    $this->db->where('Id', $Id);
+    $this->db->where('deleted_at IS NULL');
+    $row = $this->db->get('isu_strategis')->row_array();
+
+    if(!$row){
+        echo 'Data tidak ditemukan';
+        return;
+    }
+
+    // ================= RBAC =================
+    if($_SESSION['Level'] == 1){
+
+        // OPD hanya boleh hapus milik sendiri
+        if($row['IdKementerian'] != $_SESSION['IdKementerian']){
+            echo 'Akses ditolak (bukan data kementerian anda)';
+            return;
+        }
+    }
+
+    // ================= SOFT DELETE =================
+    $this->db->where('Id', $Id);
+    $this->db->update('isu_strategis', [
+        'deleted_at' => date('Y-m-d H:i:s')
+    ]);
+
     echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
 }
 
 
-   
-   
-
     public function PermasalahanPokok()
-    {
-        $Header['Halaman'] = 'Isu';
-
-        /* =====================================================
-         * INIT DATA VIEW
-         * ===================================================== */
-        $Data['UserPeriode'] = null;
-        $Data['UserKementerianName'] = null;
-        $Data['UserKementerianId'] = null;
-        $Data['CurrentPeriode'] = null;
-        $Data['CurrentKementerian'] = null;
-
-        /* =====================================================
-         * SESSION KEMENTERIAN - LEVEL 1
-         * ===================================================== */
-        if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) {
-            
-            if (empty($_SESSION['IdKementerian'])) {
-                redirect('Auth/Logout');
-            }
-
-            // Ambil data kementerian
-            $kementerian = $this->db
-                ->select('Id, NamaKementerian, TahunMulai, TahunAkhir')
-                ->get_where('kementerian', [
-                    'Id' => $_SESSION['IdKementerian'],
-                    'deleted_at' => NULL
-                ])
-                ->row_array();
-
-            if (!$kementerian) {
-                redirect('Auth/Logout');
-            }
-
-            // Sinkronisasi SESSION
-            $_SESSION['TahunMulai'] = $kementerian['TahunMulai'];
-            $_SESSION['TahunAkhir'] = $kementerian['TahunAkhir'];
-
-            $Data['UserKementerianName'] = $kementerian['NamaKementerian'];
-            $Data['UserKementerianId'] = $_SESSION['IdKementerian'];
-            $Data['UserPeriode'] = $kementerian['TahunMulai'] . ' - ' . $kementerian['TahunAkhir'];
-        }
-
-        /* =====================================================
-         * FILTER (UNTUK ADMIN SAJA)
-         * ===================================================== */
-        $periodeFilter = $this->input->get('periode');
-        $kementerianFilter = $this->input->get('kementerian');
-
-        /* =====================================================
-         * QUERY DATA (PENTING: Gunakan kode lama yang berfungsi)
-         * ===================================================== */
-        $this->db->select('pp.*, k.NamaKementerian');
-        $this->db->from('permasalahan_pokok pp');
-        $this->db->join('kementerian k', 'pp.IdKementerian = k.Id', 'left');
-        $this->db->where('pp.deleted_at IS NULL');
-        $this->db->where('k.deleted_at IS NULL');
-
-        // LEVEL 1 (KEMENTERIAN) - HANYA DATA SENDIRI
-        if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) {
-            if (!empty($_SESSION['IdKementerian'])) {
-                $this->db->where('pp.IdKementerian', $_SESSION['IdKementerian']);
-            }
-        } 
-        // LEVEL 0 (ADMIN) - FILTER OPSIONAL
-        else if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) {
-            if (!empty($periodeFilter)) {
-                [$tm, $ta] = explode('|', $periodeFilter);
-                $this->db->where('pp.TahunMulai', $tm);
-                $this->db->where('pp.TahunAkhir', $ta);
-                $Data['CurrentPeriode'] = $periodeFilter;
-            }
-
-            if (!empty($kementerianFilter)) {
-                $this->db->where('pp.IdKementerian', $kementerianFilter);
-                $Data['CurrentKementerian'] = $kementerianFilter;
-            }
-        }
-
-        $this->db->order_by('k.NamaKementerian', 'ASC');
-        $Data['PermasalahanPokok'] = $this->db->get()->result_array();
-
-        /* =====================================================
-         * DROPDOWN FILTER (UNTUK ADMIN)
-         * ===================================================== */
-        if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) {
-            $Data['AllPeriode'] = $this->db->query("
-                SELECT DISTINCT TahunMulai, TahunAkhir
-                FROM kementerian
-                WHERE deleted_at IS NULL
-                ORDER BY TahunMulai DESC
-            ")->result_array();
-
-            $Data['Kementerian'] = $this->db
-                ->where('deleted_at IS NULL')
-                ->order_by('NamaKementerian', 'ASC')
-                ->get('kementerian')
-                ->result_array();
-        } else {
-            $Data['AllPeriode'] = [];
-            $Data['Kementerian'] = [];
-        }
-
-        /* =====================================================
-         * LOAD VIEW
-         * ===================================================== */
-        $this->load->view('Kementerian/header', $Header);
-        $this->load->view('Kementerian/PermasalahanPokok', $Data);
-    }
-
-    // ============================================================
-    // METHOD CRUD (Gunakan kode lama yang sudah berfungsi)
-    // ============================================================
-    
-    public function InputPermasalahanPokok()
-    {
-        if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 1) {
-            echo json_encode([
-                'success' => false,
-                'message' => 'Akses ditolak'
-            ]);
-            return;
-        }
-
-        if (!isset($_SESSION['IdKementerian'])) {
-            echo json_encode([
-                'success' => false,
-                'message' => 'Session kementerian tidak ditemukan'
-            ]);
-            return;
-        }
-
-        $nama = trim($this->input->post('NamaPermasalahanPokok'));
-        if (!$nama) {
-            echo json_encode([
-                'success' => false,
-                'message' => 'Nama Permasalahan Pokok wajib diisi'
-            ]);
-            return;
-        }
-
-        $kementerian = $this->db
-            ->select('TahunMulai, TahunAkhir')
-            ->get_where('kementerian', [
-                'Id' => $_SESSION['IdKementerian'],
-                'deleted_at' => NULL
-            ])
-            ->row_array();
-
-        if (!$kementerian) {
-            echo json_encode([
-                'success' => false,
-                'message' => 'Data kementerian tidak ditemukan'
-            ]);
-            return;
-        }
-
-        $this->db->insert('permasalahan_pokok', [
-            'IdKementerian' => $_SESSION['IdKementerian'],
-            'NamaPermasalahanPokok' => $nama,
-            'TahunMulai' => $kementerian['TahunMulai'],
-            'TahunAkhir' => $kementerian['TahunAkhir'],
-            'created_at' => date('Y-m-d H:i:s')
-        ]);
-
-        echo json_encode([
-            'success' => true,
-            'message' => 'Data berhasil disimpan'
-        ]);
-    }
-
-    public function GetPermasalahanPokokById()
-    {
-        if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 1) {
-            echo json_encode(['success' => false, 'message' => 'Akses ditolak']);
-            return;
-        }
-
-        $id = $this->input->post('id');
-        if (!$id) {
-            echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
-            return;
-        }
-
-        $data = $this->db
-            ->select('*')
-            ->where('Id', $id)
-            ->where('IdKementerian', $_SESSION['IdKementerian'])
-            ->where('deleted_at IS NULL')
-            ->get('permasalahan_pokok')
-            ->row_array();
-
-        if (!$data) {
-            echo json_encode(['success' => false, 'message' => 'Data tidak ditemukan']);
-            return;
-        }
-
-        echo json_encode(['success' => true, 'data' => $data]);
-    }
-
-    public function UpdatePermasalahanPokok()
-    {
-        if ($_SESSION['Level'] != 1 || empty($_SESSION['IdKementerian'])) {
-            echo json_encode(['success' => false, 'message' => 'Akses ditolak']);
-            return;
-        }
-
-        $id   = $this->input->post('Id');
-        $nama = trim($this->input->post('NamaPermasalahanPokok'));
-
-        if (!$id || $nama == '') {
-            echo json_encode(['success' => false, 'message' => 'Data tidak lengkap']);
-            return;
-        }
-
-        $this->db->where('Id', $id);
-        $this->db->where('IdKementerian', $_SESSION['IdKementerian']);
-        $this->db->update('permasalahan_pokok', [
-            'NamaPermasalahanPokok' => $nama,
-            'edited_at'             => date('Y-m-d H:i:s')
-        ]);
-
-        echo json_encode(['success' => true, 'message' => 'Data berhasil diperbarui']);
-    }
-
-    /* =========================================================
-     * DELETE (FIXED)
-     * ========================================================= */
-    public function DeletePermasalahanPokok()
-    {
-        if ($_SESSION['Level'] != 1 || empty($_SESSION['IdKementerian'])) {
-            echo json_encode(['success' => false, 'message' => 'Akses ditolak']);
-            return;
-        }
-
-        $id = $this->input->post('Id');
-
-        if (!$id) {
-            echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
-            return;
-        }
-
-        $this->db->where('Id', $id);
-        $this->db->where('IdKementerian', $_SESSION['IdKementerian']);
-        $this->db->update('permasalahan_pokok', [
-            'deleted_at' => date('Y-m-d H:i:s')
-        ]);
-
-        echo json_encode(['success' => true, 'message' => 'Data berhasil dihapus']);
-    }
-
-    
-    
-  /* =========================================================
- * ISU KLHS - SESSION BASED (ADOPSI PERMASALAHAN POKOK)
- * ========================================================= */
-
-public function IsuKLHS()
 {
     $Header['Halaman'] = 'Isu';
 
     /* ================= INIT DATA ================= */
     $Data = [
-        'UserPeriode' => null,
+        'UserPeriode'         => null,
         'UserKementerianName' => null,
-        'UserKementerianId' => null,
-        'CurrentPeriode' => null,
-        'CurrentKementerian' => null,
-        'IsuKLHS' => [],
-        'AllPeriode' => [],
-        'Kementerian' => []
+        'UserKementerianId'   => null,
+        'CurrentPeriode'      => null,
+        'CurrentKementerian'  => null,
+        'PermasalahanPokok'           => [],
+        'AllPeriode'          => [],
+        'Kementerian'         => []
     ];
 
     /* ================= SESSION LEVEL 1 ================= */
@@ -1539,7 +1650,7 @@ public function IsuKLHS()
         $kementerian = $this->db
             ->select('Id, NamaKementerian, TahunMulai, TahunAkhir')
             ->where('Id', $_SESSION['IdKementerian'])
-            ->where('deleted_at IS NULL')
+            ->where('deleted_at IS NULL', null, false)
             ->get('kementerian')
             ->row_array();
 
@@ -1550,41 +1661,49 @@ public function IsuKLHS()
         $_SESSION['TahunMulai'] = $kementerian['TahunMulai'];
         $_SESSION['TahunAkhir'] = $kementerian['TahunAkhir'];
 
-        $Data['UserKementerianId'] = $kementerian['Id'];
         $Data['UserKementerianName'] = $kementerian['NamaKementerian'];
-        $Data['UserPeriode'] = $kementerian['TahunMulai'].' - '.$kementerian['TahunAkhir'];
+        $Data['UserKementerianId']   = $kementerian['Id'];
+        $Data['UserPeriode']         = $kementerian['TahunMulai'].' - '.$kementerian['TahunAkhir'];
     }
 
     /* ================= FILTER ADMIN ================= */
-    $periodeFilter = $this->input->get('periode');
+    $periodeFilter     = $this->input->get('periode');
     $kementerianFilter = $this->input->get('kementerian');
 
-    /* ================= QUERY ================= */
-    $this->db->select('ik.*, k.NamaKementerian');
-    $this->db->from('isu_klhs ik');
-    $this->db->join('kementerian k', 'ik.IdKementerian = k.Id', 'left');
-    $this->db->where('ik.deleted_at IS NULL');
-    $this->db->where('k.deleted_at IS NULL');
+    /* ================= QUERY DATA ================= */
+    $this->db->select('ig.*, k.NamaKementerian');
+    $this->db->from('permasalahan_pokok ig');
+    $this->db->join('kementerian k', 'ig.IdKementerian = k.Id', 'left');
+    $this->db->where('ig.deleted_at IS NULL', null, false);
+    $this->db->where('k.deleted_at IS NULL', null, false);
 
-    if ($_SESSION['Level'] == 1) {
-        $this->db->where('ik.IdKementerian', $_SESSION['IdKementerian']);
-    } else {
-        if ($periodeFilter) {
+    // Level 1 → hanya data sendiri
+    if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) {
+        $this->db->where('ig.IdKementerian', $_SESSION['IdKementerian']);
+    }
+
+    // Level 0 → filter opsional
+    if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) {
+
+        if (!empty($periodeFilter)) {
             [$tm, $ta] = explode('|', $periodeFilter);
-            $this->db->where('ik.TahunMulai', $tm);
-            $this->db->where('ik.TahunAkhir', $ta);
+            $this->db->where('ig.TahunMulai', $tm);
+            $this->db->where('ig.TahunAkhir', $ta);
             $Data['CurrentPeriode'] = $periodeFilter;
         }
-        if ($kementerianFilter) {
-            $this->db->where('ik.IdKementerian', $kementerianFilter);
+
+        if (!empty($kementerianFilter)) {
+            $this->db->where('ig.IdKementerian', $kementerianFilter);
             $Data['CurrentKementerian'] = $kementerianFilter;
         }
     }
 
-    $Data['IsuKLHS'] = $this->db->get()->result_array();
+    $this->db->order_by('k.NamaKementerian', 'ASC');
+    $Data['PermasalahanPokok'] = $this->db->get()->result_array();
 
     /* ================= DROPDOWN ADMIN ================= */
-    if ($_SESSION['Level'] == 0) {
+    if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) {
+
         $Data['AllPeriode'] = $this->db->query("
             SELECT DISTINCT TahunMulai, TahunAkhir
             FROM kementerian
@@ -1593,8 +1712,202 @@ public function IsuKLHS()
         ")->result_array();
 
         $Data['Kementerian'] = $this->db
-            ->where('deleted_at IS NULL')
-            ->order_by('NamaKementerian','ASC')
+            ->where('deleted_at IS NULL', null, false)
+            ->order_by('NamaKementerian', 'ASC')
+            ->get('kementerian')
+            ->result_array();
+    }
+
+    $this->load->view('Kementerian/header', $Header);
+    $this->load->view('Kementerian/PermasalahanPokok', $Data);
+}
+
+
+
+public function InputPermasalahanPokok()
+{
+    if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 1) {
+        echo json_encode(['success'=>false,'message'=>'Akses ditolak']);
+        return;
+    }
+
+    $nama = trim($this->input->post('NamaPermasalahanPokok'));
+
+    if ($nama === '') {
+        echo json_encode(['success'=>false,'message'=>'Nama Permasalahan Pokok wajib diisi']);
+        return;
+    }
+
+    $this->db->insert('permasalahan_pokok', [
+        'IdKementerian' => $_SESSION['IdKementerian'],
+        'NamaPermasalahanPokok' => $nama,
+        'TahunMulai'    => $_SESSION['TahunMulai'],
+        'TahunAkhir'    => $_SESSION['TahunAkhir'],
+        'created_at'    => date('Y-m-d H:i:s')
+    ]);
+
+    echo json_encode([
+        'success' => true,
+        'message' => 'Data berhasil disimpan'
+    ]);
+}
+
+
+
+public function UpdatePermasalahanPokok()
+{
+    $this->db->where('Id',$this->input->post('Id'));
+    $this->db->where('IdKementerian',$_SESSION['IdKementerian']);
+    $this->db->update('permasalahan_pokok',[
+        'NamaPermasalahanPokok'=>$this->input->post('NamaPermasalahanPokok'),
+        'edited_at'=>date('Y-m-d H:i:s')
+    ]);
+
+    echo json_encode(['success'=>true,'message'=>'Data berhasil diperbarui']);
+}
+
+public function DeletePermasalahanPokok()
+{
+    $this->db->where('Id',$this->input->post('Id'));
+    $this->db->where('IdKementerian',$_SESSION['IdKementerian']);
+    $this->db->update('permasalahan_pokok',[
+        'deleted_at'=>date('Y-m-d H:i:s')
+    ]);
+
+    echo json_encode(['success'=>true,'message'=>'Data berhasil dihapus']);
+}
+
+public function getPermasalahanPokokById()
+{
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+    }
+    
+    if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 1) {
+        echo json_encode(['success' => false, 'message' => 'Akses ditolak']);
+        return;
+    }
+    
+    $id = $this->input->post('Id');
+    
+    if (empty($id)) {
+        echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+        return;
+    }
+    
+    $data = $this->db
+        ->where('Id', $id)
+        ->where('IdKementerian', $_SESSION['IdKementerian'])
+        ->where('deleted_at IS NULL', null, false)
+        ->get('permasalahan_pokok')
+        ->row_array();
+    
+    if ($data) {
+        echo json_encode([
+            'success' => true,
+            'data' => $data
+        ]);
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Data tidak ditemukan'
+        ]);
+    }
+}
+  /* =========================================================
+ * ISU KLHS - SESSION BASED (ADOPSI PERMASALAHAN POKOK)
+ * ========================================================= */
+
+public function IsuKLHS()
+{
+    $Header['Halaman'] = 'Isu';
+
+    /* ================= INIT DATA ================= */
+    $Data = [
+        'UserPeriode'         => null,
+        'UserKementerianName' => null,
+        'UserKementerianId'   => null,
+        'CurrentPeriode'      => null,
+        'CurrentKementerian'  => null,
+        'IsuKLHS'           => [],
+        'AllPeriode'          => [],
+        'Kementerian'         => []
+    ];
+
+    /* ================= SESSION LEVEL 1 ================= */
+    if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) {
+
+        if (empty($_SESSION['IdKementerian'])) {
+            redirect('Auth/Logout');
+        }
+
+        $kementerian = $this->db
+            ->select('Id, NamaKementerian, TahunMulai, TahunAkhir')
+            ->where('Id', $_SESSION['IdKementerian'])
+            ->where('deleted_at IS NULL', null, false)
+            ->get('kementerian')
+            ->row_array();
+
+        if (!$kementerian) {
+            redirect('Auth/Logout');
+        }
+
+        $_SESSION['TahunMulai'] = $kementerian['TahunMulai'];
+        $_SESSION['TahunAkhir'] = $kementerian['TahunAkhir'];
+
+        $Data['UserKementerianName'] = $kementerian['NamaKementerian'];
+        $Data['UserKementerianId']   = $kementerian['Id'];
+        $Data['UserPeriode']         = $kementerian['TahunMulai'].' - '.$kementerian['TahunAkhir'];
+    }
+
+    /* ================= FILTER ADMIN ================= */
+    $periodeFilter     = $this->input->get('periode');
+    $kementerianFilter = $this->input->get('kementerian');
+
+    /* ================= QUERY DATA ================= */
+    $this->db->select('ig.*, k.NamaKementerian');
+    $this->db->from('isu_KLHS ig');
+    $this->db->join('kementerian k', 'ig.IdKementerian = k.Id', 'left');
+    $this->db->where('ig.deleted_at IS NULL', null, false);
+    $this->db->where('k.deleted_at IS NULL', null, false);
+
+    // Level 1 → hanya data sendiri
+    if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) {
+        $this->db->where('ig.IdKementerian', $_SESSION['IdKementerian']);
+    }
+
+    // Level 0 → filter opsional
+    if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) {
+
+        if (!empty($periodeFilter)) {
+            [$tm, $ta] = explode('|', $periodeFilter);
+            $this->db->where('ig.TahunMulai', $tm);
+            $this->db->where('ig.TahunAkhir', $ta);
+            $Data['CurrentPeriode'] = $periodeFilter;
+        }
+
+        if (!empty($kementerianFilter)) {
+            $this->db->where('ig.IdKementerian', $kementerianFilter);
+            $Data['CurrentKementerian'] = $kementerianFilter;
+        }
+    }
+
+    $this->db->order_by('k.NamaKementerian', 'ASC');
+    $Data['IsuKLHS'] = $this->db->get()->result_array();
+
+    /* ================= DROPDOWN ADMIN ================= */
+    if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) {
+
+        $Data['AllPeriode'] = $this->db->query("
+            SELECT DISTINCT TahunMulai, TahunAkhir
+            FROM kementerian
+            WHERE deleted_at IS NULL
+            ORDER BY TahunMulai DESC
+        ")->result_array();
+
+        $Data['Kementerian'] = $this->db
+            ->where('deleted_at IS NULL', null, false)
+            ->order_by('NamaKementerian', 'ASC')
             ->get('kementerian')
             ->result_array();
     }
@@ -1603,50 +1916,43 @@ public function IsuKLHS()
     $this->load->view('Kementerian/IsuKLHS', $Data);
 }
 
-/* ================= CRUD ================= */
+
 
 public function InputIsuKLHS()
 {
-    if ($_SESSION['Level'] != 1) {
+    if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 1) {
         echo json_encode(['success'=>false,'message'=>'Akses ditolak']);
         return;
     }
 
     $nama = trim($this->input->post('NamaIsuKLHS'));
-    if ($nama == '') {
-        echo json_encode(['success'=>false,'message'=>'Nama Isu wajib diisi']);
+
+    if ($nama === '') {
+        echo json_encode(['success'=>false,'message'=>'Nama Isu KLHS wajib diisi']);
         return;
     }
 
-    $this->db->insert('isu_klhs', [
+    $this->db->insert('isu_KLHS', [
         'IdKementerian' => $_SESSION['IdKementerian'],
         'NamaIsuKLHS' => $nama,
-        'TahunMulai' => $_SESSION['TahunMulai'],
-        'TahunAkhir' => $_SESSION['TahunAkhir'],
-        'created_at' => date('Y-m-d H:i:s')
+        'TahunMulai'    => $_SESSION['TahunMulai'],
+        'TahunAkhir'    => $_SESSION['TahunAkhir'],
+        'created_at'    => date('Y-m-d H:i:s')
     ]);
 
-    echo json_encode(['success'=>true,'message'=>'Data berhasil disimpan']);
+    echo json_encode([
+        'success' => true,
+        'message' => 'Data berhasil disimpan'
+    ]);
 }
 
-public function GetIsuKLHSById()
-{
-    $id = $this->input->post('id');
-    $data = $this->db
-        ->where('Id',$id)
-        ->where('IdKementerian',$_SESSION['IdKementerian'])
-        ->where('deleted_at IS NULL')
-        ->get('isu_klhs')
-        ->row_array();
 
-    echo json_encode(['success'=>true,'data'=>$data]);
-}
 
 public function UpdateIsuKLHS()
 {
     $this->db->where('Id',$this->input->post('Id'));
     $this->db->where('IdKementerian',$_SESSION['IdKementerian']);
-    $this->db->update('isu_klhs',[
+    $this->db->update('isu_KLHS',[
         'NamaIsuKLHS'=>$this->input->post('NamaIsuKLHS'),
         'edited_at'=>date('Y-m-d H:i:s')
     ]);
@@ -1658,12 +1964,51 @@ public function DeleteIsuKLHS()
 {
     $this->db->where('Id',$this->input->post('Id'));
     $this->db->where('IdKementerian',$_SESSION['IdKementerian']);
-    $this->db->update('isu_klhs',[
+    $this->db->update('isu_KLHS',[
         'deleted_at'=>date('Y-m-d H:i:s')
     ]);
 
     echo json_encode(['success'=>true,'message'=>'Data berhasil dihapus']);
 }
+
+public function getIsuKLHSById()
+{
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+    }
+    
+    if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 1) {
+        echo json_encode(['success' => false, 'message' => 'Akses ditolak']);
+        return;
+    }
+    
+    $id = $this->input->post('Id');
+    
+    if (empty($id)) {
+        echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+        return;
+    }
+    
+    $data = $this->db
+        ->where('Id', $id)
+        ->where('IdKementerian', $_SESSION['IdKementerian'])
+        ->where('deleted_at IS NULL', null, false)
+        ->get('isu_KLHS')
+        ->row_array();
+    
+    if ($data) {
+        echo json_encode([
+            'success' => true,
+            'data' => $data
+        ]);
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Data tidak ditemukan'
+        ]);
+    }
+}
+
 
 
 public function IsuGlobal()
@@ -2050,6 +2395,200 @@ public function getIsuNasionalById()
         ]);
     }
 }
+
+
+
+public function IsuRegional()
+{
+    $Header['Halaman'] = 'Isu';
+
+    /* ================= INIT DATA ================= */
+    $Data = [
+        'UserPeriode'         => null,
+        'UserKementerianName' => null,
+        'UserKementerianId'   => null,
+        'CurrentPeriode'      => null,
+        'CurrentKementerian'  => null,
+        'IsuRegional'           => [],
+        'AllPeriode'          => [],
+        'Kementerian'         => []
+    ];
+
+    /* ================= SESSION LEVEL 1 ================= */
+    if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) {
+
+        if (empty($_SESSION['IdKementerian'])) {
+            redirect('Auth/Logout');
+        }
+
+        $kementerian = $this->db
+            ->select('Id, NamaKementerian, TahunMulai, TahunAkhir')
+            ->where('Id', $_SESSION['IdKementerian'])
+            ->where('deleted_at IS NULL', null, false)
+            ->get('kementerian')
+            ->row_array();
+
+        if (!$kementerian) {
+            redirect('Auth/Logout');
+        }
+
+        $_SESSION['TahunMulai'] = $kementerian['TahunMulai'];
+        $_SESSION['TahunAkhir'] = $kementerian['TahunAkhir'];
+
+        $Data['UserKementerianName'] = $kementerian['NamaKementerian'];
+        $Data['UserKementerianId']   = $kementerian['Id'];
+        $Data['UserPeriode']         = $kementerian['TahunMulai'].' - '.$kementerian['TahunAkhir'];
+    }
+
+    /* ================= FILTER ADMIN ================= */
+    $periodeFilter     = $this->input->get('periode');
+    $kementerianFilter = $this->input->get('kementerian');
+
+    /* ================= QUERY DATA ================= */
+    $this->db->select('ig.*, k.NamaKementerian');
+    $this->db->from('isu_regional ig');
+    $this->db->join('kementerian k', 'ig.IdKementerian = k.Id', 'left');
+    $this->db->where('ig.deleted_at IS NULL', null, false);
+    $this->db->where('k.deleted_at IS NULL', null, false);
+
+    // Level 1 → hanya data sendiri
+    if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) {
+        $this->db->where('ig.IdKementerian', $_SESSION['IdKementerian']);
+    }
+
+    // Level 0 → filter opsional
+    if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) {
+
+        if (!empty($periodeFilter)) {
+            [$tm, $ta] = explode('|', $periodeFilter);
+            $this->db->where('ig.TahunMulai', $tm);
+            $this->db->where('ig.TahunAkhir', $ta);
+            $Data['CurrentPeriode'] = $periodeFilter;
+        }
+
+        if (!empty($kementerianFilter)) {
+            $this->db->where('ig.IdKementerian', $kementerianFilter);
+            $Data['CurrentKementerian'] = $kementerianFilter;
+        }
+    }
+
+    $this->db->order_by('k.NamaKementerian', 'ASC');
+    $Data['IsuRegional'] = $this->db->get()->result_array();
+
+    /* ================= DROPDOWN ADMIN ================= */
+    if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) {
+
+        $Data['AllPeriode'] = $this->db->query("
+            SELECT DISTINCT TahunMulai, TahunAkhir
+            FROM kementerian
+            WHERE deleted_at IS NULL
+            ORDER BY TahunMulai DESC
+        ")->result_array();
+
+        $Data['Kementerian'] = $this->db
+            ->where('deleted_at IS NULL', null, false)
+            ->order_by('NamaKementerian', 'ASC')
+            ->get('kementerian')
+            ->result_array();
+    }
+
+    $this->load->view('Kementerian/header', $Header);
+    $this->load->view('Kementerian/IsuRegional', $Data);
+}
+
+
+
+public function InputIsuRegional()
+{
+    if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 1) {
+        echo json_encode(['success'=>false,'message'=>'Akses ditolak']);
+        return;
+    }
+
+    $nama = trim($this->input->post('NamaIsuRegional'));
+
+    if ($nama === '') {
+        echo json_encode(['success'=>false,'message'=>'Nama Isu Regional wajib diisi']);
+        return;
+    }
+
+    $this->db->insert('isu_regional', [
+        'IdKementerian' => $_SESSION['IdKementerian'],
+        'NamaIsuRegional' => $nama,
+        'TahunMulai'    => $_SESSION['TahunMulai'],
+        'TahunAkhir'    => $_SESSION['TahunAkhir'],
+        'created_at'    => date('Y-m-d H:i:s')
+    ]);
+
+    echo json_encode([
+        'success' => true,
+        'message' => 'Data berhasil disimpan'
+    ]);
+}
+
+
+
+public function UpdateIsuRegional()
+{
+    $this->db->where('Id',$this->input->post('Id'));
+    $this->db->where('IdKementerian',$_SESSION['IdKementerian']);
+    $this->db->update('isu_regional',[
+        'NamaIsuRegional'=>$this->input->post('NamaIsuRegional'),
+        'edited_at'=>date('Y-m-d H:i:s')
+    ]);
+
+    echo json_encode(['success'=>true,'message'=>'Data berhasil diperbarui']);
+}
+
+public function DeleteIsuRegional()
+{
+    $this->db->where('Id',$this->input->post('Id'));
+    $this->db->where('IdKementerian',$_SESSION['IdKementerian']);
+    $this->db->update('isu_regional',[
+        'deleted_at'=>date('Y-m-d H:i:s')
+    ]);
+
+    echo json_encode(['success'=>true,'message'=>'Data berhasil dihapus']);
+}
+
+public function getIsuRegionalById()
+{
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+    }
+    
+    if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 1) {
+        echo json_encode(['success' => false, 'message' => 'Akses ditolak']);
+        return;
+    }
+    
+    $id = $this->input->post('Id');
+    
+    if (empty($id)) {
+        echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+        return;
+    }
+    
+    $data = $this->db
+        ->where('Id', $id)
+        ->where('IdKementerian', $_SESSION['IdKementerian'])
+        ->where('deleted_at IS NULL', null, false)
+        ->get('isu_regional')
+        ->row_array();
+    
+    if ($data) {
+        echo json_encode([
+            'success' => true,
+            'data' => $data
+        ]);
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Data tidak ditemukan'
+        ]);
+    }
+}
+
 
 public function SasaranStrategis() {
     $Header['Halaman'] = 'Kementerian';

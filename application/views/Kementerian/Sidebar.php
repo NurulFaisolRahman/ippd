@@ -7,11 +7,12 @@
     <title>Visi RPJMD</title>
     
     <!-- CSS Libraries -->
-    <link rel="stylesheet" href="<?=base_url()?>css/bootstrap.min.css">
-    <link rel="stylesheet" href="<?=base_url()?>css/font-awesome.min.css">
-    <link rel="stylesheet" href="<?=base_url()?>css/notika-custom-icon.css">
-    <link rel="stylesheet" href="<?=base_url()?>css/data-table/bootstrap-table.css">
-    <link rel="stylesheet" href="<?=base_url()?>css/data-table/bootstrap-editable.css">
+    <link rel="stylesheet" href="<?= base_url('css/bootstrap.min.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('css/font-awesome.min.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('css/notika-custom-icon.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('css/data-table/bootstrap-table.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('css/data-table/bootstrap-editable.css') ?>">
+
     
     <!-- Custom CSS -->
     <style>
@@ -270,7 +271,7 @@
                 <!-- RPJMD -->
                 <div class="sidebar-dropdown">
                     <a href="#">
-                        <i class="menu-icon fa fa-line-chart"></i>
+                        <i class="menu-icon fa fa-university"></i>
                         <span>Kementerian</span>
                         <i class="fa fa-chevron-down"></i>
                     </a>
@@ -284,8 +285,30 @@
                     </div>
                 </div>
 
+                <div class="sidebar-dropdown">
+                    <a href="#">
+                        <i class="menu-icon fa fa-file-alt"></i>
+                        <span>Rencana Strategis</span>
+                        <i class="fa fa-chevron-down"></i>
+                    </a>
+                    <div class="sidebar-submenu" style="display: block;">
+                        
+                        <br>
+                    </div>
+                </div>
                 
-                
+                <div class="sidebar-dropdown">
+                    <a href="#">
+                        <i class="menu-icon fa fa-file-alt"></i>
+                        <span>Rencana Kerja</span>
+                        <i class="fa fa-chevron-down"></i>
+                    </a>
+                    <div class="sidebar-submenu" style="display: block;">
+                        
+                        <br>
+                    </div>
+                </div>
+
                 <!-- Isu Kementerian -->
                 <div class="sidebar-dropdown">
                     <a href="#">

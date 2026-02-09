@@ -39,7 +39,7 @@
     <div class="button-icon-btn sm-res-mg-t-30">
 
         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0): ?>
-        <button class="btn btn-primary notika-btn-primary" id="FilterIsunasional">
+        <button class="btn btn-primary notika-btn-primary" id="FilterIsuRegional">
             <i class="notika-icon notika-search"></i>
             <b>Filter Data</b>
             <?php if (isset($CurrentPeriode) && ($CurrentPeriode || $CurrentKementerian)): ?>
@@ -49,7 +49,7 @@
         <?php endif; ?>
 
         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
-        <button class="btn btn-success notika-btn-success" id="BtnInputIsunasional">
+        <button class="btn btn-success notika-btn-success" id="BtnInputIsuRegional">
             <i class="notika-icon notika-edit"></i>
             <b>Input Isu Regional</b>
         </button>
@@ -137,7 +137,7 @@
 </div>
 
 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
-<div class="modal fade" id="ModalInputIsunasional">
+<div class="modal fade" id="ModalInputIsuRegional">
 <div class="modal-dialog modal-lg">
 <div class="modal-content">
 <div class="modal-header">
@@ -156,11 +156,11 @@
         <div class="form-group">
             <label><b>Nama Isu Regional</b></label>
             <textarea class="form-control" id="NamaIsuRegional" rows="4"
-                placeholder="Tuliskan isu strategis Regional..."></textarea>
+                placeholder="Tuliskan isu strategis regional..."></textarea>
         </div>
     </div>
 
-    <button class="btn btn-success notika-btn-success" id="InputIsunasional">
+    <button class="btn btn-success notika-btn-success" id="InputIsuRegional">
         <i class="notika-icon notika-checked"></i> SIMPAN
     </button>
     <button class="btn btn-default" data-dismiss="modal">BATAL</button>
@@ -173,7 +173,7 @@
 <?php endif; ?>
 
 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
-<div class="modal fade" id="ModalEditIsunasional">
+<div class="modal fade" id="ModalEditIsuRegional">
 <div class="modal-dialog modal-lg">
 <div class="modal-content">
 <div class="modal-header">
@@ -187,10 +187,10 @@
 <div class="form-example-wrap">
     <div class="form-example-int">
         <label><b>Nama Isu Regional</b></label>
-        <textarea class="form-control" id="EditNamaIsunasional" rows="4"></textarea>
+        <textarea class="form-control" id="EditNamaIsuRegional" rows="4"></textarea>
     </div>
 
-    <button class="btn btn-success notika-btn-success" id="UpdateIsunasional">
+    <button class="btn btn-success notika-btn-success" id="UpdateIsuRegional">
         <i class="notika-icon notika-checked"></i> UPDATE
     </button>
     <button class="btn btn-default" data-dismiss="modal">BATAL</button>
@@ -217,7 +217,7 @@
 $(document).ready(function () {
 
     /* =====================================================
-     * Regional
+     * GLOBAL
      * ===================================================== */
     const BaseURL   = "<?= site_url() ?>";
     const UserLevel = <?= isset($_SESSION['Level']) ? (int)$_SESSION['Level'] : -1 ?>;
@@ -283,7 +283,7 @@ $(document).ready(function () {
     /* =====================================================
      * FILTER (ADMIN)
      * ===================================================== */
-    $('#FilterIsunasional').on('click', function () {
+    $('#FilterIsuRegional').on('click', function () {
         $('#ModalFilter').modal('show');
     });
 
@@ -338,14 +338,14 @@ $(document).ready(function () {
     });
 
     /* =====================================================
-     * INPUT ISU Regional (LEVEL 1)
+     * INPUT ISU GLOBAL (LEVEL 1)
      * ===================================================== */
-    $('#BtnInputIsunasional').on('click', function () {
+    $('#BtnInputIsuRegional').on('click', function () {
         $('#NamaIsuRegional').val('');
-        $('#ModalInputIsunasional').modal('show');
+        $('#ModalInputIsuRegional').modal('show');
     });
 
-    $('#InputIsunasional').on('click', function () {
+    $('#InputIsuRegional').on('click', function () {
         const nama = $('#NamaIsuRegional').val().trim();
 
         if (!nama) {
@@ -358,7 +358,7 @@ $(document).ready(function () {
             return;
         }
 
-        $.post(BaseURL + 'Kementerian/InputIsunasional', {
+        $.post(BaseURL + 'Kementerian/InputIsuRegional', {
             NamaIsuRegional: nama
         }, function (res) {
             let r;
@@ -372,7 +372,7 @@ $(document).ready(function () {
 
             alert(r.message);
             if (r.success) {
-                $('#ModalInputIsunasional').modal('hide');
+                $('#ModalInputIsuRegional').modal('hide');
                 location.reload();
             }
         })
@@ -393,7 +393,7 @@ $(document).on('click', '.Edit', function (e) {
     button.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
     
     $.ajax({
-        url: BaseURL + 'Kementerian/GetIsunasionalById',
+        url: BaseURL + 'Kementerian/GetIsuRegionalById',
         type: 'POST',
         dataType: 'json',
         data: { Id: id },
@@ -402,8 +402,8 @@ $(document).on('click', '.Edit', function (e) {
             
             if (response.success) {
                 $('#EditId').val(response.data.Id);
-                $('#EditNamaIsunasional').val(response.data.NamaIsuRegional);
-                $('#ModalEditIsunasional').modal('show');
+                $('#EditNamaIsuRegional').val(response.data.NamaIsuRegional);
+                $('#ModalEditIsuRegional').modal('show');
             } else {
                 alert('Error: ' + response.message);
             }
@@ -417,13 +417,13 @@ $(document).on('click', '.Edit', function (e) {
 });
 
 /* =====================================================
- * UPDATE ISU Regional - FIXED VERSION
+ * UPDATE ISU GLOBAL - FIXED VERSION
  * ===================================================== */
-$(document).on('click', '#UpdateIsunasional', function (e) {
+$(document).on('click', '#UpdateIsuRegional', function (e) {
     e.preventDefault();
     
     const id = $('#EditId').val();
-    const nama = $('#EditNamaIsunasional').val().trim();
+    const nama = $('#EditNamaIsuRegional').val().trim();
     const button = $(this);
     
     // Validasi
@@ -442,7 +442,7 @@ $(document).on('click', '#UpdateIsunasional', function (e) {
     button.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
     
     $.ajax({
-        url: BaseURL + 'Kementerian/UpdateIsunasional',
+        url: BaseURL + 'Kementerian/UpdateIsuRegional',
         type: 'POST',
         dataType: 'json',
         data: { 
@@ -454,7 +454,7 @@ $(document).on('click', '#UpdateIsunasional', function (e) {
             
             alert(response.message);
             if (response.success) {
-                $('#ModalEditIsunasional').modal('hide');
+                $('#ModalEditIsuRegional').modal('hide');
                 setTimeout(function() {
                     location.reload();
                 }, 500);
@@ -468,14 +468,14 @@ $(document).on('click', '#UpdateIsunasional', function (e) {
     });
 });
     /* =====================================================
-     * DELETE ISU Regional
+     * DELETE ISU GLOBAL
      * ===================================================== */
     $(document).on('click', '.Hapus', function () {
         const id = $(this).data('id');
 
         if (!confirm('Yakin ingin menghapus data ini?')) return;
 
-        $.post(BaseURL + 'Kementerian/DeleteIsunasional', {
+        $.post(BaseURL + 'Kementerian/DeleteIsuRegional', {
             Id: id
         }, function (res) {
             let r;
@@ -499,7 +499,7 @@ $(document).on('click', '#UpdateIsunasional', function (e) {
     /* =====================================================
      * ERROR HANDLING UNTUK DATATABLES
      * ===================================================== */
-    // Tangkap error Regional
+    // Tangkap error regional
     window.addEventListener('error', function(e) {
         if (e.message.includes('_DT_CellIndex')) {
             console.error('DataTables Cell Index Error detected');

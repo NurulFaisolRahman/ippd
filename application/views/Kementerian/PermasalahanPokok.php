@@ -1,398 +1,254 @@
 <?php $this->load->view('Kementerian/Sidebar'); ?>
 
 <div class="main-content">
-    <div class="breadcomb-area">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <div class="breadcomb-list">
-                        <ul class="breadcomb-menu" style="list-style: none; padding: 0; margin: 0;">
-                            <li style="display: inline-block; margin-right: 5px;">
-                                <a href="<?= base_url('Beranda') ?>">Beranda</a>
-                                <span class="bread-slash" style="display: inline-block; margin: 0 5px;">/</span>
-                            </li>
-                            <li style="display: inline-block; margin-right: 5px;">
-                                <a href="<?= base_url('Kementerian/PermasalahanPokok') ?>">Isu</a>
-                                <span class="bread-slash" style="display: inline-block; margin: 0 5px;">/</span>
-                            </li>
-                            <li style="display: inline-block;">
-                                <span class="bread-blk">Permasalahan Pokok</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
+
+<div class="breadcomb-area">
+    <div class="container">
+        <ul class="breadcomb-menu" style="list-style:none;padding:0;margin:0">
+            <li style="display:inline-block">
+                <a href="<?= base_url('Beranda') ?>">Beranda</a>
+                <span class="bread-slash"> / </span>
+            </li>
+            <li style="display:inline-block">
+                <a href="<?= base_url('Kementerian/PermasalahanPokok') ?>">Isu</a>
+                <span class="bread-slash"> / </span>
+            </li>
+            <li style="display:inline-block">
+                <span class="bread-blk">PermasalahanPokok</span>
+            </li>
+        </ul>
     </div>
+</div>
 
-    <div class="data-table-area">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <div class="data-table-list">
-                        <!-- Header dengan Button -->
-                        <div class="basic-tb-hd">
-                            <div class="button-icon-btn sm-res-mg-t-30">
-                                <!-- Tombol Filter hanya untuk Admin -->
-                                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0): ?>
-                                    <button type="button" class="btn btn-primary notika-btn-primary" id="FilterPermasalahanPokok">
-                                        <i class="notika-icon notika-search"></i> 
-                                        <b>Filter Data</b>
-                                        <?php if ($CurrentPeriode || $CurrentKementerian): ?>
-                                            <span class="badge" style="background-color: #f44336; margin-left: 5px;">Filter Aktif</span>
-                                        <?php endif; ?>
-                                    </button>
-                                <?php endif; ?>
-                                
-                                <!-- Tombol Input untuk Kementerian -->
-                                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
-                                    <button type="button" class="btn btn-success notika-btn-success" id="BtnInputPermasalahanPokok">
-                                        <i class="notika-icon notika-edit"></i> <b>Input Permasalahan Pokok</b>
-                                    </button>
-                                <?php endif; ?>
-                            </div>
-                        </div>
+<div class="data-table-area">
+<div class="container">
+<div class="row">
+<div class="col-lg-12">
 
-                        <!-- Informasi Periode untuk Kementerian -->
-                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1 && isset($UserKementerianName)): ?>
-                        <div class="alert alert-info" style="margin-top: 15px; margin-bottom: 15px; padding: 10px 15px;">
-                            <div style="display: flex; align-items: center;">
-                                <i class="fa fa-info-circle" style="font-size: 18px; margin-right: 10px;"></i>
-                                <div>
-                                    <strong>Kementerian:</strong> <?= htmlspecialchars($UserKementerianName) ?><br>
-                                    <?php if (isset($UserPeriode)): ?>
-                                    <strong>Periode:</strong> <?= htmlspecialchars($UserPeriode) ?>
-                                    <?php else: ?>
-                                    <strong>Periode:</strong> <span style="color: #dc3545;">Belum ditentukan</span>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        </div>
-                        <?php endif; ?>
+<div class="data-table-list">
 
-                        <!-- Modal Filter (hanya untuk Admin) -->
-                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0): ?>
-                        <div class="modal fade" id="ModalFilter" role="dialog">
-                            <div class="modal-dialog modals-default">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <button type="button" class="close" data-dismiss="modal">×</button>
-                                        <h4 class="modal-title">Filter Data Permasalahan Pokok</h4>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="row">
-                                            <div class="col-lg-12">
-                                                <div class="form-example-wrap">
-                                                    <div class="form-example-int">
-                                                        <div class="form-group">
-                                                            <label>Periode</label>
-                                                            <select class="form-control" id="FilterPeriode">
-                                                                <option value="">Semua Periode</option>
-                                                                <?php foreach ($AllPeriode as $periode): ?>
-                                                                    <?php 
-                                                                        $periodeValue = $periode['TahunMulai'] . '|' . $periode['TahunAkhir'];
-                                                                        $selected = ($CurrentPeriode == $periodeValue) ? 'selected' : '';
-                                                                    ?>
-                                                                    <option value="<?= $periodeValue ?>" <?= $selected ?>>
-                                                                        <?= $periode['TahunMulai'] ?> - <?= $periode['TahunAkhir'] ?>
-                                                                    </option>
-                                                                <?php endforeach; ?>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div class="form-example-int">
-                                                        <div class="form-group">
-                                                            <label>Kementerian</label>
-                                                            <select class="form-control" id="FilterKementerianSelect">
-                                                                <option value="">Semua Kementerian</option>
-                                                                <?php foreach ($Kementerian as $kementerian): ?>
-                                                                    <?php $selected = ($CurrentKementerian == $kementerian['Id']) ? 'selected' : ''; ?>
-                                                                    <option value="<?= $kementerian['Id'] ?>" <?= $selected ?>>
-                                                                        <?= $kementerian['NamaKementerian'] ?>
-                                                                    </option>
-                                                                <?php endforeach; ?>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div class="form-example-int mg-t-15">
-                                                        <button class="btn btn-success notika-btn-success" id="ApplyFilter">Terapkan Filter</button>
-                                                        <button class="btn btn-danger notika-btn-danger" id="ResetFilter">Reset Filter</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <?php endif; ?>
+<?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
+<div class="alert alert-info" style="margin-bottom:15px;">
+    <i class="notika-icon notika-info"></i>
+    <b>Kementerian :</b> <?= htmlspecialchars($UserKementerianName) ?><br>
+    <b>Periode :</b> <?= htmlspecialchars($UserPeriode) ?>
+</div>
+<?php endif; ?>
 
-                        <!-- Tabel Data Permasalahan Pokok -->
-                        <div class="table-responsive">
-                            <table id="data-table-basic" class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th width="5%" class="text-center">No</th>
-                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0): ?>
-                                            <th width="25%">Kementerian</th>
-                                        <?php endif; ?>
-                                        <th width="<?= isset($_SESSION['Level']) && $_SESSION['Level'] == 0 ? '40%' : '65%' ?>">Permasalahan Pokok</th>
-                                        <th width="20%" class="text-center">Periode</th>
-                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
-                                            <th width="10%" class="text-center">Aksi</th>
-                                        <?php endif; ?>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php 
-                                    $No = 1; 
-                                    $userKementerianId = isset($_SESSION['IdKementerian']) ? $_SESSION['IdKementerian'] : null;
-                                    $isKementerian = isset($_SESSION['Level']) && $_SESSION['Level'] == 1;
-                                    $isAdmin = isset($_SESSION['Level']) && $_SESSION['Level'] == 0;
-                                    
-                                    // Hitung jumlah kolom
-                                    $colspan = $isKementerian ? 4 : 5;
-                                    
-                                    if (!empty($PermasalahanPokok)): 
-                                        foreach ($PermasalahanPokok as $key): 
-                                    ?>
-                                    <tr>
-                                        <td style="vertical-align: middle;" class="text-center"><?= $No++ ?></td>
-                                        
-                                        <?php if ($isAdmin): ?>
-                                            <td style="vertical-align: middle;"><?= htmlspecialchars($key['NamaKementerian']) ?></td>
-                                        <?php endif; ?>
-                                        
-                                        <td style="vertical-align: middle;"><?= htmlspecialchars($key['NamaPermasalahanPokok']) ?></td>
-                                        
-                                        <td style="vertical-align: middle;" class="text-center">
-                                            <?= $key['TahunMulai'] . ' - ' . $key['TahunAkhir'] ?>
-                                        </td>
-                                        
-                                        <?php if ($isKementerian): ?>
-                                        <td style="vertical-align: middle;" class="text-center">
-                                            <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                                <?php if ($key['IdKementerian'] == $userKementerianId): ?>
-                                                <button class="btn btn-sm btn-warning EditPermasalahanPokok" 
-                                                    data-id="<?= $key['Id'] ?>"
-                                                    title="Edit"
-                                                    style="width: 36px; height: 36px; padding: 0; border-radius: 50%; margin-right: 5px;">
-                                                    <i class="fa fa-edit"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-danger HapusPermasalahanPokok" 
-                                                    data-id="<?= $key['Id'] ?>"
-                                                    data-nama="<?= htmlspecialchars($key['NamaPermasalahanPokok']) ?>"
-                                                    title="Hapus"
-                                                    style="width: 36px; height: 36px; padding: 0; border-radius: 50%;">
-                                                    <i class="fa fa-trash"></i>
-                                                </button>
-                                                <?php else: ?>
-                                                <button class="btn btn-sm btn-default" disabled 
-                                                    title="Data milik kementerian lain"
-                                                    style="width: 36px; height: 36px; padding: 0; border-radius: 50%; margin-right: 5px;">
-                                                    <i class="fa fa-edit"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-default" disabled 
-                                                    title="Data milik kementerian lain"
-                                                    style="width: 36px; height: 36px; padding: 0; border-radius: 50%;">
-                                                    <i class="fa fa-trash"></i>
-                                                </button>
-                                                <?php endif; ?>
-                                            </div>
-                                        </td>
-                                        <?php endif; ?>
-                                    </tr>
-                                    <?php 
-                                        endforeach; 
-                                    else: 
-                                    ?>
-                                    <tr>
-                                        <td colspan="<?= $colspan ?>" class="text-center">
-                                            <div class="alert alert-warning" style="margin: 10px 0;">
-                                                <i class="fa fa-info-circle"></i> 
-                                                <?php if ($isKementerian): ?>
-                                                    Belum ada data Permasalahan Pokok. Silakan tambah data baru.
-                                                <?php else: ?>
-                                                    Tidak ada data ditemukan.
-                                                <?php endif; ?>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="basic-tb-hd">
+    <div class="button-icon-btn sm-res-mg-t-30">
+
+        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0): ?>
+        <button class="btn btn-primary notika-btn-primary" id="FilterPermasalahanPokok">
+            <i class="notika-icon notika-search"></i>
+            <b>Filter Data</b>
+            <?php if (isset($CurrentPeriode) && ($CurrentPeriode || $CurrentKementerian)): ?>
+                <span class="badge" style="background:#f44336;margin-left:5px;">Aktif</span>
+            <?php endif; ?>
+        </button>
+        <?php endif; ?>
+
+        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
+        <button class="btn btn-success notika-btn-success" id="BtnInputPermasalahanPokok">
+            <i class="notika-icon notika-edit"></i>
+            <b>Input Permasalahan Pokok</b>
+        </button>
+        <?php endif; ?>
+
     </div>
+</div>
 
-    <!-- Modal Input Permasalahan Pokok (untuk Kementerian) -->
-    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
-    <div class="modal fade" id="ModalInputPermasalahanPokok" role="dialog">
-        <div class="modal-dialog modals-default">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">×</button>
-                    <h4 class="modal-title">Input Permasalahan Pokok</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="form-example-wrap" style="padding: 5px;">
-                                <!-- Informasi Kementerian dan Periode -->
-                                <div class="alert alert-info" style="margin-bottom: 20px;">
-                                    <div style="display: flex; align-items: flex-start;">
-                                        <i class="fa fa-info-circle" style="font-size: 16px; margin-right: 10px; margin-top: 2px;"></i>
-                                        <div>
-                                            <strong>Kementerian:</strong> <?= htmlspecialchars($UserKementerianName) ?><br>
-                                            <?php if (isset($UserPeriode)): ?>
-                                            <strong>Periode:</strong> <?= htmlspecialchars($UserPeriode) ?>
-                                            <?php else: ?>
-                                            <strong>Periode:</strong> <span style="color: #dc3545;">Belum ditentukan</span>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-example-int form-horizental">
-                                    <div class="form-group">
-                                        <div class="row">
-                                            <div class="col-lg-12">
-                                                <label class="hrzn-fm"><b>Nama Permasalahan Pokok</b> <span class="text-danger">*</span></label>
-                                                <div class="nk-int-st">
-                                                    <input type="text" class="form-control input-sm" id="NamaPermasalahanPokok" 
-                                                           placeholder="Masukkan nama permasalahan pokok" required
-                                                           style="height: 40px; font-size: 14px;">
-                                                    <small class="text-muted">Contoh: Ketersediaan air bersih, Aksesibilitas transportasi, dll.</small>
-                                                    <div class="error-message" id="InputError" style="color: red; display: none;"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-example-int">
-                                    <div class="row">
-                                        <div class="col-lg-12">
-                                            <button class="btn btn-success notika-btn-success" id="InputPermasalahanPokokBtn" style="padding: 8px 20px;">
-                                                <i class="fa fa-save"></i> SIMPAN
-                                            </button>
-                                            <button type="button" class="btn btn-default" data-dismiss="modal" style="padding: 8px 20px;">
-                                                <i class="fa fa-times"></i> BATAL
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="table-responsive">
+<table id="data-table-basic" class="table table-striped">
+<thead>
+<tr>
+    <th width="5%" class="text-center">No</th>
+
+    <?php if (!isset($_SESSION['Level']) || $_SESSION['Level'] == 0): ?>
+        <th width="25%">Kementerian</th>
     <?php endif; ?>
 
-    <!-- Modal Edit Permasalahan Pokok (untuk Kementerian) -->
+    <th>Permasalahan Pokok</th>
+    <th width="18%">Periode</th>
+
     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
-    <div class="modal fade" id="ModalEditPermasalahanPokok" role="dialog">
-        <div class="modal-dialog modals-default">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">×</button>
-                    <h4 class="modal-title">Edit Permasalahan Pokok</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="form-example-wrap" style="padding: 5px;">
-                                <!-- Informasi Kementerian dan Periode -->
-                                <div class="alert alert-info" style="margin-bottom: 20px;">
-                                    <div style="display: flex; align-items: flex-start;">
-                                        <i class="fa fa-info-circle" style="font-size: 16px; margin-right: 10px; margin-top: 2px;"></i>
-                                        <div>
-                                            <strong>Kementerian:</strong> <?= htmlspecialchars($UserKementerianName) ?><br>
-                                            <?php if (isset($UserPeriode)): ?>
-                                            <strong>Periode:</strong> <?= htmlspecialchars($UserPeriode) ?>
-                                            <?php else: ?>
-                                            <strong>Periode:</strong> <span style="color: #dc3545;">Belum ditentukan</span>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <input type="hidden" id="EditId">
-                                
-                                <div class="form-example-int form-horizental">
-                                    <div class="form-group">
-                                        <div class="row">
-                                            <div class="col-lg-12">
-                                                <label class="hrzn-fm"><b>Nama Permasalahan Pokok</b> <span class="text-danger">*</span></label>
-                                                <div class="nk-int-st">
-                                                    <input type="text" class="form-control input-sm" id="EditNamaPermasalahanPokok" 
-                                                           placeholder="Masukkan nama permasalahan pokok" required
-                                                           style="height: 40px; font-size: 14px;">
-                                                    <div class="error-message" id="EditError" style="color: red; display: none;"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-example-int">
-                                    <div class="row">
-                                        <div class="col-lg-12">
-                                            <button class="btn btn-success notika-btn-success" id="UpdatePermasalahanPokokBtn" style="padding: 8px 20px;">
-                                                <i class="fa fa-save"></i> UPDATE
-                                            </button>
-                                            <button type="button" class="btn btn-default" data-dismiss="modal" style="padding: 8px 20px;">
-                                                <i class="fa fa-times"></i> BATAL
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+        <th width="12%" class="text-center">Aksi</th>
+    <?php endif; ?>
+</tr>
+</thead>
+
+<tbody>
+<?php if (!empty($PermasalahanPokok)): ?>
+<?php $no=1; foreach($PermasalahanPokok as $row): ?>
+<tr>
+    <td class="text-center"><?= $no++ ?></td>
+
+    <?php if (!isset($_SESSION['Level']) || $_SESSION['Level'] == 0): ?>
+        <td><?= htmlspecialchars($row['NamaKementerian']) ?></td>
     <?php endif; ?>
 
-    <!-- Scripts -->
-    <script src="<?= base_url('js/vendor/jquery-1.12.4.min.js'); ?>"></script>
-    <script src="<?= base_url('js/bootstrap.min.js'); ?>"></script>
-    <script src="<?= base_url('js/data-table/jquery.dataTables.min.js'); ?>"></script>
-    <!-- HAPUS INI: <script src="<?= base_url('js/data-table/data-table-act.js'); ?>"></script> -->
+    <td><?= htmlspecialchars($row['NamaPermasalahanPokok']) ?></td>
+    <td><?= $row['TahunMulai'].' - '.$row['TahunAkhir'] ?></td>
 
-   <script>
+    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
+    <td class="text-center">
+        <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
+            <?php if ($row['IdKementerian'] == $_SESSION['IdKementerian']): ?>
+                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit"
+                        data-id="<?= $row['Id'] ?>"
+                        title="Edit">
+                    <i class="notika-icon notika-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus"
+                        data-id="<?= $row['Id'] ?>"
+                        title="Hapus">
+                    <i class="notika-icon notika-trash"></i>
+                </button>
+            <?php else: ?>
+                <button class="btn btn-sm btn-default amber-icon-notika btn-reco-mg btn-button-mg"
+                        disabled
+                        title="Data milik kementerian lain">
+                    <i class="notika-icon notika-lock"></i>
+                </button>
+            <?php endif; ?>
+        </div>
+    </td>
+    <?php endif; ?>
+</tr>
+<?php endforeach; ?>
+<?php else: ?>
+<tr>
+    <td colspan="<?= isset($_SESSION['Level']) && $_SESSION['Level']==1 ? 4 : 4 ?>" class="text-center">
+        <div class="alert alert-warning">
+            <i class="notika-icon notika-info"></i>
+            Belum ada data Permasalahan Pokok
+        </div>
+    </td>
+</tr>
+<?php endif; ?>
+</tbody>
+</table>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
+<div class="modal fade" id="ModalInputPermasalahanPokok">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">×</button>
+    <h4 class="modal-title">Input Permasalahan Pokok</h4>
+</div>
+<div class="modal-body">
+
+<div class="alert alert-info">
+    <b>Kementerian :</b> <?= htmlspecialchars($UserKementerianName) ?><br>
+    <b>Periode :</b> <?= htmlspecialchars($UserPeriode) ?>
+</div>
+
+<div class="form-example-wrap">
+    <div class="form-example-int form-horizental">
+        <div class="form-group">
+            <label><b>Nama Permasalahan Pokok</b></label>
+            <textarea class="form-control" id="NamaPermasalahanPokok" rows="4"
+                placeholder="Tuliskan isu strategis KPermasalahanPokok..."></textarea>
+        </div>
+    </div>
+
+    <button class="btn btn-success notika-btn-success" id="InputPermasalahanPokok">
+        <i class="notika-icon notika-checked"></i> SIMPAN
+    </button>
+    <button class="btn btn-default" data-dismiss="modal">BATAL</button>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+<?php endif; ?>
+
+<?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
+<div class="modal fade" id="ModalEditPermasalahanPokok">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">×</button>
+    <h4 class="modal-title">Edit Permasalahan Pokok</h4>
+</div>
+<div class="modal-body">
+
+<input type="hidden" id="EditId">
+
+<div class="form-example-wrap">
+    <div class="form-example-int">
+        <label><b>Nama Permasalahan Pokok</b></label>
+        <textarea class="form-control" id="EditNamaPermasalahanPokok" rows="4"></textarea>
+    </div>
+
+    <button class="btn btn-success notika-btn-success" id="UpdatePermasalahanPokok">
+        <i class="notika-icon notika-checked"></i> UPDATE
+    </button>
+    <button class="btn btn-default" data-dismiss="modal">BATAL</button>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+<?php endif; ?>
+
+<script src="<?= base_url('js/vendor/jquery-1.12.4.min.js'); ?>"></script>
+<script src="<?= base_url('js/bootstrap.min.js'); ?>"></script>
+<script src="<?= base_url('js/wow.min.js'); ?>"></script>
+<script src="<?= base_url('js/jquery-price-slider.js'); ?>"></script>
+<script src="<?= base_url('js/owl.carousel.min.js'); ?>"></script>
+<script src="<?= base_url('js/jquery.scrollUp.min.js'); ?>"></script>
+<script src="<?= base_url('js/meanmenu/jquery.meanmenu.js'); ?>"></script>
+<script src="<?= base_url('js/scrollbar/jquery.mCustomScrollbar.concat.min.js'); ?>"></script>
+<script src="<?= base_url('js/data-table/jquery.dataTables.min.js'); ?>"></script>
+<script src="<?= base_url('js/main.js'); ?>"></script>
+
+<script>
 $(document).ready(function () {
 
-    /* =========================================================
+    /* =====================================================
      * GLOBAL
-     * ========================================================= */
-    const BaseURL = '<?= base_url() ?>';
+     * ===================================================== */
+    const BaseURL   = "<?= site_url() ?>";
     const UserLevel = <?= isset($_SESSION['Level']) ? (int)$_SESSION['Level'] : -1 ?>;
-    const UserKementerianId = '<?= $_SESSION['IdKementerian'] ?? '' ?>';
 
-    /* =========================================================
-     * DATATABLE INIT (JANGAN DESTROY & EMPTY)
-     * ========================================================= */
-    if (!$.fn.DataTable.isDataTable('#data-table-basic')) {
-        $('#data-table-basic').DataTable({
+    /* =====================================================
+     * DATATABLE - FIXED VERSION
+     * ===================================================== */
+    const tableSelector = '#data-table-basic';
+    
+    // Hapus instance DataTables yang ada jika ada
+    if ($.fn.DataTable.isDataTable(tableSelector)) {
+        $(tableSelector).DataTable().destroy();
+        $(tableSelector).find('tbody').empty(); // Kosongkan tbody untuk memastikan
+    }
+    
+    // Tunggu sejenak untuk memastikan DOM siap
+    setTimeout(function() {
+        // Inisialisasi DataTables dengan konfigurasi yang aman
+        const table = $(tableSelector).DataTable({
             pageLength: 10,
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
+            autoWidth: false,
+            ordering: true,
             order: [],
+            processing: true,
             language: {
                 search: "Cari:",
                 lengthMenu: "Tampilkan _MENU_ data",
-                zeroRecords: "Tidak ada data ditemukan",
-                info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                zeroRecords: "Data tidak ditemukan",
+                info: "Menampilkan _START_ - _END_ dari _TOTAL_ data",
                 infoEmpty: "Tidak ada data",
+                infoFiltered: "(difilter dari _MAX_ total data)",
                 paginate: {
                     next: "Selanjutnya",
                     previous: "Sebelumnya"
@@ -400,182 +256,260 @@ $(document).ready(function () {
             },
             columnDefs: [
                 {
-                    // Level 1 → kolom No & Aksi
-                    targets: UserLevel == 1 ? [0, 3] : [0],
-                    orderable: false
+                    targets: '_all', // Semua kolom
+                    defaultContent: '' // Default content untuk cell kosong
                 }
-            ]
+            ],
+            drawCallback: function(settings) {
+                // Pastikan semua cell memiliki _DT_CellIndex
+                const api = this.api();
+                const rows = api.rows().nodes();
+                const cells = api.cells().nodes();
+                
+                // Debug log untuk melihat jika ada masalah
+                console.log('DataTables initialized successfully');
+                console.log('Total rows:', api.rows().count());
+                console.log('Total cells:', api.cells().count());
+            }
         });
-    }
+        
+        // Tambahkan event untuk cek jika ada error
+        table.on('error.dt', function(e, settings, techNote, message) {
+            console.error('DataTables error:', message);
+            console.error('Tech note:', techNote);
+        });
+    }, 100);
 
-    /* =========================================================
-     * INPUT PERMASALAHAN POKOK
-     * ========================================================= */
-    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
+    /* =====================================================
+     * FILTER (ADMIN)
+     * ===================================================== */
+    $('#FilterPermasalahanPokok').on('click', function () {
+        $('#ModalFilter').modal('show');
+    });
 
+    $('#FilterPeriode').on('change', function () {
+        const periode = $(this).val();
+        const select  = $('#FilterKementerianSelect');
+
+        select.html('<option value="">Semua Kementerian</option>');
+
+        if (!periode) return;
+
+        const [tm, ta] = periode.split('|');
+
+        $.post(BaseURL + 'Kementerian/GetKementerianByPeriode', {
+            TahunMulai: tm,
+            TahunAkhir: ta
+        }, function (res) {
+            let data;
+            try {
+                data = JSON.parse(res);
+            } catch (e) {
+                console.error('Error parsing response:', e);
+                return;
+            }
+
+            if (Array.isArray(data)) {
+                data.forEach(item => {
+                    select.append(
+                        `<option value="${item.Id}">${item.NamaKementerian}</option>`
+                    );
+                });
+            }
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            console.error('AJAX Error:', textStatus, errorThrown);
+        });
+    });
+
+    $('#ApplyFilter').on('click', function () {
+        let url = BaseURL + 'Kementerian/PermasalahanPokok?';
+
+        const periode     = $('#FilterPeriode').val();
+        const kementerian = $('#FilterKementerianSelect').val();
+
+        if (periode)     url += 'periode=' + encodeURIComponent(periode) + '&';
+        if (kementerian) url += 'kementerian=' + encodeURIComponent(kementerian);
+
+        window.location.href = url.replace(/&$/, '');
+    });
+
+    $('#ResetFilter').on('click', function () {
+        window.location.href = BaseURL + 'Kementerian/PermasalahanPokok';
+    });
+
+    /* =====================================================
+     * INPUT ISU GLOBAL (LEVEL 1)
+     * ===================================================== */
     $('#BtnInputPermasalahanPokok').on('click', function () {
-        if (!UserKementerianId) {
-            alert('Session tidak valid, silakan login ulang');
-            window.location.href = BaseURL + 'Auth/Logout';
-            return;
-        }
         $('#NamaPermasalahanPokok').val('');
-        $('#InputError').hide();
         $('#ModalInputPermasalahanPokok').modal('show');
     });
 
-    $('#InputPermasalahanPokokBtn').on('click', function () {
+    $('#InputPermasalahanPokok').on('click', function () {
         const nama = $('#NamaPermasalahanPokok').val().trim();
 
         if (!nama) {
-            $('#InputError').text('Nama wajib diisi').show();
+            alert('Nama PermasalahanPokok wajib diisi');
             return;
         }
 
-        const btn = $(this);
-        const text = btn.html();
-        btn.prop('disabled', true).html('Menyimpan...');
+        if (nama.length < 5) {
+            alert('Nama PermasalahanPokok minimal 5 karakter');
+            return;
+        }
 
         $.post(BaseURL + 'Kementerian/InputPermasalahanPokok', {
             NamaPermasalahanPokok: nama
-        }).done(function (res) {
+        }, function (res) {
+            let r;
             try {
-                const r = JSON.parse(res);
-                if (r.success) {
-                    alert(r.message);
-                    location.reload();
-                } else {
-                    alert(r.message);
-                }
-            } catch {
-                alert(res);
+                r = JSON.parse(res);
+            } catch (e) {
+                alert('Response server tidak valid');
+                console.error('Parse error:', e);
+                return;
             }
-        }).fail(function () {
-            alert('Gagal koneksi ke server');
-        }).always(function () {
-            btn.prop('disabled', false).html(text);
+
+            alert(r.message);
+            if (r.success) {
+                $('#ModalInputPermasalahanPokok').modal('hide');
+                location.reload();
+            }
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            alert('Gagal menghubungi server: ' + textStatus);
+            console.error('AJAX Error:', errorThrown);
         });
     });
 
-    <?php endif; ?>
-
-    /* =========================================================
-     * EDIT PERMASALAHAN POKOK (FIXED)
-     * ========================================================= */
-    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
-
-    $(document).on('click', '.EditPermasalahanPokok', function () {
-        const id = $(this).data('id');
-
-        if (!id) {
-            alert('ID tidak valid');
-            return;
-        }
-
-        $('#EditId').val('');
-        $('#EditNamaPermasalahanPokok').val('');
-        $('#EditError').hide();
-
-        $.post(BaseURL + 'Kementerian/GetPermasalahanPokokById', {
-            id: id
-        }).done(function (res) {
-            const r = JSON.parse(res);
-            if (r.success) {
-                $('#EditId').val(r.data.Id);
-                $('#EditNamaPermasalahanPokok').val(r.data.NamaPermasalahanPokok);
+    
+$(document).on('click', '.Edit', function (e) {
+    e.preventDefault();
+    
+    const id = $(this).data('id');
+    const button = $(this);
+    
+    // Tampilkan loading state
+    button.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
+    
+    $.ajax({
+        url: BaseURL + 'Kementerian/GetPermasalahanPokokById',
+        type: 'POST',
+        dataType: 'json',
+        data: { Id: id },
+        success: function (response) {
+            button.prop('disabled', false).html('<i class="notika-icon notika-edit"></i>');
+            
+            if (response.success) {
+                $('#EditId').val(response.data.Id);
+                $('#EditNamaPermasalahanPokok').val(response.data.NamaPermasalahanPokok);
                 $('#ModalEditPermasalahanPokok').modal('show');
             } else {
-                alert(r.message);
+                alert('Error: ' + response.message);
             }
-        }).fail(function () {
-            alert('Gagal memuat data');
-        });
-    });
-
-    $('#UpdatePermasalahanPokokBtn').on('click', function () {
-        const id = $('#EditId').val();
-        const nama = $('#EditNamaPermasalahanPokok').val().trim();
-
-        if (!id || !nama) {
-            $('#EditError').text('Data tidak lengkap').show();
-            return;
+        },
+        error: function (xhr, status, error) {
+            button.prop('disabled', false).html('<i class="notika-icon notika-edit"></i>');
+            alert('Gagal mengambil data: ' + error);
+            console.error('AJAX Error:', error);
         }
+    });
+});
 
-        const btn = $(this);
-        const text = btn.html();
-        btn.prop('disabled', true).html('Mengupdate...');
-
-        $.post(BaseURL + 'Kementerian/UpdatePermasalahanPokok', {
+/* =====================================================
+ * UPDATE ISU GLOBAL - FIXED VERSION
+ * ===================================================== */
+$(document).on('click', '#UpdatePermasalahanPokok', function (e) {
+    e.preventDefault();
+    
+    const id = $('#EditId').val();
+    const nama = $('#EditNamaPermasalahanPokok').val().trim();
+    const button = $(this);
+    
+    // Validasi
+    if (!nama) {
+        alert('Nama PermasalahanPokok wajib diisi');
+        return;
+    }
+    
+    if (nama.length < 5) {
+        alert('Nama PermasalahanPokok minimal 5 karakter');
+        return;
+    }
+    
+    // Tampilkan loading state
+    const originalText = button.html();
+    button.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
+    
+    $.ajax({
+        url: BaseURL + 'Kementerian/UpdatePermasalahanPokok',
+        type: 'POST',
+        dataType: 'json',
+        data: { 
             Id: id,
             NamaPermasalahanPokok: nama
-        }).done(function (res) {
-            const r = JSON.parse(res);
-            if (r.success) {
-                alert(r.message);
-                location.reload();
-            } else {
-                alert(r.message);
+        },
+        success: function (response) {
+            button.prop('disabled', false).html(originalText);
+            
+            alert(response.message);
+            if (response.success) {
+                $('#ModalEditPermasalahanPokok').modal('hide');
+                setTimeout(function() {
+                    location.reload();
+                }, 500);
             }
-        }).fail(function () {
-            alert('Gagal update');
-        }).always(function () {
-            btn.prop('disabled', false).html(text);
-        });
-    });
-
-    <?php endif; ?>
-
-    /* =========================================================
-     * HAPUS PERMASALAHAN POKOK (FIXED)
-     * ========================================================= */
-    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
-
-    $(document).on('click', '.HapusPermasalahanPokok', function () {
-        const id = $(this).data('id');
-        const nama = $(this).data('nama');
-
-        if (!id) {
-            alert('ID tidak valid');
-            return;
+        },
+        error: function (xhr, status, error) {
+            button.prop('disabled', false).html(originalText);
+            alert('Gagal update data: ' + error);
+            console.error('AJAX Error:', error);
         }
+    });
+});
+    /* =====================================================
+     * DELETE ISU GLOBAL
+     * ===================================================== */
+    $(document).on('click', '.Hapus', function () {
+        const id = $(this).data('id');
 
-        if (!confirm('Hapus "' + nama + '" ?')) return;
+        if (!confirm('Yakin ingin menghapus data ini?')) return;
 
         $.post(BaseURL + 'Kementerian/DeletePermasalahanPokok', {
             Id: id
-        }).done(function (res) {
-            const r = JSON.parse(res);
-            if (r.success) {
-                alert(r.message);
-                location.reload();
-            } else {
-                alert(r.message);
+        }, function (res) {
+            let r;
+            try {
+                r = JSON.parse(res);
+            } catch (e) {
+                alert('Response server tidak valid');
+                console.error('Parse error:', e);
+                return;
             }
-        }).fail(function () {
-            alert('Gagal menghapus data');
+
+            alert(r.message);
+            if (r.success) location.reload();
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            alert('Gagal menghapus data: ' + textStatus);
+            console.error('AJAX Error:', errorThrown);
         });
     });
 
-    <?php endif; ?>
-
-    /* =========================================================
-     * ENTER KEY HANDLER
-     * ========================================================= */
-    $('#NamaPermasalahanPokok').on('keypress', function (e) {
-        if (e.which === 13) {
-            $('#InputPermasalahanPokokBtn').click();
-        }
-    });
-
-    $('#EditNamaPermasalahanPokok').on('keypress', function (e) {
-        if (e.which === 13) {
-            $('#UpdatePermasalahanPokokBtn').click();
+    /* =====================================================
+     * ERROR HANDLING UNTUK DATATABLES
+     * ===================================================== */
+    // Tangkap error KPermasalahanPokok
+    window.addEventListener('error', function(e) {
+        if (e.message.includes('_DT_CellIndex')) {
+            console.error('DataTables Cell Index Error detected');
+            // Coba reload tanpa DataTables
+            if ($.fn.DataTable.isDataTable(tableSelector)) {
+                $(tableSelector).DataTable().destroy();
+                $(tableSelector).removeAttr('style');
+            }
         }
     });
 
 });
 </script>
-
-</div>
-</body>
-</html>
