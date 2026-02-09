@@ -70,7 +70,7 @@
     </select>
   </div>
 
-  <?php if ($_SESSION['Level']==3 && $UrusanAktif) { ?>
+  <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3 && $UrusanAktif) { ?>
   <div class="col-lg-3" style="margin-top:25px;">
     <button class="btn btn-success notika-btn-success"
       data-toggle="modal" data-target="#ModalInputIKK">
@@ -91,7 +91,9 @@
   <th class="text-center"rowspan="2" width="90">Baseline<br>2024</th>
   <th class="text-center"colspan="6">Target Tahun</th>
   <th rowspan="2">Keterangan</th>
+   <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
   <th class="text-center" rowspan="2" width="120">Aksi</th>
+  <?php } ?>
 </tr>
 <tr class="text-center">
   <th class="text-center">2025</th>
