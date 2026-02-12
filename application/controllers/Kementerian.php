@@ -2774,7 +2774,554 @@ public function DeleteSasaranStrategis() {
 
     echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
 }
+public function NSPK() {
+    $Header['Halaman'] = 'NSPK';
 
+    // Filter data NSPK berdasarkan level user (opsional)
+    if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) {
+        $this->db->where('Idkementerian', $_SESSION['IdKementerian']);
+    }
 
+    $this->db->where('deleted_at IS NULL');
+    $this->db->order_by('tahun_penetapan', 'DESC');
+    $this->db->order_by('id', 'DESC');
+    $Data['NSPK'] = $this->db->get('nspk')->result_array();
+
+    // === INFO KEMENTERIAN & PERIODE (INI YANG ANDA KURANG) ===
+    $Data['UserKementerianName'] = '-';
+    $Data['UserPeriode']         = '-';
+
+    if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) {
+        // Cek apakah IdKementerian ada di session
+        if (isset($_SESSION['IdKementerian']) && is_numeric($_SESSION['IdKementerian'])) {
+            $this->db->where('Id', $_SESSION['IdKementerian']);
+            $this->db->where('deleted_at IS NULL');
+            $kementerian = $this->db->get('kementerian')->row_array();
+
+            if ($kementerian) {
+                $Data['UserKementerianName'] = $kementerian['NamaKementerian'] ?? '-';
+                $Data['UserPeriode']         = ($kementerian['TahunMulai'] ?? '-') . ' - ' . ($kementerian['TahunAkhir'] ?? '-');
+            } else {
+                $Data['UserKementerianName'] = 'Data kementerian tidak ditemukan (ID: ' . $_SESSION['IdKementerian'] . ')';
+            }
+        } else {
+            $Data['UserKementerianName'] = 'Session IdKementerian tidak ditemukan';
+        }
+    } else {
+        $Data['UserKementerianName'] = 'Login sebagai user kementerian (level 1) untuk melihat info';
+    }
+
+    $this->load->view('Kementerian/header', $Header);
+    $this->load->view('Kementerian/NSPK', $Data);
+}
+public function InputNSPK() {
+    // Cek session login (minimal)
+    if (!isset($_SESSION['Level'])) {
+        echo 'Session login tidak valid';
+        return;
+    }
+
+    // Ambil semua input dari form
+    $kode_nspk      = trim($this->input->post('kode_nspk') ?? '');
+    $judul_nspk     = trim($this->input->post('judul_nspk') ?? '');
+    $jenis_nspk     = $this->input->post('jenis_nspk') ?? '';
+    $bidang         = trim($this->input->post('bidang') ?? '');
+    $tahun_penetapan = $this->input->post('tahun_penetapan') ?? null;
+    $status         = $this->input->post('status') ?? 'Berlaku';
+    $keterangan    = trim($this->input->post('keterangan') ?? '');
+
+    // Validasi minimal (wajib diisi)
+    if (empty($kode_nspk)) {
+        echo 'Kode NSPK wajib diisi';
+        return;
+    }
+    if (empty($judul_nspk)) {
+        echo 'Judul NSPK wajib diisi';
+        return;
+    }
+    if (empty($jenis_nspk)) {
+        echo 'Jenis NSPK wajib dipilih';
+        return;
+    }
+    if (empty($bidang)) {
+        echo 'Bidang wajib diisi';
+        return;
+    }
+
+    // Validasi tahun_penetapan (harus angka 4 digit, range YEAR)
+    if (!empty($tahun_penetapan)) {
+        if (!is_numeric($tahun_penetapan) || strlen($tahun_penetapan) != 4 || $tahun_penetapan < 1901 || $tahun_penetapan > 2155) {
+            echo 'Tahun Penetapan harus 4 digit (1901-2155)';
+            return;
+        }
+        $tahun_penetapan = (int)$tahun_penetapan;
+    }
+
+    // Siapkan data untuk insert
+    $data = [
+        'kode_nspk'         => $kode_nspk,
+        'judul_nspk'        => $judul_nspk,
+        'jenis_nspk'        => $jenis_nspk,
+        'bidang'            => $bidang,
+        'tahun_penetapan'   => $tahun_penetapan,
+        'status'            => $status,
+        'keterangan'        => $keterangan,
+        'created_at'        => date('Y-m-d H:i:s')
+    ];
+
+    // Jika level 1 (kementerian), tambahkan Idkementerian dari session
+    if ($_SESSION['Level'] == 1 && isset($_SESSION['IdKementerian'])) {
+        $data['Idkementerian'] = (int)$_SESSION['IdKementerian'];
+    }
+
+    // Eksekusi insert
+    $this->db->insert('nspk', $data);
+
+    // Cek hasil
+    if ($this->db->affected_rows() > 0) {
+        echo '1';
+    } else {
+        // Jika gagal, tampilkan pesan error database (untuk debug)
+        $error = $this->db->error();
+        echo 'Gagal Input NSPK! Error: ' . $error['message'];
+    }
+}
+
+public function UpdateNSPK() {
+    $id = $this->input->post('id');
+    if (!$id) {
+        echo 'ID tidak valid';
+        return;
+    }
+
+    $data = [
+        'kode_nspk'         => $this->input->post('kode_nspk'),
+        'judul_nspk'        => $this->input->post('judul_nspk'),
+        'jenis_nspk'        => $this->input->post('jenis_nspk'),
+        'bidang'            => $this->input->post('bidang'),
+        'tahun_penetapan'   => $this->input->post('tahun_penetapan'),
+        'status'            => $this->input->post('status'),
+        'keterangan'        => $this->input->post('keterangan'),
+        'updated_at'        => date('Y-m-d H:i:s')
+    ];
+
+    $this->db->where('id', $id);
+    $this->db->update('nspk', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Update NSPK!';
+}
+
+public function DeleteNSPK() {
+    $id = $this->input->post('id');
+    if (!$id) {
+        echo 'ID tidak valid';
+        return;
+    }
+
+    $this->db->where('id', $id);
+    $this->db->update('nspk', ['deleted_at' => date('Y-m-d H:i:s')]);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Hapus NSPK!';
+}
+
+// ====================== RENSTRA ======================
+
+public function Renstra() {
+    $Header['Halaman'] = 'Renstra';
+
+    // Filter hanya data milik kementerian login (level 1)
+    if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) {
+        $this->db->where('id_kementerian', $_SESSION['IdKementerian']);
+    }
+
+    $this->db->where('deleted_at IS NULL');
+    $this->db->order_by('kode_pn', 'ASC');
+    $Data['PN'] = $this->db->get('renstra_pn')->result_array();
+
+    // === INFO KEMENTERIAN & PERIODE (INI YANG ANDA KURANG) ===
+    $Data['UserKementerianName'] = '-';
+    $Data['UserPeriode']         = '-';
+
+    if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) {
+        // Cek apakah IdKementerian ada di session
+        if (isset($_SESSION['IdKementerian']) && is_numeric($_SESSION['IdKementerian'])) {
+            $this->db->where('Id', $_SESSION['IdKementerian']);
+            $this->db->where('deleted_at IS NULL');
+            $kementerian = $this->db->get('kementerian')->row_array();
+
+            if ($kementerian) {
+                $Data['UserKementerianName'] = $kementerian['NamaKementerian'] ?? '-';
+                $Data['UserPeriode']         = ($kementerian['TahunMulai'] ?? '-') . ' - ' . ($kementerian['TahunAkhir'] ?? '-');
+            } else {
+                $Data['UserKementerianName'] = 'Data kementerian tidak ditemukan (ID: ' . $_SESSION['IdKementerian'] . ')';
+            }
+        } else {
+            $Data['UserKementerianName'] = 'Session IdKementerian tidak ditemukan';
+        }
+    } else {
+        $Data['UserKementerianName'] = 'Login sebagai user kementerian (level 1) untuk melihat info';
+    }
+
+    // Load nested data (PP, KP, Pro-P)
+    foreach ($Data['PN'] as &$pn) {
+        $this->db->where('id_pn', $pn['id']);
+        $this->db->where('deleted_at IS NULL');
+        $pn['PP'] = $this->db->get('renstra_pp')->result_array();
+
+        foreach ($pn['PP'] as &$pp) {
+            $this->db->where('id_pp', $pp['id']);
+            $this->db->where('deleted_at IS NULL');
+            $pp['KP'] = $this->db->get('renstra_kp')->result_array();
+
+            foreach ($pp['KP'] as &$kp) {
+                $this->db->where('id_kp', $kp['id']);
+                $this->db->where('deleted_at IS NULL');
+                $kp['ProP'] = $this->db->get('renstra_prop')->result_array();
+            }
+        }
+    }
+
+    $this->load->view('Kementerian/header', $Header);
+    $this->load->view('Kementerian/Renstra', $Data);
+}
+
+// ===================== CRUD PN =====================
+public function InputPN() {
+    if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 1) {
+        echo 'Akses ditolak';
+        return;
+    }
+
+    $data = [
+        'id_kementerian' => $_SESSION['IdKementerian'],
+        'kode_pn'        => trim($this->input->post('kode_pn')),
+        'nama_pn'        => trim($this->input->post('nama_pn')),
+        'tahun_mulai'    => $this->input->post('tahun_mulai'),
+        'tahun_akhir'    => $this->input->post('tahun_akhir'),
+        'keterangan'     => trim($this->input->post('keterangan')),
+        'created_at'     => date('Y-m-d H:i:s')
+    ];
+
+    $this->db->insert('renstra_pn', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Input PN!';
+}
+
+public function UpdatePN() {
+    if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 1) {
+        echo 'Akses ditolak';
+        return;
+    }
+
+    $id = $this->input->post('id');
+    $this->db->where('id', $id);
+    $this->db->where('id_kementerian', $_SESSION['IdKementerian']);
+    $row = $this->db->get('renstra_pn')->row_array();
+
+    if (!$row) {
+        echo 'Data tidak ditemukan atau bukan milik Anda';
+        return;
+    }
+
+    $data = [
+        'kode_pn'        => trim($this->input->post('kode_pn')),
+        'nama_pn'        => trim($this->input->post('nama_pn')),
+        'tahun_mulai'    => $this->input->post('tahun_mulai'),
+        'tahun_akhir'    => $this->input->post('tahun_akhir'),
+        'keterangan'     => trim($this->input->post('keterangan')),
+        'updated_at'     => date('Y-m-d H:i:s')
+    ];
+
+    $this->db->where('id', $id);
+    $this->db->update('renstra_pn', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Update PN!';
+}
+
+public function DeletePN() {
+    if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 1) {
+        echo 'Akses ditolak';
+        return;
+    }
+
+    $id = $this->input->post('id');
+    $this->db->where('id', $id);
+    $this->db->where('id_kementerian', $_SESSION['IdKementerian']);
+    $row = $this->db->get('renstra_pn')->row_array();
+
+    if (!$row) {
+        echo 'Data tidak ditemukan atau bukan milik Anda';
+        return;
+    }
+
+    $this->db->where('id', $id);
+    $this->db->update('renstra_pn', ['deleted_at' => date('Y-m-d H:i:s')]);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Hapus PN!';
+}
+
+// ===================== CRUD PP =====================
+public function InputPP() {
+    if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 1) {
+        echo 'Akses ditolak';
+        return;
+    }
+
+    $id_pn = $this->input->post('id_pn');
+    $this->db->where('id', $id_pn);
+    $this->db->where('id_kementerian', $_SESSION['IdKementerian']);
+    $pn = $this->db->get('renstra_pn')->row_array();
+
+    if (!$pn) {
+        echo 'PN tidak ditemukan atau bukan milik Anda';
+        return;
+    }
+
+    $data = [
+        'id_pn'       => $id_pn,
+        'kode_pp'     => trim($this->input->post('kode_pp')),
+        'nama_pp'     => trim($this->input->post('nama_pp')),
+        'keterangan'  => trim($this->input->post('keterangan')),
+        'created_at'  => date('Y-m-d H:i:s')
+    ];
+
+    $this->db->insert('renstra_pp', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Input PP!';
+}
+
+public function UpdatePP() {
+    if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 1) {
+        echo 'Akses ditolak';
+        return;
+    }
+
+    $id = $this->input->post('id');
+    $this->db->select('pp.*, pn.id_kementerian');
+    $this->db->from('renstra_pp pp');
+    $this->db->join('renstra_pn pn', 'pp.id_pn = pn.id');
+    $this->db->where('pp.id', $id);
+    $this->db->where('pp.deleted_at IS NULL');
+    $pp = $this->db->get()->row_array();
+
+    if (!$pp || $pp['id_kementerian'] != $_SESSION['IdKementerian']) {
+        echo 'Data tidak ditemukan atau bukan milik Anda';
+        return;
+    }
+
+    $data = [
+        'kode_pp'     => trim($this->input->post('kode_pp')),
+        'nama_pp'     => trim($this->input->post('nama_pp')),
+        'keterangan'  => trim($this->input->post('keterangan')),
+        'updated_at'  => date('Y-m-d H:i:s')
+    ];
+
+    $this->db->where('id', $id);
+    $this->db->update('renstra_pp', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Update PP!';
+}
+
+public function DeletePP() {
+    if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 1) {
+        echo 'Akses ditolak';
+        return;
+    }
+
+    $id = $this->input->post('id');
+    $this->db->select('pp.*, pn.id_kementerian');
+    $this->db->from('renstra_pp pp');
+    $this->db->join('renstra_pn pn', 'pp.id_pn = pn.id');
+    $this->db->where('pp.id', $id);
+    $this->db->where('pp.deleted_at IS NULL');
+    $pp = $this->db->get()->row_array();
+
+    if (!$pp || $pp['id_kementerian'] != $_SESSION['IdKementerian']) {
+        echo 'Data tidak ditemukan atau bukan milik Anda';
+        return;
+    }
+
+    $this->db->where('id', $id);
+    $this->db->update('renstra_pp', ['deleted_at' => date('Y-m-d H:i:s')]);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Hapus PP!';
+}
+
+// ===================== CRUD KP =====================
+public function InputKP() {
+    if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 1) {
+        echo 'Akses ditolak';
+        return;
+    }
+
+    $id_pp = $this->input->post('id_pp');
+    $this->db->select('pp.*, pn.id_kementerian');
+    $this->db->from('renstra_pp pp');
+    $this->db->join('renstra_pn pn', 'pp.id_pn = pn.id');
+    $this->db->where('pp.id', $id_pp);
+    $this->db->where('pp.deleted_at IS NULL');
+    $pp = $this->db->get()->row_array();
+
+    if (!$pp || $pp['id_kementerian'] != $_SESSION['IdKementerian']) {
+        echo 'PP tidak ditemukan atau bukan milik Anda';
+        return;
+    }
+
+    $data = [
+        'id_pp'       => $id_pp,
+        'kode_kp'     => trim($this->input->post('kode_kp')),
+        'nama_kp'     => trim($this->input->post('nama_kp')),
+        'keterangan'  => trim($this->input->post('keterangan')),
+        'created_at'  => date('Y-m-d H:i:s')
+    ];
+
+    $this->db->insert('renstra_kp', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Input KP!';
+}
+
+public function UpdateKP() {
+    if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 1) {
+        echo 'Akses ditolak';
+        return;
+    }
+
+    $id = $this->input->post('id');
+    $this->db->select('kp.*, pp.id_pn, pn.id_kementerian');
+    $this->db->from('renstra_kp kp');
+    $this->db->join('renstra_pp pp', 'kp.id_pp = pp.id');
+    $this->db->join('renstra_pn pn', 'pp.id_pn = pn.id');
+    $this->db->where('kp.id', $id);
+    $this->db->where('kp.deleted_at IS NULL');
+    $kp = $this->db->get()->row_array();
+
+    if (!$kp || $kp['id_kementerian'] != $_SESSION['IdKementerian']) {
+        echo 'Data tidak ditemukan atau bukan milik Anda';
+        return;
+    }
+
+    $data = [
+        'kode_kp'     => trim($this->input->post('kode_kp')),
+        'nama_kp'     => trim($this->input->post('nama_kp')),
+        'keterangan'  => trim($this->input->post('keterangan')),
+        'updated_at'  => date('Y-m-d H:i:s')
+    ];
+
+    $this->db->where('id', $id);
+    $this->db->update('renstra_kp', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Update KP!';
+}
+
+public function DeleteKP() {
+    if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 1) {
+        echo 'Akses ditolak';
+        return;
+    }
+
+    $id = $this->input->post('id');
+    $this->db->select('kp.*, pp.id_pn, pn.id_kementerian');
+    $this->db->from('renstra_kp kp');
+    $this->db->join('renstra_pp pp', 'kp.id_pp = pp.id');
+    $this->db->join('renstra_pn pn', 'pp.id_pn = pn.id');
+    $this->db->where('kp.id', $id);
+    $this->db->where('kp.deleted_at IS NULL');
+    $kp = $this->db->get()->row_array();
+
+    if (!$kp || $kp['id_kementerian'] != $_SESSION['IdKementerian']) {
+        echo 'Data tidak ditemukan atau bukan milik Anda';
+        return;
+    }
+
+    $this->db->where('id', $id);
+    $this->db->update('renstra_kp', ['deleted_at' => date('Y-m-d H:i:s')]);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Hapus KP!';
+}
+
+// ===================== CRUD Pro-P =====================
+public function InputProP() {
+    if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 1) {
+        echo 'Akses ditolak';
+        return;
+    }
+
+    $id_kp = $this->input->post('id_kp');
+    $this->db->select('kp.*, pp.id_pn, pn.id_kementerian');
+    $this->db->from('renstra_kp kp');
+    $this->db->join('renstra_pp pp', 'kp.id_pp = pp.id');
+    $this->db->join('renstra_pn pn', 'pp.id_pn = pn.id');
+    $this->db->where('kp.id', $id_kp);
+    $this->db->where('kp.deleted_at IS NULL');
+    $kp = $this->db->get()->row_array();
+
+    if (!$kp || $kp['id_kementerian'] != $_SESSION['IdKementerian']) {
+        echo 'KP tidak ditemukan atau bukan milik Anda';
+        return;
+    }
+
+    $data = [
+        'id_kp'       => $id_kp,
+        'kode_prop'   => trim($this->input->post('kode_prop')),
+        'nama_prop'   => trim($this->input->post('nama_prop')),
+        'target'      => trim($this->input->post('target')),
+        'indikator'   => trim($this->input->post('indikator')),
+        'keterangan'  => trim($this->input->post('keterangan')),
+        'created_at'  => date('Y-m-d H:i:s')
+    ];
+
+    $this->db->insert('renstra_prop', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Input Proyek Prioritas';
+}
+
+public function UpdateProP() {
+    if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 1) {
+        echo 'Akses ditolak';
+        return;
+    }
+
+    $id = $this->input->post('id');
+    $this->db->select('prop.*, kp.id_pp, pp.id_pn, pn.id_kementerian');
+    $this->db->from('renstra_prop prop');
+    $this->db->join('renstra_kp kp', 'prop.id_kp = kp.id');
+    $this->db->join('renstra_pp pp', 'kp.id_pp = pp.id');
+    $this->db->join('renstra_pn pn', 'pp.id_pn = pn.id');
+    $this->db->where('prop.id', $id);
+    $this->db->where('prop.deleted_at IS NULL');
+    $prop = $this->db->get()->row_array();
+
+    if (!$prop || $prop['id_kementerian'] != $_SESSION['IdKementerian']) {
+        echo 'Data tidak ditemukan atau bukan milik Anda';
+        return;
+    }
+
+    $data = [
+        'kode_prop'   => trim($this->input->post('kode_prop')),
+        'nama_prop'   => trim($this->input->post('nama_prop')),
+        'target'      => trim($this->input->post('target')),
+        'indikator'   => trim($this->input->post('indikator')),
+        'keterangan'  => trim($this->input->post('keterangan')),
+        'updated_at'  => date('Y-m-d H:i:s')
+    ];
+
+    $this->db->where('id', $id);
+    $this->db->update('renstra_prop', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Update Proyek Prioritas';
+}
+
+public function DeleteProP() {
+    if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 1) {
+        echo 'Akses ditolak';
+        return;
+    }
+
+    $id = $this->input->post('id');
+    $this->db->select('prop.*, kp.id_pp, pp.id_pn, pn.id_kementerian');
+    $this->db->from('renstra_prop prop');
+    $this->db->join('renstra_kp kp', 'prop.id_kp = kp.id');
+    $this->db->join('renstra_pp pp', 'kp.id_pp = pp.id');
+    $this->db->join('renstra_pn pn', 'pp.id_pn = pn.id');
+    $this->db->where('prop.id', $id);
+    $this->db->where('prop.deleted_at IS NULL');
+    $prop = $this->db->get()->row_array();
+
+    if (!$prop || $prop['id_kementerian'] != $_SESSION['IdKementerian']) {
+        echo 'Data tidak ditemukan atau bukan milik Anda';
+        return;
+    }
+
+    $this->db->where('id', $id);
+    $this->db->update('renstra_prop', ['deleted_at' => date('Y-m-d H:i:s')]);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Proyek Prioritas';
+}
 
 }

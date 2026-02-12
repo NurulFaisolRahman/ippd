@@ -291,8 +291,15 @@
                         <span>Rencana Strategis</span>
                         <i class="fa fa-chevron-down"></i>
                     </a>
-                    <div class="sidebar-submenu" style="display: block;">
-                        
+                    <div class="sidebar-submenu">
+                        <a href="<?=base_url('Kementerian/PermasalahanPokok')?>">Permasalahan Pokok</a>
+                        <a href="<?=base_url('Kementerian/IsuKLHS')?>">Isu KLHS</a>
+                        <a href="<?=base_url('Kementerian/IsuGlobal')?>">Isu Global</a>
+                        <a href="<?=base_url('Kementerian/IsuNasional')?>">Isu Nasional</a>
+                        <a href="<?=base_url('Kementerian/IsuRegional')?>">Isu Regional</a>
+                        <a href="<?=base_url('Kementerian/IsuStrategis')?>">Isu Strategis</a>
+                        <a href="<?=base_url('Kementerian/Renstra')?>">Renstra</a>
+                        <a href="<?=base_url('Kementerian/RenstraAnggaran')?>">Anggaran</a>
                         <br>
                     </div>
                 </div>
@@ -303,29 +310,24 @@
                         <span>Rencana Kerja</span>
                         <i class="fa fa-chevron-down"></i>
                     </a>
-                    <div class="sidebar-submenu" style="display: block;">
-                        
+                    <div class="sidebar-submenu">
+                        <a href="<?=base_url('Kementerian/PermasalahanPokok')?>">Anggaran</a>
                         <br>
                     </div>
                 </div>
 
-                <!-- Isu Kementerian -->
                 <div class="sidebar-dropdown">
                     <a href="#">
-                        <i class="menu-icon fa fa-exclamation-triangle"></i>
-                        <span>Isu </span>
+                        <i class="menu-icon fa fa-file-alt"></i>
+                        <span>NSPK</span>
                         <i class="fa fa-chevron-down"></i>
                     </a>
                     <div class="sidebar-submenu">
-                        <a href="<?=base_url('Kementerian/PermasalahanPokok')?>">Permasalahan Pokok</a>
-                        <a href="<?=base_url('Kementerian/IsuKLHS')?>">Isu KLHS</a>
-                        <a href="<?=base_url('Kementerian/IsuGlobal')?>">Isu Global</a>
-                        <a href="<?=base_url('Kementerian/IsuNasional')?>">Isu Nasional</a>
-                        <a href="<?=base_url('Kementerian/IsuRegional')?>">Isu Regional</a>
-                        <a href="<?=base_url('Kementerian/IsuStrategis')?>">Isu Strategis</a>
+                        <a href="<?=base_url('Kementerian/Nspk')?>">NSPK Kementerian</a>
                         <br>
                     </div>
                 </div>
+
             </ul>
         </div>
     </div>
