@@ -4079,184 +4079,286 @@ public function HapusSasaranPD()
     echo $hapus ? '1' : 'Gagal menghapus data';
 }
 
-public function TujuanSasaranPD()
-{
-    $Header['Halaman'] = 'Daerah';
-    $KodeWilayah = $_SESSION['KodeWilayah'] ?? '';
-    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")
-        ->get("kodewilayah")->result_array();
 
-    $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] :
-        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+    public function TujuanSasaranPD()
+    {
+        $Header['Halaman'] = 'Daerah';
 
-    $Data['KodeWilayah'] = $KodeWilayah;
+        // Ambil KodeWilayah dari session
+        $KodeWilayah = $this->session->userdata("KodeWilayah")
+            ?? $this->session->userdata("TempKodeWilayah")
+            ?? "";
 
-    if (!empty($KodeWilayah)) 
+        $Data['KodeWilayah'] = $KodeWilayah;
 
-   $masters = $masters ?? []; 
-
-    // ===== MASTER =====
-    $masters = $this->db
-        ->select("m.*,
-            sr.Sasaran AS sasaran_relevan_text,
-            tp.tujuan_pd AS tujuan_text,
-            sp.sasaran_pd AS sasaran_text")
-        ->from("tujuansasaran_pd_master m")
-        ->join("ippd.sasaranrpjmd sr", "sr.id=m.sasaran_relevan_id", "left")
-        ->join("ippd.tujuan_pd tp", "tp.id=m.tujuan_id", "left")
-        ->join("ippd.sasaran_pd sp", "sp.id=m.sasaran_id", "left")
-        ->where("m.KodeWilayah", $KodeWilayah)
-        ->where("m.deleted_at IS NULL", null, false)
-        ->order_by("m.id", "ASC")
-        ->get()
-        ->result_array();
-
-    // ===== DETAIL =====
-    foreach ($masters as &$m) {
-        $m['details'] = $this->db
-            ->where("master_id", $m['id'])
-            ->where("deleted_at IS NULL", null, false)
-            ->order_by("id", "ASC")
-            ->get("tujuansasaran_pd_detail")
+        // Dropdown Provinsi
+        $Data['Provinsi'] = $this->db
+            ->where("Kode LIKE '__'")
+            ->get("kodewilayah")
             ->result_array();
+
+        // Kalau belum pilih wilayah
+        if (empty($KodeWilayah)) {
+            $Data['TujuanSasaranPD'] = [];
+        } 
+        else {
+
+            // =============================
+            // MASTER DATA (TANPA JOIN NSPK)
+            // =============================
+            $masters = $this->db
+                ->select("m.*,
+                    sr.Sasaran AS sasaran_relevan_text,
+                    tp.tujuan_pd AS tujuan_text
+                ")
+                ->from("tujuansasaran_pd_master m")
+                ->join("ippd.sasaranrpjmd sr","sr.id=m.sasaran_relevan_id","left")
+                ->join("ippd.tujuan_pd tp","tp.id=m.tujuan_id","left")
+                ->where("m.KodeWilayah",$KodeWilayah)
+                ->where("m.deleted_at IS NULL", null, false)
+                ->order_by("m.id","ASC")
+                ->get()
+                ->result_array();
+
+            // =============================
+            // LOOP MASTER → NSPK JSON ARRAY
+            // =============================
+            foreach ($masters as &$m) {
+
+                // Decode JSON NSPK ID
+                $normaIds    = !empty($m['nspk_norma_id'])    ? explode("|||", $m['nspk_norma_id'])    : [];
+                $standarIds  = !empty($m['nspk_standar_id'])  ? explode("|||", $m['nspk_standar_id'])  : [];
+                $prosedurIds = !empty($m['nspk_prosedur_id']) ? explode("|||", $m['nspk_prosedur_id']) : [];
+                $kriteriaIds = !empty($m['nspk_kriteria_id']) ? explode("|||", $m['nspk_kriteria_id']) : [];
+
+                $normaIds    = is_array($normaIds) ? $normaIds : [];
+                $standarIds  = is_array($standarIds) ? $standarIds : [];
+                $prosedurIds = is_array($prosedurIds) ? $prosedurIds : [];
+                $kriteriaIds = is_array($kriteriaIds) ? $kriteriaIds : [];
+
+
+                // Ambil judul NSPK dari DB
+                $m['norma_list'] = (!empty($normaIds))
+                    ? $this->db->where_in("id", $normaIds)->get("nspk")->result_array()
+                    : [];
+
+                $m['standar_list'] = (!empty($standarIds))
+                    ? $this->db->where_in("id", $standarIds)->get("nspk")->result_array()
+                    : [];
+
+                $m['prosedur_list'] = (!empty($prosedurIds))
+                    ? $this->db->where_in("id", $prosedurIds)->get("nspk")->result_array()
+                    : [];
+
+                $m['kriteria_list'] = (!empty($kriteriaIds))
+                    ? $this->db->where_in("id", $kriteriaIds)->get("nspk")->result_array()
+                    : [];
+
+                // =============================
+                // DETAIL DATA
+                // =============================
+                $m['details'] = $this->db
+                    ->select("d.*, sp.sasaran_pd AS sasaran_text")
+                    ->from("tujuansasaran_pd_detail d")
+                    ->join("ippd.sasaran_pd sp","sp.id=d.sasaran_id","left")
+                    ->where("d.master_id", $m['id'])
+                    ->where("d.deleted_at IS NULL", null, false)
+                    ->order_by("d.id","ASC")
+                    ->get()
+                    ->result_array();
+            }
+
+            $Data['TujuanSasaranPD'] = $masters;
+        }
+
+        // =============================
+        // DROPDOWN NSPK (HANYA AKTIF)
+        // =============================
+        $Data['ListNSPK'] = $this->db
+            ->where("deleted_at IS NULL", null, false)
+            ->order_by("jenis_nspk","ASC")
+            ->order_by("judul_nspk","ASC")
+            ->get("nspk")
+            ->result_array();
+
+        // Dropdown Sasaran RPJMD
+        $Data['ListSasaranRPJMD'] = $this->db
+            ->select("id, Sasaran")
+            ->order_by("id","ASC")
+            ->get("ippd.sasaranrpjmd")
+            ->result_array();
+
+        // Dropdown Tujuan PD
+        $Data['ListTujuanPD'] = $this->db
+            ->select("id, tujuan_pd")
+            ->order_by("id","ASC")
+            ->get("ippd.tujuan_pd")
+            ->result_array();
+
+        // Dropdown Sasaran PD
+        $Data['ListSasaranPD'] = $this->db
+            ->select("id, sasaran_pd")
+            ->order_by("id","ASC")
+            ->get("ippd.sasaran_pd")
+            ->result_array();
+
+        // =============================
+        // LOAD VIEW
+        // =============================
+        $this->load->view("Daerah/header", $Header);
+        $this->load->view("Daerah/TujuanSasaranPD", $Data);
     }
 
-    $Data['TujuanSasaranPD'] = $masters;
 
-    // ===== DROPDOWN DATA (IPPd) =====
-                $Data['ListSasaranRPJMD'] = $this->db
-                    ->select('id, Sasaran')
-                    ->order_by('id', 'ASC')
-                    ->get('ippd.sasaranrpjmd')
-                    ->result_array();
+    // ======================================================
+    // INPUT MASTER (MULTI NSPK JSON)
+    // ======================================================
+    public function InputTujuanSasaranPD_Master()
+    {
+        $kodeWilayah = $this->session->userdata("KodeWilayah");
 
-                $Data['ListTujuanPD'] = $this->db
-                    ->select('id, tujuan_pd')
-                    ->order_by('id', 'ASC')
-                    ->get('ippd.tujuan_pd')
-                    ->result_array();
+  $data = [
+    "KodeWilayah" => $kodeWilayah,
 
-                $Data['ListSasaranPD'] = $this->db
-                    ->select('id, sasaran_pd')
-                    ->order_by('id', 'ASC')
-                    ->get('ippd.sasaran_pd')
-                    ->result_array();
+    "nspk_norma_id"    => implode("|||", $this->input->post("nspk_norma_id") ?? []),
+    "nspk_standar_id"  => implode("|||", $this->input->post("nspk_standar_id") ?? []),
+    "nspk_prosedur_id" => implode("|||", $this->input->post("nspk_prosedur_id") ?? []),
+    "nspk_kriteria_id" => implode("|||", $this->input->post("nspk_kriteria_id") ?? []),
 
-        // Dropdown (text)
+            "sasaran_relevan_id" => $this->input->post("sasaran_relevan_id"),
+            "tujuan_id"          => $this->input->post("tujuan_id"),
 
-    
-    $this->load->view('Daerah/header', $Header);
+            "created_at" => date("Y-m-d H:i:s")
+        ];
 
-    $this->load->view("Daerah/TujuanSasaranPD", $Data);
-}
+        echo $this->db->insert("tujuansasaran_pd_master", $data)
+            ? "1"
+            : "Gagal simpan master";
+    }
 
-public function InputTujuanSasaranPD_Master()
-{
-    $kodeWilayah = $this->session->userdata("KodeWilayah");
 
-    $data = [
-        "KodeWilayah" => $kodeWilayah,
-        "nspk" => trim($this->input->post("nspk")),
-        "sasaran_relevan_id" => $this->input->post("sasaran_relevan_id"),
-        "tujuan_id" => $this->input->post("tujuan_id"),
-        "sasaran_id" => $this->input->post("sasaran_id"),
-        "created_at" => date("Y-m-d H:i:s")
-    ];
+    // ======================================================
+    // EDIT MASTER (MULTI NSPK JSON)
+    // ======================================================
+    public function EditTujuanSasaranPD_Master()
+    {
+        $id = (int)$this->input->post("id");
 
-    echo $this->db->insert("tujuansasaran_pd_master", $data) ? "1" : "Gagal simpan master";
-}
+        $data = [
+           "nspk_norma_id"    => implode("|||", $this->input->post("nspk_norma_id") ?? []),
+            "nspk_standar_id"  => implode("|||", $this->input->post("nspk_standar_id") ?? []),
+            "nspk_prosedur_id" => implode("|||", $this->input->post("nspk_prosedur_id") ?? []),
+            "nspk_kriteria_id" => implode("|||", $this->input->post("nspk_kriteria_id") ?? []),
 
-public function EditTujuanSasaranPD_Master()
-{
-    $id = (int)$this->input->post("id");
 
-    $data = [
-        "nspk" => trim($this->input->post("nspk")),
-        "sasaran_relevan_id" => $this->input->post("sasaran_relevan_id"),
-        "tujuan_id" => $this->input->post("tujuan_id"),
-        "sasaran_id" => $this->input->post("sasaran_id"),
-        "updated_at" => date("Y-m-d H:i:s")
-    ];
 
-    $this->db->where("id", $id)
-             ->update("tujuansasaran_pd_master", $data);
+            "sasaran_relevan_id" => $this->input->post("sasaran_relevan_id"),
+            "tujuan_id"          => $this->input->post("tujuan_id"),
 
-    echo "1";
-}
+            "updated_at" => date("Y-m-d H:i:s")
+        ];
 
-public function HapusTujuanSasaranPD_Master()
-{
-    $id = (int)$this->input->post("id");
+        $this->db->where("id", $id)
+                 ->update("tujuansasaran_pd_master", $data);
 
-    // soft delete master
-    $this->db->where("id", $id)
-        ->update("tujuansasaran_pd_master", [
-            "deleted_at" => date("Y-m-d H:i:s")
-        ]);
+        echo "1";
+    }
 
-    // soft delete semua indikator
-    $this->db->where("master_id", $id)
-        ->update("tujuansasaran_pd_detail", [
-            "deleted_at" => date("Y-m-d H:i:s")
-        ]);
 
-    echo "1";
-}
+    // ======================================================
+    // HAPUS MASTER + SEMUA DETAIL (SOFT DELETE)
+    // ======================================================
+    public function HapusTujuanSasaranPD_Master()
+    {
+        $id = (int)$this->input->post("id");
 
-public function InputTujuanSasaranPD_Detail()
-{
-    $data = [
-        "master_id" => (int)$this->input->post("master_id"),
+        // Soft delete master
+        $this->db->where("id", $id)
+            ->update("tujuansasaran_pd_master", [
+                "deleted_at" => date("Y-m-d H:i:s")
+            ]);
 
-        "indikator" => $this->input->post("indikator"),
-        "t2025" => $this->input->post("t2025"),
-        "t2026" => $this->input->post("t2026"),
-        "t2027" => $this->input->post("t2027"),
-        "t2028" => $this->input->post("t2028"),
-        "t2029" => $this->input->post("t2029"),
-        "t2030" => $this->input->post("t2030"),
-        "keterangan" => $this->input->post("keterangan"),
+        // Soft delete semua detail
+        $this->db->where("master_id", $id)
+            ->update("tujuansasaran_pd_detail", [
+                "deleted_at" => date("Y-m-d H:i:s")
+            ]);
 
-        "created_at" => date("Y-m-d H:i:s")
-    ];
+        echo "1";
+    }
 
-    echo $this->db->insert("tujuansasaran_pd_detail", $data) ? "1" : "Gagal simpan indikator";
-}
+    // ======================================================
+    // INPUT DETAIL (SASARAN PD PINDAH KE SINI)
+    // SEMUA FIELD OPSIONAL
+    // ======================================================
+    public function InputTujuanSasaranPD_Detail()
+    {
+        $data = [
+            "master_id"   => (int)$this->input->post("master_id"),
+            "sasaran_id"  => $this->input->post("sasaran_id") ?: null,
 
-public function EditTujuanSasaranPD_Detail()
-{
-    $id = (int)$this->input->post("id");
+            "indikator"   => $this->input->post("indikator") ?: null,
 
-    $data = [
-        "indikator" => $this->input->post("indikator"),
-        "t2025" => $this->input->post("t2025"),
-        "t2026" => $this->input->post("t2026"),
-        "t2027" => $this->input->post("t2027"),
-        "t2028" => $this->input->post("t2028"),
-        "t2029" => $this->input->post("t2029"),
-        "t2030" => $this->input->post("t2030"),
-        "keterangan" => $this->input->post("keterangan"),
+            "t2025"       => $this->input->post("t2025") ?: null,
+            "t2026"       => $this->input->post("t2026") ?: null,
+            "t2027"       => $this->input->post("t2027") ?: null,
+            "t2028"       => $this->input->post("t2028") ?: null,
+            "t2029"       => $this->input->post("t2029") ?: null,
+            "t2030"       => $this->input->post("t2030") ?: null,
 
-        "updated_at" => date("Y-m-d H:i:s")
-    ];
+            "keterangan"  => $this->input->post("keterangan") ?: null,
 
-    $this->db->where("id", $id)
-             ->update("tujuansasaran_pd_detail", $data);
+            "created_at"  => date("Y-m-d H:i:s")
+        ];
 
-    echo "1";
-}
+        echo $this->db->insert("tujuansasaran_pd_detail", $data)
+            ? "1"
+            : "Gagal simpan indikator";
+    }
 
-public function HapusTujuanSasaranPD_Detail()
-{
-    $id = (int)$this->input->post("id");
+    // ======================================================
+    // EDIT DETAIL (OPSIONAL SEMUA)
+    // ======================================================
+    public function EditTujuanSasaranPD_Detail()
+    {
+        $id = (int)$this->input->post("id");
 
-    $this->db->where("id", $id)
-        ->update("tujuansasaran_pd_detail", [
-            "deleted_at" => date("Y-m-d H:i:s")
-        ]);
+        $data = [
+            "sasaran_id"  => $this->input->post("sasaran_id") ?: null,
+            "indikator"   => $this->input->post("indikator") ?: null,
 
-    echo "1";
-}
+            "t2025"       => $this->input->post("t2025") ?: null,
+            "t2026"       => $this->input->post("t2026") ?: null,
+            "t2027"       => $this->input->post("t2027") ?: null,
+            "t2028"       => $this->input->post("t2028") ?: null,
+            "t2029"       => $this->input->post("t2029") ?: null,
+            "t2030"       => $this->input->post("t2030") ?: null,
+
+            "keterangan"  => $this->input->post("keterangan") ?: null,
+
+            "updated_at"  => date("Y-m-d H:i:s")
+        ];
+
+        $this->db->where("id", $id)
+                 ->update("tujuansasaran_pd_detail", $data);
+
+        echo "1";
+    }
+
+    // ======================================================
+    // HAPUS DETAIL
+    // ======================================================
+    public function HapusTujuanSasaranPD_Detail()
+    {
+        $id = (int)$this->input->post("id");
+
+        $this->db->where("id", $id)
+            ->update("tujuansasaran_pd_detail", [
+                "deleted_at" => date("Y-m-d H:i:s")
+            ]);
+
+        echo "1";
+    }
 
 
 public function ArahKebijakanPD()
@@ -4405,13 +4507,41 @@ public function NSPKOperasionalisasiPD()
     $KodeWilayah = $_SESSION['KodeWilayah'] ?? ($_SESSION['TempKodeWilayah'] ?? '');
     $data['KodeWilayah'] = $KodeWilayah;
 
-    $data['ListNSPK'] = $this->db
-    ->select("id, nspk")
+    $data['ListNSPK'] = [];
+
+$masters = $this->db
     ->where("KodeWilayah", $KodeWilayah)
     ->where("deleted_at IS NULL", null, false)
     ->order_by("id", "ASC")
     ->get("tujuansasaran_pd_master")
     ->result_array();
+
+foreach ($masters as $m) {
+
+    $all_ids = array_merge(
+        array_filter(explode("|||", $m['nspk_norma_id'] ?? "")),
+        array_filter(explode("|||", $m['nspk_standar_id'] ?? "")),
+        array_filter(explode("|||", $m['nspk_prosedur_id'] ?? "")),
+        array_filter(explode("|||", $m['nspk_kriteria_id'] ?? ""))
+    );
+
+    $judul = [];
+
+    if (!empty($all_ids)) {
+        $rows = $this->db
+            ->select("judul_nspk")
+            ->where_in("id", $all_ids)
+            ->get("nspk")
+            ->result_array();
+
+        $judul = array_column($rows, "judul_nspk");
+    }
+
+    $data['ListNSPK'][] = [
+        "id" => $m['id'],
+        "nama_nspk" => implode(" • ", $judul)
+    ];
+}
 
 
     // 2) Arah Kebijakan RPJMD (arah_kebijakan_rpjmd: id, arah_kebijakan)
@@ -4427,7 +4557,7 @@ public function NSPKOperasionalisasiPD()
         ->select("id, arah_kebijakan")
         ->where("deleted_at", NULL)
         ->order_by("id", "ASC")
-        ->get("arah_kebijakan_rpjmd")
+        ->get("arah_kebijakan_pd")
         ->result_array();
 
     // ==========================
@@ -4437,7 +4567,7 @@ public function NSPKOperasionalisasiPD()
         $data['NSPKOperasionalisasiPD'] = $this->db
             ->select("
                 n.*,
-                t.nspk AS nspk_text,
+                
                 r1.arah_kebijakan AS arah_rpjmd_text,
                 r2.arah_kebijakan AS arah_renstra_text
             ")
@@ -4454,6 +4584,89 @@ public function NSPKOperasionalisasiPD()
         $data['NSPKOperasionalisasiPD'] = [];
     }
 
+    
+
+ foreach ($data['NSPKOperasionalisasiPD'] as &$row) {
+
+    $master = $this->db
+        ->where("id", $row['tujuansasaranpd_master_id'])
+        ->get("tujuansasaran_pd_master")
+        ->row_array();
+
+    if ($master) {
+
+        // ================= NSPK =================
+        $norma_ids    = array_filter(explode("|||", $master['nspk_norma_id'] ?? ""));
+        $standar_ids  = array_filter(explode("|||", $master['nspk_standar_id'] ?? ""));
+        $prosedur_ids = array_filter(explode("|||", $master['nspk_prosedur_id'] ?? ""));
+        $kriteria_ids = array_filter(explode("|||", $master['nspk_kriteria_id'] ?? ""));
+
+        $row['nspk_text'] = [
+            "norma" => !empty($norma_ids)
+                ? array_column(
+                    $this->db->select("judul_nspk")
+                             ->where_in("id", $norma_ids)
+                             ->get("nspk")
+                             ->result_array(),
+                    "judul_nspk"
+                )
+                : [],
+
+            "standar" => !empty($standar_ids)
+                ? array_column(
+                    $this->db->select("judul_nspk")
+                             ->where_in("id", $standar_ids)
+                             ->get("nspk")
+                             ->result_array(),
+                    "judul_nspk"
+                )
+                : [],
+
+            "prosedur" => !empty($prosedur_ids)
+                ? array_column(
+                    $this->db->select("judul_nspk")
+                             ->where_in("id", $prosedur_ids)
+                             ->get("nspk")
+                             ->result_array(),
+                    "judul_nspk"
+                )
+                : [],
+
+            "kriteria" => !empty($kriteria_ids)
+                ? array_column(
+                    $this->db->select("judul_nspk")
+                             ->where_in("id", $kriteria_ids)
+                             ->get("nspk")
+                             ->result_array(),
+                    "judul_nspk"
+                )
+                : [],
+        ];
+    }
+
+    // ================= RPJMD =================
+    $ids_rpjmd = array_filter(explode("|||", $row['arah_kebijakan_rpjmd_id']));
+    $row['arah_rpjmd_text'] = !empty($ids_rpjmd)
+        ? array_column(
+            $this->db->where_in("id", $ids_rpjmd)
+                     ->get("arah_kebijakan_rpjmd")
+                     ->result_array(),
+            "arah_kebijakan"
+        )
+        : [];
+
+    // ================= RENSTRA =================
+    $ids_renstra = array_filter(explode("|||", $row['arah_kebijakan_renstra_pd_id']));
+    $row['arah_renstra_text'] = !empty($ids_renstra)
+        ? array_column(
+            $this->db->where_in("id", $ids_renstra)
+                     ->get("arah_kebijakan_pd")
+                     ->result_array(),
+            "arah_kebijakan"
+        )
+        : [];
+}
+
     $this->load->view('Daerah/header', $Header);
     $this->load->view("Daerah/NSPKOperasionalisasiPD", $data);
 }
@@ -4462,65 +4675,89 @@ public function NSPKOperasionalisasiPD()
 public function InputNSPKOperasionalisasiPD()
 {
     $KodeWilayah = $_SESSION['KodeWilayah'] ?? ($_SESSION['TempKodeWilayah'] ?? '');
-    if (empty($KodeWilayah)) { echo "Wilayah belum dipilih!"; return; }
+    if (empty($KodeWilayah)) {
+        echo "Wilayah belum dipilih!";
+        return;
+    }
 
     $tujuansasaran_pd_id = (int)$this->input->post("tujuansasaran_pd_id");
-    $arah_kebijakan_rpjmd_id = (int)$this->input->post("arah_kebijakan_rpjmd_id");
-    $arah_kebijakan_renstra_pd_id = (int)$this->input->post("arah_kebijakan_renstra_pd_id");
+
+    // ambil array dropdown
+    $arah_rpjmd   = array_filter((array)$this->input->post("arah_kebijakan_rpjmd_id"));
+    $arah_renstra = array_filter((array)$this->input->post("arah_kebijakan_renstra_pd_id"));
+
     $keterangan = trim((string)$this->input->post("keterangan"));
 
-    if (!$tujuansasaran_pd_id) { echo "Operasionalisasi NSPK wajib dipilih!"; return; }
-    if (!$arah_kebijakan_rpjmd_id) { echo "Arah Kebijakan RPJMD wajib dipilih!"; return; }
-    if (!$arah_kebijakan_renstra_pd_id) { echo "Arah Kebijakan Renstra PD wajib dipilih!"; return; }
+    // VALIDASI
+    if (!$tujuansasaran_pd_id) {
+        echo "Operasionalisasi NSPK wajib dipilih!";
+        return;
+    }
 
-    // VALIDASI: pastikan NSPK milik wilayah ini & tidak terhapus
-    $cek = $this->db
-        ->where("id", $tujuansasaran_pd_id)
-        ->where("KodeWilayah", $KodeWilayah)
-        ->where("deleted_at IS NULL", null, false)
-        ->get("tujuansasaran_pd_master")
-        ->row_array();
+    if (empty($arah_rpjmd)) {
+        echo "Minimal pilih 1 Arah Kebijakan RPJMD!";
+        return;
+    }
 
-    if (!$cek) { echo "NSPK tidak valid / bukan milik wilayah ini"; return; }
+    if (empty($arah_renstra)) {
+        echo "Minimal pilih 1 Arah Kebijakan Renstra PD!";
+        return;
+    }
 
+    // SIMPAN ke DB format string
     $data = [
         "kode_wilayah" => $KodeWilayah,
         "tujuansasaranpd_master_id" => $tujuansasaran_pd_id,
-        "arah_kebijakan_rpjmd_id" => $arah_kebijakan_rpjmd_id,
-        "arah_kebijakan_renstra_pd_id" => $arah_kebijakan_renstra_pd_id,
-        "keterangan" => ($keterangan !== "") ? $keterangan : NULL,
+        "arah_kebijakan_rpjmd_id" => implode("|||", $arah_rpjmd),
+        "arah_kebijakan_renstra_pd_id" => implode("|||", $arah_renstra),
+        "keterangan" => $keterangan ?: NULL,
         "created_at" => date("Y-m-d H:i:s")
     ];
 
     echo $this->db->insert("nspk_operasionalisasi_pd", $data) ? "1" : "0";
 }
 
-
 public function EditNSPKOperasionalisasiPD()
 {
     $id = (int)$this->input->post("id");
-    if (!$id) { echo "ID tidak valid!"; return; }
+    if (!$id) {
+        echo "ID tidak valid!";
+        return;
+    }
 
     $tujuansasaran_pd_id = (int)$this->input->post("tujuansasaran_pd_id");
-    $arah_kebijakan_rpjmd_id = (int)$this->input->post("arah_kebijakan_rpjmd_id");
-    $arah_kebijakan_renstra_pd_id = (int)$this->input->post("arah_kebijakan_renstra_pd_id");
-    $keterangan = $this->input->post("keterangan");
 
-    if (!$tujuansasaran_pd_id) { echo "Operasionalisasi NSPK wajib dipilih!"; return; }
-    if (!$arah_kebijakan_rpjmd_id) { echo "Arah Kebijakan RPJMD wajib dipilih!"; return; }
-    if (!$arah_kebijakan_renstra_pd_id) { echo "Arah Kebijakan Renstra PD wajib dipilih!"; return; }
+    $arah_rpjmd   = array_filter((array)$this->input->post("arah_kebijakan_rpjmd_id"));
+    $arah_renstra = array_filter((array)$this->input->post("arah_kebijakan_renstra_pd_id"));
+
+    $keterangan = trim((string)$this->input->post("keterangan"));
+
+    if (!$tujuansasaran_pd_id) {
+        echo "Operasionalisasi NSPK wajib dipilih!";
+        return;
+    }
+
+    if (empty($arah_rpjmd)) {
+        echo "Minimal pilih 1 Arah Kebijakan RPJMD!";
+        return;
+    }
+
+    if (empty($arah_renstra)) {
+        echo "Minimal pilih 1 Arah Kebijakan Renstra PD!";
+        return;
+    }
 
     $data = [
         "tujuansasaranpd_master_id" => $tujuansasaran_pd_id,
-        "arah_kebijakan_rpjmd_id" => $arah_kebijakan_rpjmd_id,
-        "arah_kebijakan_renstra_pd_id" => $arah_kebijakan_renstra_pd_id,
-        "keterangan" => $keterangan ? $keterangan : NULL,
+        "arah_kebijakan_rpjmd_id" => implode("|||", $arah_rpjmd),
+        "arah_kebijakan_renstra_pd_id" => implode("|||", $arah_renstra),
+        "keterangan" => $keterangan ?: NULL,
         "updated_at" => date("Y-m-d H:i:s")
     ];
 
-    $update = $this->db->where("id", $id)->update("nspk_operasionalisasi_pd", $data);
-    echo $update ? "1" : "0";
+    echo $this->db->where("id", $id)->update("nspk_operasionalisasi_pd", $data) ? "1" : "0";
 }
+
 
 
 public function HapusNSPKOperasionalisasiPD()
@@ -4536,213 +4773,447 @@ public function HapusNSPKOperasionalisasiPD()
 }
 
 public function RumusanRenstraPD()
-{
-    $Header['Halaman'] = 'Daerah';
+    {
+        $Header['Halaman'] = 'Daerah';
 
-    /* ==========================
-     * DATA PROVINSI (FILTER)
-     * ========================== */
-    $Data['Provinsi'] = $this->db
-        ->where("Kode LIKE '__'")
-        ->get("kodewilayah")
-        ->result_array();
+        
 
-    /* ==========================
-     * AMBIL KODE WILAYAH
-     * ========================== */
-    $KodeWilayah = $_SESSION['KodeWilayah']
-        ?? ($_SESSION['TempKodeWilayah'] ?? '');
+        // Ambil kode wilayah aktif
+        $KodeWilayah = $this->session->userdata('KodeWilayah')
+                     ?: $this->session->userdata('TempKodeWilayah');
 
-    $Data['KodeWilayah'] = $KodeWilayah;
+        $Data['KodeWilayah'] = $KodeWilayah;
 
-    /* ==========================
-     * JIKA KODE WILAYAH DIPILIH
-     * ========================== */
-    if ($KodeWilayah) {
-
-        /* ==========================
-         * AMBIL DATA MASTER
-         * ========================== */
-        $masters = $this->db
-            ->select("
-                r.*,
-                m.nspk AS nspk_text,
-                sr.Sasaran AS sasaran_relevan_text,
-                tp.tujuan_pd AS tujuan_text,
-                sp.sasaran_pd AS sasaran_text
-            ")
-            ->from("rumusanrenstra_pd r")
-            ->join("tujuansasaran_pd_master m", "m.id = r.tujuansasaranpd_master_id", "left")
-            ->join("sasaranrpjmd sr", "sr.id = m.sasaran_relevan_id", "left")
-            ->join("tujuan_pd tp", "tp.id = r.tujuan_id", "left")
-            ->join("sasaran_pd sp", "sp.id = r.sasaran_id", "left")
-            ->where("r.kode_wilayah", $KodeWilayah)
-            ->where("r.deleted_at IS NULL", null, false)
-            ->order_by("r.id", "ASC")
-            ->get()
-            ->result_array();
-
-        /* ==========================
-         * AMBIL DETAIL PER MASTER
-         * ========================== */
-        foreach ($masters as &$master) {
-            $master['details'] = $this->db
-                ->where("rumusanrenstra_pd_id", $master['id'])
-                ->where("deleted_at IS NULL", null, false)
-                ->order_by("id", "ASC")
-                ->get("rumusanrenstra_pd_detail")
+        /* ==================== PROVINSI FILTER ==================== */
+        if (!isset($_SESSION['KodeWilayah'])) {
+            $Data['Provinsi'] = $this->db
+                ->select("Kode, Nama")
+                ->where("CHAR_LENGTH(Kode)=2")
+                ->order_by("Nama", "ASC")
+                ->get("kodewilayah")
                 ->result_array();
         }
 
-        $Data['RumusanRenstra'] = $masters;
-
-    } else {
+        /* ==================== DATA RENSTRA ==================== */
         $Data['RumusanRenstra'] = [];
+
+        if ($KodeWilayah) {
+
+            $Data['RumusanRenstra'] = $this->db
+                ->select([
+                    'h.id AS header_id',
+                    'h.tujuansasaran_master_id',
+                     'm.nspk_norma_id',
+                    'm.nspk_standar_id',
+                    'm.nspk_prosedur_id',
+                    'm.nspk_kriteria_id',
+                    'sr.Sasaran AS sasaran_rpjmd',
+                    'h.tujuan_pd',
+
+                    'd.id AS detail_id',
+                    'd.sasaran_pd',
+                    'd.outcome',
+                    'd.output',
+                    'd.indikator',
+                    'd.program',
+                    'd.kegiatan',
+                    'd.sub_kegiatan',
+                    'd.keterangan'
+                ])
+                ->from("rumusanrenstra_header h")
+                ->join("tujuansasaran_pd_master m", "m.id=h.tujuansasaran_master_id", "left")
+                ->join("ippd.sasaranrpjmd sr", "sr.id=m.sasaran_relevan_id", "left")
+
+                // Join detail + filter soft delete langsung di join
+                ->join(
+                    "rumusanrenstra_detail d",
+                    "d.header_id=h.id 
+                     AND d.deleted_at IS NULL
+                     AND d.kode_wilayah=h.kode_wilayah",
+                    "left"
+                )
+
+                ->where("h.kode_wilayah", $KodeWilayah)
+                ->where("h.deleted_at IS NULL", null, false)
+
+                ->order_by("h.id", "ASC")
+                ->order_by("d.urutan", "ASC")
+                ->get()
+                ->result_array();
+        }
+
+        // ================== HITUNG ROWSPAN ==================
+$groupCounts = [];
+
+foreach ($Data['RumusanRenstra'] as $row) {
+    $hid = $row['header_id'];
+
+    if (!isset($groupCounts[$hid])) {
+        $groupCounts[$hid] = 0;
     }
 
-    /* ==========================
-     * DROPDOWN MASTER NSPK
-     * ========================== */
-    $Data['ListMasterNSPK'] = $this->db
-        ->select("id, nspk")
-        ->where("deleted_at IS NULL", null, false)
-        ->order_by("id", "ASC")
-        ->get("tujuansasaran_pd_master")
+    $groupCounts[$hid]++;
+}
+
+$Data['GroupCounts'] = $groupCounts;
+
+
+        // =====================================================
+// ✅ TAMBAHAN: Ambil semua NSPK lengkap
+// =====================================================
+// =====================================================
+// Ambil nama NSPK dari tabel nspk
+// =====================================================
+foreach ($Data['RumusanRenstra'] as &$row) {
+
+    $norma_ids    = array_filter(explode("|||", $row['nspk_norma_id']));
+    $standar_ids  = array_filter(explode("|||", $row['nspk_standar_id']));
+    $prosedur_ids = array_filter(explode("|||", $row['nspk_prosedur_id']));
+    $kriteria_ids = array_filter(explode("|||", $row['nspk_kriteria_id']));
+
+    $row['norma'] = [];
+    $row['standar'] = [];
+    $row['prosedur'] = [];
+    $row['kriteria'] = [];
+
+    if (!empty($norma_ids)) {
+        $row['norma'] = $this->db
+            ->select("judul_nspk")
+            ->where_in("id", $norma_ids)
+            ->get("nspk")
+            ->result_array();
+    }
+
+    if (!empty($standar_ids)) {
+        $row['standar'] = $this->db
+            ->select("judul_nspk")
+            ->where_in("id", $standar_ids)
+            ->get("nspk")
+            ->result_array();
+    }
+
+    if (!empty($prosedur_ids)) {
+        $row['prosedur'] = $this->db
+            ->select("judul_nspk")
+            ->where_in("id", $prosedur_ids)
+            ->get("nspk")
+            ->result_array();
+    }
+
+    if (!empty($kriteria_ids)) {
+        $row['kriteria'] = $this->db
+            ->select("judul_nspk")
+            ->where_in("id", $kriteria_ids)
+            ->get("nspk")
+            ->result_array();
+    }
+}
+
+
+
+       /* ==================== DROPDOWN NSPK ==================== */
+$Data['ListNSPK'] = [];
+
+if ($KodeWilayah) {
+
+    $masters = $this->db
+        ->select("m.*, sr.Sasaran AS sasaran_rpjmd")
+        ->from("tujuansasaran_pd_master m")
+        ->join("ippd.sasaranrpjmd sr", "sr.id=m.sasaran_relevan_id", "left")
+        ->where("m.KodeWilayah", $KodeWilayah)
+        ->where("m.deleted_at IS NULL", null, false)
+        ->order_by("m.id", "ASC")
+        ->get()
         ->result_array();
 
-    /* ==========================
-     * DROPDOWN TUJUAN
-     * ========================== */
-    $Data['ListTujuan'] = $this->db
-        ->select("id, tujuan_pd")
-        ->where("kode_wilayah", $KodeWilayah)
-        ->where("deleted_at IS NULL", null, false)
-        ->order_by("id", "ASC")
-        ->get("tujuan_pd")
-        ->result_array();
+    foreach ($masters as $m) {
 
-    /* ==========================
-     * DROPDOWN SASARAN
-     * ========================== */
-    $Data['ListSasaran'] = $this->db
-        ->select("id, sasaran_pd")
-        ->where("kode_wilayah", $KodeWilayah)
-        ->where("deleted_at IS NULL", null, false)
-        ->order_by("id", "ASC")
-        ->get("sasaran_pd")
-        ->result_array();
+        $all_ids = array_merge(
+            array_filter(explode("|||", $m['nspk_norma_id'] ?? "")),
+            array_filter(explode("|||", $m['nspk_standar_id'] ?? "")),
+            array_filter(explode("|||", $m['nspk_prosedur_id'] ?? "")),
+            array_filter(explode("|||", $m['nspk_kriteria_id'] ?? ""))
+        );
 
-    /* ==========================
-     * LOAD VIEW
-     * ========================== */
-    $this->load->view("Daerah/header", $Header);
-    $this->load->view("Daerah/RumusanRenstraPD", $Data);
+        $judul = [];
+
+        if (!empty($all_ids)) {
+            $rows = $this->db
+                ->select("judul_nspk")
+                ->where_in("id", $all_ids)
+                ->get("nspk")
+                ->result_array();
+
+            $judul = array_column($rows, "judul_nspk");
+
+$namaMultiLine = "";
+
+foreach ($judul as $j) {
+    $namaMultiLine .= "• " . $j . "\n";
+}
+
+        }
+
+        $Data['ListNSPK'][] = [
+            "id" => $m['id'], // tetap master id
+            "nama_nspk" => trim($namaMultiLine),
+            "sasaran_rpjmd" => $m['sasaran_rpjmd']
+        ];
+    }
 }
 
 
-public function InputRumusanRenstraPD_Master()
-{
-    $KodeWilayah = $this->session->userdata("KodeWilayah");
 
-    $data = [
-        "kode_wilayah" => $KodeWilayah,
-        "tujuansasaranpd_master_id" => $this->input->post("tujuansasaranpd_master_id"),
-        "tujuan_id" => $this->input->post("tujuan_id"),
-        "sasaran_id" => $this->input->post("sasaran_id"),
-        "created_at" => date("Y-m-d H:i:s")
-    ];
 
-    echo $this->db->insert("rumusanrenstra_pd", $data)
-        ? "1"
-        : "Gagal simpan master";
-}
+        /* ==================== TUJUAN & SASARAN ==================== */
+        $Data['ListTujuan'] = $this->db
+            ->where("kode_wilayah", $KodeWilayah)
+            ->where("deleted_at IS NULL", null, false)
+            ->get("tujuan_pd")
+            ->result_array();
 
-public function EditRumusanRenstraPD_Master()
-{
-    $id = (int)$this->input->post("id");
+        $Data['ListSasaran'] = $this->db
+            ->where("kode_wilayah", $KodeWilayah)
+            ->where("deleted_at IS NULL", null, false)
+            ->get("sasaran_pd")
+            ->result_array();
 
-    $data = [
-        "tujuansasaranpd_master_id" => $this->input->post("tujuansasaranpd_master_id"),
-        "tujuan_id" => $this->input->post("tujuan_id"),
-        "sasaran_id" => $this->input->post("sasaran_id"),
-        "updated_at" => date("Y-m-d H:i:s")
-    ];
+        // Map ID → Text
+        $Data['MapTujuan']  = array_column($Data['ListTujuan'], 'tujuan_pd', 'id');
+        $Data['MapSasaran'] = array_column($Data['ListSasaran'], 'sasaran_pd', 'id');
 
-    $this->db->where("id", $id)
-             ->update("rumusanrenstra_pd", $data);
+        /* ==================== LOAD VIEW ==================== */
+        $this->load->view("Daerah/header", $Header);
+        $this->load->view("Daerah/RumusanRenstraPD", $Data);
+    }
 
-    echo "1";
-}
 
-public function HapusRumusanRenstraPD_Master()
-{
-    $id = (int)$this->input->post("id");
+    /* ===================================================== */
+    /*                  SIMPAN HEADER BARU                   */
+    /* ===================================================== */
+    public function SimpanRumusanRenstraPD()
+    {
+        $kode_wilayah = $this->session->userdata("KodeWilayah");
 
-    // soft delete master
-    $this->db->where("id", $id)
-        ->update("rumusanrenstra_pd", [
-            "deleted_at" => date("Y-m-d H:i:s")
+        if (!$kode_wilayah) {
+            echo json_encode(['status'=>'error','message'=>'Wilayah tidak ditemukan']);
+            return;
+        }
+
+        $data = [
+            'kode_wilayah'            => $kode_wilayah,
+            'tujuansasaran_master_id' => (int)$this->input->post("tujuansasaran_master_id"),
+            'tujuan_pd'               => (int)$this->input->post("tujuan_pd"),
+            'created_at'              => date("Y-m-d H:i:s")
+        ];
+
+        $this->db->insert("rumusanrenstra_header", $data);
+
+        echo json_encode([
+            'status' => $this->db->affected_rows() ? 'success' : 'error'
         ]);
+    }
 
-    // soft delete semua detail
-    $this->db->where("rumusanrenstra_pd_id", $id)
-        ->update("rumusanrenstra_pd_detail", [
-            "deleted_at" => date("Y-m-d H:i:s")
+
+    /* ===================================================== */
+    /*                   TAMBAH DETAIL BARU                  */
+    /* ===================================================== */
+    public function TambahDetail()
+    {
+        $kode_wilayah = $this->session->userdata("KodeWilayah");
+        $header_id    = (int)$this->input->post("header_id");
+        $sasaran_pd   = (int)$this->input->post("sasaran_pd");
+
+        if (!$kode_wilayah || !$header_id || !$sasaran_pd) {
+            echo json_encode(['status'=>'error','message'=>'Data tidak lengkap']);
+            return;
+        }
+
+        // Pastikan header milik wilayah login
+        $header = $this->db
+            ->where("id", $header_id)
+            ->where("kode_wilayah", $kode_wilayah)
+            ->where("deleted_at IS NULL", null, false)
+            ->get("rumusanrenstra_header")
+            ->row_array();
+
+        if (!$header) {
+            echo json_encode(['status'=>'error','message'=>'Header tidak valid']);
+            return;
+        }
+
+        // Urutan otomatis
+        $last = $this->db
+            ->select("MAX(urutan) as max_urutan")
+            ->where("header_id", $header_id)
+            ->where("deleted_at IS NULL", null, false)
+            ->get("rumusanrenstra_detail")
+            ->row_array();
+
+        $urutan = ($last['max_urutan'] ?? 0) + 10;
+
+        $data = [
+            'header_id'    => $header_id,
+            'kode_wilayah' => $kode_wilayah,
+            'sasaran_pd'   => $sasaran_pd,
+            'urutan'       => $urutan,
+            'created_at'   => date("Y-m-d H:i:s")
+        ];
+
+        $this->db->insert("rumusanrenstra_detail", $data);
+
+        echo json_encode([
+            'status' => $this->db->affected_rows() ? 'success' : 'error'
         ]);
+    }
 
-    echo "1";
-}
 
-public function InputRumusanRenstraPD_Detail()
+    /* ===================================================== */
+    /*                   UPDATE SASARAN DETAIL               */
+    /* ===================================================== */
+    public function UpdateDetail()
+    {
+        $kode_wilayah = $this->session->userdata("KodeWilayah");
+        $id           = (int)$this->input->post("id");
+        $sasaran_pd   = (int)$this->input->post("sasaran_pd");
+
+        $this->db->where("id", $id)
+                 ->where("kode_wilayah", $kode_wilayah)
+                 ->update("rumusanrenstra_detail", [
+                     'sasaran_pd' => $sasaran_pd,
+                     'updated_at' => date("Y-m-d H:i:s")
+                 ]);
+
+        echo json_encode([
+            'status' => $this->db->affected_rows() ? 'success' : 'error'
+        ]);
+    }
+
+    public function UpdateHeaderRenstra()
 {
-    $data = [
-        "rumusanrenstra_pd_id" => (int)$this->input->post("rumusanrenstra_pd_id"),
-
-        "outcome" => $this->input->post("outcome"),
-        "output" => $this->input->post("output"),
-        "indikator" => $this->input->post("indikator"),
-        "program" => $this->input->post("program"),
-        "keterangan" => $this->input->post("keterangan"),
-
-        "created_at" => date("Y-m-d H:i:s")
-    ];
-
-    echo $this->db->insert("rumusanrenstra_pd_detail", $data)
-        ? "1"
-        : "Gagal simpan detail";
-}
-
-public function EditRumusanRenstraPD_Detail()
-{
-    $id = (int)$this->input->post("id");
+    $kode_wilayah = $this->session->userdata("KodeWilayah");
+    $id           = (int)$this->input->post("id");
 
     $data = [
-        "outcome" => $this->input->post("outcome"),
-        "output" => $this->input->post("output"),
-        "indikator" => $this->input->post("indikator"),
-        "program" => $this->input->post("program"),
-        "keterangan" => $this->input->post("keterangan"),
-
-        "updated_at" => date("Y-m-d H:i:s")
+        "tujuansasaran_master_id" => (int)$this->input->post("tujuansasaran_master_id"),
+        "tujuan_pd"              => (int)$this->input->post("tujuan_pd"),
+        "updated_at"             => date("Y-m-d H:i:s")
     ];
 
     $this->db->where("id", $id)
-             ->update("rumusanrenstra_pd_detail", $data);
+             ->where("kode_wilayah", $kode_wilayah)
+             ->update("rumusanrenstra_header", $data);
 
-    echo "1";
+    echo json_encode([
+        "status" => $this->db->affected_rows() ? "success" : "error"
+    ]);
 }
 
-public function HapusRumusanRenstraPD_Detail()
+
+    /* ===================================================== */
+    /*               UPDATE KOLOM MULTI VALUE DETAIL         */
+    /* ===================================================== */
+    public function UpdateKolomDetail()
 {
-    $id = (int)$this->input->post("id");
+    $kode_wilayah = $this->session->userdata("KodeWilayah");
+    $id    = (int)$this->input->post("id");
+    $kolom = strtolower(trim($this->input->post("kolom")));
+    $nilai = trim($this->input->post("nilai"));
+
+    $mode  = $this->input->post("mode"); // <-- ambil mode
+
+    $allowed = ['outcome','output','indikator','program','kegiatan','sub_kegiatan','keterangan'];
+
+    if (!in_array($kolom, $allowed)) {
+        echo json_encode(['status'=>'error','message'=>'Kolom tidak valid']);
+        return;
+    }
+
+    // ================== MODE REPLACE ==================
+    if ($mode === "replace") {
+
+        $this->db->where("id", $id)
+                 ->where("kode_wilayah", $kode_wilayah)
+                 ->update("rumusanrenstra_detail", [
+                     $kolom => $nilai,
+                     'updated_at' => date("Y-m-d H:i:s")
+                 ]);
+
+        echo json_encode(['status'=>'success']);
+        return;
+    }
+
+    // ================== MODE TAMBAH (APPEND) ==================
+    $old = $this->db->select($kolom)
+        ->where("id", $id)
+        ->where("kode_wilayah", $kode_wilayah)
+        ->get("rumusanrenstra_detail")
+        ->row_array();
+
+    $oldValue = $old[$kolom] ?? "";
+
+    if (!empty($oldValue) && !empty($nilai)) {
+        $nilai = $oldValue . "|||" . $nilai;
+    }
 
     $this->db->where("id", $id)
-        ->update("rumusanrenstra_pd_detail", [
-            "deleted_at" => date("Y-m-d H:i:s")
-        ]);
+             ->where("kode_wilayah", $kode_wilayah)
+             ->update("rumusanrenstra_detail", [
+                 $kolom => $nilai,
+                 'updated_at' => date("Y-m-d H:i:s")
+             ]);
 
-    echo "1";
+    echo json_encode(['status'=>'success']);
 }
+
+    /* ===================================================== */
+    /*                     HAPUS DETAIL                      */
+    /* ===================================================== */
+    public function HapusDetail()
+    {
+        $kode_wilayah = $this->session->userdata("KodeWilayah");
+        $id = (int)$this->input->post("id");
+
+        $this->db->where("id", $id)
+                 ->where("kode_wilayah", $kode_wilayah)
+                 ->update("rumusanrenstra_detail", [
+                     'deleted_at' => date("Y-m-d H:i:s")
+                 ]);
+
+        echo json_encode([
+            'status' => $this->db->affected_rows() ? 'success' : 'error'
+        ]);
+    }
+
+
+    /* ===================================================== */
+    /*                 HAPUS HEADER + SEMUA DETAIL           */
+    /* ===================================================== */
+    public function HapusHeader()
+    {
+        $kode_wilayah = $this->session->userdata("KodeWilayah");
+        $id = (int)$this->input->post("id");
+
+        $now = date("Y-m-d H:i:s");
+
+        // Soft delete header
+        $this->db->where("id", $id)
+                 ->where("kode_wilayah", $kode_wilayah)
+                 ->update("rumusanrenstra_header", [
+                     'deleted_at' => $now
+                 ]);
+
+        // Soft delete semua detail
+        $this->db->where("header_id", $id)
+                 ->where("kode_wilayah", $kode_wilayah)
+                 ->update("rumusanrenstra_detail", [
+                     'deleted_at' => $now
+                 ]);
+
+        echo json_encode([
+            'status' => $this->db->affected_rows() ? 'success' : 'error'
+        ]);
+    }
 
 public function RencanaProgramPendanaan()
 {
@@ -4764,30 +5235,92 @@ public function RencanaProgramPendanaan()
     $KodeWilayah = $_SESSION['KodeWilayah'] ?? ($_SESSION['TempKodeWilayah'] ?? '');
     $data['KodeWilayah'] = $KodeWilayah;
 
-    // ==========================
-    // DATA TABLE
-    // ==========================
     if (!empty($KodeWilayah)) {
 
-        $data['list'] = $this->db
-            ->where("kodewilayah", $KodeWilayah) // 🔥 filter wilayah
+        // 🔥 JOIN 2 TABLE
+       $this->db->select("
+    r.*,
+    CASE 
+        WHEN r.sumber_tipe = 'urusan' THEN u.nama_urusan
+        WHEN r.sumber_tipe = 'outcome' THEN d.outcome
+        WHEN r.sumber_tipe = 'output' THEN d.output
+        WHEN r.sumber_tipe = 'program' THEN d.program
+        WHEN r.sumber_tipe = 'kegiatan' THEN d.kegiatan
+        WHEN r.sumber_tipe = 'sub_kegiatan' THEN d.sub_kegiatan
+    END as nama_sumber,
+    ri.indikator as nama_indikator
+");
+
+
+        $this->db->from("rencana_program_pendanaan r");
+
+        $this->db->join("urusan_pd u", "u.id = r.sumber_id", "left");
+        $this->db->join("rumusanrenstra_detail d", "d.id = r.sumber_id", "left");
+
+        $this->db->join(
+            "rumusanrenstra_detail ri",
+            "ri.id = r.indikator_id",
+            "left"
+        );
+
+        $this->db->where("r.kodewilayah", $KodeWilayah);
+        $this->db->where("r.deleted_at", NULL);
+        $this->db->order_by("r.id", "ASC");
+
+
+        $data['list'] = $this->db->get()->result_array();
+
+        // 🔥 Untuk Dropdown
+
+        $indikatorRaw = $this->db
+            ->select("id, indikator")
+            ->where("kode_wilayah", $KodeWilayah)
+            ->where("indikator IS NOT NULL")
+            ->get("rumusanrenstra_detail")
+            ->result_array();
+
+        $listIndikator = [];
+
+        foreach($indikatorRaw as $row){
+
+            // Pecah indikator pakai |||
+            $parts = explode("|||", $row['indikator']);
+
+            foreach($parts as $p){
+                $p = trim($p);
+
+                if($p != ''){
+                    $listIndikator[] = [
+                        "id" => $row['id'],
+                        "text" => $p
+                    ];
+                }
+            }
+        }
+
+        $data['listIndikator'] = $listIndikator;
+
+
+        $data['listUrusan'] = $this->db
+            ->where("kodewilayah", $KodeWilayah)
             ->where("deleted_at", NULL)
-            ->order_by("id", "ASC")
-            ->get("rencana_program_pendanaan")
+            ->get("urusan_pd")
+            ->result_array();
+
+        $data['listRenstra'] = $this->db
+            ->where("kode_wilayah", $KodeWilayah)
+            ->get("rumusanrenstra_detail")
             ->result_array();
 
     } else {
-        // kalau belum pilih wilayah → kosong
         $data['list'] = [];
+        $data['listUrusan'] = [];
+        $data['listRenstra'] = [];
     }
 
-    // ==========================
-    // LOAD VIEW
-    // ==========================
     $this->load->view('Daerah/header', $Header);
     $this->load->view("Daerah/RencanaProgramPendanaan", $data);
 }
-
 
 public function InputRencanaProgramPendanaan()
 {
@@ -4798,34 +5331,41 @@ public function InputRencanaProgramPendanaan()
         exit;
     }
 
-    $bidang_urusan = $this->input->post("bidang_urusan");
-    if (empty($bidang_urusan)) {
-        echo "Bidang Urusan wajib diisi!";
+    $sumber_tipe = $this->input->post("sumber_tipe");
+    $sumber_id   = $this->input->post("sumber_id");
+
+    if (empty($sumber_tipe) || empty($sumber_id)) {
+        echo "Sumber data wajib dipilih!";
         exit;
     }
 
     $data = [
-        "kodewilayah"  => $KodeWilayah, // 🔥 PENTING
-        "bidang_urusan"=> $bidang_urusan,
-        "indikator"    => $this->input->post("indikator"),
-        "baseline"     => $this->input->post("baseline"),
+        "kodewilayah" => $KodeWilayah,
+        "sumber_tipe" => $sumber_tipe,
+        "sumber_id"   => $sumber_id,
+"sumber_nilai" => $this->input->post("sumber_nilai"),
 
-        "target_2026"  => $this->input->post("target_2026"),
-        "pagu_2026"    => $this->input->post("pagu_2026"),
-        "target_2027"  => $this->input->post("target_2027"),
-        "pagu_2027"    => $this->input->post("pagu_2027"),
-        "target_2028"  => $this->input->post("target_2028"),
-        "pagu_2028"    => $this->input->post("pagu_2028"),
-        "target_2029"  => $this->input->post("target_2029"),
-        "pagu_2029"    => $this->input->post("pagu_2029"),
-        "target_2030"  => $this->input->post("target_2030"),
-        "pagu_2030"    => $this->input->post("pagu_2030"),
+        "indikator_id"   => $this->input->post("indikator_id"),
+        "indikator_text" => $this->input->post("indikator_text"),
+        "baseline"    => $this->input->post("baseline"),
 
-        "keterangan"   => $this->input->post("keterangan"),
-        "created_at"   => date("Y-m-d H:i:s")
+        "target_2026" => $this->input->post("target_2026"),
+        "pagu_2026"   => $this->input->post("pagu_2026"),
+        "target_2027" => $this->input->post("target_2027"),
+        "pagu_2027"   => $this->input->post("pagu_2027"),
+        "target_2028" => $this->input->post("target_2028"),
+        "pagu_2028"   => $this->input->post("pagu_2028"),
+        "target_2029" => $this->input->post("target_2029"),
+        "pagu_2029"   => $this->input->post("pagu_2029"),
+        "target_2030" => $this->input->post("target_2030"),
+        "pagu_2030"   => $this->input->post("pagu_2030"),
+
+        "keterangan"  => $this->input->post("keterangan"),
+        "created_at"  => date("Y-m-d H:i:s")
     ];
 
     $this->db->insert("rencana_program_pendanaan", $data);
+
     echo "1";
 }
 
@@ -4833,37 +5373,37 @@ public function EditRencanaProgramPendanaan()
 {
     $id = $this->input->post("id");
 
-    $bidang_urusan = $this->input->post("bidang_urusan");
-    $indikator     = $this->input->post("indikator");
+    $sumber_tipe = $this->input->post("sumber_tipe");
+    $sumber_id   = $this->input->post("sumber_id");
 
-    if (empty($bidang_urusan)) {
-    echo "Bidang Urusan wajib diisi!";
-    exit;
-}
+    if (empty($sumber_tipe) || empty($sumber_id)) {
+        echo "Sumber data wajib dipilih!";
+        exit;
+    }
 
     $data = [
-        "bidang_urusan" => $bidang_urusan,
-        "indikator"     => $indikator,
-        "baseline"      => $this->input->post("baseline"),
+        "sumber_tipe" => $sumber_tipe,
+        "sumber_id"   => $sumber_id,
+        "sumber_nilai" => $this->input->post("sumber_nilai"),
 
-        "target_2026"   => $this->input->post("target_2026"),
-        "pagu_2026"     => $this->input->post("pagu_2026"),
 
-        "target_2027"   => $this->input->post("target_2027"),
-        "pagu_2027"     => $this->input->post("pagu_2027"),
+        "indikator_id"   => $this->input->post("indikator_id"),
+        "indikator_text" => $this->input->post("indikator_text"),
+        "baseline"    => $this->input->post("baseline"),
 
-        "target_2028"   => $this->input->post("target_2028"),
-        "pagu_2028"     => $this->input->post("pagu_2028"),
+        "target_2026" => $this->input->post("target_2026"),
+        "pagu_2026"   => $this->input->post("pagu_2026"),
+        "target_2027" => $this->input->post("target_2027"),
+        "pagu_2027"   => $this->input->post("pagu_2027"),
+        "target_2028" => $this->input->post("target_2028"),
+        "pagu_2028"   => $this->input->post("pagu_2028"),
+        "target_2029" => $this->input->post("target_2029"),
+        "pagu_2029"   => $this->input->post("pagu_2029"),
+        "target_2030" => $this->input->post("target_2030"),
+        "pagu_2030"   => $this->input->post("pagu_2030"),
 
-        "target_2029"   => $this->input->post("target_2029"),
-        "pagu_2029"     => $this->input->post("pagu_2029"),
-
-        "target_2030"   => $this->input->post("target_2030"),
-        "pagu_2030"     => $this->input->post("pagu_2030"),
-
-        "keterangan"    => $this->input->post("keterangan"),
-
-        "updated_at"    => date("Y-m-d H:i:s")
+        "keterangan"  => $this->input->post("keterangan"),
+        "updated_at"  => date("Y-m-d H:i:s")
     ];
 
     $this->db->where("id", $id);
@@ -4871,6 +5411,7 @@ public function EditRencanaProgramPendanaan()
 
     echo "1";
 }
+
 
 public function HapusRencanaProgramPendanaan()
 {

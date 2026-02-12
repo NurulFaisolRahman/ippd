@@ -79,7 +79,7 @@
                   <tr class="text-center">
                     <th rowspan="2" style="width:50px;">No</th>
                     <th rowspan="2">Indikator</th>
-                    <th rowspan="2" style="width:80px;">Satuan</th>
+                    <th class="text-center" rowspan="2" style="width:80px;">Satuan</th>
                     <th class="text-center" rowspan="2" style="width:90px;">Baseline<br>2024</th>
                     <th class="text-center" colspan="6">Target Tahun</th>
                     <th rowspan="2">Keterangan</th>

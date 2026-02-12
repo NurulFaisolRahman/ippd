@@ -2783,8 +2783,8 @@ public function NSPK() {
     }
 
     $this->db->where('deleted_at IS NULL');
-    $this->db->order_by('tahun_penetapan', 'DESC');
-    $this->db->order_by('id', 'DESC');
+    $this->db->order_by('tahun_penetapan', 'ASC');
+    $this->db->order_by('id', 'ASC');
     $Data['NSPK'] = $this->db->get('nspk')->result_array();
 
     // === INFO KEMENTERIAN & PERIODE (INI YANG ANDA KURANG) ===

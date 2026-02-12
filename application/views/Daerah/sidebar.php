@@ -343,7 +343,7 @@
                     <a href="<?=base_url('Daerah/IsuStrategisPD')?>">Isu Strategis PD</a>
                     <a href="<?=base_url('Daerah/TujuanPD')?>">Tujuan PD</a>
                     <a href="<?=base_url('Daerah/SasaranPD')?>">Sasaran PD</a>
-                    <a href="<?=base_url('Daerah/TujuanSasaranPD')?>">Tujuan & Sasaran PD</a>
+                    <a href="<?=base_url('Daerah/TujuanSasaranPD')?>">NSPK, Tujuan & Sasaran PD</a>
                     <a href="<?=base_url('Daerah/ArahKebijakanPD')?>">Strategi & Arah Kebijakan</a>
                     <a href="<?=base_url('Daerah/NSPKOperasionalisasiPD')?>">Operasionalisasi NSPK</a>
                     <a href="<?=base_url('Daerah/RumusanRenstraPD')?>">Rumusan Renstra PD</a>

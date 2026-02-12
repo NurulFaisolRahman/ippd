@@ -90,9 +90,61 @@
                     <?php $no = 1; foreach ($NSPKOperasionalisasiPD as $row) { ?>
                       <tr>
                         <td class="text-center"><?= $no++ ?></td>
-                        <td><?= nl2br(htmlspecialchars($row['nspk_text'] ?? '-')) ?></td>
-                        <td><?= nl2br(htmlspecialchars($row['arah_rpjmd_text'] ?? '-')) ?></td>
-                        <td><?= nl2br(htmlspecialchars($row['arah_renstra_text'] ?? '-')) ?></td>
+                       <td>
+
+                        <?php if (!empty($row['nspk_text'])) { ?>
+
+                            <?php if (!empty($row['nspk_text']['norma'])) { ?>
+                                <?php foreach ($row['nspk_text']['norma'] as $v) { ?>
+                                    • <?= html_escape($v) ?><br>
+                                <?php } ?>
+                            <?php } ?>
+
+                            <?php if (!empty($row['nspk_text']['standar'])) { ?>
+                                <?php foreach ($row['nspk_text']['standar'] as $v) { ?>
+                                    • <?= html_escape($v) ?><br>
+                                <?php } ?>
+                            <?php } ?>
+
+                            <?php if (!empty($row['nspk_text']['prosedur'])) { ?>
+                                <?php foreach ($row['nspk_text']['prosedur'] as $v) { ?>
+                                    • <?= html_escape($v) ?><br>
+                                <?php } ?>
+                            <?php } ?>
+
+                            <?php if (!empty($row['nspk_text']['kriteria'])) { ?>
+                                <?php foreach ($row['nspk_text']['kriteria'] as $v) { ?>
+                                    • <?= html_escape($v) ?><br>
+                                <?php } ?>
+                            <?php } ?>
+
+                        <?php } else { ?>
+                            -
+                        <?php } ?>
+
+                        </td>
+
+
+                       <td>
+<?php if (!empty($row['arah_rpjmd_text']) && is_array($row['arah_rpjmd_text'])) { ?>
+    <?php foreach ($row['arah_rpjmd_text'] as $v) { ?>
+        • <?= html_escape($v) ?><br>
+    <?php } ?>
+<?php } else { ?>
+    -
+<?php } ?>
+</td>
+
+                        <td>
+<?php if (!empty($row['arah_renstra_text']) && is_array($row['arah_renstra_text'])) { ?>
+    <?php foreach ($row['arah_renstra_text'] as $v) { ?>
+        • <?= html_escape($v) ?><br>
+    <?php } ?>
+<?php } else { ?>
+    -
+<?php } ?>
+</td>
+
                         <td><?= nl2br(htmlspecialchars($row['keterangan'] ?? '')) ?></td>
 
                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
@@ -100,9 +152,10 @@
                             <button class="btn btn-warning btn-sm BtnEdit"
                               data-id="<?= (int)$row['id'] ?>"
                               data-tujuansasaran="<?= (int)$row['tujuansasaranpd_master_id'] ?>"
-                              data-rpjmd="<?= (int)$row['arah_kebijakan_rpjmd_id'] ?>"
-                              data-renstra="<?= (int)$row['arah_kebijakan_renstra_pd_id'] ?>"
+                              data-rpjmd="<?= html_escape($row['arah_kebijakan_rpjmd_id']) ?>"
+                              data-renstra="<?= html_escape($row['arah_kebijakan_renstra_pd_id']) ?>"
                               data-keterangan="<?= html_escape($row['keterangan'] ?? '') ?>">
+
                               <i class="notika-icon notika-edit"></i>
                             </button>
 
@@ -150,29 +203,61 @@
           <select id="TujuanSasaranPDId" class="form-control">
             <option value="">Pilih NSPK</option>
             <?php foreach($ListNSPK as $n){ ?>
-              <option value="<?= (int)$n['id'] ?>"><?= html_escape($n['nspk']) ?></option>
+              <option value="<?= (int)$n['id'] ?>"><?= html_escape($n['nama_nspk']) ?></option>
             <?php } ?>
           </select>
         </div>
 
         <div class="form-group">
           <label><b>Arah Kebijakan RPJMD</b></label>
-          <select id="ArahRPJMDId" class="form-control">
-            <option value="">Pilih Arah Kebijakan RPJMD</option>
-            <?php foreach($ListArahKebijakanRPJMD as $r){ ?>
-              <option value="<?= (int)$r['id'] ?>"><?= html_escape($r['arah_kebijakan']) ?></option>
-            <?php } ?>
-          </select>
+
+<div id="ContainerRPJMD">
+  <div class="row mb-2 item-rpjmd">
+    <div class="col-md-10">
+      <select name="arah_kebijakan_rpjmd_id[]" class="form-control">
+        <option value="">Pilih Arah Kebijakan</option>
+        <?php foreach($ListArahKebijakanRPJMD as $r){ ?>
+          <option value="<?= $r['id'] ?>">
+            <?= html_escape($r['arah_kebijakan']) ?>
+          </option>
+        <?php } ?>
+      </select>
+    </div>
+
+    <div class="col-md-2">
+      <button type="button" class="btn btn-success BtnTambahRPJMD">+</button>
+      <button type="button" class="btn btn-danger BtnHapusRPJMD">×</button>
+    </div>
+  </div>
+</div>
+
         </div>
 
         <div class="form-group">
           <label><b>Arah Kebijakan Renstra PD</b></label>
-          <select id="ArahRenstraId" class="form-control">
-            <option value="">Pilih Arah Kebijakan Renstra PD</option>
-            <?php foreach($ListArahKebijakanRenstraPD as $r){ ?>
-              <option value="<?= (int)$r['id'] ?>"><?= html_escape($r['arah_kebijakan']) ?></option>
-            <?php } ?>
-          </select>
+
+<div id="ContainerRenstra">
+
+  <div class="row mb-2 item-renstra">
+    <div class="col-md-10">
+      <select name="arah_kebijakan_renstra_pd_id[]" class="form-control">
+        <option value="">Pilih Arah Kebijakan Renstra PD</option>
+        <?php foreach($ListArahKebijakanRenstraPD as $r){ ?>
+          <option value="<?= $r['id'] ?>">
+            <?= html_escape($r['arah_kebijakan']) ?>
+          </option>
+        <?php } ?>
+      </select>
+    </div>
+
+    <div class="col-md-2">
+      <button type="button" class="btn btn-success BtnTambahRenstra">+</button>
+      <button type="button" class="btn btn-danger BtnHapusRenstra">×</button>
+    </div>
+  </div>
+
+</div>
+
         </div>
 
         <div class="form-group">
@@ -205,28 +290,64 @@
           <label><b>Operasionalisasi NSPK</b></label>
           <select id="EditTujuanSasaranPDId" class="form-control">
             <?php foreach($ListNSPK as $n){ ?>
-              <option value="<?= (int)$n['id'] ?>"><?= html_escape($n['nspk']) ?></option>
+              <option value="<?= (int)$n['id'] ?>"><?= html_escape($n['nama_nspk']) ?></option>
             <?php } ?>
           </select>
         </div>
 
         <div class="form-group">
-          <label><b>Arah Kebijakan RPJMD</b></label>
-          <select id="EditArahRPJMDId" class="form-control">
-            <?php foreach($ListArahKebijakanRPJMD as $r){ ?>
-              <option value="<?= (int)$r['id'] ?>"><?= html_escape($r['arah_kebijakan']) ?></option>
-            <?php } ?>
-          </select>
-        </div>
+  <label><b>Arah Kebijakan RPJMD</b></label>
+
+  <div id="EditContainerRPJMD">
+
+    <div class="row mb-2 item-rpjmd-edit">
+      <div class="col-md-10">
+        <select name="edit_arah_kebijakan_rpjmd_id[]" class="form-control">
+          <option value="">Pilih Arah Kebijakan</option>
+          <?php foreach($ListArahKebijakanRPJMD as $r){ ?>
+            <option value="<?= $r['id'] ?>">
+              <?= html_escape($r['arah_kebijakan']) ?>
+            </option>
+          <?php } ?>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <button type="button" class="btn btn-success BtnTambahRPJMD_Edit">+</button>
+        <button type="button" class="btn btn-danger BtnHapusRPJMD_Edit">×</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 
         <div class="form-group">
-          <label><b>Arah Kebijakan Renstra PD</b></label>
-          <select id="EditArahRenstraId" class="form-control">
-            <?php foreach($ListArahKebijakanRenstraPD as $r){ ?>
-              <option value="<?= (int)$r['id'] ?>"><?= html_escape($r['arah_kebijakan']) ?></option>
-            <?php } ?>
-          </select>
-        </div>
+  <label><b>Arah Kebijakan Renstra PD</b></label>
+
+  <div id="EditContainerRenstra">
+
+    <div class="row mb-2 item-renstra-edit">
+      <div class="col-md-10">
+        <select name="edit_arah_kebijakan_renstra_pd_id[]" class="form-control">
+          <option value="">Pilih Arah Kebijakan Renstra PD</option>
+          <?php foreach($ListArahKebijakanRenstraPD as $r){ ?>
+            <option value="<?= $r['id'] ?>">
+              <?= html_escape($r['arah_kebijakan']) ?>
+            </option>
+          <?php } ?>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <button type="button" class="btn btn-success BtnTambahRenstra_Edit">+</button>
+        <button type="button" class="btn btn-danger BtnHapusRenstra_Edit">×</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 
         <div class="form-group">
           <label><b>Keterangan (Opsional)</b></label>
@@ -335,50 +456,186 @@ $("#Provinsi").change(function() {
           }
         });
       <?php } ?>
+
+
+// Tambah dropdown RPJMD di bawah item yang diklik
+$(document).on("click", ".BtnTambahRPJMD", function () {
+
+    var newItem = $(this).closest(".item-rpjmd").clone();
+
+    newItem.find("select").val("");
+
+    // sisipkan tepat setelah dropdown yang diklik
+    $(this).closest(".item-rpjmd").after(newItem);
+});
+
+// Hapus dropdown RPJMD
+$(document).on("click", ".BtnHapusRPJMD", function () {
+
+    if ($("#ContainerRPJMD .item-rpjmd").length == 1) {
+        alert("Minimal harus ada 1 dropdown");
+        return;
+    }
+
+    $(this).closest(".item-rpjmd").remove();
+});
+
+// Tambah dropdown Renstra
+$(document).on("click", ".BtnTambahRenstra", function () {
+
+    var newItem = $(this).closest(".item-renstra").clone();
+    newItem.find("select").val("");
+
+    $(this).closest(".item-renstra").after(newItem);
+});
+
+// Hapus dropdown Renstra
+$(document).on("click", ".BtnHapusRenstra", function () {
+
+    if ($("#ContainerRenstra .item-renstra").length == 1) {
+        alert("Minimal harus ada 1 dropdown");
+        return;
+    }
+
+    $(this).closest(".item-renstra").remove();
+});
+
+
+
 /* ================= SIMPAN ================= */
 $("#BtnSimpan").click(function(){
 
+  var rpjmd = [];
+  $("select[name='arah_kebijakan_rpjmd_id[]']").each(function(){
+      if($(this).val()) rpjmd.push($(this).val());
+  });
+
+  var renstra = [];
+  $("select[name='arah_kebijakan_renstra_pd_id[]']").each(function(){
+      if($(this).val()) renstra.push($(this).val());
+  });
+
   $.post(BaseURL+"Daerah/InputNSPKOperasionalisasiPD", {
     tujuansasaran_pd_id: $("#TujuanSasaranPDId").val(),
-    arah_kebijakan_rpjmd_id: $("#ArahRPJMDId").val(),
-    arah_kebijakan_renstra_pd_id: $("#ArahRenstraId").val(),
+    arah_kebijakan_rpjmd_id: rpjmd,
+    arah_kebijakan_renstra_pd_id: renstra,
     keterangan: $("#Keterangan").val(),
     [CSRF_NAME]: CSRF_TOKEN
   }, function(res){
     if(res=="1") location.reload();
-    else alert(res || "Gagal simpan!");
+    else alert(res);
   });
 
 });
+
 
 /* ================= OPEN EDIT ================= */
 $(document).on("click",".BtnEdit",function(){
 
   $("#EditId").val($(this).data("id"));
   $("#EditTujuanSasaranPDId").val($(this).data("tujuansasaran"));
-  $("#EditArahRPJMDId").val($(this).data("rpjmd"));
-  $("#EditArahRenstraId").val($(this).data("renstra"));
   $("#EditKeterangan").val($(this).data("keterangan"));
+
+  var rpjmd_ids   = ($(this).data("rpjmd") || "").toString().split("|||");
+  var renstra_ids = ($(this).data("renstra") || "").toString().split("|||");
+
+  // ✅ SIMPAN TEMPLATE DULU SEBELUM DIHAPUS
+  var templateRPJMD   = $(".item-rpjmd-edit:first").clone();
+  var templateRenstra = $(".item-renstra-edit:first").clone();
+
+  // Reset container
+  $("#EditContainerRPJMD").html("");
+  $("#EditContainerRenstra").html("");
+
+  // ================= RPJMD =================
+  if (rpjmd_ids.length > 0) {
+    rpjmd_ids.forEach(function(val){
+
+      var item = templateRPJMD.clone();
+      item.find("select").val(val);
+
+      $("#EditContainerRPJMD").append(item);
+    });
+  } else {
+    $("#EditContainerRPJMD").append(templateRPJMD.clone());
+  }
+
+  // ================= RENSTRA =================
+  if (renstra_ids.length > 0) {
+    renstra_ids.forEach(function(val){
+
+      var item = templateRenstra.clone();
+      item.find("select").val(val);
+
+      $("#EditContainerRenstra").append(item);
+    });
+  } else {
+    $("#EditContainerRenstra").append(templateRenstra.clone());
+  }
 
   $("#ModalEdit").modal("show");
 });
 
+
 /* ================= UPDATE ================= */
 $("#BtnUpdate").click(function(){
+
+  var rpjmd = [];
+  $("select[name='edit_arah_kebijakan_rpjmd_id[]']").each(function(){
+      if($(this).val()) rpjmd.push($(this).val());
+  });
+
+  var renstra = [];
+  $("select[name='edit_arah_kebijakan_renstra_pd_id[]']").each(function(){
+      if($(this).val()) renstra.push($(this).val());
+  });
 
   $.post(BaseURL+"Daerah/EditNSPKOperasionalisasiPD", {
     id: $("#EditId").val(),
     tujuansasaran_pd_id: $("#EditTujuanSasaranPDId").val(),
-    arah_kebijakan_rpjmd_id: $("#EditArahRPJMDId").val(),
-    arah_kebijakan_renstra_pd_id: $("#EditArahRenstraId").val(),
+    arah_kebijakan_rpjmd_id: rpjmd,
+    arah_kebijakan_renstra_pd_id: renstra,
     keterangan: $("#EditKeterangan").val(),
     [CSRF_NAME]: CSRF_TOKEN
   }, function(res){
     if(res=="1") location.reload();
-    else alert(res || "Gagal update!");
+    else alert(res);
   });
 
 });
+
+// Tambah RPJMD Edit
+$(document).on("click", ".BtnTambahRPJMD_Edit", function () {
+    var newItem = $(this).closest(".item-rpjmd-edit").clone();
+    newItem.find("select").val("");
+    $(this).closest(".item-rpjmd-edit").after(newItem);
+});
+
+// Hapus RPJMD Edit
+$(document).on("click", ".BtnHapusRPJMD_Edit", function () {
+    if ($("#EditContainerRPJMD .item-rpjmd-edit").length == 1) {
+        alert("Minimal 1 dropdown");
+        return;
+    }
+    $(this).closest(".item-rpjmd-edit").remove();
+});
+
+// Tambah Renstra Edit
+$(document).on("click", ".BtnTambahRenstra_Edit", function () {
+    var newItem = $(this).closest(".item-renstra-edit").clone();
+    newItem.find("select").val("");
+    $(this).closest(".item-renstra-edit").after(newItem);
+});
+
+// Hapus Renstra Edit
+$(document).on("click", ".BtnHapusRenstra_Edit", function () {
+    if ($("#EditContainerRenstra .item-renstra-edit").length == 1) {
+        alert("Minimal 1 dropdown");
+        return;
+    }
+    $(this).closest(".item-renstra-edit").remove();
+});
+
 
 /* ================= DELETE (SOFT) ================= */
 $(document).on("click",".BtnHapus",function(){
