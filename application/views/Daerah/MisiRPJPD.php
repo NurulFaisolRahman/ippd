@@ -69,7 +69,7 @@
                             <div class="basic-tb-hd">
                                 <div class="button-icon-btn sm-res-mg-t-30">
                                     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                    <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputMisi"><i class="notika-icon notika-edit"></i> <b>Input Misi RPJPD</b></button>
+                                    <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputMisi"><i class="notika-icon bi-plus-lg"></i> <b>Tambah Misi RPJPD</b></button>
                                 <?php } ?>
                                 </div>
                             </div>

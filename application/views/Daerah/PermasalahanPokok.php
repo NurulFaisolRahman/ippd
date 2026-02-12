@@ -67,7 +67,7 @@
                             <div class="button-icon-btn sm-res-mg-t-30">
                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                                 <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputPermasalahanPokok">
-                                    <i class="notika-icon notika-edit"></i> <b>Input Permasalahan Pokok</b>
+                                    <i class="notika-icon bi-plus-lg"></i> <b>Tambah Permasalahan Pokok</b>
                                 </button>
                                 <?php } ?>
                             </div>
