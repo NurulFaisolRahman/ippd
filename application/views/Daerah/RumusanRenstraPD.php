@@ -1272,6 +1272,29 @@ $("#BtnUpdateHeader").click(function () {
     });
 });
 
+$(document).on("click", ".HapusHeader", function () {
+
+    if (!confirm("Yakin ingin menghapus grup ini beserta semua detailnya?")) return;
+
+    var id = $(this).data("id");
+
+    $.post(BaseURL + "Daerah/HapusHeader", {
+        id: id,
+        [CSRF_NAME]: CSRF_TOKEN
+    }, function (res) {
+
+        var data = typeof res === "string" ? JSON.parse(res) : res;
+
+        if (data.status === "success") {
+            location.reload();
+        } else {
+            alert("Gagal menghapus grup!");
+        }
+    });
+
+});
+
+
 
 });
 
