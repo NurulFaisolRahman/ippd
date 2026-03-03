@@ -42,6 +42,10 @@
             width: var(--sidebar-width);
             background-color: #f8f9fa;
             height: 100vh;
+            padding-top: 70px;
+            overflow-y: auto;
+
+            padding-top: 0;
             position: fixed;
             left: 0;
             top: 0;
@@ -51,6 +55,16 @@
             overflow-y: auto;
             transition: all var(--transition-speed) ease;
         }
+
+        .sidebar-menu {
+            padding-bottom: 120px;
+        }
+
+        .sidebar-submenu.show {
+            max-height: 250px;
+            overflow-y: auto;
+}
+
         
         .sidebar-mini .sidebar-wrapper {
             width: var(--sidebar-mini-width);
@@ -308,8 +322,8 @@
                     <a href="<?=base_url('Daerah/MisiRPJMD')?>">Misi</a>
                     <a href="<?=base_url('Daerah/TujuanRPJMD')?>">Tujuan</a>
                     <a href="<?=base_url('Daerah/SasaranRPJMD')?>">Sasaran</a>
-                    <a href="<?=base_url('Daerah/ArahKebijakanRPJMD')?>">Arah Kebijakan</a>
                     <a href="<?=base_url('Daerah/ProgramPD')?>">Program</a>
+                    <a href="<?=base_url('Daerah/ArahKebijakanRPJMD')?>">Arah Kebijakan</a>
                     <a href="<?=base_url('Daerah/IsuKLHS')?>">Isu KLHS</a>
                     <a href="<?=base_url('Daerah/TahapanRPJMD')?>">Tahapan</a>
                     <a href="<?=base_url('Daerah/Iku')?>">IKU</a>
@@ -351,6 +365,7 @@
                     <a href="<?=base_url('Daerah/SubKegiatanPrioritas')?>">Sub Kegiatan Prioritas</a>
                     <a href="<?=base_url('Daerah/IkuPD')?>">IKU PD</a>
                     <a href="<?=base_url('Daerah/IkkPD')?>">IKK PD</a>
+                    <a href="<?=base_url('Daerah/AnggaranRenstra')?>">Anggran Renstra</a>
                 </div>
             </li>
 
@@ -373,7 +388,8 @@
                     <i class="fa fa-chevron-down"></i>
                 </a>
                 <div class="sidebar-submenu">
-                    <a href="<?=base_url('#')?>">Pohon Kinerja</a>
+                    <a href="<?=base_url('Daerah/PohonKinerja')?>">Pohon Kinerja</a>
+                     <a href="<?=base_url('Daerah/PohonKinerjaPD')?>">Pohon Kinerja PD</a>
             
                 </div>
             </li>

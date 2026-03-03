@@ -236,14 +236,14 @@
                       <label class="hrzn-fm"><b>Induk Kementerian</b></label>
                     </div>
                     <div class="col-lg-8">
-                    <select class="form-control input-sm" id="IdKementerianAdd">
-                        <option value="">-- Pilih Kementerian --</option>
-                        <?php foreach ($Kementerian as $k) { ?>
-                          <option value="<?= $k['username'] ?>">
-                            <?= html_escape($k['username']) ?>
-                          </option>
-                        <?php } ?>
-                      </select>
+                    <div id="kementerianContainerAdd"></div>
+                      <button type="button" class="btn btn-info btn-sm" id="addKementerianRowAdd" style="margin-top:8px;">
+                        + Tambah Induk Kementerian
+                      </button>
+                      <div style="margin-top:6px; font-size:12px; color:#888;">
+                        * Boleh pilih lebih dari 1
+                      </div>
+
                     </div>
                   </div>
                 </div>
@@ -368,14 +368,14 @@
                       <label class="hrzn-fm"><b>Induk Kementerian</b></label>
                     </div>
                     <div class="col-lg-8">
-                      <select class="form-control input-sm" id="IdKementerianEdit">
-                        <option value="">-- Pilih Kementerian --</option>
-                        <?php foreach ($Kementerian as $k) { ?>
-                          <option value="<?= $k['username'] ?>">
-                            <?= html_escape($k['username']) ?>
-                          </option>
-                        <?php } ?>
-                      </select>
+                      <div id="kementerianContainerEdit"></div>
+                        <button type="button" class="btn btn-info btn-sm" id="addKementerianRowEdit" style="margin-top:8px;">
+                          + Tambah Induk Kementerian
+                        </button>
+                        <div style="margin-top:6px; font-size:12px; color:#888;">
+                          * Boleh pilih lebih dari 1
+                        </div>
+
                     </div>
                   </div>
                 </div>
@@ -455,9 +455,66 @@
 <script src="../js/main.js"></script>
 
 <script>
+  
   var BaseURL = '<?=base_url()?>';
   var CSRF_TOKEN = '<?= $this->security->get_csrf_hash() ?>';
   var CSRF_NAME  = '<?= $this->security->get_csrf_token_name() ?>';
+
+  var KEMENTERIAN_LIST = <?= json_encode($Kementerian) ?>;
+function buildKementerianSelect(nameAttr, selectedVal) {
+  var html = '<div class="kementerian-row" style="display:flex; gap:8px; margin-bottom:6px;">';
+  html += '<select class="form-control input-sm kementerian-select" name="'+nameAttr+'[]" style="flex:1;">';
+  html += '<option value="">-- Pilih Kementerian --</option>';
+
+  KEMENTERIAN_LIST.forEach(function(k){
+    var sel = (selectedVal && String(selectedVal) === String(k.username)) ? 'selected' : '';
+    html += '<option value="'+k.username+'" '+sel+'>'+k.username+'</option>';
+  });
+
+  html += '</select>';
+  html += '<button type="button" class="btn btn-danger btn-sm remove-kementerian">Hapus</button>';
+  html += '</div>';
+
+  return html;
+}
+
+function initKementerianContainer(containerId, nameAttr, selectedVals) {
+  var $c = $('#'+containerId);
+  $c.html('');
+
+  if (!selectedVals || selectedVals.length === 0) {
+    $c.append(buildKementerianSelect(nameAttr, null));
+  } else {
+    selectedVals.forEach(function(val){
+      $c.append(buildKementerianSelect(nameAttr, val));
+    });
+  }
+}
+
+function collectKementerian(containerId) {
+  var arr = [];
+  $('#'+containerId+' select.kementerian-select').each(function(){
+    var v = $(this).val();
+    if (v) arr.push(v);
+  });
+  return arr.filter(function(v, i, a){ return a.indexOf(v) === i; });
+}
+
+// init saat load
+initKementerianContainer('kementerianContainerAdd', 'idkementerian', []);
+
+$(document).on('click', '#addKementerianRowAdd', function(){
+  $('#kementerianContainerAdd').append(buildKementerianSelect('idkementerian', null));
+});
+
+$(document).on('click', '#addKementerianRowEdit', function(){
+  $('#kementerianContainerEdit').append(buildKementerianSelect('idkementerian', null));
+});
+
+$(document).on('click', '.remove-kementerian', function(){
+  $(this).closest('.kementerian-row').remove();
+});
+
 
   // data urusan dari controller
   var URUSAN_LIST = <?= json_encode($Urusan) ?>;
@@ -690,7 +747,7 @@
       tahun_mulai: $("#TahunMulai").val(),
       tahun_akhir: $("#TahunAkhir").val(),
       urusan_id: urusan,
-      idkementerian: $("#IdKementerianAdd").val(), // 🔥 TAMBAHKAN
+      idkementerian: collectKementerian('kementerianContainerAdd'),
       [CSRF_NAME]: CSRF_TOKEN
     };
 
@@ -702,29 +759,54 @@
     });
 
     // buka modal edit
-    $(document).on("click",".Edit",function(){
-      var id = $(this).data('id');
-      var nama = $(this).data('nama');
-      var tm = $(this).data('tahun-mulai');
-      var ta = $(this).data('tahun-akhir');
-      var urusanIds = $(this).data('urusan-ids'); // string "1,2,3"
-      var idKem = $(this).data('idkementerian')
+    $(document).on("click", ".Edit", function(){
 
-      $("#Id").val(id);
-      $("#_Username").val(nama);
-      $("#_Password").val("");
-      $("#_TahunMulai").val(tm);
-      $("#_TahunAkhir").val(ta);
-      $("#IdKementerian").val(idKem);
+  var id       = $(this).data('id');
+  var nama     = $(this).data('nama');
+  var tm       = $(this).data('tahun-mulai');
+  var ta       = $(this).data('tahun-akhir');
+  var urusanIds= $(this).data('urusan-ids');
+  var idKem    = $(this).data('idkementerian');
 
-      var selected = [];
-      if (urusanIds) {
-        selected = String(urusanIds).split(',').map(function(x){ return x.trim(); }).filter(Boolean);
-      }
-      initUrusanContainer('urusanContainerEdit', 'urusan_id', selected);
+  // Isi field biasa
+  $("#Id").val(id);
+  $("#_Username").val(nama);
+  $("#_Password").val("");
+  $("#_TahunMulai").val(tm);
+  $("#_TahunAkhir").val(ta);
 
-      $('#ModalEditInstansi').modal("show");
-    });
+  // ==========================
+  // ✅ SET INDUK KEMENTERIAN
+  // ==========================
+  var selectedKem = [];
+
+if (idKem) {
+    selectedKem = String(idKem)
+        .split(',')
+        .map(function(x){ return x.trim(); })
+        .filter(Boolean);
+}
+
+initKementerianContainer('kementerianContainerEdit', 'idkementerian', selectedKem);
+
+
+  // ==========================
+  // ✅ SET MULTI URUSAN
+  // ==========================
+  var selected = [];
+
+  if (urusanIds) {
+      selected = String(urusanIds)
+          .split(',')
+          .map(function(x){ return x.trim(); })
+          .filter(Boolean);
+  }
+
+  initUrusanContainer('urusanContainerEdit', 'urusan_id', selected);
+
+  $('#ModalEditInstansi').modal("show");
+});
+
 
     // SIMPAN (Edit)
     $("#Edit").click(function() {
@@ -742,7 +824,7 @@
         tahun_mulai: $("#_TahunMulai").val(),
         tahun_akhir: $("#_TahunAkhir").val(),
         urusan_id: urusan,
-        idkementerian: $("#IdKementerianEdit").val(),
+        idkementerian: collectKementerian('kementerianContainerEdit'),
         [CSRF_NAME]: CSRF_TOKEN
       };
 
