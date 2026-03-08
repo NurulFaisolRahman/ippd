@@ -13,6 +13,10 @@
     <link rel="stylesheet" href="<?=base_url()?>css/data-table/bootstrap-table.css">
     <link rel="stylesheet" href="<?=base_url()?>css/data-table/bootstrap-editable.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="../js/vendor/jquery-1.12.4.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    <script src="../js/data-table/jquery.dataTables.min.js"></script>
+    <script src=".../bootstrap.bundle.min.js"></script> 
     
     <!-- Custom CSS -->
     <style>
@@ -388,8 +392,10 @@
                     <i class="fa fa-chevron-down"></i>
                 </a>
                 <div class="sidebar-submenu">
-                    <a href="<?=base_url('Daerah/PohonKinerja')?>">Pohon Kinerja</a>
-                     <a href="<?=base_url('Daerah/PohonKinerjaPD')?>">Pohon Kinerja PD</a>
+                    <a href="<?=base_url('Daerah/Ultimate_outcome')?>">Pohon Kinerja</a>
+                    <a href="<?=base_url('Daerah/TampilPohonKinerja')?>">Tampilan Pohon Kinerja</a>
+                     <a href="<?=base_url('Daerah/Ultimate_outcome_pd')?>">Pohon Kinerja PD</a>
+                     <a href="<?=base_url('Daerah/TampilPohonKinerjaPD')?>">Tampilan Pohon Kinerja PD</a>
             
                 </div>
             </li>
