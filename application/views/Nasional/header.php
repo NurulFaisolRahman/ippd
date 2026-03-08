@@ -21,16 +21,30 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="<?=base_url()?>css/bootstrap.min.css">
     <link rel="stylesheet" href="<?=base_url()?>css/font-awesome.min.css">
-    <link rel="stylesheet" href="<?=base_url()?>css/notika-custom-icon.css">
-    <link rel="stylesheet" href="<?=base_url()?>css/data-table/bootstrap-table.css">
-    <link rel="stylesheet" href="<?=base_url()?>css/data-table/bootstrap-editable.css">
     <style>
-        /* Navbar Styles */
+        /* ==========================================
+           MODERN CSS VARIABLES
+           ========================================== */
+        :root {
+            --primary-color: #20c997;
+            --primary-dark: #17a57a;
+            --primary-light: #e6f9f3;
+            --text-main: #2d3748;
+            --text-muted: #4a5568; 
+            --transition-speed: 0.35s;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 20px 25px -5px rgba(32, 201, 151, 0.15);
+        }
+
+        /* ==========================================
+           NAVBAR STYLES (Modern & Elegant)
+           ========================================== */
         .navbar {
-            background-color:#20c997;
-            padding: 1rem 2rem;
-            border-radius: 0 0 12px 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+            padding: 0.8rem 2rem;
+            border-radius: 0 0 16px 16px;
+            box-shadow: var(--shadow-lg);
             position: relative;
             z-index: 1000;
         }
@@ -39,43 +53,57 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
         .navbar-brand {
             color: white;
-            font-weight: bold;
-            font-size: 1.25rem;
+            font-weight: 800;
+            font-size: 1.6rem;
             display: flex;
             align-items: center;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .navbar-brand i {
-            margin-right: 0.5rem;
+            font-size: 1.8rem;
         }
 
         .navbar-menu {
             display: flex;
             align-items: center;
-            gap: 1.5rem;
+            gap: 0.5rem; 
         }
 
         .navbar-item {
             color: rgba(255, 255, 255, 0.9);
-            font-weight: 500;
-            padding: 0.5rem 0;
+            font-weight: 600;
+            padding: 0.6rem 0.8rem;
+            border-radius: 8px;
             position: relative;
-            transition: all 0.3s ease;
+            transition: all var(--transition-speed) ease;
             text-decoration: none;
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem; /* Ukuran font menu utama diperbesar */
         }
 
-        .navbar-item:hover {
+        .navbar-item i.menu-icon {
+            margin-right: 6px;
+            font-size: 1.2rem; /* Ukuran icon diperbesar menyesuaikan font */
+        }
+
+        .navbar-item:hover, .navbar-item.active {
             color: white;
+            background-color: rgba(255, 255, 255, 0.15);
             text-decoration: none;
         }
 
-        /* Dropdown Styles */
+        /* ==========================================
+           DROPDOWN & SUBMENU STYLES
+           ========================================== */
         .dropdown {
             position: relative;
             display: inline-block;
@@ -85,46 +113,91 @@
             display: none;
             position: absolute;
             background-color: white;
-            min-width: 200px;
-            box-shadow: 0px 8px 20px 0px rgba(0,0,0,0.15);
+            min-width: 250px; /* Diperlebar sedikit agar muat dengan font yang lebih besar */
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
             z-index: 1001;
-            border-radius: 8px;
-            top: 100%;
+            border-radius: 12px;
+            top: 100%; 
+            margin-top: 10px; 
             left: 50%;
             transform: translateX(-50%);
-            border: 1px solid rgba(0,0,0,0.1);
+            border: 1px solid rgba(0,0,0,0.05);
+            padding: 0.5rem;
+        }
+
+        /* Jembatan tak terlihat untuk memperbaiki masalah hover (gap issue) */
+        .dropdown-content::after {
+            content: '';
+            position: absolute;
+            top: -15px; 
+            left: 0;
+            right: 0;
+            height: 15px;
+            background: transparent;
+        }
+
+        .dropdown-content::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            width: 12px;
+            height: 12px;
+            background-color: white;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            border-left: 1px solid rgba(0,0,0,0.05);
+            z-index: 1; 
         }
 
         .dropdown:hover .dropdown-content {
             display: block;
+            animation: fadeInDrop 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes fadeInDrop {
+            from { opacity: 0; transform: translate(-50%, -10px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
         }
 
         .dropdown-item {
-            color: #4b5563;
-            padding: 0.75rem 1rem;
+            color: var(--text-main);
+            padding: 0.8rem 1.2rem;
             text-decoration: none;
             display: block;
-            transition: all 0.3s ease;
+            transition: all var(--transition-speed) ease;
             white-space: nowrap;
-            position: relative;
+            border-radius: 8px;
+            margin-bottom: 2px;
+            font-weight: 500;
+            font-size: 1.05rem; /* Ukuran font dropdown item diperbesar */
         }
 
         .dropdown-item:hover {
-            background-color: #f3f4f6;
-            color: #20c997;
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            transform: translateX(4px);
         }
 
-        /* Submenu Styles */
+        /* Submenu adjustments */
         .dropdown-submenu {
             position: relative;
         }
 
         .dropdown-submenu > .dropdown-item:after {
-            content: "▸";
+            content: "\f105"; 
+            font-family: "Font Awesome 5 Free", "FontAwesome";
+            font-weight: 900;
             position: absolute;
-            right: 10px;
+            right: 15px;
             top: 50%;
             transform: translateY(-50%);
+            color: #cbd5e1;
+            transition: color var(--transition-speed);
+        }
+
+        .dropdown-submenu > .dropdown-item:hover:after {
+            color: var(--primary-color);
         }
 
         .dropdown-submenu .dropdown-submenu-content {
@@ -132,40 +205,74 @@
             position: absolute;
             left: 100%;
             top: 0;
+            margin-left: 5px; 
             background-color: white;
-            min-width: 200px;
-            box-shadow: 0px 8px 20px 0px rgba(0,0,0,0.15);
+            min-width: 220px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
             z-index: 1002;
-            border-radius: 0 8px 8px 0;
-            border: 1px solid rgba(0,0,0,0.1);
-            border-left: none;
+            border-radius: 12px;
+            padding: 0.5rem;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* Jembatan transparan untuk submenu agar tidak hilang saat cursor bergeser ke kanan */
+        .dropdown-submenu .dropdown-submenu-content::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -15px; 
+            width: 15px;
+            height: 100%;
+            background: transparent;
         }
 
         .dropdown-submenu:hover > .dropdown-submenu-content {
             display: block;
+            animation: fadeInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Logout Button */
-        .logout-btn {
-            background-color: rgba(255, 255, 255, 0.1);
+        @keyframes fadeInRight {
+            from { opacity: 0; transform: translate(-10px, 0); }
+            to { opacity: 1; transform: translate(0, 0); }
+        }
+
+        /* ==========================================
+           LOGOUT / LOGIN BUTTONS
+           ========================================== */
+        .logout-btn, .Login-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
             color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 0.5rem 1.2rem;
+            border-radius: 30px;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
+            font-weight: 700;
+            transition: all var(--transition-speed) ease;
             cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            font-size: 1rem;
+            margin-left: 10px;
         }
 
-        .logout-btn:hover {
-            background-color: rgba(255, 255, 255, 0.2);
+        .logout-btn:hover, .Login-btn:hover {
+            background-color: white;
+            color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
         }
+        
+        /* ==========================================
+           RESPONSIVE & MOBILE
+           ========================================== */
+        @media (max-width: 992px) {
+            .navbar {
+                padding: 1rem;
+                border-radius: 0;
+            }
 
-        /* Mobile Responsiveness */
-        @media (max-width: 768px) {
             .navbar-container {
                 flex-direction: column;
                 gap: 1rem;
@@ -174,7 +281,8 @@
             .navbar-menu {
                 flex-wrap: wrap;
                 justify-content: center;
-                gap: 1rem;
+                gap: 0.5rem;
+                width: 100%;
             }
             
             .dropdown-content {
@@ -182,292 +290,43 @@
                 transform: none;
                 width: 100%;
                 display: none;
+                box-shadow: none;
+                border: none;
+                background-color: rgba(255,255,255,0.05);
+                margin-top: 5px;
+            }
+
+            .dropdown-content::before, .dropdown-content::after {
+                display: none;
             }
             
             .dropdown-submenu .dropdown-submenu-content {
                 position: static;
-                border-radius: 0 0 8px 8px;
-                border-left: 1px solid rgba(0,0,0,0.1);
-                margin-left: 15px;
+                border-radius: 8px;
+                margin-top: 5px;
+                margin-left: 0;
                 box-shadow: none;
+                background-color: rgba(0,0,0,0.02);
+            }
+
+            .dropdown-submenu .dropdown-submenu-content::after {
+                display: none;
             }
             
-            .dropdown.active .dropdown-content {
-                display: block;
-            }
-            
+            .dropdown.active .dropdown-content,
             .dropdown-submenu.active > .dropdown-submenu-content {
                 display: block;
             }
+            
+            .logout-btn, .Login-btn {
+                margin-left: 0;
+                margin-top: 10px;
+            }
         }
 
-        /* Remove click effects */
-        .navbar-item:focus,
-        .navbar-item:active,
-        .dropdown-item:focus,
-        .dropdown-item:active,
-        .logout-btn:focus,
-        .logout-btn:active {
+        /* Remove click outlines */
+        button:focus, a:focus {
             outline: none;
-            box-shadow: none;
-            background-color: transparent !important;
-        }
-
-        /* Ensure main content doesn't get overlapped */
-        .main-content-wrapper {
-            position: relative;
-            z-index: 1;
-            margin-top: 20px;
-        }
-
-        /* Additional fix for dropdown arrow */
-        .dropdown .navbar-item i.fa-chevron-down {
-            transition: transform 0.3s ease;
-        }
-
-        .dropdown:hover .navbar-item i.fa-chevron-down {
-            transform: rotate(180deg);
-        }
-
-        /* Sidebar  */
-        :root {
-            --sidebar-width: 280px;
-            --sidebar-mini-width: 70px;
-            --transition-speed: 0.3s;
-        }
-
-        .menu-icon {
-            margin-right: 12px;
-            width: 20px;
-            text-align: center;
-            color: #20c997;
-        }
-        
-        /* Sidebar Styles */
-        .sidebar-wrapper {
-            width: var(--sidebar-width);
-            background-color: #f8f9fa;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            padding-top: 70px;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-            z-index: 999;
-            overflow-y: auto;
-            transition: all var(--transition-speed) ease;
-        }
-        
-        .sidebar-mini .sidebar-wrapper {
-            width: var(--sidebar-mini-width);
-        }
-        
-        .main-content {
-            margin-left: var(--sidebar-width);
-            padding: 20px;
-            min-height: 100vh;
-            transition: all var(--transition-speed) ease;
-        }
-        
-        .sidebar-mini .main-content {
-            margin-left: var(--sidebar-mini-width);
-        }
-        
-        .sidebar-menu {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .sidebar-menu a {
-            display: flex;
-            align-items: center;
-            padding: 12px 20px;
-            color: #333;
-            text-decoration: none;
-            transition: all var(--transition-speed) ease;
-            border-left: 3px solid transparent;
-            position: relative;
-            overflow: hidden;
-            white-space: nowrap;
-        }
-        
-        .sidebar-menu a:hover {
-            background-color: #e9ecef;
-            transform: translateX(5px);
-        }
-        
-        .sidebar-menu a:before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background-color: #20c997;
-            transform: scaleY(0);
-            transform-origin: bottom;
-            transition: transform var(--transition-speed) ease;
-        }
-        
-        .sidebar-menu a:hover:before {
-            transform: scaleY(1);
-        }
-        
-        .sidebar-menu .active > a {
-            border-left: 3px solid #20c997;
-            background-color: rgba(32, 201, 151, 0.1);
-        }
-        
-        .sidebar-submenu {
-            max-height: 0;
-            overflow: hidden;
-            background-color: #e9ecef;
-            padding-left: 15px;
-            transition: max-height 0.5s ease, padding var(--transition-speed) ease;
-        }
-        
-        .sidebar-submenu.show {
-            max-height: 500px; /* Adjust based on your content */
-        }
-        
-        .sidebar-submenu a {
-            padding: 10px 15px;
-            transition: all var(--transition-speed) ease;
-        }
-        
-        .sidebar-submenu a:hover {
-            padding-left: 25px;
-        }
-        
-        .sidebar-submenu .sidebar-submenu {
-            background-color: #dee2e6;
-        }
-        
-        .sidebar-submenu .sidebar-submenu a {
-            padding: 8px 15px;
-        }
-        
-        .fa-chevron-down {
-            transition: transform var(--transition-speed) ease;
-            margin-left: auto;
-        }
-        
-        /* Toggle Button */
-        .sidebar-toggle {
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            z-index: 1000;
-            background-color: #20c997;
-            color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all var(--transition-speed) ease;
-            border-radius: 50%;
-        }
-
-        .sidebar-toggle:hover {
-            transform: scale(1.1);
-            background-color: #1aa67d;
-        }
-        
-        
-        /* Mini Sidebar Styles */
-        .sidebar-mini .sidebar-menu span {
-            display: none;
-        }
-        
-        .sidebar-mini .sidebar-menu .fa-chevron-down {
-            display: none;
-        }
-        
-        .sidebar-mini .sidebar-submenu {
-            position: absolute;
-            left: var(--sidebar-mini-width);
-            top: 0;
-            width: 200px;
-            background-color: #f8f9fa;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
-            display: none !important;
-            padding-left: 0;
-            max-height: none !important;
-        }
-        
-        .sidebar-mini .sidebar-dropdown:hover .sidebar-submenu {
-            display: block !important;
-        }
-        
-        .sidebar-mini .sidebar-dropdown {
-            position: relative;
-        }
-        
-        /* Table Styles */
-        .data-table-list {
-            margin-top: 20px;
-        }
-        
-        .button-icon-btn {
-            display: flex;
-            gap: 5px;
-        }
-        
-        /* Animation for sidebar items */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-        
-        .sidebar-menu li {
-            animation: fadeIn 0.5s ease forwards;
-            opacity: 0;
-        }
-        
-        /* Delay animations for each item */
-        .sidebar-menu li:nth-child(1) { animation-delay: 0.1s; }
-        .sidebar-menu li:nth-child(2) { animation-delay: 0.2s; }
-        .sidebar-menu li:nth-child(3) { animation-delay: 0.3s; }
-        .sidebar-menu li:nth-child(4) { animation-delay: 0.4s; }
-        .sidebar-menu li:nth-child(5) { animation-delay: 0.5s; }
-        
-        /* Responsive Styles */
-        @media (max-width: 768px) {
-            .sidebar-wrapper {
-                transform: translateX(-100%);
-                width: var(--sidebar-width);
-            }
-            
-            .sidebar-mini .sidebar-wrapper {
-                transform: translateX(0);
-                width: var(--sidebar-mini-width);
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
-            
-            .sidebar-mini .main-content {
-                margin-left: 0;
-            }
-            
-            .sidebar-toggle {
-                left: 15px;
-            }
-            
-            .sidebar-mini .sidebar-toggle {
-                left: calc(var(--sidebar-mini-width) - 20px);
-            }
         }
     </style>
 </head>
@@ -478,12 +337,52 @@
         <div class="navbar-container">
             <a href="/ippd/Beranda" class="navbar-brand">
                 <i class="fas fa-chart-line"></i>
-                IPPD
+                &nbsp;IPPD
             </a>
             <div class="navbar-menu">
-                <!-- Menu Nasional dengan Submenu -->
+                
+                <!-- Menu RPJPN -->
                 <div class="dropdown">
-                    <a href="#" class="navbar-item active">Laporan Sakip <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
+                    <a href="#" class="navbar-item"><i class="fas fa-landmark menu-icon"></i> RPJPN <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
+                    <div class="dropdown-content">
+                        <a href="<?=base_url('Nasional/VisiRPJPN')?>" class="dropdown-item">VMTS</a>
+                        <a href="<?=base_url('Nasional/TahapanRPJPN')?>" class="dropdown-item">Tahapan</a>
+                        <a href="<?=base_url('Nasional/IUPRPJPN')?>" class="dropdown-item">Indikator Utama Pembangunan</a>
+                    </div>
+                </div>
+
+                <!-- Menu RPJMN -->
+                <div class="dropdown">
+                    <a href="#" class="navbar-item"><i class="fas fa-map-marked-alt menu-icon"></i> RPJMN <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
+                    <div class="dropdown-content">
+                        <a href="<?=base_url('Nasional/VisiRPJMN')?>" class="dropdown-item">VMTS</a>
+                        <a href="<?=base_url('Nasional/TahapanRPJMN')?>" class="dropdown-item">Tahapan</a>
+                        <a href="<?=base_url('Nasional/IUPRPJMN')?>" class="dropdown-item">Indikator Utama Pembangunan</a>
+                        <a href="<?=base_url('Nasional/SasaranPembangunanRPJMN')?>" class="dropdown-item">Sasaran Pembangunan Nasional</a>
+                        <a href="<?=base_url('Nasional/SasaranPembangunanDaerah')?>" class="dropdown-item">Sasaran Pembangunan Wilayah</a>
+                        <a href="<?=base_url('Nasional/PembangunanKewilayahanRPJMN')?>" class="dropdown-item">Pembangunan Kewilayahan</a>
+                        <a href="<?=base_url('Nasional/ProyekStrategisRPJMN')?>" class="dropdown-item">Proyek Strategis Nasional</a>
+                        <!-- <a href="<?=base_url('Nasional/PrioritasNasionalRPJMN')?>" class="dropdown-item">Prioritas Nasional</a>
+                        <a href="<?=base_url('Nasional/ProgramPrioritasRPJMN')?>" class="dropdown-item">Program Prioritas</a>
+                        <a href="<?=base_url('Nasional/KegiatanPrioritasRPJMN')?>" class="dropdown-item">Kegiatan Prioritas</a>
+                        <a href="<?=base_url('Nasional/ProyekPrioritasRPJMN')?>" class="dropdown-item">Proyek Prioritas</a> -->
+                    </div>
+                </div>
+
+                <!-- Menu RKP -->
+                <div class="dropdown">
+                    <a href="#" class="navbar-item"><i class="fas fa-tasks menu-icon"></i> RKP <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
+                    <div class="dropdown-content">
+                        <a href="<?=base_url('Nasional/TemaRKP')?>" class="dropdown-item">Tema Rencana Kerja Pemerintah</a>
+                        <a href="<?=base_url('Nasional/SasaranPembangunanRKP')?>" class="dropdown-item">Sasaran Pembangunan</a>
+                        <a href="<?=base_url('Nasional/SasaranPrioritasNasional')?>" class="dropdown-item">Sasaran Prioritas Nasional</a>
+                        <a href="<?=base_url('Nasional/IndikasiIntervensi')?>" class="dropdown-item">Indikasi Intervensi Prioritas Nasional</a>
+                    </div>
+                </div>
+                
+                <!-- Menu Laporan Sakip (Dipindah sebelum Kontak) -->
+                <div class="dropdown">
+                    <a href="#" class="navbar-item">Laporan Sakip <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
                     <div class="dropdown-content">
                         <div class="dropdown-submenu">
                             <a href="#" class="dropdown-item">Perencanaan</a>
@@ -532,7 +431,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Kontak Menu (tanpa dropdown) -->
                 <a href="mailto:info@ippd.example.com" class="navbar-item">Kontak</a>
                 
@@ -546,97 +445,15 @@
                 </button>
                 <?php } else { ?>
                 <button class="Login-btn" onclick="Login()">
-                    <i class="fas fa-sign-out-alt"></i>
+                    <i class="fas fa-sign-in-alt"></i>
                     Login
                 </button>
                 <?php } ?>
             </div>
         </div>
     </nav>
-    <!-- Toggle Button -->
-    <button class="sidebar-toggle" id="sidebarToggle">
-        <i class="fa fa-bars"></i>
-    </button>
 
-    <!-- Sidebar -->
-    <div class="sidebar-wrapper">
-        <div class="sidebar-content">
-            <ul class="sidebar-menu">
-                <br>
-                <!-- RPJPN -->
-                <div class="sidebar-dropdown">
-                    <a href="#">
-                        <i class="menu-icon fa fa-line-chart"></i>
-                        <span>RPJPN</span>
-                        <i class="fa fa-chevron-down"></i>
-                    </a>
-                    <div class="sidebar-submenu" style="display: block;">
-                        <a href="<?=base_url('Nasional/VisiRPJPN')?>">Visi</a>
-                        <a href="<?=base_url('Nasional/MisiRPJPN')?>">Misi</a>
-                        <a href="<?=base_url('Nasional/TujuanRPJPN')?>">Tujuan</a>
-                        <a href="<?=base_url('Nasional/SasaranRPJPN')?>">Sasaran</a>
-                        <a href="<?=base_url('Nasional/TahapanRPJPN')?>">Tahapan</a>
-                        <a href="<?=base_url('Nasional/IUPRPJPN')?>">IUP RPJPN</a>
-                        <br>
-                    </div>
-                </div>
-
-                <!-- RPJMN -->
-                <div class="sidebar-dropdown">
-                    <a href="#">
-                    <i class="menu-icon fa fa-area-chart"></i>
-                    <span>RPJMN</span>
-                    <i class="fa fa-chevron-down"></i>
-                    </a>
-                    <div class="sidebar-submenu">
-                        <a href="<?=base_url('Nasional/VisiRPJMN')?>">Visi</a>
-                        <a href="<?=base_url('Nasional/MisiRPJMN')?>">Misi</a>
-                        <a href="<?=base_url('Nasional/TujuanRPJMN')?>">Tujuan</a>
-                        <a href="<?=base_url('Nasional/SasaranRPJMN')?>">Sasaran</a>
-                        <a href="<?=base_url('Nasional/TahapanRPJMN')?>">Tahapan</a>
-                        <a href="<?=base_url('Nasional/IUPRPJMN')?>">IUP RPJMN</a>
-                        <a href="<?=base_url('Nasional/SasaranPembangunanRPJMN')?>">Sasaran Pembangunan Nasional</a>
-                        <a href="<?=base_url('Nasional/SasaranPembangunanDaerah')?>">Sasaran Pembangunan Daerah</a>
-                        <a href="<?=base_url('Nasional/PembangunanKawasanRPJMN')?>">Pembangunan Kawasan</a>
-                        <a href="<?=base_url('Nasional/PrioritasNasionalRPJMN')?>">Prioritas Nasional</a>
-                        <a href="<?=base_url('Nasional/ProgramPrioritasRPJMN')?>">Program Prioritas</a>
-                        <a href="<?=base_url('Nasional/KegiatanPrioritasRPJMN')?>">Kegiatan Prioritas</a>
-                        <a href="<?=base_url('Nasional/ProyekPrioritasRPJMN')?>">Proyek Prioritas</a>
-                        <br>
-                    </div>
-                </div>
-
-                <!-- RKP -->
-                <div class="sidebar-dropdown">
-                    <a href="#">
-                    <i class="menu-icon fa fa-area-chart"></i>
-                    <span>RKP</span>
-                    <i class="fa fa-chevron-down"></i>
-                    </a>
-                    <div class="sidebar-submenu">
-                        <a href="<?=base_url('Nasional/TemaRKP')?>">Tema Rencana Kerja Pemerintah</a>
-                        <a href="<?=base_url('Nasional/SasaranPembangunanRKP')?>">Sasaran Pembangunan</a>
-                        <a href="<?=base_url('Nasional/SasaranPrioritasNasional')?>">Sasaran Prioritas Nasional</a>
-                        <a href="<?=base_url('Nasional/IndikasiIntervensi')?>">Indikasi Intervensi Prioritas Nasional</a>
-                        <br>
-                    </div>
-                </div>
-
-                <div class="sidebar-dropdown">
-                    <a href="#">
-                    <i class="menu-icon fa fa-area-chart"></i>
-                    <span>Daftar Kementerian</span>
-                    <i class="fa fa-chevron-down"></i>
-                    </a>
-                    <div class="sidebar-submenu">
-                        <a href="<?=base_url('Nasional/Kementerian')?>">Daftar Kementerian</a>
-                        <br>
-                    </div>
-                </div>
-            </ul>
-        </div>
-    </div>
-<script>
+    <script>
         // Log Out Clear Session in Controller Beranda
         function logout() {
             window.location.href = '/ippd';
@@ -649,8 +466,8 @@
 
         // Mobile menu handling
         document.addEventListener('DOMContentLoaded', function() {
-            // Handle mobile menu clicks
-            if (window.innerWidth <= 768) {
+            // Handle mobile menu clicks (Ubah Hover menjadi Click pada Mobile View)
+            if (window.innerWidth <= 992) {
                 document.addEventListener('click', function(e) {
                     // Close all dropdowns if clicking outside
                     if (!e.target.closest('.dropdown')) {
@@ -666,7 +483,7 @@
                 // Toggle main dropdowns
                 document.querySelectorAll('.navbar-item').forEach(item => {
                     item.addEventListener('click', function(e) {
-                        if (window.innerWidth <= 768 && this.nextElementSibling && 
+                        if (window.innerWidth <= 992 && this.nextElementSibling && 
                             this.nextElementSibling.classList.contains('dropdown-content')) {
                             e.preventDefault();
                             const dropdown = this.closest('.dropdown');
@@ -687,7 +504,7 @@
                 // Toggle submenus
                 document.querySelectorAll('.dropdown-submenu > .dropdown-item').forEach(item => {
                     item.addEventListener('click', function(e) {
-                        if (window.innerWidth <= 768) {
+                        if (window.innerWidth <= 992) {
                             e.preventDefault();
                             e.stopPropagation();
                             const submenu = this.nextElementSibling;
@@ -707,127 +524,6 @@
                     });
                 });
             }
-        });
-    </script>
-    <script>
-        var BaseURL = '<?=base_url()?>';
-        
-        // Sidebar Toggle Functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const body = document.body;
-            
-            // Check if sidebar state is saved in localStorage
-            if (localStorage.getItem('sidebarMini') === 'true') {
-                body.classList.add('sidebar-mini');
-            }
-            
-            // Toggle sidebar
-            sidebarToggle.addEventListener('click', function() {
-                body.classList.toggle('sidebar-mini');
-                // Save state to localStorage
-                localStorage.setItem('sidebarMini', body.classList.contains('sidebar-mini'));
-            });
-            
-            // Close all dropdowns except the active one
-            document.querySelectorAll('.sidebar-dropdown').forEach(dropdown => {
-                if (!dropdown.classList.contains('active')) {
-                    const submenu = dropdown.querySelector('.sidebar-submenu');
-                    if (submenu) {
-                        submenu.style.maxHeight = '0';
-                        submenu.style.padding = '0 15px';
-                    }
-                }
-            });
-
-            // Toggle sidebar dropdowns (for expanded sidebar)
-            document.querySelectorAll('.sidebar-dropdown > a').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    // Only prevent default if sidebar is not minimized
-                    if (!body.classList.contains('sidebar-mini')) {
-                        e.preventDefault();
-                        
-                        const dropdown = this.parentElement;
-                        const submenu = this.nextElementSibling;
-                        
-                        // Close other dropdowns at the same level
-                        if (dropdown.parentElement.classList.contains('sidebar-menu') || 
-                            dropdown.parentElement.classList.contains('sidebar-submenu')) {
-                            const siblings = Array.from(dropdown.parentElement.children)
-                                .filter(child => child !== dropdown);
-                            
-                            siblings.forEach(sibling => {
-                                const siblingSubmenu = sibling.querySelector('.sidebar-submenu');
-                                if (siblingSubmenu) {
-                                    siblingSubmenu.style.maxHeight = '0';
-                                    siblingSubmenu.style.padding = '0 15px';
-                                }
-                                sibling.classList.remove('active');
-                                
-                                // Reset chevron icon for siblings
-                                const siblingChevron = sibling.querySelector('.fa-chevron-down');
-                                if (siblingChevron) {
-                                    siblingChevron.style.transform = 'rotate(0)';
-                                }
-                            });
-                        }
-                        
-                        // Toggle current dropdown
-                        if (submenu) {
-                            if (dropdown.classList.contains('active')) {
-                                submenu.style.maxHeight = '0';
-                                submenu.style.padding = '0 15px';
-                                dropdown.classList.remove('active');
-                            } else {
-                                submenu.style.maxHeight = submenu.scrollHeight + 'px';
-                                submenu.style.padding = '10px 15px';
-                                dropdown.classList.add('active');
-                            }
-                            
-                            // Rotate chevron icon
-                            const chevron = this.querySelector('.fa-chevron-down');
-                            if (chevron) {
-                                chevron.style.transform = dropdown.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0)';
-                            }
-                        }
-                    }
-                });
-            });
-            
-            // Highlight active menu item based on current URL
-            const currentUrl = window.location.pathname;
-            document.querySelectorAll('.sidebar-submenu a').forEach(link => {
-                if (link.getAttribute('href') === currentUrl) {
-                    link.style.color = '#20c997';
-                    link.style.fontWeight = 'bold';
-                    
-                    // Expand parent menus
-                    let parent = link.closest('.sidebar-submenu');
-                    while (parent) {
-                        parent.style.maxHeight = parent.scrollHeight + 'px';
-                        parent.style.padding = '10px 15px';
-                        const parentDropdown = parent.previousElementSibling;
-                        if (parentDropdown) {
-                            parentDropdown.style.color = '#20c997';
-                            const chevron = parentDropdown.querySelector('.fa-chevron-down');
-                            if (chevron) chevron.style.transform = 'rotate(180deg)';
-                            parentDropdown.parentElement.classList.add('active');
-                        }
-                        parent = parent.parentElement.closest('.sidebar-submenu');
-                    }
-                }
-            });
-            
-            // Add hover effect animation
-            document.querySelectorAll('.sidebar-menu a').forEach(item => {
-                item.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateX(5px)';
-                });
-                
-                item.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateX(0)';
-                });
-            });
         });
     </script>
 </body>

@@ -571,12 +571,9 @@
                         <i class="fa fa-chevron-down"></i>
                     </a>
                     <div class="sidebar-submenu" style="display: block;">
-                        <a href="<?=base_url('Provinsi/VisiRPJPD')?>">Visi</a>
-                        <a href="<?=base_url('Provinsi/MisiRPJPD')?>">Misi</a>
-                        <a href="<?=base_url('Provinsi/TujuanRPJPD')?>">Tujuan</a>
-                        <a href="<?=base_url('Provinsi/SasaranRPJPD')?>">Sasaran</a>
+                        <a href="<?=base_url('Provinsi/VisiRPJPD')?>">VMTS</a>
                         <a href="<?=base_url('Provinsi/TahapanRPJPD')?>">Tahapan</a>
-                        <a href="<?=base_url('Provinsi/IUPRPJPD')?>">IUP RPJPD</a>
+                        <a href="<?=base_url('Provinsi/IUPRPJPD')?>">Indikator Utama Pembangunan</a>
                         <br>
                     </div>
                 </div>
@@ -589,12 +586,9 @@
                     <i class="fa fa-chevron-down"></i>
                     </a>
                     <div class="sidebar-submenu">
-                        <a href="<?=base_url('Provinsi/VisiRPJMD')?>">Visi</a>
-                        <a href="<?=base_url('Provinsi/MisiRPJMD')?>">Misi</a>
-                        <a href="<?=base_url('Provinsi/TujuanRPJMD')?>">Tujuan</a>
-                        <a href="<?=base_url('Provinsi/SasaranRPJMD')?>">Sasaran</a>
+                        <a href="<?=base_url('Provinsi/VisiRPJMD')?>">VMTS</a>
                         <a href="<?=base_url('Provinsi/TahapanRPJMD')?>">Tahapan</a>
-                        <a href="<?=base_url('Provinsi/IUPRPJMD')?>">IUP RPJMD</a>
+                        <a href="<?=base_url('Provinsi/IUPRPJMD')?>">Indikator Utama Pembangunan</a>
                         <br>
                     </div>
                 </div>
