@@ -298,8 +298,9 @@
                         <a href="<?=base_url('Kementerian/IsuNasional')?>">Isu Nasional</a>
                         <a href="<?=base_url('Kementerian/IsuRegional')?>">Isu Regional</a>
                         <a href="<?=base_url('Kementerian/IsuStrategis')?>">Isu Strategis</a>
-                        <a href="<?=base_url('Kementerian/Renstra')?>">Renstra</a>
-                        <a href="<?=base_url('Kementerian/RenstraAnggaran')?>">Anggaran</a>
+                        <a href="<?=base_url('Kementerian/Renstra')?>">Hubungan antara Prioritas Nasional (PN), Program Prioritas (PP), Kegiatan Prioritas (KP), dan Proyek Prioritas (Pro-P)</a>
+                        <a href="<?=base_url('Kementerian/MatriksKinerja')?>">Matriks Kinerja dan Pendanaan</a>
+                        <a href="<?=base_url('Kementerian/Pendanaan')?>">Matriks Pendanaan Kegiatan Prioritas dan Proyek Prioritas</a>
                         <br>
                     </div>
                 </div>

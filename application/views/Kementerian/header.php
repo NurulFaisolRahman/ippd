@@ -223,6 +223,200 @@
         .dropdown:hover .navbar-item i.fa-chevron-down {
             transform: rotate(180deg);
         }
+
+        #modalDetailNilai .modal-dialog {
+    transform: translate(0, 30%) !important; /* Geser ke bawah 30% dari posisi tengah */
+}
+
+/* ============================================================
+   MODAL DETAIL NILAI - Custom Styling
+   Compatible dengan Bootstrap 3 + Notika Template
+============================================================ */
+
+/* Overlay backdrop lebih gelap & smooth */
+#modalDetailNilai.modal.fade .modal-dialog {
+    transform: scale(0.85) translateY(-30px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#modalDetailNilai.modal.in .modal-dialog {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+/* Dialog container */
+#modalDetailNilai .modal-dialog {
+    width: 340px;
+    margin: 80px auto;
+}
+
+/* Modal wrapper dengan shadow tebal */
+#modalDetailNilai .modal-content {
+    border: none;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.25),
+        0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* ── HEADER ── */
+#modalDetailNilai .modal-header {
+    background: linear-gradient(135deg, #27ae60 0%, #1e8449 60%, #145a32 100%) !important;
+    border: none;
+    padding: 20px 20px 18px;
+    position: relative;
+}
+
+#modalDetailNilai .modal-header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 18px;
+    background: #fff;
+    border-radius: 18px 18px 0 0;
+}
+
+#modalDetailNilai .modal-title {
+    color: #fff !important;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    margin: 0;
+    padding-right: 28px;
+    line-height: 1.4;
+    position: relative;
+    z-index: 1;
+}
+
+/* Ikon dekoratif di header */
+#modalDetailNilai .modal-header::before {
+    content: '₹';
+    position: absolute;
+    right: 48px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 38px;
+    color: rgba(255, 255, 255, 0.12);
+    font-weight: 900;
+    z-index: 0;
+    line-height: 1;
+}
+
+/* Tombol close */
+#modalDetailNilai .close {
+    color: #fff !important;
+    opacity: 0.85;
+    font-size: 22px;
+    font-weight: 300;
+    line-height: 1;
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    z-index: 2;
+    transition: opacity 0.2s, transform 0.2s;
+    text-shadow: none;
+}
+#modalDetailNilai .close:hover {
+    opacity: 1;
+    transform: rotate(90deg);
+}
+
+/* ── BODY ── */
+#modalDetailNilai .modal-body {
+    padding: 28px 24px 20px;
+    background: #fff;
+    text-align: center;
+}
+
+/* Label jenis nilai */
+#modalDetailNilai .detail-label {
+    display: inline-block;
+    background: #eafaf1;
+    color: #1e8449;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+    border: 1px solid #a9dfbf;
+}
+
+/* Teks jenis nilai (id jenisNilai) */
+#modalDetailNilai #jenisNilai {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #444 !important;
+    margin: 0 0 18px 0 !important;
+    line-height: 1.5;
+    padding: 10px 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #27ae60;
+    text-align: center;
+}
+
+/* Divider tipis */
+#modalDetailNilai .detail-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, #dfe6e9, transparent);
+    margin: 4px 0 18px;
+}
+
+/* Nilai penuh (id nilaiPenuh) */
+#modalDetailNilai #nilaiPenuh {
+    font-size: 28px !important;
+    font-weight: 800 !important;
+    color: #1e8449 !important;
+    margin: 0 !important;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    word-break: break-all;
+    padding: 16px;
+    background: linear-gradient(135deg, #eafaf1, #d5f5e3);
+    border-radius: 12px;
+    border: 1px solid #a9dfbf;
+}
+
+/* Satuan kecil di bawah nilai */
+#modalDetailNilai .detail-satuan {
+    font-size: 11px;
+    color: #95a5a6;
+    margin-top: 10px;
+    letter-spacing: 0.3px;
+}
+
+/* ── FOOTER ── */
+#modalDetailNilai .modal-footer {
+    background: #f8f9fa;
+    border-top: 1px solid #ecf0f1;
+    padding: 12px 20px;
+    text-align: center;
+    border-radius: 0 0 16px 16px;
+}
+
+#modalDetailNilai .modal-footer .btn-default {
+    background: transparent;
+    border: 1.5px solid #bdc3c7;
+    color: #7f8c8d;
+    border-radius: 8px;
+    padding: 7px 24px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    transition: all 0.2s ease;
+    box-shadow: none;
+}
+#modalDetailNilai .modal-footer .btn-default:hover {
+    background: #ecf0f1;
+    border-color: #95a5a6;
+    color: #2c3e50;
+}
     </style>
 </head>
 

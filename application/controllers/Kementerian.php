@@ -2774,152 +2774,170 @@ public function DeleteSasaranStrategis() {
 
     echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
 }
+// ==================== VIEW HALAMAN ====================
 public function NSPK() {
     $Header['Halaman'] = 'NSPK';
 
-    // Filter data NSPK berdasarkan level user (opsional)
+    // Filter berdasarkan level user
     if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) {
-        $this->db->where('Idkementerian', $_SESSION['IdKementerian']);
+        $this->db->where('IdKementerian', $_SESSION['IdKementerian']);
     }
-
     $this->db->where('deleted_at IS NULL');
     $this->db->order_by('tahun_penetapan', 'ASC');
     $this->db->order_by('id', 'ASC');
     $Data['NSPK'] = $this->db->get('nspk')->result_array();
 
-    // === INFO KEMENTERIAN & PERIODE (INI YANG ANDA KURANG) ===
+    // Info kementerian & periode
     $Data['UserKementerianName'] = '-';
     $Data['UserPeriode']         = '-';
-
     if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) {
-        // Cek apakah IdKementerian ada di session
-        if (isset($_SESSION['IdKementerian']) && is_numeric($_SESSION['IdKementerian'])) {
+        if (isset($_SESSION['IdKementerian'])) {
             $this->db->where('Id', $_SESSION['IdKementerian']);
             $this->db->where('deleted_at IS NULL');
             $kementerian = $this->db->get('kementerian')->row_array();
-
             if ($kementerian) {
                 $Data['UserKementerianName'] = $kementerian['NamaKementerian'] ?? '-';
-                $Data['UserPeriode']         = ($kementerian['TahunMulai'] ?? '-') . ' - ' . ($kementerian['TahunAkhir'] ?? '-');
-            } else {
-                $Data['UserKementerianName'] = 'Data kementerian tidak ditemukan (ID: ' . $_SESSION['IdKementerian'] . ')';
+                $Data['UserPeriode'] = ($kementerian['TahunMulai'] ?? '-') . ' - ' . ($kementerian['TahunAkhir'] ?? '-');
             }
-        } else {
-            $Data['UserKementerianName'] = 'Session IdKementerian tidak ditemukan';
         }
-    } else {
-        $Data['UserKementerianName'] = 'Login sebagai user kementerian (level 1) untuk melihat info';
     }
 
     $this->load->view('Kementerian/header', $Header);
     $this->load->view('Kementerian/NSPK', $Data);
 }
-public function InputNSPK() {
-    // Cek session login (minimal)
-    if (!isset($_SESSION['Level'])) {
-        echo 'Session login tidak valid';
+
+// ==================== DETAIL CRUD ====================
+public function GetNSPKDetails() {
+    $nspk_id = (int)$this->input->post('nspk_id');
+    if (!$nspk_id) { echo json_encode([]); exit; }
+
+    $this->db->where('nspk_id', $nspk_id);
+    $this->db->order_by('urutan', 'ASC');
+    $this->db->order_by('id', 'ASC');
+    $data = $this->db->get('nspk_detail')->result_array();
+    echo json_encode($data);
+}
+
+public function InputNSPKDetail() {
+    $nspk_id = (int)$this->input->post('nspk_id');
+    $jenis   = $this->input->post('jenis');
+    $isi     = trim($this->input->post('isi'));
+    $urutan  = (int)($this->input->post('urutan') ?? 1);
+
+    if (!$nspk_id || empty($jenis) || empty($isi)) {
+        echo 'Data tidak lengkap';
         return;
     }
 
-    // Ambil semua input dari form
-    $kode_nspk      = trim($this->input->post('kode_nspk') ?? '');
-    $judul_nspk     = trim($this->input->post('judul_nspk') ?? '');
-    $jenis_nspk     = $this->input->post('jenis_nspk') ?? '';
-    $bidang         = trim($this->input->post('bidang') ?? '');
-    $tahun_penetapan = $this->input->post('tahun_penetapan') ?? null;
-    $status         = $this->input->post('status') ?? 'Berlaku';
-    $keterangan    = trim($this->input->post('keterangan') ?? '');
-
-    // Validasi minimal (wajib diisi)
-    if (empty($kode_nspk)) {
-        echo 'Kode NSPK wajib diisi';
-        return;
-    }
-    if (empty($judul_nspk)) {
-        echo 'Judul NSPK wajib diisi';
-        return;
-    }
-    if (empty($jenis_nspk)) {
-        echo 'Jenis NSPK wajib dipilih';
-        return;
-    }
-    if (empty($bidang)) {
-        echo 'Bidang wajib diisi';
-        return;
-    }
-
-    // Validasi tahun_penetapan (harus angka 4 digit, range YEAR)
-    if (!empty($tahun_penetapan)) {
-        if (!is_numeric($tahun_penetapan) || strlen($tahun_penetapan) != 4 || $tahun_penetapan < 1901 || $tahun_penetapan > 2155) {
-            echo 'Tahun Penetapan harus 4 digit (1901-2155)';
-            return;
-        }
-        $tahun_penetapan = (int)$tahun_penetapan;
-    }
-
-    // Siapkan data untuk insert
     $data = [
-        'kode_nspk'         => $kode_nspk,
-        'judul_nspk'        => $judul_nspk,
-        'jenis_nspk'        => $jenis_nspk,
-        'bidang'            => $bidang,
-        'tahun_penetapan'   => $tahun_penetapan,
-        'status'            => $status,
-        'keterangan'        => $keterangan,
-        'created_at'        => date('Y-m-d H:i:s')
+        'nspk_id'    => $nspk_id,
+        'jenis'      => $jenis,
+        'isi'        => $isi,
+        'urutan'     => $urutan,
+        'created_at' => date('Y-m-d H:i:s')
+    ];
+    $this->db->insert('nspk_detail', $data);
+    echo $this->db->affected_rows() > 0 ? '1' : 'Gagal simpan detail';
+}
+
+public function UpdateNSPKDetail() {
+    $id = (int)$this->input->post('id');
+    if (!$id) { echo 'ID tidak valid'; return; }
+
+    $data = [
+        'jenis'      => $this->input->post('jenis'),
+        'isi'        => $this->input->post('isi'),
+        'urutan'     => (int)($this->input->post('urutan') ?? 1),
+        'updated_at' => date('Y-m-d H:i:s')
+    ];
+    $this->db->where('id', $id);
+    $this->db->update('nspk_detail', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal update detail';
+}
+
+public function DeleteNSPKDetail() {
+    $id = (int)$this->input->post('id');
+    if (!$id) { echo 'ID tidak valid'; return; }
+    $this->db->where('id', $id);
+    $this->db->delete('nspk_detail');
+    echo $this->db->affected_rows() ? '1' : 'Gagal hapus detail';
+}
+
+// ==================== HEADER NSPK ====================
+public function InputNSPK() {
+    if (!isset($_SESSION['Level'])) { echo 'Session tidak valid'; return; }
+
+    $data = [
+        'kode_nspk'       => trim($this->input->post('kode_nspk')),
+        'judul_nspk'      => trim($this->input->post('judul_nspk')),
+        'bidang'          => trim($this->input->post('bidang')),
+        'tahun_penetapan' => (int)$this->input->post('tahun_penetapan'),
+        'status'          => $this->input->post('status') ?? 'Berlaku',
+        'keterangan'      => trim($this->input->post('keterangan')),
+        'created_at'      => date('Y-m-d H:i:s')
     ];
 
-    // Jika level 1 (kementerian), tambahkan Idkementerian dari session
+    if (empty($data['kode_nspk']) || empty($data['judul_nspk']) || empty($data['bidang'])) {
+        echo 'Kode NSPK, Judul, dan Bidang wajib diisi';
+        return;
+    }
+
     if ($_SESSION['Level'] == 1 && isset($_SESSION['IdKementerian'])) {
-        $data['Idkementerian'] = (int)$_SESSION['IdKementerian'];
+        $data['IdKementerian'] = (int)$_SESSION['IdKementerian'];
     }
 
-    // Eksekusi insert
     $this->db->insert('nspk', $data);
-
-    // Cek hasil
-    if ($this->db->affected_rows() > 0) {
-        echo '1';
-    } else {
-        // Jika gagal, tampilkan pesan error database (untuk debug)
-        $error = $this->db->error();
-        echo 'Gagal Input NSPK! Error: ' . $error['message'];
+    if ($this->db->affected_rows() <= 0) {
+        echo 'Gagal input NSPK!';
+        return;
     }
+
+    $nspk_id = $this->db->insert_id();
+
+    // Simpan detail dinamis
+    $details = $this->input->post('details');
+    if (is_array($details)) {
+        foreach ($details as $det) {
+            if (!empty($det['jenis']) && !empty($det['isi'])) {
+                $this->db->insert('nspk_detail', [
+                    'nspk_id'    => $nspk_id,
+                    'jenis'      => $det['jenis'],
+                    'isi'        => trim($det['isi']),
+                    'urutan'     => (int)($det['urutan'] ?? 1),
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+            }
+        }
+    }
+    echo '1';
 }
 
 public function UpdateNSPK() {
     $id = $this->input->post('id');
-    if (!$id) {
-        echo 'ID tidak valid';
-        return;
-    }
+    if (!$id) { echo 'ID tidak valid'; return; }
 
     $data = [
-        'kode_nspk'         => $this->input->post('kode_nspk'),
-        'judul_nspk'        => $this->input->post('judul_nspk'),
-        'jenis_nspk'        => $this->input->post('jenis_nspk'),
-        'bidang'            => $this->input->post('bidang'),
-        'tahun_penetapan'   => $this->input->post('tahun_penetapan'),
-        'status'            => $this->input->post('status'),
-        'keterangan'        => $this->input->post('keterangan'),
-        'updated_at'        => date('Y-m-d H:i:s')
+        'kode_nspk'       => $this->input->post('kode_nspk'),
+        'judul_nspk'      => $this->input->post('judul_nspk'),
+        'bidang'          => $this->input->post('bidang'),
+        'tahun_penetapan' => $this->input->post('tahun_penetapan'),
+        'status'          => $this->input->post('status'),
+        'keterangan'      => $this->input->post('keterangan'),
+        'updated_at'      => date('Y-m-d H:i:s')
     ];
 
     $this->db->where('id', $id);
     $this->db->update('nspk', $data);
-    echo $this->db->affected_rows() ? '1' : 'Gagal Update NSPK!';
+    echo $this->db->affected_rows() ? '1' : 'Gagal update NSPK';
 }
 
 public function DeleteNSPK() {
     $id = $this->input->post('id');
-    if (!$id) {
-        echo 'ID tidak valid';
-        return;
-    }
+    if (!$id) { echo 'ID tidak valid'; return; }
 
     $this->db->where('id', $id);
     $this->db->update('nspk', ['deleted_at' => date('Y-m-d H:i:s')]);
-    echo $this->db->affected_rows() ? '1' : 'Gagal Hapus NSPK!';
+    echo $this->db->affected_rows() ? '1' : 'Gagal hapus NSPK';
 }
 
 // ====================== RENSTRA ======================
@@ -3323,5 +3341,371 @@ public function DeleteProP() {
     $this->db->update('renstra_prop', ['deleted_at' => date('Y-m-d H:i:s')]);
     echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Proyek Prioritas';
 }
+
+
+
+    public function MatriksKinerja() {
+        $Header['Halaman'] = 'Matriks Kinerja dan Pendanaan';
+
+        // Inisialisasi default info kementerian & periode
+        $Data['UserKementerianName'] = '-';
+        $Data['UserPeriode']         = '-';
+
+        // Cek session
+        if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 1 ||
+            !isset($_SESSION['IdKementerian']) || !is_numeric($_SESSION['IdKementerian'])) {
+            $Data['UserKementerianName'] = 'Silakan login sebagai user kementerian';
+        } else {
+            $this->db->where('Id', $_SESSION['IdKementerian']);
+            $this->db->where('deleted_at IS NULL');
+            $kementerian = $this->db->get('kementerian')->row_array();
+
+            if ($kementerian) {
+                $Data['UserKementerianName'] = $kementerian['NamaKementerian'] ?? '-';
+                $Data['UserPeriode']         = ($kementerian['TahunMulai'] ?? '-') . ' - ' . ($kementerian['TahunAkhir'] ?? '-');
+            } else {
+                $Data['UserKementerianName'] = 'Data kementerian tidak ditemukan';
+            }
+        }
+
+        // Query Matriks dengan filter id_kementerian
+        $this->db->select([
+            'prog.id AS program_id',
+            'prog.kode_program',
+            'prog.nama_program',
+            'keg.id AS kegiatan_id',
+            'keg.kode_kegiatan',
+            'keg.nama_kegiatan',
+            'rin.id AS rincian_id',
+            'rin.kode_rincian',
+            'rin.nama_rincian',
+            'rin.lokasi',
+            'rin.satuan',
+            'rin.unit_organisasi',
+            'pend.id AS pend_id',
+            'pend.indikator',
+            'pend.target_2025', 'pend.target_2026', 'pend.target_2027', 'pend.target_2028', 'pend.target_2029',
+            'pend.apbn_2025', 'pend.apbn_2026', 'pend.apbn_2027', 'pend.apbn_2028', 'pend.apbn_2029',
+            'pend.non_apbn_2025', 'pend.non_apbn_2026', 'pend.non_apbn_2027', 'pend.non_apbn_2028', 'pend.non_apbn_2029',
+            'pend.total_2025', 'pend.total_2026', 'pend.total_2027', 'pend.total_2028', 'pend.total_2029'
+        ]);
+        $this->db->from('renstra_program prog');
+        $this->db->join('renstra_kegiatan keg', 'keg.id_program = prog.id', 'left');
+        $this->db->join('renstra_rincian rin', 'rin.id_kegiatan = keg.id', 'left');
+        $this->db->join('renstra_kinerja_pendanaan pend', 'pend.id_rincian = rin.id AND pend.deleted_at IS NULL', 'left');
+        $this->db->where('prog.id_kementerian', $_SESSION['IdKementerian']);
+        $this->db->where('prog.deleted_at IS NULL');
+        $this->db->order_by('prog.kode_program ASC, keg.kode_kegiatan ASC, rin.kode_rincian ASC');
+        $Data['DataMatriks'] = $this->db->get()->result_array();
+
+        // Tambahkan CSRF ke view
+        $Data['csrf_name'] = $this->security->get_csrf_token_name();
+        $Data['csrf_hash'] = $this->security->get_csrf_hash();
+
+        $this->load->view('Kementerian/header', $Header);
+        $this->load->view('Kementerian/MatriksKinerja', $Data);
+    }
+
+    // Ambil data untuk edit (AJAX)
+    public function GetMatriksById()
+    {
+        $response = ['status' => 'error', 'message' => 'Data tidak ditemukan'];
+
+        if ($this->input->is_ajax_request()) {
+            $id = $this->input->post('id');
+            if ($id && is_numeric($id)) {
+                $this->db->select('pend.*, rin.nama_rincian');
+                $this->db->from('renstra_kinerja_pendanaan pend');
+                $this->db->join('renstra_rincian rin', 'rin.id = pend.id_rincian', 'left');
+                $this->db->where('pend.id', $id);
+                $this->db->where('pend.deleted_at IS NULL');
+                $data = $this->db->get()->row_array();
+
+                if ($data) {
+                    $response = [
+                        'status' => 'success',
+                        'data'   => $data
+                    ];
+                }
+            }
+        }
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($response));
+    }
+
+    // Simpan (tambah / edit)
+    public function SaveMatriks()
+    {
+        $response = ['status' => 'error', 'message' => 'Gagal menyimpan data'];
+
+        if ($this->input->is_ajax_request()) {
+            try {
+                $id = $this->input->post('id');
+                
+                // Validasi input
+                $id_rincian = $this->input->post('id_rincian');
+                if (empty($id_rincian)) {
+                    throw new Exception('ID Rincian tidak boleh kosong');
+                }
+
+                $data = [
+                    'id_rincian' => $id_rincian,
+                    'indikator'  => $this->input->post('indikator'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                    'updated_by' => $_SESSION['IdKementerian'] ?? 0
+                ];
+
+                // Proses data per tahun
+                for ($th = 2025; $th <= 2029; $th++) {
+                    $target = $this->input->post("target_$th");
+                    $apbn = $this->input->post("apbn_$th");
+                    $non_apbn = $this->input->post("non_apbn_$th");
+                    
+                    $data["target_$th"]   = !empty($target) ? (float)$target : 0;
+                    $data["apbn_$th"]     = !empty($apbn) ? (float)$apbn : 0;
+                    $data["non_apbn_$th"] = !empty($non_apbn) ? (float)$non_apbn : 0;
+                    $data["total_$th"]    = $data["apbn_$th"] + $data["non_apbn_$th"];
+                }
+
+                if (!empty($id) && is_numeric($id)) {
+                    // Update
+                    $this->db->where('id', $id);
+                    $this->db->where('deleted_at IS NULL');
+                    
+                    if ($this->db->update('renstra_kinerja_pendanaan', $data)) {
+                        $response = ['status' => 'success', 'message' => 'Data berhasil diperbarui'];
+                    } else {
+                        $db_error = $this->db->error();
+                        $response['message'] = 'Database error: ' . $db_error['message'];
+                    }
+                } else {
+                    // Tambah baru
+                    $data['created_at'] = date('Y-m-d H:i:s');
+                    $data['created_by'] = $_SESSION['IdKementerian'] ?? 0;
+                    
+                    if ($this->db->insert('renstra_kinerja_pendanaan', $data)) {
+                        $response = ['status' => 'success', 'message' => 'Data berhasil ditambahkan'];
+                    } else {
+                        $db_error = $this->db->error();
+                        $response['message'] = 'Database error: ' . $db_error['message'];
+                    }
+                }
+            } catch (Exception $e) {
+                $response['message'] = 'Exception: ' . $e->getMessage();
+            }
+        }
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($response));
+    }
+
+    // Hapus (soft delete)
+    public function DeleteMatriks()
+    {
+        $response = ['status' => 'error', 'message' => 'Gagal menghapus data'];
+
+        if ($this->input->is_ajax_request()) {
+            $id = $this->input->post('id');
+            if ($id && is_numeric($id)) {
+                $data = [
+                    'deleted_at' => date('Y-m-d H:i:s'),
+                    'deleted_by' => $_SESSION['IdKementerian'] ?? 0
+                ];
+                
+                $this->db->where('id', $id);
+                $this->db->where('deleted_at IS NULL');
+                $this->db->update('renstra_kinerja_pendanaan', $data);
+
+                if ($this->db->affected_rows() > 0) {
+                    $response = ['status' => 'success', 'message' => 'Data berhasil dihapus'];
+                }
+            }
+        }
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($response));
+    }
+
+
+public function pendanaan() {
+        $Header['Halaman'] = 'Matriks Pendanaan Renstra';
+
+        // Default info kementerian & periode
+        $Data['UserKementerianName'] = '-';
+        $Data['UserPeriode']         = '-';
+
+        // Ambil data kementerian dari session
+        if (isset($_SESSION['IdKementerian']) && is_numeric($_SESSION['IdKementerian'])) {
+            $this->db->where('Id', $_SESSION['IdKementerian']);
+            $this->db->where('deleted_at IS NULL');
+            $kementerian = $this->db->get('kementerian')->row_array();
+
+            if ($kementerian) {
+                $Data['UserKementerianName'] = $kementerian['NamaKementerian'] ?? '-';
+                $Data['UserPeriode']         = ($kementerian['TahunMulai'] ?? '-') . ' - ' . ($kementerian['TahunAkhir'] ?? '-');
+            } else {
+                $Data['UserKementerianName'] = 'Data kementerian tidak ditemukan';
+            }
+        }
+
+        // Kegiatan Prioritas (KP)
+        $this->db->select('kp.id AS kp_id, kp.kode_kp, kp.nama_kp,
+                           pend.id AS pend_id, pend.penugasan_indikator,
+                           pend.target_2025, pend.target_2026, pend.target_2027, pend.target_2028, pend.target_2029,
+                           pend.apbn_2025, pend.apbn_2026, pend.apbn_2027, pend.apbn_2028, pend.apbn_2029,
+                           pend.non_apbn_2025, pend.non_apbn_2026, pend.non_apbn_2027, pend.non_apbn_2028, pend.non_apbn_2029,
+                           pend.total_2025, pend.total_2026, pend.total_2027, pend.total_2028, pend.total_2029');
+        $this->db->from('renstra_kp kp');
+        $this->db->join('renstra_pp pp', 'kp.id_pp = pp.id', 'inner');
+        $this->db->join('renstra_pn pn', 'pp.id_pn = pn.id', 'inner');
+        $this->db->join('renstra_pendanaan pend', 'pend.id_kp = kp.id AND pend.jenis = "KP" AND pend.deleted_at IS NULL', 'left');
+        $this->db->where('pn.id_kementerian', $_SESSION['IdKementerian']);
+        $this->db->where('kp.deleted_at IS NULL');
+        $this->db->order_by('kp.kode_kp', 'ASC');
+        $Data['Kegiatan'] = $this->db->get()->result_array();
+
+        // Proyek Prioritas (ProP)
+        $this->db->select('prop.id AS prop_id, prop.kode_prop, prop.nama_prop,
+                           pend.id AS pend_id, pend.penugasan_indikator,
+                           pend.target_2025, pend.target_2026, pend.target_2027, pend.target_2028, pend.target_2029,
+                           pend.apbn_2025, pend.apbn_2026, pend.apbn_2027, pend.apbn_2028, pend.apbn_2029,
+                           pend.non_apbn_2025, pend.non_apbn_2026, pend.non_apbn_2027, pend.non_apbn_2028, pend.non_apbn_2029,
+                           pend.total_2025, pend.total_2026, pend.total_2027, pend.total_2028, pend.total_2029');
+        $this->db->from('renstra_prop prop');
+        $this->db->join('renstra_kp kp', 'prop.id_kp = kp.id', 'inner');
+        $this->db->join('renstra_pp pp', 'kp.id_pp = pp.id', 'inner');
+        $this->db->join('renstra_pn pn', 'pp.id_pn = pn.id', 'inner');
+        $this->db->join('renstra_pendanaan pend', 'pend.id_prop = prop.id AND pend.jenis = "ProP" AND pend.deleted_at IS NULL', 'left');
+        $this->db->where('pn.id_kementerian', $_SESSION['IdKementerian']);
+        $this->db->where('prop.deleted_at IS NULL');
+        $this->db->order_by('prop.kode_prop', 'ASC');
+        $Data['Proyek'] = $this->db->get()->result_array();
+
+        // Load view
+        $this->load->view('Kementerian/header', $Header);
+        $this->load->view('Kementerian/Pendanaan', $Data);
+    }
+
+    // AJAX: Ambil data pendanaan berdasarkan ID (untuk modal detail & edit)
+    public function GetPendanaanById() {
+        $id = $this->input->post('id');
+        if (!$id || !is_numeric($id)) {
+            echo json_encode(['status' => 'error', 'message' => 'ID tidak valid']);
+            return;
+        }
+
+        $this->db->where('id', $id);
+        $this->db->where('deleted_at IS NULL');
+        $data = $this->db->get('renstra_pendanaan')->row_array();
+
+        if ($data) {
+            // Ambil nama entitas berdasarkan jenis
+            if ($data['jenis'] === 'KP') {
+                $this->db->select('nama_kp AS nama_entitas');
+                $this->db->where('id', $data['id_kp']);
+                $entitas = $this->db->get('renstra_kp')->row_array();
+            } else {
+                $this->db->select('nama_prop AS nama_entitas');
+                $this->db->where('id', $data['id_prop']);
+                $entitas = $this->db->get('renstra_prop')->row_array();
+            }
+
+            $data['nama_entitas'] = $entitas['nama_entitas'] ?? 'Tidak diketahui';
+
+            echo json_encode(['status' => 'success', 'data' => $data]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+        }
+    }
+
+    // AJAX: Simpan / Update pendanaan
+   public function SavePendanaan() {
+    $post = $this->input->post();
+
+    // Log input untuk debug (cek di application/logs/log-*.php)
+    log_message('debug', 'SavePendanaan POST data: ' . json_encode($post));
+
+    // Validasi wajib
+    if (empty($post['jenis']) || !in_array($post['jenis'], ['KP', 'ProP'])) {
+        echo json_encode(['status' => 'error', 'message' => 'Jenis entitas tidak valid']);
+        return;
+    }
+
+    if (empty($post['id_ref']) || !is_numeric($post['id_ref'])) {
+        echo json_encode(['status' => 'error', 'message' => 'ID referensi tidak valid']);
+        return;
+    }
+
+    // Pastikan semua kolom numerik ada & default ke 0
+    $years = range(2025, 2029);
+    $columns = ['target_', 'apbn_', 'non_apbn_', 'total_'];
+    foreach ($years as $year) {
+        foreach ($columns as $col) {
+            $key = $col . $year;
+            $post[$key] = isset($post[$key]) && is_numeric($post[$key]) ? (float)$post[$key] : 0;
+        }
+    }
+
+    // Hitung ulang total sebagai backup
+    foreach ($years as $year) {
+        $post['total_' . $year] = $post['apbn_' . $year] + $post['non_apbn_' . $year];
+    }
+
+    // Siapkan data untuk insert/update
+    $data = [
+        'jenis'                  => $post['jenis'],
+        'id_kp'                  => ($post['jenis'] === 'KP') ? $post['id_ref'] : null,
+        'id_prop'                => ($post['jenis'] === 'ProP') ? $post['id_ref'] : null,
+        'penugasan_indikator'    => $post['penugasan_indikator'] ?? null,
+    ];
+
+    // Masukkan semua kolom tahun
+    foreach ($years as $year) {
+        $data['target_' . $year]     = $post['target_' . $year];
+        $data['apbn_' . $year]       = $post['apbn_' . $year];
+        $data['non_apbn_' . $year]   = $post['non_apbn_' . $year];
+        $data['total_' . $year]      = $post['total_' . $year];
+    }
+
+    if (!empty($post['id']) && is_numeric($post['id'])) {
+        // Update
+        $id = $post['id'];
+        $this->db->where('id', $id);
+        $updated = $this->db->update('renstra_pendanaan', $data);
+
+        if ($updated) {
+            echo json_encode(['status' => 'success', 'message' => 'Data berhasil diperbarui']);
+        } else {
+            $error = $this->db->error();
+            echo json_encode(['status' => 'error', 'message' => 'Gagal update: ' . ($error['message'] ?? 'Unknown error')]);
+        }
+    } else {
+        // Insert baru
+        $inserted = $this->db->insert('renstra_pendanaan', $data);
+
+        if ($inserted) {
+            echo json_encode(['status' => 'success', 'message' => 'Data berhasil disimpan']);
+        } else {
+            $error = $this->db->error();
+            echo json_encode(['status' => 'error', 'message' => 'Gagal insert: ' . ($error['message'] ?? 'Unknown error')]);
+        }
+    }
+}
+    // AJAX: Hapus pendanaan (soft delete)
+    public function DeletePendanaan() {
+        $id = $this->input->post('id');
+        if (!$id || !is_numeric($id)) {
+            echo json_encode(['status' => 'error', 'message' => 'ID tidak valid']);
+            return;
+        }
+
+        $this->db->where('id', $id);
+        $this->db->update('renstra_pendanaan', ['deleted_at' => date('Y-m-d H:i:s')]);
+        echo json_encode(['status' => 'success', 'message' => 'Data berhasil dihapus']);
+    }
 
 }

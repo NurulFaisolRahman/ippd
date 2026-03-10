@@ -29,149 +29,187 @@
         <div class="row">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="data-table-list">
-                    <!-- Tombol Tambah PN -->
-                     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
+
+                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
                     <div class="alert alert-info" style="margin-bottom:15px;">
                         <i class="notika-icon notika-info"></i>
                         <b>Kementerian :</b> <?= htmlspecialchars($UserKementerianName ?? '-') ?><br>
                         <b>Periode :</b> <?= htmlspecialchars($UserPeriode ?? '-') ?>
                     </div>
                     <?php endif; ?>
+
                     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
-                    <div class="basic-tb-hd">
+                    <div class="basic-tb-hd" style="margin-bottom: 20px;">
                         <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#modalAddPN">
                             <i class="notika-icon notika-plus-symbol"></i> Tambah Prioritas Nasional
                         </button>
                     </div>
                     <?php endif; ?>
 
-                    <!-- Tabel Hierarki -->
-                    <!-- Tabel Hierarki (tanpa kolom Aksi di header) -->
-<div class="table-responsive">
-    <table class="table table-bordered table-hover">
-        <thead class="bg-success text-white">
-            <tr>
-                <th>Prioritas Nasional (PN)</th>
-                <th>Program Prioritas (PP)</th>
-                <th>Kegiatan Prioritas (KP)</th>
-                <th>Proyek Prioritas (Pro-P)</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php if (!empty($PN)): ?>
-                <?php foreach ($PN as $pn): ?>
-                <tr class="table-active">
-                    <td colspan="4">
-                        <strong><?= htmlspecialchars($pn['kode_pn']) ?> - <?= htmlspecialchars($pn['nama_pn']) ?></strong>
-                        <small>(<?= $pn['tahun_mulai'] ?> - <?= $pn['tahun_akhir'] ?>)</small>
-                        <?php if ($_SESSION['Level'] == 1): ?>
-                        <div class="pull-right">
-                            <button class="btn btn-xs btn-success" onclick="showModalAddPP(<?= $pn['id'] ?>)">
-                                + Tambah PP
-                            </button>
-                            <button class="btn btn-xs btn-warning btnEditPN" data-id="<?= $pn['id'] ?>">Edit</button>
-                            <button class="btn btn-xs btn-danger btnDeletePN" data-id="<?= $pn['id'] ?>">Hapus</button>
-                        </div>
-                        <?php endif; ?>
-                    </td>
-                </tr>
+                    <!-- TABEL HIERARKI - SATU ITEM PER KOLOM -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered renstra-hierarchy">
+                            <thead class="bg-success text-white">
+                                <tr>
+                                    <th style="width:25%">Prioritas Nasional (PN)</th>
+                                    <th style="width:25%">Program Prioritas (PP)</th>
+                                    <th style="width:25%">Kegiatan Prioritas (KP)</th>
+                                    <th style="width:25%">Proyek Prioritas (Pro-P)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (!empty($PN)): ?>
+                                    <?php foreach ($PN as $pn): ?>
 
-                <?php if (!empty($pn['PP'])): ?>
-                    <?php foreach ($pn['PP'] as $pp): ?>
-                    <tr>
-                        <td></td>
-                        <td>
-                            <?= htmlspecialchars($pp['kode_pp']) ?> - <?= htmlspecialchars($pp['nama_pp']) ?>
-                            <?php if ($_SESSION['Level'] == 1): ?>
-                            <div class="pull-right">
-                                <button class="btn btn-xs btn-success" onclick="showModalAddKP(<?= $pp['id'] ?>)">
-                                    + Tambah KP
-                                </button>
-                                <button class="btn btn-xs btn-warning btnEditPP"
-                                        data-id="<?= $pp['id'] ?>"
-                                        data-kode="<?= htmlspecialchars($pp['kode_pp']) ?>"
-                                        data-nama="<?= htmlspecialchars($pp['nama_pp']) ?>"
-                                        data-ket="<?= htmlspecialchars($pp['keterangan'] ?? '') ?>">
-                                    Edit
-                                </button>
-                                <button class="btn btn-xs btn-danger btnDeletePP" data-id="<?= $pp['id'] ?>">
-                                    Hapus
-                                </button>
-                            </div>
-                            <?php endif; ?>
-                        </td>
-                        <td colspan="2"></td>
-                    </tr>
+                                        <!-- PN hanya di kolom 1 -->
+                                        <tr class="level-1">
+                                            <td class="level-cell pn-cell">
+                                                <div class="item-header">
+                                                    <strong><?= htmlspecialchars($pn['kode_pn']) ?> – <?= htmlspecialchars($pn['nama_pn']) ?></strong>
+                                                    <small class="text-muted d-block mt-1">(<?= $pn['tahun_mulai'] ?> – <?= $pn['tahun_akhir'] ?>)</small>
+                                                </div>
+                                                <?php if ($_SESSION['Level'] == 1): ?>
+                                                <div class="item-actions mt-2">
+                                                    <button class="btn btn-xs btn-success me-1" onclick="showModalAddPP(<?= $pn['id'] ?>)">+ PP</button>
+                                                    <button class="btn btn-xs btn-warning me-1 btnEditPN" data-id="<?= $pn['id'] ?>">Edit</button>
+                                                    <button class="btn btn-xs btn-danger btnDeletePN" data-id="<?= $pn['id'] ?>">Hapus</button>
+                                                </div>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td class="level-cell empty"></td>
+                                            <td class="level-cell empty"></td>
+                                            <td class="level-cell empty"></td>
+                                        </tr>
 
-                    <?php if (!empty($pp['KP'])): ?>
-                        <?php foreach ($pp['KP'] as $kp): ?>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td>
-                                <?= htmlspecialchars($kp['kode_kp']) ?> - <?= htmlspecialchars($kp['nama_kp']) ?>
-                                <?php if ($_SESSION['Level'] == 1): ?>
-                                <div class="pull-right">
-                                    <button class="btn btn-xs btn-success" onclick="showModalAddProP(<?= $kp['id'] ?>)">
-                                        + Tambah Pro-P
-                                    </button>
-                                    <button class="btn btn-xs btn-warning btnEditKP"
-                                            data-id="<?= $kp['id'] ?>"
-                                            data-kode="<?= htmlspecialchars($kp['kode_kp']) ?>"
-                                            data-nama="<?= htmlspecialchars($kp['nama_kp']) ?>"
-                                            data-ket="<?= htmlspecialchars($kp['keterangan'] ?? '') ?>">
-                                        Edit
-                                    </button>
-                                    <button class="btn btn-xs btn-danger btnDeleteKP" data-id="<?= $kp['id'] ?>">
-                                        Hapus
-                                    </button>
-                                </div>
+                                        <?php if (!empty($pn['PP'])): ?>
+                                            <?php foreach ($pn['PP'] as $pp): ?>
+
+                                                <!-- PP hanya di kolom 2 -->
+                                                <tr class="level-2">
+                                                    <td class="level-cell empty"></td>
+                                                    <td class="level-cell pp-cell">
+                                                        <div class="item-header">
+                                                            <?= htmlspecialchars($pp['kode_pp']) ?> – <?= htmlspecialchars($pp['nama_pp']) ?>
+                                                        </div>
+                                                        <?php if ($_SESSION['Level'] == 1): ?>
+                                                        <div class="item-actions mt-2">
+                                                            <button class="btn btn-xs btn-success me-1" onclick="showModalAddKP(<?= $pp['id'] ?>)">+ KP</button>
+                                                            <button class="btn btn-xs btn-warning me-1 btnEditPP"
+                                                                    data-id="<?= $pp['id'] ?>"
+                                                                    data-kode="<?= htmlspecialchars($pp['kode_pp']) ?>"
+                                                                    data-nama="<?= htmlspecialchars($pp['nama_pp']) ?>"
+                                                                    data-ket="<?= htmlspecialchars($pp['keterangan'] ?? '') ?>">
+                                                                Edit
+                                                            </button>
+                                                            <button class="btn btn-xs btn-danger btnDeletePP" data-id="<?= $pp['id'] ?>">Hapus</button>
+                                                        </div>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    <td class="level-cell empty"></td>
+                                                    <td class="level-cell empty"></td>
+                                                </tr>
+
+                                                <?php if (!empty($pp['KP'])): ?>
+                                                    <?php foreach ($pp['KP'] as $kp): ?>
+
+                                                        <!-- KP hanya di kolom 3 -->
+                                                        <tr class="level-3">
+                                                            <td class="level-cell empty"></td>
+                                                            <td class="level-cell empty"></td>
+                                                            <td class="level-cell kp-cell">
+                                                                <div class="item-header">
+                                                                    <?= htmlspecialchars($kp['kode_kp']) ?> – <?= htmlspecialchars($kp['nama_kp']) ?>
+                                                                </div>
+                                                                <?php if ($_SESSION['Level'] == 1): ?>
+                                                                <div class="item-actions mt-2">
+                                                                    <button class="btn btn-xs btn-success me-1" onclick="showModalAddProP(<?= $kp['id'] ?>)">+ Pro-P</button>
+                                                                    <button class="btn btn-xs btn-warning me-1 btnEditKP"
+                                                                            data-id="<?= $kp['id'] ?>"
+                                                                            data-kode="<?= htmlspecialchars($kp['kode_kp']) ?>"
+                                                                            data-nama="<?= htmlspecialchars($kp['nama_kp']) ?>"
+                                                                            data-ket="<?= htmlspecialchars($kp['keterangan'] ?? '') ?>">
+                                                                        Edit
+                                                                    </button>
+                                                                    <button class="btn btn-xs btn-danger btnDeleteKP" data-id="<?= $kp['id'] ?>">Hapus</button>
+                                                                </div>
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td class="level-cell empty"></td>
+                                                        </tr>
+
+                                                        <?php if (!empty($kp['ProP'])): ?>
+                                                            <?php foreach ($kp['ProP'] as $prop): ?>
+
+                                                                <!-- Pro-P hanya di kolom 4 -->
+                                                                <tr class="level-4">
+                                                                    <td class="level-cell empty"></td>
+                                                                    <td class="level-cell empty"></td>
+                                                                    <td class="level-cell empty"></td>
+                                                                    <td class="level-cell prop-cell">
+                                                                        <div class="item-header">
+                                                                            <?= htmlspecialchars($prop['kode_prop']) ?> – <?= htmlspecialchars($prop['nama_prop']) ?>
+                                                                        </div>
+                                                                        <?php if (!empty($prop['target']) || !empty($prop['indikator'])): ?>
+                                                                        <div class="item-meta small text-muted mt-2">
+                                                                            <?php if (!empty($prop['target'])): ?>
+                                                                                <div><strong>Target:</strong><br><?= nl2br(htmlspecialchars($prop['target'])) ?></div>
+                                                                            <?php endif; ?>
+                                                                            <?php if (!empty($prop['indikator'])): ?>
+                                                                                <div><strong>Indikator:</strong><br><?= nl2br(htmlspecialchars($prop['indikator'])) ?></div>
+                                                                            <?php endif; ?>
+                                                                        </div>
+                                                                        <?php endif; ?>
+                                                                        <?php if ($_SESSION['Level'] == 1): ?>
+                                                                        <div class="item-actions mt-2">
+                                                                            <button class="btn btn-xs btn-warning me-1 btnEditProP"
+                                                                                    data-id="<?= $prop['id'] ?>"
+                                                                                    data-kode="<?= htmlspecialchars($prop['kode_prop']) ?>"
+                                                                                    data-nama="<?= htmlspecialchars($prop['nama_prop']) ?>"
+                                                                                    data-target="<?= htmlspecialchars($prop['target'] ?? '') ?>"
+                                                                                    data-indikator="<?= htmlspecialchars($prop['indikator'] ?? '') ?>"
+                                                                                    data-ket="<?= htmlspecialchars($prop['keterangan'] ?? '') ?>">
+                                                                                Edit
+                                                                            </button>
+                                                                            <button class="btn btn-xs btn-danger btnDeleteProP" data-id="<?= $prop['id'] ?>">Hapus</button>
+                                                                        </div>
+                                                                        <?php endif; ?>
+                                                                    </td>
+                                                                </tr>
+
+                                                            <?php endforeach; ?>
+                                                        <?php endif; ?>
+
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+
+                                        <!-- Jarak visual antar grup PN -->
+                                        <tr class="spacer"><td colspan="4"></td></tr>
+
+                                    <?php endforeach; ?>
+
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-5">
+                                            Belum ada data Renstra
+                                        </td>
+                                    </tr>
                                 <?php endif; ?>
-                            </td>
-                            <td></td>
-                        </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-                        <?php if (!empty($kp['ProP'])): ?>
-                            <?php foreach ($kp['ProP'] as $prop): ?>
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td>
-                                    <?= htmlspecialchars($prop['kode_prop']) ?> - <?= htmlspecialchars($prop['nama_prop']) ?>
-                                    <?php if ($_SESSION['Level'] == 1): ?>
-                                    <div class="pull-right">
-                                        <button class="btn btn-xs btn-warning btnEditProP"
-                                                data-id="<?= $prop['id'] ?>"
-                                                data-kode="<?= htmlspecialchars($prop['kode_prop']) ?>"
-                                                data-nama="<?= htmlspecialchars($prop['nama_prop']) ?>"
-                                                data-target="<?= htmlspecialchars($prop['target'] ?? '') ?>"
-                                                data-indikator="<?= htmlspecialchars($prop['indikator'] ?? '') ?>"
-                                                data-ket="<?= htmlspecialchars($prop['keterangan'] ?? '') ?>">
-                                            Edit
-                                        </button>
-                                        <button class="btn btn-xs btn-danger btnDeleteProP" data-id="<?= $prop['id'] ?>">
-                                            Hapus
-                                        </button>
-                                    </div>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <tr>
-                    <td colspan="4" class="text-center text-muted">Belum ada data Renstra</td>
-                </tr>
-            <?php endif; ?>
-        </tbody>
-    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- ============================================= -->
+<!--                  MODAL-MODAL                 -->
+<!-- ============================================= -->
 
 <!-- Modal Tambah PN -->
 <div class="modal fade" id="modalAddPN" role="dialog">
@@ -209,6 +247,7 @@
         </div>
     </div>
 </div>
+
 <!-- Modal Edit PN -->
 <div class="modal fade" id="modalEditPN" role="dialog">
     <div class="modal-dialog">
@@ -443,75 +482,59 @@
     </div>
 </div>
 
+<!-- ============================================= -->
+<!--                  JAVASCRIPT                  -->
+<!-- ============================================= -->
+
 <script src="<?= base_url('js/vendor/jquery-1.12.4.min.js'); ?>"></script>
 <script src="<?= base_url('js/bootstrap.min.js'); ?>"></script>
 <script src="<?= base_url('js/data-table/jquery.dataTables.min.js'); ?>"></script>
 <script src="<?= base_url('js/data-table/data-table-act.js'); ?>"></script>
 <script src="<?= base_url('js/main.js'); ?>"></script>
+
 <script>
 var BaseURL = '<?= base_url() ?>';
 
-// ===================== Tambah PN =====================
+// Tambah PN
 $("#formAddPN").submit(function(e) {
     e.preventDefault();
-    var formData = $(this).serialize();
-    $.post(BaseURL + "Kementerian/InputPN", formData, function(res) {
-        if (res.trim() === '1') {
-            location.reload();
-        } else {
-            alert(res);
-        }
-    }).fail(function() {
-        alert('Gagal menghubungi server');
-    });
+    $.post(BaseURL + "Kementerian/InputPN", $(this).serialize(), function(res) {
+        if (res.trim() === '1') location.reload();
+        else alert(res || 'Gagal menyimpan');
+    }).fail(() => alert('Gagal koneksi server'));
 });
 
 // Edit PN
 $(document).on('click', '.btnEditPN', function() {
     var btn = $(this);
     $('#editPN_id').val(btn.data('id'));
-    $('#editPN_kode').val(btn.data('kode'));
-    $('#editPN_nama').val(btn.data('nama'));
-    $('#editPN_mulai').val(btn.data('mulai'));
-    $('#editPN_akhir').val(btn.data('akhir'));
-    $('#editPN_ket').val(btn.data('ket'));
+    $('#editPN_kode').val(btn.data('kode') || '');
+    $('#editPN_nama').val(btn.data('nama') || '');
+    $('#editPN_mulai').val(btn.data('mulai') || '');
+    $('#editPN_akhir').val(btn.data('akhir') || '');
+    $('#editPN_ket').val(btn.data('ket') || '');
     $('#modalEditPN').modal('show');
 });
 
 $("#formEditPN").submit(function(e) {
     e.preventDefault();
-    $.post(BaseURL + "Kementerian/UpdatePN", $(this).serialize())
-        .done(function(res) {
-            if (res.trim() === '1') {
-                location.reload();
-            } else {
-                alert(res || 'Gagal mengupdate Prioritas Nasional');
-            }
-        })
-        .fail(function() {
-            alert('Gagal menghubungi server (Update PN)');
-        });
+    $.post(BaseURL + "Kementerian/UpdatePN", $(this).serialize(), function(res) {
+        if (res.trim() === '1') location.reload();
+        else alert(res || 'Gagal update');
+    }).fail(() => alert('Gagal koneksi'));
 });
 
 // Hapus PN
 $(document).on('click', '.btnDeletePN', function() {
-    if (confirm('Yakin hapus Prioritas Nasional ini?\nSemua Program, Kegiatan, dan Proyek di bawahnya akan terhapus secara permanen.')) {
-        var id = $(this).data('id');
-        $.post(BaseURL + "Kementerian/DeletePN", {id: id})
-            .done(function(res) {
-                if (res.trim() === '1') {
-                    location.reload();
-                } else {
-                    alert(res || 'Gagal menghapus Prioritas Nasional');
-                }
-            })
-            .fail(function() {
-                alert('Gagal menghubungi server (Hapus PN)');
-            });
+    if (confirm('Yakin hapus Prioritas Nasional ini?\nSemua sub-item akan ikut terhapus.')) {
+        $.post(BaseURL + "Kementerian/DeletePN", {id: $(this).data('id')}, function(res) {
+            if (res.trim() === '1') location.reload();
+            else alert(res || 'Gagal hapus');
+        }).fail(() => alert('Gagal koneksi'));
     }
 });
 
-// ===================== Tambah PP =====================
+// Tambah PP
 function showModalAddPP(id_pn) {
     $('#addPP_id_pn').val(id_pn);
     $('#modalAddPP').modal('show');
@@ -519,16 +542,10 @@ function showModalAddPP(id_pn) {
 
 $("#formAddPP").submit(function(e) {
     e.preventDefault();
-    var formData = $(this).serialize();
-    $.post(BaseURL + "Kementerian/InputPP", formData, function(res) {
-        if (res.trim() === '1') {
-            location.reload();
-        } else {
-            alert(res);
-        }
-    }).fail(function() {
-        alert('Gagal menghubungi server');
-    });
+    $.post(BaseURL + "Kementerian/InputPP", $(this).serialize(), function(res) {
+        if (res.trim() === '1') location.reload();
+        else alert(res);
+    }).fail(() => alert('Gagal koneksi'));
 });
 
 // Edit PP
@@ -543,35 +560,23 @@ $(document).on('click', '.btnEditPP', function() {
 
 $("#formEditPP").submit(function(e) {
     e.preventDefault();
-    var formData = $(this).serialize();
-    $.post(BaseURL + "Kementerian/UpdatePP", formData, function(res) {
-        if (res.trim() === '1') {
-            location.reload();
-        } else {
-            alert(res);
-        }
-    }).fail(function() {
-        alert('Gagal menghubungi server');
-    });
+    $.post(BaseURL + "Kementerian/UpdatePP", $(this).serialize(), function(res) {
+        if (res.trim() === '1') location.reload();
+        else alert(res);
+    }).fail(() => alert('Gagal koneksi'));
 });
 
 // Hapus PP
 $(document).on('click', '.btnDeletePP', function() {
-    if (confirm('Yakin hapus Program Prioritas ini? Semua KP dan Pro-P di bawahnya juga akan terhapus.')) {
-        var id = $(this).data('id');
-        $.post(BaseURL + "Kementerian/DeletePP", {id: id}, function(res) {
-            if (res.trim() === '1') {
-                location.reload();
-            } else {
-                alert(res);
-            }
-        }).fail(function() {
-            alert('Gagal menghubungi server');
-        });
+    if (confirm('Yakin hapus Program Prioritas ini?\nSemua sub-item akan terhapus.')) {
+        $.post(BaseURL + "Kementerian/DeletePP", {id: $(this).data('id')}, function(res) {
+            if (res.trim() === '1') location.reload();
+            else alert(res);
+        }).fail(() => alert('Gagal koneksi'));
     }
 });
 
-// ===================== Tambah KP =====================
+// Tambah KP
 function showModalAddKP(id_pp) {
     $('#addKP_id_pp').val(id_pp);
     $('#modalAddKP').modal('show');
@@ -579,16 +584,10 @@ function showModalAddKP(id_pp) {
 
 $("#formAddKP").submit(function(e) {
     e.preventDefault();
-    var formData = $(this).serialize();
-    $.post(BaseURL + "Kementerian/InputKP", formData, function(res) {
-        if (res.trim() === '1') {
-            location.reload();
-        } else {
-            alert(res);
-        }
-    }).fail(function() {
-        alert('Gagal menghubungi server');
-    });
+    $.post(BaseURL + "Kementerian/InputKP", $(this).serialize(), function(res) {
+        if (res.trim() === '1') location.reload();
+        else alert(res);
+    }).fail(() => alert('Gagal koneksi'));
 });
 
 // Edit KP
@@ -603,35 +602,23 @@ $(document).on('click', '.btnEditKP', function() {
 
 $("#formEditKP").submit(function(e) {
     e.preventDefault();
-    var formData = $(this).serialize();
-    $.post(BaseURL + "Kementerian/UpdateKP", formData, function(res) {
-        if (res.trim() === '1') {
-            location.reload();
-        } else {
-            alert(res);
-        }
-    }).fail(function() {
-        alert('Gagal menghubungi server');
-    });
+    $.post(BaseURL + "Kementerian/UpdateKP", $(this).serialize(), function(res) {
+        if (res.trim() === '1') location.reload();
+        else alert(res);
+    }).fail(() => alert('Gagal koneksi'));
 });
 
 // Hapus KP
 $(document).on('click', '.btnDeleteKP', function() {
-    if (confirm('Yakin hapus Kegiatan Prioritas ini? Semua Pro-P di bawahnya juga akan terhapus.')) {
-        var id = $(this).data('id');
-        $.post(BaseURL + "Kementerian/DeleteKP", {id: id}, function(res) {
-            if (res.trim() === '1') {
-                location.reload();
-            } else {
-                alert(res);
-            }
-        }).fail(function() {
-            alert('Gagal menghubungi server');
-        });
+    if (confirm('Yakin hapus Kegiatan Prioritas ini?\nSemua Proyek akan terhapus.')) {
+        $.post(BaseURL + "Kementerian/DeleteKP", {id: $(this).data('id')}, function(res) {
+            if (res.trim() === '1') location.reload();
+            else alert(res);
+        }).fail(() => alert('Gagal koneksi'));
     }
 });
 
-// ===================== Tambah Pro-P =====================
+// Tambah Pro-P
 function showModalAddProP(id_kp) {
     $('#addProP_id_kp').val(id_kp);
     $('#modalAddProP').modal('show');
@@ -639,16 +626,10 @@ function showModalAddProP(id_kp) {
 
 $("#formAddProP").submit(function(e) {
     e.preventDefault();
-    var formData = $(this).serialize();
-    $.post(BaseURL + "Kementerian/InputProP", formData, function(res) {
-        if (res.trim() === '1') {
-            location.reload();
-        } else {
-            alert(res);
-        }
-    }).fail(function() {
-        alert('Gagal menghubungi server');
-    });
+    $.post(BaseURL + "Kementerian/InputProP", $(this).serialize(), function(res) {
+        if (res.trim() === '1') location.reload();
+        else alert(res);
+    }).fail(() => alert('Gagal koneksi'));
 });
 
 // Edit Pro-P
@@ -665,31 +646,74 @@ $(document).on('click', '.btnEditProP', function() {
 
 $("#formEditProP").submit(function(e) {
     e.preventDefault();
-    var formData = $(this).serialize();
-    $.post(BaseURL + "Kementerian/UpdateProP", formData, function(res) {
-        if (res.trim() === '1') {
-            location.reload();
-        } else {
-            alert(res);
-        }
-    }).fail(function() {
-        alert('Gagal menghubungi server');
-    });
+    $.post(BaseURL + "Kementerian/UpdateProP", $(this).serialize(), function(res) {
+        if (res.trim() === '1') location.reload();
+        else alert(res);
+    }).fail(() => alert('Gagal koneksi'));
 });
 
 // Hapus Pro-P
 $(document).on('click', '.btnDeleteProP', function() {
     if (confirm('Yakin hapus Proyek Prioritas ini?')) {
-        var id = $(this).data('id');
-        $.post(BaseURL + "Kementerian/DeleteProP", {id: id}, function(res) {
-            if (res.trim() === '1') {
-                location.reload();
-            } else {
-                alert(res);
-            }
-        }).fail(function() {
-            alert('Gagal menghubungi server');
-        });
+        $.post(BaseURL + "Kementerian/DeleteProP", {id: $(this).data('id')}, function(res) {
+            if (res.trim() === '1') location.reload();
+            else alert(res);
+        }).fail(() => alert('Gagal koneksi'));
     }
 });
 </script>
+
+<style>
+/* CSS untuk tampilan rapi tanpa tabrakan antar kolom */
+.renstra-hierarchy {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.renstra-hierarchy th, .renstra-hierarchy td {
+    vertical-align: top;
+    padding: 12px 16px;
+    border: 1px solid #dee2e6;
+}
+
+.renstra-hierarchy .level-cell.empty {
+    background-color: #f8f9fa;
+    border-color: #e9ecef;
+}
+
+.pn-cell  { background-color: #e8f5e9; border-left: 5px solid #4caf50; font-weight: 600; }
+.pp-cell  { padding-left: 50px !important; background-color: #f1f8e9; border-left: 5px solid #81c784; }
+.kp-cell  { padding-left: 100px !important; background-color: #f9fbe7; border-left: 5px solid #aed581; }
+.prop-cell{ padding-left: 150px !important; background-color: #fffde7; border-left: 5px solid #dce775; }
+
+.item-header {
+    line-height: 1.5;
+    word-wrap: break-word;
+    margin-bottom: 4px;
+}
+
+.item-actions {
+    white-space: nowrap;
+}
+
+.item-meta {
+    line-height: 1.5;
+    margin-top: 6px;
+}
+
+.spacer td {
+    height: 24px;
+    border: none !important;
+    background: transparent !important;
+}
+
+@media (max-width: 992px) {
+    .renstra-hierarchy th, .renstra-hierarchy td {
+        padding: 10px 12px;
+        font-size: 0.95rem;
+    }
+    .pp-cell  { padding-left: 30px !important; }
+    .kp-cell  { padding-left: 60px !important; }
+    .prop-cell{ padding-left: 90px !important; }
+}
+</style>
