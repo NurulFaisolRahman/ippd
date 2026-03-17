@@ -297,6 +297,7 @@
                 <div class="sidebar-submenu">
                     <a href="<?=base_url('Daerah/UrusanPD')?>">Daftar Urusan</a>
                     <a href="<?=base_url('Daerah/Instansi')?>">Daftar Instansi</a>
+                    <a href="<?=base_url('Daerah/Akun_Karyawan')?>">Daftar Karyawan</a>
                 </div>
             </li>
 

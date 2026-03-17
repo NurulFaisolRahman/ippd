@@ -267,106 +267,322 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
 
 #chart-svg:active { cursor: grabbing; }
 
-/* === TOOLTIP === */
-.pk-tooltip {
-    position: absolute;
-    background: #1e293b;
-    color: #f1f5f9;
-    padding: 16px 20px;
-    border-radius: 16px;
-    font-size: 13px;
-    max-width: 380px;
-    line-height: 1.6;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity .2s;
-    z-index: 1000;
-    box-shadow: 0 12px 32px rgba(0,0,0,0.4);
-    border-left: 4px solid;
+/* === MODAL POPUP === */
+.pk-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
 }
 
-.pk-tooltip.show { opacity: 1; }
+.pk-modal {
+    background: #1e293b;
+    border-radius: 24px;
+    width: 90%;
+    max-width: 650px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    animation: modalSlideUp 0.3s ease;
+    border-left: 6px solid;
+}
 
-.tooltip-section {
-    margin-bottom: 12px;
-    padding-bottom: 8px;
+@keyframes modalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.pk-modal-header {
+    padding: 20px 24px;
+    background: rgba(255,255,255,0.05);
+    border-bottom: 1px solid #334155;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 24px 24px 0 0;
+}
+
+.pk-modal-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #f8fafc;
+    margin: 0;
+}
+
+.pk-modal-header h3 i {
+    font-size: 20px;
+}
+
+.pk-modal-close {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: #f8fafc;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 18px;
+}
+
+.pk-modal-close:hover {
+    background: rgba(255,255,255,0.2);
+    transform: rotate(90deg);
+}
+
+.pk-modal-body {
+    padding: 24px;
+    overflow-y: auto;
+    max-height: calc(85vh - 80px);
+    color: #e2e8f0;
+    scrollbar-width: thin;
+    scrollbar-color: #475569 #1e293b;
+}
+
+.pk-modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.pk-modal-body::-webkit-scrollbar-track {
+    background: #1e293b;
+    border-radius: 8px;
+}
+
+.pk-modal-body::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 8px;
+}
+
+.pk-modal-body::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+.modal-section {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
     border-bottom: 1px solid #334155;
 }
 
-.tooltip-section:last-child {
+.modal-section:last-child {
     margin-bottom: 0;
     padding-bottom: 0;
     border-bottom: none;
 }
 
-.tooltip-label {
-    font-size: 10px;
+.modal-label {
+    font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: #94a3b8;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
-.tooltip-value {
+.modal-label i {
+    font-size: 12px;
+}
+
+.modal-value {
     font-weight: 500;
     color: #f8fafc;
     word-break: break-word;
+    font-size: 14px;
+    line-height: 1.6;
 }
 
-.tooltip-badge {
-    display: inline-block;
-    padding: 2px 8px;
+.higher-link-item {
+    background: rgba(255,255,255,0.05);
     border-radius: 12px;
-    font-size: 10px;
-    font-weight: 600;
-    background: rgba(255,255,255,0.1);
-    color: #cbd5e1;
-    margin-right: 4px;
-    margin-bottom: 4px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    border-left: 4px solid;
 }
 
-/* === FOOTER === */
-.pk-footer {
-    background: #f8fafc;
-    border-top: 1px solid #e2e8f0;
-    padding: 12px 24px;
+.higher-link-item:last-child {
+    margin-bottom: 0;
+}
+
+.pelaksana-card {
+    background: rgba(255,255,255,0.05);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.pelaksana-avatar {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border-radius: 50%;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    font-size: 20px;
+    color: white;
     flex-shrink: 0;
 }
 
-.pk-footer-info {
-    font-size: 12px;
-    color: #94a3b8;
+.pelaksana-info {
+    flex: 1;
 }
 
-.pk-footer-info strong {
-    color: #475569;
-}
-
-.btn-group-pk { display: flex; gap: 8px; }
-
-.btn-pk {
-    border: none;
-    border-radius: 10px;
-    padding: 8px 16px;
-    font-size: 13px;
+.pelaksana-info h4 {
+    font-size: 16px;
     font-weight: 600;
-    cursor: pointer;
-    display: flex; align-items: center; gap: 6px;
-    transition: all .2s;
+    color: #f8fafc;
+    margin: 0 0 4px 0;
 }
 
-.btn-pk:hover { transform: translateY(-1px); }
+.pelaksana-info p {
+    margin: 4px 0;
+    font-size: 12px;
+    color: #cbd5e1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
 
-.btn-back  { background:#f1f5f9; color:#475569; }
-.btn-back:hover { background:#e2e8f0; }
-.btn-zoom  { background:#eff6ff; color:#2563eb; }
-.btn-zoom:hover { background:#dbeafe; }
-.btn-reset { background:#f0fdf4; color:#15803d; }
-.btn-reset:hover { background:#dcfce7; }
+.pelaksana-info p i {
+    width: 16px;
+    color: #64748b;
+}
+
+.indikator-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.indikator-list li {
+    margin-bottom: 8px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    display: flex;
+    align-items: start;
+    gap: 8px;
+    font-size: 13px;
+}
+
+.indikator-list li i {
+    color: #3b82f6;
+    font-size: 12px;
+    margin-top: 3px;
+}
+
+.inovasi-item {
+    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 8px;
+}
+
+.inovasi-item:last-child {
+    margin-bottom: 0;
+}
+
+.inovasi-item .label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.inovasi-item .label i {
+    font-size: 12px;
+}
+
+.inovasi-item .value {
+    font-size: 13px;
+    color: #f8fafc;
+}
+
+.inovasi-item .value div {
+    margin-bottom: 4px;
+    padding-left: 8px;
+}
+
+/* === TABEL CROSSCUTTING === */
+.crosscutting-section {
+    background: rgba(255,255,255,0.02);
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.crosscutting-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+.crosscutting-table th {
+    text-align: left;
+    padding: 8px 6px;
+    color: #94a3b8;
+    font-weight: 600;
+    font-size: 10px;
+    text-transform: uppercase;
+    border-bottom: 1px solid #334155;
+}
+
+.crosscutting-table td {
+    padding: 8px 6px;
+    border-bottom: 1px solid #2d3748;
+    color: #cbd5e1;
+}
+
+.crosscutting-table tr:last-child td {
+    border-bottom: none;
+}
+
+.pd-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    background: rgba(59, 130, 246, 0.2);
+    border-radius: 12px;
+    color: #60a5fa;
+    font-weight: 500;
+    font-size: 11px;
+}
+
+.id-footer {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #334155;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #64748b;
+}
 
 /* === ZOOM COUNTER === */
 .zoom-badge {
@@ -428,6 +644,72 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
     font-size: 11px;
     color: #64748b;
 }
+
+/* === FOOTER === */
+.pk-footer {
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.pk-footer-info {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+.pk-footer-info strong {
+    color: #475569;
+}
+
+.btn-group-pk {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-pk {
+    border: none;
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.btn-pk:hover {
+    transform: translateY(-1px);
+}
+
+.btn-back {
+    background: #f1f5f9;
+    color: #475569;
+}
+.btn-back:hover {
+    background: #e2e8f0;
+}
+
+.btn-zoom {
+    background: #eff6ff;
+    color: #2563eb;
+}
+.btn-zoom:hover {
+    background: #dbeafe;
+}
+
+.btn-reset {
+    background: #f0fdf4;
+    color: #15803d;
+}
+.btn-reset:hover {
+    background: #dcfce7;
+}
 </style>
 
 <div class="main-content">
@@ -442,7 +724,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
             
             <div class="filter-row">
                 <div class="filter-group">
-                    <label> Provinsi</label>
+                    <label><i class="fa fa-map"></i> Provinsi</label>
                     <select id="Provinsi">
                         <option value="">Pilih Provinsi</option>
                         <?php foreach ($Provinsi as $prov) { ?>
@@ -454,7 +736,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
                 </div>
                 
                 <div class="filter-group">
-                    <label></i> Kabupaten/Kota</label>
+                    <label><i class="fa fa-city"></i> Kabupaten/Kota</label>
                     <select id="KabKota" disabled>
                         <option value="">Pilih Kab/Kota</option>
                     </select>
@@ -482,8 +764,8 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
             <div class="pk-header-title">
                 <div class="icon-wrap"><i class="fa fa-sitemap"></i></div>
                 <div>
-                    <h4>Pohon Kinerja Perangkat Daerah</h4>
-                    <p>Visualisasi hierarki kinerja 4 level</p>
+                    <h4>Pohon Kinerja Perangkat Daerah <?= !empty($NamaWilayah) ? '- ' . html_escape($NamaWilayah) : '' ?></h4>
+                    <p>Visualisasi hierarki kinerja 4 level - Klik node untuk melihat detail</p>
                 </div>
             </div>
         </div>
@@ -516,15 +798,32 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
         <!-- CHART -->
         <div id="chart-container">
             <svg id="chart-svg"></svg>
-            <div class="pk-tooltip" id="tooltip"></div>
             <div class="zoom-badge" id="zoom-badge">100%</div>
+        </div>
+
+        <!-- MODAL POPUP -->
+        <div class="pk-modal-overlay" id="modalOverlay">
+            <div class="pk-modal" id="modal">
+                <div class="pk-modal-header">
+                    <h3>
+                        <i class="fa fa-info-circle"></i>
+                        <span id="modalTitle">Detail Kinerja</span>
+                    </h3>
+                    <button class="pk-modal-close" id="modalClose">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+                <div class="pk-modal-body" id="modalBody">
+                    <!-- Content will be inserted by JavaScript -->
+                </div>
+            </div>
         </div>
 
         <!-- FOOTER -->
         <div class="pk-footer">
             <div class="pk-footer-info">
                 <i class="fa fa-info-circle"></i> 
-                Scroll / Pinch untuk zoom &bull; Drag untuk pan &bull; Hover node untuk detail
+                Scroll / Pinch untuk zoom &bull; Drag untuk pan &bull; <strong>Klik node untuk melihat detail</strong>
             </div>
             <div class="btn-group-pk">
                 <button class="btn-pk btn-back" onclick="location.href='<?= base_url('Daerah') ?>'">
@@ -582,6 +881,11 @@ $(document).ready(function() {
                 }
 
                 $("#KabKota").html(options).prop('disabled', false);
+                
+                <?php if (!empty($KodeWilayah)): ?>
+                    var kodeKab = "<?= $KodeWilayah ?>";
+                    $("#KabKota").val(kodeKab);
+                <?php endif; ?>
             },
             error: function() {
                 alert("Gagal memuat data Kab/Kota");
@@ -589,6 +893,11 @@ $(document).ready(function() {
             }
         });
     });
+
+    <?php if (!empty($KodeWilayah)): ?>
+        var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
+        $("#Provinsi").val(kodeProv).trigger('change');
+    <?php endif; ?>
 
     // Filter button click
     $("#Filter").click(function() {
@@ -607,7 +916,6 @@ $(document).ready(function() {
             return;
         }
 
-        // Disable button and show loading
         var $btn = $(this);
         $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Memuat...');
 
@@ -617,7 +925,6 @@ $(document).ready(function() {
             data: { KodeWilayah: kabkota },
             success: function(res) {
                 if (res === '1') {
-                    // Reload page to show chart for selected wilayah
                     window.location.reload();
                 } else {
                     alert(res || "Gagal menyimpan filter wilayah!");
@@ -631,19 +938,19 @@ $(document).ready(function() {
         });
     });
 
-    // Load Kab/Kota on page load if KodeWilayah already set
-    <?php if (!empty($KodeWilayah)): ?>
-        var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
-        var kodeKab = "<?= $KodeWilayah ?>";
-        
-        $("#Provinsi").val(kodeProv).trigger('change');
-        
-        // Set Kab/Kota after options are loaded
-        setTimeout(function() {
-            $("#KabKota").val(kodeKab);
-        }, 500);
-    <?php endif; ?>
+    // Modal close handlers
+    $("#modalClose, #modalOverlay").click(function(e) {
+        if (e.target === this) {
+            $("#modalOverlay").fadeOut(200);
+        }
+    });
 
+    // Close modal with ESC key
+    $(document).keydown(function(e) {
+        if (e.key === "Escape" && $("#modalOverlay").is(":visible")) {
+            $("#modalOverlay").fadeOut(200);
+        }
+    });
 });
 </script>
 
@@ -654,7 +961,9 @@ $(document).ready(function() {
     const totalData = <?= json_encode($TotalData ?? []) ?>;
 
     const container = document.getElementById('chart-container');
-    const tooltip = document.getElementById('tooltip');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
     const zoomBadge = document.getElementById('zoom-badge');
 
     // Helper functions
@@ -679,69 +988,49 @@ $(document).ready(function() {
     }
 
     function formatCrosscutting(pd, ket) {
+        if (!pd) return [];
+        
         try {
-            if (pd && typeof pd === 'string') pd = JSON.parse(pd);
-            if (ket && typeof ket === 'string') ket = JSON.parse(ket);
+            let pdList = [];
+            let ketList = [];
             
-            if (Array.isArray(pd) && pd.length > 0) {
-                return pd.map((p, idx) => ({
-                    pd: p,
-                    ket: ket && ket[idx] ? ket[idx] : ''
-                }));
+            // Parse JSON jika perlu
+            if (typeof pd === 'string') {
+                try {
+                    pdList = JSON.parse(pd);
+                } catch(e) {
+                    // Jika bukan JSON, mungkin sudah dalam format array
+                    console.log('pd not JSON:', pd);
+                    return [];
+                }
+            } else if (Array.isArray(pd)) {
+                pdList = pd;
             }
+            
+            if (typeof ket === 'string') {
+                try {
+                    ketList = JSON.parse(ket);
+                } catch(e) {
+                    ketList = [];
+                }
+            } else if (Array.isArray(ket)) {
+                ketList = ket;
+            }
+            
+            if (!Array.isArray(pdList)) return [];
+            
+            return pdList.map((item, index) => ({
+                pd: item,
+                ket: (ketList && ketList[index]) ? ketList[index] : ''
+            }));
+            
         } catch (e) {
             console.error('Error parsing crosscutting:', e);
+            return [];
         }
-        return [];
     }
 
-    // Cek data kosong
-    if (!chartData || !chartData.children || chartData.children.length === 0) {
-        document.getElementById('chart-svg').style.display = 'none';
-        
-        // Tampilkan empty state dengan stats
-        let emptyHtml = `
-            <div class="pk-empty">
-                <i class="fa fa-diagram-project"></i>
-                <p>Tidak ada data Pohon Kinerja Perangkat Daerah untuk wilayah ini.</p>
-        `;
-        
-        if (totalData.level1 > 0 || totalData.level2 > 0 || totalData.level3 > 0 || totalData.level4 > 0) {
-            emptyHtml += `
-                <div class="stats-card" style="margin-top:16px;">
-                    <div class="stat-item">
-                        <div class="stat-dot" style="background:var(--l1)"></div>
-                        <span class="stat-value">${totalData.level1 || 0}</span>
-                        <span class="stat-label">Ultimate</span>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-dot" style="background:var(--l2)"></div>
-                        <span class="stat-value">${totalData.level2 || 0}</span>
-                        <span class="stat-label">Intermediate</span>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-dot" style="background:var(--l3)"></div>
-                        <span class="stat-value">${totalData.level3 || 0}</span>
-                        <span class="stat-label">Immediate</span>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-dot" style="background:var(--l4)"></div>
-                        <span class="stat-value">${totalData.level4 || 0}</span>
-                        <span class="stat-label">Output</span>
-                    </div>
-                </div>
-            `;
-        } else {
-            emptyHtml += `<p style="margin-top:8px;">Silahkan pilih wilayah terlebih dahulu.</p>`;
-        }
-        
-        emptyHtml += `</div>`;
-        
-        container.insertAdjacentHTML('beforeend', emptyHtml);
-        return;
-    }
-
-    // Level configuration
+    // Level configuration for 4 levels
     const LEVELS = {
         1: { 
             label: 'ULTIMATE OUTCOME',       
@@ -774,8 +1063,313 @@ $(document).ready(function() {
             text: '#fff',    
             badge: '#a78bfa',
             icon: 'fa-check-circle'
-        },
+        }
     };
+
+    // Fungsi untuk mendapatkan path ke atas (higher level links)
+    function getHigherLevelLinks(node) {
+        const links = [];
+        let currentNode = node.parent;
+        
+        while (currentNode && currentNode.data && currentNode.data.nama !== 'ROOT') {
+            links.push({
+                level: currentNode.data.level,
+                nama: currentNode.data.nama,
+                id: currentNode.data.id,
+                color: LEVELS[currentNode.data.level]?.fill || '#94a3b8',
+                original_id: currentNode.data.original_id
+            });
+            currentNode = currentNode.parent;
+        }
+        
+        return links;
+    }
+
+   // Fungsi untuk menampilkan modal dengan data node
+function showNodeDetails(nodeData, level, node) {
+    const lv = LEVELS[level];
+    const levelName = lv ? lv.label : 'Level ' + level;
+    const levelColor = lv ? lv.fill : '#94a3b8';
+    
+    // Format indikator
+    const indikatorList = formatIndikator(nodeData.indikator);
+    
+    // Format crosscutting
+    const crosscuttingList = formatCrosscutting(nodeData.crosscutting_pd, nodeData.crosscutting_ket);
+    
+    // Format inovasi
+    const inovasiList = nodeData.inovasi ? String(nodeData.inovasi).split('|||').filter(i => i.trim()) : [];
+    const outcomeInovasiList = nodeData.outcome_inovasi ? String(nodeData.outcome_inovasi).split('|||').filter(o => o.trim()) : [];
+    const outputInovasiList = nodeData.output_inovasi ? String(nodeData.output_inovasi).split('|||').filter(o => o.trim()) : [];
+    
+    // Dapatkan tautan kinerja yang lebih tinggi
+    const higherLinks = node ? getHigherLevelLinks(node) : [];
+    
+    // Ambil detail pelaksana
+    const pelaksanaDetail = nodeData.pelaksana_detail;
+    
+    // Ambil data perangkat daerah dari PHP (jika ada)
+    // Data ini bisa dikirim dari controller atau diambil dari variable global
+    const perangkatDaerah = <?= json_encode($perangkat_daerah ?? []) ?>;
+    
+    // Buat mapping ID ke nama perangkat daerah
+    const pdMap = {};
+    if (perangkatDaerah && perangkatDaerah.length > 0) {
+        perangkatDaerah.forEach(pd => {
+            pdMap[pd.id] = pd.nama;
+        });
+    }
+    
+    // Set modal title
+    modalTitle.innerHTML = `${levelName}`;
+    document.querySelector('.pk-modal').style.borderLeftColor = levelColor;
+    
+    // Mulai membangun konten modal
+    let modalHtml = '';
+    
+    // ===== TAUTAN KINERJA YANG LEBIH TINGGI =====
+    if (higherLinks.length > 0) {
+        modalHtml += `
+            <div class="modal-section">
+                <div class="modal-label">
+                    <i class="fa fa-link"></i> Tautan Kinerja yang Lebih Tinggi
+                </div>
+        `;
+        
+        higherLinks.forEach(link => {
+            modalHtml += `
+                <div class="higher-link-item" style="border-left-color: ${link.color};">
+                    <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+                        <i class="fa ${LEVELS[link.level]?.icon || 'fa-sitemap'}" style="color: ${link.color};"></i>
+                        <span style="font-size:11px; font-weight:600; color:${link.color};">${LEVELS[link.level]?.label || 'Level ' + link.level}</span>
+                    </div>
+                    <div style="font-size:13px; margin-left:6px;">${link.nama}</div>
+                </div>
+            `;
+        });
+        
+        modalHtml += `</div>`;
+    }
+    
+    // ===== KINERJA =====
+    modalHtml += `
+        <div class="modal-section">
+            <div class="modal-label">
+                <i class="fa fa-tag"></i> Kinerja
+            </div>
+            <div class="modal-value">${nodeData.nama}</div>
+        </div>
+    `;
+    
+    // ===== INDIKATOR KINERJA =====
+    if (indikatorList.length > 0) {
+        modalHtml += `
+            <div class="modal-section">
+                <div class="modal-label">
+                    <i class="fa fa-list-check"></i> Indikator Kinerja
+                </div>
+                <ul class="indikator-list">
+        `;
+        
+        indikatorList.forEach(ind => {
+            modalHtml += `<li><i class="fa fa-circle" style="color:${levelColor}; font-size:8px;"></i> ${ind}</li>`;
+        });
+        
+        modalHtml += `</ul></div>`;
+    }
+    
+    // ===== PELAKSANA DENGAN DETAIL =====
+    if (pelaksanaDetail) {
+        modalHtml += `
+            <div class="modal-section">
+                <div class="modal-label">
+                    <i class="fa fa-users"></i> Pelaksana
+                </div>
+                <div class="pelaksana-card">
+                    <div class="pelaksana-avatar">
+                        <i class="fa fa-user"></i>
+                    </div>
+                    <div class="pelaksana-info">
+                        <h4>${pelaksanaDetail.nama}</h4>
+                        ${pelaksanaDetail.nip ? `<p><i class="fa fa-id-card"></i> NIP: ${pelaksanaDetail.nip}</p>` : ''}
+                        ${pelaksanaDetail.jabatan ? `<p><i class="fa fa-briefcase"></i> ${pelaksanaDetail.jabatan}</p>` : ''}
+                        ${pelaksanaDetail.dinas ? `<p><i class="fa fa-building"></i> ${pelaksanaDetail.dinas}</p>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    } else if (nodeData.pelaksana && nodeData.pelaksana !== 'null' && nodeData.pelaksana !== '') {
+        modalHtml += `
+            <div class="modal-section">
+                <div class="modal-label">
+                    <i class="fa fa-users"></i> Pelaksana / Urusan
+                </div>
+                <div class="modal-value">${nodeData.pelaksana}</div>
+            </div>
+        `;
+    }
+    
+    // ===== INOVASI DAERAH =====
+    if (inovasiList.length > 0 || outcomeInovasiList.length > 0 || outputInovasiList.length > 0) {
+        modalHtml += `
+            <div class="modal-section">
+                <div class="modal-label">
+                    <i class="fa fa-lightbulb"></i> Inovasi Daerah
+                </div>
+        `;
+        
+        if (inovasiList.length > 0) {
+            modalHtml += `
+                <div class="inovasi-item">
+                    <div class="label"><i class="fa fa-star" style="color:#eab308;"></i> Inovasi</div>
+                    <div class="value">
+            `;
+            inovasiList.forEach(inv => {
+                modalHtml += `<div>• ${inv}</div>`;
+            });
+            modalHtml += `</div></div>`;
+        }
+        
+        if (outcomeInovasiList.length > 0) {
+            modalHtml += `
+                <div class="inovasi-item">
+                    <div class="label"><i class="fa fa-chart-line" style="color:#3b82f6;"></i> Outcome Inovasi</div>
+                    <div class="value">
+            `;
+            outcomeInovasiList.forEach(out => {
+                modalHtml += `<div>• ${out}</div>`;
+            });
+            modalHtml += `</div></div>`;
+        }
+        
+        if (outputInovasiList.length > 0) {
+            modalHtml += `
+                <div class="inovasi-item">
+                    <div class="label"><i class="fa fa-check-circle" style="color:#10b981;"></i> Output Inovasi</div>
+                    <div class="value">
+            `;
+            outputInovasiList.forEach(out => {
+                modalHtml += `<div>• ${out}</div>`;
+            });
+            modalHtml += `</div></div>`;
+        }
+        
+        modalHtml += `</div>`;
+    }
+    
+    // ===== CROSSCUTTING DENGAN PERANGKAT DAERAH =====
+    if (crosscuttingList.length > 0) {
+        modalHtml += `
+            <div class="modal-section">
+                <div class="modal-label">
+                    <i class="fa fa-share-alt"></i> Crosscutting Dengan Perangkat Daerah
+                </div>
+                <div class="crosscutting-section">
+                    <table class="crosscutting-table">
+                        <thead>
+                            <tr>
+                                <th>Perangkat Daerah</th>
+                                <th>Keterangan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+        `;
+        
+        crosscuttingList.forEach(cc => {
+            // Ambil ID perangkat daerah (bisa dalam format string atau integer)
+            let pdId = cc.pd;
+            
+            // Cari nama perangkat daerah berdasarkan ID
+            let pdName = pdId; // Default tampilkan ID jika tidak ditemukan
+            
+            // Jika pdMap tersedia, cari nama berdasarkan ID
+            if (pdMap && pdMap[pdId]) {
+                pdName = pdMap[pdId];
+            } else {
+                // Coba parse jika ID adalah string yang bisa dikonversi ke integer
+                let numericId = parseInt(pdId);
+                if (!isNaN(numericId) && pdMap && pdMap[numericId]) {
+                    pdName = pdMap[numericId];
+                }
+            }
+            
+            modalHtml += `
+                <tr>
+                    <td><span class="pd-badge"><i class="fa fa-building" style="margin-right:4px;"></i> ${pdName}</span></td>
+                    <td>${cc.ket || '—'}</td>
+                </tr>
+            `;
+        });
+        
+        modalHtml += `</tbody></table></div></div>`;
+    } else {
+        modalHtml += `
+            <div class="modal-section">
+                <div class="modal-label">
+                    <i class="fa fa-share-alt"></i> Crosscutting Dengan Perangkat Daerah
+                </div>
+                <div class="modal-value" style="color:#94a3b8; font-style:italic;">
+                    Tidak ada data crosscutting
+                </div>
+            </div>
+        `;
+    }
+    
+    // ===== ID =====
+    modalHtml += `
+        <div class="id-footer">
+            <span><i class="fa fa-hashtag"></i> ID: ${nodeData.id}</span>
+            <span><i class="fa fa-layer-group"></i> Level ${level}</span>
+        </div>
+    `;
+    
+    modalBody.innerHTML = modalHtml;
+    modalOverlay.style.display = 'flex';
+}
+
+    // Cek data kosong
+    if (!chartData || !chartData.children || chartData.children.length === 0) {
+        document.getElementById('chart-svg').style.display = 'none';
+        
+        let emptyHtml = `
+            <div class="pk-empty">
+                <i class="fa fa-diagram-project"></i>
+                <p>Tidak ada data Pohon Kinerja untuk wilayah ini.</p>
+        `;
+        
+        if (totalData.level1 > 0 || totalData.level2 > 0 || totalData.level3 > 0 || totalData.level4 > 0) {
+            emptyHtml += `
+                <div class="stats-card" style="margin-top:16px;">
+                    <div class="stat-item">
+                        <div class="stat-dot" style="background:var(--l1)"></div>
+                        <span class="stat-value">${totalData.level1 || 0}</span>
+                        <span class="stat-label">Ultimate</span>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-dot" style="background:var(--l2)"></div>
+                        <span class="stat-value">${totalData.level2 || 0}</span>
+                        <span class="stat-label">Intermediate</span>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-dot" style="background:var(--l3)"></div>
+                        <span class="stat-value">${totalData.level3 || 0}</span>
+                        <span class="stat-label">Immediate</span>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-dot" style="background:var(--l4)"></div>
+                        <span class="stat-value">${totalData.level4 || 0}</span>
+                        <span class="stat-label">Output</span>
+                    </div>
+                </div>
+            `;
+        } else {
+            emptyHtml += `<p style="margin-top:8px;">Silahkan pilih wilayah terlebih dahulu.</p>`;
+        }
+        
+        emptyHtml += `</div>`;
+        container.insertAdjacentHTML('beforeend', emptyHtml);
+        return;
+    }
 
     // D3 Setup
     const svg = d3.select('#chart-svg');
@@ -1084,124 +1678,12 @@ $(document).ready(function() {
             .text(d.data.id.split('_')[1] || '');
     });
 
-    // Tooltip handlers - Enhanced with more details
-    node.on('mousemove', function(event, d) {
-        const lv = LEVELS[d.data.level];
-        const levelName = lv ? lv.label : 'Level ' + d.data.level;
-        const levelColor = lv ? lv.fill : '#94a3b8';
-        
-        // Format indikator
-        const indikatorList = formatIndikator(d.data.indikator);
-        
-        // Format crosscutting
-        const crosscuttingList = formatCrosscutting(d.data.crosscutting_pd, d.data.crosscutting_ket);
-        
-        let tooltipHtml = `
-            <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-                <div style="width:12px; height:12px; border-radius:50%; background:${levelColor};"></div>
-                <div style="font-size:11px; font-weight:600; letter-spacing:0.5px; color:${levelColor};">${levelName}</div>
-            </div>
-            <div class="tooltip-section">
-                <div class="tooltip-label">Kinerja</div>
-                <div class="tooltip-value">${truncate(d.data.nama, 150)}</div>
-            </div>
-        `;
-        
-        // Indikator
-        if (indikatorList.length > 0) {
-            tooltipHtml += `
-                <div class="tooltip-section">
-                    <div class="tooltip-label">Indikator Kinerja</div>
-                    <div class="tooltip-value">
-            `;
-            indikatorList.forEach(ind => {
-                tooltipHtml += `<span class="tooltip-badge"><i class="fa fa-check-circle" style="font-size:8px; margin-right:4px;"></i>${truncate(ind, 50)}</span>`;
-            });
-            tooltipHtml += `</div></div>`;
-        }
-        
-        // Pelaksana
-        if (d.data.pelaksana) {
-            let pelaksanaColor = '#94a3b8';
-            if (d.data.pelaksana === 'Tinggi') pelaksanaColor = '#22c55e';
-            else if (d.data.pelaksana === 'Sedang') pelaksanaColor = '#eab308';
-            else if (d.data.pelaksana === 'Rendah') pelaksanaColor = '#ef4444';
-            
-            tooltipHtml += `
-                <div class="tooltip-section">
-                    <div class="tooltip-label">Pelaksana / Urusan</div>
-                    <div style="display:flex; align-items:center; gap:6px;">
-                        <div style="width:8px; height:8px; border-radius:50%; background:${pelaksanaColor};"></div>
-                        <div class="tooltip-value">${d.data.pelaksana}</div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        // Inovasi
-        if (d.data.inovasi || d.data.outcome_inovasi || d.data.output_inovasi) {
-            tooltipHtml += `<div class="tooltip-section"><div class="tooltip-label">Inovasi Daerah</div>`;
-            
-            if (d.data.inovasi) {
-                const inovasiList = String(d.data.inovasi).split('|||').filter(i => i.trim());
-                inovasiList.forEach(inv => {
-                    tooltipHtml += `<div style="margin-bottom:4px;"><i class="fa fa-lightbulb" style="color:#eab308; font-size:10px; margin-right:6px;"></i>${truncate(inv, 70)}</div>`;
-                });
-            }
-            
-            if (d.data.outcome_inovasi) {
-                const outcomeList = String(d.data.outcome_inovasi).split('|||').filter(o => o.trim());
-                outcomeList.forEach(out => {
-                    tooltipHtml += `<div style="margin-bottom:4px; margin-left:16px;"><i class="fa fa-arrow-right" style="color:#94a3b8; font-size:8px; margin-right:6px;"></i>Outcome: ${truncate(out, 70)}</div>`;
-                });
-            }
-            
-            if (d.data.output_inovasi) {
-                const outputList = String(d.data.output_inovasi).split('|||').filter(o => o.trim());
-                outputList.forEach(out => {
-                    tooltipHtml += `<div style="margin-bottom:4px; margin-left:16px;"><i class="fa fa-arrow-right" style="color:#94a3b8; font-size:8px; margin-right:6px;"></i>Output: ${truncate(out, 70)}</div>`;
-                });
-            }
-            
-            tooltipHtml += `</div>`;
-        }
-        
-        // Crosscutting
-        if (crosscuttingList.length > 0) {
-            tooltipHtml += `
-                <div class="tooltip-section">
-                    <div class="tooltip-label">Crosscutting dengan PD</div>
-            `;
-            crosscuttingList.forEach(cc => {
-                tooltipHtml += `<div style="margin-bottom:4px;"><i class="fa fa-share-alt" style="color:#3b82f6; font-size:10px; margin-right:6px;"></i>PD #${cc.pd} - <em>${cc.ket || '—'}</em></div>`;
-            });
-            tooltipHtml += `</div>`;
-        }
-        
-        // ID
-        tooltipHtml += `
-            <div style="font-size:10px; color:#64748b; border-top:1px solid #334155; margin-top:8px; padding-top:6px;">
-                <i class="fa fa-hashtag" style="margin-right:4px;"></i> ID: ${d.data.id}
-            </div>
-        `;
-        
-        tooltip.innerHTML = tooltipHtml;
-        tooltip.style.borderLeftColor = levelColor;
-        
-        const rect = container.getBoundingClientRect();
-        let tx = event.clientX - rect.left + 15;
-        let ty = event.clientY - rect.top + 15;
-        
-        if (tx + 350 > rect.width) tx = event.clientX - rect.left - 335;
-        if (ty + 300 > rect.height) ty = event.clientY - rect.top - 285;
-        
-        tooltip.style.left = tx + 'px';
-        tooltip.style.top = ty + 'px';
-        tooltip.classList.add('show');
-    });
-
-    node.on('mouseleave', () => {
-        tooltip.classList.remove('show');
+    // ============================================
+    // CLICK HANDLER UNTUK MENAMPILKAN MODAL
+    // ============================================
+    node.on('click', function(event, d) {
+        event.stopPropagation();
+        showNodeDetails(d.data, d.data.level, d);
     });
 
     // Function to fit view

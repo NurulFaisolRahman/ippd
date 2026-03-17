@@ -1,6 +1,9 @@
 <?php $this->load->view('Daerah/sidebar'); ?>
 <?php $this->load->view('Daerah/Cssumum'); ?>
 
+<!-- Di bagian head tambahkan CSS Select2 -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
 <div class="main-content">
   <div class="data-table-area">
     <div class="container-fluid">
@@ -82,28 +85,46 @@
               </div>
             <?php } ?>
 
-            <!-- TABEL SEDERHANA - HANYA 3 KOLOM + AKSI -->
+            <!-- TABEL DENGAN KOLOM PELAKSANA -->
             <div class="table-responsive">
               <table id="data-table-basic" class="table table-striped table-bordered table-hover">
                 <thead>
                   <tr>
                     <th width="40" class="text-center">NO</th>
                     <th>Immediate Outcome (Level 3)</th>
-                    <th>Kinerja Output</th>
+                    <th>Kinerja Output & Pelaksana</th>
                     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                       <th width="120" class="text-center">AKSI</th>
                     <?php } ?>
                   </tr>
                 </thead>
                 <tbody>
-                  <?php if (!empty($items)) { $no = 1; foreach($items as $row){ ?>
+                  <?php if (!empty($items)) { $no = 1; foreach($items as $row){ 
+                    // Ambil nama pelaksana dari tabel akun_karyawan
+                    $nama_pelaksana = '';
+                    $detail_pelaksana = '';
+                    if (!empty($row['pelaksana'])) {
+                        $pelaksana = $this->db
+                            ->select('nama, jabatan')
+                            ->where('id', $row['pelaksana'])
+                            ->get('akun_karyawan')
+                            ->row();
+                        if ($pelaksana) {
+                            $nama_pelaksana = $pelaksana->nama;
+                            $detail_pelaksana = $pelaksana->jabatan;
+                        }
+                    }
+                  ?>
                     <tr data-id="<?= (int)$row['id'] ?>">
                       <td class="text-center align-middle"><?= $no++ ?></td>
                       <td class="align-middle">
                         <small><?= nl2br(html_escape(substr($row['immediate_kinerja'] ?? '—', 0, 150))) . (strlen($row['immediate_kinerja'] ?? '') > 150 ? '...' : '') ?></small>
                       </td>
                       <td class="align-middle">
-                        <div><?= nl2br(html_escape($row['kinerja'] ?? '—')) ?></div>
+                        <strong><?= nl2br(html_escape($row['kinerja'] ?? '—')) ?></strong>
+                        <?php if (!empty($nama_pelaksana)): ?>
+                          <br>
+                        <?php endif; ?>
                       </td>
                       <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                         <td class="text-center align-middle">
@@ -184,12 +205,25 @@
             </div>
           </div>
           <div class="col-md-6">
+            <!-- Dinas / Instansi - WAJIB PILIH DULU -->
             <div class="form-group">
+              <label><b>Pilih Dinas / Instansi</b> <span class="text-danger">*</span></label>
+              <div class="mb-2 text-muted small">
+                <em>Pilih Dinas terlebih dahulu untuk melihat Pelaksana</em>
+              </div>
+              <select id="DinasFilter" class="form-control select2-dinas" style="width: 100%;" required>
+                <option value="">-- Pilih Dinas --</option>
+              </select>
+            </div>
+
+            <!-- Pelaksana dari Database - Hanya muncul setelah Dinas dipilih -->
+            <div class="form-group mt-3" id="PelaksanaGroup" style="display: none;">
               <label><b>Pelaksana / Urusan</b></label>
-              <select id="Pelaksana" class="form-control">
-                <option value="Tinggi">Tinggi</option>
-                <option value="Sedang" selected>Sedang</option>
-                <option value="Rendah">Rendah</option>
+              <div class="mb-2 text-muted small">
+                <em>Pilih Pelaksana (Level 4 - Karyawan) dari Dinas terpilih</em>
+              </div>
+              <select id="Pelaksana" class="form-control select2-pelaksana" style="width: 100%;">
+                <option value="">-- Pilih Pelaksana --</option>
               </select>
             </div>
           </div>
@@ -330,10 +364,52 @@
     border-radius: 8px;
     flex-direction: column;
   }
+  
+  /* Select2 Custom Styling */
+  .select2-container--default .select2-selection--single {
+    height: 38px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    background-color: #fff;
+  }
+  .select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 36px;
+    padding-left: 12px;
+  }
+  .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 36px;
+  }
+  .select2-dropdown {
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  .select2-results__option--highlighted {
+    background-color: #007bff !important;
+  }
+  
+  /* Styling untuk list di tabel */
+  .list-unstyled {
+    padding-left: 0;
+    list-style: none;
+  }
+  .list-unstyled li {
+    margin-bottom: 5px;
+    padding: 3px 0;
+    border-bottom: 1px dashed #eee;
+  }
+  .list-unstyled li:last-child {
+    border-bottom: none;
+  }
+  .list-unstyled li i {
+    margin-right: 5px;
+  }
 </style>
 
-<script src="../js/vendor/jquery-1.12.4.min.js"></script>
-<script src="../js/bootstrap.min.js"></script>
+<script src="<?= base_url('assets/js/vendor/jquery-1.12.4.min.js') ?>"></script>
+<script src="<?= base_url('assets/js/bootstrap.min.js') ?>"></script>
+<script src="<?= base_url('assets/js/data-table/jquery.dataTables.min.js') ?>"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
 <script>
 var BaseURL = "<?= base_url() ?>";
@@ -349,6 +425,123 @@ $(document).ready(function() {
         settings.data = (settings.data || '') + (settings.data ? '&' : '') + CSRF_NAME + '=' + encodeURIComponent(CSRF_TOKEN);
       }
     }
+  });
+
+  // ==================== LOAD DROPDOWN DINAS ====================
+  function loadDinasOptions(selectedDinasId = '') {
+    $.ajax({
+      url: BaseURL + 'Daerah/Output_pd_get_daftar_dinas',
+      type: 'GET',
+      dataType: 'json',
+      beforeSend: function() {
+        $('#DinasFilter').html('<option value="">Loading...</option>');
+      },
+      success: function(data) {
+        let options = '<option value="">-- Pilih Dinas --</option>';
+        
+        if (data.length > 0) {
+          $.each(data, function(index, item) {
+            let selected = (item.id == selectedDinasId) ? 'selected' : '';
+            options += `<option value="${item.id}" ${selected}>${item.nama}</option>`;
+          });
+        } else {
+          options += '<option value="" disabled>Tidak ada data Dinas</option>';
+        }
+        
+        $('#DinasFilter').html(options);
+        
+        // Inisialisasi Select2 untuk Dinas
+        if ($('#DinasFilter').hasClass('select2-hidden-accessible')) {
+          $('#DinasFilter').select2('destroy');
+        }
+        $('#DinasFilter').select2({
+          placeholder: 'Pilih Dinas...',
+          dropdownParent: $('#ModalLevel4'),
+          width: '100%',
+          minimumResultsForSearch: -1
+        });
+        
+        // Tampilkan/Sembunyikan group pelaksana berdasarkan selected value
+        if (selectedDinasId) {
+          $('#PelaksanaGroup').show();
+        } else {
+          $('#PelaksanaGroup').hide();
+        }
+      },
+      error: function() {
+        $('#DinasFilter').html('<option value="">Gagal memuat data</option>');
+      }
+    });
+  }
+
+  // ==================== LOAD PELAKSANA BERDASARKAN DINAS ====================
+  function loadPelaksanaByDinas(dinasId, selectedPelaksanaId = '') {
+    if (!dinasId) {
+      $('#PelaksanaGroup').hide();
+      $('#Pelaksana').html('<option value="">-- Pilih Pelaksana --</option>');
+      return;
+    }
+    
+    $('#PelaksanaGroup').show();
+    
+    $.ajax({
+      url: BaseURL + 'Daerah/Output_pd_get_pelaksana_by_dinas',
+      type: 'POST',
+      data: { dinas_id: dinasId },
+      dataType: 'json',
+      beforeSend: function() {
+        $('#Pelaksana').html('<option value="">Loading...</option>');
+      },
+      success: function(data) {
+        let options = '<option value="">-- Pilih Pelaksana --</option>';
+        
+        if (data.length > 0) {
+          $.each(data, function(index, item) {
+            let selected = (item.id == selectedPelaksanaId) ? 'selected' : '';
+            
+            // Format tampilan: Nama - Jabatan
+            let displayText = item.nama;
+            if (item.jabatan) {
+              displayText += ' - ' + item.jabatan;
+            }
+            if (item.nama_dinas) {
+              displayText += ' (' + item.nama_dinas + ')';
+            }
+            
+            options += `<option value="${item.id}" ${selected}>${displayText}</option>`;
+          });
+        } else {
+          options += '<option value="" disabled>Tidak ada pelaksana untuk dinas ini</option>';
+        }
+        
+        $('#Pelaksana').html(options);
+        
+        // Re-inisialisasi Select2 untuk Pelaksana
+        if ($('#Pelaksana').hasClass('select2-hidden-accessible')) {
+          $('#Pelaksana').select2('destroy');
+        }
+        $('#Pelaksana').select2({
+          placeholder: 'Pilih Pelaksana...',
+          dropdownParent: $('#ModalLevel4'),
+          width: '100%',
+          minimumResultsForSearch: -1
+        });
+        
+        // Set value setelah Select2 diinisialisasi
+        if (selectedPelaksanaId) {
+          $('#Pelaksana').val(selectedPelaksanaId).trigger('change');
+        }
+      },
+      error: function() {
+        $('#Pelaksana').html('<option value="">Gagal memuat data</option>');
+      }
+    });
+  }
+
+  // ==================== SAAT DINAS BERUBAH ====================
+  $('#DinasFilter').on('change', function() {
+    let dinasId = $(this).val();
+    loadPelaksanaByDinas(dinasId, '');
   });
 
   // ==================== LOAD PERANGKAT DAERAH ====================
@@ -453,7 +646,13 @@ $(document).ready(function() {
       $('#ItemId').val('');
       $('#ImmediateId').val('');
       $('#Kinerja').val('');
-      $('#Pelaksana').val('Sedang');
+      $('#DinasFilter').val('').trigger('change');
+      
+      // Load dinas options
+      loadDinasOptions('');
+      
+      // Sembunyikan group pelaksana
+      $('#PelaksanaGroup').hide();
       
       // Clear all containers
       $('#IndikatorList').empty();
@@ -500,14 +699,51 @@ $(document).ready(function() {
         $('#ItemId').val(data.id);
         $('#ImmediateId').val(data.immediate_outcome_id || '');
         $('#Kinerja').val(data.kinerja || '');
-        $('#Pelaksana').val(data.pelaksana_urutan || 'Sedang');
         
-        // Clear all containers
+        // Reset containers
         $('#IndikatorList').empty();
         $('#InovasiList').empty();
         $('#OutcomeList').empty();
         $('#OutputList').empty();
         $('#CrosscuttingBody').empty();
+        
+        // Load dinas options terlebih dahulu
+        loadDinasOptions('');
+        
+        // Untuk mendapatkan dinas_id dari pelaksana
+        if (data.pelaksana) {
+          $.ajax({
+            url: BaseURL + 'Daerah/Output_pd_get_pelaksana_detail',
+            type: 'POST',
+            data: { id: data.pelaksana },
+            dataType: 'json',
+            success: function(detail) {
+              if (detail && detail.dinas_id) {
+                // Parse dinas_id (mungkin berisi multiple ID dipisah koma)
+                let dinasIds = detail.dinas_id.split(',');
+                if (dinasIds.length > 0 && dinasIds[0]) {
+                  // Set dinas filter ke ID pertama
+                  $('#DinasFilter').val(dinasIds[0]).trigger('change');
+                  // Load pelaksana berdasarkan dinas dan set selected
+                  setTimeout(function() {
+                    loadPelaksanaByDinas(dinasIds[0], data.pelaksana);
+                  }, 500);
+                } else {
+                  // Jika tidak ada dinas, sembunyikan group pelaksana
+                  $('#PelaksanaGroup').hide();
+                }
+              } else {
+                // Jika tidak ada data, sembunyikan group pelaksana
+                $('#PelaksanaGroup').hide();
+              }
+            },
+            error: function() {
+              $('#PelaksanaGroup').hide();
+            }
+          });
+        } else {
+          $('#PelaksanaGroup').hide();
+        }
         
         // ========== INDIKATOR ==========
         if (data.indikator) {
@@ -623,7 +859,7 @@ $(document).ready(function() {
     let id = $('#ItemId').val();
     let immediate_id = $('#ImmediateId').val();
     let kinerja = $('#Kinerja').val().trim();
-    let pelaksana = $('#Pelaksana').val();
+    let pelaksana_id = $('#Pelaksana').val();
     
     if (!kinerja) {
       alert('Kinerja wajib diisi!');
@@ -675,7 +911,7 @@ $(document).ready(function() {
         id: id,
         immediate_id: immediate_id,
         kinerja: kinerja,
-        pelaksana_urutan: pelaksana,
+        pelaksana: pelaksana_id,
         indikator: indikator,
         inovasi_daerah: inovasi.join('|||'),
         outcome_inovasi: outcome.join('|||'),
@@ -688,6 +924,7 @@ $(document).ready(function() {
         $btn.prop('disabled', false).html('Simpan');
         
         if (res.status === 'success') {
+          alert(res.message);
           location.reload();
         } else {
           alert(res.message || 'Gagal menyimpan');
