@@ -15,10 +15,8 @@
     --l2-light: #e0f2fe;
     --l3: #b45309;
     --l3-light: #fef3c7;
-    --l4: #c2410c;
-    --l4-light: #ffedd5;
-    --l5: #6d28d9;
-    --l5-light: #ede9fe;
+    --l4: #6d28d9;
+    --l4-light: #ede9fe;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -288,7 +286,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
     background: #1e293b;
     border-radius: 24px;
     width: 90%;
-    max-width: 600px;
+    max-width: 650px;
     max-height: 85vh;
     display: flex;
     flex-direction: column;
@@ -403,6 +401,10 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
     gap: 6px;
 }
 
+.modal-label i {
+    font-size: 12px;
+}
+
 .modal-value {
     font-weight: 500;
     color: #f8fafc;
@@ -411,19 +413,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
     line-height: 1.6;
 }
 
-.modal-badge {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    background: rgba(255,255,255,0.1);
-    color: #cbd5e1;
-    margin-right: 6px;
-    margin-bottom: 6px;
-}
-
-.higher-link-modal-item {
+.higher-link-item {
     background: rgba(255,255,255,0.05);
     border-radius: 12px;
     padding: 12px 14px;
@@ -431,7 +421,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
     border-left: 4px solid;
 }
 
-.higher-link-modal-item:last-child {
+.higher-link-item:last-child {
     margin-bottom: 0;
 }
 
@@ -477,9 +467,9 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
     gap: 6px;
 }
 
-.pelaksana-info i {
-    color: #64748b;
+.pelaksana-info p i {
     width: 16px;
+    color: #64748b;
 }
 
 .indikator-list {
@@ -505,15 +495,15 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
     margin-top: 3px;
 }
 
-.inovasi-grid {
-    display: grid;
-    gap: 12px;
-}
-
 .inovasi-item {
     background: rgba(255,255,255,0.03);
     border-radius: 12px;
     padding: 12px;
+    margin-bottom: 8px;
+}
+
+.inovasi-item:last-child {
+    margin-bottom: 0;
 }
 
 .inovasi-item .label {
@@ -526,20 +516,37 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
     gap: 4px;
 }
 
+.inovasi-item .label i {
+    font-size: 12px;
+}
+
 .inovasi-item .value {
     font-size: 13px;
     color: #f8fafc;
 }
 
-.crosscutting-modal-table {
+.inovasi-item .value div {
+    margin-bottom: 4px;
+    padding-left: 8px;
+}
+
+/* === TABEL CROSSCUTTING === */
+.crosscutting-section {
+    background: rgba(255,255,255,0.02);
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.crosscutting-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 12px;
+    margin-top: 8px;
 }
 
-.crosscutting-modal-table th {
+.crosscutting-table th {
     text-align: left;
-    padding: 8px 4px;
+    padding: 8px 6px;
     color: #94a3b8;
     font-weight: 600;
     font-size: 10px;
@@ -547,13 +554,24 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
     border-bottom: 1px solid #334155;
 }
 
-.crosscutting-modal-table td {
-    padding: 10px 4px;
+.crosscutting-table td {
+    padding: 8px 6px;
     border-bottom: 1px solid #2d3748;
+    color: #cbd5e1;
 }
 
-.crosscutting-modal-table tr:last-child td {
+.crosscutting-table tr:last-child td {
     border-bottom: none;
+}
+
+.pd-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    background: rgba(59, 130, 246, 0.2);
+    border-radius: 12px;
+    color: #60a5fa;
+    font-weight: 500;
+    font-size: 11px;
 }
 
 .id-footer {
@@ -626,6 +644,72 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
     font-size: 11px;
     color: #64748b;
 }
+
+/* === FOOTER === */
+.pk-footer {
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.pk-footer-info {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+.pk-footer-info strong {
+    color: #475569;
+}
+
+.btn-group-pk {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-pk {
+    border: none;
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.btn-pk:hover {
+    transform: translateY(-1px);
+}
+
+.btn-back {
+    background: #f1f5f9;
+    color: #475569;
+}
+.btn-back:hover {
+    background: #e2e8f0;
+}
+
+.btn-zoom {
+    background: #eff6ff;
+    color: #2563eb;
+}
+.btn-zoom:hover {
+    background: #dbeafe;
+}
+
+.btn-reset {
+    background: #f0fdf4;
+    color: #15803d;
+}
+.btn-reset:hover {
+    background: #dcfce7;
+}
 </style>
 
 <div class="main-content">
@@ -640,7 +724,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
             
             <div class="filter-row">
                 <div class="filter-group">
-                    <label> Provinsi</label>
+                    <label><i class="fa fa-map"></i> Provinsi</label>
                     <select id="Provinsi">
                         <option value="">Pilih Provinsi</option>
                         <?php foreach ($Provinsi as $prov) { ?>
@@ -652,7 +736,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
                 </div>
                 
                 <div class="filter-group">
-                    <label> Kabupaten/Kota</label>
+                    <label><i class="fa fa-city"></i> Kabupaten/Kota</label>
                     <select id="KabKota" disabled>
                         <option value="">Pilih Kab/Kota</option>
                     </select>
@@ -680,8 +764,8 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
             <div class="pk-header-title">
                 <div class="icon-wrap"><i class="fa fa-sitemap"></i></div>
                 <div>
-                    <h4>Pohon Kinerja <?= !empty($NamaWilayah) ? '- ' . html_escape($NamaWilayah) : '' ?></h4>
-                    <p>Visualisasi hierarki kinerja 5 level - Klik node untuk melihat detail</p>
+                    <h4>Pohon Kinerja Perangkat Daerah <?= !empty($NamaWilayah) ? '- ' . html_escape($NamaWilayah) : '' ?></h4>
+                    <p>Visualisasi hierarki kinerja 4 level - Klik node untuk melihat detail</p>
                 </div>
             </div>
         </div>
@@ -696,23 +780,18 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
             </div>
             <div class="legend-item">
                 <div class="legend-dot" style="background:var(--l2)"></div> 
-                Intermediate Sektor
+                Intermediate Outcome
                 <span class="legend-count"><?= $TotalData['level2'] ?? 0 ?></span>
             </div>
             <div class="legend-item">
                 <div class="legend-dot" style="background:var(--l3)"></div> 
-                Intermediate Taktikal
+                Immediate Outcome
                 <span class="legend-count"><?= $TotalData['level3'] ?? 0 ?></span>
             </div>
             <div class="legend-item">
                 <div class="legend-dot" style="background:var(--l4)"></div> 
-                Immediate Outcome
-                <span class="legend-count"><?= $TotalData['level4'] ?? 0 ?></span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-dot" style="background:var(--l5)"></div> 
                 Output
-                <span class="legend-count"><?= $TotalData['level5'] ?? 0 ?></span>
+                <span class="legend-count"><?= $TotalData['level4'] ?? 0 ?></span>
             </div>
         </div>
 
@@ -735,7 +814,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
                     </button>
                 </div>
                 <div class="pk-modal-body" id="modalBody">
-                    <!-- Content will be inserted here -->
+                    <!-- Content will be inserted by JavaScript -->
                 </div>
             </div>
         </div>
@@ -880,12 +959,21 @@ $(document).ready(function() {
     // Ambil data dari PHP
     const chartData = <?= $ChartData ?? 'null' ?>;
     const totalData = <?= json_encode($TotalData ?? []) ?>;
+    const perangkatDaerahData = <?= json_encode($perangkat_daerah ?? []) ?>;
 
     const container = document.getElementById('chart-container');
     const modalOverlay = document.getElementById('modalOverlay');
     const modalTitle = document.getElementById('modalTitle');
     const modalBody = document.getElementById('modalBody');
     const zoomBadge = document.getElementById('zoom-badge');
+
+    // Buat mapping perangkat daerah
+    const pdMap = {};
+    if (perangkatDaerahData && perangkatDaerahData.length > 0) {
+        perangkatDaerahData.forEach(pd => {
+            pdMap[pd.id] = pd.nama;
+        });
+    }
 
     // Helper functions
     function safe(v, fb = '—') {
@@ -908,6 +996,82 @@ $(document).ready(function() {
         return [];
     }
 
+    function formatCrosscutting(pd, ket) {
+        if (!pd) return [];
+        
+        try {
+            let pdList = [];
+            let ketList = [];
+            
+            if (typeof pd === 'string') {
+                try {
+                    pdList = JSON.parse(pd);
+                } catch(e) {
+                    return [];
+                }
+            } else if (Array.isArray(pd)) {
+                pdList = pd;
+            }
+            
+            if (typeof ket === 'string') {
+                try {
+                    ketList = JSON.parse(ket);
+                } catch(e) {
+                    ketList = [];
+                }
+            } else if (Array.isArray(ket)) {
+                ketList = ket;
+            }
+            
+            if (!Array.isArray(pdList)) return [];
+            
+            return pdList.map((item, index) => ({
+                pd: item,
+                ket: (ketList && ketList[index]) ? ketList[index] : ''
+            }));
+            
+        } catch (e) {
+            console.error('Error parsing crosscutting:', e);
+            return [];
+        }
+    }
+
+    // Level configuration for 4 levels
+    const LEVELS = {
+        1: { 
+            label: 'ULTIMATE OUTCOME',       
+            fill: '#1e40af', 
+            light: '#dbeafe', 
+            text: '#fff',    
+            badge: '#60a5fa',
+            icon: 'fa-crown'
+        },
+        2: { 
+            label: 'INTERMEDIATE OUTCOME',   
+            fill: '#0369a1', 
+            light: '#e0f2fe', 
+            text: '#fff',    
+            badge: '#38bdf8',
+            icon: 'fa-chart-line'
+        },
+        3: { 
+            label: 'IMMEDIATE OUTCOME',      
+            fill: '#b45309', 
+            light: '#fef3c7', 
+            text: '#fff',    
+            badge: '#fbbf24',
+            icon: 'fa-bolt'
+        },
+        4: { 
+            label: 'OUTPUT',                  
+            fill: '#6d28d9', 
+            light: '#ede9fe', 
+            text: '#fff',    
+            badge: '#a78bfa',
+            icon: 'fa-check-circle'
+        }
+    };
+
     // Fungsi untuk mendapatkan path ke atas (higher level links)
     function getHigherLevelLinks(node) {
         const links = [];
@@ -928,36 +1092,27 @@ $(document).ready(function() {
     }
 
     // Fungsi untuk menampilkan modal dengan data node
-    function showNodeDetails(nodeData, level) {
+    function showNodeDetails(nodeData, level, node) {
         const lv = LEVELS[level];
         const levelName = lv ? lv.label : 'Level ' + level;
         const levelColor = lv ? lv.fill : '#94a3b8';
         
-        // Format indikator
         const indikatorList = formatIndikator(nodeData.indikator);
+        const crosscuttingList = formatCrosscutting(nodeData.crosscutting_pd, nodeData.crosscutting_ket);
         
-        // Format crosscutting
-        const crosscuttingList = nodeData.crosscutting_array || [];
-        
-        // Format inovasi
         const inovasiList = nodeData.inovasi ? String(nodeData.inovasi).split('|||').filter(i => i.trim()) : [];
         const outcomeInovasiList = nodeData.outcome_inovasi ? String(nodeData.outcome_inovasi).split('|||').filter(o => o.trim()) : [];
         const outputInovasiList = nodeData.output_inovasi ? String(nodeData.output_inovasi).split('|||').filter(o => o.trim()) : [];
         
-        // Dapatkan tautan kinerja yang lebih tinggi
-        const higherLinks = getHigherLevelLinks({ parent: { data: nodeData.parent } }); // Ini perlu disesuaikan
-        
-        // Ambil detail pelaksana
+        const higherLinks = node ? getHigherLevelLinks(node) : [];
         const pelaksanaDetail = nodeData.pelaksana_detail;
         
-        // Set modal title
         modalTitle.innerHTML = `${levelName}`;
         document.querySelector('.pk-modal').style.borderLeftColor = levelColor;
         
-        // Mulai membangun konten modal
         let modalHtml = '';
         
-        // ===== TAUTAN KINERJA YANG LEBIH TINGGI =====
+        // TAUTAN KINERJA YANG LEBIH TINGGI
         if (higherLinks.length > 0) {
             modalHtml += `
                 <div class="modal-section">
@@ -968,7 +1123,7 @@ $(document).ready(function() {
             
             higherLinks.forEach(link => {
                 modalHtml += `
-                    <div class="higher-link-modal-item" style="border-left-color: ${link.color};">
+                    <div class="higher-link-item" style="border-left-color: ${link.color};">
                         <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
                             <i class="fa ${LEVELS[link.level]?.icon || 'fa-sitemap'}" style="color: ${link.color};"></i>
                             <span style="font-size:11px; font-weight:600; color:${link.color};">${LEVELS[link.level]?.label || 'Level ' + link.level}</span>
@@ -981,7 +1136,7 @@ $(document).ready(function() {
             modalHtml += `</div>`;
         }
         
-        // ===== KINERJA =====
+        // KINERJA
         modalHtml += `
             <div class="modal-section">
                 <div class="modal-label">
@@ -991,7 +1146,7 @@ $(document).ready(function() {
             </div>
         `;
         
-        // ===== INDIKATOR KINERJA =====
+        // INDIKATOR KINERJA
         if (indikatorList.length > 0) {
             modalHtml += `
                 <div class="modal-section">
@@ -1008,7 +1163,7 @@ $(document).ready(function() {
             modalHtml += `</ul></div>`;
         }
         
-        // ===== PELAKSANA / URUSAN DENGAN DETAIL =====
+        // PELAKSANA
         if (pelaksanaDetail) {
             modalHtml += `
                 <div class="modal-section">
@@ -1023,30 +1178,20 @@ $(document).ready(function() {
                             <h4>${pelaksanaDetail.nama}</h4>
                             ${pelaksanaDetail.nip ? `<p><i class="fa fa-id-card"></i> NIP: ${pelaksanaDetail.nip}</p>` : ''}
                             ${pelaksanaDetail.jabatan ? `<p><i class="fa fa-briefcase"></i> ${pelaksanaDetail.jabatan}</p>` : ''}
-                            ${pelaksanaDetail.dinas && pelaksanaDetail.dinas !== '-' ? `<p><i class="fa fa-building"></i> ${pelaksanaDetail.dinas}</p>` : ''}
+                            ${pelaksanaDetail.dinas ? `<p><i class="fa fa-building"></i> ${pelaksanaDetail.dinas}</p>` : ''}
                         </div>
                     </div>
                 </div>
             `;
-        } else if (nodeData.pelaksana && nodeData.pelaksana !== 'null' && nodeData.pelaksana !== '') {
-            modalHtml += `
-                <div class="modal-section">
-                    <div class="modal-label">
-                        <i class="fa fa-users"></i> Pelaksana / Urusan
-                    </div>
-                    <div class="modal-value">${nodeData.pelaksana}</div>
-                </div>
-            `;
         }
         
-        // ===== INOVASI DAERAH =====
+        // INOVASI DAERAH
         if (inovasiList.length > 0 || outcomeInovasiList.length > 0 || outputInovasiList.length > 0) {
             modalHtml += `
                 <div class="modal-section">
                     <div class="modal-label">
                         <i class="fa fa-lightbulb"></i> Inovasi Daerah
                     </div>
-                    <div class="inovasi-grid">
             `;
             
             if (inovasiList.length > 0) {
@@ -1056,7 +1201,7 @@ $(document).ready(function() {
                         <div class="value">
                 `;
                 inovasiList.forEach(inv => {
-                    modalHtml += `<div style="margin-bottom:4px;">• ${inv}</div>`;
+                    modalHtml += `<div>• ${inv}</div>`;
                 });
                 modalHtml += `</div></div>`;
             }
@@ -1068,7 +1213,7 @@ $(document).ready(function() {
                         <div class="value">
                 `;
                 outcomeInovasiList.forEach(out => {
-                    modalHtml += `<div style="margin-bottom:4px;">• ${out}</div>`;
+                    modalHtml += `<div>• ${out}</div>`;
                 });
                 modalHtml += `</div></div>`;
             }
@@ -1080,49 +1225,49 @@ $(document).ready(function() {
                         <div class="value">
                 `;
                 outputInovasiList.forEach(out => {
-                    modalHtml += `<div style="margin-bottom:4px;">• ${out}</div>`;
+                    modalHtml += `<div>• ${out}</div>`;
                 });
                 modalHtml += `</div></div>`;
             }
             
-            modalHtml += `</div></div>`;
+            modalHtml += `</div>`;
         }
         
-        // ===== CROSSCUTTING =====
+        // CROSSCUTTING
         if (crosscuttingList.length > 0) {
             modalHtml += `
                 <div class="modal-section">
                     <div class="modal-label">
-                        <i class="fa fa-share-alt"></i> Crosscutting
+                        <i class="fa fa-share-alt"></i> Crosscutting Dengan Perangkat Daerah
                     </div>
-                    <table class="crosscutting-modal-table">
-                        <thead>
-                            <tr>
-                                <th>PD/Lembaga</th>
-                                <th>Pohon Kinerja</th>
-                                <th>Informasi Kegiatan</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                    <div class="crosscutting-section">
+                        <table class="crosscutting-table">
+                            <thead><tr><th>Perangkat Daerah</th><th>Keterangan</th></tr></thead>
+                            <tbody>
             `;
             
             crosscuttingList.forEach(cc => {
+                let pdId = cc.pd;
+                let pdName = pdId;
+                if (pdMap && (pdMap[pdId] || pdMap[String(pdId)] || pdMap[parseInt(pdId)])) {
+                    pdName = pdMap[pdId] || pdMap[String(pdId)] || pdMap[parseInt(pdId)];
+                }
+                
                 modalHtml += `
                     <tr>
-                        <td>${cc.pd || '—'}</td>
-                        <td>${cc.pohon || '—'}</td>
-                        <td>${cc.info || '—'}</td>
+                        <td><span class="pd-badge"><i class="fa fa-building"></i> ${pdName}</span></td>
+                        <td>${cc.ket || '—'}</td>
                     </tr>
                 `;
             });
             
-            modalHtml += `</tbody></table></div>`;
+            modalHtml += `</tbody></table></div></div>`;
         }
         
-        // ===== ID =====
+        // ID
         modalHtml += `
             <div class="id-footer">
-                <span><i class="fa fa-hashtag"></i> ID: ${nodeData.original_id || nodeData.id}</span>
+                <span><i class="fa fa-hashtag"></i> ID: ${nodeData.id}</span>
                 <span><i class="fa fa-layer-group"></i> Level ${level}</span>
             </div>
         `;
@@ -1141,34 +1286,13 @@ $(document).ready(function() {
                 <p>Tidak ada data Pohon Kinerja untuk wilayah ini.</p>
         `;
         
-        if (totalData.level1 > 0 || totalData.level2 > 0 || totalData.level3 > 0 || totalData.level4 > 0 || totalData.level5 > 0) {
+        if (totalData.level1 > 0 || totalData.level2 > 0 || totalData.level3 > 0 || totalData.level4 > 0) {
             emptyHtml += `
                 <div class="stats-card" style="margin-top:16px;">
-                    <div class="stat-item">
-                        <div class="stat-dot" style="background:var(--l1)"></div>
-                        <span class="stat-value">${totalData.level1 || 0}</span>
-                        <span class="stat-label">Ultimate</span>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-dot" style="background:var(--l2)"></div>
-                        <span class="stat-value">${totalData.level2 || 0}</span>
-                        <span class="stat-label">Sektor</span>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-dot" style="background:var(--l3)"></div>
-                        <span class="stat-value">${totalData.level3 || 0}</span>
-                        <span class="stat-label">Taktikal</span>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-dot" style="background:var(--l4)"></div>
-                        <span class="stat-value">${totalData.level4 || 0}</span>
-                        <span class="stat-label">Immediate</span>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-dot" style="background:var(--l5)"></div>
-                        <span class="stat-value">${totalData.level5 || 0}</span>
-                        <span class="stat-label">Output</span>
-                    </div>
+                    <div class="stat-item"><div class="stat-dot" style="background:var(--l1)"></div><span class="stat-value">${totalData.level1 || 0}</span><span class="stat-label">Ultimate</span></div>
+                    <div class="stat-item"><div class="stat-dot" style="background:var(--l2)"></div><span class="stat-value">${totalData.level2 || 0}</span><span class="stat-label">Intermediate</span></div>
+                    <div class="stat-item"><div class="stat-dot" style="background:var(--l3)"></div><span class="stat-value">${totalData.level3 || 0}</span><span class="stat-label">Immediate</span></div>
+                    <div class="stat-item"><div class="stat-dot" style="background:var(--l4)"></div><span class="stat-value">${totalData.level4 || 0}</span><span class="stat-label">Output</span></div>
                 </div>
             `;
         } else {
@@ -1180,50 +1304,6 @@ $(document).ready(function() {
         return;
     }
 
-    // Level configuration for 5 levels
-    const LEVELS = {
-        1: { 
-            label: 'ULTIMATE OUTCOME',       
-            fill: '#1e40af', 
-            light: '#dbeafe', 
-            text: '#fff',    
-            badge: '#60a5fa',
-            icon: 'fa-crown'
-        },
-        2: { 
-            label: 'INTERMEDIATE SEKTOR',   
-            fill: '#0369a1', 
-            light: '#e0f2fe', 
-            text: '#fff',    
-            badge: '#38bdf8',
-            icon: 'fa-chart-line'
-        },
-        3: { 
-            label: 'INTERMEDIATE TAKTIKAL',  
-            fill: '#b45309', 
-            light: '#fef3c7', 
-            text: '#fff',    
-            badge: '#fbbf24',
-            icon: 'fa-gear'
-        },
-        4: { 
-            label: 'IMMEDIATE OUTCOME',      
-            fill: '#c2410c', 
-            light: '#ffedd5', 
-            text: '#fff',    
-            badge: '#fb923c',
-            icon: 'fa-bolt'
-        },
-        5: { 
-            label: 'OUTPUT',                  
-            fill: '#6d28d9', 
-            light: '#ede9fe', 
-            text: '#fff',    
-            badge: '#a78bfa',
-            icon: 'fa-check-circle'
-        },
-    };
-
     // D3 Setup
     const svg = d3.select('#chart-svg');
     svg.selectAll('*').remove();
@@ -1233,17 +1313,14 @@ $(document).ready(function() {
 
     svg.attr('width', W).attr('height', H);
 
-    // Node dimensions
     const NODE_WIDTH = 280;
     const NODE_HEIGHT = 120;
     const NODE_RADIUS = 16;
     const LEVEL_HEIGHT = 180;
     const HORIZONTAL_SPACING = 320;
 
-    // Build hierarchy
     const root = d3.hierarchy(chartData, d => d.children);
 
-    // Calculate tree layout manually
     function calculateTreeLayout(node, level = 0, x = 0, positions = new Map()) {
         if (!node) return;
         
@@ -1266,10 +1343,8 @@ $(document).ready(function() {
         return positions;
     }
 
-    // Calculate positions
     const positions = calculateTreeLayout(root, 0, 0);
 
-    // Convert to arrays for D3
     const nodes = [];
     const links = [];
 
@@ -1284,7 +1359,6 @@ $(document).ready(function() {
         }
     });
 
-    // Create links
     positions.forEach((pos, node) => {
         if (node.parent && node.parent.data.nama !== 'ROOT') {
             const sourcePos = positions.get(node.parent);
@@ -1299,11 +1373,9 @@ $(document).ready(function() {
         }
     });
 
-    // Store original transform for reset
     let originalTransform = null;
-
-    // Setup zoom
     let currentScale = 1;
+
     const zoom = d3.zoom()
         .scaleExtent([0.2, 3])
         .on('zoom', e => {
@@ -1313,13 +1385,10 @@ $(document).ready(function() {
         });
 
     svg.call(zoom);
-
     const g = svg.append('g');
 
-    // Defs for gradients and shadow
     const defs = svg.append('defs');
 
-    // Shadow filter
     const filter = defs.append('filter')
         .attr('id', 'shadow')
         .attr('x', '-20%')
@@ -1333,7 +1402,6 @@ $(document).ready(function() {
         .attr('stdDeviation', 6)
         .attr('flood-color', 'rgba(0,0,0,0.15)');
 
-    // Gradients per level
     Object.entries(LEVELS).forEach(([lv, cfg]) => {
         const grad = defs.append('linearGradient')
             .attr('id', `grad-${lv}`)
@@ -1366,7 +1434,6 @@ $(document).ready(function() {
         );
         
         if (siblings.length > 0) {
-            // Draw vertical line from parent
             g.append('line')
                 .attr('x1', sourceX)
                 .attr('y1', sourceY)
@@ -1376,7 +1443,6 @@ $(document).ready(function() {
                 .attr('stroke-width', 2)
                 .attr('stroke-opacity', 0.3);
             
-            // Draw horizontal connector line
             const siblingNodes = [link, ...siblings].map(l => l.target);
             const minX = Math.min(...siblingNodes.map(n => n.x));
             const maxX = Math.max(...siblingNodes.map(n => n.x));
@@ -1390,7 +1456,6 @@ $(document).ready(function() {
                 .attr('stroke-width', 2)
                 .attr('stroke-opacity', 0.3);
             
-            // Draw vertical line to this child
             g.append('line')
                 .attr('x1', targetX)
                 .attr('y1', sourceY + 20)
@@ -1400,7 +1465,6 @@ $(document).ready(function() {
                 .attr('stroke-width', 2)
                 .attr('stroke-opacity', 0.3);
         } else {
-            // Draw simple vertical line for single child
             g.append('line')
                 .attr('x1', sourceX)
                 .attr('y1', sourceY)
@@ -1420,7 +1484,6 @@ $(document).ready(function() {
         .attr('transform', d => `translate(${d.x - NODE_WIDTH/2}, ${d.y})`)
         .style('cursor', 'pointer');
 
-    // Card background
     node.append('rect')
         .attr('width', NODE_WIDTH)
         .attr('height', NODE_HEIGHT)
@@ -1431,7 +1494,6 @@ $(document).ready(function() {
         .attr('stroke-width', 2)
         .attr('filter', 'url(#shadow)');
 
-    // Top colored band
     node.append('rect')
         .attr('width', NODE_WIDTH)
         .attr('height', 32)
@@ -1439,7 +1501,6 @@ $(document).ready(function() {
         .attr('ry', NODE_RADIUS)
         .attr('fill', d => `url(#grad-${d.data.level})`);
 
-    // Level label
     node.append('text')
         .attr('x', NODE_WIDTH / 2)
         .attr('y', 20)
@@ -1451,7 +1512,6 @@ $(document).ready(function() {
         .attr('text-transform', 'uppercase')
         .text(d => LEVELS[d.data.level]?.label || '');
 
-    // Level badge
     node.append('circle')
         .attr('cx', 25)
         .attr('cy', 16)
@@ -1469,7 +1529,6 @@ $(document).ready(function() {
         .attr('font-weight', '800')
         .text(d => d.data.level);
 
-    // Node content with text wrapping
     node.each(function(d) {
         const el = d3.select(this);
         const words = d.data.nama.split(' ');
@@ -1520,7 +1579,6 @@ $(document).ready(function() {
                 .text(line);
         });
 
-        // ID kecil di pojok
         el.append('text')
             .attr('x', NODE_WIDTH - 15)
             .attr('y', NODE_HEIGHT - 10)
@@ -1528,18 +1586,14 @@ $(document).ready(function() {
             .attr('fill', '#94a3b8')
             .attr('font-size', '8px')
             .attr('font-weight', '500')
-            .text(d.data.original_id || d.data.id.split('_')[1] || '');
+            .text(d.data.id.split('_')[1] || '');
     });
 
-    // ============================================
-    // CLICK HANDLER UNTUK MENAMPILKAN MODAL
-    // ============================================
     node.on('click', function(event, d) {
         event.stopPropagation();
-        showNodeDetails(d.data, d.data.level);
+        showNodeDetails(d.data, d.data.level, d);
     });
 
-    // Function to fit view
     function fitView() {
         let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
         
@@ -1576,10 +1630,8 @@ $(document).ready(function() {
         svg.call(zoom.transform, transform);
     }
 
-    // Fit view after a short delay
     setTimeout(fitView, 100);
 
-    // Zoom buttons
     document.getElementById('zoomIn').addEventListener('click', () => {
         svg.transition().duration(300).call(zoom.scaleBy, 1.3);
     });
@@ -1596,7 +1648,6 @@ $(document).ready(function() {
         }
     });
 
-    // Resize handler
     window.addEventListener('resize', () => {
         const newW = container.clientWidth;
         const newH = container.clientHeight;

@@ -370,7 +370,7 @@
                     <a href="<?=base_url('Daerah/SubKegiatanPrioritas')?>">Sub Kegiatan Prioritas</a>
                     <a href="<?=base_url('Daerah/IkuPD')?>">IKU PD</a>
                     <a href="<?=base_url('Daerah/IkkPD')?>">IKK PD</a>
-                    <a href="<?=base_url('Daerah/AnggaranRenstra')?>">Anggran Renstra</a>
+                    <a href="<?=base_url('Daerah/MenuRenstra')?>">Menu Renstra</a>
                 </div>
             </li>
 

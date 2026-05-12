@@ -1,3 +1,6 @@
+ganti ke role 4
+
+ini controleer saya sebelumnya daerah.php
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
@@ -6173,122 +6176,226 @@ public function HapusIkkPD()
     echo '1';
 }
 
-/**
- * Halaman Anggaran Renstra PD (tanpa hierarki)
- */
-public function AnggaranRenstra()
-{
-    $Header['Halaman'] = 'Renstra';
 
-    $KodeWilayah = $this->session->userdata('KodeWilayah')
-                     ?: $this->session->userdata('TempKodeWilayah');
+    //  =====================================================
+    //  * MENU RENSTRA - HALAMAN UTAMA
+    //  ===================================================== 
 
+    public function MenuRenstra()
+    {
+        $Header['Halaman'] = 'Renstra';
 
-    $data['KodeWilayah'] = $KodeWilayah;
-    $data['Provinsi']    = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
+        $KodeWilayah = $this->session->userdata('KodeWilayah')
+                         ?: $this->session->userdata('TempKodeWilayah');
 
-    if ($KodeWilayah) {
-        $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-        $data['NamaWilayah'] = $wilayah ? html_escape($wilayah['Nama']) : 'Wilayah Tidak Ditemukan';
+        $data['KodeWilayah'] = $KodeWilayah;
+        $data['Provinsi']    = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
 
-        // Ambil semua data tanpa hierarki
-        $this->db->select('*');
-        $this->db->from('anggaranrenstrapd');
-        $this->db->where('KodeWilayah', $KodeWilayah);
-        $this->db->where('deleted_at IS NULL');
-        $this->db->order_by('Id', 'ASC');  // atau bisa order by NoManual jika diinginkan
+        if ($KodeWilayah) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            $data['NamaWilayah'] = $wilayah ? html_escape($wilayah['Nama']) : 'Wilayah Tidak Ditemukan';
 
-        $data['anggaran'] = $this->db->get()->result_array();
-    } else {
-        $data['anggaran']    = [];
-        $data['NamaWilayah'] = '';
+            // Ambil semua data dari menurenstrapd
+            $this->db->select('*');
+            $this->db->from('menurenstrapd');
+            $this->db->where('KodeWilayah', $KodeWilayah);
+            $this->db->where('deleted_at IS NULL');
+            $this->db->order_by('Id', 'ASC');
+
+            $data['anggaran'] = $this->db->get()->result_array();
+        } else {
+            $data['anggaran']    = [];
+            $data['NamaWilayah'] = '';
+        }
+
+        $this->load->view('Daerah/header', $Header);
+        $this->load->view('Daerah/MenuRenstra', $data);
     }
 
-    $this->load->view('Daerah/header', $Header);
-    $this->load->view('Daerah/AnggaranRenstra', $data);
-}
-
-/**
- * Simpan / Update data (termasuk NoManual)
+   /**
+ * =====================================================
+ * GET NOMENKLATUR BERDASARKAN LEVEL (AJAX)
+ * =====================================================
  */
-public function simpanAnggaranRenstra()
+public function getNomenklaturByLevel()
 {
     if (!$this->input->is_ajax_request()) show_404();
-
-    $KodeWilayah = $this->session->userdata('KodeWilayah')
-                 ?? $this->session->userdata('TempKodeWilayah');
-
-    if (!$KodeWilayah) {
-        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih']);
+    
+    $level = (int)$this->input->post('level');
+    $parent_kode = $this->input->post('parent_kode');
+    
+    if ($level < 1 || $level > 5) {
+        echo json_encode([]);
         return;
     }
+    
+    $this->db->select('Kode, Nomenklatur');
+    $this->db->from('nomenklaturprovinsi');
+    
+    // Logika khusus untuk struktur data dengan lompatan titik
+    if ($level == 1) {
+        // Urusan: 0 titik
+        $this->db->where('Kode NOT LIKE', '%.%');
+        $this->db->where('LENGTH(Kode) = 1');
+    } elseif ($level == 2) {
+        // Bidang Urusan: 1 titik
+        $this->db->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 1);
+        if ($parent_kode) {
+            $this->db->where('Kode LIKE', $parent_kode . '.%');
+        }
+    } elseif ($level == 3) {
+        // Program: 2 titik
+        $this->db->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 2);
+        if ($parent_kode) {
+            $this->db->where('Kode LIKE', $parent_kode . '.%');
+        }
+    } elseif ($level == 4) {
+        // Kegiatan: 4 titik (LANGSUNG dari Program yang punya 2 titik)
+        $this->db->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 4);
+        if ($parent_kode) {
+            // Parent kode adalah Program (2 titik), cari kegiatan yang diawali dengan kode program
+            $this->db->where('Kode LIKE', $parent_kode . '.%');
+            // Pastikan hanya 4 titik total
+            $this->db->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 4);
+        }
+    } elseif ($level == 5) {
+        // Sub Kegiatan: 5 titik
+        $this->db->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 5);
+        if ($parent_kode) {
+            $this->db->where('Kode LIKE', $parent_kode . '.%');
+        }
+    }
+    
+    $this->db->order_by('Kode', 'ASC');
+    $data = $this->db->get()->result_array();
+    
+    // Debug: log ke file untuk melihat query
+    // log_message('debug', 'Level: ' . $level . ', Parent: ' . $parent_kode . ', Count: ' . count($data));
+    
+    echo json_encode($data);
+}
+    /**
+     * =====================================================
+     * GET DETAIL NOMENKLATUR BY KODE (AJAX)
+     * =====================================================
+     */
+    public function getNomenklaturDetail()
+    {
+        if (!$this->input->is_ajax_request()) show_404();
+        
+        $kode = $this->input->post('kode');
+        
+        if (!$kode) {
+            echo json_encode(['status' => 'error', 'message' => 'Kode tidak ditemukan']);
+            return;
+        }
+        
+        $data = $this->db
+            ->select('Kode, Nomenklatur')
+            ->from('nomenklaturprovinsi')
+            ->where('Kode', $kode)
+            ->get()
+            ->row_array();
+        
+        if ($data) {
+            echo json_encode(['status' => 'success', 'data' => $data]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+        }
+    }
 
-    $Id = (int)$this->input->post('Id');
-    $data = [
-        'KodeWilayah'      => $KodeWilayah,
-        'NoManual'         => trim($this->input->post('NoManual')),  // SIMPAN NOMOR MANUAL
-        'Uraian'           => trim($this->input->post('Uraian')),
-        'IndikatorKinerja' => trim($this->input->post('IndikatorKinerja')),
-        'Satuan'           => trim($this->input->post('Satuan')),
-        'Target2025'       => $this->input->post('Target2025') ?: null,
-        'Rp2025'           => $this->input->post('Rp2025') ?: null,
-        'Target2026'       => $this->input->post('Target2026') ?: null,
-        'Rp2026'           => $this->input->post('Rp2026') ?: null,
-        'Target2027'       => $this->input->post('Target2027') ?: null,
-        'Rp2027'           => $this->input->post('Rp2027') ?: null,
-        'Target2028'       => $this->input->post('Target2028') ?: null,
-        'Rp2028'           => $this->input->post('Rp2028') ?: null,
-        'Target2029'       => $this->input->post('Target2029') ?: null,
-        'Rp2029'           => $this->input->post('Rp2029') ?: null,
-        'Target2030'       => $this->input->post('Target2030') ?: null,
-        'Rp2030'           => $this->input->post('Rp2030') ?: null,
-        'Keterangan'       => trim($this->input->post('Keterangan')),
-        'updated_at'       => date('Y-m-d H:i:s')
-    ];
+    /**
+     * =====================================================
+     * SIMPAN / UPDATE DATA MENU RENSTRA
+     * =====================================================
+     */
+    public function simpanMenuRenstra()
+    {
+        if (!$this->input->is_ajax_request()) show_404();
 
-    if ($Id > 0) {
+        $KodeWilayah = $this->session->userdata('KodeWilayah')
+                     ?? $this->session->userdata('TempKodeWilayah');
+
+        if (!$KodeWilayah) {
+            echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih']);
+            return;
+        }
+
+        $Id = (int)$this->input->post('Id');
+        
+        $data = [
+            'KodeWilayah'      => $KodeWilayah,
+            'NoManual'         => trim($this->input->post('NoManual')),
+            'Uraian'           => trim($this->input->post('Uraian')),
+            'IndikatorKinerja' => trim($this->input->post('IndikatorKinerja')),
+            'Satuan'           => trim($this->input->post('Satuan')),
+            'Target2025'       => $this->input->post('Target2025') ?: null,
+            'Rp2025'           => $this->input->post('Rp2025') ?: null,
+            'Target2026'       => $this->input->post('Target2026') ?: null,
+            'Rp2026'           => $this->input->post('Rp2026') ?: null,
+            'Target2027'       => $this->input->post('Target2027') ?: null,
+            'Rp2027'           => $this->input->post('Rp2027') ?: null,
+            'Target2028'       => $this->input->post('Target2028') ?: null,
+            'Rp2028'           => $this->input->post('Rp2028') ?: null,
+            'Target2029'       => $this->input->post('Target2029') ?: null,
+            'Rp2029'           => $this->input->post('Rp2029') ?: null,
+            'Target2030'       => $this->input->post('Target2030') ?: null,
+            'Rp2030'           => $this->input->post('Rp2030') ?: null,
+            'Keterangan'       => trim($this->input->post('Keterangan')),
+            'updated_at'       => date('Y-m-d H:i:s')
+        ];
+
+        if (empty($data['Uraian'])) {
+            echo json_encode(['status' => 'error', 'message' => 'Uraian tidak boleh kosong']);
+            return;
+        }
+
+        if ($Id > 0) {
+            $this->db->where('Id', $Id)
+                     ->where('KodeWilayah', $KodeWilayah)
+                     ->update('menurenstrapd', $data);
+        } else {
+            $data['created_at'] = date('Y-m-d H:i:s');
+            $this->db->insert('menurenstrapd', $data);
+        }
+
+        $affected = $this->db->affected_rows();
+        echo json_encode([
+            'status'  => $affected > 0 ? 'success' : 'error',
+            'message' => $affected > 0 ? 'Data berhasil disimpan' : 'Tidak ada perubahan'
+        ]);
+    }
+
+    /**
+     * =====================================================
+     * HAPUS DATA MENU RENSTRA (SOFT DELETE)
+     * =====================================================
+     */
+    public function hapusMenuRenstra()
+    {
+        if (!$this->input->is_ajax_request()) show_404();
+
+        $Id = (int)$this->input->post('Id');
+        $KodeWilayah = $this->session->userdata('KodeWilayah')
+                     ?? $this->session->userdata('TempKodeWilayah');
+
+        if (!$Id || !$KodeWilayah) {
+            echo json_encode(['status' => 'error', 'message' => 'Parameter tidak lengkap']);
+            return;
+        }
+
         $this->db->where('Id', $Id)
                  ->where('KodeWilayah', $KodeWilayah)
-                 ->update('anggaranrenstrapd', $data);
-    } else {
-        $data['created_at'] = date('Y-m-d H:i:s');
-        $this->db->insert('anggaranrenstrapd', $data);
+                 ->update('menurenstrapd', [
+                     'deleted_at' => date('Y-m-d H:i:s')
+                 ]);
+
+        echo json_encode([
+            'status'  => $this->db->affected_rows() > 0 ? 'success' : 'error',
+            'message' => $this->db->affected_rows() > 0 ? 'Data berhasil dihapus' : 'Data tidak ditemukan'
+        ]);
     }
 
-    $affected = $this->db->affected_rows();
-    echo json_encode([
-        'status'  => $affected > 0 ? 'success' : 'error',
-        'message' => $affected > 0 ? 'Data berhasil disimpan' : 'Tidak ada perubahan'
-    ]);
-}
-
-/**
- * Hapus (soft delete)
- */
-public function hapusAnggaranRenstra()
-{
-    if (!$this->input->is_ajax_request()) show_404();
-
-    $Id = (int)$this->input->post('Id');
-    $KodeWilayah = $this->session->userdata('KodeWilayah')
-                 ?? $this->session->userdata('TempKodeWilayah');
-
-    if (!$Id || !$KodeWilayah) {
-        echo json_encode(['status' => 'error', 'message' => 'Parameter tidak lengkap']);
-        return;
-    }
-
-    $this->db->where('Id', $Id)
-             ->where('KodeWilayah', $KodeWilayah)
-             ->update('anggaranrenstrapd', [
-                 'deleted_at' => date('Y-m-d H:i:s')
-             ]);
-
-    echo json_encode([
-        'status'  => $this->db->affected_rows() > 0 ? 'success' : 'error',
-        'message' => $this->db->affected_rows() > 0 ? 'Data berhasil dihapus' : 'Data tidak ditemukan'
-    ]);
-}
 
 
         // =====================================================================
@@ -8214,178 +8321,64 @@ public function hapusAnggaranRenstra()
         return $tree_data;
     }
 
-        // =====================================================================
-        // ULTIMATE OUTCOME PD (Level 1)
-        // =====================================================================
-
-        public function Ultimate_outcome_pd()
-        {
-            $header['Halaman'] = 'Ultimate Outcome PD';
-
-            $kodewilayah = $this->session->userdata('KodeWilayah') 
-                        ?? $this->session->userdata('TempKodeWilayah') ?? '';
-
-            $data['KodeWilayah'] = $kodewilayah;
-            $data['Provinsi'] = $this->db->where("Kode LIKE '__'")
-                                        ->order_by('Nama')
-                                        ->get('kodewilayah')
-                                        ->result_array();
-
-            $data['items'] = [];
-
-            if ($kodewilayah) {
-                $data['items'] = $this->db
-                    ->where('kode_wilayah', $kodewilayah)
-                    ->where('deleted_at IS NULL')
-                    ->order_by('id', 'ASC')
-                    ->get('ultimate_outcome_pd')
-                    ->result_array();
-            }
-
-            // Ambil Nama Wilayah
-            if ($kodewilayah) {
-                $wil = $this->db
-                    ->where('Kode', $kodewilayah)
-                    ->get('kodewilayah')
-                    ->row_array();
-
-                $data['NamaWilayah'] = $wil ? $wil['Nama'] : '';
-            } else {
-                $data['NamaWilayah'] = '';
-            }
-
-            $this->load->view('Daerah/header', $header);
-            $this->load->view('Daerah/Ultimate_outcome_pd', $data);
-        }
-
-        public function Ultimate_outcome_pd_simpan()
-        {
-            if (!$this->input->is_ajax_request()) {
-                show_404();
-                return;
-            }
-
-            $kodewilayah = $this->session->userdata('KodeWilayah') 
-                        ?? $this->session->userdata('TempKodeWilayah');
-
-            if (!$kodewilayah) {
-                echo json_encode([
-                    'status' => 'error',
-                    'message' => 'Wilayah belum dipilih'
-                ]);
-                return;
-            }
-
-            $id       = $this->input->post('id', TRUE);
-            $kinerja  = trim($this->input->post('kinerja', TRUE));
-            $ind_list = $this->input->post('indikator') ?: [];
-
-            if (empty($kinerja)) {
-                echo json_encode([
-                    'status' => 'error',
-                    'message' => 'Kinerja wajib diisi'
-                ]);
-                return;
-            }
-
-            $indikator = !empty($ind_list) ? implode('|||', array_filter($ind_list, 'trim')) : NULL;
-
-            $save = [
-                'kode_wilayah' => $kodewilayah,
-                'kinerja'      => $kinerja,
-                'indikator'    => $indikator,
-                'updated_at'   => date('Y-m-d H:i:s')
-            ];
-
-            if ($id) {
-                // Update data
-                $this->db->where('id', $id)
-                        ->where('kode_wilayah', $kodewilayah)
-                        ->update('ultimate_outcome_pd', $save);
-                $msg = 'Data berhasil diperbarui';
-            } else {
-                // Insert data baru
-                $save['created_at'] = date('Y-m-d H:i:s');
-                $this->db->insert('ultimate_outcome_pd', $save);
-                $msg = 'Data berhasil ditambahkan';
-            }
-
-            echo json_encode([
-                'status' => 'success',
-                'message' => $msg
-            ]);
-            exit;
-        }
-
-        public function Ultimate_outcome_pd_hapus()
-        {
-            if (!$this->input->is_ajax_request()) show_404();
-
-            $id = $this->input->post('id', TRUE);
-            $kodewilayah = $this->session->userdata('KodeWilayah') 
-                        ?? $this->session->userdata('TempKodeWilayah');
-
-            if (!$id || !$kodewilayah) {
-                echo json_encode([
-                    'status' => 'error',
-                    'message' => 'Parameter tidak lengkap'
-                ]);
-                exit;
-            }
-
-            // Soft delete (menandai sebagai terhapus)
-            $this->db->where('id', $id)
-                    ->where('kode_wilayah', $kodewilayah)
-                    ->update('ultimate_outcome_pd', ['deleted_at' => date('Y-m-d H:i:s')]);
-
-            $status = $this->db->affected_rows() > 0 ? 'success' : 'error';
-
-            echo json_encode([
-                'status' => $status,
-                'message' => $status == 'success' ? 'Data berhasil dihapus' : 'Data tidak ditemukan'
-            ]);
-            exit;
-        }
-
-        
-    /**
+ /**
      * =====================================================
-     * INTERMEDIATE OUTCOME PD (Level 2)
+     * ULTIMATE OUTCOME PD (Level 1) - WITH CASCADING DROPDOWN
      * =====================================================
      */
-    public function Intermediate_outcome_pd()
+    public function Ultimate_outcome_pd()
     {
-        $header['Halaman'] = 'Intermediate Outcome Perangkat Daerah';
+        $header['Halaman'] = 'Ultimate Outcome PD';
 
         $kodewilayah = $this->session->userdata('KodeWilayah') 
                     ?? $this->session->userdata('TempKodeWilayah') ?? '';
 
         $data['KodeWilayah'] = $kodewilayah;
-        $data['Provinsi'] = $this->GetListProvinsiData();
+        $data['Provinsi'] = $this->db->where("Kode LIKE '__'")
+                                    ->order_by('Nama')
+                                    ->get('kodewilayah')
+                                    ->result_array();
 
         $data['items'] = [];
-        $data['ultimate_options'] = [];
+        $data['intermediate_sektor'] = [];
+        $data['intermediate_taktikal'] = [];
 
         if ($kodewilayah) {
-            // Ambil data intermediate outcome dengan join ke ultimate outcome
-            $this->db->select('i.*, u.kinerja as ultimate_kinerja');
-            $this->db->from('intermediate_outcome_pd i');
-            $this->db->join('ultimate_outcome_pd u', 'u.id = i.ultimate_outcome_id', 'left');
-            $this->db->where('i.kode_wilayah', $kodewilayah);
-            $this->db->where('i.deleted_at IS NULL');
-            $this->db->order_by('i.urutan', 'ASC');
-            $this->db->order_by('i.id', 'ASC');
-            $data['items'] = $this->db->get()->result_array();
-
-            // Ambil options untuk ultimate outcome (level 1)
-            $data['ultimate_options'] = $this->db
-                ->select('id, kinerja')
-                ->from('ultimate_outcome_pd')
+            // Ambil data ultimate outcome dengan join ke sumber
+            $sql = "
+                SELECT 
+                    u.*,
+                    CASE 
+                        WHEN u.data_type = 'sektor' THEN s.kinerja
+                        WHEN u.data_type = 'taktikal' THEN t.kinerja
+                        ELSE NULL
+                    END as sumber_kinerja
+                FROM ultimate_outcome_pd u
+                LEFT JOIN pk_intermediate_sektor s ON s.id = u.sumber_id AND u.data_type = 'sektor' AND s.deleted_at IS NULL
+                LEFT JOIN pk_intermediate_taktikal t ON t.id = u.sumber_id AND u.data_type = 'taktikal' AND t.deleted_at IS NULL
+                WHERE u.kode_wilayah = ? 
+                    AND u.deleted_at IS NULL
+                ORDER BY u.urutan ASC, u.id ASC
+            ";
+            
+            $data['items'] = $this->db->query($sql, array($kodewilayah))->result_array();
+            
+            // Ambil data dari pk_intermediate_sektor untuk dropdown
+            $data['intermediate_sektor'] = $this->db
+                ->select('id, kinerja, indikator')
                 ->where('kode_wilayah', $kodewilayah)
                 ->where('deleted_at IS NULL')
-                ->order_by('urutan', 'ASC')
                 ->order_by('id', 'ASC')
-                ->get()
+                ->get('pk_intermediate_sektor')
+                ->result_array();
+            
+            // Ambil data dari pk_intermediate_taktikal untuk dropdown
+            $data['intermediate_taktikal'] = $this->db
+                ->select('id, kinerja, indikator')
+                ->where('kode_wilayah', $kodewilayah)
+                ->where('deleted_at IS NULL')
+                ->order_by('id', 'ASC')
+                ->get('pk_intermediate_taktikal')
                 ->result_array();
         }
 
@@ -8402,8 +8395,261 @@ public function hapusAnggaranRenstra()
         }
 
         $this->load->view('Daerah/header', $header);
-        $this->load->view('Daerah/Intermediate_outcome_pd', $data);
+        $this->load->view('Daerah/Ultimate_outcome_pd', $data);
     }
+
+    public function Ultimate_outcome_pd_simpan()
+    {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+
+        $kodewilayah = $this->session->userdata('KodeWilayah') 
+                    ?? $this->session->userdata('TempKodeWilayah');
+
+        if (!$kodewilayah) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Wilayah belum dipilih'
+            ]);
+            return;
+        }
+
+        $id = $this->input->post('id', TRUE);
+        $kinerja = trim($this->input->post('kinerja', TRUE));
+        $indikator_raw = $this->input->post('indikator', TRUE);
+
+        if (empty($kinerja)) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Kinerja wajib diisi'
+            ]);
+            return;
+        }
+
+        if (empty($indikator_raw)) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Data sumber minimal satu harus dipilih'
+            ]);
+            return;
+        }
+
+        $save = [
+            'kode_wilayah' => $kodewilayah,
+            'kinerja' => $kinerja,
+            'indikator' => $indikator_raw,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        $this->db->trans_start();
+
+        try {
+            if ($id) {
+                // Cek data exists
+                $existing = $this->db
+                    ->where('id', $id)
+                    ->where('kode_wilayah', $kodewilayah)
+                    ->where('deleted_at IS NULL')
+                    ->get('ultimate_outcome_pd')
+                    ->row();
+
+                if (!$existing) {
+                    throw new Exception('Data tidak ditemukan');
+                }
+
+                // Update data
+                $this->db->where('id', $id)
+                        ->where('kode_wilayah', $kodewilayah)
+                        ->update('ultimate_outcome_pd', $save);
+                $msg = 'Data berhasil diperbarui';
+            } else {
+                // Insert data baru
+                $save['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('ultimate_outcome_pd', $save);
+                $msg = 'Data berhasil ditambahkan';
+            }
+
+            $this->db->trans_complete();
+
+            if ($this->db->trans_status() === FALSE) {
+                throw new Exception('Gagal menyimpan data');
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => $msg,
+                'data' => ['id' => $id ?: $this->db->insert_id()]
+            ]);
+
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            echo json_encode([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ]);
+        }
+        exit;
+    }
+
+    public function Ultimate_outcome_pd_hapus()
+    {
+        if (!$this->input->is_ajax_request()) show_404();
+
+        $id = $this->input->post('id', TRUE);
+        $kodewilayah = $this->session->userdata('KodeWilayah') 
+                    ?? $this->session->userdata('TempKodeWilayah');
+
+        if (!$id || !$kodewilayah) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Parameter tidak lengkap'
+            ]);
+            exit;
+        }
+
+        // Cek apakah data ada
+        $exists = $this->db
+            ->where('id', $id)
+            ->where('kode_wilayah', $kodewilayah)
+            ->where('deleted_at IS NULL')
+            ->get('ultimate_outcome_pd')
+            ->num_rows();
+
+        if ($exists == 0) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Data tidak ditemukan'
+            ]);
+            exit;
+        }
+
+        // Soft delete
+        $this->db->where('id', $id)
+                ->where('kode_wilayah', $kodewilayah)
+                ->update('ultimate_outcome_pd', ['deleted_at' => date('Y-m-d H:i:s')]);
+
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Data berhasil dihapus'
+        ]);
+        exit;
+    }
+
+    public function Ultimate_outcome_pd_get()
+    {
+        if (!$this->input->is_ajax_request()) show_404();
+
+        $id = $this->input->post('id', TRUE);
+        $kodewilayah = $this->session->userdata('KodeWilayah') 
+                    ?? $this->session->userdata('TempKodeWilayah');
+
+        if (!$id || !$kodewilayah) {
+            echo json_encode(['status' => 'error', 'message' => 'Parameter tidak lengkap']);
+            return;
+        }
+
+        $data = $this->db
+            ->where('id', $id)
+            ->where('kode_wilayah', $kodewilayah)
+            ->where('deleted_at IS NULL')
+            ->get('ultimate_outcome_pd')
+            ->row_array();
+
+        if ($data) {
+            echo json_encode([
+                'status' => 'success',
+                'data' => $data
+            ]);
+        } else {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Data tidak ditemukan'
+            ]);
+        }
+        exit;
+    }
+
+    /**
+ * =====================================================
+ * INTERMEDIATE OUTCOME PD (Level 2)
+ * =====================================================
+ */
+public function Intermediate_outcome_pd()
+{
+    $header['Halaman'] = 'Intermediate Outcome Perangkat Daerah';
+
+    $kodewilayah = $this->session->userdata('KodeWilayah') 
+                ?? $this->session->userdata('TempKodeWilayah') ?? '';
+
+    $data['KodeWilayah'] = $kodewilayah;
+    $data['Provinsi'] = $this->GetListProvinsiData();
+
+    $data['items'] = [];
+    $data['ultimate_options'] = [];
+
+    if ($kodewilayah) {
+        // Ambil data intermediate outcome dengan join ke ultimate outcome
+        $sql = "
+            SELECT 
+                i.*,
+                CASE 
+                    WHEN u.data_type = 'sektor' THEN s.kinerja
+                    WHEN u.data_type = 'taktikal' THEN t.kinerja
+                    ELSE NULL
+                END as ultimate_kinerja
+            FROM intermediate_outcome_pd i
+            LEFT JOIN ultimate_outcome_pd u ON u.id = i.ultimate_outcome_id AND u.deleted_at IS NULL
+            LEFT JOIN pk_intermediate_sektor s ON s.id = u.sumber_id AND u.data_type = 'sektor' AND s.deleted_at IS NULL
+            LEFT JOIN pk_intermediate_taktikal t ON t.id = u.sumber_id AND u.data_type = 'taktikal' AND t.deleted_at IS NULL
+            WHERE i.kode_wilayah = ? 
+                AND i.deleted_at IS NULL
+            ORDER BY i.urutan ASC, i.id ASC
+        ";
+        
+        $data['items'] = $this->db->query($sql, array($kodewilayah))->result_array();
+
+        // ========== PERBAIKAN: Ambil Ultimate Options dengan Kinerja ==========
+        // Ambil data ultimate outcome beserta kinerjanya
+        $sql_ultimate = "
+            SELECT 
+                u.id,
+                u.kinerja as ultimate_kinerja
+            FROM ultimate_outcome_pd u
+            WHERE u.kode_wilayah = ? 
+                AND u.deleted_at IS NULL
+            ORDER BY u.id ASC
+        ";
+        
+        $ultimate_raw = $this->db->query($sql_ultimate, array($kodewilayah))->result_array();
+        
+        // Proses ultimate options untuk mendapatkan teks kinerja
+        foreach ($ultimate_raw as $opt) {
+            $data['ultimate_options'][] = [
+                'id' => $opt['id'],
+                'kinerja' => $opt['ultimate_kinerja'] ?? 'Data tidak ditemukan',
+                'display_text' => substr($opt['ultimate_kinerja'] ?? 'Data tidak ditemukan', 0, 150) . 
+                                 (strlen($opt['ultimate_kinerja'] ?? '') > 150 ? '...' : '')
+            ];
+        }
+    }
+
+    // Ambil Nama Wilayah
+    if ($kodewilayah) {
+        $wil = $this->db
+            ->where('Kode', $kodewilayah)
+            ->get('kodewilayah')
+            ->row_array();
+
+        $data['NamaWilayah'] = $wil ? $wil['Nama'] : '';
+    } else {
+        $data['NamaWilayah'] = '';
+    }
+
+    $this->load->view('Daerah/header', $header);
+    $this->load->view('Daerah/Intermediate_outcome_pd', $data);
+}
 
     /**
      * =====================================================
@@ -9720,287 +9966,319 @@ public function hapusAnggaranRenstra()
 
            
     /**
-     * ======================================================
-     * TAMPIL POHON KINERJA PERANGKAT DAERAH (4 Level)
-     * ======================================================
-     */
-    public function TampilPohonKinerjaPD()
-    {
-        // ==============================
-        // 1. CEK SESSION WILAYAH
-        // ==============================
-        $kodewilayah = $this->session->userdata('KodeWilayah') 
-                    ?? $this->session->userdata('TempKodeWilayah') ?? '';
+ * ======================================================
+ * TAMPIL POHON KINERJA PERANGKAT DAERAH (4 Level)
+ * ======================================================
+ */
+public function TampilPohonKinerjaPD()
+{
+    // ==============================
+    // 1. CEK SESSION WILAYAH
+    // ==============================
+    $kodewilayah = $this->session->userdata('KodeWilayah') 
+                ?? $this->session->userdata('TempKodeWilayah') ?? '';
 
-        $data['KodeWilayah'] = $kodewilayah;
-        $data['Provinsi'] = $this->GetListProvinsiData();
-        $data['NamaWilayah'] = '';
+    $data['KodeWilayah'] = $kodewilayah;
+    $data['Provinsi'] = $this->GetListProvinsiData();
+    $data['NamaWilayah'] = '';
+    $data['TotalData'] = [
+        'level1' => 0,
+        'level2' => 0,
+        'level3' => 0,
+        'level4' => 0
+    ];
+    $data['ChartData'] = json_encode(['nama' => 'ROOT', 'children' => []]);
+    $data['PelaksanaData'] = [];
+    $data['perangkat_daerah'] = [];
+
+    // ==============================
+    // 2. JIKA WILAYAH SUDAH DIPILIH, AMBIL DATA
+    // ==============================
+    if (!empty($kodewilayah)) {
+        
+        // Ambil Nama Wilayah
+        $wil = $this->db
+            ->where('Kode', $kodewilayah)
+            ->get('kodewilayah')
+            ->row_array();
+
+        $data['NamaWilayah'] = $wil ? $wil['Nama'] : 'Wilayah Tidak Dikenal';
+
+        // Ambil data perangkat daerah (akun_instansi Level 2) untuk mapping ID ke nama
+        $perangkatDaerah = $this->db
+            ->select('id, nama')
+            ->from('akun_instansi')
+            ->where('Level', 2)
+            ->where('kodewilayah', $kodewilayah)
+            ->where('deleted_at IS NULL')
+            ->order_by('nama', 'ASC')
+            ->get()
+            ->result_array();
+
+        $data['perangkat_daerah'] = $perangkatDaerah;
+
+        // Ambil data pelaksana dari akun_karyawan
+        $pelaksanaData = $this->db
+            ->select('
+                akun_karyawan.id,
+                akun_karyawan.nama,
+                akun_karyawan.nip,
+                akun_karyawan.jabatan,
+                akun_karyawan.dinas_id,
+                GROUP_CONCAT(akun_instansi.nama SEPARATOR ", ") as nama_dinas
+            ')
+            ->from('akun_karyawan')
+            ->join('akun_instansi', 'FIND_IN_SET(akun_instansi.id, akun_karyawan.dinas_id)', 'left')
+            ->where('akun_karyawan.Level', 4)
+            ->where('akun_karyawan.kodewilayah', $kodewilayah)
+            ->where('akun_karyawan.deleted_at IS NULL')
+            ->group_by('akun_karyawan.id')
+            ->get()
+            ->result_array();
+        
+        // Buat mapping pelaksana berdasarkan ID
+        $pelaksanaMap = [];
+        foreach ($pelaksanaData as $p) {
+            $pelaksanaMap[$p['id']] = [
+                'nama' => $p['nama'],
+                'nip' => $p['nip'],
+                'jabatan' => $p['jabatan'],
+                'dinas' => $p['nama_dinas']
+            ];
+        }
+        $data['PelaksanaData'] = $pelaksanaMap;
+
+        // ========== PERBAIKAN: AMBIL ULTIMATE OUTCOME (LEVEL 1) ==========
+        // Ambil langsung dari tabel ultimate_outcome_pd karena sudah memiliki kolom kinerja
+        $ultimate = $this->db
+            ->select('id, kinerja as nama, indikator')
+            ->from('ultimate_outcome_pd')
+            ->where('kode_wilayah', $kodewilayah)
+            ->where('deleted_at IS NULL')
+            ->order_by('id', 'ASC')
+            ->get()
+            ->result_array();
+
+        // ========== AMBIL INTERMEDIATE OUTCOME (LEVEL 2) ==========
+        $intermediate = $this->db
+            ->select('
+                i.id, 
+                i.kinerja as nama, 
+                i.indikator, 
+                i.pelaksana, 
+                i.inovasi_daerah, 
+                i.outcome_inovasi, 
+                i.output_inovasi,
+                i.crosscutting_pd, 
+                i.crosscutting_keterangan,
+                i.ultimate_outcome_id as parent_id
+            ')
+            ->from('intermediate_outcome_pd i')
+            ->where('i.kode_wilayah', $kodewilayah)
+            ->where('i.deleted_at IS NULL')
+            ->order_by('i.urutan', 'ASC')
+            ->order_by('i.id', 'ASC')
+            ->get()
+            ->result_array();
+
+        // ========== AMBIL IMMEDIATE OUTCOME (LEVEL 3) ==========
+        $immediate = $this->db
+            ->select('
+                i.id, 
+                i.kinerja as nama, 
+                i.indikator, 
+                i.pelaksana,
+                i.inovasi_daerah, 
+                i.outcome_inovasi, 
+                i.output_inovasi,
+                i.crosscutting_pd, 
+                i.crosscutting_keterangan,
+                i.intermediate_outcome_id as parent_id
+            ')
+            ->from('immediate_outcome_pd i')
+            ->where('i.kode_wilayah', $kodewilayah)
+            ->where('i.deleted_at IS NULL')
+            ->order_by('i.urutan', 'ASC')
+            ->order_by('i.id', 'ASC')
+            ->get()
+            ->result_array();
+
+        // ========== AMBIL OUTPUT (LEVEL 4) ==========
+        $output = $this->db
+            ->select('
+                o.id, 
+                o.kinerja as nama, 
+                o.indikator, 
+                o.pelaksana,
+                o.inovasi_daerah, 
+                o.outcome_inovasi, 
+                o.output_inovasi,
+                o.crosscutting_pd, 
+                o.crosscutting_keterangan,
+                o.immediate_outcome_id as parent_id
+            ')
+            ->from('output_pd o')
+            ->where('o.kode_wilayah', $kodewilayah)
+            ->where('o.deleted_at IS NULL')
+            ->order_by('o.urutan', 'ASC')
+            ->order_by('o.id', 'ASC')
+            ->get()
+            ->result_array();
+
+        // Update total data
         $data['TotalData'] = [
-            'level1' => 0,
-            'level2' => 0,
-            'level3' => 0,
-            'level4' => 0
+            'level1' => count($ultimate),
+            'level2' => count($intermediate),
+            'level3' => count($immediate),
+            'level4' => count($output)
         ];
-        $data['ChartData'] = json_encode(['nama' => 'ROOT', 'children' => []]);
-        $data['PelaksanaData'] = []; // Untuk menyimpan data pelaksana
 
         // ==============================
-        // 2. JIKA WILAYAH SUDAH DIPILIH, AMBIL DATA
+        // 3. STRUKTURKAN DATA UNTUK TREE
         // ==============================
-        if (!empty($kodewilayah)) {
+        $tree_data = [];
+
+        // Buat mapping untuk memudahkan pencarian
+        $intermediate_by_parent = [];
+        foreach ($intermediate as $inter) {
+            $intermediate_by_parent[$inter['parent_id']][] = $inter;
+        }
+
+        $immediate_by_parent = [];
+        foreach ($immediate as $imm) {
+            $immediate_by_parent[$imm['parent_id']][] = $imm;
+        }
+
+        $output_by_parent = [];
+        foreach ($output as $out) {
+            $output_by_parent[$out['parent_id']][] = $out;
+        }
+
+        // Bangun tree dari Level 1 (Ultimate)
+        foreach ($ultimate as $ult) {
+            // Gunakan nama/kinerja dari hasil query (sudah langsung dari kolom kinerja)
+            $kinerja_text = $ult['nama'] ?? '—';
             
-            // Ambil Nama Wilayah
-            $wil = $this->db
-                ->where('Kode', $kodewilayah)
-                ->get('kodewilayah')
-                ->row_array();
-
-            $data['NamaWilayah'] = $wil ? $wil['Nama'] : 'Wilayah Tidak Dikenal';
-
-            // Ambil data pelaksana dari akun_karyawan untuk ditampilkan di tooltip
-            $pelaksanaData = $this->db
-                ->select('
-                    akun_karyawan.id,
-                    akun_karyawan.nama,
-                    akun_karyawan.nip,
-                    akun_karyawan.jabatan,
-                    akun_karyawan.dinas_id,
-                    GROUP_CONCAT(akun_instansi.nama SEPARATOR ", ") as nama_dinas
-                ')
-                ->from('akun_karyawan')
-                ->join('akun_instansi', 'FIND_IN_SET(akun_instansi.id, akun_karyawan.dinas_id)', 'left')
-                ->where('akun_karyawan.Level', 4)
-                ->where('akun_karyawan.kodewilayah', $kodewilayah)
-                ->where('akun_karyawan.deleted_at IS NULL')
-                ->group_by('akun_karyawan.id')
-                ->get()
-                ->result_array();
-            
-            // Buat mapping pelaksana berdasarkan ID
-            $pelaksanaMap = [];
-            foreach ($pelaksanaData as $p) {
-                $pelaksanaMap[$p['id']] = [
-                    'nama' => $p['nama'],
-                    'nip' => $p['nip'],
-                    'jabatan' => $p['jabatan'],
-                    'dinas' => $p['nama_dinas']
-                ];
-            }
-            $data['PelaksanaData'] = $pelaksanaMap;
-
-            // Ambil data perangkat daerah (akun_instansi Level 2) untuk mapping ID ke nama
-            $perangkatDaerah = $this->db
-                ->select('id, nama')
-                ->from('akun_instansi')
-                ->where('Level', 2)
-                ->where('kodewilayah', $kodewilayah)
-                ->where('deleted_at IS NULL')
-                ->order_by('nama', 'ASC')
-                ->get()
-                ->result_array();
-
-            $data['perangkat_daerah'] = $perangkatDaerah;
-
-            // Ambil Ultimate Outcome (Level 1)
-            $ultimate = $this->db
-                ->select('id, kinerja as nama, indikator')
-                ->where('kode_wilayah', $kodewilayah)
-                ->where('deleted_at IS NULL')
-                ->order_by('urutan', 'ASC')
-                ->order_by('id', 'ASC')
-                ->get('ultimate_outcome_pd')
-                ->result_array();
-
-            // Ambil Intermediate Outcome (Level 2) dengan relasi ke Level 1
-            $intermediate = $this->db
-                ->select('i.id, i.kinerja as nama, i.indikator, i.pelaksana, 
-                        i.inovasi_daerah, i.outcome_inovasi, i.output_inovasi,
-                        i.crosscutting_pd, i.crosscutting_keterangan,
-                        i.ultimate_outcome_id as parent_id')
-                ->from('intermediate_outcome_pd i')
-                ->where('i.kode_wilayah', $kodewilayah)
-                ->where('i.deleted_at IS NULL')
-                ->order_by('i.urutan', 'ASC')
-                ->order_by('i.id', 'ASC')
-                ->get()
-                ->result_array();
-
-            // Ambil Immediate Outcome (Level 3) dengan relasi ke Level 2
-            $immediate = $this->db
-                ->select('i.id, i.kinerja as nama, i.indikator, i.pelaksana,
-                        i.inovasi_daerah, i.outcome_inovasi, i.output_inovasi,
-                        i.crosscutting_pd, i.crosscutting_keterangan,
-                        i.intermediate_outcome_id as parent_id')
-                ->from('immediate_outcome_pd i')
-                ->where('i.kode_wilayah', $kodewilayah)
-                ->where('i.deleted_at IS NULL')
-                ->order_by('i.urutan', 'ASC')
-                ->order_by('i.id', 'ASC')
-                ->get()
-                ->result_array();
-
-            // Ambil Output (Level 4) dengan relasi ke Level 3
-            $output = $this->db
-                ->select('o.id, o.kinerja as nama, o.indikator, o.pelaksana,
-                        o.inovasi_daerah, o.outcome_inovasi, o.output_inovasi,
-                        o.crosscutting_pd, o.crosscutting_keterangan,
-                        o.immediate_outcome_id as parent_id')
-                ->from('output_pd o')
-                ->where('o.kode_wilayah', $kodewilayah)
-                ->where('o.deleted_at IS NULL')
-                ->order_by('o.urutan', 'ASC')
-                ->order_by('o.id', 'ASC')
-                ->get()
-                ->result_array();
-
-            // Update total data
-            $data['TotalData'] = [
-                'level1' => count($ultimate),
-                'level2' => count($intermediate),
-                'level3' => count($immediate),
-                'level4' => count($output)
+            $ult_node = [
+                'id' => 'l1_' . $ult['id'],
+                'original_id' => $ult['id'],
+                'nama' => $kinerja_text,
+                'indikator' => $ult['indikator'] ?? null,
+                'pelaksana' => null,
+                'pelaksana_detail' => null,
+                'inovasi' => null,
+                'outcome_inovasi' => null,
+                'output_inovasi' => null,
+                'crosscutting_pd' => null,
+                'crosscutting_ket' => null,
+                'level' => 1,
+                'children' => []
             ];
-
-            // ==============================
-            // 3. STRUKTURKAN DATA UNTUK TREE
-            // ==============================
-            $tree_data = [];
-
-            // Buat mapping untuk memudahkan pencarian
-            $intermediate_by_parent = [];
-            foreach ($intermediate as $inter) {
-                $intermediate_by_parent[$inter['parent_id']][] = $inter;
-            }
-
-            $immediate_by_parent = [];
-            foreach ($immediate as $imm) {
-                $immediate_by_parent[$imm['parent_id']][] = $imm;
-            }
-
-            $output_by_parent = [];
-            foreach ($output as $out) {
-                $output_by_parent[$out['parent_id']][] = $out;
-            }
-
-            // Bangun tree dari Level 1 (Ultimate)
-            foreach ($ultimate as $ult) {
-                $ult_node = [
-                    'id' => 'l1_' . $ult['id'],
-                    'nama' => $ult['nama'],
-                    'indikator' => $ult['indikator'],
-                    'pelaksana' => null,
-                    'pelaksana_detail' => null,
-                    'inovasi' => null,
-                    'outcome_inovasi' => null,
-                    'output_inovasi' => null,
-                    'crosscutting_pd' => null,
-                    'crosscutting_ket' => null,
-                    'level' => 1,
-                    'children' => []
-                ];
-                
-                // Cari Level 2 (Intermediate) yang memiliki parent_id = $ult['id']
-                if (isset($intermediate_by_parent[$ult['id']])) {
-                    foreach ($intermediate_by_parent[$ult['id']] as $inter) {
-                        // Ambil detail pelaksana jika ada
-                        $pelaksana_detail = null;
-                        if (!empty($inter['pelaksana']) && isset($pelaksanaMap[$inter['pelaksana']])) {
-                            $pelaksana_detail = $pelaksanaMap[$inter['pelaksana']];
-                        }
-                        
-                        $inter_node = [
-                            'id' => 'l2_' . $inter['id'],
-                            'nama' => $inter['nama'],
-                            'indikator' => $inter['indikator'],
-                            'pelaksana' => $inter['pelaksana'],
-                            'pelaksana_detail' => $pelaksana_detail,
-                            'inovasi' => $inter['inovasi_daerah'],
-                            'outcome_inovasi' => $inter['outcome_inovasi'],
-                            'output_inovasi' => $inter['output_inovasi'],
-                            'crosscutting_pd' => $inter['crosscutting_pd'],
-                            'crosscutting_ket' => $inter['crosscutting_keterangan'],
-                            'level' => 2,
-                            'children' => []
-                        ];
-                        
-                        // Cari Level 3 (Immediate) yang memiliki parent_id = $inter['id']
-                        if (isset($immediate_by_parent[$inter['id']])) {
-                            foreach ($immediate_by_parent[$inter['id']] as $imm) {
-                                // Ambil detail pelaksana jika ada
-                                $pelaksana_detail_imm = null;
-                                if (!empty($imm['pelaksana']) && isset($pelaksanaMap[$imm['pelaksana']])) {
-                                    $pelaksana_detail_imm = $pelaksanaMap[$imm['pelaksana']];
-                                }
-                                
-                                $imm_node = [
-                                    'id' => 'l3_' . $imm['id'],
-                                    'nama' => $imm['nama'],
-                                    'indikator' => $imm['indikator'],
-                                    'pelaksana' => $imm['pelaksana'],
-                                    'pelaksana_detail' => $pelaksana_detail_imm,
-                                    'inovasi' => $imm['inovasi_daerah'],
-                                    'outcome_inovasi' => $imm['outcome_inovasi'],
-                                    'output_inovasi' => $imm['output_inovasi'],
-                                    'crosscutting_pd' => $imm['crosscutting_pd'],
-                                    'crosscutting_ket' => $imm['crosscutting_keterangan'],
-                                    'level' => 3,
-                                    'children' => []
-                                ];
-                                
-                                // Cari Level 4 (Output) yang memiliki parent_id = $imm['id']
-                                if (isset($output_by_parent[$imm['id']])) {
-                                    foreach ($output_by_parent[$imm['id']] as $out) {
-                                        // Ambil detail pelaksana jika ada
-                                        $pelaksana_detail_out = null;
-                                        if (!empty($out['pelaksana']) && isset($pelaksanaMap[$out['pelaksana']])) {
-                                            $pelaksana_detail_out = $pelaksanaMap[$out['pelaksana']];
-                                        }
-                                        
-                                        $imm_node['children'][] = [
-                                            'id' => 'l4_' . $out['id'],
-                                            'nama' => $out['nama'],
-                                            'indikator' => $out['indikator'],
-                                            'pelaksana' => $out['pelaksana'],
-                                            'pelaksana_detail' => $pelaksana_detail_out,
-                                            'inovasi' => $out['inovasi_daerah'],
-                                            'outcome_inovasi' => $out['outcome_inovasi'],
-                                            'output_inovasi' => $out['output_inovasi'],
-                                            'crosscutting_pd' => $out['crosscutting_pd'],
-                                            'crosscutting_ket' => $out['crosscutting_keterangan'],
-                                            'level' => 4,
-                                            'children' => []
-                                        ];
-                                    }
-                                }
-                                
-                                $inter_node['children'][] = $imm_node;
-                            }
-                        }
-                        
-                        $ult_node['children'][] = $inter_node;
+            
+            // Cari Level 2 (Intermediate) yang memiliki parent_id = $ult['id']
+            if (isset($intermediate_by_parent[$ult['id']])) {
+                foreach ($intermediate_by_parent[$ult['id']] as $inter) {
+                    // Ambil detail pelaksana jika ada
+                    $pelaksana_detail = null;
+                    if (!empty($inter['pelaksana']) && isset($pelaksanaMap[$inter['pelaksana']])) {
+                        $pelaksana_detail = $pelaksanaMap[$inter['pelaksana']];
                     }
+                    
+                    $inter_node = [
+                        'id' => 'l2_' . $inter['id'],
+                        'original_id' => $inter['id'],
+                        'nama' => $inter['nama'] ?? '—',
+                        'indikator' => $inter['indikator'] ?? null,
+                        'pelaksana' => $inter['pelaksana'] ?? null,
+                        'pelaksana_detail' => $pelaksana_detail,
+                        'inovasi' => $inter['inovasi_daerah'] ?? null,
+                        'outcome_inovasi' => $inter['outcome_inovasi'] ?? null,
+                        'output_inovasi' => $inter['output_inovasi'] ?? null,
+                        'crosscutting_pd' => $inter['crosscutting_pd'] ?? null,
+                        'crosscutting_ket' => $inter['crosscutting_keterangan'] ?? null,
+                        'level' => 2,
+                        'children' => []
+                    ];
+                    
+                    // Cari Level 3 (Immediate) yang memiliki parent_id = $inter['id']
+                    if (isset($immediate_by_parent[$inter['id']])) {
+                        foreach ($immediate_by_parent[$inter['id']] as $imm) {
+                            // Ambil detail pelaksana jika ada
+                            $pelaksana_detail_imm = null;
+                            if (!empty($imm['pelaksana']) && isset($pelaksanaMap[$imm['pelaksana']])) {
+                                $pelaksana_detail_imm = $pelaksanaMap[$imm['pelaksana']];
+                            }
+                            
+                            $imm_node = [
+                                'id' => 'l3_' . $imm['id'],
+                                'original_id' => $imm['id'],
+                                'nama' => $imm['nama'] ?? '—',
+                                'indikator' => $imm['indikator'] ?? null,
+                                'pelaksana' => $imm['pelaksana'] ?? null,
+                                'pelaksana_detail' => $pelaksana_detail_imm,
+                                'inovasi' => $imm['inovasi_daerah'] ?? null,
+                                'outcome_inovasi' => $imm['outcome_inovasi'] ?? null,
+                                'output_inovasi' => $imm['output_inovasi'] ?? null,
+                                'crosscutting_pd' => $imm['crosscutting_pd'] ?? null,
+                                'crosscutting_ket' => $imm['crosscutting_keterangan'] ?? null,
+                                'level' => 3,
+                                'children' => []
+                            ];
+                            
+                            // Cari Level 4 (Output) yang memiliki parent_id = $imm['id']
+                            if (isset($output_by_parent[$imm['id']])) {
+                                foreach ($output_by_parent[$imm['id']] as $out) {
+                                    // Ambil detail pelaksana jika ada
+                                    $pelaksana_detail_out = null;
+                                    if (!empty($out['pelaksana']) && isset($pelaksanaMap[$out['pelaksana']])) {
+                                        $pelaksana_detail_out = $pelaksanaMap[$out['pelaksana']];
+                                    }
+                                    
+                                    $imm_node['children'][] = [
+                                        'id' => 'l4_' . $out['id'],
+                                        'original_id' => $out['id'],
+                                        'nama' => $out['nama'] ?? '—',
+                                        'indikator' => $out['indikator'] ?? null,
+                                        'pelaksana' => $out['pelaksana'] ?? null,
+                                        'pelaksana_detail' => $pelaksana_detail_out,
+                                        'inovasi' => $out['inovasi_daerah'] ?? null,
+                                        'outcome_inovasi' => $out['outcome_inovasi'] ?? null,
+                                        'output_inovasi' => $out['output_inovasi'] ?? null,
+                                        'crosscutting_pd' => $out['crosscutting_pd'] ?? null,
+                                        'crosscutting_ket' => $out['crosscutting_keterangan'] ?? null,
+                                        'level' => 4,
+                                        'children' => []
+                                    ];
+                                }
+                            }
+                            
+                            $inter_node['children'][] = $imm_node;
+                        }
+                    }
+                    
+                    $ult_node['children'][] = $inter_node;
                 }
-                
-                $tree_data[] = $ult_node;
             }
-
-            // ==============================
-            // 4. FORMAT UNTUK VIEW
-            // ==============================
-            $chart_data = [
-                'nama' => 'ROOT',
-                'children' => $tree_data
-            ];
-
-            $data['ChartData'] = json_encode($chart_data);
+            
+            $tree_data[] = $ult_node;
         }
 
         // ==============================
-        // 5. LOAD VIEW
+        // 4. FORMAT UNTUK VIEW
         // ==============================
-        $header['Halaman'] = 'Visualisasi Pohon Kinerja Perangkat Daerah';
-        $this->load->view('Daerah/header', $header);
-        $this->load->view('Daerah/TampilPohonKinerjaPD', $data);
-    }
-}
+        $chart_data = [
+            'nama' => 'ROOT',
+            'children' => $tree_data
+        ];
 
+        $data['ChartData'] = json_encode($chart_data);
+    }
+
+    // ==============================
+    // 5. LOAD VIEW
+    // ==============================
+    $header['Halaman'] = 'Visualisasi Pohon Kinerja Perangkat Daerah';
+    $this->load->view('Daerah/header', $header);
+    $this->load->view('Daerah/TampilPohonKinerjaPD', $data);
+}
+}

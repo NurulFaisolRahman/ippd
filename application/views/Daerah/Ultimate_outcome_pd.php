@@ -19,14 +19,12 @@
         <div class="col-lg-12">
           <div class="data-table-list">
 
-            <!-- ================= FILTER WILAYAH ================= -->
+            <!-- FILTER WILAYAH -->
             <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-
               <div class="form-example-wrap" style="margin-bottom: 20px;">
                 <div class="form-example-int form-horizental">
                   <div class="form-group">
                     <div class="row filter-row">
-
                       <div class="col-lg-3 col-md-6">
                         <label><b>Provinsi</b></label>
                         <select class="form-control" id="Provinsi">
@@ -38,14 +36,12 @@
                           <?php } ?>
                         </select>
                       </div>
-
                       <div class="col-lg-3 col-md-6">
                         <label><b>Kab/Kota</b></label>
                         <select class="form-control" id="KabKota">
                           <option value="">Pilih Kab/Kota</option>
                         </select>
                       </div>
-
                       <div class="col-lg-2 col-md-6">
                         <div style="margin-top: 28px;">
                           <button class="btn btn-primary btn-block" id="Filter">
@@ -53,7 +49,6 @@
                           </button>
                         </div>
                       </div>
-
                     </div>
                   </div>
                 </div>
@@ -68,15 +63,13 @@
                   <strong>Wilayah terpilih:</strong> <?= $nama_wilayah ?>
                 </div>
               <?php } ?>
-
             <?php } ?>
-            <!-- ================= END FILTER ================= -->
             <br>
 
             <!-- TOMBOL TAMBAH -->
             <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
               <div class="basic-tb-hd mb-3">
-                <button class="btn btn-success" data-toggle="modal" data-target="#modalLevel1">
+                <button class="btn btn-success" data-toggle="modal" data-target="#modalLevel1" id="btn-tambah">
                   <i class="fa fa-plus"></i> Tambah ULTIMATE OUTCOME PD (Level 1)
                 </button>
               </div>
@@ -86,14 +79,14 @@
             <div class="table-responsive">
               <table id="data-table-basic" class="table table-striped table-bordered table-hover">
                 <thead>
-                  <tr>
-                    <th width="60" class="text-center">NO</th>
-                    <th>Kinerja Strategis Daerah</th>
-                    <th>Indikator Kinerja</th>
-                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                      <th width="120" class="text-center">AKSI</th>
-                    <?php } ?>
-                  </tr>
+                    <tr>
+                      <th width="60" class="text-center">NO</th>
+                      <th>Kinerja</th>
+                      <th>Indikator Kinerja</th>
+                      <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                        <th width="120" class="text-center">AKSI</th>
+                      <?php } ?>
+                    </tr>
                 </thead>
                 <tbody>
                   <?php if (!empty($items)): ?>
@@ -104,20 +97,50 @@
                           <strong><?= nl2br(html_escape($row['kinerja'] ?? '—')) ?></strong>
                         </td>
                         <td class="align-middle">
-                          <?php if (!empty($row['indikator'])): ?>
-                            <?php 
-                              $indikator_list = explode('|||', $row['indikator']);
-                              foreach($indikator_list as $ind):
-                                if(trim($ind)):
-                            ?>
-                                <div><?= html_escape(trim($ind)) ?></div>
-                            <?php 
-                                endif;
-                              endforeach; 
-                            ?>
-                          <?php else: ?>
-                            —
-                          <?php endif; ?>
+                          <?php 
+                            // Parse indikator yang disimpan dalam format: kategori1|||sumber_id1|||kategori2|||sumber_id2
+                            if (!empty($row['indikator'])) {
+                              $indikator_parts = explode('|||', $row['indikator']);
+                              $display_indikator = [];
+                              
+                              for ($i = 0; $i < count($indikator_parts); $i += 2) {
+                                if (isset($indikator_parts[$i + 1])) {
+                                  $kategori = $indikator_parts[$i];
+                                  $sumber_id = $indikator_parts[$i + 1];
+                                  
+                                  // Cari teks sumber dari data yang ada
+                                  $sumber_text = '';
+                                  if ($kategori == 'sektor') {
+                                    foreach ($intermediate_sektor as $s) {
+                                      if ($s['id'] == $sumber_id) {
+                                        $sumber_text = $s['kinerja'];
+                                        break;
+                                      }
+                                    }
+                                  } elseif ($kategori == 'taktikal') {
+                                    foreach ($intermediate_taktikal as $t) {
+                                      if ($t['id'] == $sumber_id) {
+                                        $sumber_text = $t['kinerja'];
+                                        break;
+                                      }
+                                    }
+                                  }
+                                  
+                                  if ($sumber_text) {
+                                    $display_indikator[] = '• ' . html_escape($sumber_text);
+                                  }
+                                }
+                              }
+                              
+                              if (!empty($display_indikator)) {
+                                echo implode('<br>', $display_indikator);
+                              } else {
+                                echo '—';
+                              }
+                            } else {
+                              echo '—';
+                            }
+                          ?>
                         </td>
                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3): ?>
                           <td class="text-center align-middle">
@@ -163,38 +186,39 @@
     <div class="modal-content">
 
       <div class="modal-header bg-light">
-        <button type="button" class="close" data-dismiss="modal">×</button>
         <h3 class="modal-title">
           Ultimate Outcome / Level 1
         </h3>
+        <button type="button" class="close" data-dismiss="modal">×</button>
       </div>
 
       <div class="modal-body">
         <input type="hidden" id="id_level1">
+        <input type="hidden" id="edit_mode" value="0">
 
-        <!-- Kinerja -->
         <div class="p-3 mb-4" style="background:#f3f3f3; border-radius:6px;">
           
-          <!-- Kinerja -->
+          <!-- KINERJA - TEXTFIELD UTAMA -->
           <div class="form-group">
-            <label><b>Kinerja Strategis Daerah</b> <span class="text-danger">*</span></label>
+            <label><b>Kinerja</b> <span class="text-danger">*</span></label>
             <div class="mb-2 text-muted small">
-              <em>Ultimate Outcome / Level 1 - Kinerja Strategis Daerah</em>
+              <em>Ultimate Outcome Level 1 - Kinerja Strategis</em>
             </div>
-            <textarea id="kinerja_level1" class="form-control" rows="4" placeholder="Masukkan kinerja strategis daerah..." required></textarea>
+            <textarea id="kinerja" class="form-control" rows="4" placeholder="Masukkan kinerja strategis..."></textarea>
           </div>
 
-          <!-- Indikator Kinerja -->
+          <!-- DATA SUMBER (INDIKATOR) -->
           <div class="form-group">
-            <label><b>Indikator Kinerja</b></label>
+            <label><b>Data Sumber (Indikator Kinerja)</b> <span class="text-danger">*</span></label>
             <div class="mb-2 text-muted small">
-              <em>Ultimate Outcome Level 1 - Indikator Kinerja</em>
+              <em>Pilih data dari Intermediate Outcome Sektor atau Taktikal yang akan menjadi indikator kinerja</em>
             </div>
-            <div id="indikator-container-level1"></div>
-            <button type="button" class="btn btn-success btn-sm mt-2" id="btn-add-indikator-l1">
-              <i class="fa fa-plus"></i> Tambah Indikator
+            <div id="sumber-container"></div>
+            <button type="button" class="btn btn-success btn-sm mt-2" id="btn-tambah-sumber">
+              <i class="fa fa-plus"></i> Tambah Data Sumber
             </button>
           </div>
+
         </div>
       </div>
 
@@ -210,20 +234,23 @@
   </div>
 </div>
 
-<!-- STYLE -->
 <style>
   .table td { 
     padding: 12px !important; 
     vertical-align: middle !important; 
   }
-  .field-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
+  .sumber-row {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    position: relative;
   }
-  .field-row .form-control {
-    flex: 1;
+  .sumber-row .btn-remove-sumber {
+    position: absolute;
+    top: 10px;
+    right: 10px;
   }
   .modal-content {
     border-radius: 8px;
@@ -238,7 +265,6 @@
     padding-top: 70px;
   }
   
-  /* Style untuk navigasi link */
   .nav-link {
     color: #6c757d;
     text-decoration: none;
@@ -255,30 +281,35 @@
     border-bottom-color: #007bff;
   }
   
-  .nav-link::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background-color: #007bff;
-    transform: scaleX(0);
-    transition: transform 0.3s ease;
-    transform-origin: center;
-  }
-  
-  .nav-link:hover::after {
-    transform: scaleX(1);
-  }
-  
   .nav-link.active {
     color: #007bff;
     border-bottom: 2px solid #007bff;
   }
   
-  .nav-link.active::after {
-    display: none;
+  .badge {
+    padding: 5px 10px;
+    font-size: 11px;
+    border-radius: 3px;
+  }
+  .badge-primary {
+    background-color: #007bff;
+    color: white;
+  }
+  .badge-info {
+    background-color: #17a2b8;
+    color: white;
+  }
+  
+  textarea.form-control {
+    resize: vertical;
+  }
+  
+  .sumber-row select {
+    margin-bottom: 0;
+  }
+  
+  .sumber-row .form-group {
+    margin-bottom: 0;
   }
 </style>
 
@@ -289,6 +320,13 @@
 var BaseURL = "<?= base_url() ?>";
 var CSRF_NAME = "<?= $this->security->get_csrf_token_name() ?>";
 var CSRF_TOKEN = "<?= $this->security->get_csrf_hash() ?>";
+
+// Data dari server untuk dropdown
+var sektorData = <?= json_encode($intermediate_sektor) ?>;
+var taktikalData = <?= json_encode($intermediate_taktikal) ?>;
+var sumberCounter = 0;
+var isEditMode = false;
+var editDataId = null;
 
 $(document).ready(function() {
   
@@ -301,73 +339,173 @@ $(document).ready(function() {
     }
   });
 
-  // ================= FUNGSI TAMBAH BARIS INDIKATOR =================
-  function addIndikator(container, val = '') {
-    // Escape nilai untuk mencegah XSS
-    let safeVal = $('<div>').text(val).html();
+  // ================= FUNGSI TAMBAH BARIS DATA SUMBER =================
+  function addSumberRow(kategori = '', sumberId = '') {
+    sumberCounter++;
+    let rowId = 'sumber_row_' + sumberCounter;
     
-    $(container).append(`
-      <div class="field-row">
-        <input type="text" class="form-control" value="${safeVal}" placeholder="Masukkan indikator...">
-        <button type="button" class="btn btn-danger btn-sm remove-row"><i class="fa fa-trash"></i></button>
+    let kategoriOptions = `
+      <option value="">-- Pilih Kategori --</option>
+      <option value="sektor" ${kategori === 'sektor' ? 'selected' : ''}>Intermediate Outcome Sektor</option>
+      <option value="taktikal" ${kategori === 'taktikal' ? 'selected' : ''}>Intermediate Outcome Taktikal</option>
+    `;
+    
+    let sumberOptions = '<option value="">-- Pilih Kategori Terlebih Dahulu --</option>';
+    
+    // Jika kategori sudah dipilih, load data sumber
+    if (kategori) {
+      sumberOptions = getSumberOptions(kategori, sumberId);
+    }
+    
+    let html = `
+      <div class="sumber-row" id="${rowId}">
+        <button type="button" class="btn btn-danger btn-sm btn-remove-sumber" data-rowid="${rowId}">
+          <i class="fa fa-trash"></i>
+        </button>
+        <div class="row">
+          <div class="col-md-5">
+            <div class="form-group">
+              <label><b>Kategori Data Sumber</b> <span class="text-danger">*</span></label>
+              <select class="form-control kategori-select" data-rowid="${rowId}" required>
+                ${kategoriOptions}
+              </select>
+            </div>
+          </div>
+          <div class="col-md-7">
+            <div class="form-group">
+              <label><b>Data Sumber (Indikator)</b> <span class="text-danger">*</span></label>
+              <select class="form-control sumber-select" id="sumber_${rowId}" data-rowid="${rowId}" required ${!kategori ? 'disabled' : ''}>
+                ${sumberOptions}
+              </select>
+            </div>
+          </div>
+        </div>
       </div>
-    `);
+    `;
+    
+    $('#sumber-container').append(html);
+    
+    // Bind event untuk kategori select
+    $(document).on('change', `.kategori-select[data-rowid="${rowId}"]`, function() {
+      let selectedKategori = $(this).val();
+      let $sumberSelect = $(`#sumber_${rowId}`);
+      
+      if (!selectedKategori) {
+        $sumberSelect.prop('disabled', true);
+        $sumberSelect.html('<option value="">-- Pilih Kategori Terlebih Dahulu --</option>');
+        return;
+      }
+      
+      $sumberSelect.prop('disabled', false);
+      $sumberSelect.html(getSumberOptions(selectedKategori));
+    });
+  }
+  
+  // Fungsi untuk mendapatkan options sumber berdasarkan kategori
+  function getSumberOptions(kategori, selectedId = null) {
+    let options = '<option value="">-- Pilih Data Sumber --</option>';
+    
+    if (kategori === 'sektor') {
+      if (sektorData && sektorData.length > 0) {
+        $.each(sektorData, function(index, item) {
+          let selected = (selectedId == item.id) ? 'selected' : '';
+          let text = item.kinerja.length > 100 ? item.kinerja.substring(0, 100) + '...' : item.kinerja;
+          options += `<option value="${item.id}" ${selected}>${escapeHtml(text)}</option>`;
+        });
+      } else {
+        options += '<option value="" disabled>-- Tidak ada data sektor --</option>';
+      }
+    } else if (kategori === 'taktikal') {
+      if (taktikalData && taktikalData.length > 0) {
+        $.each(taktikalData, function(index, item) {
+          let selected = (selectedId == item.id) ? 'selected' : '';
+          let text = item.kinerja.length > 100 ? item.kinerja.substring(0, 100) + '...' : item.kinerja;
+          options += `<option value="${item.id}" ${selected}>${escapeHtml(text)}</option>`;
+        });
+      } else {
+        options += '<option value="" disabled>-- Tidak ada data taktikal --</option>';
+      }
+    }
+    
+    return options;
+  }
+  
+  // Hapus baris sumber
+  $(document).on('click', '.btn-remove-sumber', function() {
+    let rowId = $(this).data('rowid');
+    $(`#${rowId}`).remove();
+  });
+  
+  // Helper function untuk escape HTML
+  function escapeHtml(text) {
+    var map = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, function(m) { return map[m]; });
   }
 
-  // Hapus baris indikator
-  $(document).on("click", ".remove-row", function(e) {
-    e.preventDefault();
-    $(this).closest(".field-row").remove();
+  // ================= BUTTON TAMBAH DATA SUMBER =================
+  $("#btn-tambah-sumber").click(function() {
+    addSumberRow();
   });
 
-  // ================= BUTTON TAMBAH INDIKATOR =================
-  $("#btn-add-indikator-l1").click(function() {
-    addIndikator("#indikator-container-level1");
-  });
+  // ================= RESET FORM UNTUK TAMBAH DATA =================
+  function resetForm() {
+    $('#id_level1').val('');
+    $('#kinerja').val('');
+    $('#sumber-container').empty();
+    isEditMode = false;
+    editDataId = null;
+    // Tambah 1 baris default untuk tambah baru
+    addSumberRow();
+  }
 
-  // ================= RESET MODAL SAAT TAMBAH BARU =================
-  $('#modalLevel1').on('show.bs.modal', function(e) {
-    if (!e.relatedTarget) return;
-
-    // Jika tombol yang diklik bukan btn-edit-level1 (berarti tombol tambah baru)
-    if (!$(e.relatedTarget).hasClass('btn-edit-level1')) {
-      $('#id_level1').val('');
-      $('#kinerja_level1').val('');
-      $('#indikator-container-level1').empty();
-      addIndikator('#indikator-container-level1');
-    }
+  // ================= EVENT UNTUK TAMBAH DATA =================
+  $('#btn-tambah').on('click', function() {
+    resetForm();
   });
 
   // ================= EDIT DATA =================
-  $(document).on('click', '.btn-edit-level1', function() {
-    // Ambil data dari atribut menggunakan .attr() seperti contoh
-    let id        = $(this).attr('data-id');
-    let kinerja   = $(this).attr('data-kinerja') || '';
+  $(document).on('click', '.btn-edit-level1', function(e) {
+    e.preventDefault();
+    
+    let id = $(this).attr('data-id');
+    let kinerja = $(this).attr('data-kinerja') || '';
     let indikator = $(this).attr('data-indikator') || '';
-
+    
+    // Reset form terlebih dahulu
+    $('#id_level1').val('');
+    $('#kinerja').val('');
+    $('#sumber-container').empty();
+    
     // Set nilai ke form
     $('#id_level1').val(id);
-    $('#kinerja_level1').val(kinerja);
-
-    // Kosongkan container indikator
-    $('#indikator-container-level1').empty();
-
-    // Proses indikator
+    $('#kinerja').val(kinerja);
+    isEditMode = true;
+    editDataId = id;
+    
+    // Proses indikator untuk edit
+    // Format indikator: kategori1|||sumber_id1|||kategori2|||sumber_id2|||...
     if (indikator && indikator.trim() !== '' && indikator !== 'null') {
-      // Pisahkan berdasarkan separator |||
       let indikatorArray = indikator.split('|||');
       
-      // Tambahkan setiap indikator ke form
-      indikatorArray.forEach(function(v) {
-        if(v && v.trim() !== '') {
-          addIndikator('#indikator-container-level1', v.trim());
+      // Loop untuk setiap pasangan kategori dan sumber_id
+      for (let i = 0; i < indikatorArray.length; i += 2) {
+        if (i + 1 < indikatorArray.length) {
+          let kategori = indikatorArray[i];
+          let sumberId = indikatorArray[i + 1];
+          addSumberRow(kategori, sumberId);
         }
-      });
+      }
     }
     
-    // Jika tidak ada indikator yang ditambahkan, berikan 1 baris kosong
-    if ($('#indikator-container-level1 .field-row').length === 0) {
-      addIndikator('#indikator-container-level1');
+    // Jika tidak ada data, tambah 1 baris kosong
+    if ($('#sumber-container .sumber-row').length === 0) {
+      addSumberRow();
     }
 
     // Tampilkan modal
@@ -377,20 +515,50 @@ $(document).ready(function() {
   // ================= SIMPAN DATA =================
   $('#btn-simpan-level1').click(function() {
     let id = $('#id_level1').val();
-    let kinerja = $('#kinerja_level1').val().trim();
+    let kinerja = $('#kinerja').val().trim();
 
     if (!kinerja) {
       alert('Kinerja wajib diisi!');
+      $('#kinerja').focus();
       return;
     }
-
-    // Kumpulkan indikator
-    let indikator = [];
-    $('#indikator-container-level1 input').each(function() {
-      let v = $(this).val().trim();
-      if (v) indikator.push(v);
+    
+    // Kumpulkan data sumber
+    let indikatorList = [];
+    let isValid = true;
+    
+    $('.sumber-row').each(function() {
+      let $row = $(this);
+      let kategori = $row.find('.kategori-select').val();
+      let sumberId = $row.find('.sumber-select').val();
+      
+      if (!kategori) {
+        alert('Kategori data sumber wajib dipilih!');
+        isValid = false;
+        return false;
+      }
+      
+      if (!sumberId) {
+        alert('Data sumber wajib dipilih!');
+        isValid = false;
+        return false;
+      }
+      
+      // Simpan dalam format: kategori|||sumber_id
+      indikatorList.push(kategori);
+      indikatorList.push(sumberId);
     });
-
+    
+    if (!isValid) return;
+    
+    if (indikatorList.length === 0) {
+      alert('Minimal satu data sumber harus ditambahkan!');
+      return;
+    }
+    
+    // Gabungkan indikator dengan delimiter |||
+    let indikator = indikatorList.join('|||');
+    
     $.ajax({
       url: BaseURL + 'Daerah/Ultimate_outcome_pd_simpan',
       type: 'POST',
@@ -402,6 +570,7 @@ $(document).ready(function() {
       dataType: 'json',
       success: function(res) {
         if (res.status === 'success') {
+          alert(res.message);
           location.reload();
         } else {
           alert(res.message || 'Gagal menyimpan');

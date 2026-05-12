@@ -3,92 +3,116 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Home extends CI_Controller {
 
-	/**
-	 * Index Page for this controller.
-	 *
-	 * Maps to the following URL
-	 * 		http://example.com/index.php/welcome
-	 *	- or -
-	 * 		http://example.com/index.php/welcome/index
-	 *	- or -
-	 * Since this controller is set as the default controller in
-	 * config/routes.php, it's displayed at http://example.com/
-	 *
-	 * So any other public methods not prefixed with an underscore will
-	 * map to /index.php/welcome/<method_name>
-	 * @see https://codeigniter.com/userguide3/general/urls.html
-	 */
 	public function index(){
 		$this->load->view('index');
 	}
 
-	// public function GetListKementerian(){
-  //   echo json_encode($this->db->where("deleted_at IS NULL")->get("kementerian")->result_array());
-	// }
-
 	public function Login(){  
-    $username = htmlentities($_POST['Username']);
-    $password = $_POST['Password'];
+		$username = htmlentities($_POST['Username']);
+		$password = $_POST['Password'];
 
-    // 1. Cek di tabel 'akun' (Biasanya Level 0, 1, 2, 3)
-    $User = $this->db->get_where('akun', array('Username' => $username));
-    
-    // 2. Jika tidak ada, cek di tabel 'akun_instansi' (Level 4)
-    if ($User->num_rows() == 0) {
-        // Pada akun_instansi, kita gunakan kolom 'nama' sebagai username
-        $User = $this->db->get_where('akun_instansi', array('nama' => $username));
-    }
+		// 1. Cek di tabel 'akun' (Level 0, 1, 2, 3)
+		$User = $this->db->get_where('akun', array('Username' => $username));
+		
+		// 2. Jika tidak ada, cek di tabel 'akun_instansi' (Level 4)
+		if ($User->num_rows() == 0) {
+			$User = $this->db->get_where('akun_instansi', array('nama' => $username));
+		}
 
-    if ($User->num_rows() == 0) {
-        echo "Username Salah!";
-    }
-    else {
-        $Akun = $User->result_array();
-        
-        // Cek password (mengantisipasi perbedaan nama kolom P kapital atau kecil)
-        $pass_db = isset($Akun[0]['Password']) ? $Akun[0]['Password'] : $Akun[0]['password'];
+		if ($User->num_rows() == 0) {
+			echo "Username Salah!";
+		}
+		else {
+			$Akun = $User->result_array();
+			
+			// Cek password (menyesuaikan dengan tabel yang berbeda)
+			$pass_db = '';
+			if (isset($Akun[0]['Password'])) {
+				$pass_db = $Akun[0]['Password'];
+			} elseif (isset($Akun[0]['password'])) {
+				$pass_db = $Akun[0]['password'];
+			}
 
-        if (password_verify($password, $pass_db)) {
-            $level = $Akun[0]['Level'];
+			if (empty($pass_db)) {
+				echo "Konfigurasi database error!";
+				return;
+			}
 
-            // Logika Session berdasarkan Level
-            if ($level == '0') {
-                $Session = array('Admin' => true, 'Level' => $level);
-                $this->session->set_userdata($Session);
-                echo $level;
-            } else if ($level == '1') {
-    $Session = array(
-        'isLoggedIn' => true,
-        'userLevel' => 1,
-        'Level' => 1, // tetap dipertahankan kalau dipakai di tempat lain
-        'IdKementerian' => $Akun[0]['IdKementerian'], // 🔥 WAJIB ADA
-        'Username' => $Akun[0]['Username']
-    );
-    $this->session->set_userdata($Session);
-    echo $level;
-            } else if ($level == '2') {
-                $Session = array('Admin' => true, 'Provinsi' => '', 'Level' => $level, 'KodeWilayah' => $Akun[0]['KodeWilayah']);
-                $this->session->set_userdata($Session);
-                echo $level;
-            } else if ($level == '3') {
-                $Session = array('Admin' => true, 'Level' => $level, 'KodeWilayah' => $Akun[0]['KodeWilayah']);
-                $this->session->set_userdata($Session);
-                echo $level;
-            } else if ($level == '4') {
-                // Sesi Khusus untuk Instansi (Tabel akun_instansi)
-                $Session = array(
-                    'Admin' => true, 
-                    'Instansi' => true, 
-                    'Level' => $level, 
-                    'KodeWilayah' => $Akun[0]['kodewilayah'], // Sesuai gambar: huruf kecil
-                    'NamaInstansi' => $Akun[0]['nama']
-                );
-                $this->session->set_userdata($Session);
-                echo $level;
-            } 
-        } else {
-            echo "Password Salah!";
-        }
-    }   
-}
+			if (password_verify($password, $pass_db)) {
+				$level = isset($Akun[0]['Level']) ? $Akun[0]['Level'] : 4; // Default 4 untuk akun_instansi
+
+				// Logika Session berdasarkan Level
+				if ($level == '0') {
+					$Session = array(
+						'isLoggedIn' => true,
+						'Admin' => true, 
+						'Level' => $level,
+						'KodeWilayah' => ''
+					);
+					$this->session->set_userdata($Session);
+					echo $level;
+					
+				} else if ($level == '1') {
+					$Session = array(
+						'isLoggedIn' => true,
+						'userLevel' => 1,
+						'Level' => 1,
+						'IdKementerian' => $Akun[0]['IdKementerian'],
+						'Username' => $Akun[0]['Username'],
+						'KodeWilayah' => ''
+					);
+					$this->session->set_userdata($Session);
+					echo $level;
+					
+				} else if ($level == '2') {
+					$Session = array(
+						'isLoggedIn' => true,
+						'Admin' => true, 
+						'Provinsi' => '', 
+						'Level' => $level, 
+						'KodeWilayah' => isset($Akun[0]['KodeWilayah']) ? $Akun[0]['KodeWilayah'] : ''
+					);
+					$this->session->set_userdata($Session);
+					echo $level;
+					
+				} else if ($level == '3') {
+					$Session = array(
+						'isLoggedIn' => true,
+						'Admin' => true, 
+						'Level' => $level, 
+						'KodeWilayah' => isset($Akun[0]['KodeWilayah']) ? $Akun[0]['KodeWilayah'] : ''
+					);
+					$this->session->set_userdata($Session);
+					echo $level;
+					
+				} else if ($level == '4' || empty($level)) {
+					// Sesi Khusus untuk Instansi (Tabel akun_instansi)
+					// Ambil kodewilayah dari tabel akun_instansi
+					$kodeWilayah = isset($Akun[0]['kodewilayah']) ? $Akun[0]['kodewilayah'] : 
+								  (isset($Akun[0]['KodeWilayah']) ? $Akun[0]['KodeWilayah'] : '');
+					
+					// Ambil urusan_id jika ada (bisa multiple, dipisah koma)
+					$urusanId = isset($Akun[0]['urusan_id']) ? $Akun[0]['urusan_id'] : '';
+					
+					$Session = array(
+						'isLoggedIn' => true,
+						'Admin' => true, 
+						'Instansi' => true, 
+						'Level' => 4, 
+						'KodeWilayah' => $kodeWilayah,
+						'NamaInstansi' => isset($Akun[0]['nama']) ? $Akun[0]['nama'] : '',
+						'IdInstansi' => isset($Akun[0]['id']) ? $Akun[0]['id'] : '',
+						'IdKementerian' => isset($Akun[0]['idkementerian']) ? $Akun[0]['idkementerian'] : '',
+						'UrusanId' => $urusanId,
+						'Username' => $username
+					);
+					$this->session->set_userdata($Session);
+					
+					echo '4';
+				}
+			} else {
+				echo "Password Salah!";
+			}
+		}  
+	}
 }
