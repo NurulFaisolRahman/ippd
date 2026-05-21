@@ -358,6 +358,8 @@
             window.location = BaseURL + "Provinsi/VisiRPJPD";
           } else if (Respon == 3) {
             window.location = BaseURL + "Daerah/UrusanPD"
+          } else if (Respon == 4) {
+            window.location = BaseURL + "Instansi/PermasalahanPD"
           } else {
             alert(Respon);
           }

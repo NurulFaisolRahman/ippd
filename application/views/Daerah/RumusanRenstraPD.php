@@ -34,6 +34,14 @@
                                                 </select>
                                             </div>
 
+                                            <!-- FILTER INSTANSI SEBELUM LOGIN -->
+                                            <div class="col-lg-3 col-md-6" id="FilterInstansiGroupBefore" style="display: none;">
+                                                <label><b>Filter Instansi</b></label>
+                                                <select class="form-control" id="FilterInstansiBeforeLogin">
+                                                    <option value="">-- Semua Instansi --</option>
+                                                </select>
+                                            </div>
+
                                             <div class="col-lg-2 col-md-6">
                                                 <label>&nbsp;</label>
                                                 <button class="btn btn-primary btn-block" id="Filter">FILTER</button>
@@ -49,33 +57,82 @@
                             ?>
                                 <div class="alert alert-info mb-4">
                                     <strong>Wilayah Aktif:</strong> <?= $nama_wilayah ?>
+                                    <?php 
+                                    $filter_instansi_id = $this->input->get('instansi_id', TRUE);
+                                    if (!empty($filter_instansi_id)) { 
+                                        $instansi_terpilih = $this->db->select('nama')->from('akun_instansi')->where('id', $filter_instansi_id)->get()->row_array();
+                                    ?>
+                                        <br><strong>Instansi terpilih:</strong> <?= htmlspecialchars($instansi_terpilih['nama'] ?? '-') ?>
+                                    <?php } ?>
                                 </div>
                             <?php } ?>
                         <?php } ?>
 
-                        <!-- TOMBOL TAMBAH GRUP -->
-                         <div class="basic-tb-hd">
-                        <?php if ($this->session->userdata('Level') == 3) { ?>
-                            <button type="button" class="btn btn-success mb-3" data-toggle="modal" data-target="#ModalTambahHeader">
-                                <i class="fa fa-plus"></i> Tambah Grup Renstra PD
-                            </button>
-                        <?php } ?>
+                        <!-- FILTER INSTANSI (UNTUK YANG SUDAH LOGIN DAN BUKAN ROLE 4) -->
+                        <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
+                            <div class="form-example-wrap" style="margin-bottom: 20px;">
+                                <div class="form-example-int form-horizental">
+                                    <div class="form-group">
+                                        <div class="row filter-row">
+                                            <div class="col-lg-4 col-md-6">
+                                                <div class="filter-group">
+                                                    <label for="FilterInstansi"><b>Filter Instansi</b></label>
+                                                    <select class="form-control filter-select" id="FilterInstansi">
+                                                        <option value="">-- Semua Instansi --</option>
+                                                        <?php foreach ($ListInstansi as $ins) { ?>
+                                                            <option value="<?= $ins['id'] ?>" <?= ($FilterInstansiId == $ins['id']) ? 'selected' : '' ?>>
+                                                                <?= html_escape($ins['nama']) ?>
+                                                            </option>
+                                                        <?php } ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-6">
+                                                <div class="filter-group" style="margin-top: 28px;">
+                                                    <button class="btn btn-info notika-btn-info btn-block" id="FilterInstansiBtn">
+                                                        <b>Tampilkan</b>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-6">
+                                                <div class="filter-group" style="margin-top: 28px;">
+                                                    <button class="btn btn-default notika-btn-default btn-block" id="ResetFilterBtn">
+                                                        <b>Reset</b>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+                        <?php } ?>
+
+
+                        <!-- TOMBOL TAMBAH GRUP -->
+                        <div class="basic-tb-hd">
+                            <?php if ($IsRole4) { ?>
+                                <button type="button" class="btn btn-success mb-3" data-toggle="modal" data-target="#ModalTambahHeader">
+                                    <i class="fa fa-plus"></i> Tambah Grup Renstra PD
+                                </button>
+                            <?php } ?>
+                        </div>
+
+
                         <div class="table-responsive">
                             <table id="data-table-basic" class="table table-striped table-hover table-bordered">
-                                <thead >
+                                <thead>
                                     <tr>
                                         <th class="text-center" style="width:60px;">No</th>
-                                        <th>NSPK dan Sasaran RPJMD yang Relevan</th>
-                                        <th>Tujuan PD</th>
-                                        <th>Sasaran PD</th>
-                                        <th>Outcome</th>
-                                        <th>Output</th>
-                                        <th>Indikator</th>
-                                        <th>Program/Kegiatan</th>
-                                        <th>Keterangan</th>
-                                        <?php if ($this->session->userdata('Level') == 3) { ?>
-                                            <th class="text-center" style="width:160px;">Aksi</th>
+                                        <th style="width:25%;">NSPK dan Sasaran RPJMD yang Relevan</th>
+                                        <th style="width:15%;">Tujuan PD</th>
+                                        <th style="width:15%;">Sasaran PD</th>
+                                        <th style="width:10%;">Outcome</th>
+                                        <th style="width:10%;">Output</th>
+                                        <th style="width:10%;">Indikator</th>
+                                        <th style="width:15%;">Program/Kegiatan</th>
+                                        <th style="width:10%;">Keterangan</th>
+                                        <?php if ($IsRole4) { ?>
+                                            <th class="text-center" style="width:100px;">Aksi</th>
                                         <?php } ?>
                                     </tr>
                                 </thead>
@@ -89,7 +146,6 @@
                                             if ($is_new_group) $group_no++;
                                             $prev_header_id = $r['header_id'];
                                         ?>
-                                        
                                             <tr <?= $is_new_group ? 'class="table-primary"' : '' ?>>
                                                 <!-- No Grup -->
                                                 <td class="text-center align-middle font-weight-bold" <?= $is_new_group ? '' : 'style="display:none;"' ?> rowspan="<?= $is_new_group ? $GroupCounts[$r['header_id']] : 1 ?>">
@@ -99,35 +155,31 @@
                                                 <!-- NSPK + Sasaran RPJMD Relevan -->
                                                 <td class="align-top" <?= $is_new_group ? '' : 'style="display:none;"' ?> rowspan="<?= $is_new_group ? $GroupCounts[$r['header_id']] : 1 ?>">
                                                    <div class="p-2">
+                                                        <strong>Norma:</strong><br>
+                                                        <?php if(!empty($r['norma'])){ foreach($r['norma'] as $n){ ?>
+                                                            • <?= html_escape($n['judul_nspk']) ?><br>
+                                                        <?php } } else { echo "-<br>"; } ?>
 
-                                                    <strong>Norma:</strong><br>
-                                                    <?php if(!empty($r['norma'])){ foreach($r['norma'] as $n){ ?>
-                                                        • <?= html_escape($n['judul_nspk']) ?><br>
-                                                    <?php } } else { echo "-<br>"; } ?>
+                                                        <br><strong>Standar:</strong><br>
+                                                        <?php if(!empty($r['standar'])){ foreach($r['standar'] as $s){ ?>
+                                                            • <?= html_escape($s['judul_nspk']) ?><br>
+                                                        <?php } } else { echo "-<br>"; } ?>
 
-                                                    <br><strong>Standar:</strong><br>
-                                                    <?php if(!empty($r['standar'])){ foreach($r['standar'] as $s){ ?>
-                                                        • <?= html_escape($s['judul_nspk']) ?><br>
-                                                    <?php } } else { echo "-<br>"; } ?>
+                                                        <br><strong>Prosedur:</strong><br>
+                                                        <?php if(!empty($r['prosedur'])){ foreach($r['prosedur'] as $p){ ?>
+                                                            • <?= html_escape($p['judul_nspk']) ?><br>
+                                                        <?php } } else { echo "-<br>"; } ?>
 
-                                                    <br><strong>Prosedur:</strong><br>
-                                                    <?php if(!empty($r['prosedur'])){ foreach($r['prosedur'] as $p){ ?>
-                                                        • <?= html_escape($p['judul_nspk']) ?><br>
-                                                    <?php } } else { echo "-<br>"; } ?>
+                                                        <br><strong>Kriteria:</strong><br>
+                                                        <?php if(!empty($r['kriteria'])){ foreach($r['kriteria'] as $k){ ?>
+                                                            • <?= html_escape($k['judul_nspk']) ?><br>
+                                                        <?php } } else { echo "-<br>"; } ?>
 
-                                                    <br><strong>Kriteria:</strong><br>
-                                                    <?php if(!empty($r['kriteria'])){ foreach($r['kriteria'] as $k){ ?>
-                                                        • <?= html_escape($k['judul_nspk']) ?><br>
-                                                    <?php } } else { echo "-<br>"; } ?>
+                                                        <hr style="margin:10px 0;">
 
-                                                    <hr style="margin:10px 0;">
-
-                                                    <strong>Sasaran RPJMD Relevan:</strong><br>
-                                                    <?= html_escape($r['sasaran_rpjmd'] ?? '-') ?>
-
-                                                </div>
-
-
+                                                        <strong>Sasaran RPJMD Relevan:</strong><br>
+                                                        <?= html_escape($r['sasaran_rpjmd'] ?? '-') ?>
+                                                    </div>
                                                 </td>
 
                                                 <!-- Tujuan PD -->
@@ -138,36 +190,28 @@
                                                 <!-- Sasaran PD -->
                                                 <td style="vertical-align:top;">
                                                     <div style="display:flex; flex-direction:column; height:100%;">
-
-                                                        <!-- Tombol -->
                                                         <div style="display:flex; justify-content:center; gap:5px; margin-bottom:5px;">
-                                                            <?php if ($this->session->userdata('Level') == 3) { ?>
-
-                                                                <button class="btn btn-sm btn-success TambahDetail"
+                                                            <?php if ($IsRole4) { ?>
+                                                                <button class="btn btn-sm btn-success TambahDetail" title="Tambah Sasaran PD"
                                                                         data-header-id="<?= $r['header_id'] ?>"
                                                                         style="width:30px;height:30px;padding:0;">
                                                                     <i class="fa fa-plus"></i>
                                                                 </button>
-
                                                                 <?php if (!empty($r['sasaran_pd'])) { ?>
-                                                                    <button class="btn btn-sm btn-primary EditDetail"
+                                                                    <button class="btn btn-sm btn-primary EditDetail" title="Edit Sasaran PD"
                                                                             data-id="<?= $r['detail_id'] ?>"
                                                                             data-sasaran="<?= $r['sasaran_pd'] ?>"
                                                                             style="width:30px;height:30px;padding:0;">
                                                                         <i class="fa fa-edit"></i>
                                                                     </button>
-
-                                                                    <button class="btn btn-sm btn-danger HapusDetail"
+                                                                    <button class="btn btn-sm btn-danger HapusDetail" title="Hapus Sasaran PD"
                                                                             data-id="<?= $r['detail_id'] ?>"
                                                                             style="width:30px;height:30px;padding:0;">
-                                                                        <i class="notika-icon notika-trash"></i>
+                                                                        <i class="fa fa-trash"></i>
                                                                     </button>
                                                                 <?php } ?>
-
                                                             <?php } ?>
                                                         </div>
-
-                                                        <!-- Isi -->
                                                         <div style="flex-grow:1; overflow:auto; padding-left:5px;">
                                                             <?php if (!empty($r['sasaran_pd']) && isset($MapSasaran[$r['sasaran_pd']])) { ?>
                                                                 <div>• <?= html_escape($MapSasaran[$r['sasaran_pd']]) ?></div>
@@ -175,38 +219,34 @@
                                                                 <span class="text-muted">— Belum ada sasaran PD —</span>
                                                             <?php } ?>
                                                         </div>
-
                                                     </div>
                                                 </td>
 
-
-                                             <!-- Outcome -->
+                                               <!-- Outcome -->
                                                 <td style="vertical-align:top;">
                                                     <div style="display:flex; flex-direction:column; height:100%;">
-
                                                         <div style="display:flex; justify-content:center; gap:5px; margin-bottom:5px;">
-                                                            <?php if ($this->session->userdata('Level') == 3) { ?>
-
-                                                                <button class="btn btn-sm btn-success TambahKolom"
+                                                            <?php if ($IsRole4 && !empty($r['detail_id'])) { ?>
+                                                                <!-- Tombol Tambah Outcome (SELALU TAMPIL jika ada detail_id) -->
+                                                                <button class="btn btn-sm btn-success TambahKolom" title="Tambah Outcome"
                                                                         data-id="<?= $r['detail_id'] ?>"
                                                                         data-kolom="outcome"
                                                                         style="width:30px;height:30px;padding:0;">
                                                                     <i class="fa fa-plus"></i>
                                                                 </button>
-
+                                                                
+                                                                <!-- Tombol Edit Outcome (hanya jika outcome tidak kosong) -->
                                                                 <?php if (!empty($r['outcome'])) { ?>
-                                                                    <button class="btn btn-sm btn-primary EditKolom"
+                                                                    <button class="btn btn-sm btn-primary EditKolom" title="Edit Outcome"
                                                                             data-id="<?= $r['detail_id'] ?>"
                                                                             data-kolom="outcome"
-                                                                            data-raw='<?= html_escape($r["outcome"]) ?>'
+                                                                            data-raw='<?= html_escape($r["outcome"] ?? '') ?>'
                                                                             style="width:30px;height:30px;padding:0;">
                                                                         <i class="fa fa-edit"></i>
                                                                     </button>
                                                                 <?php } ?>
-
                                                             <?php } ?>
                                                         </div>
-
                                                         <div style="flex-grow:1; overflow:auto; padding-left:5px;">
                                                             <?php if (!empty($r['outcome'])) {
                                                                 $items = array_filter(array_map('trim', explode('|||', $r['outcome'])));
@@ -217,38 +257,32 @@
                                                                 <span class="text-muted">—</span>
                                                             <?php } ?>
                                                         </div>
-
                                                     </div>
                                                 </td>
+ 
 
-
-                                                <!-- Output -->
+                                                                                                <!-- Output -->
                                                 <td style="vertical-align:top;">
                                                     <div style="display:flex; flex-direction:column; height:100%;">
-
                                                         <div style="display:flex; justify-content:center; gap:5px; margin-bottom:5px;">
-                                                            <?php if ($this->session->userdata('Level') == 3) { ?>
-
-                                                                <button class="btn btn-sm btn-success TambahKolom"
+                                                            <?php if ($IsRole4 && !empty($r['detail_id'])) { ?>
+                                                                <button class="btn btn-sm btn-success TambahKolom" title="Tambah Output"
                                                                         data-id="<?= $r['detail_id'] ?>"
                                                                         data-kolom="output"
                                                                         style="width:30px;height:30px;padding:0;">
                                                                     <i class="fa fa-plus"></i>
                                                                 </button>
-
                                                                 <?php if (!empty($r['output'])) { ?>
-                                                                    <button class="btn btn-sm btn-primary EditKolom"
+                                                                    <button class="btn btn-sm btn-primary EditKolom" title="Edit Output"
                                                                             data-id="<?= $r['detail_id'] ?>"
                                                                             data-kolom="output"
-                                                                            data-raw='<?= html_escape($r["output"]) ?>'
+                                                                            data-raw='<?= html_escape($r["output"] ?? '') ?>'
                                                                             style="width:30px;height:30px;padding:0;">
                                                                         <i class="fa fa-edit"></i>
                                                                     </button>
                                                                 <?php } ?>
-
                                                             <?php } ?>
                                                         </div>
-
                                                         <div style="flex-grow:1; overflow:auto; padding-left:5px;">
                                                             <?php if (!empty($r['output'])) {
                                                                 $items = array_filter(array_map('trim', explode('|||', $r['output'])));
@@ -259,38 +293,31 @@
                                                                 <span class="text-muted">—</span>
                                                             <?php } ?>
                                                         </div>
-
                                                     </div>
                                                 </td>
 
-
-                                        <!-- Indikator -->
+                                                <!-- Indikator -->
                                                 <td style="vertical-align:top;">
                                                     <div style="display:flex; flex-direction:column; height:100%;">
-
                                                         <div style="display:flex; justify-content:center; gap:5px; margin-bottom:5px;">
-                                                            <?php if ($this->session->userdata('Level') == 3) { ?>
-
-                                                                <button class="btn btn-sm btn-success TambahKolom"
+                                                            <?php if ($IsRole4 && !empty($r['detail_id'])) { ?>
+                                                                <button class="btn btn-sm btn-success TambahKolom" title="Tambah Indikator"
                                                                         data-id="<?= $r['detail_id'] ?>"
                                                                         data-kolom="indikator"
                                                                         style="width:30px;height:30px;padding:0;">
                                                                     <i class="fa fa-plus"></i>
                                                                 </button>
-
                                                                 <?php if (!empty($r['indikator'])) { ?>
-                                                                    <button class="btn btn-sm btn-primary EditKolom"
+                                                                    <button class="btn btn-sm btn-primary EditKolom" title="Edit Indikator"
                                                                             data-id="<?= $r['detail_id'] ?>"
                                                                             data-kolom="indikator"
-                                                                            data-raw='<?= html_escape($r["indikator"]) ?>'
+                                                                            data-raw='<?= html_escape($r["indikator"] ?? '') ?>'
                                                                             style="width:30px;height:30px;padding:0;">
                                                                         <i class="fa fa-edit"></i>
                                                                     </button>
                                                                 <?php } ?>
-
                                                             <?php } ?>
                                                         </div>
-
                                                         <div style="flex-grow:1; overflow:auto; padding-left:5px;">
                                                             <?php if (!empty($r['indikator'])) {
                                                                 $items = array_filter(array_map('trim', explode('|||', $r['indikator'])));
@@ -301,133 +328,94 @@
                                                                 <span class="text-muted">—</span>
                                                             <?php } ?>
                                                         </div>
-
                                                     </div>
                                                 </td>
-
 
                                                 <!-- Program/Kegiatan -->
                                                 <td style="vertical-align:top;">
                                                     <div style="display:flex; flex-direction:column; height:100%;">
-
                                                         <?php
-                                                        $items = [];
-                                                        $rawValues = [];
-
+                                                        $prog_items = [];
                                                         if (!empty($r['program'])) {
                                                             foreach (explode('|||', $r['program']) as $v) {
                                                                 $v = trim($v);
-                                                                if ($v) {
-                                                                    $items[] = "Program: " . $v;
-                                                                    $rawValues[] = $v;
-                                                                }
+                                                                if ($v) $prog_items[] = "Program: " . $v;
                                                             }
                                                         }
-
                                                         if (!empty($r['kegiatan'])) {
                                                             foreach (explode('|||', $r['kegiatan']) as $v) {
                                                                 $v = trim($v);
-                                                                if ($v) {
-                                                                    $items[] = "Kegiatan: " . $v;
-                                                                    $rawValues[] = $v;
-                                                                }
+                                                                if ($v) $prog_items[] = "Kegiatan: " . $v;
                                                             }
                                                         }
-
                                                         if (!empty($r['sub_kegiatan'])) {
                                                             foreach (explode('|||', $r['sub_kegiatan']) as $v) {
                                                                 $v = trim($v);
-                                                                if ($v) {
-                                                                    $items[] = "Sub Kegiatan: " . $v;
-                                                                    $rawValues[] = $v;
-                                                                }
+                                                                if ($v) $prog_items[] = "Sub Kegiatan: " . $v;
                                                             }
                                                         }
                                                         ?>
-
-                                                        <!-- Tombol -->
                                                         <div style="display:flex; justify-content:center; gap:5px; margin-bottom:5px;">
-                                                            <?php if ($this->session->userdata('Level') == 3) { ?>
-
-                                                                <!-- Tambah -->
-                                                                <button class="btn btn-sm btn-success TambahKolom"
+                                                            <?php if ($IsRole4 && !empty($r['detail_id'])) { ?>
+                                                                <button class="btn btn-sm btn-success TambahKolom" title="Tambah Program/Kegiatan"
                                                                         data-id="<?= $r['detail_id'] ?>"
                                                                         data-kolom="program_kegiatan"
                                                                         style="width:30px;height:30px;padding:0;">
                                                                     <i class="fa fa-plus"></i>
                                                                 </button>
-
-                                                                <?php if (!empty($items)) { ?>
-
-                                                                    <!-- Edit -->
-                                                                    <button class="btn btn-sm btn-primary EditKolom"
+                                                                <?php if (!empty($prog_items)) { ?>
+                                                                    <button class="btn btn-sm btn-primary EditKolom" title="Edit Program/Kegiatan"
                                                                             data-id="<?= $r['detail_id'] ?>"
                                                                             data-kolom="program_kegiatan"
                                                                             data-program="<?= html_escape($r['program'] ?? '') ?>"
                                                                             data-kegiatan="<?= html_escape($r['kegiatan'] ?? '') ?>"
                                                                             data-sub="<?= html_escape($r['sub_kegiatan'] ?? '') ?>"
-
                                                                             style="width:30px;height:30px;padding:0;">
                                                                         <i class="fa fa-edit"></i>
                                                                     </button>
-
-                                                                    <!-- Hapus -->
-                                                                    <button class="btn btn-sm btn-danger HapusKolom"
+                                                                    <button class="btn btn-sm btn-danger HapusKolom" title="Hapus Program/Kegiatan"
                                                                             data-id="<?= $r['detail_id'] ?>"
                                                                             data-kolom="program_kegiatan"
                                                                             style="width:30px;height:30px;padding:0;">
                                                                         <i class="fa fa-trash"></i>
                                                                     </button>
-
                                                                 <?php } ?>
-
                                                             <?php } ?>
                                                         </div>
-
-                                                        <!-- Isi -->
                                                         <div style="flex-grow:1; overflow:auto; padding-left:5px;">
-                                                            <?php
-                                                            if (!empty($items)) {
-                                                                foreach ($items as $item) {
+                                                            <?php if (!empty($prog_items)) {
+                                                                foreach ($prog_items as $item) {
                                                                     echo '<div>• ' . html_escape($item) . '</div>';
                                                                 }
-                                                            } else {
-                                                                echo '<span class="text-muted">—</span>';
-                                                            }
-                                                            ?>
+                                                            } else { ?>
+                                                                <span class="text-muted">—</span>
+                                                            <?php } ?>
                                                         </div>
-
                                                     </div>
                                                 </td>
-
 
                                                 <!-- Keterangan -->
                                                 <td style="vertical-align:top;">
                                                     <div style="display:flex; flex-direction:column; height:100%;">
-
                                                         <div style="display:flex; justify-content:center; gap:5px; margin-bottom:5px;">
-                                                            <?php if ($this->session->userdata('Level') == 3) { ?>
-
-                                                                <button class="btn btn-sm btn-success TambahKolom"
+                                                            <?php if ($IsRole4 && !empty($r['detail_id'])) { ?>
+                                                                <button class="btn btn-sm btn-success TambahKolom" title="Tambah Keterangan"
                                                                         data-id="<?= $r['detail_id'] ?>"
                                                                         data-kolom="keterangan"
                                                                         style="width:30px;height:30px;padding:0;">
                                                                     <i class="fa fa-plus"></i>
                                                                 </button>
-
                                                                 <?php if (!empty($r['keterangan'])) { ?>
-                                                                    <button class="btn btn-sm btn-primary EditKolom"
+                                                                    <button class="btn btn-sm btn-primary EditKolom" title="Edit Keterangan"
                                                                             data-id="<?= $r['detail_id'] ?>"
                                                                             data-kolom="keterangan"
-                                                                            data-raw='<?= html_escape($r["keterangan"]) ?>'
+                                                                            data-raw='<?= html_escape($r["keterangan"] ?? '') ?>'
                                                                             style="width:30px;height:30px;padding:0;">
                                                                         <i class="fa fa-edit"></i>
                                                                     </button>
                                                                 <?php } ?>
-
                                                             <?php } ?>
                                                         </div>
-
                                                         <div style="flex-grow:1; overflow:auto; padding-left:5px;">
                                                             <?php if (!empty($r['keterangan'])) {
                                                                 $items = array_filter(array_map('trim', explode('|||', $r['keterangan'])));
@@ -438,43 +426,33 @@
                                                                 <span class="text-muted">—</span>
                                                             <?php } ?>
                                                         </div>
-
                                                     </div>
                                                 </td>
 
-
-                                                 <!-- Aksi -->
-                                                <!-- Aksi Grup Header -->
-                                                    <?php if ($this->session->userdata('Level') == 3) { ?>
+                                                <!-- Aksi Header -->
+                                                <?php if ($IsRole4) { ?>
                                                     <td class="text-center align-middle">
-
-                                                        <!-- Edit Header -->
-                                                        <button class="btn btn-sm btn-warning EditHeader"
+                                                        <button class="btn btn-sm btn-warning EditHeader" title="Edit Grup"
                                                                 data-id="<?= $r['header_id'] ?>"
                                                                 data-nspk="<?= $r['tujuansasaran_master_id'] ?>"
                                                                 data-tujuan="<?= $r['tujuan_pd'] ?>"
                                                                 style="width:30px;height:30px;padding:0;">
                                                             <i class="fa fa-edit"></i>
                                                         </button>
-
-                                                        <!-- Hapus Header -->
-                                                        <button class="btn btn-sm btn-danger HapusHeader"
+                                                        <button class="btn btn-sm btn-danger HapusHeader" title="Hapus Grup"
                                                                 data-id="<?= $r['header_id'] ?>"
                                                                 style="width:30px;height:30px;padding:0;">
                                                             <i class="fa fa-trash"></i>
                                                         </button>
-
                                                     </td>
-                                                    <?php } ?>
-
-
+                                                <?php } ?>
                                             </tr>
                                         <?php } ?>
                                     <?php } else { ?>
                                         <tr>
-                                            <td colspan="11" class="text-center py-5 text-muted">
+                                            <td colspan="<?= $IsRole4 ? '11' : '10' ?>" class="text-center py-5 text-muted">
                                                 <i class="fa fa-folder-open fa-3x mb-3 d-block opacity-50"></i>
-                                                <div>Belum ada data Rumusan Renstra PD untuk wilayah ini.</div>
+                                                <div>Belum ada Rumusan Renstra PD untuk wilayah ini.</div>
                                                 <small class="d-block mt-2">Silakan tambah grup baru untuk memulai.</small>
                                             </td>
                                         </tr>
@@ -494,35 +472,36 @@
 <!-- ===================================================================== -->
 
 <!-- Modal Tambah Grup Baru (Header) -->
-<div class="modal fade" id="ModalTambahHeader" tabindex="-1" role="dialog" aria-labelledby="modalTambahHeaderLabel">
+<div class="modal fade" id="ModalTambahHeader" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);">
         <div class="modal-content">
-            <div class="modal-header ">
-                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+            <div class="modal-header">
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>
-                <h5 class="modal-title" id="modalTambahHeaderLabel">
+                <h5 class="modal-title">
                     <i class="fa fa-plus-circle"></i> Tambah Grup Renstra PD Baru
                 </h5>
             </div>
             <div class="modal-body">
+                <?php if ($IsRole4 && !empty($NamaInstansi)) { ?>
+                    <div class="alert alert-info">
+                        <strong>Instansi:</strong> <?= htmlspecialchars($NamaInstansi) ?>
+                    </div>
+                <?php } ?>
                 <div class="form-group">
                     <label class="font-weight-bold">NSPK</label>
-                   <select id="NSPK" class="form-control" style="white-space: pre-line;" required>
-    <option value="">-- Pilih NSPK --</option>
-
-    <?php foreach ($ListNSPK as $n) { ?>
-        <option value="<?= $n['id'] ?>">
-            <?= html_escape($n['nama_nspk']) ?>
-            <?php if(!empty($n['sasaran_rpjmd'])){ ?>
-                - (<?= html_escape($n['sasaran_rpjmd']) ?>)
-            <?php } ?>
-        </option>
-    <?php } ?>
-
-</select>
-
-
+                    <select id="NSPK" class="form-control" style="white-space: pre-line;" required>
+                        <option value="">-- Pilih NSPK --</option>
+                        <?php foreach ($ListNSPK as $n) { ?>
+                            <option value="<?= $n['id'] ?>">
+                                <?= html_escape($n['nama_nspk']) ?>
+                                <?php if(!empty($n['sasaran_rpjmd'])){ ?>
+                                    - (<?= html_escape($n['sasaran_rpjmd']) ?>)
+                                <?php } ?>
+                            </option>
+                        <?php } ?>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label class="font-weight-bold">Tujuan PD</label>
@@ -544,17 +523,16 @@
 </div>
 
 <!-- Modal Tambah Sasaran PD -->
-<div class="modal fade" id="ModalTambahDetail" tabindex="-1" role="dialog" aria-labelledby="modalTambahDetailLabel">
+<div class="modal fade" id="ModalTambahDetail" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-dialog-centered modal-md" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);">
         <div class="modal-content">
-            <div class="modal-header ">
-                <h5 class="modal-title" id="modalTambahDetailLabel">
+            <div class="modal-header">
+                <h5 class="modal-title">
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
+                        <span aria-hidden="true">×</span>
+                    </button>
                     <i class="fa fa-plus-circle"></i> Tambah Sasaran PD
                 </h5>
-                
             </div>
             <div class="modal-body">
                 <input type="hidden" id="TambahHeaderId">
@@ -578,14 +556,14 @@
 </div>
 
 <!-- Modal Edit Sasaran PD -->
-<div class="modal fade" id="ModalEditDetail" tabindex="-1" role="dialog" aria-labelledby="modalEditDetailLabel">
+<div class="modal fade" id="ModalEditDetail" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-dialog-centered modal-md" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);">
         <div class="modal-content">
-            <div class="modal-header ">
-                <h5 class="modal-title" id="modalEditDetailLabel">
+            <div class="modal-header">
+                <h5 class="modal-title">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
+                        <span aria-hidden="true">×</span>
+                    </button>
                     <i class="fa fa-edit"></i> Edit Sasaran PD
                 </h5>
             </div>
@@ -611,85 +589,71 @@
 </div>
 
 <!-- Modal Edit Grup Header -->
-<div class="modal fade" id="ModalEditHeader" tabindex="-1"role="dialog" aria-labelledby="modalEditDetailLabel">
+<div class="modal fade" id="ModalEditHeader" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-dialog-centered modal-md" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);">
         <div class="modal-content">
-
-      <div class="modal-header">
-        <h5 class="modal-title">
-          <i class="fa fa-edit"></i> Edit Grup Renstra PD
-        </h5>
-        <button type="button" class="close" data-dismiss="modal">
-          <span>&times;</span>
-        </button>
-      </div>
-
-      <div class="modal-body">
-
-        <input type="hidden" id="EditHeaderId">
-
-        <div class="form-group">
-          <label><b>NSPK</b></label>
-        <select id="EditNSPK" class="form-control">
-    <?php foreach ($ListNSPK as $n) { ?>
-        <option value="<?= $n['id'] ?>">
-            <?= html_escape($n['nama_nspk']) ?>
-            <?php if(!empty($n['sasaran_rpjmd'])){ ?>
-                - (<?= html_escape($n['sasaran_rpjmd']) ?>)
-            <?php } ?>
-        </option>
-    <?php } ?>
-</select>
-
-
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fa fa-edit"></i> Edit Grup Renstra PD
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="EditHeaderId">
+                <div class="form-group">
+                    <label><b>NSPK</b></label>
+                    <select id="EditNSPK" class="form-control">
+                        <?php foreach ($ListNSPK as $n) { ?>
+                            <option value="<?= $n['id'] ?>">
+                                <?= html_escape($n['nama_nspk']) ?>
+                                <?php if(!empty($n['sasaran_rpjmd'])){ ?>
+                                    - (<?= html_escape($n['sasaran_rpjmd']) ?>)
+                                <?php } ?>
+                            </option>
+                        <?php } ?>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><b>Tujuan PD</b></label>
+                    <select id="EditTujuanPD" class="form-control">
+                        <?php foreach ($ListTujuan as $t) { ?>
+                            <option value="<?= $t['id'] ?>">
+                                <?= html_escape($t['tujuan_pd']) ?>
+                            </option>
+                        <?php } ?>
+                    </select>
+                </div>
+                <button class="btn btn-warning btn-block text-white" id="BtnUpdateHeader">
+                    <i class="fa fa-save"></i> UPDATE GRUP
+                </button>
+            </div>
         </div>
-
-        <div class="form-group">
-          <label><b>Tujuan PD</b></label>
-          <select id="EditTujuanPD" class="form-control">
-            <?php foreach ($ListTujuan as $t) { ?>
-              <option value="<?= $t['id'] ?>">
-                <?= html_escape($t['tujuan_pd']) ?>
-              </option>
-            <?php } ?>
-          </select>
-        </div>
-
-        <button class="btn btn-warning btn-block text-white" id="BtnUpdateHeader">
-          <i class="fa fa-save"></i> UPDATE GRUP
-        </button>
-
-      </div>
     </div>
-  </div>
 </div>
 
-
 <!-- Modal Reusable Tambah/Edit Multi-Value -->
-<div class="modal fade" id="ModalMultiValue" tabindex="-1" role="dialog" aria-labelledby="modalMultiValueLabel">
+<div class="modal fade" id="ModalMultiValue" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-xl" style="top:10%;">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalMultiValueLabel">
+                <h5 class="modal-title">
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
+                        <span aria-hidden="true">×</span>
+                    </button>
                     <i class="fa fa-list-ul"></i> <span id="ModalMultiTitle">Tambah / Edit Data</span>
                 </h5>
-                
             </div>
             <div class="modal-body">
                 <input type="hidden" id="MultiDetailId">
-<input type="hidden" id="MultiKolom">
-
-<select id="JenisProgramKegiatan" class="form-control mb-3" style="display:none;">
-    <option value="program">Program</option>
-    <option value="kegiatan">Kegiatan</option>
-    <option value="sub_kegiatan">Sub Kegiatan</option>
-</select>
-
-<div id="ListMultiItem" class="mb-3"></div>
-
+                <input type="hidden" id="MultiKolom">
+                <select id="JenisProgramKegiatan" class="form-control mb-3" style="display:none;">
+                    <option value="program">Program</option>
+                    <option value="kegiatan">Kegiatan</option>
+                    <option value="sub_kegiatan">Sub Kegiatan</option>
+                </select>
+                <div id="ListMultiItem" class="mb-3"></div>
                 <hr>
                 <button class="btn btn-success btn-block mt-3" id="BtnSimpanMulti">
                     <i class="fa fa-save"></i> SIMPAN PERUBAHAN
@@ -699,34 +663,28 @@
     </div>
 </div>
 
-<!-- Styling -->
 <style>
 .btn-remove-multi {
     display: inline-block;
     margin-left: 5px;
 }
-
 .multi-card {
     padding: 5px;
     margin-bottom: 10px;
 }
-
-/* Spacing antar item bullet */
 .table td div > div {
     margin-bottom: 10px;
     line-height: 1.6;
 }
-
-/* Optional: beri jarak lebih besar antar blok kolom */
 .table td {
     padding-top: 12px !important;
     padding-bottom: 12px !important;
 }
+.btn-sm {
+    margin: 2px;
+}
+</style>
 
-
- </style>   
-
-<!-- Script Lengkap -->
 <script src="../js/vendor/jquery-1.12.4.min.js"></script>
 <script src="../js/bootstrap.min.js"></script>
 <script src="../js/data-table/jquery.dataTables.min.js"></script>
@@ -737,94 +695,161 @@ var CSRF_NAME = "<?= $this->security->get_csrf_token_name() ?>";
 var CSRF_TOKEN = "<?= $this->security->get_csrf_hash() ?>";
 var MapSasaran = <?= json_encode($MapSasaran ?? []) ?>;
 var MapTujuan  = <?= json_encode($MapTujuan ?? []) ?>;
-// ================= MODE SIMPAN =================
+var IS_ROLE_4 = '<?= $IsRole4 ?>';
+var IS_LOGGED_IN = '<?= $IsLoggedIn ?>';
+var CURRENT_FILTER_INSTANSI = '<?= $FilterInstansiId ?? '' ?>';
+var KODE_WILAYAH = '<?= $KodeWilayah ?? '' ?>';
 var MultiMode = "append";
 
-
 $(document).ready(function() {
-    /* ================= FILTER ================= */
-$("#Provinsi").change(function() {
+
+    // Inisialisasi DataTable
+    if ($('#data-table-basic').length > 0) {
+        try {
+            if ($.fn.DataTable.isDataTable('#data-table-basic')) {
+                $('#data-table-basic').DataTable().destroy();
+            }
+            $('#data-table-basic').DataTable({
+                "pageLength": 10,
+                "ordering": false,
+                "language": {
+                    "emptyTable": "Tidak ada data",
+                    "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                    "infoEmpty": "Tidak ada data",
+                    "paginate": {
+                        "first": "Pertama",
+                        "last": "Terakhir",
+                        "next": "Berikutnya",
+                        "previous": "Sebelumnya"
+                    }
+                }
+            });
+        } catch(e) { console.log("DataTable error:", e); }
+    }
+
+    /* ================= FILTER WILAYAH SEBELUM LOGIN ================= */
+    <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
+
+    $("#Provinsi").change(function() {
         if ($(this).val() === "") {
-          $("#KabKota").html('<option value="">Pilih Kab/Kota</option>');
-          return;
+            $("#KabKota").html('<option value="">Pilih Kab/Kota</option>');
+            $("#FilterInstansiGroupBefore").hide();
+            return;
         }
 
         $.ajax({
-          url: BaseURL + "Daerah/GetListKabKota",
-          type: "POST",
-          data: { Kode: $(this).val(), [CSRF_NAME]: CSRF_TOKEN },
-          beforeSend: function() { $("#KabKota").prop('disabled', true); },
-          success: function(res) {
-            var Data = (typeof res === 'string') ? JSON.parse(res) : res;
-            var KabKota = '<option value="">Pilih Kab/Kota</option>';
-
-            if (Data.length > 0) {
-              for (let i = 0; i < Data.length; i++) {
-                KabKota += '<option value="' + Data[i].Kode + '">' + Data[i].Nama + '</option>';
-              }
-            } else {
-              alert("Belum Ada Data Kab/Kota");
-            }
-
-            $("#KabKota").html(KabKota).prop('disabled', false);
-          },
-          error: function() {
-            alert("Gagal memuat data Kab/Kota");
-            $("#KabKota").prop('disabled', false);
-          }
+            url: BaseURL + "Instansi/GetListKabKota",
+            type: "POST",
+            data: { Kode: $(this).val(), [CSRF_NAME]: CSRF_TOKEN },
+            dataType: 'json',
+            beforeSend: function() { 
+                $("#KabKota").prop('disabled', true).html('<option value="">Memuat...</option>');
+                $("#FilterInstansiGroupBefore").hide();
+            },
+            success: function(Data) {
+                var KabKota = '<option value="">Pilih Kab/Kota</option>';
+                if (Data && Data.length > 0) {
+                    for (let i = 0; i < Data.length; i++) {
+                        KabKota += '<option value="' + Data[i].Kode + '">' + Data[i].Nama + '</option>';
+                    }
+                }
+                $("#KabKota").html(KabKota).prop('disabled', false);
+            },
+            error: function() { alert("Gagal memuat data Kab/Kota"); }
         });
-      });
+    });
 
-      $("#Filter").click(function() {
-        if ($("#Provinsi").val() === "") return alert("Mohon Pilih Provinsi");
-        if ($("#KabKota").val() === "") return alert("Mohon Pilih Kab/Kota");
+    $("#KabKota").change(function() {
+        var kabKotaKode = $(this).val();
+        if (kabKotaKode === "") {
+            $("#FilterInstansiGroupBefore").hide();
+            $("#FilterInstansiBeforeLogin").html('<option value="">-- Semua Instansi --</option>');
+            return;
+        }
+
+        $.ajax({
+            url: BaseURL + "Instansi/GetListInstansiLevel4",
+            type: "POST",
+            data: { kode_wilayah: kabKotaKode, [CSRF_NAME]: CSRF_TOKEN },
+            dataType: 'json',
+            beforeSend: function() {
+                $("#FilterInstansiBeforeLogin").html('<option value="">Memuat...</option>');
+                $("#FilterInstansiGroupBefore").show();
+            },
+            success: function(Data) {
+                var options = '<option value="">-- Semua Instansi --</option>';
+                if (Data && Data.length > 0) {
+                    for (let i = 0; i < Data.length; i++) {
+                        var selected = (CURRENT_FILTER_INSTANSI == Data[i].id) ? 'selected' : '';
+                        options += '<option value="' + Data[i].id + '" ' + selected + '>' + Data[i].nama + '</option>';
+                    }
+                }
+                $("#FilterInstansiBeforeLogin").html(options);
+                $("#FilterInstansiGroupBefore").show();
+            },
+            error: function() { alert("Gagal memuat data Instansi"); }
+        });
+    });
+
+    $("#Filter").click(function() {
+        if ($("#Provinsi").val() === "") { alert("Mohon Pilih Provinsi"); return; }
+        if ($("#KabKota").val() === "") { alert("Mohon Pilih Kab/Kota"); return; }
 
         var kodeWilayah = $("#KabKota").val();
-
+        var instansiId = $("#FilterInstansiBeforeLogin").val();
+        
         $.ajax({
-          url: BaseURL + "Daerah/SetTempKodeWilayah",
-          type: "POST",
-          data: { KodeWilayah: kodeWilayah, [CSRF_NAME]: CSRF_TOKEN },
-          beforeSend: function() { $("#Filter").prop('disabled', true).text('Memuat...'); },
-          success: function(res) {
-            if (res === '1') {
-              window.location.reload();
-            } else {
-              alert(res || "Gagal menyimpan filter wilayah!");
-              $("#Filter").prop('disabled', false).text('Filter');
-            }
-          },
-          error: function() {
-            alert("Gagal menghubungi server!");
-            $("#Filter").prop('disabled', false).text('Filter');
-          }
+            url: BaseURL + "Instansi/SetTempKodeWilayah",
+            type: "POST",
+            data: { KodeWilayah: kodeWilayah, [CSRF_NAME]: CSRF_TOKEN },
+            beforeSend: function() { $("#Filter").prop('disabled', true).text('Memuat...'); },
+            success: function(res) {
+                if (res === '1') {
+                    var redirectUrl = BaseURL + "Instansi/RumusanRenstraPD";
+                    if (instansiId && instansiId != '') {
+                        redirectUrl += "?instansi_id=" + instansiId;
+                    }
+                    window.location.href = redirectUrl;
+                } else {
+                    alert(res || "Gagal menyimpan filter wilayah!");
+                    $("#Filter").prop('disabled', false).text('Filter');
+                }
+            },
+            error: function() { alert("Gagal menghubungi server!"); }
         });
-      });
+    });
 
-      // Populate kab/kota on page load jika KodeWilayah sudah ada
-      <?php if (!empty($KodeWilayah)) { ?>
+    <?php if (!empty($KodeWilayah)) { ?>
         var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
         var kodeKab  = "<?= $KodeWilayah ?>";
-        $("#Provinsi").val(kodeProv);
+        $("#Provinsi").val(kodeProv).trigger('change');
+        setTimeout(function() {
+            $("#KabKota").val(kodeKab).trigger('change');
+            <?php if (!empty($FilterInstansiId)) { ?>
+                setTimeout(function() {
+                    if ($("#FilterInstansiBeforeLogin option[value='<?= $FilterInstansiId ?>']").length > 0) {
+                        $("#FilterInstansiBeforeLogin").val("<?= $FilterInstansiId ?>");
+                    }
+                }, 800);
+            <?php } ?>
+        }, 500);
+    <?php } ?>
 
-        $.ajax({
-          url: BaseURL + "Daerah/GetListKabKota",
-          type: "POST",
-          data: { Kode: kodeProv, [CSRF_NAME]: CSRF_TOKEN },
-          success: function(res) {
-            var Data = (typeof res === 'string') ? JSON.parse(res) : res;
-            var KabKota = '<option value="">Pilih Kab/Kota</option>';
+    <?php } ?>
 
-            if (Data.length > 0) {
-              for (let i = 0; i < Data.length; i++) {
-                var selected = (Data[i].Kode === kodeKab) ? 'selected' : '';
-                KabKota += '<option value="' + Data[i].Kode + '" ' + selected + '>' + Data[i].Nama + '</option>';
-              }
-            }
-            $("#KabKota").html(KabKota);
-          }
+    /* ================= FILTER INSTANSI (UNTUK YANG SUDAH LOGIN DAN BUKAN ROLE 4) ================= */
+    <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
+        $("#FilterInstansiBtn").click(function() {
+            var instansiId = $("#FilterInstansi").val();
+            var url = BaseURL + "Instansi/RumusanRenstraPD";
+            if (instansiId && instansiId != '') { url += "?instansi_id=" + instansiId; }
+            window.location.href = url;
         });
-      <?php } ?>
+        $("#ResetFilterBtn").click(function() { window.location.href = BaseURL + "Instansi/RumusanRenstraPD"; });
+    <?php } ?>
+
+    /* ================= CRUD OPERATIONS (HANYA UNTUK ROLE 4) ================= */
+    <?php if ($IsRole4) { ?>
 
     // Tambah Grup Baru (Header)
     $("#BtnSimpanHeader").click(function() {
@@ -836,21 +861,23 @@ $("#Provinsi").change(function() {
             return;
         }
 
-        $.post(BaseURL + "Daerah/SimpanRumusanRenstraPD", {
-            tujuansasaran_master_id: nspk,
-            tujuan_pd: tujuan,
-            [CSRF_NAME]: CSRF_TOKEN
-        }, function(res) {
-            try {
-                var data = typeof res === 'string' ? JSON.parse(res) : res;
-                if (data.status === "success") {
+        $.ajax({
+            url: BaseURL + "Instansi/SimpanRumusanRenstraPD",
+            type: "POST",
+            data: {
+                tujuansasaran_master_id: nspk,
+                tujuan_pd: tujuan,
+                [CSRF_NAME]: CSRF_TOKEN
+            },
+            dataType: 'json',
+            success: function(res) {
+                if (res.status === "success") {
                     location.reload();
                 } else {
-                    alert(data.message || "Gagal menyimpan grup baru");
+                    alert(res.message || "Gagal menyimpan grup baru");
                 }
-            } catch (e) {
-                alert("Terjadi kesalahan saat menyimpan grup");
-            }
+            },
+            error: function() { alert("Terjadi kesalahan saat menyimpan grup"); }
         });
     });
 
@@ -870,21 +897,23 @@ $("#Provinsi").change(function() {
             return;
         }
 
-        $.post(BaseURL + "Daerah/TambahDetail", {
-            header_id: header_id,
-            sasaran_pd: sasaran,
-            [CSRF_NAME]: CSRF_TOKEN
-        }, function(res) {
-            try {
-                var data = typeof res === 'string' ? JSON.parse(res) : res;
-                if (data.status === "success") {
+        $.ajax({
+            url: BaseURL + "Instansi/TambahDetail",
+            type: "POST",
+            data: {
+                header_id: header_id,
+                sasaran_pd: sasaran,
+                [CSRF_NAME]: CSRF_TOKEN
+            },
+            dataType: 'json',
+            success: function(res) {
+                if (res.status === "success") {
                     location.reload();
                 } else {
-                    alert(data.message || "Gagal menambah sasaran PD");
+                    alert(res.message || "Gagal menambah sasaran PD");
                 }
-            } catch (e) {
-                alert("Error saat menambah sasaran");
-            }
+            },
+            error: function() { alert("Error saat menambah sasaran"); }
         });
     });
 
@@ -904,157 +933,205 @@ $("#Provinsi").change(function() {
             return;
         }
 
-        $.post(BaseURL + "Daerah/UpdateDetail", {
-            id: id,
-            sasaran_pd: sasaran,
-            [CSRF_NAME]: CSRF_TOKEN
-        }, function(res) {
-            try {
-                var data = typeof res === 'string' ? JSON.parse(res) : res;
-                if (data.status === "success") {
+        $.ajax({
+            url: BaseURL + "Instansi/UpdateDetail",
+            type: "POST",
+            data: {
+                id: id,
+                sasaran_pd: sasaran,
+                [CSRF_NAME]: CSRF_TOKEN
+            },
+            dataType: 'json',
+            success: function(res) {
+                if (res.status === "success") {
                     location.reload();
                 } else {
-                    alert(data.message || "Gagal mengubah sasaran PD");
+                    alert(res.message || "Gagal mengubah sasaran PD");
                 }
-            } catch (e) {
-                alert("Error saat update sasaran");
-            }
+            },
+            error: function() { alert("Error saat update sasaran"); }
         });
     });
 
-    // Hapus Kolom Multi (Outcome, Output, Program dll)
-$(document).on("click", ".HapusKolom", function() {
+    // Edit Header
+    $(document).on("click", ".EditHeader", function() {
+        $("#EditHeaderId").val($(this).data("id"));
+        $("#EditNSPK").val($(this).data("nspk"));
+        $("#EditTujuanPD").val($(this).data("tujuan"));
+        $("#ModalEditHeader").modal("show");
+    });
 
-    if (!confirm("Yakin ingin menghapus semua data pada kolom ini?")) return;
+    $("#BtnUpdateHeader").click(function() {
+        var id = $("#EditHeaderId").val();
+        var nspk = $("#EditNSPK").val();
+        var tujuan = $("#EditTujuanPD").val();
 
-    var id = $(this).data("id");
-    var kolom = $(this).data("kolom");
-
-    if (kolom === "program_kegiatan") {
-        // kosongkan semua jenis
-        $.post(BaseURL + "Daerah/UpdateKolomDetail", {
-            id: id,
-            kolom: "program",
-            nilai: "",
-            [CSRF_NAME]: CSRF_TOKEN
+        $.ajax({
+            url: BaseURL + "Instansi/UpdateHeaderRenstra",
+            type: "POST",
+            data: {
+                id: id,
+                tujuansasaran_master_id: nspk,
+                tujuan_pd: tujuan,
+                [CSRF_NAME]: CSRF_TOKEN
+            },
+            dataType: 'json',
+            success: function(res) {
+                if (res.status === "success") {
+                    location.reload();
+                } else {
+                    alert("Gagal update header!");
+                }
+            },
+            error: function() { alert("Error update header"); }
         });
+    });
 
-        $.post(BaseURL + "Daerah/UpdateKolomDetail", {
-            id: id,
-            kolom: "kegiatan",
-            nilai: "",
-            [CSRF_NAME]: CSRF_TOKEN
-        });
-
-        $.post(BaseURL + "Daerah/UpdateKolomDetail", {
-            id: id,
-            kolom: "sub_kegiatan",
-            nilai: "",
-            [CSRF_NAME]: CSRF_TOKEN
-        }, function() {
-            location.reload();
-        });
-
-    } else {
-$.post(BaseURL + "Daerah/UpdateKolomDetail", {
-    id: id,
-    kolom: kolom,
-    nilai: items.join(""),
-    mode: MultiMode,            [CSRF_NAME]: CSRF_TOKEN
-        }, function() {
-            location.reload();
-        });
-
-    }
-
-});
-
-    // Hapus Sasaran PD (Detail)
-    $(document).on("click", ".HapusDetail", function() {
-        if (!confirm("Yakin ingin menghapus sasaran PD ini beserta semua datanya?")) return;
-
+    // Hapus Header
+    $(document).on("click", ".HapusHeader", function() {
+        if (!confirm("Yakin ingin menghapus grup ini beserta semua detailnya?")) return;
         var id = $(this).data("id");
 
-        $.post(BaseURL + "Daerah/HapusDetail", {
-            id: id,
-            [CSRF_NAME]: CSRF_TOKEN
-        }, function(res) {
-            try {
-                var data = typeof res === 'string' ? JSON.parse(res) : res;
-                if (data.status === "success") {
+        $.ajax({
+            url: BaseURL + "Instansi/HapusHeader",
+            type: "POST",
+            data: {
+                id: id,
+                [CSRF_NAME]: CSRF_TOKEN
+            },
+            dataType: 'json',
+            success: function(res) {
+                if (res.status === "success") {
                     location.reload();
                 } else {
-                    alert(data.message || "Gagal menghapus sasaran PD");
+                    alert("Gagal menghapus grup!");
                 }
-            } catch (e) {
-                alert("Error saat menghapus");
-            }
+            },
+            error: function() { alert("Error hapus grup"); }
         });
     });
 
-    // Tambah / Edit Kolom Multi-Value (Outcome, Output, dll)
-$(document).on("click", ".TambahKolom, .EditKolom", function() {
+    // Hapus Detail (Sasaran PD)
+    $(document).on("click", ".HapusDetail", function() {
+        if (!confirm("Yakin ingin menghapus sasaran PD ini beserta semua datanya?")) return;
+        var id = $(this).data("id");
 
-    var isEdit   = $(this).hasClass("EditKolom");
+        $.ajax({
+            url: BaseURL + "Instansi/HapusDetail",
+            type: "POST",
+            data: {
+                id: id,
+                [CSRF_NAME]: CSRF_TOKEN
+            },
+            dataType: 'json',
+            success: function(res) {
+                if (res.status === "success") {
+                    location.reload();
+                } else {
+                    alert(res.message || "Gagal menghapus sasaran PD");
+                }
+            },
+            error: function() { alert("Error hapus sasaran"); }
+        });
+    });
+
+   // Tambah / Edit Kolom Multi-Value
+$(document).on("click", ".TambahKolom, .EditKolom", function(e) {
+    e.preventDefault();
+    
+    var $this = $(this);
+    var isEdit = $this.hasClass("EditKolom");
+    var kolom = $this.data("kolom");
+    var detailId = $this.data("id");
+    
+    // DEBUG: Log untuk melihat data
+    console.log("Tombol diklik:", this);
+    console.log("data-kolom:", kolom);
+    console.log("data-id (raw):", detailId);
+    
+    // VALIDASI: Pastikan kolom tidak undefined
+    if (!kolom) {
+        console.error("ERROR: kolom undefined - periksa atribut data-kolom pada tombol");
+        alert("Terjadi kesalahan: data kolom tidak ditemukan. Silakan refresh halaman.");
+        return;
+    }
+    
+    // VALIDASI: Jika detailId kosong atau 0
+    if (!detailId || detailId == 0 || detailId === "") {
+        console.warn("Warning: detailId kosong, mencoba mencari alternatif");
+        
+        // Coba ambil dari attribute data-detail-id
+        detailId = $this.data("detail-id");
+        
+        // Jika masih kosong, coba dari parent row
+        if (!detailId || detailId == 0) {
+            var parentRow = $this.closest("tr");
+            detailId = parentRow.data("detail-id");
+        }
+        
+        console.log("data-id (after fallback):", detailId);
+    }
+    
+    // VALIDASI: Jika masih kosong, tampilkan error
+    if (!detailId || detailId == 0 || detailId === "") {
+        console.error("ERROR: detailId masih kosong setelah fallback");
+        alert("Terjadi kesalahan: ID detail tidak ditemukan. Silakan tambah sasaran PD terlebih dahulu.");
+        return;
+    }
+    
     MultiMode = isEdit ? "replace" : "append";
-    var kolom    = $(this).data("kolom");
-    var detailId = $(this).data("id");
-
+    
     $("#MultiDetailId").val(detailId);
     $("#MultiKolom").val(kolom);
     $("#ListMultiItem").empty();
-
-    $("#ModalMultiTitle").text(
-        (isEdit ? "Edit " : "Tambah ") + kolom.toUpperCase()
-    );
-
+    
+    // Set judul modal dengan aman
+    var kolomName = String(kolom).toUpperCase();
+    $("#ModalMultiTitle").text((isEdit ? "Edit " : "Tambah ") + kolomName);
+    
     if (kolom === "program_kegiatan") {
-
-    function addProgramItem(type, value) {
-        $("#ListMultiItem").append(`
-            <div class="multi-card">
-                <select class="form-control multi-type mb-2">
-                    <option value="program" ${type=="program"?"selected":""}>Program</option>
-                    <option value="kegiatan" ${type=="kegiatan"?"selected":""}>Kegiatan</option>
-                    <option value="sub_kegiatan" ${type=="sub_kegiatan"?"selected":""}>Sub Kegiatan</option>
-                </select>
-
-                <textarea class="form-control multi-item" rows="3">${value}</textarea>
-
-                <div class="mt-2">
-                    <button class="btn btn-success btn-sm btn-add-after" type="button">Tambah</button>
-                    <button class="btn btn-danger btn-sm btn-remove-multi" type="button">Hapus</button>
+        function addProgramItem(type, value) {
+            $("#ListMultiItem").append(`
+                <div class="multi-card">
+                    <select class="form-control multi-type mb-2">
+                        <option value="program" ${type=="program"?"selected":""}>Program</option>
+                        <option value="kegiatan" ${type=="kegiatan"?"selected":""}>Kegiatan</option>
+                        <option value="sub_kegiatan" ${type=="sub_kegiatan"?"selected":""}>Sub Kegiatan</option>
+                    </select>
+                    <textarea class="form-control multi-item" rows="3">${value || ''}</textarea>
+                    <div class="mt-2">
+                        <button class="btn btn-success btn-sm btn-add-after" type="button">Tambah</button>
+                        <button class="btn btn-danger btn-sm btn-remove-multi" type="button">Hapus</button>
+                    </div>
                 </div>
-            </div>
-        `);
+            `);
+        }
+        
+        if (isEdit) {
+            let prog = ($this.data("program") || "").toString().split("|||");
+            let keg = ($this.data("kegiatan") || "").toString().split("|||");
+            let sub = ($this.data("sub") || "").toString().split("|||");
+            prog.forEach(v => { if(v && v.trim()) addProgramItem("program", v.trim()); });
+            keg.forEach(v => { if(v && v.trim()) addProgramItem("kegiatan", v.trim()); });
+            sub.forEach(v => { if(v && v.trim()) addProgramItem("sub_kegiatan", v.trim()); });
+        } else {
+            addProgramItem("program", "");
+        }
+        
+        // Jika tidak ada item, tambahkan satu baris kosong
+        if ($("#ListMultiItem .multi-card").length === 0) {
+            addProgramItem("program", "");
+        }
+        
+        $("#ModalMultiValue").modal("show");
+        return;
     }
-
-    if (isEdit) {
-
-        let prog = ($(this).data("program") || "").split("|||");
-        let keg  = ($(this).data("kegiatan") || "").split("|||");
-        let sub  = ($(this).data("sub") || "").split("|||");
-
-        prog.forEach(v => { if(v.trim()) addProgramItem("program", v.trim()); });
-        keg.forEach(v => { if(v.trim()) addProgramItem("kegiatan", v.trim()); });
-        sub.forEach(v => { if(v.trim()) addProgramItem("sub_kegiatan", v.trim()); });
-
-    } else {
-        addProgramItem("program", "");
-    }
-
-    $("#ModalMultiValue").modal("show");
-    return; // IMPORTANT → stop lanjut ke kode kolom biasa
-}
-
-
-    // ==== KOLOM BIASA ====
+    
+    // Kolom biasa (outcome, output, indikator, keterangan)
     var nilai = "";
-
     if (isEdit) {
-        var raw = $(this).attr("data-raw");
-
-        if (raw) {
+        var raw = $this.attr("data-raw");
+        if (raw && raw !== "undefined" && raw !== "null") {
             try {
                 nilai = JSON.parse(raw) || "";
             } catch(e) {
@@ -1062,14 +1139,14 @@ $(document).on("click", ".TambahKolom, .EditKolom", function() {
             }
         }
     }
-
+    
     nilai = String(nilai);
     var arr = nilai ? nilai.split("|||") : [];
-
+    
     function appendSimple(value) {
         $("#ListMultiItem").append(`
             <div class="multi-card">
-                <textarea class="form-control multi-item" rows="3">${value}</textarea>
+                <textarea class="form-control multi-item" rows="3">${value || ''}</textarea>
                 <div class="mt-2">
                     <button class="btn btn-success btn-sm btn-add-after" type="button">Tambah</button>
                     <button class="btn btn-danger btn-sm btn-remove-multi" type="button">Hapus</button>
@@ -1078,30 +1155,29 @@ $(document).on("click", ".TambahKolom, .EditKolom", function() {
         `);
     }
     
-
     if (arr.length > 0) {
-    arr.forEach(v => appendSimple(v.trim()));
-}
-
-// kalau klik Tambah → tambahkan 1 field kosong di bawah
-if (!isEdit) {
-    appendSimple("");
-}
-
+        arr.forEach(v => { if(v && v.trim()) appendSimple(v.trim()); });
+    }
+    
+    if (!isEdit || arr.length === 0) {
+        appendSimple("");
+    }
+    
+    // Jika masih tidak ada item, tambahkan satu baris kosong
+    if ($("#ListMultiItem .multi-card").length === 0) {
+        appendSimple("");
+    }
+    
     $("#ModalMultiValue").modal("show");
-
 });
 
-
+// Tambah item multi
 $(document).on("click", ".btn-add-after", function(e) {
-
     e.preventDefault();
-
     var kolom = $("#MultiKolom").val();
     var card = $(this).closest(".multi-card");
 
     if (kolom === "program_kegiatan") {
-
         var newItem = `
             <div class="multi-card">
                 <select class="form-control multi-type mb-2">
@@ -1109,193 +1185,81 @@ $(document).on("click", ".btn-add-after", function(e) {
                     <option value="kegiatan">Kegiatan</option>
                     <option value="sub_kegiatan">Sub Kegiatan</option>
                 </select>
-
                 <textarea class="form-control multi-item" rows="3"></textarea>
-
                 <div class="mt-2">
                     <button class="btn btn-success btn-sm btn-add-after" type="button">Tambah</button>
                     <button class="btn btn-danger btn-sm btn-remove-multi" type="button">Hapus</button>
                 </div>
             </div>
         `;
-
         card.after(newItem);
-
     } else {
-
-        // Untuk Outcome, Output, Indikator, Keterangan
         var newItem = `
             <div class="multi-card">
                 <textarea class="form-control multi-item" rows="3"></textarea>
-
                 <div class="mt-2">
                     <button class="btn btn-success btn-sm btn-add-after" type="button">Tambah</button>
                     <button class="btn btn-danger btn-sm btn-remove-multi" type="button">Hapus</button>
                 </div>
             </div>
         `;
-
         card.after(newItem);
     }
 });
 
-
-
-
-    // Hapus item multi-value
-    $(document).on("click", ".btn-remove-multi", function() {
+// Hapus item multi
+$(document).on("click", ".btn-remove-multi", function() {
     $(this).closest(".multi-card").remove();
 });
 
-
-    // Simpan multi-value
-   $("#BtnSimpanMulti").click(function () {
-
+// Simpan multi-value
+$("#BtnSimpanMulti").click(function() {
     var id = $("#MultiDetailId").val();
     var kolom = $("#MultiKolom").val();
 
     if (kolom === "program_kegiatan") {
-
-    var programArr = [];
-    var kegiatanArr = [];
-    var subArr = [];
-
-    $("#ListMultiItem .multi-card").each(function () {
-
-        var type = $(this).find(".multi-type").val();
-        var val  = $(this).find(".multi-item").val().trim();
-
-        if (!val) return;
-
-        if (type === "program") programArr.push(val);
-        if (type === "kegiatan") kegiatanArr.push(val);
-        if (type === "sub_kegiatan") subArr.push(val);
-    });
-
-    // kumpulkan request
-    var requests = [];
-
-    if (programArr.length > 0) {
-        requests.push(
-            $.post(BaseURL + "Daerah/UpdateKolomDetail", {
-                id: id,
-                kolom: "program",
-                nilai: programArr.join("|||"),
-                mode: MultiMode,
-                [CSRF_NAME]: CSRF_TOKEN
-            })
-        );
+        var programArr = [], kegiatanArr = [], subArr = [];
+        $("#ListMultiItem .multi-card").each(function() {
+            var type = $(this).find(".multi-type").val();
+            var val = $(this).find(".multi-item").val().trim();
+            if (!val) return;
+            if (type === "program") programArr.push(val);
+            if (type === "kegiatan") kegiatanArr.push(val);
+            if (type === "sub_kegiatan") subArr.push(val);
+        });
+        var requests = [];
+        if (programArr.length > 0) {
+            requests.push($.post(BaseURL + "Instansi/UpdateKolomDetail", {
+                id: id, kolom: "program", nilai: programArr.join("|||"), mode: MultiMode, [CSRF_NAME]: CSRF_TOKEN
+            }));
+        }
+        if (kegiatanArr.length > 0) {
+            requests.push($.post(BaseURL + "Instansi/UpdateKolomDetail", {
+                id: id, kolom: "kegiatan", nilai: kegiatanArr.join("|||"), mode: MultiMode, [CSRF_NAME]: CSRF_TOKEN
+            }));
+        }
+        if (subArr.length > 0) {
+            requests.push($.post(BaseURL + "Instansi/UpdateKolomDetail", {
+                id: id, kolom: "sub_kegiatan", nilai: subArr.join("|||"), mode: MultiMode, [CSRF_NAME]: CSRF_TOKEN
+            }));
+        }
+        $.when.apply($, requests).done(function() { location.reload(); });
+        return;
     }
 
-    if (kegiatanArr.length > 0) {
-        requests.push(
-            $.post(BaseURL + "Daerah/UpdateKolomDetail", {
-                id: id,
-                kolom: "kegiatan",
-                nilai: kegiatanArr.join("|||"),
-                mode: MultiMode,
-                [CSRF_NAME]: CSRF_TOKEN
-            })
-        );
-    }
-
-    if (subArr.length > 0) {
-        requests.push(
-            $.post(BaseURL + "Daerah/UpdateKolomDetail", {
-                id: id,
-                kolom: "sub_kegiatan",
-                nilai: subArr.join("|||"),
-                mode: MultiMode,
-                [CSRF_NAME]: CSRF_TOKEN
-            })
-        );
-    }
-
-    // ✅ reload setelah semua selesai
-    $.when.apply($, requests).done(function () {
-        location.reload();
-    });
-
-    return;
-}
-
-
-    // ================= KOLOM BIASA =================
-
+    // Kolom biasa
     var items = [];
-
-    $("#ListMultiItem .multi-item").each(function () {
+    $("#ListMultiItem .multi-item").each(function() {
         var val = $(this).val().trim();
         if (val) items.push(val);
     });
-
-    $.post(BaseURL + "Daerah/UpdateKolomDetail", {
-        id: id,
-        kolom: kolom,
-        nilai: items.join("|||"),
-        mode: MultiMode,        [CSRF_NAME]: CSRF_TOKEN
-    }, function () {
-        location.reload();
-    });
-
+    $.post(BaseURL + "Instansi/UpdateKolomDetail", {
+        id: id, kolom: kolom, nilai: items.join("|||"), mode: MultiMode, [CSRF_NAME]: CSRF_TOKEN
+    }, function() { location.reload(); });
 });
 
-$(document).on("click", ".EditHeader", function () {
-
-    $("#EditHeaderId").val($(this).data("id"));
-    $("#EditNSPK").val($(this).data("nspk"));
-    $("#EditTujuanPD").val($(this).data("tujuan"));
-
-    $("#ModalEditHeader").modal("show");
+<?php } ?>
 });
-
-$("#BtnUpdateHeader").click(function () {
-
-    var id     = $("#EditHeaderId").val();
-    var nspk   = $("#EditNSPK").val();
-    var tujuan = $("#EditTujuanPD").val();
-
-    $.post(BaseURL + "Daerah/UpdateHeaderRenstra", {
-        id: id,
-        tujuansasaran_master_id: nspk,
-        tujuan_pd: tujuan,
-        [CSRF_NAME]: CSRF_TOKEN
-    }, function (res) {
-
-        var data = typeof res === "string" ? JSON.parse(res) : res;
-
-        if (data.status === "success") {
-            location.reload();
-        } else {
-            alert("Gagal update header!");
-        }
-    });
-});
-
-$(document).on("click", ".HapusHeader", function () {
-
-    if (!confirm("Yakin ingin menghapus grup ini beserta semua detailnya?")) return;
-
-    var id = $(this).data("id");
-
-    $.post(BaseURL + "Daerah/HapusHeader", {
-        id: id,
-        [CSRF_NAME]: CSRF_TOKEN
-    }, function (res) {
-
-        var data = typeof res === "string" ? JSON.parse(res) : res;
-
-        if (data.status === "success") {
-            location.reload();
-        } else {
-            alert("Gagal menghapus grup!");
-        }
-    });
-
-});
-
-
-
-});
-
 </script>
+</body>
+</html>

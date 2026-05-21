@@ -358,19 +358,19 @@
                     <i class="fa fa-chevron-down"></i>
                 </a>
                 <div class="sidebar-submenu">
-                    <a href="<?=base_url('Daerah/PermasalahanPD')?>">Permasalahan PD</a>
-                    <a href="<?=base_url('Daerah/IsuStrategisPD')?>">Isu Strategis PD</a>
-                    <a href="<?=base_url('Daerah/TujuanPD')?>">Tujuan PD</a>
-                    <a href="<?=base_url('Daerah/SasaranPD')?>">Sasaran PD</a>
-                    <a href="<?=base_url('Daerah/TujuanSasaranPD')?>">NSPK, Tujuan & Sasaran PD</a>
-                    <a href="<?=base_url('Daerah/ArahKebijakanPD')?>">Strategi & Arah Kebijakan</a>
-                    <a href="<?=base_url('Daerah/NSPKOperasionalisasiPD')?>">Operasionalisasi NSPK</a>
-                    <a href="<?=base_url('Daerah/RumusanRenstraPD')?>">Rumusan Renstra PD</a>
-                    <a href="<?=base_url('Daerah/RencanaProgramPendanaan')?>">Rencana Program Pendanaan</a>
-                    <a href="<?=base_url('Daerah/SubKegiatanPrioritas')?>">Sub Kegiatan Prioritas</a>
-                    <a href="<?=base_url('Daerah/IkuPD')?>">IKU PD</a>
-                    <a href="<?=base_url('Daerah/IkkPD')?>">IKK PD</a>
-                    <a href="<?=base_url('Daerah/MenuRenstra')?>">Menu Renstra</a>
+                    <a href="<?=base_url('Instansi/PermasalahanPD')?>">Permasalahan PD</a>
+                    <a href="<?=base_url('Instansi/IsuStrategisPD')?>">Isu Strategis PD</a>
+                    <a href="<?=base_url('Instansi/TujuanPD')?>">Tujuan PD</a>
+                    <a href="<?=base_url('Instansi/SasaranPD')?>">Sasaran PD</a>
+                    <a href="<?=base_url('Instansi/TujuanSasaranPD')?>">NSPK, Tujuan & Sasaran PD</a>
+                    <a href="<?=base_url('Instansi/ArahKebijakanPD')?>">Strategi & Arah Kebijakan</a>
+                    <a href="<?=base_url('Instansi/NSPKOperasionalisasiPD')?>">Operasionalisasi NSPK</a>
+                    <a href="<?=base_url('Instansi/RumusanRenstraPD')?>">Rumusan Renstra PD</a>
+                    <a href="<?=base_url('Instansi/RencanaProgramPendanaan')?>">Rencana Program Pendanaan</a>
+                    <a href="<?=base_url('Instansi/SubKegiatanPrioritas')?>">Sub Kegiatan Prioritas</a>
+                    <a href="<?=base_url('Instansi/IkuPD')?>">IKU PD</a>
+                    <a href="<?=base_url('Instansi/IkkPD')?>">IKK PD</a>
+                    <a href="<?=base_url('Instansi/MenuRenstra')?>">Menu Renstra</a>
                 </div>
             </li>
 
@@ -395,8 +395,8 @@
                 <div class="sidebar-submenu">
                     <a href="<?=base_url('Daerah/Ultimate_outcome')?>">Pohon Kinerja</a>
                     <a href="<?=base_url('Daerah/TampilPohonKinerja')?>">Tampilan Pohon Kinerja</a>
-                     <a href="<?=base_url('Daerah/Ultimate_outcome_pd')?>">Pohon Kinerja PD</a>
-                     <a href="<?=base_url('Daerah/TampilPohonKinerjaPD')?>">Tampilan Pohon Kinerja PD</a>
+                     <a href="<?=base_url('Instansi/Ultimate_outcome_pd')?>">Pohon Kinerja PD</a>
+                     <a href="<?=base_url('Instansi/TampilPohonKinerjaPD')?>">Tampilan Pohon Kinerja PD</a>
             
                 </div>
             </li>

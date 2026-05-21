@@ -141,31 +141,49 @@
                 <div class="col-lg-12">
                     <div class="data-table-list">
 
+                        <!-- FILTER WILAYAH (Provinsi, Kab/Kota, dan Instansi) - SEBELUM LOGIN -->
                         <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
                             <div class="form-example-wrap" style="margin-bottom: 20px;">
                                 <div class="form-example-int form-horizental">
                                     <div class="form-group">
                                         <div class="row filter-row">
                                             <div class="col-lg-3 col-md-6">
-                                                <label><b>Provinsi</b></label>
-                                                <select class="form-control" id="Provinsi">
-                                                    <option value="">Pilih Provinsi</option>
-                                                    <?php foreach ($Provinsi as $prov) { ?>
-                                                        <option value="<?= html_escape($prov['Kode']) ?>">
-                                                            <?= html_escape($prov['Nama']) ?>
-                                                        </option>
-                                                    <?php } ?>
-                                                </select>
+                                                <div class="filter-group">
+                                                    <label for="Provinsi"><b>Provinsi</b></label>
+                                                    <select class="form-control filter-select" id="Provinsi">
+                                                        <option value="">Pilih Provinsi</option>
+                                                        <?php foreach ($Provinsi as $prov) { ?>
+                                                            <option value="<?= html_escape($prov['Kode']) ?>"
+                                                                <?= (!empty($KodeWilayah) && substr($KodeWilayah,0,2)==$prov['Kode']) ? 'selected' : '' ?>>
+                                                                <?= html_escape($prov['Nama']) ?>
+                                                            </option>
+                                                        <?php } ?>
+                                                    </select>
+                                                </div>
                                             </div>
+
                                             <div class="col-lg-3 col-md-6">
-                                                <label><b>Kab/Kota</b></label>
-                                                <select class="form-control" id="KabKota">
-                                                    <option value="">Pilih Kab/Kota</option>
-                                                </select>
+                                                <div class="filter-group">
+                                                    <label for="KabKota"><b>Kab/Kota</b></label>
+                                                    <select class="form-control filter-select" id="KabKota">
+                                                        <option value="">Pilih Kab/Kota</option>
+                                                    </select>
+                                                </div>
                                             </div>
+
+                                            <!-- FILTER INSTANSI SEBELUM LOGIN -->
+                                            <div class="col-lg-3 col-md-6" id="FilterInstansiGroupBefore" style="display: none;">
+                                                <div class="filter-group">
+                                                    <label for="FilterInstansiBeforeLogin"><b>Filter Instansi</b></label>
+                                                    <select class="form-control filter-select" id="FilterInstansiBeforeLogin">
+                                                        <option value="">-- Semua Instansi --</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
                                             <div class="col-lg-2 col-md-6">
-                                                <div style="margin-top: 28px;">
-                                                    <button class="btn btn-primary btn-block" id="Filter">
+                                                <div class="filter-group" style="margin-top: 28px;">
+                                                    <button class="btn btn-primary notika-btn-primary btn-block" id="Filter">
                                                         <b>Filter</b>
                                                     </button>
                                                 </div>
@@ -174,15 +192,85 @@
                                     </div>
                                 </div>
                             </div>
-                        <?php } ?>
-                        
-                        <br>
 
-                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                            <button class="btn btn-success" data-toggle="modal" data-target="#ModalInput">
-                                <i class="notika-icon bi-plus-lg"></i> <b>Tambah Data</b>
-                            </button>
-                            <br><br>
+                            <?php if (!empty($KodeWilayah)) { ?>
+                                <?php
+                                    $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+                                    $nama_wilayah = $wilayah ? html_escape($wilayah['Nama']) : 'Wilayah Tidak Ditemukan';
+                                ?>
+                                <div class="alert alert-info" style="margin-bottom: 20px;">
+                                    <strong>Wilayah terpilih:</strong> <?= $nama_wilayah ?>
+                                    <?php 
+                                    $filter_instansi_id = $this->input->get('instansi_id', TRUE);
+                                    if (!empty($filter_instansi_id)) { 
+                                        $instansi_terpilih = $this->db->select('nama')->from('akun_instansi')->where('id', $filter_instansi_id)->get()->row_array();
+                                    ?>
+                                        <br><strong>Instansi terpilih:</strong> <?= htmlspecialchars($instansi_terpilih['nama'] ?? '-') ?>
+                                    <?php } ?>
+                                </div>
+                            <?php } ?>
+                        <?php } ?>
+                        <!-- END FILTER WILAYAH -->
+
+                        <!-- FILTER INSTANSI (UNTUK YANG SUDAH LOGIN DAN BUKAN ROLE 4) -->
+                        <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
+                            <div class="form-example-wrap" style="margin-bottom: 20px;">
+                                <div class="form-example-int form-horizental">
+                                    <div class="form-group">
+                                        <div class="row filter-row">
+                                            <div class="col-lg-4 col-md-6">
+                                                <div class="filter-group">
+                                                    <label for="FilterInstansi"><b>Filter Instansi</b></label>
+                                                    <select class="form-control filter-select" id="FilterInstansi">
+                                                        <option value="">-- Semua Instansi --</option>
+                                                        <?php foreach ($ListInstansi as $ins) { ?>
+                                                            <option value="<?= $ins['id'] ?>" <?= ($FilterInstansiId == $ins['id']) ? 'selected' : '' ?>>
+                                                                <?= html_escape($ins['nama']) ?>
+                                                            </option>
+                                                        <?php } ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-6">
+                                                <div class="filter-group" style="margin-top: 28px;">
+                                                    <button class="btn btn-info notika-btn-info btn-block" id="FilterInstansiBtn">
+                                                        <b>Tampilkan</b>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-6">
+                                                <div class="filter-group" style="margin-top: 28px;">
+                                                    <button class="btn btn-default notika-btn-default btn-block" id="ResetFilterBtn">
+                                                        <b>Reset</b>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php } ?>
+                        <!-- END FILTER INSTANSI -->
+
+                        <!-- TAMPILKAN NAMA INSTANSI YANG SEDANG LOGIN (UNTUK ROLE 4) -->
+                        <?php if ($IsRole4 && !empty($NamaInstansi)) { ?>
+                            <div class="alert alert-success" style="margin-bottom: 20px;">
+                                <i class="fa fa-building"></i> <strong>Instansi:</strong> <?= htmlspecialchars($NamaInstansi) ?>
+                                <br><small>Anda hanya dapat melihat dan mengelola data milik instansi Anda sendiri.</small>
+                            </div>
+                        <?php } ?>
+
+
+                        <!-- TOMBOL TAMBAH (HANYA UNTUK ROLE 4) -->
+                        <?php if ($IsRole4) { ?>
+                            <div class="basic-tb-hd">
+                                <div class="button-icon-btn sm-res-mg-t-30">
+                                    <button class="btn btn-success" data-toggle="modal" data-target="#ModalInput">
+                                        <i class="notika-icon bi-plus-lg"></i> <b>Tambah Data</b>
+                                    </button>
+                                </div>
+                            </div>
+                            <br>
                         <?php } ?>
 
                         <div class="table-responsive">
@@ -194,9 +282,9 @@
                                         <th>Indikator Kinerja</th>
                                         <th>Satuan</th>
                                         <?php for ($thn = 2025; $thn <= 2030; $thn++): ?>
-                                            <th colspan="2"><?= $thn ?></th>
+                                            <th colspan="2" class="text-center"><?= $thn ?></th>
                                         <?php endfor; ?>
-                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                                        <?php if ($IsRole4) { ?>
                                             <th class="text-center" style="width:120px;">AKSI</th>
                                         <?php } ?>
                                     </tr>
@@ -206,10 +294,12 @@
                                         <th></th>
                                         <th></th>
                                         <?php for ($thn = 2025; $thn <= 2030; $thn++): ?>
-                                            <th>Target</th>
-                                            <th>Rp</th>
+                                            <th class="text-center">Target</th>
+                                            <th class="text-center">Rp</th>
                                         <?php endfor; ?>
-                                        <th></th>
+                                        <?php if ($IsRole4) { ?>
+                                            <th></th>
+                                        <?php } ?>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -220,8 +310,8 @@
                                             <tr>
                                                 <td class="text-center"><?= html_escape($row['NoManual'] ?: $no) ?></td>
                                                 <td class="uraian"><?= nl2br(html_escape($row['Uraian'])) ?></td>
-                                                <td><?= nl2br(html_escape($row['IndikatorKinerja'] ?? '-')) ?></td>
-                                                <td><?= html_escape($row['Satuan'] ?: '-') ?></td>
+                                                <td class="uraian"><?= nl2br(html_escape($row['IndikatorKinerja'] ?? '-')) ?></td>
+                                                <td class="text-center"><?= html_escape($row['Satuan'] ?: '-') ?></td>
 
                                                 <?php for ($thn = 2025; $thn <= 2030; $thn++): ?>
                                                     <td class="text-right">
@@ -232,37 +322,41 @@
                                                     </td>
                                                 <?php endfor; ?>
 
-                                                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                                                <?php if ($IsRole4) { ?>
                                                     <td class="text-center">
-                                                        <div class="btn-group-aksi">
-                                                            <button class="btn btn-warning btn-sm BtnEdit"
-                                                                data-id="<?= (int)$row['Id'] ?>"
-                                                                data-nomanual="<?= html_escape($row['NoManual'] ?? '') ?>"
-                                                                data-uraian="<?= html_escape($row['Uraian']) ?>"
-                                                                data-indikator="<?= html_escape($row['IndikatorKinerja'] ?? '') ?>"
-                                                                data-satuan="<?= html_escape($row['Satuan'] ?? '') ?>"
-                                                                data-target2025="<?= $row['Target2025'] ?? '' ?>"
-                                                                data-rp2025="<?= $row['Rp2025'] ?? '' ?>"
-                                                                data-target2026="<?= $row['Target2026'] ?? '' ?>"
-                                                                data-rp2026="<?= $row['Rp2026'] ?? '' ?>"
-                                                                data-target2027="<?= $row['Target2027'] ?? '' ?>"
-                                                                data-rp2027="<?= $row['Rp2027'] ?? '' ?>"
-                                                                data-target2028="<?= $row['Target2028'] ?? '' ?>"
-                                                                data-rp2028="<?= $row['Rp2028'] ?? '' ?>"
-                                                                data-target2029="<?= $row['Target2029'] ?? '' ?>"
-                                                                data-rp2029="<?= $row['Rp2029'] ?? '' ?>"
-                                                                data-target2030="<?= $row['Target2030'] ?? '' ?>"
-                                                                data-rp2030="<?= $row['Rp2030'] ?? '' ?>"
-                                                                data-keterangan="<?= html_escape($row['Keterangan'] ?? '') ?>"
-                                                                title="Edit">
-                                                                <i class="notika-icon notika-edit"></i>
-                                                            </button>
-                                                            <button class="btn btn-danger btn-sm BtnHapus"
-                                                                data-id="<?= (int)$row['Id'] ?>"
-                                                                title="Hapus">
-                                                                <i class="notika-icon notika-trash"></i>
-                                                            </button>
-                                                        </div>
+                                                        <?php if ($InstansiId == ($row['id_instansi'] ?? null)) { ?>
+                                                            <div class="btn-group-aksi">
+                                                                <button class="btn btn-warning btn-sm BtnEdit"
+                                                                    data-id="<?= (int)$row['Id'] ?>"
+                                                                    data-nomanual="<?= html_escape($row['NoManual'] ?? '') ?>"
+                                                                    data-uraian="<?= html_escape($row['Uraian']) ?>"
+                                                                    data-indikator="<?= html_escape($row['IndikatorKinerja'] ?? '') ?>"
+                                                                    data-satuan="<?= html_escape($row['Satuan'] ?? '') ?>"
+                                                                    data-target2025="<?= $row['Target2025'] ?? '' ?>"
+                                                                    data-rp2025="<?= $row['Rp2025'] ?? '' ?>"
+                                                                    data-target2026="<?= $row['Target2026'] ?? '' ?>"
+                                                                    data-rp2026="<?= $row['Rp2026'] ?? '' ?>"
+                                                                    data-target2027="<?= $row['Target2027'] ?? '' ?>"
+                                                                    data-rp2027="<?= $row['Rp2027'] ?? '' ?>"
+                                                                    data-target2028="<?= $row['Target2028'] ?? '' ?>"
+                                                                    data-rp2028="<?= $row['Rp2028'] ?? '' ?>"
+                                                                    data-target2029="<?= $row['Target2029'] ?? '' ?>"
+                                                                    data-rp2029="<?= $row['Rp2029'] ?? '' ?>"
+                                                                    data-target2030="<?= $row['Target2030'] ?? '' ?>"
+                                                                    data-rp2030="<?= $row['Rp2030'] ?? '' ?>"
+                                                                    data-keterangan="<?= html_escape($row['Keterangan'] ?? '') ?>"
+                                                                    title="Edit">
+                                                                    <i class="notika-icon notika-edit"></i> 
+                                                                </button>
+                                                                <button class="btn btn-danger btn-sm BtnHapus"
+                                                                    data-id="<?= (int)$row['Id'] ?>"
+                                                                    title="Hapus">
+                                                                    <i class="notika-icon notika-trash"></i> 
+                                                                </button>
+                                                            </div>
+                                                        <?php } else { ?>
+                                                            <span class="text-muted">-</span>
+                                                        <?php } ?>
                                                     </td>
                                                 <?php } ?>
                                             </tr>
@@ -271,7 +365,7 @@
                                         } ?>
                                     <?php } else { ?>
                                         <tr>
-                                            <td colspan="<?= (isset($_SESSION['Level']) && $_SESSION['Level']==3) ? 17 : 16 ?>" class="text-center">
+                                            <td colspan="<?= $IsRole4 ? '17' : '16' ?>" class="text-center">
                                                 <i>Belum ada data</i>
                                             </td>
                                         </tr>
@@ -296,6 +390,11 @@
                 <h4><b>Tambah Menu Renstra PD</b></h4>
             </div>
             <div class="modal-body">
+                <?php if ($IsRole4 && !empty($NamaInstansi)) { ?>
+                    <div class="alert alert-info">
+                        <strong>Instansi:</strong> <?= htmlspecialchars($NamaInstansi) ?>
+                    </div>
+                <?php } ?>
                 
                 <ul class="nav nav-tabs">
                     <li class="active"><a href="#tab_nomenklatur_input" data-toggle="tab">📋 Pilih dari Nomenklatur (Berjenjang)</a></li>
@@ -618,12 +717,15 @@
 <script src="<?= base_url('js/vendor/jquery-1.12.4.min.js') ?>"></script>
 <script src="<?= base_url('js/bootstrap.min.js') ?>"></script>
 <script src="<?= base_url('js/data-table/jquery.dataTables.min.js') ?>"></script>
-<script src="<?= base_url('js/data-table/data-table-act.js') ?>"></script>
 
 <script>
 var BaseURL    = "<?= base_url() ?>";
 var CSRF_NAME  = "<?= $this->security->get_csrf_token_name() ?>";
 var CSRF_TOKEN = "<?= $this->security->get_csrf_hash() ?>";
+var IS_ROLE_4 = '<?= $IsRole4 ?>';
+var IS_LOGGED_IN = '<?= $IsLoggedIn ?>';
+var CURRENT_FILTER_INSTANSI = '<?= $FilterInstansiId ?? '' ?>';
+var KODE_WILAYAH = '<?= $KodeWilayah ?? '' ?>';
 
 var existingKode = '';
 var existingNomenklatur = '';
@@ -637,66 +739,169 @@ var nomenklaturCache = {
     level5: null
 };
 
+function countDots(str) {
+    return (str.match(/\./g) || []).length;
+}
+
 $(document).ready(function() {
     
-    /* ================= FILTER WILAYAH ================= */
+    // Inisialisasi DataTable
+    if ($('#data-table-basic').length > 0) {
+        try {
+            if ($.fn.DataTable.isDataTable('#data-table-basic')) {
+                $('#data-table-basic').DataTable().destroy();
+            }
+            $('#data-table-basic').DataTable({
+                "pageLength": 10,
+                "ordering": false,
+                "language": {
+                    "emptyTable": "Tidak ada data",
+                    "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                    "infoEmpty": "Tidak ada",
+                    "paginate": {
+                        "first": "Pertama",
+                        "last": "Terakhir",
+                        "next": "Berikutnya",
+                        "previous": "Sebelumnya"
+                    }
+                },
+                "drawCallback": function(settings) {
+                    var pagination = $(this).closest('.dataTables_wrapper').find('.dataTables_paginate');
+                    pagination.find('a').css('margin', '0 5px');
+                }
+            });
+        } catch(e) {
+            console.log("DataTable error:", e);
+        }
+    }
+
+    setTimeout(function() {
+        $('.dataTables_paginate a').css('margin', '0 5px');
+        $('.dataTables_paginate span a').css('margin', '0 5px');
+        $('.dataTables_paginate').css('margin-top', '10px');
+        $('.dataTables_info').css('margin', '10px 0');
+    }, 100);
+
+    /* ================= FILTER WILAYAH SEBELUM LOGIN ================= */
+    <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
+
     $("#Provinsi").change(function() {
         if ($(this).val() === "") {
             $("#KabKota").html('<option value="">Pilih Kab/Kota</option>');
+            $("#FilterInstansiGroupBefore").hide();
             return;
         }
-        
+
         $.ajax({
-            url: BaseURL + "Daerah/GetListKabKota",
+            url: BaseURL + "Instansi/GetListKabKota",
             type: "POST",
             data: { Kode: $(this).val(), [CSRF_NAME]: CSRF_TOKEN },
-            beforeSend: function() { $("#KabKota").prop('disabled', true); },
-            success: function(res) {
-                var Data = (typeof res === 'string') ? JSON.parse(res) : res;
+            dataType: 'json',
+            beforeSend: function() { 
+                $("#KabKota").prop('disabled', true).html('<option value="">Memuat...</option>');
+                $("#FilterInstansiGroupBefore").hide();
+            },
+            success: function(Data) {
                 var KabKota = '<option value="">Pilih Kab/Kota</option>';
-                
-                if (Data.length > 0) {
+                if (Data && Data.length > 0) {
                     for (let i = 0; i < Data.length; i++) {
                         KabKota += '<option value="' + Data[i].Kode + '">' + Data[i].Nama + '</option>';
                     }
-                } else {
-                    alert("Belum Ada Data Kab/Kota");
                 }
-                
                 $("#KabKota").html(KabKota).prop('disabled', false);
             },
-            error: function() {
-                alert("Gagal memuat data Kab/Kota");
-                $("#KabKota").prop('disabled', false);
-            }
+            error: function() { alert("Gagal memuat data Kab/Kota"); }
         });
     });
-    
+
+    $("#KabKota").change(function() {
+        var kabKotaKode = $(this).val();
+        if (kabKotaKode === "") {
+            $("#FilterInstansiGroupBefore").hide();
+            $("#FilterInstansiBeforeLogin").html('<option value="">-- Semua Instansi --</option>');
+            return;
+        }
+
+        $.ajax({
+            url: BaseURL + "Instansi/GetListInstansiLevel4",
+            type: "POST",
+            data: { kode_wilayah: kabKotaKode, [CSRF_NAME]: CSRF_TOKEN },
+            dataType: 'json',
+            beforeSend: function() {
+                $("#FilterInstansiBeforeLogin").html('<option value="">Memuat...</option>');
+                $("#FilterInstansiGroupBefore").show();
+            },
+            success: function(Data) {
+                var options = '<option value="">-- Semua Instansi --</option>';
+                if (Data && Data.length > 0) {
+                    for (let i = 0; i < Data.length; i++) {
+                        var selected = (CURRENT_FILTER_INSTANSI == Data[i].id) ? 'selected' : '';
+                        options += '<option value="' + Data[i].id + '" ' + selected + '>' + Data[i].nama + '</option>';
+                    }
+                }
+                $("#FilterInstansiBeforeLogin").html(options);
+                $("#FilterInstansiGroupBefore").show();
+            },
+            error: function() { alert("Gagal memuat data Instansi"); }
+        });
+    });
+
     $("#Filter").click(function() {
-        if ($("#Provinsi").val() === "") return alert("Mohon Pilih Provinsi");
-        if ($("#KabKota").val() === "") return alert("Mohon Pilih Kab/Kota");
-        
+        if ($("#Provinsi").val() === "") { alert("Mohon Pilih Provinsi"); return; }
+        if ($("#KabKota").val() === "") { alert("Mohon Pilih Kab/Kota"); return; }
+
         var kodeWilayah = $("#KabKota").val();
+        var instansiId = $("#FilterInstansiBeforeLogin").val();
         
         $.ajax({
-            url: BaseURL + "Daerah/SetTempKodeWilayah",
+            url: BaseURL + "Instansi/SetTempKodeWilayah",
             type: "POST",
             data: { KodeWilayah: kodeWilayah, [CSRF_NAME]: CSRF_TOKEN },
             beforeSend: function() { $("#Filter").prop('disabled', true).text('Memuat...'); },
             success: function(res) {
                 if (res === '1') {
-                    window.location.reload();
+                    var redirectUrl = BaseURL + "Instansi/MenuRenstra";
+                    if (instansiId && instansiId != '') {
+                        redirectUrl += "?instansi_id=" + instansiId;
+                    }
+                    window.location.href = redirectUrl;
                 } else {
                     alert(res || "Gagal menyimpan filter wilayah!");
                     $("#Filter").prop('disabled', false).text('Filter');
                 }
             },
-            error: function() {
-                alert("Gagal menghubungi server!");
-                $("#Filter").prop('disabled', false).text('Filter');
-            }
+            error: function() { alert("Gagal menghubungi server!"); }
         });
     });
+
+    <?php if (!empty($KodeWilayah)) { ?>
+        var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
+        var kodeKab  = "<?= $KodeWilayah ?>";
+        $("#Provinsi").val(kodeProv).trigger('change');
+        setTimeout(function() {
+            $("#KabKota").val(kodeKab).trigger('change');
+            <?php if (!empty($FilterInstansiId)) { ?>
+                setTimeout(function() {
+                    if ($("#FilterInstansiBeforeLogin option[value='<?= $FilterInstansiId ?>']").length > 0) {
+                        $("#FilterInstansiBeforeLogin").val("<?= $FilterInstansiId ?>");
+                    }
+                }, 800);
+            <?php } ?>
+        }, 500);
+    <?php } ?>
+
+    <?php } ?>
+
+    /* ================= FILTER INSTANSI (UNTUK YANG SUDAH LOGIN DAN BUKAN ROLE 4) ================= */
+    <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
+        $("#FilterInstansiBtn").click(function() {
+            var instansiId = $("#FilterInstansi").val();
+            var url = BaseURL + "Instansi/MenuRenstra";
+            if (instansiId && instansiId != '') { url += "?instansi_id=" + instansiId; }
+            window.location.href = url;
+        });
+        $("#ResetFilterBtn").click(function() { window.location.href = BaseURL + "Instansi/MenuRenstra"; });
+    <?php } ?>
     
     /* ================= FUNGSI NOMENKLATUR INPUT ================= */
     
@@ -707,7 +912,7 @@ $(document).ready(function() {
         }
         
         $.ajax({
-            url: BaseURL + "Daerah/getNomenklaturByLevel",
+            url: BaseURL + "Instansi/getNomenklaturByLevel",
             type: "POST",
             data: { level: level, [CSRF_NAME]: CSRF_TOKEN },
             dataType: 'json',
@@ -720,10 +925,6 @@ $(document).ready(function() {
                 callback([]);
             }
         });
-    }
-    
-    function countDots(str) {
-        return (str.match(/\./g) || []).length;
     }
     
     function loadUrusan() {
@@ -1178,7 +1379,7 @@ $(document).ready(function() {
         <?php endfor; ?>
         
         $.ajax({
-            url: BaseURL + "Daerah/simpanMenuRenstra",
+            url: BaseURL + "Instansi/simpanMenuRenstra",
             type: "POST",
             data: data,
             dataType: "json",
@@ -1196,243 +1397,237 @@ $(document).ready(function() {
         });
     });
     
-   /* ================= OPEN EDIT ================= */
-$(document).on("click", ".BtnEdit", function(){
-    var btn = $(this);
-    
-    $("#EditId").val(btn.data("id"));
-    
-    // Pastikan data diambil sebagai string
-    var noManual = String(btn.data("nomanual") || "");
-    var uraian = String(btn.data("uraian") || "");
-    
-    // Set nilai ke form manual
-    $("#EditNoManual").val(noManual);
-    $("#EditUraian").val(uraian);
-    $("#EditIndikatorKinerja").val(String(btn.data("indikator") || ""));
-    $("#EditSatuan").val(String(btn.data("satuan") || ""));
-    $("#EditKeterangan").val(String(btn.data("keterangan") || ""));
-    
-    <?php for ($thn = 2025; $thn <= 2030; $thn++): ?>
-        $("#EditTarget<?= $thn ?>").val(String(btn.data("target<?= $thn ?>") || ""));
-        $("#EditRp<?= $thn ?>").val(String(btn.data("rp<?= $thn ?>") || ""));
-    <?php endfor; ?>
-    
-    existingKode = String(noManual);
-    existingNomenklatur = String(uraian);
-    
-    console.log('Edit data - Kode:', existingKode, 'Uraian:', existingNomenklatur);
-    
-    // Reset edit form
-    $('#edit_select_urusan, #edit_select_bidang_urusan, #edit_select_program, #edit_select_kegiatan, #edit_select_sub_kegiatan')
-        .html('<option value="">-- Pilih --</option>').prop('disabled', true);
-    $('#preview_no_edit, #preview_uraian_edit').val('');
-    $('#alert_data_existing, #info_nomenklatur_edit').hide();
-    $('#path_display_edit').html('Belum ada yang dipilih');
-    
-    // Load data untuk edit berdasarkan kode yang ada
-    if (existingKode && existingKode !== "" && existingKode !== "null" && existingKode !== "undefined") {
-        // Konversi ke string dan split
-        var kodeStr = String(existingKode);
-        var parts = kodeStr.split('.');
-        var dotCount = countDots(kodeStr);
+    /* ================= OPEN EDIT ================= */
+    $(document).on("click", ".BtnEdit", function(){
+        var btn = $(this);
         
-        console.log('Parts:', parts, 'DotCount:', dotCount);
+        $("#EditId").val(btn.data("id"));
         
-        if (dotCount === 0) {
-            // Urusan
-            loadEditUrusan(kodeStr);
-        } else if (dotCount === 1) {
-            // Bidang Urusan
-            loadEditUrusan(parts[0]);
-            setTimeout(function() {
-                loadEditBidangUrusan(parts[0], kodeStr);
-            }, 300);
-        } else if (dotCount === 2) {
-            // Program
-            var kodeBidang = parts[0] + '.' + parts[1];
-            loadEditUrusan(parts[0]);
-            setTimeout(function() {
-                loadEditBidangUrusan(parts[0], kodeBidang);
+        // Pastikan data diambil sebagai string
+        var noManual = String(btn.data("nomanual") || "");
+        var uraian = String(btn.data("uraian") || "");
+        
+        // Set nilai ke form manual
+        $("#EditNoManual").val(noManual);
+        $("#EditUraian").val(uraian);
+        $("#EditIndikatorKinerja").val(String(btn.data("indikator") || ""));
+        $("#EditSatuan").val(String(btn.data("satuan") || ""));
+        $("#EditKeterangan").val(String(btn.data("keterangan") || ""));
+        
+        <?php for ($thn = 2025; $thn <= 2030; $thn++): ?>
+            $("#EditTarget<?= $thn ?>").val(String(btn.data("target<?= $thn ?>") || ""));
+            $("#EditRp<?= $thn ?>").val(String(btn.data("rp<?= $thn ?>") || ""));
+        <?php endfor; ?>
+        
+        existingKode = String(noManual);
+        existingNomenklatur = String(uraian);
+        
+        console.log('Edit data - Kode:', existingKode, 'Uraian:', existingNomenklatur);
+        
+        // Reset edit form
+        $('#edit_select_urusan, #edit_select_bidang_urusan, #edit_select_program, #edit_select_kegiatan, #edit_select_sub_kegiatan')
+            .html('<option value="">-- Pilih --</option>').prop('disabled', true);
+        $('#preview_no_edit, #preview_uraian_edit').val('');
+        $('#alert_data_existing, #info_nomenklatur_edit').hide();
+        $('#path_display_edit').html('Belum ada yang dipilih');
+        
+        // Load data untuk edit berdasarkan kode yang ada
+        if (existingKode && existingKode !== "" && existingKode !== "null" && existingKode !== "undefined") {
+            var kodeStr = String(existingKode);
+            var parts = kodeStr.split('.');
+            var dotCount = countDots(kodeStr);
+            
+            console.log('Parts:', parts, 'DotCount:', dotCount);
+            
+            if (dotCount === 0) {
+                loadEditUrusan(kodeStr);
+            } else if (dotCount === 1) {
+                loadEditUrusan(parts[0]);
                 setTimeout(function() {
-                    loadEditProgram(kodeBidang, kodeStr);
+                    loadEditBidangUrusan(parts[0], kodeStr);
                 }, 300);
-            }, 300);
-        } else if (dotCount === 4) {
-            // Kegiatan
-            var kodeBidang = parts[0] + '.' + parts[1];
-            var kodeProgram = parts[0] + '.' + parts[1] + '.' + parts[2];
-            loadEditUrusan(parts[0]);
-            setTimeout(function() {
-                loadEditBidangUrusan(parts[0], kodeBidang);
+            } else if (dotCount === 2) {
+                var kodeBidang = parts[0] + '.' + parts[1];
+                loadEditUrusan(parts[0]);
                 setTimeout(function() {
-                    loadEditProgram(kodeBidang, kodeProgram);
+                    loadEditBidangUrusan(parts[0], kodeBidang);
                     setTimeout(function() {
-                        loadEditKegiatan(kodeProgram, kodeStr);
+                        loadEditProgram(kodeBidang, kodeStr);
                     }, 300);
                 }, 300);
-            }, 300);
-        } else if (dotCount === 5) {
-            // Sub Kegiatan
-            var kodeBidang = parts[0] + '.' + parts[1];
-            var kodeProgram = parts[0] + '.' + parts[1] + '.' + parts[2];
-            var kodeKegiatan = parts.slice(0, 5).join('.');
-            loadEditUrusan(parts[0]);
-            setTimeout(function() {
-                loadEditBidangUrusan(parts[0], kodeBidang);
+            } else if (dotCount === 4) {
+                var kodeBidang = parts[0] + '.' + parts[1];
+                var kodeProgram = parts[0] + '.' + parts[1] + '.' + parts[2];
+                loadEditUrusan(parts[0]);
                 setTimeout(function() {
-                    loadEditProgram(kodeBidang, kodeProgram);
+                    loadEditBidangUrusan(parts[0], kodeBidang);
                     setTimeout(function() {
-                        loadEditKegiatan(kodeProgram, kodeKegiatan);
+                        loadEditProgram(kodeBidang, kodeProgram);
                         setTimeout(function() {
-                            loadEditSubKegiatan(kodeKegiatan, kodeStr);
+                            loadEditKegiatan(kodeProgram, kodeStr);
                         }, 300);
                     }, 300);
                 }, 300);
-            }, 300);
-        }
-    }
-    
-    $("#ModalEdit").modal("show");
-});
-
-/* ================= UPDATE ================= */
-$("#BtnUpdate").click(function(){
-    var data = {
-        Id: $("#EditId").val(),
-        [CSRF_NAME]: CSRF_TOKEN
-    };
-    
-    if ($('#tab_nomenklatur_edit').hasClass('active')) {
-        var kode = $('#edit_select_sub_kegiatan').val();
-        var uraian = $('#edit_select_sub_kegiatan option:selected').text();
-        
-        if (!kode || kode === "") {
-            kode = $('#edit_select_kegiatan').val();
-            uraian = $('#edit_select_kegiatan option:selected').text();
-        }
-        if (!kode || kode === "") {
-            kode = $('#edit_select_program').val();
-            uraian = $('#edit_select_program option:selected').text();
-        }
-        if (!kode || kode === "") {
-            kode = $('#edit_select_bidang_urusan').val();
-            uraian = $('#edit_select_bidang_urusan option:selected').text();
-        }
-        if (!kode || kode === "") {
-            kode = $('#edit_select_urusan').val();
-            uraian = $('#edit_select_urusan option:selected').text();
-        }
-        
-        data.NoManual = kode;
-        var parts = uraian.split(' - ');
-        data.Uraian = parts.slice(1).join(' - ');
-        
-        if (!data.NoManual || !data.Uraian) {
-            alert("Silakan pilih data dari nomenklatur terlebih dahulu!");
-            return;
-        }
-    } else {
-        data.NoManual = $("#EditNoManual").val();
-        data.Uraian = $("#EditUraian").val();
-        
-        if (!data.Uraian) {
-            alert("Uraian harus diisi!");
-            return;
-        }
-    }
-    
-    data.IndikatorKinerja = $("#EditIndikatorKinerja").val();
-    data.Satuan = $("#EditSatuan").val();
-    data.Keterangan = $("#EditKeterangan").val();
-    
-    <?php for ($thn = 2025; $thn <= 2030; $thn++): ?>
-        data["Target<?= $thn ?>"] = $("#EditTarget<?= $thn ?>").val() || null;
-        data["Rp<?= $thn ?>"] = $("#EditRp<?= $thn ?>").val() || null;
-    <?php endfor; ?>
-    
-    $.ajax({
-        url: BaseURL + "Daerah/simpanMenuRenstra",
-        type: "POST",
-        data: data,
-        dataType: "json",
-        success: function(res){
-            if(res.status === "success") {
-                alert("Data berhasil diupdate");
-                location.reload();
-            } else {
-                alert(res.message || "Gagal update");
+            } else if (dotCount === 5) {
+                var kodeBidang = parts[0] + '.' + parts[1];
+                var kodeProgram = parts[0] + '.' + parts[1] + '.' + parts[2];
+                var kodeKegiatan = parts.slice(0, 5).join('.');
+                loadEditUrusan(parts[0]);
+                setTimeout(function() {
+                    loadEditBidangUrusan(parts[0], kodeBidang);
+                    setTimeout(function() {
+                        loadEditProgram(kodeBidang, kodeProgram);
+                        setTimeout(function() {
+                            loadEditKegiatan(kodeProgram, kodeKegiatan);
+                            setTimeout(function() {
+                                loadEditSubKegiatan(kodeKegiatan, kodeStr);
+                            }, 300);
+                        }, 300);
+                    }, 300);
+                }, 300);
             }
-        },
-        error: function() {
-            alert("Terjadi kesalahan saat update data");
         }
+        
+        $("#ModalEdit").modal("show");
     });
-});
-
-/* ================= HAPUS ================= */
-$(document).on("click", ".BtnHapus", function(){
-    if(!confirm("Yakin hapus data ini?")) return;
     
-    $.ajax({
-        url: BaseURL + "Daerah/hapusMenuRenstra",
-        type: "POST",
-        data: {
-            Id: $(this).data("id"),
+    /* ================= UPDATE ================= */
+    $("#BtnUpdate").click(function(){
+        var data = {
+            Id: $("#EditId").val(),
             [CSRF_NAME]: CSRF_TOKEN
-        },
-        dataType: "json",
-        success: function(res){
-            if(res.status === "success") {
-                alert("Data berhasil dihapus");
-                location.reload();
-            } else {
-                alert(res.message || "Gagal hapus!");
+        };
+        
+        if ($('#tab_nomenklatur_edit').hasClass('active')) {
+            var kode = $('#edit_select_sub_kegiatan').val();
+            var uraian = $('#edit_select_sub_kegiatan option:selected').text();
+            
+            if (!kode || kode === "") {
+                kode = $('#edit_select_kegiatan').val();
+                uraian = $('#edit_select_kegiatan option:selected').text();
             }
-        },
-        error: function() {
-            alert("Terjadi kesalahan saat menghapus data");
+            if (!kode || kode === "") {
+                kode = $('#edit_select_program').val();
+                uraian = $('#edit_select_program option:selected').text();
+            }
+            if (!kode || kode === "") {
+                kode = $('#edit_select_bidang_urusan').val();
+                uraian = $('#edit_select_bidang_urusan option:selected').text();
+            }
+            if (!kode || kode === "") {
+                kode = $('#edit_select_urusan').val();
+                uraian = $('#edit_select_urusan option:selected').text();
+            }
+            
+            data.NoManual = kode;
+            var parts = uraian.split(' - ');
+            data.Uraian = parts.slice(1).join(' - ');
+            
+            if (!data.NoManual || !data.Uraian) {
+                alert("Silakan pilih data dari nomenklatur terlebih dahulu!");
+                return;
+            }
+        } else {
+            data.NoManual = $("#EditNoManual").val();
+            data.Uraian = $("#EditUraian").val();
+            
+            if (!data.Uraian) {
+                alert("Uraian harus diisi!");
+                return;
+            }
         }
+        
+        data.IndikatorKinerja = $("#EditIndikatorKinerja").val();
+        data.Satuan = $("#EditSatuan").val();
+        data.Keterangan = $("#EditKeterangan").val();
+        
+        <?php for ($thn = 2025; $thn <= 2030; $thn++): ?>
+            data["Target<?= $thn ?>"] = $("#EditTarget<?= $thn ?>").val() || null;
+            data["Rp<?= $thn ?>"] = $("#EditRp<?= $thn ?>").val() || null;
+        <?php endfor; ?>
+        
+        $.ajax({
+            url: BaseURL + "Instansi/simpanMenuRenstra",
+            type: "POST",
+            data: data,
+            dataType: "json",
+            success: function(res){
+                if(res.status === "success") {
+                    alert("Data berhasil diupdate");
+                    location.reload();
+                } else {
+                    alert(res.message || "Gagal update");
+                }
+            },
+            error: function() {
+                alert("Terjadi kesalahan saat update data");
+            }
+        });
     });
-});
-
-/* ================= RESET FORM ================= */
-$('#ModalInput').on('hidden.bs.modal', function() {
-    $('#NoManual, #Uraian, #IndikatorKinerja, #Satuan, #Keterangan').val('');
-    $('#preview_no_input, #preview_uraian_input').val('');
-    $('#select_urusan, #select_bidang_urusan, #select_program, #select_kegiatan, #select_sub_kegiatan')
-        .html('<option value="">-- Pilih --</option>').prop('disabled', true);
-    $('#path_display').html('Belum ada yang dipilih');
-    $('#info_nomenklatur_input').hide();
     
-    <?php for ($thn = 2025; $thn <= 2030; $thn++): ?>
-        $('#Target<?= $thn ?>').val('');
-        $('#Rp<?= $thn ?>').val('');
-    <?php endfor; ?>
+    /* ================= HAPUS ================= */
+    $(document).on("click", ".BtnHapus", function(){
+        if(!confirm("Yakin hapus data ini?")) return;
+        
+        $.ajax({
+            url: BaseURL + "Instansi/hapusMenuRenstra",
+            type: "POST",
+            data: {
+                Id: $(this).data("id"),
+                [CSRF_NAME]: CSRF_TOKEN
+            },
+            dataType: "json",
+            success: function(res){
+                if(res.status === "success") {
+                    alert("Data berhasil dihapus");
+                    location.reload();
+                } else {
+                    alert(res.message || "Gagal hapus!");
+                }
+            },
+            error: function() {
+                alert("Terjadi kesalahan saat menghapus data");
+            }
+        });
+    });
     
-    $('a[href="#tab_manual_input"]').tab('show');
+    /* ================= RESET FORM ================= */
+    $('#ModalInput').on('hidden.bs.modal', function() {
+        $('#NoManual, #Uraian, #IndikatorKinerja, #Satuan, #Keterangan').val('');
+        $('#preview_no_input, #preview_uraian_input').val('');
+        $('#select_urusan, #select_bidang_urusan, #select_program, #select_kegiatan, #select_sub_kegiatan')
+            .html('<option value="">-- Pilih --</option>').prop('disabled', true);
+        $('#path_display').html('Belum ada yang dipilih');
+        $('#info_nomenklatur_input').hide();
+        
+        <?php for ($thn = 2025; $thn <= 2030; $thn++): ?>
+            $('#Target<?= $thn ?>').val('');
+            $('#Rp<?= $thn ?>').val('');
+        <?php endfor; ?>
+        
+        $('a[href="#tab_manual_input"]').tab('show');
+        loadUrusan();
+    });
+    
+    $('#ModalEdit').on('hidden.bs.modal', function() {
+        $('#EditNoManual, #EditUraian, #EditIndikatorKinerja, #EditSatuan, #EditKeterangan').val('');
+        $('#preview_no_edit, #preview_uraian_edit').val('');
+        $('#edit_select_urusan, #edit_select_bidang_urusan, #edit_select_program, #edit_select_kegiatan, #edit_select_sub_kegiatan')
+            .html('<option value="">-- Pilih --</option>').prop('disabled', true);
+        $('#path_display_edit').html('Belum ada yang dipilih');
+        $('#info_nomenklatur_edit, #alert_data_existing').hide();
+        
+        <?php for ($thn = 2025; $thn <= 2030; $thn++): ?>
+            $('#EditTarget<?= $thn ?>').val('');
+            $('#EditRp<?= $thn ?>').val('');
+        <?php endfor; ?>
+        
+        existingKode = '';
+        existingNomenklatur = '';
+    });
+    
+    // Inisialisasi
     loadUrusan();
-});
-
-$('#ModalEdit').on('hidden.bs.modal', function() {
-    $('#EditNoManual, #EditUraian, #EditIndikatorKinerja, #EditSatuan, #EditKeterangan').val('');
-    $('#preview_no_edit, #preview_uraian_edit').val('');
-    $('#edit_select_urusan, #edit_select_bidang_urusan, #edit_select_program, #edit_select_kegiatan, #edit_select_sub_kegiatan')
-        .html('<option value="">-- Pilih --</option>').prop('disabled', true);
-    $('#path_display_edit').html('Belum ada yang dipilih');
-    $('#info_nomenklatur_edit, #alert_data_existing').hide();
-    
-    <?php for ($thn = 2025; $thn <= 2030; $thn++): ?>
-        $('#EditTarget<?= $thn ?>').val('');
-        $('#EditRp<?= $thn ?>').val('');
-    <?php endfor; ?>
-    
-    existingKode = '';
-    existingNomenklatur = '';
-});
-
-// Inisialisasi
-loadUrusan();
     
 });
 </script>

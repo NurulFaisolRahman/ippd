@@ -8,7 +8,7 @@
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
           <div class="data-table-list">
 
-            <!-- FILTER PROVINSI & KAB/KOTA (MUNCUL SAAT BELUM SET KodeWilayah) -->
+            <!-- FILTER WILAYAH (Provinsi, Kab/Kota, dan Instansi) - SEBELUM LOGIN -->
             <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
               <div class="form-example-wrap" style="margin-bottom: 20px;">
                 <div class="form-example-int form-horizental">
@@ -39,6 +39,16 @@
                         </div>
                       </div>
 
+                      <!-- FILTER INSTANSI - Muncul setelah pilih Kab/Kota -->
+                      <div class="col-lg-3 col-md-6" id="FilterInstansiGroup" style="display: none;">
+                        <div class="filter-group">
+                          <label for="FilterInstansiBeforeLogin"><b>Instansi </b></label>
+                          <select class="form-control filter-select" id="FilterInstansiBeforeLogin">
+                            <option value="">-- Semua Instansi --</option>
+                          </select>
+                        </div>
+                      </div>
+
                       <div class="col-lg-2 col-md-6">
                         <div class="filter-group" style="margin-top: 28px;">
                           <button class="btn btn-primary notika-btn-primary btn-block" id="Filter">
@@ -59,13 +69,63 @@
                 ?>
                 <div class="alert alert-info" style="margin-bottom: 20px;">
                   <strong>Wilayah terpilih:</strong> <?= $nama_wilayah ?>
+                  <?php 
+                  $filter_instansi_id = $this->input->get('instansi_id', TRUE);
+                  if (!empty($filter_instansi_id)) { 
+                    $instansi_terpilih = $this->db->select('nama')->from('akun_instansi')->where('id', $filter_instansi_id)->get()->row_array();
+                  ?>
+                    <br><strong>Instansi terpilih:</strong> <?= htmlspecialchars($instansi_terpilih['nama'] ?? '-') ?>
+                  <?php } ?>
                 </div>
               <?php } ?>
             <?php } ?>
-            <!-- END FILTER -->
+            <!-- END FILTER WILAYAH -->
 
-            <!-- Tombol Tambah -->
-            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+            <!-- FILTER INSTANSI (UNTUK YANG SUDAH LOGIN DAN BUKAN ROLE 4) -->
+            <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
+              <div class="form-example-wrap" style="margin-bottom: 20px;">
+                <div class="form-example-int form-horizental">
+                  <div class="form-group">
+                    <div class="row filter-row">
+                      <div class="col-lg-4 col-md-6">
+                        <div class="filter-group">
+                          <label for="FilterInstansi"><b>Filter Instansi </b></label>
+                          <select class="form-control filter-select" id="FilterInstansi">
+                            <option value="">-- Semua Instansi --</option>
+                            <?php foreach ($ListInstansi as $ins) { ?>
+                              <option value="<?= $ins['id'] ?>" <?= ($FilterInstansiId == $ins['id']) ? 'selected' : '' ?>>
+                                <?= html_escape($ins['nama']) ?>
+                              </option>
+                            <?php } ?>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div class="col-lg-2 col-md-6">
+                        <div class="filter-group" style="margin-top: 38px;">
+                          <button class="btn btn-info notika-btn-info btn-block" id="FilterInstansiBtn">
+                            <b>Tampilkan</b>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div class="col-lg-2 col-md-6">
+                        <div class="filter-group" style="margin-top: 38px;">
+                          <button class="btn btn-default notika-btn-default btn-block" id="ResetFilterBtn">
+                            <b>Reset</b>
+                          </button>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <?php } ?>
+            <!-- END FILTER INSTANSI -->
+
+            <!-- Tombol Tambah (HANYA UNTUK ROLE 4) -->
+            <?php if ($IsRole4) { ?>
               <div class="basic-tb-hd">
                 <div class="button-icon-btn sm-res-mg-t-30">
                   <button type="button"
@@ -85,19 +145,20 @@
                 <thead>
                   <tr>
                     <th rowspan="2" style="width:60px;">No</th>
-                    <th rowspan="2" style="width:220px;">POTENSI DAERAH<br>YANG MENJADI KEWENANGAN</th>
-                    <th rowspan="2" style="width:220px;">PERMASALAHAN PD</th>
-                    <th rowspan="2" style="width:220px;">ISU KLHS<br>YANG RELEVAN DENGAN PD</th>
+                    <th rowspan="2" style="width:200px;">POTENSI DAERAH<br>YANG MENJADI KEWENANGAN</th>
+                    <th rowspan="2" style="width:200px;">PERMASALAHAN PD</th>
+                    <th rowspan="2" style="width:200px;">ISU KLHS<br>YANG RELEVAN DENGAN PD</th>
                     <th colspan="3" style="text-align:center;">ISU LINGKUNGAN DINAMIS YANG RELEVAN DENGAN PD</th>
-                    <th rowspan="2" style="width:220px;">ISU STRATEGIS</th>
-                    <th class="text-center" rowspan="2" style="width:120px;">AKSI</th>
+                    <th rowspan="2" style="width:200px;">ISU STRATEGIS</th>
+                    <?php if ($IsRole4) { ?>
+                      <th class="text-center" rowspan="2" style="width:120px;">AKSI</th>
+                    <?php } ?>
                   </tr>
                   <tr>
-                    <th class="text-center" style="width:115px;">GLOBAL</th>
-                    <th class="text-center" style="width:115px;">NASIONAL</th>
-                    <th class="text-center" style="width:115px;">REGIONAL</th>
+                    <th class="text-center" style="width:100px;">GLOBAL</th>
+                    <th class="text-center" style="width:100px;">NASIONAL</th>
+                    <th class="text-center" style="width:100px;">REGIONAL</th>
                   </tr>
-
                 </thead>
 
                 <tbody>
@@ -108,53 +169,57 @@
                         $permasalahan_ids = isset($row['permasalahan_ids']) && is_array($row['permasalahan_ids']) ? $row['permasalahan_ids'] : [];
                         $klhs_ids         = isset($row['klhs_ids']) && is_array($row['klhs_ids']) ? $row['klhs_ids'] : [];
 
-                        // Untuk tampilan teks di tabel (kalau controller sudah siapkan stringnya juga, pakai itu)
+                        // Untuk tampilan teks di tabel
                         $permasalahan_text = isset($row['permasalahan_pd_text']) ? $row['permasalahan_pd_text'] : '';
                         $klhs_text         = isset($row['isu_klhs_text']) ? $row['isu_klhs_text'] : '';
+                        $nama_instansi     = isset($row['nama_instansi']) ? $row['nama_instansi'] : '-';
                       ?>
                       <tr>
                         <td class="text-center" style="vertical-align: middle;"><?= $no++ ?></td>
-
-                        <td style="vertical-align: middle;"><?= nl2br(htmlspecialchars($row['potensi_daerah'], ENT_QUOTES, 'UTF-8')) ?></td>
-
+                        <td style="vertical-align: middle;"><?= nl2br(htmlspecialchars($row['potensi_daerah'] ?? '-', ENT_QUOTES, 'UTF-8')) ?></td>
                         <td style="vertical-align: middle;">
                           <?= $permasalahan_text ? nl2br(htmlspecialchars($permasalahan_text, ENT_QUOTES, 'UTF-8')) : '-' ?>
                         </td>
-
                         <td style="vertical-align: middle;">
                           <?= $klhs_text ? nl2br(htmlspecialchars($klhs_text, ENT_QUOTES, 'UTF-8')) : '-' ?>
                         </td>
+                        <td class="text-center" style="vertical-align: middle;"><?= htmlspecialchars($row['isu_global'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
+                        <td class="text-center" style="vertical-align: middle;"><?= htmlspecialchars($row['isu_nasional'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
+                        <td class="text-center" style="vertical-align: middle;"><?= htmlspecialchars($row['isu_regional'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
+                        <td style="vertical-align: middle;"><?= nl2br(htmlspecialchars($row['isu_strategis'] ?? '-', ENT_QUOTES, 'UTF-8')) ?></td>
 
-                        <td class="text-center" style="vertical-align: middle;"><?= htmlspecialchars($row['isu_global'], ENT_QUOTES, 'UTF-8') ?></td>
-                        <td class="text-center" style="vertical-align: middle;"><?= htmlspecialchars($row['isu_nasional'], ENT_QUOTES, 'UTF-8') ?></td>
-                        <td class="text-center" style="vertical-align: middle;"><?= htmlspecialchars($row['isu_regional'], ENT_QUOTES, 'UTF-8') ?></td>
+                        <?php if ($IsRole4) { ?>
+                          <td class="text-center" style="vertical-align: middle;">
+                            <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
+                              <?php if ($InstansiId == ($row['instansi_id'] ?? null)) { ?>
+                                <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg BtnEdit"
+                                        data-id="<?= (int)$row['id'] ?>"
+                                        data-potensi="<?= htmlspecialchars($row['potensi_daerah'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                        data-global="<?= htmlspecialchars($row['isu_global'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                        data-nasional="<?= htmlspecialchars($row['isu_nasional'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                        data-regional="<?= htmlspecialchars($row['isu_regional'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                        data-strategis="<?= htmlspecialchars($row['isu_strategis'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                        data-permasalahan-ids='<?= htmlspecialchars(json_encode(array_values($permasalahan_ids)), ENT_QUOTES, 'UTF-8') ?>'
+                                        data-klhs-ids='<?= htmlspecialchars(json_encode(array_values($klhs_ids)), ENT_QUOTES, 'UTF-8') ?>'>
+                                  <i class="notika-icon notika-edit"></i>
+                                </button>
 
-                        <td style="vertical-align: middle;"><?= nl2br(htmlspecialchars($row['isu_strategis'], ENT_QUOTES, 'UTF-8')) ?></td>
-
-                        <td class="text-center" style="vertical-align: middle;">
-                          <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                              <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg BtnEdit"
-                                      data-id="<?= (int)$row['id'] ?>"
-                                      data-potensi="<?= htmlspecialchars($row['potensi_daerah'], ENT_QUOTES, 'UTF-8') ?>"
-                                      data-global="<?= htmlspecialchars($row['isu_global'], ENT_QUOTES, 'UTF-8') ?>"
-                                      data-nasional="<?= htmlspecialchars($row['isu_nasional'], ENT_QUOTES, 'UTF-8') ?>"
-                                      data-regional="<?= htmlspecialchars($row['isu_regional'], ENT_QUOTES, 'UTF-8') ?>"
-                                      data-strategis="<?= htmlspecialchars($row['isu_strategis'], ENT_QUOTES, 'UTF-8') ?>"
-                                      data-permasalahan-ids='<?= htmlspecialchars(json_encode(array_values($permasalahan_ids)), ENT_QUOTES, 'UTF-8') ?>'
-                                      data-klhs-ids='<?= htmlspecialchars(json_encode(array_values($klhs_ids)), ENT_QUOTES, 'UTF-8') ?>'>
-                                <i class="notika-icon notika-edit"></i>
-                              </button>
-
-                              <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg BtnHapus"
-                                      data-id="<?= (int)$row['id'] ?>">
-                                <i class="notika-icon notika-trash"></i>
-                              </button>
-                            <?php } ?>
-                          </div>
-                        </td>
+                                <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg BtnHapus"
+                                        data-id="<?= (int)$row['id'] ?>">
+                                  <i class="notika-icon notika-trash"></i>
+                                </button>
+                              <?php } else { ?>
+                                <span class="text-muted">-</span>
+                              <?php } ?>
+                            </div>
+                          </td>
+                        <?php } ?>
                       </tr>
                     <?php } ?>
+                  <?php } else { ?>
+                    <tr>
+                      <td colspan="<?= $IsRole4 ? '10' : '9' ?>" class="text-center">Belum ada data Isu Strategis PD</td>
+                    </tr>
                   <?php } ?>
                 </tbody>
 
@@ -177,18 +242,24 @@
         </div>
 
         <div class="modal-body">
+          <?php if (!empty($NamaInstansi)) { ?>
+            <div class="alert alert-info">
+              <strong>Instansi:</strong> <?= htmlspecialchars($NamaInstansi) ?>
+            </div>
+          <?php } ?>
+
           <div class="form-group">
-            <label><b>Potensi Daerah</b></label>
+            <label><b>Potensi Daerah</b> <span class="text-danger">*</span></label>
             <textarea id="Potensi" class="form-control" rows="2"></textarea>
           </div>
 
-          <!-- PERMASALAHAN PD MULTI (STYLE + / TRASH) -->
+          <!-- PERMASALAHAN PD MULTI -->
           <div class="form-group">
             <label><b>Permasalahan PD</b></label>
             <div id="WrapPermasalahanAdd"></div>
           </div>
 
-          <!-- ISU KLHS MULTI (STYLE + / TRASH) -->
+          <!-- ISU KLHS MULTI -->
           <div class="form-group">
             <label><b>Isu KLHS yang relevan dengan PD</b></label>
             <div id="WrapKLHSAdd"></div>
@@ -212,11 +283,12 @@
           <br>
 
           <div class="form-group">
-            <label><b>Isu Strategis </b></label>
+            <label><b>Isu Strategis</b></label>
             <textarea id="Strategis" class="form-control" rows="2"></textarea>
           </div>
 
           <button class="btn btn-success notika-btn-success" id="BtnSimpanIsu"><b>SIMPAN</b></button>
+          <button type="button" class="btn btn-default" data-dismiss="modal"><b>BATAL</b></button>
         </div>
       </div>
     </div>
@@ -235,7 +307,7 @@
           <input type="hidden" id="EditId">
 
           <div class="form-group">
-            <label><b>Potensi Daerah</b></label>
+            <label><b>Potensi Daerah</b> <span class="text-danger">*</span></label>
             <textarea id="EditPotensi" class="form-control" rows="2"></textarea>
           </div>
 
@@ -269,18 +341,18 @@
           <br>
 
           <div class="form-group">
-            <label><b>Isu Strategis </b></label>
+            <label><b>Isu Strategis</b></label>
             <textarea id="EditStrategis" class="form-control" rows="2"></textarea>
           </div>
 
-          <button class="btn btn-success notika-btn-success" id="BtnUpdateIsu"><b>SIMPAN</b></button>
+          <button class="btn btn-success notika-btn-success" id="BtnUpdateIsu"><b>UPDATE</b></button>
+          <button type="button" class="btn btn-default" data-dismiss="modal"><b>BATAL</b></button>
         </div>
       </div>
     </div>
   </div>
 
 </div><!-- /.main-content -->
-
 
 <script src="../js/vendor/jquery-1.12.4.min.js"></script>
 <script src="../js/bootstrap.min.js"></script>
@@ -291,6 +363,10 @@
   var BaseURL = '<?= base_url() ?>';
   var CSRF_TOKEN = '<?= $this->security->get_csrf_hash() ?>';
   var CSRF_NAME  = '<?= $this->security->get_csrf_token_name() ?>';
+  var IS_ROLE_4 = '<?= $IsRole4 ?>';
+  var IS_LOGGED_IN = '<?= $IsLoggedIn ?>';
+  var CURRENT_FILTER_INSTANSI = '<?= $FilterInstansiId ?? '' ?>';
+  var KODE_WILAYAH = '<?= $KodeWilayah ?? '' ?>';
 
   // ====== MASTER OPTIONS (SERVER -> JS) ======
   var OPT_PERMASALAHAN = `<?php
@@ -388,7 +464,7 @@
       }
     });
 
-    // unique (biar tidak double)
+    // unique
     var uniq = [];
     for (var i=0;i<vals.length;i++){
       if (uniq.indexOf(vals[i]) === -1) uniq.push(vals[i]);
@@ -398,14 +474,48 @@
 
   jQuery(document).ready(function($){
 
-    // DataTable
-    $('#data-table-basic').DataTable();
+    // Inisialisasi DataTable
+    if ($('#data-table-isu-strategis').length > 0) {
+      try {
+        if ($.fn.DataTable.isDataTable('#data-table-isu-strategis')) {
+          $('#data-table-isu-strategis').DataTable().destroy();
+        }
+        $('#data-table-isu-strategis').DataTable({
+          "pageLength": 10,
+          "ordering": false,
+          "language": {
+            "emptyTable": "Tidak ada data",
+            "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            "infoEmpty": "Tidak ada data",
+            "paginate": {
+              "first": "Pertama",
+              "last": "Terakhir",
+              "next": "Berikutnya",
+              "previous": "Sebelumnya"
+            }
+          },
+          "drawCallback": function(settings) {
+            var pagination = $(this).closest('.dataTables_wrapper').find('.dataTables_paginate');
+            pagination.find('a').css('margin', '0 5px');
+          }
+        });
+      } catch(e) {
+        console.log("DataTable error:", e);
+      }
+    }
+
+    setTimeout(function() {
+      $('.dataTables_paginate a').css('margin', '0 5px');
+      $('.dataTables_paginate span a').css('margin', '0 5px');
+      $('.dataTables_paginate').css('margin-top', '10px');
+      $('.dataTables_info').css('margin', '10px 0');
+    }, 100);
 
     // ===== init repeater add modal (default 1 row)
     initRepeater('#WrapPermasalahanAdd', 'permasalahan_add', 'permasalahan_ids[]', OPT_PERMASALAHAN, []);
     initRepeater('#WrapKLHSAdd', 'klhs_add', 'klhs_ids[]', OPT_KLHS, []);
 
-    // ====== ADD ROW handler (global)
+    // ====== ADD ROW handler
     $(document).on('click', '.BtnAddRow', function(){
       var type = $(this).data('type');
 
@@ -426,56 +536,122 @@
     });
 
     // =========================
-    // FILTER PROVINSI & KAB/KOTA
+    // FILTER WILAYAH SEBELUM LOGIN
     // =========================
     <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
 
       $("#Provinsi").change(function() {
-        if ($(this).val() === "") {
+        var provinsiKode = $(this).val();
+        
+        if (provinsiKode === "") {
           $("#KabKota").html('<option value="">Pilih Kab/Kota</option>');
+          $("#FilterInstansiGroup").hide();
+          $("#FilterInstansiBeforeLogin").html('<option value="">-- Semua Instansi --</option>');
           return;
         }
 
         $.ajax({
-          url: BaseURL + "Daerah/GetListKabKota",
+          url: BaseURL + "Instansi/GetListKabKota",
           type: "POST",
-          data: { Kode: $(this).val(), [CSRF_NAME]: CSRF_TOKEN },
-          beforeSend: function() { $("#KabKota").prop('disabled', true); },
-          success: function(res) {
-            var Data = (typeof res === 'string') ? JSON.parse(res) : res;
+          data: { Kode: provinsiKode, [CSRF_NAME]: CSRF_TOKEN },
+          dataType: 'json',
+          beforeSend: function() { 
+            $("#KabKota").prop('disabled', true).html('<option value="">Memuat...</option>');
+            $("#FilterInstansiGroup").hide();
+          },
+          success: function(Data) {
             var KabKota = '<option value="">Pilih Kab/Kota</option>';
-
-            if (Data.length > 0) {
+            
+            if (Data && Data.length > 0) {
               for (let i = 0; i < Data.length; i++) {
                 KabKota += '<option value="' + Data[i].Kode + '">' + Data[i].Nama + '</option>';
               }
             } else {
-              alert("Belum Ada Data Kab/Kota");
+              KabKota = '<option value="">Tidak ada data untuk provinsi ini</option>';
             }
-
+            
             $("#KabKota").html(KabKota).prop('disabled', false);
+            $("#FilterInstansiGroup").hide();
           },
-          error: function() {
+          error: function(xhr, status, error) {
+            console.error("AJAX Error:", error);
             alert("Gagal memuat data Kab/Kota");
-            $("#KabKota").prop('disabled', false);
+            $("#KabKota").html('<option value="">Error memuat data</option>').prop('disabled', false);
+          }
+        });
+      });
+
+      $("#KabKota").change(function() {
+        var kabKotaKode = $(this).val();
+        
+        if (kabKotaKode === "") {
+          $("#FilterInstansiGroup").hide();
+          $("#FilterInstansiBeforeLogin").html('<option value="">-- Semua Instansi --</option>');
+          return;
+        }
+
+        $.ajax({
+          url: BaseURL + "Instansi/GetListInstansiLevel4",
+          type: "POST",
+          data: { kode_wilayah: kabKotaKode, [CSRF_NAME]: CSRF_TOKEN },
+          dataType: 'json',
+          beforeSend: function() {
+            $("#FilterInstansiBeforeLogin").html('<option value="">Memuat...</option>');
+            $("#FilterInstansiGroup").show();
+          },
+          success: function(Data) {
+            var options = '<option value="">-- Semua Instansi --</option>';
+            
+            if (Data && Data.length > 0) {
+              for (let i = 0; i < Data.length; i++) {
+                var selected = (CURRENT_FILTER_INSTANSI == Data[i].id) ? 'selected' : '';
+                options += '<option value="' + Data[i].id + '" ' + selected + '>' + Data[i].nama + '</option>';
+              }
+            } else {
+              options = '<option value="">-- Tidak Ada Instansi --</option>';
+            }
+            
+            $("#FilterInstansiBeforeLogin").html(options);
+            $("#FilterInstansiGroup").show();
+          },
+          error: function(xhr, status, error) {
+            console.error("AJAX Error:", error);
+            alert("Gagal memuat data Instansi");
+            $("#FilterInstansiBeforeLogin").html('<option value="">-- Gagal Memuat --</option>');
           }
         });
       });
 
       $("#Filter").click(function() {
-        if ($("#Provinsi").val() === "") return alert("Mohon Pilih Provinsi");
-        if ($("#KabKota").val() === "") return alert("Mohon Pilih Kab/Kota");
+        if ($("#Provinsi").val() === "") {
+          alert("Mohon Pilih Provinsi");
+          return;
+        }
+        if ($("#KabKota").val() === "") {
+          alert("Mohon Pilih Kab/Kota");
+          return;
+        }
 
         var kodeWilayah = $("#KabKota").val();
-
+        var instansiId = $("#FilterInstansiBeforeLogin").val();
+        
         $.ajax({
-          url: BaseURL + "Daerah/SetTempKodeWilayah",
+          url: BaseURL + "Instansi/SetTempKodeWilayah",
           type: "POST",
-          data: { KodeWilayah: kodeWilayah, [CSRF_NAME]: CSRF_TOKEN },
-          beforeSend: function() { $("#Filter").prop('disabled', true).text('Memuat...'); },
+          data: { 
+            KodeWilayah: kodeWilayah, 
+            [CSRF_NAME]: CSRF_TOKEN 
+          },
+          beforeSend: function() { 
+            $("#Filter").prop('disabled', true).text('Memuat...'); 
+          },
           success: function(res) {
             if (res === '1') {
-              window.location.reload();
+              var redirectUrl = BaseURL + "Instansi/IsuStrategisPD";
+              if (instansiId && instansiId != '') {
+                redirectUrl += "?instansi_id=" + instansiId;
+              }
+              window.location.href = redirectUrl;
             } else {
               alert(res || "Gagal menyimpan filter wilayah!");
               $("#Filter").prop('disabled', false).text('Filter');
@@ -491,35 +667,49 @@
       <?php if (!empty($KodeWilayah)) { ?>
         var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
         var kodeKab  = "<?= $KodeWilayah ?>";
-        $("#Provinsi").val(kodeProv);
-
-        $.ajax({
-          url: BaseURL + "Daerah/GetListKabKota",
-          type: "POST",
-          data: { Kode: kodeProv, [CSRF_NAME]: CSRF_TOKEN },
-          success: function(res) {
-            var Data = (typeof res === 'string') ? JSON.parse(res) : res;
-            var KabKota = '<option value="">Pilih Kab/Kota</option>';
-
-            if (Data.length > 0) {
-              for (let i = 0; i < Data.length; i++) {
-                var selected = (Data[i].Kode === kodeKab) ? 'selected' : '';
-                KabKota += '<option value="' + Data[i].Kode + '" ' + selected + '>' + Data[i].Nama + '</option>';
+        $("#Provinsi").val(kodeProv).trigger('change');
+        
+        setTimeout(function() {
+          $("#KabKota").val(kodeKab).trigger('change');
+          
+          <?php if (!empty($FilterInstansiId)) { ?>
+            setTimeout(function() {
+              if ($("#FilterInstansiBeforeLogin option[value='<?= $FilterInstansiId ?>']").length > 0) {
+                $("#FilterInstansiBeforeLogin").val("<?= $FilterInstansiId ?>");
               }
-            }
-            $("#KabKota").html(KabKota);
-          }
-        });
+            }, 800);
+          <?php } ?>
+        }, 500);
       <?php } ?>
 
     <?php } ?>
-    // =========================
-    // END FILTER
-    // =========================
 
     // =========================
-    // TAMBAH ISU (GLOBAL/NASIONAL/REGIONAL OPSIONAL)
+    // FILTER INSTANSI (UNTUK YANG SUDAH LOGIN DAN BUKAN ROLE 4)
     // =========================
+    <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
+      
+      $("#FilterInstansiBtn").click(function() {
+        var instansiId = $("#FilterInstansi").val();
+        var url = BaseURL + "Instansi/IsuStrategisPD";
+        
+        if (instansiId && instansiId != '') {
+          url += "?instansi_id=" + instansiId;
+        }
+        
+        window.location.href = url;
+      });
+      
+      $("#ResetFilterBtn").click(function() {
+        window.location.href = BaseURL + "Instansi/IsuStrategisPD";
+      });
+      
+    <?php } ?>
+
+    // =========================
+    // TAMBAH ISU
+    // =========================
+    <?php if ($IsRole4) { ?>
     $("#BtnSimpanIsu").click(function(){
       var potensi = $("#Potensi").val().trim();
       if(!potensi){
@@ -530,30 +720,34 @@
       var permasalahan_ids = collectValues('#WrapPermasalahanAdd');
       var klhs_ids         = collectValues('#WrapKLHSAdd');
 
-      $.post(BaseURL + "Daerah/InputIsuStrategisPD", {
-        potensi_daerah: potensi,
-        permasalahan_ids: permasalahan_ids,
-        klhs_ids: klhs_ids,
-        isu_global: $("#Global").val().trim(),
-        isu_nasional: $("#Nasional").val().trim(),
-        isu_regional: $("#Regional").val().trim(),
-        isu_strategis: $("#Strategis").val().trim(),
-        [CSRF_NAME]: CSRF_TOKEN
-      })
-      .done(function(res){
-        if(res == '1'){
-          window.location.reload();
-        } else {
-          alert(res);
+      $.ajax({
+        url: BaseURL + "Instansi/InputIsuStrategisPD",
+        type: "POST",
+        data: {
+          potensi_daerah: potensi,
+          permasalahan_ids: permasalahan_ids,
+          klhs_ids: klhs_ids,
+          isu_global: $("#Global").val().trim(),
+          isu_nasional: $("#Nasional").val().trim(),
+          isu_regional: $("#Regional").val().trim(),
+          isu_strategis: $("#Strategis").val().trim(),
+          [CSRF_NAME]: CSRF_TOKEN
+        },
+        success: function(res){
+          if(res == '1'){
+            window.location.reload();
+          } else {
+            alert(res);
+          }
+        },
+        error: function(){
+          alert('Gagal request (Tambah Isu Strategis)');
         }
-      })
-      .fail(function(){
-        alert('Gagal request (Tambah Isu Strategis)');
       });
     });
 
     // =========================
-    // BUKA MODAL EDIT (load multi IDs dari data attribute JSON)
+    // BUKA MODAL EDIT
     // =========================
     $(document).on("click", ".BtnEdit", function(){
       $("#EditId").val($(this).data('id'));
@@ -571,7 +765,6 @@
       try { permasalahanArr = JSON.parse(permasalahanIdsJson); } catch(e) { permasalahanArr = []; }
       try { klhsArr = JSON.parse(klhsIdsJson); } catch(e) { klhsArr = []; }
 
-      // init repeater edit
       initRepeater('#WrapPermasalahanEdit', 'permasalahan_edit', 'edit_permasalahan_ids[]', OPT_PERMASALAHAN, permasalahanArr);
       initRepeater('#WrapKLHSEdit', 'klhs_edit', 'edit_klhs_ids[]', OPT_KLHS, klhsArr);
 
@@ -579,7 +772,7 @@
     });
 
     // =========================
-    // UPDATE ISU (GLOBAL/NASIONAL/REGIONAL bisa diisi di edit)
+    // UPDATE ISU
     // =========================
     $("#BtnUpdateIsu").click(function(){
       var id = $("#EditId").val();
@@ -597,26 +790,30 @@
       var permasalahan_ids = collectValues('#WrapPermasalahanEdit');
       var klhs_ids         = collectValues('#WrapKLHSEdit');
 
-      $.post(BaseURL + "Daerah/EditIsuStrategisPD", {
-        id: id,
-        potensi_daerah: potensi,
-        permasalahan_ids: permasalahan_ids,
-        klhs_ids: klhs_ids,
-        isu_global: $("#EditGlobal").val().trim(),
-        isu_nasional: $("#EditNasional").val().trim(),
-        isu_regional: $("#EditRegional").val().trim(),
-        isu_strategis: $("#EditStrategis").val().trim(),
-        [CSRF_NAME]: CSRF_TOKEN
-      })
-      .done(function(res){
-        if(res == '1'){
-          window.location.reload();
-        } else {
-          alert(res);
+      $.ajax({
+        url: BaseURL + "Instansi/EditIsuStrategisPD",
+        type: "POST",
+        data: {
+          id: id,
+          potensi_daerah: potensi,
+          permasalahan_ids: permasalahan_ids,
+          klhs_ids: klhs_ids,
+          isu_global: $("#EditGlobal").val().trim(),
+          isu_nasional: $("#EditNasional").val().trim(),
+          isu_regional: $("#EditRegional").val().trim(),
+          isu_strategis: $("#EditStrategis").val().trim(),
+          [CSRF_NAME]: CSRF_TOKEN
+        },
+        success: function(res){
+          if(res == '1'){
+            window.location.reload();
+          } else {
+            alert(res);
+          }
+        },
+        error: function(){
+          alert('Gagal request (Edit Isu Strategis)');
         }
-      })
-      .fail(function(){
-        alert('Gagal request (Edit Isu Strategis)');
       });
     });
 
@@ -634,21 +831,27 @@
         return;
       }
 
-      $.post(BaseURL + "Daerah/HapusIsuStrategis", {
-        id: id,
-        [CSRF_NAME]: CSRF_TOKEN
-      })
-      .done(function(res){
-        if(res == '1'){
-          window.location.reload();
-        } else {
-          alert(res);
+      $.ajax({
+        url: BaseURL + "Instansi/HapusIsuStrategisPD",
+        type: "POST",
+        data: {
+          id: id,
+          [CSRF_NAME]: CSRF_TOKEN
+        },
+        success: function(res){
+          if(res == '1'){
+            window.location.reload();
+          } else {
+            alert(res);
+          }
+        },
+        error: function(){
+          alert('Gagal request (Hapus Isu Strategis)');
         }
-      })
-      .fail(function(){
-        alert('Gagal request (Hapus Isu Strategis)');
       });
     });
+    
+    <?php } ?>
 
   });
 </script>

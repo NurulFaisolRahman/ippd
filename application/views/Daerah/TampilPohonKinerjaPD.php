@@ -1,5 +1,3 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
-
 <?php $this->load->view('Daerah/sidebar'); ?>
 <?php $this->load->view('Daerah/Cssumum'); ?>
 
@@ -147,10 +145,144 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-wrap: wrap;
 }
 
 .wilayah-info i {
     font-size: 16px;
+}
+
+/* === FILTER INSTANSI SECTION === */
+.filter-instansi-section {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px dashed #cbd5e1;
+}
+
+.filter-instansi-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    color: #1e293b;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.filter-instansi-title i {
+    color: #059669;
+    font-size: 14px;
+}
+
+.filter-instansi-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.filter-instansi-group {
+    flex: 2;
+    min-width: 250px;
+}
+
+.filter-instansi-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.filter-instansi-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 14px;
+    background: white;
+    transition: all 0.2s;
+}
+
+.btn-group-instansi {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.btn-instansi {
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+    flex: 1;
+}
+
+.btn-instansi-filter {
+    background: #059669;
+    color: white;
+}
+
+.btn-instansi-filter:hover {
+    background: #047857;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(5,150,105,0.2);
+}
+
+.btn-instansi-reset {
+    background: #6b7280;
+    color: white;
+}
+
+.btn-instansi-reset:hover {
+    background: #4b5563;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(107,114,128,0.2);
+}
+
+.instansi-info {
+    margin-top: 12px;
+    padding: 10px 16px;
+    background: #d1fae5;
+    border-left: 4px solid #059669;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #065f46;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.instansi-info i {
+    font-size: 14px;
+}
+
+.info-readonly {
+    margin-top: 12px;
+    padding: 10px 16px;
+    background: #fef3c7;
+    border-left: 4px solid #d97706;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #92400e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.info-readonly i {
+    font-size: 14px;
 }
 
 /* === HEADER === */
@@ -715,7 +847,8 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
 <div class="main-content">
     <div class="pk-card">
 
-        <!-- FILTER WILAYAH SECTION -->
+        <!-- FILTER WILAYAH SECTION - HANYA UNTUK SEBELUM LOGIN -->
+        <?php if (!$IsLoggedIn): ?>
         <div class="filter-section">
             <div class="filter-title">
                 <i class="fa fa-map-filter"></i>
@@ -728,7 +861,8 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
                     <select id="Provinsi">
                         <option value="">Pilih Provinsi</option>
                         <?php foreach ($Provinsi as $prov) { ?>
-                            <option value="<?= html_escape($prov['Kode']) ?>">
+                            <option value="<?= html_escape($prov['Kode']) ?>"
+                                <?= (!empty($KodeWilayah) && substr($KodeWilayah,0,2)==$prov['Kode']) ? 'selected' : '' ?>>
                                 <?= html_escape($prov['Nama']) ?>
                             </option>
                         <?php } ?>
@@ -739,6 +873,14 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
                     <label><i class="fa fa-city"></i> Kabupaten/Kota</label>
                     <select id="KabKota" disabled>
                         <option value="">Pilih Kab/Kota</option>
+                    </select>
+                </div>
+
+                <!-- FILTER INSTANSI SEBELUM LOGIN -->
+                <div class="filter-group" id="FilterInstansiGroupBefore" style="display: none;">
+                    <label><i class="fa fa-building"></i> Filter Instansi</label>
+                    <select id="FilterInstansiBeforeLogin">
+                        <option value="">-- Semua Instansi --</option>
                     </select>
                 </div>
                 
@@ -755,16 +897,55 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
                 <div class="wilayah-info">
                     <i class="fa fa-map-pin"></i>
                     <span><strong>Wilayah terpilih:</strong> <?= html_escape($NamaWilayah) ?></span>
+                    <?php if (!empty($FilterInstansiId)): 
+                        $instansi_terpilih = $this->db->select('nama')->from('akun_instansi')->where('id', $FilterInstansiId)->get()->row_array();
+                    ?>
+                        <span style="margin-left: 16px;"><strong>Instansi terpilih:</strong> <?= htmlspecialchars($instansi_terpilih['nama'] ?? '-') ?></span>
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
         </div>
+        <?php endif; ?>
+
+        <!-- FILTER INSTANSI (UNTUK YANG SUDAH LOGIN DAN BUKAN ROLE 4) -->
+        <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)): ?>
+            <div class="filter-section">
+                <div class="filter-instansi-section" style="margin-top:0; border-top:none;">
+                    <div class="filter-instansi-title">
+                        <i class="fa fa-building"></i>
+                        <span>Filter Instansi</span>
+                    </div>
+                    <div class="filter-instansi-row">
+                        <div class="filter-instansi-group">
+                            <select id="FilterInstansi">
+                                <option value="">-- Semua Instansi --</option>
+                                <?php foreach ($ListInstansi as $ins): ?>
+                                    <option value="<?= $ins['id'] ?>" <?= ($FilterInstansiId == $ins['id']) ? 'selected' : '' ?>>
+                                        <?= html_escape($ins['nama']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="btn-group-instansi">
+                            <button class="btn-instansi btn-instansi-filter" id="FilterInstansiBtn">
+                                <i class="fa fa-filter"></i> Tampilkan
+                            </button>
+                            <button class="btn-instansi btn-instansi-reset" id="ResetFilterBtn">
+                                <i class="fa fa-undo"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
 
         <!-- HEADER CHART -->
         <div class="pk-header">
             <div class="pk-header-title">
                 <div class="icon-wrap"><i class="fa fa-sitemap"></i></div>
                 <div>
-                    <h4>Pohon Kinerja Perangkat Daerah <?= !empty($NamaWilayah) ? '- ' . html_escape($NamaWilayah) : '' ?></h4>
+                    <h4>Pohon Kinerja Perangkat Daerah 
                     <p>Visualisasi hierarki kinerja 4 level - Klik node untuk melihat detail</p>
                 </div>
             </div>
@@ -826,7 +1007,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
                 Scroll / Pinch untuk zoom &bull; Drag untuk pan &bull; <strong>Klik node untuk melihat detail</strong>
             </div>
             <div class="btn-group-pk">
-                <button class="btn-pk btn-back" onclick="location.href='<?= base_url('Daerah') ?>'">
+                <button class="btn-pk btn-back" onclick="location.href='<?= base_url('Instansi') ?>'">
                     <i class="fa fa-arrow-left"></i> Kembali
                 </button>
                 <button class="btn-pk btn-zoom" id="zoomIn"><i class="fa fa-search-plus"></i></button>
@@ -842,6 +1023,21 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
 var BaseURL = "<?= base_url() ?>";
 var CSRF_NAME = "<?= $this->security->get_csrf_token_name() ?>";
 var CSRF_TOKEN = "<?= $this->security->get_csrf_hash() ?>";
+var IS_ROLE_4 = '<?= $IsRole4 ?>';
+var IS_LOGGED_IN = '<?= $IsLoggedIn ?>';
+var CURRENT_FILTER_INSTANSI = '<?= $FilterInstansiId ?? '' ?>';
+var KODE_WILAYAH = '<?= $KodeWilayah ?? '' ?>';
+
+// Data perangkat daerah untuk mapping crosscutting
+var perangkatDaerah = <?= json_encode($perangkat_daerah ?? []) ?>;
+
+// Buat mapping ID ke nama perangkat daerah
+var pdMap = {};
+if (perangkatDaerah && perangkatDaerah.length > 0) {
+    perangkatDaerah.forEach(function(pd) {
+        pdMap[pd.id] = pd.nama;
+    });
+}
 
 $(document).ready(function() {
     
@@ -854,38 +1050,36 @@ $(document).ready(function() {
         }
     });
 
-    // Load Kab/Kota saat Provinsi dipilih
+    <?php if (!$IsLoggedIn): ?>
+    // Load Kab/Kota saat Provinsi dipilih (hanya untuk belum login)
     $("#Provinsi").change(function() {
         var prov = $(this).val();
         
         if (prov === "") {
             $("#KabKota").html('<option value="">Pilih Kab/Kota</option>').prop('disabled', true);
+            $("#FilterInstansiGroupBefore").hide();
             return;
         }
 
         $.ajax({
-            url: BaseURL + "Daerah/GetListKabKota",
+            url: BaseURL + "Instansi/GetListKabKota",
             type: "POST",
             data: { Kode: prov },
+            dataType: 'json',
             beforeSend: function() { 
-                $("#KabKota").prop('disabled', true).html('<option value="">Memuat...</option>'); 
+                $("#KabKota").prop('disabled', true).html('<option value="">Memuat...</option>');
+                $("#FilterInstansiGroupBefore").hide();
             },
-            success: function(res) {
-                var Data = (typeof res === 'string') ? JSON.parse(res) : res;
+            success: function(Data) {
                 var options = '<option value="">Pilih Kab/Kota</option>';
 
-                if (Data.length > 0) {
+                if (Data && Data.length > 0) {
                     for (let i = 0; i < Data.length; i++) {
                         options += '<option value="' + Data[i].Kode + '">' + Data[i].Nama + '</option>';
                     }
                 }
 
                 $("#KabKota").html(options).prop('disabled', false);
-                
-                <?php if (!empty($KodeWilayah)): ?>
-                    var kodeKab = "<?= $KodeWilayah ?>";
-                    $("#KabKota").val(kodeKab);
-                <?php endif; ?>
             },
             error: function() {
                 alert("Gagal memuat data Kab/Kota");
@@ -894,15 +1088,62 @@ $(document).ready(function() {
         });
     });
 
+    // Load Instansi saat Kab/Kota dipilih (SEBELUM LOGIN)
+    $("#KabKota").change(function() {
+        var kabKotaKode = $(this).val();
+        if (kabKotaKode === "") {
+            $("#FilterInstansiGroupBefore").hide();
+            $("#FilterInstansiBeforeLogin").html('<option value="">-- Semua Instansi --</option>');
+            return;
+        }
+
+        $.ajax({
+            url: BaseURL + "Instansi/GetListInstansiLevel4",
+            type: "POST",
+            data: { kode_wilayah: kabKotaKode },
+            dataType: 'json',
+            beforeSend: function() {
+                $("#FilterInstansiBeforeLogin").html('<option value="">Memuat...</option>');
+                $("#FilterInstansiGroupBefore").show();
+            },
+            success: function(Data) {
+                var options = '<option value="">-- Semua Instansi --</option>';
+                if (Data && Data.length > 0) {
+                    for (let i = 0; i < Data.length; i++) {
+                        var selected = (CURRENT_FILTER_INSTANSI == Data[i].id) ? 'selected' : '';
+                        options += '<option value="' + Data[i].id + '" ' + selected + '>' + Data[i].nama + '</option>';
+                    }
+                }
+                $("#FilterInstansiBeforeLogin").html(options);
+                $("#FilterInstansiGroupBefore").show();
+            },
+            error: function() {
+                alert("Gagal memuat data Instansi");
+            }
+        });
+    });
+
     <?php if (!empty($KodeWilayah)): ?>
         var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
+        var kodeKab = "<?= $KodeWilayah ?>";
         $("#Provinsi").val(kodeProv).trigger('change');
+        setTimeout(function() {
+            $("#KabKota").val(kodeKab).trigger('change');
+            <?php if (!empty($FilterInstansiId)): ?>
+                setTimeout(function() {
+                    if ($("#FilterInstansiBeforeLogin option[value='<?= $FilterInstansiId ?>']").length > 0) {
+                        $("#FilterInstansiBeforeLogin").val("<?= $FilterInstansiId ?>");
+                    }
+                }, 800);
+            <?php endif; ?>
+        }, 500);
     <?php endif; ?>
 
-    // Filter button click
+    // Filter button click (SEBELUM LOGIN)
     $("#Filter").click(function() {
         var provinsi = $("#Provinsi").val();
         var kabkota = $("#KabKota").val();
+        var instansiId = $("#FilterInstansiBeforeLogin").val();
 
         if (provinsi === "") {
             alert("Mohon pilih Provinsi terlebih dahulu");
@@ -920,12 +1161,16 @@ $(document).ready(function() {
         $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Memuat...');
 
         $.ajax({
-            url: BaseURL + "Daerah/SetTempKodeWilayah",
+            url: BaseURL + "Instansi/SetTempKodeWilayah",
             type: "POST",
             data: { KodeWilayah: kabkota },
             success: function(res) {
                 if (res === '1') {
-                    window.location.reload();
+                    var url = BaseURL + "Instansi/TampilPohonKinerjaPD";
+                    if (instansiId && instansiId != '') {
+                        url += "?instansi_id=" + instansiId;
+                    }
+                    window.location.href = url;
                 } else {
                     alert(res || "Gagal menyimpan filter wilayah!");
                     $btn.prop('disabled', false).html('<i class="fa fa-search"></i> Tampilkan');
@@ -937,11 +1182,30 @@ $(document).ready(function() {
             }
         });
     });
+    <?php endif; // end if !$IsLoggedIn ?>
 
-    // Modal close handlers
-    $("#modalClose, #modalOverlay").click(function(e) {
-        if (e.target === this) {
+    // Filter Instansi untuk non role 4 (setelah login)
+    <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah)): ?>
+        $("#FilterInstansiBtn").click(function() {
+            var instansiId = $("#FilterInstansi").val();
+            var url = BaseURL + "Instansi/TampilPohonKinerjaPD";
+            if (instansiId && instansiId != '') {
+                url += "?instansi_id=" + instansiId;
+            }
+            window.location.href = url;
+        });
+        
+        $("#ResetFilterBtn").click(function() {
+            window.location.href = BaseURL + "Instansi/TampilPohonKinerjaPD";
+        });
+    <?php endif; ?>
+
+    // ========== PERBAIKAN: MODAL CLOSE HANDLER DENGAN EVENT DELEGATION ==========
+    // Gunakan event delegation karena modal dibuat secara dinamis oleh D3
+    $(document).on('click', '#modalClose, #modalOverlay', function(e) {
+        if (e.target === this || $(e.target).closest('#modalClose').length) {
             $("#modalOverlay").fadeOut(200);
+            $("#modalBody").empty();
         }
     });
 
@@ -949,6 +1213,7 @@ $(document).ready(function() {
     $(document).keydown(function(e) {
         if (e.key === "Escape" && $("#modalOverlay").is(":visible")) {
             $("#modalOverlay").fadeOut(200);
+            $("#modalBody").empty();
         }
     });
 });
@@ -984,6 +1249,7 @@ $(document).ready(function() {
         if (typeof ind === 'string') {
             return ind.split('|||').filter(i => i && i.trim() !== '');
         }
+        if (Array.isArray(ind)) return ind;
         return [];
     }
 
@@ -994,13 +1260,10 @@ $(document).ready(function() {
             let pdList = [];
             let ketList = [];
             
-            // Parse JSON jika perlu
             if (typeof pd === 'string') {
                 try {
                     pdList = JSON.parse(pd);
                 } catch(e) {
-                    // Jika bukan JSON, mungkin sudah dalam format array
-                    console.log('pd not JSON:', pd);
                     return [];
                 }
             } else if (Array.isArray(pd)) {
@@ -1085,247 +1348,221 @@ $(document).ready(function() {
         return links;
     }
 
-   // Fungsi untuk menampilkan modal dengan data node
-function showNodeDetails(nodeData, level, node) {
-    const lv = LEVELS[level];
-    const levelName = lv ? lv.label : 'Level ' + level;
-    const levelColor = lv ? lv.fill : '#94a3b8';
-    
-    // Format indikator
-    const indikatorList = formatIndikator(nodeData.indikator);
-    
-    // Format crosscutting
-    const crosscuttingList = formatCrosscutting(nodeData.crosscutting_pd, nodeData.crosscutting_ket);
-    
-    // Format inovasi
-    const inovasiList = nodeData.inovasi ? String(nodeData.inovasi).split('|||').filter(i => i.trim()) : [];
-    const outcomeInovasiList = nodeData.outcome_inovasi ? String(nodeData.outcome_inovasi).split('|||').filter(o => o.trim()) : [];
-    const outputInovasiList = nodeData.output_inovasi ? String(nodeData.output_inovasi).split('|||').filter(o => o.trim()) : [];
-    
-    // Dapatkan tautan kinerja yang lebih tinggi
-    const higherLinks = node ? getHigherLevelLinks(node) : [];
-    
-    // Ambil detail pelaksana
-    const pelaksanaDetail = nodeData.pelaksana_detail;
-    
-    // Ambil data perangkat daerah dari PHP (jika ada)
-    // Data ini bisa dikirim dari controller atau diambil dari variable global
-    const perangkatDaerah = <?= json_encode($perangkat_daerah ?? []) ?>;
-    
-    // Buat mapping ID ke nama perangkat daerah
-    const pdMap = {};
-    if (perangkatDaerah && perangkatDaerah.length > 0) {
-        perangkatDaerah.forEach(pd => {
-            pdMap[pd.id] = pd.nama;
-        });
-    }
-    
-    // Set modal title
-    modalTitle.innerHTML = `${levelName}`;
-    document.querySelector('.pk-modal').style.borderLeftColor = levelColor;
-    
-    // Mulai membangun konten modal
-    let modalHtml = '';
-    
-    // ===== TAUTAN KINERJA YANG LEBIH TINGGI =====
-    if (higherLinks.length > 0) {
-        modalHtml += `
-            <div class="modal-section">
-                <div class="modal-label">
-                    <i class="fa fa-link"></i> Tautan Kinerja yang Lebih Tinggi
-                </div>
-        `;
+    // Fungsi untuk menampilkan modal dengan data node
+    function showNodeDetails(nodeData, level, node) {
+        const lv = LEVELS[level];
+        const levelName = lv ? lv.label : 'Level ' + level;
+        const levelColor = lv ? lv.fill : '#94a3b8';
         
-        higherLinks.forEach(link => {
+        const indikatorList = formatIndikator(nodeData.indikator);
+        const crosscuttingList = formatCrosscutting(nodeData.crosscutting_pd, nodeData.crosscutting_ket);
+        
+        const inovasiList = nodeData.inovasi ? String(nodeData.inovasi).split('|||').filter(i => i.trim()) : [];
+        const outcomeInovasiList = nodeData.outcome_inovasi ? String(nodeData.outcome_inovasi).split('|||').filter(o => o.trim()) : [];
+        const outputInovasiList = nodeData.output_inovasi ? String(nodeData.output_inovasi).split('|||').filter(o => o.trim()) : [];
+        
+        const higherLinks = node ? getHigherLevelLinks(node) : [];
+        const pelaksanaDetail = nodeData.pelaksana_detail;
+        
+        modalTitle.innerHTML = `${levelName}`;
+        document.querySelector('.pk-modal').style.borderLeftColor = levelColor;
+        
+        let modalHtml = '';
+        
+        // Tautan kinerja yang lebih tinggi
+        if (higherLinks.length > 0) {
             modalHtml += `
-                <div class="higher-link-item" style="border-left-color: ${link.color};">
-                    <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
-                        <i class="fa ${LEVELS[link.level]?.icon || 'fa-sitemap'}" style="color: ${link.color};"></i>
-                        <span style="font-size:11px; font-weight:600; color:${link.color};">${LEVELS[link.level]?.label || 'Level ' + link.level}</span>
+                <div class="modal-section">
+                    <div class="modal-label">
+                        <i class="fa fa-link"></i> Tautan Kinerja yang Lebih Tinggi
                     </div>
-                    <div style="font-size:13px; margin-left:6px;">${link.nama}</div>
-                </div>
             `;
-        });
-        
-        modalHtml += `</div>`;
-    }
-    
-    // ===== KINERJA =====
-    modalHtml += `
-        <div class="modal-section">
-            <div class="modal-label">
-                <i class="fa fa-tag"></i> Kinerja
-            </div>
-            <div class="modal-value">${nodeData.nama}</div>
-        </div>
-    `;
-    
-    // ===== INDIKATOR KINERJA =====
-    if (indikatorList.length > 0) {
-        modalHtml += `
-            <div class="modal-section">
-                <div class="modal-label">
-                    <i class="fa fa-list-check"></i> Indikator Kinerja
-                </div>
-                <ul class="indikator-list">
-        `;
-        
-        indikatorList.forEach(ind => {
-            modalHtml += `<li><i class="fa fa-circle" style="color:${levelColor}; font-size:8px;"></i> ${ind}</li>`;
-        });
-        
-        modalHtml += `</ul></div>`;
-    }
-    
-    // ===== PELAKSANA DENGAN DETAIL =====
-    if (pelaksanaDetail) {
-        modalHtml += `
-            <div class="modal-section">
-                <div class="modal-label">
-                    <i class="fa fa-users"></i> Pelaksana
-                </div>
-                <div class="pelaksana-card">
-                    <div class="pelaksana-avatar">
-                        <i class="fa fa-user"></i>
-                    </div>
-                    <div class="pelaksana-info">
-                        <h4>${pelaksanaDetail.nama}</h4>
-                        ${pelaksanaDetail.nip ? `<p><i class="fa fa-id-card"></i> NIP: ${pelaksanaDetail.nip}</p>` : ''}
-                        ${pelaksanaDetail.jabatan ? `<p><i class="fa fa-briefcase"></i> ${pelaksanaDetail.jabatan}</p>` : ''}
-                        ${pelaksanaDetail.dinas ? `<p><i class="fa fa-building"></i> ${pelaksanaDetail.dinas}</p>` : ''}
-                    </div>
-                </div>
-            </div>
-        `;
-    } else if (nodeData.pelaksana && nodeData.pelaksana !== 'null' && nodeData.pelaksana !== '') {
-        modalHtml += `
-            <div class="modal-section">
-                <div class="modal-label">
-                    <i class="fa fa-users"></i> Pelaksana / Urusan
-                </div>
-                <div class="modal-value">${nodeData.pelaksana}</div>
-            </div>
-        `;
-    }
-    
-    // ===== INOVASI DAERAH =====
-    if (inovasiList.length > 0 || outcomeInovasiList.length > 0 || outputInovasiList.length > 0) {
-        modalHtml += `
-            <div class="modal-section">
-                <div class="modal-label">
-                    <i class="fa fa-lightbulb"></i> Inovasi Daerah
-                </div>
-        `;
-        
-        if (inovasiList.length > 0) {
-            modalHtml += `
-                <div class="inovasi-item">
-                    <div class="label"><i class="fa fa-star" style="color:#eab308;"></i> Inovasi</div>
-                    <div class="value">
-            `;
-            inovasiList.forEach(inv => {
-                modalHtml += `<div>• ${inv}</div>`;
-            });
-            modalHtml += `</div></div>`;
-        }
-        
-        if (outcomeInovasiList.length > 0) {
-            modalHtml += `
-                <div class="inovasi-item">
-                    <div class="label"><i class="fa fa-chart-line" style="color:#3b82f6;"></i> Outcome Inovasi</div>
-                    <div class="value">
-            `;
-            outcomeInovasiList.forEach(out => {
-                modalHtml += `<div>• ${out}</div>`;
-            });
-            modalHtml += `</div></div>`;
-        }
-        
-        if (outputInovasiList.length > 0) {
-            modalHtml += `
-                <div class="inovasi-item">
-                    <div class="label"><i class="fa fa-check-circle" style="color:#10b981;"></i> Output Inovasi</div>
-                    <div class="value">
-            `;
-            outputInovasiList.forEach(out => {
-                modalHtml += `<div>• ${out}</div>`;
-            });
-            modalHtml += `</div></div>`;
-        }
-        
-        modalHtml += `</div>`;
-    }
-    
-    // ===== CROSSCUTTING DENGAN PERANGKAT DAERAH =====
-    if (crosscuttingList.length > 0) {
-        modalHtml += `
-            <div class="modal-section">
-                <div class="modal-label">
-                    <i class="fa fa-share-alt"></i> Crosscutting Dengan Perangkat Daerah
-                </div>
-                <div class="crosscutting-section">
-                    <table class="crosscutting-table">
-                        <thead>
-                            <tr>
-                                <th>Perangkat Daerah</th>
-                                <th>Keterangan</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-        `;
-        
-        crosscuttingList.forEach(cc => {
-            // Ambil ID perangkat daerah (bisa dalam format string atau integer)
-            let pdId = cc.pd;
             
-            // Cari nama perangkat daerah berdasarkan ID
-            let pdName = pdId; // Default tampilkan ID jika tidak ditemukan
+            higherLinks.forEach(link => {
+                modalHtml += `
+                    <div class="higher-link-item" style="border-left-color: ${link.color};">
+                        <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+                            <i class="fa ${LEVELS[link.level]?.icon || 'fa-sitemap'}" style="color: ${link.color};"></i>
+                            <span style="font-size:11px; font-weight:600; color:${link.color};">${LEVELS[link.level]?.label || 'Level ' + link.level}</span>
+                        </div>
+                        <div style="font-size:13px; margin-left:6px;">${safe(link.nama)}</div>
+                    </div>
+                `;
+            });
             
-            // Jika pdMap tersedia, cari nama berdasarkan ID
-            if (pdMap && pdMap[pdId]) {
-                pdName = pdMap[pdId];
-            } else {
-                // Coba parse jika ID adalah string yang bisa dikonversi ke integer
-                let numericId = parseInt(pdId);
-                if (!isNaN(numericId) && pdMap && pdMap[numericId]) {
-                    pdName = pdMap[numericId];
-                }
+            modalHtml += `</div>`;
+        }
+        
+        // Kinerja
+        modalHtml += `
+            <div class="modal-section">
+                <div class="modal-label">
+                    <i class="fa fa-tag"></i> Kinerja
+                </div>
+                <div class="modal-value">${safe(nodeData.nama)}</div>
+            </div>
+        `;
+        
+        // Indikator Kinerja
+        if (indikatorList.length > 0) {
+            modalHtml += `
+                <div class="modal-section">
+                    <div class="modal-label">
+                        <i class="fa fa-list-check"></i> Indikator Kinerja
+                    </div>
+                    <ul class="indikator-list">
+            `;
+            
+            indikatorList.forEach(ind => {
+                modalHtml += `<li><i class="fa fa-circle" style="color:${levelColor}; font-size:8px;"></i> ${safe(ind)}</li>`;
+            });
+            
+            modalHtml += `</ul></div>`;
+        }
+        
+        // Pelaksana dengan detail
+        if (pelaksanaDetail && pelaksanaDetail.nama) {
+            modalHtml += `
+                <div class="modal-section">
+                    <div class="modal-label">
+                        <i class="fa fa-users"></i> Pelaksana
+                    </div>
+                    <div class="pelaksana-card">
+                        <div class="pelaksana-avatar">
+                            <i class="fa fa-user"></i>
+                        </div>
+                        <div class="pelaksana-info">
+                            <h4>${safe(pelaksanaDetail.nama)}</h4>
+                            ${pelaksanaDetail.nip ? `<p><i class="fa fa-id-card"></i> NIP: ${safe(pelaksanaDetail.nip)}</p>` : ''}
+                            ${pelaksanaDetail.jabatan ? `<p><i class="fa fa-briefcase"></i> ${safe(pelaksanaDetail.jabatan)}</p>` : ''}
+                            ${pelaksanaDetail.dinas ? `<p><i class="fa fa-building"></i> ${safe(pelaksanaDetail.dinas)}</p>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else if (nodeData.pelaksana && nodeData.pelaksana !== 'null' && nodeData.pelaksana !== '') {
+            modalHtml += `
+                <div class="modal-section">
+                    <div class="modal-label">
+                        <i class="fa fa-users"></i> Pelaksana / Urusan
+                    </div>
+                    <div class="modal-value">${safe(nodeData.pelaksana)}</div>
+                </div>
+            `;
+        }
+        
+        // Inovasi Daerah
+        if (inovasiList.length > 0 || outcomeInovasiList.length > 0 || outputInovasiList.length > 0) {
+            modalHtml += `
+                <div class="modal-section">
+                    <div class="modal-label">
+                        <i class="fa fa-lightbulb"></i> Inovasi Daerah
+                    </div>
+            `;
+            
+            if (inovasiList.length > 0) {
+                modalHtml += `
+                    <div class="inovasi-item">
+                        <div class="label"><i class="fa fa-star" style="color:#eab308;"></i> Inovasi</div>
+                        <div class="value">
+                `;
+                inovasiList.forEach(inv => {
+                    modalHtml += `<div>• ${safe(inv)}</div>`;
+                });
+                modalHtml += `</div></div>`;
             }
             
-            modalHtml += `
-                <tr>
-                    <td><span class="pd-badge"><i class="fa fa-building" style="margin-right:4px;"></i> ${pdName}</span></td>
-                    <td>${cc.ket || '—'}</td>
-                </tr>
-            `;
-        });
+            if (outcomeInovasiList.length > 0) {
+                modalHtml += `
+                    <div class="inovasi-item">
+                        <div class="label"><i class="fa fa-chart-line" style="color:#3b82f6;"></i> Outcome Inovasi</div>
+                        <div class="value">
+                `;
+                outcomeInovasiList.forEach(out => {
+                    modalHtml += `<div>• ${safe(out)}</div>`;
+                });
+                modalHtml += `</div></div>`;
+            }
+            
+            if (outputInovasiList.length > 0) {
+                modalHtml += `
+                    <div class="inovasi-item">
+                        <div class="label"><i class="fa fa-check-circle" style="color:#10b981;"></i> Output Inovasi</div>
+                        <div class="value">
+                `;
+                outputInovasiList.forEach(out => {
+                    modalHtml += `<div>• ${safe(out)}</div>`;
+                });
+                modalHtml += `</div></div>`;
+            }
+            
+            modalHtml += `</div>`;
+        }
         
-        modalHtml += `</tbody></table></div></div>`;
-    } else {
+        // Crosscutting dengan Perangkat Daerah
+        if (crosscuttingList.length > 0) {
+            modalHtml += `
+                <div class="modal-section">
+                    <div class="modal-label">
+                        <i class="fa fa-share-alt"></i> Crosscutting Dengan Perangkat Daerah
+                    </div>
+                    <div class="crosscutting-section">
+                        <table class="crosscutting-table">
+                            <thead>
+                                <tr>
+                                    <th>Perangkat Daerah</th>
+                                    <th>Keterangan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            crosscuttingList.forEach(cc => {
+                let pdId = cc.pd;
+                let pdName = pdId;
+                
+                if (pdMap && pdMap[pdId]) {
+                    pdName = pdMap[pdId];
+                } else {
+                    let numericId = parseInt(pdId);
+                    if (!isNaN(numericId) && pdMap && pdMap[numericId]) {
+                        pdName = pdMap[numericId];
+                    }
+                }
+                
+                modalHtml += `
+                    <tr>
+                        <td><span class="pd-badge"><i class="fa fa-building" style="margin-right:4px;"></i> ${safe(pdName)}</span></td>
+                        <td>${safe(cc.ket)}</span></td>
+                    </tr>
+                `;
+            });
+            
+            modalHtml += `</tbody></table></div></div>`;
+        } else {
+            modalHtml += `
+                <div class="modal-section">
+                    <div class="modal-label">
+                        <i class="fa fa-share-alt"></i> Crosscutting Dengan Perangkat Daerah
+                    </div>
+                    <div class="modal-value" style="color:#94a3b8; font-style:italic;">
+                        Tidak ada data crosscutting
+                    </div>
+                </div>
+            `;
+        }
+        
+        // ID
         modalHtml += `
-            <div class="modal-section">
-                <div class="modal-label">
-                    <i class="fa fa-share-alt"></i> Crosscutting Dengan Perangkat Daerah
-                </div>
-                <div class="modal-value" style="color:#94a3b8; font-style:italic;">
-                    Tidak ada data crosscutting
-                </div>
+            <div class="id-footer">
+                <span><i class="fa fa-hashtag"></i> ID: ${nodeData.id}</span>
+                <span><i class="fa fa-layer-group"></i> Level ${level}</span>
             </div>
         `;
+        
+        modalBody.innerHTML = modalHtml;
+        modalOverlay.style.display = 'flex';
     }
-    
-    // ===== ID =====
-    modalHtml += `
-        <div class="id-footer">
-            <span><i class="fa fa-hashtag"></i> ID: ${nodeData.id}</span>
-            <span><i class="fa fa-layer-group"></i> Level ${level}</span>
-        </div>
-    `;
-    
-    modalBody.innerHTML = modalHtml;
-    modalOverlay.style.display = 'flex';
-}
 
     // Cek data kosong
     if (!chartData || !chartData.children || chartData.children.length === 0) {
@@ -1513,7 +1750,6 @@ function showNodeDetails(nodeData, level, node) {
         );
         
         if (siblings.length > 0) {
-            // Draw vertical line from parent
             g.append('line')
                 .attr('x1', sourceX)
                 .attr('y1', sourceY)
@@ -1523,7 +1759,6 @@ function showNodeDetails(nodeData, level, node) {
                 .attr('stroke-width', 2)
                 .attr('stroke-opacity', 0.3);
             
-            // Draw horizontal connector line
             const siblingNodes = [link, ...siblings].map(l => l.target);
             const minX = Math.min(...siblingNodes.map(n => n.x));
             const maxX = Math.max(...siblingNodes.map(n => n.x));
@@ -1537,7 +1772,6 @@ function showNodeDetails(nodeData, level, node) {
                 .attr('stroke-width', 2)
                 .attr('stroke-opacity', 0.3);
             
-            // Draw vertical line to this child
             g.append('line')
                 .attr('x1', targetX)
                 .attr('y1', sourceY + 20)
@@ -1547,7 +1781,6 @@ function showNodeDetails(nodeData, level, node) {
                 .attr('stroke-width', 2)
                 .attr('stroke-opacity', 0.3);
         } else {
-            // Draw simple vertical line for single child
             g.append('line')
                 .attr('x1', sourceX)
                 .attr('y1', sourceY)
@@ -1567,7 +1800,6 @@ function showNodeDetails(nodeData, level, node) {
         .attr('transform', d => `translate(${d.x - NODE_WIDTH/2}, ${d.y})`)
         .style('cursor', 'pointer');
 
-    // Card background
     node.append('rect')
         .attr('width', NODE_WIDTH)
         .attr('height', NODE_HEIGHT)
@@ -1578,7 +1810,6 @@ function showNodeDetails(nodeData, level, node) {
         .attr('stroke-width', 2)
         .attr('filter', 'url(#shadow)');
 
-    // Top colored band
     node.append('rect')
         .attr('width', NODE_WIDTH)
         .attr('height', 32)
@@ -1586,7 +1817,6 @@ function showNodeDetails(nodeData, level, node) {
         .attr('ry', NODE_RADIUS)
         .attr('fill', d => `url(#grad-${d.data.level})`);
 
-    // Level label
     node.append('text')
         .attr('x', NODE_WIDTH / 2)
         .attr('y', 20)
@@ -1598,7 +1828,6 @@ function showNodeDetails(nodeData, level, node) {
         .attr('text-transform', 'uppercase')
         .text(d => LEVELS[d.data.level]?.label || '');
 
-    // Level badge
     node.append('circle')
         .attr('cx', 25)
         .attr('cy', 16)
@@ -1616,7 +1845,6 @@ function showNodeDetails(nodeData, level, node) {
         .attr('font-weight', '800')
         .text(d => d.data.level);
 
-    // Node content with text wrapping
     node.each(function(d) {
         const el = d3.select(this);
         const words = d.data.nama.split(' ');
@@ -1667,7 +1895,6 @@ function showNodeDetails(nodeData, level, node) {
                 .text(line);
         });
 
-        // ID kecil di pojok
         el.append('text')
             .attr('x', NODE_WIDTH - 15)
             .attr('y', NODE_HEIGHT - 10)
@@ -1678,15 +1905,11 @@ function showNodeDetails(nodeData, level, node) {
             .text(d.data.id.split('_')[1] || '');
     });
 
-    // ============================================
-    // CLICK HANDLER UNTUK MENAMPILKAN MODAL
-    // ============================================
     node.on('click', function(event, d) {
         event.stopPropagation();
         showNodeDetails(d.data, d.data.level, d);
     });
 
-    // Function to fit view
     function fitView() {
         let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
         
@@ -1723,10 +1946,8 @@ function showNodeDetails(nodeData, level, node) {
         svg.call(zoom.transform, transform);
     }
 
-    // Fit view after a short delay
     setTimeout(fitView, 100);
 
-    // Zoom buttons
     document.getElementById('zoomIn').addEventListener('click', () => {
         svg.transition().duration(300).call(zoom.scaleBy, 1.3);
     });
@@ -1743,7 +1964,6 @@ function showNodeDetails(nodeData, level, node) {
         }
     });
 
-    // Resize handler
     window.addEventListener('resize', () => {
         const newW = container.clientWidth;
         const newH = container.clientHeight;
@@ -1753,3 +1973,5 @@ function showNodeDetails(nodeData, level, node) {
 
 })();
 </script>
+</body>
+</html>

@@ -345,7 +345,7 @@
       <a href="mailto:cvideconsultan@gmail.com" class="navbar-item">Kontak</a>
       <a href="#" class="navbar-item">Tentang Kami</a>
 
-      <?php if (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 3) { ?>
+      <?php if (isset($_SESSION['Level']) && ((int)$_SESSION['Level'] === 3 || (int)$_SESSION['Level'] === 4)) { ?>
         <button class="logout-btn" onclick="logout()" type="button">
           <i class="fas fa-sign-out-alt"></i> Logout
         </button>

@@ -8,7 +8,7 @@
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
           <div class="data-table-list">
 
-            <!-- FILTER PROVINSI & KAB/KOTA (MUNCUL SAAT BELUM SET KodeWilayah) -->
+            <!-- FILTER WILAYAH (Provinsi, Kab/Kota, dan Instansi) - SEBELUM LOGIN -->
             <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
               <div class="form-example-wrap" style="margin-bottom: 20px;">
                 <div class="form-example-int form-horizental">
@@ -39,6 +39,16 @@
                         </div>
                       </div>
 
+                      <!-- FILTER INSTANSI -->
+                      <div class="col-lg-3 col-md-6" id="FilterInstansiGroup" style="display: none;">
+                        <div class="filter-group">
+                          <label for="FilterInstansiBeforeLogin"><b>Filter Instansi</b></label>
+                          <select class="form-control filter-select" id="FilterInstansiBeforeLogin">
+                            <option value="">-- Semua Instansi --</option>
+                          </select>
+                        </div>
+                      </div>
+
                       <div class="col-lg-2 col-md-6">
                         <div class="filter-group" style="margin-top: 28px;">
                           <button class="btn btn-primary notika-btn-primary btn-block" id="Filter">
@@ -59,13 +69,62 @@
                 ?>
                 <div class="alert alert-info" style="margin-bottom: 20px;">
                   <strong>Wilayah terpilih:</strong> <?= $nama_wilayah ?>
+                  <?php 
+                  $filter_instansi_id = $this->input->get('instansi_id', TRUE);
+                  if (!empty($filter_instansi_id)) { 
+                    $instansi_terpilih = $this->db->select('nama')->from('akun_instansi')->where('id', $filter_instansi_id)->get()->row_array();
+                  ?>
+                    <br><strong>Instansi terpilih:</strong> <?= htmlspecialchars($instansi_terpilih['nama'] ?? '-') ?>
+                  <?php } ?>
                 </div>
               <?php } ?>
             <?php } ?>
-            <!-- END FILTER -->
+            <!-- END FILTER WILAYAH -->
 
-            <!-- Tombol Tambah MASTER -->
-            <?php if (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 3) { ?>
+            <!-- FILTER INSTANSI (UNTUK YANG SUDAH LOGIN DAN BUKAN ROLE 4) -->
+            <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
+              <div class="form-example-wrap" style="margin-bottom: 20px;">
+                <div class="form-example-int form-horizental">
+                  <div class="form-group">
+                    <div class="row filter-row">
+                      <div class="col-lg-4 col-md-6">
+                        <div class="filter-group">
+                          <label for="FilterInstansi"><b>Filter Instansi</b></label>
+                          <select class="form-control filter-select" id="FilterInstansi">
+                            <option value="">-- Semua Instansi --</option>
+                            <?php foreach ($ListInstansi as $ins) { ?>
+                              <option value="<?= $ins['id'] ?>" <?= ($FilterInstansiId == $ins['id']) ? 'selected' : '' ?>>
+                                <?= html_escape($ins['nama']) ?>
+                              </option>
+                            <?php } ?>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div class="col-lg-2 col-md-6">
+                        <div class="filter-group" style="margin-top: 38px;">
+                          <button class="btn btn-info notika-btn-info btn-block" id="FilterInstansiBtn">
+                            <b>Tampilkan</b>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div class="col-lg-2 col-md-6">
+                        <div class="filter-group" style="margin-top: 38px;">
+                          <button class="btn btn-default notika-btn-default btn-block" id="ResetFilterBtn">
+                            <b>Reset</b>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <?php } ?>
+            <!-- END FILTER INSTANSI -->
+
+            <!-- Tombol Tambah MASTER (HANYA UNTUK ROLE 4) -->
+            <?php if ($IsRole4) { ?>
               <div class="basic-tb-hd">
                 <div class="button-icon-btn sm-res-mg-t-30">
                   <button type="button"
@@ -79,6 +138,8 @@
               <br>
             <?php } ?>
 
+            
+
             <!-- TABLE (MASTER-DETAIL) -->
             <div class="table-responsive">
               <table id="data-table-basic" class="table table-striped">
@@ -91,9 +152,9 @@
                     <th rowspan="2" style="width:220px; text-align:center;">INDIKATOR</th>
                     <th colspan="6" style="text-align:center;">TARGET TAHUN</th>
                     <th rowspan="2" style="width:220px; text-align:center;">KETERANGAN</th>
-                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                      <th rowspan="2" style="width:120px; text-align:center;">AKSI</th>
-                      <th rowspan="2" style="width:120px; text-align:center;">AKSI <br>INDIKATOR</th>
+                    <?php if ($IsRole4) { ?>
+                      <th rowspan="2" style="width:60px; text-align:center;">AKSI<br>HEADER</th>
+                      <th rowspan="2" style="width:60px; text-align:center;">AKSI<br>INDIKATOR</th>
                     <?php } ?>
                   </tr>
                   <tr>
@@ -109,6 +170,7 @@
                 <tbody>
                 <?php if (!empty($TujuanSasaranPD)) { ?>
                 <?php $no = 1; foreach ($TujuanSasaranPD as $m) { ?>
+                <?php if ($IsRole4 && $m['id_instansi'] != $InstansiId && empty($FilterInstansiId)) continue; ?>
 
                 <?php
                   $details  = isset($m['details']) ? $m['details'] : [];
@@ -168,13 +230,10 @@
                       </ul>
                     <?php } ?>
 
-
-
                     <br>
                     <b>Sasaran RPJMD yang Relevan:</b><br>
                     <?= nl2br(html_escape($sasaranRelText)) ?>
                   </td>
-
 
                   <td rowspan="<?= $rowspan ?>"><?= nl2br(html_escape($tujuanText)) ?></td>
 
@@ -193,67 +252,51 @@
                   <td><?= nl2br(html_escape($d0['keterangan'])) ?></td>
 
                   <!-- AKSI HEADER -->
+                  <?php if ($IsRole4) { ?>
                   <td class="text-center">
                     <div class="btn-group-flex">
-                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                    <?php
-$normaPipe    = $m['nspk_norma_id'] ?? '';
-$standarPipe  = $m['nspk_standar_id'] ?? '';
-$prosedurPipe = $m['nspk_prosedur_id'] ?? '';
-$kriteriaPipe = $m['nspk_kriteria_id'] ?? '';
-?>
-                     <button class="btn btn-info BtnEditMaster"
-    data-id="<?= $m['id'] ?>"
-
-    data-norma="<?= $normaPipe ?>"
-    data-standar="<?= $standarPipe ?>"
-    data-prosedur="<?= $prosedurPipe ?>"
-    data-kriteria="<?= $kriteriaPipe ?>"
-
-    data-sasaran-relevan-id="<?= $m['sasaran_relevan_id'] ?>"
-    data-tujuan-id="<?= $m['tujuan_id'] ?>"
->
-
-                    <i class="notika-icon notika-edit"></i>
-                  </button>
-
-
-
+                      <button class="btn btn-info btn-sm BtnEditMaster"
+                        data-id="<?= $m['id'] ?>"
+                        data-norma="<?= $m['nspk_norma_id'] ?? '' ?>"
+                        data-standar="<?= $m['nspk_standar_id'] ?? '' ?>"
+                        data-prosedur="<?= $m['nspk_prosedur_id'] ?? '' ?>"
+                        data-kriteria="<?= $m['nspk_kriteria_id'] ?? '' ?>"
+                        data-sasaran-relevan-id="<?= $m['sasaran_relevan_id'] ?>"
+                        data-tujuan-id="<?= $m['tujuan_id'] ?>">
+                        <i class="notika-icon notika-edit"></i>
+                      </button>
                       <button class="btn btn-danger btn-sm BtnHapusMaster" data-id="<?= $m['id'] ?>">
                         <i class="notika-icon notika-trash"></i>
                       </button>
-                    <?php } ?>
                     </div>
                   </td>
 
                   <!-- AKSI INDIKATOR -->
                   <td class="text-center">
                     <div class="btn-group-flex">
-                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                       <button class="btn btn-success btn-sm BtnAddDetail" data-master-id="<?= $m['id'] ?>">
                         <i class="notika-icon bi-plus-lg"></i>
                       </button>
                       <button class="btn btn-warning btn-sm BtnEditDetail"
-                  data-id="<?= (int)$d0['id'] ?>"
-                  data-parent-id="<?= (int)$m['id'] ?>"
-                  data-sasaran-id="<?= (int)$d0['sasaran_id'] ?>"
-                  data-indikator="<?= html_escape($d0['indikator']) ?>"
-                  data-t2025="<?= html_escape($d0['t2025']) ?>"
-                  data-t2026="<?= html_escape($d0['t2026']) ?>"
-                  data-t2027="<?= html_escape($d0['t2027']) ?>"
-                  data-t2028="<?= html_escape($d0['t2028']) ?>"
-                  data-t2029="<?= html_escape($d0['t2029']) ?>"
-                  data-t2030="<?= html_escape($d0['t2030']) ?>"
-                  data-keterangan="<?= html_escape($d0['keterangan']) ?>">
-                  <i class="notika-icon notika-edit"></i>
-                </button>
-
+                        data-id="<?= (int)$d0['id'] ?>"
+                        data-parent-id="<?= (int)$m['id'] ?>"
+                        data-sasaran-id="<?= (int)$d0['sasaran_id'] ?>"
+                        data-indikator="<?= html_escape($d0['indikator']) ?>"
+                        data-t2025="<?= html_escape($d0['t2025']) ?>"
+                        data-t2026="<?= html_escape($d0['t2026']) ?>"
+                        data-t2027="<?= html_escape($d0['t2027']) ?>"
+                        data-t2028="<?= html_escape($d0['t2028']) ?>"
+                        data-t2029="<?= html_escape($d0['t2029']) ?>"
+                        data-t2030="<?= html_escape($d0['t2030']) ?>"
+                        data-keterangan="<?= html_escape($d0['keterangan']) ?>">
+                        <i class="notika-icon notika-edit"></i>
+                      </button>
                       <button class="btn btn-danger btn-sm BtnHapusDetail" data-id="<?= $d0['id'] ?>">
                         <i class="notika-icon notika-trash"></i>
                       </button>
-                    <?php } ?>
                     </div>
                   </td>
+                  <?php } ?>
                 </tr>
 
                 <?php for ($i=1; $i<count($details); $i++) { $d=$details[$i]; ?>
@@ -267,29 +310,30 @@ $kriteriaPipe = $m['nspk_kriteria_id'] ?? '';
                   <td class="text-center"><?= $d['t2029'] ?></td>
                   <td class="text-center"><?= $d['t2030'] ?></td>
                   <td><?= nl2br(html_escape($d['keterangan'])) ?></td>
-                  <td></td>
+                  <?php if ($IsRole4) { ?>
                   <td class="text-center">
-                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                    <div class="btn-group-flex">
                       <button class="btn btn-warning btn-sm BtnEditDetail"
-                  data-id="<?= (int)$d['id'] ?>"
-                  data-parent-id="<?= (int)$m['id'] ?>"
-                  data-sasaran-id="<?= (int)$d['sasaran_id'] ?>"
-                  data-indikator="<?= html_escape($d['indikator']) ?>"
-                  data-t2025="<?= html_escape($d['t2025']) ?>"
-                  data-t2026="<?= html_escape($d['t2026']) ?>"
-                  data-t2027="<?= html_escape($d['t2027']) ?>"
-                  data-t2028="<?= html_escape($d['t2028']) ?>"
-                  data-t2029="<?= html_escape($d['t2029']) ?>"
-                  data-t2030="<?= html_escape($d['t2030']) ?>"
-                  data-keterangan="<?= html_escape($d['keterangan']) ?>">
-                  <i class="notika-icon notika-edit"></i>
-                </button>
-
+                        data-id="<?= (int)$d['id'] ?>"
+                        data-parent-id="<?= (int)$m['id'] ?>"
+                        data-sasaran-id="<?= (int)$d['sasaran_id'] ?>"
+                        data-indikator="<?= html_escape($d['indikator']) ?>"
+                        data-t2025="<?= html_escape($d['t2025']) ?>"
+                        data-t2026="<?= html_escape($d['t2026']) ?>"
+                        data-t2027="<?= html_escape($d['t2027']) ?>"
+                        data-t2028="<?= html_escape($d['t2028']) ?>"
+                        data-t2029="<?= html_escape($d['t2029']) ?>"
+                        data-t2030="<?= html_escape($d['t2030']) ?>"
+                        data-keterangan="<?= html_escape($d['keterangan']) ?>">
+                        <i class="notika-icon notika-edit"></i>
+                      </button>
                       <button class="btn btn-danger btn-sm BtnHapusDetail" data-id="<?= $d['id'] ?>">
                         <i class="notika-icon notika-trash"></i>
                       </button>
-                    <?php } ?>
+                    </div>
                   </td>
+                  <td class="text-center">-</td>
+                  <?php } ?>
                 </tr>
                 <?php } ?>
 
@@ -298,103 +342,66 @@ $kriteriaPipe = $m['nspk_kriteria_id'] ?? '';
                   <td class="text-center"><?= $no++ ?></td>
                   <td>
                     <b>NSPK:</b><br>
-
-                        <?php if(!empty($m['norma_list'])){ ?>
-                          <b>Norma:</b><br>
-                          <?php $i=0; foreach($m['norma_list'] as $x){ ?>
-                            <div class="huruf-list">
-                              <span class="huruf"><?= chr(97+$i++) ?>.</span>
-                              <span class="isi"><?= html_escape($x['judul_nspk']) ?></span>
-                            </div>
-                          <?php } ?>
-                          <br>
-                        <?php } ?>
-
-                        <?php if(!empty($m['standar_list'])){ ?>
-                          <b>Standar:</b><br>
-                          <?php $i=0; foreach($m['standar_list'] as $x){ ?>
-                            <div class="huruf-list">
-                              <span class="huruf"><?= chr(97+$i++) ?>.</span>
-                              <span class="isi"><?= html_escape($x['judul_nspk']) ?></span>
-                            </div>
-                          <?php } ?>
-                          <br>
-                        <?php } ?>
-
-                        <?php if(!empty($m['prosedur_list'])){ ?>
-                          <b>Prosedur:</b><br>
-                          <?php $i=0; foreach($m['prosedur_list'] as $x){ ?>
-                            <div class="huruf-list">
-                              <span class="huruf"><?= chr(97+$i++) ?>.</span>
-                              <span class="isi"><?= html_escape($x['judul_nspk']) ?></span>
-                            </div>
-                          <?php } ?>
-                          <br>
-                        <?php } ?>
-
-                        <?php if(!empty($m['kriteria_list'])){ ?>
-                          <b>Kriteria:</b><br>
-                          <?php $i=0; foreach($m['kriteria_list'] as $x){ ?>
-                            <div class="huruf-list">
-                              <span class="huruf"><?= chr(97+$i++) ?>.</span>
-                              <span class="isi"><?= html_escape($x['judul_nspk']) ?></span>
-                            </div>
-                          <?php } ?>
-                          <br>
-                        <?php } ?>
+                    <?php if(!empty($m['norma_list'])){ ?>
+                      <b>Norma:</b><br>
+                      <?php $i=0; foreach($m['norma_list'] as $x){ ?>
+                        <div><?= chr(97+$i++) ?>. <?= html_escape($x['judul_nspk']) ?></div>
+                      <?php } ?>
+                      <br>
+                    <?php } ?>
+                    <?php if(!empty($m['standar_list'])){ ?>
+                      <b>Standar:</b><br>
+                      <?php $i=0; foreach($m['standar_list'] as $x){ ?>
+                        <div><?= chr(97+$i++) ?>. <?= html_escape($x['judul_nspk']) ?></div>
+                      <?php } ?>
+                      <br>
+                    <?php } ?>
+                    <?php if(!empty($m['prosedur_list'])){ ?>
+                      <b>Prosedur:</b><br>
+                      <?php $i=0; foreach($m['prosedur_list'] as $x){ ?>
+                        <div><?= chr(97+$i++) ?>. <?= html_escape($x['judul_nspk']) ?></div>
+                      <?php } ?>
+                      <br>
+                    <?php } ?>
+                    <?php if(!empty($m['kriteria_list'])){ ?>
+                      <b>Kriteria:</b><br>
+                      <?php $i=0; foreach($m['kriteria_list'] as $x){ ?>
+                        <div><?= chr(97+$i++) ?>. <?= html_escape($x['judul_nspk']) ?></div>
+                      <?php } ?>
+                      <br>
+                    <?php } ?>
                     <b>Sasaran RPJMD yang Relevan:</b><br><?= nl2br(html_escape($sasaranRelText)) ?>
                   </td>
                   <td><?= nl2br(html_escape($tujuanText)) ?></td>
-
                   <td colspan="8" class="text-center"><i>Belum ada indikator</i></td>
                   <td>-</td>
-
+                  <?php if ($IsRole4) { ?>
                   <td class="text-center">
-                    <div class="btn-group-flex">
-                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                    <?php
-                      $normaPipe    = $m['nspk_norma_id'] ?? '';
-                      $standarPipe  = $m['nspk_standar_id'] ?? '';
-                      $prosedurPipe = $m['nspk_prosedur_id'] ?? '';
-                      $kriteriaPipe = $m['nspk_kriteria_id'] ?? '';
-                      ?>
-                                            <button class="btn btn-info BtnEditMaster"
-                          data-id="<?= $m['id'] ?>"
-
-                          data-norma="<?= $normaPipe ?>"
-                          data-standar="<?= $standarPipe ?>"
-                          data-prosedur="<?= $prosedurPipe ?>"
-                          data-kriteria="<?= $kriteriaPipe ?>"
-
-                          data-sasaran-relevan-id="<?= $m['sasaran_relevan_id'] ?>"
-                          data-tujuan-id="<?= $m['tujuan_id'] ?>"
-                      >
-
+                    <button class="btn btn-info btn-sm BtnEditMaster"
+                      data-id="<?= $m['id'] ?>"
+                      data-norma="<?= $m['nspk_norma_id'] ?? '' ?>"
+                      data-standar="<?= $m['nspk_standar_id'] ?? '' ?>"
+                      data-prosedur="<?= $m['nspk_prosedur_id'] ?? '' ?>"
+                      data-kriteria="<?= $m['nspk_kriteria_id'] ?? '' ?>"
+                      data-sasaran-relevan-id="<?= $m['sasaran_relevan_id'] ?>"
+                      data-tujuan-id="<?= $m['tujuan_id'] ?>">
                       <i class="notika-icon notika-edit"></i>
-                  </button>
-
-
-                      <button class="btn btn-danger btn-sm BtnHapusMaster" data-id="<?= $m['id'] ?>">
-                        <i class="notika-icon notika-trash"></i>
-                      </button>
-                    <?php } ?>
-                    </div>
+                    </button>
+                    <button class="btn btn-danger btn-sm BtnHapusMaster" data-id="<?= $m['id'] ?>">
+                      <i class="notika-icon notika-trash"></i>
+                    </button>
                   </td>
-
                   <td class="text-center">
-                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                      <button class="btn btn-success btn-sm BtnAddDetail" data-master-id="<?= $m['id'] ?>">
-                        <i class="notika-icon bi-plus-lg"></i>
-                      </button>
-                    <?php } ?>
+                    <button class="btn btn-success btn-sm BtnAddDetail" data-master-id="<?= $m['id'] ?>">
+                      <i class="notika-icon bi-plus-lg"></i>
+                    </button>
                   </td>
+                  <?php } ?>
                 </tr>
                 <?php } ?>
 
                 <?php } } ?>
                 </tbody>
-
-
               </table>
             </div>
 
@@ -405,93 +412,96 @@ $kriteriaPipe = $m['nspk_kriteria_id'] ?? '';
   </div>
 
   <!-- ================= MODAL INPUT MASTER ================= -->
-  <!-- ================= MODAL INPUT MASTER ================= -->
-<div class="modal fade" id="ModalInputMaster" role="dialog">
-  <div class="modal-dialog modal-lg" style="top:10%;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4><b>Tambah NSPK & Sasaran (Header)</b></h4>
-      </div>
-
-      <div class="modal-body">
-
-        <!-- NORMA -->
-        <div class="form-group">
-          <label><b>Norma</b></label>
-          <div class="nspk-wrapper">
-            <div class="nspk-row">
-              <select name="nspk_norma_id[]" class="form-control">
-                <option value="">Pilih Norma</option>
-                <?php foreach($ListNSPK as $n){
-                  if($n['jenis_nspk']=="Norma"){ ?>
-                    <option value="<?= $n['id'] ?>">
-                      <?= html_escape($n['kode_nspk']." - ".$n['judul_nspk']) ?>
-                    </option>
-                <?php }} ?>
-              </select>
-              <button type="button" class="btn btn-success BtnAddRow">+</button>
-            </div>
-          </div>
+  <div class="modal fade" id="ModalInputMaster" role="dialog">
+    <div class="modal-dialog modal-lg" style="top:10%;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4><b>Tambah NSPK & Sasaran (Header)</b></h4>
         </div>
 
-        <!-- STANDAR -->
-        <div class="form-group">
-          <label><b>Standar</b></label>
-          <div class="nspk-wrapper">
-            <div class="nspk-row">
-              <select name="nspk_standar_id[]" class="form-control">
-                <option value="">Pilih Standar</option>
-                <?php foreach($ListNSPK as $n){
-                  if($n['jenis_nspk']=="Standar"){ ?>
-                    <option value="<?= $n['id'] ?>">
-                      <?= html_escape($n['kode_nspk']." - ".$n['judul_nspk']) ?>
-                    </option>
-                <?php }} ?>
-              </select>
-              <button type="button" class="btn btn-success BtnAddRow">+</button>
+        <div class="modal-body">
+          <?php if (!empty($NamaInstansi)) { ?>
+            <div class="alert alert-info">
+              <strong>Instansi:</strong> <?= htmlspecialchars($NamaInstansi) ?>
+            </div>
+          <?php } ?>
+
+          <!-- NORMA -->
+          <div class="form-group">
+            <label><b>Norma</b></label>
+            <div class="nspk-wrapper">
+              <div class="nspk-row">
+                <select name="nspk_norma_id[]" class="form-control">
+                  <option value="">Pilih Norma</option>
+                  <?php foreach($ListNSPK as $n){
+                    if($n['jenis_nspk']=="Norma"){ ?>
+                      <option value="<?= $n['id'] ?>">
+                        <?= html_escape($n['kode_nspk']." - ".$n['judul_nspk']) ?>
+                      </option>
+                  <?php }} ?>
+                </select>
+                <button type="button" class="btn btn-success BtnAddRow">+</button>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- PROSEDUR -->
-        <div class="form-group">
-          <label><b>Prosedur</b></label>
-          <div class="nspk-wrapper">
-            <div class="nspk-row">
-              <select name="nspk_prosedur_id[]" class="form-control">
-                <option value="">Pilih Prosedur</option>
-                <?php foreach($ListNSPK as $n){
-                  if($n['jenis_nspk']=="Prosedur"){ ?>
-                    <option value="<?= $n['id'] ?>">
-                      <?= html_escape($n['kode_nspk']." - ".$n['judul_nspk']) ?>
-                    </option>
-                <?php }} ?>
-              </select>
-              <button type="button" class="btn btn-success BtnAddRow">+</button>
+          <!-- STANDAR -->
+          <div class="form-group">
+            <label><b>Standar</b></label>
+            <div class="nspk-wrapper">
+              <div class="nspk-row">
+                <select name="nspk_standar_id[]" class="form-control">
+                  <option value="">Pilih Standar</option>
+                  <?php foreach($ListNSPK as $n){
+                    if($n['jenis_nspk']=="Standar"){ ?>
+                      <option value="<?= $n['id'] ?>">
+                        <?= html_escape($n['kode_nspk']." - ".$n['judul_nspk']) ?>
+                      </option>
+                  <?php }} ?>
+                </select>
+                <button type="button" class="btn btn-success BtnAddRow">+</button>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- KRITERIA -->
-        <div class="form-group">
-          <label><b>Kriteria</b></label>
-          <div class="nspk-wrapper">
-            <div class="nspk-row">
-              <select name="nspk_kriteria_id[]" class="form-control">
-                <option value="">Pilih Kriteria</option>
-                <?php foreach($ListNSPK as $n){
-                  if($n['jenis_nspk']=="Kriteria"){ ?>
-                    <option value="<?= $n['id'] ?>">
-                      <?= html_escape($n['kode_nspk']." - ".$n['judul_nspk']) ?>
-                    </option>
-                <?php }} ?>
-              </select>
-              <button type="button" class="btn btn-success BtnAddRow">+</button>
+          <!-- PROSEDUR -->
+          <div class="form-group">
+            <label><b>Prosedur</b></label>
+            <div class="nspk-wrapper">
+              <div class="nspk-row">
+                <select name="nspk_prosedur_id[]" class="form-control">
+                  <option value="">Pilih Prosedur</option>
+                  <?php foreach($ListNSPK as $n){
+                    if($n['jenis_nspk']=="Prosedur"){ ?>
+                      <option value="<?= $n['id'] ?>">
+                        <?= html_escape($n['kode_nspk']." - ".$n['judul_nspk']) ?>
+                      </option>
+                  <?php }} ?>
+                </select>
+                <button type="button" class="btn btn-success BtnAddRow">+</button>
+              </div>
             </div>
           </div>
-        </div>
 
+          <!-- KRITERIA -->
+          <div class="form-group">
+            <label><b>Kriteria</b></label>
+            <div class="nspk-wrapper">
+              <div class="nspk-row">
+                <select name="nspk_kriteria_id[]" class="form-control">
+                  <option value="">Pilih Kriteria</option>
+                  <?php foreach($ListNSPK as $n){
+                    if($n['jenis_nspk']=="Kriteria"){ ?>
+                      <option value="<?= $n['id'] ?>">
+                        <?= html_escape($n['kode_nspk']." - ".$n['judul_nspk']) ?>
+                      </option>
+                  <?php }} ?>
+                </select>
+                <button type="button" class="btn btn-success BtnAddRow">+</button>
+              </div>
+            </div>
+          </div>
 
           <div class="form-group">
             <label><b>Sasaran RPJMD yang Relevan</b></label>
@@ -531,57 +541,48 @@ $kriteriaPipe = $m['nspk_kriteria_id'] ?? '';
         <div class="modal-body">
           <input type="hidden" id="EditMasterId">
 
-          <!-- ================= NSPK DROPDOWN EDIT ================= -->
+          <div class="form-group">
+            <label><b>Norma</b></label>
+            <div class="wrapper-norma"></div>
+          </div>
 
           <div class="form-group">
-                    <label><b>Norma</b></label>
-                    <div class="wrapper-norma"></div>
-                  </div>
+            <label><b>Standar</b></label>
+            <div class="wrapper-standar"></div>
+          </div>
 
-                  <div class="form-group">
-                    <label><b>Standar</b></label>
-                    <div class="wrapper-standar"></div>
-                  </div>
+          <div class="form-group">
+            <label><b>Prosedur</b></label>
+            <div class="wrapper-prosedur"></div>
+          </div>
 
-                  <div class="form-group">
-                    <label><b>Prosedur</b></label>
-                    <div class="wrapper-prosedur"></div>
-                  </div>
+          <div class="form-group">
+            <label><b>Kriteria</b></label>
+            <div class="wrapper-kriteria"></div>
+          </div>
 
-                  <div class="form-group">
-                    <label><b>Kriteria</b></label>
-                    <div class="wrapper-kriteria"></div>
-                  </div>
-
-                  <!-- Tambahkan opsi untuk modal edit -->
-                  <div style="display:none">
-                    <div id="edit-opt-norma">
-                      <?php foreach($ListNSPK as $n){ if($n['jenis_nspk']=="Norma"){ ?>
-                        <option value="<?= $n['id'] ?>"><?= html_escape($n['kode_nspk']." - ".$n['judul_nspk']) ?></option>
-                      <?php }} ?>
-                    </div>
-
-                    <div id="edit-opt-standar">
-                      <?php foreach($ListNSPK as $n){ if($n['jenis_nspk']=="Standar"){ ?>
-                        <option value="<?= $n['id'] ?>"><?= html_escape($n['kode_nspk']." - ".$n['judul_nspk']) ?></option>
-                      <?php }} ?>
-                    </div>
-
-                    <div id="edit-opt-prosedur">
-                      <?php foreach($ListNSPK as $n){ if($n['jenis_nspk']=="Prosedur"){ ?>
-                        <option value="<?= $n['id'] ?>"><?= html_escape($n['kode_nspk']." - ".$n['judul_nspk']) ?></option>
-                      <?php }} ?>
-                    </div>
-
-                    <div id="edit-opt-kriteria">
-                      <?php foreach($ListNSPK as $n){ if($n['jenis_nspk']=="Kriteria"){ ?>
-                        <option value="<?= $n['id'] ?>"><?= html_escape($n['kode_nspk']." - ".$n['judul_nspk']) ?></option>
-                      <?php }} ?>
-                    </div>
-                  </div>
-
-
-            <!-- ================= END NSPK DROPDOWN EDIT ================= -->
+          <div style="display:none">
+            <div id="edit-opt-norma">
+              <?php foreach($ListNSPK as $n){ if($n['jenis_nspk']=="Norma"){ ?>
+                <option value="<?= $n['id'] ?>"><?= html_escape($n['kode_nspk']." - ".$n['judul_nspk']) ?></option>
+              <?php }} ?>
+            </div>
+            <div id="edit-opt-standar">
+              <?php foreach($ListNSPK as $n){ if($n['jenis_nspk']=="Standar"){ ?>
+                <option value="<?= $n['id'] ?>"><?= html_escape($n['kode_nspk']." - ".$n['judul_nspk']) ?></option>
+              <?php }} ?>
+            </div>
+            <div id="edit-opt-prosedur">
+              <?php foreach($ListNSPK as $n){ if($n['jenis_nspk']=="Prosedur"){ ?>
+                <option value="<?= $n['id'] ?>"><?= html_escape($n['kode_nspk']." - ".$n['judul_nspk']) ?></option>
+              <?php }} ?>
+            </div>
+            <div id="edit-opt-kriteria">
+              <?php foreach($ListNSPK as $n){ if($n['jenis_nspk']=="Kriteria"){ ?>
+                <option value="<?= $n['id'] ?>"><?= html_escape($n['kode_nspk']." - ".$n['judul_nspk']) ?></option>
+              <?php }} ?>
+            </div>
+          </div>
 
           <div class="form-group">
             <label><b>Sasaran RPJMD yang Relevan</b></label>
@@ -602,8 +603,6 @@ $kriteriaPipe = $m['nspk_kriteria_id'] ?? '';
               <?php }} ?>
             </select>
           </div>
-
-          
 
           <button class="btn btn-success notika-btn-success" id="BtnUpdateMaster"><b>SIMPAN</b></button>
         </div>
@@ -717,43 +716,19 @@ $kriteriaPipe = $m['nspk_kriteria_id'] ?? '';
 
 <style>
   .btn-group-flex {
-  display: flex;
-  justify-content: center; /* tengah */
-  align-items: center;
-  gap: 6px; /* jarak antar tombol */
-  flex-wrap: nowrap;
-}
-
-.btn-group-flex .btn {
-  margin: 0;
-}
-
-.nspk-row{
-  display:flex;
-  gap:6px;
-  margin-bottom:6px;
-}
-
-.nspk-row select{
-  flex:1;
-}
-
-.huruf-list {
     display: flex;
-    align-items: flex-start;
-    margin-bottom: 4px;
-}
-
-.huruf {
-    width: 22px;       /* jarak huruf */
-    flex-shrink: 0;
-}
-
-.isi {
-    flex: 1;
-}
-
-
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+  }
+  .btn-group-flex .btn { margin: 0; }
+  .nspk-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .nspk-row select { flex: 1; }
 </style>
 
 <script src="../js/vendor/jquery-1.12.4.min.js"></script>
@@ -764,314 +739,297 @@ $kriteriaPipe = $m['nspk_kriteria_id'] ?? '';
   var BaseURL    = '<?= base_url() ?>';
   var CSRF_TOKEN = '<?= $this->security->get_csrf_hash() ?>';
   var CSRF_NAME  = '<?= $this->security->get_csrf_token_name() ?>';
+  var IS_ROLE_4 = '<?= $IsRole4 ?>';
+  var IS_LOGGED_IN = '<?= $IsLoggedIn ?>';
+  var CURRENT_FILTER_INSTANSI = '<?= $FilterInstansiId ?? '' ?>';
+  var KODE_WILAYAH = '<?= $KodeWilayah ?? '' ?>';
 
   jQuery(document).ready(function($){
 
+    // Inisialisasi DataTable
+    if ($('#data-table-tujuan-sasaran').length > 0) {
+      try {
+        if ($.fn.DataTable.isDataTable('#data-table-tujuan-sasaran')) {
+          $('#data-table-tujuan-sasaran').DataTable().destroy();
+        }
+        $('#data-table-tujuan-sasaran').DataTable({
+          "pageLength": 10,
+          "ordering": false,
+          "language": {
+            "emptyTable": "Tidak ada data",
+            "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            "infoEmpty": "Tidak ada data",
+            "paginate": {
+              "first": "Pertama",
+              "last": "Terakhir",
+              "next": "Berikutnya",
+              "previous": "Sebelumnya"
+            }
+          }
+        });
+      } catch(e) { console.log("DataTable error:", e); }
+    }
 
     // =========================
-    // FILTER PROVINSI & KAB/KOTA
+    // FILTER WILAYAH SEBELUM LOGIN
     // =========================
     <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
 
       $("#Provinsi").change(function() {
-        if ($(this).val() === "") {
+        var provinsiKode = $(this).val();
+        if (provinsiKode === "") {
           $("#KabKota").html('<option value="">Pilih Kab/Kota</option>');
+          $("#FilterInstansiGroup").hide();
           return;
         }
 
         $.ajax({
-          url: BaseURL + "Daerah/GetListKabKota",
+          url: BaseURL + "Instansi/GetListKabKota",
           type: "POST",
-          data: { Kode: $(this).val(), [CSRF_NAME]: CSRF_TOKEN },
-          beforeSend: function() { $("#KabKota").prop('disabled', true); },
-          success: function(res) {
-            var Data = (typeof res === 'string') ? JSON.parse(res) : res;
+          data: { Kode: provinsiKode, [CSRF_NAME]: CSRF_TOKEN },
+          dataType: 'json',
+          beforeSend: function() { 
+            $("#KabKota").prop('disabled', true).html('<option value="">Memuat...</option>');
+            $("#FilterInstansiGroup").hide();
+          },
+          success: function(Data) {
             var KabKota = '<option value="">Pilih Kab/Kota</option>';
-
-            if (Data.length > 0) {
+            if (Data && Data.length > 0) {
               for (let i = 0; i < Data.length; i++) {
                 KabKota += '<option value="' + Data[i].Kode + '">' + Data[i].Nama + '</option>';
               }
-            } else {
-              alert("Belum Ada Data Kab/Kota");
             }
-
             $("#KabKota").html(KabKota).prop('disabled', false);
           },
-          error: function() {
-            alert("Gagal memuat data Kab/Kota");
-            $("#KabKota").prop('disabled', false);
-          }
+          error: function() { alert("Gagal memuat data Kab/Kota"); }
+        });
+      });
+
+      $("#KabKota").change(function() {
+        var kabKotaKode = $(this).val();
+        if (kabKotaKode === "") {
+          $("#FilterInstansiGroup").hide();
+          return;
+        }
+
+        $.ajax({
+          url: BaseURL + "Instansi/GetListInstansiLevel4",
+          type: "POST",
+          data: { kode_wilayah: kabKotaKode, [CSRF_NAME]: CSRF_TOKEN },
+          dataType: 'json',
+          beforeSend: function() {
+            $("#FilterInstansiBeforeLogin").html('<option value="">Memuat...</option>');
+            $("#FilterInstansiGroup").show();
+          },
+          success: function(Data) {
+            var options = '<option value="">-- Semua Instansi --</option>';
+            if (Data && Data.length > 0) {
+              for (let i = 0; i < Data.length; i++) {
+                var selected = (CURRENT_FILTER_INSTANSI == Data[i].id) ? 'selected' : '';
+                options += '<option value="' + Data[i].id + '" ' + selected + '>' + Data[i].nama + '</option>';
+              }
+            }
+            $("#FilterInstansiBeforeLogin").html(options);
+            $("#FilterInstansiGroup").show();
+          },
+          error: function() { alert("Gagal memuat data Instansi"); }
         });
       });
 
       $("#Filter").click(function() {
-        if ($("#Provinsi").val() === "") return alert("Mohon Pilih Provinsi");
-        if ($("#KabKota").val() === "") return alert("Mohon Pilih Kab/Kota");
+        if ($("#Provinsi").val() === "") { alert("Mohon Pilih Provinsi"); return; }
+        if ($("#KabKota").val() === "") { alert("Mohon Pilih Kab/Kota"); return; }
 
         var kodeWilayah = $("#KabKota").val();
-
+        var instansiId = $("#FilterInstansiBeforeLogin").val();
+        
         $.ajax({
-          url: BaseURL + "Daerah/SetTempKodeWilayah",
+          url: BaseURL + "Instansi/SetTempKodeWilayah",
           type: "POST",
           data: { KodeWilayah: kodeWilayah, [CSRF_NAME]: CSRF_TOKEN },
           beforeSend: function() { $("#Filter").prop('disabled', true).text('Memuat...'); },
           success: function(res) {
             if (res === '1') {
-              window.location.reload();
+              var redirectUrl = BaseURL + "Instansi/TujuanSasaranPD";
+              if (instansiId && instansiId != '') {
+                redirectUrl += "?instansi_id=" + instansiId;
+              }
+              window.location.href = redirectUrl;
             } else {
               alert(res || "Gagal menyimpan filter wilayah!");
               $("#Filter").prop('disabled', false).text('Filter');
             }
           },
-          error: function() {
-            alert("Gagal menghubungi server!");
-            $("#Filter").prop('disabled', false).text('Filter');
-          }
+          error: function() { alert("Gagal menghubungi server!"); }
         });
       });
 
       <?php if (!empty($KodeWilayah)) { ?>
         var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
         var kodeKab  = "<?= $KodeWilayah ?>";
-        $("#Provinsi").val(kodeProv);
-
-        $.ajax({
-          url: BaseURL + "Daerah/GetListKabKota",
-          type: "POST",
-          data: { Kode: kodeProv, [CSRF_NAME]: CSRF_TOKEN },
-          success: function(res) {
-            var Data = (typeof res === 'string') ? JSON.parse(res) : res;
-            var KabKota = '<option value="">Pilih Kab/Kota</option>';
-
-            if (Data.length > 0) {
-              for (let i = 0; i < Data.length; i++) {
-                var selected = (Data[i].Kode === kodeKab) ? 'selected' : '';
-                KabKota += '<option value="' + Data[i].Kode + '" ' + selected + '>' + Data[i].Nama + '</option>';
+        $("#Provinsi").val(kodeProv).trigger('change');
+        setTimeout(function() {
+          $("#KabKota").val(kodeKab).trigger('change');
+          <?php if (!empty($FilterInstansiId)) { ?>
+            setTimeout(function() {
+              if ($("#FilterInstansiBeforeLogin option[value='<?= $FilterInstansiId ?>']").length > 0) {
+                $("#FilterInstansiBeforeLogin").val("<?= $FilterInstansiId ?>");
               }
-            }
-            $("#KabKota").html(KabKota);
-          }
-        });
+            }, 800);
+          <?php } ?>
+        }, 500);
       <?php } ?>
 
     <?php } ?>
-    // =========================
-    // END FILTER
-    // =========================
 
     // =========================
-    // MASTER - SIMPAN
+    // FILTER INSTANSI (UNTUK YANG SUDAH LOGIN DAN BUKAN ROLE 4)
     // =========================
+    <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
+      $("#FilterInstansiBtn").click(function() {
+        var instansiId = $("#FilterInstansi").val();
+        var url = BaseURL + "Instansi/TujuanSasaranPD";
+        if (instansiId && instansiId != '') { url += "?instansi_id=" + instansiId; }
+        window.location.href = url;
+      });
+      $("#ResetFilterBtn").click(function() { window.location.href = BaseURL + "Instansi/TujuanSasaranPD"; });
+    <?php } ?>
+
+    // =========================
+    // CRUD OPERATIONS (HANYA UNTUK ROLE 4)
+    // =========================
+    <?php if ($IsRole4) { ?>
 
     function getNSPK(name){
-  var arr = [];
-  $("select[name='"+name+"']").each(function(){
-    if($(this).val()!="") arr.push($(this).val());
-  });
-  return arr;
-}
+      var arr = [];
+      $("select[name='"+name+"']").each(function(){
+        if($(this).val()!="") arr.push($(this).val());
+      });
+      return arr;
+    }
 
-   $("#BtnSimpanMaster").click(function(){
- 
-var nspk_norma_id    = getNSPK("nspk_norma_id[]");
-var nspk_standar_id  = getNSPK("nspk_standar_id[]");
-var nspk_prosedur_id = getNSPK("nspk_prosedur_id[]");
-var nspk_kriteria_id = getNSPK("nspk_kriteria_id[]");
+    // MASTER - SIMPAN
+    $("#BtnSimpanMaster").click(function(){
+      var nspk_norma_id = getNSPK("nspk_norma_id[]");
+      var nspk_standar_id = getNSPK("nspk_standar_id[]");
+      var nspk_prosedur_id = getNSPK("nspk_prosedur_id[]");
+      var nspk_kriteria_id = getNSPK("nspk_kriteria_id[]");
 
- if(
-   nspk_standar_id.length == 0 &&
-   nspk_norma_id.length == 0 &&
-   nspk_prosedur_id.length == 0 &&
-   nspk_kriteria_id.length == 0
-)
-{
-   alert("Minimal pilih salah satu NSPK!");
-   return;
-}
-
-
-  var sasaranRelevanId = $("#SasaranRelevanId").val();
-  var tujuanId = $("#TujuanId").val();
-
-  if(!sasaranRelevanId){ alert('Sasaran RPJMD harus dipilih!'); return; }
-  if(!tujuanId){ alert('Tujuan harus dipilih!'); return; }
-
-  $.post(BaseURL + "Daerah/InputTujuanSasaranPD_Master", {
-  nspk_standar_id: nspk_standar_id,
-  nspk_norma_id: nspk_norma_id,
-  nspk_prosedur_id: nspk_prosedur_id,
-  nspk_kriteria_id: nspk_kriteria_id,
-  sasaran_relevan_id: sasaranRelevanId,
-  tujuan_id: tujuanId,
-  [CSRF_NAME]: CSRF_TOKEN
-})
-
-  .done(function(res){
-    if(res == '1') window.location.reload();
-    else alert(res || 'Gagal simpan!');
-  });
-});
-
-
-
-    // MASTER - BUKA EDIT
- $(document).on("click", ".BtnEditMaster", function(){
-
-  let btn = $(this);
-
-  $("#EditMasterId").val(btn.data("id"));
-
-  function render(wrapperClass, dataAttr, name, optionId){
-
-let raw = btn.attr(dataAttr) || "";
-let ids = raw !== "" ? raw.split("|||") : [];
-
-if(ids.length === 0) ids = [""];
-
-
-    if(ids.length === 0) ids = [""];
-
-    $(wrapperClass).html("");
-
-    ids.forEach((val,i)=>{
-
-        let row = `
-            <div class="nspk-row">
-                <select name="${name}[]" class="form-control">
-                    <option value="">Pilih</option>
-                    ${$(optionId).html()}
-                </select>
-
-                <button type="button" class="btn btn-success BtnAddRowEdit">+</button>
-
-                ${i>0 ? `<button type="button" class="btn btn-danger BtnRemoveRowEdit">x</button>` : ""}
-            </div>
-        `;
-
-        $(wrapperClass).append(row);
-        $(wrapperClass).find("select").last().val(val);
-    });
-}
-
-
-  render(".wrapper-norma",    "data-norma",    "edit_nspk_norma_id",    "#edit-opt-norma");
-  render(".wrapper-standar",  "data-standar",  "edit_nspk_standar_id",  "#edit-opt-standar");
-  render(".wrapper-prosedur", "data-prosedur", "edit_nspk_prosedur_id", "#edit-opt-prosedur");
-  render(".wrapper-kriteria", "data-kriteria", "edit_nspk_kriteria_id", "#edit-opt-kriteria");
-
-  $("#EditSasaranRelevanId").val(btn.data("sasaran-relevan-id"));
-  $("#EditTujuanId").val(btn.data("tujuan-id"));
-
-  $("#ModalEditMaster").modal("show");
-});
-
-
-// ADD ROW INPUT
-$(document).on("click", ".BtnAddRow", function(){
-  var row = $(this).closest(".nspk-row");
-  var newRow = row.clone();
-  newRow.find("select").val("");
-
-  if(newRow.find(".BtnRemoveRow").length==0){
-    newRow.append('<button type="button" class="btn btn-danger BtnRemoveRow">x</button>');
-  }
-
-  row.after(newRow);
-});
-
-$(document).on("click", ".BtnRemoveRow", function(){
-  $(this).closest(".nspk-row").remove();
-});
-
-
-// ADD ROW EDIT
-$(document).on("click", ".BtnAddRowEdit", function(){
-  var row = $(this).closest(".nspk-row");
-  var newRow = row.clone();
-  newRow.find("select").val("");
-
-  if(newRow.find(".BtnRemoveRowEdit").length==0){
-    newRow.append('<button type="button" class="btn btn-danger BtnRemoveRowEdit">x</button>');
-  }
-
-  row.after(newRow);
-});
-
-$(document).on("click", ".BtnRemoveRowEdit", function(){
-  $(this).closest(".nspk-row").remove();
-});
-
-
-
-    // MASTER - UPDATE
- $("#BtnUpdateMaster").click(function(){
-
-  var id = $("#EditMasterId").val();
-
-  // ambil isi dropdown NSPK edit
-  var nspk_norma_id    = getNSPK("edit_nspk_norma_id[]");
-var nspk_standar_id  = getNSPK("edit_nspk_standar_id[]");
-var nspk_prosedur_id = getNSPK("edit_nspk_prosedur_id[]");
-var nspk_kriteria_id = getNSPK("edit_nspk_kriteria_id[]");
-
-
-  // validasi minimal pilih salah satu
-  if(
-  nspk_norma_id.length == 0 &&
-  nspk_standar_id.length == 0 &&
-  nspk_prosedur_id.length == 0 &&
-  nspk_kriteria_id.length == 0
-){
-  alert("Minimal pilih salah satu NSPK!");
-  return;
-}
-
-  // validasi sasaran & tujuan
-  var sasaranRelevanId = $("#EditSasaranRelevanId").val();
-  var tujuanId         = $("#EditTujuanId").val();
-
-  if(!sasaranRelevanId){
-    alert("Sasaran RPJMD harus dipilih!");
-    return;
-  }
-
-  if(!tujuanId){
-    alert("Tujuan harus dipilih!");
-    return;
-  }
-
-  // kirim AJAX update
-  $.post(BaseURL + "Daerah/EditTujuanSasaranPD_Master", {
-
-    id: id,
-
-    nspk_standar_id: nspk_standar_id,
-nspk_norma_id: nspk_norma_id,
-nspk_prosedur_id: nspk_prosedur_id,
-nspk_kriteria_id: nspk_kriteria_id,
-
-
-    sasaran_relevan_id: sasaranRelevanId,
-    tujuan_id: tujuanId,
-
-    [CSRF_NAME]: CSRF_TOKEN
-
-  }).done(function(res){
-
-      if(res == "1"){
-        window.location.reload();
-      } else {
-        alert(res || "Gagal update header!");
+      if(nspk_standar_id.length == 0 && nspk_norma_id.length == 0 && nspk_prosedur_id.length == 0 && nspk_kriteria_id.length == 0){
+        alert("Minimal pilih salah satu NSPK!");
+        return;
       }
 
-  }).fail(function(){
-      alert("Request gagal (Update Master)");
-  });
+      var sasaranRelevanId = $("#SasaranRelevanId").val();
+      var tujuanId = $("#TujuanId").val();
 
-});
+      if(!sasaranRelevanId){ alert('Sasaran RPJMD harus dipilih!'); return; }
+      if(!tujuanId){ alert('Tujuan harus dipilih!'); return; }
 
+      $.post(BaseURL + "Instansi/InputTujuanSasaranPD_Master", {
+        nspk_standar_id: nspk_standar_id,
+        nspk_norma_id: nspk_norma_id,
+        nspk_prosedur_id: nspk_prosedur_id,
+        nspk_kriteria_id: nspk_kriteria_id,
+        sasaran_relevan_id: sasaranRelevanId,
+        tujuan_id: tujuanId,
+        [CSRF_NAME]: CSRF_TOKEN
+      }).done(function(res){
+        if(res == '1') window.location.reload();
+        else alert(res || 'Gagal simpan!');
+      });
+    });
 
+    // MASTER - BUKA EDIT
+    $(document).on("click", ".BtnEditMaster", function(){
+      let btn = $(this);
+      $("#EditMasterId").val(btn.data("id"));
+
+      function render(wrapperClass, dataAttr, name, optionId){
+        let raw = btn.attr(dataAttr) || "";
+        let ids = raw !== "" ? raw.split("|||") : [];
+        if(ids.length === 0) ids = [""];
+        $(wrapperClass).html("");
+        ids.forEach((val,i)=>{
+          let row = `<div class="nspk-row">
+            <select name="${name}[]" class="form-control">
+              <option value="">Pilih</option>
+              ${$(optionId).html()}
+            </select>
+            <button type="button" class="btn btn-success BtnAddRowEdit">+</button>
+            ${i>0 ? `<button type="button" class="btn btn-danger BtnRemoveRowEdit">x</button>` : ""}
+          </div>`;
+          $(wrapperClass).append(row);
+          $(wrapperClass).find("select").last().val(val);
+        });
+      }
+
+      render(".wrapper-norma", "data-norma", "edit_nspk_norma_id", "#edit-opt-norma");
+      render(".wrapper-standar", "data-standar", "edit_nspk_standar_id", "#edit-opt-standar");
+      render(".wrapper-prosedur", "data-prosedur", "edit_nspk_prosedur_id", "#edit-opt-prosedur");
+      render(".wrapper-kriteria", "data-kriteria", "edit_nspk_kriteria_id", "#edit-opt-kriteria");
+
+      $("#EditSasaranRelevanId").val(btn.data("sasaran-relevan-id"));
+      $("#EditTujuanId").val(btn.data("tujuan-id"));
+
+      $("#ModalEditMaster").modal("show");
+    });
+
+    $(document).on("click", ".BtnAddRow", function(){
+      var row = $(this).closest(".nspk-row");
+      var newRow = row.clone();
+      newRow.find("select").val("");
+      if(newRow.find(".BtnRemoveRow").length==0){
+        newRow.append('<button type="button" class="btn btn-danger BtnRemoveRow">x</button>');
+      }
+      row.after(newRow);
+    });
+
+    $(document).on("click", ".BtnRemoveRow", function(){ $(this).closest(".nspk-row").remove(); });
+    $(document).on("click", ".BtnAddRowEdit", function(){
+      var row = $(this).closest(".nspk-row");
+      var newRow = row.clone();
+      newRow.find("select").val("");
+      if(newRow.find(".BtnRemoveRowEdit").length==0){
+        newRow.append('<button type="button" class="btn btn-danger BtnRemoveRowEdit">x</button>');
+      }
+      row.after(newRow);
+    });
+    $(document).on("click", ".BtnRemoveRowEdit", function(){ $(this).closest(".nspk-row").remove(); });
+
+    // MASTER - UPDATE
+    $("#BtnUpdateMaster").click(function(){
+      var id = $("#EditMasterId").val();
+      var nspk_norma_id = getNSPK("edit_nspk_norma_id[]");
+      var nspk_standar_id = getNSPK("edit_nspk_standar_id[]");
+      var nspk_prosedur_id = getNSPK("edit_nspk_prosedur_id[]");
+      var nspk_kriteria_id = getNSPK("edit_nspk_kriteria_id[]");
+
+      if(nspk_norma_id.length == 0 && nspk_standar_id.length == 0 && nspk_prosedur_id.length == 0 && nspk_kriteria_id.length == 0){
+        alert("Minimal pilih salah satu NSPK!");
+        return;
+      }
+
+      var sasaranRelevanId = $("#EditSasaranRelevanId").val();
+      var tujuanId = $("#EditTujuanId").val();
+
+      if(!sasaranRelevanId){ alert("Sasaran RPJMD harus dipilih!"); return; }
+      if(!tujuanId){ alert("Tujuan harus dipilih!"); return; }
+
+      $.post(BaseURL + "Instansi/EditTujuanSasaranPD_Master", {
+        id: id,
+        nspk_standar_id: nspk_standar_id,
+        nspk_norma_id: nspk_norma_id,
+        nspk_prosedur_id: nspk_prosedur_id,
+        nspk_kriteria_id: nspk_kriteria_id,
+        sasaran_relevan_id: sasaranRelevanId,
+        tujuan_id: tujuanId,
+        [CSRF_NAME]: CSRF_TOKEN
+      }).done(function(res){
+        if(res == "1") window.location.reload();
+        else alert(res || "Gagal update header!");
+      });
+    });
 
     // MASTER - HAPUS
     $(document).on("click", ".BtnHapusMaster", function(){
@@ -1079,20 +1037,16 @@ nspk_kriteria_id: nspk_kriteria_id,
       if(!id){ alert('ID tidak valid!'); return; }
       if(!confirm('Yakin hapus HEADER ini beserta semua indikatornya?')) return;
 
-      $.post(BaseURL + "Daerah/HapusTujuanSasaranPD_Master", {
+      $.post(BaseURL + "Instansi/HapusTujuanSasaranPD_Master", {
         id: id,
         [CSRF_NAME]: CSRF_TOKEN
       }).done(function(res){
-        if(res == '1'){ window.location.reload(); }
-        else { alert(res || 'Gagal hapus header!'); }
-      }).fail(function(){
-        alert('Gagal request (Hapus Header)');
+        if(res == '1') window.location.reload();
+        else alert(res || 'Gagal hapus header!');
       });
     });
 
-    // =========================
     // DETAIL - OPEN ADD
-    // =========================
     $(document).on("click", ".BtnAddDetail", function(){
       $("#DetailMasterId").val($(this).data('master-id'));
       $("#DetailSasaranId").val('');
@@ -1104,56 +1058,42 @@ nspk_kriteria_id: nspk_kriteria_id,
 
     // DETAIL - SIMPAN
     $("#BtnSimpanDetail").click(function(){
+      var masterId = $("#DetailMasterId").val();
+      var indikator = $("#Indikator").val().trim();
+      if(!indikator){ alert("Indikator wajib diisi!"); return; }
 
-  var masterId  = $("#DetailMasterId").val();
-  var indikator = $("#Indikator").val().trim();
-
-  if(!indikator){
-    alert("Indikator wajib diisi!");
-    return;
-  }
-
-  $.post(BaseURL + "Daerah/InputTujuanSasaranPD_Detail", {
-    master_id: masterId,
-    sasaran_id: $("#DetailSasaranId").val(),
-    indikator: indikator,
-
-    t2025: $("#T2025").val(),
-    t2026: $("#T2026").val(),
-    t2027: $("#T2027").val(),
-    t2028: $("#T2028").val(),
-    t2029: $("#T2029").val(),
-    t2030: $("#T2030").val(),
-
-    keterangan: $("#Keterangan").val(),
-
-    [CSRF_NAME]: CSRF_TOKEN
-  })
-  .done(function(res){
-    if(res == "1") window.location.reload();
-    else alert(res);
-  });
-
-});
-
-
+      $.post(BaseURL + "Instansi/InputTujuanSasaranPD_Detail", {
+        master_id: masterId,
+        sasaran_id: $("#DetailSasaranId").val(),
+        indikator: indikator,
+        t2025: $("#T2025").val(),
+        t2026: $("#T2026").val(),
+        t2027: $("#T2027").val(),
+        t2028: $("#T2028").val(),
+        t2029: $("#T2029").val(),
+        t2030: $("#T2030").val(),
+        keterangan: $("#Keterangan").val(),
+        [CSRF_NAME]: CSRF_TOKEN
+      }).done(function(res){
+        if(res == "1") window.location.reload();
+        else alert(res);
+      });
+    });
 
     // DETAIL - OPEN EDIT
     $(document).on("click", ".BtnEditDetail", function(){
-  $("#EditDetailId").val($(this).data('id'));
-  $("#EditDetailParentId").val($(this).data('parent-id'));
- $("#EditDetailSasaranId").val($(this).data('sasaran-id'));
-  $("#EditIndikator").val($(this).data('indikator'));
-  $("#EditT2025").val($(this).data('t2025'));
-  $("#EditT2026").val($(this).data('t2026'));
-  $("#EditT2027").val($(this).data('t2027'));
-  $("#EditT2028").val($(this).data('t2028'));
-  $("#EditT2029").val($(this).data('t2029'));
-  $("#EditT2030").val($(this).data('t2030'));
-  $("#EditKeterangan").val($(this).data('keterangan'));
-  $("#ModalEditDetail").modal("show");
-});
-
+      $("#EditDetailId").val($(this).data('id'));
+      $("#EditDetailSasaranId").val($(this).data('sasaran-id'));
+      $("#EditIndikator").val($(this).data('indikator'));
+      $("#EditT2025").val($(this).data('t2025'));
+      $("#EditT2026").val($(this).data('t2026'));
+      $("#EditT2027").val($(this).data('t2027'));
+      $("#EditT2028").val($(this).data('t2028'));
+      $("#EditT2029").val($(this).data('t2029'));
+      $("#EditT2030").val($(this).data('t2030'));
+      $("#EditKeterangan").val($(this).data('keterangan'));
+      $("#ModalEditDetail").modal("show");
+    });
 
     // DETAIL - UPDATE
     $("#BtnUpdateDetail").click(function(){
@@ -1161,23 +1101,21 @@ nspk_kriteria_id: nspk_kriteria_id,
       var indikator = $("#EditIndikator").val().trim();
       if(!id){ alert('ID detail tidak valid!'); return; }
 
-      $.post(BaseURL + "Daerah/EditTujuanSasaranPD_Detail", {
+      $.post(BaseURL + "Instansi/EditTujuanSasaranPD_Detail", {
         id: id,
         sasaran_id: $("#EditDetailSasaranId").val(),
         indikator: indikator,
-        t2025: $("#EditT2025").val().trim(),
-        t2026: $("#EditT2026").val().trim(),
-        t2027: $("#EditT2027").val().trim(),
-        t2028: $("#EditT2028").val().trim(),
-        t2029: $("#EditT2029").val().trim(),
-        t2030: $("#EditT2030").val().trim(),
-        keterangan: $("#EditKeterangan").val().trim(),
+        t2025: $("#EditT2025").val(),
+        t2026: $("#EditT2026").val(),
+        t2027: $("#EditT2027").val(),
+        t2028: $("#EditT2028").val(),
+        t2029: $("#EditT2029").val(),
+        t2030: $("#EditT2030").val(),
+        keterangan: $("#EditKeterangan").val(),
         [CSRF_NAME]: CSRF_TOKEN
       }).done(function(res){
-        if(res == '1'){ window.location.reload(); }
-        else { alert(res || 'Gagal update indikator!'); }
-      }).fail(function(){
-        alert('Gagal request (Update Indikator)');
+        if(res == '1') window.location.reload();
+        else alert(res || 'Gagal update indikator!');
       });
     });
 
@@ -1187,60 +1125,42 @@ nspk_kriteria_id: nspk_kriteria_id,
       if(!id){ alert('ID detail tidak valid!'); return; }
       if(!confirm('Yakin hapus indikator ini?')) return;
 
-      $.post(BaseURL + "Daerah/HapusTujuanSasaranPD_Detail", {
+      $.post(BaseURL + "Instansi/HapusTujuanSasaranPD_Detail", {
         id: id,
         [CSRF_NAME]: CSRF_TOKEN
       }).done(function(res){
-        if(res == '1'){ window.location.reload(); }
-        else { alert(res || 'Gagal hapus indikator!'); }
-      }).fail(function(){
-        alert('Gagal request (Hapus Indikator)');
+        if(res == '1') window.location.reload();
+        else alert(res || 'Gagal hapus indikator!');
       });
     });
+
+    <?php } ?>
 
   });
 </script>
 
 <div style="display:none">
-
   <div id="opt-norma">
-    <?php foreach($ListNSPK as $n){
-      if($n['jenis_nspk']=="Norma"){ ?>
-        <option value="<?= $n['id'] ?>">
-          <?= html_escape($n['judul_nspk']) ?>
-        </option>
+    <?php foreach($ListNSPK as $n){ if($n['jenis_nspk']=="Norma"){ ?>
+      <option value="<?= $n['id'] ?>"><?= html_escape($n['judul_nspk']) ?></option>
     <?php }} ?>
   </div>
-
   <div id="opt-standar">
-    <?php foreach($ListNSPK as $n){
-      if($n['jenis_nspk']=="Standar"){ ?>
-        <option value="<?= $n['id'] ?>">
-          <?= html_escape($n['judul_nspk']) ?>
-        </option>
+    <?php foreach($ListNSPK as $n){ if($n['jenis_nspk']=="Standar"){ ?>
+      <option value="<?= $n['id'] ?>"><?= html_escape($n['judul_nspk']) ?></option>
     <?php }} ?>
   </div>
-
   <div id="opt-prosedur">
-    <?php foreach($ListNSPK as $n){
-      if($n['jenis_nspk']=="Prosedur"){ ?>
-        <option value="<?= $n['id'] ?>">
-          <?= html_escape($n['judul_nspk']) ?>
-        </option>
+    <?php foreach($ListNSPK as $n){ if($n['jenis_nspk']=="Prosedur"){ ?>
+      <option value="<?= $n['id'] ?>"><?= html_escape($n['judul_nspk']) ?></option>
     <?php }} ?>
   </div>
-
   <div id="opt-kriteria">
-    <?php foreach($ListNSPK as $n){
-      if($n['jenis_nspk']=="Kriteria"){ ?>
-        <option value="<?= $n['id'] ?>">
-          <?= html_escape($n['judul_nspk']) ?>
-        </option>
+    <?php foreach($ListNSPK as $n){ if($n['jenis_nspk']=="Kriteria"){ ?>
+      <option value="<?= $n['id'] ?>"><?= html_escape($n['judul_nspk']) ?></option>
     <?php }} ?>
   </div>
-
 </div>
-
 
 </body>
 </html>
