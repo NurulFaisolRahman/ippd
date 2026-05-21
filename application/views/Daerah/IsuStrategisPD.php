@@ -1,6 +1,40 @@
 <?php $this->load->view('Daerah/sidebar'); ?>
 <?php $this->load->view('Daerah/Cssumum'); ?>
 
+<style>
+/* ========== UKURAN FONT TABEL ========== */
+/* Judul tabel (th) - ukuran 12px dan BOLD */
+#data-table-isu-strategis th {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* Isi tabel (td) - ukuran 12px, normal (tidak bold) */
+#data-table-isu-strategis td {
+    font-size: 12px;
+    font-weight: normal;
+}
+
+#data-table-isu-strategis {
+    font-size: 12px;
+}
+
+/* ========== UKURAN FONT MODAL TITLE ========== */
+.modal-title,
+.modal-header h4,
+.modal-header .modal-title {
+    font-size: 12px !important;
+    font-weight: bold;
+}
+
+/* Optional: jika ingin judul modal tetap 12px */
+#ModalInputIsu .modal-header h4,
+#ModalEditIsu .modal-header h4 {
+    font-size: 12px;
+    font-weight: bold;
+}
+</style>
+
 <div class="main-content">
   <div class="data-table-area">
     <div class="container-fluid">
@@ -141,7 +175,7 @@
 
             <!-- TABLE -->
             <div class="table-responsive">
-              <table id="data-table-basic" class="table table-striped">
+              <table id="data-table-isu-strategis" class="table table-striped">
                 <thead>
                   <tr>
                     <th rowspan="2" style="width:60px;">No</th>

@@ -1,6 +1,25 @@
 <?php $this->load->view('Daerah/sidebar'); ?>
 <?php $this->load->view('Daerah/Cssumum'); ?>
 
+<style>
+/* ========== UKURAN FONT TABEL SAJA ========== */
+/* Judul tabel (th) - ukuran 12px dan BOLD */
+#data-table-tujuan th {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* Isi tabel (td) - ukuran 12px, normal (tidak bold) */
+#data-table-tujuan td {
+    font-size: 12px;
+    font-weight: normal;
+}
+
+#data-table-tujuan {
+    font-size: 12px;
+}
+</style>
+
 <div class="main-content">
   <div class="data-table-area">
     <div class="container-fluid">
@@ -136,7 +155,7 @@
             <?php } ?>
 
             <div class="table-responsive">
-              <table id="data-table-basic" class="table table-striped">
+              <table id="data-table-tujuan" class="table table-striped">
                 <thead>
                   <tr>
                     <th class="text-center" style="width:70px;">No</th>

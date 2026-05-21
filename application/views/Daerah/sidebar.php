@@ -376,6 +376,17 @@
 
             <li class="sidebar-dropdown">
                 <a href="#">
+                    <i class="bi bi-file-text-fill"></i>
+                    <span>Renja</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Instansi/RenjaPD')?>">Menu Renja</a>
+                </div>
+            </li>
+
+            <li class="sidebar-dropdown">
+                <a href="#">
                     <i class="bi bi-cash"></i>
                     <span>Anggaran</span>
                     <i class="fa fa-chevron-down"></i>

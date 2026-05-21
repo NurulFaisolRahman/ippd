@@ -1,6 +1,32 @@
 <?php $this->load->view('Daerah/sidebar'); ?>
 <?php $this->load->view('Daerah/Cssumum'); ?>
 
+<style>
+/* Tambahan CSS untuk mengatur ukuran font tabel */
+#data-table-permasalahan,
+#data-table-permasalahan th,
+#data-table-permasalahan td {
+    font-size: 12px;
+}
+
+/* Judul tabel tetap BOLD dengan ukuran 12px */
+.data-table-list .table th {
+    font-size: 12px;
+    font-weight: bold;  /* atau font-weight: 700; */
+}
+
+/* Isi tabel ukuran 12px (tidak bold) */
+.data-table-list .table td {
+    font-size: 12px;
+    font-weight: normal;
+}
+
+/* Untuk memastikan semua elemen dalam tabel berukuran 12px */
+.data-table-list .table {
+    font-size: 12px;
+}
+</style>
+
 
 <div class="main-content">
   <div class="data-table-area">
@@ -139,7 +165,7 @@
             <?php } ?>
 
             <div class="table-responsive">
-              <table id="data-table-basic" class="table table-striped">
+              <table id="data-table-permasalahan" class="table table-striped">
                 <thead>
                   <tr>
                     <th class="text-center" style="width:50px;">No</th>
@@ -201,7 +227,7 @@
                     <?php } ?>
                   <?php } else { ?>
                     <tr>
-                      <td colspan="<?= $IsRole4 ? '9' : '8' ?>" class="text-center">Belum ada数据</td>
+                      <td colspan="<?= $IsRole4 ? '9' : '8' ?>" class="text-center">Belum ada</td>
                     </tr>
                   <?php } ?>
                 </tbody>

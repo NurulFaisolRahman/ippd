@@ -61,19 +61,42 @@ class Instansi extends CI_Controller {
     /**
      * Set TempKodeWilayah (untuk filter wilayah)
      */
-    public function SetTempKodeWilayah() {
-        if (!$this->input->is_ajax_request()) {
-            show_404();
-            return;
-        }
-        $kodeWilayah = $this->input->post('KodeWilayah', TRUE);
-        if ($kodeWilayah && $this->db->where('Kode', $kodeWilayah)->get('kodewilayah')->num_rows() > 0) {
-            $this->session->set_userdata('TempKodeWilayah', $kodeWilayah);
-            echo '1';
-        } else {
-            echo 'Kode Wilayah tidak valid';
-        }
+    // Di controller Instansi.php
+public function SetTempKodeWilayah() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
     }
+    
+    $kodeWilayah = $this->input->post('KodeWilayah', TRUE);
+    $instansiId = $this->input->post('InstansiId', TRUE);
+    
+    if ($kodeWilayah && $this->db->where('Kode', $kodeWilayah)->get('kodewilayah')->num_rows() > 0) {
+        $this->session->set_userdata('TempKodeWilayah', $kodeWilayah);
+        
+        // ✅ SIMPAN JUGA INSTANSI ID
+        if (!empty($instansiId) && is_numeric($instansiId)) {
+            $this->session->set_userdata('TempInstansiId', $instansiId);
+        } else {
+            $this->session->unset_userdata('TempInstansiId');
+        }
+        
+        echo '1';
+    } else {
+        echo 'Kode Wilayah tidak valid';
+    }
+}
+
+// Tambah method untuk reset filter
+public function ResetTempFilter() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    $this->session->unset_userdata('TempKodeWilayah');
+    $this->session->unset_userdata('TempInstansiId');
+    echo '1';
+}
 
     /**
      * Halaman Permasalahan PD
@@ -7060,6 +7083,600 @@ private function buildTreeDataPD($ultimate, $intermediate, $immediate, $output)
 
     return $tree_data;
 }
+
+// =====================================================
+    // RENJA PERANGKAT DAERAH
+    // =====================================================
+
+    /**
+     * Halaman Renja PD
+     */
+    /**
+ * Halaman Renja PD
+ * Support filter untuk user belum login (session TempInstansiId)
+ */
+public function RenjaPD() {
+    $Header['Halaman'] = 'Renja Perangkat Daerah';
+    
+    // ==============================
+    // 1. AMBIL DATA DARI SESSION & PARAMETER
+    // ==============================
+    $KodeWilayah = $this->get_kode_wilayah();
+    $instansi_id = $this->get_instansi_id();
+    $is_logged_in = $this->is_logged_in();
+    $is_role_4 = $this->is_role_4();
+    
+    // ✅ Untuk user BELUM login, ambil dari session TempInstansiId
+    $temp_instansi_id = null;
+    if (!$is_logged_in && isset($_SESSION['TempInstansiId']) && !empty($_SESSION['TempInstansiId'])) {
+        $temp_instansi_id = $_SESSION['TempInstansiId'];
+    }
+    
+    // ✅ Prioritaskan: URL parameter > session > null
+    $filter_instansi_id = $this->input->get('instansi_id', TRUE);
+    if (empty($filter_instansi_id) && !empty($temp_instansi_id)) {
+        $filter_instansi_id = $temp_instansi_id;
+    }
+    
+    // ==============================
+    // 2. DATA DASAR UNTUK VIEW
+    // ==============================
+    $data['KodeWilayah'] = $KodeWilayah;
+    $data['InstansiId'] = $instansi_id;
+    $data['IsLoggedIn'] = $is_logged_in;
+    $data['IsRole4'] = $is_role_4;
+    $data['FilterInstansiId'] = $filter_instansi_id;
+    $data['NamaInstansi'] = isset($_SESSION['NamaInstansi']) ? $_SESSION['NamaInstansi'] : '';
+    $data['TempInstansiId'] = $temp_instansi_id; // Kirim ke view untuk keperluan JS
+    
+    $tahun = $this->input->get('tahun', TRUE) ?: date('Y');
+    $data['TahunAktif'] = $tahun;
+    
+    // ==============================
+    // 3. AMBIL NAMA WILAYAH
+    // ==============================
+    $data['NamaWilayah'] = '';
+    if ($KodeWilayah) {
+        $wilayah = $this->db->select('Nama')->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+        $data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
+    }
+    
+    // ==============================
+    // 4. DATA PROVINSI UNTUK DROPDOWN FILTER
+    // ==============================
+    $data['Provinsi'] = $this->db->where("Kode LIKE '__'")
+                                 ->order_by('Nama')
+                                 ->get('kodewilayah')
+                                 ->result_array();
+    
+    // ==============================
+    // 5. DAFTAR INSTANSI UNTUK FILTER (NON ROLE 4)
+    // ==============================
+    $data['ListInstansi'] = [];
+    if ((!$is_role_4 || !$is_logged_in) && $KodeWilayah) {
+        $data['ListInstansi'] = $this->db->select('id, nama')
+            ->from('akun_instansi')
+            ->where('kodewilayah', $KodeWilayah)
+            ->where('Level', 4)
+            ->where('deleted_at IS NULL')
+            ->order_by('nama', 'ASC')
+            ->get()
+            ->result_array();
+    }
+    
+    // ==============================
+    // 6. DATA DAFTAR DINAS (LEVEL 2) UNTUK DROPDOWN BIDANG
+    // ==============================
+    $data['ListDinas'] = [];
+    if ($KodeWilayah) {
+        $data['ListDinas'] = $this->db->select('id, nama')
+            ->from('akun_instansi')
+            ->where('kodewilayah', $KodeWilayah)
+            ->where('Level', 2)
+            ->where('deleted_at IS NULL')
+            ->order_by('nama', 'ASC')
+            ->get()
+            ->result_array();
+    }
+    
+    // ==============================
+    // 7. DATA KARYAWAN UNTUK DROPDOWN PENGAMPU (LEVEL 4)
+    // ==============================
+    $data['ListKaryawan'] = [];
+    if ($KodeWilayah) {
+        $karyawan_raw = $this->db->select('id, nama, nip, jabatan, dinas_id')
+            ->from('akun_karyawan')
+            ->where('kodewilayah', $KodeWilayah)
+            ->where('Level', 4)
+            ->where('deleted_at IS NULL')
+            ->order_by('nama', 'ASC')
+            ->get()
+            ->result_array();
+        
+        foreach ($karyawan_raw as &$k) {
+            $k['dinas_id_array'] = !empty($k['dinas_id']) ? explode(',', $k['dinas_id']) : [];
+            foreach ($k['dinas_id_array'] as &$id) {
+                $id = trim($id);
+            }
+        }
+        $data['ListKaryawan'] = $karyawan_raw;
+    }
+    
+    // ==============================
+    // 8. DATA NOMENKLATUR URUSAN UNTUK DROPDOWN
+    // ==============================
+    $data['ListUrusan'] = $this->db->select('Kode, Nomenklatur')
+        ->from('nomenklaturprovinsi')
+        ->where('Kode NOT LIKE', '%.%')
+        ->where('LENGTH(Kode) = 1')
+        ->order_by('Kode', 'ASC')
+        ->get()
+        ->result_array();
+    
+    // ==============================
+    // 9. AMBIL DATA RENJA
+    // ==============================
+    $data['RenjaData'] = [];
+    
+    if ($KodeWilayah) {
+        $query = $this->db->select('r.*, 
+                    k.nama as karyawan_nama, 
+                    k.nip as karyawan_nip, 
+                    k.jabatan as karyawan_jabatan,
+                    u.nama as instansi_nama,
+                    d.nama as dinas_nama')
+            ->from('renja_pd r')
+            ->join('akun_karyawan k', 'k.id = r.pengampu_id', 'left')
+            ->join('akun_instansi u', 'u.id = r.id_instansi', 'left')
+            ->join('akun_instansi d', 'd.id = r.dinas_id', 'left')
+            ->where('r.kode_wilayah', $KodeWilayah)
+            ->where('r.tahun', $tahun)
+            ->where('r.deleted_at IS NULL');
+        
+        // ✅ Filter berdasarkan role (dengan dukungan temp_instansi_id untuk user belum login)
+        if ($is_role_4 && $instansi_id) {
+            // Role 4: Hanya data instansi sendiri
+            $query->where('r.id_instansi', $instansi_id);
+        } elseif (!empty($filter_instansi_id)) {
+            // Filter manual dari URL atau session
+            $query->where('r.id_instansi', (int)$filter_instansi_id);
+        }
+        
+        $data['RenjaData'] = $query->order_by('r.id', 'ASC')->get()->result_array();
+    }
+    
+    // ==============================
+    // 10. LOAD VIEW
+    // ==============================
+    $this->load->view('Daerah/header', $Header);
+    $this->load->view('Daerah/RenjaPD', $data);
+}
+
+    /**
+     * Get Nomenklatur Berdasarkan Level dan Parent (AJAX)
+     * level: 1=Urusan, 2=Bidang Urusan, 3=Program, 4=Kegiatan, 5=Sub Kegiatan
+     */
+    public function getNomenklaturByLevelAndParent() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $level = (int)$this->input->post('level');
+        $parent_kode = $this->input->post('parent_kode');
+        
+        if ($level < 1 || $level > 5) {
+            echo json_encode([]);
+            return;
+        }
+        
+        $this->db->select('Kode, Nomenklatur');
+        $this->db->from('nomenklaturprovinsi');
+        
+        if ($level == 1) {
+            // Urusan: 0 titik, panjang 1
+            $this->db->where('Kode NOT LIKE', '%.%');
+            $this->db->where('LENGTH(Kode) = 1');
+        } elseif ($level == 2) {
+            // Bidang Urusan: 1 titik
+            $this->db->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 1);
+            if ($parent_kode) {
+                $this->db->where('Kode LIKE', $parent_kode . '.%');
+                // Tidak pakai filter LENGTH agar lebih fleksibel
+            }
+        } elseif ($level == 3) {
+            // Program: 2 titik
+            $this->db->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 2);
+            if ($parent_kode) {
+                $this->db->where('Kode LIKE', $parent_kode . '.%');
+            }
+        } elseif ($level == 4) {
+            // Kegiatan: 4 titik
+            $this->db->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 4);
+            if ($parent_kode) {
+                $this->db->where('Kode LIKE', $parent_kode . '.%');
+            }
+        } elseif ($level == 5) {
+            // Sub Kegiatan: 5 titik
+            $this->db->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 5);
+            if ($parent_kode) {
+                $this->db->where('Kode LIKE', $parent_kode . '.%');
+            }
+        }
+        
+        $this->db->order_by('Kode', 'ASC');
+        $data = $this->db->get()->result_array();
+        
+        echo json_encode($data);
+    }
+
+    /**
+     * Generate Kode Rekening dari kode nomenklatur (sesuai aslinya)
+     */
+    private function generateKodeRekening($kode_nomenklatur, $level) {
+        // Langsung return kode nomenklatur asli tanpa modifikasi
+        return $kode_nomenklatur;
+    }
+
+    /**
+ * Simpan Renja PD (AJAX) - HANYA UNTUK ROLE 4
+ */
+public function simpanRenjaPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    if (!$this->can_crud()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menambah/mengedit data.']);
+        return;
+    }
+    
+    $kode_wilayah = $this->get_kode_wilayah();
+    $instansi_id = $this->get_instansi_id();
+    
+    if (!$kode_wilayah) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih']);
+        return;
+    }
+    
+    if (!$instansi_id) {
+        echo json_encode(['status' => 'error', 'message' => 'Data instansi tidak ditemukan!']);
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', TRUE);
+    $tahun = (int)$this->input->post('tahun', TRUE);
+    $mode_nomenklatur = (int)$this->input->post('mode_nomenklatur', TRUE);
+    
+    // Format Rupiah helper
+    $formatRp = function($val) {
+        if (empty($val)) return null;
+        return str_replace(['Rp', ' ', '.', ','], '', $val);
+    };
+    
+    // Data nomenklatur
+    $kode_rekening = '';
+    $tujuan = '';
+    $sasaran = '';
+    $program = '';
+    $kegiatan = '';
+    $sub_kegiatan = '';
+    
+    if ($mode_nomenklatur == 1) {
+        // Mode pilih dari nomenklatur
+        $urusan_kode = trim($this->input->post('urusan_kode', TRUE));
+        $bidang_kode = trim($this->input->post('bidang_kode', TRUE));
+        $program_kode = trim($this->input->post('program_kode', TRUE));
+        $kegiatan_kode = trim($this->input->post('kegiatan_kode', TRUE));
+        $sub_kegiatan_kode = trim($this->input->post('sub_kegiatan_kode', TRUE));
+        
+        // Ambil nama dari kode untuk disimpan di field teks
+        if ($urusan_kode) {
+            $urusan = $this->db->select('Nomenklatur')->from('nomenklaturprovinsi')->where('Kode', $urusan_kode)->get()->row_array();
+            $tujuan = $urusan ? $urusan['Nomenklatur'] : '';
+        }
+        if ($bidang_kode) {
+            $bidang = $this->db->select('Nomenklatur')->from('nomenklaturprovinsi')->where('Kode', $bidang_kode)->get()->row_array();
+            $sasaran = $bidang ? $bidang['Nomenklatur'] : '';
+        }
+        if ($program_kode) {
+            $prog = $this->db->select('Nomenklatur')->from('nomenklaturprovinsi')->where('Kode', $program_kode)->get()->row_array();
+            $program = $prog ? $prog['Nomenklatur'] : '';
+        }
+        if ($kegiatan_kode) {
+            $keg = $this->db->select('Nomenklatur')->from('nomenklaturprovinsi')->where('Kode', $kegiatan_kode)->get()->row_array();
+            $kegiatan = $keg ? $keg['Nomenklatur'] : '';
+        }
+        if ($sub_kegiatan_kode) {
+            $sub = $this->db->select('Nomenklatur')->from('nomenklaturprovinsi')->where('Kode', $sub_kegiatan_kode)->get()->row_array();
+            $sub_kegiatan = $sub ? $sub['Nomenklatur'] : '';
+        }
+        
+        // Generate kode rekening berdasarkan level terendah yang dipilih
+        if ($sub_kegiatan_kode) {
+            $kode_rekening = $sub_kegiatan_kode;
+        } elseif ($kegiatan_kode) {
+            $kode_rekening = $kegiatan_kode;
+        } elseif ($program_kode) {
+            $kode_rekening = $program_kode;
+        } elseif ($bidang_kode) {
+            $kode_rekening = $bidang_kode;
+        } elseif ($urusan_kode) {
+            $kode_rekening = $urusan_kode;
+        }
+        
+        // VALIDASI: HANYA WAJIB ADA SATU NOMENKLATUR YANG DIPILIH
+        if (empty($urusan_kode) && empty($bidang_kode) && empty($program_kode) && empty($kegiatan_kode) && empty($sub_kegiatan_kode)) {
+            echo json_encode(['status' => 'error', 'message' => 'Silakan pilih minimal Urusan, Bidang Urusan, Program, Kegiatan, atau Sub Kegiatan!']);
+            return;
+        }
+    } else {
+        // Mode manual
+        $kode_rekening = trim($this->input->post('kode_rekening', TRUE));
+        $tujuan = trim($this->input->post('tujuan_manual', TRUE));
+        $sasaran = trim($this->input->post('sasaran_manual', TRUE));
+        $program = trim($this->input->post('program_manual', TRUE));
+        $kegiatan = trim($this->input->post('kegiatan_manual', TRUE));
+        $sub_kegiatan = trim($this->input->post('sub_kegiatan_manual', TRUE));
+        
+        // VALIDASI: HANYA WAJIB ADA SATU FIELD YANG DIISI
+        if (empty($tujuan) && empty($sasaran) && empty($program) && empty($kegiatan) && empty($sub_kegiatan)) {
+            echo json_encode(['status' => 'error', 'message' => 'Silakan isi minimal Urusan, Bidang Urusan, Program, Kegiatan, atau Sub Kegiatan!']);
+            return;
+        }
+    }
+    
+    // Field lainnya OPSIONAL - boleh kosong
+    $data = [
+        'kode_wilayah' => $kode_wilayah,
+        'id_instansi' => $instansi_id,
+        'tahun' => $tahun,
+        'kode_rekening' => $kode_rekening,
+        'tujuan' => $tujuan,
+        'sasaran' => $sasaran,
+        'program' => $program,
+        'kegiatan' => $kegiatan,
+        'sub_kegiatan' => $sub_kegiatan,
+        'indikator_kinerja' => trim($this->input->post('indikator_kinerja', TRUE)) ?: null,
+        'satuan' => trim($this->input->post('satuan', TRUE)) ?: null,
+        'lokasi' => trim($this->input->post('lokasi', TRUE)) ?: null,
+        'prioritas' => trim($this->input->post('prioritas', TRUE)) ?: null,
+        'prioritas_daerah' => trim($this->input->post('prioritas_daerah', TRUE)) ?: null,
+        'prioritas_nasional' => trim($this->input->post('prioritas_nasional', TRUE)) ?: null,
+        'ranwal_kinerja' => trim($this->input->post('ranwal_kinerja', TRUE)) ?: null,
+        'ranwal_rp' => $formatRp($this->input->post('ranwal_rp', TRUE)),
+        'rancangan_kinerja' => trim($this->input->post('rancangan_kinerja', TRUE)) ?: null,
+        'rancangan_rp' => $formatRp($this->input->post('rancangan_rp', TRUE)),
+        'ranhir_kinerja' => trim($this->input->post('ranhir_kinerja', TRUE)) ?: null,
+        'ranhir_rp' => $formatRp($this->input->post('ranhir_rp', TRUE)),
+        'renja_kinerja' => trim($this->input->post('renja_kinerja', TRUE)) ?: null,
+        'renja_rp' => $formatRp($this->input->post('renja_rp', TRUE)),
+        'dpa_murni_kinerja' => trim($this->input->post('dpa_murni_kinerja', TRUE)) ?: null,
+        'dpa_murni_rp' => $formatRp($this->input->post('dpa_murni_rp', TRUE)),
+        'sumber_dana' => trim($this->input->post('sumber_dana', TRUE)) ?: null,
+        'dpa_perubahan_kinerja' => trim($this->input->post('dpa_perubahan_kinerja', TRUE)) ?: null,
+        'dpa_perubahan_rp' => $formatRp($this->input->post('dpa_perubahan_rp', TRUE)),
+        'dinas_id' => (int)$this->input->post('dinas_id', TRUE) ?: null,
+        'pengampu_id' => (int)$this->input->post('pengampu_id', TRUE) ?: null,
+        'bidang_pengampu' => trim($this->input->post('bidang_pengampu', TRUE)) ?: null,
+        'kinerja' => trim($this->input->post('kinerja', TRUE)) ?: null,
+        'target' => trim($this->input->post('target', TRUE)) ?: null,
+        'pagu_anggaran' => $formatRp($this->input->post('pagu_anggaran', TRUE)),
+        'updated_at' => date('Y-m-d H:i:s')
+    ];
+    
+    if ($id > 0) {
+        // Update data
+        $existing = $this->db->where('id', $id)
+            ->where('kode_wilayah', $kode_wilayah)
+            ->where('deleted_at IS NULL')
+            ->get('renja_pd')
+            ->row();
+        
+        if (!$existing) {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+            return;
+        }
+        
+        if ($existing->id_instansi != $instansi_id) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda hanya dapat mengedit data instansi sendiri.']);
+            return;
+        }
+        
+        $this->db->where('id', $id)->update('renja_pd', $data);
+        $message = 'Data berhasil diperbarui';
+    } else {
+        // Insert data baru
+        $data['created_at'] = date('Y-m-d H:i:s');
+        $this->db->insert('renja_pd', $data);
+        $message = 'Data berhasil ditambahkan';
+    }
+    
+    if ($this->db->affected_rows() > 0) {
+        echo json_encode(['status' => 'success', 'message' => $message]);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data']);
+    }
+    exit;
+}
+
+    /**
+     * Hapus Renja PD (AJAX) - HANYA UNTUK ROLE 4
+     */
+    public function hapusRenjaPD() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        if (!$this->can_crud()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menghapus data.']);
+            return;
+        }
+        
+        $id = (int)$this->input->post('id', TRUE);
+        $kode_wilayah = $this->get_kode_wilayah();
+        $instansi_id = $this->get_instansi_id();
+        
+        if (!$id) {
+            echo json_encode(['status' => 'error', 'message' => 'ID tidak valid']);
+            return;
+        }
+        
+        // Validasi kepemilikan data
+        $existing = $this->db->where('id', $id)
+            ->where('kode_wilayah', $kode_wilayah)
+            ->where('deleted_at IS NULL')
+            ->get('renja_pd')
+            ->row();
+        
+        if (!$existing) {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+            return;
+        }
+        
+        if ($existing->id_instansi != $instansi_id) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda hanya dapat menghapus data instansi sendiri.']);
+            return;
+        }
+        
+        // Soft delete
+        $this->db->where('id', $id)->update('renja_pd', ['deleted_at' => date('Y-m-d H:i:s')]);
+        
+        echo json_encode(['status' => 'success', 'message' => 'Data berhasil dihapus']);
+        exit;
+    }
+
+    /**
+     * Get Renja PD by ID (AJAX) - Untuk edit
+     */
+    public function getRenjaPD() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $id = (int)$this->input->post('id', TRUE);
+        $kode_wilayah = $this->get_kode_wilayah();
+        
+        if (!$id) {
+            echo json_encode(['status' => 'error', 'message' => 'ID tidak valid']);
+            return;
+        }
+        
+        $data = $this->db->select('*')
+            ->from('renja_pd')
+            ->where('id', $id)
+            ->where('kode_wilayah', $kode_wilayah)
+            ->where('deleted_at IS NULL')
+            ->get()
+            ->row_array();
+        
+        if ($data) {
+            echo json_encode(['status' => 'success', 'data' => $data]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+        }
+        exit;
+    }
+
+    /**
+     * Get Daftar Dinas (AJAX) - Untuk dropdown Bidang
+     */
+    public function Renja_get_daftar_dinas() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $kodewilayah = $this->get_kode_wilayah();
+        
+        if (!$kodewilayah) {
+            echo json_encode([]);
+            return;
+        }
+        
+        $dinas = $this->db
+            ->select('id, nama')
+            ->from('akun_instansi')
+            ->where('kodewilayah', $kodewilayah)
+            ->where('Level', 2)
+            ->where('deleted_at IS NULL')
+            ->order_by('nama', 'ASC')
+            ->get()
+            ->result_array();
+
+        echo json_encode($dinas);
+        exit;
+    }
+
+    /**
+     * Get Pelaksana/Karyawan by Dinas (AJAX)
+     */
+    public function Renja_get_pelaksana_by_dinas() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $kodewilayah = $this->get_kode_wilayah();
+        $dinas_id = $this->input->post('dinas_id', TRUE);
+        
+        if (!$kodewilayah) {
+            echo json_encode([]);
+            return;
+        }
+        
+        $this->db->select('id, nama, nip, jabatan, dinas_id')
+            ->from('akun_karyawan')
+            ->where('kodewilayah', $kodewilayah)
+            ->where('Level', 4)
+            ->where('deleted_at IS NULL');
+        
+        if (!empty($dinas_id) && $dinas_id != '') {
+            $this->db->where("FIND_IN_SET('$dinas_id', dinas_id) > 0");
+        }
+        
+        $pelaksana = $this->db
+            ->order_by('nama', 'ASC')
+            ->get()
+            ->result_array();
+
+        echo json_encode($pelaksana);
+        exit;
+    }
+
+    /**
+     * Get Detail Pelaksana (AJAX)
+     */
+    public function Renja_get_pelaksana_detail() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $id = $this->input->post('id', TRUE);
+        $kodewilayah = $this->get_kode_wilayah();
+        
+        if (!$id || !$kodewilayah) {
+            echo json_encode([]);
+            return;
+        }
+        
+        $detail = $this->db
+            ->select('id, nama, nip, jabatan, dinas_id')
+            ->from('akun_karyawan')
+            ->where('id', $id)
+            ->where('kodewilayah', $kodewilayah)
+            ->where('Level', 4)
+            ->where('deleted_at IS NULL')
+            ->get()
+            ->row_array();
+
+        echo json_encode($detail);
+        exit;
+    }
     
 }
 ?>
