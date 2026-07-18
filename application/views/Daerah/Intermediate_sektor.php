@@ -530,42 +530,50 @@ $(document).ready(function() {
   // ================= LOAD DROPDOWN DINAS =================
   function loadDinasOptions(selectedDinasId = '') {
     $.ajax({
-      url: BaseURL + 'Daerah/Intermediate_outcome_pd_get_perangkat_daerah',
-      type: 'GET',
-      dataType: 'json',
-      beforeSend: function() {
-        $('#dinas_filter_l2').html('<option value="">Loading...</option>');
-      },
-      success: function(response) {
-        let options = '<option value="">-- Semua Dinas --</option>';
-        
-        if (response.status === 'success' && response.data.length > 0) {
-          $.each(response.data, function(index, item) {
-            let selected = (item.id == selectedDinasId) ? 'selected' : '';
-            options += `<option value="${item.id}" ${selected}>${item.nama}</option>`;
-          });
-        } else {
-          options += '<option value="" disabled>Tidak ada data Dinas</option>';
+        // ✅ PERBAIKI URL
+        url: BaseURL + 'Daerah/get_daftar_dinas',
+        type: 'GET',  // atau POST
+        dataType: 'json',
+        beforeSend: function() {
+            $('#dinas_filter_l2').html('<option value="">Loading...</option>');
+        },
+        success: function(response) {
+            let options = '<option value="">-- Semua Dinas --</option>';
+            
+            // Cek format response
+            let data = response;
+            if (response.status === 'success' && response.data) {
+                data = response.data;
+            }
+            
+            if (data && data.length > 0) {
+                $.each(data, function(index, item) {
+                    let selected = (item.id == selectedDinasId) ? 'selected' : '';
+                    options += `<option value="${item.id}" ${selected}>${item.nama}</option>`;
+                });
+            } else {
+                options += '<option value="" disabled>Tidak ada data Dinas</option>';
+            }
+            
+            $('#dinas_filter_l2').html(options);
+            
+            // Re-inisialisasi Select2
+            if ($('#dinas_filter_l2').hasClass('select2-hidden-accessible')) {
+                $('#dinas_filter_l2').select2('destroy');
+            }
+            $('#dinas_filter_l2').select2({
+                placeholder: 'Pilih Dinas...',
+                dropdownParent: $('#modalLevel2'),
+                width: '100%',
+                minimumResultsForSearch: -1
+            });
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading dinas:', error);
+            $('#dinas_filter_l2').html('<option value="">Gagal memuat data</option>');
         }
-        
-        $('#dinas_filter_l2').html(options);
-        
-        // Inisialisasi Select2 untuk Dinas
-        if ($('#dinas_filter_l2').hasClass('select2-hidden-accessible')) {
-          $('#dinas_filter_l2').select2('destroy');
-        }
-        $('#dinas_filter_l2').select2({
-          placeholder: 'Pilih Dinas...',
-          dropdownParent: $('#modalLevel2'),
-          width: '100%',
-          minimumResultsForSearch: -1 // Menonaktifkan kotak pencarian
-        });
-      },
-      error: function() {
-        $('#dinas_filter_l2').html('<option value="">Gagal memuat data</option>');
-      }
     });
-  }
+}
 
   // ================= LOAD PELAKSANA BERDASARKAN DINAS =================
   function loadPelaksanaByDinas(dinasId, selectedPelaksanaId = '') {

@@ -310,9 +310,10 @@
                 <div class="sidebar-submenu">
                     <a href="<?=base_url('Daerah/VisiRPJPD')?>">Visi</a>
                     <a href="<?=base_url('Daerah/MisiRPJPD')?>">Misi</a>
-                    <a href="<?=base_url('Daerah/TujuanRPJPD')?>">Tujuan</a>
-                    <a href="<?=base_url('Daerah/SasaranRPJPD')?>">Sasaran</a>
-                    <a href="<?=base_url('Daerah/TahapanRPJPD')?>">Tahapan</a>
+                    <!-- <a href="<?=base_url('Daerah/TujuanRPJPD')?>">Tujuan</a> -->
+                    <!-- <a href="<?=base_url('Daerah/SasaranRPJPD')?>">Sasaran</a> -->
+                    <a href="<?=base_url('Daerah/TahapanArahKebijakan')?>">Tahapan Arah Kebijakan</a>
+                    <a href="<?=base_url('Daerah/SasaranPokok')?>">Sasaran Pokok & IUP</a>
                 </div>
             </li>
 
@@ -323,10 +324,10 @@
                     <i class="fa fa-chevron-down"></i>
                 </a>
                 <div class="sidebar-submenu">
-                    <a href="<?=base_url('Daerah/VisiRPJMD')?>">Visi</a>
-                    <a href="<?=base_url('Daerah/MisiRPJMD')?>">Misi</a>
-                    <a href="<?=base_url('Daerah/TujuanRPJMD')?>">Tujuan</a>
-                    <a href="<?=base_url('Daerah/SasaranRPJMD')?>">Sasaran</a>
+                    <a href="<?=base_url('Daerah/VisiRPJMD')?>">VMTS</a>
+                    <!-- <a href="<?=base_url('Daerah/MisiRPJMD')?>">Misi</a> -->
+                    <!-- <a href="<?=base_url('Daerah/TujuanRPJMD')?>">Tujuan</a> -->
+                    <!-- <a href="<?=base_url('Daerah/SasaranRPJMD')?>">Sasaran</a> -->
                     <a href="<?=base_url('Daerah/ProgramPD')?>">Program</a>
                     <a href="<?=base_url('Daerah/ArahKebijakanRPJMD')?>">Arah Kebijakan</a>
                     <a href="<?=base_url('Daerah/IsuKLHS')?>">Isu KLHS</a>

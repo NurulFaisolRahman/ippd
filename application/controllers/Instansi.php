@@ -1710,90 +1710,147 @@ public function HapusSasaranPD() {
      * Input Detail Tujuan Sasaran PD (AJAX) - HANYA UNTUK ROLE 4
      */
     public function InputTujuanSasaranPD_Detail() {
-        if (!$this->input->is_ajax_request()) {
-            show_404();
-            return;
-        }
-        
-        if (!$this->can_crud()) {
-            echo "Akses ditolak! Hanya Instansi yang dapat menambah data.";
-            return;
-        }
-        
+    // Enable error reporting untuk debugging
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+    
+    // Cek apakah request AJAX
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    // Cek role
+    if (!$this->can_crud()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menambah data.']);
+        return;
+    }
+    
+    try {
+        // Ambil data dari session
         $KodeWilayah = $this->get_kode_wilayah();
         $instansi_id = $this->get_instansi_id();
         
+        // Validasi wilayah
         if (!$KodeWilayah) {
-            echo "Wilayah belum dipilih!";
+            echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
             return;
         }
         
+        // Validasi instansi
+        if (!$instansi_id) {
+            echo json_encode(['status' => 'error', 'message' => 'Data instansi tidak ditemukan!']);
+            return;
+        }
+        
+        // Ambil dan validasi master_id
         $master_id = (int)$this->input->post('master_id', true);
         
-        // Validasi apakah master milik instansi ini
+        if ($master_id <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'Master ID tidak valid!']);
+            return;
+        }
+        
+        // Cek apakah master ada dan milik instansi ini
         $master = $this->db->where('id', $master_id)
             ->where('deleted_at IS NULL')
             ->get('tujuansasaran_pd_master')
             ->row_array();
         
         if (!$master) {
-            echo "Master data tidak ditemukan!";
+            echo json_encode(['status' => 'error', 'message' => 'Master data tidak ditemukan!']);
             return;
         }
         
         if ($master['id_instansi'] != $instansi_id) {
-            echo "Akses ditolak! Anda hanya dapat menambah data ke master milik sendiri.";
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda hanya dapat menambah data ke master milik sendiri.']);
             return;
         }
         
-        $sasaran_id = $this->input->post('sasaran_id', true) ?: null;
+        // Ambil data dari POST
+        $sasaran_id = $this->input->post('sasaran_id', true);
         $indikator = trim($this->input->post('indikator', true));
         $keterangan = trim($this->input->post('keterangan', true));
         
-        if (!$indikator) {
-            echo "Indikator harus diisi!";
+        // Validasi indikator
+        if (empty($indikator)) {
+            echo json_encode(['status' => 'error', 'message' => 'Indikator harus diisi!']);
             return;
         }
         
+        // Validasi sasaran_id jika diisi
+        if (!empty($sasaran_id) && is_numeric($sasaran_id)) {
+            $cek_sasaran = $this->db->where('id', $sasaran_id)
+                ->where('kode_wilayah', $KodeWilayah)
+                ->where('deleted_at IS NULL')
+                ->get('sasaran_pd')
+                ->row_array();
+            
+            if (!$cek_sasaran) {
+                echo json_encode(['status' => 'error', 'message' => 'Sasaran PD tidak valid!']);
+                return;
+            }
+        } else {
+            $sasaran_id = null;
+        }
+        
+        // Siapkan data untuk insert - SESUAI STRUKTUR TABEL ANDA
         $data = [
-            'master_id'     => $master_id,
-            'kode_wilayah'  => $KodeWilayah,
             'id_instansi'   => $instansi_id,
+            'master_id'     => $master_id,
             'sasaran_id'    => $sasaran_id,
             'indikator'     => $indikator,
-            't2025'         => $this->input->post('t2025', true),
-            't2026'         => $this->input->post('t2026', true),
-            't2027'         => $this->input->post('t2027', true),
-            't2028'         => $this->input->post('t2028', true),
-            't2029'         => $this->input->post('t2029', true),
-            't2030'         => $this->input->post('t2030', true),
+            't2025'         => $this->input->post('t2025', true) ?: null,
+            't2026'         => $this->input->post('t2026', true) ?: null,
+            't2027'         => $this->input->post('t2027', true) ?: null,
+            't2028'         => $this->input->post('t2028', true) ?: null,
+            't2029'         => $this->input->post('t2029', true) ?: null,
+            't2030'         => $this->input->post('t2030', true) ?: null,
             'keterangan'    => $keterangan,
             'created_at'    => date('Y-m-d H:i:s')
         ];
         
-        $this->db->insert('tujuansasaran_pd_detail', $data);
-        echo $this->db->affected_rows() > 0 ? '1' : 'Gagal menyimpan!';
+        // Insert ke database
+        $insert = $this->db->insert('tujuansasaran_pd_detail', $data);
+        
+        if ($insert) {
+            $insert_id = $this->db->insert_id();
+            echo json_encode(['status' => 'success', 'message' => '1', 'id' => $insert_id]);
+        } else {
+            $error = $this->db->error();
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data: ' . $error['message']]);
+        }
+        
+    } catch (Exception $e) {
+        echo json_encode(['status' => 'error', 'message' => 'Error: ' . $e->getMessage()]);
     }
+}
 
-    /**
-     * Edit Detail Tujuan Sasaran PD (AJAX) - HANYA UNTUK ROLE 4
-     */
-    public function EditTujuanSasaranPD_Detail() {
-        if (!$this->input->is_ajax_request()) {
-            show_404();
-            return;
-        }
-        
-        if (!$this->can_crud()) {
-            echo "Akses ditolak! Hanya Instansi yang dapat mengedit data.";
-            return;
-        }
-        
+/**
+ * Edit Detail Tujuan Sasaran PD (AJAX) - HANYA UNTUK ROLE 4
+ * SESUAI DENGAN STRUKTUR TABEL
+ */
+public function EditTujuanSasaranPD_Detail() {
+    // Enable error reporting untuk debugging
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+    
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    if (!$this->can_crud()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat mengedit data.']);
+        return;
+    }
+    
+    try {
         $id = (int)$this->input->post('id', true);
         $instansi_id = $this->get_instansi_id();
         
         if (!$id) {
-            echo "ID tidak valid!";
+            echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
             return;
         }
         
@@ -1804,12 +1861,12 @@ public function HapusSasaranPD() {
             ->row_array();
         
         if (!$existing) {
-            echo "Data tidak ditemukan!";
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
             return;
         }
         
         if ($existing['id_instansi'] != $instansi_id) {
-            echo "Akses ditolak! Anda hanya dapat mengedit data instansi sendiri.";
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda hanya dapat mengedit data instansi sendiri.']);
             return;
         }
         
@@ -1817,20 +1874,20 @@ public function HapusSasaranPD() {
         $indikator = trim($this->input->post('indikator', true));
         $keterangan = trim($this->input->post('keterangan', true));
         
-        if (!$indikator) {
-            echo "Indikator harus diisi!";
+        if (empty($indikator)) {
+            echo json_encode(['status' => 'error', 'message' => 'Indikator harus diisi!']);
             return;
         }
         
         $data = [
             'sasaran_id'    => $sasaran_id,
             'indikator'     => $indikator,
-            't2025'         => $this->input->post('t2025', true),
-            't2026'         => $this->input->post('t2026', true),
-            't2027'         => $this->input->post('t2027', true),
-            't2028'         => $this->input->post('t2028', true),
-            't2029'         => $this->input->post('t2029', true),
-            't2030'         => $this->input->post('t2030', true),
+            't2025'         => $this->input->post('t2025', true) ?: null,
+            't2026'         => $this->input->post('t2026', true) ?: null,
+            't2027'         => $this->input->post('t2027', true) ?: null,
+            't2028'         => $this->input->post('t2028', true) ?: null,
+            't2029'         => $this->input->post('t2029', true) ?: null,
+            't2030'         => $this->input->post('t2030', true) ?: null,
             'keterangan'    => $keterangan,
             'updated_at'    => date('Y-m-d H:i:s')
         ];
@@ -1838,28 +1895,37 @@ public function HapusSasaranPD() {
         $this->db->where('id', $id);
         $this->db->update('tujuansasaran_pd_detail', $data);
         
-        echo $this->db->affected_rows() > 0 ? '1' : 'Tidak ada perubahan data!';
+        if ($this->db->affected_rows() > 0) {
+            echo json_encode(['status' => 'success', 'message' => '1']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Tidak ada perubahan data!']);
+        }
+        
+    } catch (Exception $e) {
+        echo json_encode(['status' => 'error', 'message' => 'Error: ' . $e->getMessage()]);
     }
+}
 
-    /**
-     * Hapus Detail Tujuan Sasaran PD (AJAX) - HANYA UNTUK ROLE 4
-     */
-    public function HapusTujuanSasaranPD_Detail() {
-        if (!$this->input->is_ajax_request()) {
-            show_404();
-            return;
-        }
-        
-        if (!$this->can_crud()) {
-            echo "Akses ditolak! Hanya Instansi yang dapat menghapus data.";
-            return;
-        }
-        
+/**
+ * Hapus Detail Tujuan Sasaran PD (AJAX) - HANYA UNTUK ROLE 4
+ */
+public function HapusTujuanSasaranPD_Detail() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    if (!$this->can_crud()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menghapus data.']);
+        return;
+    }
+    
+    try {
         $id = (int)$this->input->post('id', true);
         $instansi_id = $this->get_instansi_id();
         
         if (!$id) {
-            echo "ID tidak valid!";
+            echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
             return;
         }
         
@@ -1870,12 +1936,12 @@ public function HapusSasaranPD() {
             ->row_array();
         
         if (!$existing) {
-            echo "Data tidak ditemukan!";
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
             return;
         }
         
         if ($existing['id_instansi'] != $instansi_id) {
-            echo "Akses ditolak! Anda hanya dapat menghapus data instansi sendiri.";
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda hanya dapat menghapus data instansi sendiri.']);
             return;
         }
         
@@ -1884,8 +1950,16 @@ public function HapusSasaranPD() {
             'deleted_at' => date('Y-m-d H:i:s')
         ]);
         
-        echo $this->db->affected_rows() > 0 ? '1' : 'Gagal menghapus data!';
+        if ($this->db->affected_rows() > 0) {
+            echo json_encode(['status' => 'success', 'message' => '1']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus data!']);
+        }
+        
+    } catch (Exception $e) {
+        echo json_encode(['status' => 'error', 'message' => 'Error: ' . $e->getMessage()]);
     }
+}
 
     // =====================================================
 // ARAH KEBIJAKAN PD

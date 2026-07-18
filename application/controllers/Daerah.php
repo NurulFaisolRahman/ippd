@@ -13,18 +13,18 @@ class Daerah extends CI_Controller {
   }
 
 public function SetTempKodeWilayah() {
-		if (!$this->input->is_ajax_request()) {
-			show_404();
-			return;
-		}
-		$kodeWilayah = $this->input->post('KodeWilayah', TRUE);
-		if ($kodeWilayah && $this->db->where('Kode', $kodeWilayah)->get('kodewilayah')->num_rows() > 0) {
-			$this->session->set_userdata('TempKodeWilayah', $kodeWilayah);
-			echo '1';
-		} else {
-			echo 'Kode Wilayah tidak valid';
-		}
-	}
+    // Ambil KodeWilayah dari POST
+    $kodeWilayah = $this->input->post('KodeWilayah', TRUE);
+    
+    if ($kodeWilayah && $this->db->where('Kode', $kodeWilayah)->get('kodewilayah')->num_rows() > 0) {
+        // Simpan ke session
+        $this->session->set_userdata('TempKodeWilayah', $kodeWilayah);
+        // Kembalikan response sukses
+        echo 'success';
+    } else {
+        echo 'error';
+    }
+}
 
   public function GetVisiRPJPDP(){
     echo json_encode($this->db->query("SELECT v.Id as IdVisi,m.* FROM visirpjpdp as v, misirpjpdp as m WHERE m.Id = ".$_POST['Id']." AND m.deleted_at IS NULL")->result_array());
@@ -75,117 +75,572 @@ public function SetTempKodeWilayah() {
                                 ->result_array());
     }
 
+        // ============================================================
+    // METHOD UNTUK MENDAPATKAN DATA VISI VIA AJAX
+    // ============================================================
+
+    // Tambahkan method ini di dalam class Daerah, setelah __construct()
+private function _checkSessionWilayah() {
+    $kodeWilayah = $this->session->userdata('KodeWilayah') 
+                ?? $this->session->userdata('TempKodeWilayah');
+    
+    if (empty($kodeWilayah)) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+        return false;
+    }
+    return $kodeWilayah;
+}
+
+    /**
+     * Get Visi RPJPDP (Provinsi) berdasarkan periode
+     * Menampilkan SEMUA visi yang memiliki periode yang sama
+     */
+    public function GetVisiRPJPDPByPeriode() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $periodeId = (int)$this->input->post('Id', TRUE);
+        if ($periodeId <= 0) {
+            echo json_encode([]);
+            return;
+        }
+        
+        // STEP 1: Ambil informasi periode dari ID yang dipilih
+        $periodeInfo = $this->db->query("
+            SELECT TahunMulai, TahunAkhir
+            FROM visirpjpdp
+            WHERE Id = ?
+            AND deleted_at IS NULL
+        ", array($periodeId))->row_array();
+        
+        if (!$periodeInfo) {
+            echo json_encode([]);
+            return;
+        }
+        
+        // STEP 2: Ambil SEMUA visi dengan periode yang sama
+        $query = $this->db->query("
+            SELECT Id, Visi, TahunMulai, TahunAkhir
+            FROM visirpjpdp
+            WHERE TahunMulai = ? 
+            AND TahunAkhir = ?
+            AND deleted_at IS NULL
+            ORDER BY Id ASC
+        ", array($periodeInfo['TahunMulai'], $periodeInfo['TahunAkhir']));
+        
+        $result = $query->result_array();
+        
+        // Jika tidak ada hasil, coba ambil berdasarkan ID (fallback)
+        if (empty($result)) {
+            $query2 = $this->db->query("
+                SELECT Id, Visi, TahunMulai, TahunAkhir
+                FROM visirpjpdp
+                WHERE Id = ?
+                AND deleted_at IS NULL
+            ", array($periodeId));
+            $result = $query2->result_array();
+        }
+        
+        echo json_encode($result);
+    }
+
+    /**
+     * Get Visi RPJPN (Nasional) berdasarkan periode
+     * Menampilkan SEMUA visi yang memiliki periode yang sama
+     */
+    public function GetVisiRPJPNByPeriode() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $periodeId = (int)$this->input->post('Id', TRUE);
+        if ($periodeId <= 0) {
+            echo json_encode([]);
+            return;
+        }
+        
+        // STEP 1: Ambil informasi periode dari ID yang dipilih
+        $periodeInfo = $this->db->query("
+            SELECT TahunMulai, TahunAkhir
+            FROM visirpjpn
+            WHERE Id = ?
+            AND deleted_at IS NULL
+        ", array($periodeId))->row_array();
+        
+        if (!$periodeInfo) {
+            echo json_encode([]);
+            return;
+        }
+        
+        // STEP 2: Ambil SEMUA visi dengan periode yang sama
+        $query = $this->db->query("
+            SELECT Id, Visi, TahunMulai, TahunAkhir
+            FROM visirpjpn
+            WHERE TahunMulai = ? 
+            AND TahunAkhir = ?
+            AND deleted_at IS NULL
+            ORDER BY Id ASC
+        ", array($periodeInfo['TahunMulai'], $periodeInfo['TahunAkhir']));
+        
+        $result = $query->result_array();
+        
+        if (empty($result)) {
+            $query2 = $this->db->query("
+                SELECT Id, Visi, TahunMulai, TahunAkhir
+                FROM visirpjpn
+                WHERE Id = ?
+                AND deleted_at IS NULL
+            ", array($periodeId));
+            $result = $query2->result_array();
+        }
+        
+        echo json_encode($result);
+    }
+
+    /**
+     * Get Visi RPJPDP berdasarkan ID (untuk edit)
+     */
+    public function GetVisiRPJPDPById() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $visiId = (int)$this->input->post('visi_id', TRUE);
+        if ($visiId <= 0) {
+            echo json_encode([]);
+            return;
+        }
+        
+        $query = $this->db->query("
+            SELECT Id, Visi, TahunMulai, TahunAkhir
+            FROM visirpjpdp
+            WHERE Id = ?
+            AND deleted_at IS NULL
+        ", array($visiId));
+        
+        echo json_encode($query->result_array());
+    }
+
+    /**
+     * Get Visi RPJPN berdasarkan ID (untuk edit)
+     */
+    public function GetVisiRPJPNById() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $visiId = (int)$this->input->post('visi_id', TRUE);
+        if ($visiId <= 0) {
+            echo json_encode([]);
+            return;
+        }
+        
+        $query = $this->db->query("
+            SELECT Id, Visi, TahunMulai, TahunAkhir
+            FROM visirpjpn
+            WHERE Id = ?
+            AND deleted_at IS NULL
+        ", array($visiId));
+        
+        echo json_encode($query->result_array());
+    }
+
+    /**
+     * Get periode RPJPDP berdasarkan visi ID (untuk edit)
+     */
+    public function GetPeriodeRPJPDPByVisiId() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $visiId = (int)$this->input->post('visi_id', TRUE);
+        if ($visiId <= 0) {
+            echo json_encode([]);
+            return;
+        }
+        
+        // Cari periode dari visirpjpdp berdasarkan ID
+        $query = $this->db->query("
+            SELECT Id, TahunMulai, TahunAkhir
+            FROM visirpjpdp
+            WHERE Id = ?
+            AND deleted_at IS NULL
+        ", array($visiId));
+        
+        $result = $query->result_array();
+        
+        // Jika tidak ditemukan, coba cari di visirpjpd sebagai referensi
+        if (empty($result)) {
+            $check = $this->db->query("
+                SELECT visi_rpjpdp 
+                FROM visirpjpd 
+                WHERE visi_rpjpdp = ? 
+                AND deleted_at IS NULL
+                LIMIT 1
+            ", array($visiId))->row_array();
+            
+            if (!empty($check)) {
+                $query2 = $this->db->query("
+                    SELECT Id, TahunMulai, TahunAkhir
+                    FROM visirpjpdp
+                    WHERE Id = ?
+                    AND deleted_at IS NULL
+                ", array($visiId));
+                $result = $query2->result_array();
+            }
+        }
+        
+        echo json_encode($result);
+    }
+
+    /**
+     * Get periode RPJPN berdasarkan visi ID (untuk edit)
+     */
+    public function GetPeriodeRPJPNByVisiId() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $visiId = (int)$this->input->post('visi_id', TRUE);
+        if ($visiId <= 0) {
+            echo json_encode([]);
+            return;
+        }
+        
+        $query = $this->db->query("
+            SELECT Id, TahunMulai, TahunAkhir
+            FROM visirpjpn
+            WHERE Id = ?
+            AND deleted_at IS NULL
+        ", array($visiId));
+        
+        $result = $query->result_array();
+        
+        if (empty($result)) {
+            $check = $this->db->query("
+                SELECT visi_rpjpn 
+                FROM visirpjpd 
+                WHERE visi_rpjpn = ? 
+                AND deleted_at IS NULL
+                LIMIT 1
+            ", array($visiId))->row_array();
+            
+            if (!empty($check)) {
+                $query2 = $this->db->query("
+                    SELECT Id, TahunMulai, TahunAkhir
+                    FROM visirpjpn
+                    WHERE Id = ?
+                    AND deleted_at IS NULL
+                ", array($visiId));
+                $result = $query2->result_array();
+            }
+        }
+        
+        echo json_encode($result);
+    }
+
+     // ============================================================
+    // VISI RPJPD
+    // ============================================================
     public function VisiRPJPD() {
-		$Header['Halaman'] = 'RPJPD';
-		$Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
+        $Header['Halaman'] = 'RPJPD';
+        
+        // Data Provinsi untuk filter
+        $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
 
-		// Tentukan KodeWilayah
-		$KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
-					   (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : $this->input->get('KodeWilayah', TRUE));
+        // Tentukan KodeWilayah
+        $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                       (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : $this->input->get('KodeWilayah', TRUE));
 
-		log_message('debug', 'KodeWilayah diterima: ' . $KodeWilayah);
+        log_message('debug', 'KodeWilayah diterima: ' . $KodeWilayah);
 
-		// Simpan KodeWilayah ke sesi sementara jika belum login
-		if (!isset($_SESSION['KodeWilayah']) && $KodeWilayah) {
-			$this->session->set_userdata('TempKodeWilayah', $KodeWilayah);
-		}
+        // Simpan KodeWilayah ke sesi sementara jika belum login
+        if (!isset($_SESSION['KodeWilayah']) && $KodeWilayah) {
+            $this->session->set_userdata('TempKodeWilayah', $KodeWilayah);
+        }
 
-		if ($KodeWilayah) {
-			$wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-			if ($wilayah) {
-				$Data['KodeWilayah'] = $KodeWilayah;
-				$Data['Visi'] = $this->db->select('v.*, k.Nama')
-					->from('visirpjpd v')
-					->join('kodewilayah k', 'v.KodeWilayah = k.Kode', 'left')
-					->where('v.KodeWilayah', $KodeWilayah)
-					->where('v.deleted_at IS NULL')
-					->get()->result_array();
-			} else {
-				$Data['KodeWilayah'] = '';
-				$Data['Visi'] = [];
-				log_message('error', 'KodeWilayah ' . $KodeWilayah . ' tidak ditemukan di tabel kodewilayah');
-			}
-		} else {
-			$Data['KodeWilayah'] = '';
-			$Data['Visi'] = [];
-		}
+        if ($KodeWilayah) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            if ($wilayah) {
+                $Data['KodeWilayah'] = $KodeWilayah;
+                $Data['NamaWilayah'] = $wilayah['Nama'];
+                
+                // Data Visi RPJPD (lokal)
+                $Data['Visi'] = $this->db->select('v.*, k.Nama')
+                    ->from('visirpjpd v')
+                    ->join('kodewilayah k', 'v.KodeWilayah = k.Kode', 'left')
+                    ->where('v.KodeWilayah', $KodeWilayah)
+                    ->where('v.deleted_at IS NULL')
+                    ->get()->result_array();
+                
+                // Data periode untuk dropdown referensi
+                $kodeProvinsi = substr($KodeWilayah, 0, 2);
+                
+                // Periode RPJPDP (Provinsi)
+                $Data['PeriodeRPJPDP'] = $this->db->query("
+                    SELECT Id, TahunMulai, TahunAkhir
+                    FROM visirpjpdp
+                    WHERE KodeWilayah = ?
+                    AND deleted_at IS NULL
+                    ORDER BY TahunMulai DESC
+                ", array($kodeProvinsi))->result_array();
+                
+                // Periode RPJPN (Nasional)
+                $Data['PeriodeRPJPN'] = $this->db->query("
+                    SELECT Id, TahunMulai, TahunAkhir
+                    FROM visirpjpn
+                    WHERE deleted_at IS NULL
+                    ORDER BY TahunMulai DESC
+                ")->result_array();
+                    
+            } else {
+                $Data['KodeWilayah'] = '';
+                $Data['NamaWilayah'] = '';
+                $Data['Visi'] = [];
+                $Data['PeriodeRPJPDP'] = [];
+                $Data['PeriodeRPJPN'] = [];
+                log_message('error', 'KodeWilayah ' . $KodeWilayah . ' tidak ditemukan di tabel kodewilayah');
+            }
+        } else {
+            $Data['KodeWilayah'] = '';
+            $Data['NamaWilayah'] = '';
+            $Data['Visi'] = [];
+            $Data['PeriodeRPJPDP'] = [];
+            $Data['PeriodeRPJPN'] = [];
+        }
 
-		$this->load->view('Daerah/header', $Header);
-		$this->load->view('Daerah/VisiRPJPD', $Data);
-	}
-
-  public function InputVisiRPJPD(){  
-    $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
-    $this->db->insert('visirpjpd',$_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Menyimpan Data!';
+        $this->load->view('Daerah/header', $Header);
+        $this->load->view('Daerah/VisiRPJPD', $Data);
     }
-	}
-	
-		public function EditVisiRPJPD() {
-		try {
-			// Validate input
-			if (empty($_POST['Id']) || !is_numeric($_POST['Id'])) {
-				throw new Exception('ID tidak valid');
-			}
-			if (empty($_POST['Visi'])) {
-				throw new Exception('Visi harus diisi');
-			}
-			if (empty($_POST['TahunMulai']) || !is_numeric($_POST['TahunMulai']) || strlen($_POST['TahunMulai']) != 4) {
-				throw new Exception('Tahun Mulai tidak valid');
-			}
-			if (empty($_POST['TahunAkhir']) || !is_numeric($_POST['TahunAkhir']) || strlen($_POST['TahunAkhir']) != 4) {
-				throw new Exception('Tahun Akhir tidak valid');
-			}
 
-			// Check if record exists
-			$existing = $this->db->where('Id', $_POST['Id'])
-								 ->where('KodeWilayah', $_SESSION['KodeWilayah'])
-								 ->where('deleted_at IS NULL')
-								 ->get('visirpjpd')
-								 ->row_array();
-			if (!$existing) {
-				throw new Exception('Data Visi tidak ditemukan');
-			}
-
-			// Prepare update data
-			$data = [
-				'Visi' => $this->input->post('Visi', TRUE),
-				'TahunMulai' => $this->input->post('TahunMulai', TRUE),
-				'TahunAkhir' => $this->input->post('TahunAkhir', TRUE),
-				'KodeWilayah' => $_SESSION['KodeWilayah'],
-				'updated_at' => date('Y-m-d H:i:s')
-			];
-
-			$this->db->where('Id', $_POST['Id']);
-			$this->db->update('visirpjpd', $data);
-
-			echo $this->db->affected_rows() ? '1' : 'Tidak ada perubahan';
-		} catch (Exception $e) {
-			log_message('error', 'Error editing Visi RPJPD: ' . $e->getMessage());
-			echo $e->getMessage();
-		}
-	}
-
-  public function HapusVisiRPJPD(){  
-		$_POST['deleted_at'] = date('Y-m-d H:i:s');
-		$this->db->where('Id',$_POST['Id'])->update('visirpjpd', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Hapus Data!';
+    // ============================================================
+    // CRUD VISI RPJPD
+    // ============================================================
+    // ============================================================
+// CRUD VISI RPJPD - DENGAN DUKUNGAN MULTI-PILIH
+// ============================================================
+public function InputVisiRPJPD() {
+    if (!isset($_SESSION['KodeWilayah']) || empty($_SESSION['KodeWilayah'])) {
+        echo 'Session KodeWilayah tidak ditemukan!';
+        return;
     }
-  }
+    
+    $visi = trim($this->input->post('Visi', TRUE));
+    $tahunMulai = $this->input->post('TahunMulai', TRUE);
+    $tahunAkhir = $this->input->post('TahunAkhir', TRUE);
+    $visiRPJPDP = $this->input->post('visi_rpjpdp', TRUE); // Bisa berupa array
+    $visiRPJPN = $this->input->post('visi_rpjpn', TRUE); // Bisa berupa array
+    
+    // Validasi
+    if (empty($visi)) {
+        echo 'Visi harus diisi!';
+        return;
+    }
+    if (!is_numeric($tahunMulai) || strlen($tahunMulai) != 4) {
+        echo 'Tahun Mulai tidak valid!';
+        return;
+    }
+    if (!is_numeric($tahunAkhir) || strlen($tahunAkhir) != 4) {
+        echo 'Tahun Akhir tidak valid!';
+        return;
+    }
+    if ($tahunMulai >= $tahunAkhir) {
+        echo 'Tahun Mulai harus lebih kecil dari Tahun Akhir!';
+        return;
+    }
+    
+    // KONVERSI KE FORMAT && UNTUK MULTI-PILIH
+    $visiRPJPDPValue = $this->convertToMultipleFormat($visiRPJPDP);
+    $visiRPJPNValue = $this->convertToMultipleFormat($visiRPJPN);
+    
+    $data = [
+        'KodeWilayah' => $_SESSION['KodeWilayah'],
+        'Visi' => $visi,
+        'TahunMulai' => $tahunMulai,
+        'TahunAkhir' => $tahunAkhir,
+        'visi_rpjpdp' => $visiRPJPDPValue,
+        'visi_rpjpn' => $visiRPJPNValue,
+        'created_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->insert('visirpjpd', $data);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Menyimpan Data!';
+}
+
+public function EditVisiRPJPD() {
+    try {
+        if (!isset($_SESSION['KodeWilayah']) || empty($_SESSION['KodeWilayah'])) {
+            throw new Exception('Session KodeWilayah tidak ditemukan!');
+        }
+        
+        $id = (int)$this->input->post('Id', TRUE);
+        $visi = trim($this->input->post('Visi', TRUE));
+        $tahunMulai = $this->input->post('TahunMulai', TRUE);
+        $tahunAkhir = $this->input->post('TahunAkhir', TRUE);
+        $visiRPJPDP = $this->input->post('visi_rpjpdp', TRUE);
+        $visiRPJPN = $this->input->post('visi_rpjpn', TRUE);
+        
+        if ($id <= 0) throw new Exception('ID tidak valid');
+        if (empty($visi)) throw new Exception('Visi harus diisi');
+        if (!is_numeric($tahunMulai) || strlen($tahunMulai) != 4) throw new Exception('Tahun Mulai tidak valid');
+        if (!is_numeric($tahunAkhir) || strlen($tahunAkhir) != 4) throw new Exception('Tahun Akhir tidak valid');
+        if ($tahunMulai >= $tahunAkhir) throw new Exception('Tahun Mulai harus lebih kecil dari Tahun Akhir');
+
+        $existing = $this->db->where('Id', $id)
+            ->where('KodeWilayah', $_SESSION['KodeWilayah'])
+            ->where('deleted_at IS NULL')
+            ->get('visirpjpd')->row_array();
+            
+        if (!$existing) throw new Exception('Data Visi tidak ditemukan');
+
+        // KONVERSI KE FORMAT && UNTUK MULTI-PILIH
+        $visiRPJPDPValue = $this->convertToMultipleFormat($visiRPJPDP);
+        $visiRPJPNValue = $this->convertToMultipleFormat($visiRPJPN);
+
+        $data = [
+            'Visi' => $visi,
+            'TahunMulai' => $tahunMulai,
+            'TahunAkhir' => $tahunAkhir,
+            'visi_rpjpdp' => $visiRPJPDPValue,
+            'visi_rpjpn' => $visiRPJPNValue,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        $this->db->where('Id', $id);
+        $this->db->update('visirpjpd', $data);
+
+        echo '1';
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error editing Visi RPJPD: ' . $e->getMessage());
+        echo $e->getMessage();
+    }
+}
+
+/**
+ * Helper function untuk konversi ke format multiple dengan separator &&
+ * @param mixed $data Array atau string
+ * @return string Format: "id1&&id2&&id3"
+ */
+private function convertToMultipleFormat($data) {
+    if (empty($data)) {
+        return '';
+    }
+    
+    if (is_array($data)) {
+        // Filter nilai kosong dan valid
+        $filtered = array_filter($data, function($val) {
+            return !empty($val) && $val !== '0' && $val !== 'null' && $val !== 'undefined';
+        });
+        return implode('&&', $filtered);
+    }
+    
+    // Jika sudah string, cek apakah sudah dalam format multiple
+    if (strpos($data, '&&') !== false) {
+        return $data;
+    }
+    
+    // Single value
+    return $data;
+}
+
+/**
+ * Helper function untuk mengubah format && menjadi array
+ */
+private function parseMultipleFormat($data) {
+    if (empty($data)) {
+        return [];
+    }
+    return explode('&&', $data);
+}
+
+/**
+ * Get detail visi untuk ditampilkan di tabel (nama visi)
+ */
+public function GetVisiNamesByIds() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $visiIds = $this->input->post('visi_ids', TRUE);
+    $type = $this->input->post('type', TRUE); // 'rpjpdp' atau 'rpjpn'
+    
+    if (empty($visiIds)) {
+        echo json_encode([]);
+        return;
+    }
+    
+    // Parse format && menjadi array
+    $ids = explode('&&', $visiIds);
+    $ids = array_filter($ids, function($id) {
+        return !empty($id) && is_numeric($id);
+    });
+    
+    if (empty($ids)) {
+        echo json_encode([]);
+        return;
+    }
+    
+    // Tentukan tabel berdasarkan type
+    $table = ($type === 'rpjpdp') ? 'visirpjpdp' : 'visirpjpn';
+    
+    $this->db->select('Id, Visi');
+    $this->db->where_in('Id', $ids);
+    $this->db->where('deleted_at IS NULL');
+    $query = $this->db->get($table);
+    
+    echo json_encode($query->result_array());
+}
+
+    public function HapusVisiRPJPD() {
+        if (!isset($_SESSION['KodeWilayah']) || empty($_SESSION['KodeWilayah'])) {
+            echo 'Session KodeWilayah tidak ditemukan!';
+            return;
+        }
+        
+        $id = (int)$this->input->post('Id', TRUE);
+        if ($id <= 0) {
+            echo 'ID tidak valid!';
+            return;
+        }
+        
+        $this->db->where('Id', $id);
+        $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);
+        $this->db->update('visirpjpd', [
+            'deleted_at' => date('Y-m-d H:i:s')
+        ]);
+        
+        echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
+    }
 
   public function GetMisiRPJPDP(){
-    echo json_encode($this->db->where("KodeWilayah = ".substr($_SESSION['KodeWilayah'],0,2)." AND _Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("misirpjpdp")->result_array());
-	}
+    echo json_encode($this->db->query("
+        SELECT DISTINCT * 
+        FROM misirpjpdp 
+        WHERE KodeWilayah = ".substr($_SESSION['KodeWilayah'],0,2)." 
+        AND _Id = ".$_POST['Id']." 
+        AND deleted_at IS NULL
+        GROUP BY Misi
+    ")->result_array());
+}
 
-  public function GetMisiRPJPN(){
-    echo json_encode($this->db->query("SELECT v.*,m.* FROM visirpjpn as v, misirpjpn as m WHERE m._Id = ".$_POST['Id']." AND m.deleted_at IS NULL")->result_array());
-	}
+ public function GetMisiRPJPN(){
+    echo json_encode($this->db->query("
+        SELECT DISTINCT v.*, m.* 
+        FROM visirpjpn as v, misirpjpn as m 
+        WHERE m._Id = ".$_POST['Id']." 
+        AND m.deleted_at IS NULL
+        GROUP BY m.Misi
+    ")->result_array());
+}
 
   public function GetPeriodeMisiRPJPD(){
     echo json_encode($this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("misirpjpd")->result_array());
@@ -251,24 +706,96 @@ public function SetTempKodeWilayah() {
 }
 
   public function InputMisiRPJPD(){  
-    $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
-    $this->db->insert('misirpjpd',$_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Menyimpan Data!';
+    try {
+        $visiId = (int)$this->input->post('_Id', TRUE);
+        $misi = trim($this->input->post('Misi', TRUE));
+        
+        // Ambil data dengan nama field yang berbeda
+        $rpjpn = $this->input->post('rpjpn', TRUE);
+        $rpjpdp = $this->input->post('rpjpdp', TRUE);
+        
+        if ($visiId <= 0) throw new Exception('Visi harus dipilih');
+        if (empty($misi)) throw new Exception('Misi harus diisi');
+        
+        $rpjpnValue = is_array($rpjpn) ? implode('$', $rpjpn) : $rpjpn;
+        $rpjpdpValue = is_array($rpjpdp) ? implode('$', $rpjpdp) : $rpjpdp;
+        
+        $data = [
+            'KodeWilayah' => $_SESSION['KodeWilayah'],
+            '_Id' => $visiId,
+            'Misi' => $misi,
+            'rpjpn' => $rpjpnValue,
+            'rpjpdp' => $rpjpdpValue,
+            'created_at' => date('Y-m-d H:i:s')
+        ];
+        
+        $this->db->insert('misirpjpd', $data);
+        
+        if ($this->db->affected_rows() > 0) {
+            echo '1';
+        } else {
+            echo 'Gagal Menyimpan Data!';
+        }
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error InputMisiRPJPD: ' . $e->getMessage());
+        echo $e->getMessage();
     }
-	}
+}
 	
 	public function EditMisiRPJPD(){  
-		$this->db->where('Id',$_POST['Id']); 
-		$this->db->update('misirpjpd', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Update Data!';
+    try {
+        $id = (int)$this->input->post('Id', TRUE);
+        $visiId = (int)$this->input->post('_Id', TRUE);
+        $misi = trim($this->input->post('Misi', TRUE));
+        
+        // Ambil data RPJPN dan RPJPDP dengan nama field berbeda
+        $rpjpn = $this->input->post('rpjpn', TRUE);
+        $rpjpdp = $this->input->post('rpjpdp', TRUE);
+        
+        // Validasi
+        if ($id <= 0) throw new Exception('ID tidak valid');
+        if ($visiId <= 0) throw new Exception('Visi harus dipilih');
+        if (empty($misi)) throw new Exception('Misi harus diisi');
+        
+        // Pastikan data ada dan sesuai wilayah
+        $existing = $this->db
+            ->where('Id', $id)
+            ->where('KodeWilayah', $_SESSION['KodeWilayah'])
+            ->where('deleted_at IS NULL')
+            ->get('misirpjpd')
+            ->row_array();
+            
+        if (!$existing) {
+            throw new Exception('Data tidak ditemukan');
+        }
+        
+        // Konversi array ke string dengan separator
+        $rpjpnValue = is_array($rpjpn) ? implode('$', $rpjpn) : $rpjpn;
+        $rpjpdpValue = is_array($rpjpdp) ? implode('$', $rpjpdp) : $rpjpdp;
+        
+        $data = [
+            '_Id' => $visiId,
+            'Misi' => $misi,
+            'rpjpn' => $rpjpnValue,    // Field terpisah untuk RPJPN
+            'rpjpdp' => $rpjpdpValue,  // Field terpisah untuk RPJPDP
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        $this->db->where('Id', $id);
+        $this->db->update('misirpjpd', $data);
+        
+        if ($this->db->affected_rows() > 0) {
+            echo '1';
+        } else {
+            echo 'Tidak ada perubahan data';
+        }
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error EditMisiRPJPD: ' . $e->getMessage());
+        echo $e->getMessage();
     }
-  }
+}
 
   public function HapusMisiRPJPD(){  
 		$_POST['deleted_at'] = date('Y-m-d H:i:s');
@@ -481,79 +1008,1239 @@ public function SetTempKodeWilayah() {
     }
   }
 
-  public function TahapanRPJPD() {
-		$Header['Halaman'] = 'RPJPD';
+ // ============================================================
+    // TAHAPAN ARAH KEBIJAKAN - MAIN PAGE
+    // ============================================================
+    public function TahapanArahKebijakan() {
+        $Header['Halaman'] = 'Tahapan Arah Kebijakan';
+        
+        // Ambil daftar provinsi untuk filter
+        $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
 
-    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array(); 
+        // Tentukan KodeWilayah
+        $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                       (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
 
-		$KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
-					   (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+        log_message('debug', 'KodeWilayah diterima untuk Tahapan Arah Kebijakan: ' . $KodeWilayah);
 
-		log_message('debug', 'KodeWilayah diterima: ' . $KodeWilayah);
+        if ($KodeWilayah) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            if ($wilayah) {
+                $Data['KodeWilayah'] = $KodeWilayah;
+                $Data['NamaWilayah'] = $wilayah['Nama'];
+                
+                // =============================================
+                // PERBAIKAN: Ambil periode yang memiliki misi
+                // =============================================
+                // METHOD 1: Menggunakan distinct() (REKOMENDASI)
+                $Data['PeriodeList'] = $this->db
+                    ->distinct()
+                    ->select('v.Id, v.TahunMulai, v.TahunAkhir, CONCAT(v.TahunMulai, " - ", v.TahunAkhir) as Periode')
+                    ->from('visirpjpd v')
+                    ->join('misirpjpd m', 'm._Id = v.Id AND m.KodeWilayah = v.KodeWilayah', 'inner')
+                    ->where('v.KodeWilayah', $KodeWilayah)
+                    ->where('v.deleted_at IS NULL')
+                    ->where('m.deleted_at IS NULL')
+                    ->order_by('v.TahunMulai', 'ASC')
+                    ->get()
+                    ->result_array();
+                
+                // =============================================
+                // Ambil data Misi
+                // =============================================
+                $Data['Misi'] = $this->db
+                    ->select('m.*, v.TahunMulai as VisiTahunMulai, v.TahunAkhir as VisiTahunAkhir, CONCAT(v.TahunMulai, " - ", v.TahunAkhir) as Periode')
+                    ->from('misirpjpd m')
+                    ->join('visirpjpd v', 'v.Id = m._Id AND v.KodeWilayah = m.KodeWilayah', 'inner')
+                    ->where('m.KodeWilayah', $KodeWilayah)
+                    ->where('m.deleted_at IS NULL')
+                    ->where('v.deleted_at IS NULL')
+                    ->order_by('v.TahunMulai', 'ASC')
+                    ->order_by('m.Id', 'ASC')
+                    ->get()
+                    ->result_array();
+                
+                // =============================================
+                // Ambil data Tahapan Arah Kebijakan
+                // =============================================
+                $Data['TahapanArahKebijakan'] = $this->db
+                    ->select('t.*, CONCAT(v.TahunMulai, " - ", v.TahunAkhir) as Periode')
+                    ->from('tahapan_arah_kebijakan t')
+                    ->join('misirpjpd m', 'm.Id = t.IdMisi AND m.KodeWilayah = t.KodeWilayah', 'inner')
+                    ->join('visirpjpd v', 'v.Id = m._Id AND v.KodeWilayah = m.KodeWilayah', 'inner')
+                    ->where('t.KodeWilayah', $KodeWilayah)
+                    ->where('t.deleted_at IS NULL')
+                    ->where('m.deleted_at IS NULL')
+                    ->where('v.deleted_at IS NULL')
+                    ->order_by('t.IdMisi', 'ASC')
+                    ->get()
+                    ->result_array();
+                    
+                // Group by IdMisi untuk memudahkan di view
+                $Data['TahapanGrouped'] = [];
+                foreach ($Data['TahapanArahKebijakan'] as $row) {
+                    $Data['TahapanGrouped'][$row['IdMisi']][] = $row;
+                }
+                
+            } else {
+                $Data['KodeWilayah'] = '';
+                $Data['NamaWilayah'] = '';
+                $Data['Misi'] = [];
+                $Data['TahapanArahKebijakan'] = [];
+                $Data['TahapanGrouped'] = [];
+                $Data['PeriodeList'] = [];
+            }
+        } else {
+            $Data['KodeWilayah'] = '';
+            $Data['NamaWilayah'] = '';
+            $Data['Misi'] = [];
+            $Data['TahapanArahKebijakan'] = [];
+            $Data['TahapanGrouped'] = [];
+            $Data['PeriodeList'] = [];
+        }
 
-		if ($KodeWilayah) {
-			$wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-			if ($wilayah) {
-				$Data['KodeWilayah'] = $KodeWilayah;
-				$Data['NamaWilayah'] = $wilayah['Nama'];
-				$Data['Visi'] = $this->db->where('KodeWilayah', $KodeWilayah)
-					->where('deleted_at IS NULL')
-					->get('visirpjpd')->result_array();
-				$Data['Tahapan'] = $this->db->select('v.*, t.*')
-					->from('visirpjpd v')
-					->join('tahapanrpjpd t', 't._Id = v.Id')
-					->where('t.KodeWilayah', $KodeWilayah)
-					->where('t.deleted_at IS NULL')
-					->get()->result_array();
-			} else {
-				$Data['KodeWilayah'] = '';
-				$Data['NamaWilayah'] = '';
-				$Data['Visi'] = [];
-				$Data['Tahapan'] = [];
-				log_message('error', 'KodeWilayah ' . $KodeWilayah . ' tidak ditemukan di tabel kodewilayah');
-			}
-		} else {
-			$Data['KodeWilayah'] = '';
-			$Data['NamaWilayah'] = '';
-			$Data['Visi'] = [];
-			$Data['Tahapan'] = [];
-		}
-
-     log_message('debug', 'Jumlah provinsi: ' . count($Data['Provinsi']));
-
-		$this->load->view('Daerah/header', $Header);
-		$this->load->view('Daerah/TahapanRPJPD', $Data);
-	}
-
-  public function InputTahapanRPJPD(){  
-    $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
-    $this->db->insert('tahapanrpjpd',$_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Menyimpan Data!';
+        $this->load->view('Daerah/header', $Header);
+        $this->load->view('Daerah/TahapanArahKebijakan', $Data);
     }
-	}
-	
-	public function EditTahapanRPJPD(){  
-		$this->db->where('Id',$_POST['Id']); 
-		$this->db->update('tahapanrpjpd', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Update Data!';
-    }
-  }
 
-  public function HapusTahapanRPJPD(){  
-		$_POST['deleted_at'] = date('Y-m-d H:i:s');
-		$this->db->where('Id',$_POST['Id'])->update('tahapanrpjpd', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Hapus Data!';
+    // ============================================================
+    // GET MISI BY PERIODE (AJAX)
+    // ============================================================
+    public function GetMisiByPeriodeArahKebijakan() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $periodeId = (int)$this->input->post('Id', TRUE);
+        $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                       (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+        
+        if ($periodeId <= 0 || empty($kodeWilayah)) {
+            echo json_encode([]);
+            return;
+        }
+        
+        // Ambil misi berdasarkan visi
+        $misi = $this->db
+            ->select('m.Id, m.Misi, v.Id as VisiId, v.TahunMulai, v.TahunAkhir, CONCAT(v.TahunMulai, " - ", v.TahunAkhir) as Periode')
+            ->from('misirpjpd m')
+            ->join('visirpjpd v', 'v.Id = m._Id AND v.KodeWilayah = m.KodeWilayah', 'inner')
+            ->where('m.KodeWilayah', $kodeWilayah)
+            ->where('m._Id', $periodeId)
+            ->where('m.deleted_at IS NULL')
+            ->where('v.deleted_at IS NULL')
+            ->order_by('m.Id', 'ASC')
+            ->get()
+            ->result_array();
+        
+        // Cek apakah sudah ada data untuk setiap misi
+        foreach ($misi as &$row) {
+            $exists = $this->db
+                ->where('IdMisi', $row['Id'])
+                ->where('KodeWilayah', $kodeWilayah)
+                ->where('deleted_at IS NULL')
+                ->get('tahapan_arah_kebijakan')
+                ->num_rows();
+            $row['hasData'] = $exists > 0;
+        }
+        
+        echo json_encode($misi);
     }
-  }
+
+    // ============================================================
+    // GET TAHAPAN BY ID (AJAX)
+    // ============================================================
+    public function GetTahapanArahKebijakanById() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $id = (int)$this->input->post('Id', TRUE);
+        $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                       (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+        
+        if (empty($kodeWilayah) || $id <= 0) {
+            echo json_encode([]);
+            return;
+        }
+        
+        $data = $this->db
+            ->select('t.*, m._Id as visi_id')
+            ->from('tahapan_arah_kebijakan t')
+            ->join('misirpjpd m', 'm.Id = t.IdMisi', 'left')
+            ->where('t.Id', $id)
+            ->where('t.KodeWilayah', $kodeWilayah)
+            ->where('t.deleted_at IS NULL')
+            ->get()
+            ->row_array();
+        
+        echo json_encode($data);
+    }
+
+    // ============================================================
+// CRUD: INPUT TAHAPAN
+// ============================================================
+public function InputTahapanArahKebijakan() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                   (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+    
+    if (empty($kodeWilayah)) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+        return;
+    }
+    
+    $idMisi = (int)$this->input->post('IdMisi', TRUE);
+    $tahapan = $this->input->post('tahapan', TRUE);
+    
+    if ($idMisi <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Misi harus dipilih!']);
+        return;
+    }
+    
+    // Validasi misi exists
+    $misiExists = $this->db->where('Id', $idMisi)
+        ->where('KodeWilayah', $kodeWilayah)
+        ->where('deleted_at IS NULL')
+        ->get('misirpjpd')
+        ->num_rows();
+    
+    if (!$misiExists) {
+        echo json_encode(['status' => 'error', 'message' => 'Misi tidak ditemukan!']);
+        return;
+    }
+    
+    // Ambil misi untuk mendapatkan nama misi
+    $misi = $this->db->select('m.*, v.TahunMulai, v.TahunAkhir')
+        ->from('misirpjpd m')
+        ->join('visirpjpd v', 'v.Id = m._Id')
+        ->where('m.Id', $idMisi)
+        ->where('m.KodeWilayah', $kodeWilayah)
+        ->where('m.deleted_at IS NULL')
+        ->get()
+        ->row_array();
+    
+    if (!$misi) {
+        echo json_encode(['status' => 'error', 'message' => 'Data Misi tidak ditemukan!']);
+        return;
+    }
+    
+    // Cek apakah sudah ada data untuk misi ini
+    $existing = $this->db->where('IdMisi', $idMisi)
+        ->where('KodeWilayah', $kodeWilayah)
+        ->where('deleted_at IS NULL')
+        ->get('tahapan_arah_kebijakan')
+        ->num_rows();
+    
+    if ($existing > 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Data untuk Misi ini sudah ada! Gunakan Edit untuk mengubah.']);
+        return;
+    }
+    
+    // TAHAPAN OPSIONAL: Boleh kosong
+    $data = [
+        'KodeWilayah' => $kodeWilayah,
+        'IdMisi' => $idMisi,
+        'Misi' => $misi['Misi'],
+        'tahap_1' => isset($tahapan[0]) && !empty(trim($tahapan[0])) ? trim($tahapan[0]) : null,
+        'tahap_2' => isset($tahapan[1]) && !empty(trim($tahapan[1])) ? trim($tahapan[1]) : null,
+        'tahap_3' => isset($tahapan[2]) && !empty(trim($tahapan[2])) ? trim($tahapan[2]) : null,
+        'tahap_4' => isset($tahapan[3]) && !empty(trim($tahapan[3])) ? trim($tahapan[3]) : null,
+        'created_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->insert('tahapan_arah_kebijakan', $data);
+    
+    if ($this->db->affected_rows() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Data berhasil disimpan!']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data!']);
+    }
+}
+
+// ============================================================
+// CRUD: EDIT TAHAPAN
+// ============================================================
+public function EditTahapanArahKebijakan() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $id = (int)$this->input->post('Id', TRUE);
+    $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                   (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+    
+    if (empty($kodeWilayah)) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+        return;
+    }
+    
+    if ($id <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    
+    $idMisi = (int)$this->input->post('IdMisi', TRUE);
+    $tahapan = $this->input->post('tahapan', TRUE);
+    
+    if ($idMisi <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Misi harus dipilih!']);
+        return;
+    }
+    
+    // Ambil misi untuk mendapatkan nama misi
+    $misi = $this->db->select('Misi')
+        ->from('misirpjpd')
+        ->where('Id', $idMisi)
+        ->where('KodeWilayah', $kodeWilayah)
+        ->where('deleted_at IS NULL')
+        ->get()
+        ->row_array();
+    
+    if (!$misi) {
+        echo json_encode(['status' => 'error', 'message' => 'Misi tidak ditemukan!']);
+        return;
+    }
+    
+    // TAHAPAN OPSIONAL: Boleh kosong
+    $data = [
+        'IdMisi' => $idMisi,
+        'Misi' => $misi['Misi'],
+        'tahap_1' => isset($tahapan[0]) && !empty(trim($tahapan[0])) ? trim($tahapan[0]) : null,
+        'tahap_2' => isset($tahapan[1]) && !empty(trim($tahapan[1])) ? trim($tahapan[1]) : null,
+        'tahap_3' => isset($tahapan[2]) && !empty(trim($tahapan[2])) ? trim($tahapan[2]) : null,
+        'tahap_4' => isset($tahapan[3]) && !empty(trim($tahapan[3])) ? trim($tahapan[3]) : null,
+        'updated_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->where('Id', $id)
+        ->where('KodeWilayah', $kodeWilayah)
+        ->update('tahapan_arah_kebijakan', $data);
+    
+    if ($this->db->affected_rows() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Data berhasil diupdate!']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal update data!']);
+    }
+}
+
+// ============================================================
+// CRUD: HAPUS TAHAPAN
+// ============================================================
+public function HapusTahapanArahKebijakan() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $id = (int)$this->input->post('Id', TRUE);
+    $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                   (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+    
+    if (empty($kodeWilayah) || $id <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak valid!']);
+        return;
+    }
+    
+    $this->db->where('Id', $id)
+        ->where('KodeWilayah', $kodeWilayah)
+        ->update('tahapan_arah_kebijakan', [
+            'deleted_at' => date('Y-m-d H:i:s')
+        ]);
+    
+    if ($this->db->affected_rows() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Data berhasil dihapus!']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus data!']);
+    }
+}
+
+ // ============================================================
+    // SASARAN POKOK - MAIN PAGE
+    // ============================================================
+    public function SasaranPokok() {
+        $Header['Halaman'] = 'Sasaran Pokok dan IUP';
+        
+        // Ambil daftar provinsi untuk filter
+        $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
+
+        // Tentukan KodeWilayah
+        $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                       (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+
+        if ($KodeWilayah) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            if ($wilayah) {
+                $Data['KodeWilayah'] = $KodeWilayah;
+                $Data['NamaWilayah'] = $wilayah['Nama'];
+                
+                // Ambil periode yang memiliki misi
+                $Data['PeriodeList'] = $this->db
+                    ->distinct()
+                    ->select('v.Id, v.TahunMulai, v.TahunAkhir, CONCAT(v.TahunMulai, " - ", v.TahunAkhir) as Periode')
+                    ->from('visirpjpd v')
+                    ->join('misirpjpd m', 'm._Id = v.Id AND m.KodeWilayah = v.KodeWilayah', 'inner')
+                    ->where('v.KodeWilayah', $KodeWilayah)
+                    ->where('v.deleted_at IS NULL')
+                    ->where('m.deleted_at IS NULL')
+                    ->order_by('v.TahunMulai', 'ASC')
+                    ->get()
+                    ->result_array();
+                
+                // Ambil data Misi
+                $Data['Misi'] = $this->db
+                    ->select('m.*, v.TahunMulai as VisiTahunMulai, v.TahunAkhir as VisiTahunAkhir, CONCAT(v.TahunMulai, " - ", v.TahunAkhir) as Periode')
+                    ->from('misirpjpd m')
+                    ->join('visirpjpd v', 'v.Id = m._Id AND v.KodeWilayah = m.KodeWilayah', 'inner')
+                    ->where('m.KodeWilayah', $KodeWilayah)
+                    ->where('m.deleted_at IS NULL')
+                    ->where('v.deleted_at IS NULL')
+                    ->order_by('v.TahunMulai', 'ASC')
+                    ->order_by('m.Id', 'ASC')
+                    ->get()
+                    ->result_array();
+                
+                // Ambil data Sasaran Pokok dengan informasi misi dan periode
+                $Data['SasaranPokok'] = $this->db
+                    ->select('sp.*, m.Misi, m._Id as VisiId, CONCAT(v.TahunMulai, " - ", v.TahunAkhir) as Periode')
+                    ->from('sasaran_pokok sp')
+                    ->join('misirpjpd m', 'm.Id = sp.IdMisi AND m.KodeWilayah = sp.KodeWilayah', 'inner')
+                    ->join('visirpjpd v', 'v.Id = m._Id AND v.KodeWilayah = m.KodeWilayah', 'inner')
+                    ->where('sp.KodeWilayah', $KodeWilayah)
+                    ->where('sp.deleted_at IS NULL')
+                    ->where('m.deleted_at IS NULL')
+                    ->where('v.deleted_at IS NULL')
+                    ->order_by('sp.IdMisi', 'ASC')
+                    ->order_by('sp.Id', 'ASC')
+                    ->get()
+                    ->result_array();
+                
+                // Ambil data IUP
+                $Data['IUP'] = $this->db
+                    ->select('i.*, sp.SasaranPokok')
+                    ->from('iup i')
+                    ->join('sasaran_pokok sp', 'sp.Id = i.IdSasaranPokok AND sp.KodeWilayah = i.KodeWilayah', 'inner')
+                    ->where('i.KodeWilayah', $KodeWilayah)
+                    ->where('i.deleted_at IS NULL')
+                    ->where('sp.deleted_at IS NULL')
+                    ->order_by('i.IdSasaranPokok', 'ASC')
+                    ->order_by('i.Id', 'ASC')
+                    ->get()
+                    ->result_array();
+                
+                // Group IUP by IdSasaranPokok
+                $Data['IUPGrouped'] = [];
+                foreach ($Data['IUP'] as $row) {
+                    $Data['IUPGrouped'][$row['IdSasaranPokok']][] = $row;
+                }
+                
+            } else {
+                $Data['KodeWilayah'] = '';
+                $Data['NamaWilayah'] = '';
+                $Data['Misi'] = [];
+                $Data['SasaranPokok'] = [];
+                $Data['IUP'] = [];
+                $Data['IUPGrouped'] = [];
+                $Data['PeriodeList'] = [];
+            }
+        } else {
+            $Data['KodeWilayah'] = '';
+            $Data['NamaWilayah'] = '';
+            $Data['Misi'] = [];
+            $Data['SasaranPokok'] = [];
+            $Data['IUP'] = [];
+            $Data['IUPGrouped'] = [];
+            $Data['PeriodeList'] = [];
+        }
+
+        $this->load->view('Daerah/header', $Header);
+        $this->load->view('Daerah/SasaranPokok', $Data);
+    }
+
+    // ============================================================
+    // GET MISI BY PERIODE (AJAX)
+    // ============================================================
+    public function GetMisiByPeriodeSasaranPokok() {
+    log_message('debug', '=== GetMisiByPeriodeSasaranPokok dipanggil ===');
+    
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $periodeId = (int)$this->input->post('Id', TRUE);
+    $kodeWilayah = $this->session->userdata('KodeWilayah') 
+                ?? $this->session->userdata('TempKodeWilayah') 
+                ?? '';
+    
+    log_message('debug', "periodeId: $periodeId, kodeWilayah: $kodeWilayah");
+    
+    if ($periodeId <= 0 || empty($kodeWilayah)) {
+        echo json_encode([]);
+        return;
+    }
+    
+    // Ambil misi berdasarkan periode (visi)
+    $misi = $this->db
+        ->select('m.Id, m.Misi')
+        ->from('misirpjpd m')
+        ->where('m._Id', $periodeId)
+        ->where('m.KodeWilayah', $kodeWilayah)
+        ->where('m.deleted_at IS NULL')
+        ->order_by('m.Id', 'ASC')
+        ->get()
+        ->result_array();
+    
+    log_message('debug', 'Misi ditemukan: ' . count($misi));
+    
+    echo json_encode($misi);
+}
+
+    // ============================================================
+    // GET SASARAN POKOK BY MISI (AJAX)
+    // ============================================================
+    public function GetSasaranPokokByMisi() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $idMisi = (int)$this->input->post('IdMisi', TRUE);
+        $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                       (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+        
+        if ($idMisi <= 0 || empty($kodeWilayah)) {
+            echo json_encode([]);
+            return;
+        }
+        
+        $sasaran = $this->db
+            ->select('Id, SasaranPokok')
+            ->from('sasaran_pokok')
+            ->where('KodeWilayah', $kodeWilayah)
+            ->where('IdMisi', $idMisi)
+            ->where('deleted_at IS NULL')
+            ->order_by('Id', 'ASC')
+            ->get()
+            ->result_array();
+        
+        echo json_encode($sasaran);
+    }
+
+    // ============================================================
+    // GET IUP BY SASARAN POKOK (AJAX)
+    // ============================================================
+    public function GetIUPBySasaranPokok() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $idSasaran = (int)$this->input->post('IdSasaranPokok', TRUE);
+        $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                       (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+        
+        if ($idSasaran <= 0 || empty($kodeWilayah)) {
+            echo json_encode([]);
+            return;
+        }
+        
+        $iup = $this->db
+            ->select('*')
+            ->from('iup')
+            ->where('KodeWilayah', $kodeWilayah)
+            ->where('IdSasaranPokok', $idSasaran)
+            ->where('deleted_at IS NULL')
+            ->order_by('Id', 'ASC')
+            ->get()
+            ->result_array();
+        
+        echo json_encode($iup);
+    }
+
+    // ============================================================
+// CRUD: TAMBAH SASARAN POKOK (DARI MISI)
+// ============================================================
+public function InputSasaranPokok() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                   (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+    
+    if (empty($kodeWilayah)) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+        return;
+    }
+    
+    $idMisi = (int)$this->input->post('IdMisi', TRUE);
+    $sasaranPokok = trim($this->input->post('SasaranPokok', TRUE));
+    
+    if ($idMisi <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Misi harus dipilih!']);
+        return;
+    }
+    
+    if (empty($sasaranPokok)) {
+        echo json_encode(['status' => 'error', 'message' => 'Sasaran Pokok harus diisi!']);
+        return;
+    }
+    
+    // Validasi misi exists
+    $misiExists = $this->db->where('Id', $idMisi)
+        ->where('KodeWilayah', $kodeWilayah)
+        ->where('deleted_at IS NULL')
+        ->get('misirpjpd')
+        ->num_rows();
+    
+    if (!$misiExists) {
+        echo json_encode(['status' => 'error', 'message' => 'Misi tidak ditemukan!']);
+        return;
+    }
+    
+    $data = [
+        'KodeWilayah' => $kodeWilayah,
+        'IdMisi' => $idMisi,
+        'SasaranPokok' => $sasaranPokok,
+        'created_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->insert('sasaran_pokok', $data);
+    
+    if ($this->db->affected_rows() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Sasaran Pokok berhasil disimpan!']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data!']);
+    }
+}
+
+// ============================================================
+// CRUD: TAMBAH IUP (LANGSUNG DARI BARIS)
+// ============================================================
+public function InputIUP() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                   (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+    
+    if (empty($kodeWilayah)) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+        return;
+    }
+    
+    $idSasaranPokok = (int)$this->input->post('IdSasaranPokok', TRUE);
+    $indikator = trim($this->input->post('Indikator', TRUE));
+    $satuan = trim($this->input->post('Satuan', TRUE));
+    $target1 = $this->input->post('Target1', TRUE);
+    $target2 = $this->input->post('Target2', TRUE);
+    $target3 = $this->input->post('Target3', TRUE);
+    $target4 = $this->input->post('Target4', TRUE);
+    
+    if ($idSasaranPokok <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Sasaran Pokok tidak valid!']);
+        return;
+    }
+    
+    if (empty($indikator)) {
+        echo json_encode(['status' => 'error', 'message' => 'Indikator harus diisi!']);
+        return;
+    }
+    
+    // Validasi sasaran pokok exists
+    $sasaranExists = $this->db->where('Id', $idSasaranPokok)
+        ->where('KodeWilayah', $kodeWilayah)
+        ->where('deleted_at IS NULL')
+        ->get('sasaran_pokok')
+        ->num_rows();
+    
+    if (!$sasaranExists) {
+        echo json_encode(['status' => 'error', 'message' => 'Sasaran Pokok tidak ditemukan!']);
+        return;
+    }
+    
+    $data = [
+        'KodeWilayah' => $kodeWilayah,
+        'IdSasaranPokok' => $idSasaranPokok,
+        'Indikator' => $indikator,
+        'Satuan' => !empty($satuan) ? $satuan : null,
+        'Target_Tahap_I' => !empty($target1) ? $target1 : null,
+        'Target_Tahap_II' => !empty($target2) ? $target2 : null,
+        'Target_Tahap_III' => !empty($target3) ? $target3 : null,
+        'Target_Tahap_IV' => !empty($target4) ? $target4 : null,
+        'created_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->insert('iup', $data);
+    
+    if ($this->db->affected_rows() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'IUP berhasil disimpan!']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data!']);
+    }
+}
+
+    // ============================================================
+    // CRUD: EDIT SASARAN POKOK
+    // ============================================================
+    public function EditSasaranPokok() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $id = (int)$this->input->post('Id', TRUE);
+        $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                       (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+        
+        if (empty($kodeWilayah) || $id <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak valid!']);
+            return;
+        }
+        
+        $sasaranPokok = trim($this->input->post('SasaranPokok', TRUE));
+        
+        if (empty($sasaranPokok)) {
+            echo json_encode(['status' => 'error', 'message' => 'Sasaran Pokok harus diisi!']);
+            return;
+        }
+        
+        $data = [
+            'SasaranPokok' => $sasaranPokok,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        $this->db->where('Id', $id)
+            ->where('KodeWilayah', $kodeWilayah)
+            ->update('sasaran_pokok', $data);
+        
+        if ($this->db->affected_rows() > 0) {
+            echo json_encode(['status' => 'success', 'message' => 'Sasaran Pokok berhasil diupdate!']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Gagal update data!']);
+        }
+    }
+
+    // ============================================================
+    // CRUD: EDIT IUP
+    // ============================================================
+    public function EditIUP() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $id = (int)$this->input->post('Id', TRUE);
+        $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                       (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+        
+        if (empty($kodeWilayah) || $id <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak valid!']);
+            return;
+        }
+        
+        $indikator = trim($this->input->post('Indikator', TRUE));
+        $satuan = trim($this->input->post('Satuan', TRUE));
+        $target1 = $this->input->post('Target1', TRUE);
+        $target2 = $this->input->post('Target2', TRUE);
+        $target3 = $this->input->post('Target3', TRUE);
+        $target4 = $this->input->post('Target4', TRUE);
+        
+        if (empty($indikator)) {
+            echo json_encode(['status' => 'error', 'message' => 'Indikator harus diisi!']);
+            return;
+        }
+        
+        $data = [
+            'Indikator' => $indikator,
+            'Satuan' => !empty($satuan) ? $satuan : null,
+            'Target_Tahap_I' => !empty($target1) ? $target1 : null,
+            'Target_Tahap_II' => !empty($target2) ? $target2 : null,
+            'Target_Tahap_III' => !empty($target3) ? $target3 : null,
+            'Target_Tahap_IV' => !empty($target4) ? $target4 : null,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        $this->db->where('Id', $id)
+            ->where('KodeWilayah', $kodeWilayah)
+            ->update('iup', $data);
+        
+        if ($this->db->affected_rows() > 0) {
+            echo json_encode(['status' => 'success', 'message' => 'IUP berhasil diupdate!']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Gagal update data!']);
+        }
+    }
+
+    // ============================================================
+    // CRUD: HAPUS SASARAN POKOK
+    // ============================================================
+    public function HapusSasaranPokok() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $id = (int)$this->input->post('Id', TRUE);
+        $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                       (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+        
+        if (empty($kodeWilayah) || $id <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak valid!']);
+            return;
+        }
+        
+        // Hapus juga semua IUP yang terkait
+        $this->db->where('IdSasaranPokok', $id)
+            ->where('KodeWilayah', $kodeWilayah)
+            ->update('iup', ['deleted_at' => date('Y-m-d H:i:s')]);
+        
+        $this->db->where('Id', $id)
+            ->where('KodeWilayah', $kodeWilayah)
+            ->update('sasaran_pokok', ['deleted_at' => date('Y-m-d H:i:s')]);
+        
+        if ($this->db->affected_rows() > 0) {
+            echo json_encode(['status' => 'success', 'message' => 'Data berhasil dihapus!']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus data!']);
+        }
+    }
+
+    // ============================================================
+    // CRUD: HAPUS IUP
+    // ============================================================
+    public function HapusIUP() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $id = (int)$this->input->post('Id', TRUE);
+        $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                       (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+        
+        if (empty($kodeWilayah) || $id <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak valid!']);
+            return;
+        }
+        
+        $this->db->where('Id', $id)
+            ->where('KodeWilayah', $kodeWilayah)
+            ->update('iup', ['deleted_at' => date('Y-m-d H:i:s')]);
+        
+        if ($this->db->affected_rows() > 0) {
+            echo json_encode(['status' => 'success', 'message' => 'IUP berhasil dihapus!']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus data!']);
+        }
+    }
+
+    public function GetDataPeriodeMisi() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $idMisi = (int)$this->input->post('IdMisi', TRUE);
+    $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                   (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+    
+    if ($idMisi <= 0 || empty($kodeWilayah)) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak valid']);
+        return;
+    }
+    
+    // Ambil data misi dari misirpjpd dengan join ke visirpjpd
+    $data = $this->db
+        ->select('m.Id as MisiId, m.Misi, m._Id as VisiId, v.TahunMulai, v.TahunAkhir, CONCAT(v.TahunMulai, " - ", v.TahunAkhir) as Periode')
+        ->from('misirpjpd m')
+        ->join('visirpjpd v', 'v.Id = m._Id AND v.KodeWilayah = m.KodeWilayah', 'inner')
+        ->where('m.Id', $idMisi)
+        ->where('m.KodeWilayah', $kodeWilayah)
+        ->where('m.deleted_at IS NULL')
+        ->where('v.deleted_at IS NULL')
+        ->get()
+        ->row_array();
+    
+    if ($data) {
+        // Ambil daftar periode yang tersedia untuk dropdown
+        $periodes = $this->db
+            ->select('Id, TahunMulai, TahunAkhir, CONCAT(TahunMulai, " - ", TahunAkhir) as Periode')
+            ->where('KodeWilayah', $kodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->order_by('TahunMulai', 'ASC')
+            ->get('visirpjpd')
+            ->result_array();
+        
+        // Ambil daftar misi untuk periode yang dipilih
+        $misiList = $this->db
+            ->select('Id, Misi')
+            ->where('_Id', $data['VisiId'])
+            ->where('KodeWilayah', $kodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->order_by('Id', 'ASC')
+            ->get('misirpjpd')
+            ->result_array();
+        
+        echo json_encode([
+            'status' => 'success',
+            'data' => $data,
+            'periodes' => $periodes,
+            'misi_list' => $misiList
+        ]);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+    }
+}
+
+// ============================================================
+// HAPUS PERIODE DAN MISI BESERTA SELURUH DATA TURUNAN
+// ============================================================
+public function HapusPeriodeMisi() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $idMisi = (int)$this->input->post('IdMisi', TRUE);
+    $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                   (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+    
+    if ($idMisi <= 0 || empty($kodeWilayah)) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak valid']);
+        return;
+    }
+    
+    // Cek apakah ada sasaran pokok dengan misi ini
+    $sasaranList = $this->db
+        ->select('Id')
+        ->where('IdMisi', $idMisi)
+        ->where('KodeWilayah', $kodeWilayah)
+        ->where('deleted_at IS NULL')
+        ->get('sasaran_pokok')
+        ->result_array();
+    
+    if (empty($sasaranList)) {
+        echo json_encode(['status' => 'error', 'message' => 'Tidak ada sasaran pokok dengan misi ini']);
+        return;
+    }
+    
+    $sasaranIds = array_column($sasaranList, 'Id');
+    
+    // Mulai transaksi
+    $this->db->trans_start();
+    
+    try {
+        // 1. Hapus (soft delete) semua IUP yang terkait dengan sasaran pokok ini
+        if (!empty($sasaranIds)) {
+            $this->db
+                ->where_in('IdSasaranPokok', $sasaranIds)
+                ->where('KodeWilayah', $kodeWilayah)
+                ->update('iup', [
+                    'deleted_at' => date('Y-m-d H:i:s')
+                ]);
+            log_message('debug', 'IUP dihapus: ' . $this->db->affected_rows() . ' baris');
+        }
+        
+        // 2. Hapus (soft delete) semua Sasaran Pokok dengan misi ini
+        $this->db
+            ->where('IdMisi', $idMisi)
+            ->where('KodeWilayah', $kodeWilayah)
+            ->update('sasaran_pokok', [
+                'deleted_at' => date('Y-m-d H:i:s')
+            ]);
+        
+        $affectedSasaran = $this->db->affected_rows();
+        log_message('debug', 'Sasaran pokok dihapus: ' . $affectedSasaran . ' baris');
+        
+        // 3. TIDAK menghapus dari tabel misirpjpd
+        //    Hanya menghapus relasi data di sasaran_pokok dan iup
+        
+        $this->db->trans_complete();
+        
+        if ($this->db->trans_status() === FALSE) {
+            throw new Exception('Gagal melakukan transaksi');
+        }
+        
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Berhasil menghapus ' . $affectedSasaran . ' sasaran pokok dan IUP terkait'
+        ]);
+        
+    } catch (Exception $e) {
+        $this->db->trans_rollback();
+        log_message('error', 'Error HapusPeriodeMisi: ' . $e->getMessage());
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+        ]);
+    }
+}
+
+public function EditPeriodeMisi() {
+    // Aktifkan error reporting
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+    
+    // Log untuk debugging
+    log_message('debug', '=== EditPeriodeMisi dipanggil ===');
+    log_message('debug', 'POST: ' . print_r($_POST, true));
+    
+    // Cek AJAX
+    if (!$this->input->is_ajax_request()) {
+        log_message('error', 'Bukan AJAX request');
+        show_404();
+        return;
+    }
+    
+    // Ambil session
+    $kodeWilayah = $this->session->userdata('KodeWilayah') 
+                ?? $this->session->userdata('TempKodeWilayah') 
+                ?? '';
+    
+    if (empty($kodeWilayah)) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih']);
+        return;
+    }
+    
+    // Ambil parameter
+    $idMisiLama = $this->input->post('IdMisi', TRUE);
+    $visiIdBaru = $this->input->post('VisiId', TRUE);
+    $idMisiBaru = $this->input->post('MisiId', TRUE);
+    
+    // Konversi ke integer
+    $idMisiLama = (int)$idMisiLama;
+    $visiIdBaru = (int)$visiIdBaru;
+    $idMisiBaru = (int)$idMisiBaru;
+    
+    log_message('debug', "idMisiLama: $idMisiLama, visiIdBaru: $visiIdBaru, idMisiBaru: $idMisiBaru");
+    
+    // Validasi sederhana
+    if ($idMisiLama <= 0 || $visiIdBaru <= 0 || $idMisiBaru <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak valid']);
+        return;
+    }
+    
+    // CEK: Apakah misi baru ada?
+    $misiBaru = $this->db
+        ->where('Id', $idMisiBaru)
+        ->where('KodeWilayah', $kodeWilayah)
+        ->where('deleted_at IS NULL')
+        ->get('misirpjpd')
+        ->row_array();
+    
+    if (!$misiBaru) {
+        echo json_encode(['status' => 'error', 'message' => 'Misi baru tidak ditemukan']);
+        return;
+    }
+    
+    // CEK: Apakah ada sasaran dengan misi lama?
+    $sasaranCount = $this->db
+        ->where('IdMisi', $idMisiLama)
+        ->where('KodeWilayah', $kodeWilayah)
+        ->where('deleted_at IS NULL')
+        ->count_all_results('sasaran_pokok');
+    
+    if ($sasaranCount == 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Tidak ada sasaran dengan misi ini']);
+        return;
+    }
+    
+    // ============================================
+    // UPDATE SEDERHANA - hanya update sasaran_pokok
+    // ============================================
+    $this->db
+        ->where('IdMisi', $idMisiLama)
+        ->where('KodeWilayah', $kodeWilayah)
+        ->where('deleted_at IS NULL')
+        ->update('sasaran_pokok', [
+            'IdMisi' => $idMisiBaru,
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+    
+    $affected = $this->db->affected_rows();
+    log_message('debug', 'Sasaran diupdate: ' . $affected);
+    
+    if ($affected > 0) {
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Berhasil mengupdate ' . $affected . ' sasaran pokok'
+        ]);
+    } else {
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Gagal mengupdate data'
+        ]);
+    }
+}
+
+public function GetDataPeriodeMisiEdit() {
+    log_message('debug', '=== GetDataPeriodeMisiEdit dipanggil ===');
+    log_message('debug', 'POST: ' . print_r($_POST, true));
+    
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $idMisi = (int)$this->input->post('IdMisi', TRUE);
+    $kodeWilayah = $this->session->userdata('KodeWilayah') 
+                ?? $this->session->userdata('TempKodeWilayah') 
+                ?? '';
+    
+    log_message('debug', "idMisi: $idMisi, kodeWilayah: $kodeWilayah");
+    
+    if ($idMisi <= 0 || empty($kodeWilayah)) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak valid']);
+        return;
+    }
+    
+    // Ambil data misi
+    $dataMisi = $this->db
+        ->select('m.Id as MisiId, m.Misi, m._Id as VisiId')
+        ->from('misirpjpd m')
+        ->where('m.Id', $idMisi)
+        ->where('m.KodeWilayah', $kodeWilayah)
+        ->where('m.deleted_at IS NULL')
+        ->get()
+        ->row_array();
+    
+    if (!$dataMisi) {
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Data misi tidak ditemukan'
+        ]);
+        return;
+    }
+    
+    // Ambil daftar periode
+    $periodes = $this->db
+        ->select('Id, TahunMulai, TahunAkhir, CONCAT(TahunMulai, " - ", TahunAkhir) as Periode')
+        ->where('KodeWilayah', $kodeWilayah)
+        ->where('deleted_at IS NULL')
+        ->order_by('TahunMulai', 'ASC')
+        ->get('visirpjpd')
+        ->result_array();
+    
+    // Ambil daftar misi untuk periode yang dipilih
+    $misiList = $this->db
+        ->select('Id, Misi')
+        ->where('_Id', $dataMisi['VisiId'])
+        ->where('KodeWilayah', $kodeWilayah)
+        ->where('deleted_at IS NULL')
+        ->order_by('Id', 'ASC')
+        ->get('misirpjpd')
+        ->result_array();
+    
+    echo json_encode([
+        'status' => 'success',
+        'data' => $dataMisi,
+        'periodes' => $periodes,
+        'misi_list' => $misiList
+    ]);
+}
+
+    // ============================================================
+    // GET DATA BY ID (AJAX)
+    // ============================================================
+    public function GetSasaranPokokById() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $id = (int)$this->input->post('Id', TRUE);
+        $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                       (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+        
+        if (empty($kodeWilayah) || $id <= 0) {
+            echo json_encode([]);
+            return;
+        }
+        
+        $data = $this->db
+            ->select('*')
+            ->from('sasaran_pokok')
+            ->where('Id', $id)
+            ->where('KodeWilayah', $kodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->get()
+            ->row_array();
+        
+        echo json_encode($data);
+    }
+
+    public function GetIUPById() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $id = (int)$this->input->post('Id', TRUE);
+        $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                       (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+        
+        if (empty($kodeWilayah) || $id <= 0) {
+            echo json_encode([]);
+            return;
+        }
+        
+        $data = $this->db
+            ->select('*')
+            ->from('iup')
+            ->where('Id', $id)
+            ->where('KodeWilayah', $kodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->get()
+            ->row_array();
+        
+        echo json_encode($data);
+    }
+
+    // ============================================================
+// GET PERIODE DAN MISI BY ID MISI (AJAX)
+// ============================================================
+public function GetPeriodeMisiByIdMisi() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $idMisi = (int)$this->input->post('IdMisi', TRUE);
+    $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                   (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+    
+    if ($idMisi <= 0 || empty($kodeWilayah)) {
+        echo json_encode([]);
+        return;
+    }
+    
+    $data = $this->db
+        ->select('m.Id as MisiId, m.Misi, v.Id as VisiId, CONCAT(v.TahunMulai, " - ", v.TahunAkhir) as Periode, v.TahunMulai, v.TahunAkhir')
+        ->from('misirpjpd m')
+        ->join('visirpjpd v', 'v.Id = m._Id AND v.KodeWilayah = m.KodeWilayah', 'inner')
+        ->where('m.Id', $idMisi)
+        ->where('m.KodeWilayah', $kodeWilayah)
+        ->where('m.deleted_at IS NULL')
+        ->where('v.deleted_at IS NULL')
+        ->get()
+        ->row_array();
+    
+    echo json_encode($data);
+}
+
+
 
   public function GetVisiRPJMDP(){
     echo json_encode($this->db->query("SELECT v.Id as IdVisi,m.* FROM visirpjmdp as v, misirpjmdp as m WHERE m.Id = ".$_POST['Id']." AND m.deleted_at IS NULL")->result_array());
@@ -563,76 +2250,296 @@ public function SetTempKodeWilayah() {
     echo json_encode($this->db->query("SELECT v.Id as IdVisi,m.* FROM visirpjmn as v, misirpjmn as m WHERE m.Id = ".$_POST['Id']." AND m.deleted_at IS NULL")->result_array());
 	}
 
-  public function GetVisiRPJMD(){
-    echo json_encode($this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("visirpjmd")->result_array());
-	}
+  public function GetVisiRPJMD() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $kodeWilayah = $this->_checkSessionWilayah();
+        if (!$kodeWilayah) return;
+        
+        $periodeId = (int)$this->input->post('Id', TRUE);
+        if ($periodeId <= 0) {
+            echo json_encode([]);
+            return;
+        }
+        
+        $data = $this->db->where('Id', $periodeId)
+            ->where('KodeWilayah', $kodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->get('visirpjmd')
+            ->result_array();
+        
+        echo json_encode($data);
+    }
 
-  public function VisiRPJMD() {
+        /**
+     * Helper untuk mendapatkan periode dari Visi berdasarkan ID
+     */
+    private function _getPeriodeFromVisi($visiId) {
+        $visi = $this->db
+            ->select('TahunMulai, TahunAkhir')
+            ->where('Id', $visiId)
+            ->where('deleted_at IS NULL')
+            ->get('visirpjmd')
+            ->row_array();
+        return $visi;
+    }
+
+    private function _getPeriodeFromMisi($misiId) {
+        $misi = $this->db
+            ->select('m.TahunMulai, m.TahunAkhir')
+            ->from('misirpjmd m')
+            ->where('m.Id', $misiId)
+            ->where('m.deleted_at IS NULL')
+            ->get()
+            ->row_array();
+        return $misi;
+    }
+
+    private function _getPeriodeFromTujuan($tujuanId) {
+        $tujuan = $this->db
+            ->select('t.TahunMulai, t.TahunAkhir')
+            ->from('tujuanrpjmd t')
+            ->where('t.Id', $tujuanId)
+            ->where('t.deleted_at IS NULL')
+            ->get()
+            ->row_array();
+        return $tujuan;
+    }
+
+    // ============================================================
+    // CRUD VISI RPJMD - FIXED
+    // ============================================================
+    
+    public function VisiRPJMD() {
         $Header['Halaman'] = 'RPJMD';
         $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
 
-        $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
-                       (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
-
-        log_message('debug', 'KodeWilayah diterima: ' . $KodeWilayah);
+        $KodeWilayah = $this->session->userdata('KodeWilayah') 
+                    ?? $this->session->userdata('TempKodeWilayah') 
+                    ?? $this->input->get('KodeWilayah', TRUE);
 
         if ($KodeWilayah) {
             $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
             if ($wilayah) {
                 $Data['KodeWilayah'] = $KodeWilayah;
                 $Data['NamaWilayah'] = $wilayah['Nama'];
+                
                 $Data['Visi'] = $this->db->select('v.*, k.Nama')
                     ->from('visirpjmd v')
                     ->join('kodewilayah k', 'v.KodeWilayah = k.Kode', 'left')
                     ->where('v.KodeWilayah', $KodeWilayah)
                     ->where('v.deleted_at IS NULL')
+                    ->order_by('v.TahunMulai', 'DESC')
                     ->get()->result_array();
+                
+                foreach ($Data['Visi'] as &$visi) {
+                    $visi['Misi'] = $this->db
+                        ->select('m.*')
+                        ->from('misirpjmd m')
+                        ->where('m._Id', $visi['Id'])
+                        ->where('m.KodeWilayah', $KodeWilayah)
+                        ->where('m.deleted_at IS NULL')
+                        ->order_by('m.Id', 'ASC')
+                        ->get()->result_array();
+                    
+                    foreach ($visi['Misi'] as &$misi) {
+                        if (empty($misi['TahunMulai']) || empty($misi['TahunAkhir'])) {
+                            $misi['TahunMulai'] = $visi['TahunMulai'];
+                            $misi['TahunAkhir'] = $visi['TahunAkhir'];
+                        }
+                        
+                        $misi['Tujuan'] = $this->db
+                            ->select('t.*')
+                            ->from('tujuanrpjmd t')
+                            ->where('t._Id', $misi['Id'])
+                            ->where('t.KodeWilayah', $KodeWilayah)
+                            ->where('t.deleted_at IS NULL')
+                            ->order_by('t.Id', 'ASC')
+                            ->get()->result_array();
+                        
+                        foreach ($misi['Tujuan'] as &$tujuan) {
+                            if (empty($tujuan['TahunMulai']) || empty($tujuan['TahunAkhir'])) {
+                                $tujuan['TahunMulai'] = $misi['TahunMulai'];
+                                $tujuan['TahunAkhir'] = $misi['TahunAkhir'];
+                            }
+                            
+                            $tujuan['Sasaran'] = $this->db
+                                ->select('s.*')
+                                ->from('sasaranrpjmd s')
+                                ->where('s._Id', $tujuan['Id'])
+                                ->where('s.KodeWilayah', $KodeWilayah)
+                                ->where('s.deleted_at IS NULL')
+                                ->order_by('s.Id', 'ASC')
+                                ->get()->result_array();
+                            
+                            foreach ($tujuan['Sasaran'] as &$sasaran) {
+                                if (empty($sasaran['TahunMulai']) || empty($sasaran['TahunAkhir'])) {
+                                    $sasaran['TahunMulai'] = $tujuan['TahunMulai'];
+                                    $sasaran['TahunAkhir'] = $tujuan['TahunAkhir'];
+                                }
+                            }
+                        }
+                    }
+                }
             } else {
+                $Data['Visi'] = [];
                 $Data['KodeWilayah'] = '';
                 $Data['NamaWilayah'] = '';
-                $Data['Visi'] = [];
-                log_message('error', 'KodeWilayah ' . $KodeWilayah . ' tidak ditemukan di tabel kodewilayah');
             }
         } else {
+            $Data['Visi'] = [];
             $Data['KodeWilayah'] = '';
             $Data['NamaWilayah'] = '';
-            $Data['Visi'] = [];
         }
 
-        log_message('debug', 'Jumlah provinsi: ' . count($Data['Provinsi']));
         $this->load->view('Daerah/header', $Header);
         $this->load->view('Daerah/VisiRPJMD', $Data);
     }
 
-  public function InputVisiRPJMD(){  
-    $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
-    $this->db->insert('visirpjmd',$_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Menyimpan Data!';
+    // ============================================================
+// CRUD VISI RPJMD - PERBAIKAN
+// ============================================================
+public function InputVisiRPJMD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
     }
-	}
-	
-	public function EditVisiRPJMD(){  
-		$this->db->where('Id',$_POST['Id']); 
-		$this->db->update('visirpjmd', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Update Data!';
+    
+    $kodeWilayah = $this->_checkSessionWilayah();
+    if (!$kodeWilayah) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+        return;
     }
-  }
+    
+    $visi = trim($this->input->post('Visi', TRUE));
+    $tahunMulai = $this->input->post('TahunMulai', TRUE);
+    $tahunAkhir = $this->input->post('TahunAkhir', TRUE);
+    
+    // Validasi
+    if (empty($visi)) {
+        echo json_encode(['status' => 'error', 'message' => 'Visi harus diisi!']);
+        return;
+    }
+    if (!is_numeric($tahunMulai) || strlen($tahunMulai) != 4) {
+        echo json_encode(['status' => 'error', 'message' => 'Tahun Mulai tidak valid!']);
+        return;
+    }
+    if (!is_numeric($tahunAkhir) || strlen($tahunAkhir) != 4) {
+        echo json_encode(['status' => 'error', 'message' => 'Tahun Akhir tidak valid!']);
+        return;
+    }
+    if ($tahunMulai >= $tahunAkhir) {
+        echo json_encode(['status' => 'error', 'message' => 'Tahun Mulai harus lebih kecil dari Tahun Akhir!']);
+        return;
+    }
+    
+    $data = [
+        'KodeWilayah' => $kodeWilayah,
+        'Visi' => $visi,
+        'TahunMulai' => $tahunMulai,
+        'TahunAkhir' => $tahunAkhir,
+        'created_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->insert('visirpjmd', $data);
+    
+    if ($this->db->affected_rows() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Data berhasil disimpan']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data!']);
+    }
+}
 
-  public function HapusVisiRPJMD(){  
-		$_POST['deleted_at'] = date('Y-m-d H:i:s');
-		$this->db->where('Id',$_POST['Id'])->update('visirpjmd', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Hapus Data!';
+public function EditVisiRPJMD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
     }
-  }
+    
+    $kodeWilayah = $this->_checkSessionWilayah();
+    if (!$kodeWilayah) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+        return;
+    }
+    
+    $id = (int)$this->input->post('Id', TRUE);
+    $visi = trim($this->input->post('Visi', TRUE));
+    $tahunMulai = $this->input->post('TahunMulai', TRUE);
+    $tahunAkhir = $this->input->post('TahunAkhir', TRUE);
+    
+    if ($id <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    if (empty($visi)) {
+        echo json_encode(['status' => 'error', 'message' => 'Visi harus diisi!']);
+        return;
+    }
+    if (!is_numeric($tahunMulai) || strlen($tahunMulai) != 4) {
+        echo json_encode(['status' => 'error', 'message' => 'Tahun Mulai tidak valid!']);
+        return;
+    }
+    if (!is_numeric($tahunAkhir) || strlen($tahunAkhir) != 4) {
+        echo json_encode(['status' => 'error', 'message' => 'Tahun Akhir tidak valid!']);
+        return;
+    }
+    if ($tahunMulai >= $tahunAkhir) {
+        echo json_encode(['status' => 'error', 'message' => 'Tahun Mulai harus lebih kecil dari Tahun Akhir!']);
+        return;
+    }
+    
+    $data = [
+        'Visi' => $visi,
+        'TahunMulai' => $tahunMulai,
+        'TahunAkhir' => $tahunAkhir,
+        'updated_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->where('Id', $id);
+    $this->db->where('KodeWilayah', $kodeWilayah);
+    $this->db->update('visirpjmd', $data);
+    
+    if ($this->db->affected_rows() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Data berhasil diupdate']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal update data atau tidak ada perubahan!']);
+    }
+}
+
+public function HapusVisiRPJMD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $kodeWilayah = $this->_checkSessionWilayah();
+    if (!$kodeWilayah) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+        return;
+    }
+    
+    $id = (int)$this->input->post('Id', TRUE);
+    if ($id <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    
+    $this->db->where('Id', $id);
+    $this->db->where('KodeWilayah', $kodeWilayah);
+    $this->db->update('visirpjmd', [
+        'deleted_at' => date('Y-m-d H:i:s')
+    ]);
+    
+    if ($this->db->affected_rows() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Data berhasil dihapus']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus data!']);
+    }
+}
+
 
   public function GetMisiRPJMDP(){
     echo json_encode($this->db->where("KodeWilayah = ".substr($_SESSION['KodeWilayah'],0,2)." AND _Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("misirpjmdp")->result_array());
@@ -646,9 +2553,30 @@ public function SetTempKodeWilayah() {
     echo json_encode($this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("misirpjmd")->result_array());
 	}
 
-  public function GetMisiRPJMD(){
-    echo json_encode($this->db->where("KodeWilayah = ".$_SESSION['KodeWilayah']." AND _Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("misirpjmd")->result_array());
-	}
+  public function GetMisiRPJMD() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $kodeWilayah = $this->_checkSessionWilayah();
+        if (!$kodeWilayah) return;
+        
+        $visiId = (int)$this->input->post('Id', TRUE);
+        if ($visiId <= 0) {
+            echo json_encode([]);
+            return;
+        }
+        
+        $data = $this->db->where('_Id', $visiId)
+            ->where('KodeWilayah', $kodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->order_by('Id', 'ASC')
+            ->get('misirpjmd')
+            ->result_array();
+        
+        echo json_encode($data);
+    }
 
  public function MisiRPJMD() {
         $Header['Halaman'] = 'RPJMD';
@@ -701,35 +2629,141 @@ public function SetTempKodeWilayah() {
         $this->load->view('Daerah/MisiRPJMD', $Data);
     }
 
-  public function InputMisiRPJMD(){  
-    $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
-    $this->db->insert('misirpjmd',$_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Menyimpan Data!';
+  // ============================================================
+// CRUD MISI RPJMD - PERBAIKAN
+// ============================================================
+public function InputMisiRPJMD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
     }
-	}
-	
-	public function EditMisiRPJMD(){  
-		$this->db->where('Id',$_POST['Id']); 
-		$this->db->update('misirpjmd', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Update Data!';
+    
+    $kodeWilayah = $this->_checkSessionWilayah();
+    if (!$kodeWilayah) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+        return;
     }
-  }
+    
+    $visiId = (int)$this->input->post('_Id', TRUE);
+    $misi = trim($this->input->post('Misi', TRUE));
+    
+    if ($visiId <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Visi harus dipilih!']);
+        return;
+    }
+    if (empty($misi)) {
+        echo json_encode(['status' => 'error', 'message' => 'Misi harus diisi!']);
+        return;
+    }
+    
+    $periode = $this->_getPeriodeFromVisi($visiId);
+    if (!$periode) {
+        echo json_encode(['status' => 'error', 'message' => 'Visi tidak ditemukan!']);
+        return;
+    }
+    
+    $data = [
+        'KodeWilayah' => $kodeWilayah,
+        '_Id' => $visiId,
+        'Misi' => $misi,
+        'TahunMulai' => $periode['TahunMulai'],
+        'TahunAkhir' => $periode['TahunAkhir'],
+        'created_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->insert('misirpjmd', $data);
+    
+    if ($this->db->affected_rows() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Data berhasil disimpan']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data!']);
+    }
+}
 
-  public function HapusMisiRPJMD(){  
-		$_POST['deleted_at'] = date('Y-m-d H:i:s');
-		$this->db->where('Id',$_POST['Id'])->update('misirpjmd', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Hapus Data!';
+public function EditMisiRPJMD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
     }
-  }
+    
+    $kodeWilayah = $this->_checkSessionWilayah();
+    if (!$kodeWilayah) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+        return;
+    }
+    
+    $id = (int)$this->input->post('Id', TRUE);
+    $visiId = (int)$this->input->post('_Id', TRUE);
+    $misi = trim($this->input->post('Misi', TRUE));
+    
+    if ($id <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    if ($visiId <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Visi harus dipilih!']);
+        return;
+    }
+    if (empty($misi)) {
+        echo json_encode(['status' => 'error', 'message' => 'Misi harus diisi!']);
+        return;
+    }
+    
+    $periode = $this->_getPeriodeFromVisi($visiId);
+    if (!$periode) {
+        echo json_encode(['status' => 'error', 'message' => 'Visi tidak ditemukan!']);
+        return;
+    }
+    
+    $data = [
+        '_Id' => $visiId,
+        'Misi' => $misi,
+        'TahunMulai' => $periode['TahunMulai'],
+        'TahunAkhir' => $periode['TahunAkhir'],
+        'updated_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->where('Id', $id);
+    $this->db->where('KodeWilayah', $kodeWilayah);
+    $this->db->update('misirpjmd', $data);
+    
+    if ($this->db->affected_rows() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Data berhasil diupdate']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal update data atau tidak ada perubahan!']);
+    }
+}
+
+public function HapusMisiRPJMD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $kodeWilayah = $this->_checkSessionWilayah();
+    if (!$kodeWilayah) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+        return;
+    }
+    
+    $id = (int)$this->input->post('Id', TRUE);
+    if ($id <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    
+    $this->db->where('Id', $id);
+    $this->db->where('KodeWilayah', $kodeWilayah);
+    $this->db->update('misirpjmd', [
+        'deleted_at' => date('Y-m-d H:i:s')
+    ]);
+    
+    if ($this->db->affected_rows() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Data berhasil dihapus']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus data!']);
+    }
+}
 
   public function GetTujuanRPJMDP(){
     echo json_encode($this->db->where("KodeWilayah = ".substr($_SESSION['KodeWilayah'],0,2)." AND _Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("tujuanrpjmdp")->result_array());
@@ -743,9 +2777,30 @@ public function SetTempKodeWilayah() {
     echo json_encode($this->db->query("SELECT v.Id as IdVisi FROM visirpjmd as v, misirpjmd as m, tujuanrpjmd as t WHERE t._Id = ".$_POST['Id']." AND t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL AND t.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array());
 	}
 
-  public function GetTujuanRPJMD(){
-    echo json_encode($this->db->query("SELECT t.* FROM visirpjmd as v, misirpjmd as m, tujuanrpjmd as t WHERE v.Id = ".$_POST['Id']." AND t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL AND t.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array());
-	}
+  public function GetTujuanRPJMD() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $kodeWilayah = $this->_checkSessionWilayah();
+        if (!$kodeWilayah) return;
+        
+        $misiId = (int)$this->input->post('Id', TRUE);
+        if ($misiId <= 0) {
+            echo json_encode([]);
+            return;
+        }
+        
+        $data = $this->db->where('_Id', $misiId)
+            ->where('KodeWilayah', $kodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->order_by('Id', 'ASC')
+            ->get('tujuanrpjmd')
+            ->result_array();
+        
+        echo json_encode($data);
+    }
 
 public function TujuanRPJMD() {
         $Header['Halaman'] = 'RPJMD';
@@ -799,35 +2854,142 @@ public function TujuanRPJMD() {
         $this->load->view('Daerah/TujuanRPJMD', $Data);
     }
 
-  public function InputTujuanRPJMD(){  
-    $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
-    $this->db->insert('tujuanrpjmd',$_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Menyimpan Data!';
+  // ============================================================
+    // INPUT TUJUAN - FIXED
+    // ============================================================
+    public function InputTujuanRPJMD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
     }
-	}
-	
-	public function EditTujuanRPJMD(){  
-		$this->db->where('Id',$_POST['Id']); 
-		$this->db->update('tujuanrpjmd', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Update Data!';
+    
+    $kodeWilayah = $this->_checkSessionWilayah();
+    if (!$kodeWilayah) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+        return;
     }
-  }
+    
+    $misiId = (int)$this->input->post('_Id', TRUE);
+    $tujuan = trim($this->input->post('Tujuan', TRUE));
+    
+    if ($misiId <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Misi harus dipilih!']);
+        return;
+    }
+    if (empty($tujuan)) {
+        echo json_encode(['status' => 'error', 'message' => 'Tujuan harus diisi!']);
+        return;
+    }
+    
+    $periode = $this->_getPeriodeFromMisi($misiId);
+    if (!$periode) {
+        echo json_encode(['status' => 'error', 'message' => 'Misi tidak ditemukan!']);
+        return;
+    }
+    
+    $data = [
+        'KodeWilayah' => $kodeWilayah,
+        '_Id' => $misiId,
+        'Tujuan' => $tujuan,
+        'TahunMulai' => $periode['TahunMulai'],
+        'TahunAkhir' => $periode['TahunAkhir'],
+        'created_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->insert('tujuanrpjmd', $data);
+    
+    if ($this->db->affected_rows() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Data berhasil disimpan']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data!']);
+    }
+}
 
-  public function HapusTujuanRPJMD(){  
-		$_POST['deleted_at'] = date('Y-m-d H:i:s');
-		$this->db->where('Id',$_POST['Id'])->update('tujuanrpjmd', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Hapus Data!';
+public function EditTujuanRPJMD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
     }
-  }
+    
+    $kodeWilayah = $this->_checkSessionWilayah();
+    if (!$kodeWilayah) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+        return;
+    }
+    
+    $id = (int)$this->input->post('Id', TRUE);
+    $misiId = (int)$this->input->post('_Id', TRUE);
+    $tujuan = trim($this->input->post('Tujuan', TRUE));
+    
+    if ($id <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    if ($misiId <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Misi harus dipilih!']);
+        return;
+    }
+    if (empty($tujuan)) {
+        echo json_encode(['status' => 'error', 'message' => 'Tujuan harus diisi!']);
+        return;
+    }
+    
+    $periode = $this->_getPeriodeFromMisi($misiId);
+    if (!$periode) {
+        echo json_encode(['status' => 'error', 'message' => 'Misi tidak ditemukan!']);
+        return;
+    }
+    
+    $data = [
+        '_Id' => $misiId,
+        'Tujuan' => $tujuan,
+        'TahunMulai' => $periode['TahunMulai'],
+        'TahunAkhir' => $periode['TahunAkhir'],
+        'updated_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->where('Id', $id);
+    $this->db->where('KodeWilayah', $kodeWilayah);
+    $this->db->update('tujuanrpjmd', $data);
+    
+    if ($this->db->affected_rows() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Data berhasil diupdate']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal update data atau tidak ada perubahan!']);
+    }
+}
+
+public function HapusTujuanRPJMD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $kodeWilayah = $this->_checkSessionWilayah();
+    if (!$kodeWilayah) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+        return;
+    }
+    
+    $id = (int)$this->input->post('Id', TRUE);
+    if ($id <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    
+    $this->db->where('Id', $id);
+    $this->db->where('KodeWilayah', $kodeWilayah);
+    $this->db->update('tujuanrpjmd', [
+        'deleted_at' => date('Y-m-d H:i:s')
+    ]);
+    
+    if ($this->db->affected_rows() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Data berhasil dihapus']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus data!']);
+    }
+}
+
 
   public function GetSasaranRPJMDP(){
     echo json_encode($this->db->where("KodeWilayah = ".substr($_SESSION['KodeWilayah'],0,2)." AND _Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("sasaranrpjmdp")->result_array());
@@ -841,9 +3003,30 @@ public function TujuanRPJMD() {
     echo json_encode($this->db->query("SELECT v.Id as IdVisi FROM visirpjmd as v, misirpjmd as m, tujuanrpjmd as t WHERE t._Id = ".$_POST['Id']." AND t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL AND t.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array());
 	}
 
-  public function GetSasaranRPJMD(){
-    echo json_encode($this->db->query("SELECT t.* FROM visirpjmd as v, misirpjmd as m, tujuanrpjmd as t WHERE v.Id = ".$_POST['Id']." AND t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL AND t.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array());
-	}
+   public function GetSasaranRPJMD() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $kodeWilayah = $this->_checkSessionWilayah();
+        if (!$kodeWilayah) return;
+        
+        $tujuanId = (int)$this->input->post('Id', TRUE);
+        if ($tujuanId <= 0) {
+            echo json_encode([]);
+            return;
+        }
+        
+        $data = $this->db->where('_Id', $tujuanId)
+            ->where('KodeWilayah', $kodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->order_by('Id', 'ASC')
+            ->get('sasaranrpjmd')
+            ->result_array();
+        
+        echo json_encode($data);
+    }
 
 public function SasaranRPJMD() {
         $Header['Halaman'] = 'RPJMD';
@@ -898,35 +3081,142 @@ public function SasaranRPJMD() {
         $this->load->view('Daerah/SasaranRPJMD', $Data);
     }
 
-  public function InputSasaranRPJMD(){  
-    $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
-    $this->db->insert('sasaranrpjmd',$_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Menyimpan Data!';
+    // ============================================================
+    // INPUT SASARAN - FIXED
+    // ============================================================
+   public function InputSasaranRPJMD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
     }
-	}
-	
-	public function EditSasaranRPJMD(){  
-		$this->db->where('Id',$_POST['Id']); 
-		$this->db->update('sasaranrpjmd', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Update Data!';
+    
+    $kodeWilayah = $this->_checkSessionWilayah();
+    if (!$kodeWilayah) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+        return;
     }
-  }
+    
+    $tujuanId = (int)$this->input->post('_Id', TRUE);
+    $sasaran = trim($this->input->post('Sasaran', TRUE));
+    
+    if ($tujuanId <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Tujuan harus dipilih!']);
+        return;
+    }
+    if (empty($sasaran)) {
+        echo json_encode(['status' => 'error', 'message' => 'Sasaran harus diisi!']);
+        return;
+    }
+    
+    $periode = $this->_getPeriodeFromTujuan($tujuanId);
+    if (!$periode) {
+        echo json_encode(['status' => 'error', 'message' => 'Tujuan tidak ditemukan!']);
+        return;
+    }
+    
+    $data = [
+        'KodeWilayah' => $kodeWilayah,
+        '_Id' => $tujuanId,
+        'Sasaran' => $sasaran,
+        'TahunMulai' => $periode['TahunMulai'],
+        'TahunAkhir' => $periode['TahunAkhir'],
+        'created_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->insert('sasaranrpjmd', $data);
+    
+    if ($this->db->affected_rows() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Data berhasil disimpan']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data!']);
+    }
+}
 
-  public function HapusSasaranRPJMD(){  
-		$_POST['deleted_at'] = date('Y-m-d H:i:s');
-		$this->db->where('Id',$_POST['Id'])->update('sasaranrpjmd', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Hapus Data!';
+public function EditSasaranRPJMD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
     }
-  }
+    
+    $kodeWilayah = $this->_checkSessionWilayah();
+    if (!$kodeWilayah) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+        return;
+    }
+    
+    $id = (int)$this->input->post('Id', TRUE);
+    $tujuanId = (int)$this->input->post('_Id', TRUE);
+    $sasaran = trim($this->input->post('Sasaran', TRUE));
+    
+    if ($id <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    if ($tujuanId <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Tujuan harus dipilih!']);
+        return;
+    }
+    if (empty($sasaran)) {
+        echo json_encode(['status' => 'error', 'message' => 'Sasaran harus diisi!']);
+        return;
+    }
+    
+    $periode = $this->_getPeriodeFromTujuan($tujuanId);
+    if (!$periode) {
+        echo json_encode(['status' => 'error', 'message' => 'Tujuan tidak ditemukan!']);
+        return;
+    }
+    
+    $data = [
+        '_Id' => $tujuanId,
+        'Sasaran' => $sasaran,
+        'TahunMulai' => $periode['TahunMulai'],
+        'TahunAkhir' => $periode['TahunAkhir'],
+        'updated_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->where('Id', $id);
+    $this->db->where('KodeWilayah', $kodeWilayah);
+    $this->db->update('sasaranrpjmd', $data);
+    
+    if ($this->db->affected_rows() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Data berhasil diupdate']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal update data atau tidak ada perubahan!']);
+    }
+}
+
+public function HapusSasaranRPJMD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $kodeWilayah = $this->_checkSessionWilayah();
+    if (!$kodeWilayah) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+        return;
+    }
+    
+    $id = (int)$this->input->post('Id', TRUE);
+    if ($id <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    
+    $this->db->where('Id', $id);
+    $this->db->where('KodeWilayah', $kodeWilayah);
+    $this->db->update('sasaranrpjmd', [
+        'deleted_at' => date('Y-m-d H:i:s')
+    ]);
+    
+    if ($this->db->affected_rows() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Data berhasil dihapus']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus data!']);
+    }
+}
+
 
   public function GetSasaran(){
     $Id = $this->input->post('id');
@@ -5768,6 +8058,5 @@ public function EditProgramPD()
                             ->get('kodewilayah')
                             ->result_array();
         }
-
-           
+  
 }
