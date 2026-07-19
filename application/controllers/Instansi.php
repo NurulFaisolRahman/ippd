@@ -4552,21 +4552,25 @@ public function simpanMenuRenstra() {
     }
     
     $Id = (int)$this->input->post('Id');
+    
+    // ✅ PERUBAHAN: NoManual boleh kosong (tidak wajib diisi)
     $NoManual = trim($this->input->post('NoManual'));
     $Uraian = trim($this->input->post('Uraian'));
     $IndikatorKinerja = trim($this->input->post('IndikatorKinerja'));
     $Satuan = trim($this->input->post('Satuan'));
     $Keterangan = trim($this->input->post('Keterangan'));
     
+    // ✅ HANYA URAIAN YANG WAJIB DIISI
     if (empty($Uraian)) {
         echo json_encode(['status' => 'error', 'message' => 'Uraian tidak boleh kosong']);
         return;
     }
     
+    // ✅ NoManual boleh NULL jika kosong
     $data = [
         'KodeWilayah'      => $KodeWilayah,
         'id_instansi'      => $instansi_id,
-        'NoManual'         => $NoManual,
+        'NoManual'         => !empty($NoManual) ? $NoManual : null,  // ← NULL jika kosong
         'Uraian'           => $Uraian,
         'IndikatorKinerja' => $IndikatorKinerja,
         'Satuan'           => $Satuan,

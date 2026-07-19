@@ -295,80 +295,39 @@
             margin-left: 5px;
         }
 
-        /* PD Multi-Select Styles */
-        .pd-multiselect {
-            width: 100%;
-            min-height: 80px;
-            padding: 8px;
+        /* PD Pengampuh Table Styles - Seperti Crosscutting */
+        .pd-table {
+            margin-bottom: 5px;
+        }
+        .pd-table thead th {
+            font-size: 12px;
+            padding: 5px 8px;
+            background: #f8f9fa;
+        }
+        .pd-table tbody td {
+            padding: 5px 8px;
+            vertical-align: middle;
+        }
+        .pd-table .form-control-sm {
+            padding: 4px 8px;
+            font-size: 13px;
+            height: 34px;
+        }
+        .pd-table .btn-sm {
+            padding: 3px 8px;
+            font-size: 12px;
+        }
+        .select2-container--default .select2-selection--single {
+            height: 34px;
+            border: 1px solid #ced4da;
             border-radius: 4px;
-            border: 1px solid #ddd;
-            background: white;
         }
-        .pd-multiselect option {
-            padding: 6px 10px;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            justify-content: space-between;
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 32px;
+            padding-left: 10px;
         }
-        .pd-multiselect option:checked {
-            background: #00c292;
-            color: white;
-        }
-        .pd-multiselect option:checked:hover {
-            background: #00b386;
-        }
-        .pd-multiselect option .pd-level-badge {
-            float: right;
-            font-size: 10px;
-            color: #999;
-            margin-left: 10px;
-        }
-        .pd-multiselect option:checked .pd-level-badge {
-            color: rgba(255,255,255,0.8);
-        }
-
-        .pd-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            margin-top: 8px;
-            min-height: 20px;
-        }
-
-        .pd-tag {
-            background: #e8f5e9;
-            color: #2e7d32;
-            padding: 3px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            display: inline-flex;
-            align-items: center;
-            border: 1px solid #c8e6c9;
-            animation: tagIn 0.3s ease;
-        }
-
-        @keyframes tagIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        .pd-tag .remove-pd {
-            margin-left: 6px;
-            cursor: pointer;
-            color: #c62828;
-            font-weight: bold;
-            font-size: 14px;
-            line-height: 1;
-        }
-        .pd-tag .remove-pd:hover {
-            color: #d32f2f;
-            transform: scale(1.2);
-        }
-
-        .pd-info-text {
-            color: #666;
-            font-size: 12px;
-            margin-top: 5px;
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 32px;
         }
 
         /* Aksi Indikator - Berdampingan */
@@ -988,296 +947,323 @@
             </div>
         </div>
     </div>
-    
 
     <!-- ============================================== -->
-<!-- MODAL INDIKATOR TUJUAN - DENGAN PD MULTI-SELECT (SEMUA LEVEL) -->
-<!-- ============================================== -->
-<div class="modal fade" id="ModalIndikatorTujuan" role="dialog">
-    <div class="modal-dialog modal-lg" style="width: 95%; max-width: 1200px;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h2>Indikator Tujuan</h2>
-                <p id="tujuan_info" style="margin-top: 10px; color: #555; font-size: 14px;"></p>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="indikator_tujuan_id">
-                <input type="hidden" id="current_tujuan_id">
-                <input type="hidden" id="is_edit_tujuan" value="false">
- <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>               
-                <!-- Form Tambah/Edit Indikator -->
-                <div class="panel panel-default" style="margin-bottom: 20px; border: 1px solid #e0e0e0; border-radius: 4px;">
-                    <div class="panel-heading" style="background: #f5f5f5; padding: 10px 15px; border-bottom: 1px solid #e0e0e0;">
-                        <h4 class="panel-title" style="margin: 0; font-size: 14px; font-weight: 600;">
-                            <i class="fa fa-plus-circle" style="color: #4caf50;" id="icon_tujuan_form"></i> 
-                            <span id="judul_form_tujuan">Tambah Indikator Baru</span>
-                        </h4>
-                    </div>
-                    <div class="panel-body" style="padding: 15px;">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label>Indikator <span class="text-danger">*</span></label>
-                                    <textarea class="form-control" id="input_indikator_tujuan" rows="2" placeholder="Masukkan indikator tujuan" style="resize: vertical;"></textarea>
-                                </div>
-                            </div>
+    <!-- MODAL INDIKATOR TUJUAN - DENGAN PD PENGGAMPUH SEPERTI CROSSCUTTING -->
+    <!-- ============================================== -->
+    <div class="modal fade" id="ModalIndikatorTujuan" role="dialog">
+        <div class="modal-dialog modal-lg" style="width: 95%; max-width: 1200px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h2>Indikator Tujuan</h2>
+                    <p id="tujuan_info" style="margin-top: 10px; color: #555; font-size: 14px;"></p>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="indikator_tujuan_id">
+                    <input type="hidden" id="current_tujuan_id">
+                    <input type="hidden" id="is_edit_tujuan" value="false">
+
+                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                    <!-- Form Tambah/Edit Indikator -->
+                    <div class="panel panel-default" style="margin-bottom: 20px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                        <div class="panel-heading" style="background: #f5f5f5; padding: 10px 15px; border-bottom: 1px solid #e0e0e0;">
+                            <h4 class="panel-title" style="margin: 0; font-size: 14px; font-weight: 600;">
+                                <i class="fa fa-plus-circle" style="color: #4caf50;" id="icon_tujuan_form"></i> 
+                                <span id="judul_form_tujuan">Tambah Indikator Baru</span>
+                            </h4>
                         </div>
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label>Satuan</label>
-                                    <input type="text" class="form-control" id="input_satuan_tujuan" placeholder="Contoh: %">
+                        <div class="panel-body" style="padding: 15px;">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>Indikator <span class="text-danger">*</span></label>
+                                        <textarea class="form-control" id="input_indikator_tujuan" rows="2" placeholder="Masukkan indikator tujuan" style="resize: vertical;"></textarea>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label>Baseline 2024</label>
-                                    <input type="number" class="form-control input-target-tujuan" id="input_baseline_tujuan" placeholder="0" step="0.01">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Satuan</label>
+                                        <input type="text" class="form-control" id="input_satuan_tujuan" placeholder="Contoh: %">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Baseline 2024</label>
+                                        <input type="number" class="form-control input-target-tujuan" id="input_baseline_tujuan" placeholder="0" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <!-- PD PENGGAMPUH - GAYA SEPERTI CROSSCUTTING -->
+                                    <div class="form-group">
+                                        <label><b>Perangkat Daerah Pengampuh</b></label>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-sm pd-table" style="margin-bottom: 5px;">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Nama Perangkat Daerah</th>
+                                                        <th width="50" class="text-center">Hapus</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="pd-pengampuh-tujuan-body"></tbody>
+                                            </table>
+                                        </div>
+                                        <button type="button" class="btn btn-success btn-sm" id="btn-tambah-pd-tujuan">
+                                            <i class="fa fa-plus"></i> Tambah Perangkat Daerah
+                                        </button>
+                                        <small class="text-muted pd-info-text" style="display: block; margin-top: 5px;">
+                                            Pilih Perangkat Daerah yang menjadi pengampuh indikator ini
+                                        </small>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Perangkat Daerah Pengampuh <span class="text-info">(Bisa pilih lebih dari 1)</span></label>
-                                    <select class="form-control pd-multiselect" id="input_pd_tujuan" multiple size="4">
-                                        <option value="">-- Pilih PD --</option>
-                                    </select>
-                                    <small class="text-muted pd-info-text">Tekan <kbd>Ctrl</kbd> + Klik untuk memilih lebih dari satu</small>
-                                    <div class="pd-tags" id="pd_tags_tujuan"></div>
+                            <div class="row" style="margin-top: 10px;">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Target 2025</label>
+                                        <input type="number" class="form-control input-target-tujuan" id="input_target2025_tujuan" placeholder="0" step="0.01">
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="row" style="margin-top: 10px;">
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Target 2025</label>
-                                    <input type="number" class="form-control input-target-tujuan" id="input_target2025_tujuan" placeholder="0" step="0.01">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Target 2026</label>
+                                        <input type="number" class="form-control input-target-tujuan" id="input_target2026_tujuan" placeholder="0" step="0.01">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Target 2026</label>
-                                    <input type="number" class="form-control input-target-tujuan" id="input_target2026_tujuan" placeholder="0" step="0.01">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Target 2027</label>
+                                        <input type="number" class="form-control input-target-tujuan" id="input_target2027_tujuan" placeholder="0" step="0.01">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Target 2027</label>
-                                    <input type="number" class="form-control input-target-tujuan" id="input_target2027_tujuan" placeholder="0" step="0.01">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Target 2028</label>
+                                        <input type="number" class="form-control input-target-tujuan" id="input_target2028_tujuan" placeholder="0" step="0.01">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Target 2028</label>
-                                    <input type="number" class="form-control input-target-tujuan" id="input_target2028_tujuan" placeholder="0" step="0.01">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Target 2029</label>
+                                        <input type="number" class="form-control input-target-tujuan" id="input_target2029_tujuan" placeholder="0" step="0.01">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Target 2029</label>
-                                    <input type="number" class="form-control input-target-tujuan" id="input_target2029_tujuan" placeholder="0" step="0.01">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Target 2030</label>
+                                        <input type="number" class="form-control input-target-tujuan" id="input_target2030_tujuan" placeholder="0" step="0.01">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Target 2030</label>
-                                    <input type="number" class="form-control input-target-tujuan" id="input_target2030_tujuan" placeholder="0" step="0.01">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-12 text-right" style="margin-top: 10px;">
-                                <button class="btn btn-success btn-action" id="SimpanIndikatorTujuan">
-                                    <i class="fa fa-save"></i> <span id="btn_text_tujuan">Simpan</span>
-                                </button>
-                                <button class="btn btn-default btn-action" onclick="resetFormTujuan()">
-                                    <i class="fa fa-refresh"></i> Reset
-                                </button>
                             </div>
                             
+                            <div class="row">
+                                <div class="col-md-12 text-right" style="margin-top: 10px;">
+                                    <button class="btn btn-success btn-action" id="SimpanIndikatorTujuan">
+                                        <i class="fa fa-save"></i> <span id="btn_text_tujuan">Simpan</span>
+                                    </button>
+                                    <button class="btn btn-default btn-action" onclick="resetFormTujuan()">
+                                        <i class="fa fa-refresh"></i> Reset
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    <?php } ?>
+
+                    <!-- Tabel Indikator -->
+                    <div class="table-indikator-wrapper">
+                        <table class="table table-bordered table-striped" id="tabel-indikator-tujuan">
+                            <thead>
+                                <tr style="background: #f8f9fa;">
+                                    <th style="width: 18%;">Indikator</th>
+                                    <th style="width: 7%;">Satuan</th>
+                                    <th style="width: 8%;">Baseline 2024</th>
+                                    <th style="width: 6%;">Target 2025</th>
+                                    <th style="width: 6%;">Target 2026</th>
+                                    <th style="width: 6%;">Target 2027</th>
+                                    <th style="width: 6%;">Target 2028</th>
+                                    <th style="width: 6%;">Target 2029</th>
+                                    <th style="width: 6%;">Target 2030</th>
+                                    <th style="width: 22%;">PD Pengampuh</th>
+                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                                    <th style="width: 9%;">Aksi</th>
+                                    <?php } ?>
+                                </tr>
+                            </thead>
+                            <tbody id="list-indikator-tujuan">
+                                <tr>
+                                    <td colspan="11" class="text-center" style="padding: 20px; color: #999;">Belum ada indikator</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-<?php } ?>
-                <!-- Tabel Indikator -->
-                <div class="table-indikator-wrapper">
-                    <table class="table table-bordered table-striped" id="tabel-indikator-tujuan">
-                        <thead>
-                            <tr style="background: #f8f9fa;">
-                                <th style="width: 18%;">Indikator</th>
-                                <th style="width: 7%;">Satuan</th>
-                                <th style="width: 8%;">Baseline 2024</th>
-                                <th style="width: 6%;">Target 2025</th>
-                                <th style="width: 6%;">Target 2026</th>
-                                <th style="width: 6%;">Target 2027</th>
-                                <th style="width: 6%;">Target 2028</th>
-                                <th style="width: 6%;">Target 2029</th>
-                                <th style="width: 6%;">Target 2030</th>
-                                <th style="width: 22%;">PD Pengampuh</th>
-                                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                <th style="width: 9%;">Aksi</th>
-                                <?php  } ?>
-                            </tr>
-                        </thead>
-                        <tbody id="list-indikator-tujuan">
-                            <tr>
-                                <td colspan="11" class="text-center" style="padding: 20px; color: #999;">Belum ada indikator</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="modal-footer" style="padding: 10px 15px; border-top: 1px solid #e0e0e0;">
+                    <button type="button" class="btn btn-default btn-action" data-dismiss="modal">Tutup</button>
                 </div>
-            </div>
-            <div class="modal-footer" style="padding: 10px 15px; border-top: 1px solid #e0e0e0;">
-                <button type="button" class="btn btn-default btn-action" data-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>
-</div>
 
     <!-- ============================================== -->
-<!-- MODAL INDIKATOR SASARAN - DENGAN PD MULTI-SELECT (SEMUA LEVEL) -->
-<!-- ============================================== -->
-<div class="modal fade" id="ModalIndikatorSasaran" role="dialog">
-    <div class="modal-dialog modal-lg" style="width: 95%; max-width: 1200px;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h2>Indikator Sasaran</h2>
-                <p id="sasaran_info" style="margin-top: 10px; color: #555; font-size: 14px;"></p>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="indikator_sasaran_id">
-                <input type="hidden" id="current_sasaran_id">
-                <input type="hidden" id="is_edit_sasaran" value="false">
- <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>               
-                <!-- Form Tambah/Edit Indikator Sasaran -->
-                <div class="panel panel-default" style="margin-bottom: 20px; border: 1px solid #e0e0e0; border-radius: 4px;">
-                    <div class="panel-heading" style="background: #f5f5f5; padding: 10px 15px; border-bottom: 1px solid #e0e0e0;">
-                        <h4 class="panel-title" style="margin: 0; font-size: 14px; font-weight: 600;">
-                            <i class="fa fa-plus-circle" style="color: #4caf50;" id="icon_sasaran_form"></i> 
-                            <span id="judul_form_sasaran">Tambah Indikator Baru</span>
-                        </h4>
-                    </div>
-                    <div class="panel-body" style="padding: 15px;">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label>Indikator <span class="text-danger">*</span></label>
-                                    <textarea class="form-control" id="input_indikator_sasaran" rows="2" placeholder="Masukkan indikator sasaran" style="resize: vertical;"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label>Satuan</label>
-                                    <input type="text" class="form-control" id="input_satuan_sasaran" placeholder="Contoh: %">
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label>Baseline 2024</label>
-                                    <input type="number" class="form-control input-target-sasaran" id="input_baseline_sasaran" placeholder="0" step="0.01">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Perangkat Daerah Pengampuh <span class="text-info">(Bisa pilih lebih dari 1)</span></label>
-                                    <select class="form-control pd-multiselect" id="input_pd_sasaran" multiple size="4">
-                                        <option value="">-- Pilih PD --</option>
-                                    </select>
-                                    <small class="text-muted pd-info-text">Tekan <kbd>Ctrl</kbd> + Klik untuk memilih lebih dari satu</small>
-                                    <div class="pd-tags" id="pd_tags_sasaran"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row" style="margin-top: 10px;">
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Target 2025</label>
-                                    <input type="number" class="form-control input-target-sasaran" id="input_target2025_sasaran" placeholder="0" step="0.01">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Target 2026</label>
-                                    <input type="number" class="form-control input-target-sasaran" id="input_target2026_sasaran" placeholder="0" step="0.01">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Target 2027</label>
-                                    <input type="number" class="form-control input-target-sasaran" id="input_target2027_sasaran" placeholder="0" step="0.01">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Target 2028</label>
-                                    <input type="number" class="form-control input-target-sasaran" id="input_target2028_sasaran" placeholder="0" step="0.01">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Target 2029</label>
-                                    <input type="number" class="form-control input-target-sasaran" id="input_target2029_sasaran" placeholder="0" step="0.01">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Target 2030</label>
-                                    <input type="number" class="form-control input-target-sasaran" id="input_target2030_sasaran" placeholder="0" step="0.01">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12 text-right" style="margin-top: 10px;">
-                                <button class="btn btn-success btn-action" id="SimpanIndikatorSasaran">
-                                    <i class="fa fa-save"></i> <span id="btn_text_sasaran">Simpan</span>
-                                </button>
-                                <button class="btn btn-default btn-action" onclick="resetFormSasaran()">
-                                    <i class="fa fa-refresh"></i> Reset
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+    <!-- MODAL INDIKATOR SASARAN - DENGAN PD PENGGAMPUH SEPERTI CROSSCUTTING -->
+    <!-- ============================================== -->
+    <div class="modal fade" id="ModalIndikatorSasaran" role="dialog">
+        <div class="modal-dialog modal-lg" style="width: 95%; max-width: 1200px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h2>Indikator Sasaran</h2>
+                    <p id="sasaran_info" style="margin-top: 10px; color: #555; font-size: 14px;"></p>
                 </div>
-        <?php } ?>
+                <div class="modal-body">
+                    <input type="hidden" id="indikator_sasaran_id">
+                    <input type="hidden" id="current_sasaran_id">
+                    <input type="hidden" id="is_edit_sasaran" value="false">
 
-                <!-- Tabel Indikator Sasaran -->
-                <div class="table-indikator-wrapper">
-                    <table class="table table-bordered table-striped" id="tabel-indikator-sasaran">
-                        <thead>
-                            <tr style="background: #f8f9fa;">
-                                <th style="width: 18%;">Indikator</th>
-                                <th style="width: 7%;">Satuan</th>
-                                <th style="width: 8%;">Baseline 2024</th>
-                                <th style="width: 6%;">Target 2025</th>
-                                <th style="width: 6%;">Target 2026</th>
-                                <th style="width: 6%;">Target 2027</th>
-                                <th style="width: 6%;">Target 2028</th>
-                                <th style="width: 6%;">Target 2029</th>
-                                <th style="width: 6%;">Target 2030</th>
-                                <th style="width: 22%;">PD Pengampuh</th>
-                                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                <th style="width: 9%;">Aksi</th>
-                                <?php } ?>
-                            </tr>
-                        </thead>
-                        <tbody id="list-indikator-sasaran">
-                            <tr>
-                                <td colspan="11" class="text-center" style="padding: 20px; color: #999;">Belum ada indikator</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                    <!-- Form Tambah/Edit Indikator Sasaran -->
+                    <div class="panel panel-default" style="margin-bottom: 20px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                        <div class="panel-heading" style="background: #f5f5f5; padding: 10px 15px; border-bottom: 1px solid #e0e0e0;">
+                            <h4 class="panel-title" style="margin: 0; font-size: 14px; font-weight: 600;">
+                                <i class="fa fa-plus-circle" style="color: #4caf50;" id="icon_sasaran_form"></i> 
+                                <span id="judul_form_sasaran">Tambah Indikator Baru</span>
+                            </h4>
+                        </div>
+                        <div class="panel-body" style="padding: 15px;">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>Indikator <span class="text-danger">*</span></label>
+                                        <textarea class="form-control" id="input_indikator_sasaran" rows="2" placeholder="Masukkan indikator sasaran" style="resize: vertical;"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Satuan</label>
+                                        <input type="text" class="form-control" id="input_satuan_sasaran" placeholder="Contoh: %">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Baseline 2024</label>
+                                        <input type="number" class="form-control input-target-sasaran" id="input_baseline_sasaran" placeholder="0" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <!-- PD PENGGAMPUH - GAYA SEPERTI CROSSCUTTING -->
+                                    <div class="form-group">
+                                        <label><b>Perangkat Daerah Pengampuh</b></label>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-sm pd-table" style="margin-bottom: 5px;">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Nama Perangkat Daerah</th>
+                                                        <th width="50" class="text-center">Hapus</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="pd-pengampuh-sasaran-body"></tbody>
+                                            </table>
+                                        </div>
+                                        <button type="button" class="btn btn-success btn-sm" id="btn-tambah-pd-sasaran">
+                                            <i class="fa fa-plus"></i> Tambah Perangkat Daerah
+                                        </button>
+                                        <small class="text-muted pd-info-text" style="display: block; margin-top: 5px;">
+                                            Pilih Perangkat Daerah yang menjadi pengampuh indikator ini
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top: 10px;">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Target 2025</label>
+                                        <input type="number" class="form-control input-target-sasaran" id="input_target2025_sasaran" placeholder="0" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Target 2026</label>
+                                        <input type="number" class="form-control input-target-sasaran" id="input_target2026_sasaran" placeholder="0" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Target 2027</label>
+                                        <input type="number" class="form-control input-target-sasaran" id="input_target2027_sasaran" placeholder="0" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Target 2028</label>
+                                        <input type="number" class="form-control input-target-sasaran" id="input_target2028_sasaran" placeholder="0" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Target 2029</label>
+                                        <input type="number" class="form-control input-target-sasaran" id="input_target2029_sasaran" placeholder="0" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Target 2030</label>
+                                        <input type="number" class="form-control input-target-sasaran" id="input_target2030_sasaran" placeholder="0" step="0.01">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 text-right" style="margin-top: 10px;">
+                                    <button class="btn btn-success btn-action" id="SimpanIndikatorSasaran">
+                                        <i class="fa fa-save"></i> <span id="btn_text_sasaran">Simpan</span>
+                                    </button>
+                                    <button class="btn btn-default btn-action" onclick="resetFormSasaran()">
+                                        <i class="fa fa-refresh"></i> Reset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php } ?>
+
+                    <!-- Tabel Indikator Sasaran -->
+                    <div class="table-indikator-wrapper">
+                        <table class="table table-bordered table-striped" id="tabel-indikator-sasaran">
+                            <thead>
+                                <tr style="background: #f8f9fa;">
+                                    <th style="width: 18%;">Indikator</th>
+                                    <th style="width: 7%;">Satuan</th>
+                                    <th style="width: 8%;">Baseline 2024</th>
+                                    <th style="width: 6%;">Target 2025</th>
+                                    <th style="width: 6%;">Target 2026</th>
+                                    <th style="width: 6%;">Target 2027</th>
+                                    <th style="width: 6%;">Target 2028</th>
+                                    <th style="width: 6%;">Target 2029</th>
+                                    <th style="width: 6%;">Target 2030</th>
+                                    <th style="width: 22%;">PD Pengampuh</th>
+                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                                    <th style="width: 9%;">Aksi</th>
+                                    <?php } ?>
+                                </tr>
+                            </thead>
+                            <tbody id="list-indikator-sasaran">
+                                <tr>
+                                    <td colspan="11" class="text-center" style="padding: 20px; color: #999;">Belum ada indikator</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
-            <div class="modal-footer" style="padding: 10px 15px; border-top: 1px solid #e0e0e0;">
-                <button type="button" class="btn btn-default btn-action" data-dismiss="modal">Tutup</button>
+                <div class="modal-footer" style="padding: 10px 15px; border-top: 1px solid #e0e0e0;">
+                    <button type="button" class="btn btn-default btn-action" data-dismiss="modal">Tutup</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
     <!-- ============================================== -->
     <!-- SCRIPTS -->
@@ -1293,6 +1279,10 @@
     <script src="<?=base_url()?>js/data-table/jquery.dataTables.min.js"></script>
     <script src="<?=base_url()?>js/data-table/data-table-act.js"></script>
     <script src="<?=base_url()?>js/main.js"></script>
+    
+    <!-- Select2 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
     <script>
         var BaseURL = '<?=base_url()?>';
@@ -1359,151 +1349,262 @@
         }
 
         // ==============================================
-// FUNGSI UNTUK MENGUBAH JUDUL FORM INDIKATOR
-// ==============================================
-
-function setFormModeTujuan(mode) {
-    // mode: 'add' atau 'edit'
-    var isEdit = (mode === 'edit');
-    
-    $('#is_edit_tujuan').val(isEdit ? 'true' : 'false');
-    
-    if (isEdit) {
-        $('#judul_form_tujuan').text('Edit Indikator');
-        $('#icon_tujuan_form').removeClass('fa-plus-circle').addClass('fa-edit');
-        $('#btn_text_tujuan').text('Update');
-        $('#SimpanIndikatorTujuan').removeClass('btn-success').addClass('btn-warning');
-    } else {
-        $('#judul_form_tujuan').text('Tambah Indikator Baru');
-        $('#icon_tujuan_form').removeClass('fa-edit').addClass('fa-plus-circle');
-        $('#btn_text_tujuan').text('Simpan');
-        $('#SimpanIndikatorTujuan').removeClass('btn-warning').addClass('btn-success');
-    }
-}
-
-function setFormModeSasaran(mode) {
-    // mode: 'add' atau 'edit'
-    var isEdit = (mode === 'edit');
-    
-    $('#is_edit_sasaran').val(isEdit ? 'true' : 'false');
-    
-    if (isEdit) {
-        $('#judul_form_sasaran').text('Edit Indikator');
-        $('#icon_sasaran_form').removeClass('fa-plus-circle').addClass('fa-edit');
-        $('#btn_text_sasaran').text('Update');
-        $('#SimpanIndikatorSasaran').removeClass('btn-success').addClass('btn-warning');
-    } else {
-        $('#judul_form_sasaran').text('Tambah Indikator Baru');
-        $('#icon_sasaran_form').removeClass('fa-edit').addClass('fa-plus-circle');
-        $('#btn_text_sasaran').text('Simpan');
-        $('#SimpanIndikatorSasaran').removeClass('btn-warning').addClass('btn-success');
-    }
-}
-
+        // FUNGSI UNTUK MENGUBAH JUDUL FORM INDIKATOR
         // ==============================================
-        // FUNGSI PD MULTI-SELECT (SEMUA LEVEL)
-        // ==============================================
-        function loadPDList(selectId) {
-        var select = document.getElementById(selectId.replace('#', ''));
-        if (!select) return;
-        
-        $.ajax({
-            url: BaseURL + "Daerah/GetListPD",
-            type: "POST",
-            data: { [CSRF_NAME]: CSRF_TOKEN },
-            success: function(Respon) {
-                try {
-                    var result = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
-                    if (result.status === 'success') {
-                        var options = '<option value="">-- Pilih PD --</option>';
-                        result.data.forEach(function(pd) {
-                            // HANYA TAMPILKAN NAMA PD, TANPA LEVEL
-                            options += '<option value="' + pd.id + '">' + 
-                                    escapeHtml(pd.nama) + 
-                                    '</option>';
-                        });
-                        select.innerHTML = options;
-                    } else {
-                        select.innerHTML = '<option value="">Gagal memuat data PD</option>';
-                    }
-                } catch(e) {
-                    console.error('Error loading PD list:', e);
-                    select.innerHTML = '<option value="">Error loading data</option>';
-                }
-            },
-            error: function() {
-                select.innerHTML = '<option value="">Gagal menghubungi server</option>';
+        function setFormModeTujuan(mode) {
+            var isEdit = (mode === 'edit');
+            $('#is_edit_tujuan').val(isEdit ? 'true' : 'false');
+            
+            if (isEdit) {
+                $('#judul_form_tujuan').text('Edit Indikator');
+                $('#icon_tujuan_form').removeClass('fa-plus-circle').addClass('fa-edit');
+                $('#btn_text_tujuan').text('Update');
+                $('#SimpanIndikatorTujuan').removeClass('btn-success').addClass('btn-warning');
+            } else {
+                $('#judul_form_tujuan').text('Tambah Indikator Baru');
+                $('#icon_tujuan_form').removeClass('fa-edit').addClass('fa-plus-circle');
+                $('#btn_text_tujuan').text('Simpan');
+                $('#SimpanIndikatorTujuan').removeClass('btn-warning').addClass('btn-success');
             }
+        }
+
+        function setFormModeSasaran(mode) {
+            var isEdit = (mode === 'edit');
+            $('#is_edit_sasaran').val(isEdit ? 'true' : 'false');
+            
+            if (isEdit) {
+                $('#judul_form_sasaran').text('Edit Indikator');
+                $('#icon_sasaran_form').removeClass('fa-plus-circle').addClass('fa-edit');
+                $('#btn_text_sasaran').text('Update');
+                $('#SimpanIndikatorSasaran').removeClass('btn-success').addClass('btn-warning');
+            } else {
+                $('#judul_form_sasaran').text('Tambah Indikator Baru');
+                $('#icon_sasaran_form').removeClass('fa-edit').addClass('fa-plus-circle');
+                $('#btn_text_sasaran').text('Simpan');
+                $('#SimpanIndikatorSasaran').removeClass('btn-warning').addClass('btn-success');
+            }
+        }
+
+        // ==============================================
+        // DATA PERANGKAT DAERAH UNTUK PD PENGGAMPUH
+        // ==============================================
+        var daftarPD = [];
+
+        function loadDaftarPD() {
+            $.ajax({
+                url: BaseURL + "Daerah/GetListPDForIndikator",
+                type: "GET",
+                dataType: "json",
+                success: function(res) {
+                    if (res && res.status === 'success') {
+                        daftarPD = res.data;
+                    }
+                },
+                error: function() {
+                    console.log('Gagal memuat daftar PD');
+                }
+            });
+        }
+
+        // Load daftar PD saat halaman dimuat
+        $(document).ready(function() {
+            loadDaftarPD();
+        });
+
+        // ==============================================
+        // FUNGSI TAMBAH BARIS PD PENGGAMPUH TUJUAN
+        // ==============================================
+        function addPDRowTujuan(containerId, pdId = '') {
+        var container = document.getElementById(containerId);
+        if (!container) return;
+        
+        var options = '<option value="">-- Pilih Perangkat Daerah --</option>';
+        
+        if (daftarPD && daftarPD.length > 0) {
+            for (var i = 0; i < daftarPD.length; i++) {
+                var selected = (String(daftarPD[i].id) === String(pdId)) ? 'selected' : '';
+                options += '<option value="' + daftarPD[i].id + '" ' + selected + '>' + 
+                        escapeHtml(daftarPD[i].nama) +
+                        '</option>';
+            }
+        } else {
+            options += '<option value="" disabled>Data perangkat daerah tidak tersedia</option>';
+        }
+        
+        var tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>
+                <select class="form-control form-control-sm pd-select-tujuan" style="width: 100%;">
+                    ${options}
+                </select>
+            </td>
+            <td class="text-center">
+                <button type="button" class="btn btn-danger btn-sm remove-pd-row"><i class="fa fa-trash"></i></button>
+            </td>
+        `;
+        container.appendChild(tr);
+        
+        // Inisialisasi Select2 untuk dropdown
+        $(tr).find('.pd-select-tujuan').select2({
+            placeholder: 'Pilih Perangkat Daerah',
+            dropdownParent: $('#ModalIndikatorTujuan'),
+            width: '100%'
         });
     }
 
-        function updatePDTags(selectId, containerId) {
-            var select = document.getElementById(selectId);
-            var container = document.getElementById(containerId);
-            if (!select || !container) return;
-            
-            var selectedOptions = select.selectedOptions;
-            container.innerHTML = '';
-            
-            for (var i = 0; i < selectedOptions.length; i++) {
-                var option = selectedOptions[i];
-                if (option.value) {
-                    var tag = document.createElement('span');
-                    tag.className = 'pd-tag';
-                    // Ambil teks tanpa span
-                    var textContent = option.textContent || option.innerText;
-                    textContent = textContent.replace(/\(.*?\)/g, '').trim();
-                    
-                    tag.innerHTML = escapeHtml(textContent) + 
-                                   ' <span class="remove-pd" data-value="' + option.value + 
-                                   '" onclick="removePDTag(\'' + selectId + '\', \'' + containerId + '\', ' + option.value + ')">&times;</span>';
-                    container.appendChild(tag);
+    // ==============================================
+    // FUNGSI TAMBAH BARIS PD PENGGAMPUH SASARAN (SEMUA LEVEL - TANPA LABEL)
+    // ==============================================
+    function addPDRowSasaran(containerId, pdId = '') {
+        var container = document.getElementById(containerId);
+        if (!container) return;
+        
+        var options = '<option value="">-- Pilih Perangkat Daerah --</option>';
+        
+        if (daftarPD && daftarPD.length > 0) {
+            for (var i = 0; i < daftarPD.length; i++) {
+                var selected = (String(daftarPD[i].id) === String(pdId)) ? 'selected' : '';
+                options += '<option value="' + daftarPD[i].id + '" ' + selected + '>' + 
+                        escapeHtml(daftarPD[i].nama) +
+                        '</option>';
+            }
+        } else {
+            options += '<option value="" disabled>Data perangkat daerah tidak tersedia</option>';
+        }
+        
+        var tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>
+                <select class="form-control form-control-sm pd-select-sasaran" style="width: 100%;">
+                    ${options}
+                </select>
+            </td>
+            <td class="text-center">
+                <button type="button" class="btn btn-danger btn-sm remove-pd-row"><i class="fa fa-trash"></i></button>
+            </td>
+        `;
+        container.appendChild(tr);
+        
+        // Inisialisasi Select2 untuk dropdown
+        $(tr).find('.pd-select-sasaran').select2({
+            placeholder: 'Pilih Perangkat Daerah',
+            dropdownParent: $('#ModalIndikatorSasaran'),
+            width: '100%'
+        });
+    }
+
+        // ==============================================
+        // EVENT HAPUS BARIS PD
+        // ==============================================
+        $(document).on('click', '.remove-pd-row', function(e) {
+            e.preventDefault();
+            $(this).closest('tr').remove();
+        });
+
+        // ==============================================
+        // FUNGSI UNTUK MENGAMBIL DATA PD YANG DIPILIH
+        // ==============================================
+        function getSelectedPDTujuan() {
+            var ids = [];
+            $('#pd-pengampuh-tujuan-body .pd-select-tujuan').each(function() {
+                var val = $(this).val();
+                if (val && val !== '') {
+                    ids.push(val);
                 }
+            });
+            return ids;
+        }
+
+        function getSelectedPDSasaran() {
+            var ids = [];
+            $('#pd-pengampuh-sasaran-body .pd-select-sasaran').each(function() {
+                var val = $(this).val();
+                if (val && val !== '') {
+                    ids.push(val);
+                }
+            });
+            return ids;
+        }
+
+        // ==============================================
+        // FUNGSI SET DATA PD PENGGAMPUH (UNTUK EDIT)
+        // ==============================================
+        function setSelectedPDTujuan(selectedIds) {
+            $('#pd-pengampuh-tujuan-body').empty();
+            
+            if (!selectedIds || selectedIds.length === 0) {
+                // Tambahkan satu baris kosong
+                addPDRowTujuan('pd-pengampuh-tujuan-body', '');
+                return;
+            }
+            
+            for (var i = 0; i < selectedIds.length; i++) {
+                addPDRowTujuan('pd-pengampuh-tujuan-body', selectedIds[i]);
             }
         }
 
-        function removePDTag(selectId, containerId, value) {
-            var select = document.getElementById(selectId);
-            if (!select) return;
+        function setSelectedPDSasaran(selectedIds) {
+            $('#pd-pengampuh-sasaran-body').empty();
             
-            for (var i = 0; i < select.options.length; i++) {
-                if (select.options[i].value == value) {
-                    select.options[i].selected = false;
-                    break;
-                }
+            if (!selectedIds || selectedIds.length === 0) {
+                addPDRowSasaran('pd-pengampuh-sasaran-body', '');
+                return;
             }
-            updatePDTags(selectId, containerId);
+            
+            for (var i = 0; i < selectedIds.length; i++) {
+                addPDRowSasaran('pd-pengampuh-sasaran-body', selectedIds[i]);
+            }
         }
 
-        function setSelectedPD(selectId, values) {
-    var select = document.getElementById(selectId);
-    if (!select) {
-        console.error('Select element not found:', selectId);
-        return;
-    }
-    
-    // Pastikan values adalah array
-    if (!Array.isArray(values)) {
-        try {
-            values = JSON.parse(values);
-        } catch(e) {
-            values = [];
+        // ==============================================
+        // TOMBOL TAMBAH PD PENGGAMPUH
+        // ==============================================
+        $(document).on('click', '#btn-tambah-pd-tujuan', function(e) {
+            e.preventDefault();
+            addPDRowTujuan('pd-pengampuh-tujuan-body', '');
+        });
+
+        $(document).on('click', '#btn-tambah-pd-sasaran', function(e) {
+            e.preventDefault();
+            addPDRowSasaran('pd-pengampuh-sasaran-body', '');
+        });
+
+        // ==============================================
+        // RESET FORM TUJUAN
+        // ==============================================
+        function resetFormTujuan() {
+            $('#indikator_tujuan_id').val('');
+            $('#input_indikator_tujuan').val('');
+            $('#input_satuan_tujuan').val('');
+            $('#input_baseline_tujuan').val('');
+            $('.input-target-tujuan').val('');
+            
+            // Reset PD Pengampuh
+            $('#pd-pengampuh-tujuan-body').empty();
+            // Tambahkan satu baris kosong
+            addPDRowTujuan('pd-pengampuh-tujuan-body', '');
+            
+            // Reset ke mode tambah
+            setFormModeTujuan('add');
         }
-    }
-    
-    // Convert values ke string untuk perbandingan
-    var valueStrings = values.map(String);
-    
-    for (var i = 0; i < select.options.length; i++) {
-        select.options[i].selected = false;
-        if (valueStrings.indexOf(select.options[i].value) !== -1) {
-            select.options[i].selected = true;
+
+        // ==============================================
+        // RESET FORM SASARAN
+        // ==============================================
+        function resetFormSasaran() {
+            $('#indikator_sasaran_id').val('');
+            $('#input_indikator_sasaran').val('');
+            $('#input_satuan_sasaran').val('');
+            $('#input_baseline_sasaran').val('');
+            $('.input-target-sasaran').val('');
+            
+            // Reset PD Pengampuh
+            $('#pd-pengampuh-sasaran-body').empty();
+            addPDRowSasaran('pd-pengampuh-sasaran-body', '');
+            
+            // Reset ke mode tambah
+            setFormModeSasaran('add');
         }
-    }
-    
-    var containerId = selectId.replace('input', 'pd_tags');
-    updatePDTags(selectId, containerId);
-}
 
         // ==============================================
         // FILTER WILAYAH
@@ -2181,7 +2282,7 @@ function setFormModeSasaran(mode) {
             });
 
             // ==============================================
-            // INDIKATOR TUJUAN - DENGAN PD MULTI-SELECT (SEMUA LEVEL)
+            // INDIKATOR TUJUAN
             // ==============================================
             var currentTujuanId = null;
 
@@ -2193,34 +2294,10 @@ function setFormModeSasaran(mode) {
                 $('#tujuan_info').html('<strong>Tujuan:</strong> ' + escapeHtml(tujuanText));
                 
                 resetFormTujuan();
-                loadPDList('input_pd_tujuan');
                 loadIndikatorTujuan(currentTujuanId);
                 
                 $('#ModalIndikatorTujuan').modal('show');
             });
-
-            // ==============================================
-            // RESET FORM TUJUAN - KEMBALI KE MODE TAMBAH
-            // ==============================================
-            function resetFormTujuan() {
-                $('#indikator_tujuan_id').val('');
-                $('#input_indikator_tujuan').val('');
-                $('#input_satuan_tujuan').val('');
-                $('#input_baseline_tujuan').val('');
-                $('#input_pd_tujuan').val('');
-                $('.input-target-tujuan').val('');
-                $('#pd_tags_tujuan').html('');
-                
-                // Reset ke mode tambah
-                setFormModeTujuan('add');
-                
-                var select = document.getElementById('input_pd_tujuan');
-                if (select) {
-                    for (var i = 0; i < select.options.length; i++) {
-                        select.options[i].selected = false;
-                    }
-                }
-            }
 
             function loadIndikatorTujuan(tujuanId) {
                 $.post(BaseURL + "Daerah/GetIndikatorTujuan", {
@@ -2256,9 +2333,9 @@ function setFormModeSasaran(mode) {
                                 html += '<div class="aksi-indikator">';
                                 html += '<button class="btn btn-sm btn-warning EditIndikatorTujuan btn-action" data-id="' + item.id + '" title="Edit"><i class="fa fa-edit"></i></button>';
                                 html += '<button class="btn btn-sm btn-danger HapusIndikatorTujuan btn-action" data-id="' + item.id + '" title="Hapus"><i class="fa fa-trash"></i></button>';
-                                <?php } ?>
                                 html += '</div>';
                                 html += '</td>';
+                                <?php } ?>
                                 html += '</tr>';
                             });
                         } else {
@@ -2283,7 +2360,6 @@ function setFormModeSasaran(mode) {
                 var id = $(this).data('id');
                 $('#indikator_tujuan_id').val(id);
                 
-                // Ubah ke mode edit
                 setFormModeTujuan('edit');
                 
                 var row = $(this).closest('tr');
@@ -2299,12 +2375,12 @@ function setFormModeSasaran(mode) {
                 $('#input_target2029_tujuan').val(cells.eq(7).text().trim());
                 $('#input_target2030_tujuan').val(cells.eq(8).text().trim());
                 
-                // Load selected PD dengan AJAX
+                // Load selected PD
                 var btn = $(this);
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
                 
                 $.ajax({
-                    url: BaseURL + "Daerah/GetSelectedPD",
+                    url: BaseURL + "Daerah/GetSelectedPDForIndikator",
                     type: "POST",
                     data: { 
                         indikator_id: id, 
@@ -2315,20 +2391,17 @@ function setFormModeSasaran(mode) {
                         btn.prop('disabled', false).html('<i class="fa fa-edit"></i>');
                         try {
                             var selectedIds = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
-                            console.log('Selected PD IDs:', selectedIds);
-                            setSelectedPD('input_pd_tujuan', selectedIds);
+                            setSelectedPDTujuan(selectedIds);
                         } catch(e) {
                             console.error('Error parsing selected PD:', e);
                         }
                     },
-                    error: function(xhr, status, error) {
+                    error: function() {
                         btn.prop('disabled', false).html('<i class="fa fa-edit"></i>');
-                        console.error('AJAX Error:', status, error);
                         showToast('Gagal memuat data PD terpilih', 'error');
                     }
                 });
                 
-                // Scroll ke form
                 $('html, body').animate({
                     scrollTop: $('#input_indikator_tujuan').offset().top - 100
                 }, 300);
@@ -2344,15 +2417,7 @@ function setFormModeSasaran(mode) {
                     return;
                 }
                 
-                var pdSelect = document.getElementById('input_pd_tujuan');
-                var pdValues = [];
-                if (pdSelect) {
-                    for (var i = 0; i < pdSelect.options.length; i++) {
-                        if (pdSelect.options[i].selected && pdSelect.options[i].value) {
-                            pdValues.push(pdSelect.options[i].value);
-                        }
-                    }
-                }
+                var pdValues = getSelectedPDTujuan();
                 
                 var data = {
                     tujuan_id: currentTujuanId,
@@ -2374,8 +2439,6 @@ function setFormModeSasaran(mode) {
                 var url = isEdit ? 'EditIndikatorTujuan' : 'InputIndikatorTujuan';
                 if (isEdit) data.id = editId;
                 
-                console.log('Saving data:', data);
-                
                 var btn = $(this);
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
                 
@@ -2395,10 +2458,8 @@ function setFormModeSasaran(mode) {
                             showToast('❌ ' + result.message, 'error');
                         }
                     },
-                    error: function(xhr, status, error) {
+                    error: function(xhr) {
                         btn.prop('disabled', false).html('<i class="fa fa-save"></i> <span id="btn_text_tujuan">' + (isEdit ? 'Update' : 'Simpan') + '</span>');
-                        console.error('AJAX Error:', status, error);
-                        console.error('Response:', xhr.responseText);
                         showToast('❌ Gagal menyimpan: ' + xhr.status + ' - ' + xhr.statusText, 'error');
                     }
                 });
@@ -2435,7 +2496,7 @@ function setFormModeSasaran(mode) {
             });
 
             // ==============================================
-            // INDIKATOR SASARAN - OPEN MODAL
+            // INDIKATOR SASARAN
             // ==============================================
             var currentSasaranId = null;
 
@@ -2446,35 +2507,12 @@ function setFormModeSasaran(mode) {
                 var sasaranText = $(this).closest('tr').find('.text-content').text().trim();
                 $('#sasaran_info').html('<strong>Sasaran:</strong> ' + escapeHtml(sasaranText));
                 
-                // Reset ke mode tambah
                 resetFormSasaran();
                 setFormModeSasaran('add');
-                
-                loadPDList('input_pd_sasaran');
                 loadIndikatorSasaran(currentSasaranId);
                 
                 $('#ModalIndikatorSasaran').modal('show');
             });
-
-            function resetFormSasaran() {
-            $('#indikator_sasaran_id').val('');
-            $('#input_indikator_sasaran').val('');
-            $('#input_satuan_sasaran').val('');
-            $('#input_baseline_sasaran').val('');
-            $('#input_pd_sasaran').val('');
-            $('.input-target-sasaran').val('');
-            $('#pd_tags_sasaran').html('');
-            
-            // Reset ke mode tambah
-            setFormModeSasaran('add');
-            
-            var select = document.getElementById('input_pd_sasaran');
-            if (select) {
-                for (var i = 0; i < select.options.length; i++) {
-                    select.options[i].selected = false;
-                }
-            }
-        }
 
             function loadIndikatorSasaran(sasaranId) {
                 $.post(BaseURL + "Daerah/GetIndikatorSasaran", {
@@ -2510,9 +2548,9 @@ function setFormModeSasaran(mode) {
                                 html += '<div class="aksi-indikator">';
                                 html += '<button class="btn btn-sm btn-warning EditIndikatorSasaran btn-action" data-id="' + item.id + '" title="Edit"><i class="fa fa-edit"></i></button>';
                                 html += '<button class="btn btn-sm btn-danger HapusIndikatorSasaran btn-action" data-id="' + item.id + '" title="Hapus"><i class="fa fa-trash"></i></button>';
-                                <?php }?>
                                 html += '</div>';
                                 html += '</td>';
+                                <?php } ?>
                                 html += '</tr>';
                             });
                         } else {
@@ -2537,7 +2575,6 @@ function setFormModeSasaran(mode) {
                 var id = $(this).data('id');
                 $('#indikator_sasaran_id').val(id);
                 
-                // Ubah ke mode edit
                 setFormModeSasaran('edit');
                 
                 var row = $(this).closest('tr');
@@ -2553,12 +2590,12 @@ function setFormModeSasaran(mode) {
                 $('#input_target2029_sasaran').val(cells.eq(7).text().trim());
                 $('#input_target2030_sasaran').val(cells.eq(8).text().trim());
                 
-                // Load selected PD dengan AJAX
+                // Load selected PD
                 var btn = $(this);
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
                 
                 $.ajax({
-                    url: BaseURL + "Daerah/GetSelectedPD",
+                    url: BaseURL + "Daerah/GetSelectedPDForIndikator",
                     type: "POST",
                     data: { 
                         indikator_id: id, 
@@ -2569,15 +2606,13 @@ function setFormModeSasaran(mode) {
                         btn.prop('disabled', false).html('<i class="fa fa-edit"></i>');
                         try {
                             var selectedIds = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
-                            console.log('Selected PD IDs:', selectedIds);
-                            setSelectedPD('input_pd_sasaran', selectedIds);
+                            setSelectedPDSasaran(selectedIds);
                         } catch(e) {
                             console.error('Error parsing selected PD:', e);
                         }
                     },
-                    error: function(xhr, status, error) {
+                    error: function() {
                         btn.prop('disabled', false).html('<i class="fa fa-edit"></i>');
-                        console.error('AJAX Error:', status, error);
                         showToast('Gagal memuat data PD terpilih', 'error');
                     }
                 });
@@ -2597,15 +2632,7 @@ function setFormModeSasaran(mode) {
                     return;
                 }
                 
-                var pdSelect = document.getElementById('input_pd_sasaran');
-                var pdValues = [];
-                if (pdSelect) {
-                    for (var i = 0; i < pdSelect.options.length; i++) {
-                        if (pdSelect.options[i].selected && pdSelect.options[i].value) {
-                            pdValues.push(pdSelect.options[i].value);
-                        }
-                    }
-                }
+                var pdValues = getSelectedPDSasaran();
                 
                 var data = {
                     sasaran_id: currentSasaranId,
@@ -2627,8 +2654,6 @@ function setFormModeSasaran(mode) {
                 var url = isEdit ? 'EditIndikatorSasaran' : 'InputIndikatorSasaran';
                 if (isEdit) data.id = editId;
                 
-                console.log('Saving data:', data);
-                
                 var btn = $(this);
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
                 
@@ -2648,10 +2673,8 @@ function setFormModeSasaran(mode) {
                             showToast('❌ ' + result.message, 'error');
                         }
                     },
-                    error: function(xhr, status, error) {
+                    error: function(xhr) {
                         btn.prop('disabled', false).html('<i class="fa fa-save"></i> <span id="btn_text_sasaran">' + (isEdit ? 'Update' : 'Simpan') + '</span>');
-                        console.error('AJAX Error:', status, error);
-                        console.error('Response:', xhr.responseText);
                         showToast('❌ Gagal menyimpan: ' + xhr.status + ' - ' + xhr.statusText, 'error');
                     }
                 });
@@ -2688,21 +2711,9 @@ function setFormModeSasaran(mode) {
             });
 
             // ==============================================
-            // EVENT LISTENER UNTUK PD DROPDOWN
-            // ==============================================
-            $('#input_pd_tujuan').on('change', function() {
-                updatePDTags('input_pd_tujuan', 'pd_tags_tujuan');
-            });
-
-            $('#input_pd_sasaran').on('change', function() {
-                updatePDTags('input_pd_sasaran', 'pd_tags_sasaran');
-            });
-
-            // ==============================================
             // LOAD ALL INDIKATOR COUNTS
             // ==============================================
             function loadAllIndikatorCounts() {
-                // Hitung indikator tujuan
                 $('.IndikatorTujuan').each(function() {
                     var tujuanId = $(this).data('id');
                     $.post(BaseURL + "Daerah/GetIndikatorTujuan", {
@@ -2716,7 +2727,6 @@ function setFormModeSasaran(mode) {
                     });
                 });
                 
-                // Hitung indikator sasaran
                 $('.IndikatorSasaran').each(function() {
                     var sasaranId = $(this).data('id');
                     $.post(BaseURL + "Daerah/GetIndikatorSasaran", {

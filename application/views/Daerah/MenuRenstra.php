@@ -132,6 +132,25 @@
         background: #007bff;
         margin-right: 5px;
     }
+    
+    .text-muted {
+        color: #6c757d !important;
+    }
+    
+    .text-danger {
+        color: #dc3545 !important;
+    }
+    
+    .alert-warning {
+        background-color: #fff3cd;
+        border-color: #ffeeba;
+        color: #856404;
+    }
+    
+    .no-data {
+        padding: 30px 0;
+        color: #999;
+    }
 </style>
 
 <div class="main-content">
@@ -260,7 +279,6 @@
                             </div>
                         <?php } ?>
 
-
                         <!-- TOMBOL TAMBAH (HANYA UNTUK ROLE 4) -->
                         <?php if ($IsRole4) { ?>
                             <div class="basic-tb-hd">
@@ -308,7 +326,9 @@
                                         $no = 1;
                                         foreach ($anggaran as $row) { ?>
                                             <tr>
-                                                <td class="text-center"><?= html_escape($row['NoManual'] ?: $no) ?></td>
+                                                <td class="text-center">
+                                                    <?= !empty($row['NoManual']) ? html_escape($row['NoManual']) : '-' ?>
+                                                </td>
                                                 <td class="uraian"><?= nl2br(html_escape($row['Uraian'])) ?></td>
                                                 <td class="uraian"><?= nl2br(html_escape($row['IndikatorKinerja'] ?? '-')) ?></td>
                                                 <td class="text-center"><?= html_escape($row['Satuan'] ?: '-') ?></td>
@@ -365,7 +385,7 @@
                                         } ?>
                                     <?php } else { ?>
                                         <tr>
-                                            <td colspan="<?= $IsRole4 ? '17' : '16' ?>" class="text-center">
+                                            <td colspan="<?= $IsRole4 ? '17' : '16' ?>" class="text-center no-data">
                                                 <i>Belum ada data</i>
                                             </td>
                                         </tr>
@@ -381,7 +401,9 @@
     </div>
 </div>
 
+<!-- ============================================================ -->
 <!-- MODAL INPUT -->
+<!-- ============================================================ -->
 <div class="modal fade" id="ModalInput" role="dialog">
     <div class="modal-dialog modal-lg" style="top:5%; width:90%; max-width:1200px;">
         <div class="modal-content">
@@ -395,6 +417,11 @@
                         <strong>Instansi:</strong> <?= htmlspecialchars($NamaInstansi) ?>
                     </div>
                 <?php } ?>
+                
+                <!-- ✅ INFORMASI NO BISA KOSONG -->
+                <div class="alert alert-warning" style="margin-bottom:15px;">
+                    <i class="fa fa-info-circle"></i> <strong>Catatan:</strong> Field <b>NO</b> bersifat opsional (boleh dikosongkan). Hanya field <b>Uraian</b> yang wajib diisi.
+                </div>
                 
                 <ul class="nav nav-tabs">
                     <li class="active"><a href="#tab_nomenklatur_input" data-toggle="tab">📋 Pilih dari Nomenklatur (Berjenjang)</a></li>
@@ -466,11 +493,11 @@
                             </div>
                             <div class="panel-body">
                                 <div class="form-group">
-                                    <label><b>Kode</b></label>
+                                    <label><b>Kode / NO</b> <span class="text-muted">(otomatis)</span></label>
                                     <input type="text" class="form-control" id="preview_no_input" readonly style="background:#f1f8e9; font-family: monospace;">
                                 </div>
                                 <div class="form-group">
-                                    <label><b>Uraian</b></label>
+                                    <label><b>Uraian</b> <span class="text-muted">(otomatis)</span></label>
                                     <textarea class="form-control" id="preview_uraian_input" rows="3" readonly style="background:#f1f8e9;"></textarea>
                                 </div>
                             </div>
@@ -489,12 +516,14 @@
                             </div>
                             <div class="panel-body">
                                 <div class="form-group">
-                                    <label><b>NO (diisi manual)</b></label>
-                                    <input type="text" class="form-control" id="NoManual" placeholder="contoh: 1. atau A atau 1.1">
+                                    <label><b>NO</b> <span class="text-muted">(opsional - boleh kosong)</span></label>
+                                    <input type="text" class="form-control" id="NoManual" placeholder="contoh: 1. atau A atau 1.1 (kosongkan jika tidak perlu)">
+                                    <small class="text-muted">Field ini opsional, bisa dikosongkan</small>
                                 </div>
                                 <div class="form-group">
-                                    <label><b>Uraian</b></label>
+                                    <label><b>Uraian</b> <span class="text-danger">*</span></label>
                                     <textarea class="form-control" id="Uraian" rows="3" placeholder="Isi uraian secara manual..."></textarea>
+                                    <small class="text-danger">Wajib diisi</small>
                                 </div>
                             </div>
                         </div>
@@ -550,7 +579,9 @@
     </div>
 </div>
 
+<!-- ============================================================ -->
 <!-- MODAL EDIT -->
+<!-- ============================================================ -->
 <div class="modal fade" id="ModalEdit" role="dialog">
     <div class="modal-dialog modal-lg" style="top:5%; width:90%; max-width:1200px;">
         <div class="modal-content">
@@ -560,6 +591,11 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" id="EditId">
+                
+                <!-- ✅ INFORMASI NO BISA KOSONG -->
+                <div class="alert alert-warning" style="margin-bottom:15px;">
+                    <i class="fa fa-info-circle"></i> <strong>Catatan:</strong> Field <b>NO</b> bersifat opsional (boleh dikosongkan). Hanya field <b>Uraian</b> yang wajib diisi.
+                </div>
                 
                 <ul class="nav nav-tabs">
                     <li class="active"><a href="#tab_nomenklatur_edit" data-toggle="tab">📋 Pilih dari Nomenklatur (Berjenjang)</a></li>
@@ -636,11 +672,11 @@
                             </div>
                             <div class="panel-body">
                                 <div class="form-group">
-                                    <label><b>Kode</b></label>
+                                    <label><b>Kode / NO</b> <span class="text-muted">(otomatis)</span></label>
                                     <input type="text" class="form-control" id="preview_no_edit" readonly style="background:#f1f8e9; font-family: monospace;">
                                 </div>
                                 <div class="form-group">
-                                    <label><b>Uraian</b></label>
+                                    <label><b>Uraian</b> <span class="text-muted">(otomatis)</span></label>
                                     <textarea class="form-control" id="preview_uraian_edit" rows="3" readonly style="background:#f1f8e9;"></textarea>
                                 </div>
                             </div>
@@ -654,12 +690,14 @@
                             </div>
                             <div class="panel-body">
                                 <div class="form-group">
-                                    <label><b>NO (diisi manual)</b></label>
-                                    <input type="text" class="form-control" id="EditNoManual">
+                                    <label><b>NO</b> <span class="text-muted">(opsional - boleh kosong)</span></label>
+                                    <input type="text" class="form-control" id="EditNoManual" placeholder="Kosongkan jika tidak perlu">
+                                    <small class="text-muted">Field ini opsional, bisa dikosongkan</small>
                                 </div>
                                 <div class="form-group">
-                                    <label><b>Uraian</b></label>
+                                    <label><b>Uraian</b> <span class="text-danger">*</span></label>
                                     <textarea class="form-control" id="EditUraian" rows="3"></textarea>
+                                    <small class="text-danger">Wajib diisi</small>
                                 </div>
                             </div>
                         </div>
@@ -714,6 +752,9 @@
     </div>
 </div>
 
+<!-- ============================================================ -->
+<!-- JAVASCRIPT -->
+<!-- ============================================================ -->
 <script src="<?= base_url('js/vendor/jquery-1.12.4.min.js') ?>"></script>
 <script src="<?= base_url('js/bootstrap.min.js') ?>"></script>
 <script src="<?= base_url('js/data-table/jquery.dataTables.min.js') ?>"></script>
@@ -1351,16 +1392,18 @@ $(document).ready(function() {
                 uraian = $('#select_urusan option:selected').text();
             }
             
-            data.NoManual = kode;
+            // ✅ NO otomatis dari kode (bisa kosong jika tidak ada kode)
+            data.NoManual = kode || '';
             var parts = uraian.split(' - ');
             data.Uraian = parts.slice(1).join(' - ');
             
-            if (!data.NoManual || !data.Uraian) {
+            if (!data.Uraian) {
                 alert("Silakan pilih data dari nomenklatur terlebih dahulu!");
                 return;
             }
         } else {
-            data.NoManual = $("#NoManual").val();
+            // ✅ NO manual: Bisa kosong
+            data.NoManual = $("#NoManual").val() || '';
             data.Uraian = $("#Uraian").val();
             
             if (!data.Uraian) {
@@ -1403,11 +1446,11 @@ $(document).ready(function() {
         
         $("#EditId").val(btn.data("id"));
         
-        // Pastikan data diambil sebagai string
+        // ✅ Ambil data NO (bisa kosong)
         var noManual = String(btn.data("nomanual") || "");
         var uraian = String(btn.data("uraian") || "");
         
-        // Set nilai ke form manual
+        // ✅ Set nilai ke form manual (bisa kosong)
         $("#EditNoManual").val(noManual);
         $("#EditUraian").val(uraian);
         $("#EditIndikatorKinerja").val(String(btn.data("indikator") || ""));
@@ -1431,7 +1474,7 @@ $(document).ready(function() {
         $('#alert_data_existing, #info_nomenklatur_edit').hide();
         $('#path_display_edit').html('Belum ada yang dipilih');
         
-        // Load data untuk edit berdasarkan kode yang ada
+        // ✅ Jika ada kode, load data untuk edit
         if (existingKode && existingKode !== "" && existingKode !== "null" && existingKode !== "undefined") {
             var kodeStr = String(existingKode);
             var parts = kodeStr.split('.');
@@ -1519,16 +1562,18 @@ $(document).ready(function() {
                 uraian = $('#edit_select_urusan option:selected').text();
             }
             
-            data.NoManual = kode;
+            // ✅ NO otomatis dari kode (bisa kosong jika tidak ada kode)
+            data.NoManual = kode || '';
             var parts = uraian.split(' - ');
             data.Uraian = parts.slice(1).join(' - ');
             
-            if (!data.NoManual || !data.Uraian) {
+            if (!data.Uraian) {
                 alert("Silakan pilih data dari nomenklatur terlebih dahulu!");
                 return;
             }
         } else {
-            data.NoManual = $("#EditNoManual").val();
+            // ✅ NO manual: Bisa kosong
+            data.NoManual = $("#EditNoManual").val() || '';
             data.Uraian = $("#EditUraian").val();
             
             if (!data.Uraian) {

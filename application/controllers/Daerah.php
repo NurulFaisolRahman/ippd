@@ -3941,6 +3941,71 @@ public function GetSelectedPD() {
     }
 }
 
+// ============================================================
+// GET DAFTAR PERANGKAT DAERAH UNTUK PD PENGGAMPUH
+// ============================================================
+public function GetListPDForIndikator() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $kodeWilayah = $this->_checkSessionWilayah();
+    if (!$kodeWilayah) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih', 'data' => []]);
+        return;
+    }
+    
+    // Ambil data perangkat daerah dari akun_instansi - SEMUA LEVEL
+    $this->db->select('id, nama');
+    $this->db->where('kodewilayah', $kodeWilayah);
+    $this->db->where('deleted_at IS NULL', null, false);
+    $this->db->order_by('nama', 'ASC');
+    $query = $this->db->get('akun_instansi');
+    
+    $data = $query->result_array();
+    
+    echo json_encode([
+        'status' => 'success',
+        'data' => $data
+    ]);
+}
+
+// ============================================================
+// GET DETAIL PD PENGGAMPUH YANG SUDAH DIPILIH
+// ============================================================
+public function GetSelectedPDForIndikator() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $indikatorId = (int)$this->input->post('indikator_id', TRUE);
+    $type = $this->input->post('type', TRUE); // 'tujuan' atau 'sasaran'
+    
+    if ($indikatorId <= 0) {
+        echo json_encode([]);
+        return;
+    }
+    
+    // Tentukan tabel berdasarkan type
+    $table = ($type === 'tujuan') ? 'indikator_tujuan' : 'indikator_sasaran';
+    
+    $data = $this->db
+        ->select('pd_pengampuh')
+        ->where('id', $indikatorId)
+        ->where('deleted_at IS NULL', null, false)
+        ->get($table)
+        ->row_array();
+    
+    if ($data && !empty($data['pd_pengampuh'])) {
+        $selectedIds = array_filter(array_map('intval', explode(',', $data['pd_pengampuh'])));
+        echo json_encode(array_values($selectedIds));
+    } else {
+        echo json_encode([]);
+    }
+}
+
  public function TahapanRPJMD() {
         $Header['Halaman'] = 'RPJMD';
         $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
