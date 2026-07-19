@@ -2314,90 +2314,125 @@ public function GetPeriodeMisiByIdMisi() {
     // ============================================================
     
     public function VisiRPJMD() {
-        $Header['Halaman'] = 'RPJMD';
-        $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
+    $Header['Halaman'] = 'RPJMD';
+    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
 
-        $KodeWilayah = $this->session->userdata('KodeWilayah') 
-                    ?? $this->session->userdata('TempKodeWilayah') 
-                    ?? $this->input->get('KodeWilayah', TRUE);
+    $KodeWilayah = $this->session->userdata('KodeWilayah') 
+                ?? $this->session->userdata('TempKodeWilayah') 
+                ?? $this->input->get('KodeWilayah', TRUE);
 
-        if ($KodeWilayah) {
-            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-            if ($wilayah) {
-                $Data['KodeWilayah'] = $KodeWilayah;
-                $Data['NamaWilayah'] = $wilayah['Nama'];
+    if ($KodeWilayah) {
+        $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+        if ($wilayah) {
+            $Data['KodeWilayah'] = $KodeWilayah;
+            $Data['NamaWilayah'] = $wilayah['Nama'];
+            
+            // Ambil Visi
+            $Data['Visi'] = $this->db
+                ->select('v.*, k.Nama')
+                ->from('visirpjmd v')
+                ->join('kodewilayah k', 'v.KodeWilayah = k.Kode', 'left')
+                ->where('v.KodeWilayah', $KodeWilayah)
+                ->where('v.deleted_at IS NULL')
+                ->order_by('v.TahunMulai', 'DESC')
+                ->get()
+                ->result_array();
+            
+            // Load Misi, Tujuan, Sasaran untuk setiap Visi
+            foreach ($Data['Visi'] as &$visi) {
+                $visi['Misi'] = $this->db
+                    ->select('m.*')
+                    ->from('misirpjmd m')
+                    ->where('m._Id', $visi['Id'])
+                    ->where('m.KodeWilayah', $KodeWilayah)
+                    ->where('m.deleted_at IS NULL')
+                    ->order_by('m.Id', 'ASC')
+                    ->get()
+                    ->result_array();
                 
-                $Data['Visi'] = $this->db->select('v.*, k.Nama')
-                    ->from('visirpjmd v')
-                    ->join('kodewilayah k', 'v.KodeWilayah = k.Kode', 'left')
-                    ->where('v.KodeWilayah', $KodeWilayah)
-                    ->where('v.deleted_at IS NULL')
-                    ->order_by('v.TahunMulai', 'DESC')
-                    ->get()->result_array();
-                
-                foreach ($Data['Visi'] as &$visi) {
-                    $visi['Misi'] = $this->db
-                        ->select('m.*')
-                        ->from('misirpjmd m')
-                        ->where('m._Id', $visi['Id'])
-                        ->where('m.KodeWilayah', $KodeWilayah)
-                        ->where('m.deleted_at IS NULL')
-                        ->order_by('m.Id', 'ASC')
-                        ->get()->result_array();
+                foreach ($visi['Misi'] as &$misi) {
+                    // Jika misi tidak punya periode, ambil dari visi
+                    if (empty($misi['TahunMulai']) || empty($misi['TahunAkhir'])) {
+                        $misi['TahunMulai'] = $visi['TahunMulai'];
+                        $misi['TahunAkhir'] = $visi['TahunAkhir'];
+                    }
                     
-                    foreach ($visi['Misi'] as &$misi) {
-                        if (empty($misi['TahunMulai']) || empty($misi['TahunAkhir'])) {
-                            $misi['TahunMulai'] = $visi['TahunMulai'];
-                            $misi['TahunAkhir'] = $visi['TahunAkhir'];
+                    $misi['Tujuan'] = $this->db
+                        ->select('t.*')
+                        ->from('tujuanrpjmd t')
+                        ->where('t._Id', $misi['Id'])
+                        ->where('t.KodeWilayah', $KodeWilayah)
+                        ->where('t.deleted_at IS NULL')
+                        ->order_by('t.Id', 'ASC')
+                        ->get()
+                        ->result_array();
+                    
+                    foreach ($misi['Tujuan'] as &$tujuan) {
+                        // Jika tujuan tidak punya periode, ambil dari misi
+                        if (empty($tujuan['TahunMulai']) || empty($tujuan['TahunAkhir'])) {
+                            $tujuan['TahunMulai'] = $misi['TahunMulai'];
+                            $tujuan['TahunAkhir'] = $misi['TahunAkhir'];
                         }
                         
-                        $misi['Tujuan'] = $this->db
-                            ->select('t.*')
-                            ->from('tujuanrpjmd t')
-                            ->where('t._Id', $misi['Id'])
-                            ->where('t.KodeWilayah', $KodeWilayah)
-                            ->where('t.deleted_at IS NULL')
-                            ->order_by('t.Id', 'ASC')
-                            ->get()->result_array();
+                        $tujuan['Sasaran'] = $this->db
+                            ->select('s.*')
+                            ->from('sasaranrpjmd s')
+                            ->where('s._Id', $tujuan['Id'])
+                            ->where('s.KodeWilayah', $KodeWilayah)
+                            ->where('s.deleted_at IS NULL')
+                            ->order_by('s.Id', 'ASC')
+                            ->get()
+                            ->result_array();
                         
-                        foreach ($misi['Tujuan'] as &$tujuan) {
-                            if (empty($tujuan['TahunMulai']) || empty($tujuan['TahunAkhir'])) {
-                                $tujuan['TahunMulai'] = $misi['TahunMulai'];
-                                $tujuan['TahunAkhir'] = $misi['TahunAkhir'];
-                            }
-                            
-                            $tujuan['Sasaran'] = $this->db
-                                ->select('s.*')
-                                ->from('sasaranrpjmd s')
-                                ->where('s._Id', $tujuan['Id'])
-                                ->where('s.KodeWilayah', $KodeWilayah)
-                                ->where('s.deleted_at IS NULL')
-                                ->order_by('s.Id', 'ASC')
-                                ->get()->result_array();
-                            
-                            foreach ($tujuan['Sasaran'] as &$sasaran) {
-                                if (empty($sasaran['TahunMulai']) || empty($sasaran['TahunAkhir'])) {
-                                    $sasaran['TahunMulai'] = $tujuan['TahunMulai'];
-                                    $sasaran['TahunAkhir'] = $tujuan['TahunAkhir'];
-                                }
+                        foreach ($tujuan['Sasaran'] as &$sasaran) {
+                            // Jika sasaran tidak punya periode, ambil dari tujuan
+                            if (empty($sasaran['TahunMulai']) || empty($sasaran['TahunAkhir'])) {
+                                $sasaran['TahunMulai'] = $tujuan['TahunMulai'];
+                                $sasaran['TahunAkhir'] = $tujuan['TahunAkhir'];
                             }
                         }
                     }
                 }
-            } else {
-                $Data['Visi'] = [];
-                $Data['KodeWilayah'] = '';
-                $Data['NamaWilayah'] = '';
             }
+            
+            // Data periode untuk dropdown referensi
+            $kodeProvinsi = substr($KodeWilayah, 0, 2);
+            
+            $Data['PeriodeRPJPDP'] = $this->db
+                ->select('Id, TahunMulai, TahunAkhir')
+                ->from('visirpjpdp')
+                ->where('KodeWilayah', $kodeProvinsi)
+                ->where('deleted_at IS NULL')
+                ->order_by('TahunMulai', 'DESC')
+                ->get()
+                ->result_array();
+            
+            $Data['PeriodeRPJPN'] = $this->db
+                ->select('Id, TahunMulai, TahunAkhir')
+                ->from('visirpjpn')
+                ->where('deleted_at IS NULL')
+                ->order_by('TahunMulai', 'DESC')
+                ->get()
+                ->result_array();
+                
         } else {
-            $Data['Visi'] = [];
             $Data['KodeWilayah'] = '';
             $Data['NamaWilayah'] = '';
+            $Data['Visi'] = [];
+            $Data['PeriodeRPJPDP'] = [];
+            $Data['PeriodeRPJPN'] = [];
         }
-
-        $this->load->view('Daerah/header', $Header);
-        $this->load->view('Daerah/VisiRPJMD', $Data);
+    } else {
+        $Data['KodeWilayah'] = '';
+        $Data['NamaWilayah'] = '';
+        $Data['Visi'] = [];
+        $Data['PeriodeRPJPDP'] = [];
+        $Data['PeriodeRPJPN'] = [];
     }
+
+    $this->load->view('Daerah/header', $Header);
+    $this->load->view('Daerah/VisiRPJMD', $Data);
+}
 
     // ============================================================
 // CRUD VISI RPJMD - PERBAIKAN
@@ -2554,29 +2589,45 @@ public function HapusVisiRPJMD() {
 	}
 
   public function GetMisiRPJMD() {
-        if (!$this->input->is_ajax_request()) {
-            show_404();
-            return;
-        }
-        
-        $kodeWilayah = $this->_checkSessionWilayah();
-        if (!$kodeWilayah) return;
-        
-        $visiId = (int)$this->input->post('Id', TRUE);
-        if ($visiId <= 0) {
-            echo json_encode([]);
-            return;
-        }
-        
-        $data = $this->db->where('_Id', $visiId)
-            ->where('KodeWilayah', $kodeWilayah)
-            ->where('deleted_at IS NULL')
-            ->order_by('Id', 'ASC')
-            ->get('misirpjmd')
-            ->result_array();
-        
-        echo json_encode($data);
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
     }
+    
+    $kodeWilayah = $this->_checkSessionWilayah();
+    if (!$kodeWilayah) {
+        echo json_encode([]);
+        return;
+    }
+    
+    $visiId = (int)$this->input->post('Id', TRUE);
+    if ($visiId <= 0) {
+        echo json_encode([]);
+        return;
+    }
+    
+    $data = $this->db
+        ->select('m.*, v.TahunMulai as VisiTahunMulai, v.TahunAkhir as VisiTahunAkhir')
+        ->from('misirpjmd m')
+        ->join('visirpjmd v', 'v.Id = m._Id AND v.KodeWilayah = m.KodeWilayah', 'inner')
+        ->where('m._Id', $visiId)
+        ->where('m.KodeWilayah', $kodeWilayah)
+        ->where('m.deleted_at IS NULL')
+        ->get()
+        ->result_array();
+    
+    // Pastikan setiap misi memiliki periode
+    foreach ($data as &$misi) {
+        if (empty($misi['TahunMulai']) || empty($misi['TahunAkhir'])) {
+            $misi['TahunMulai'] = $misi['VisiTahunMulai'];
+            $misi['TahunAkhir'] = $misi['VisiTahunAkhir'];
+        }
+        unset($misi['VisiTahunMulai']);
+        unset($misi['VisiTahunAkhir']);
+    }
+    
+    echo json_encode($data);
+}
 
  public function MisiRPJMD() {
         $Header['Halaman'] = 'RPJMD';
@@ -2881,8 +2932,17 @@ public function TujuanRPJMD() {
         return;
     }
     
-    $periode = $this->_getPeriodeFromMisi($misiId);
-    if (!$periode) {
+    // Ambil periode dari misi
+    $misi = $this->db
+        ->select('m.TahunMulai, m.TahunAkhir')
+        ->from('misirpjmd m')
+        ->where('m.Id', $misiId)
+        ->where('m.KodeWilayah', $kodeWilayah)
+        ->where('m.deleted_at IS NULL')
+        ->get()
+        ->row_array();
+    
+    if (!$misi) {
         echo json_encode(['status' => 'error', 'message' => 'Misi tidak ditemukan!']);
         return;
     }
@@ -2891,8 +2951,8 @@ public function TujuanRPJMD() {
         'KodeWilayah' => $kodeWilayah,
         '_Id' => $misiId,
         'Tujuan' => $tujuan,
-        'TahunMulai' => $periode['TahunMulai'],
-        'TahunAkhir' => $periode['TahunAkhir'],
+        'TahunMulai' => $misi['TahunMulai'],
+        'TahunAkhir' => $misi['TahunAkhir'],
         'created_at' => date('Y-m-d H:i:s')
     ];
     
@@ -2934,8 +2994,17 @@ public function EditTujuanRPJMD() {
         return;
     }
     
-    $periode = $this->_getPeriodeFromMisi($misiId);
-    if (!$periode) {
+    // Ambil periode dari misi
+    $misi = $this->db
+        ->select('m.TahunMulai, m.TahunAkhir')
+        ->from('misirpjmd m')
+        ->where('m.Id', $misiId)
+        ->where('m.KodeWilayah', $kodeWilayah)
+        ->where('m.deleted_at IS NULL')
+        ->get()
+        ->row_array();
+    
+    if (!$misi) {
         echo json_encode(['status' => 'error', 'message' => 'Misi tidak ditemukan!']);
         return;
     }
@@ -2943,8 +3012,8 @@ public function EditTujuanRPJMD() {
     $data = [
         '_Id' => $misiId,
         'Tujuan' => $tujuan,
-        'TahunMulai' => $periode['TahunMulai'],
-        'TahunAkhir' => $periode['TahunAkhir'],
+        'TahunMulai' => $misi['TahunMulai'],
+        'TahunAkhir' => $misi['TahunAkhir'],
         'updated_at' => date('Y-m-d H:i:s')
     ];
     
@@ -2977,6 +3046,24 @@ public function HapusTujuanRPJMD() {
         return;
     }
     
+    // Cek apakah ada sasaran yang terkait
+    $sasaranCount = $this->db
+        ->where('_Id', $id)
+        ->where('KodeWilayah', $kodeWilayah)
+        ->where('deleted_at IS NULL')
+        ->count_all_results('sasaranrpjmd');
+    
+    if ($sasaranCount > 0) {
+        // Hapus sasaran terkait terlebih dahulu
+        $this->db
+            ->where('_Id', $id)
+            ->where('KodeWilayah', $kodeWilayah)
+            ->update('sasaranrpjmd', [
+                'deleted_at' => date('Y-m-d H:i:s')
+            ]);
+    }
+    
+    // Hapus tujuan
     $this->db->where('Id', $id);
     $this->db->where('KodeWilayah', $kodeWilayah);
     $this->db->update('tujuanrpjmd', [
@@ -3004,29 +3091,46 @@ public function HapusTujuanRPJMD() {
 	}
 
    public function GetSasaranRPJMD() {
-        if (!$this->input->is_ajax_request()) {
-            show_404();
-            return;
-        }
-        
-        $kodeWilayah = $this->_checkSessionWilayah();
-        if (!$kodeWilayah) return;
-        
-        $tujuanId = (int)$this->input->post('Id', TRUE);
-        if ($tujuanId <= 0) {
-            echo json_encode([]);
-            return;
-        }
-        
-        $data = $this->db->where('_Id', $tujuanId)
-            ->where('KodeWilayah', $kodeWilayah)
-            ->where('deleted_at IS NULL')
-            ->order_by('Id', 'ASC')
-            ->get('sasaranrpjmd')
-            ->result_array();
-        
-        echo json_encode($data);
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
     }
+    
+    $kodeWilayah = $this->_checkSessionWilayah();
+    if (!$kodeWilayah) {
+        echo json_encode([]);
+        return;
+    }
+    
+    $tujuanId = (int)$this->input->post('Id', TRUE);
+    if ($tujuanId <= 0) {
+        echo json_encode([]);
+        return;
+    }
+    
+    $data = $this->db
+        ->select('s.*, t.TahunMulai as TujuanTahunMulai, t.TahunAkhir as TujuanTahunAkhir')
+        ->from('sasaranrpjmd s')
+        ->join('tujuanrpjmd t', 't.Id = s._Id AND t.KodeWilayah = s.KodeWilayah', 'inner')
+        ->where('s._Id', $tujuanId)
+        ->where('s.KodeWilayah', $kodeWilayah)
+        ->where('s.deleted_at IS NULL')
+        ->order_by('s.Id', 'ASC')
+        ->get()
+        ->result_array();
+    
+    // Pastikan setiap sasaran memiliki periode
+    foreach ($data as &$sasaran) {
+        if (empty($sasaran['TahunMulai']) || empty($sasaran['TahunAkhir'])) {
+            $sasaran['TahunMulai'] = $sasaran['TujuanTahunMulai'];
+            $sasaran['TahunAkhir'] = $sasaran['TujuanTahunAkhir'];
+        }
+        unset($sasaran['TujuanTahunMulai']);
+        unset($sasaran['TujuanTahunAkhir']);
+    }
+    
+    echo json_encode($data);
+}
 
 public function SasaranRPJMD() {
         $Header['Halaman'] = 'RPJMD';
@@ -3108,8 +3212,17 @@ public function SasaranRPJMD() {
         return;
     }
     
-    $periode = $this->_getPeriodeFromTujuan($tujuanId);
-    if (!$periode) {
+    // Ambil periode dari tujuan
+    $tujuan = $this->db
+        ->select('t.TahunMulai, t.TahunAkhir')
+        ->from('tujuanrpjmd t')
+        ->where('t.Id', $tujuanId)
+        ->where('t.KodeWilayah', $kodeWilayah)
+        ->where('t.deleted_at IS NULL')
+        ->get()
+        ->row_array();
+    
+    if (!$tujuan) {
         echo json_encode(['status' => 'error', 'message' => 'Tujuan tidak ditemukan!']);
         return;
     }
@@ -3118,8 +3231,8 @@ public function SasaranRPJMD() {
         'KodeWilayah' => $kodeWilayah,
         '_Id' => $tujuanId,
         'Sasaran' => $sasaran,
-        'TahunMulai' => $periode['TahunMulai'],
-        'TahunAkhir' => $periode['TahunAkhir'],
+        'TahunMulai' => $tujuan['TahunMulai'],
+        'TahunAkhir' => $tujuan['TahunAkhir'],
         'created_at' => date('Y-m-d H:i:s')
     ];
     
@@ -3161,8 +3274,17 @@ public function EditSasaranRPJMD() {
         return;
     }
     
-    $periode = $this->_getPeriodeFromTujuan($tujuanId);
-    if (!$periode) {
+    // Ambil periode dari tujuan
+    $tujuan = $this->db
+        ->select('t.TahunMulai, t.TahunAkhir')
+        ->from('tujuanrpjmd t')
+        ->where('t.Id', $tujuanId)
+        ->where('t.KodeWilayah', $kodeWilayah)
+        ->where('t.deleted_at IS NULL')
+        ->get()
+        ->row_array();
+    
+    if (!$tujuan) {
         echo json_encode(['status' => 'error', 'message' => 'Tujuan tidak ditemukan!']);
         return;
     }
@@ -3170,8 +3292,8 @@ public function EditSasaranRPJMD() {
     $data = [
         '_Id' => $tujuanId,
         'Sasaran' => $sasaran,
-        'TahunMulai' => $periode['TahunMulai'],
-        'TahunAkhir' => $periode['TahunAkhir'],
+        'TahunMulai' => $tujuan['TahunMulai'],
+        'TahunAkhir' => $tujuan['TahunAkhir'],
         'updated_at' => date('Y-m-d H:i:s')
     ];
     
@@ -3222,6 +3344,602 @@ public function HapusSasaranRPJMD() {
     $Id = $this->input->post('id');
     echo json_encode($this->db->get_where('sasaran', array('IdTujuan' => $Id))->result_array());
 	}
+
+    public function GetIndikatorTujuan() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $tujuanId = (int)$this->input->post('tujuan_id', TRUE);
+    if ($tujuanId <= 0) {
+        echo json_encode([]);
+        return;
+    }
+    
+    $data = $this->db
+        ->where('tujuan_id', $tujuanId)
+        ->where('deleted_at IS NULL')
+        ->order_by('id', 'ASC')
+        ->get('indikator_tujuan')
+        ->result_array();
+    
+    // Tambahkan nama PD untuk setiap indikator
+    foreach ($data as &$item) {
+        if (!empty($item['pd_pengampuh'])) {
+            $pdIds = explode(',', $item['pd_pengampuh']);
+            $pdNames = $this->db
+                ->select('nama')
+                ->where_in('id', $pdIds)
+                ->where('deleted_at IS NULL')
+                ->get('akun_instansi')
+                ->result_array();
+            $item['pd_pengampuh_names'] = array_column($pdNames, 'nama');
+        } else {
+            $item['pd_pengampuh_names'] = [];
+        }
+    }
+    
+    echo json_encode($data);
+}
+
+/**
+ * Input Indikator Tujuan - dengan PD Multi-Select
+ */
+public function InputIndikatorTujuan() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $kodeWilayah = $this->session->userdata('KodeWilayah') 
+                ?? $this->session->userdata('TempKodeWilayah') 
+                ?? '';
+    
+    if (empty($kodeWilayah)) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+        return;
+    }
+    
+    $tujuanId = (int)$this->input->post('tujuan_id', TRUE);
+    $indikator = trim($this->input->post('indikator', TRUE));
+    $satuan = trim($this->input->post('satuan', TRUE));
+    $pdPengampuh = $this->input->post('pd_pengampuh', TRUE);
+    
+    if ($tujuanId <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Tujuan tidak valid!']);
+        return;
+    }
+    if (empty($indikator)) {
+        echo json_encode(['status' => 'error', 'message' => 'Indikator harus diisi!']);
+        return;
+    }
+    
+    // Validasi PD yang dipilih
+    $pdPengampuhValue = '';
+    if (!empty($pdPengampuh) && is_array($pdPengampuh)) {
+        $pdPengampuh = array_filter($pdPengampuh, function($val) {
+            return !empty($val) && is_numeric($val);
+        });
+        
+        if (!empty($pdPengampuh)) {
+            $validCount = $this->db
+                ->where_in('id', $pdPengampuh)
+                ->where('kodewilayah', $kodeWilayah)
+                ->where('deleted_at IS NULL')
+                ->count_all_results('akun_instansi');
+            
+            if ($validCount !== count($pdPengampuh)) {
+                echo json_encode(['status' => 'error', 'message' => 'Beberapa PD tidak valid!']);
+                return;
+            }
+            
+            $pdPengampuhValue = implode(',', $pdPengampuh);
+        }
+    }
+    
+    // Tentukan apakah perlu insert kodewilayah
+    // Jika tabel memiliki kolom kodewilayah, tambahkan
+    $data = [
+        'tujuan_id' => $tujuanId,
+        'indikator' => $indikator,
+        'satuan' => $satuan,
+        'baseline_2024' => $this->input->post('baseline_2024') ?: null,
+        'target_2025' => $this->input->post('target_2025') ?: null,
+        'target_2026' => $this->input->post('target_2026') ?: null,
+        'target_2027' => $this->input->post('target_2027') ?: null,
+        'target_2028' => $this->input->post('target_2028') ?: null,
+        'target_2029' => $this->input->post('target_2029') ?: null,
+        'target_2030' => $this->input->post('target_2030') ?: null,
+        'pd_pengampuh' => $pdPengampuhValue,
+        'created_at' => date('Y-m-d H:i:s')
+    ];
+    
+    // Jika tabel memiliki kolom kodewilayah, tambahkan
+    // Cek apakah kolom kodewilayah ada
+    $columns = $this->db->query("SHOW COLUMNS FROM indikator_tujuan LIKE 'kodewilayah'")->num_rows();
+    if ($columns > 0) {
+        $data['kodewilayah'] = $kodeWilayah;
+    }
+    
+    $this->db->insert('indikator_tujuan', $data);
+    
+    if ($this->db->affected_rows() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Indikator berhasil ditambahkan']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan indikator!']);
+    }
+}
+
+/**
+ * Edit Indikator Tujuan - dengan PD Multi-Select (tanpa filter level)
+ */
+public function EditIndikatorTujuan() {
+    // Aktifkan error reporting untuk debugging
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+    
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    try {
+        $id = (int)$this->input->post('id', TRUE);
+        if ($id <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+            return;
+        }
+        
+        $indikator = trim($this->input->post('indikator', TRUE));
+        if (empty($indikator)) {
+            echo json_encode(['status' => 'error', 'message' => 'Indikator harus diisi!']);
+            return;
+        }
+        
+        // Ambil data existing - TANPA kodewilayah
+        $existing = $this->db
+            ->where('id', $id)
+            ->where('deleted_at IS NULL')
+            ->get('indikator_tujuan')
+            ->row_array();
+        
+        if (!$existing) {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
+            return;
+        }
+        
+        // Gunakan session KodeWilayah
+        $kodeWilayah = $this->session->userdata('KodeWilayah') 
+                    ?? $this->session->userdata('TempKodeWilayah') 
+                    ?? '';
+        
+        if (empty($kodeWilayah)) {
+            echo json_encode(['status' => 'error', 'message' => 'Wilayah tidak ditemukan!']);
+            return;
+        }
+        
+        // Ambil PD Pengampuh dari POST
+        $pdPengampuh = $this->input->post('pd_pengampuh', TRUE);
+        
+        // Validasi dan proses PD Pengampuh
+        $pdPengampuhValue = '';
+        if (!empty($pdPengampuh) && is_array($pdPengampuh)) {
+            // Filter nilai kosong dan validasi numeric
+            $pdPengampuh = array_filter($pdPengampuh, function($val) {
+                return !empty($val) && is_numeric($val);
+            });
+            
+            // Validasi setiap PD exists (tanpa filter Level)
+            if (!empty($pdPengampuh)) {
+                $validCount = $this->db
+                    ->where_in('id', $pdPengampuh)
+                    ->where('kodewilayah', $kodeWilayah)
+                    ->where('deleted_at IS NULL')
+                    ->count_all_results('akun_instansi');
+                
+                if ($validCount !== count($pdPengampuh)) {
+                    echo json_encode(['status' => 'error', 'message' => 'Beberapa PD tidak valid!']);
+                    return;
+                }
+                
+                $pdPengampuhValue = implode(',', $pdPengampuh);
+            }
+        }
+        
+        // Siapkan data untuk update
+        $data = [
+            'indikator' => $indikator,
+            'satuan' => trim($this->input->post('satuan', TRUE)),
+            'baseline_2024' => $this->input->post('baseline_2024') ?: null,
+            'target_2025' => $this->input->post('target_2025') ?: null,
+            'target_2026' => $this->input->post('target_2026') ?: null,
+            'target_2027' => $this->input->post('target_2027') ?: null,
+            'target_2028' => $this->input->post('target_2028') ?: null,
+            'target_2029' => $this->input->post('target_2029') ?: null,
+            'target_2030' => $this->input->post('target_2030') ?: null,
+            'pd_pengampuh' => $pdPengampuhValue,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        // Debug: Log data yang akan diupdate
+        log_message('debug', 'EditIndikatorTujuan Data: ' . print_r($data, true));
+        
+        // Update database
+        $this->db->where('id', $id);
+        $result = $this->db->update('indikator_tujuan', $data);
+        
+        if ($result) {
+            echo json_encode(['status' => 'success', 'message' => 'Indikator berhasil diupdate']);
+        } else {
+            // Cek error database
+            $error = $this->db->error();
+            log_message('error', 'DB Error: ' . $error['message']);
+            echo json_encode(['status' => 'error', 'message' => 'Gagal update data: ' . $error['message']]);
+        }
+        
+    } catch (Exception $e) {
+        log_message('error', 'EditIndikatorTujuan Exception: ' . $e->getMessage());
+        echo json_encode(['status' => 'error', 'message' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+    }
+}
+
+public function HapusIndikatorTujuan() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', TRUE);
+    if ($id <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    
+    $this->db->where('id', $id);
+    $this->db->update('indikator_tujuan', [
+        'deleted_at' => date('Y-m-d H:i:s')
+    ]);
+    
+    if ($this->db->affected_rows() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Indikator berhasil dihapus']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus indikator!']);
+    }
+}
+
+// ============================================================
+// INDIKATOR SASARAN - CRUD
+// ============================================================
+
+public function GetIndikatorSasaran() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $sasaranId = (int)$this->input->post('sasaran_id', TRUE);
+    if ($sasaranId <= 0) {
+        echo json_encode([]);
+        return;
+    }
+    
+    $data = $this->db
+        ->where('sasaran_id', $sasaranId)
+        ->where('deleted_at IS NULL')
+        ->order_by('id', 'ASC')
+        ->get('indikator_sasaran')
+        ->result_array();
+    
+    // Tambahkan nama PD untuk setiap indikator
+    foreach ($data as &$item) {
+        if (!empty($item['pd_pengampuh'])) {
+            $pdIds = explode(',', $item['pd_pengampuh']);
+            $pdNames = $this->db
+                ->select('nama')
+                ->where_in('id', $pdIds)
+                ->where('deleted_at IS NULL')
+                ->get('akun_instansi')
+                ->result_array();
+            $item['pd_pengampuh_names'] = array_column($pdNames, 'nama');
+        } else {
+            $item['pd_pengampuh_names'] = [];
+        }
+    }
+    
+    echo json_encode($data);
+}
+
+/**
+ * Input Indikator Sasaran - dengan PD Multi-Select
+ */
+public function InputIndikatorSasaran() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $kodeWilayah = $this->session->userdata('KodeWilayah') 
+                ?? $this->session->userdata('TempKodeWilayah') 
+                ?? '';
+    
+    if (empty($kodeWilayah)) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+        return;
+    }
+    
+    $sasaranId = (int)$this->input->post('sasaran_id', TRUE);
+    $indikator = trim($this->input->post('indikator', TRUE));
+    $satuan = trim($this->input->post('satuan', TRUE));
+    $pdPengampuh = $this->input->post('pd_pengampuh', TRUE);
+    
+    if ($sasaranId <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Sasaran tidak valid!']);
+        return;
+    }
+    if (empty($indikator)) {
+        echo json_encode(['status' => 'error', 'message' => 'Indikator harus diisi!']);
+        return;
+    }
+    
+    // Validasi PD yang dipilih
+    $pdPengampuhValue = '';
+    if (!empty($pdPengampuh) && is_array($pdPengampuh)) {
+        $pdPengampuh = array_filter($pdPengampuh, function($val) {
+            return !empty($val) && is_numeric($val);
+        });
+        
+        if (!empty($pdPengampuh)) {
+            $validCount = $this->db
+                ->where_in('id', $pdPengampuh)
+                ->where('kodewilayah', $kodeWilayah)
+                ->where('deleted_at IS NULL')
+                ->count_all_results('akun_instansi');
+            
+            if ($validCount !== count($pdPengampuh)) {
+                echo json_encode(['status' => 'error', 'message' => 'Beberapa PD tidak valid!']);
+                return;
+            }
+            
+            $pdPengampuhValue = implode(',', $pdPengampuh);
+        }
+    }
+    
+    // Siapkan data untuk insert
+    $data = [
+        'sasaran_id' => $sasaranId,
+        'indikator' => $indikator,
+        'satuan' => $satuan,
+        'baseline_2024' => $this->input->post('baseline_2024') ?: null,
+        'target_2025' => $this->input->post('target_2025') ?: null,
+        'target_2026' => $this->input->post('target_2026') ?: null,
+        'target_2027' => $this->input->post('target_2027') ?: null,
+        'target_2028' => $this->input->post('target_2028') ?: null,
+        'target_2029' => $this->input->post('target_2029') ?: null,
+        'target_2030' => $this->input->post('target_2030') ?: null,
+        'pd_pengampuh' => $pdPengampuhValue,
+        'created_at' => date('Y-m-d H:i:s')
+    ];
+    
+    // Jika tabel memiliki kolom kodewilayah, tambahkan
+    $columns = $this->db->query("SHOW COLUMNS FROM indikator_sasaran LIKE 'kodewilayah'")->num_rows();
+    if ($columns > 0) {
+        $data['kodewilayah'] = $kodeWilayah;
+    }
+    
+    $this->db->insert('indikator_sasaran', $data);
+    
+    if ($this->db->affected_rows() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Indikator berhasil ditambahkan']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan indikator!']);
+    }
+}
+
+/**
+ * Edit Indikator Sasaran - dengan PD Multi-Select
+ */
+public function EditIndikatorSasaran() {
+    // Aktifkan error reporting untuk debugging
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+    
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    try {
+        $id = (int)$this->input->post('id', TRUE);
+        if ($id <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+            return;
+        }
+        
+        $indikator = trim($this->input->post('indikator', TRUE));
+        if (empty($indikator)) {
+            echo json_encode(['status' => 'error', 'message' => 'Indikator harus diisi!']);
+            return;
+        }
+        
+        // Ambil data existing - TANPA kodewilayah
+        $existing = $this->db
+            ->where('id', $id)
+            ->where('deleted_at IS NULL')
+            ->get('indikator_sasaran')
+            ->row_array();
+        
+        if (!$existing) {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
+            return;
+        }
+        
+        // Gunakan session KodeWilayah
+        $kodeWilayah = $this->session->userdata('KodeWilayah') 
+                    ?? $this->session->userdata('TempKodeWilayah') 
+                    ?? '';
+        
+        if (empty($kodeWilayah)) {
+            echo json_encode(['status' => 'error', 'message' => 'Wilayah tidak ditemukan!']);
+            return;
+        }
+        
+        // Ambil PD Pengampuh dari POST
+        $pdPengampuh = $this->input->post('pd_pengampuh', TRUE);
+        
+        // Validasi dan proses PD Pengampuh
+        $pdPengampuhValue = '';
+        if (!empty($pdPengampuh) && is_array($pdPengampuh)) {
+            // Filter nilai kosong dan validasi numeric
+            $pdPengampuh = array_filter($pdPengampuh, function($val) {
+                return !empty($val) && is_numeric($val);
+            });
+            
+            // Validasi setiap PD exists (tanpa filter Level)
+            if (!empty($pdPengampuh)) {
+                $validCount = $this->db
+                    ->where_in('id', $pdPengampuh)
+                    ->where('kodewilayah', $kodeWilayah)
+                    ->where('deleted_at IS NULL')
+                    ->count_all_results('akun_instansi');
+                
+                if ($validCount !== count($pdPengampuh)) {
+                    echo json_encode(['status' => 'error', 'message' => 'Beberapa PD tidak valid!']);
+                    return;
+                }
+                
+                $pdPengampuhValue = implode(',', $pdPengampuh);
+            }
+        }
+        
+        // Siapkan data untuk update
+        $data = [
+            'indikator' => $indikator,
+            'satuan' => trim($this->input->post('satuan', TRUE)),
+            'baseline_2024' => $this->input->post('baseline_2024') ?: null,
+            'target_2025' => $this->input->post('target_2025') ?: null,
+            'target_2026' => $this->input->post('target_2026') ?: null,
+            'target_2027' => $this->input->post('target_2027') ?: null,
+            'target_2028' => $this->input->post('target_2028') ?: null,
+            'target_2029' => $this->input->post('target_2029') ?: null,
+            'target_2030' => $this->input->post('target_2030') ?: null,
+            'pd_pengampuh' => $pdPengampuhValue,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        // Debug: Log data yang akan diupdate
+        log_message('debug', 'EditIndikatorSasaran Data: ' . print_r($data, true));
+        
+        // Update database
+        $this->db->where('id', $id);
+        $result = $this->db->update('indikator_sasaran', $data);
+        
+        if ($result) {
+            echo json_encode(['status' => 'success', 'message' => 'Indikator berhasil diupdate']);
+        } else {
+            // Cek error database
+            $error = $this->db->error();
+            log_message('error', 'DB Error: ' . $error['message']);
+            echo json_encode(['status' => 'error', 'message' => 'Gagal update data: ' . $error['message']]);
+        }
+        
+    } catch (Exception $e) {
+        log_message('error', 'EditIndikatorSasaran Exception: ' . $e->getMessage());
+        echo json_encode(['status' => 'error', 'message' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+    }
+}
+
+public function HapusIndikatorSasaran() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', TRUE);
+    if ($id <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    
+    $this->db->where('id', $id);
+    $this->db->update('indikator_sasaran', [
+        'deleted_at' => date('Y-m-d H:i:s')
+    ]);
+    
+    if ($this->db->affected_rows() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Indikator berhasil dihapus']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus indikator!']);
+    }
+}
+
+/**
+ * Get daftar semua Perangkat Daerah (akun_instansi) untuk dropdown
+ * Tanpa filter level - ambil semua data aktif
+ */
+public function GetListPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $kodeWilayah = $this->_checkSessionWilayah();
+    if (!$kodeWilayah) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+        return;
+    }
+    
+    // Ambil SEMUA data PD dari akun_instansi (tanpa filter Level)
+    $pd = $this->db
+        ->select('id, nama, Level, tahun_mulai, tahun_akhir')
+        ->where('kodewilayah', $kodeWilayah)
+        ->where('deleted_at IS NULL')
+        ->order_by('nama', 'ASC')
+        ->get('akun_instansi')
+        ->result_array();
+    
+    echo json_encode([
+        'status' => 'success',
+        'data' => $pd
+    ]);
+}
+
+/**
+ * Get detail PD yang sudah dipilih untuk edit
+ */
+public function GetSelectedPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $indikatorId = (int)$this->input->post('indikator_id', TRUE);
+    $type = $this->input->post('type', TRUE); // 'tujuan' atau 'sasaran'
+    
+    if ($indikatorId <= 0) {
+        echo json_encode([]);
+        return;
+    }
+    
+    // Tentukan tabel berdasarkan type
+    $table = ($type === 'tujuan') ? 'indikator_tujuan' : 'indikator_sasaran';
+    
+    // Hanya ambil pd_pengampuh, tanpa kodewilayah
+    $data = $this->db
+        ->select('pd_pengampuh')
+        ->where('id', $indikatorId)
+        ->where('deleted_at IS NULL')
+        ->get($table)
+        ->row_array();
+    
+    if ($data && !empty($data['pd_pengampuh'])) {
+        // Konversi string CSV ke array of integers
+        $selectedIds = array_filter(array_map('intval', explode(',', $data['pd_pengampuh'])));
+        echo json_encode(array_values($selectedIds));
+    } else {
+        echo json_encode([]);
+    }
+}
 
  public function TahapanRPJMD() {
         $Header['Halaman'] = 'RPJMD';

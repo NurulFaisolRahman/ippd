@@ -309,7 +309,7 @@
                                                                                 data-idmisi="<?= $sp['IdMisi'] ?>" 
                                                                                 style="font-size:10px; padding:2px 8px;" 
                                                                                 title="Edit Periode dan Misi">
-                                                                            <i class="notika-icon notika-edit"></i> Edit
+                                                                            <i class="notika-icon notika-edit"></i> 
                                                                         </button>
                                                                         <button class="btn btn-xs btn-danger HapusPeriodeMisi" 
                                                                                 data-idmisi="<?= $sp['IdMisi'] ?>"
@@ -317,7 +317,7 @@
                                                                                 data-misi="<?= html_escape($sp['Misi']) ?>"
                                                                                 style="font-size:10px; padding:2px 8px;" 
                                                                                 title="Hapus Periode dan Misi">
-                                                                            <i class="notika-icon notika-trash"></i> Hapus
+                                                                            <i class="notika-icon notika-trash"></i> 
                                                                         </button>
                                                                     </div>
                                                                 <?php } ?>
@@ -606,7 +606,7 @@ MODAL EDIT PERIODE DAN MISI (SAMA DENGAN FORM INPUT)
 ============================================================ -->
 <!-- Modal Edit Periode dan Misi -->
 <div class="modal fade" id="ModalEditPeriodeMisi" role="dialog">
-    <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
+    <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);overflow-x: hidden;overflow-y: auto;max-height: 600px;">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -717,7 +717,7 @@ MODAL KONFIRMASI HAPUS PERIODE DAN MISI
 MODAL EDIT SASARAN POKOK
 ============================================================ -->
 <div class="modal fade" id="ModalEditSasaranPokok" role="dialog">
-    <div class="modal-dialog modals-default">
+    <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);overflow-x: hidden;overflow-y: auto;max-height: 600px;">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -748,7 +748,7 @@ MODAL EDIT SASARAN POKOK
 MODAL EDIT IUP
 ============================================================ -->
 <div class="modal fade" id="ModalEditIUP" role="dialog">
-    <div class="modal-dialog modals-default" style="max-width: 800px;">
+    <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);overflow-x: hidden;overflow-y: auto;max-height: 600px;">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -829,6 +829,114 @@ MODAL EDIT IUP
 
 <!-- CSS -->
 <style>
+    /* ==============================================
+   MODAL STYLING - Tombol Close Terlihat
+   ============================================== */
+.modal {
+    text-align: center;
+    padding: 0!important;
+}
+.modal:before {
+    content: '';
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+    margin-right: -4px;
+}
+.modal-dialog {
+    display: inline-block;
+    text-align: left;
+    vertical-align: middle;
+    width: 700px; 
+    max-width: 95%; 
+}
+.modal-lg {
+    width: 95% !important;
+    max-width: 1200px !important;
+}
+
+/* TOMBOL CLOSE - JELAS TERLIHAT */
+.modal-header {
+    position: relative !important;
+    padding: 15px 20px !important;
+    border-bottom: 1px solid #e5e5e5 !important;
+    background: #fafafa !important;
+    border-radius: 4px 4px 0 0 !important;
+}
+
+.modal-header .close {
+    position: absolute !important;
+    right: 15px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 28px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    color: #333 !important;
+    text-shadow: none !important;
+    opacity: 0.6 !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    z-index: 10 !important;
+    cursor: pointer !important;
+    width: 35px !important;
+    height: 35px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    transition: all 0.3s ease !important;
+}
+
+.modal-header .close:hover {
+    opacity: 1 !important;
+    background: rgba(0,0,0,0.08) !important;
+    transform: translateY(-50%) rotate(90deg) !important;
+}
+
+.modal-header .close:focus {
+    outline: none !important;
+    opacity: 0.8 !important;
+}
+
+.modal-header .close span {
+    display: inline-block !important;
+    font-size: 30px !important;
+    line-height: 1 !important;
+}
+
+.modal-header h2 {
+    font-size: 20px;
+    color: #333;
+    font-weight: 600;
+    margin: 0;
+    padding-right: 40px;
+}
+
+/* Untuk modal dengan judul kecil */
+.modal-header h4.modal-title {
+    font-size: 18px;
+    margin: 0;
+    padding-right: 40px;
+    font-weight: 600;
+}
+
+/* Modal body */
+.modal-body {
+    padding: 20px 25px !important;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+/* Modal footer */
+.modal-footer {
+    padding: 12px 20px !important;
+    border-top: 1px solid #e5e5e5 !important;
+    background: #fafafa !important;
+    border-radius: 0 0 4px 4px !important;
+}
+
 .filter-row {
     display: flex;
     align-items: flex-end;

@@ -53,7 +53,6 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
-        /* CSS untuk Modal persis di tengah (Vertical Center) */
         .modal {
             text-align: center;
             padding: 0!important;
@@ -72,6 +71,10 @@
             width: 700px; 
             max-width: 95%; 
         }
+        .modal-lg {
+            width: 95% !important;
+            max-width: 1200px !important;
+        }
         .modal-header h2 {
             font-size: 20px;
             color: #333;
@@ -81,7 +84,6 @@
             border-bottom: 1px solid #eee;
         }
 
-        /* CSS Card Container Enhancement */
         .data-table-list {
             background: #ffffff;
             border-radius: 10px;
@@ -90,7 +92,6 @@
             border: none;
         }
 
-        /* CSS Table Enhancement - SEMUA RATA KIRI TANPA INDENTASI */
         #hierarki-table > thead > tr > th {
             background-color: #f8f9fa;
             color: #455a64;
@@ -107,7 +108,6 @@
             border-top: 1px solid #f2f2f2;
         }
         
-        /* SEMUA BARIS RATA KIRI TANPA INDENTASI */
         #hierarki-table > tbody > tr > td:nth-child(2) {
             padding-left: 15px !important;
             padding-right: 15px !important;
@@ -139,6 +139,23 @@
             box-shadow: none !important;
         }
 
+        .btn-aksi-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            justify-content: center;
+            align-items: center;
+        }
+        .btn-aksi-group .btn-action {
+            margin: 1px;
+            padding: 4px 8px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        .btn-aksi-group .btn-action i {
+            margin-right: 3px;
+        }
+
         .badge-periode {
             background-color: #00c292;
             color: white;
@@ -163,7 +180,6 @@
             box-shadow: 0 2px 5px rgba(158, 158, 158, 0.3);
         }
 
-        /* Filter Wilayah */
         .filter-row {
             display: flex;
             align-items: flex-end;
@@ -184,17 +200,7 @@
             font-size: 14px;
             padding: 5px 8px;
         }
-        @media (max-width: 768px) {
-            .filter-row {
-                flex-direction: column;
-                gap: 15px;
-            }
-            .filter-select {
-                width: 100%;
-            }
-        }
 
-        /* Info Periode di Modal */
         .periode-info {
             background: #e8f5e9;
             padding: 8px 15px;
@@ -205,7 +211,6 @@
             border-left: 3px solid #4caf50;
         }
 
-        /* Loading Spinner di Tombol */
         .spinner-border-sm {
             width: 1rem;
             height: 1rem;
@@ -221,7 +226,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Gaya untuk konten teks yang bisa wrap - RATA KIRI SEMUA */
         .td-content-wrapper {
             display: block !important;
             padding: 6px 0;
@@ -243,29 +247,155 @@
             white-space: nowrap;
         }
 
-        /* Warna latar belakang per level */
         .row-visi { background-color: #f1f8e9 !important; }
         .row-misi { background-color: #e0f7fa !important; }
         .row-tujuan { background-color: #fff3e0 !important; }
         .row-sasaran { background-color: #ffffff !important; }
         
-        /* Border kiri per level */
         .border-visi { border-left: 4px solid #8bc34a !important; }
         .border-misi { border-left: 4px solid #00bcd4 !important; }
         .border-tujuan { border-left: 4px solid #ff9800 !important; }
         .border-sasaran { border-left: 4px solid #9e9e9e !important; }
 
-        /* INDENTASI DINONAKTIFKAN - SEMUA RATA KIRI */
-        .level-indent {
-            display: none !important;
-        }
-
-        /* Baris yang bisa diklik */
         .clickable-row {
             cursor: pointer;
         }
         .clickable-row:hover {
             background-color: rgba(0,0,0,0.02);
+        }
+
+        /* Tabel Indikator */
+        #tabel-indikator-tujuan thead th,
+        #tabel-indikator-sasaran thead th {
+            font-size: 11px;
+            padding: 8px 5px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        #tabel-indikator-tujuan tbody td,
+        #tabel-indikator-sasaran tbody td {
+            padding: 8px 5px;
+            vertical-align: middle;
+            font-size: 13px;
+        }
+        #tabel-indikator-tujuan tbody td:first-child,
+        #tabel-indikator-sasaran tbody td:first-child {
+            text-align: left;
+        }
+        .table-indikator-wrapper {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .badge-indikator-count {
+            background: #2196F3;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 8px;
+            font-size: 11px;
+            margin-left: 5px;
+        }
+
+        /* PD Multi-Select Styles */
+        .pd-multiselect {
+            width: 100%;
+            min-height: 80px;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            background: white;
+        }
+        .pd-multiselect option {
+            padding: 6px 10px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+        }
+        .pd-multiselect option:checked {
+            background: #00c292;
+            color: white;
+        }
+        .pd-multiselect option:checked:hover {
+            background: #00b386;
+        }
+        .pd-multiselect option .pd-level-badge {
+            float: right;
+            font-size: 10px;
+            color: #999;
+            margin-left: 10px;
+        }
+        .pd-multiselect option:checked .pd-level-badge {
+            color: rgba(255,255,255,0.8);
+        }
+
+        .pd-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 8px;
+            min-height: 20px;
+        }
+
+        .pd-tag {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 3px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid #c8e6c9;
+            animation: tagIn 0.3s ease;
+        }
+
+        @keyframes tagIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .pd-tag .remove-pd {
+            margin-left: 6px;
+            cursor: pointer;
+            color: #c62828;
+            font-weight: bold;
+            font-size: 14px;
+            line-height: 1;
+        }
+        .pd-tag .remove-pd:hover {
+            color: #d32f2f;
+            transform: scale(1.2);
+        }
+
+        .pd-info-text {
+            color: #666;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        /* Aksi Indikator - Berdampingan */
+        .aksi-indikator {
+            display: flex;
+            gap: 3px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+        .aksi-indikator .btn-action {
+            padding: 3px 7px;
+            font-size: 12px;
+            margin: 0;
+        }
+        .aksi-indikator .btn-action i {
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .aksi-indikator {
+                flex-wrap: wrap;
+            }
+            .aksi-indikator .btn-action {
+                padding: 2px 5px;
+                font-size: 10px;
+            }
         }
     </style>
 
@@ -328,14 +458,11 @@
                                 <?php 
                                     $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
                                     $nama_wilayah = $wilayah ? html_escape($wilayah['Nama']) : 'Wilayah Tidak Ditemukan';
-                                    if (empty($Visi)) {
-                                        $pesan_error = "Tidak ada data untuk wilayah: $nama_wilayah";
-                                    }
                                 ?>
-                                <div class="alert <?= empty($Visi) ? 'alert-warning' : 'alert-info' ?>" style="margin-bottom: 20px;">
+                                <div class="alert alert-info" style="margin-bottom: 20px;">
                                     <strong>Wilayah:</strong> <?= $nama_wilayah ?><br>
-                                    <?php if (!empty($pesan_error)) { ?>
-                                        <strong>Peringatan:</strong> <?= html_escape($pesan_error) ?>
+                                    <?php if (empty($Visi)) { ?>
+                                        <strong>Peringatan:</strong> Tidak ada data Visi RPJMD untuk wilayah ini.
                                     <?php } ?>
                                 </div>
                             <?php } ?>
@@ -351,16 +478,17 @@
                                 </div>
                             </div>
 
-                            <!-- TABEL HIERARKI - SEMUA RATA KIRI TANPA INDENTASI -->
+                            <!-- TABEL HIERARKI -->
                             <div class="table-responsive">
                                 <table id="hierarki-table" class="table table-striped">
                                     <thead>
                                         <tr>
                                             <th style="width: 5%;" class="text-center">No</th>
-                                            <th style="width: 55%;">Uraian (Visi / Misi / Tujuan / Sasaran)</th>
-                                            <th style="width: 15%;" class="text-center">Periode</th>
+                                            <th style="width: 40%;">Uraian (Visi / Misi / Tujuan / Sasaran)</th>
+                                            <th style="width: 10%;" class="text-center">Periode</th>
+                                            <th style="width: 8%;" class="text-center">Indikator</th>
                                             <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                            <th style="width: 25%;" class="text-center">Aksi</th>
+                                            <th style="width: 37%;" class="text-center">Aksi</th>
                                             <?php } ?>
                                         </tr>
                                     </thead>
@@ -371,7 +499,7 @@
                                             foreach ($Visi as $visi) { 
                                                 $misiData = isset($visi['Misi']) ? $visi['Misi'] : [];
                                         ?>
-                                            <!-- LEVEL 1: VISI - TAMPIL -->
+                                            <!-- LEVEL 1: VISI -->
                                             <tr data-id="visi-<?= $visi['Id'] ?>" data-parent="" data-expanded="false" class="row-visi">
                                                 <td class="text-center" style="font-size: 14px;"><b><?= $noVisi ?></b></td>
                                                 <td style="cursor: pointer; padding-left: 15px !important;" class="border-visi clickable-row" onclick="toggleLevel('visi-<?= $visi['Id'] ?>', this)">
@@ -385,11 +513,14 @@
                                                 <td class="text-center">
                                                     <span class="badge-periode"><?= $visi['TahunMulai'] . ' - ' . $visi['TahunAkhir'] ?></span>
                                                 </td>
+                                                <td class="text-center">-</td>
                                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                                                 <td class="text-center">
-                                                    <button class="btn btn-sm btn-success TambahMisi btn-action" data-id="<?= $visi['Id'] ?>" title="Tambah Misi"><i class="fa fa-plus"></i> Misi</button>
-                                                    <button class="btn btn-sm btn-warning EditVisi btn-action" data-id="<?= $visi['Id'] ?>" data-visi="<?= html_escape($visi['Visi']) ?>" data-awal="<?= $visi['TahunMulai'] ?>" data-akhir="<?= $visi['TahunAkhir'] ?>" title="Edit Visi"><i class="fa fa-edit"></i> </button>
-                                                    <button class="btn btn-sm btn-danger HapusVisi btn-action" data-id="<?= $visi['Id'] ?>" title="Hapus Visi"><i class="fa fa-trash"></i> </button>
+                                                    <div class="btn-aksi-group">
+                                                        <button class="btn btn-sm btn-success TambahMisi btn-action" data-id="<?= $visi['Id'] ?>" title="Tambah Misi"><i class="fa fa-plus"></i> Misi</button>
+                                                        <button class="btn btn-sm btn-warning EditVisi btn-action" data-id="<?= $visi['Id'] ?>" data-visi="<?= html_escape($visi['Visi']) ?>" data-awal="<?= $visi['TahunMulai'] ?>" data-akhir="<?= $visi['TahunAkhir'] ?>" title="Edit Visi"><i class="fa fa-edit"></i></button>
+                                                        <button class="btn btn-sm btn-danger HapusVisi btn-action" data-id="<?= $visi['Id'] ?>" title="Hapus Visi"><i class="fa fa-trash"></i></button>
+                                                    </div>
                                                 </td>
                                                 <?php } ?>
                                             </tr>
@@ -400,7 +531,7 @@
                                                 foreach ($misiData as $misi) { 
                                                     $tujuanData = isset($misi['Tujuan']) ? $misi['Tujuan'] : [];
                                             ?>
-                                                <!-- LEVEL 2: MISI - DISEMBUNYIKAN -->
+                                                <!-- LEVEL 2: MISI -->
                                                 <tr data-id="misi-<?= $misi['Id'] ?>" data-parent="visi-<?= $visi['Id'] ?>" data-expanded="false" style="display: none;" class="row-misi">
                                                     <td></td>
                                                     <td style="cursor: pointer; padding-left: 15px !important;" class="border-misi clickable-row" onclick="toggleLevel('misi-<?= $misi['Id'] ?>', this)">
@@ -414,11 +545,14 @@
                                                     <td class="text-center">
                                                         <span class="badge-periode level2"><?= $misi['TahunMulai'] . ' - ' . $misi['TahunAkhir'] ?></span>
                                                     </td>
+                                                    <td class="text-center">-</td>
                                                     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                                                     <td class="text-center">
-                                                        <button class="btn btn-sm btn-success TambahTujuan btn-action" data-id="<?= $misi['Id'] ?>" title="Tambah Tujuan"><i class="fa fa-plus"></i> Tujuan</button>
-                                                        <button class="btn btn-sm btn-warning EditMisi btn-action" data-id="<?= $misi['Id'] ?>" data-idvisi="<?= $visi['Id'] ?>" data-misi="<?= html_escape($misi['Misi']) ?>" title="Edit Misi"><i class="fa fa-edit"></i> </button>
-                                                        <button class="btn btn-sm btn-danger HapusMisi btn-action" data-id="<?= $misi['Id'] ?>" title="Hapus Misi"><i class="fa fa-trash"></i></button>
+                                                        <div class="btn-aksi-group">
+                                                            <button class="btn btn-sm btn-success TambahTujuan btn-action" data-id="<?= $misi['Id'] ?>" title="Tambah Tujuan"><i class="fa fa-plus"></i> Tujuan</button>
+                                                            <button class="btn btn-sm btn-warning EditMisi btn-action" data-id="<?= $misi['Id'] ?>" data-idvisi="<?= $visi['Id'] ?>" data-misi="<?= html_escape($misi['Misi']) ?>" title="Edit Misi"><i class="fa fa-edit"></i></button>
+                                                            <button class="btn btn-sm btn-danger HapusMisi btn-action" data-id="<?= $misi['Id'] ?>" title="Hapus Misi"><i class="fa fa-trash"></i></button>
+                                                        </div>
                                                     </td>
                                                     <?php } ?>
                                                 </tr>
@@ -429,7 +563,7 @@
                                                     foreach ($tujuanData as $tujuan) { 
                                                         $sasaranData = isset($tujuan['Sasaran']) ? $tujuan['Sasaran'] : [];
                                                 ?>
-                                                    <!-- LEVEL 3: TUJUAN - DISEMBUNYIKAN -->
+                                                    <!-- LEVEL 3: TUJUAN -->
                                                     <tr data-id="tujuan-<?= $tujuan['Id'] ?>" data-parent="misi-<?= $misi['Id'] ?>" data-expanded="false" style="display: none;" class="row-tujuan">
                                                         <td></td>
                                                         <td style="cursor: pointer; padding-left: 15px !important;" class="border-tujuan clickable-row" onclick="toggleLevel('tujuan-<?= $tujuan['Id'] ?>', this)">
@@ -443,11 +577,19 @@
                                                         <td class="text-center">
                                                             <span class="badge-periode level3"><?= $tujuan['TahunMulai'] . ' - ' . $tujuan['TahunAkhir'] ?></span>
                                                         </td>
+                                                        <td class="text-center">
+                                                            <button class="btn btn-sm btn-info btn-action IndikatorTujuan" data-id="<?= $tujuan['Id'] ?>" title="Kelola Indikator">
+                                                                <i class="fa fa-bar-chart"></i> 
+                                                                <span class="badge-indikator-count" id="indikator-count-tujuan-<?= $tujuan['Id'] ?>">0</span>
+                                                            </button>
+                                                        </td>
                                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                                                         <td class="text-center">
-                                                            <button class="btn btn-sm btn-success TambahSasaran btn-action" data-id="<?= $tujuan['Id'] ?>" title="Tambah Sasaran"><i class="fa fa-plus"></i> Sasaran</button>
-                                                            <button class="btn btn-sm btn-warning EditTujuan btn-action" data-id="<?= $tujuan['Id'] ?>" data-idmisi="<?= $misi['Id'] ?>" data-tujuan="<?= html_escape($tujuan['Tujuan']) ?>" title="Edit Tujuan"><i class="fa fa-edit"></i> </button>
-                                                            <button class="btn btn-sm btn-danger HapusTujuan btn-action" data-id="<?= $tujuan['Id'] ?>" title="Hapus Tujuan"><i class="fa fa-trash"></i> </button>
+                                                            <div class="btn-aksi-group">
+                                                                <button class="btn btn-sm btn-success TambahSasaran btn-action" data-id="<?= $tujuan['Id'] ?>" title="Tambah Sasaran"><i class="fa fa-plus"></i> Sasaran</button>
+                                                                <button class="btn btn-sm btn-warning EditTujuan btn-action" data-id="<?= $tujuan['Id'] ?>" data-idmisi="<?= $misi['Id'] ?>" data-tujuan="<?= html_escape($tujuan['Tujuan']) ?>" title="Edit Tujuan"><i class="fa fa-edit"></i></button>
+                                                                <button class="btn btn-sm btn-danger HapusTujuan btn-action" data-id="<?= $tujuan['Id'] ?>" title="Hapus Tujuan"><i class="fa fa-trash"></i></button>
+                                                            </div>
                                                         </td>
                                                         <?php } ?>
                                                     </tr>
@@ -457,7 +599,7 @@
                                                         $noSasaran = 1;
                                                         foreach ($sasaranData as $sasaran) { 
                                                     ?>
-                                                        <!-- LEVEL 4: SASARAN - DISEMBUNYIKAN -->
+                                                        <!-- LEVEL 4: SASARAN -->
                                                         <tr data-id="sasaran-<?= $sasaran['Id'] ?>" data-parent="tujuan-<?= $tujuan['Id'] ?>" data-expanded="false" style="display: none;" class="row-sasaran">
                                                             <td></td>
                                                             <td style="padding-left: 15px !important;" class="border-sasaran">
@@ -471,10 +613,18 @@
                                                             <td class="text-center">
                                                                 <span class="badge-periode level4"><?= $sasaran['TahunMulai'] . ' - ' . $sasaran['TahunAkhir'] ?></span>
                                                             </td>
+                                                            <td class="text-center">
+                                                                <button class="btn btn-sm btn-info btn-action IndikatorSasaran" data-id="<?= $sasaran['Id'] ?>" title="Kelola Indikator">
+                                                                    <i class="fa fa-bar-chart"></i> 
+                                                                    <span class="badge-indikator-count" id="indikator-count-sasaran-<?= $sasaran['Id'] ?>">0</span>
+                                                                </button>
+                                                            </td>
                                                             <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                                                             <td class="text-center">
-                                                                <button class="btn btn-sm btn-warning EditSasaran btn-action" data-id="<?= $sasaran['Id'] ?>" data-idtujuan="<?= $tujuan['Id'] ?>" data-sasaran="<?= html_escape($sasaran['Sasaran']) ?>" title="Edit Sasaran"><i class="fa fa-edit"></i> </button>
-                                                                <button class="btn btn-sm btn-danger HapusSasaran btn-action" data-id="<?= $sasaran['Id'] ?>" title="Hapus Sasaran"><i class="fa fa-trash"></i> </button>
+                                                                <div class="btn-aksi-group">
+                                                                    <button class="btn btn-sm btn-warning EditSasaran btn-action" data-id="<?= $sasaran['Id'] ?>" data-idtujuan="<?= $tujuan['Id'] ?>" data-sasaran="<?= html_escape($sasaran['Sasaran']) ?>" title="Edit Sasaran"><i class="fa fa-edit"></i></button>
+                                                                    <button class="btn btn-sm btn-danger HapusSasaran btn-action" data-id="<?= $sasaran['Id'] ?>" title="Hapus Sasaran"><i class="fa fa-trash"></i></button>
+                                                                </div>
                                                             </td>
                                                             <?php } ?>
                                                         </tr>
@@ -498,7 +648,7 @@
                                             } 
                                         } else { ?>
                                             <tr>
-                                                <td colspan="4" class="text-center" style="padding: 30px; color: #999;">Belum ada data Visi RPJMD.</td>
+                                                <td colspan="5" class="text-center" style="padding: 30px; color: #999;">Belum ada data Visi RPJMD.</td>
                                             </tr>
                                         <?php } ?>
                                     </tbody>
@@ -838,6 +988,296 @@
             </div>
         </div>
     </div>
+    
+
+    <!-- ============================================== -->
+<!-- MODAL INDIKATOR TUJUAN - DENGAN PD MULTI-SELECT (SEMUA LEVEL) -->
+<!-- ============================================== -->
+<div class="modal fade" id="ModalIndikatorTujuan" role="dialog">
+    <div class="modal-dialog modal-lg" style="width: 95%; max-width: 1200px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h2>Indikator Tujuan</h2>
+                <p id="tujuan_info" style="margin-top: 10px; color: #555; font-size: 14px;"></p>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="indikator_tujuan_id">
+                <input type="hidden" id="current_tujuan_id">
+                <input type="hidden" id="is_edit_tujuan" value="false">
+ <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>               
+                <!-- Form Tambah/Edit Indikator -->
+                <div class="panel panel-default" style="margin-bottom: 20px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                    <div class="panel-heading" style="background: #f5f5f5; padding: 10px 15px; border-bottom: 1px solid #e0e0e0;">
+                        <h4 class="panel-title" style="margin: 0; font-size: 14px; font-weight: 600;">
+                            <i class="fa fa-plus-circle" style="color: #4caf50;" id="icon_tujuan_form"></i> 
+                            <span id="judul_form_tujuan">Tambah Indikator Baru</span>
+                        </h4>
+                    </div>
+                    <div class="panel-body" style="padding: 15px;">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Indikator <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" id="input_indikator_tujuan" rows="2" placeholder="Masukkan indikator tujuan" style="resize: vertical;"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Satuan</label>
+                                    <input type="text" class="form-control" id="input_satuan_tujuan" placeholder="Contoh: %">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Baseline 2024</label>
+                                    <input type="number" class="form-control input-target-tujuan" id="input_baseline_tujuan" placeholder="0" step="0.01">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Perangkat Daerah Pengampuh <span class="text-info">(Bisa pilih lebih dari 1)</span></label>
+                                    <select class="form-control pd-multiselect" id="input_pd_tujuan" multiple size="4">
+                                        <option value="">-- Pilih PD --</option>
+                                    </select>
+                                    <small class="text-muted pd-info-text">Tekan <kbd>Ctrl</kbd> + Klik untuk memilih lebih dari satu</small>
+                                    <div class="pd-tags" id="pd_tags_tujuan"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top: 10px;">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Target 2025</label>
+                                    <input type="number" class="form-control input-target-tujuan" id="input_target2025_tujuan" placeholder="0" step="0.01">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Target 2026</label>
+                                    <input type="number" class="form-control input-target-tujuan" id="input_target2026_tujuan" placeholder="0" step="0.01">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Target 2027</label>
+                                    <input type="number" class="form-control input-target-tujuan" id="input_target2027_tujuan" placeholder="0" step="0.01">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Target 2028</label>
+                                    <input type="number" class="form-control input-target-tujuan" id="input_target2028_tujuan" placeholder="0" step="0.01">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Target 2029</label>
+                                    <input type="number" class="form-control input-target-tujuan" id="input_target2029_tujuan" placeholder="0" step="0.01">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Target 2030</label>
+                                    <input type="number" class="form-control input-target-tujuan" id="input_target2030_tujuan" placeholder="0" step="0.01">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12 text-right" style="margin-top: 10px;">
+                                <button class="btn btn-success btn-action" id="SimpanIndikatorTujuan">
+                                    <i class="fa fa-save"></i> <span id="btn_text_tujuan">Simpan</span>
+                                </button>
+                                <button class="btn btn-default btn-action" onclick="resetFormTujuan()">
+                                    <i class="fa fa-refresh"></i> Reset
+                                </button>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+<?php } ?>
+                <!-- Tabel Indikator -->
+                <div class="table-indikator-wrapper">
+                    <table class="table table-bordered table-striped" id="tabel-indikator-tujuan">
+                        <thead>
+                            <tr style="background: #f8f9fa;">
+                                <th style="width: 18%;">Indikator</th>
+                                <th style="width: 7%;">Satuan</th>
+                                <th style="width: 8%;">Baseline 2024</th>
+                                <th style="width: 6%;">Target 2025</th>
+                                <th style="width: 6%;">Target 2026</th>
+                                <th style="width: 6%;">Target 2027</th>
+                                <th style="width: 6%;">Target 2028</th>
+                                <th style="width: 6%;">Target 2029</th>
+                                <th style="width: 6%;">Target 2030</th>
+                                <th style="width: 22%;">PD Pengampuh</th>
+                                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                                <th style="width: 9%;">Aksi</th>
+                                <?php  } ?>
+                            </tr>
+                        </thead>
+                        <tbody id="list-indikator-tujuan">
+                            <tr>
+                                <td colspan="11" class="text-center" style="padding: 20px; color: #999;">Belum ada indikator</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 10px 15px; border-top: 1px solid #e0e0e0;">
+                <button type="button" class="btn btn-default btn-action" data-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- ============================================== -->
+<!-- MODAL INDIKATOR SASARAN - DENGAN PD MULTI-SELECT (SEMUA LEVEL) -->
+<!-- ============================================== -->
+<div class="modal fade" id="ModalIndikatorSasaran" role="dialog">
+    <div class="modal-dialog modal-lg" style="width: 95%; max-width: 1200px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h2>Indikator Sasaran</h2>
+                <p id="sasaran_info" style="margin-top: 10px; color: #555; font-size: 14px;"></p>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="indikator_sasaran_id">
+                <input type="hidden" id="current_sasaran_id">
+                <input type="hidden" id="is_edit_sasaran" value="false">
+ <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>               
+                <!-- Form Tambah/Edit Indikator Sasaran -->
+                <div class="panel panel-default" style="margin-bottom: 20px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                    <div class="panel-heading" style="background: #f5f5f5; padding: 10px 15px; border-bottom: 1px solid #e0e0e0;">
+                        <h4 class="panel-title" style="margin: 0; font-size: 14px; font-weight: 600;">
+                            <i class="fa fa-plus-circle" style="color: #4caf50;" id="icon_sasaran_form"></i> 
+                            <span id="judul_form_sasaran">Tambah Indikator Baru</span>
+                        </h4>
+                    </div>
+                    <div class="panel-body" style="padding: 15px;">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Indikator <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" id="input_indikator_sasaran" rows="2" placeholder="Masukkan indikator sasaran" style="resize: vertical;"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Satuan</label>
+                                    <input type="text" class="form-control" id="input_satuan_sasaran" placeholder="Contoh: %">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Baseline 2024</label>
+                                    <input type="number" class="form-control input-target-sasaran" id="input_baseline_sasaran" placeholder="0" step="0.01">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Perangkat Daerah Pengampuh <span class="text-info">(Bisa pilih lebih dari 1)</span></label>
+                                    <select class="form-control pd-multiselect" id="input_pd_sasaran" multiple size="4">
+                                        <option value="">-- Pilih PD --</option>
+                                    </select>
+                                    <small class="text-muted pd-info-text">Tekan <kbd>Ctrl</kbd> + Klik untuk memilih lebih dari satu</small>
+                                    <div class="pd-tags" id="pd_tags_sasaran"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top: 10px;">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Target 2025</label>
+                                    <input type="number" class="form-control input-target-sasaran" id="input_target2025_sasaran" placeholder="0" step="0.01">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Target 2026</label>
+                                    <input type="number" class="form-control input-target-sasaran" id="input_target2026_sasaran" placeholder="0" step="0.01">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Target 2027</label>
+                                    <input type="number" class="form-control input-target-sasaran" id="input_target2027_sasaran" placeholder="0" step="0.01">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Target 2028</label>
+                                    <input type="number" class="form-control input-target-sasaran" id="input_target2028_sasaran" placeholder="0" step="0.01">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Target 2029</label>
+                                    <input type="number" class="form-control input-target-sasaran" id="input_target2029_sasaran" placeholder="0" step="0.01">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Target 2030</label>
+                                    <input type="number" class="form-control input-target-sasaran" id="input_target2030_sasaran" placeholder="0" step="0.01">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-right" style="margin-top: 10px;">
+                                <button class="btn btn-success btn-action" id="SimpanIndikatorSasaran">
+                                    <i class="fa fa-save"></i> <span id="btn_text_sasaran">Simpan</span>
+                                </button>
+                                <button class="btn btn-default btn-action" onclick="resetFormSasaran()">
+                                    <i class="fa fa-refresh"></i> Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        <?php } ?>
+
+                <!-- Tabel Indikator Sasaran -->
+                <div class="table-indikator-wrapper">
+                    <table class="table table-bordered table-striped" id="tabel-indikator-sasaran">
+                        <thead>
+                            <tr style="background: #f8f9fa;">
+                                <th style="width: 18%;">Indikator</th>
+                                <th style="width: 7%;">Satuan</th>
+                                <th style="width: 8%;">Baseline 2024</th>
+                                <th style="width: 6%;">Target 2025</th>
+                                <th style="width: 6%;">Target 2026</th>
+                                <th style="width: 6%;">Target 2027</th>
+                                <th style="width: 6%;">Target 2028</th>
+                                <th style="width: 6%;">Target 2029</th>
+                                <th style="width: 6%;">Target 2030</th>
+                                <th style="width: 22%;">PD Pengampuh</th>
+                                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                                <th style="width: 9%;">Aksi</th>
+                                <?php } ?>
+                            </tr>
+                        </thead>
+                        <tbody id="list-indikator-sasaran">
+                            <tr>
+                                <td colspan="11" class="text-center" style="padding: 20px; color: #999;">Belum ada indikator</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 10px 15px; border-top: 1px solid #e0e0e0;">
+                <button type="button" class="btn btn-default btn-action" data-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
 
     <!-- ============================================== -->
     <!-- SCRIPTS -->
@@ -860,13 +1300,12 @@
         var CSRF_NAME = '<?= $this->security->get_csrf_token_name() ?>';
 
         // ==============================================
-        // FUNGSI TOAST ERROR
+        // FUNGSI TOAST
         // ==============================================
         function showToast(message, type = 'error') {
             var toast = document.getElementById('toastError');
             var msgEl = document.getElementById('toastMessage');
             
-            // Reset class
             toast.className = 'toast-error';
             if (type === 'success') {
                 toast.classList.add('success');
@@ -875,13 +1314,19 @@
             }
             
             msgEl.innerHTML = message;
-            toast.classList.add('show');
+            toast.style.display = 'block';
             
-            // Auto hide after 5 seconds
             clearTimeout(window.toastTimeout);
             window.toastTimeout = setTimeout(function() {
-                toast.classList.remove('show');
+                toast.style.display = 'none';
             }, 5000);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            var div = document.createElement('div');
+            div.appendChild(document.createTextNode(text));
+            return div.innerHTML;
         }
 
         // ==============================================
@@ -901,7 +1346,6 @@
                     tr.style.display = 'table-row';
                 });
             }
-            saveExpandedState();
         }
 
         function hideAllChildren(parentId) {
@@ -914,16 +1358,155 @@
             });
         }
 
-        function saveExpandedState() {
-            var expanded = [];
-            document.querySelectorAll('tr[data-expanded="true"]').forEach(function(tr) {
-                expanded.push(tr.getAttribute('data-id'));
-            });
-            sessionStorage.setItem('expandedRows', JSON.stringify(expanded));
-        }
+        // ==============================================
+// FUNGSI UNTUK MENGUBAH JUDUL FORM INDIKATOR
+// ==============================================
+
+function setFormModeTujuan(mode) {
+    // mode: 'add' atau 'edit'
+    var isEdit = (mode === 'edit');
+    
+    $('#is_edit_tujuan').val(isEdit ? 'true' : 'false');
+    
+    if (isEdit) {
+        $('#judul_form_tujuan').text('Edit Indikator');
+        $('#icon_tujuan_form').removeClass('fa-plus-circle').addClass('fa-edit');
+        $('#btn_text_tujuan').text('Update');
+        $('#SimpanIndikatorTujuan').removeClass('btn-success').addClass('btn-warning');
+    } else {
+        $('#judul_form_tujuan').text('Tambah Indikator Baru');
+        $('#icon_tujuan_form').removeClass('fa-edit').addClass('fa-plus-circle');
+        $('#btn_text_tujuan').text('Simpan');
+        $('#SimpanIndikatorTujuan').removeClass('btn-warning').addClass('btn-success');
+    }
+}
+
+function setFormModeSasaran(mode) {
+    // mode: 'add' atau 'edit'
+    var isEdit = (mode === 'edit');
+    
+    $('#is_edit_sasaran').val(isEdit ? 'true' : 'false');
+    
+    if (isEdit) {
+        $('#judul_form_sasaran').text('Edit Indikator');
+        $('#icon_sasaran_form').removeClass('fa-plus-circle').addClass('fa-edit');
+        $('#btn_text_sasaran').text('Update');
+        $('#SimpanIndikatorSasaran').removeClass('btn-success').addClass('btn-warning');
+    } else {
+        $('#judul_form_sasaran').text('Tambah Indikator Baru');
+        $('#icon_sasaran_form').removeClass('fa-edit').addClass('fa-plus-circle');
+        $('#btn_text_sasaran').text('Simpan');
+        $('#SimpanIndikatorSasaran').removeClass('btn-warning').addClass('btn-success');
+    }
+}
 
         // ==============================================
-        // FILTER WILAYAH UNTUK PENGGUNA BELUM LOGIN
+        // FUNGSI PD MULTI-SELECT (SEMUA LEVEL)
+        // ==============================================
+        function loadPDList(selectId) {
+        var select = document.getElementById(selectId.replace('#', ''));
+        if (!select) return;
+        
+        $.ajax({
+            url: BaseURL + "Daerah/GetListPD",
+            type: "POST",
+            data: { [CSRF_NAME]: CSRF_TOKEN },
+            success: function(Respon) {
+                try {
+                    var result = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
+                    if (result.status === 'success') {
+                        var options = '<option value="">-- Pilih PD --</option>';
+                        result.data.forEach(function(pd) {
+                            // HANYA TAMPILKAN NAMA PD, TANPA LEVEL
+                            options += '<option value="' + pd.id + '">' + 
+                                    escapeHtml(pd.nama) + 
+                                    '</option>';
+                        });
+                        select.innerHTML = options;
+                    } else {
+                        select.innerHTML = '<option value="">Gagal memuat data PD</option>';
+                    }
+                } catch(e) {
+                    console.error('Error loading PD list:', e);
+                    select.innerHTML = '<option value="">Error loading data</option>';
+                }
+            },
+            error: function() {
+                select.innerHTML = '<option value="">Gagal menghubungi server</option>';
+            }
+        });
+    }
+
+        function updatePDTags(selectId, containerId) {
+            var select = document.getElementById(selectId);
+            var container = document.getElementById(containerId);
+            if (!select || !container) return;
+            
+            var selectedOptions = select.selectedOptions;
+            container.innerHTML = '';
+            
+            for (var i = 0; i < selectedOptions.length; i++) {
+                var option = selectedOptions[i];
+                if (option.value) {
+                    var tag = document.createElement('span');
+                    tag.className = 'pd-tag';
+                    // Ambil teks tanpa span
+                    var textContent = option.textContent || option.innerText;
+                    textContent = textContent.replace(/\(.*?\)/g, '').trim();
+                    
+                    tag.innerHTML = escapeHtml(textContent) + 
+                                   ' <span class="remove-pd" data-value="' + option.value + 
+                                   '" onclick="removePDTag(\'' + selectId + '\', \'' + containerId + '\', ' + option.value + ')">&times;</span>';
+                    container.appendChild(tag);
+                }
+            }
+        }
+
+        function removePDTag(selectId, containerId, value) {
+            var select = document.getElementById(selectId);
+            if (!select) return;
+            
+            for (var i = 0; i < select.options.length; i++) {
+                if (select.options[i].value == value) {
+                    select.options[i].selected = false;
+                    break;
+                }
+            }
+            updatePDTags(selectId, containerId);
+        }
+
+        function setSelectedPD(selectId, values) {
+    var select = document.getElementById(selectId);
+    if (!select) {
+        console.error('Select element not found:', selectId);
+        return;
+    }
+    
+    // Pastikan values adalah array
+    if (!Array.isArray(values)) {
+        try {
+            values = JSON.parse(values);
+        } catch(e) {
+            values = [];
+        }
+    }
+    
+    // Convert values ke string untuk perbandingan
+    var valueStrings = values.map(String);
+    
+    for (var i = 0; i < select.options.length; i++) {
+        select.options[i].selected = false;
+        if (valueStrings.indexOf(select.options[i].value) !== -1) {
+            select.options[i].selected = true;
+        }
+    }
+    
+    var containerId = selectId.replace('input', 'pd_tags');
+    updatePDTags(selectId, containerId);
+}
+
+        // ==============================================
+        // FILTER WILAYAH
         // ==============================================
         <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
         $("#Provinsi").change(function() {
@@ -957,16 +1540,16 @@
 
         $("#Filter").click(function() {
             if ($("#Provinsi").val() === "") {
-                showNotification("Mohon Pilih Provinsi", "warning");
+                showToast("Mohon Pilih Provinsi", "error");
                 return;
             }
             if ($("#KabKota").val() === "") {
-                showNotification("Mohon Pilih Kab/Kota", "warning");
+                showToast("Mohon Pilih Kab/Kota", "error");
                 return;
             }
             
             var kodeWilayah = $("#KabKota").val();
-            $("#Filter").prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status"></span> Memuat...');
+            $("#Filter").prop('disabled', true).html('<span class="spinner-border-sm" role="status"></span> Memuat...');
             
             $.ajax({
                 url: BaseURL + "Daerah/SetTempKodeWilayah",
@@ -979,52 +1562,16 @@
                     if (Respon.trim() === '1' || Respon.trim() === 'success') {
                         window.location.href = BaseURL + "Daerah/VisiRPJMD";
                     } else {
-                        showNotification(Respon || "Gagal menyimpan filter wilayah!", "error");
+                        showToast(Respon || "Gagal menyimpan filter wilayah!", "error");
                         $("#Filter").prop('disabled', false).html('<b>Filter</b>');
                     }
                 },
                 error: function() {
-                    showNotification("Gagal menghubungi server!", "error");
+                    showToast("Gagal menghubungi server!", "error");
                     $("#Filter").prop('disabled', false).html('<b>Filter</b>');
                 }
             });
         });
-
-        function showNotification(message, type) {
-            var container = $('#notification-container');
-            if (container.length === 0) {
-                container = $('<div id="notification-container" style="position:fixed;top:20px;right:20px;z-index:9999;max-width:400px;"></div>');
-                $('body').append(container);
-            }
-            
-            var bgColor = type === 'error' ? '#f44336' : (type === 'warning' ? '#ff9800' : '#4CAF50');
-            var icon = type === 'error' ? '✕' : (type === 'warning' ? '⚠' : '✓');
-            
-            var notification = $('<div class="notification" style="background:'+bgColor+';color:white;padding:12px 18px;margin-bottom:8px;border-radius:5px;box-shadow:0 2px 8px rgba(0,0,0,0.2);animation:slideIn 0.3s ease;display:flex;align-items:center;gap:10px;">' +
-                '<span style="font-weight:bold;font-size:18px;">' + icon + '</span>' +
-                '<span>' + message + '</span>' +
-                '</div>');
-            
-            container.append(notification);
-            
-            setTimeout(function() {
-                notification.fadeOut(400, function() {
-                    $(this).remove();
-                    if (container.children().length === 0) {
-                        container.remove();
-                    }
-                });
-            }, 3000);
-        }
-
-        var style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-        `;
-        document.head.appendChild(style);
 
         <?php if (!empty($KodeWilayah)) { ?>
             var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
@@ -1050,42 +1597,36 @@
         <?php } ?>
 
         // ==============================================
-        // INIT - HANYA VISI YANG TAMPIL
+        // INIT
         // ==============================================
         $(document).ready(function() {
-            // Hapus session storage agar tidak mengembalikan state lama
-            sessionStorage.removeItem('expandedRows');
-            
-            // SEMUA disembunyikan kecuali Visi
-            // Visi: tampil (data-expanded="false" tapi tetap terlihat karena tidak ada style display:none)
-            // Misi, Tujuan, Sasaran: disembunyikan (style="display: none;")
-            
-            // Visi tetap tampil (tanpa style display:none)
-            document.querySelectorAll('#hierarki-table tbody tr.row-visi').forEach(function(tr) {
-                tr.style.display = 'table-row';
-                tr.setAttribute('data-expanded', 'false');
-            });
-            
-            // Misi disembunyikan
+            // Sembunyikan semua Misi, Tujuan, Sasaran
             document.querySelectorAll('#hierarki-table tbody tr.row-misi').forEach(function(tr) {
                 tr.style.display = 'none';
                 tr.setAttribute('data-expanded', 'false');
             });
-            
-            // Tujuan disembunyikan
             document.querySelectorAll('#hierarki-table tbody tr.row-tujuan').forEach(function(tr) {
                 tr.style.display = 'none';
                 tr.setAttribute('data-expanded', 'false');
             });
-            
-            // Sasaran disembunyikan
             document.querySelectorAll('#hierarki-table tbody tr.row-sasaran').forEach(function(tr) {
                 tr.style.display = 'none';
                 tr.setAttribute('data-expanded', 'false');
             });
+            
+            // Visi tetap tampil
+            document.querySelectorAll('#hierarki-table tbody tr.row-visi').forEach(function(tr) {
+                tr.style.display = 'table-row';
+                tr.setAttribute('data-expanded', 'false');
+            });
 
             // ==============================================
-            // CRUD VISI - DENGAN RELOAD OTOMATIS
+            // LOAD INDIKATOR COUNTS
+            // ==============================================
+            loadAllIndikatorCounts();
+
+            // ==============================================
+            // CRUD VISI
             // ==============================================
             $("#SimpanVisi").click(function() {
                 if (isNaN($("#TahunMulai").val()) || $("#TahunMulai").val() == "" || $("#TahunMulai").val().length != 4) {
@@ -1105,7 +1646,7 @@
                     return;
                 }
                 
-                var Visi = {
+                var data = {
                     Visi: $("#Visi").val(),
                     TahunMulai: $("#TahunMulai").val(),
                     TahunAkhir: $("#TahunAkhir").val(),
@@ -1114,19 +1655,23 @@
                 
                 $("#SimpanVisi").prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
                 
-                $.post(BaseURL + "Daerah/InputVisiRPJMD", Visi, function(Respon) {
+                $.post(BaseURL + "Daerah/InputVisiRPJMD", data, function(Respon) {
                     $("#SimpanVisi").prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
-                    var data = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
-                    if (data.status === 'success') { 
-                        $('#ModalInputVisi').modal('hide');
-                        showToast('✅ ' + data.message, 'success');
-                        setTimeout(function() { location.reload(); }, 600);
-                    } else { 
-                        showToast('❌ Error: ' + data.message, 'error'); 
+                    try {
+                        var result = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
+                        if (result.status === 'success') { 
+                            $('#ModalInputVisi').modal('hide');
+                            showToast('✅ ' + result.message, 'success');
+                            setTimeout(function() { location.reload(); }, 600);
+                        } else { 
+                            showToast('❌ Error: ' + result.message, 'error'); 
+                        }
+                    } catch(e) {
+                        showToast('❌ Error parsing response', 'error');
                     }
-                }).fail(function(jqXHR, textStatus, errorThrown) {
+                }).fail(function() {
                     $("#SimpanVisi").prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
-                    showToast('❌ AJAX Error: ' + textStatus, 'error');
+                    showToast('❌ Gagal menghubungi server!', 'error');
                 });
             });
 
@@ -1156,7 +1701,7 @@
                     return;
                 }
                 
-                var Visi = {
+                var data = {
                     Id: $("#IdVisiForm").val(),
                     Visi: $("#_Visi").val(),
                     TahunMulai: $("#_TahunMulai").val(),
@@ -1166,44 +1711,52 @@
                 
                 $("#EditBtnVisi").prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
                 
-                $.post(BaseURL + "Daerah/EditVisiRPJMD", Visi, function(Respon) {
+                $.post(BaseURL + "Daerah/EditVisiRPJMD", data, function(Respon) {
                     $("#EditBtnVisi").prop('disabled', false).html('<i class="fa fa-save"></i> Update');
-                    var data = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
-                    if (data.status === 'success') { 
-                        $('#ModalEditVisi').modal('hide');
-                        showToast('✅ ' + data.message, 'success');
-                        setTimeout(function() { location.reload(); }, 600);
-                    } else { 
-                        showToast('❌ Error: ' + data.message, 'error'); 
+                    try {
+                        var result = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
+                        if (result.status === 'success') { 
+                            $('#ModalEditVisi').modal('hide');
+                            showToast('✅ ' + result.message, 'success');
+                            setTimeout(function() { location.reload(); }, 600);
+                        } else { 
+                            showToast('❌ Error: ' + result.message, 'error'); 
+                        }
+                    } catch(e) {
+                        showToast('❌ Error parsing response', 'error');
                     }
-                }).fail(function(jqXHR, textStatus, errorThrown) {
+                }).fail(function() {
                     $("#EditBtnVisi").prop('disabled', false).html('<i class="fa fa-save"></i> Update');
-                    showToast('❌ AJAX Error: ' + textStatus, 'error');
+                    showToast('❌ Gagal menghubungi server!', 'error');
                 });
             });
 
             $('#hierarki-table tbody').on('click', '.HapusVisi', function() {
                 if (confirm("Yakin ingin menghapus Visi ini?")) {
-                    var Visi = { Id: $(this).data('id'), [CSRF_NAME]: CSRF_TOKEN };
+                    var data = { Id: $(this).data('id'), [CSRF_NAME]: CSRF_TOKEN };
                     var btn = $(this);
                     btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
-                    $.post(BaseURL + "Daerah/HapusVisiRPJMD", Visi, function(Respon) {
-                        var data = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
-                        if (data.status === 'success') { 
-                            showToast('✅ ' + data.message, 'success');
-                            setTimeout(function() { location.reload(); }, 600);
-                        } else { 
+                    $.post(BaseURL + "Daerah/HapusVisiRPJMD", data, function(Respon) {
+                        try {
+                            var result = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
+                            if (result.status === 'success') { 
+                                showToast('✅ ' + result.message, 'success');
+                                setTimeout(function() { location.reload(); }, 600);
+                            } else { 
+                                btn.prop('disabled', false).html('<i class="fa fa-trash"></i> Hapus');
+                                showToast('❌ Error: ' + result.message, 'error'); 
+                            }
+                        } catch(e) {
                             btn.prop('disabled', false).html('<i class="fa fa-trash"></i> Hapus');
-                            showToast('❌ Error: ' + data.message, 'error'); 
+                            showToast('❌ Error parsing response', 'error');
                         }
                     });
                 }
             });
 
             // ==============================================
-            // CRUD MISI - DENGAN RELOAD OTOMATIS
+            // CRUD MISI
             // ==============================================
-
             $('#hierarki-table tbody').on('click', '.TambahMisi', function() {
                 var parentRow = $(this).closest('tr')[0];
                 if (parentRow.getAttribute('data-expanded') !== 'true') {
@@ -1216,12 +1769,14 @@
                 $.post(BaseURL + "Daerah/GetVisiRPJMD", {
                     Id: visiId,
                     [CSRF_NAME]: CSRF_TOKEN
-                }, function(respon) {
-                    var data = JSON.parse(respon);
-                    if (data.length > 0) {
-                        var periode = data[0].TahunMulai + ' - ' + data[0].TahunAkhir;
-                        $('#PeriodeMisiInfo').html('<i class="fa fa-info-circle"></i> Periode: <strong>' + periode + '</strong> (otomatis dari Visi)');
-                    }
+                }, function(Respon) {
+                    try {
+                        var data = JSON.parse(Respon);
+                        if (data.length > 0) {
+                            var periode = data[0].TahunMulai + ' - ' + data[0].TahunAkhir;
+                            $('#PeriodeMisiInfo').html('<i class="fa fa-info-circle"></i> Periode: <strong>' + periode + '</strong> (otomatis dari Visi)');
+                        }
+                    } catch(e) {}
                 });
                 
                 $('#Misi').val('');
@@ -1234,7 +1789,7 @@
                     return;
                 }
                 
-                var Misi = {
+                var data = {
                     _Id: $("#IdVisiMisiForm").val(),
                     Misi: $("#Misi").val(),
                     [CSRF_NAME]: CSRF_TOKEN
@@ -1242,19 +1797,23 @@
                 
                 $("#SimpanMisi").prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
                 
-                $.post(BaseURL + "Daerah/InputMisiRPJMD", Misi, function(Respon) {
+                $.post(BaseURL + "Daerah/InputMisiRPJMD", data, function(Respon) {
                     $("#SimpanMisi").prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
-                    var data = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
-                    if (data.status === 'success') { 
-                        $('#ModalInputMisi').modal('hide');
-                        showToast('✅ ' + data.message, 'success');
-                        setTimeout(function() { location.reload(); }, 600);
-                    } else { 
-                        showToast('❌ Error: ' + data.message, 'error'); 
+                    try {
+                        var result = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
+                        if (result.status === 'success') { 
+                            $('#ModalInputMisi').modal('hide');
+                            showToast('✅ ' + result.message, 'success');
+                            setTimeout(function() { location.reload(); }, 600);
+                        } else { 
+                            showToast('❌ Error: ' + result.message, 'error'); 
+                        }
+                    } catch(e) {
+                        showToast('❌ Error parsing response', 'error');
                     }
-                }).fail(function(jqXHR, textStatus, errorThrown) {
+                }).fail(function() {
                     $("#SimpanMisi").prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
-                    showToast('❌ AJAX Error: ' + textStatus, 'error');
+                    showToast('❌ Gagal menghubungi server!', 'error');
                 });
             });
 
@@ -1266,12 +1825,14 @@
                 $.post(BaseURL + "Daerah/GetVisiRPJMD", {
                     Id: $(this).data('idvisi'),
                     [CSRF_NAME]: CSRF_TOKEN
-                }, function(respon) {
-                    var data = JSON.parse(respon);
-                    if (data.length > 0) {
-                        var periode = data[0].TahunMulai + ' - ' + data[0].TahunAkhir;
-                        $('#EditPeriodeMisiInfo').html('<i class="fa fa-info-circle"></i> Periode: <strong>' + periode + '</strong> (otomatis dari Visi)');
-                    }
+                }, function(Respon) {
+                    try {
+                        var data = JSON.parse(Respon);
+                        if (data.length > 0) {
+                            var periode = data[0].TahunMulai + ' - ' + data[0].TahunAkhir;
+                            $('#EditPeriodeMisiInfo').html('<i class="fa fa-info-circle"></i> Periode: <strong>' + periode + '</strong> (otomatis dari Visi)');
+                        }
+                    } catch(e) {}
                 });
                 
                 $('#ModalEditMisi').modal("show");
@@ -1283,7 +1844,7 @@
                     return;
                 }
                 
-                var Misi = {
+                var data = {
                     Id: $("#IdMisiForm").val(),
                     _Id: $("#_IdVisi").val(),
                     Misi: $("#_Misi").val(),
@@ -1292,44 +1853,52 @@
                 
                 $("#EditBtnMisi").prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
                 
-                $.post(BaseURL + "Daerah/EditMisiRPJMD", Misi, function(Respon) {
+                $.post(BaseURL + "Daerah/EditMisiRPJMD", data, function(Respon) {
                     $("#EditBtnMisi").prop('disabled', false).html('<i class="fa fa-save"></i> Update');
-                    var data = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
-                    if (data.status === 'success') { 
-                        $('#ModalEditMisi').modal('hide');
-                        showToast('✅ ' + data.message, 'success');
-                        setTimeout(function() { location.reload(); }, 600);
-                    } else { 
-                        showToast('❌ Error: ' + data.message, 'error'); 
+                    try {
+                        var result = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
+                        if (result.status === 'success') { 
+                            $('#ModalEditMisi').modal('hide');
+                            showToast('✅ ' + result.message, 'success');
+                            setTimeout(function() { location.reload(); }, 600);
+                        } else { 
+                            showToast('❌ Error: ' + result.message, 'error'); 
+                        }
+                    } catch(e) {
+                        showToast('❌ Error parsing response', 'error');
                     }
-                }).fail(function(jqXHR, textStatus, errorThrown) {
+                }).fail(function() {
                     $("#EditBtnMisi").prop('disabled', false).html('<i class="fa fa-save"></i> Update');
-                    showToast('❌ AJAX Error: ' + textStatus, 'error');
+                    showToast('❌ Gagal menghubungi server!', 'error');
                 });
             });
 
             $('#hierarki-table tbody').on('click', '.HapusMisi', function() {
                 if (confirm("Yakin ingin menghapus Misi ini?")) {
-                    var Misi = { Id: $(this).data('id'), [CSRF_NAME]: CSRF_TOKEN };
+                    var data = { Id: $(this).data('id'), [CSRF_NAME]: CSRF_TOKEN };
                     var btn = $(this);
                     btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
-                    $.post(BaseURL + "Daerah/HapusMisiRPJMD", Misi, function(Respon) {
-                        var data = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
-                        if (data.status === 'success') { 
-                            showToast('✅ ' + data.message, 'success');
-                            setTimeout(function() { location.reload(); }, 600);
-                        } else { 
+                    $.post(BaseURL + "Daerah/HapusMisiRPJMD", data, function(Respon) {
+                        try {
+                            var result = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
+                            if (result.status === 'success') { 
+                                showToast('✅ ' + result.message, 'success');
+                                setTimeout(function() { location.reload(); }, 600);
+                            } else { 
+                                btn.prop('disabled', false).html('<i class="fa fa-trash"></i> Hapus');
+                                showToast('❌ Error: ' + result.message, 'error'); 
+                            }
+                        } catch(e) {
                             btn.prop('disabled', false).html('<i class="fa fa-trash"></i> Hapus');
-                            showToast('❌ Error: ' + data.message, 'error'); 
+                            showToast('❌ Error parsing response', 'error');
                         }
                     });
                 }
             });
 
             // ==============================================
-            // CRUD TUJUAN - DENGAN RELOAD OTOMATIS
+            // CRUD TUJUAN
             // ==============================================
-
             $('#hierarki-table tbody').on('click', '.TambahTujuan', function() {
                 var parentRow = $(this).closest('tr')[0];
                 if (parentRow.getAttribute('data-expanded') !== 'true') {
@@ -1342,12 +1911,14 @@
                 $.post(BaseURL + "Daerah/GetMisiRPJMD", {
                     Id: misiId,
                     [CSRF_NAME]: CSRF_TOKEN
-                }, function(respon) {
-                    var data = JSON.parse(respon);
-                    if (data.length > 0) {
-                        var periode = data[0].TahunMulai + ' - ' + data[0].TahunAkhir;
-                        $('#PeriodeTujuanInfo').html('<i class="fa fa-info-circle"></i> Periode: <strong>' + periode + '</strong> (otomatis dari Misi)');
-                    }
+                }, function(Respon) {
+                    try {
+                        var data = JSON.parse(Respon);
+                        if (data.length > 0) {
+                            var periode = data[0].TahunMulai + ' - ' + data[0].TahunAkhir;
+                            $('#PeriodeTujuanInfo').html('<i class="fa fa-info-circle"></i> Periode: <strong>' + periode + '</strong> (otomatis dari Misi)');
+                        }
+                    } catch(e) {}
                 });
                 
                 $('#Tujuan').val('');
@@ -1360,7 +1931,7 @@
                     return;
                 }
                 
-                var Tujuan = {
+                var data = {
                     _Id: $("#IdMisiTujuanForm").val(),
                     Tujuan: $("#Tujuan").val(),
                     [CSRF_NAME]: CSRF_TOKEN
@@ -1368,19 +1939,23 @@
                 
                 $("#SimpanTujuan").prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
                 
-                $.post(BaseURL + "Daerah/InputTujuanRPJMD", Tujuan, function(Respon) {
+                $.post(BaseURL + "Daerah/InputTujuanRPJMD", data, function(Respon) {
                     $("#SimpanTujuan").prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
-                    var data = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
-                    if (data.status === 'success') { 
-                        $('#ModalInputTujuan').modal('hide');
-                        showToast('✅ ' + data.message, 'success');
-                        setTimeout(function() { location.reload(); }, 600);
-                    } else { 
-                        showToast('❌ Error: ' + data.message, 'error'); 
+                    try {
+                        var result = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
+                        if (result.status === 'success') { 
+                            $('#ModalInputTujuan').modal('hide');
+                            showToast('✅ ' + result.message, 'success');
+                            setTimeout(function() { location.reload(); }, 600);
+                        } else { 
+                            showToast('❌ Error: ' + result.message, 'error'); 
+                        }
+                    } catch(e) {
+                        showToast('❌ Error parsing response', 'error');
                     }
-                }).fail(function(jqXHR, textStatus, errorThrown) {
+                }).fail(function() {
                     $("#SimpanTujuan").prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
-                    showToast('❌ AJAX Error: ' + textStatus, 'error');
+                    showToast('❌ Gagal menghubungi server!', 'error');
                 });
             });
 
@@ -1392,12 +1967,14 @@
                 $.post(BaseURL + "Daerah/GetMisiRPJMD", {
                     Id: $(this).data('idmisi'),
                     [CSRF_NAME]: CSRF_TOKEN
-                }, function(respon) {
-                    var data = JSON.parse(respon);
-                    if (data.length > 0) {
-                        var periode = data[0].TahunMulai + ' - ' + data[0].TahunAkhir;
-                        $('#EditPeriodeTujuanInfo').html('<i class="fa fa-info-circle"></i> Periode: <strong>' + periode + '</strong> (otomatis dari Misi)');
-                    }
+                }, function(Respon) {
+                    try {
+                        var data = JSON.parse(Respon);
+                        if (data.length > 0) {
+                            var periode = data[0].TahunMulai + ' - ' + data[0].TahunAkhir;
+                            $('#EditPeriodeTujuanInfo').html('<i class="fa fa-info-circle"></i> Periode: <strong>' + periode + '</strong> (otomatis dari Misi)');
+                        }
+                    } catch(e) {}
                 });
                 
                 $('#ModalEditTujuan').modal("show");
@@ -1409,7 +1986,7 @@
                     return;
                 }
                 
-                var Tujuan = {
+                var data = {
                     Id: $("#IdTujuanForm").val(),
                     _Id: $("#_IdMisi").val(),
                     Tujuan: $("#_Tujuan").val(),
@@ -1418,44 +1995,52 @@
                 
                 $("#EditBtnTujuan").prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
                 
-                $.post(BaseURL + "Daerah/EditTujuanRPJMD", Tujuan, function(Respon) {
+                $.post(BaseURL + "Daerah/EditTujuanRPJMD", data, function(Respon) {
                     $("#EditBtnTujuan").prop('disabled', false).html('<i class="fa fa-save"></i> Update');
-                    var data = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
-                    if (data.status === 'success') { 
-                        $('#ModalEditTujuan').modal('hide');
-                        showToast('✅ ' + data.message, 'success');
-                        setTimeout(function() { location.reload(); }, 600);
-                    } else { 
-                        showToast('❌ Error: ' + data.message, 'error'); 
+                    try {
+                        var result = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
+                        if (result.status === 'success') { 
+                            $('#ModalEditTujuan').modal('hide');
+                            showToast('✅ ' + result.message, 'success');
+                            setTimeout(function() { location.reload(); }, 600);
+                        } else { 
+                            showToast('❌ Error: ' + result.message, 'error'); 
+                        }
+                    } catch(e) {
+                        showToast('❌ Error parsing response', 'error');
                     }
-                }).fail(function(jqXHR, textStatus, errorThrown) {
+                }).fail(function() {
                     $("#EditBtnTujuan").prop('disabled', false).html('<i class="fa fa-save"></i> Update');
-                    showToast('❌ AJAX Error: ' + textStatus, 'error');
+                    showToast('❌ Gagal menghubungi server!', 'error');
                 });
             });
 
             $('#hierarki-table tbody').on('click', '.HapusTujuan', function() {
                 if (confirm("Yakin ingin menghapus Tujuan ini?")) {
-                    var Tujuan = { Id: $(this).data('id'), [CSRF_NAME]: CSRF_TOKEN };
+                    var data = { Id: $(this).data('id'), [CSRF_NAME]: CSRF_TOKEN };
                     var btn = $(this);
                     btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
-                    $.post(BaseURL + "Daerah/HapusTujuanRPJMD", Tujuan, function(Respon) {
-                        var data = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
-                        if (data.status === 'success') { 
-                            showToast('✅ ' + data.message, 'success');
-                            setTimeout(function() { location.reload(); }, 600);
-                        } else { 
+                    $.post(BaseURL + "Daerah/HapusTujuanRPJMD", data, function(Respon) {
+                        try {
+                            var result = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
+                            if (result.status === 'success') { 
+                                showToast('✅ ' + result.message, 'success');
+                                setTimeout(function() { location.reload(); }, 600);
+                            } else { 
+                                btn.prop('disabled', false).html('<i class="fa fa-trash"></i> Hapus');
+                                showToast('❌ Error: ' + result.message, 'error'); 
+                            }
+                        } catch(e) {
                             btn.prop('disabled', false).html('<i class="fa fa-trash"></i> Hapus');
-                            showToast('❌ Error: ' + data.message, 'error'); 
+                            showToast('❌ Error parsing response', 'error');
                         }
                     });
                 }
             });
 
             // ==============================================
-            // CRUD SASARAN - DENGAN RELOAD OTOMATIS
+            // CRUD SASARAN
             // ==============================================
-
             $('#hierarki-table tbody').on('click', '.TambahSasaran', function() {
                 var parentRow = $(this).closest('tr')[0];
                 if (parentRow.getAttribute('data-expanded') !== 'true') {
@@ -1468,12 +2053,14 @@
                 $.post(BaseURL + "Daerah/GetTujuanRPJMD", {
                     Id: tujuanId,
                     [CSRF_NAME]: CSRF_TOKEN
-                }, function(respon) {
-                    var data = JSON.parse(respon);
-                    if (data.length > 0) {
-                        var periode = data[0].TahunMulai + ' - ' + data[0].TahunAkhir;
-                        $('#PeriodeSasaranInfo').html('<i class="fa fa-info-circle"></i> Periode: <strong>' + periode + '</strong> (otomatis dari Tujuan)');
-                    }
+                }, function(Respon) {
+                    try {
+                        var data = JSON.parse(Respon);
+                        if (data.length > 0) {
+                            var periode = data[0].TahunMulai + ' - ' + data[0].TahunAkhir;
+                            $('#PeriodeSasaranInfo').html('<i class="fa fa-info-circle"></i> Periode: <strong>' + periode + '</strong> (otomatis dari Tujuan)');
+                        }
+                    } catch(e) {}
                 });
                 
                 $('#Sasaran').val('');
@@ -1486,7 +2073,7 @@
                     return;
                 }
                 
-                var Sasaran = {
+                var data = {
                     _Id: $("#IdTujuanSasaranForm").val(),
                     Sasaran: $("#Sasaran").val(),
                     [CSRF_NAME]: CSRF_TOKEN
@@ -1494,19 +2081,23 @@
                 
                 $("#SimpanSasaran").prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
                 
-                $.post(BaseURL + "Daerah/InputSasaranRPJMD", Sasaran, function(Respon) {
+                $.post(BaseURL + "Daerah/InputSasaranRPJMD", data, function(Respon) {
                     $("#SimpanSasaran").prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
-                    var data = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
-                    if (data.status === 'success') { 
-                        $('#ModalInputSasaran').modal('hide');
-                        showToast('✅ ' + data.message, 'success');
-                        setTimeout(function() { location.reload(); }, 600);
-                    } else { 
-                        showToast('❌ Error: ' + data.message, 'error'); 
+                    try {
+                        var result = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
+                        if (result.status === 'success') { 
+                            $('#ModalInputSasaran').modal('hide');
+                            showToast('✅ ' + result.message, 'success');
+                            setTimeout(function() { location.reload(); }, 600);
+                        } else { 
+                            showToast('❌ Error: ' + result.message, 'error'); 
+                        }
+                    } catch(e) {
+                        showToast('❌ Error parsing response', 'error');
                     }
-                }).fail(function(jqXHR, textStatus, errorThrown) {
+                }).fail(function() {
                     $("#SimpanSasaran").prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
-                    showToast('❌ AJAX Error: ' + textStatus, 'error');
+                    showToast('❌ Gagal menghubungi server!', 'error');
                 });
             });
 
@@ -1518,12 +2109,14 @@
                 $.post(BaseURL + "Daerah/GetTujuanRPJMD", {
                     Id: $(this).data('idtujuan'),
                     [CSRF_NAME]: CSRF_TOKEN
-                }, function(respon) {
-                    var data = JSON.parse(respon);
-                    if (data.length > 0) {
-                        var periode = data[0].TahunMulai + ' - ' + data[0].TahunAkhir;
-                        $('#EditPeriodeSasaranInfo').html('<i class="fa fa-info-circle"></i> Periode: <strong>' + periode + '</strong> (otomatis dari Tujuan)');
-                    }
+                }, function(Respon) {
+                    try {
+                        var data = JSON.parse(Respon);
+                        if (data.length > 0) {
+                            var periode = data[0].TahunMulai + ' - ' + data[0].TahunAkhir;
+                            $('#EditPeriodeSasaranInfo').html('<i class="fa fa-info-circle"></i> Periode: <strong>' + periode + '</strong> (otomatis dari Tujuan)');
+                        }
+                    } catch(e) {}
                 });
                 
                 $('#ModalEditSasaran').modal("show");
@@ -1535,7 +2128,7 @@
                     return;
                 }
                 
-                var Sasaran = {
+                var data = {
                     Id: $("#IdSasaranForm").val(),
                     _Id: $("#_IdTujuan").val(),
                     Sasaran: $("#_Sasaran").val(),
@@ -1544,39 +2137,599 @@
                 
                 $("#EditBtnSasaran").prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
                 
-                $.post(BaseURL + "Daerah/EditSasaranRPJMD", Sasaran, function(Respon) {
+                $.post(BaseURL + "Daerah/EditSasaranRPJMD", data, function(Respon) {
                     $("#EditBtnSasaran").prop('disabled', false).html('<i class="fa fa-save"></i> Update');
-                    var data = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
-                    if (data.status === 'success') { 
-                        $('#ModalEditSasaran').modal('hide');
-                        showToast('✅ ' + data.message, 'success');
-                        setTimeout(function() { location.reload(); }, 600);
-                    } else { 
-                        showToast('❌ Error: ' + data.message, 'error'); 
+                    try {
+                        var result = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
+                        if (result.status === 'success') { 
+                            $('#ModalEditSasaran').modal('hide');
+                            showToast('✅ ' + result.message, 'success');
+                            setTimeout(function() { location.reload(); }, 600);
+                        } else { 
+                            showToast('❌ Error: ' + result.message, 'error'); 
+                        }
+                    } catch(e) {
+                        showToast('❌ Error parsing response', 'error');
                     }
-                }).fail(function(jqXHR, textStatus, errorThrown) {
+                }).fail(function() {
                     $("#EditBtnSasaran").prop('disabled', false).html('<i class="fa fa-save"></i> Update');
-                    showToast('❌ AJAX Error: ' + textStatus, 'error');
+                    showToast('❌ Gagal menghubungi server!', 'error');
                 });
             });
 
             $('#hierarki-table tbody').on('click', '.HapusSasaran', function() {
                 if (confirm("Yakin ingin menghapus Sasaran ini?")) {
-                    var Sasaran = { Id: $(this).data('id'), [CSRF_NAME]: CSRF_TOKEN };
+                    var data = { Id: $(this).data('id'), [CSRF_NAME]: CSRF_TOKEN };
                     var btn = $(this);
                     btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
-                    $.post(BaseURL + "Daerah/HapusSasaranRPJMD", Sasaran, function(Respon) {
-                        var data = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
-                        if (data.status === 'success') { 
-                            showToast('✅ ' + data.message, 'success');
-                            setTimeout(function() { location.reload(); }, 600);
-                        } else { 
+                    $.post(BaseURL + "Daerah/HapusSasaranRPJMD", data, function(Respon) {
+                        try {
+                            var result = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
+                            if (result.status === 'success') { 
+                                showToast('✅ ' + result.message, 'success');
+                                setTimeout(function() { location.reload(); }, 600);
+                            } else { 
+                                btn.prop('disabled', false).html('<i class="fa fa-trash"></i> Hapus');
+                                showToast('❌ Error: ' + result.message, 'error'); 
+                            }
+                        } catch(e) {
                             btn.prop('disabled', false).html('<i class="fa fa-trash"></i> Hapus');
-                            showToast('❌ Error: ' + data.message, 'error'); 
+                            showToast('❌ Error parsing response', 'error');
                         }
                     });
                 }
             });
+
+            // ==============================================
+            // INDIKATOR TUJUAN - DENGAN PD MULTI-SELECT (SEMUA LEVEL)
+            // ==============================================
+            var currentTujuanId = null;
+
+            $('#hierarki-table tbody').on('click', '.IndikatorTujuan', function() {
+                currentTujuanId = $(this).data('id');
+                $('#current_tujuan_id').val(currentTujuanId);
+                
+                var tujuanText = $(this).closest('tr').find('.text-content').text().trim();
+                $('#tujuan_info').html('<strong>Tujuan:</strong> ' + escapeHtml(tujuanText));
+                
+                resetFormTujuan();
+                loadPDList('input_pd_tujuan');
+                loadIndikatorTujuan(currentTujuanId);
+                
+                $('#ModalIndikatorTujuan').modal('show');
+            });
+
+            // ==============================================
+            // RESET FORM TUJUAN - KEMBALI KE MODE TAMBAH
+            // ==============================================
+            function resetFormTujuan() {
+                $('#indikator_tujuan_id').val('');
+                $('#input_indikator_tujuan').val('');
+                $('#input_satuan_tujuan').val('');
+                $('#input_baseline_tujuan').val('');
+                $('#input_pd_tujuan').val('');
+                $('.input-target-tujuan').val('');
+                $('#pd_tags_tujuan').html('');
+                
+                // Reset ke mode tambah
+                setFormModeTujuan('add');
+                
+                var select = document.getElementById('input_pd_tujuan');
+                if (select) {
+                    for (var i = 0; i < select.options.length; i++) {
+                        select.options[i].selected = false;
+                    }
+                }
+            }
+
+            function loadIndikatorTujuan(tujuanId) {
+                $.post(BaseURL + "Daerah/GetIndikatorTujuan", {
+                    tujuan_id: tujuanId,
+                    [CSRF_NAME]: CSRF_TOKEN
+                }, function(Respon) {
+                    try {
+                        var data = JSON.parse(Respon);
+                        var html = '';
+                        
+                        if (data.length > 0) {
+                            data.forEach(function(item, index) {
+                                var pdDisplay = '-';
+                                if (item.pd_pengampuh_names && item.pd_pengampuh_names.length > 0) {
+                                    pdDisplay = item.pd_pengampuh_names.join(', ');
+                                } else if (item.pd_pengampuh) {
+                                    pdDisplay = 'ID: ' + item.pd_pengampuh;
+                                }
+                                
+                                html += '<tr>';
+                                html += '<td>' + escapeHtml(item.indikator) + '</td>';
+                                html += '<td class="text-center">' + escapeHtml(item.satuan || '-') + '</td>';
+                                html += '<td class="text-center">' + (item.baseline_2024 || '-') + '</td>';
+                                html += '<td class="text-center">' + (item.target_2025 || '-') + '</td>';
+                                html += '<td class="text-center">' + (item.target_2026 || '-') + '</td>';
+                                html += '<td class="text-center">' + (item.target_2027 || '-') + '</td>';
+                                html += '<td class="text-center">' + (item.target_2028 || '-') + '</td>';
+                                html += '<td class="text-center">' + (item.target_2029 || '-') + '</td>';
+                                html += '<td class="text-center">' + (item.target_2030 || '-') + '</td>';
+                                html += '<td>' + escapeHtml(pdDisplay) + '</td>';
+                                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                                html += '<td class="text-center">';
+                                html += '<div class="aksi-indikator">';
+                                html += '<button class="btn btn-sm btn-warning EditIndikatorTujuan btn-action" data-id="' + item.id + '" title="Edit"><i class="fa fa-edit"></i></button>';
+                                html += '<button class="btn btn-sm btn-danger HapusIndikatorTujuan btn-action" data-id="' + item.id + '" title="Hapus"><i class="fa fa-trash"></i></button>';
+                                <?php } ?>
+                                html += '</div>';
+                                html += '</td>';
+                                html += '</tr>';
+                            });
+                        } else {
+                            html = '<tr><td colspan="11" class="text-center" style="padding: 20px; color: #999;">Belum ada indikator</td></tr>';
+                        }
+                        
+                        $('#list-indikator-tujuan').html(html);
+                        
+                        // Update badge count
+                        $('#indikator-count-tujuan-' + tujuanId).text(data.length);
+                        
+                    } catch(e) {
+                        console.error('Error loading indikator:', e);
+                    }
+                });
+            }
+
+            // ==============================================
+            // EDIT INDIKATOR TUJUAN
+            // ==============================================
+            $('#list-indikator-tujuan').on('click', '.EditIndikatorTujuan', function() {
+                var id = $(this).data('id');
+                $('#indikator_tujuan_id').val(id);
+                
+                // Ubah ke mode edit
+                setFormModeTujuan('edit');
+                
+                var row = $(this).closest('tr');
+                var cells = row.find('td');
+                
+                $('#input_indikator_tujuan').val(cells.eq(0).text().trim());
+                $('#input_satuan_tujuan').val(cells.eq(1).text().trim());
+                $('#input_baseline_tujuan').val(cells.eq(2).text().trim());
+                $('#input_target2025_tujuan').val(cells.eq(3).text().trim());
+                $('#input_target2026_tujuan').val(cells.eq(4).text().trim());
+                $('#input_target2027_tujuan').val(cells.eq(5).text().trim());
+                $('#input_target2028_tujuan').val(cells.eq(6).text().trim());
+                $('#input_target2029_tujuan').val(cells.eq(7).text().trim());
+                $('#input_target2030_tujuan').val(cells.eq(8).text().trim());
+                
+                // Load selected PD dengan AJAX
+                var btn = $(this);
+                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
+                
+                $.ajax({
+                    url: BaseURL + "Daerah/GetSelectedPD",
+                    type: "POST",
+                    data: { 
+                        indikator_id: id, 
+                        type: 'tujuan',
+                        [CSRF_NAME]: CSRF_TOKEN 
+                    },
+                    success: function(Respon) {
+                        btn.prop('disabled', false).html('<i class="fa fa-edit"></i>');
+                        try {
+                            var selectedIds = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
+                            console.log('Selected PD IDs:', selectedIds);
+                            setSelectedPD('input_pd_tujuan', selectedIds);
+                        } catch(e) {
+                            console.error('Error parsing selected PD:', e);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        btn.prop('disabled', false).html('<i class="fa fa-edit"></i>');
+                        console.error('AJAX Error:', status, error);
+                        showToast('Gagal memuat data PD terpilih', 'error');
+                    }
+                });
+                
+                // Scroll ke form
+                $('html, body').animate({
+                    scrollTop: $('#input_indikator_tujuan').offset().top - 100
+                }, 300);
+            });
+
+            // ==============================================
+            // SIMPAN INDIKATOR TUJUAN
+            // ==============================================
+            $("#SimpanIndikatorTujuan").click(function() {
+                var indikator = $('#input_indikator_tujuan').val().trim();
+                if (indikator === '') {
+                    showToast('Indikator harus diisi!', 'error');
+                    return;
+                }
+                
+                var pdSelect = document.getElementById('input_pd_tujuan');
+                var pdValues = [];
+                if (pdSelect) {
+                    for (var i = 0; i < pdSelect.options.length; i++) {
+                        if (pdSelect.options[i].selected && pdSelect.options[i].value) {
+                            pdValues.push(pdSelect.options[i].value);
+                        }
+                    }
+                }
+                
+                var data = {
+                    tujuan_id: currentTujuanId,
+                    indikator: indikator,
+                    satuan: $('#input_satuan_tujuan').val().trim(),
+                    baseline_2024: $('#input_baseline_tujuan').val() || null,
+                    target_2025: $('#input_target2025_tujuan').val() || null,
+                    target_2026: $('#input_target2026_tujuan').val() || null,
+                    target_2027: $('#input_target2027_tujuan').val() || null,
+                    target_2028: $('#input_target2028_tujuan').val() || null,
+                    target_2029: $('#input_target2029_tujuan').val() || null,
+                    target_2030: $('#input_target2030_tujuan').val() || null,
+                    pd_pengampuh: pdValues,
+                    [CSRF_NAME]: CSRF_TOKEN
+                };
+                
+                var editId = $('#indikator_tujuan_id').val();
+                var isEdit = $('#is_edit_tujuan').val() === 'true';
+                var url = isEdit ? 'EditIndikatorTujuan' : 'InputIndikatorTujuan';
+                if (isEdit) data.id = editId;
+                
+                console.log('Saving data:', data);
+                
+                var btn = $(this);
+                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
+                
+                $.ajax({
+                    url: BaseURL + "Daerah/" + url,
+                    type: "POST",
+                    data: data,
+                    dataType: 'json',
+                    success: function(result) {
+                        btn.prop('disabled', false).html('<i class="fa fa-save"></i> <span id="btn_text_tujuan">' + (isEdit ? 'Update' : 'Simpan') + '</span>');
+                        if (result.status === 'success') {
+                            showToast('✅ ' + result.message, 'success');
+                            resetFormTujuan();
+                            setFormModeTujuan('add');
+                            loadIndikatorTujuan(currentTujuanId);
+                        } else {
+                            showToast('❌ ' + result.message, 'error');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        btn.prop('disabled', false).html('<i class="fa fa-save"></i> <span id="btn_text_tujuan">' + (isEdit ? 'Update' : 'Simpan') + '</span>');
+                        console.error('AJAX Error:', status, error);
+                        console.error('Response:', xhr.responseText);
+                        showToast('❌ Gagal menyimpan: ' + xhr.status + ' - ' + xhr.statusText, 'error');
+                    }
+                });
+            });
+
+            // ==============================================
+            // HAPUS INDIKATOR TUJUAN
+            // ==============================================
+            $('#list-indikator-tujuan').on('click', '.HapusIndikatorTujuan', function() {
+                if (confirm("Yakin ingin menghapus indikator ini?")) {
+                    var id = $(this).data('id');
+                    var btn = $(this);
+                    btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
+                    
+                    $.post(BaseURL + "Daerah/HapusIndikatorTujuan", {
+                        id: id,
+                        [CSRF_NAME]: CSRF_TOKEN
+                    }, function(Respon) {
+                        try {
+                            var result = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
+                            if (result.status === 'success') {
+                                showToast('✅ ' + result.message, 'success');
+                                loadIndikatorTujuan(currentTujuanId);
+                            } else {
+                                btn.prop('disabled', false).html('<i class="fa fa-trash"></i>');
+                                showToast('❌ ' + result.message, 'error');
+                            }
+                        } catch(e) {
+                            btn.prop('disabled', false).html('<i class="fa fa-trash"></i>');
+                            showToast('❌ Error parsing response', 'error');
+                        }
+                    });
+                }
+            });
+
+            // ==============================================
+            // INDIKATOR SASARAN - OPEN MODAL
+            // ==============================================
+            var currentSasaranId = null;
+
+            $('#hierarki-table tbody').on('click', '.IndikatorSasaran', function() {
+                currentSasaranId = $(this).data('id');
+                $('#current_sasaran_id').val(currentSasaranId);
+                
+                var sasaranText = $(this).closest('tr').find('.text-content').text().trim();
+                $('#sasaran_info').html('<strong>Sasaran:</strong> ' + escapeHtml(sasaranText));
+                
+                // Reset ke mode tambah
+                resetFormSasaran();
+                setFormModeSasaran('add');
+                
+                loadPDList('input_pd_sasaran');
+                loadIndikatorSasaran(currentSasaranId);
+                
+                $('#ModalIndikatorSasaran').modal('show');
+            });
+
+            function resetFormSasaran() {
+            $('#indikator_sasaran_id').val('');
+            $('#input_indikator_sasaran').val('');
+            $('#input_satuan_sasaran').val('');
+            $('#input_baseline_sasaran').val('');
+            $('#input_pd_sasaran').val('');
+            $('.input-target-sasaran').val('');
+            $('#pd_tags_sasaran').html('');
+            
+            // Reset ke mode tambah
+            setFormModeSasaran('add');
+            
+            var select = document.getElementById('input_pd_sasaran');
+            if (select) {
+                for (var i = 0; i < select.options.length; i++) {
+                    select.options[i].selected = false;
+                }
+            }
+        }
+
+            function loadIndikatorSasaran(sasaranId) {
+                $.post(BaseURL + "Daerah/GetIndikatorSasaran", {
+                    sasaran_id: sasaranId,
+                    [CSRF_NAME]: CSRF_TOKEN
+                }, function(Respon) {
+                    try {
+                        var data = JSON.parse(Respon);
+                        var html = '';
+                        
+                        if (data.length > 0) {
+                            data.forEach(function(item) {
+                                var pdDisplay = '-';
+                                if (item.pd_pengampuh_names && item.pd_pengampuh_names.length > 0) {
+                                    pdDisplay = item.pd_pengampuh_names.join(', ');
+                                } else if (item.pd_pengampuh) {
+                                    pdDisplay = 'ID: ' + item.pd_pengampuh;
+                                }
+                                
+                                html += '<tr>';
+                                html += '<td>' + escapeHtml(item.indikator) + '</td>';
+                                html += '<td class="text-center">' + escapeHtml(item.satuan || '-') + '</td>';
+                                html += '<td class="text-center">' + (item.baseline_2024 || '-') + '</td>';
+                                html += '<td class="text-center">' + (item.target_2025 || '-') + '</td>';
+                                html += '<td class="text-center">' + (item.target_2026 || '-') + '</td>';
+                                html += '<td class="text-center">' + (item.target_2027 || '-') + '</td>';
+                                html += '<td class="text-center">' + (item.target_2028 || '-') + '</td>';
+                                html += '<td class="text-center">' + (item.target_2029 || '-') + '</td>';
+                                html += '<td class="text-center">' + (item.target_2030 || '-') + '</td>';
+                                html += '<td>' + escapeHtml(pdDisplay) + '</td>';
+                                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                                html += '<td class="text-center">';
+                                html += '<div class="aksi-indikator">';
+                                html += '<button class="btn btn-sm btn-warning EditIndikatorSasaran btn-action" data-id="' + item.id + '" title="Edit"><i class="fa fa-edit"></i></button>';
+                                html += '<button class="btn btn-sm btn-danger HapusIndikatorSasaran btn-action" data-id="' + item.id + '" title="Hapus"><i class="fa fa-trash"></i></button>';
+                                <?php }?>
+                                html += '</div>';
+                                html += '</td>';
+                                html += '</tr>';
+                            });
+                        } else {
+                            html = '<tr><td colspan="11" class="text-center" style="padding: 20px; color: #999;">Belum ada indikator</td></tr>';
+                        }
+                        
+                        $('#list-indikator-sasaran').html(html);
+                        
+                        // Update badge count
+                        $('#indikator-count-sasaran-' + sasaranId).text(data.length);
+                        
+                    } catch(e) {
+                        console.error('Error loading indikator:', e);
+                    }
+                });
+            }
+
+            // ==============================================
+            // EDIT INDIKATOR SASARAN
+            // ==============================================
+            $('#list-indikator-sasaran').on('click', '.EditIndikatorSasaran', function() {
+                var id = $(this).data('id');
+                $('#indikator_sasaran_id').val(id);
+                
+                // Ubah ke mode edit
+                setFormModeSasaran('edit');
+                
+                var row = $(this).closest('tr');
+                var cells = row.find('td');
+                
+                $('#input_indikator_sasaran').val(cells.eq(0).text().trim());
+                $('#input_satuan_sasaran').val(cells.eq(1).text().trim());
+                $('#input_baseline_sasaran').val(cells.eq(2).text().trim());
+                $('#input_target2025_sasaran').val(cells.eq(3).text().trim());
+                $('#input_target2026_sasaran').val(cells.eq(4).text().trim());
+                $('#input_target2027_sasaran').val(cells.eq(5).text().trim());
+                $('#input_target2028_sasaran').val(cells.eq(6).text().trim());
+                $('#input_target2029_sasaran').val(cells.eq(7).text().trim());
+                $('#input_target2030_sasaran').val(cells.eq(8).text().trim());
+                
+                // Load selected PD dengan AJAX
+                var btn = $(this);
+                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
+                
+                $.ajax({
+                    url: BaseURL + "Daerah/GetSelectedPD",
+                    type: "POST",
+                    data: { 
+                        indikator_id: id, 
+                        type: 'sasaran',
+                        [CSRF_NAME]: CSRF_TOKEN 
+                    },
+                    success: function(Respon) {
+                        btn.prop('disabled', false).html('<i class="fa fa-edit"></i>');
+                        try {
+                            var selectedIds = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
+                            console.log('Selected PD IDs:', selectedIds);
+                            setSelectedPD('input_pd_sasaran', selectedIds);
+                        } catch(e) {
+                            console.error('Error parsing selected PD:', e);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        btn.prop('disabled', false).html('<i class="fa fa-edit"></i>');
+                        console.error('AJAX Error:', status, error);
+                        showToast('Gagal memuat data PD terpilih', 'error');
+                    }
+                });
+                
+                $('html, body').animate({
+                    scrollTop: $('#input_indikator_sasaran').offset().top - 100
+                }, 300);
+            });
+
+            // ==============================================
+            // SIMPAN INDIKATOR SASARAN
+            // ==============================================
+            $("#SimpanIndikatorSasaran").click(function() {
+                var indikator = $('#input_indikator_sasaran').val().trim();
+                if (indikator === '') {
+                    showToast('Indikator harus diisi!', 'error');
+                    return;
+                }
+                
+                var pdSelect = document.getElementById('input_pd_sasaran');
+                var pdValues = [];
+                if (pdSelect) {
+                    for (var i = 0; i < pdSelect.options.length; i++) {
+                        if (pdSelect.options[i].selected && pdSelect.options[i].value) {
+                            pdValues.push(pdSelect.options[i].value);
+                        }
+                    }
+                }
+                
+                var data = {
+                    sasaran_id: currentSasaranId,
+                    indikator: indikator,
+                    satuan: $('#input_satuan_sasaran').val().trim(),
+                    baseline_2024: $('#input_baseline_sasaran').val() || null,
+                    target_2025: $('#input_target2025_sasaran').val() || null,
+                    target_2026: $('#input_target2026_sasaran').val() || null,
+                    target_2027: $('#input_target2027_sasaran').val() || null,
+                    target_2028: $('#input_target2028_sasaran').val() || null,
+                    target_2029: $('#input_target2029_sasaran').val() || null,
+                    target_2030: $('#input_target2030_sasaran').val() || null,
+                    pd_pengampuh: pdValues,
+                    [CSRF_NAME]: CSRF_TOKEN
+                };
+                
+                var editId = $('#indikator_sasaran_id').val();
+                var isEdit = $('#is_edit_sasaran').val() === 'true';
+                var url = isEdit ? 'EditIndikatorSasaran' : 'InputIndikatorSasaran';
+                if (isEdit) data.id = editId;
+                
+                console.log('Saving data:', data);
+                
+                var btn = $(this);
+                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
+                
+                $.ajax({
+                    url: BaseURL + "Daerah/" + url,
+                    type: "POST",
+                    data: data,
+                    dataType: 'json',
+                    success: function(result) {
+                        btn.prop('disabled', false).html('<i class="fa fa-save"></i> <span id="btn_text_sasaran">' + (isEdit ? 'Update' : 'Simpan') + '</span>');
+                        if (result.status === 'success') {
+                            showToast('✅ ' + result.message, 'success');
+                            resetFormSasaran();
+                            setFormModeSasaran('add');
+                            loadIndikatorSasaran(currentSasaranId);
+                        } else {
+                            showToast('❌ ' + result.message, 'error');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        btn.prop('disabled', false).html('<i class="fa fa-save"></i> <span id="btn_text_sasaran">' + (isEdit ? 'Update' : 'Simpan') + '</span>');
+                        console.error('AJAX Error:', status, error);
+                        console.error('Response:', xhr.responseText);
+                        showToast('❌ Gagal menyimpan: ' + xhr.status + ' - ' + xhr.statusText, 'error');
+                    }
+                });
+            });
+
+            // ==============================================
+            // HAPUS INDIKATOR SASARAN
+            // ==============================================
+            $('#list-indikator-sasaran').on('click', '.HapusIndikatorSasaran', function() {
+                if (confirm("Yakin ingin menghapus indikator ini?")) {
+                    var id = $(this).data('id');
+                    var btn = $(this);
+                    btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
+                    
+                    $.post(BaseURL + "Daerah/HapusIndikatorSasaran", {
+                        id: id,
+                        [CSRF_NAME]: CSRF_TOKEN
+                    }, function(Respon) {
+                        try {
+                            var result = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
+                            if (result.status === 'success') {
+                                showToast('✅ ' + result.message, 'success');
+                                loadIndikatorSasaran(currentSasaranId);
+                            } else {
+                                btn.prop('disabled', false).html('<i class="fa fa-trash"></i>');
+                                showToast('❌ ' + result.message, 'error');
+                            }
+                        } catch(e) {
+                            btn.prop('disabled', false).html('<i class="fa fa-trash"></i>');
+                            showToast('❌ Error parsing response', 'error');
+                        }
+                    });
+                }
+            });
+
+            // ==============================================
+            // EVENT LISTENER UNTUK PD DROPDOWN
+            // ==============================================
+            $('#input_pd_tujuan').on('change', function() {
+                updatePDTags('input_pd_tujuan', 'pd_tags_tujuan');
+            });
+
+            $('#input_pd_sasaran').on('change', function() {
+                updatePDTags('input_pd_sasaran', 'pd_tags_sasaran');
+            });
+
+            // ==============================================
+            // LOAD ALL INDIKATOR COUNTS
+            // ==============================================
+            function loadAllIndikatorCounts() {
+                // Hitung indikator tujuan
+                $('.IndikatorTujuan').each(function() {
+                    var tujuanId = $(this).data('id');
+                    $.post(BaseURL + "Daerah/GetIndikatorTujuan", {
+                        tujuan_id: tujuanId,
+                        [CSRF_NAME]: CSRF_TOKEN
+                    }, function(Respon) {
+                        try {
+                            var data = JSON.parse(Respon);
+                            $('#indikator-count-tujuan-' + tujuanId).text(data.length);
+                        } catch(e) {}
+                    });
+                });
+                
+                // Hitung indikator sasaran
+                $('.IndikatorSasaran').each(function() {
+                    var sasaranId = $(this).data('id');
+                    $.post(BaseURL + "Daerah/GetIndikatorSasaran", {
+                        sasaran_id: sasaranId,
+                        [CSRF_NAME]: CSRF_TOKEN
+                    }, function(Respon) {
+                        try {
+                            var data = JSON.parse(Respon);
+                            $('#indikator-count-sasaran-' + sasaranId).text(data.length);
+                        } catch(e) {}
+                    });
+                });
+            }
 
         });
     </script>
