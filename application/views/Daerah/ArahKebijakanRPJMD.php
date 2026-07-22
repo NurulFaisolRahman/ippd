@@ -217,161 +217,298 @@
 <script src="../js/data-table/data-table-act.js"></script>
 
 <script>
-var BaseURL    = "<?= base_url() ?>";
+var BaseURL = "<?= base_url() ?>";
 var CSRF_TOKEN = "<?= $this->security->get_csrf_hash() ?>";
-var CSRF_NAME  = "<?= $this->security->get_csrf_token_name() ?>";
+var CSRF_NAME = "<?= $this->security->get_csrf_token_name() ?>";
 
-/* ================= FILTER ================= */
-$("#Provinsi").change(function() {
+$(document).ready(function() {
+
+    // ============================================================
+    // FUNGSI BANTUAN HANDLE RESPONSE
+    // ============================================================
+
+    function handleResponse(res, modalId, formId) {
+        try {
+            if (res === '1' || res.trim() === '1') {
+                if (formId) {
+                    $('#' + formId)[0].reset();
+                }
+                if (modalId) {
+                    $('#' + modalId).modal('hide');
+                }
+                // RELOAD HALAMAN
+                window.location.reload();
+            } else {
+                try {
+                    var error = JSON.parse(res);
+                    alert(error.message || "Gagal memproses data!");
+                } catch (e) {
+                    alert(res || "Gagal memproses data!");
+                }
+            }
+        } catch (e) {
+            alert("Terjadi kesalahan: " + e.message);
+        }
+    }
+
+    // ============================================================
+    // FILTER WILAYAH
+    // ============================================================
+
+    $("#Provinsi").change(function() {
         if ($(this).val() === "") {
-          $("#KabKota").html('<option value="">Pilih Kab/Kota</option>');
-          return;
+            $("#KabKota").html('<option value="">Pilih Kab/Kota</option>');
+            return;
         }
 
         $.ajax({
-          url: BaseURL + "Daerah/GetListKabKota",
-          type: "POST",
-          data: { Kode: $(this).val(), [CSRF_NAME]: CSRF_TOKEN },
-          beforeSend: function() { $("#KabKota").prop('disabled', true); },
-          success: function(res) {
-            var Data = (typeof res === 'string') ? JSON.parse(res) : res;
-            var KabKota = '<option value="">Pilih Kab/Kota</option>';
+            url: BaseURL + "Daerah/GetListKabKota",
+            type: "POST",
+            data: { 
+                Kode: $(this).val(), 
+                [CSRF_NAME]: CSRF_TOKEN 
+            },
+            beforeSend: function() { 
+                $("#KabKota").prop('disabled', true); 
+            },
+            success: function(res) {
+                try {
+                    var Data = (typeof res === 'string') ? JSON.parse(res) : res;
+                    var KabKota = '<option value="">Pilih Kab/Kota</option>';
 
-            if (Data.length > 0) {
-              for (let i = 0; i < Data.length; i++) {
-                KabKota += '<option value="' + Data[i].Kode + '">' + Data[i].Nama + '</option>';
-              }
-            } else {
-              alert("Belum Ada Data Kab/Kota");
+                    if (Data.length > 0) {
+                        for (let i = 0; i < Data.length; i++) {
+                            KabKota += '<option value="' + Data[i].Kode + '">' + Data[i].Nama + '</option>';
+                        }
+                    } else {
+                        alert("Belum Ada Data Kab/Kota");
+                    }
+
+                    $("#KabKota").html(KabKota).prop('disabled', false);
+                } catch(e) {
+                    alert("Gagal memuat data Kab/Kota");
+                    $("#KabKota").prop('disabled', false);
+                }
+            },
+            error: function() {
+                alert("Gagal memuat data Kab/Kota");
+                $("#KabKota").prop('disabled', false);
             }
-
-            $("#KabKota").html(KabKota).prop('disabled', false);
-          },
-          error: function() {
-            alert("Gagal memuat data Kab/Kota");
-            $("#KabKota").prop('disabled', false);
-          }
         });
-      });
+    });
 
-      $("#Filter").click(function() {
-        if ($("#Provinsi").val() === "") return alert("Mohon Pilih Provinsi");
-        if ($("#KabKota").val() === "") return alert("Mohon Pilih Kab/Kota");
+    $("#Filter").click(function() {
+        if ($("#Provinsi").val() === "") {
+            alert("Mohon Pilih Provinsi");
+            return;
+        }
+        if ($("#KabKota").val() === "") {
+            alert("Mohon Pilih Kab/Kota");
+            return;
+        }
 
         var kodeWilayah = $("#KabKota").val();
 
         $.ajax({
-          url: BaseURL + "Daerah/SetTempKodeWilayah",
-          type: "POST",
-          data: { KodeWilayah: kodeWilayah, [CSRF_NAME]: CSRF_TOKEN },
-          beforeSend: function() { $("#Filter").prop('disabled', true).text('Memuat...'); },
-          success: function(res) {
-            if (res === '1') {
-              window.location.reload();
-            } else {
-              alert(res || "Gagal menyimpan filter wilayah!");
-              $("#Filter").prop('disabled', false).text('Filter');
+            url: BaseURL + "Daerah/SetTempKodeWilayah",
+            type: "POST",
+            data: { 
+                KodeWilayah: kodeWilayah, 
+                [CSRF_NAME]: CSRF_TOKEN 
+            },
+            beforeSend: function() { 
+                $("#Filter").prop('disabled', true).text('Memuat...'); 
+            },
+            success: function(res) {
+                try {
+                    if (res === '1' || res.trim() === '1') {
+                        window.location.reload();
+                    } else {
+                        alert(res || "Gagal menyimpan filter wilayah!");
+                        $("#Filter").prop('disabled', false).text('Filter');
+                    }
+                } catch(e) {
+                    alert("Gagal memproses respons server!");
+                    $("#Filter").prop('disabled', false).text('Filter');
+                }
+            },
+            error: function() {
+                alert("Gagal menghubungi server!");
+                $("#Filter").prop('disabled', false).text('Filter');
             }
-          },
-          error: function() {
-            alert("Gagal menghubungi server!");
-            $("#Filter").prop('disabled', false).text('Filter');
-          }
         });
-      });
+    });
 
-      // Populate kab/kota on page load jika KodeWilayah sudah ada
-      <?php if (!empty($KodeWilayah)) { ?>
+    // Populate kab/kota on page load jika KodeWilayah sudah ada
+    <?php if (!empty($KodeWilayah)) { ?>
         var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
         var kodeKab  = "<?= $KodeWilayah ?>";
         $("#Provinsi").val(kodeProv);
 
         $.ajax({
-          url: BaseURL + "Daerah/GetListKabKota",
-          type: "POST",
-          data: { Kode: kodeProv, [CSRF_NAME]: CSRF_TOKEN },
-          success: function(res) {
-            var Data = (typeof res === 'string') ? JSON.parse(res) : res;
-            var KabKota = '<option value="">Pilih Kab/Kota</option>';
+            url: BaseURL + "Daerah/GetListKabKota",
+            type: "POST",
+            data: { 
+                Kode: kodeProv, 
+                [CSRF_NAME]: CSRF_TOKEN 
+            },
+            success: function(res) {
+                try {
+                    var Data = (typeof res === 'string') ? JSON.parse(res) : res;
+                    var KabKota = '<option value="">Pilih Kab/Kota</option>';
 
-            if (Data.length > 0) {
-              for (let i = 0; i < Data.length; i++) {
-                var selected = (Data[i].Kode === kodeKab) ? 'selected' : '';
-                KabKota += '<option value="' + Data[i].Kode + '" ' + selected + '>' + Data[i].Nama + '</option>';
-              }
+                    if (Data.length > 0) {
+                        for (let i = 0; i < Data.length; i++) {
+                            var selected = (Data[i].Kode === kodeKab) ? 'selected' : '';
+                            KabKota += '<option value="' + Data[i].Kode + '" ' + selected + '>' + Data[i].Nama + '</option>';
+                        }
+                    }
+                    $("#KabKota").html(KabKota);
+                } catch(e) {
+                    alert("Gagal memuat data Kab/Kota");
+                }
+            },
+            error: function() {
+                alert("Gagal memuat data Kab/Kota");
             }
-            $("#KabKota").html(KabKota);
-          }
         });
-      <?php } ?>
+    <?php } ?>
 
-/* ================= SIMPAN ================= */
-$("#BtnSimpan").click(function(){
+    // ============================================================
+    // TAMBAH / INPUT
+    // ============================================================
 
-  if($("#SasaranRPJMDId").val() === "") return alert("Sasaran RPJMD wajib dipilih!");
-  if($("#Strategi").val().trim() === "") return alert("Strategi wajib diisi!");
-  if($("#ArahKebijakan").val().trim() === "") return alert("Arah Kebijakan wajib diisi!");
+    $("#BtnSimpan").click(function() {
+        if ($("#SasaranRPJMDId").val() === "") {
+            alert("Sasaran RPJMD wajib dipilih!");
+            return;
+        }
+        if ($("#Strategi").val().trim() === "") {
+            alert("Strategi wajib diisi!");
+            return;
+        }
+        if ($("#ArahKebijakan").val().trim() === "") {
+            alert("Arah Kebijakan wajib diisi!");
+            return;
+        }
 
-  $.post(BaseURL+"Daerah/InputArahKebijakanRPJMD", {
-    sasaran_rpjmd_id: $("#SasaranRPJMDId").val(),
-    strategi: $("#Strategi").val(),
-    arah_kebijakan: $("#ArahKebijakan").val(),
-    [CSRF_NAME]: CSRF_TOKEN
-  }, function(res){
-    if(res=="1") location.reload();
-    else alert(res || "Gagal simpan!");
-  });
-});
+        $.ajax({
+            url: BaseURL + "Daerah/InputArahKebijakanRPJMD",
+            type: "POST",
+            data: {
+                sasaran_rpjmd_id: $("#SasaranRPJMDId").val(),
+                strategi: $("#Strategi").val(),
+                arah_kebijakan: $("#ArahKebijakan").val(),
+                [CSRF_NAME]: CSRF_TOKEN
+            },
+            beforeSend: function() {
+                $("#BtnSimpan").prop('disabled', true).text('Menyimpan...');
+            },
+            success: function(res) {
+                handleResponse(res, 'ModalInput', null);
+                $("#BtnSimpan").prop('disabled', false).text('SIMPAN');
+            },
+            error: function(xhr) {
+                alert("Terjadi kesalahan: " + xhr.statusText);
+                $("#BtnSimpan").prop('disabled', false).text('SIMPAN');
+            }
+        });
+    });
 
-/* ================= OPEN EDIT ================= */
-$(document).on("click",".BtnEdit",function(){
+    // ============================================================
+    // OPEN EDIT
+    // ============================================================
 
-  $("#EditId").val($(this).data("id"));
-  $("#EditSasaranRPJMDId").val(String($(this).data("sasaran_id")));
-  $("#EditStrategi").val($(this).data("strategi"));
-  $("#EditArahKebijakan").val($(this).data("arah"));
+    $(document).on("click", ".BtnEdit", function() {
+        $("#EditId").val($(this).data("id"));
+        $("#EditSasaranRPJMDId").val(String($(this).data("sasaran_id")));
+        $("#EditStrategi").val($(this).data("strategi"));
+        $("#EditArahKebijakan").val($(this).data("arah"));
 
-  $("#ModalEdit").modal("show");
-});
+        $("#ModalEdit").modal("show");
+    });
 
-/* ================= UPDATE ================= */
-$("#BtnUpdate").click(function(){
+    // ============================================================
+    // UPDATE / EDIT
+    // ============================================================
 
-  if($("#EditId").val() === "") return alert("ID tidak valid!");
-  if($("#EditSasaranRPJMDId").val() === "") return alert("Sasaran RPJMD wajib dipilih!");
-  if($("#EditStrategi").val().trim() === "") return alert("Strategi wajib diisi!");
-  if($("#EditArahKebijakan").val().trim() === "") return alert("Arah Kebijakan wajib diisi!");
+    $("#BtnUpdate").click(function() {
+        if ($("#EditId").val() === "") {
+            alert("ID tidak valid!");
+            return;
+        }
+        if ($("#EditSasaranRPJMDId").val() === "") {
+            alert("Sasaran RPJMD wajib dipilih!");
+            return;
+        }
+        if ($("#EditStrategi").val().trim() === "") {
+            alert("Strategi wajib diisi!");
+            return;
+        }
+        if ($("#EditArahKebijakan").val().trim() === "") {
+            alert("Arah Kebijakan wajib diisi!");
+            return;
+        }
 
-  $.post(BaseURL+"Daerah/EditArahKebijakanRPJMD", {
-    id: $("#EditId").val(),
-    sasaran_rpjmd_id: $("#EditSasaranRPJMDId").val(),
-    strategi: $("#EditStrategi").val(),
-    arah_kebijakan: $("#EditArahKebijakan").val(),
-    [CSRF_NAME]: CSRF_TOKEN
-  }, function(res){
-    if(res=="1") location.reload();
-    else alert(res || "Gagal update!");
-  });
-});
+        $.ajax({
+            url: BaseURL + "Daerah/EditArahKebijakanRPJMD",
+            type: "POST",
+            data: {
+                id: $("#EditId").val(),
+                sasaran_rpjmd_id: $("#EditSasaranRPJMDId").val(),
+                strategi: $("#EditStrategi").val(),
+                arah_kebijakan: $("#EditArahKebijakan").val(),
+                [CSRF_NAME]: CSRF_TOKEN
+            },
+            beforeSend: function() {
+                $("#BtnUpdate").prop('disabled', true).text('Menyimpan...');
+            },
+            success: function(res) {
+                handleResponse(res, 'ModalEdit', null);
+                $("#BtnUpdate").prop('disabled', false).text('SIMPAN');
+            },
+            error: function(xhr) {
+                alert("Terjadi kesalahan: " + xhr.statusText);
+                $("#BtnUpdate").prop('disabled', false).text('SIMPAN');
+            }
+        });
+    });
 
-/* ================= SOFT DELETE ================= */
-$(document).on("click",".BtnHapus",function(){
+    // ============================================================
+    // HAPUS (SOFT DELETE)
+    // ============================================================
 
-  if(!confirm("Yakin hapus data ini?")) return;
+    $(document).on("click", ".BtnHapus", function() {
+        if (!confirm("Yakin hapus data ini?")) return;
 
-  $.post(BaseURL+"Daerah/HapusArahKebijakanRPJMD", {
-    id: $(this).data("id"),
-    [CSRF_NAME]: CSRF_TOKEN
-  }, function(res){
-    if(res=="1") location.reload();
-    else alert(res || "Gagal hapus!");
-  });
-});
+        var id = $(this).data("id");
 
-/* BONUS: anti backdrop nyangkut (biar sidebar ga kekunci) */
-$(".modal").on("hidden.bs.modal", function () {
-  $(".modal-backdrop").remove();
-  $("body").removeClass("modal-open");
+        $.ajax({
+            url: BaseURL + "Daerah/HapusArahKebijakanRPJMD",
+            type: "POST",
+            data: {
+                id: id,
+                [CSRF_NAME]: CSRF_TOKEN
+            },
+            beforeSend: function() {
+                $(this).prop('disabled', true);
+            },
+            success: function(res) {
+                handleResponse(res, null, null);
+                $(this).prop('disabled', false);
+            },
+            error: function(xhr) {
+                alert("Terjadi kesalahan: " + xhr.statusText);
+                $(this).prop('disabled', false);
+            }
+        });
+    });
+
+    $(".modal").on("hidden.bs.modal", function() {
+        $(".modal-backdrop").remove();
+        $("body").removeClass("modal-open");
+    });
+
 });
 </script>
 

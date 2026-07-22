@@ -667,804 +667,756 @@
 
     <script>
         var BaseURL = '<?= base_url() ?>';
-        var CSRF_TOKEN = '<?= $this->security->get_csrf_token_name() ?>';
-        var CSRF_NAME = '<?= $this->security->get_csrf_hash() ?>';
-        var instansiOptions = <?php echo json_encode($Instansi); ?>;
+var CSRF_TOKEN = '<?= $this->security->get_csrf_token_name() ?>';
+var CSRF_NAME = '<?= $this->security->get_csrf_hash() ?>';
+var instansiOptions = <?php echo json_encode($Instansi); ?>;
 
-        $(document).ready(function() {
-            // Logika filter untuk pengguna yang belum login
-            <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-                $("#Provinsi").change(function() {
-                    if ($(this).val() === "") {
-                        $("#KabKota").html('<option value="">Pilih Kab/Kota</option>');
-                        return;
-                    }
-                    $.ajax({
-                        url: BaseURL + "Daerah/GetListKabKota",
-                        type: "POST",
-                        data: { Kode: $(this).val(), [CSRF_NAME]: CSRF_TOKEN },
-                        beforeSend: function() { $("#KabKota").prop('disabled', true); },
-                        success: function(Respon) {
-                            try {
-                                var Data = JSON.parse(Respon);
-                                var KabKota = '<option value="">Pilih Kab/Kota</option>';
-                                if (Data.length > 0) {
-                                    for (let i = 0; i < Data.length; i++) {
-                                        KabKota += '<option value="' + Data[i].Kode + '">' + Data[i].Nama + '</option>';
-                                    }
-                                } else {
-                                    alert("Belum Ada Data Kab/Kota");
-                                }
-                                $("#KabKota").html(KabKota).prop('disabled', false);
-                            } catch (e) {
-                                alert("Gagal memuat data Kab/Kota");
-                                $("#KabKota").prop('disabled', false);
-                            }
-                        },
-                        error: function() {
-                            alert("Gagal memuat data Kab/Kota");
-                            $("#KabKota").prop('disabled', false);
-                        }
-                    });
-                });
+$(document).ready(function() {
 
-                $("#Filter").click(function() {
-                    if ($("#Provinsi").val() === "") {
-                        alert("Mohon Pilih Provinsi");
-                        return;
-                    }
-                    if ($("#KabKota").val() === "") {
-                        alert("Mohon Pilih Kab/Kota");
-                        return;
-                    }
-                    var kodeWilayah = $("#KabKota").val();
-                    $.ajax({
-                        url: BaseURL + "Daerah/SetTempKodeWilayah",
-                        type: "POST",
-                        data: { KodeWilayah: kodeWilayah, [CSRF_NAME]: CSRF_TOKEN },
-                        beforeSend: function() { $("#Filter").prop('disabled', true).text('Memuat...'); },
-                        success: function(Respon) {
-                            try {
-                                if (Respon === '1') {
-                                    window.location.href = BaseURL + "Daerah/IKD";
-                                } else {
-                                    var error = JSON.parse(Respon);
-                                    alert(error.message || "Gagal menyimpan filter wilayah!");
-                                    $("#Filter").prop('disabled', false).text('Filter');
-                                }
-                            } catch (e) {
-                                alert("Gagal memproses respons server!");
-                                $("#Filter").prop('disabled', false).text('Filter');
-                            }
-                        },
-                        error: function() {
-                            alert("Gagal menghubungi server!");
-                            $("#Filter").prop('disabled', false).text('Filter');
-                        }
-                    });
-                });
+    // ============================================================
+    // FUNGSI BANTUAN
+    // ============================================================
 
-                // Populate Kab/Kota dropdown on page load if KodeWilayah is set
-                <?php if (!empty($KodeWilayah)) { ?>
-                    var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
-                    var kodeKab = "<?= $KodeWilayah ?>";
-                    $("#Provinsi").val(kodeProv);
-                    $.ajax({
-                        url: BaseURL + "Daerah/GetListKabKota",
-                        type: "POST",
-                        data: { Kode: kodeProv, [CSRF_NAME]: CSRF_TOKEN },
-                        success: function(Respon) {
-                            try {
-                                var Data = JSON.parse(Respon);
-                                var KabKota = '<option value="">Pilih Kab/Kota</option>';
-                                if (Data.length > 0) {
-                                    for (let i = 0; i < Data.length; i++) {
-                                        var selected = (Data[i].Kode === kodeKab) ? 'selected' : '';
-                                        KabKota += '<option value="' + Data[i].Kode + '" ' + selected + '>' + Data[i].Nama + '</option>';
-                                    }
-                                }
-                                $("#KabKota").html(KabKota);
-                            } catch (e) {
-                                alert("Gagal memuat data Kab/Kota");
-                            }
-                        },
-                        error: function() {
-                            alert("Gagal memuat data Kab/Kota");
-                        }
-                    });
-                <?php } ?>
-            <?php } ?>
+    function getInstansiOptions() {
+        var options = '';
+        instansiOptions.forEach(function(instansi) {
+            options += '<option value="' + instansi.nama + '">' + instansi.nama + '</option>';
+        });
+        return options;
+    }
 
-            // Function to add new PD Penanggung Jawab dropdown
-            $(document).on('click', '.btn-add-pj', function() {
-                var newRow = $('<div class="form-group pj-row">' +
-                    '<div class="row">' +
-                    '<div class="col-md-10">' +
-                    '<select class="form-control pj-select" name="pd_penanggung_jawab[]" required>' +
-                    '<option value="">Pilih PD Penanggung Jawab</option>' +
-                    '<option value="Semua Instansi Terkait">Semua Instansi Terkait</option>' +
-                    getInstansiOptions() +
-                    '</select>' +
-                    '</div>' +
-                    '<div class="col-md-2" style="padding-top: 7px;">' +
-                    '<button type="button" class="btn btn-danger btn-remove-pj">' +
-                    '<i class="notika-icon notika-trash"></i>' +
-                    '</button>' +
-                    '</div>' +
-                    '</div>' +
-                    '</div>');
-                $('#pj-container').append(newRow);
-            });
+    function getIsuStrategisOptions() {
+        var options = '';
+        <?php 
+        $allIsu = $this->db->where('KodeWilayah', $_SESSION['KodeWilayah'])
+                          ->where('deleted_at IS NULL')
+                          ->get('isustrategisdaerah')
+                          ->result_array();
+        foreach ($allIsu as $isu): ?>
+            options += '<option value="<?= html_escape($isu['Id']) ?>"><?= html_escape($isu['NamaIsuStrategis']) ?></option>';
+        <?php endforeach; ?>
+        return options;
+    }
 
-            // Function to add new PD Penunjang dropdown
-            $(document).on('click', '.btn-add-pn', function() {
-                var newRow = $('<div class="form-group pn-row">' +
-                    '<div class="row">' +
-                    '<div class="col-md-10">' +
-                    '<select class="form-control pn-select" name="pd_penunjang[]" required>' +
-                    '<option value="">Pilih PD Penunjang</option>' +
-                    '<option value="Semua Instansi Terkait">Semua Instansi Terkait</option>' +
-                    getInstansiOptions() +
-                    '</select>' +
-                    '</div>' +
-                    '<div class="col-md-2" style="padding-top: 7px;">' +
-                    '<button type="button" class="btn btn-danger btn-remove-pn">' +
-                    '<i class="notika-icon notika-trash"></i>' +
-                    '</button>' +
-                    '</div>' +
-                    '</div>' +
-                    '</div>');
-                $('#pn-container').append(newRow);
-            });
-
-            // Function to remove PD Penanggung Jawab dropdown
-            $(document).on('click', '.btn-remove-pj', function() {
-                if ($('.pj-row').length > 1) {
-                    $(this).closest('.pj-row').remove();
-                } else {
-                    alert('Minimal harus ada satu PD Penanggung Jawab');
-                }
-            });
-
-            // Function to remove PD Penunjang dropdown
-            $(document).on('click', '.btn-remove-pn', function() {
-                if ($('.pn-row').length > 1) {
-                    $(this).closest('.pn-row').remove();
-                } else {
-                    alert('Minimal harus ada satu PD Penunjang');
-                }
-            });
-
-            // Function to generate instansi options
-            function getInstansiOptions() {
-                var options = '';
-                instansiOptions.forEach(function(instansi) {
-                    options += '<option value="' + instansi.nama + '">' + instansi.nama + '</option>';
-                });
-                return options;
-            }
-
-            // Function to load sasaran by period
-            function loadSasaranByPeriod(tahunRange, targetSelect, disableMessage) {
-                if (tahunRange) {
-                    targetSelect.prop('disabled', false).html('<option value="" selected disabled>-- Pilih Sasaran --</option>');
-                    var tahunRangeSplit = tahunRange.split('-');
-                    $.ajax({
-                        url: BaseURL + 'Daerah/GetSasaranByPeriod',
-                        type: 'POST',
-                        data: {
-                            tahun_mulai: tahunRangeSplit[0],
-                            tahun_akhir: tahunRangeSplit[1],
-                            [CSRF_NAME]: CSRF_TOKEN
-                        },
-                        success: function(response) {
-                            try {
-                                var data = JSON.parse(response);
-                                if (data.message) {
-                                    alert(data.message);
-                                    targetSelect.html('<option value="" selected disabled>' + disableMessage + '</option>').prop('disabled', true);
-                                } else if (data.length > 0) {
-                                    $.each(data, function(key, value) {
-                                        targetSelect.append('<option value="' + value.Id + '">' + value.Sasaran + '</option>');
-                                    });
-                                } else {
-                                    targetSelect.html('<option value="" selected disabled>' + disableMessage + '</option>').prop('disabled', true);
-                                }
-                            } catch (e) {
-                                alert("Gagal memproses respons server!");
-                                targetSelect.html('<option value="" selected disabled>' + disableMessage + '</option>').prop('disabled', true);
-                            }
-                        },
-                        error: function() {
-                            alert("Gagal memuat data sasaran!");
+    function loadSasaranByPeriod(tahunRange, targetSelect, disableMessage) {
+        if (tahunRange && tahunRange !== '') {
+            targetSelect.prop('disabled', false).html('<option value="" selected disabled>-- Pilih Sasaran --</option>');
+            var tahunRangeSplit = tahunRange.split('-');
+            $.ajax({
+                url: BaseURL + 'Daerah/GetSasaranByPeriod',
+                type: 'POST',
+                data: {
+                    tahun_mulai: tahunRangeSplit[0],
+                    tahun_akhir: tahunRangeSplit[1],
+                    [CSRF_NAME]: CSRF_TOKEN
+                },
+                success: function(response) {
+                    try {
+                        var data = JSON.parse(response);
+                        if (data.message) {
+                            alert(data.message);
+                            targetSelect.html('<option value="" selected disabled>' + disableMessage + '</option>').prop('disabled', true);
+                        } else if (data.length > 0) {
+                            $.each(data, function(key, value) {
+                                targetSelect.append('<option value="' + value.Id + '">' + value.Sasaran + '</option>');
+                            });
+                        } else {
                             targetSelect.html('<option value="" selected disabled>' + disableMessage + '</option>').prop('disabled', true);
                         }
-                    });
-                } else {
-                    targetSelect.prop('disabled', true).html('<option value="" selected disabled>' + disableMessage + '</option>');
-                }
-            }
-
-            // Load sasaran when tahun filter changes (Tambah)
-            $('#TahunFilter').change(function() {
-                loadSasaranByPeriod($(this).val(), $('#Sasaran'), '-- Tidak ada sasaran untuk periode ini --');
-            });
-
-            // Load sasaran when tahun filter changes (Edit)
-            $('#EditPeriode').change(function() {
-                loadSasaranByPeriod($(this).val(), $('#EditSasaran'), '-- Tidak ada sasaran untuk periode ini --');
-            });
-
-            // Validasi sebelum submit (Tambah)
-            $("#FormTambahIkd").submit(function(e) {
-                e.preventDefault();
-                if ($('#TahunFilter').val() === "" || $('#TahunFilter').val() === null) {
-                    alert('Silakan pilih periode tahun terlebih dahulu!');
-                    return false;
-                }
-                if ($('#Sasaran').val() === "" || $('#Sasaran').val() === null) {
-                    alert('Silakan pilih sasaran terlebih dahulu!');
-                    return false;
-                }
-                if ($('#IndikatorSasaran').val() === "") {
-                    alert('Silakan isi indikator sasaran!');
-                    return false;
-                }
-                if (!validateIntegerInputs('FormTambahIkd')) {
-                    return false;
-                }
-                $.ajax({
-                    url: BaseURL + "Daerah/TambahIkd",
-                    type: "POST",
-                    data: $(this).serialize(),
-                    beforeSend: function() {
-                        $("#FormTambahIkd button[type=submit]").prop('disabled', true).text('Menyimpan...');
-                    },
-                    success: function(res) {
-                        try {
-                            if (res === '1') {
-                                $("#FormTambahIkd")[0].reset();
-                                $("#Sasaran").prop('disabled', true).html('<option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>');
-                                $("#ModalTambahIkd").modal('hide');
-                                window.location.reload();
-                            } else {
-                                var error = JSON.parse(res);
-                                alert(error.message || "Gagal menyimpan data!");
-                            }
-                        } catch (e) {
-                            alert("Gagal memproses respons server!");
-                        }
-                        $("#FormTambahIkd button[type=submit]").prop('disabled', false).text('Simpan');
-                    },
-                    error: function(xhr) {
-                        alert("Terjadi kesalahan: " + xhr.statusText);
-                        $("#FormTambahIkd button[type=submit]").prop('disabled', false).text('Simpan');
+                    } catch (e) {
+                        alert("Gagal memproses respons server!");
+                        targetSelect.html('<option value="" selected disabled>' + disableMessage + '</option>').prop('disabled', true);
                     }
-                });
-            });
-
-            // Validasi sebelum submit (Edit)
-            $("#FormEditIkd").submit(function(e) {
-                e.preventDefault();
-                if ($('#EditPeriode').val() === "" || $('#EditPeriode').val() === null) {
-                    alert('Silakan pilih periode tahun terlebih dahulu!');
-                    return false;
-                }
-                if ($('#EditSasaran').val() === "" || $('#EditSasaran').val() === null) {
-                    alert('Silakan pilih sasaran terlebih dahulu!');
-                    return false;
-                }
-                if ($('#EditIndikatorSasaran').val() === "") {
-                    alert('Silakan isi indikator sasaran!');
-                    return false;
-                }
-                if (!validateIntegerInputs('FormEditIkd')) {
-                    return false;
-                }
-                $.ajax({
-                    url: BaseURL + "Daerah/EditIkd",
-                    type: "POST",
-                    data: $(this).serialize(),
-                    beforeSend: function() {
-                        $("#FormEditIkd button[type=submit]").prop('disabled', true).text('Menyimpan...');
-                    },
-                    success: function(res) {
-                        try {
-                            if (res === '1') {
-                                $("#FormEditIkd")[0].reset();
-                                $("#EditSasaran").prop('disabled', true).html('<option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>');
-                                $("#ModalEditIkd").modal('hide');
-                                window.location.reload();
-                            } else {
-                                var error = JSON.parse(res);
-                                alert(error.message || "Gagal mengupdate data!");
-                            }
-                        } catch (e) {
-                            alert("Gagal memproses respons server!");
-                        }
-                        $("#FormEditIkd button[type=submit]").prop('disabled', false).text('Simpan');
-                    },
-                    error: function(xhr) {
-                        alert("Terjadi kesalahan: " + xhr.statusText);
-                        $("#FormEditIkd button[type=submit]").prop('disabled', false).text('Simpan');
-                    }
-                });
-            });
-
-            // Edit IKD - Load data
-            $(".Edit").click(function() {
-                var id = $(this).data('id');
-                var IdSasaran = $(this).data('sasaran');
-                var indikatorSasaran = $(this).data('indikator-sasaran');
-                var target1 = $(this).data('target1');
-                var target2 = $(this).data('target2');
-                var target3 = $(this).data('target3');
-                var target4 = $(this).data('target4');
-                var target5 = $(this).data('target5');
-                var tahunMulai = $(this).data('tahunmulai');
-                var tahunAkhir = $(this).data('tahunakhir');
-
-                $("#EditId").val(id);
-                $("#EditPeriode").val('');
-                $("#EditSasaran").html('<option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>');
-                $("#EditSasaran").prop('disabled', true);
-                $("#EditIndikatorSasaran").val(indikatorSasaran);
-                $("#EditTarget1").val(target1 || '');
-                $("#EditTarget2").val(target2 || '');
-                $("#EditTarget3").val(target3 || '');
-                $("#EditTarget4").val(target4 || '');
-                $("#EditTarget5").val(target5 || '');
-
-                $("#EditPeriode").val(tahunMulai + '-' + tahunAkhir).trigger('change');
-
-                var checkSasaranExist = setInterval(function() {
-                    if ($('#EditSasaran option[value="' + IdSasaran + '"]').length > 0) {
-                        $('#EditSasaran').val(IdSasaran);
-                        clearInterval(checkSasaranExist);
-                    }
-                }, 100);
-
-                $("#ModalEditIkd").modal('show');
-            });
-
-            // Hapus IKD
-            $(".Hapus").click(function() {
-                if (confirm("Apakah Anda yakin ingin menghapus data ini?")) {
-                    var id = $(this).data('id');
-                    $.ajax({
-                        url: BaseURL + "Daerah/HapusIkd",
-                        type: "POST",
-                        data: { id: id, [CSRF_NAME]: CSRF_TOKEN },
-                        beforeSend: function() {
-                            $(this).prop('disabled', true);
-                        },
-                        success: function(res) {
-                            try {
-                                if (res === '1') {
-                                    window.location.reload();
-                                } else {
-                                    var error = JSON.parse(res);
-                                    alert(error.message || "Gagal menghapus data!");
-                                }
-                            } catch (e) {
-                                alert("Gagal memproses respons server!");
-                            }
-                            $(this).prop('disabled', false);
-                        },
-                        error: function(xhr) {
-                            alert("Terjadi kesalahan: " + xhr.statusText);
-                            $(this).prop('disabled', false);
-                        }
-                    });
+                },
+                error: function() {
+                    alert("Gagal memuat data sasaran!");
+                    targetSelect.html('<option value="" selected disabled>' + disableMessage + '</option>').prop('disabled', true);
                 }
             });
+        } else {
+            targetSelect.prop('disabled', true).html('<option value="" selected disabled>' + disableMessage + '</option>');
+        }
+    }
 
-            // Tambah PD Penanggung Jawab
-            $(".TambahPj").click(function() {
-                var id = $(this).data('id');
-                $("#PjId").val(id);
-                $("#pj-container").html('<div class="form-group pj-row">' +
-                    '<div class="row">' +
-                    '<div class="col-md-10">' +
-                    '<label>PD Penanggung Jawab</label>' +
-                    '<select class="form-control pj-select" name="pd_penanggung_jawab[]" required>' +
-                    '<option value="">Pilih PD Penanggung Jawab</option>' +
-                    '<option value="Semua Instansi Terkait">Semua Instansi Terkait</option>' +
-                    getInstansiOptions() +
-                    '</select>' +
-                    '</div>' +
-                    '<div class="col-md-2" style="padding-top: 25px;">' +
-                    '<button type="button" class="btn btn-success btn-add-pj">' +
-                    '<i class="notika-icon notika-plus-symbol"></i>' +
-                    '</button>' +
-                    '</div>' +
-                    '</div>' +
-                    '</div>');
-                $("#ModalTambahPj").modal('show');
-            });
-
-            $("#FormTambahPj").submit(function(e) {
-                e.preventDefault();
-                var formData = $(this).serializeArray();
-                var pdValues = [];
-                $('select[name="pd_penanggung_jawab[]"]').each(function() {
-                    if ($(this).val()) {
-                        pdValues.push($(this).val());
-                    }
-                });
-                formData = formData.filter(item => item.name !== 'pd_penanggung_jawab[]');
-                formData.push({ name: 'pd_penanggung_jawab', value: pdValues.join(',') });
-                $.ajax({
-                    url: BaseURL + "Daerah/TambahPd",
-                    type: "POST",
-                    data: $.param(formData),
-                    beforeSend: function() {
-                        $("#FormTambahPj button[type=submit]").prop('disabled', true).text('Menyimpan...');
-                    },
-                    success: function(res) {
-                        try {
-                            if (res === '1') {
-                                $("#FormTambahPj")[0].reset();
-                                $("#ModalTambahPj").modal('hide');
-                                window.location.reload();
-                            } else {
-                                var error = JSON.parse(res);
-                                alert(error.message || "Gagal menambahkan PD Penanggung Jawab!");
-                            }
-                        } catch (e) {
-                            alert("Gagal memproses respons server!");
-                        }
-                        $("#FormTambahPj button[type=submit]").prop('disabled', false).text('Simpan');
-                    },
-                    error: function(xhr) {
-                        alert("Terjadi kesalahan: " + xhr.statusText);
-                        $("#FormTambahPj button[type=submit]").prop('disabled', false).text('Simpan');
-                    }
-                });
-            });
-
-            // Tambah PD Penunjang
-            $(".TambahPn").click(function() {
-                var id = $(this).data('id');
-                $("#PnId").val(id);
-                $("#pn-container").html('<div class="form-group pn-row">' +
-                    '<div class="row">' +
-                    '<div class="col-md-10">' +
-                    '<label>PD Penunjang</label>' +
-                    '<select class="form-control pn-select" name="pd_penunjang[]" required>' +
-                    '<option value="">Pilih PD Penunjang</option>' +
-                    '<option value="Semua Instansi Terkait">Semua Instansi Terkait</option>' +
-                    getInstansiOptions() +
-                    '</select>' +
-                    '</div>' +
-                    '<div class="col-md-2" style="padding-top: 25px;">' +
-                    '<button type="button" class="btn btn-success btn-add-pn">' +
-                    '<i class="notika-icon notika-plus-symbol"></i>' +
-                    '</button>' +
-                    '</div>' +
-                    '</div>' +
-                    '</div>');
-                $("#ModalTambahPn").modal('show');
-            });
-
-            $("#FormTambahPn").submit(function(e) {
-                e.preventDefault();
-                var formData = $(this).serializeArray();
-                var pdValues = [];
-                $('select[name="pd_penunjang[]"]').each(function() {
-                    if ($(this).val()) {
-                        pdValues.push($(this).val());
-                    }
-                });
-                formData = formData.filter(item => item.name !== 'pd_penunjang[]');
-                formData.push({ name: 'pd_penunjang', value: pdValues.join(',') });
-                $.ajax({
-                    url: BaseURL + "Daerah/TambahPd",
-                    type: "POST",
-                    data: $.param(formData),
-                    beforeSend: function() {
-                        $("#FormTambahPn button[type=submit]").prop('disabled', true).text('Menyimpan...');
-                    },
-                    success: function(res) {
-                        try {
-                            if (res === '1') {
-                                $("#FormTambahPn")[0].reset();
-                                $("#ModalTambahPn").modal('hide');
-                                window.location.reload();
-                            } else {
-                                var error = JSON.parse(res);
-                                alert(error.message || "Gagal menambahkan PD Penunjang!");
-                            }
-                        } catch (e) {
-                            alert("Gagal memproses respons server!");
-                        }
-                        $("#FormTambahPn button[type=submit]").prop('disabled', false).text('Simpan');
-                    },
-                    error: function(xhr) {
-                        alert("Terjadi kesalahan: " + xhr.statusText);
-                        $("#FormTambahPn button[type=submit]").prop('disabled', false).text('Simpan');
-                    }
-                });
-            });
-
-            $(".Pic").click(function() {
-                var Data = $(this).attr('Pic').split("|");
-                $("#IdIKDPic").val(Data[0]);
-                var Pisah = Data[1].split(",");
-                var List = '';
-                for (let i = 0; i < Pisah.length; i++) {
-                    List += '<label><input style="margin-top: 10px;" type="checkbox" checked name="Pic" value="'+Pisah[i]+'"> '+Pisah[i]+'</label><br>';
-                }
-                $("#ListPic").html(List);
-                $("#ModalPic").modal('show');
-            });
-
-            $("#EditPic").click(function() {
-                var Tampung = [];
-                $.each($("input[name='Pic']:checked"), function() {
-                    Tampung.push($(this).val());
-                });
-                var Pic = {
-                    id: $("#IdIKDPic").val(),
-                    pd_penanggung_jawab: Tampung.join(","),
-                    [CSRF_NAME]: CSRF_TOKEN
-                };
-                $.ajax({
-                    url: BaseURL + "Daerah/EditPDIKD",
-                    type: "POST",
-                    data: Pic,
-                    beforeSend: function() {
-                        $("#EditPic").prop('disabled', true).text('Menyimpan...');
-                    },
-                    success: function(Respon) {
-                        try {
-                            if (Respon === '1') {
-                                $("#ModalPic").modal('hide');
-                                window.location.reload();
-                            } else {
-                                var error = JSON.parse(Respon);
-                                alert(error.message || "Gagal menyimpan data!");
-                            }
-                        } catch (e) {
-                            alert("Gagal memproses respons server!");
-                        }
-                        $("#EditPic").prop('disabled', false).text('Simpan');
-                    },
-                    error: function(xhr) {
-                        alert("Terjadi kesalahan: " + xhr.statusText);
-                        $("#EditPic").prop('disabled', false).text('Simpan');
-                    }
-                });
-            });
-
-            $(".Pis").click(function() {
-                var Data = $(this).attr('Pis').split("|");
-                $("#IdIKDPis").val(Data[0]);
-                var Pisah = Data[1].split(",");
-                var List = '';
-                for (let i = 0; i < Pisah.length; i++) {
-                    List += '<label><input style="margin-top: 10px;" type="checkbox" checked name="Pis" value="'+Pisah[i]+'"> '+Pisah[i]+'</label><br>';
-                }
-                $("#ListPis").html(List);
-                $("#ModalPis").modal('show');
-            });
-
-            $("#EditPis").click(function() {
-                var Tampung = [];
-                $.each($("input[name='Pis']:checked"), function() {
-                    Tampung.push($(this).val());
-                });
-                var Pis = {
-                    id: $("#IdIKDPis").val(),
-                    pd_penunjang: Tampung.join(","),
-                    [CSRF_NAME]: CSRF_TOKEN
-                };
-                $.ajax({
-                    url: BaseURL + "Daerah/EditPDIKD",
-                    type: "POST",
-                    data: Pis,
-                    beforeSend: function() {
-                        $("#EditPis").prop('disabled', true).text('Menyimpan...');
-                    },
-                    success: function(Respon) {
-                        try {
-                            if (Respon === '1') {
-                                $("#ModalPis").modal('hide');
-                                window.location.reload();
-                            } else {
-                                var error = JSON.parse(Respon);
-                                alert(error.message || "Gagal menyimpan data!");
-                            }
-                        } catch (e) {
-                            alert("Gagal memproses respons server!");
-                        }
-                        $("#EditPis").prop('disabled', false).text('Simpan');
-                    },
-                    error: function(xhr) {
-                        alert("Terjadi kesalahan: " + xhr.statusText);
-                        $("#EditPis").prop('disabled', false).text('Simpan');
-                    }
-                });
-            });
-
-            // Function to get Isu Strategis options
-            function getIsuStrategisOptions() {
-                var options = '';
-                <?php 
-                $allIsu = $this->db->where('KodeWilayah', $_SESSION['KodeWilayah'])
-                                  ->where('deleted_at IS NULL')
-                                  ->get('isustrategisdaerah')
-                                  ->result_array();
-                foreach ($allIsu as $isu): ?>
-                    options += '<option value="<?= html_escape($isu['Id']) ?>"><?= html_escape($isu['NamaIsuStrategis']) ?></option>';
-                <?php endforeach; ?>
-                return options;
-            }
-
-            // Add new Isu Strategis dropdown
-            $(document).on('click', '.btn-add-isu', function() {
-                var newRow = $('<div class="form-group isu-row">' +
-                    '<div class="row">' +
-                    '<div class="col-md-10">' +
-                    '<select class="form-control isu-select" name="isu_strategis[]" required>' +
-                    '<option value="">Pilih Isu Strategis</option>' +
-                    getIsuStrategisOptions() +
-                    '</select>' +
-                    '</div>' +
-                    '<div class="col-md-2" style="padding-top: 7px;">' +
-                    '<button type="button" class="btn btn-danger btn-remove-isu">' +
-                    '<i class="notika-icon notika-trash"></i>' +
-                    '</button>' +
-                    '</div>' +
-                    '</div>' +
-                    '</div>');
-                $('#isu-container').append(newRow);
-            });
-
-            // Remove Isu Strategis dropdown
-            $(document).on('click', '.btn-remove-isu', function() {
-                if ($('.isu-row').length > 1) {
-                    $(this).closest('.isu-row').remove();
-                } else {
-                    alert('Minimal harus ada satu Isu Strategis');
-                }
-            });
-
-            // Tambah Isu Strategis button click
-            $(".TambahIsu").click(function() {
-                var id = $(this).data('id');
-                $("#IsuId").val(id);
-                $("#isu-container").html('<div class="form-group isu-row">' +
-                    '<div class="row">' +
-                    '<div class="col-md-10">' +
-                    '<label>Isu Strategis Daerah</label>' +
-                    '<select class="form-control isu-select" name="isu_strategis[]" required>' +
-                    '<option value="">Pilih Isu Strategis</option>' +
-                    getIsuStrategisOptions() +
-                    '</select>' +
-                    '</div>' +
-                    '<div class="col-md-2" style="padding-top: 25px;">' +
-                    '<button type="button" class="btn btn-success btn-add-isu">' +
-                    '<i class="notika-icon notika-plus-symbol"></i>' +
-                    '</button>' +
-                    '</div>' +
-                    '</div>' +
-                    '</div>');
-                $("#ModalTambahIsu").modal('show');
-            });
-
-            // Form submission for adding Isu Strategis
-            $("#FormTambahIsu").submit(function(e) {
-                e.preventDefault();
-                var formData = $(this).serializeArray();
-                var isuValues = [];
-                $('select[name="isu_strategis[]"]').each(function() {
-                    if ($(this).val()) {
-                        isuValues.push($(this).val());
-                    }
-                });
-                formData = formData.filter(item => item.name !== 'isu_strategis[]');
-                formData.push({ name: 'isu_strategis', value: isuValues.join(',') });
-                $.ajax({
-                    url: BaseURL + "Daerah/TambahIsuStrategis",
-                    type: "POST",
-                    data: $.param(formData),
-                    beforeSend: function() {
-                        $("#FormTambahIsu button[type=submit]").prop('disabled', true).text('Menyimpan...');
-                    },
-                    success: function(res) {
-                        try {
-                            if (res === '1') {
-                                $("#FormTambahIsu")[0].reset();
-                                $("#ModalTambahIsu").modal('hide');
-                                window.location.reload();
-                            } else {
-                                var error = JSON.parse(res);
-                                alert(error.message || "Gagal menambahkan Isu Strategis!");
-                            }
-                        } catch (e) {
-                            alert("Gagal memproses respons server!");
-                        }
-                        $("#FormTambahIsu button[type=submit]").prop('disabled', false).text('Simpan');
-                    },
-                    error: function(xhr) {
-                        alert("Terjadi kesalahan: " + xhr.statusText);
-                        $("#FormTambahIsu button[type=submit]").prop('disabled', false).text('Simpan');
-                    }
-                });
-            });
-
-            // Edit Isu Strategis button click
-            $(".EditIsu").click(function() {
-                var Data = $(this).attr('data-isi').split("|");
-                $("#IdIKDIsu").val(Data[0]);
-                var Pisah = Data[1].split(",");
-                var List = '';
-                <?php 
-                $allIsu = $this->db->where('KodeWilayah', $_SESSION['KodeWilayah'])
-                                  ->where('deleted_at IS NULL')
-                                  ->get('isustrategisdaerah')
-                                  ->result_array();
-                foreach ($allIsu as $isu): ?>
-                    var isChecked = Pisah.includes("<?= html_escape($isu['Id']) ?>") ? 'checked' : '';
-                    List += '<label><input style="margin-top: 10px;" type="checkbox" '+isChecked+' name="Isu" value="<?= html_escape($isu['Id']) ?>"> <?= html_escape($isu['NamaIsuStrategis']) ?></label><br>';
-                <?php endforeach; ?>
-                $("#ListIsu").html(List);
-                $("#ModalEditIsu").modal('show');
-            });
-
-            // Save edited Isu Strategis
-            $("#EditIsu").click(function() {
-                var Tampung = [];
-                $.each($("input[name='Isu']:checked"), function() {
-                    Tampung.push($(this).val());
-                });
-                var Isu = {
-                    id: $("#IdIKDIsu").val(),
-                    isu_strategis: Tampung.join(","),
-                    [CSRF_NAME]: CSRF_TOKEN
-                };
-                $.ajax({
-                    url: BaseURL + "Daerah/EditIsuStrategis",
-                    type: "POST",
-                    data: Isu,
-                    beforeSend: function() {
-                        $("#EditIsu").prop('disabled', true).text('Menyimpan...');
-                    },
-                    success: function(Respon) {
-                        try {
-                            if (Respon === '1') {
-                                $("#ModalEditIsu").modal('hide');
-                                window.location.reload();
-                            } else {
-                                var error = JSON.parse(Respon);
-                                alert(error.message || "Gagal menyimpan data!");
-                            }
-                        } catch (e) {
-                            alert("Gagal memproses respons server!");
-                        }
-                        $("#EditIsu").prop('disabled', false).text('Simpan');
-                    },
-                    error: function(xhr) {
-                        alert("Terjadi kesalahan: " + xhr.statusText);
-                        $("#EditIsu").prop('disabled', false).text('Simpan');
-                    }
-                });
-            });
-
-            // Function to validate integer inputs
-            function validateIntegerInputs(formId) {
-                var isValid = true;
-                $('#' + formId + ' input[type="number"]').each(function() {
-                    if (this.value && !Number.isInteger(parseFloat(this.value))) {
-                        alert('Harap masukkan angka bulat untuk semua target!');
-                        isValid = false;
-                        return false;
-                    }
-                });
-                return isValid;
+    function validateIntegerInputs(formId) {
+        var isValid = true;
+        $('#' + formId + ' input[type="number"]').each(function() {
+            if (this.value && !Number.isInteger(parseFloat(this.value))) {
+                alert('Harap masukkan angka bulat untuk semua target!');
+                isValid = false;
+                return false;
             }
         });
+        return isValid;
+    }
+
+    function handleResponse(res, modalId, formId) {
+        try {
+            if (res === '1' || res.trim() === '1') {
+                if (formId) {
+                    $('#' + formId)[0].reset();
+                }
+                if (modalId) {
+                    $('#' + modalId).modal('hide');
+                }
+                window.location.reload();
+            } else {
+                try {
+                    var error = JSON.parse(res);
+                    alert(error.message || "Gagal memproses data!");
+                } catch (e) {
+                    alert(res || "Gagal memproses data!");
+                }
+            }
+        } catch (e) {
+            alert("Terjadi kesalahan: " + e.message);
+        }
+    }
+
+    // ============================================================
+    // FILTER WILAYAH
+    // ============================================================
+    <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
+        $("#Provinsi").change(function() {
+            if ($(this).val() === "") {
+                $("#KabKota").html('<option value="">Pilih Kab/Kota</option>');
+                return;
+            }
+            $.ajax({
+                url: BaseURL + "Daerah/GetListKabKota",
+                type: "POST",
+                data: { Kode: $(this).val(), [CSRF_NAME]: CSRF_TOKEN },
+                beforeSend: function() { $("#KabKota").prop('disabled', true); },
+                success: function(Respon) {
+                    try {
+                        var Data = JSON.parse(Respon);
+                        var KabKota = '<option value="">Pilih Kab/Kota</option>';
+                        if (Data.length > 0) {
+                            for (let i = 0; i < Data.length; i++) {
+                                KabKota += '<option value="' + Data[i].Kode + '">' + Data[i].Nama + '</option>';
+                            }
+                        } else {
+                            alert("Belum Ada Data Kab/Kota");
+                        }
+                        $("#KabKota").html(KabKota).prop('disabled', false);
+                    } catch (e) {
+                        alert("Gagal memuat data Kab/Kota");
+                        $("#KabKota").prop('disabled', false);
+                    }
+                },
+                error: function() {
+                    alert("Gagal memuat data Kab/Kota");
+                    $("#KabKota").prop('disabled', false);
+                }
+            });
+        });
+
+        $("#Filter").click(function() {
+            if ($("#Provinsi").val() === "") {
+                alert("Mohon Pilih Provinsi");
+                return;
+            }
+            if ($("#KabKota").val() === "") {
+                alert("Mohon Pilih Kab/Kota");
+                return;
+            }
+            var kodeWilayah = $("#KabKota").val();
+            $.ajax({
+                url: BaseURL + "Daerah/SetTempKodeWilayah",
+                type: "POST",
+                data: { KodeWilayah: kodeWilayah, [CSRF_NAME]: CSRF_TOKEN },
+                beforeSend: function() { $("#Filter").prop('disabled', true).text('Memuat...'); },
+                success: function(Respon) {
+                    try {
+                        if (Respon === '1' || Respon.trim() === '1') {
+                            window.location.href = BaseURL + "Daerah/IKD";
+                        } else {
+                            var error = JSON.parse(Respon);
+                            alert(error.message || "Gagal menyimpan filter wilayah!");
+                            $("#Filter").prop('disabled', false).text('Filter');
+                        }
+                    } catch (e) {
+                        alert("Gagal memproses respons server!");
+                        $("#Filter").prop('disabled', false).text('Filter');
+                    }
+                },
+                error: function() {
+                    alert("Gagal menghubungi server!");
+                    $("#Filter").prop('disabled', false).text('Filter');
+                }
+            });
+        });
+
+        <?php if (!empty($KodeWilayah)) { ?>
+            var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
+            var kodeKab = "<?= $KodeWilayah ?>";
+            $("#Provinsi").val(kodeProv);
+            $.ajax({
+                url: BaseURL + "Daerah/GetListKabKota",
+                type: "POST",
+                data: { Kode: kodeProv, [CSRF_NAME]: CSRF_TOKEN },
+                success: function(Respon) {
+                    try {
+                        var Data = JSON.parse(Respon);
+                        var KabKota = '<option value="">Pilih Kab/Kota</option>';
+                        if (Data.length > 0) {
+                            for (let i = 0; i < Data.length; i++) {
+                                var selected = (Data[i].Kode === kodeKab) ? 'selected' : '';
+                                KabKota += '<option value="' + Data[i].Kode + '" ' + selected + '>' + Data[i].Nama + '</option>';
+                            }
+                        }
+                        $("#KabKota").html(KabKota);
+                    } catch (e) {
+                        alert("Gagal memuat data Kab/Kota");
+                    }
+                },
+                error: function() {
+                    alert("Gagal memuat data Kab/Kota");
+                }
+            });
+        <?php } ?>
+    <?php } ?>
+
+    // ============================================================
+    // PERIODE & SASARAN DROPDOWN
+    // ============================================================
+
+    $('#TahunFilter').change(function() {
+        loadSasaranByPeriod($(this).val(), $('#Sasaran'), '-- Tidak ada sasaran untuk periode ini --');
+    });
+
+    $('#EditPeriode').change(function() {
+        loadSasaranByPeriod($(this).val(), $('#EditSasaran'), '-- Tidak ada sasaran untuk periode ini --');
+    });
+
+    // ============================================================
+    // TAMBAH IKD
+    // ============================================================
+
+    $("#FormTambahIkd").submit(function(e) {
+        e.preventDefault();
+        if ($('#TahunFilter').val() === "" || $('#TahunFilter').val() === null) {
+            alert('Silakan pilih periode tahun terlebih dahulu!');
+            return false;
+        }
+        if ($('#Sasaran').val() === "" || $('#Sasaran').val() === null) {
+            alert('Silakan pilih sasaran terlebih dahulu!');
+            return false;
+        }
+        if ($('#IndikatorSasaran').val() === "") {
+            alert('Silakan isi indikator sasaran!');
+            return false;
+        }
+        if (!validateIntegerInputs('FormTambahIkd')) {
+            return false;
+        }
+        $.ajax({
+            url: BaseURL + "Daerah/TambahIkd",
+            type: "POST",
+            data: $(this).serialize(),
+            beforeSend: function() {
+                $("#FormTambahIkd button[type=submit]").prop('disabled', true).text('Menyimpan...');
+            },
+            success: function(res) {
+                handleResponse(res, 'ModalTambahIkd', 'FormTambahIkd');
+                $("#FormTambahIkd button[type=submit]").prop('disabled', false).text('Simpan');
+            },
+            error: function(xhr) {
+                alert("Terjadi kesalahan: " + xhr.statusText);
+                $("#FormTambahIkd button[type=submit]").prop('disabled', false).text('Simpan');
+            }
+        });
+    });
+
+    // ============================================================
+    // EDIT IKD
+    // ============================================================
+
+    $(".Edit").click(function() {
+        var id = $(this).data('id');
+        var IdSasaran = $(this).data('sasaran');
+        var indikatorSasaran = $(this).data('indikator-sasaran');
+        var target1 = $(this).data('target1');
+        var target2 = $(this).data('target2');
+        var target3 = $(this).data('target3');
+        var target4 = $(this).data('target4');
+        var target5 = $(this).data('target5');
+        var tahunMulai = $(this).data('tahunmulai');
+        var tahunAkhir = $(this).data('tahunakhir');
+
+        $("#EditId").val(id);
+        $("#EditPeriode").val('');
+        $("#EditSasaran").html('<option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>');
+        $("#EditSasaran").prop('disabled', true);
+        $("#EditIndikatorSasaran").val(indikatorSasaran);
+        $("#EditTarget1").val(target1 || '');
+        $("#EditTarget2").val(target2 || '');
+        $("#EditTarget3").val(target3 || '');
+        $("#EditTarget4").val(target4 || '');
+        $("#EditTarget5").val(target5 || '');
+
+        $("#EditPeriode").val(tahunMulai + '-' + tahunAkhir).trigger('change');
+
+        var checkSasaranExist = setInterval(function() {
+            if ($('#EditSasaran option[value="' + IdSasaran + '"]').length > 0) {
+                $('#EditSasaran').val(IdSasaran);
+                clearInterval(checkSasaranExist);
+            }
+        }, 100);
+
+        $("#ModalEditIkd").modal('show');
+    });
+
+    $("#FormEditIkd").submit(function(e) {
+        e.preventDefault();
+        if ($('#EditPeriode').val() === "" || $('#EditPeriode').val() === null) {
+            alert('Silakan pilih periode tahun terlebih dahulu!');
+            return false;
+        }
+        if ($('#EditSasaran').val() === "" || $('#EditSasaran').val() === null) {
+            alert('Silakan pilih sasaran terlebih dahulu!');
+            return false;
+        }
+        if ($('#EditIndikatorSasaran').val() === "") {
+            alert('Silakan isi indikator sasaran!');
+            return false;
+        }
+        if (!validateIntegerInputs('FormEditIkd')) {
+            return false;
+        }
+        $.ajax({
+            url: BaseURL + "Daerah/EditIkd",
+            type: "POST",
+            data: $(this).serialize(),
+            beforeSend: function() {
+                $("#FormEditIkd button[type=submit]").prop('disabled', true).text('Menyimpan...');
+            },
+            success: function(res) {
+                handleResponse(res, 'ModalEditIkd', 'FormEditIkd');
+                $("#FormEditIkd button[type=submit]").prop('disabled', false).text('Simpan');
+            },
+            error: function(xhr) {
+                alert("Terjadi kesalahan: " + xhr.statusText);
+                $("#FormEditIkd button[type=submit]").prop('disabled', false).text('Simpan');
+            }
+        });
+    });
+
+    // ============================================================
+    // HAPUS IKD
+    // ============================================================
+
+    $(".Hapus").click(function() {
+        if (confirm("Apakah Anda yakin ingin menghapus data ini?")) {
+            var id = $(this).data('id');
+            $.ajax({
+                url: BaseURL + "Daerah/HapusIkd",
+                type: "POST",
+                data: { id: id, [CSRF_NAME]: CSRF_TOKEN },
+                beforeSend: function() {
+                    $(this).prop('disabled', true);
+                },
+                success: function(res) {
+                    handleResponse(res, null, null);
+                    $(this).prop('disabled', false);
+                },
+                error: function(xhr) {
+                    alert("Terjadi kesalahan: " + xhr.statusText);
+                    $(this).prop('disabled', false);
+                }
+            });
+        }
+    });
+
+    // ============================================================
+    // TAMBAH PD PENANGGUNG JAWAB
+    // ============================================================
+
+    $(document).on('click', '.btn-add-pj', function() {
+        var newRow = $('<div class="form-group pj-row">' +
+            '<div class="row">' +
+            '<div class="col-md-10">' +
+            '<select class="form-control pj-select" name="pd_penanggung_jawab[]" required>' +
+            '<option value="">Pilih PD Penanggung Jawab</option>' +
+            '<option value="Semua Instansi Terkait">Semua Instansi Terkait</option>' +
+            getInstansiOptions() +
+            '</select>' +
+            '</div>' +
+            '<div class="col-md-2" style="padding-top: 7px;">' +
+            '<button type="button" class="btn btn-danger btn-remove-pj">' +
+            '<i class="notika-icon notika-trash"></i>' +
+            '</button>' +
+            '</div>' +
+            '</div>' +
+            '</div>');
+        $('#pj-container').append(newRow);
+    });
+
+    $(document).on('click', '.btn-remove-pj', function() {
+        if ($('.pj-row').length > 1) {
+            $(this).closest('.pj-row').remove();
+        } else {
+            alert('Minimal harus ada satu PD Penanggung Jawab');
+        }
+    });
+
+    $(".TambahPj").click(function() {
+        var id = $(this).data('id');
+        $("#PjId").val(id);
+        $("#pj-container").html('<div class="form-group pj-row">' +
+            '<div class="row">' +
+            '<div class="col-md-10">' +
+            '<label>PD Penanggung Jawab</label>' +
+            '<select class="form-control pj-select" name="pd_penanggung_jawab[]" required>' +
+            '<option value="">Pilih PD Penanggung Jawab</option>' +
+            '<option value="Semua Instansi Terkait">Semua Instansi Terkait</option>' +
+            getInstansiOptions() +
+            '</select>' +
+            '</div>' +
+            '<div class="col-md-2" style="padding-top: 25px;">' +
+            '<button type="button" class="btn btn-success btn-add-pj">' +
+            '<i class="notika-icon notika-plus-symbol"></i>' +
+            '</button>' +
+            '</div>' +
+            '</div>' +
+            '</div>');
+        $("#ModalTambahPj").modal('show');
+    });
+
+    $("#FormTambahPj").submit(function(e) {
+        e.preventDefault();
+        var formData = $(this).serializeArray();
+        var pdValues = [];
+        $('select[name="pd_penanggung_jawab[]"]').each(function() {
+            if ($(this).val()) {
+                pdValues.push($(this).val());
+            }
+        });
+        formData = formData.filter(item => item.name !== 'pd_penanggung_jawab[]');
+        formData.push({ name: 'pd_penanggung_jawab', value: pdValues.join(',') });
+        $.ajax({
+            url: BaseURL + "Daerah/TambahPd",
+            type: "POST",
+            data: $.param(formData),
+            beforeSend: function() {
+                $("#FormTambahPj button[type=submit]").prop('disabled', true).text('Menyimpan...');
+            },
+            success: function(res) {
+                handleResponse(res, 'ModalTambahPj', 'FormTambahPj');
+                $("#FormTambahPj button[type=submit]").prop('disabled', false).text('Simpan');
+            },
+            error: function(xhr) {
+                alert("Terjadi kesalahan: " + xhr.statusText);
+                $("#FormTambahPj button[type=submit]").prop('disabled', false).text('Simpan');
+            }
+        });
+    });
+
+    // ============================================================
+    // TAMBAH PD PENUNJANG
+    // ============================================================
+
+    $(document).on('click', '.btn-add-pn', function() {
+        var newRow = $('<div class="form-group pn-row">' +
+            '<div class="row">' +
+            '<div class="col-md-10">' +
+            '<select class="form-control pn-select" name="pd_penunjang[]" required>' +
+            '<option value="">Pilih PD Penunjang</option>' +
+            '<option value="Semua Instansi Terkait">Semua Instansi Terkait</option>' +
+            getInstansiOptions() +
+            '</select>' +
+            '</div>' +
+            '<div class="col-md-2" style="padding-top: 7px;">' +
+            '<button type="button" class="btn btn-danger btn-remove-pn">' +
+            '<i class="notika-icon notika-trash"></i>' +
+            '</button>' +
+            '</div>' +
+            '</div>' +
+            '</div>');
+        $('#pn-container').append(newRow);
+    });
+
+    $(document).on('click', '.btn-remove-pn', function() {
+        if ($('.pn-row').length > 1) {
+            $(this).closest('.pn-row').remove();
+        } else {
+            alert('Minimal harus ada satu PD Penunjang');
+        }
+    });
+
+    $(".TambahPn").click(function() {
+        var id = $(this).data('id');
+        $("#PnId").val(id);
+        $("#pn-container").html('<div class="form-group pn-row">' +
+            '<div class="row">' +
+            '<div class="col-md-10">' +
+            '<label>PD Penunjang</label>' +
+            '<select class="form-control pn-select" name="pd_penunjang[]" required>' +
+            '<option value="">Pilih PD Penunjang</option>' +
+            '<option value="Semua Instansi Terkait">Semua Instansi Terkait</option>' +
+            getInstansiOptions() +
+            '</select>' +
+            '</div>' +
+            '<div class="col-md-2" style="padding-top: 25px;">' +
+            '<button type="button" class="btn btn-success btn-add-pn">' +
+            '<i class="notika-icon notika-plus-symbol"></i>' +
+            '</button>' +
+            '</div>' +
+            '</div>' +
+            '</div>');
+        $("#ModalTambahPn").modal('show');
+    });
+
+    $("#FormTambahPn").submit(function(e) {
+        e.preventDefault();
+        var formData = $(this).serializeArray();
+        var pdValues = [];
+        $('select[name="pd_penunjang[]"]').each(function() {
+            if ($(this).val()) {
+                pdValues.push($(this).val());
+            }
+        });
+        formData = formData.filter(item => item.name !== 'pd_penunjang[]');
+        formData.push({ name: 'pd_penunjang', value: pdValues.join(',') });
+        $.ajax({
+            url: BaseURL + "Daerah/TambahPd",
+            type: "POST",
+            data: $.param(formData),
+            beforeSend: function() {
+                $("#FormTambahPn button[type=submit]").prop('disabled', true).text('Menyimpan...');
+            },
+            success: function(res) {
+                handleResponse(res, 'ModalTambahPn', 'FormTambahPn');
+                $("#FormTambahPn button[type=submit]").prop('disabled', false).text('Simpan');
+            },
+            error: function(xhr) {
+                alert("Terjadi kesalahan: " + xhr.statusText);
+                $("#FormTambahPn button[type=submit]").prop('disabled', false).text('Simpan');
+            }
+        });
+    });
+
+    // ============================================================
+    // EDIT PD PENANGGUNG JAWAB
+    // ============================================================
+
+    $(".Pic").click(function() {
+        var Data = $(this).attr('Pic').split("|");
+        $("#IdIKDPic").val(Data[0]);
+        var Pisah = Data[1].split(",");
+        var List = '';
+        for (let i = 0; i < Pisah.length; i++) {
+            List += '<label><input style="margin-top: 10px;" type="checkbox" checked name="Pic" value="'+Pisah[i]+'"> '+Pisah[i]+'</label><br>';
+        }
+        $("#ListPic").html(List);
+        $("#ModalPic").modal('show');
+    });
+
+    $("#EditPic").click(function() {
+        var Tampung = [];
+        $.each($("input[name='Pic']:checked"), function() {
+            Tampung.push($(this).val());
+        });
+        var Pic = {
+            id: $("#IdIKDPic").val(),
+            pd_penanggung_jawab: Tampung.join(","),
+            [CSRF_NAME]: CSRF_TOKEN
+        };
+        $.ajax({
+            url: BaseURL + "Daerah/EditPDIKD",
+            type: "POST",
+            data: Pic,
+            beforeSend: function() {
+                $("#EditPic").prop('disabled', true).text('Menyimpan...');
+            },
+            success: function(Respon) {
+                handleResponse(Respon, 'ModalPic', null);
+                $("#EditPic").prop('disabled', false).text('Simpan');
+            },
+            error: function(xhr) {
+                alert("Terjadi kesalahan: " + xhr.statusText);
+                $("#EditPic").prop('disabled', false).text('Simpan');
+            }
+        });
+    });
+
+    // ============================================================
+    // EDIT PD PENUNJANG
+    // ============================================================
+
+    $(".Pis").click(function() {
+        var Data = $(this).attr('Pis').split("|");
+        $("#IdIKDPis").val(Data[0]);
+        var Pisah = Data[1].split(",");
+        var List = '';
+        for (let i = 0; i < Pisah.length; i++) {
+            List += '<label><input style="margin-top: 10px;" type="checkbox" checked name="Pis" value="'+Pisah[i]+'"> '+Pisah[i]+'</label><br>';
+        }
+        $("#ListPis").html(List);
+        $("#ModalPis").modal('show');
+    });
+
+    $("#EditPis").click(function() {
+        var Tampung = [];
+        $.each($("input[name='Pis']:checked"), function() {
+            Tampung.push($(this).val());
+        });
+        var Pis = {
+            id: $("#IdIKDPis").val(),
+            pd_penunjang: Tampung.join(","),
+            [CSRF_NAME]: CSRF_TOKEN
+        };
+        $.ajax({
+            url: BaseURL + "Daerah/EditPDIKD",
+            type: "POST",
+            data: Pis,
+            beforeSend: function() {
+                $("#EditPis").prop('disabled', true).text('Menyimpan...');
+            },
+            success: function(Respon) {
+                handleResponse(Respon, 'ModalPis', null);
+                $("#EditPis").prop('disabled', false).text('Simpan');
+            },
+            error: function(xhr) {
+                alert("Terjadi kesalahan: " + xhr.statusText);
+                $("#EditPis").prop('disabled', false).text('Simpan');
+            }
+        });
+    });
+
+    // ============================================================
+    // TAMBAH ISU STRATEGIS
+    // ============================================================
+
+    $(document).on('click', '.btn-add-isu', function() {
+        var newRow = $('<div class="form-group isu-row">' +
+            '<div class="row">' +
+            '<div class="col-md-10">' +
+            '<select class="form-control isu-select" name="isu_strategis[]" required>' +
+            '<option value="">Pilih Isu Strategis</option>' +
+            getIsuStrategisOptions() +
+            '</select>' +
+            '</div>' +
+            '<div class="col-md-2" style="padding-top: 7px;">' +
+            '<button type="button" class="btn btn-danger btn-remove-isu">' +
+            '<i class="notika-icon notika-trash"></i>' +
+            '</button>' +
+            '</div>' +
+            '</div>' +
+            '</div>');
+        $('#isu-container').append(newRow);
+    });
+
+    $(document).on('click', '.btn-remove-isu', function() {
+        if ($('.isu-row').length > 1) {
+            $(this).closest('.isu-row').remove();
+        } else {
+            alert('Minimal harus ada satu Isu Strategis');
+        }
+    });
+
+    $(".TambahIsu").click(function() {
+        var id = $(this).data('id');
+        $("#IsuId").val(id);
+        $("#isu-container").html('<div class="form-group isu-row">' +
+            '<div class="row">' +
+            '<div class="col-md-10">' +
+            '<label>Isu Strategis Daerah</label>' +
+            '<select class="form-control isu-select" name="isu_strategis[]" required>' +
+            '<option value="">Pilih Isu Strategis</option>' +
+            getIsuStrategisOptions() +
+            '</select>' +
+            '</div>' +
+            '<div class="col-md-2" style="padding-top: 25px;">' +
+            '<button type="button" class="btn btn-success btn-add-isu">' +
+            '<i class="notika-icon notika-plus-symbol"></i>' +
+            '</button>' +
+            '</div>' +
+            '</div>' +
+            '</div>');
+        $("#ModalTambahIsu").modal('show');
+    });
+
+    $("#FormTambahIsu").submit(function(e) {
+        e.preventDefault();
+        var formData = $(this).serializeArray();
+        var isuValues = [];
+        $('select[name="isu_strategis[]"]').each(function() {
+            if ($(this).val()) {
+                isuValues.push($(this).val());
+            }
+        });
+        formData = formData.filter(item => item.name !== 'isu_strategis[]');
+        formData.push({ name: 'isu_strategis', value: isuValues.join(',') });
+        $.ajax({
+            url: BaseURL + "Daerah/TambahIsuStrategis",
+            type: "POST",
+            data: $.param(formData),
+            beforeSend: function() {
+                $("#FormTambahIsu button[type=submit]").prop('disabled', true).text('Menyimpan...');
+            },
+            success: function(res) {
+                handleResponse(res, 'ModalTambahIsu', 'FormTambahIsu');
+                $("#FormTambahIsu button[type=submit]").prop('disabled', false).text('Simpan');
+            },
+            error: function(xhr) {
+                alert("Terjadi kesalahan: " + xhr.statusText);
+                $("#FormTambahIsu button[type=submit]").prop('disabled', false).text('Simpan');
+            }
+        });
+    });
+
+    // ============================================================
+    // EDIT ISU STRATEGIS
+    // ============================================================
+
+    $(".EditIsu").click(function() {
+        var Data = $(this).attr('data-isi').split("|");
+        $("#IdIKDIsu").val(Data[0]);
+        var Pisah = Data[1].split(",");
+        var List = '';
+        <?php 
+        $allIsu = $this->db->where('KodeWilayah', $_SESSION['KodeWilayah'])
+                          ->where('deleted_at IS NULL')
+                          ->get('isustrategisdaerah')
+                          ->result_array();
+        foreach ($allIsu as $isu): ?>
+            var isChecked = Pisah.includes("<?= html_escape($isu['Id']) ?>") ? 'checked' : '';
+            List += '<label><input style="margin-top: 10px;" type="checkbox" '+isChecked+' name="Isu" value="<?= html_escape($isu['Id']) ?>"> <?= html_escape($isu['NamaIsuStrategis']) ?></label><br>';
+        <?php endforeach; ?>
+        $("#ListIsu").html(List);
+        $("#ModalEditIsu").modal('show');
+    });
+
+    $("#EditIsu").click(function() {
+        var Tampung = [];
+        $.each($("input[name='Isu']:checked"), function() {
+            Tampung.push($(this).val());
+        });
+        var Isu = {
+            id: $("#IdIKDIsu").val(),
+            isu_strategis: Tampung.join(","),
+            [CSRF_NAME]: CSRF_TOKEN
+        };
+        $.ajax({
+            url: BaseURL + "Daerah/EditIsuStrategis",
+            type: "POST",
+            data: Isu,
+            beforeSend: function() {
+                $("#EditIsu").prop('disabled', true).text('Menyimpan...');
+            },
+            success: function(Respon) {
+                handleResponse(Respon, 'ModalEditIsu', null);
+                $("#EditIsu").prop('disabled', false).text('Simpan');
+            },
+            error: function(xhr) {
+                alert("Terjadi kesalahan: " + xhr.statusText);
+                $("#EditIsu").prop('disabled', false).text('Simpan');
+            }
+        });
+    });
+
+});
     </script>
 </div>
 </body>

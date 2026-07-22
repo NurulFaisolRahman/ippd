@@ -5202,184 +5202,807 @@ public function EditPDIKD() {
   }
 }
 
-public function PotensiDaerah() {
-    $Header['Halaman'] = 'PotensiDaerah';
-    
-    // Ambil daftar provinsi untuk filter
-    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
+// ============================================================
+// POTENSI DAERAH - CRUD
+// ============================================================
 
-    // Tentukan KodeWilayah
+/**
+ * INPUT POTENSI DAERAH
+ */
+public function InputPotensiDaerah() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    try {
+        $kodeWilayah = $this->session->userdata('KodeWilayah') 
+                    ?? $this->session->userdata('TempKodeWilayah');
+        
+        if (empty($kodeWilayah)) {
+            echo 'Wilayah belum dipilih!';
+            return;
+        }
+        
+        $periode = explode('-', $this->input->post('PeriodeRPJMD', TRUE));
+        $namaPotensi = trim($this->input->post('NamaPotensiDaerah', TRUE));
+        
+        if (empty($namaPotensi)) {
+            echo 'Nama Potensi Daerah harus diisi!';
+            return;
+        }
+        
+        $data = [
+            'KodeWilayah' => $kodeWilayah,
+            'NamaPotensiDaerah' => $namaPotensi,
+            'TahunMulai' => $periode[0],
+            'TahunAkhir' => $periode[1],
+            'created_at' => date('Y-m-d H:i:s')
+        ];
+        
+        $this->db->insert('potensidaerah', $data);
+        
+        echo $this->db->affected_rows() > 0 ? '1' : 'Gagal Menyimpan Data!';
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error InputPotensiDaerah: ' . $e->getMessage());
+        echo 'Terjadi kesalahan: ' . $e->getMessage();
+    }
+}
+
+/**
+ * UPDATE POTENSI DAERAH
+ */
+public function UpdatePotensiDaerah() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    try {
+        $kodeWilayah = $this->session->userdata('KodeWilayah') 
+                    ?? $this->session->userdata('TempKodeWilayah');
+        
+        if (empty($kodeWilayah)) {
+            echo 'Wilayah belum dipilih!';
+            return;
+        }
+        
+        $id = (int)$this->input->post('Id', TRUE);
+        $periode = explode('-', $this->input->post('PeriodeRPJMD', TRUE));
+        $namaPotensi = trim($this->input->post('NamaPotensiDaerah', TRUE));
+        
+        if ($id <= 0) {
+            echo 'ID tidak valid!';
+            return;
+        }
+        
+        if (empty($namaPotensi)) {
+            echo 'Nama Potensi Daerah harus diisi!';
+            return;
+        }
+        
+        // Cek apakah data ada
+        $exists = $this->db->where('Id', $id)
+                           ->where('KodeWilayah', $kodeWilayah)
+                           ->where('deleted_at IS NULL')
+                           ->get('potensidaerah')
+                           ->num_rows();
+        
+        if ($exists == 0) {
+            echo 'Data tidak ditemukan!';
+            return;
+        }
+        
+        $data = [
+            'NamaPotensiDaerah' => $namaPotensi,
+            'TahunMulai' => $periode[0],
+            'TahunAkhir' => $periode[1],
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        $this->db->where('Id', $id)
+                 ->where('KodeWilayah', $kodeWilayah)
+                 ->update('potensidaerah', $data);
+        
+        echo $this->db->affected_rows() > 0 ? '1' : 'Tidak ada perubahan data';
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error UpdatePotensiDaerah: ' . $e->getMessage());
+        echo 'Terjadi kesalahan: ' . $e->getMessage();
+    }
+}
+
+/**
+ * DELETE POTENSI DAERAH (Soft Delete)
+ */
+public function DeletePotensiDaerah() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    try {
+        $kodeWilayah = $this->session->userdata('KodeWilayah') 
+                    ?? $this->session->userdata('TempKodeWilayah');
+        
+        if (empty($kodeWilayah)) {
+            echo 'Wilayah belum dipilih!';
+            return;
+        }
+        
+        $id = (int)$this->input->post('Id', TRUE);
+        
+        if ($id <= 0) {
+            echo 'ID tidak valid!';
+            return;
+        }
+        
+        // Cek apakah data ada
+        $exists = $this->db->where('Id', $id)
+                           ->where('KodeWilayah', $kodeWilayah)
+                           ->where('deleted_at IS NULL')
+                           ->get('potensidaerah')
+                           ->num_rows();
+        
+        if ($exists == 0) {
+            echo 'Data tidak ditemukan!';
+            return;
+        }
+        
+        $this->db->where('Id', $id)
+                 ->where('KodeWilayah', $kodeWilayah)
+                 ->update('potensidaerah', [
+                     'deleted_at' => date('Y-m-d H:i:s')
+                 ]);
+        
+        echo $this->db->affected_rows() > 0 ? '1' : 'Gagal Hapus Data!';
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error DeletePotensiDaerah: ' . $e->getMessage());
+        echo 'Terjadi kesalahan: ' . $e->getMessage();
+    }
+}
+
+public function GetKementerian() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $tahunMulai = (int)$this->input->post('TahunMulai', TRUE);
+    
+    if ($tahunMulai <= 0) {
+        echo json_encode([]);
+        return;
+    }
+    
+    $query = $this->db->query(
+        "SELECT * FROM kementerian WHERE TahunMulai = ? AND deleted_at IS NULL ORDER BY NamaKementerian ASC",
+        array($tahunMulai)
+    );
+    
+    echo json_encode($query->result_array());
+}
+
+public function GetPermasalahanPokokNasional() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $idKementerian = (int)$this->input->post('Id', TRUE);
+    
+    if ($idKementerian <= 0) {
+        echo json_encode([]);
+        return;
+    }
+    
+    $query = $this->db->query(
+        "SELECT * FROM permasalahan_pokok WHERE IdKementerian = ? AND deleted_at IS NULL ORDER BY NamaPermasalahanPokok ASC",
+        array($idKementerian)
+    );
+    
+    echo json_encode($query->result_array());
+}
+
+public function GetPeriodePermasalahanPokokNasional() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $id = (int)$this->input->post('Id', TRUE);
+    
+    if ($id <= 0) {
+        echo json_encode([]);
+        return;
+    }
+    
+    // PERBAIKAN: Ambil data kementerian langsung berdasarkan ID
+    $query = $this->db->query("
+        SELECT Id, NamaKementerian, TahunMulai, TahunAkhir 
+        FROM kementerian 
+        WHERE Id = ? 
+        AND deleted_at IS NULL
+    ", array($id));
+    
+    $result = $query->result_array();
+    
+    // Jika tidak ditemukan, coba cari melalui permasalahan_pokok
+    if (empty($result)) {
+        $query2 = $this->db->query("
+            SELECT k.Id, k.NamaKementerian, k.TahunMulai, k.TahunAkhir 
+            FROM kementerian k
+            JOIN permasalahan_pokok pp ON pp.IdKementerian = k.Id
+            WHERE pp.Id = ? 
+            AND pp.deleted_at IS NULL
+            AND k.deleted_at IS NULL
+        ", array($id));
+        $result = $query2->result_array();
+    }
+    
+    // Jika masih kosong, coba ambil semua data kementerian
+    if (empty($result)) {
+        $query3 = $this->db->query("
+            SELECT Id, NamaKementerian, TahunMulai, TahunAkhir 
+            FROM kementerian 
+            WHERE deleted_at IS NULL
+            LIMIT 1
+        ");
+        $result = $query3->result_array();
+    }
+    
+    echo json_encode($result);
+}
+
+public function GetKementerianById() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $id = (int)$this->input->post('Id', TRUE);
+    
+    if ($id <= 0) {
+        echo json_encode([]);
+        return;
+    }
+    
+    $query = $this->db->query("
+        SELECT Id, NamaKementerian, TahunMulai, TahunAkhir 
+        FROM kementerian 
+        WHERE Id = ? 
+        AND deleted_at IS NULL
+    ", array($id));
+    
+    echo json_encode($query->result_array());
+}
+
+// ============================================================
+    // PERMASALAHAN POKOK - MAIN PAGE
+    // ============================================================
+    // Halaman Permasalahan Pokok
+public function PermasalahanPokok() {
+    $Header['Halaman'] = 'Isudaerah';
+    
     $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
                    (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
 
     log_message('debug', 'KodeWilayah diterima: ' . $KodeWilayah);
 
+    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
+
+    $query = $this->db->query("
+        SELECT DISTINCT TahunMulai, TahunAkhir 
+        FROM visirpjmd 
+        WHERE KodeWilayah = ? AND deleted_at IS NULL
+        ORDER BY TahunMulai
+    ", array($KodeWilayah));
+    $Data['Periods'] = $query->result_array();
+    
+    // ==========================================================
+    // AMBIL DATA PERMASALAHAN POKOK
+    // ==========================================================
+    $query = $this->db->query("
+        SELECT p.* 
+        FROM permasalahanpokokdaerah p
+        WHERE p.KodeWilayah = ? 
+          AND p.deleted_at IS NULL
+        ORDER BY p.Id DESC
+    ", array($KodeWilayah));
+    $Data['PermasalahanPokokRaw'] = $query->result_array();
+    
+    // ==========================================================
+    // PROSES DATA UNTUK MENAMBAHKAN NamaKementerian DAN NamaPermasalahanNasional
+    // ==========================================================
+    $Data['PermasalahanPokok'] = array();
+    
+    foreach ($Data['PermasalahanPokokRaw'] as $row) {
+        $permIds = !empty($row['_Id']) ? explode('$', $row['_Id']) : array();
+        $kementerianNames = array();
+        $kementerianIds = array();
+        
+        foreach ($permIds as $id) {
+            if (!empty($id) && is_numeric($id)) {
+                // Ambil data permasalahan pokok nasional
+                $permData = $this->db->query("
+                    SELECT pp.IdKementerian, pp.NamaPermasalahanPokok, k.NamaKementerian
+                    FROM permasalahan_pokok pp
+                    LEFT JOIN kementerian k ON k.Id = pp.IdKementerian AND k.deleted_at IS NULL
+                    WHERE pp.Id = ? AND pp.deleted_at IS NULL
+                ", array($id))->row_array();
+                
+                if ($permData) {
+                    // Simpan nama permasalahan untuk display
+                    if (!empty($permData['NamaPermasalahanPokok'])) {
+                        // Akan diproses nanti di view
+                    }
+                    
+                    // Kumpulkan ID Kementerian
+                    if (!empty($permData['IdKementerian'])) {
+                        $kementerianIds[] = $permData['IdKementerian'];
+                    }
+                }
+            }
+        }
+        
+        // Ambil nama kementerian dari ID yang unik
+        $kementerianIds = array_unique($kementerianIds);
+        $kementerianNames = array();
+        
+        if (!empty($kementerianIds)) {
+            $kemQuery = $this->db->query("
+                SELECT NamaKementerian 
+                FROM kementerian 
+                WHERE Id IN (" . implode(',', $kementerianIds) . ")
+                AND deleted_at IS NULL
+            ");
+            $kementerianNames = array_column($kemQuery->result_array(), 'NamaKementerian');
+        }
+        
+        // Tambahkan data ke array
+        $row['NamaKementerian'] = !empty($kementerianNames) ? implode('; ', $kementerianNames) : '';
+        $row['NamaPermasalahanNasional'] = ''; // Akan diisi di view menggunakan $Permasalahan
+        $row['IdKementerian'] = !empty($kementerianIds) ? implode(',', $kementerianIds) : '';
+        
+        $Data['PermasalahanPokok'][] = $row;
+    }
+
+    // ==========================================================
+    // AMBIL DATA UNTUK DROPDOWN
+    // ==========================================================
+    $Data['PeriodePermasalahanPokokNasional'] = $this->db->query("
+        SELECT DISTINCT TahunMulai, TahunAkhir 
+        FROM kementerian 
+        WHERE deleted_at IS NULL
+        ORDER BY TahunMulai DESC
+    ")->result_array();
+    
+    $ListKementerian = $this->db->query("
+        SELECT k.*, 
+               GROUP_CONCAT(pp.Id) as PermasalahanIds,
+               GROUP_CONCAT(pp.NamaPermasalahanPokok SEPARATOR '||') as PermasalahanNames
+        FROM kementerian k
+        LEFT JOIN permasalahan_pokok pp ON pp.IdKementerian = k.Id AND pp.deleted_at IS NULL
+        WHERE k.deleted_at IS NULL
+        GROUP BY k.Id
+        ORDER BY k.TahunMulai DESC, k.NamaKementerian ASC
+    ")->result_array();
+    
+    $Data['Kementerian'] = array();
+    $Data['Permasalahan'] = array();
+    
+    foreach ($ListKementerian as $key) {
+        $Data['Kementerian'][$key['Id']] = $key['NamaKementerian'];
+        if (!empty($key['PermasalahanIds'])) {
+            $permIds = explode(',', $key['PermasalahanIds']);
+            $permNames = explode('||', $key['PermasalahanNames']);
+            for ($i = 0; $i < count($permIds); $i++) {
+                if (isset($permIds[$i]) && isset($permNames[$i])) {
+                    $Data['Permasalahan'][$permIds[$i]] = $permNames[$i];
+                }
+            }
+        }
+    }
+
+    // Data untuk filter wilayah
     if ($KodeWilayah) {
         $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
         if ($wilayah) {
             $Data['KodeWilayah'] = $KodeWilayah;
             $Data['NamaWilayah'] = $wilayah['Nama'];
-            
-            // Ambil data Potensi Daerah berdasarkan KodeWilayah
-            $Data['PotensiDaerah'] = $this->db->select('p.*, k.Nama')
-                ->from('potensidaerah p')
-                ->join('kodewilayah k', 'p.KodeWilayah = k.Kode', 'left')
-                ->where('p.KodeWilayah', $KodeWilayah)
-                ->where('p.deleted_at IS NULL')
-                ->get()->result_array();
-                
-            // Ambil periode dari RPJMD
-            $Data['Periods'] = $this->db->select('TahunMulai, TahunAkhir')
-                ->where('KodeWilayah', $KodeWilayah)
-                ->where('deleted_at IS NULL')
-                ->get('visirpjmd')
-                ->result_array();
         } else {
             $Data['KodeWilayah'] = '';
             $Data['NamaWilayah'] = '';
-            $Data['PotensiDaerah'] = [];
-            $Data['Periods'] = [];
-            log_message('error', 'KodeWilayah ' . $KodeWilayah . ' tidak ditemukan di tabel kodewilayah');
         }
     } else {
         $Data['KodeWilayah'] = '';
         $Data['NamaWilayah'] = '';
-        $Data['PotensiDaerah'] = [];
-        $Data['Periods'] = [];
     }
 
     $this->load->view('Daerah/header', $Header);
-    $this->load->view('Daerah/PotensiDaerah', $Data);
+    $this->load->view('Daerah/PermasalahanPokok', $Data);
 }
 
-public function GetKementerian(){
-  echo json_encode($this->db->query("SELECT * FROM kementerian WHERE TahunMulai = ".$_POST['TahunMulai']." AND deleted_at IS NULL")->result_array());
+    // ============================================================
+    // INPUT PERMASALAHAN POKOK
+    // ============================================================
+    // Input Permasalahan Pokok
+public function InputPermasalahanPokok() {
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+    
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    try {
+        $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                       (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+        
+        if (empty($kodeWilayah)) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Wilayah belum dipilih!'
+            ]);
+            return;
+        }
+        
+        $periode = explode('-', $this->input->post('PeriodeRPJMD', TRUE));
+        $namaPermasalahan = trim($this->input->post('NamaPermasalahanPokok', TRUE));
+        $permasalahanIds = $this->input->post('_Id', TRUE);
+        
+        if (empty($periode) || count($periode) != 2) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Periode tidak valid!'
+            ]);
+            return;
+        }
+        
+        if (empty($namaPermasalahan)) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Nama Permasalahan Pokok harus diisi!'
+            ]);
+            return;
+        }
+        
+        if (empty($permasalahanIds)) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Pilih minimal satu Permasalahan Nasional!'
+            ]);
+            return;
+        }
+        
+        // ==========================================================
+        // PERBAIKAN: Ambil ID Kementerian dari Permasalahan yang dipilih
+        // ==========================================================
+        $kementerianIds = [];
+        if (!empty($permasalahanIds)) {
+            $permIds = explode('$', $permasalahanIds);
+            $permIds = array_filter($permIds, function($id) {
+                return is_numeric($id) && $id > 0;
+            });
+            
+            if (!empty($permIds)) {
+                $query = $this->db->query("
+                    SELECT DISTINCT IdKementerian 
+                    FROM permasalahan_pokok 
+                    WHERE Id IN (" . implode(',', $permIds) . ")
+                    AND deleted_at IS NULL
+                ");
+                $kementerianIds = array_column($query->result_array(), 'IdKementerian');
+            }
+        }
+        
+        $kementerianIdsValue = !empty($kementerianIds) ? implode(',', $kementerianIds) : null;
+        
+        $data = array(
+            'NamaPermasalahanPokok' => $namaPermasalahan,
+            '_Id' => $permasalahanIds,
+            'IdKementerian' => $kementerianIdsValue, // SIMPAN ID KEMENTERIAN
+            'TahunMulai' => trim($periode[0]),
+            'TahunAkhir' => trim($periode[1]),
+            'KodeWilayah' => $kodeWilayah,
+            'created_at' => date('Y-m-d H:i:s')
+        );
+        
+        log_message('debug', 'Data InputPermasalahanPokok: ' . print_r($data, true));
+        
+        $this->db->insert('permasalahanpokokdaerah', $data);
+        
+        if ($this->db->affected_rows() > 0) {
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Data berhasil disimpan!'
+            ]);
+        } else {
+            $error = $this->db->error();
+            log_message('error', 'DB Error InputPermasalahanPokok: ' . $error['message']);
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Gagal menyimpan data: ' . $error['message']
+            ]);
+        }
+        
+    } catch (Exception $e) {
+        log_message('error', 'Exception InputPermasalahanPokok: ' . $e->getMessage());
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+        ]);
+    }
 }
 
-public function GetPermasalahanPokokNasional(){
-  echo json_encode($this->db->query("SELECT * FROM permasalahan_pokok WHERE IdKementerian = ".$_POST['Id']." AND deleted_at IS NULL")->result_array());
+    // ============================================================
+    // UPDATE PERMASALAHAN POKOK
+    // ============================================================
+    // Update Permasalahan Pokok
+public function UpdatePermasalahanPokok() {
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+    
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    try {
+        $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                       (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+        
+        if (empty($kodeWilayah)) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Wilayah belum dipilih!'
+            ]);
+            return;
+        }
+        
+        $id = (int)$this->input->post('Id', TRUE);
+        $periode = explode('-', $this->input->post('EditPeriodeRPJMD', TRUE));
+        $namaPermasalahan = trim($this->input->post('NamaPermasalahanPokok', TRUE));
+        $permasalahanIds = $this->input->post('_Id', TRUE);
+        
+        if ($id <= 0) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'ID tidak valid!'
+            ]);
+            return;
+        }
+        
+        if (empty($periode) || count($periode) != 2) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Periode tidak valid!'
+            ]);
+            return;
+        }
+        
+        if (empty($namaPermasalahan)) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Nama Permasalahan Pokok harus diisi!'
+            ]);
+            return;
+        }
+        
+        if (empty($permasalahanIds)) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Pilih minimal satu Permasalahan Nasional!'
+            ]);
+            return;
+        }
+        
+        // Cek apakah data ada
+        $exists = $this->db
+            ->where('Id', $id)
+            ->where('KodeWilayah', $kodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->get('permasalahanpokokdaerah')
+            ->num_rows();
+        
+        if ($exists == 0) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Data tidak ditemukan!'
+            ]);
+            return;
+        }
+        
+        // Ambil ID Kementerian dari Permasalahan yang dipilih
+        $kementerianIds = [];
+        if (!empty($permasalahanIds)) {
+            $permIds = explode('$', $permasalahanIds);
+            $permIds = array_filter($permIds, function($id) {
+                return is_numeric($id) && $id > 0;
+            });
+            
+            if (!empty($permIds)) {
+                $query = $this->db->query("
+                    SELECT DISTINCT IdKementerian 
+                    FROM permasalahan_pokok 
+                    WHERE Id IN (" . implode(',', $permIds) . ")
+                    AND deleted_at IS NULL
+                ");
+                $kementerianIds = array_column($query->result_array(), 'IdKementerian');
+            }
+        }
+        
+        $kementerianIdsValue = !empty($kementerianIds) ? implode(',', $kementerianIds) : null;
+        
+        $data = array(
+            'NamaPermasalahanPokok' => $namaPermasalahan,
+            '_Id' => $permasalahanIds,
+            'IdKementerian' => $kementerianIdsValue,
+            'TahunMulai' => trim($periode[0]),
+            'TahunAkhir' => trim($periode[1]),
+            'updated_at' => date('Y-m-d H:i:s')
+        );
+        
+        log_message('debug', 'Data UpdatePermasalahanPokok: ' . print_r($data, true));
+        
+        $this->db->where('Id', $id);
+        $this->db->where('KodeWilayah', $kodeWilayah);
+        $this->db->update('permasalahanpokokdaerah', $data);
+        
+        if ($this->db->affected_rows() > 0) {
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Data berhasil diupdate!'
+            ]);
+        } else {
+            $error = $this->db->error();
+            if ($error['code'] == 0) {
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Tidak ada perubahan data'
+                ]);
+            } else {
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Gagal update data: ' . $error['message']
+                ]);
+            }
+        }
+        
+    } catch (Exception $e) {
+        log_message('error', 'Exception UpdatePermasalahanPokok: ' . $e->getMessage());
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+        ]);
+    }
 }
 
-public function GetPeriodePermasalahanPokokNasional(){
-  echo json_encode($this->db->query("SELECT kementerian.* FROM permasalahan_pokok,kementerian WHERE kementerian.Id=permasalahan_pokok.IdKementerian AND kementerian.deleted_at IS NULL AND permasalahan_pokok.Id = ".$_POST['Id'])->result_array());
-}
+    // ============================================================
+    // HAPUS PERMASALAHAN POKOK (Soft Delete)
+    // ============================================================
+    public function DeletePermasalahanPokok() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        try {
+            $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                           (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+            
+            if (empty($kodeWilayah)) {
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Wilayah belum dipilih!'
+                ]);
+                return;
+            }
+            
+            $id = (int)$this->input->post('Id', TRUE);
+            
+            if ($id <= 0) {
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'ID tidak valid!'
+                ]);
+                return;
+            }
+            
+            // Cek apakah data ada
+            $exists = $this->db
+                ->where('Id', $id)
+                ->where('KodeWilayah', $kodeWilayah)
+                ->where('deleted_at IS NULL')
+                ->get('permasalahanpokokdaerah')
+                ->num_rows();
+            
+            if ($exists == 0) {
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Data tidak ditemukan!'
+                ]);
+                return;
+            }
+            
+            $this->db->where('Id', $id);
+            $this->db->where('KodeWilayah', $kodeWilayah);
+            $this->db->update('permasalahanpokokdaerah', array(
+                'deleted_at' => date('Y-m-d H:i:s')
+            ));
+            
+            if ($this->db->affected_rows() > 0) {
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Data berhasil dihapus!'
+                ]);
+            } else {
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Gagal menghapus data!'
+                ]);
+            }
+            
+        } catch (Exception $e) {
+            log_message('error', 'Exception DeletePermasalahanPokok: ' . $e->getMessage());
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ]);
+        }
+    }
 
-    // Halaman Permasalahan Pokok
-public function PermasalahanPokok() {
-		$Header['Halaman'] = 'Isudaerah';
-		
-		// Ambil KodeWilayah
-		$KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
-					   (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+    // ============================================================
+    // GET DATA PERMASALAHAN POKOK BY ID (UNTUK EDIT)
+    // ============================================================
+    public function GetPermasalahanPokokById() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $id = (int)$this->input->post('id', TRUE);
+        $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                       (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+        
+        if ($id <= 0 || empty($kodeWilayah)) {
+            echo json_encode([]);
+            return;
+        }
+        
+        $data = $this->db
+            ->where('Id', $id)
+            ->where('KodeWilayah', $kodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->get('permasalahanpokokdaerah')
+            ->row_array();
+        
+        if ($data) {
+            // Parse _Id menjadi array
+            $data['_Id_array'] = !empty($data['_Id']) ? explode('$', $data['_Id']) : [];
+            
+            // Parse IdKementerian menjadi array
+            $data['IdKementerian_array'] = !empty($data['IdKementerian']) ? explode(',', $data['IdKementerian']) : [];
+            
+            // Ambil detail kementerian
+            if (!empty($data['IdKementerian_array'])) {
+                $kementerianDetail = $this->db
+                    ->select('Id, NamaKementerian, TahunMulai, TahunAkhir')
+                    ->where_in('Id', $data['IdKementerian_array'])
+                    ->where('deleted_at IS NULL')
+                    ->get('kementerian')
+                    ->result_array();
+                $data['kementerian_detail'] = $kementerianDetail;
+            }
+        }
+        
+        echo json_encode($data);
+    }
 
-		log_message('debug', 'KodeWilayah diterima: ' . $KodeWilayah);
-
-		// Ambil daftar provinsi untuk filter
-		$Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
-
-		// Ambil periode dari RPJMD
-		$query = $this->db->query("
-			SELECT DISTINCT TahunMulai, TahunAkhir 
-			FROM visirpjmd 
-			WHERE KodeWilayah = ? AND deleted_at IS NULL
-			ORDER BY TahunMulai
-		", array($KodeWilayah));
-		$Data['Periods'] = $query->result_array();
-		
-		// Ambil data Permasalahan Pokok
-		$query = $this->db->query("
-			SELECT * FROM Permasalahanpokokdaerah 
-			WHERE KodeWilayah = ? AND deleted_at IS NULL
-		", array($KodeWilayah));
-		$Data['PermasalahanPokok'] = $query->result_array();
-
-		// Ambil periode dan data kementerian untuk Permasalahan Pokok Nasional
-		$Data['PeriodePermasalahanPokokNasional'] = $this->db->query("SELECT DISTINCT TahunMulai,TahunAkhir,deleted_at FROM kementerian WHERE deleted_at IS NULL")->result_array();
-		$ListKementerian = $this->db->query("SELECT kementerian.NamaKementerian,permasalahan_pokok.* FROM permasalahan_pokok,kementerian WHERE kementerian.Id=permasalahan_pokok.IdKementerian AND permasalahan_pokok.deleted_at IS NULL")->result_array();
-		$Data['Kementerian'] = $Data['Permasalahan'] = array();
-		foreach ($ListKementerian as $key) {
-			$Data['Kementerian'][$key['Id']] = $key['NamaKementerian'];
-			$Data['Permasalahan'][$key['Id']] = $key['NamaPermasalahanPokok'];
-		}
-
-		// Data untuk filter wilayah
-		if ($KodeWilayah) {
-			$wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-			if ($wilayah) {
-				$Data['KodeWilayah'] = $KodeWilayah;
-				$Data['NamaWilayah'] = $wilayah['Nama'];
-			} else {
-				$Data['KodeWilayah'] = '';
-				$Data['NamaWilayah'] = '';
-				log_message('error', 'KodeWilayah ' . $KodeWilayah . ' tidak ditemukan di tabel kodewilayah');
-			}
-		} else {
-			$Data['KodeWilayah'] = '';
-			$Data['NamaWilayah'] = '';
-		}
-
-		$this->load->view('Daerah/header', $Header);
-		$this->load->view('Daerah/PermasalahanPokok', $Data);
-	}
-
-  // Input Permasalahan Pokok
-  public function InputPermasalahanPokok() {
-      $periode = explode('-', $this->input->post('PeriodeRPJMD'));
-      
-      $data = array(
-          'NamaPermasalahanPokok' => $this->input->post('NamaPermasalahanPokok'),
-          '_Id' => $this->input->post('_Id'),
-          'TahunMulai' => $periode[0],
-          'TahunAkhir' => $periode[1],
-          'KodeWilayah' => $_SESSION['KodeWilayah'],
-          'created_at' => date('Y-m-d H:i:s')
-      );
-      
-      $this->db->insert('Permasalahanpokokdaerah', $data);
-      echo $this->db->affected_rows() ? '1' : 'Gagal Menyimpan Data!';
-  }
-
-  // Update Permasalahan Pokok
-  public function UpdatePermasalahanPokok() {
-      $periode = explode('-', $this->input->post('EditPeriodeRPJMD'));
-      
-      $data = array(
-          'NamaPermasalahanPokok' => $this->input->post('NamaPermasalahanPokok'),
-          '_Id' => $this->input->post('_Id'),
-          'TahunMulai' => $periode[0],
-          'TahunAkhir' => $periode[1],
-          'updated_at' => date('Y-m-d H:i:s')
-      );
-      
-      $this->db->where('Id', $this->input->post('Id'));
-      $this->db->update('Permasalahanpokokdaerah', $data);
-      echo $this->db->affected_rows() ? '1' : 'Gagal Update Data!';
-  }
-
-  // Hapus Permasalahan Pokok (Soft Delete)
-  public function DeletePermasalahanPokok() {
-      $data = array(
-          'deleted_at' => date('Y-m-d H:i:s')
-      );
-      
-      $this->db->where('Id', $this->input->post('Id'));
-      $this->db->update('Permasalahanpokokdaerah', $data);
-      echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
-  }
-
-  public function GetKementerianIsu(){
-    echo json_encode($this->db->query("SELECT * FROM kementerian WHERE TahunMulai = ".$_POST['TahunMulai']." AND deleted_at IS NULL")->result_array());
-  }
-  
-  public function GetIsuKLHSNasional(){
-    echo json_encode($this->db->query("SELECT * FROM isu_klhs WHERE IdKementerian = ".$_POST['Id']." AND deleted_at IS NULL")->result_array());
-  }
-  
-  public function GetPeriodeIsuKLHSNasional(){
-    echo json_encode($this->db->query("SELECT kementerian.* FROM isu_klhs,kementerian WHERE kementerian.Id=isu_klhs.IdKementerian AND kementerian.deleted_at IS NULL AND isu_klhs.Id = ".$_POST['Id'])->result_array());
-  }
-
- public function IsuKLHS() {
+  public function IsuKLHS() {
 		$Header['Halaman'] = 'Isudaerah';
 		
 		// Ambil KodeWilayah
@@ -5402,7 +6025,7 @@ public function PermasalahanPokok() {
 		
 		// Ambil data Isu KLHS
 		$query = $this->db->query("
-			SELECT * FROM IsuKLHS 
+			SELECT * FROM isuklhs 
 			WHERE KodeWilayah = ? AND deleted_at IS NULL
 		", array($KodeWilayah));
 		$Data['IsuKLHS'] = $query->result_array();
@@ -5436,46 +6059,493 @@ public function PermasalahanPokok() {
 		$this->load->view('Daerah/IsuKLHS', $Data);
 	}
 
+  /**
+ * INPUT ISU KLHS
+ */
 public function InputIsuKLHS() {
-    $periode = explode('-', $this->input->post('PeriodeRPJMD'));
+    // Aktifkan error reporting untuk debugging
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
     
-    $data = array(
-        'NamaIsuKLHS' => $this->input->post('NamaIsuKLHS'),
-        '_Id' => $this->input->post('_Id'),
-        'TahunMulai' => $periode[0],
-        'TahunAkhir' => $periode[1],
-        'KodeWilayah' => $_SESSION['KodeWilayah'],
-        'created_at' => date('Y-m-d H:i:s')
-    );
+    // Cek AJAX request
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
     
-    $this->db->insert('IsuKLHS', $data);
-    echo $this->db->affected_rows() ? '1' : 'Gagal Menyimpan Data!';
+    try {
+        // Ambil KodeWilayah dari session
+        $kodeWilayah = $this->session->userdata('KodeWilayah') 
+                    ?? $this->session->userdata('TempKodeWilayah');
+        
+        if (empty($kodeWilayah)) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Wilayah belum dipilih!'
+            ]);
+            return;
+        }
+        
+        // Ambil data dari POST
+        $periodeRPJMD = $this->input->post('PeriodeRPJMD', TRUE);
+        $namaIsuKLHS = trim($this->input->post('NamaIsuKLHS', TRUE));
+        $isuIds = $this->input->post('_Id', TRUE);
+        
+        // Validasi
+        if (empty($periodeRPJMD)) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Periode RPJMD harus dipilih!'
+            ]);
+            return;
+        }
+        
+        if (empty($namaIsuKLHS)) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Nama Isu KLHS harus diisi!'
+            ]);
+            return;
+        }
+        
+        if (empty($isuIds)) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Pilih minimal satu Isu KLHS Nasional!'
+            ]);
+            return;
+        }
+        
+        // Parse periode
+        $periode = explode('-', $periodeRPJMD);
+        $tahunMulai = isset($periode[0]) ? trim($periode[0]) : '';
+        $tahunAkhir = isset($periode[1]) ? trim($periode[1]) : '';
+        
+        if (!is_numeric($tahunMulai) || !is_numeric($tahunAkhir)) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Periode tidak valid!'
+            ]);
+            return;
+        }
+        
+        // Siapkan data untuk insert
+        $data = array(
+            'NamaIsuKLHS' => $namaIsuKLHS,
+            '_Id' => $isuIds,
+            'TahunMulai' => $tahunMulai,
+            'TahunAkhir' => $tahunAkhir,
+            'KodeWilayah' => $kodeWilayah,
+            'created_at' => date('Y-m-d H:i:s')
+        );
+        
+        // Log untuk debugging
+        log_message('debug', 'Data InputIsuKLHS: ' . print_r($data, true));
+        
+        // Insert ke database - gunakan nama tabel 'isuklhs'
+        $this->db->insert('isuklhs', $data);
+        
+        if ($this->db->affected_rows() > 0) {
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Data berhasil disimpan!'
+            ]);
+        } else {
+            $error = $this->db->error();
+            log_message('error', 'DB Error InputIsuKLHS: ' . $error['message']);
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Gagal menyimpan data: ' . $error['message']
+            ]);
+        }
+        
+    } catch (Exception $e) {
+        log_message('error', 'Exception InputIsuKLHS: ' . $e->getMessage());
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+        ]);
+    }
 }
 
+/**
+ * UPDATE ISU KLHS
+ */
 public function UpdateIsuKLHS() {
-    $periode = explode('-', $this->input->post('EditPeriodeRPJMD'));
+    // Aktifkan error reporting untuk debugging
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
     
-    $data = array(
-        'NamaIsuKLHS' => $this->input->post('NamaIsuKLHS'),
-        '_Id' => $this->input->post('_Id'),
-        'TahunMulai' => $periode[0],
-        'TahunAkhir' => $periode[1],
-        'updated_at' => date('Y-m-d H:i:s')
-    );
+    // Cek AJAX request
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
     
-    $this->db->where('Id', $this->input->post('Id'));
-    $this->db->update('IsuKLHS', $data);
-    echo $this->db->affected_rows() ? '1' : 'Gagal Update Data!';
+    try {
+        // Ambil KodeWilayah dari session
+        $kodeWilayah = $this->session->userdata('KodeWilayah') 
+                    ?? $this->session->userdata('TempKodeWilayah');
+        
+        if (empty($kodeWilayah)) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Wilayah belum dipilih!'
+            ]);
+            return;
+        }
+        
+        // Ambil data dari POST
+        $id = (int)$this->input->post('Id', TRUE);
+        $periodeRPJMD = $this->input->post('EditPeriodeRPJMD', TRUE);
+        $namaIsuKLHS = trim($this->input->post('NamaIsuKLHS', TRUE));
+        $isuIds = $this->input->post('_Id', TRUE);
+        
+        // Validasi
+        if ($id <= 0) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'ID tidak valid!'
+            ]);
+            return;
+        }
+        
+        if (empty($periodeRPJMD)) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Periode RPJMD harus dipilih!'
+            ]);
+            return;
+        }
+        
+        if (empty($namaIsuKLHS)) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Nama Isu KLHS harus diisi!'
+            ]);
+            return;
+        }
+        
+        if (empty($isuIds)) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Pilih minimal satu Isu KLHS Nasional!'
+            ]);
+            return;
+        }
+        
+        // Cek apakah data ada - gunakan nama tabel 'isuklhs'
+        $existing = $this->db
+            ->where('Id', $id)
+            ->where('KodeWilayah', $kodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->get('isuklhs')
+            ->row_array();
+        
+        if (!$existing) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Data tidak ditemukan!'
+            ]);
+            return;
+        }
+        
+        // Parse periode
+        $periode = explode('-', $periodeRPJMD);
+        $tahunMulai = isset($periode[0]) ? trim($periode[0]) : '';
+        $tahunAkhir = isset($periode[1]) ? trim($periode[1]) : '';
+        
+        if (!is_numeric($tahunMulai) || !is_numeric($tahunAkhir)) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Periode tidak valid!'
+            ]);
+            return;
+        }
+        
+        // Siapkan data untuk update
+        $data = array(
+            'NamaIsuKLHS' => $namaIsuKLHS,
+            '_Id' => $isuIds,
+            'TahunMulai' => $tahunMulai,
+            'TahunAkhir' => $tahunAkhir,
+            'updated_at' => date('Y-m-d H:i:s')
+        );
+        
+        // Log untuk debugging
+        log_message('debug', 'Data UpdateIsuKLHS: ' . print_r($data, true));
+        
+        // Update database - gunakan nama tabel 'isuklhs'
+        $this->db->where('Id', $id);
+        $this->db->where('KodeWilayah', $kodeWilayah);
+        $this->db->update('isuklhs', $data);
+        
+        if ($this->db->affected_rows() > 0) {
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Data berhasil diupdate!'
+            ]);
+        } else {
+            // Cek apakah ada perubahan atau error
+            $error = $this->db->error();
+            if ($error['code'] == 0) {
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Tidak ada perubahan data'
+                ]);
+            } else {
+                log_message('error', 'DB Error UpdateIsuKLHS: ' . $error['message']);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Gagal update data: ' . $error['message']
+                ]);
+            }
+        }
+        
+    } catch (Exception $e) {
+        log_message('error', 'Exception UpdateIsuKLHS: ' . $e->getMessage());
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+        ]);
+    }
 }
 
+/**
+ * DELETE ISU KLHS (Soft Delete)
+ */
 public function DeleteIsuKLHS() {
-    $data = array(
-        'deleted_at' => date('Y-m-d H:i:s')
-    );
+    // Aktifkan error reporting untuk debugging
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
     
-    $this->db->where('Id', $this->input->post('Id'));
-    $this->db->update('IsuKLHS', $data);
-    echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
+    // Cek AJAX request
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    try {
+        // Ambil KodeWilayah dari session
+        $kodeWilayah = $this->session->userdata('KodeWilayah') 
+                    ?? $this->session->userdata('TempKodeWilayah');
+        
+        if (empty($kodeWilayah)) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Wilayah belum dipilih!'
+            ]);
+            return;
+        }
+        
+        // Ambil ID dari POST
+        $id = (int)$this->input->post('Id', TRUE);
+        
+        if ($id <= 0) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'ID tidak valid!'
+            ]);
+            return;
+        }
+        
+        // Cek apakah data ada - gunakan nama tabel 'isuklhs'
+        $existing = $this->db
+            ->where('Id', $id)
+            ->where('KodeWilayah', $kodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->get('isuklhs')
+            ->row_array();
+        
+        if (!$existing) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Data tidak ditemukan!'
+            ]);
+            return;
+        }
+        
+        // Soft delete - gunakan nama tabel 'isuklhs'
+        $data = array(
+            'deleted_at' => date('Y-m-d H:i:s')
+        );
+        
+        $this->db->where('Id', $id);
+        $this->db->where('KodeWilayah', $kodeWilayah);
+        $this->db->update('isuklhs', $data);
+        
+        if ($this->db->affected_rows() > 0) {
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Data berhasil dihapus!'
+            ]);
+        } else {
+            $error = $this->db->error();
+            log_message('error', 'DB Error DeleteIsuKLHS: ' . $error['message']);
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Gagal hapus data: ' . $error['message']
+            ]);
+        }
+        
+    } catch (Exception $e) {
+        log_message('error', 'Exception DeleteIsuKLHS: ' . $e->getMessage());
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+        ]);
+    }
+}
+
+/**
+ * GET PERIODE ISU KLHS NASIONAL
+ */
+public function GetPeriodeIsuKLHSNasional() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $id = (int)$this->input->post('Id', TRUE);
+    
+    if ($id <= 0) {
+        echo json_encode([]);
+        return;
+    }
+    
+    // Ambil data periode dari isu_klhs berdasarkan ID
+    $query = $this->db->query("
+        SELECT k.* 
+        FROM isu_klhs ik
+        JOIN kementerian k ON k.Id = ik.IdKementerian
+        WHERE ik.Id = ?
+        AND ik.deleted_at IS NULL
+        AND k.deleted_at IS NULL
+    ", array($id));
+    
+    $result = $query->result_array();
+    
+    // Jika tidak ditemukan, coba ambil dari kementerian berdasarkan IdKementerian
+    if (empty($result)) {
+        $query2 = $this->db->query("
+            SELECT k.* 
+            FROM kementerian k
+            JOIN isu_klhs ik ON ik.IdKementerian = k.Id
+            WHERE ik.Id = ?
+            AND ik.deleted_at IS NULL
+            AND k.deleted_at IS NULL
+        ", array($id));
+        $result = $query2->result_array();
+    }
+    
+    echo json_encode($result);
+}
+
+/**
+ * GET KEMENTERIAN ISU
+ */
+public function GetKementerianIsu() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $tahunMulai = $this->input->post('TahunMulai', TRUE);
+    
+    if (empty($tahunMulai) || !is_numeric($tahunMulai)) {
+        echo json_encode([]);
+        return;
+    }
+    
+    $query = $this->db->query("
+        SELECT * 
+        FROM kementerian 
+        WHERE TahunMulai = ? 
+        AND deleted_at IS NULL
+        ORDER BY NamaKementerian ASC
+    ", array($tahunMulai));
+    
+    echo json_encode($query->result_array());
+}
+
+/**
+ * GET ISU KLHS NASIONAL
+ */
+public function GetIsuKLHSNasional() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $idKementerian = (int)$this->input->post('Id', TRUE);
+    
+    if ($idKementerian <= 0) {
+        echo json_encode([]);
+        return;
+    }
+    
+    $query = $this->db->query("
+        SELECT * 
+        FROM isu_klhs 
+        WHERE IdKementerian = ? 
+        AND deleted_at IS NULL
+        ORDER BY NamaIsuKLHS ASC
+    ", array($idKementerian));
+    
+    echo json_encode($query->result_array());
+}
+
+/**
+ * GET DATA ISU KLHS BY ID (untuk edit)
+ */
+public function GetIsuKLHSById() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', TRUE);
+    $kodeWilayah = $this->session->userdata('KodeWilayah') 
+                ?? $this->session->userdata('TempKodeWilayah');
+    
+    if ($id <= 0 || empty($kodeWilayah)) {
+        echo json_encode([]);
+        return;
+    }
+    
+    $data = $this->db
+        ->where('Id', $id)
+        ->where('KodeWilayah', $kodeWilayah)
+        ->where('deleted_at IS NULL')
+        ->get('isuklhs')
+        ->row_array();
+    
+    if ($data) {
+        // Parse _Id menjadi array
+        $data['_Id_array'] = !empty($data['_Id']) ? explode('$', $data['_Id']) : [];
+        
+        // Ambil informasi periode dan kementerian dari isu pertama
+        if (!empty($data['_Id_array'])) {
+            $firstIsuId = $data['_Id_array'][0];
+            
+            // Cari periode dan kementerian
+            $isuInfo = $this->db->query("
+                SELECT ik.IdKementerian, k.TahunMulai, k.TahunAkhir
+                FROM isu_klhs ik
+                JOIN kementerian k ON k.Id = ik.IdKementerian
+                WHERE ik.Id = ?
+                AND ik.deleted_at IS NULL
+                AND k.deleted_at IS NULL
+            ", array($firstIsuId))->row_array();
+            
+            if ($isuInfo) {
+                $data['periode_nasional'] = $isuInfo['TahunMulai'];
+                $data['kementerian_id'] = $isuInfo['IdKementerian'];
+            }
+        }
+    }
+    
+    echo json_encode($data);
 }
 
 public function GetKementerianStrategis(){

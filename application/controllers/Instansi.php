@@ -1371,154 +1371,219 @@ public function HapusSasaranPD() {
 }
 
   // =====================================================
-    // TUJUAN SASARAN PD (NSPK)
-    // =====================================================
+// TUJUAN SASARAN PD (NSPK)
+// =====================================================
 
-    /**
-     * Halaman Tujuan Sasaran PD
-     */
-    public function TujuanSasaranPD() {
-        $Header['Halaman'] = 'NSPK, Tujuan & Sasaran PD';
-        
-        $KodeWilayah = $this->get_kode_wilayah();
-        $instansi_id = $this->get_instansi_id();
-        $is_logged_in = $this->is_logged_in();
-        $is_role_4 = $this->is_role_4();
-        $filter_instansi_id = $this->input->get('instansi_id', TRUE);
-        
-        $data['KodeWilayah'] = $KodeWilayah;
-        $data['InstansiId'] = $instansi_id;
-        $data['IsLoggedIn'] = $is_logged_in;
-        $data['IsRole4'] = $is_role_4;
-        $data['FilterInstansiId'] = $filter_instansi_id;
-        $data['NamaInstansi'] = isset($_SESSION['NamaInstansi']) ? $_SESSION['NamaInstansi'] : '';
-        
-        // Ambil nama wilayah
-        $data['NamaWilayah'] = '';
-        if ($KodeWilayah) {
-            $wilayah = $this->db->select('Nama')->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-            $data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
-        }
-        
-        // Data provinsi untuk dropdown filter
-        $data['Provinsi'] = $this->db->where("Kode LIKE '__'")
-                                     ->order_by('Nama')
-                                     ->get('kodewilayah')
-                                     ->result_array();
-        
-        // Daftar instansi untuk filter
-        $data['ListInstansi'] = [];
-        if (!$is_role_4 && $KodeWilayah) {
-            $data['ListInstansi'] = $this->db->select('id, nama')
-                ->from('akun_instansi')
-                ->where('kodewilayah', $KodeWilayah)
-                ->where('Level', 4)
-                ->where('deleted_at IS NULL')
-                ->order_by('nama', 'ASC')
-                ->get()
-                ->result_array();
-        }
-        
-        // Data NSPK
-        $data['ListNSPK'] = $this->db->where('deleted_at IS NULL')
-                                     ->order_by('jenis_nspk', 'ASC')
-                                     ->order_by('judul_nspk', 'ASC')
-                                     ->get('nspk')
-                                     ->result_array();
-        
-        // Data Sasaran RPJMD
-        $data['ListSasaranRPJMD'] = $this->db->select('id, Sasaran')
-            ->order_by('id', 'ASC')
-            ->get('sasaranrpjmd')
-            ->result_array();
-        
-        // Data Tujuan PD (hanya milik instansi sendiri untuk Role 4)
-        $data['ListTujuanPD'] = [];
-        if ($KodeWilayah) {
-            $query = $this->db->select('id, tujuan_pd')
-                ->from('tujuan_pd')
-                ->where('kode_wilayah', $KodeWilayah)
-                ->where('deleted_at IS NULL');
-            
-            if ($is_role_4 && $instansi_id) {
-                $query->where('id_instansi', $instansi_id);
-            } elseif (!empty($filter_instansi_id)) {
-                $query->where('id_instansi', (int)$filter_instansi_id);
-            }
-            
-            $data['ListTujuanPD'] = $query->order_by('id', 'ASC')->get()->result_array();
-        }
-        
-        // Data Sasaran PD (hanya milik instansi sendiri untuk Role 4)
-        $data['ListSasaranPD'] = [];
-        if ($KodeWilayah) {
-            $query = $this->db->select('id, sasaran_pd')
-                ->from('sasaran_pd')
-                ->where('kode_wilayah', $KodeWilayah)
-                ->where('deleted_at IS NULL');
-            
-            if ($is_role_4 && $instansi_id) {
-                $query->where('id_instansi', $instansi_id);
-            } elseif (!empty($filter_instansi_id)) {
-                $query->where('id_instansi', (int)$filter_instansi_id);
-            }
-            
-            $data['ListSasaranPD'] = $query->order_by('id', 'ASC')->get()->result_array();
-        }
-        
-        // Ambil data master dengan filter instansi
-        $data['TujuanSasaranPD'] = [];
-        
-        if ($KodeWilayah) {
-            $master_query = $this->db->select('m.*, sr.Sasaran AS sasaran_relevan_text, tp.tujuan_pd AS tujuan_text')
-                ->from('tujuansasaran_pd_master m')
-                ->join('sasaranrpjmd sr', 'sr.id = m.sasaran_relevan_id', 'left')
-                ->join('tujuan_pd tp', 'tp.id = m.tujuan_id', 'left')
-                ->where('m.KodeWilayah', $KodeWilayah)
-                ->where('m.deleted_at IS NULL');
-            
-            if ($is_role_4 && $instansi_id) {
-                $master_query->where('m.id_instansi', $instansi_id);
-            } elseif (!empty($filter_instansi_id)) {
-                $master_query->where('m.id_instansi', (int)$filter_instansi_id);
-            }
-            
-            $masters = $master_query->order_by('m.id', 'ASC')->get()->result_array();
-            
-            foreach ($masters as &$m) {
-                // Proses NSPK
-                $norma_ids = !empty($m['nspk_norma_id']) ? explode('|||', $m['nspk_norma_id']) : [];
-                $standar_ids = !empty($m['nspk_standar_id']) ? explode('|||', $m['nspk_standar_id']) : [];
-                $prosedur_ids = !empty($m['nspk_prosedur_id']) ? explode('|||', $m['nspk_prosedur_id']) : [];
-                $kriteria_ids = !empty($m['nspk_kriteria_id']) ? explode('|||', $m['nspk_kriteria_id']) : [];
-                
-                $m['norma_list'] = !empty($norma_ids) ? $this->db->where_in('id', $norma_ids)->get('nspk')->result_array() : [];
-                $m['standar_list'] = !empty($standar_ids) ? $this->db->where_in('id', $standar_ids)->get('nspk')->result_array() : [];
-                $m['prosedur_list'] = !empty($prosedur_ids) ? $this->db->where_in('id', $prosedur_ids)->get('nspk')->result_array() : [];
-                $m['kriteria_list'] = !empty($kriteria_ids) ? $this->db->where_in('id', $kriteria_ids)->get('nspk')->result_array() : [];
-                
-                // Ambil detail
-                $detail_query = $this->db->select('d.*, sp.sasaran_pd AS sasaran_text')
-                    ->from('tujuansasaran_pd_detail d')
-                    ->join('sasaran_pd sp', 'sp.id = d.sasaran_id', 'left')
-                    ->where('d.master_id', $m['id'])
-                    ->where('d.deleted_at IS NULL');
-                
-                if ($is_role_4 && $instansi_id) {
-                    $detail_query->where('d.id_instansi', $instansi_id);
-                } elseif (!empty($filter_instansi_id)) {
-                    $detail_query->where('d.id_instansi', (int)$filter_instansi_id);
-                }
-                
-                $m['details'] = $detail_query->order_by('d.id', 'ASC')->get()->result_array();
-            }
-            
-            $data['TujuanSasaranPD'] = $masters;
-        }
-        
-        $this->load->view('Daerah/header', $Header);
-        $this->load->view('Daerah/TujuanSasaranPD', $data);
+/**
+ * Halaman Tujuan Sasaran PD
+ */
+public function TujuanSasaranPD() {
+    $Header['Halaman'] = 'NSPK, Tujuan & Sasaran PD';
+    
+    $KodeWilayah = $this->get_kode_wilayah();
+    $instansi_id = $this->get_instansi_id();
+    $is_logged_in = $this->is_logged_in();
+    $is_role_4 = $this->is_role_4();
+    $filter_instansi_id = $this->input->get('instansi_id', TRUE);
+    
+    $data['KodeWilayah'] = $KodeWilayah;
+    $data['InstansiId'] = $instansi_id;
+    $data['IsLoggedIn'] = $is_logged_in;
+    $data['IsRole4'] = $is_role_4;
+    $data['FilterInstansiId'] = $filter_instansi_id;
+    $data['NamaInstansi'] = isset($_SESSION['NamaInstansi']) ? $_SESSION['NamaInstansi'] : '';
+    
+    // Ambil nama wilayah
+    $data['NamaWilayah'] = '';
+    if ($KodeWilayah) {
+        $wilayah = $this->db->select('Nama')->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+        $data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
     }
+    
+    // Data provinsi untuk dropdown filter
+    $data['Provinsi'] = $this->db->where("Kode LIKE '__'")
+                                 ->order_by('Nama')
+                                 ->get('kodewilayah')
+                                 ->result_array();
+    
+    // Daftar instansi untuk filter
+    $data['ListInstansi'] = [];
+    if (!$is_role_4 && $KodeWilayah) {
+        $data['ListInstansi'] = $this->db->select('id, nama')
+            ->from('akun_instansi')
+            ->where('kodewilayah', $KodeWilayah)
+            ->where('Level', 4)
+            ->where('deleted_at IS NULL')
+            ->order_by('nama', 'ASC')
+            ->get()
+            ->result_array();
+    }
+    
+    // ===================== DATA NSPK =====================
+    // Data NSPK dengan JOIN ke nspk_detail untuk mendapatkan jenis
+    // TANPA filter deleted_at
+    $data['ListNSPK'] = [
+        'Norma' => [],
+        'Standar' => [],
+        'Prosedur' => [],
+        'Kriteria' => []
+    ];
+    
+    // Query NSPK tanpa deleted_at
+    $nspkData = $this->db->select('nspk.*, nd.jenis, nd.isi, nd.urutan')
+        ->from('nspk')
+        ->join('nspk_detail nd', 'nd.nspk_id = nspk.id', 'left')
+        ->order_by('nd.jenis', 'ASC')
+        ->order_by('nspk.judul_nspk', 'ASC')
+        ->get()
+        ->result_array();
+    
+    // Kelompokkan berdasarkan jenis dari nspk_detail
+    foreach ($nspkData as $row) {
+        $jenis = $row['jenis'] ?? 'Lainnya';
+        if (!isset($data['ListNSPK'][$jenis])) {
+            $data['ListNSPK'][$jenis] = [];
+        }
+        $data['ListNSPK'][$jenis][] = $row;
+    }
+    // ===================== END DATA NSPK =====================
+    
+    // Data Sasaran RPJMD
+    $data['ListSasaranRPJMD'] = $this->db->select('id, Sasaran')
+        ->order_by('id', 'ASC')
+        ->get('sasaranrpjmd')
+        ->result_array();
+    
+    // Data Tujuan PD (hanya milik instansi sendiri untuk Role 4)
+    $data['ListTujuanPD'] = [];
+    if ($KodeWilayah) {
+        $query = $this->db->select('id, tujuan_pd')
+            ->from('tujuan_pd')
+            ->where('kode_wilayah', $KodeWilayah)
+            ->where('deleted_at IS NULL');
+        
+        if ($is_role_4 && $instansi_id) {
+            $query->where('id_instansi', $instansi_id);
+        } elseif (!empty($filter_instansi_id)) {
+            $query->where('id_instansi', (int)$filter_instansi_id);
+        }
+        
+        $data['ListTujuanPD'] = $query->order_by('id', 'ASC')->get()->result_array();
+    }
+    
+    // Data Sasaran PD (hanya milik instansi sendiri untuk Role 4)
+    $data['ListSasaranPD'] = [];
+    if ($KodeWilayah) {
+        $query = $this->db->select('id, sasaran_pd')
+            ->from('sasaran_pd')
+            ->where('kode_wilayah', $KodeWilayah)
+            ->where('deleted_at IS NULL');
+        
+        if ($is_role_4 && $instansi_id) {
+            $query->where('id_instansi', $instansi_id);
+        } elseif (!empty($filter_instansi_id)) {
+            $query->where('id_instansi', (int)$filter_instansi_id);
+        }
+        
+        $data['ListSasaranPD'] = $query->order_by('id', 'ASC')->get()->result_array();
+    }
+    
+    // ========== AMBIL DATA MASTER ==========
+    $data['TujuanSasaranPD'] = [];
+    
+    if ($KodeWilayah) {
+        $master_query = $this->db->select('m.*, sr.Sasaran AS sasaran_relevan_text, tp.tujuan_pd AS tujuan_text')
+            ->from('tujuansasaran_pd_master m')
+            ->join('sasaranrpjmd sr', 'sr.id = m.sasaran_relevan_id', 'left')
+            ->join('tujuan_pd tp', 'tp.id = m.tujuan_id', 'left')
+            ->where('m.KodeWilayah', $KodeWilayah)
+            ->where('m.deleted_at IS NULL');
+        
+        if ($is_role_4 && $instansi_id) {
+            $master_query->where('m.id_instansi', $instansi_id);
+        } elseif (!empty($filter_instansi_id)) {
+            $master_query->where('m.id_instansi', (int)$filter_instansi_id);
+        }
+        
+        $masters = $master_query->order_by('m.id', 'ASC')->get()->result_array();
+        
+        foreach ($masters as &$m) {
+            // Proses NSPK - TANPA filter deleted_at
+            $norma_ids = !empty($m['nspk_norma_id']) ? explode('|||', $m['nspk_norma_id']) : [];
+            $standar_ids = !empty($m['nspk_standar_id']) ? explode('|||', $m['nspk_standar_id']) : [];
+            $prosedur_ids = !empty($m['nspk_prosedur_id']) ? explode('|||', $m['nspk_prosedur_id']) : [];
+            $kriteria_ids = !empty($m['nspk_kriteria_id']) ? explode('|||', $m['nspk_kriteria_id']) : [];
+            
+            // Ambil data Norma - TANPA deleted_at
+            $m['norma_list'] = [];
+            if (!empty($norma_ids)) {
+                $m['norma_list'] = $this->db->select('nspk.*, nd.jenis, nd.isi')
+                    ->from('nspk')
+                    ->join('nspk_detail nd', 'nd.nspk_id = nspk.id', 'left')
+                    ->where_in('nspk.id', $norma_ids)
+                    ->where('nd.jenis', 'Norma')
+                    ->get()
+                    ->result_array();
+            }
+            
+            // Ambil data Standar - TANPA deleted_at
+            $m['standar_list'] = [];
+            if (!empty($standar_ids)) {
+                $m['standar_list'] = $this->db->select('nspk.*, nd.jenis, nd.isi')
+                    ->from('nspk')
+                    ->join('nspk_detail nd', 'nd.nspk_id = nspk.id', 'left')
+                    ->where_in('nspk.id', $standar_ids)
+                    ->where('nd.jenis', 'Standar')
+                    ->get()
+                    ->result_array();
+            }
+            
+            // Ambil data Prosedur - TANPA deleted_at
+            $m['prosedur_list'] = [];
+            if (!empty($prosedur_ids)) {
+                $m['prosedur_list'] = $this->db->select('nspk.*, nd.jenis, nd.isi')
+                    ->from('nspk')
+                    ->join('nspk_detail nd', 'nd.nspk_id = nspk.id', 'left')
+                    ->where_in('nspk.id', $prosedur_ids)
+                    ->where('nd.jenis', 'Prosedur')
+                    ->get()
+                    ->result_array();
+            }
+            
+            // Ambil data Kriteria - TANPA deleted_at
+            $m['kriteria_list'] = [];
+            if (!empty($kriteria_ids)) {
+                $m['kriteria_list'] = $this->db->select('nspk.*, nd.jenis, nd.isi')
+                    ->from('nspk')
+                    ->join('nspk_detail nd', 'nd.nspk_id = nspk.id', 'left')
+                    ->where_in('nspk.id', $kriteria_ids)
+                    ->where('nd.jenis', 'Kriteria')
+                    ->get()
+                    ->result_array();
+            }
+            
+            // Ambil detail
+            $detail_query = $this->db->select('d.*, sp.sasaran_pd AS sasaran_text')
+                ->from('tujuansasaran_pd_detail d')
+                ->join('sasaran_pd sp', 'sp.id = d.sasaran_id', 'left')
+                ->where('d.master_id', $m['id'])
+                ->where('d.deleted_at IS NULL');
+            
+            if ($is_role_4 && $instansi_id) {
+                $detail_query->where('d.id_instansi', $instansi_id);
+            } elseif (!empty($filter_instansi_id)) {
+                $detail_query->where('d.id_instansi', (int)$filter_instansi_id);
+            }
+            
+            $m['details'] = $detail_query->order_by('d.id', 'ASC')->get()->result_array();
+        }
+        
+        $data['TujuanSasaranPD'] = $masters;
+    }
+    
+    $this->load->view('Daerah/header', $Header);
+    $this->load->view('Daerah/TujuanSasaranPD', $data);
+}
 
     /**
      * Input Master Tujuan Sasaran PD (AJAX) - HANYA UNTUK ROLE 4
@@ -7162,56 +7227,37 @@ private function buildTreeDataPD($ultimate, $intermediate, $immediate, $output)
     return $tree_data;
 }
 
-// =====================================================
-    // RENJA PERANGKAT DAERAH
+    // =====================================================
+    // RENJA PERANGKAT DAERAH (DENGAN DROPDOWN NOMENKLATUR)
     // =====================================================
 
     /**
-     * Halaman Renja PD
+     * Halaman Renja PD (Header + Detail)
      */
-    /**
- * Halaman Renja PD
- * Support filter untuk user belum login (session TempInstansiId)
- */
-public function RenjaPD() {
+    public function RenjaPD() {
     $Header['Halaman'] = 'Renja Perangkat Daerah';
     
     // ==============================
-    // 1. AMBIL DATA DARI SESSION & PARAMETER
+    // 1. AMBIL DATA DARI SESSION
     // ==============================
     $KodeWilayah = $this->get_kode_wilayah();
     $instansi_id = $this->get_instansi_id();
     $is_logged_in = $this->is_logged_in();
     $is_role_4 = $this->is_role_4();
-    
-    // ✅ Untuk user BELUM login, ambil dari session TempInstansiId
-    $temp_instansi_id = null;
-    if (!$is_logged_in && isset($_SESSION['TempInstansiId']) && !empty($_SESSION['TempInstansiId'])) {
-        $temp_instansi_id = $_SESSION['TempInstansiId'];
-    }
-    
-    // ✅ Prioritaskan: URL parameter > session > null
     $filter_instansi_id = $this->input->get('instansi_id', TRUE);
-    if (empty($filter_instansi_id) && !empty($temp_instansi_id)) {
-        $filter_instansi_id = $temp_instansi_id;
-    }
     
-    // ==============================
-    // 2. DATA DASAR UNTUK VIEW
-    // ==============================
+    $tahun = $this->input->get('tahun', TRUE) ?: date('Y');
+    
     $data['KodeWilayah'] = $KodeWilayah;
     $data['InstansiId'] = $instansi_id;
     $data['IsLoggedIn'] = $is_logged_in;
     $data['IsRole4'] = $is_role_4;
     $data['FilterInstansiId'] = $filter_instansi_id;
     $data['NamaInstansi'] = isset($_SESSION['NamaInstansi']) ? $_SESSION['NamaInstansi'] : '';
-    $data['TempInstansiId'] = $temp_instansi_id; // Kirim ke view untuk keperluan JS
-    
-    $tahun = $this->input->get('tahun', TRUE) ?: date('Y');
     $data['TahunAktif'] = $tahun;
     
     // ==============================
-    // 3. AMBIL NAMA WILAYAH
+    // 2. AMBIL NAMA WILAYAH
     // ==============================
     $data['NamaWilayah'] = '';
     if ($KodeWilayah) {
@@ -7220,7 +7266,7 @@ public function RenjaPD() {
     }
     
     // ==============================
-    // 4. DATA PROVINSI UNTUK DROPDOWN FILTER
+    // 3. DATA PROVINSI UNTUK DROPDOWN
     // ==============================
     $data['Provinsi'] = $this->db->where("Kode LIKE '__'")
                                  ->order_by('Nama')
@@ -7228,10 +7274,10 @@ public function RenjaPD() {
                                  ->result_array();
     
     // ==============================
-    // 5. DAFTAR INSTANSI UNTUK FILTER (NON ROLE 4)
+    // 4. DAFTAR INSTANSI UNTUK FILTER
     // ==============================
     $data['ListInstansi'] = [];
-    if ((!$is_role_4 || !$is_logged_in) && $KodeWilayah) {
+    if (!$is_role_4 && $KodeWilayah) {
         $data['ListInstansi'] = $this->db->select('id, nama')
             ->from('akun_instansi')
             ->where('kodewilayah', $KodeWilayah)
@@ -7243,170 +7289,76 @@ public function RenjaPD() {
     }
     
     // ==============================
-    // 6. DATA DAFTAR DINAS (LEVEL 2) UNTUK DROPDOWN BIDANG
+    // 5. DATA NOMENKLATUR UNTUK DROPDOWN
+    // 🔧 PERBAIKAN: Hapus filter deleted_at
     // ==============================
-    $data['ListDinas'] = [];
-    if ($KodeWilayah) {
-        $data['ListDinas'] = $this->db->select('id, nama')
-            ->from('akun_instansi')
-            ->where('kodewilayah', $KodeWilayah)
-            ->where('Level', 2)
-            ->where('deleted_at IS NULL')
-            ->order_by('nama', 'ASC')
-            ->get()
-            ->result_array();
-    }
-    
-    // ==============================
-    // 7. DATA KARYAWAN UNTUK DROPDOWN PENGAMPU (LEVEL 4)
-    // ==============================
-    $data['ListKaryawan'] = [];
-    if ($KodeWilayah) {
-        $karyawan_raw = $this->db->select('id, nama, nip, jabatan, dinas_id')
-            ->from('akun_karyawan')
-            ->where('kodewilayah', $KodeWilayah)
-            ->where('Level', 4)
-            ->where('deleted_at IS NULL')
-            ->order_by('nama', 'ASC')
-            ->get()
-            ->result_array();
-        
-        foreach ($karyawan_raw as &$k) {
-            $k['dinas_id_array'] = !empty($k['dinas_id']) ? explode(',', $k['dinas_id']) : [];
-            foreach ($k['dinas_id_array'] as &$id) {
-                $id = trim($id);
-            }
-        }
-        $data['ListKaryawan'] = $karyawan_raw;
-    }
-    
-    // ==============================
-    // 8. DATA NOMENKLATUR URUSAN UNTUK DROPDOWN
-    // ==============================
-    $data['ListUrusan'] = $this->db->select('Kode, Nomenklatur')
+    $data['NomenklaturData'] = $this->db
+        ->select('Kode, Nomenklatur')
         ->from('nomenklaturprovinsi')
-        ->where('Kode NOT LIKE', '%.%')
-        ->where('LENGTH(Kode) = 1')
+        // ⚠️ HAPUS BARIS INI: ->where('deleted_at IS NULL')
         ->order_by('Kode', 'ASC')
         ->get()
         ->result_array();
     
     // ==============================
-    // 9. AMBIL DATA RENJA
+    // 6. AMBIL DATA RENJA
     // ==============================
     $data['RenjaData'] = [];
     
     if ($KodeWilayah) {
-        $query = $this->db->select('r.*, 
-                    k.nama as karyawan_nama, 
-                    k.nip as karyawan_nip, 
-                    k.jabatan as karyawan_jabatan,
-                    u.nama as instansi_nama,
-                    d.nama as dinas_nama')
-            ->from('renja_pd r')
-            ->join('akun_karyawan k', 'k.id = r.pengampu_id', 'left')
-            ->join('akun_instansi u', 'u.id = r.id_instansi', 'left')
-            ->join('akun_instansi d', 'd.id = r.dinas_id', 'left')
-            ->where('r.kode_wilayah', $KodeWilayah)
-            ->where('r.tahun', $tahun)
-            ->where('r.deleted_at IS NULL');
+        // Ambil Header
+        $query_header = $this->db->select('h.*, a.nama as instansi_nama')
+            ->from('renja_pd_header h')
+            ->join('akun_instansi a', 'a.id = h.id_instansi', 'left')
+            ->where('h.kode_wilayah', $KodeWilayah)
+            ->where('h.tahun', $tahun)
+            ->where('h.deleted_at IS NULL');
         
-        // ✅ Filter berdasarkan role (dengan dukungan temp_instansi_id untuk user belum login)
         if ($is_role_4 && $instansi_id) {
-            // Role 4: Hanya data instansi sendiri
-            $query->where('r.id_instansi', $instansi_id);
+            $query_header->where('h.id_instansi', $instansi_id);
         } elseif (!empty($filter_instansi_id)) {
-            // Filter manual dari URL atau session
-            $query->where('r.id_instansi', (int)$filter_instansi_id);
+            $query_header->where('h.id_instansi', (int)$filter_instansi_id);
         }
         
-        $data['RenjaData'] = $query->order_by('r.id', 'ASC')->get()->result_array();
+        $headers = $query_header->order_by('h.id', 'ASC')->get()->result_array();
+        
+        // Ambil Detail untuk setiap header
+        foreach ($headers as &$header) {
+            $details = $this->db->select('*')
+                ->from('renja_pd_detail')
+                ->where('header_id', $header['id'])
+                ->where('deleted_at IS NULL')
+                ->order_by('urutan', 'ASC')
+                ->order_by('id', 'ASC')
+                ->get()
+                ->result_array();
+            
+            $header['details'] = $details;
+            $header['detail_count'] = count($details);
+        }
+        
+        $data['RenjaData'] = $headers;
     }
     
     // ==============================
-    // 10. LOAD VIEW
+    // 7. LOAD VIEW
     // ==============================
     $this->load->view('Daerah/header', $Header);
     $this->load->view('Daerah/RenjaPD', $data);
 }
 
-    /**
-     * Get Nomenklatur Berdasarkan Level dan Parent (AJAX)
-     * level: 1=Urusan, 2=Bidang Urusan, 3=Program, 4=Kegiatan, 5=Sub Kegiatan
-     */
-    public function getNomenklaturByLevelAndParent() {
-        if (!$this->input->is_ajax_request()) {
-            show_404();
-            return;
-        }
-        
-        $level = (int)$this->input->post('level');
-        $parent_kode = $this->input->post('parent_kode');
-        
-        if ($level < 1 || $level > 5) {
-            echo json_encode([]);
-            return;
-        }
-        
-        $this->db->select('Kode, Nomenklatur');
-        $this->db->from('nomenklaturprovinsi');
-        
-        if ($level == 1) {
-            // Urusan: 0 titik, panjang 1
-            $this->db->where('Kode NOT LIKE', '%.%');
-            $this->db->where('LENGTH(Kode) = 1');
-        } elseif ($level == 2) {
-            // Bidang Urusan: 1 titik
-            $this->db->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 1);
-            if ($parent_kode) {
-                $this->db->where('Kode LIKE', $parent_kode . '.%');
-                // Tidak pakai filter LENGTH agar lebih fleksibel
-            }
-        } elseif ($level == 3) {
-            // Program: 2 titik
-            $this->db->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 2);
-            if ($parent_kode) {
-                $this->db->where('Kode LIKE', $parent_kode . '.%');
-            }
-        } elseif ($level == 4) {
-            // Kegiatan: 4 titik
-            $this->db->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 4);
-            if ($parent_kode) {
-                $this->db->where('Kode LIKE', $parent_kode . '.%');
-            }
-        } elseif ($level == 5) {
-            // Sub Kegiatan: 5 titik
-            $this->db->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 5);
-            if ($parent_kode) {
-                $this->db->where('Kode LIKE', $parent_kode . '.%');
-            }
-        }
-        
-        $this->db->order_by('Kode', 'ASC');
-        $data = $this->db->get()->result_array();
-        
-        echo json_encode($data);
-    }
-
-    /**
-     * Generate Kode Rekening dari kode nomenklatur (sesuai aslinya)
-     */
-    private function generateKodeRekening($kode_nomenklatur, $level) {
-        // Langsung return kode nomenklatur asli tanpa modifikasi
-        return $kode_nomenklatur;
-    }
-
-    /**
- * Simpan Renja PD (AJAX) - HANYA UNTUK ROLE 4
+/**
+ * TAMBAH Header Renja PD (AJAX) - HANYA UNTUK ROLE 4
+ * URL: Instansi/tambahRenjaHeader
  */
-public function simpanRenjaPD() {
+public function tambahRenjaHeader() {
     if (!$this->input->is_ajax_request()) {
         show_404();
         return;
     }
     
     if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menambah/mengedit data.']);
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menambah data.']);
         return;
     }
     
@@ -7423,17 +7375,11 @@ public function simpanRenjaPD() {
         return;
     }
     
-    $id = (int)$this->input->post('id', TRUE);
-    $tahun = (int)$this->input->post('tahun', TRUE);
+    $tahun = (int)$this->input->post('tahun', TRUE) ?: date('Y');
+    
+    // Ambil data dari dropdown nomenklatur
     $mode_nomenklatur = (int)$this->input->post('mode_nomenklatur', TRUE);
     
-    // Format Rupiah helper
-    $formatRp = function($val) {
-        if (empty($val)) return null;
-        return str_replace(['Rp', ' ', '.', ','], '', $val);
-    };
-    
-    // Data nomenklatur
     $kode_rekening = '';
     $tujuan = '';
     $sasaran = '';
@@ -7449,7 +7395,7 @@ public function simpanRenjaPD() {
         $kegiatan_kode = trim($this->input->post('kegiatan_kode', TRUE));
         $sub_kegiatan_kode = trim($this->input->post('sub_kegiatan_kode', TRUE));
         
-        // Ambil nama dari kode untuk disimpan di field teks
+        // Ambil nama dari kode
         if ($urusan_kode) {
             $urusan = $this->db->select('Nomenklatur')->from('nomenklaturprovinsi')->where('Kode', $urusan_kode)->get()->row_array();
             $tujuan = $urusan ? $urusan['Nomenklatur'] : '';
@@ -7471,7 +7417,7 @@ public function simpanRenjaPD() {
             $sub_kegiatan = $sub ? $sub['Nomenklatur'] : '';
         }
         
-        // Generate kode rekening berdasarkan level terendah yang dipilih
+        // Generate kode rekening
         if ($sub_kegiatan_kode) {
             $kode_rekening = $sub_kegiatan_kode;
         } elseif ($kegiatan_kode) {
@@ -7484,9 +7430,8 @@ public function simpanRenjaPD() {
             $kode_rekening = $urusan_kode;
         }
         
-        // VALIDASI: HANYA WAJIB ADA SATU NOMENKLATUR YANG DIPILIH
         if (empty($urusan_kode) && empty($bidang_kode) && empty($program_kode) && empty($kegiatan_kode) && empty($sub_kegiatan_kode)) {
-            echo json_encode(['status' => 'error', 'message' => 'Silakan pilih minimal Urusan, Bidang Urusan, Program, Kegiatan, atau Sub Kegiatan!']);
+            echo json_encode(['status' => 'error', 'message' => 'Silakan pilih minimal satu level nomenklatur!']);
             return;
         }
     } else {
@@ -7498,91 +7443,226 @@ public function simpanRenjaPD() {
         $kegiatan = trim($this->input->post('kegiatan_manual', TRUE));
         $sub_kegiatan = trim($this->input->post('sub_kegiatan_manual', TRUE));
         
-        // VALIDASI: HANYA WAJIB ADA SATU FIELD YANG DIISI
-        if (empty($tujuan) && empty($sasaran) && empty($program) && empty($kegiatan) && empty($sub_kegiatan)) {
-            echo json_encode(['status' => 'error', 'message' => 'Silakan isi minimal Urusan, Bidang Urusan, Program, Kegiatan, atau Sub Kegiatan!']);
+        if (empty($kode_rekening) && empty($tujuan) && empty($sasaran) && empty($program) && empty($kegiatan) && empty($sub_kegiatan)) {
+            echo json_encode(['status' => 'error', 'message' => 'Silakan isi minimal Kode Rekening atau salah satu field!']);
             return;
         }
     }
     
-    // Field lainnya OPSIONAL - boleh kosong
     $data = [
         'kode_wilayah' => $kode_wilayah,
         'id_instansi' => $instansi_id,
-        'tahun' => $tahun,
-        'kode_rekening' => $kode_rekening,
+        'kode_rekening' => $kode_rekening ?: null,
         'tujuan' => $tujuan,
         'sasaran' => $sasaran,
         'program' => $program,
         'kegiatan' => $kegiatan,
         'sub_kegiatan' => $sub_kegiatan,
-        'indikator_kinerja' => trim($this->input->post('indikator_kinerja', TRUE)) ?: null,
-        'satuan' => trim($this->input->post('satuan', TRUE)) ?: null,
-        'lokasi' => trim($this->input->post('lokasi', TRUE)) ?: null,
-        'prioritas' => trim($this->input->post('prioritas', TRUE)) ?: null,
-        'prioritas_daerah' => trim($this->input->post('prioritas_daerah', TRUE)) ?: null,
-        'prioritas_nasional' => trim($this->input->post('prioritas_nasional', TRUE)) ?: null,
-        'ranwal_kinerja' => trim($this->input->post('ranwal_kinerja', TRUE)) ?: null,
-        'ranwal_rp' => $formatRp($this->input->post('ranwal_rp', TRUE)),
-        'rancangan_kinerja' => trim($this->input->post('rancangan_kinerja', TRUE)) ?: null,
-        'rancangan_rp' => $formatRp($this->input->post('rancangan_rp', TRUE)),
-        'ranhir_kinerja' => trim($this->input->post('ranhir_kinerja', TRUE)) ?: null,
-        'ranhir_rp' => $formatRp($this->input->post('ranhir_rp', TRUE)),
-        'renja_kinerja' => trim($this->input->post('renja_kinerja', TRUE)) ?: null,
-        'renja_rp' => $formatRp($this->input->post('renja_rp', TRUE)),
-        'dpa_murni_kinerja' => trim($this->input->post('dpa_murni_kinerja', TRUE)) ?: null,
-        'dpa_murni_rp' => $formatRp($this->input->post('dpa_murni_rp', TRUE)),
-        'sumber_dana' => trim($this->input->post('sumber_dana', TRUE)) ?: null,
-        'dpa_perubahan_kinerja' => trim($this->input->post('dpa_perubahan_kinerja', TRUE)) ?: null,
-        'dpa_perubahan_rp' => $formatRp($this->input->post('dpa_perubahan_rp', TRUE)),
-        'dinas_id' => (int)$this->input->post('dinas_id', TRUE) ?: null,
-        'pengampu_id' => (int)$this->input->post('pengampu_id', TRUE) ?: null,
-        'bidang_pengampu' => trim($this->input->post('bidang_pengampu', TRUE)) ?: null,
-        'kinerja' => trim($this->input->post('kinerja', TRUE)) ?: null,
-        'target' => trim($this->input->post('target', TRUE)) ?: null,
-        'pagu_anggaran' => $formatRp($this->input->post('pagu_anggaran', TRUE)),
+        'tahun' => $tahun,
+        'created_at' => date('Y-m-d H:i:s'),
         'updated_at' => date('Y-m-d H:i:s')
     ];
     
-    if ($id > 0) {
-        // Update data
-        $existing = $this->db->where('id', $id)
-            ->where('kode_wilayah', $kode_wilayah)
-            ->where('deleted_at IS NULL')
-            ->get('renja_pd')
-            ->row();
-        
-        if (!$existing) {
-            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
-            return;
-        }
-        
-        if ($existing->id_instansi != $instansi_id) {
-            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda hanya dapat mengedit data instansi sendiri.']);
-            return;
-        }
-        
-        $this->db->where('id', $id)->update('renja_pd', $data);
-        $message = 'Data berhasil diperbarui';
+    $result = $this->db->insert('renja_pd_header', $data);
+    $new_id = $this->db->insert_id();
+    
+    if ($result && $new_id) {
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Header berhasil ditambahkan',
+            'data' => ['id' => $new_id]
+        ]);
     } else {
-        // Insert data baru
-        $data['created_at'] = date('Y-m-d H:i:s');
-        $this->db->insert('renja_pd', $data);
-        $message = 'Data berhasil ditambahkan';
+        $error = $this->db->error();
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Gagal menyimpan data: ' . $error['message']
+        ]);
+    }
+    exit;
+}
+
+/**
+ * EDIT Header Renja PD (AJAX) - HANYA UNTUK ROLE 4
+ * URL: Instansi/editRenjaHeader
+ */
+public function editRenjaHeader() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
     }
     
-    if ($this->db->affected_rows() > 0) {
-        echo json_encode(['status' => 'success', 'message' => $message]);
+    if (!$this->can_crud()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat mengedit data.']);
+        return;
+    }
+    
+    $kode_wilayah = $this->get_kode_wilayah();
+    $instansi_id = $this->get_instansi_id();
+    
+    if (!$kode_wilayah) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih']);
+        return;
+    }
+    
+    if (!$instansi_id) {
+        echo json_encode(['status' => 'error', 'message' => 'Data instansi tidak ditemukan!']);
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', TRUE);
+    
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    
+    // 🔧 CEK APAKAH DATA ADA DAN MILIK INSTANSI INI
+    $existing = $this->db->where('id', $id)
+        ->where('deleted_at IS NULL')
+        ->get('renja_pd_header')
+        ->row();
+    
+    if (!$existing) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan atau sudah dihapus!']);
+        return;
+    }
+    
+    if ($existing->id_instansi != $instansi_id) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda hanya dapat mengedit data instansi sendiri.']);
+        return;
+    }
+    
+    $tahun = (int)$this->input->post('tahun', TRUE) ?: date('Y');
+    
+    // Ambil data dari dropdown nomenklatur
+    $mode_nomenklatur = (int)$this->input->post('mode_nomenklatur', TRUE);
+    
+    $kode_rekening = '';
+    $tujuan = '';
+    $sasaran = '';
+    $program = '';
+    $kegiatan = '';
+    $sub_kegiatan = '';
+    
+    if ($mode_nomenklatur == 1) {
+        // Mode pilih dari nomenklatur
+        $urusan_kode = trim($this->input->post('urusan_kode', TRUE));
+        $bidang_kode = trim($this->input->post('bidang_kode', TRUE));
+        $program_kode = trim($this->input->post('program_kode', TRUE));
+        $kegiatan_kode = trim($this->input->post('kegiatan_kode', TRUE));
+        $sub_kegiatan_kode = trim($this->input->post('sub_kegiatan_kode', TRUE));
+        
+        // Ambil nama dari kode
+        if ($urusan_kode) {
+            $urusan = $this->db->select('Nomenklatur')->from('nomenklaturprovinsi')->where('Kode', $urusan_kode)->get()->row_array();
+            $tujuan = $urusan ? $urusan['Nomenklatur'] : '';
+        }
+        if ($bidang_kode) {
+            $bidang = $this->db->select('Nomenklatur')->from('nomenklaturprovinsi')->where('Kode', $bidang_kode)->get()->row_array();
+            $sasaran = $bidang ? $bidang['Nomenklatur'] : '';
+        }
+        if ($program_kode) {
+            $prog = $this->db->select('Nomenklatur')->from('nomenklaturprovinsi')->where('Kode', $program_kode)->get()->row_array();
+            $program = $prog ? $prog['Nomenklatur'] : '';
+        }
+        if ($kegiatan_kode) {
+            $keg = $this->db->select('Nomenklatur')->from('nomenklaturprovinsi')->where('Kode', $kegiatan_kode)->get()->row_array();
+            $kegiatan = $keg ? $keg['Nomenklatur'] : '';
+        }
+        if ($sub_kegiatan_kode) {
+            $sub = $this->db->select('Nomenklatur')->from('nomenklaturprovinsi')->where('Kode', $sub_kegiatan_kode)->get()->row_array();
+            $sub_kegiatan = $sub ? $sub['Nomenklatur'] : '';
+        }
+        
+        // Generate kode rekening
+        if ($sub_kegiatan_kode) {
+            $kode_rekening = $sub_kegiatan_kode;
+        } elseif ($kegiatan_kode) {
+            $kode_rekening = $kegiatan_kode;
+        } elseif ($program_kode) {
+            $kode_rekening = $program_kode;
+        } elseif ($bidang_kode) {
+            $kode_rekening = $bidang_kode;
+        } elseif ($urusan_kode) {
+            $kode_rekening = $urusan_kode;
+        }
+        
+        if (empty($urusan_kode) && empty($bidang_kode) && empty($program_kode) && empty($kegiatan_kode) && empty($sub_kegiatan_kode)) {
+            echo json_encode(['status' => 'error', 'message' => 'Silakan pilih minimal satu level nomenklatur!']);
+            return;
+        }
     } else {
-        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data']);
+        // Mode manual
+        $kode_rekening = trim($this->input->post('kode_rekening', TRUE));
+        $tujuan = trim($this->input->post('tujuan_manual', TRUE));
+        $sasaran = trim($this->input->post('sasaran_manual', TRUE));
+        $program = trim($this->input->post('program_manual', TRUE));
+        $kegiatan = trim($this->input->post('kegiatan_manual', TRUE));
+        $sub_kegiatan = trim($this->input->post('sub_kegiatan_manual', TRUE));
+        
+        if (empty($kode_rekening) && empty($tujuan) && empty($sasaran) && empty($program) && empty($kegiatan) && empty($sub_kegiatan)) {
+            echo json_encode(['status' => 'error', 'message' => 'Minimal isi Kode Rekening atau salah satu field!']);
+            return;
+        }
+    }
+    
+    // 🔧 DATA YANG AKAN DIUPDATE - PASTIKAN SEMUA FIELD TERMASUK
+    $data = [
+        'kode_rekening' => $kode_rekening ?: null,
+        'tujuan' => $tujuan,
+        'sasaran' => $sasaran,
+        'program' => $program,
+        'kegiatan' => $kegiatan,
+        'sub_kegiatan' => $sub_kegiatan,
+        'tahun' => $tahun,
+        'updated_at' => date('Y-m-d H:i:s')
+    ];
+    
+    // 🔧 PERBAIKAN: Update hanya berdasarkan ID, tanpa where kode_wilayah
+    $this->db->where('id', $id);
+    $result = $this->db->update('renja_pd_header', $data);
+    
+    // 🔧 CEK HASIL UPDATE
+    if ($result) {
+        $affected = $this->db->affected_rows();
+        if ($affected > 0) {
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Header berhasil diperbarui',
+                'data' => ['id' => $id, 'affected' => $affected]
+            ]);
+        } else {
+            // Cek apakah data benar-benar berubah
+            $check = $this->db->where('id', $id)->get('renja_pd_header')->row_array();
+            if ($check) {
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Tidak ada perubahan data (data sudah sama)',
+                    'data' => ['id' => $id, 'affected' => 0]
+                ]);
+            } else {
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Gagal mengupdate data!'
+                ]);
+            }
+        }
+    } else {
+        // Debug: tampilkan error
+        $error = $this->db->error();
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Gagal update: ' . $error['message']
+        ]);
     }
     exit;
 }
 
     /**
-     * Hapus Renja PD (AJAX) - HANYA UNTUK ROLE 4
+     * Hapus Header Renja PD (AJAX)
      */
-    public function hapusRenjaPD() {
+    public function hapusRenjaHeader() {
         if (!$this->input->is_ajax_request()) {
             show_404();
             return;
@@ -7602,11 +7682,10 @@ public function simpanRenjaPD() {
             return;
         }
         
-        // Validasi kepemilikan data
         $existing = $this->db->where('id', $id)
             ->where('kode_wilayah', $kode_wilayah)
             ->where('deleted_at IS NULL')
-            ->get('renja_pd')
+            ->get('renja_pd_header')
             ->row();
         
         if (!$existing) {
@@ -7619,17 +7698,427 @@ public function simpanRenjaPD() {
             return;
         }
         
-        // Soft delete
-        $this->db->where('id', $id)->update('renja_pd', ['deleted_at' => date('Y-m-d H:i:s')]);
+        $now = date('Y-m-d H:i:s');
+        
+        // Soft delete header
+        $this->db->where('id', $id)->update('renja_pd_header', ['deleted_at' => $now]);
+        
+        // Soft delete semua detail
+        $this->db->where('header_id', $id)->update('renja_pd_detail', ['deleted_at' => $now]);
         
         echo json_encode(['status' => 'success', 'message' => 'Data berhasil dihapus']);
         exit;
     }
 
+/**
+ * Get Header Renja PD by ID (AJAX) - UNTUK EDIT
+ * URL: Instansi/getRenjaHeaderData
+ */
+public function getRenjaHeaderData() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    // Hanya Role 4 yang bisa mengambil data untuk edit
+    if (!$this->can_crud()) {
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Akses ditolak! Hanya Instansi yang dapat mengedit data.'
+        ]);
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', TRUE);
+    $kode_wilayah = $this->get_kode_wilayah();
+    $instansi_id = $this->get_instansi_id();
+    
+    if (!$id || !$kode_wilayah) {
+        echo json_encode(['status' => 'error', 'message' => 'Parameter tidak lengkap']);
+        return;
+    }
+    
+    // 🔧 PERBAIKAN: Hapus where('kode_wilayah') karena sudah dicek via instansi
+    $data = $this->db->select('*')
+        ->from('renja_pd_header')
+        ->where('id', $id)
+        ->where('deleted_at IS NULL')
+        ->get()
+        ->row_array();
+    
+    if ($data) {
+        // Cek kepemilikan
+        if ($data['id_instansi'] != $instansi_id) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Akses ditolak! Data bukan milik instansi Anda.'
+            ]);
+            return;
+        }
+        
+        echo json_encode([
+            'status' => 'success',
+            'data' => $data
+        ]);
+    } else {
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Data tidak ditemukan'
+        ]);
+    }
+    exit;
+}
+
+// =====================================================
+// GET DAFTAR DINAS UNTUK BIDANG PENGAMPU (RENJA)
+// =====================================================
+
+/**
+ * Get Daftar Dinas untuk dropdown Bidang Pengampu
+ * URL: Instansi/getDaftarDinasRenja
+ */
+public function getDaftarDinasRenja() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $kodewilayah = $this->get_kode_wilayah();
+    
+    if (!$kodewilayah) {
+        echo json_encode([]);
+        return;
+    }
+    
+    $dinas = $this->db
+        ->select('id, nama')
+        ->from('akun_instansi')
+        ->where('Level', 2)  // Level 2 = Dinas/Perangkat Daerah
+        ->where('kodewilayah', $kodewilayah)
+        ->where('deleted_at IS NULL')
+        ->order_by('nama', 'ASC')
+        ->get()
+        ->result_array();
+
+    echo json_encode($dinas);
+    exit;
+}
+
+/**
+ * Get Pelaksana by Dinas untuk dropdown Pengampu (Renja)
+ * URL: Instansi/getPelaksanaByDinasRenja
+ */
+public function getPelaksanaByDinasRenja() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $kodewilayah = $this->get_kode_wilayah();
+    $dinas_id = $this->input->post('dinas_id', TRUE);
+    
+    if (!$kodewilayah) {
+        echo json_encode([]);
+        return;
+    }
+    
+    $this->db->select('
+        akun_karyawan.id,
+        akun_karyawan.nama,
+        akun_karyawan.nip,
+        akun_karyawan.jabatan,
+        akun_karyawan.dinas_id,
+        GROUP_CONCAT(akun_instansi.nama SEPARATOR ", ") as nama_dinas
+    ')
+    ->from('akun_karyawan')
+    ->join('akun_instansi', 'FIND_IN_SET(akun_instansi.id, akun_karyawan.dinas_id)', 'left')
+    ->where('akun_karyawan.Level', 4)  // Level 4 = Pelaksana
+    ->where('akun_karyawan.kodewilayah', $kodewilayah)
+    ->where('akun_karyawan.deleted_at IS NULL');
+    
+    if (!empty($dinas_id) && $dinas_id != '') {
+        $this->db->where("FIND_IN_SET('$dinas_id', akun_karyawan.dinas_id) > 0");
+    }
+    
+    $pelaksana = $this->db
+        ->group_by('akun_karyawan.id')
+        ->order_by('akun_karyawan.nama', 'ASC')
+        ->get()
+        ->result_array();
+
+    echo json_encode($pelaksana);
+    exit;
+}
+
+/**
+ * Get Detail Pelaksana untuk dropdown Pengampu (Renja)
+ * URL: Instansi/getPelaksanaDetailRenja
+ */
+public function getPelaksanaDetailRenja() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $id = $this->input->post('id', TRUE);
+    $kodewilayah = $this->get_kode_wilayah();
+    
+    if (!$id || !$kodewilayah) {
+        echo json_encode([]);
+        return;
+    }
+    
+    $detail = $this->db
+        ->select('id, nama, nip, jabatan, dinas_id')
+        ->from('akun_karyawan')
+        ->where('id', $id)
+        ->where('kodewilayah', $kodewilayah)
+        ->where('Level', 4)
+        ->where('deleted_at IS NULL')
+        ->get()
+        ->row_array();
+
+    echo json_encode($detail);
+    exit;
+}
+
     /**
-     * Get Renja PD by ID (AJAX) - Untuk edit
+     * Simpan Detail Indikator Renja PD (AJAX)
      */
-    public function getRenjaPD() {
+    public function simpanRenjaDetail() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        if (!$this->can_crud()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menambah/mengedit data.']);
+            return;
+        }
+        
+        $kode_wilayah = $this->get_kode_wilayah();
+        $instansi_id = $this->get_instansi_id();
+        
+        if (!$kode_wilayah) {
+            echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih']);
+            return;
+        }
+        
+        if (!$instansi_id) {
+            echo json_encode(['status' => 'error', 'message' => 'Data instansi tidak ditemukan!']);
+            return;
+        }
+        
+        $id = (int)$this->input->post('id', TRUE);
+        $header_id = (int)$this->input->post('header_id', TRUE);
+        
+        if (!$header_id) {
+            echo json_encode(['status' => 'error', 'message' => 'Header tidak valid']);
+            return;
+        }
+        
+        // Validasi header milik instansi ini
+        $header = $this->db->where('id', $header_id)
+            ->where('kode_wilayah', $kode_wilayah)
+            ->where('deleted_at IS NULL')
+            ->get('renja_pd_header')
+            ->row();
+        
+        if (!$header) {
+            echo json_encode(['status' => 'error', 'message' => 'Header tidak ditemukan']);
+            return;
+        }
+        
+        if ($header->id_instansi != $instansi_id) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda hanya dapat menambah data ke header milik sendiri.']);
+            return;
+        }
+        
+        // Format Rupiah helper
+        $formatRp = function($val) {
+            if (empty($val)) return null;
+            $val = str_replace(['Rp', ' ', '.', ','], '', $val);
+            return $val !== '' ? (float)$val : null;
+        };
+        
+        $data = [
+            'header_id' => $header_id,
+            'kode_wilayah' => $kode_wilayah,
+            'id_instansi' => $instansi_id,
+            'indikator_kinerja' => trim($this->input->post('indikator_kinerja', TRUE)),
+            'satuan' => trim($this->input->post('satuan', TRUE)),
+            'lokasi' => trim($this->input->post('lokasi', TRUE)),
+            'prioritas_daerah' => trim($this->input->post('prioritas_daerah', TRUE)),
+            'prioritas_nasional' => trim($this->input->post('prioritas_nasional', TRUE)),
+            'ranwal_kinerja' => trim($this->input->post('ranwal_kinerja', TRUE)),
+            'ranwal_rp' => $formatRp($this->input->post('ranwal_rp', TRUE)),
+            'rancangan_kinerja' => trim($this->input->post('rancangan_kinerja', TRUE)),
+            'rancangan_rp' => $formatRp($this->input->post('rancangan_rp', TRUE)),
+            'ranhir_kinerja' => trim($this->input->post('ranhir_kinerja', TRUE)),
+            'ranhir_rp' => $formatRp($this->input->post('ranhir_rp', TRUE)),
+            'renja_kinerja' => trim($this->input->post('renja_kinerja', TRUE)),
+            'renja_rp' => $formatRp($this->input->post('renja_rp', TRUE)),
+            'dpa_murni_kinerja' => trim($this->input->post('dpa_murni_kinerja', TRUE)),
+            'dpa_murni_rp' => $formatRp($this->input->post('dpa_murni_rp', TRUE)),
+            'sumber_dana' => trim($this->input->post('sumber_dana', TRUE)),
+            'dpa_perubahan_kinerja' => trim($this->input->post('dpa_perubahan_kinerja', TRUE)),
+            'dpa_perubahan_rp' => $formatRp($this->input->post('dpa_perubahan_rp', TRUE)),
+            'bidang_pengampu' => trim($this->input->post('bidang_pengampu', TRUE)),
+            'pengampu' => trim($this->input->post('pengampu', TRUE)),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        if ($id > 0) {
+            // Update detail
+            $existing = $this->db->where('id', $id)
+                ->where('kode_wilayah', $kode_wilayah)
+                ->where('deleted_at IS NULL')
+                ->get('renja_pd_detail')
+                ->row();
+            
+            if (!$existing) {
+                echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+                return;
+            }
+            
+            if ($existing->id_instansi != $instansi_id) {
+                echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda hanya dapat mengedit data instansi sendiri.']);
+                return;
+            }
+            
+            $this->db->where('id', $id)->update('renja_pd_detail', $data);
+            $message = 'Indikator berhasil diperbarui';
+        } else {
+            // Insert detail
+            $last_urutan = $this->db->select_max('urutan')
+                ->where('header_id', $header_id)
+                ->where('deleted_at IS NULL')
+                ->get('renja_pd_detail')
+                ->row()
+                ->urutan;
+            
+            $data['urutan'] = ($last_urutan ? $last_urutan + 10 : 10);
+            $data['created_at'] = date('Y-m-d H:i:s');
+            
+            $this->db->insert('renja_pd_detail', $data);
+            $id = $this->db->insert_id();
+            $message = 'Indikator berhasil ditambahkan';
+        }
+        
+        if ($this->db->affected_rows() > 0 || $id > 0) {
+            echo json_encode([
+                'status' => 'success',
+                'message' => $message,
+                'data' => ['id' => $id]
+            ]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan indikator']);
+        }
+        exit;
+    }
+
+    /**
+     * Hapus Detail Renja PD (AJAX)
+     */
+    public function hapusRenjaDetail() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        if (!$this->can_crud()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menghapus data.']);
+            return;
+        }
+        
+        $id = (int)$this->input->post('id', TRUE);
+        $kode_wilayah = $this->get_kode_wilayah();
+        $instansi_id = $this->get_instansi_id();
+        
+        if (!$id) {
+            echo json_encode(['status' => 'error', 'message' => 'ID tidak valid']);
+            return;
+        }
+        
+        $existing = $this->db->where('id', $id)
+            ->where('kode_wilayah', $kode_wilayah)
+            ->where('deleted_at IS NULL')
+            ->get('renja_pd_detail')
+            ->row();
+        
+        if (!$existing) {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+            return;
+        }
+        
+        if ($existing->id_instansi != $instansi_id) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda hanya dapat menghapus data instansi sendiri.']);
+            return;
+        }
+        
+        $this->db->where('id', $id)->update('renja_pd_detail', [
+            'deleted_at' => date('Y-m-d H:i:s')
+        ]);
+        
+        echo json_encode(['status' => 'success', 'message' => 'Indikator berhasil dihapus']);
+        exit;
+    }
+
+    /**
+ * Get Detail Renja PD by ID (AJAX) - DIPERBAIKI
+ */
+/**
+ * Get Detail Renja PD by ID (AJAX) - DIPERBAIKI DENGAN JOIN NAMA
+ */
+public function getRenjaDetail() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', TRUE);
+    $kode_wilayah = $this->get_kode_wilayah();
+    
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid']);
+        return;
+    }
+    
+    // 🔥 JOIN dengan akun_instansi dan akun_karyawan untuk mendapatkan nama
+    $this->db->select('
+        d.*, 
+        h.kode_rekening, 
+        h.tujuan, 
+        h.sasaran, 
+        h.program, 
+        h.kegiatan, 
+        h.sub_kegiatan, 
+        h.tahun,
+        ai.nama as bidang_pengampu_nama,
+        ak.nama as pengampu_nama
+    ');
+    $this->db->from('renja_pd_detail d');
+    $this->db->join('renja_pd_header h', 'h.id = d.header_id', 'left');
+    $this->db->join('akun_instansi ai', 'ai.id = d.bidang_pengampu', 'left');
+    $this->db->join('akun_karyawan ak', 'ak.id = d.pengampu', 'left');
+    $this->db->where('d.id', $id);
+    $this->db->where('d.kode_wilayah', $kode_wilayah);
+    $this->db->where('d.deleted_at IS NULL');
+    
+    $data = $this->db->get()->row_array();
+    
+    if ($data) {
+        echo json_encode(['status' => 'success', 'data' => $data]);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+    }
+    exit;
+}
+
+    /**
+     * Get Header Renja PD by ID (AJAX)
+     */
+    public function getRenjaHeader() {
         if (!$this->input->is_ajax_request()) {
             show_404();
             return;
@@ -7644,7 +8133,7 @@ public function simpanRenjaPD() {
         }
         
         $data = $this->db->select('*')
-            ->from('renja_pd')
+            ->from('renja_pd_header')
             ->where('id', $id)
             ->where('kode_wilayah', $kode_wilayah)
             ->where('deleted_at IS NULL')
@@ -7660,101 +8149,142 @@ public function simpanRenjaPD() {
     }
 
     /**
-     * Get Daftar Dinas (AJAX) - Untuk dropdown Bidang
-     */
-    public function Renja_get_daftar_dinas() {
-        if (!$this->input->is_ajax_request()) {
-            show_404();
-            return;
-        }
-        
-        $kodewilayah = $this->get_kode_wilayah();
-        
-        if (!$kodewilayah) {
-            echo json_encode([]);
-            return;
-        }
-        
-        $dinas = $this->db
-            ->select('id, nama')
-            ->from('akun_instansi')
-            ->where('kodewilayah', $kodewilayah)
-            ->where('Level', 2)
-            ->where('deleted_at IS NULL')
-            ->order_by('nama', 'ASC')
-            ->get()
-            ->result_array();
-
-        echo json_encode($dinas);
-        exit;
-    }
-
-    /**
-     * Get Pelaksana/Karyawan by Dinas (AJAX)
-     */
-    public function Renja_get_pelaksana_by_dinas() {
-        if (!$this->input->is_ajax_request()) {
-            show_404();
-            return;
-        }
-        
-        $kodewilayah = $this->get_kode_wilayah();
-        $dinas_id = $this->input->post('dinas_id', TRUE);
-        
-        if (!$kodewilayah) {
-            echo json_encode([]);
-            return;
-        }
-        
-        $this->db->select('id, nama, nip, jabatan, dinas_id')
-            ->from('akun_karyawan')
-            ->where('kodewilayah', $kodewilayah)
-            ->where('Level', 4)
-            ->where('deleted_at IS NULL');
-        
-        if (!empty($dinas_id) && $dinas_id != '') {
-            $this->db->where("FIND_IN_SET('$dinas_id', dinas_id) > 0");
-        }
-        
-        $pelaksana = $this->db
-            ->order_by('nama', 'ASC')
-            ->get()
-            ->result_array();
-
-        echo json_encode($pelaksana);
-        exit;
-    }
-
-    /**
-     * Get Detail Pelaksana (AJAX)
-     */
-    public function Renja_get_pelaksana_detail() {
-        if (!$this->input->is_ajax_request()) {
-            show_404();
-            return;
-        }
-        
-        $id = $this->input->post('id', TRUE);
-        $kodewilayah = $this->get_kode_wilayah();
-        
-        if (!$id || !$kodewilayah) {
-            echo json_encode([]);
-            return;
-        }
-        
-        $detail = $this->db
-            ->select('id, nama, nip, jabatan, dinas_id')
-            ->from('akun_karyawan')
-            ->where('id', $id)
-            ->where('kodewilayah', $kodewilayah)
-            ->where('Level', 4)
-            ->where('deleted_at IS NULL')
-            ->get()
-            ->row_array();
-
-        echo json_encode($detail);
-        exit;
+ * Get Nomenklatur Berdasarkan Level (AJAX) - UNTUK RENJA
+ */
+public function getNomenklaturByLevelRenja() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
     }
     
+    $level = (int)$this->input->post('level');
+    $parent_kode = $this->input->post('parent_kode');
+    
+    if ($level < 1 || $level > 5) {
+        echo json_encode([]);
+        return;
+    }
+    
+    $this->db->select('Kode, Nomenklatur');
+    $this->db->from('nomenklaturprovinsi');
+    // TIDAK ADA FILTER deleted_at
+    
+    if ($level == 1) {
+        // Urusan: 0 titik, panjang 1
+        $this->db->where('Kode NOT LIKE', '%.%');
+        $this->db->where('LENGTH(Kode) = 1');
+    } elseif ($level == 2) {
+        // Bidang Urusan: 1 titik
+        $this->db->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 1);
+        if ($parent_kode) {
+            $this->db->where('Kode LIKE', $parent_kode . '.%');
+        }
+    } elseif ($level == 3) {
+        // Program: 2 titik
+        $this->db->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 2);
+        if ($parent_kode) {
+            $this->db->where('Kode LIKE', $parent_kode . '.%');
+        }
+    } elseif ($level == 4) {
+        // Kegiatan: 4 titik
+        $this->db->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 4);
+        if ($parent_kode) {
+            $this->db->where('Kode LIKE', $parent_kode . '.%');
+        }
+    } elseif ($level == 5) {
+        // Sub Kegiatan: 5 titik
+        $this->db->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 5);
+        if ($parent_kode) {
+            $this->db->where('Kode LIKE', $parent_kode . '.%');
+        }
+    }
+    
+    $this->db->order_by('Kode', 'ASC');
+    $data = $this->db->get()->result_array();
+    
+    echo json_encode($data);
+}
+
+/**
+ * Get list Provinsi untuk dropdown
+ */
+public function getProvinsiList() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $provinsi = $this->db
+        ->select('Kode, Nama')
+        ->where("Kode LIKE '__'")
+        ->where('LENGTH(Kode) = 2')
+        ->order_by('Nama', 'ASC')
+        ->get('kodewilayah')
+        ->result_array();
+    
+    $this->output
+        ->set_content_type('application/json')
+        ->set_output(json_encode($provinsi));
+}
+
+/**
+ * Get list Kab/Kota berdasarkan Provinsi
+ */
+public function getKabKotaByProvinsi() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $kode_provinsi = $this->input->post('kode_provinsi', TRUE);
+    
+    if (empty($kode_provinsi)) {
+        $this->output->set_content_type('application/json')->set_output(json_encode([]));
+        return;
+    }
+    
+    // Cari semua Kab/Kota dengan kode yang dimulai dengan kode provinsi
+    $kabkota = $this->db
+        ->select('Kode, Nama')
+        ->from('kodewilayah')
+        ->like('Kode', $kode_provinsi . '.', 'after')
+        ->where('LENGTH(REPLACE(Kode, ".", "")) = 4', null, false)
+        ->order_by('Nama', 'ASC')
+        ->get()
+        ->result_array();
+    
+    $this->output
+        ->set_content_type('application/json')
+        ->set_output(json_encode($kabkota));
+}
+
+/**
+ * Get detail lokasi berdasarkan Kode
+ */
+public function getLokasiDetail() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $kode = $this->input->post('kode', TRUE);
+    
+    if (empty($kode)) {
+        $this->output->set_content_type('application/json')->set_output(json_encode(null));
+        return;
+    }
+    
+    $data = $this->db
+        ->select('Kode, Nama')
+        ->from('kodewilayah')
+        ->where('Kode', $kode)
+        ->get()
+        ->row_array();
+    
+    $this->output
+        ->set_content_type('application/json')
+        ->set_output(json_encode($data));
+}
+
 }
 ?>

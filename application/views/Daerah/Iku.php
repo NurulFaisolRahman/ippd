@@ -570,21 +570,14 @@
                         $("#FormTambahIku button[type=submit]").prop('disabled', true).text('Menyimpan...');
                     },
                     success: function(res) {
-                        try {
-                            if (res === '1') {
-                                window.location.reload();
-                            } else {
-                                var error = JSON.parse(res);
-                                alert(error.message || "Gagal menyimpan data!");
-                            }
-                        } catch (e) {
-                            alert("Gagal memproses respons server!");
+                        if ($.trim(res) == '1') {
+                            location.reload();
+                        } else {
+                            location.reload();
                         }
-                        $("#FormTambahIku button[type=submit]").prop('disabled', false).text('Simpan');
                     },
-                    error: function(xhr) {
-                        alert("Terjadi kesalahan: " + xhr.statusText);
-                        $("#FormTambahIku button[type=submit]").prop('disabled', false).text('Simpan');
+                    error: function() {
+                        location.reload();
                     }
                 });
             });
@@ -612,21 +605,14 @@
                         $("#FormEditIku button[type=submit]").prop('disabled', true).text('Menyimpan...');
                     },
                     success: function(res) {
-                        try {
-                            if (res === '1') {
-                                window.location.reload();
-                            } else {
-                                var error = JSON.parse(res);
-                                alert(error.message || "Gagal mengupdate data!");
-                            }
-                        } catch (e) {
-                            alert("Gagal memproses respons server!");
+                        if ($.trim(res) == '1') {
+                            location.reload();
+                        } else {
+                            location.reload();
                         }
-                        $("#FormEditIku button[type=submit]").prop('disabled', false).text('Simpan');
                     },
-                    error: function(xhr) {
-                        alert("Terjadi kesalahan: " + xhr.statusText);
-                        $("#FormEditIku button[type=submit]").prop('disabled', false).text('Simpan');
+                    error: function() {
+                        location.reload();
                     }
                 });
             });
@@ -678,21 +664,14 @@
                         $(this).prop('disabled', true);
                     },
                     success: function(res) {
-                        try {
-                            if (res === '1') {
-                                window.location.reload();
-                            } else {
-                                var error = JSON.parse(res);
-                                alert(error.message || "Gagal menghapus data!");
-                            }
-                        } catch (e) {
-                            alert("Gagal memproses respons server!");
+                        if ($.trim(res) == '1') {
+                            location.reload();
+                        } else {
+                            location.reload();
                         }
-                        $(this).prop('disabled', false);
                     },
-                    error: function(xhr) {
-                        alert("Terjadi kesalahan: " + xhr.statusText);
-                        $(this).prop('disabled', false);
+                    error: function() {
+                        location.reload();
                     }
                 });
             });

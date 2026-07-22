@@ -139,10 +139,10 @@
 
             <!-- TABLE (MASTER-DETAIL) -->
             <div class="table-responsive">
-              <table id="data-table-basic" class="table table-striped">
+              <table id="data-table-tujuan-sasaran" class="table table-striped">
                 <thead>
                   <tr>
-                    <th rowspan="2" style="width:60px;">No</th>
+                    <th rowspan="2" style="width:60px; text-align:center;">No</th>
                     <th rowspan="2" style="width:420px; text-align:center;">NSPK DAN SASARAN RPJMD YANG RELEVAN</th>
                     <th rowspan="2" style="width:180px; text-align:center;">TUJUAN</th>
                     <th rowspan="2" style="width:180px; text-align:center;">SASARAN PD</th>
@@ -192,7 +192,15 @@
                       <b>Norma:</b>
                       <ul>
                         <?php foreach($m['norma_list'] as $x){ ?>
-                          <li><?= html_escape($x['judul_nspk']) ?></li>
+                          <li>
+                            <?= html_escape($x['judul_nspk'] ?? '') ?>
+                            <?php 
+                            // Cek apakah ada isi dari nspk_detail
+                            $detail_isi = isset($x['isi']) && !empty($x['isi']) ? $x['isi'] : '';
+                            if (!empty($detail_isi)) { ?>
+                              <br><small class="text-muted"><?= html_escape($detail_isi) ?></small>
+                            <?php } ?>
+                          </li>
                         <?php } ?>
                       </ul>
                     <?php } ?>
@@ -201,7 +209,14 @@
                       <b>Standar:</b>
                       <ul>
                         <?php foreach($m['standar_list'] as $x){ ?>
-                          <li><?= html_escape($x['judul_nspk']) ?></li>
+                          <li>
+                            <?= html_escape($x['judul_nspk'] ?? '') ?>
+                            <?php 
+                            $detail_isi = isset($x['isi']) && !empty($x['isi']) ? $x['isi'] : '';
+                            if (!empty($detail_isi)) { ?>
+                              <br><small class="text-muted"><?= html_escape($detail_isi) ?></small>
+                            <?php } ?>
+                          </li>
                         <?php } ?>
                       </ul>
                     <?php } ?>
@@ -210,7 +225,14 @@
                       <b>Prosedur:</b>
                       <ul>
                         <?php foreach($m['prosedur_list'] as $x){ ?>
-                          <li><?= html_escape($x['judul_nspk']) ?></li>
+                          <li>
+                            <?= html_escape($x['judul_nspk'] ?? '') ?>
+                            <?php 
+                            $detail_isi = isset($x['isi']) && !empty($x['isi']) ? $x['isi'] : '';
+                            if (!empty($detail_isi)) { ?>
+                              <br><small class="text-muted"><?= html_escape($detail_isi) ?></small>
+                            <?php } ?>
+                          </li>
                         <?php } ?>
                       </ul>
                     <?php } ?>
@@ -219,7 +241,14 @@
                       <b>Kriteria:</b>
                       <ul>
                         <?php foreach($m['kriteria_list'] as $x){ ?>
-                          <li><?= html_escape($x['judul_nspk']) ?></li>
+                          <li>
+                            <?= html_escape($x['judul_nspk'] ?? '') ?>
+                            <?php 
+                            $detail_isi = isset($x['isi']) && !empty($x['isi']) ? $x['isi'] : '';
+                            if (!empty($detail_isi)) { ?>
+                              <br><small class="text-muted"><?= html_escape($detail_isi) ?></small>
+                            <?php } ?>
+                          </li>
                         <?php } ?>
                       </ul>
                     <?php } ?>
@@ -233,14 +262,14 @@
 
                   <!-- Detail Pertama -->
                   <td><?= html_escape($d0['sasaran_text'] ?? '-') ?></td>
-                  <td><?= nl2br(html_escape($d0['indikator'])) ?></td>
-                  <td class="text-center"><?= html_escape($d0['t2025']) ?></td>
-                  <td class="text-center"><?= html_escape($d0['t2026']) ?></td>
-                  <td class="text-center"><?= html_escape($d0['t2027']) ?></td>
-                  <td class="text-center"><?= html_escape($d0['t2028']) ?></td>
-                  <td class="text-center"><?= html_escape($d0['t2029']) ?></td>
-                  <td class="text-center"><?= html_escape($d0['t2030']) ?></td>
-                  <td><?= nl2br(html_escape($d0['keterangan'])) ?></td>
+                  <td><?= nl2br(html_escape($d0['indikator'] ?? '')) ?></td>
+                  <td class="text-center"><?= html_escape($d0['t2025'] ?? '') ?></td>
+                  <td class="text-center"><?= html_escape($d0['t2026'] ?? '') ?></td>
+                  <td class="text-center"><?= html_escape($d0['t2027'] ?? '') ?></td>
+                  <td class="text-center"><?= html_escape($d0['t2028'] ?? '') ?></td>
+                  <td class="text-center"><?= html_escape($d0['t2029'] ?? '') ?></td>
+                  <td class="text-center"><?= html_escape($d0['t2030'] ?? '') ?></td>
+                  <td><?= nl2br(html_escape($d0['keterangan'] ?? '')) ?></td>
 
                   <!-- AKSI HEADER -->
                   <?php if ($IsRole4) { ?>
@@ -252,8 +281,8 @@
                         data-standar="<?= html_escape($m['nspk_standar_id'] ?? '') ?>"
                         data-prosedur="<?= html_escape($m['nspk_prosedur_id'] ?? '') ?>"
                         data-kriteria="<?= html_escape($m['nspk_kriteria_id'] ?? '') ?>"
-                        data-sasaran-relevan-id="<?= html_escape($m['sasaran_relevan_id']) ?>"
-                        data-tujuan-id="<?= html_escape($m['tujuan_id']) ?>">
+                        data-sasaran-relevan-id="<?= html_escape($m['sasaran_relevan_id'] ?? '') ?>"
+                        data-tujuan-id="<?= html_escape($m['tujuan_id'] ?? '') ?>">
                         <i class="notika-icon notika-edit"></i>
                       </button>
                       <button class="btn btn-danger btn-sm BtnHapusMaster" data-id="<?= html_escape($m['id']) ?>">
@@ -267,25 +296,25 @@
                     <div class="btn-group-flex">
                       <button class="btn btn-success btn-sm BtnAddDetail" 
                               data-master-id="<?= html_escape($m['id']) ?>"
-                              data-detail-id="<?= html_escape($d0['id']) ?>"
+                              data-detail-id="<?= html_escape($d0['id'] ?? 0) ?>"
                               data-position="after">
                         <i class="notika-icon bi-plus-lg"></i>
                       </button>
                       <button class="btn btn-warning btn-sm BtnEditDetail"
-                        data-id="<?= html_escape((int)$d0['id']) ?>"
+                        data-id="<?= html_escape((int)($d0['id'] ?? 0)) ?>"
                         data-parent-id="<?= html_escape((int)$m['id']) ?>"
-                        data-sasaran-id="<?= html_escape((int)$d0['sasaran_id']) ?>"
-                        data-indikator="<?= html_escape($d0['indikator']) ?>"
-                        data-t2025="<?= html_escape($d0['t2025']) ?>"
-                        data-t2026="<?= html_escape($d0['t2026']) ?>"
-                        data-t2027="<?= html_escape($d0['t2027']) ?>"
-                        data-t2028="<?= html_escape($d0['t2028']) ?>"
-                        data-t2029="<?= html_escape($d0['t2029']) ?>"
-                        data-t2030="<?= html_escape($d0['t2030']) ?>"
-                        data-keterangan="<?= html_escape($d0['keterangan']) ?>">
+                        data-sasaran-id="<?= html_escape((int)($d0['sasaran_id'] ?? 0)) ?>"
+                        data-indikator="<?= html_escape($d0['indikator'] ?? '') ?>"
+                        data-t2025="<?= html_escape($d0['t2025'] ?? '') ?>"
+                        data-t2026="<?= html_escape($d0['t2026'] ?? '') ?>"
+                        data-t2027="<?= html_escape($d0['t2027'] ?? '') ?>"
+                        data-t2028="<?= html_escape($d0['t2028'] ?? '') ?>"
+                        data-t2029="<?= html_escape($d0['t2029'] ?? '') ?>"
+                        data-t2030="<?= html_escape($d0['t2030'] ?? '') ?>"
+                        data-keterangan="<?= html_escape($d0['keterangan'] ?? '') ?>">
                         <i class="notika-icon notika-edit"></i>
                       </button>
-                      <button class="btn btn-danger btn-sm BtnHapusDetail" data-id="<?= html_escape($d0['id']) ?>">
+                      <button class="btn btn-danger btn-sm BtnHapusDetail" data-id="<?= html_escape($d0['id'] ?? 0) ?>">
                         <i class="notika-icon notika-trash"></i>
                       </button>
                     </div>
@@ -295,41 +324,41 @@
 
                 <!-- BARIS DETAIL SELANJUTNYA -->
                 <?php for ($i=1; $i<$detailCount; $i++) { $d=$details[$i]; ?>
-                <tr class="detail-row" data-master-id="<?= html_escape($m['id']) ?>" data-detail-id="<?= html_escape($d['id']) ?>">
+                <tr class="detail-row" data-master-id="<?= html_escape($m['id']) ?>" data-detail-id="<?= html_escape($d['id'] ?? 0) ?>">
                   <td><?= html_escape($d['sasaran_text'] ?? '-') ?></td>
-                  <td><?= nl2br(html_escape($d['indikator'])) ?></td>
-                  <td class="text-center"><?= html_escape($d['t2025']) ?></td>
-                  <td class="text-center"><?= html_escape($d['t2026']) ?></td>
-                  <td class="text-center"><?= html_escape($d['t2027']) ?></td>
-                  <td class="text-center"><?= html_escape($d['t2028']) ?></td>
-                  <td class="text-center"><?= html_escape($d['t2029']) ?></td>
-                  <td class="text-center"><?= html_escape($d['t2030']) ?></td>
-                  <td><?= nl2br(html_escape($d['keterangan'])) ?></td>
+                  <td><?= nl2br(html_escape($d['indikator'] ?? '')) ?></td>
+                  <td class="text-center"><?= html_escape($d['t2025'] ?? '') ?></td>
+                  <td class="text-center"><?= html_escape($d['t2026'] ?? '') ?></td>
+                  <td class="text-center"><?= html_escape($d['t2027'] ?? '') ?></td>
+                  <td class="text-center"><?= html_escape($d['t2028'] ?? '') ?></td>
+                  <td class="text-center"><?= html_escape($d['t2029'] ?? '') ?></td>
+                  <td class="text-center"><?= html_escape($d['t2030'] ?? '') ?></td>
+                  <td><?= nl2br(html_escape($d['keterangan'] ?? '')) ?></td>
                   <?php if ($IsRole4) { ?>
                   <td class="text-center">-</td>
                   <td class="text-center">
                     <div class="btn-group-flex">
                       <button class="btn btn-success btn-sm BtnAddDetail" 
                               data-master-id="<?= html_escape($m['id']) ?>"
-                              data-detail-id="<?= html_escape($d['id']) ?>"
+                              data-detail-id="<?= html_escape($d['id'] ?? 0) ?>"
                               data-position="after">
                         <i class="notika-icon bi-plus-lg"></i>
                       </button>
                       <button class="btn btn-warning btn-sm BtnEditDetail"
-                        data-id="<?= html_escape((int)$d['id']) ?>"
+                        data-id="<?= html_escape((int)($d['id'] ?? 0)) ?>"
                         data-parent-id="<?= html_escape((int)$m['id']) ?>"
-                        data-sasaran-id="<?= html_escape((int)$d['sasaran_id']) ?>"
-                        data-indikator="<?= html_escape($d['indikator']) ?>"
-                        data-t2025="<?= html_escape($d['t2025']) ?>"
-                        data-t2026="<?= html_escape($d['t2026']) ?>"
-                        data-t2027="<?= html_escape($d['t2027']) ?>"
-                        data-t2028="<?= html_escape($d['t2028']) ?>"
-                        data-t2029="<?= html_escape($d['t2029']) ?>"
-                        data-t2030="<?= html_escape($d['t2030']) ?>"
-                        data-keterangan="<?= html_escape($d['keterangan']) ?>">
+                        data-sasaran-id="<?= html_escape((int)($d['sasaran_id'] ?? 0)) ?>"
+                        data-indikator="<?= html_escape($d['indikator'] ?? '') ?>"
+                        data-t2025="<?= html_escape($d['t2025'] ?? '') ?>"
+                        data-t2026="<?= html_escape($d['t2026'] ?? '') ?>"
+                        data-t2027="<?= html_escape($d['t2027'] ?? '') ?>"
+                        data-t2028="<?= html_escape($d['t2028'] ?? '') ?>"
+                        data-t2029="<?= html_escape($d['t2029'] ?? '') ?>"
+                        data-t2030="<?= html_escape($d['t2030'] ?? '') ?>"
+                        data-keterangan="<?= html_escape($d['keterangan'] ?? '') ?>">
                         <i class="notika-icon notika-edit"></i>
                       </button>
-                      <button class="btn btn-danger btn-sm BtnHapusDetail" data-id="<?= html_escape($d['id']) ?>">
+                      <button class="btn btn-danger btn-sm BtnHapusDetail" data-id="<?= html_escape($d['id'] ?? 0) ?>">
                         <i class="notika-icon notika-trash"></i>
                       </button>
                     </div>
@@ -344,35 +373,74 @@
                   <td class="text-center"><?= $no++ ?></td>
                   <td>
                     <b>NSPK:</b><br>
+
                     <?php if(!empty($m['norma_list'])){ ?>
-                      <b>Norma:</b><br>
-                      <?php $i=0; foreach($m['norma_list'] as $x){ ?>
-                        <div><?= chr(97+$i++) ?>. <?= html_escape($x['judul_nspk']) ?></div>
-                      <?php } ?>
-                      <br>
+                      <b>Norma:</b>
+                      <ul>
+                        <?php foreach($m['norma_list'] as $x){ ?>
+                          <li>
+                            <?= html_escape($x['judul_nspk'] ?? '') ?>
+                            <?php 
+                            $detail_isi = isset($x['isi']) && !empty($x['isi']) ? $x['isi'] : '';
+                            if (!empty($detail_isi)) { ?>
+                              <br><small class="text-muted"><?= html_escape($detail_isi) ?></small>
+                            <?php } ?>
+                          </li>
+                        <?php } ?>
+                      </ul>
                     <?php } ?>
+
                     <?php if(!empty($m['standar_list'])){ ?>
-                      <b>Standar:</b><br>
-                      <?php $i=0; foreach($m['standar_list'] as $x){ ?>
-                        <div><?= chr(97+$i++) ?>. <?= html_escape($x['judul_nspk']) ?></div>
-                      <?php } ?>
-                      <br>
+                      <b>Standar:</b>
+                      <ul>
+                        <?php foreach($m['standar_list'] as $x){ ?>
+                          <li>
+                            <?= html_escape($x['judul_nspk'] ?? '') ?>
+                            <?php 
+                            $detail_isi = isset($x['isi']) && !empty($x['isi']) ? $x['isi'] : '';
+                            if (!empty($detail_isi)) { ?>
+                              <br><small class="text-muted"><?= html_escape($detail_isi) ?></small>
+                            <?php } ?>
+                          </li>
+                        <?php } ?>
+                      </ul>
                     <?php } ?>
+
                     <?php if(!empty($m['prosedur_list'])){ ?>
-                      <b>Prosedur:</b><br>
-                      <?php $i=0; foreach($m['prosedur_list'] as $x){ ?>
-                        <div><?= chr(97+$i++) ?>. <?= html_escape($x['judul_nspk']) ?></div>
-                      <?php } ?>
-                      <br>
+                      <b>Prosedur:</b>
+                      <ul>
+                        <?php foreach($m['prosedur_list'] as $x){ ?>
+                          <li>
+                            <?= html_escape($x['judul_nspk'] ?? '') ?>
+                            <?php 
+                            $detail_isi = isset($x['isi']) && !empty($x['isi']) ? $x['isi'] : '';
+                            if (!empty($detail_isi)) { ?>
+                              <br><small class="text-muted"><?= html_escape($detail_isi) ?></small>
+                            <?php } ?>
+                          </li>
+                        <?php } ?>
+                      </ul>
                     <?php } ?>
+
                     <?php if(!empty($m['kriteria_list'])){ ?>
-                      <b>Kriteria:</b><br>
-                      <?php $i=0; foreach($m['kriteria_list'] as $x){ ?>
-                        <div><?= chr(97+$i++) ?>. <?= html_escape($x['judul_nspk']) ?></div>
-                      <?php } ?>
-                      <br>
+                      <b>Kriteria:</b>
+                      <ul>
+                        <?php foreach($m['kriteria_list'] as $x){ ?>
+                          <li>
+                            <?= html_escape($x['judul_nspk'] ?? '') ?>
+                            <?php 
+                            $detail_isi = isset($x['isi']) && !empty($x['isi']) ? $x['isi'] : '';
+                            if (!empty($detail_isi)) { ?>
+                              <br><small class="text-muted"><?= html_escape($detail_isi) ?></small>
+                            <?php } ?>
+                          </li>
+                        <?php } ?>
+                      </ul>
                     <?php } ?>
-                    <b>Sasaran RPJMD yang Relevan:</b><br><?= nl2br(html_escape($sasaranRelText)) ?>
+
+                    <br>
+                    <b>Sasaran RPJMD yang Relevan:</b><br>
+                    <?= nl2br(html_escape($sasaranRelText)) ?>
                   </td>
                   <td><?= nl2br(html_escape($tujuanText)) ?></td>
                   <td colspan="8" class="text-center"><i>Belum ada indikator</i></td>
@@ -385,8 +453,8 @@
                       data-standar="<?= html_escape($m['nspk_standar_id'] ?? '') ?>"
                       data-prosedur="<?= html_escape($m['nspk_prosedur_id'] ?? '') ?>"
                       data-kriteria="<?= html_escape($m['nspk_kriteria_id'] ?? '') ?>"
-                      data-sasaran-relevan-id="<?= html_escape($m['sasaran_relevan_id']) ?>"
-                      data-tujuan-id="<?= html_escape($m['tujuan_id']) ?>">
+                      data-sasaran-relevan-id="<?= html_escape($m['sasaran_relevan_id'] ?? '') ?>"
+                      data-tujuan-id="<?= html_escape($m['tujuan_id'] ?? '') ?>">
                       <i class="notika-icon notika-edit"></i>
                     </button>
                     <button class="btn btn-danger btn-sm BtnHapusMaster" data-id="<?= html_escape($m['id']) ?>">
@@ -439,12 +507,16 @@
               <div class="nspk-row">
                 <select name="nspk_norma_id[]" class="form-control">
                   <option value="">Pilih Norma</option>
-                  <?php foreach($ListNSPK as $n){
-                    if($n['jenis_nspk']=="Norma"){ ?>
-                      <option value="<?= html_escape($n['id']) ?>">
-                        <?= html_escape($n['kode_nspk']." - ".$n['judul_nspk']) ?>
-                      </option>
-                  <?php }} ?>
+                  <?php 
+                  $normaList = isset($ListNSPK['Norma']) ? $ListNSPK['Norma'] : [];
+                  foreach ($normaList as $n) { ?>
+                    <option value="<?= html_escape($n['id']) ?>">
+                      <?= html_escape($n['kode_nspk'] ?? '') . " - " . html_escape($n['judul_nspk'] ?? '') ?>
+                      <?php if (!empty($n['isi'])) { ?>
+                        (<?= html_escape($n['isi']) ?>)
+                      <?php } ?>
+                    </option>
+                  <?php } ?>
                 </select>
                 <button type="button" class="btn btn-success BtnAddRow">+</button>
               </div>
@@ -458,12 +530,16 @@
               <div class="nspk-row">
                 <select name="nspk_standar_id[]" class="form-control">
                   <option value="">Pilih Standar</option>
-                  <?php foreach($ListNSPK as $n){
-                    if($n['jenis_nspk']=="Standar"){ ?>
-                      <option value="<?= html_escape($n['id']) ?>">
-                        <?= html_escape($n['kode_nspk']." - ".$n['judul_nspk']) ?>
-                      </option>
-                  <?php }} ?>
+                  <?php 
+                  $standarList = isset($ListNSPK['Standar']) ? $ListNSPK['Standar'] : [];
+                  foreach ($standarList as $n) { ?>
+                    <option value="<?= html_escape($n['id']) ?>">
+                      <?= html_escape($n['kode_nspk'] ?? '') . " - " . html_escape($n['judul_nspk'] ?? '') ?>
+                      <?php if (!empty($n['isi'])) { ?>
+                        (<?= html_escape($n['isi']) ?>)
+                      <?php } ?>
+                    </option>
+                  <?php } ?>
                 </select>
                 <button type="button" class="btn btn-success BtnAddRow">+</button>
               </div>
@@ -477,12 +553,16 @@
               <div class="nspk-row">
                 <select name="nspk_prosedur_id[]" class="form-control">
                   <option value="">Pilih Prosedur</option>
-                  <?php foreach($ListNSPK as $n){
-                    if($n['jenis_nspk']=="Prosedur"){ ?>
-                      <option value="<?= html_escape($n['id']) ?>">
-                        <?= html_escape($n['kode_nspk']." - ".$n['judul_nspk']) ?>
-                      </option>
-                  <?php }} ?>
+                  <?php 
+                  $prosedurList = isset($ListNSPK['Prosedur']) ? $ListNSPK['Prosedur'] : [];
+                  foreach ($prosedurList as $n) { ?>
+                    <option value="<?= html_escape($n['id']) ?>">
+                      <?= html_escape($n['kode_nspk'] ?? '') . " - " . html_escape($n['judul_nspk'] ?? '') ?>
+                      <?php if (!empty($n['isi'])) { ?>
+                        (<?= html_escape($n['isi']) ?>)
+                      <?php } ?>
+                    </option>
+                  <?php } ?>
                 </select>
                 <button type="button" class="btn btn-success BtnAddRow">+</button>
               </div>
@@ -496,12 +576,16 @@
               <div class="nspk-row">
                 <select name="nspk_kriteria_id[]" class="form-control">
                   <option value="">Pilih Kriteria</option>
-                  <?php foreach($ListNSPK as $n){
-                    if($n['jenis_nspk']=="Kriteria"){ ?>
-                      <option value="<?= html_escape($n['id']) ?>">
-                        <?= html_escape($n['kode_nspk']." - ".$n['judul_nspk']) ?>
-                      </option>
-                  <?php }} ?>
+                  <?php 
+                  $kriteriaList = isset($ListNSPK['Kriteria']) ? $ListNSPK['Kriteria'] : [];
+                  foreach ($kriteriaList as $n) { ?>
+                    <option value="<?= html_escape($n['id']) ?>">
+                      <?= html_escape($n['kode_nspk'] ?? '') . " - " . html_escape($n['judul_nspk'] ?? '') ?>
+                      <?php if (!empty($n['isi'])) { ?>
+                        (<?= html_escape($n['isi']) ?>)
+                      <?php } ?>
+                    </option>
+                  <?php } ?>
                 </select>
                 <button type="button" class="btn btn-success BtnAddRow">+</button>
               </div>
@@ -513,7 +597,7 @@
             <select id="SasaranRelevanId" class="form-control">
               <option value="">Pilih Sasaran RPJMD</option>
               <?php if (!empty($ListSasaranRPJMD)) { foreach ($ListSasaranRPJMD as $s) { ?>
-                <option value="<?= html_escape((int)$s['id']) ?>"><?= html_escape($s['Sasaran']) ?></option>
+                <option value="<?= html_escape((int)$s['id']) ?>"><?= html_escape($s['Sasaran'] ?? '') ?></option>
               <?php }} ?>
             </select>
           </div>
@@ -523,7 +607,7 @@
             <select id="TujuanId" class="form-control">
               <option value="">Pilih Tujuan</option>
               <?php if (!empty($ListTujuanPD)) { foreach ($ListTujuanPD as $t) { ?>
-                <option value="<?= html_escape((int)$t['id']) ?>"><?= html_escape($t['tujuan_pd']) ?></option>
+                <option value="<?= html_escape((int)$t['id']) ?>"><?= html_escape($t['tujuan_pd'] ?? '') ?></option>
               <?php }} ?>
             </select>
           </div>
@@ -568,24 +652,40 @@
 
           <div style="display:none">
             <div id="edit-opt-norma">
-              <?php foreach($ListNSPK as $n){ if($n['jenis_nspk']=="Norma"){ ?>
-                <option value="<?= html_escape($n['id']) ?>"><?= html_escape($n['kode_nspk']." - ".$n['judul_nspk']) ?></option>
-              <?php }} ?>
+              <?php 
+              $normaList = isset($ListNSPK['Norma']) ? $ListNSPK['Norma'] : [];
+              foreach ($normaList as $n) { ?>
+                <option value="<?= html_escape($n['id']) ?>">
+                  <?= html_escape($n['kode_nspk'] ?? '') . " - " . html_escape($n['judul_nspk'] ?? '') ?>
+                </option>
+              <?php } ?>
             </div>
             <div id="edit-opt-standar">
-              <?php foreach($ListNSPK as $n){ if($n['jenis_nspk']=="Standar"){ ?>
-                <option value="<?= html_escape($n['id']) ?>"><?= html_escape($n['kode_nspk']." - ".$n['judul_nspk']) ?></option>
-              <?php }} ?>
+              <?php 
+              $standarList = isset($ListNSPK['Standar']) ? $ListNSPK['Standar'] : [];
+              foreach ($standarList as $n) { ?>
+                <option value="<?= html_escape($n['id']) ?>">
+                  <?= html_escape($n['kode_nspk'] ?? '') . " - " . html_escape($n['judul_nspk'] ?? '') ?>
+                </option>
+              <?php } ?>
             </div>
             <div id="edit-opt-prosedur">
-              <?php foreach($ListNSPK as $n){ if($n['jenis_nspk']=="Prosedur"){ ?>
-                <option value="<?= html_escape($n['id']) ?>"><?= html_escape($n['kode_nspk']." - ".$n['judul_nspk']) ?></option>
-              <?php }} ?>
+              <?php 
+              $prosedurList = isset($ListNSPK['Prosedur']) ? $ListNSPK['Prosedur'] : [];
+              foreach ($prosedurList as $n) { ?>
+                <option value="<?= html_escape($n['id']) ?>">
+                  <?= html_escape($n['kode_nspk'] ?? '') . " - " . html_escape($n['judul_nspk'] ?? '') ?>
+                </option>
+              <?php } ?>
             </div>
             <div id="edit-opt-kriteria">
-              <?php foreach($ListNSPK as $n){ if($n['jenis_nspk']=="Kriteria"){ ?>
-                <option value="<?= html_escape($n['id']) ?>"><?= html_escape($n['kode_nspk']." - ".$n['judul_nspk']) ?></option>
-              <?php }} ?>
+              <?php 
+              $kriteriaList = isset($ListNSPK['Kriteria']) ? $ListNSPK['Kriteria'] : [];
+              foreach ($kriteriaList as $n) { ?>
+                <option value="<?= html_escape($n['id']) ?>">
+                  <?= html_escape($n['kode_nspk'] ?? '') . " - " . html_escape($n['judul_nspk'] ?? '') ?>
+                </option>
+              <?php } ?>
             </div>
           </div>
 
@@ -594,7 +694,7 @@
             <select id="EditSasaranRelevanId" class="form-control">
               <option value="">Pilih Sasaran RPJMD</option>
               <?php if (!empty($ListSasaranRPJMD)) { foreach ($ListSasaranRPJMD as $s) { ?>
-                <option value="<?= html_escape((int)$s['id']) ?>"><?= html_escape($s['Sasaran']) ?></option>
+                <option value="<?= html_escape((int)$s['id']) ?>"><?= html_escape($s['Sasaran'] ?? '') ?></option>
               <?php }} ?>
             </select>
           </div>
@@ -604,7 +704,7 @@
             <select id="EditTujuanId" class="form-control">
               <option value="">Pilih Tujuan</option>
               <?php if (!empty($ListTujuanPD)) { foreach ($ListTujuanPD as $t) { ?>
-                <option value="<?= html_escape((int)$t['id']) ?>"><?= html_escape($t['tujuan_pd']) ?></option>
+                <option value="<?= html_escape((int)$t['id']) ?>"><?= html_escape($t['tujuan_pd'] ?? '') ?></option>
               <?php }} ?>
             </select>
           </div>
@@ -635,7 +735,7 @@
               <option value="">-- Tidak dipilih --</option>
               <?php foreach ($ListSasaranPD as $sp) { ?>
                 <option value="<?= html_escape((int)$sp['id']) ?>">
-                  <?= html_escape($sp['sasaran_pd']) ?>
+                  <?= html_escape($sp['sasaran_pd'] ?? '') ?>
                 </option>
               <?php } ?>
             </select>
@@ -660,6 +760,14 @@
           <div class="form-group">
             <label><b>Keterangan</b></label>
             <textarea id="Keterangan" class="form-control" rows="2" placeholder="Ketik keterangan..."></textarea>
+          </div>
+
+          <!-- Debug Info (hidden by default) -->
+          <div id="DebugMasterInfo" style="display:none; padding:10px; background:#f8f9fa; border-radius:5px; margin-bottom:10px;">
+            <small>
+              <b>Debug:</b> Master ID: <span id="DebugMasterIdValue"></span> | 
+              Posisi: <span id="DebugPositionId"></span>
+            </small>
           </div>
 
           <button class="btn btn-success notika-btn-success" id="BtnSimpanDetail"><b>SIMPAN</b></button>
@@ -690,7 +798,7 @@
               <option value="">-- Tidak dipilih --</option>
               <?php foreach ($ListSasaranPD as $sp) { ?>
                 <option value="<?= html_escape((int)$sp['id']) ?>">
-                  <?= html_escape($sp['sasaran_pd']) ?>
+                  <?= html_escape($sp['sasaran_pd'] ?? '') ?>
                 </option>
               <?php } ?>
             </select>
@@ -972,8 +1080,21 @@ jQuery(document).ready(function($){
       $("#T2025,#T2026,#T2027,#T2028,#T2029,#T2030").val('');
       $("#Keterangan").val('');
       $("#DebugMasterInfo").hide();
-      $("#DebugMasterIdValue").text('');
-      $("#DebugPositionId").text('');
+    }
+
+    // ============================================
+    // FUNGSI UPDATE ROWSPAN
+    // ============================================
+    function updateMasterRowspan(masterId) {
+      var detailCount = $('tr.detail-row[data-master-id="' + masterId + '"]').length;
+      var masterRow = $('tr.master-row[data-master-id="' + masterId + '"]');
+      
+      if (masterRow.length > 0) {
+        var rowspan = detailCount > 0 ? detailCount + 1 : 1;
+        masterRow.find('td:first').attr('rowspan', rowspan);
+        masterRow.find('td:nth-child(2)').attr('rowspan', rowspan);
+        masterRow.find('td:nth-child(3)').attr('rowspan', rowspan);
+      }
     }
 
     // ============================================
@@ -993,20 +1114,33 @@ jQuery(document).ready(function($){
     // FUNGSI TAMBAH BARIS DETAIL
     // ============================================
     function addNewDetailRow(masterId, positionId, positionType, newData) {
-      console.log("Menambahkan baris baru:", newData);
+      console.log("=== addNewDetailRow ===");
+      console.log("Master ID:", masterId);
+      console.log("Position ID:", positionId);
+      console.log("Position Type:", positionType);
+      console.log("New Data:", newData);
       
       // Cari baris target
       var targetRow = null;
+      var isDetail = false;
       
       if (positionType == 'after' && positionId && positionId != 0 && positionId != '0') {
+        // Cari baris dengan detail-id tertentu
         targetRow = $('tr.detail-row[data-detail-id="' + positionId + '"]');
-        if (targetRow.length == 0) {
-          targetRow = $('tr.master-row[data-master-id="' + masterId + '"]');
+        if (targetRow.length > 0) {
+          isDetail = true;
         }
-      } else {
-        targetRow = $('tr.detail-row[data-master-id="' + masterId + '"]').last();
-        if (targetRow.length == 0) {
+      }
+      
+      // Jika tidak ditemukan, cari baris terakhir di master
+      if (targetRow == null || targetRow.length == 0) {
+        var detailRows = $('tr.detail-row[data-master-id="' + masterId + '"]');
+        if (detailRows.length > 0) {
+          targetRow = detailRows.last();
+          isDetail = true;
+        } else {
           targetRow = $('tr.master-row[data-master-id="' + masterId + '"]');
+          isDetail = false;
         }
       }
       
@@ -1019,8 +1153,8 @@ jQuery(document).ready(function($){
       var isMasterRow = targetRow.hasClass('master-row');
       
       // Data untuk baris baru
-      var indikator = newData.indikator || '';
       var sasaranText = newData.sasaran_text || '-';
+      var indikator = newData.indikator || '';
       var t2025 = newData.t2025 || '';
       var t2026 = newData.t2026 || '';
       var t2027 = newData.t2027 || '';
@@ -1031,53 +1165,60 @@ jQuery(document).ready(function($){
       var detailId = newData.id || 'new_' + Date.now();
       var sasaranId = newData.sasaran_id || '';
       
-      // Buat baris baru
+      var isRole4 = <?= $IsRole4 ? 'true' : 'false' ?>;
+      
+      // Buat baris baru dengan struktur yang tepat
       var newRow = $('<tr class="detail-row new-row-highlight" data-master-id="' + masterId + '" data-detail-id="' + detailId + '">');
+      var html = '';
       
-      var cols = '';
-      
-      if (isMasterRow) {
-        // Baris detail di bawah master - SESUAIKAN DENGAN STRUKTUR KOLOM
-        // Kolom: No(1), NSPK(2), Tujuan(3), Sasaran PD(4), Indikator(5), Target(6-11), Keterangan(12), Aksi Header(13), Aksi Indikator(14)
-        cols += '<td></td>'; // No (kosong)
-        cols += '<td></td>'; // NSPK (kosong)
-        cols += '<td></td>'; // Tujuan (kosong)
-        cols += '<td>' + sasaranText + '</td>'; // Sasaran PD
-        cols += '<td>' + indikator + '</td>'; // Indikator
-        cols += '<td class="text-center">' + t2025 + '</td>';
-        cols += '<td class="text-center">' + t2026 + '</td>';
-        cols += '<td class="text-center">' + t2027 + '</td>';
-        cols += '<td class="text-center">' + t2028 + '</td>';
-        cols += '<td class="text-center">' + t2029 + '</td>';
-        cols += '<td class="text-center">' + t2030 + '</td>';
-        cols += '<td>' + keterangan + '</td>'; // Keterangan
-        cols += '<td class="text-center">-</td>'; // Aksi Header
-        cols += '<td class="text-center"><div class="btn-group-flex">'; // Aksi Indikator
-        cols += '<button class="btn btn-success btn-sm BtnAddDetail" data-master-id="' + masterId + '" data-detail-id="' + detailId + '" data-position="after"><i class="notika-icon bi-plus-lg"></i></button>';
-        cols += '<button class="btn btn-warning btn-sm BtnEditDetail" data-id="' + detailId + '" data-parent-id="' + masterId + '" data-sasaran-id="' + sasaranId + '" data-indikator="' + indikator + '" data-t2025="' + t2025 + '" data-t2026="' + t2026 + '" data-t2027="' + t2027 + '" data-t2028="' + t2028 + '" data-t2029="' + t2029 + '" data-t2030="' + t2030 + '" data-keterangan="' + keterangan + '"><i class="notika-icon notika-edit"></i></button>';
-        cols += '<button class="btn btn-danger btn-sm BtnHapusDetail" data-id="' + detailId + '"><i class="notika-icon notika-trash"></i></button>';
-        cols += '</div></td>';
+      if (isMasterRow || !isDetail) {
+        // Ini adalah baris pertama detail (di bawah master)
+        // Kolom: No(1), NSPK(2), Tujuan(3), Sasaran PD(4), Indikator(5), Target(6-11), Keterangan(12), Aksi(13-14)
+        html += '<td></td>'; // No (kosong)
+        html += '<td></td>'; // NSPK (kosong)
+        html += '<td></td>'; // Tujuan (kosong)
+        html += '<td>' + sasaranText + '</td>'; // Sasaran PD
+        html += '<td>' + indikator + '</td>'; // Indikator
+        html += '<td class="text-center">' + t2025 + '</td>';
+        html += '<td class="text-center">' + t2026 + '</td>';
+        html += '<td class="text-center">' + t2027 + '</td>';
+        html += '<td class="text-center">' + t2028 + '</td>';
+        html += '<td class="text-center">' + t2029 + '</td>';
+        html += '<td class="text-center">' + t2030 + '</td>';
+        html += '<td>' + keterangan + '</td>'; // Keterangan
+        
+        if (isRole4) {
+          html += '<td class="text-center">-</td>'; // Aksi Header
+          html += '<td class="text-center"><div class="btn-group-flex">';
+          html += '<button class="btn btn-success btn-sm BtnAddDetail" data-master-id="' + masterId + '" data-detail-id="' + detailId + '" data-position="after"><i class="notika-icon bi-plus-lg"></i></button>';
+          html += '<button class="btn btn-warning btn-sm BtnEditDetail" data-id="' + detailId + '" data-parent-id="' + masterId + '" data-sasaran-id="' + sasaranId + '" data-indikator="' + indikator.replace(/"/g, '&quot;') + '" data-t2025="' + t2025 + '" data-t2026="' + t2026 + '" data-t2027="' + t2027 + '" data-t2028="' + t2028 + '" data-t2029="' + t2029 + '" data-t2030="' + t2030 + '" data-keterangan="' + keterangan.replace(/"/g, '&quot;') + '"><i class="notika-icon notika-edit"></i></button>';
+          html += '<button class="btn btn-danger btn-sm BtnHapusDetail" data-id="' + detailId + '"><i class="notika-icon notika-trash"></i></button>';
+          html += '</div></td>';
+        }
       } else {
-        // Baris detail biasa - SESUAIKAN DENGAN STRUKTUR KOLOM DETAIL
-        // Kolom: Sasaran PD(1), Indikator(2), Target(3-8), Keterangan(9), Aksi Header(10), Aksi Indikator(11)
-        cols += '<td>' + sasaranText + '</td>'; // Sasaran PD
-        cols += '<td>' + indikator + '</td>'; // Indikator
-        cols += '<td class="text-center">' + t2025 + '</td>';
-        cols += '<td class="text-center">' + t2026 + '</td>';
-        cols += '<td class="text-center">' + t2027 + '</td>';
-        cols += '<td class="text-center">' + t2028 + '</td>';
-        cols += '<td class="text-center">' + t2029 + '</td>';
-        cols += '<td class="text-center">' + t2030 + '</td>';
-        cols += '<td>' + keterangan + '</td>'; // Keterangan
-        cols += '<td class="text-center">-</td>'; // Aksi Header
-        cols += '<td class="text-center"><div class="btn-group-flex">'; // Aksi Indikator
-        cols += '<button class="btn btn-success btn-sm BtnAddDetail" data-master-id="' + masterId + '" data-detail-id="' + detailId + '" data-position="after"><i class="notika-icon bi-plus-lg"></i></button>';
-        cols += '<button class="btn btn-warning btn-sm BtnEditDetail" data-id="' + detailId + '" data-parent-id="' + masterId + '" data-sasaran-id="' + sasaranId + '" data-indikator="' + indikator + '" data-t2025="' + t2025 + '" data-t2026="' + t2026 + '" data-t2027="' + t2027 + '" data-t2028="' + t2028 + '" data-t2029="' + t2029 + '" data-t2030="' + t2030 + '" data-keterangan="' + keterangan + '"><i class="notika-icon notika-edit"></i></button>';
-        cols += '<button class="btn btn-danger btn-sm BtnHapusDetail" data-id="' + detailId + '"><i class="notika-icon notika-trash"></i></button>';
-        cols += '</div></td>';
+        // Detail row biasa (di bawah detail lain)
+        // Kolom: Sasaran PD(1), Indikator(2), Target(3-8), Keterangan(9)
+        html += '<td>' + sasaranText + '</td>'; // Sasaran PD
+        html += '<td>' + indikator + '</td>'; // Indikator
+        html += '<td class="text-center">' + t2025 + '</td>';
+        html += '<td class="text-center">' + t2026 + '</td>';
+        html += '<td class="text-center">' + t2027 + '</td>';
+        html += '<td class="text-center">' + t2028 + '</td>';
+        html += '<td class="text-center">' + t2029 + '</td>';
+        html += '<td class="text-center">' + t2030 + '</td>';
+        html += '<td>' + keterangan + '</td>'; // Keterangan
+        
+        if (isRole4) {
+          html += '<td class="text-center">-</td>'; // Aksi Header
+          html += '<td class="text-center"><div class="btn-group-flex">';
+          html += '<button class="btn btn-success btn-sm BtnAddDetail" data-master-id="' + masterId + '" data-detail-id="' + detailId + '" data-position="after"><i class="notika-icon bi-plus-lg"></i></button>';
+          html += '<button class="btn btn-warning btn-sm BtnEditDetail" data-id="' + detailId + '" data-parent-id="' + masterId + '" data-sasaran-id="' + sasaranId + '" data-indikator="' + indikator.replace(/"/g, '&quot;') + '" data-t2025="' + t2025 + '" data-t2026="' + t2026 + '" data-t2027="' + t2027 + '" data-t2028="' + t2028 + '" data-t2029="' + t2029 + '" data-t2030="' + t2030 + '" data-keterangan="' + keterangan.replace(/"/g, '&quot;') + '"><i class="notika-icon notika-edit"></i></button>';
+          html += '<button class="btn btn-danger btn-sm BtnHapusDetail" data-id="' + detailId + '"><i class="notika-icon notika-trash"></i></button>';
+          html += '</div></td>';
+        }
       }
       
-      newRow.html(cols);
+      newRow.html(html);
       
       // Sisipkan setelah target
       targetRow.after(newRow);
@@ -1099,21 +1240,6 @@ jQuery(document).ready(function($){
       }, 500);
       
       return true;
-    }
-
-    // ============================================
-    // FUNGSI UPDATE ROWSPAN
-    // ============================================
-    function updateMasterRowspan(masterId) {
-      var detailCount = $('tr.detail-row[data-master-id="' + masterId + '"]').length;
-      var masterRow = $('tr.master-row[data-master-id="' + masterId + '"]');
-      
-      if (masterRow.length > 0) {
-        var rowspan = detailCount > 0 ? detailCount + 1 : 1;
-        masterRow.find('td:first').attr('rowspan', rowspan);
-        masterRow.find('td:nth-child(2)').attr('rowspan', rowspan);
-        masterRow.find('td:nth-child(3)').attr('rowspan', rowspan);
-      }
     }
 
     // ============================================
@@ -1547,12 +1673,16 @@ jQuery(document).ready(function($){
               }
               var sasaranId = $('#EditDetailSasaranId').val() || '';
               
+              // Get all cells
               var cells = $row.find('td');
               
-              // Cek apakah ini baris di bawah master (memiliki 14 kolom) atau detail biasa (11 kolom)
-              if (cells.length >= 14) {
-                // Baris di bawah master
-                $(cells[3]).text(sasaranText); // Sasaran
+              // Check row type by checking previous row
+              var prevRow = $row.prev();
+              var isFirstDetail = (prevRow.length > 0 && prevRow.hasClass('master-row'));
+              
+              if (isFirstDetail) {
+                // Baris pertama detail (di bawah master) - 14 kolom
+                $(cells[3]).text(sasaranText); // Sasaran PD
                 $(cells[4]).text(indikator); // Indikator
                 $(cells[5]).text($("#EditT2025").val() || ''); // 2025
                 $(cells[6]).text($("#EditT2026").val() || ''); // 2026
@@ -1562,8 +1692,8 @@ jQuery(document).ready(function($){
                 $(cells[10]).text($("#EditT2030").val() || ''); // 2030
                 $(cells[11]).text($("#EditKeterangan").val() || ''); // Keterangan
               } else {
-                // Baris detail biasa
-                $(cells[0]).text(sasaranText); // Sasaran
+                // Detail row biasa - 11 kolom
+                $(cells[0]).text(sasaranText); // Sasaran PD
                 $(cells[1]).text(indikator); // Indikator
                 $(cells[2]).text($("#EditT2025").val() || ''); // 2025
                 $(cells[3]).text($("#EditT2026").val() || ''); // 2026
@@ -1574,7 +1704,7 @@ jQuery(document).ready(function($){
                 $(cells[8]).text($("#EditKeterangan").val() || ''); // Keterangan
               }
               
-              // Update data di tombol
+              // Update data attributes on buttons
               $row.find('.BtnEditDetail').data({
                 'sasaran-id': sasaranId,
                 'indikator': indikator,
@@ -1653,29 +1783,6 @@ jQuery(document).ready(function($){
 
   }); // End document ready
 </script>
-
-<div style="display:none">
-  <div id="opt-norma">
-    <?php foreach($ListNSPK as $n){ if($n['jenis_nspk']=="Norma"){ ?>
-      <option value="<?= html_escape($n['id']) ?>"><?= html_escape($n['judul_nspk']) ?></option>
-    <?php }} ?>
-  </div>
-  <div id="opt-standar">
-    <?php foreach($ListNSPK as $n){ if($n['jenis_nspk']=="Standar"){ ?>
-      <option value="<?= html_escape($n['id']) ?>"><?= html_escape($n['judul_nspk']) ?></option>
-    <?php }} ?>
-  </div>
-  <div id="opt-prosedur">
-    <?php foreach($ListNSPK as $n){ if($n['jenis_nspk']=="Prosedur"){ ?>
-      <option value="<?= html_escape($n['id']) ?>"><?= html_escape($n['judul_nspk']) ?></option>
-    <?php }} ?>
-  </div>
-  <div id="opt-kriteria">
-    <?php foreach($ListNSPK as $n){ if($n['jenis_nspk']=="Kriteria"){ ?>
-      <option value="<?= html_escape($n['id']) ?>"><?= html_escape($n['judul_nspk']) ?></option>
-    <?php }} ?>
-  </div>
-</div>
 
 </body>
 </html>

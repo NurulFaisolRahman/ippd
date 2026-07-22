@@ -253,19 +253,6 @@
         .modal-content {
             color: #000;
         }
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-            margin-left: 10px;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
         .filter-row {
             display: flex;
             align-items: flex-end;
@@ -295,26 +282,40 @@
                 width: 100%;
             }
         }
+
+        /* Button styles */
+        .btn-amber {
+            background: #ffc107;
+            color: #212529;
+        }
+        .btn-amber:hover {
+            background: #e0a800;
+            color: #212529;
+        }
     </style>
 
-    <script src="<?= base_url('js/vendor/jquery-1.12.4.min.js'); ?>"></script>
-    <script src="<?= base_url('js/bootstrap.min.js'); ?>"></script>
-    <script src="<?= base_url('js/wow.min.js'); ?>"></script>
-    <script src="<?= base_url('js/jquery-price-slider.js'); ?>"></script>
-    <script src="<?= base_url('js/owl.carousel.min.js'); ?>"></script>
-    <script src="<?= base_url('js/jquery.scrollUp.min.js'); ?>"></script>
-    <script src="<?= base_url('js/meanmenu/jquery.meanmenu.js'); ?>"></script>
-    <script src="<?= base_url('js/scrollbar/jquery.mCustomScrollbar.concat.min.js'); ?>"></script>
-    <script src="<?= base_url('js/data-table/jquery.dataTables.min.js'); ?>"></script>
-    <script src="<?= base_url('js/data-table/data-table-act.js'); ?>"></script>
-    <script src="<?= base_url('js/main.js'); ?>"></script>
+    <!-- SCRIPT - Gunakan CDN untuk menghindari 404 -->
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap.min.js"></script>
+    
     <script>
         var BaseURL = '<?= base_url() ?>';
-        var CSRF_TOKEN = '<?= $this->security->get_csrf_hash() ?>';
-        var CSRF_NAME = '<?= $this->security->get_csrf_token_name() ?>';
+        var CSRF_TOKEN_NAME = '<?= $this->security->get_csrf_token_name() ?>';
+        var CSRF_TOKEN_VALUE = '<?= $this->security->get_csrf_hash() ?>';
+
+        // ============================================================
+        // FUNCTION TO REFRESH PAGE
+        // ============================================================
+        function refreshPage() {
+            window.location.reload();
+        }
 
         jQuery(document).ready(function($) {
-            // Logika filter untuk pengguna yang belum login
+            // ============================================================
+            // FILTER LOGIC (untuk pengguna belum login)
+            // ============================================================
             <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
                 $("#Provinsi").change(function() {
                     if ($(this).val() === "") {
@@ -324,22 +325,28 @@
                     $.ajax({
                         url: BaseURL + "Daerah/GetListKabKota",
                         type: "POST",
-                        data: { Kode: $(this).val(), [CSRF_NAME]: CSRF_TOKEN },
-                        beforeSend: function() { $("#KabKota").prop('disabled', true); },
+                        data: { 
+                            Kode: $(this).val(), 
+                            [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE 
+                        },
+                        beforeSend: function() { 
+                            $("#KabKota").prop('disabled', true); 
+                        },
                         success: function(Respon) {
-                            var Data = JSON.parse(Respon);
-                            var KabKota = '<option value="">Pilih Kab/Kota</option>';
-                            if (Data.length > 0) {
-                                for (let i = 0; i < Data.length; i++) {
-                                    KabKota += '<option value="' + Data[i].Kode + '">' + Data[i].Nama + '</option>';
+                            try {
+                                var Data = JSON.parse(Respon);
+                                var KabKota = '<option value="">Pilih Kab/Kota</option>';
+                                if (Data.length > 0) {
+                                    for (let i = 0; i < Data.length; i++) {
+                                        KabKota += '<option value="' + Data[i].Kode + '">' + Data[i].Nama + '</option>';
+                                    }
                                 }
-                            } else {
-                                alert("Belum Ada Data Kab/Kota");
+                                $("#KabKota").html(KabKota).prop('disabled', false);
+                            } catch (e) {
+                                $("#KabKota").prop('disabled', false);
                             }
-                            $("#KabKota").html(KabKota).prop('disabled', false);
                         },
                         error: function() {
-                            alert("Gagal memuat data Kab/Kota");
                             $("#KabKota").prop('disabled', false);
                         }
                     });
@@ -358,13 +365,23 @@
                     $.ajax({
                         url: BaseURL + "Daerah/SetTempKodeWilayah",
                         type: "POST",
-                        data: { KodeWilayah: kodeWilayah, [CSRF_NAME]: CSRF_TOKEN },
-                        beforeSend: function() { $("#Filter").prop('disabled', true).text('Memuat...'); },
+                        data: { 
+                            KodeWilayah: kodeWilayah, 
+                            [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE 
+                        },
+                        beforeSend: function() { 
+                            $("#Filter").prop('disabled', true).text('Memuat...'); 
+                        },
                         success: function(Respon) {
-                            if (Respon === '1') {
-                                window.location.href = BaseURL + "Daerah/PotensiDaerah";
-                            } else {
-                                alert(Respon || "Gagal menyimpan filter wilayah!");
+                            try {
+                                if (Respon === '1' || Respon === 'success') {
+                                    window.location.href = BaseURL + "Daerah/PotensiDaerah";
+                                } else {
+                                    alert(Respon || "Gagal menyimpan filter wilayah!");
+                                    $("#Filter").prop('disabled', false).text('Filter');
+                                }
+                            } catch (e) {
+                                alert("Gagal memproses respons server!");
                                 $("#Filter").prop('disabled', false).text('Filter');
                             }
                         },
@@ -383,23 +400,31 @@
                     $.ajax({
                         url: BaseURL + "Daerah/GetListKabKota",
                         type: "POST",
-                        data: { Kode: kodeProv, [CSRF_NAME]: CSRF_TOKEN },
+                        data: { 
+                            Kode: kodeProv, 
+                            [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE 
+                        },
                         success: function(Respon) {
-                            var Data = JSON.parse(Respon);
-                            var KabKota = '<option value="">Pilih Kab/Kota</option>';
-                            if (Data.length > 0) {
-                                for (let i = 0; i < Data.length; i++) {
-                                    var selected = (Data[i].Kode === kodeKab) ? 'selected' : '';
-                                    KabKota += '<option value="' + Data[i].Kode + '" ' + selected + '>' + Data[i].Nama + '</option>';
+                            try {
+                                var Data = JSON.parse(Respon);
+                                var KabKota = '<option value="">Pilih Kab/Kota</option>';
+                                if (Data.length > 0) {
+                                    for (let i = 0; i < Data.length; i++) {
+                                        var selected = (Data[i].Kode === kodeKab) ? 'selected' : '';
+                                        KabKota += '<option value="' + Data[i].Kode + '" ' + selected + '>' + Data[i].Nama + '</option>';
+                                    }
                                 }
-                            }
-                            $("#KabKota").html(KabKota);
-                        }
+                                $("#KabKota").html(KabKota);
+                            } catch (e) {}
+                        },
+                        error: function() {}
                     });
                 <?php } ?>
             <?php } ?>
 
-            // Set tahun saat periode dipilih (Input)
+            // ============================================================
+            // SET TAHUN SAAT PERIODE DIPILIH (INPUT)
+            // ============================================================
             $("#PeriodeRPJMD").change(function() {
                 if ($(this).val()) {
                     var years = $(this).val().split('-');
@@ -408,7 +433,9 @@
                 }
             });
 
-            // Set tahun saat periode dipilih (Edit)
+            // ============================================================
+            // SET TAHUN SAAT PERIODE DIPILIH (EDIT)
+            // ============================================================
             $("#EditPeriodeRPJMD").change(function() {
                 if ($(this).val()) {
                     var years = $(this).val().split('-');
@@ -417,7 +444,9 @@
                 }
             });
 
-            // Input Potensi Daerah
+            // ============================================================
+            // INPUT POTENSI DAERAH - LANGSUNG REFRESH
+            // ============================================================
             $("#InputPotensiDaerah").click(function() {
                 if ($("#PeriodeRPJMD").val() === "") {
                     alert('Pilih Periode RPJMD terlebih dahulu!');
@@ -432,24 +461,38 @@
                     PeriodeRPJMD: $("#PeriodeRPJMD").val(),
                     NamaPotensiDaerah: $("#NamaPotensiDaerah").val(),
                     TahunMulai: $("#TahunMulai").val(),
-                    TahunAkhir: $("#TahunAkhir").val()
+                    TahunAkhir: $("#TahunAkhir").val(),
+                    [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
                 };
 
-                $.post(BaseURL + "Daerah/InputPotensiDaerah", Data).done(function(Respon) {
-                    if (Respon == '1') {
+                $.ajax({
+                    url: BaseURL + "Daerah/InputPotensiDaerah",
+                    type: "POST",
+                    data: Data,
+                    beforeSend: function() {
+                        $("#InputPotensiDaerah").prop('disabled', true).html('<b>Menyimpan...</b>');
+                    },
+                    success: function(Respon) {
                         $("#PeriodeRPJMD").val('').trigger('change');
                         $("#NamaPotensiDaerah").val('');
                         $("#TahunMulai").val('');
                         $("#TahunAkhir").val('');
                         $('#ModalInputPotensiDaerah').modal('hide');
-                        window.location.reload();
-                    } else {
-                        alert(Respon);
+                        refreshPage();
+                    },
+                    error: function() {
+                        $('#ModalInputPotensiDaerah').modal('hide');
+                        refreshPage();
+                    },
+                    complete: function() {
+                        $("#InputPotensiDaerah").prop('disabled', false).html('<b>SIMPAN</b>');
                     }
                 });
             });
 
-            // Edit Potensi Daerah
+            // ============================================================
+            // EDIT POTENSI DAERAH - LOAD DATA
+            // ============================================================
             $(document).on("click", ".EditPotensi", function() {
                 var id = $(this).data('id');
                 var nama = $(this).data('nama');
@@ -466,7 +509,9 @@
                 $('#ModalEditPotensiDaerah').modal("show");
             });
 
-            // Update Potensi Daerah
+            // ============================================================
+            // UPDATE POTENSI DAERAH - LANGSUNG REFRESH
+            // ============================================================
             $("#UpdatePotensiDaerah").click(function() {
                 if ($("#EditPeriodeRPJMD").val() === "") {
                     alert('Pilih Periode RPJMD terlebih dahulu!');
@@ -482,34 +527,63 @@
                     PeriodeRPJMD: $("#EditPeriodeRPJMD").val(),
                     NamaPotensiDaerah: $("#EditNamaPotensiDaerah").val(),
                     TahunMulai: $("#EditTahunMulai").val(),
-                    TahunAkhir: $("#EditTahunAkhir").val()
+                    TahunAkhir: $("#EditTahunAkhir").val(),
+                    [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
                 };
 
-                $.post(BaseURL + "Daerah/UpdatePotensiDaerah", Data).done(function(Respon) {
-                    if (Respon == '1') {
+                $.ajax({
+                    url: BaseURL + "Daerah/UpdatePotensiDaerah",
+                    type: "POST",
+                    data: Data,
+                    beforeSend: function() {
+                        $("#UpdatePotensiDaerah").prop('disabled', true).html('<b>Menyimpan...</b>');
+                    },
+                    success: function(Respon) {
                         $('#ModalEditPotensiDaerah').modal('hide');
-                        window.location.reload();
-                    } else {
-                        alert(Respon);
+                        refreshPage();
+                    },
+                    error: function() {
+                        $('#ModalEditPotensiDaerah').modal('hide');
+                        refreshPage();
+                    },
+                    complete: function() {
+                        $("#UpdatePotensiDaerah").prop('disabled', false).html('<b>UPDATE</b>');
                     }
                 });
             });
 
-            // Hapus Potensi Daerah
+            // ============================================================
+            // HAPUS POTENSI DAERAH - LANGSUNG REFRESH
+            // ============================================================
             $(".HapusPotensi").click(function() {
-                if (confirm("Apakah Anda yakin ingin menghapus data ini?")) {
-                    var Id = { Id: $(this).data('id') };
-                    $.post(BaseURL + "Daerah/DeletePotensiDaerah", Id).done(function(Respon) {
-                        if (Respon == '1') {
-                            window.location.reload();
-                        } else {
-                            alert(Respon);
-                        }
-                    });
+                if (!confirm("Apakah Anda yakin ingin menghapus data ini?")) {
+                    return;
                 }
+                
+                var Data = { 
+                    Id: $(this).data('id'),
+                    [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
+                };
+                
+                $.ajax({
+                    url: BaseURL + "Daerah/DeletePotensiDaerah",
+                    type: "POST",
+                    data: Data,
+                    beforeSend: function() {
+                        $(this).prop('disabled', true);
+                    },
+                    success: function(Respon) {
+                        refreshPage();
+                    },
+                    error: function() {
+                        refreshPage();
+                    }
+                });
             });
 
-            // Reset form saat modal ditutup
+            // ============================================================
+            // RESET FORM SAAT MODAL DITUTUP
+            // ============================================================
             $('#ModalInputPotensiDaerah').on('hidden.bs.modal', function () {
                 $("#PeriodeRPJMD").val('').trigger('change');
                 $("#NamaPotensiDaerah").val('');
@@ -527,3 +601,5 @@
         });
     </script>
 </div>
+</body>
+</html>

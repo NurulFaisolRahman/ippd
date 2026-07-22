@@ -875,1554 +875,1260 @@
     <script src="<?= base_url('js/main.js'); ?>"></script>
 
     <script>
-        var BaseURL = '<?= base_url() ?>';
-        var CSRF_TOKEN = '<?= $this->security->get_csrf_token_name() ?>';
-        var CSRF_HASH = '<?= $this->security->get_csrf_hash() ?>';
-        var instansiOptions = <?php echo json_encode($Instansi); ?>;
+       var BaseURL = '<?= base_url() ?>';
+var CSRF_TOKEN = '<?= $this->security->get_csrf_token_name() ?>';
+var CSRF_HASH = '<?= $this->security->get_csrf_hash() ?>';
+var instansiOptions = <?php echo json_encode($Instansi); ?>;
 
-        $(document).ready(function() {
-            // Debug info
-            console.log('BaseURL:', BaseURL);
-            console.log('CSRF_TOKEN:', CSRF_TOKEN);
-            console.log('CSRF_HASH:', CSRF_HASH);
+$(document).ready(function() {
 
-            // Logika filter untuk pengguna yang belum login
-            <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-                $("#Provinsi").change(function() {
-                    if ($(this).val() === "") {
-                        $("#KabKota").html('<option value="">Pilih Kab/Kota</option>');
-                        return;
-                    }
-                    $.ajax({
-                        url: BaseURL + "Daerah/GetListKabKota",
-                        type: "POST",
-                        data: { Kode: $(this).val(), [CSRF_TOKEN]: CSRF_HASH },
-                        beforeSend: function() { $("#KabKota").prop('disabled', true); },
-                        success: function(Respon) {
-                            try {
-                                var Data = JSON.parse(Respon);
-                                var KabKota = '<option value="">Pilih Kab/Kota</option>';
-                                if (Data.length > 0) {
-                                    for (let i = 0; i < Data.length; i++) {
-                                        KabKota += '<option value="' + Data[i].Kode + '">' + Data[i].Nama + '</option>';
-                                    }
-                                } else {
-                                    alert("Belum Ada Data Kab/Kota");
-                                }
-                                $("#KabKota").html(KabKota).prop('disabled', false);
-                            } catch (e) {
-                                alert("Gagal memuat data Kab/Kota");
-                                $("#KabKota").prop('disabled', false);
-                            }
-                        },
-                        error: function() {
-                            alert("Gagal memuat data Kab/Kota");
-                            $("#KabKota").prop('disabled', false);
-                        }
-                    });
-                });
+    // ============================================================
+    // FUNGSI BANTUAN
+    // ============================================================
 
-                $("#Filter").click(function() {
-                    if ($("#Provinsi").val() === "") {
-                        alert("Mohon Pilih Provinsi");
-                        return;
-                    }
-                    if ($("#KabKota").val() === "") {
-                        alert("Mohon Pilih Kab/Kota");
-                        return;
-                    }
-                    var kodeWilayah = $("#KabKota").val();
-                    $.ajax({
-                        url: BaseURL + "Daerah/SetTempKodeWilayah",
-                        type: "POST",
-                        data: { KodeWilayah: kodeWilayah, [CSRF_TOKEN]: CSRF_HASH },
-                        beforeSend: function() { $("#Filter").prop('disabled', true).text('Memuat...'); },
-                        success: function(Respon) {
-                            try {
-                                if (Respon === '1') {
-                                    window.location.href = BaseURL + "Daerah/Cascade";
-                                } else {
-                                    alert(Respon || "Gagal menyimpan filter wilayah!");
-                                    $("#Filter").prop('disabled', false).text('Filter');
-                                }
-                            } catch (e) {
-                                alert("Gagal memproses respons server!");
-                                $("#Filter").prop('disabled', false).text('Filter');
-                            }
-                        },
-                        error: function() {
-                            alert("Gagal menghubungi server!");
-                            $("#Filter").prop('disabled', false).text('Filter');
-                        }
-                    });
-                });
-
-                // Populate Kab/Kota on load if KodeWilayah set
-                <?php if (!empty($KodeWilayah)) { ?>
-                    var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
-                    var kodeKab = "<?= $KodeWilayah ?>";
-                    $("#Provinsi").val(kodeProv);
-                    $.ajax({
-                        url: BaseURL + "Daerah/GetListKabKota",
-                        type: "POST",
-                        data: { Kode: kodeProv, [CSRF_TOKEN]: CSRF_HASH },
-                        success: function(Respon) {
-                            try {
-                                var Data = JSON.parse(Respon);
-                                var KabKota = '<option value="">Pilih Kab/Kota</option>';
-                                if (Data.length > 0) {
-                                    for (let i = 0; i < Data.length; i++) {
-                                        var selected = (Data[i].Kode === kodeKab) ? 'selected' : '';
-                                        KabKota += '<option value="' + Data[i].Kode + '" ' + selected + '>' + Data[i].Nama + '</option>';
-                                    }
-                                }
-                                $("#KabKota").html(KabKota);
-                            } catch (e) {
-                                alert("Gagal memuat data Kab/Kota");
-                            }
-                        },
-                        error: function() {
-                            alert("Gagal memuat data Kab/Kota");
-                        }
-                    });
-                <?php } ?>
-            <?php } ?>
-
-            // Function to generate instansi options
-            function getInstansiOptions() {
-                var options = '<option value="">Pilih PD</option><option value="Semua Instansi Terkait">Semua Instansi Terkait</option>';
-                instansiOptions.forEach(function(instansi) {
-                    options += '<option value="' + instansi.nama + '">' + instansi.nama + '</option>';
-                });
-                return options;
-            }
-
-            // Indikator Cascade - Tambah Indikator
-            $(document).on('click', '.TambahIndikatorCascade', function() {
-                var id = $(this).data('id');
-                $('#IndikatorCascadeId').val(id);
-                $('#IndikatorText').val('');
-                $('#ModalTambahIndikatorCascade').modal('show');
-            });
-
-            // Indikator Cascade - Edit Indikator
-            $(document).on('click', '.EditIndikatorCascade', function() {
-                var data = $(this).attr('data-indikator').split('|');
-                $('#EditIndikatorCascadeId').val(data[0]);
-                $('#EditIndikatorText').val(data[1]);
-                $('#ModalEditIndikatorCascade').modal('show');
-            });
-
-            // Indikator Cascade - Hapus Indikator
-            $(document).on('click', '.HapusIndikatorCascade', function() {
-                if (confirm('Apakah Anda yakin ingin menghapus indikator ini?')) {
-                    var id = $(this).data('id');
-                    $.ajax({
-                        url: BaseURL + 'Daerah/HapusIndikatorCascade',
-                        type: 'POST',
-                        data: { id: id, [CSRF_TOKEN]: CSRF_HASH },
-                        success: function(response) {
-                            if (response === '1') {
-                                location.reload();
-                            } else {
-                                alert(response || 'Gagal menghapus indikator!');
-                            }
-                        },
-                        error: function() {
-                            alert('Terjadi kesalahan saat menghapus!');
-                        }
-                    });
-                }
-            });
-
-            // Submit Tambah Indikator Cascade
-            $('#FormTambahIndikatorCascade').submit(function(e) {
-                e.preventDefault();
-                var formData = $(this).serialize();
-                $.ajax({
-                    url: BaseURL + 'Daerah/TambahIndikatorCascade',
-                    type: 'POST',
-                    data: formData,
-                    beforeSend: function() {
-                        $('button[type="submit"]', this).prop('disabled', true).text('Menyimpan...');
-                    },
-                    success: function(res) {
-                        if (res === '1') {
-                            $('#ModalTambahIndikatorCascade').modal('hide');
-                            alert('Indikator berhasil ditambahkan!');
-                            location.reload();
-                        } else {
-                            alert(res || 'Gagal menambahkan indikator!');
-                        }
-                        $('button[type="submit"]', this).prop('disabled', false).text('Simpan');
-                    },
-                    error: function() {
-                        alert('Terjadi kesalahan!');
-                        $('button[type="submit"]', this).prop('disabled', false).text('Simpan');
-                    }
-                });
-            });
-
-            // Submit Edit Indikator Cascade
-            $('#FormEditIndikatorCascade').submit(function(e) {
-                e.preventDefault();
-                var formData = $(this).serialize();
-                $.ajax({
-                    url: BaseURL + 'Daerah/EditIndikatorCascade',
-                    type: 'POST',
-                    data: formData,
-                    beforeSend: function() {
-                        $('button[type="submit"]', this).prop('disabled', true).text('Menyimpan...');
-                    },
-                    success: function(res) {
-                        if (res === '1') {
-                            $('#ModalEditIndikatorCascade').modal('hide');
-                            alert('Indikator berhasil diupdate!');
-                            location.reload();
-                        } else {
-                            alert(res || 'Gagal update indikator!');
-                        }
-                        $('button[type="submit"]', this).prop('disabled', false).text('Simpan');
-                    },
-                    error: function() {
-                        alert('Terjadi kesalahan!');
-                        $('button[type="submit"]', this).prop('disabled', false).text('Simpan');
-                    }
-                });
-            });
-
-            // Tujuan & Sasaran Cascade - Add/Remove functionality
-            $(document).on('click', '.btn-add-tujuan-cascade', function() {
-                var newRow = $('<div class="form-group tujuan-cascade-row">' +
-                    '<div class="row">' +
-                    '<div class="col-md-10">' +
-                    '<select class="form-control tujuan-cascade-select" name="tujuan_ids[]" required>' +
-                    '<option value="">Pilih Tujuan</option>' +
-                    '</select>' +
-                    '</div>' +
-                    '<div class="col-md-2" style="padding-top: 7px;">' +
-                    '<button type="button" class="btn btn-danger btn-remove-tujuan-cascade">' +
-                    '<i class="notika-icon notika-trash"></i>' +
-                    '</button>' +
-                    '</div>' +
-                    '</div>' +
-                    '</div>');
-                $('#tujuan-cascade-container').append(newRow);
-                var misiId = $('#TujuanCascadeMisi').val();
-                loadTujuanByMisi(misiId, newRow.find('.tujuan-cascade-select'), '-- Tidak ada tujuan untuk misi ini --');
-            });
-
-           // Update fungsi tambah baris sasaran
-$(document).on('click', '.btn-add-sasaran-cascade', function() {
-    var row = $(this).closest('.sasaran-cascade-row');
-    var tujuanIds = row.find('.tujuan-select-for-sasaran').attr('data-available-tujuan');
-    
-    var newRow = $('<div class="form-group sasaran-cascade-row">' +
-        '<div class="row">' +
-        '<div class="col-md-12">' +
-        '<label>Tujuan Terkait</label>' +
-        '<select class="form-control tujuan-select-for-sasaran" name="tujuan_terkait[]" required>' +
-        '<option value="">Pilih Tujuan</option>' +
-        '</select>' +
-        '</div>' +
-        '</div>' +
-        '<div class="row">' +
-        '<div class="col-md-10">' +
-        '<label>Sasaran</label>' +
-        '<select class="form-control sasaran-cascade-select" name="sasaran_ids[]" required disabled>' +
-        '<option value="">Pilih Sasaran</option>' +
-        '</select>' +
-        '</div>' +
-        '<div class="col-md-2" style="padding-top: 25px;">' +
-        '<button type="button" class="btn btn-danger btn-remove-sasaran-cascade">' +
-        '<i class="notika-icon notika-trash"></i>' +
-        '</button>' +
-        '</div>' +
-        '</div>' +
-        '</div>');
-    
-    $('#sasaran-cascade-container').append(newRow);
-    
-    // Load tujuan yang sama untuk baris baru
-    var firstTujuanSelect = $('#sasaran-cascade-container .tujuan-select-for-sasaran:first');
-    var availableTujuan = firstTujuanSelect.find('option').map(function() {
-        return $(this).val();
-    }).get();
-    
-    loadTujuanForNewRow(availableTujuan, newRow.find('.tujuan-select-for-sasaran'));
-});
-
-// Fungsi untuk load tujuan ke baris baru
-function loadTujuanForNewRow(availableTujuan, targetSelect) {
-    if (availableTujuan.length > 0) {
-        targetSelect.prop('disabled', false).html('<option value="" selected disabled>-- Pilih Tujuan --</option>');
-        
-        // Ambil data tujuan dari select pertama
-        var firstSelect = $('#sasaran-cascade-container .tujuan-select-for-sasaran:first');
-        firstSelect.find('option').each(function() {
-            if ($(this).val() !== "") {
-                targetSelect.append('<option value="' + $(this).val() + '">' + $(this).text() + '</option>');
-            }
+    function getInstansiOptions() {
+        var options = '<option value="">Pilih PD</option><option value="Semua Instansi Terkait">Semua Instansi Terkait</option>';
+        instansiOptions.forEach(function(instansi) {
+            options += '<option value="' + instansi.nama + '">' + instansi.nama + '</option>';
         });
-    } else {
-        targetSelect.prop('disabled', true).html('<option value="" selected disabled>-- Tidak ada tujuan --</option>');
+        return options;
     }
-}
 
-            $(document).on('click', '.btn-remove-tujuan-cascade', function() {
-                if ($('.tujuan-cascade-row').length > 1) {
-                    $(this).closest('.tujuan-cascade-row').remove();
-                } else {
-                    alert('Minimal harus ada satu Tujuan');
+    function handleResponse(res, modalId, formId) {
+        try {
+            if (res === '1' || res.trim() === '1') {
+                if (formId) {
+                    $('#' + formId)[0].reset();
                 }
-            });
-
-            $(document).on('click', '.btn-remove-sasaran-cascade', function() {
-                if ($('.sasaran-cascade-row').length > 1) {
-                    $(this).closest('.sasaran-cascade-row').remove();
-                } else {
-                    alert('Minimal harus ada satu Sasaran');
+                if (modalId) {
+                    $('#' + modalId).modal('hide');
                 }
-            });
-
-            // PD Cascade - Add/Remove functionality
-            $(document).on('click', '.btn-add-pj-cascade', function() {
-                var newRow = $('<div class="form-group pj-cascade-row">' +
-                    '<div class="row">' +
-                    '<div class="col-md-10">' +
-                    '<select class="form-control pj-cascade-select" name="pd_penanggung_jawab[]" required>' +
-                    getInstansiOptions() +
-                    '</select>' +
-                    '</div>' +
-                    '<div class="col-md-2" style="padding-top: 7px;">' +
-                    '<button type="button" class="btn btn-danger btn-remove-pj-cascade">' +
-                    '<i class="notika-icon notika-trash"></i>' +
-                    '</button>' +
-                    '</div>' +
-                    '</div>' +
-                    '</div>');
-                $('#pj-cascade-container').append(newRow);
-            });
-
-            $(document).on('click', '.btn-add-pn-cascade', function() {
-                var newRow = $('<div class="form-group pn-cascade-row">' +
-                    '<div class="row">' +
-                    '<div class="col-md-10">' +
-                    '<select class="form-control pn-cascade-select" name="pd_penunjang[]" required>' +
-                    getInstansiOptions() +
-                    '</select>' +
-                    '</div>' +
-                    '<div class="col-md-2" style="padding-top: 7px;">' +
-                    '<button type="button" class="btn btn-danger btn-remove-pn-cascade">' +
-                    '<i class="notika-icon notika-trash"></i>' +
-                    '</button>' +
-                    '</div>' +
-                    '</div>' +
-                    '</div>');
-                $('#pn-cascade-container').append(newRow);
-            });
-
-            $(document).on('click', '.btn-remove-pj-cascade', function() {
-                if ($('.pj-cascade-row').length > 1) {
-                    $(this).closest('.pj-cascade-row').remove();
-                } else {
-                    alert('Minimal harus ada satu PD Penanggung Jawab');
-                }
-            });
-
-            $(document).on('click', '.btn-remove-pn-cascade', function() {
-                if ($('.pn-cascade-row').length > 1) {
-                    $(this).closest('.pn-cascade-row').remove();
-                } else {
-                    alert('Minimal harus ada satu PD Penunjang');
-                }
-            });
-
-            // Fungsi untuk load tujuan berdasarkan misi
-            function loadTujuanByMisi(misiId, targetSelect, disableMessage) {
-                if (misiId) {
-                    targetSelect.prop('disabled', false).html('<option value="" selected disabled>-- Pilih Tujuan --</option>');
-                    $.ajax({
-                        url: BaseURL + 'Daerah/GetTujuanByMisi',
-                        type: 'POST',
-                        data: { misi_id: misiId, [CSRF_TOKEN]: CSRF_HASH },
-                        success: function(response) {
-                            try {
-                                var data = JSON.parse(response);
-                                if (data.length > 0) {
-                                    $.each(data, function(key, value) {
-                                        targetSelect.append('<option value="' + value.Id + '">' + value.Tujuan + '</option>');
-                                    });
-                                } else {
-                                    targetSelect.html('<option value="" selected disabled>' + disableMessage + '</option>').prop('disabled', true);
-                                }
-                            } catch (e) {
-                                console.error("Gagal memproses data tujuan:", e);
-                                targetSelect.html('<option value="" selected disabled>Error memuat data</option>').prop('disabled', true);
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            console.error("Gagal memuat data tujuan:", error);
-                            targetSelect.html('<option value="" selected disabled>Error memuat data</option>').prop('disabled', true);
-                        }
-                    });
-                } else {
-                    targetSelect.prop('disabled', true).html('<option value="" selected disabled>' + disableMessage + '</option>');
-                }
-            }
-
-            // Fungsi untuk load sasaran berdasarkan tujuan
-            function loadSasaranByTujuan(tujuanId, targetSelect, disableMessage) {
-                if (tujuanId) {
-                    targetSelect.prop('disabled', false).html('<option value="" selected disabled>-- Pilih Sasaran --</option>');
-                    $.ajax({
-                        url: BaseURL + 'Daerah/GetSasaranByTujuan',
-                        type: 'POST',
-                        data: { tujuan_id: tujuanId, [CSRF_TOKEN]: CSRF_HASH },
-                        success: function(response) {
-                            try {
-                                var data = JSON.parse(response);
-                                if (data.length > 0) {
-                                    $.each(data, function(key, value) {
-                                        targetSelect.append('<option value="' + value.Id + '">' + value.Sasaran + '</option>');
-                                    });
-                                } else {
-                                    targetSelect.html('<option value="" selected disabled>' + disableMessage + '</option>').prop('disabled', true);
-                                }
-                            } catch (e) {
-                                console.error("Gagal memproses data sasaran:", e);
-                                targetSelect.html('<option value="" selected disabled>Error memuat data</option>').prop('disabled', true);
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            console.error("Gagal memuat data sasaran:", error);
-                            targetSelect.html('<option value="" selected disabled>Error memuat data</option>').prop('disabled', true);
-                        }
-                    });
-                } else {
-                    targetSelect.prop('disabled', true).html('<option value="" selected disabled>' + disableMessage + '</option>');
-                }
-            }
-
-            // Fungsi loading untuk chain dropdown
-            function loadVisiByPeriod(tahunRange, targetSelect, disableMessage) {
-                if (tahunRange) {
-                    targetSelect.prop('disabled', false).html('<option value="" selected disabled>-- Pilih Visi --</option>');
-                    var tahunRangeSplit = tahunRange.split('-');
-                    $.ajax({
-                        url: BaseURL + 'Daerah/GetVisiByPeriod',
-                        type: 'POST',
-                        data: {
-                            tahun_mulai: tahunRangeSplit[0],
-                            tahun_akhir: tahunRangeSplit[1],
-                            [CSRF_TOKEN]: CSRF_HASH
-                        },
-                        success: function(response) {
-                            try {
-                                var data = JSON.parse(response);
-                                if (data.length > 0) {
-                                    $.each(data, function(key, value) {
-                                        targetSelect.append('<option value="' + value.Id + '">' + value.Visi + '</option>');
-                                    });
-                                } else {
-                                    targetSelect.html('<option value="" selected disabled>' + disableMessage + '</option>').prop('disabled', true);
-                                }
-                            } catch (e) {
-                                console.error("Gagal memproses data visi:", e);
-                                targetSelect.html('<option value="" selected disabled>Error memuat data</option>').prop('disabled', true);
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            console.error("Gagal memuat data visi:", error);
-                            targetSelect.html('<option value="" selected disabled>Error memuat data</option>').prop('disabled', true);
-                        }
-                    });
-                } else {
-                    targetSelect.prop('disabled', true).html('<option value="" selected disabled>' + disableMessage + '</option>');
-                }
-            }
-
-            function loadMisiByVisi(visiId, targetSelect, disableMessage) {
-                if (visiId) {
-                    targetSelect.prop('disabled', false).html('<option value="" selected disabled>-- Pilih Misi --</option>');
-                    $.ajax({
-                        url: BaseURL + 'Daerah/GetMisiByVisi',
-                        type: 'POST',
-                        data: { visi_id: visiId, [CSRF_TOKEN]: CSRF_HASH },
-                        success: function(response) {
-                            try {
-                                var data = JSON.parse(response);
-                                if (data.length > 0) {
-                                    $.each(data, function(key, value) {
-                                        targetSelect.append('<option value="' + value.Id + '">' + value.Misi + '</option>');
-                                    });
-                                } else {
-                                    targetSelect.html('<option value="" selected disabled>' + disableMessage + '</option>').prop('disabled', true);
-                                }
-                            } catch (e) {
-                                console.error("Gagal memproses data misi:", e);
-                                targetSelect.html('<option value="" selected disabled>Error memuat data</option>').prop('disabled', true);
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            console.error("Gagal memuat data misi:", error);
-                            targetSelect.html('<option value="" selected disabled>Error memuat data</option>').prop('disabled', true);
-                        }
-                    });
-                } else {
-                    targetSelect.prop('disabled', true).html('<option value="" selected disabled>' + disableMessage + '</option>');
-                }
-            }
-
-            // Chain for Tambah
-            $('#TahunFilter').change(function() {
-                loadVisiByPeriod($(this).val(), $('#Visi'), '-- Tidak ada visi untuk periode ini --');
-                $('#Misi').prop('disabled', true).html('<option value="" selected disabled>-- Pilih Visi terlebih dahulu --</option>');
-            });
-
-            $('#Visi').change(function() {
-                loadMisiByVisi($(this).val(), $('#Misi'), '-- Tidak ada misi untuk visi ini --');
-            });
-
-            // Chain for Edit
-            $('#EditPeriode').change(function() {
-                loadVisiByPeriod($(this).val(), $('#EditVisi'), '-- Tidak ada visi untuk periode ini --');
-                $('#EditMisi').prop('disabled', true).html('<option value="" selected disabled>-- Pilih Visi terlebih dahulu --</option>');
-            });
-
-            $('#EditVisi').change(function() {
-                loadMisiByVisi($(this).val(), $('#EditMisi'), '-- Tidak ada misi untuk visi ini --');
-            });
-
-            // ========== TAMBAH CASCADE ==========
-            $("#FormTambahCascade").submit(function(e) {
-                e.preventDefault();
-                
-                // Validasi
-                if (!validateCascadeInputs('FormTambahCascade')) return false;
-                
-                var formData = $(this).serializeArray();
-                console.log('Data Cascade yang dikirim:', formData);
-                
-                $.ajax({
-                    url: BaseURL + "Daerah/TambahCascade",
-                    type: "POST",
-                    data: formData,
-                    beforeSend: function() {
-                        $("#FormTambahCascade button[type=submit]").prop('disabled', true).text('Menyimpan...');
-                    },
-                    success: function(res) {
-                        console.log('Response Cascade:', res);
-                        if (res === '1') {
-                            $("#ModalTambahCascade").modal('hide');
-                            alert('Data Cascade berhasil disimpan!');
-                            location.reload();
-                        } else {
-                            alert(res || "Gagal menyimpan data Cascade!");
-                        }
-                        $("#FormTambahCascade button[type=submit]").prop('disabled', false).text('Simpan');
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error Cascade:', error);
-                        alert("Terjadi kesalahan: " + error);
-                        $("#FormTambahCascade button[type=submit]").prop('disabled', false).text('Simpan');
-                    }
-                });
-            });
-
-            // ========== EDIT CASCADE ==========
-            $("#FormEditCascade").submit(function(e) {
-                e.preventDefault();
-                if (!validateCascadeInputs('FormEditCascade')) return false;
-                
-                var formData = $(this).serializeArray();
-                console.log('Data Edit Cascade:', formData);
-                
-                $.ajax({
-                    url: BaseURL + "Daerah/EditCascade",
-                    type: "POST",
-                    data: formData,
-                    beforeSend: function() {
-                        $("#FormEditCascade button[type=submit]").prop('disabled', true).text('Menyimpan...');
-                    },
-                    success: function(res) {
-                        console.log('Response Edit Cascade:', res);
-                        if (res === '1') {
-                            $("#ModalEditCascade").modal('hide');
-                            alert('Data Cascade berhasil diupdate!');
-                            location.reload();
-                        } else {
-                            alert(res || "Gagal update data Cascade!");
-                        }
-                        $("#FormEditCascade button[type=submit]").prop('disabled', false).text('Simpan');
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error Edit Cascade:', error);
-                        alert("Terjadi kesalahan: " + error);
-                        $("#FormEditCascade button[type=submit]").prop('disabled', false).text('Simpan');
-                    }
-                });
-            });
-
-            // Edit Cascade click
-            // Edit Cascade click
-$(".EditCascade").click(function() {
-    var data = $(this).data();
-    $("#EditId").val(data.id);
-    // Hapus baris ini: $("#EditIndikator").val(data.indikator);
-    $("#EditTarget1").val(data.target1 || '');
-    $("#EditTarget2").val(data.target2 || '');
-    $("#EditTarget3").val(data.target3 || '');
-    $("#EditTarget4").val(data.target4 || '');
-    $("#EditTarget5").val(data.target5 || '');
-    $("#EditPeriode").val(data.tahunmulai + '-' + data.tahunakhir).trigger('change');
-
-    // Chain set values dengan setInterval untuk async load
-    var intervalVisi = setInterval(function() {
-        if ($('#EditVisi option[value="' + data.visi + '"]').length > 0) {
-            $('#EditVisi').val(data.visi).trigger('change');
-            clearInterval(intervalVisi);
-            var intervalMisi = setInterval(function() {
-                if ($('#EditMisi option[value="' + data.misi + '"]').length > 0) {
-                    $('#EditMisi').val(data.misi);
-                    clearInterval(intervalMisi);
-                }
-            }, 100);
-        }
-    }, 100);
-
-    $("#ModalEditCascade").modal('show');
-});
-
-// ========== VALIDATION FUNCTIONS ==========
-function validateCascadeInputs(formId) {
-    var baseId = formId.includes('Tambah') ? '' : 'Edit';
-    if ($('#' + baseId + 'TahunFilter').val() === "") {
-        alert('Pilih periode tahun!');
-        return false;
-    }
-    if ($('#' + baseId + 'Visi').val() === "") {
-        alert('Pilih visi!');
-        return false;
-    }
-    if ($('#' + baseId + 'Misi').val() === "") {
-        alert('Pilih misi!');
-        return false;
-    }
-    // Hapus validasi indikator: if ($('#' + baseId + 'Indikator').val() === "") {
-    //     alert('Isi indikator!');
-    //     return false;
-    // }
-    return validateIntegerInputs(formId);
-}
-
-            // Hapus Cascade
-            $(".HapusCascade").click(function() {
-                if (confirm("Apakah Anda yakin ingin menghapus data cascade ini?")) {
-                    var id = $(this).data('id');
-                    $.ajax({
-                        url: BaseURL + "Daerah/HapusCascade",
-                        type: "POST",
-                        data: { id: id, [CSRF_TOKEN]: CSRF_HASH },
-                        beforeSend: function() {
-                            $(this).prop('disabled', true);
-                        },
-                        success: function(res) {
-                            console.log('Response Hapus Cascade:', res);
-                            if (res === '1') {
-                                alert('Data berhasil dihapus!');
-                                location.reload();
-                            } else {
-                                alert(res || "Gagal hapus data!");
-                            }
-                            $(this).prop('disabled', false);
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('Error Hapus Cascade:', error);
-                            alert("Terjadi kesalahan: " + error);
-                            $(this).prop('disabled', false);
-                        }
-                    });
-                }
-            });
-
-            // ========== TAMBAH TUJUAN CASCADE ==========
-            // ========== TAMBAH TUJUAN CASCADE ==========
-$(".TambahTujuanCascade").click(function() {
-    var id = $(this).data('id');
-    var misiId = $(this).data('misi');
-    
-    $("#TujuanCascadeId").val(id);
-    $("#TujuanCascadeMisi").val(misiId);
-    
-    // SELALU KOSONGKAN CONTAINER DAN TAMPILKAN SATU FORM KOSONG
-    $("#tujuan-cascade-container").html('<div class="form-group tujuan-cascade-row">' +
-        '<div class="row">' +
-        '<div class="col-md-10">' +
-        '<label>Tujuan</label>' +
-        '<select class="form-control tujuan-cascade-select" name="tujuan_ids[]" required>' +
-        '<option value="">Pilih Tujuan</option>' +
-        '</select>' +
-        '</div>' +
-        '<div class="col-md-2" style="padding-top: 25px;">' +
-        '<button type="button" class="btn btn-success btn-add-tujuan-cascade">' +
-        '<i class="notika-icon notika-plus-symbol"></i>' +
-        '</button>' +
-        '</div>' +
-        '</div>' +
-        '</div>');
-    
-    // Load tujuan untuk form kosong pertama
-    loadTujuanByMisi(misiId, $('#tujuan-cascade-container .tujuan-cascade-select:first'), '-- Tidak ada tujuan untuk misi ini --');
-    
-    $("#ModalTambahTujuanCascade").modal('show');
-});
-
-// Fungsi untuk menambah row tujuan baru
-function addNewTujuanRow(misiId) {
-    var newRow = $('<div class="form-group tujuan-cascade-row">' +
-        '<div class="row">' +
-        '<div class="col-md-10">' +
-        '<select class="form-control tujuan-cascade-select" name="tujuan_ids[]" required>' +
-        '<option value="">Pilih Tujuan</option>' +
-        '</select>' +
-        '</div>' +
-        '<div class="col-md-2" style="padding-top: 7px;">' +
-        '<button type="button" class="btn btn-danger btn-remove-tujuan-cascade">' +
-        '<i class="notika-icon notika-trash"></i>' +
-        '</button>' +
-        '</div>' +
-        '</div>' +
-        '</div>');
-    
-    $('#tujuan-cascade-container').append(newRow);
-    loadTujuanByMisi(misiId, newRow.find('.tujuan-cascade-select'), '-- Tidak ada tujuan untuk misi ini --');
-}
-
-// Submit Tambah Tujuan Cascade - HANYA SIMPAN YANG BARU
-$("#FormTambahTujuanCascade").submit(function(e) {
-    e.preventDefault();
-    
-    var semuaTujuanIds = [];
-    
-    // Kumpulkan SEMUA tujuan dari form (hanya yang baru)
-    $('select[name="tujuan_ids[]"]').each(function() {
-        if ($(this).val()) {
-            semuaTujuanIds.push($(this).val());
-        }
-    });
-    
-    if (semuaTujuanIds.length === 0) {
-        alert('Pilih minimal satu Tujuan!');
-        return false;
-    }
-    
-    var formData = {
-        id: $('#TujuanCascadeId').val(),
-        tujuan_ids: semuaTujuanIds.join(','),
-        [CSRF_TOKEN]: CSRF_HASH
-    };
-    
-    console.log('Data Tujuan Cascade (hanya yang baru):', formData);
-    
-    $.ajax({
-        url: BaseURL + "Daerah/TambahTujuanCascade",
-        type: "POST",
-        data: formData,
-        beforeSend: function() {
-            $("#FormTambahTujuanCascade button[type=submit]").prop('disabled', true).text('Menyimpan...');
-        },
-        success: function(res) {
-            console.log('Response Tujuan Cascade:', res);
-            if (res === '1') {
-                $("#ModalTambahTujuanCascade").modal('hide');
-                alert('Tujuan berhasil ditambahkan!');
-                location.reload();
+                window.location.reload();
             } else {
-                alert(res || "Gagal menambahkan Tujuan!");
-            }
-            $("#FormTambahTujuanCascade button[type=submit]").prop('disabled', false).text('Simpan');
-                            },
-                    error: function(xhr, status, error) {
-                        console.error('Error Tujuan Cascade:', error);
-                        alert("Terjadi kesalahan: " + error);
-                        $("#FormTambahTujuanCascade button[type=submit]").prop('disabled', false).text('Simpan');
-                    }
-                });
-            });
-
-// Submit Tambah Sasaran Cascade (MODIFIED - combine existing and new)
-$("#FormTambahSasaranCascade").submit(function(e) {
-    e.preventDefault();
-    
-    var semuaSasaranIds = [];
-    
-    // Kumpulkan semua sasaran (yang sudah ada dan yang baru)
-    $('select[name="sasaran_ids[]"]').each(function() {
-        if ($(this).val()) {
-            semuaSasaranIds.push($(this).val());
-        }
-    });
-    
-    if (semuaSasaranIds.length === 0) {
-        alert('Pilih minimal satu Sasaran!');
-        return false;
-    }
-    
-    var formData = {
-        id: $('#SasaranCascadeId').val(),
-        sasaran_ids: semuaSasaranIds.join(','),
-        [CSRF_TOKEN]: CSRF_HASH
-    };
-    
-    console.log('Data Sasaran Cascade (gabungan):', formData);
-    
-    $.ajax({
-        url: BaseURL + "Daerah/TambahSasaranCascade",
-        type: "POST",
-        data: formData,
-        beforeSend: function() {
-            $("#FormTambahSasaranCascade button[type=submit]").prop('disabled', true).text('Menyimpan...');
-        },
-        success: function(res) {
-            console.log('Response Sasaran Cascade:', res);
-            if (res === '1') {
-                $("#ModalTambahSasaranCascade").modal('hide');
-                location.reload();
-            } else {
-                alert(res || "Gagal menambahkan Sasaran!");
-            }
-            $("#FormTambahSasaranCascade button[type=submit]").prop('disabled', false).text('Simpan');
-        },
-        error: function(xhr, status, error) {
-            console.error('Error Sasaran Cascade:', error);
-            alert("Terjadi kesalahan: " + error);
-            $("#FormTambahSasaranCascade button[type=submit]").prop('disabled', false).text('Simpan');
-        }
-    });
-});
-
-            // Tujuan Cascade - Edit Tujuan 
-// Tujuan Cascade - Edit Tujuan (MODIFIED dengan auto-delete sasaran)
-$(".EditTujuanCascade").click(function() {
-    var Data = $(this).attr('data-tujuan').split("|");
-    var misiId = $(this).data('misi');
-    var cascadeId = Data[0];
-    var existingTujuanIds = Data[1].split(",");
-    var List = '';
-    
-    // Simpan cascadeId untuk digunakan nanti
-    $("#IdCascadeTujuan").val(cascadeId);
-    $("#EditTujuanCascadeMisi").val(misiId);
-    
-    // Ambil data sasaran yang terkait untuk warning
-    var row = $(this).closest('tr');
-    var existingSasaranTexts = row.find('td:eq(3)').find('div:last-child div').map(function() {
-        return $(this).text().trim();
-    }).get();
-    
-    if (existingTujuanIds.length > 0 && existingTujuanIds[0] !== "") {
-        $.ajax({
-            url: BaseURL + 'Daerah/GetTujuanByMisi',
-            type: 'POST',
-            data: { misi_id: misiId, [CSRF_TOKEN]: CSRF_HASH },
-            success: function(response) {
                 try {
-                    var data = JSON.parse(response);
-                    if (data.length > 0) {
-                        // Filter hanya tujuan yang sudah dipilih
-                        var filteredData = data.filter(function(tujuan) {
-                            return existingTujuanIds.includes(tujuan.Id.toString());
-                        });
-                        
-                        if (filteredData.length > 0) {
-                            // Tampilkan warning jika ada sasaran terkait
-                            if (existingSasaranTexts.length > 0 && existingSasaranTexts[0] !== "") {
-                                List += '<div class="alert alert-warning" style="font-size: 12px; padding: 8px; margin-bottom: 15px;">';
-                                List += '<strong>Peringatan:</strong> Jika tujuan dihapus, sasaran yang terkait juga akan terhapus otomatis.';
-                                List += '</div>';
-                            }
-                            
-                            $.each(filteredData, function(key, value) {
-                                List += '<label><input style="margin-top: 10px;" type="checkbox" checked name="TujuanCascade" value="'+value.Id+'"> '+value.Tujuan+'</label><br>';
-                            });
-                            $("#ListTujuanCascade").html(List);
-                            $("#ModalEditTujuanCascade").modal('show');
-                        } else {
-                            alert("Tujuan yang dipilih sebelumnya tidak ditemukan");
-                        }
-                    } else {
-                        alert("Tidak ada tujuan untuk misi ini");
-                    }
+                    var error = JSON.parse(res);
+                    alert(error.message || "Gagal memproses data!");
                 } catch (e) {
-                    alert("Gagal memproses data tujuan");
+                    alert(res || "Gagal memproses data!");
                 }
-            },
-            error: function() {
-                alert("Gagal memuat data tujuan");
             }
-        });
-    } else {
-        alert("Tidak ada tujuan yang dipilih sebelumnya");
-    }
-});
-
-         
-$("#EditTujuanCascade").click(function() {
-    var Tampung = [];
-    var previousTujuanIds = $("#ListTujuanCascade input[name='TujuanCascade']").map(function() {
-        return $(this).val();
-    }).get();
-    
-    var currentTujuanIds = [];
-    $.each($("input[name='TujuanCascade']:checked"), function() {
-        currentTujuanIds.push($(this).val());
-        Tampung.push($(this).val());
-    });
-    
-    // Cari tujuan yang dihapus
-    var deletedTujuanIds = previousTujuanIds.filter(function(id) {
-        return !currentTujuanIds.includes(id);
-    });
-    
-    var Tujuan = {
-        id: $("#IdCascadeTujuan").val(),
-        tujuan_ids: Tampung.join(","),
-        deleted_tujuan_ids: deletedTujuanIds.join(","),
-        [CSRF_TOKEN]: CSRF_HASH
-    };
-    
-    console.log('Data Edit Tujuan:', Tujuan);
-    
-    // Konfirmasi jika ada tujuan dihapus dan ada sasaran/indikator terkait
-    if (deletedTujuanIds.length > 0) {
-        var row = $("#IdCascadeTujuan").closest('tr');  // Ambil row cascade
-        var hasSasaran = row.find('td:eq(3) div:last-child div').length > 0;  // Cek sasaran
-        var hasIndikator = row.find('td:eq(4) div:last-child div').length > 0;  // Cek indikator
-        var message = "Beberapa tujuan akan dihapus. ";
-        if (hasSasaran) message += "Sasaran terkait juga akan terhapus. ";
-        if (hasIndikator) message += "Indikator (IKU/IKD) juga akan terhapus. ";
-        message += "Lanjutkan?";
-        
-        if (!confirm(message)) {
-            return;
+        } catch (e) {
+            alert("Terjadi kesalahan: " + e.message);
         }
     }
-    
-    $.ajax({
-        url: BaseURL + "Daerah/EditTujuanCascade",
-        type: "POST",
-        data: Tujuan,
-        beforeSend: function() {
-            $("#EditTujuanCascade").prop('disabled', true).text('Menyimpan...');
-        },
-        success: function(Respon) {
-            console.log('Response Edit Tujuan:', Respon);
-            if (Respon === '1') {
-                $("#ModalEditTujuanCascade").modal('hide');
-                location.reload();
-            } else {
-                alert(Respon || "Gagal menyimpan data!");
-            }
-            $("#EditTujuanCascade").prop('disabled', false).text('Simpan');
-        },
-        error: function(xhr, status, error) {
-            console.error('Error Edit Tujuan:', error);
-            alert("Terjadi kesalahan: " + error);
-            $("#EditTujuanCascade").prop('disabled', false).text('Simpan');
-        }
-    });
-});
 
-            // ========== TAMBAH SASARAN CASCADE ==========
-           // Sasaran Cascade - Tambah Sasaran (MODIFIED dengan pilihan tujuan)
-$(".TambahSasaranCascade").click(function() {
-    var id = $(this).data('id');
-    var tujuanIds = $(this).closest('tr').find('.EditTujuanCascade').attr('data-tujuan').split("|")[1];
-    
-    $("#SasaranCascadeId").val(id);
-    
-    // Reset container
-    $("#sasaran-cascade-container").html('<div class="form-group sasaran-cascade-row">' +
-        '<div class="row">' +
-        '<div class="col-md-12">' +
-        '<label>Tujuan Terkait</label>' +
-        '<select class="form-control tujuan-select-for-sasaran" name="tujuan_terkait[]" required>' +
-        '<option value="">Pilih Tujuan</option>' +
-        '</select>' +
-        '</div>' +
-        '</div>' +
-        '<div class="row">' +
-        '<div class="col-md-10">' +
-        '<label>Sasaran</label>' +
-        '<select class="form-control sasaran-cascade-select" name="sasaran_ids[]" required disabled>' +
-        '<option value="">Pilih Sasaran</option>' +
-        '</select>' +
-        '</div>' +
-        '<div class="col-md-2" style="padding-top: 25px;">' +
-        '<button type="button" class="btn btn-success btn-add-sasaran-cascade">' +
-        '<i class="notika-icon notika-plus-symbol"></i>' +
-        '</button>' +
-        '</div>' +
-        '</div>' +
-        '</div>');
-    
-    // Load tujuan yang sudah dipilih di cascade
-    loadTujuanForSasaran(tujuanIds, $('#sasaran-cascade-container .tujuan-select-for-sasaran:first'));
-    
-    $("#ModalTambahSasaranCascade").modal('show');
-});
-
-// Fungsi untuk load tujuan yang sudah dipilih di cascade
-function loadTujuanForSasaran(tujuanIds, targetSelect) {
-    if (tujuanIds && tujuanIds !== "") {
-        var tujuanIdArray = tujuanIds.split(",");
-        targetSelect.prop('disabled', false).html('<option value="" selected disabled>-- Pilih Tujuan --</option>');
-        
-        // Load semua tujuan untuk mendapatkan nama
-        $.ajax({
-            url: BaseURL + 'Daerah/GetTujuanByMisi',
-            type: 'POST',
-            data: { 
-                misi_id: $('#EditTujuanCascadeMisi').val() || $('.EditTujuanCascade').data('misi'), 
-                [CSRF_TOKEN]: CSRF_HASH 
-            },
-            success: function(response) {
-                try {
-                    var data = JSON.parse(response);
-                    if (data.length > 0) {
-                        // Filter hanya tujuan yang sudah dipilih di cascade
-                        var filteredTujuan = data.filter(function(tujuan) {
-                            return tujuanIdArray.includes(tujuan.Id.toString());
-                        });
-                        
-                        if (filteredTujuan.length > 0) {
-                            $.each(filteredTujuan, function(key, value) {
+    function loadTujuanByMisi(misiId, targetSelect, disableMessage) {
+        if (misiId) {
+            targetSelect.prop('disabled', false).html('<option value="" selected disabled>-- Pilih Tujuan --</option>');
+            $.ajax({
+                url: BaseURL + 'Daerah/GetTujuanByMisi',
+                type: 'POST',
+                data: { misi_id: misiId, [CSRF_TOKEN]: CSRF_HASH },
+                success: function(response) {
+                    try {
+                        var data = JSON.parse(response);
+                        if (data.length > 0) {
+                            $.each(data, function(key, value) {
                                 targetSelect.append('<option value="' + value.Id + '">' + value.Tujuan + '</option>');
                             });
-                            
-                            // Trigger change untuk load sasaran pertama kali
-                            targetSelect.trigger('change');
                         } else {
-                            targetSelect.html('<option value="" selected disabled>-- Tidak ada tujuan yang dipilih --</option>').prop('disabled', true);
-                            alert('Belum ada tujuan yang dipilih untuk cascade ini');
+                            targetSelect.html('<option value="" selected disabled>' + disableMessage + '</option>').prop('disabled', true);
                         }
-                    } else {
-                        targetSelect.html('<option value="" selected disabled>-- Tidak ada tujuan --</option>').prop('disabled', true);
+                    } catch (e) {
+                        targetSelect.html('<option value="" selected disabled>Error memuat data</option>').prop('disabled', true);
                     }
-                } catch (e) {
-                    console.error("Gagal memproses data tujuan:", e);
+                },
+                error: function() {
                     targetSelect.html('<option value="" selected disabled>Error memuat data</option>').prop('disabled', true);
                 }
-            },
-            error: function(xhr, status, error) {
-                console.error("Gagal memuat data tujuan:", error);
-                targetSelect.html('<option value="" selected disabled>Error memuat data</option>').prop('disabled', true);
+            });
+        } else {
+            targetSelect.prop('disabled', true).html('<option value="" selected disabled>' + disableMessage + '</option>');
+        }
+    }
+
+    function loadSasaranByTujuan(tujuanId, targetSelect, disableMessage) {
+        if (tujuanId) {
+            targetSelect.prop('disabled', false).html('<option value="" selected disabled>-- Pilih Sasaran --</option>');
+            $.ajax({
+                url: BaseURL + 'Daerah/GetSasaranByTujuan',
+                type: 'POST',
+                data: { tujuan_id: tujuanId, [CSRF_TOKEN]: CSRF_HASH },
+                success: function(response) {
+                    try {
+                        var data = JSON.parse(response);
+                        if (data.length > 0) {
+                            $.each(data, function(key, value) {
+                                targetSelect.append('<option value="' + value.Id + '">' + value.Sasaran + '</option>');
+                            });
+                        } else {
+                            targetSelect.html('<option value="" selected disabled>' + disableMessage + '</option>').prop('disabled', true);
+                        }
+                    } catch (e) {
+                        targetSelect.html('<option value="" selected disabled>Error memuat data</option>').prop('disabled', true);
+                    }
+                },
+                error: function() {
+                    targetSelect.html('<option value="" selected disabled>Error memuat data</option>').prop('disabled', true);
+                }
+            });
+        } else {
+            targetSelect.prop('disabled', true).html('<option value="" selected disabled>' + disableMessage + '</option>');
+        }
+    }
+
+    function loadVisiByPeriod(tahunRange, targetSelect, disableMessage) {
+        if (tahunRange) {
+            targetSelect.prop('disabled', false).html('<option value="" selected disabled>-- Pilih Visi --</option>');
+            var tahunRangeSplit = tahunRange.split('-');
+            $.ajax({
+                url: BaseURL + 'Daerah/GetVisiByPeriod',
+                type: 'POST',
+                data: {
+                    tahun_mulai: tahunRangeSplit[0],
+                    tahun_akhir: tahunRangeSplit[1],
+                    [CSRF_TOKEN]: CSRF_HASH
+                },
+                success: function(response) {
+                    try {
+                        var data = JSON.parse(response);
+                        if (data.length > 0) {
+                            $.each(data, function(key, value) {
+                                targetSelect.append('<option value="' + value.Id + '">' + value.Visi + '</option>');
+                            });
+                        } else {
+                            targetSelect.html('<option value="" selected disabled>' + disableMessage + '</option>').prop('disabled', true);
+                        }
+                    } catch (e) {
+                        targetSelect.html('<option value="" selected disabled>Error memuat data</option>').prop('disabled', true);
+                    }
+                },
+                error: function() {
+                    targetSelect.html('<option value="" selected disabled>Error memuat data</option>').prop('disabled', true);
+                }
+            });
+        } else {
+            targetSelect.prop('disabled', true).html('<option value="" selected disabled>' + disableMessage + '</option>');
+        }
+    }
+
+    function loadMisiByVisi(visiId, targetSelect, disableMessage) {
+        if (visiId) {
+            targetSelect.prop('disabled', false).html('<option value="" selected disabled>-- Pilih Misi --</option>');
+            $.ajax({
+                url: BaseURL + 'Daerah/GetMisiByVisi',
+                type: 'POST',
+                data: { visi_id: visiId, [CSRF_TOKEN]: CSRF_HASH },
+                success: function(response) {
+                    try {
+                        var data = JSON.parse(response);
+                        if (data.length > 0) {
+                            $.each(data, function(key, value) {
+                                targetSelect.append('<option value="' + value.Id + '">' + value.Misi + '</option>');
+                            });
+                        } else {
+                            targetSelect.html('<option value="" selected disabled>' + disableMessage + '</option>').prop('disabled', true);
+                        }
+                    } catch (e) {
+                        targetSelect.html('<option value="" selected disabled>Error memuat data</option>').prop('disabled', true);
+                    }
+                },
+                error: function() {
+                    targetSelect.html('<option value="" selected disabled>Error memuat data</option>').prop('disabled', true);
+                }
+            });
+        } else {
+            targetSelect.prop('disabled', true).html('<option value="" selected disabled>' + disableMessage + '</option>');
+        }
+    }
+
+    function loadTujuanForSasaran(tujuanIds, targetSelect) {
+        if (tujuanIds && tujuanIds !== "") {
+            var tujuanIdArray = tujuanIds.split(",");
+            targetSelect.prop('disabled', false).html('<option value="" selected disabled>-- Pilih Tujuan --</option>');
+            
+            $.ajax({
+                url: BaseURL + 'Daerah/GetTujuanByMisi',
+                type: 'POST',
+                data: { 
+                    misi_id: $('.EditTujuanCascade').data('misi') || '', 
+                    [CSRF_TOKEN]: CSRF_HASH 
+                },
+                success: function(response) {
+                    try {
+                        var data = JSON.parse(response);
+                        if (data.length > 0) {
+                            var filteredTujuan = data.filter(function(tujuan) {
+                                return tujuanIdArray.includes(tujuan.Id.toString());
+                            });
+                            
+                            if (filteredTujuan.length > 0) {
+                                $.each(filteredTujuan, function(key, value) {
+                                    targetSelect.append('<option value="' + value.Id + '">' + value.Tujuan + '</option>');
+                                });
+                                targetSelect.trigger('change');
+                            } else {
+                                targetSelect.html('<option value="" selected disabled>-- Tidak ada tujuan yang dipilih --</option>').prop('disabled', true);
+                            }
+                        } else {
+                            targetSelect.html('<option value="" selected disabled>-- Tidak ada tujuan --</option>').prop('disabled', true);
+                        }
+                    } catch (e) {
+                        targetSelect.html('<option value="" selected disabled>Error memuat data</option>').prop('disabled', true);
+                    }
+                },
+                error: function() {
+                    targetSelect.html('<option value="" selected disabled>Error memuat data</option>').prop('disabled', true);
+                }
+            });
+        } else {
+            targetSelect.prop('disabled', true).html('<option value="" selected disabled>-- Belum ada tujuan yang dipilih --</option>');
+        }
+    }
+
+    function validateIntegerInputs(formId) {
+        var isValid = true;
+        $('#' + formId + ' input[type="number"]').each(function() {
+            if (this.value && !Number.isInteger(parseFloat(this.value))) {
+                alert('Target harus angka bulat!');
+                isValid = false;
+                return false;
             }
         });
-    } else {
-        targetSelect.prop('disabled', true).html('<option value="" selected disabled>-- Belum ada tujuan yang dipilih --</option>');
-        alert('Harus memilih tujuan terlebih dahulu sebelum menambah sasaran');
+        return isValid;
     }
-}
 
-// Event ketika tujuan dipilih di form sasaran
-$(document).on('change', '.tujuan-select-for-sasaran', function() {
-    var tujuanId = $(this).val();
-    var sasaranSelect = $(this).closest('.sasaran-cascade-row').find('.sasaran-cascade-select');
-    
-    if (tujuanId) {
-        loadSasaranByTujuan(tujuanId, sasaranSelect, '-- Tidak ada sasaran untuk tujuan ini --');
-        sasaranSelect.prop('disabled', false);
-    } else {
-        sasaranSelect.prop('disabled', true).html('<option value="">Pilih Sasaran</option>');
-    }
-});
-// Submit Tambah Sasaran Cascade (MODIFIED)
-$("#FormTambahSasaranCascade").submit(function(e) {
-    e.preventDefault();
-    
-    // Validasi: pastikan setiap sasaran memiliki tujuan terkait
-    var isValid = true;
-    var sasaranData = [];
-    
-    $('.sasaran-cascade-row').each(function() {
-        var tujuanId = $(this).find('.tujuan-select-for-sasaran').val();
-        var sasaranId = $(this).find('.sasaran-cascade-select').val();
+    // ============================================================
+    // FILTER WILAYAH
+    // ============================================================
+    <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
+        $("#Provinsi").change(function() {
+            if ($(this).val() === "") {
+                $("#KabKota").html('<option value="">Pilih Kab/Kota</option>');
+                return;
+            }
+            $.ajax({
+                url: BaseURL + "Daerah/GetListKabKota",
+                type: "POST",
+                data: { Kode: $(this).val(), [CSRF_TOKEN]: CSRF_HASH },
+                beforeSend: function() { $("#KabKota").prop('disabled', true); },
+                success: function(Respon) {
+                    try {
+                        var Data = JSON.parse(Respon);
+                        var KabKota = '<option value="">Pilih Kab/Kota</option>';
+                        if (Data.length > 0) {
+                            for (let i = 0; i < Data.length; i++) {
+                                KabKota += '<option value="' + Data[i].Kode + '">' + Data[i].Nama + '</option>';
+                            }
+                        } else {
+                            alert("Belum Ada Data Kab/Kota");
+                        }
+                        $("#KabKota").html(KabKota).prop('disabled', false);
+                    } catch (e) {
+                        alert("Gagal memuat data Kab/Kota");
+                        $("#KabKota").prop('disabled', false);
+                    }
+                },
+                error: function() {
+                    alert("Gagal memuat data Kab/Kota");
+                    $("#KabKota").prop('disabled', false);
+                }
+            });
+        });
+
+        $("#Filter").click(function() {
+            if ($("#Provinsi").val() === "") {
+                alert("Mohon Pilih Provinsi");
+                return;
+            }
+            if ($("#KabKota").val() === "") {
+                alert("Mohon Pilih Kab/Kota");
+                return;
+            }
+            var kodeWilayah = $("#KabKota").val();
+            $.ajax({
+                url: BaseURL + "Daerah/SetTempKodeWilayah",
+                type: "POST",
+                data: { KodeWilayah: kodeWilayah, [CSRF_TOKEN]: CSRF_HASH },
+                beforeSend: function() { $("#Filter").prop('disabled', true).text('Memuat...'); },
+                success: function(Respon) {
+                    try {
+                        if (Respon === '1' || Respon.trim() === '1') {
+                            window.location.href = BaseURL + "Daerah/Cascade";
+                        } else {
+                            alert(Respon || "Gagal menyimpan filter wilayah!");
+                            $("#Filter").prop('disabled', false).text('Filter');
+                        }
+                    } catch (e) {
+                        alert("Gagal memproses respons server!");
+                        $("#Filter").prop('disabled', false).text('Filter');
+                    }
+                },
+                error: function() {
+                    alert("Gagal menghubungi server!");
+                    $("#Filter").prop('disabled', false).text('Filter');
+                }
+            });
+        });
+
+        <?php if (!empty($KodeWilayah)) { ?>
+            var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
+            var kodeKab = "<?= $KodeWilayah ?>";
+            $("#Provinsi").val(kodeProv);
+            $.ajax({
+                url: BaseURL + "Daerah/GetListKabKota",
+                type: "POST",
+                data: { Kode: kodeProv, [CSRF_TOKEN]: CSRF_HASH },
+                success: function(Respon) {
+                    try {
+                        var Data = JSON.parse(Respon);
+                        var KabKota = '<option value="">Pilih Kab/Kota</option>';
+                        if (Data.length > 0) {
+                            for (let i = 0; i < Data.length; i++) {
+                                var selected = (Data[i].Kode === kodeKab) ? 'selected' : '';
+                                KabKota += '<option value="' + Data[i].Kode + '" ' + selected + '>' + Data[i].Nama + '</option>';
+                            }
+                        }
+                        $("#KabKota").html(KabKota);
+                    } catch (e) {
+                        alert("Gagal memuat data Kab/Kota");
+                    }
+                },
+                error: function() {
+                    alert("Gagal memuat data Kab/Kota");
+                }
+            });
+        <?php } ?>
+    <?php } ?>
+
+    // ============================================================
+    // TAMBAH CASCADE
+    // ============================================================
+
+    $('#TahunFilter').change(function() {
+        loadVisiByPeriod($(this).val(), $('#Visi'), '-- Tidak ada visi untuk periode ini --');
+        $('#Misi').prop('disabled', true).html('<option value="" selected disabled>-- Pilih Visi terlebih dahulu --</option>');
+    });
+
+    $('#Visi').change(function() {
+        loadMisiByVisi($(this).val(), $('#Misi'), '-- Tidak ada misi untuk visi ini --');
+    });
+
+    $("#FormTambahCascade").submit(function(e) {
+        e.preventDefault();
         
-        if (!tujuanId || !sasaranId) {
-            alert('Setiap sasaran harus memiliki tujuan terkait!');
-            isValid = false;
+        if ($('#TahunFilter').val() === "") { alert('Pilih periode tahun!'); return false; }
+        if ($('#Visi').val() === "") { alert('Pilih visi!'); return false; }
+        if ($('#Misi').val() === "") { alert('Pilih misi!'); return false; }
+        if (!validateIntegerInputs('FormTambahCascade')) return false;
+        
+        $.ajax({
+            url: BaseURL + "Daerah/TambahCascade",
+            type: "POST",
+            data: $(this).serialize(),
+            beforeSend: function() {
+                $("#FormTambahCascade button[type=submit]").prop('disabled', true).text('Menyimpan...');
+            },
+            success: function(res) {
+                handleResponse(res, 'ModalTambahCascade', 'FormTambahCascade');
+                $("#FormTambahCascade button[type=submit]").prop('disabled', false).text('Simpan');
+            },
+            error: function(xhr) {
+                alert("Terjadi kesalahan: " + xhr.statusText);
+                $("#FormTambahCascade button[type=submit]").prop('disabled', false).text('Simpan');
+            }
+        });
+    });
+
+    // ============================================================
+    // EDIT CASCADE
+    // ============================================================
+
+    $('#EditPeriode').change(function() {
+        loadVisiByPeriod($(this).val(), $('#EditVisi'), '-- Tidak ada visi untuk periode ini --');
+        $('#EditMisi').prop('disabled', true).html('<option value="" selected disabled>-- Pilih Visi terlebih dahulu --</option>');
+    });
+
+    $('#EditVisi').change(function() {
+        loadMisiByVisi($(this).val(), $('#EditMisi'), '-- Tidak ada misi untuk visi ini --');
+    });
+
+    $(".EditCascade").click(function() {
+        var data = $(this).data();
+        $("#EditId").val(data.id);
+        $("#EditTarget1").val(data.target1 || '');
+        $("#EditTarget2").val(data.target2 || '');
+        $("#EditTarget3").val(data.target3 || '');
+        $("#EditTarget4").val(data.target4 || '');
+        $("#EditTarget5").val(data.target5 || '');
+        $("#EditPeriode").val(data.tahunmulai + '-' + data.tahunakhir).trigger('change');
+
+        var intervalVisi = setInterval(function() {
+            if ($('#EditVisi option[value="' + data.visi + '"]').length > 0) {
+                $('#EditVisi').val(data.visi).trigger('change');
+                clearInterval(intervalVisi);
+                var intervalMisi = setInterval(function() {
+                    if ($('#EditMisi option[value="' + data.misi + '"]').length > 0) {
+                        $('#EditMisi').val(data.misi);
+                        clearInterval(intervalMisi);
+                    }
+                }, 100);
+            }
+        }, 100);
+
+        $("#ModalEditCascade").modal('show');
+    });
+
+    $("#FormEditCascade").submit(function(e) {
+        e.preventDefault();
+        
+        if ($('#EditPeriode').val() === "") { alert('Pilih periode tahun!'); return false; }
+        if ($('#EditVisi').val() === "") { alert('Pilih visi!'); return false; }
+        if ($('#EditMisi').val() === "") { alert('Pilih misi!'); return false; }
+        if (!validateIntegerInputs('FormEditCascade')) return false;
+        
+        $.ajax({
+            url: BaseURL + "Daerah/EditCascade",
+            type: "POST",
+            data: $(this).serialize(),
+            beforeSend: function() {
+                $("#FormEditCascade button[type=submit]").prop('disabled', true).text('Menyimpan...');
+            },
+            success: function(res) {
+                handleResponse(res, 'ModalEditCascade', 'FormEditCascade');
+                $("#FormEditCascade button[type=submit]").prop('disabled', false).text('Simpan');
+            },
+            error: function(xhr) {
+                alert("Terjadi kesalahan: " + xhr.statusText);
+                $("#FormEditCascade button[type=submit]").prop('disabled', false).text('Simpan');
+            }
+        });
+    });
+
+    // ============================================================
+    // HAPUS CASCADE
+    // ============================================================
+
+    $(".HapusCascade").click(function() {
+        if (confirm("Apakah Anda yakin ingin menghapus data cascade ini?")) {
+            var id = $(this).data('id');
+            $.ajax({
+                url: BaseURL + "Daerah/HapusCascade",
+                type: "POST",
+                data: { id: id, [CSRF_TOKEN]: CSRF_HASH },
+                beforeSend: function() { $(this).prop('disabled', true); },
+                success: function(res) {
+                    handleResponse(res, null, null);
+                    $(this).prop('disabled', false);
+                },
+                error: function(xhr) {
+                    alert("Terjadi kesalahan: " + xhr.statusText);
+                    $(this).prop('disabled', false);
+                }
+            });
+        }
+    });
+
+    // ============================================================
+    // INDIKATOR CASCADE
+    // ============================================================
+
+    $(document).on('click', '.TambahIndikatorCascade', function() {
+        $('#IndikatorCascadeId').val($(this).data('id'));
+        $('#IndikatorText').val('');
+        $('#ModalTambahIndikatorCascade').modal('show');
+    });
+
+    $('#FormTambahIndikatorCascade').submit(function(e) {
+        e.preventDefault();
+        if ($('#IndikatorText').val().trim() === "") { alert('Indikator harus diisi!'); return false; }
+        
+        $.ajax({
+            url: BaseURL + 'Daerah/TambahIndikatorCascade',
+            type: 'POST',
+            data: $(this).serialize(),
+            beforeSend: function() {
+                $('button[type="submit"]', this).prop('disabled', true).text('Menyimpan...');
+            },
+            success: function(res) {
+                handleResponse(res, 'ModalTambahIndikatorCascade', 'FormTambahIndikatorCascade');
+                $('button[type="submit"]', this).prop('disabled', false).text('Simpan');
+            },
+            error: function(xhr) {
+                alert("Terjadi kesalahan: " + xhr.statusText);
+                $('button[type="submit"]', this).prop('disabled', false).text('Simpan');
+            }
+        });
+    });
+
+    $(document).on('click', '.EditIndikatorCascade', function() {
+        var data = $(this).attr('data-indikator').split('|');
+        $('#EditIndikatorCascadeId').val(data[0]);
+        $('#EditIndikatorText').val(data[1]);
+        $('#ModalEditIndikatorCascade').modal('show');
+    });
+
+    $('#FormEditIndikatorCascade').submit(function(e) {
+        e.preventDefault();
+        if ($('#EditIndikatorText').val().trim() === "") { alert('Indikator harus diisi!'); return false; }
+        
+        $.ajax({
+            url: BaseURL + 'Daerah/EditIndikatorCascade',
+            type: 'POST',
+            data: $(this).serialize(),
+            beforeSend: function() {
+                $('button[type="submit"]', this).prop('disabled', true).text('Menyimpan...');
+            },
+            success: function(res) {
+                handleResponse(res, 'ModalEditIndikatorCascade', 'FormEditIndikatorCascade');
+                $('button[type="submit"]', this).prop('disabled', false).text('Simpan');
+            },
+            error: function(xhr) {
+                alert("Terjadi kesalahan: " + xhr.statusText);
+                $('button[type="submit"]', this).prop('disabled', false).text('Simpan');
+            }
+        });
+    });
+
+    $(document).on('click', '.HapusIndikatorCascade', function() {
+        if (confirm('Apakah Anda yakin ingin menghapus indikator ini?')) {
+            var id = $(this).data('id');
+            $.ajax({
+                url: BaseURL + 'Daerah/HapusIndikatorCascade',
+                type: 'POST',
+                data: { id: id, [CSRF_TOKEN]: CSRF_HASH },
+                beforeSend: function() { $(this).prop('disabled', true); },
+                success: function(res) {
+                    handleResponse(res, null, null);
+                    $(this).prop('disabled', false);
+                },
+                error: function(xhr) {
+                    alert("Terjadi kesalahan: " + xhr.statusText);
+                    $(this).prop('disabled', false);
+                }
+            });
+        }
+    });
+
+    // ============================================================
+    // TUJUAN CASCADE
+    // ============================================================
+
+    $(document).on('click', '.btn-add-tujuan-cascade', function() {
+        var misiId = $('#TujuanCascadeMisi').val();
+        var newRow = $('<div class="form-group tujuan-cascade-row">' +
+            '<div class="row">' +
+            '<div class="col-md-10">' +
+            '<select class="form-control tujuan-cascade-select" name="tujuan_ids[]" required>' +
+            '<option value="">Pilih Tujuan</option>' +
+            '</select>' +
+            '</div>' +
+            '<div class="col-md-2" style="padding-top: 7px;">' +
+            '<button type="button" class="btn btn-danger btn-remove-tujuan-cascade">' +
+            '<i class="notika-icon notika-trash"></i>' +
+            '</button>' +
+            '</div>' +
+            '</div>' +
+            '</div>');
+        $('#tujuan-cascade-container').append(newRow);
+        loadTujuanByMisi(misiId, newRow.find('.tujuan-cascade-select'), '-- Tidak ada tujuan untuk misi ini --');
+    });
+
+    $(document).on('click', '.btn-remove-tujuan-cascade', function() {
+        if ($('.tujuan-cascade-row').length > 1) {
+            $(this).closest('.tujuan-cascade-row').remove();
+        } else {
+            alert('Minimal harus ada satu Tujuan');
+        }
+    });
+
+    $(".TambahTujuanCascade").click(function() {
+        var id = $(this).data('id');
+        var misiId = $(this).data('misi');
+        
+        $("#TujuanCascadeId").val(id);
+        $("#TujuanCascadeMisi").val(misiId);
+        
+        $("#tujuan-cascade-container").html('<div class="form-group tujuan-cascade-row">' +
+            '<div class="row">' +
+            '<div class="col-md-10">' +
+            '<label>Tujuan</label>' +
+            '<select class="form-control tujuan-cascade-select" name="tujuan_ids[]" required>' +
+            '<option value="">Pilih Tujuan</option>' +
+            '</select>' +
+            '</div>' +
+            '<div class="col-md-2" style="padding-top: 25px;">' +
+            '<button type="button" class="btn btn-success btn-add-tujuan-cascade">' +
+            '<i class="notika-icon notika-plus-symbol"></i>' +
+            '</button>' +
+            '</div>' +
+            '</div>' +
+            '</div>');
+        
+        loadTujuanByMisi(misiId, $('#tujuan-cascade-container .tujuan-cascade-select:first'), '-- Tidak ada tujuan untuk misi ini --');
+        $("#ModalTambahTujuanCascade").modal('show');
+    });
+
+    $("#FormTambahTujuanCascade").submit(function(e) {
+        e.preventDefault();
+        
+        var semuaTujuanIds = [];
+        $('select[name="tujuan_ids[]"]').each(function() {
+            if ($(this).val()) {
+                semuaTujuanIds.push($(this).val());
+            }
+        });
+        
+        if (semuaTujuanIds.length === 0) {
+            alert('Pilih minimal satu Tujuan!');
             return false;
         }
         
-        sasaranData.push({
-            tujuan_id: tujuanId,
-            sasaran_id: sasaranId
+        var formData = {
+            id: $('#TujuanCascadeId').val(),
+            tujuan_ids: semuaTujuanIds.join(','),
+            [CSRF_TOKEN]: CSRF_HASH
+        };
+        
+        $.ajax({
+            url: BaseURL + "Daerah/TambahTujuanCascade",
+            type: "POST",
+            data: formData,
+            beforeSend: function() {
+                $("#FormTambahTujuanCascade button[type=submit]").prop('disabled', true).text('Menyimpan...');
+            },
+            success: function(res) {
+                handleResponse(res, 'ModalTambahTujuanCascade', 'FormTambahTujuanCascade');
+                $("#FormTambahTujuanCascade button[type=submit]").prop('disabled', false).text('Simpan');
+            },
+            error: function(xhr) {
+                alert("Terjadi kesalahan: " + xhr.statusText);
+                $("#FormTambahTujuanCascade button[type=submit]").prop('disabled', false).text('Simpan');
+            }
         });
     });
-    
-    if (!isValid) return false;
-    
-    // Group sasaran by tujuan (jika diperlukan) atau langsung simpan semua
-    var sasaranIds = sasaranData.map(function(item) {
-        return item.sasaran_id;
-    }).join(',');
-    
-    var formData = {
-        id: $('#SasaranCascadeId').val(),
-        sasaran_ids: sasaranIds,
-        [CSRF_TOKEN]: CSRF_HASH
-    };
-    
-    console.log('Data Sasaran Cascade:', formData);
-    
-    $.ajax({
-        url: BaseURL + "Daerah/TambahSasaranCascade",
-        type: "POST",
-        data: formData,
-        beforeSend: function() {
-            $("#FormTambahSasaranCascade button[type=submit]").prop('disabled', true).text('Menyimpan...');
-        },
-        success: function(res) {
-            console.log('Response Sasaran Cascade:', res);
-            if (res === '1') {
-                $("#ModalTambahSasaranCascade").modal('hide');
-                alert('Sasaran berhasil ditambahkan!');
-                location.reload();
-            } else {
-                alert(res || "Gagal menambahkan Sasaran!");
-            }
-            $("#FormTambahSasaranCascade button[type=submit]").prop('disabled', false).text('Simpan');
-        },
-        error: function(xhr, status, error) {
-            console.error('Error Sasaran Cascade:', error);
-            alert("Terjadi kesalahan: " + error);
-            $("#FormTambahSasaranCascade button[type=submit]").prop('disabled', false).text('Simpan');
+
+    // ============================================================
+    // EDIT TUJUAN CASCADE
+    // ============================================================
+
+    $(".EditTujuanCascade").click(function() {
+        var Data = $(this).attr('data-tujuan').split("|");
+        var misiId = $(this).data('misi');
+        var cascadeId = Data[0];
+        var existingTujuanIds = Data[1].split(",");
+        
+        $("#IdCascadeTujuan").val(cascadeId);
+        $("#EditTujuanCascadeMisi").val(misiId);
+        
+        if (existingTujuanIds.length > 0 && existingTujuanIds[0] !== "") {
+            $.ajax({
+                url: BaseURL + 'Daerah/GetTujuanByMisi',
+                type: 'POST',
+                data: { misi_id: misiId, [CSRF_TOKEN]: CSRF_HASH },
+                success: function(response) {
+                    try {
+                        var data = JSON.parse(response);
+                        if (data.length > 0) {
+                            var filteredData = data.filter(function(tujuan) {
+                                return existingTujuanIds.includes(tujuan.Id.toString());
+                            });
+                            
+                            if (filteredData.length > 0) {
+                                var List = '';
+                                $.each(filteredData, function(key, value) {
+                                    List += '<label><input style="margin-top: 10px;" type="checkbox" checked name="TujuanCascade" value="'+value.Id+'"> '+value.Tujuan+'</label><br>';
+                                });
+                                $("#ListTujuanCascade").html(List);
+                                $("#ModalEditTujuanCascade").modal('show');
+                            } else {
+                                alert("Tujuan yang dipilih sebelumnya tidak ditemukan");
+                            }
+                        } else {
+                            alert("Tidak ada tujuan untuk misi ini");
+                        }
+                    } catch (e) {
+                        alert("Gagal memproses data tujuan");
+                    }
+                },
+                error: function() {
+                    alert("Gagal memuat data tujuan");
+                }
+            });
+        } else {
+            alert("Tidak ada tujuan yang dipilih sebelumnya");
         }
     });
-});
 
-            // Sasaran Cascade - Edit Sasaran
-            // Sasaran Cascade - Edit Sasaran (MODIFIED)
-$(".EditSasaranCascade").click(function() {
-    var Data = $(this).attr('data-sasaran').split("|");
-    var tujuanId = $(this).data('tujuan');
-    $("#IdCascadeSasaran").val(Data[0]);
-    $("#EditSasaranCascadeTujuan").val(tujuanId);
-    var existingSasaranIds = Data[1].split(",");
-    var List = '';
-    
-    // Hanya tampilkan sasaran yang sudah dipilih sebelumnya
-    if (existingSasaranIds.length > 0 && existingSasaranIds[0] !== "") {
-        $.ajax({
-            url: BaseURL + 'Daerah/GetSasaranByTujuan',
-            type: 'POST',
-            data: { tujuan_id: tujuanId, [CSRF_TOKEN]: CSRF_HASH },
-            success: function(response) {
-                try {
-                    var data = JSON.parse(response);
-                    if (data.length > 0) {
-                        // Filter hanya sasaran yang sudah dipilih
-                        var filteredData = data.filter(function(sasaran) {
-                            return existingSasaranIds.includes(sasaran.Id.toString());
-                        });
-                        
-                        if (filteredData.length > 0) {
-                            $.each(filteredData, function(key, value) {
-                                List += '<label><input style="margin-top: 10px;" type="checkbox" checked name="SasaranCascade" value="'+value.Id+'"> '+value.Sasaran+'</label><br>';
-                            });
-                            $("#ListSasaranCascade").html(List);
-                            $("#ModalEditSasaranCascade").modal('show');
-                        } else {
-                            alert("Sasaran yang dipilih sebelumnya tidak ditemukan");
-                        }
-                    } else {
-                        alert("Tidak ada sasaran untuk tujuan ini");
-                    }
-                } catch (e) {
-                    alert("Gagal memproses data sasaran");
-                }
-            },
-            error: function() {
-                alert("Gagal memuat data sasaran");
-            }
+    $("#EditTujuanCascade").click(function() {
+        var previousTujuanIds = $("#ListTujuanCascade input[name='TujuanCascade']").map(function() {
+            return $(this).val();
+        }).get();
+        
+        var currentTujuanIds = [];
+        $.each($("input[name='TujuanCascade']:checked"), function() {
+            currentTujuanIds.push($(this).val());
         });
-    } else {
-        alert("Tidak ada sasaran yang dipilih sebelumnya");
-    }
-});
-
-// Update submit Edit Sasaran Cascade
-$("#EditSasaranCascade").click(function() {
-    var Tampung = [];
-    var previousSasaranIds = $("#ListSasaranCascade input[name='SasaranCascade']").map(function() {
-        return $(this).val();
-    }).get();
-    
-    var currentSasaranIds = [];
-    $.each($("input[name='SasaranCascade']:checked"), function() {
-        currentSasaranIds.push($(this).val());
-        Tampung.push($(this).val());
-    });
-    
-    // Baru: Cari sasaran yang dihapus
-    var deletedSasaranIds = previousSasaranIds.filter(function(id) {
-        return !currentSasaranIds.includes(id);
-    });
-    
-    var Sasaran = {
-        id: $("#IdCascadeSasaran").val(),
-        sasaran_ids: Tampung.join(","),
-        deleted_sasaran_ids: deletedSasaranIds.join(","),  // Kirim ID sasaran yang dihapus
-        [CSRF_TOKEN]: CSRF_HASH
-    };
-    
-    console.log('Data Edit Sasaran:', Sasaran);
-    
-    // Konfirmasi jika ada sasaran dihapus dan ada indikator
-    if (deletedSasaranIds.length > 0) {
-        var row = $("#IdCascadeSasaran").closest('tr');  // Ambil row cascade
-        var hasIndikator = row.find('td:eq(4) div:last-child div').length > 0;  // Cek apakah ada indikator
-        if (hasIndikator && !confirm("Beberapa sasaran akan dihapus. Indikator (IKU/IKD) terkait juga akan terhapus. Lanjutkan?")) {
+        
+        var deletedTujuanIds = previousTujuanIds.filter(function(id) {
+            return !currentTujuanIds.includes(id);
+        });
+        
+        var Tujuan = {
+            id: $("#IdCascadeTujuan").val(),
+            tujuan_ids: currentTujuanIds.join(","),
+            deleted_tujuan_ids: deletedTujuanIds.join(","),
+            [CSRF_TOKEN]: CSRF_HASH
+        };
+        
+        if (deletedTujuanIds.length > 0 && !confirm("Beberapa tujuan akan dihapus. Sasaran dan indikator terkait juga akan terhapus. Lanjutkan?")) {
             return;
         }
-    }
-    
-    $.ajax({
-        url: BaseURL + "Daerah/EditSasaranCascade",
-        type: "POST",
-        data: Sasaran,
-        beforeSend: function() {
-            $("#EditSasaranCascade").prop('disabled', true).text('Menyimpan...');
-        },
-        success: function(Respon) {
-            console.log('Response Edit Sasaran:', Respon);
-            if (Respon === '1') {
-                $("#ModalEditSasaranCascade").modal('hide');
-                alert('Sasaran berhasil diupdate!');
-                location.reload();
-            } else {
-                alert(Respon || "Gagal menyimpan data!");
+        
+        $.ajax({
+            url: BaseURL + "Daerah/EditTujuanCascade",
+            type: "POST",
+            data: Tujuan,
+            beforeSend: function() {
+                $("#EditTujuanCascade").prop('disabled', true).text('Menyimpan...');
+            },
+            success: function(Respon) {
+                handleResponse(Respon, 'ModalEditTujuanCascade', null);
+                $("#EditTujuanCascade").prop('disabled', false).text('Simpan');
+            },
+            error: function(xhr) {
+                alert("Terjadi kesalahan: " + xhr.statusText);
+                $("#EditTujuanCascade").prop('disabled', false).text('Simpan');
             }
-            $("#EditSasaranCascade").prop('disabled', false).text('Simpan');
-        },
-        error: function(xhr, status, error) {
-            console.error('Error Edit Sasaran:', error);
-            alert("Terjadi kesalahan: " + error);
-            $("#EditSasaranCascade").prop('disabled', false).text('Simpan');
+        });
+    });
+
+    // ============================================================
+    // SASARAN CASCADE
+    // ============================================================
+
+    $(document).on('change', '.tujuan-select-for-sasaran', function() {
+        var tujuanId = $(this).val();
+        var sasaranSelect = $(this).closest('.sasaran-cascade-row').find('.sasaran-cascade-select');
+        
+        if (tujuanId) {
+            loadSasaranByTujuan(tujuanId, sasaranSelect, '-- Tidak ada sasaran untuk tujuan ini --');
+            sasaranSelect.prop('disabled', false);
+        } else {
+            sasaranSelect.prop('disabled', true).html('<option value="">Pilih Sasaran</option>');
         }
     });
-});
 
-            // ========== PD CASCADE ==========
-            // PD Cascade - Tambah PD Penanggung Jawab
-            $(".TambahPjCascade").click(function() {
-                var id = $(this).data('id');
-                $("#PjCascadeId").val(id);
-                $("#pj-cascade-container").html('<div class="form-group pj-cascade-row">' +
-                    '<div class="row">' +
-                    '<div class="col-md-10">' +
-                    '<label>PD Penanggung Jawab</label>' +
-                    '<select class="form-control pj-cascade-select" name="pd_penanggung_jawab[]" required>' +
-                    getInstansiOptions() +
-                    '</select>' +
-                    '</div>' +
-                    '<div class="col-md-2" style="padding-top: 25px;">' +
-                    '<button type="button" class="btn btn-success btn-add-pj-cascade">' +
-                    '<i class="notika-icon notika-plus-symbol"></i>' +
-                    '</button>' +
-                    '</div>' +
-                    '</div>' +
-                    '</div>');
-                $("#ModalTambahPjCascade").modal('show');
-            });
-
-            // Submit Tambah PD Penanggung Jawab Cascade
-            $("#FormTambahPjCascade").submit(function(e) {
-                e.preventDefault();
-                
-                var pdValues = [];
-                $('select[name="pd_penanggung_jawab[]"]').each(function() {
-                    if ($(this).val()) {
-                        pdValues.push($(this).val());
-                    }
-                });
-                
-                if (pdValues.length === 0) {
-                    alert('Pilih minimal satu PD Penanggung Jawab!');
-                    return false;
-                }
-                
-                var formData = {
-                    id: $('#PjCascadeId').val(),
-                    pd_values: pdValues.join(','),
-                    type: 'pj',
-                    [CSRF_TOKEN]: CSRF_HASH
-                };
-                
-                console.log('Data PD Penanggung Jawab:', formData);
-                
-                $.ajax({
-                    url: BaseURL + "Daerah/TambahPdCascade",
-                    type: "POST",
-                    data: formData,
-                    beforeSend: function() {
-                        $("#FormTambahPjCascade button[type=submit]").prop('disabled', true).text('Menyimpan...');
-                    },
-                    success: function(res) {
-                        console.log('Response PD Penanggung Jawab:', res);
-                        if (res === '1') {
-                            $("#ModalTambahPjCascade").modal('hide');
-                            alert('PD Penanggung Jawab berhasil ditambahkan!');
-                            location.reload();
-                        } else {
-                            alert(res || "Gagal menambahkan PD Penanggung Jawab!");
-                        }
-                        $("#FormTambahPjCascade button[type=submit]").prop('disabled', false).text('Simpan');
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error PD Penanggung Jawab:', error);
-                        alert("Terjadi kesalahan: " + error);
-                        $("#FormTambahPjCascade button[type=submit]").prop('disabled', false).text('Simpan');
-                    }
-                });
-            });
-
-            // PD Cascade - Tambah PD Penunjang
-            $(".TambahPnCascade").click(function() {
-                var id = $(this).data('id');
-                $("#PnCascadeId").val(id);
-                $("#pn-cascade-container").html('<div class="form-group pn-cascade-row">' +
-                    '<div class="row">' +
-                    '<div class="col-md-10">' +
-                    '<label>PD Penunjang</label>' +
-                    '<select class="form-control pn-cascade-select" name="pd_penunjang[]" required>' +
-                    getInstansiOptions() +
-                    '</select>' +
-                    '</div>' +
-                    '<div class="col-md-2" style="padding-top: 25px;">' +
-                    '<button type="button" class="btn btn-success btn-add-pn-cascade">' +
-                    '<i class="notika-icon notika-plus-symbol"></i>' +
-                    '</button>' +
-                    '</div>' +
-                    '</div>' +
-                    '</div>');
-                $("#ModalTambahPnCascade").modal('show');
-            });
-
-            // Submit Tambah PD Penunjang Cascade
-            $("#FormTambahPnCascade").submit(function(e) {
-                e.preventDefault();
-                
-                var pdValues = [];
-                $('select[name="pd_penunjang[]"]').each(function() {
-                    if ($(this).val()) {
-                        pdValues.push($(this).val());
-                    }
-                });
-                
-                if (pdValues.length === 0) {
-                    alert('Pilih minimal satu PD Penunjang!');
-                    return false;
-                }
-                
-                var formData = {
-                    id: $('#PnCascadeId').val(),
-                    pd_values: pdValues.join(','),
-                    type: 'pn',
-                    [CSRF_TOKEN]: CSRF_HASH
-                };
-                
-                console.log('Data PD Penunjang:', formData);
-                
-                $.ajax({
-                    url: BaseURL + "Daerah/TambahPdCascade",
-                    type: "POST",
-                    data: formData,
-                    beforeSend: function() {
-                        $("#FormTambahPnCascade button[type=submit]").prop('disabled', true).text('Menyimpan...');
-                    },
-                    success: function(res) {
-                        console.log('Response PD Penunjang:', res);
-                        if (res === '1') {
-                            $("#ModalTambahPnCascade").modal('hide');
-                            alert('PD Penunjang berhasil ditambahkan!');
-                            location.reload();
-                        } else {
-                            alert(res || "Gagal menambahkan PD Penunjang!");
-                        }
-                        $("#FormTambahPnCascade button[type=submit]").prop('disabled', false).text('Simpan');
-                                        },
-                    error: function(xhr, status, error) {
-                        console.error('Error PD Penunjang:', error);
-                        alert("Terjadi kesalahan: " + error);
-                        $("#FormTambahPnCascade button[type=submit]").prop('disabled', false).text('Simpan');
-                    }
-                });
-            });
-
-            // PD Cascade - Edit PD Penanggung Jawab
-            $(".PicCascade").click(function() {
-                var Data = $(this).attr('data-pic').split("|");
-                $("#IdCascadePic").val(Data[0]);
-                var Pisah = Data[1].split(",");
-                var List = '';
-                for (let i = 0; i < Pisah.length; i++) {
-                    List += '<label><input style="margin-top: 10px;" type="checkbox" checked name="PicCascade" value="'+Pisah[i]+'"> '+Pisah[i]+'</label><br>';
-                }
-                $("#ListPicCascade").html(List);
-                $("#ModalPicCascade").modal('show');
-            });
-
-            $("#EditPicCascade").click(function() {
-                var Tampung = [];
-                $.each($("input[name='PicCascade']:checked"), function() {
-                    Tampung.push($(this).val());
-                });
-                var Pic = {
-                    id: $("#IdCascadePic").val(),
-                    pd_penanggung_jawab: Tampung.join(","),
-                    [CSRF_TOKEN]: CSRF_HASH
-                };
-                
-                console.log('Data Edit PD Penanggung Jawab:', Pic);
-                
-                $.ajax({
-                    url: BaseURL + "Daerah/EditPDCascade",
-                    type: "POST",
-                    data: Pic,
-                    beforeSend: function() {
-                        $("#EditPicCascade").prop('disabled', true).text('Menyimpan...');
-                    },
-                    success: function(Respon) {
-                        console.log('Response Edit PD Penanggung Jawab:', Respon);
-                        if (Respon === '1') {
-                            $("#ModalPicCascade").modal('hide');
-                            alert('PD Penanggung Jawab berhasil diupdate!');
-                            location.reload();
-                        } else {
-                            alert(Respon || "Gagal menyimpan data!");
-                        }
-                        $("#EditPicCascade").prop('disabled', false).text('Simpan');
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error Edit PD Penanggung Jawab:', error);
-                        alert("Terjadi kesalahan: " + error);
-                        $("#EditPicCascade").prop('disabled', false).text('Simpan');
-                    }
-                });
-            });
-
-            // PD Cascade - Edit PD Penunjang
-            $(".PisCascade").click(function() {
-                var Data = $(this).attr('data-pis').split("|");
-                $("#IdCascadePis").val(Data[0]);
-                var Pisah = Data[1].split(",");
-                var List = '';
-                for (let i = 0; i < Pisah.length; i++) {
-                    List += '<label><input style="margin-top: 10px;" type="checkbox" checked name="PisCascade" value="'+Pisah[i]+'"> '+Pisah[i]+'</label><br>';
-                }
-                $("#ListPisCascade").html(List);
-                $("#ModalPisCascade").modal('show');
-            });
-
-            $("#EditPisCascade").click(function() {
-                var Tampung = [];
-                $.each($("input[name='PisCascade']:checked"), function() {
-                    Tampung.push($(this).val());
-                });
-                var Pis = {
-                    id: $("#IdCascadePis").val(),
-                    pd_penunjang: Tampung.join(","),
-                    [CSRF_TOKEN]: CSRF_HASH
-                };
-                
-                console.log('Data Edit PD Penunjang:', Pis);
-                
-                $.ajax({
-                    url: BaseURL + "Daerah/EditPDCascade",
-                    type: "POST",
-                    data: Pis,
-                    beforeSend: function() {
-                        $("#EditPisCascade").prop('disabled', true).text('Menyimpan...');
-                    },
-                    success: function(Respon) {
-                        console.log('Response Edit PD Penunjang:', Respon);
-                        if (Respon === '1') {
-                            $("#ModalPisCascade").modal('hide');
-                            alert('PD Penunjang berhasil diupdate!');
-                            location.reload();
-                        } else {
-                            alert(Respon || "Gagal menyimpan data!");
-                        }
-                        $("#EditPisCascade").prop('disabled', false).text('Simpan');
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error Edit PD Penunjang:', error);
-                        alert("Terjadi kesalahan: " + error);
-                        $("#EditPisCascade").prop('disabled', false).text('Simpan');
-                    }
-                });
-            });
-
-            // ========== VALIDATION FUNCTIONS ==========
-            function validateCascadeInputs(formId) {
-                var baseId = formId.includes('Tambah') ? '' : 'Edit';
-                if ($('#' + baseId + 'TahunFilter').val() === "") {
-                    alert('Pilih periode tahun!');
-                    return false;
-                }
-                if ($('#' + baseId + 'Visi').val() === "") {
-                    alert('Pilih visi!');
-                    return false;
-                }
-                if ($('#' + baseId + 'Misi').val() === "") {
-                    alert('Pilih misi!');
-                    return false;
-                }
-                if ($('#' + baseId + 'Indikator').val() === "") {
-                    alert('Isi indikator!');
-                    return false;
-                }
-                return validateIntegerInputs(formId);
+    $(document).on('click', '.btn-add-sasaran-cascade', function() {
+        var newRow = $('<div class="form-group sasaran-cascade-row">' +
+            '<div class="row">' +
+            '<div class="col-md-12">' +
+            '<label>Tujuan Terkait</label>' +
+            '<select class="form-control tujuan-select-for-sasaran" name="tujuan_terkait[]" required>' +
+            '<option value="">Pilih Tujuan</option>' +
+            '</select>' +
+            '</div>' +
+            '</div>' +
+            '<div class="row">' +
+            '<div class="col-md-10">' +
+            '<label>Sasaran</label>' +
+            '<select class="form-control sasaran-cascade-select" name="sasaran_ids[]" required disabled>' +
+            '<option value="">Pilih Sasaran</option>' +
+            '</select>' +
+            '</div>' +
+            '<div class="col-md-2" style="padding-top: 25px;">' +
+            '<button type="button" class="btn btn-danger btn-remove-sasaran-cascade">' +
+            '<i class="notika-icon notika-trash"></i>' +
+            '</button>' +
+            '</div>' +
+            '</div>' +
+            '</div>');
+        
+        $('#sasaran-cascade-container').append(newRow);
+        
+        var firstTujuanSelect = $('#sasaran-cascade-container .tujuan-select-for-sasaran:first');
+        firstTujuanSelect.find('option').each(function() {
+            if ($(this).val() !== "") {
+                newRow.find('.tujuan-select-for-sasaran').append('<option value="' + $(this).val() + '">' + $(this).text() + '</option>');
             }
-
-            function validateIntegerInputs(formId) {
-                var isValid = true;
-                $('#' + formId + ' input[type="number"]').each(function() {
-                    if (this.value && !Number.isInteger(parseFloat(this.value))) {
-                        alert('Target harus angka bulat!');
-                        isValid = false;
-                        return false;
-                    }
-                });
-                return isValid;
-            }
-
-            // Reset form ketika modal ditutup
-            $('#ModalTambahCascade').on('hidden.bs.modal', function () {
-                $('#FormTambahCascade')[0].reset();
-                $('#Visi').prop('disabled', true).html('<option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>');
-                $('#Misi').prop('disabled', true).html('<option value="" selected disabled>-- Pilih Visi terlebih dahulu --</option>');
-            });
-
-            $('#ModalTambahTujuanCascade').on('hidden.bs.modal', function () {
-                $('#FormTambahTujuanCascade')[0].reset();
-            });
-
-            $('#ModalTambahSasaranCascade').on('hidden.bs.modal', function () {
-                $('#FormTambahSasaranCascade')[0].reset();
-            });
-
-            $('#ModalTambahIndikatorCascade').on('hidden.bs.modal', function () {
-                $('#FormTambahIndikatorCascade')[0].reset();
-            });
-
-            $('#ModalEditIndikatorCascade').on('hidden.bs.modal', function () {
-                $('#FormEditIndikatorCascade')[0].reset();
-            });
         });
+    });
+
+    $(document).on('click', '.btn-remove-sasaran-cascade', function() {
+        if ($('.sasaran-cascade-row').length > 1) {
+            $(this).closest('.sasaran-cascade-row').remove();
+        } else {
+            alert('Minimal harus ada satu Sasaran');
+        }
+    });
+
+    $(".TambahSasaranCascade").click(function() {
+        var id = $(this).data('id');
+        var tujuanIds = $(this).closest('tr').find('.EditTujuanCascade').attr('data-tujuan').split("|")[1];
+        
+        $("#SasaranCascadeId").val(id);
+        
+        $("#sasaran-cascade-container").html('<div class="form-group sasaran-cascade-row">' +
+            '<div class="row">' +
+            '<div class="col-md-12">' +
+            '<label>Tujuan Terkait</label>' +
+            '<select class="form-control tujuan-select-for-sasaran" name="tujuan_terkait[]" required>' +
+            '<option value="">Pilih Tujuan</option>' +
+            '</select>' +
+            '</div>' +
+            '</div>' +
+            '<div class="row">' +
+            '<div class="col-md-10">' +
+            '<label>Sasaran</label>' +
+            '<select class="form-control sasaran-cascade-select" name="sasaran_ids[]" required disabled>' +
+            '<option value="">Pilih Sasaran</option>' +
+            '</select>' +
+            '</div>' +
+            '<div class="col-md-2" style="padding-top: 25px;">' +
+            '<button type="button" class="btn btn-success btn-add-sasaran-cascade">' +
+            '<i class="notika-icon notika-plus-symbol"></i>' +
+            '</button>' +
+            '</div>' +
+            '</div>' +
+            '</div>');
+        
+        loadTujuanForSasaran(tujuanIds, $('#sasaran-cascade-container .tujuan-select-for-sasaran:first'));
+        $("#ModalTambahSasaranCascade").modal('show');
+    });
+
+    $("#FormTambahSasaranCascade").submit(function(e) {
+        e.preventDefault();
+        
+        var semuaSasaranIds = [];
+        $('select[name="sasaran_ids[]"]').each(function() {
+            if ($(this).val()) {
+                semuaSasaranIds.push($(this).val());
+            }
+        });
+        
+        if (semuaSasaranIds.length === 0) {
+            alert('Pilih minimal satu Sasaran!');
+            return false;
+        }
+        
+        var formData = {
+            id: $('#SasaranCascadeId').val(),
+            sasaran_ids: semuaSasaranIds.join(','),
+            [CSRF_TOKEN]: CSRF_HASH
+        };
+        
+        $.ajax({
+            url: BaseURL + "Daerah/TambahSasaranCascade",
+            type: "POST",
+            data: formData,
+            beforeSend: function() {
+                $("#FormTambahSasaranCascade button[type=submit]").prop('disabled', true).text('Menyimpan...');
+            },
+            success: function(res) {
+                handleResponse(res, 'ModalTambahSasaranCascade', 'FormTambahSasaranCascade');
+                $("#FormTambahSasaranCascade button[type=submit]").prop('disabled', false).text('Simpan');
+            },
+            error: function(xhr) {
+                alert("Terjadi kesalahan: " + xhr.statusText);
+                $("#FormTambahSasaranCascade button[type=submit]").prop('disabled', false).text('Simpan');
+            }
+        });
+    });
+
+    // ============================================================
+    // EDIT SASARAN CASCADE
+    // ============================================================
+
+    $(".EditSasaranCascade").click(function() {
+        var Data = $(this).attr('data-sasaran').split("|");
+        var tujuanId = $(this).data('tujuan');
+        $("#IdCascadeSasaran").val(Data[0]);
+        $("#EditSasaranCascadeTujuan").val(tujuanId);
+        var existingSasaranIds = Data[1].split(",");
+        
+        if (existingSasaranIds.length > 0 && existingSasaranIds[0] !== "") {
+            $.ajax({
+                url: BaseURL + 'Daerah/GetSasaranByTujuan',
+                type: 'POST',
+                data: { tujuan_id: tujuanId, [CSRF_TOKEN]: CSRF_HASH },
+                success: function(response) {
+                    try {
+                        var data = JSON.parse(response);
+                        if (data.length > 0) {
+                            var filteredData = data.filter(function(sasaran) {
+                                return existingSasaranIds.includes(sasaran.Id.toString());
+                            });
+                            
+                            if (filteredData.length > 0) {
+                                var List = '';
+                                $.each(filteredData, function(key, value) {
+                                    List += '<label><input style="margin-top: 10px;" type="checkbox" checked name="SasaranCascade" value="'+value.Id+'"> '+value.Sasaran+'</label><br>';
+                                });
+                                $("#ListSasaranCascade").html(List);
+                                $("#ModalEditSasaranCascade").modal('show');
+                            } else {
+                                alert("Sasaran yang dipilih sebelumnya tidak ditemukan");
+                            }
+                        } else {
+                            alert("Tidak ada sasaran untuk tujuan ini");
+                        }
+                    } catch (e) {
+                        alert("Gagal memproses data sasaran");
+                    }
+                },
+                error: function() {
+                    alert("Gagal memuat data sasaran");
+                }
+            });
+        } else {
+            alert("Tidak ada sasaran yang dipilih sebelumnya");
+        }
+    });
+
+    $("#EditSasaranCascade").click(function() {
+        var previousSasaranIds = $("#ListSasaranCascade input[name='SasaranCascade']").map(function() {
+            return $(this).val();
+        }).get();
+        
+        var currentSasaranIds = [];
+        $.each($("input[name='SasaranCascade']:checked"), function() {
+            currentSasaranIds.push($(this).val());
+        });
+        
+        var deletedSasaranIds = previousSasaranIds.filter(function(id) {
+            return !currentSasaranIds.includes(id);
+        });
+        
+        var Sasaran = {
+            id: $("#IdCascadeSasaran").val(),
+            sasaran_ids: currentSasaranIds.join(","),
+            deleted_sasaran_ids: deletedSasaranIds.join(","),
+            [CSRF_TOKEN]: CSRF_HASH
+        };
+        
+        if (deletedSasaranIds.length > 0 && !confirm("Beberapa sasaran akan dihapus. Indikator terkait juga akan terhapus. Lanjutkan?")) {
+            return;
+        }
+        
+        $.ajax({
+            url: BaseURL + "Daerah/EditSasaranCascade",
+            type: "POST",
+            data: Sasaran,
+            beforeSend: function() {
+                $("#EditSasaranCascade").prop('disabled', true).text('Menyimpan...');
+            },
+            success: function(Respon) {
+                handleResponse(Respon, 'ModalEditSasaranCascade', null);
+                $("#EditSasaranCascade").prop('disabled', false).text('Simpan');
+            },
+            error: function(xhr) {
+                alert("Terjadi kesalahan: " + xhr.statusText);
+                $("#EditSasaranCascade").prop('disabled', false).text('Simpan');
+            }
+        });
+    });
+
+    // ============================================================
+    // PD CASCADE
+    // ============================================================
+
+    $(document).on('click', '.btn-add-pj-cascade', function() {
+        var newRow = $('<div class="form-group pj-cascade-row">' +
+            '<div class="row">' +
+            '<div class="col-md-10">' +
+            '<select class="form-control pj-cascade-select" name="pd_penanggung_jawab[]" required>' +
+            getInstansiOptions() +
+            '</select>' +
+            '</div>' +
+            '<div class="col-md-2" style="padding-top: 7px;">' +
+            '<button type="button" class="btn btn-danger btn-remove-pj-cascade">' +
+            '<i class="notika-icon notika-trash"></i>' +
+            '</button>' +
+            '</div>' +
+            '</div>' +
+            '</div>');
+        $('#pj-cascade-container').append(newRow);
+    });
+
+    $(document).on('click', '.btn-remove-pj-cascade', function() {
+        if ($('.pj-cascade-row').length > 1) {
+            $(this).closest('.pj-cascade-row').remove();
+        } else {
+            alert('Minimal harus ada satu PD Penanggung Jawab');
+        }
+    });
+
+    $(".TambahPjCascade").click(function() {
+        var id = $(this).data('id');
+        $("#PjCascadeId").val(id);
+        $("#pj-cascade-container").html('<div class="form-group pj-cascade-row">' +
+            '<div class="row">' +
+            '<div class="col-md-10">' +
+            '<label>PD Penanggung Jawab</label>' +
+            '<select class="form-control pj-cascade-select" name="pd_penanggung_jawab[]" required>' +
+            getInstansiOptions() +
+            '</select>' +
+            '</div>' +
+            '<div class="col-md-2" style="padding-top: 25px;">' +
+            '<button type="button" class="btn btn-success btn-add-pj-cascade">' +
+            '<i class="notika-icon notika-plus-symbol"></i>' +
+            '</button>' +
+            '</div>' +
+            '</div>' +
+            '</div>');
+        $("#ModalTambahPjCascade").modal('show');
+    });
+
+    $("#FormTambahPjCascade").submit(function(e) {
+        e.preventDefault();
+        
+        var pdValues = [];
+        $('select[name="pd_penanggung_jawab[]"]').each(function() {
+            if ($(this).val()) {
+                pdValues.push($(this).val());
+            }
+        });
+        
+        if (pdValues.length === 0) {
+            alert('Pilih minimal satu PD Penanggung Jawab!');
+            return false;
+        }
+        
+        var formData = {
+            id: $('#PjCascadeId').val(),
+            pd_values: pdValues.join(','),
+            type: 'pj',
+            [CSRF_TOKEN]: CSRF_HASH
+        };
+        
+        $.ajax({
+            url: BaseURL + "Daerah/TambahPdCascade",
+            type: "POST",
+            data: formData,
+            beforeSend: function() {
+                $("#FormTambahPjCascade button[type=submit]").prop('disabled', true).text('Menyimpan...');
+            },
+            success: function(res) {
+                handleResponse(res, 'ModalTambahPjCascade', 'FormTambahPjCascade');
+                $("#FormTambahPjCascade button[type=submit]").prop('disabled', false).text('Simpan');
+            },
+            error: function(xhr) {
+                alert("Terjadi kesalahan: " + xhr.statusText);
+                $("#FormTambahPjCascade button[type=submit]").prop('disabled', false).text('Simpan');
+            }
+        });
+    });
+
+    // PD Penunjang
+    $(document).on('click', '.btn-add-pn-cascade', function() {
+        var newRow = $('<div class="form-group pn-cascade-row">' +
+            '<div class="row">' +
+            '<div class="col-md-10">' +
+            '<select class="form-control pn-cascade-select" name="pd_penunjang[]" required>' +
+            getInstansiOptions() +
+            '</select>' +
+            '</div>' +
+            '<div class="col-md-2" style="padding-top: 7px;">' +
+            '<button type="button" class="btn btn-danger btn-remove-pn-cascade">' +
+            '<i class="notika-icon notika-trash"></i>' +
+            '</button>' +
+            '</div>' +
+            '</div>' +
+            '</div>');
+        $('#pn-cascade-container').append(newRow);
+    });
+
+    $(document).on('click', '.btn-remove-pn-cascade', function() {
+        if ($('.pn-cascade-row').length > 1) {
+            $(this).closest('.pn-cascade-row').remove();
+        } else {
+            alert('Minimal harus ada satu PD Penunjang');
+        }
+    });
+
+    $(".TambahPnCascade").click(function() {
+        var id = $(this).data('id');
+        $("#PnCascadeId").val(id);
+        $("#pn-cascade-container").html('<div class="form-group pn-cascade-row">' +
+            '<div class="row">' +
+            '<div class="col-md-10">' +
+            '<label>PD Penunjang</label>' +
+            '<select class="form-control pn-cascade-select" name="pd_penunjang[]" required>' +
+            getInstansiOptions() +
+            '</select>' +
+            '</div>' +
+            '<div class="col-md-2" style="padding-top: 25px;">' +
+            '<button type="button" class="btn btn-success btn-add-pn-cascade">' +
+            '<i class="notika-icon notika-plus-symbol"></i>' +
+            '</button>' +
+            '</div>' +
+            '</div>' +
+            '</div>');
+        $("#ModalTambahPnCascade").modal('show');
+    });
+
+    $("#FormTambahPnCascade").submit(function(e) {
+        e.preventDefault();
+        
+        var pdValues = [];
+        $('select[name="pd_penunjang[]"]').each(function() {
+            if ($(this).val()) {
+                pdValues.push($(this).val());
+            }
+        });
+        
+        if (pdValues.length === 0) {
+            alert('Pilih minimal satu PD Penunjang!');
+            return false;
+        }
+        
+        var formData = {
+            id: $('#PnCascadeId').val(),
+            pd_values: pdValues.join(','),
+            type: 'pn',
+            [CSRF_TOKEN]: CSRF_HASH
+        };
+        
+        $.ajax({
+            url: BaseURL + "Daerah/TambahPdCascade",
+            type: "POST",
+            data: formData,
+            beforeSend: function() {
+                $("#FormTambahPnCascade button[type=submit]").prop('disabled', true).text('Menyimpan...');
+            },
+            success: function(res) {
+                handleResponse(res, 'ModalTambahPnCascade', 'FormTambahPnCascade');
+                $("#FormTambahPnCascade button[type=submit]").prop('disabled', false).text('Simpan');
+            },
+            error: function(xhr) {
+                alert("Terjadi kesalahan: " + xhr.statusText);
+                $("#FormTambahPnCascade button[type=submit]").prop('disabled', false).text('Simpan');
+            }
+        });
+    });
+
+    // Edit PD Penanggung Jawab
+    $(".PicCascade").click(function() {
+        var Data = $(this).attr('data-pic').split("|");
+        $("#IdCascadePic").val(Data[0]);
+        var Pisah = Data[1].split(",");
+        var List = '';
+        for (let i = 0; i < Pisah.length; i++) {
+            List += '<label><input style="margin-top: 10px;" type="checkbox" checked name="PicCascade" value="'+Pisah[i]+'"> '+Pisah[i]+'</label><br>';
+        }
+        $("#ListPicCascade").html(List);
+        $("#ModalPicCascade").modal('show');
+    });
+
+    $("#EditPicCascade").click(function() {
+        var Tampung = [];
+        $.each($("input[name='PicCascade']:checked"), function() {
+            Tampung.push($(this).val());
+        });
+        var Pic = {
+            id: $("#IdCascadePic").val(),
+            pd_penanggung_jawab: Tampung.join(","),
+            [CSRF_TOKEN]: CSRF_HASH
+        };
+        
+        $.ajax({
+            url: BaseURL + "Daerah/EditPDCascade",
+            type: "POST",
+            data: Pic,
+            beforeSend: function() {
+                $("#EditPicCascade").prop('disabled', true).text('Menyimpan...');
+            },
+            success: function(Respon) {
+                handleResponse(Respon, 'ModalPicCascade', null);
+                $("#EditPicCascade").prop('disabled', false).text('Simpan');
+            },
+            error: function(xhr) {
+                alert("Terjadi kesalahan: " + xhr.statusText);
+                $("#EditPicCascade").prop('disabled', false).text('Simpan');
+            }
+        });
+    });
+
+    // Edit PD Penunjang
+    $(".PisCascade").click(function() {
+        var Data = $(this).attr('data-pis').split("|");
+        $("#IdCascadePis").val(Data[0]);
+        var Pisah = Data[1].split(",");
+        var List = '';
+        for (let i = 0; i < Pisah.length; i++) {
+            List += '<label><input style="margin-top: 10px;" type="checkbox" checked name="PisCascade" value="'+Pisah[i]+'"> '+Pisah[i]+'</label><br>';
+        }
+        $("#ListPisCascade").html(List);
+        $("#ModalPisCascade").modal('show');
+    });
+
+    $("#EditPisCascade").click(function() {
+        var Tampung = [];
+        $.each($("input[name='PisCascade']:checked"), function() {
+            Tampung.push($(this).val());
+        });
+        var Pis = {
+            id: $("#IdCascadePis").val(),
+            pd_penunjang: Tampung.join(","),
+            [CSRF_TOKEN]: CSRF_HASH
+        };
+        
+        $.ajax({
+            url: BaseURL + "Daerah/EditPDCascade",
+            type: "POST",
+            data: Pis,
+            beforeSend: function() {
+                $("#EditPisCascade").prop('disabled', true).text('Menyimpan...');
+            },
+            success: function(Respon) {
+                handleResponse(Respon, 'ModalPisCascade', null);
+                $("#EditPisCascade").prop('disabled', false).text('Simpan');
+            },
+            error: function(xhr) {
+                alert("Terjadi kesalahan: " + xhr.statusText);
+                $("#EditPisCascade").prop('disabled', false).text('Simpan');
+            }
+        });
+    });
+
+    // ============================================================
+    // MODAL CLEANUP
+    // ============================================================
+
+    $(".modal").on("hidden.bs.modal", function() {
+        $(".modal-backdrop").remove();
+        $("body").removeClass("modal-open");
+    });
+
+    $('#ModalTambahCascade').on('hidden.bs.modal', function() {
+        $('#FormTambahCascade')[0].reset();
+        $('#Visi').prop('disabled', true).html('<option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>');
+        $('#Misi').prop('disabled', true).html('<option value="" selected disabled>-- Pilih Visi terlebih dahulu --</option>');
+    });
+
+    $('#ModalEditCascade').on('hidden.bs.modal', function() {
+        $('#FormEditCascade')[0].reset();
+        $('#EditVisi').prop('disabled', true).html('<option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>');
+        $('#EditMisi').prop('disabled', true).html('<option value="" selected disabled>-- Pilih Visi terlebih dahulu --</option>');
+    });
+
+    $('#ModalTambahTujuanCascade').on('hidden.bs.modal', function() {
+        $('#FormTambahTujuanCascade')[0].reset();
+    });
+
+    $('#ModalTambahSasaranCascade').on('hidden.bs.modal', function() {
+        $('#FormTambahSasaranCascade')[0].reset();
+    });
+
+    $('#ModalTambahIndikatorCascade').on('hidden.bs.modal', function() {
+        $('#FormTambahIndikatorCascade')[0].reset();
+    });
+
+    $('#ModalEditIndikatorCascade').on('hidden.bs.modal', function() {
+        $('#FormEditIndikatorCascade')[0].reset();
+    });
+
+});
     </script>
 </div>
 </body>
