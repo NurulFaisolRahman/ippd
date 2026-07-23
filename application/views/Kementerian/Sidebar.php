@@ -311,7 +311,10 @@
                         <i class="fa fa-chevron-down"></i>
                     </a>
                     <div class="sidebar-submenu">
-                        <a href="<?=base_url('Kementerian/PermasalahanPokok')?>">Anggaran</a>
+                        <a href="<?=base_url('Kementerian/ProgramPrioritasKL')?>">Program Prioritas Kementerian/Lembaga</a>
+                        <a href="<?=base_url('Kementerian/ProgramKL')?>">Program Kementerian/Lembaga</a>
+                        <a href="<?=base_url('Kementerian/KegiatanKL')?>">Kegiatan Kementerian/Lembaga</a>
+
                         <br>
                     </div>
                 </div>

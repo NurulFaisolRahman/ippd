@@ -69,6 +69,7 @@
                                     <td><?= $key['jenis_nspk'] ?></td>
                                     <td><?= htmlspecialchars($key['bidang']) ?></td>
                                     <td><?= $key['tahun_penetapan'] ?></td>
+<<<<<<< HEAD
                                     <td>
                                         <span class="badge badge-<?= ($key['status'] == 'Berlaku') ? 'success' : (($key['status'] == 'Revisi') ? 'warning' : 'danger') ?>">
                                             <?= $key['status'] ?>
@@ -76,6 +77,24 @@
                                     </td>
                                     <td><?= nl2br(htmlspecialchars($key['keterangan'])) ?></td>
 
+=======
+                                   <td>
+                                    <?php 
+                                    $bg_color = '';
+                                    if ($key['status'] == 'Berlaku') {
+                                        $bg_color = '#26B99A'; // Hijau
+                                    } elseif ($key['status'] == 'Revisi') {
+                                        $bg_color = '#3498DB'; // Biru
+                                    } else {
+                                        $bg_color = '#E74C3C'; // Merah
+                                    }
+                                    ?>
+                                    <span class="badge" style="background-color: <?= $bg_color ?>; color: white;">
+                                        <?= $key['status'] ?>
+                                    </span>
+                                </td>
+                                    <td><?= nl2br(htmlspecialchars($key['keterangan'] ?? '')) ?></td>
+>>>>>>> edbc646 (Perubahan modul Kementerian)
                                     <td>
                                         <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
                                             <button class="btn btn-sm btn-warning EditNSPK"
@@ -107,7 +126,7 @@
 
 <!-- Modal Input NSPK -->
 <div class="modal fade" id="ModalInputNSPK" role="dialog">
-    <div class="modal-dialog modals-default">
+    <div class="modal-dialog modals-sm">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">×</button>
@@ -203,7 +222,7 @@
 
 <!-- Modal Edit NSPK -->
 <div class="modal fade" id="ModalEditNSPK" role="dialog">
-    <div class="modal-dialog modals-default">
+    <div class="modal-dialog modals-sm">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">×</button>

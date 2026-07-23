@@ -45,6 +45,7 @@
                     </div>
                     <?php endif; ?>
 
+<<<<<<< HEAD
                     <!-- Tabel Hierarki -->
                     <!-- Tabel Hierarki (tanpa kolom Aksi di header) -->
 <div class="table-responsive">
@@ -126,6 +127,158 @@
                                         Hapus
                                     </button>
                                 </div>
+=======
+                    <!-- TABEL DATA TABLE BIASA DENGAN EXPAND/COLLAPSE -->
+                    <div class="table-responsive">
+                        <table id="renstraTable" class="table table-bordered table-striped">
+                            <thead class="bg-success text-white">
+                                <tr>
+                                    <th width="5%">No</th>
+                                    <th width="20%">Kode</th>
+                                    <th width="45%">Nama</th>
+                                    <th width="30%">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (!empty($PN)): ?>
+                                    <?php $no = 1; foreach ($PN as $pn): ?>
+                                        <!-- Baris PN -->
+                                        <tr class="level-1" data-level="pn" data-id="<?= $pn['id'] ?>" data-type="pn">
+                                            <td><?= $no++ ?></td>
+                                            <td><strong><?= htmlspecialchars($pn['kode_pn']) ?></strong></td>
+                                            <td>
+                                                <strong><?= htmlspecialchars($pn['nama_pn']) ?></strong>
+                                                <small class="text-muted d-block">(<?= $pn['tahun_mulai'] ?> – <?= $pn['tahun_akhir'] ?>)</small>
+                                                <?php if (!empty($pn['keterangan'])): ?>
+                                                    <div class="text-muted small mt-1"><?= htmlspecialchars($pn['keterangan']) ?></div>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
+                                                    <button class="btn btn-xs btn-success me-1" onclick="showModalAddPP(<?= $pn['id'] ?>)">+ PP</button>
+                                                    <button class="btn btn-xs btn-warning me-1 btnEditPN" 
+                                                            data-id="<?= $pn['id'] ?>"
+                                                            data-kode="<?= htmlspecialchars($pn['kode_pn']) ?>"
+                                                            data-nama="<?= htmlspecialchars($pn['nama_pn']) ?>"
+                                                            data-mulai="<?= $pn['tahun_mulai'] ?>"
+                                                            data-akhir="<?= $pn['tahun_akhir'] ?>"
+                                                            data-ket="<?= htmlspecialchars($pn['keterangan'] ?? '') ?>">
+                                                        Edit
+                                                    </button>
+                                                    <button class="btn btn-xs btn-danger btnDeletePN" data-id="<?= $pn['id'] ?>">Hapus</button>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Baris PP (child dari PN) -->
+                                        <?php if (!empty($pn['PP'])): ?>
+                                            <?php $pp_no = 1; foreach ($pn['PP'] as $pp): ?>
+                                                <tr class="level-2 child-row" data-parent="<?= $pn['id'] ?>" data-level="pp" data-id="<?= $pp['id'] ?>" data-type="pp" style="display: none;">
+                                                    <td><?= $pp_no++ ?></td>
+                                                    <td><?= htmlspecialchars($pp['kode_pp']) ?></td>
+                                                    <td>
+                                                        <?= htmlspecialchars($pp['nama_pp']) ?>
+                                                        <?php if (!empty($pp['keterangan'])): ?>
+                                                            <div class="text-muted small mt-1"><?= htmlspecialchars($pp['keterangan']) ?></div>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    <td>
+                                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
+                                                            <button class="btn btn-xs btn-success me-1" onclick="showModalAddKP(<?= $pp['id'] ?>)">+ KP</button>
+                                                            <button class="btn btn-xs btn-warning me-1 btnEditPP"
+                                                                    data-id="<?= $pp['id'] ?>"
+                                                                    data-kode="<?= htmlspecialchars($pp['kode_pp']) ?>"
+                                                                    data-nama="<?= htmlspecialchars($pp['nama_pp']) ?>"
+                                                                    data-ket="<?= htmlspecialchars($pp['keterangan'] ?? '') ?>">
+                                                                Edit
+                                                            </button>
+                                                            <button class="btn btn-xs btn-danger btnDeletePP" data-id="<?= $pp['id'] ?>">Hapus</button>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                </tr>
+
+                                                <!-- Baris KP (child dari PP) -->
+                                                <?php if (!empty($pp['KP'])): ?>
+                                                    <?php $kp_no = 1; foreach ($pp['KP'] as $kp): ?>
+                                                        <tr class="level-3 child-row" data-parent="<?= $pp['id'] ?>" data-level="kp" data-id="<?= $kp['id'] ?>" data-type="kp" style="display: none;">
+                                                            <td><?= $kp_no++ ?></td>
+                                                            <td><?= htmlspecialchars($kp['kode_kp']) ?></td>
+                                                            <td>
+                                                                <?= htmlspecialchars($kp['nama_kp']) ?>
+                                                                <?php if (!empty($kp['keterangan'])): ?>
+                                                                    <div class="text-muted small mt-1"><?= htmlspecialchars($kp['keterangan']) ?></div>
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td>
+                                                                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
+                                                                    <button class="btn btn-xs btn-success me-1" onclick="showModalAddProP(<?= $kp['id'] ?>)">+ Pro-P</button>
+                                                                    <button class="btn btn-xs btn-warning me-1 btnEditKP"
+                                                                            data-id="<?= $kp['id'] ?>"
+                                                                            data-kode="<?= htmlspecialchars($kp['kode_kp']) ?>"
+                                                                            data-nama="<?= htmlspecialchars($kp['nama_kp']) ?>"
+                                                                            data-ket="<?= htmlspecialchars($kp['keterangan'] ?? '') ?>">
+                                                                        Edit
+                                                                    </button>
+                                                                    <button class="btn btn-xs btn-danger btnDeleteKP" data-id="<?= $kp['id'] ?>">Hapus</button>
+                                                                <?php endif; ?>
+                                                            </td>
+                                                        </tr>
+
+                                                        <!-- Baris Pro-P (child dari KP) -->
+                                                        <?php if (!empty($kp['ProP'])): ?>
+                                                            <?php $prop_no = 1; foreach ($kp['ProP'] as $prop): ?>
+                                                                <tr class="level-4 child-row" data-parent="<?= $kp['id'] ?>" data-level="prop" data-id="<?= $prop['id'] ?>" data-type="prop" style="display: none;">
+                                                                    <td><?= $prop_no++ ?></td>
+                                                                    <td><?= htmlspecialchars($prop['kode_prop']) ?></td>
+                                                                    <td>
+                                                                        <?= htmlspecialchars($prop['nama_prop']) ?>
+                                                                        <?php if (!empty($prop['target']) || !empty($prop['indikator'])): ?>
+                                                                            <div class="item-meta small text-muted mt-2">
+                                                                                <?php if (!empty($prop['target'])): ?>
+                                                                                    <div><strong>Target:</strong> <?= nl2br(htmlspecialchars($prop['target'])) ?></div>
+                                                                                <?php endif; ?>
+                                                                                <?php if (!empty($prop['indikator'])): ?>
+                                                                                    <div><strong>Indikator:</strong> <?= nl2br(htmlspecialchars($prop['indikator'])) ?></div>
+                                                                                <?php endif; ?>
+                                                                            </div>
+                                                                        <?php endif; ?>
+                                                                        <?php if (!empty($prop['keterangan'])): ?>
+                                                                            <div class="text-muted small mt-1"><?= htmlspecialchars($prop['keterangan']) ?></div>
+                                                                        <?php endif; ?>
+                                                                    </td>
+                                                                    <td>
+                                                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
+                                                                            <button class="btn btn-xs btn-warning me-1 btnEditProP"
+                                                                                    data-id="<?= $prop['id'] ?>"
+                                                                                    data-kode="<?= htmlspecialchars($prop['kode_prop']) ?>"
+                                                                                    data-nama="<?= htmlspecialchars($prop['nama_prop']) ?>"
+                                                                                    data-target="<?= htmlspecialchars($prop['target'] ?? '') ?>"
+                                                                                    data-indikator="<?= htmlspecialchars($prop['indikator'] ?? '') ?>"
+                                                                                    data-ket="<?= htmlspecialchars($prop['keterangan'] ?? '') ?>">
+                                                                                Edit
+                                                                            </button>
+                                                                            <button class="btn btn-xs btn-danger btnDeleteProP" data-id="<?= $prop['id'] ?>">Hapus</button>
+                                                                        <?php endif; ?>
+                                                                    </td>
+                                                                </tr>
+                                                            <?php endforeach; ?>
+                                                        <?php endif; ?>
+
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+
+                                    <?php endforeach; ?>
+
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-5">
+                                            Belum ada data Renstra
+                                        </td>
+                                    </tr>
+>>>>>>> edbc646 (Perubahan modul Kementerian)
                                 <?php endif; ?>
                             </td>
                             <td></td>
@@ -451,7 +604,98 @@
 <script>
 var BaseURL = '<?= base_url() ?>';
 
+<<<<<<< HEAD
 // ===================== Tambah PN =====================
+=======
+// Inisialisasi DataTable
+$(document).ready(function() {
+    var table = $('#renstraTable').DataTable({
+        "pageLength": 10,
+        "language": {
+            "lengthMenu": "Tampilkan _MENU_ data per halaman",
+            "zeroRecords": "Data tidak ditemukan",
+            "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            "infoEmpty": "Tidak ada data",
+            "infoFiltered": "(difilter dari _MAX_ total data)",
+            "search": "Cari:",
+            "paginate": {
+                "first": "Pertama",
+                "last": "Terakhir",
+                "next": "Selanjutnya",
+                "previous": "Sebelumnya"
+            }
+        },
+        "drawCallback": function() {
+            // Sembunyikan semua child rows setelah draw
+            $('.child-row').hide();
+        }
+    });
+    
+    // Event klik pada baris utama (PN)
+    $('#renstraTable tbody').on('click', 'tr.level-1', function(e) {
+        // Cegah jika klik tombol aksi
+        if($(e.target).is('button')) return;
+        
+        var tr = $(this);
+        var rowId = tr.data('id');
+        
+        // Cari semua child dengan parent ID ini
+        var childRows = $('tr.child-row[data-parent="' + rowId + '"]');
+        
+        if(childRows.is(':visible')) {
+            childRows.hide();
+            // Sembunyikan juga child dari child
+            childRows.each(function() {
+                var childId = $(this).data('id');
+                $('tr.child-row[data-parent="' + childId + '"]').hide();
+            });
+        } else {
+            childRows.show();
+        }
+    });
+    
+    // Event klik pada baris PP
+    $('#renstraTable tbody').on('click', 'tr.level-2', function(e) {
+        if($(e.target).is('button')) return;
+        
+        var tr = $(this);
+        var rowId = tr.data('id');
+        
+        // Cari semua child dengan parent ID ini (KP)
+        var childRows = $('tr.child-row[data-parent="' + rowId + '"]');
+        
+        if(childRows.is(':visible')) {
+            childRows.hide();
+            // Sembunyikan juga child dari child
+            childRows.each(function() {
+                var childId = $(this).data('id');
+                $('tr.child-row[data-parent="' + childId + '"]').hide();
+            });
+        } else {
+            childRows.show();
+        }
+    });
+    
+    // Event klik pada baris KP
+    $('#renstraTable tbody').on('click', 'tr.level-3', function(e) {
+        if($(e.target).is('button')) return;
+        
+        var tr = $(this);
+        var rowId = tr.data('id');
+        
+        // Cari semua child dengan parent ID ini (Pro-P)
+        var childRows = $('tr.child-row[data-parent="' + rowId + '"]');
+        
+        if(childRows.is(':visible')) {
+            childRows.hide();
+        } else {
+            childRows.show();
+        }
+    });
+});
+
+// Tambah PN
+>>>>>>> edbc646 (Perubahan modul Kementerian)
 $("#formAddPN").submit(function(e) {
     e.preventDefault();
     var formData = $(this).serialize();
@@ -692,4 +936,51 @@ $(document).on('click', '.btnDeleteProP', function() {
         });
     }
 });
+<<<<<<< HEAD
 </script>
+=======
+</script>
+
+<style>
+/* CSS untuk tampilan datatable */
+.renstra-table {
+    margin-top: 20px;
+}
+
+.child-row {
+    background-color: #f9f9f9;
+}
+
+.child-row:hover {
+    background-color: #f5f5f5;
+}
+
+.level-2 td:first-child {
+    padding-left: 30px;
+}
+
+.level-3 td:first-child {
+    padding-left: 60px;
+}
+
+.level-4 td:first-child {
+    padding-left: 90px;
+}
+
+.item-meta {
+    line-height: 1.5;
+    margin-top: 6px;
+}
+
+.btn-xs {
+    padding: 2px 8px;
+    font-size: 11px;
+    line-height: 1.5;
+    border-radius: 3px;
+}
+
+.me-1 {
+    margin-right: 5px;
+}
+</style>
+>>>>>>> edbc646 (Perubahan modul Kementerian)
