@@ -311,9 +311,12 @@
                         <i class="fa fa-chevron-down"></i>
                     </a>
                     <div class="sidebar-submenu">
-                        <a href="<?=base_url('Kementerian/ProgramPrioritasKL')?>">Program Prioritas Kementerian/Lembaga</a>
+                        <a href="<?=base_url('Kementerian/renjaanggaranrekap1')?>">Rekap 1</a>
+                        <a href="<?=base_url('Kementerian/renjaanggaranrekap2')?>">Rekap 2</a>
+                        <a href="<?=base_url('Kementerian/renjaanggaranrekap3')?>">Rekap 3</a>
+                        <!-- <a href="<?=base_url('Kementerian/ProgramPrioritasKL')?>">Program Prioritas Kementerian/Lembaga</a>
                         <a href="<?=base_url('Kementerian/ProgramKL')?>">Program Kementerian/Lembaga</a>
-                        <a href="<?=base_url('Kementerian/KegiatanKL')?>">Kegiatan Kementerian/Lembaga</a>
+                        <a href="<?=base_url('Kementerian/KegiatanKL')?>">Kegiatan Kementerian/Lembaga</a> -->
 
                         <br>
                     </div>

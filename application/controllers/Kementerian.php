@@ -3324,8 +3324,7 @@ public function DeleteProP() {
     echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Proyek Prioritas';
 }
 
-<<<<<<< HEAD
-=======
+
 
 
     public function MatriksKinerja() {
@@ -3696,5 +3695,559 @@ public function pendanaan() {
         echo json_encode(['status' => 'success', 'message' => 'Data berhasil dihapus']);
     }
 
->>>>>>> edbc646 (Perubahan modul Kementerian)
+   
+    public function renjaanggaranrekap1() {
+        $Header['Halaman'] = 'Renja Anggaran Rekap 1';
+        
+        // Ambil data kementerian dari session
+        $Data['UserKementerianName'] = '-';
+        $Data['UserPeriode'] = '-';
+        $Data['UserTahunMulai'] = null;
+        $Data['UserTahunAkhir'] = null;
+        $Data['TahunList'] = [];
+        
+        $id_kementerian = $_SESSION['IdKementerian'] ?? 0;
+        
+        if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) {
+            if ($id_kementerian) {
+                $this->db->where('Id', $id_kementerian);
+                $this->db->where('deleted_at IS NULL');
+                $kementerian = $this->db->get('kementerian')->row_array();
+                
+                if ($kementerian) {
+                    $Data['UserKementerianName'] = $kementerian['NamaKementerian'] ?? '-';
+                    $Data['UserPeriode'] = ($kementerian['TahunMulai'] ?? '-') . ' - ' . ($kementerian['TahunAkhir'] ?? '-');
+                    $Data['UserTahunMulai'] = $kementerian['TahunMulai'];
+                    $Data['UserTahunAkhir'] = $kementerian['TahunAkhir'];
+                    
+                    // Buat daftar tahun
+                    for ($t = $kementerian['TahunMulai']; $t <= $kementerian['TahunAkhir']; $t++) {
+                        $Data['TahunList'][] = $t;
+                    }
+                }
+            }
+        }
+        
+        // Ambil data Renja untuk tahun berjalan
+        $tahun_sekarang = date('Y');
+        $this->db->where('id_kementerian', $id_kementerian);
+        $this->db->where('tahun', $tahun_sekarang);
+        $this->db->where('deleted_at IS NULL');
+        $renja = $this->db->get('renja_kl')->row_array();
+        
+        // Jika tidak ada data tahun berjalan, ambil tahun terakhir yang ada
+        if (!$renja) {
+            $this->db->where('id_kementerian', $id_kementerian);
+            $this->db->where('deleted_at IS NULL');
+            $this->db->order_by('tahun', 'DESC');
+            $renja = $this->db->get('renja_kl')->row_array();
+        }
+        
+        $Data['Renja'] = $renja;
+        $Data['CurrentTahun'] = $renja['tahun'] ?? date('Y');
+        $Data['IdKementerian'] = $id_kementerian;
+        
+        // Ambil data terkait jika ada
+        if ($renja) {
+            // Prioritas Nasional
+            $this->db->where('id_renja', $renja['id']);
+            $this->db->where('deleted_at IS NULL');
+            $this->db->order_by('kode', 'ASC');
+            $Data['PrioritasNasional'] = $this->db->get('renja_prioritas_nasional')->result_array();
+            
+            // Sasaran Strategis
+            $this->db->where('id_renja', $renja['id']);
+            $this->db->where('deleted_at IS NULL');
+            $this->db->order_by('kode', 'ASC');
+            $Data['SasaranStrategis'] = $this->db->get('renja_sasaran_strategis')->result_array();
+            
+            // Program dengan pendanaan
+            $this->db->select('p.*');
+            $this->db->where('p.id_renja', $renja['id']);
+            $this->db->where('p.deleted_at IS NULL');
+            $this->db->order_by('p.kode_program', 'ASC');
+            $programs = $this->db->get('renja_program p')->result_array();
+            
+            foreach ($programs as &$program) {
+                $this->db->where('id_program', $program['id']);
+                $this->db->where('deleted_at IS NULL');
+                $this->db->order_by('tahun', 'ASC');
+                $program['pendanaan'] = $this->db->get('renja_pendanaan')->result_array();
+            }
+            $Data['Program'] = $programs;
+            
+            // Total
+            $Data['TotalPrioritas'] = array_sum(array_column($Data['PrioritasNasional'], 'alokasi'));
+            $Data['TotalSasaran'] = array_sum(array_column($Data['SasaranStrategis'], 'alokasi'));
+            $Data['TotalPendanaan'] = 0;
+            foreach ($Data['Program'] as $p) {
+                foreach ($p['pendanaan'] as $pd) {
+                    $Data['TotalPendanaan'] += $pd['total'];
+                }
+            }
+        } else {
+            $Data['PrioritasNasional'] = [];
+            $Data['SasaranStrategis'] = [];
+            $Data['Program'] = [];
+            $Data['TotalPrioritas'] = 0;
+            $Data['TotalSasaran'] = 0;
+            $Data['TotalPendanaan'] = 0;
+        }
+        
+        // CSRF
+        $Data['csrf_name'] = $this->security->get_csrf_token_name();
+        $Data['csrf_hash'] = $this->security->get_csrf_hash();
+        
+        $this->load->view('Kementerian/header', $Header);
+        $this->load->view('Kementerian/renjaanggaranrekap1', $Data);
+    }
+
+    // ============================================================
+    // GET TAHUN PERIODE KEMENTERIAN
+    // ============================================================
+    public function renja_get_tahun_periode() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+        
+        $id_kementerian = $_SESSION['IdKementerian'] ?? 0;
+        
+        $this->db->select('TahunMulai, TahunAkhir');
+        $this->db->where('Id', $id_kementerian);
+        $this->db->where('deleted_at IS NULL');
+        $kementerian = $this->db->get('kementerian')->row_array();
+        
+        if ($kementerian) {
+            $tahun_mulai = $kementerian['TahunMulai'];
+            $tahun_akhir = $kementerian['TahunAkhir'];
+            $tahun_list = [];
+            
+            for ($tahun = $tahun_mulai; $tahun <= $tahun_akhir; $tahun++) {
+                $tahun_list[] = $tahun;
+            }
+            
+            echo json_encode([
+                'success' => true,
+                'data' => [
+                    'tahun_mulai' => $tahun_mulai,
+                    'tahun_akhir' => $tahun_akhir,
+                    'tahun_list' => $tahun_list
+                ]
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Data kementerian tidak ditemukan']);
+        }
+    }
+
+    // ============================================================
+    // GET DATA RENJA PER TAHUN
+    // ============================================================
+    public function renja_get_by_tahun() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+        
+        $tahun = $this->input->post('tahun');
+        $id_kementerian = $_SESSION['IdKementerian'] ?? 0;
+        
+        if (!$tahun) {
+            echo json_encode(['success' => false, 'message' => 'Tahun tidak valid']);
+            return;
+        }
+        
+        // Ambil Renja
+        $this->db->where('id_kementerian', $id_kementerian);
+        $this->db->where('tahun', $tahun);
+        $this->db->where('deleted_at IS NULL');
+        $renja = $this->db->get('renja_kl')->row_array();
+        
+        if (!$renja) {
+            echo json_encode(['success' => false, 'message' => 'Data Renja tahun ' . $tahun . ' tidak ditemukan']);
+            return;
+        }
+        
+        // Ambil Prioritas Nasional
+        $this->db->where('id_renja', $renja['id']);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->order_by('kode', 'ASC');
+        $prioritas = $this->db->get('renja_prioritas_nasional')->result_array();
+        
+        // Ambil Sasaran Strategis
+        $this->db->where('id_renja', $renja['id']);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->order_by('kode', 'ASC');
+        $sasaran = $this->db->get('renja_sasaran_strategis')->result_array();
+        
+        // Ambil Program dengan pendanaan
+        $this->db->select('p.*');
+        $this->db->where('p.id_renja', $renja['id']);
+        $this->db->where('p.deleted_at IS NULL');
+        $this->db->order_by('p.kode_program', 'ASC');
+        $programs = $this->db->get('renja_program p')->result_array();
+        
+        foreach ($programs as &$program) {
+            $this->db->where('id_program', $program['id']);
+            $this->db->where('deleted_at IS NULL');
+            $this->db->order_by('tahun', 'ASC');
+            $program['pendanaan'] = $this->db->get('renja_pendanaan')->result_array();
+        }
+        
+        // Hitung total
+        $total_prioritas = array_sum(array_column($prioritas, 'alokasi'));
+        $total_sasaran = array_sum(array_column($sasaran, 'alokasi'));
+        $total_pendanaan = 0;
+        foreach ($programs as $p) {
+            foreach ($p['pendanaan'] as $pd) {
+                $total_pendanaan += $pd['total'];
+            }
+        }
+        
+        echo json_encode([
+            'success' => true,
+            'data' => [
+                'renja' => $renja,
+                'prioritas' => $prioritas,
+                'sasaran' => $sasaran,
+                'program' => $programs,
+                'total_prioritas' => $total_prioritas,
+                'total_sasaran' => $total_sasaran,
+                'total_pendanaan' => $total_pendanaan
+            ]
+        ]);
+    }
+
+    // ============================================================
+    // CRUD RENJA UTAMA
+    // ============================================================
+    public function renja_save() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+        
+        $this->form_validation->set_rules('tahun', 'Tahun', 'required|numeric|min_length[4]|max_length[4]');
+        $this->form_validation->set_rules('visi', 'Visi', 'trim|required');
+        $this->form_validation->set_rules('misi', 'Misi', 'trim|required');
+        
+        if ($this->form_validation->run() == FALSE) {
+            echo json_encode(['success' => false, 'message' => strip_tags(validation_errors())]);
+            return;
+        }
+        
+        $id = $this->input->post('id');
+        $id_kementerian = $_SESSION['IdKementerian'] ?? 0;
+        
+        $data = [
+            'id_kementerian' => $id_kementerian,
+            'tahun' => $this->input->post('tahun'),
+            'visi' => $this->input->post('visi'),
+            'misi' => $this->input->post('misi')
+        ];
+        
+        if ($id && is_numeric($id)) {
+            // Update
+            $this->db->where('id', $id);
+            $this->db->where('id_kementerian', $id_kementerian);
+            $this->db->update('renja_kl', $data);
+            $new_id = $id;
+        } else {
+            // Insert
+            $data['created_at'] = date('Y-m-d H:i:s');
+            $this->db->insert('renja_kl', $data);
+            $new_id = $this->db->insert_id();
+        }
+        
+        if ($new_id) {
+            echo json_encode(['success' => true, 'id' => $new_id, 'message' => 'Data Renja berhasil disimpan']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Gagal menyimpan data Renja']);
+        }
+    }
+
+    // ============================================================
+    // CRUD PRIORITAS NASIONAL
+    // ============================================================
+    public function renja_prioritas_save() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+        
+        $this->form_validation->set_rules('id_renja', 'ID Renja', 'required|numeric');
+        $this->form_validation->set_rules('kode', 'Kode Prioritas', 'required|max_length[10]');
+        $this->form_validation->set_rules('nama_prioritas', 'Nama Prioritas', 'trim|required');
+        $this->form_validation->set_rules('alokasi', 'Alokasi', 'numeric');
+        
+        if ($this->form_validation->run() == FALSE) {
+            echo json_encode(['success' => false, 'message' => strip_tags(validation_errors())]);
+            return;
+        }
+        
+        $id = $this->input->post('id');
+        $data = [
+            'id_renja' => $this->input->post('id_renja'),
+            'kode' => $this->input->post('kode'),
+            'nama_prioritas' => $this->input->post('nama_prioritas'),
+            'alokasi' => $this->input->post('alokasi') ?: 0
+        ];
+        
+        if ($id && is_numeric($id)) {
+            $this->db->where('id', $id);
+            $this->db->update('renja_prioritas_nasional', $data);
+        } else {
+            $data['created_at'] = date('Y-m-d H:i:s');
+            $this->db->insert('renja_prioritas_nasional', $data);
+        }
+        
+        echo json_encode(['success' => true, 'message' => 'Data prioritas berhasil disimpan']);
+    }
+
+    public function renja_prioritas_delete() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+        
+        $id = $this->input->post('id');
+        if (!$id || !is_numeric($id)) {
+            echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+            return;
+        }
+        
+        $this->db->where('id', $id);
+        $this->db->update('renja_prioritas_nasional', ['deleted_at' => date('Y-m-d H:i:s')]);
+        echo json_encode(['success' => true, 'message' => 'Data berhasil dihapus']);
+    }
+
+    // ============================================================
+    // CRUD SASARAN STRATEGIS
+    // ============================================================
+    public function renja_sasaran_save() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+        
+        $this->form_validation->set_rules('id_renja', 'ID Renja', 'required|numeric');
+        $this->form_validation->set_rules('kode', 'Kode Sasaran', 'required|max_length[10]');
+        $this->form_validation->set_rules('nama_sasaran', 'Nama Sasaran', 'trim|required');
+        $this->form_validation->set_rules('indikator_kinerja', 'Indikator Kinerja', 'trim|required');
+        $this->form_validation->set_rules('target', 'Target', 'numeric');
+        $this->form_validation->set_rules('alokasi', 'Alokasi', 'numeric');
+        
+        if ($this->form_validation->run() == FALSE) {
+            echo json_encode(['success' => false, 'message' => strip_tags(validation_errors())]);
+            return;
+        }
+        
+        $id = $this->input->post('id');
+        $data = [
+            'id_renja' => $this->input->post('id_renja'),
+            'kode' => $this->input->post('kode'),
+            'nama_sasaran' => $this->input->post('nama_sasaran'),
+            'indikator_kinerja' => $this->input->post('indikator_kinerja'),
+            'target' => $this->input->post('target') ?: null,
+            'alokasi' => $this->input->post('alokasi') ?: 0
+        ];
+        
+        if ($id && is_numeric($id)) {
+            $this->db->where('id', $id);
+            $this->db->update('renja_sasaran_strategis', $data);
+        } else {
+            $data['created_at'] = date('Y-m-d H:i:s');
+            $this->db->insert('renja_sasaran_strategis', $data);
+        }
+        
+        echo json_encode(['success' => true, 'message' => 'Data sasaran strategis berhasil disimpan']);
+    }
+
+    public function renja_sasaran_delete() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+        
+        $id = $this->input->post('id');
+        if (!$id || !is_numeric($id)) {
+            echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+            return;
+        }
+        
+        $this->db->where('id', $id);
+        $this->db->update('renja_sasaran_strategis', ['deleted_at' => date('Y-m-d H:i:s')]);
+        echo json_encode(['success' => true, 'message' => 'Data berhasil dihapus']);
+    }
+
+    // ============================================================
+    // CRUD PROGRAM
+    // ============================================================
+    public function renja_program_save() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+        
+        $this->form_validation->set_rules('id_renja', 'ID Renja', 'required|numeric');
+        $this->form_validation->set_rules('kode_program', 'Kode Program', 'required|max_length[20]');
+        $this->form_validation->set_rules('nama_program', 'Nama Program', 'trim|required');
+        
+        if ($this->form_validation->run() == FALSE) {
+            echo json_encode(['success' => false, 'message' => strip_tags(validation_errors())]);
+            return;
+        }
+        
+        $id = $this->input->post('id');
+        $data = [
+            'id_renja' => $this->input->post('id_renja'),
+            'kode_program' => $this->input->post('kode_program'),
+            'nama_program' => $this->input->post('nama_program')
+        ];
+        
+        if ($id && is_numeric($id)) {
+            $this->db->where('id', $id);
+            $this->db->update('renja_program', $data);
+            $program_id = $id;
+        } else {
+            $data['created_at'] = date('Y-m-d H:i:s');
+            $this->db->insert('renja_program', $data);
+            $program_id = $this->db->insert_id();
+        }
+        
+        echo json_encode(['success' => true, 'id' => $program_id, 'message' => 'Data program berhasil disimpan']);
+    }
+
+    public function renja_program_delete() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+        
+        $id = $this->input->post('id');
+        if (!$id || !is_numeric($id)) {
+            echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+            return;
+        }
+        
+        $this->db->where('id', $id);
+        $this->db->update('renja_program', ['deleted_at' => date('Y-m-d H:i:s')]);
+        echo json_encode(['success' => true, 'message' => 'Data program berhasil dihapus']);
+    }
+
+    // ============================================================
+    // CRUD PENDANAAN
+    // ============================================================
+    public function renja_pendanaan_save() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+        
+        $this->form_validation->set_rules('id_program', 'ID Program', 'required|numeric');
+        $this->form_validation->set_rules('tahun', 'Tahun', 'required|numeric|min_length[4]|max_length[4]');
+        
+        if ($this->form_validation->run() == FALSE) {
+            echo json_encode(['success' => false, 'message' => strip_tags(validation_errors())]);
+            return;
+        }
+        
+        $sources = ['rpp', 'nbp', 'blu', 'ln', 'rm', 'ppdn', 'hibah', 'phbs', 'snh', 'nt'];
+        $id = $this->input->post('id');
+        $data = [
+            'id_program' => $this->input->post('id_program'),
+            'tahun' => $this->input->post('tahun')
+        ];
+        
+        $total = 0;
+        foreach ($sources as $source) {
+            $value = $this->input->post($source) ?: 0;
+            $data[$source] = $value;
+            $total += (float)$value;
+        }
+        $data['total'] = $total;
+        
+        if ($id && is_numeric($id)) {
+            $this->db->where('id', $id);
+            $this->db->update('renja_pendanaan', $data);
+        } else {
+            $data['created_at'] = date('Y-m-d H:i:s');
+            $this->db->insert('renja_pendanaan', $data);
+        }
+        
+        echo json_encode(['success' => true, 'total' => $total, 'message' => 'Data pendanaan berhasil disimpan']);
+    }
+
+    public function renja_pendanaan_delete() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+        
+        $id = $this->input->post('id');
+        if (!$id || !is_numeric($id)) {
+            echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+            return;
+        }
+        
+        $this->db->where('id', $id);
+        $this->db->update('renja_pendanaan', ['deleted_at' => date('Y-m-d H:i:s')]);
+        echo json_encode(['success' => true, 'message' => 'Data pendanaan berhasil dihapus']);
+    }
+
+    public function renja_pendanaan_get() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+        
+        $id = $this->input->post('id');
+        if (!$id || !is_numeric($id)) {
+            echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+            return;
+        }
+        
+        $this->db->where('id', $id);
+        $this->db->where('deleted_at IS NULL');
+        $data = $this->db->get('renja_pendanaan')->row_array();
+        
+        if ($data) {
+            echo json_encode(['success' => true, 'data' => $data]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Data tidak ditemukan']);
+        }
+    }
+
+    // ============================================================
+    // REKAP AKUMULASI
+    // ============================================================
+    public function renja_akumulasi() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+        
+        $id_renja = $this->input->post('id_renja');
+        if (!$id_renja || !is_numeric($id_renja)) {
+            echo json_encode(['success' => false, 'message' => 'ID Renja tidak valid']);
+            return;
+        }
+        
+        // Total Prioritas Nasional
+        $this->db->select('SUM(alokasi) as total');
+        $this->db->where('id_renja', $id_renja);
+        $this->db->where('deleted_at IS NULL');
+        $total_prioritas = $this->db->get('renja_prioritas_nasional')->row_array();
+        
+        // Total Sasaran Strategis
+        $this->db->select('SUM(alokasi) as total');
+        $this->db->where('id_renja', $id_renja);
+        $this->db->where('deleted_at IS NULL');
+        $total_sasaran = $this->db->get('renja_sasaran_strategis')->row_array();
+        
+        // Total Pendanaan Program
+        $this->db->select('SUM(pd.total) as total');
+        $this->db->from('renja_pendanaan pd');
+        $this->db->join('renja_program p', 'pd.id_program = p.id', 'inner');
+        $this->db->where('p.id_renja', $id_renja);
+        $this->db->where('pd.deleted_at IS NULL');
+        $total_pendanaan = $this->db->get()->row_array();
+        
+        echo json_encode([
+            'success' => true,
+            'data' => [
+                'total_prioritas' => $total_prioritas['total'] ?? 0,
+                'total_sasaran' => $total_sasaran['total'] ?? 0,
+                'total_pendanaan' => $total_pendanaan['total'] ?? 0
+            ]
+        ]);
+    }
 }
+?>
