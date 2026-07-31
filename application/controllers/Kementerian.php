@@ -4249,5 +4249,1141 @@ public function pendanaan() {
             ]
         ]);
     }
+
+  
+    // ============================================================
+    // REKAP 2 - PROGRAM K/L
+    // ============================================================
+    public function renjaanggaranrekap2() {
+        $Header['Halaman'] = 'Renja Anggaran Rekap 2';
+        
+        $id_kementerian = $_SESSION['IdKementerian'] ?? 0;
+        
+        $Data = [
+            'UserKementerianName' => '-',
+            'UserPeriode' => '-',
+            'UserTahunMulai' => null,
+            'UserTahunAkhir' => null,
+            'TahunList' => [],
+            'TahunStatus' => [],
+            'Rekap2' => null,
+            'Prioritas' => [],
+            'SasaranProgram' => [],
+            'OutputProgram' => [],
+            'Kegiatan' => [],
+            'CurrentTahun' => date('Y'),
+            'IdKementerian' => $id_kementerian,
+            'IdRenja' => null
+        ];
+        
+        if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1 && $id_kementerian) {
+            $this->db->where('Id', $id_kementerian);
+            $this->db->where('deleted_at IS NULL');
+            $kementerian = $this->db->get('kementerian')->row_array();
+            
+            if ($kementerian) {
+                $Data['UserKementerianName'] = $kementerian['NamaKementerian'] ?? '-';
+                $Data['UserPeriode'] = ($kementerian['TahunMulai'] ?? '-') . ' - ' . ($kementerian['TahunAkhir'] ?? '-');
+                $Data['UserTahunMulai'] = $kementerian['TahunMulai'];
+                $Data['UserTahunAkhir'] = $kementerian['TahunAkhir'];
+                
+                for ($t = $kementerian['TahunMulai']; $t <= $kementerian['TahunAkhir']; $t++) {
+                    $Data['TahunList'][] = $t;
+                    
+                    $this->db->where('id_kementerian', $id_kementerian);
+                    $this->db->where('tahun', $t);
+                    $this->db->where('deleted_at IS NULL');
+                    $renja = $this->db->get('renja_kl')->row_array();
+                    
+                    if ($renja) {
+                        $this->db->where('id_renja', $renja['id']);
+                        $this->db->where('deleted_at IS NULL');
+                        $rekap2 = $this->db->get('renja_rekap2')->row_array();
+                        $Data['TahunStatus'][$t] = $rekap2 ? 'filled' : 'renja_only';
+                    } else {
+                        $Data['TahunStatus'][$t] = 'empty';
+                    }
+                }
+                
+                $tahun_display = $this->input->get('tahun') ?? date('Y');
+                
+                if (in_array($tahun_display, $Data['TahunList'])) {
+                    $this->db->where('id_kementerian', $id_kementerian);
+                    $this->db->where('tahun', $tahun_display);
+                    $this->db->where('deleted_at IS NULL');
+                    $renja = $this->db->get('renja_kl')->row_array();
+                    
+                    if ($renja) {
+                        $Data['IdRenja'] = $renja['id'];
+                        $Data['CurrentTahun'] = $tahun_display;
+                        
+                        $this->db->where('id_renja', $renja['id']);
+                        $this->db->where('deleted_at IS NULL');
+                        $rekap2 = $this->db->get('renja_rekap2')->row_array();
+                        
+                        if ($rekap2) {
+                            $Data['Rekap2'] = $rekap2;
+                            $this->loadRekap2Data($rekap2['id'], $Data);
+                        }
+                    }
+                }
+            }
+        }
+        
+        $Data['csrf_name'] = $this->security->get_csrf_token_name();
+        $Data['csrf_hash'] = $this->security->get_csrf_hash();
+        
+        $this->load->view('Kementerian/header', $Header);
+        $this->load->view('Kementerian/renjaanggaranrekap2', $Data);
+    }
+
+    private function loadRekap2Data($id_rekap2, &$Data) {
+        $this->db->where('id_rekap2', $id_rekap2);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->order_by('kode', 'ASC');
+        $Data['Prioritas'] = $this->db->get('renja_rekap2_prioritas')->result_array();
+        
+        $this->db->where('id_rekap2', $id_rekap2);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->order_by('kode', 'ASC');
+        $Data['SasaranProgram'] = $this->db->get('renja_rekap2_sasaran_program')->result_array();
+        
+        $this->db->where('id_rekap2', $id_rekap2);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->order_by('kode', 'ASC');
+        $Data['OutputProgram'] = $this->db->get('renja_rekap2_output')->result_array();
+        
+        $this->db->where('id_rekap2', $id_rekap2);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->order_by('kode', 'ASC');
+        $Data['Kegiatan'] = $this->db->get('renja_rekap2_kegiatan')->result_array();
+    }
+
+    // ============================================================
+    // CRUD REKAP 2 UTAMA
+    // ============================================================
+    public function rekap2_save() {
+        if (!$this->input->is_ajax_request()) show_404();
+        
+        $this->form_validation->set_rules('id_renja', 'ID Renja', 'required|numeric');
+        $this->form_validation->set_rules('sasaran_strategis', 'Sasaran Strategis', 'trim');
+        $this->form_validation->set_rules('program', 'Program', 'trim');
+        
+        if ($this->form_validation->run() == FALSE) {
+            echo json_encode(['success' => false, 'message' => strip_tags(validation_errors())]);
+            return;
+        }
+        
+        $id = $this->input->post('id');
+        $data = [
+            'id_renja' => $this->input->post('id_renja'),
+            'id_kementerian' => $_SESSION['IdKementerian'] ?? 0,
+            'tahun' => $this->input->post('tahun'),
+            'sasaran_strategis' => $this->input->post('sasaran_strategis'),
+            'program' => $this->input->post('program')
+        ];
+        
+        if ($id && is_numeric($id)) {
+            $this->db->where('id', $id);
+            $this->db->update('renja_rekap2', $data);
+        } else {
+            $data['created_at'] = date('Y-m-d H:i:s');
+            $this->db->insert('renja_rekap2', $data);
+            $id = $this->db->insert_id();
+        }
+        
+        echo json_encode(['success' => true, 'id' => $id, 'message' => 'Data Rekap 2 berhasil disimpan']);
+    }
+
+    public function rekap2_get() {
+        if (!$this->input->is_ajax_request()) show_404();
+        
+        $id_renja = $this->input->post('id_renja');
+        if (!$id_renja || !is_numeric($id_renja)) {
+            echo json_encode(['success' => false, 'message' => 'ID Renja tidak valid']);
+            return;
+        }
+        
+        $this->db->where('id_renja', $id_renja);
+        $this->db->where('deleted_at IS NULL');
+        $data = $this->db->get('renja_rekap2')->row_array();
+        
+        echo json_encode(['success' => true, 'data' => $data]);
+    }
+
+    // ============================================================
+    // CRUD PRIORITAS REKAP 2
+    // ============================================================
+    public function rekap2_prioritas_save() {
+        if (!$this->input->is_ajax_request()) show_404();
+        
+        $this->form_validation->set_rules('id_rekap2', 'ID Rekap 2', 'required|numeric');
+        $this->form_validation->set_rules('kode', 'Kode', 'required|max_length[20]');
+        $this->form_validation->set_rules('nama_prioritas', 'Nama Prioritas', 'trim|required');
+        $this->form_validation->set_rules('alokasi', 'Alokasi', 'numeric');
+        
+        if ($this->form_validation->run() == FALSE) {
+            echo json_encode(['success' => false, 'message' => strip_tags(validation_errors())]);
+            return;
+        }
+        
+        $id = $this->input->post('id');
+        $data = [
+            'id_rekap2' => $this->input->post('id_rekap2'),
+            'kode' => $this->input->post('kode'),
+            'nama_prioritas' => $this->input->post('nama_prioritas'),
+            'program_prioritas' => $this->input->post('program_prioritas'),
+            'alokasi' => $this->input->post('alokasi') ?: 0
+        ];
+        
+        if ($id && is_numeric($id)) {
+            $this->db->where('id', $id);
+            $this->db->update('renja_rekap2_prioritas', $data);
+        } else {
+            $data['created_at'] = date('Y-m-d H:i:s');
+            $this->db->insert('renja_rekap2_prioritas', $data);
+        }
+        
+        echo json_encode(['success' => true, 'message' => 'Data prioritas berhasil disimpan']);
+    }
+
+    public function rekap2_prioritas_delete() {
+        if (!$this->input->is_ajax_request()) show_404();
+        
+        $id = $this->input->post('id');
+        if (!$id || !is_numeric($id)) {
+            echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+            return;
+        }
+        
+        $this->db->where('id', $id);
+        $this->db->update('renja_rekap2_prioritas', ['deleted_at' => date('Y-m-d H:i:s')]);
+        echo json_encode(['success' => true, 'message' => 'Data berhasil dihapus']);
+    }
+
+    public function rekap2_prioritas_get() {
+        if (!$this->input->is_ajax_request()) show_404();
+        
+        $id = $this->input->post('id');
+        if (!$id || !is_numeric($id)) {
+            echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+            return;
+        }
+        
+        $this->db->where('id', $id);
+        $this->db->where('deleted_at IS NULL');
+        $data = $this->db->get('renja_rekap2_prioritas')->row_array();
+        
+        echo json_encode(['success' => true, 'data' => $data]);
+    }
+
+    // ============================================================
+    // CRUD SASARAN PROGRAM REKAP 2
+    // ============================================================
+    public function rekap2_sasaran_save() {
+        if (!$this->input->is_ajax_request()) show_404();
+        
+        $this->form_validation->set_rules('id_rekap2', 'ID Rekap 2', 'required|numeric');
+        $this->form_validation->set_rules('kode', 'Kode', 'required|max_length[20]');
+        $this->form_validation->set_rules('nama_sasaran', 'Nama Sasaran', 'trim|required');
+        
+        if ($this->form_validation->run() == FALSE) {
+            echo json_encode(['success' => false, 'message' => strip_tags(validation_errors())]);
+            return;
+        }
+        
+        $id = $this->input->post('id');
+        $data = [
+            'id_rekap2' => $this->input->post('id_rekap2'),
+            'kode' => $this->input->post('kode'),
+            'nama_sasaran' => $this->input->post('nama_sasaran'),
+            'indikator_kinerja' => $this->input->post('indikator_kinerja'),
+            'target' => $this->input->post('target'),
+            'alokasi' => $this->input->post('alokasi') ?: 0
+        ];
+        
+        if ($id && is_numeric($id)) {
+            $this->db->where('id', $id);
+            $this->db->update('renja_rekap2_sasaran_program', $data);
+        } else {
+            $data['created_at'] = date('Y-m-d H:i:s');
+            $this->db->insert('renja_rekap2_sasaran_program', $data);
+        }
+        
+        echo json_encode(['success' => true, 'message' => 'Data sasaran program berhasil disimpan']);
+    }
+
+    public function rekap2_sasaran_delete() {
+        if (!$this->input->is_ajax_request()) show_404();
+        
+        $id = $this->input->post('id');
+        if (!$id || !is_numeric($id)) {
+            echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+            return;
+        }
+        
+        $this->db->where('id', $id);
+        $this->db->update('renja_rekap2_sasaran_program', ['deleted_at' => date('Y-m-d H:i:s')]);
+        echo json_encode(['success' => true, 'message' => 'Data berhasil dihapus']);
+    }
+
+    public function rekap2_sasaran_get() {
+        if (!$this->input->is_ajax_request()) show_404();
+        
+        $id = $this->input->post('id');
+        if (!$id || !is_numeric($id)) {
+            echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+            return;
+        }
+        
+        $this->db->where('id', $id);
+        $this->db->where('deleted_at IS NULL');
+        $data = $this->db->get('renja_rekap2_sasaran_program')->row_array();
+        
+        echo json_encode(['success' => true, 'data' => $data]);
+    }
+
+    // ============================================================
+    // CRUD OUTPUT PROGRAM REKAP 2
+    // ============================================================
+    public function rekap2_output_save() {
+        if (!$this->input->is_ajax_request()) show_404();
+        
+        $this->form_validation->set_rules('id_rekap2', 'ID Rekap 2', 'required|numeric');
+        $this->form_validation->set_rules('kode', 'Kode', 'required|max_length[20]');
+        $this->form_validation->set_rules('nama_output', 'Nama Output', 'trim|required');
+        
+        if ($this->form_validation->run() == FALSE) {
+            echo json_encode(['success' => false, 'message' => strip_tags(validation_errors())]);
+            return;
+        }
+        
+        $id = $this->input->post('id');
+        $data = [
+            'id_rekap2' => $this->input->post('id_rekap2'),
+            'kode' => $this->input->post('kode'),
+            'nama_output' => $this->input->post('nama_output'),
+            'indikator_output' => $this->input->post('indikator_output'),
+            'alokasi' => $this->input->post('alokasi') ?: 0
+        ];
+        
+        if ($id && is_numeric($id)) {
+            $this->db->where('id', $id);
+            $this->db->update('renja_rekap2_output', $data);
+        } else {
+            $data['created_at'] = date('Y-m-d H:i:s');
+            $this->db->insert('renja_rekap2_output', $data);
+        }
+        
+        echo json_encode(['success' => true, 'message' => 'Data output program berhasil disimpan']);
+    }
+
+    public function rekap2_output_delete() {
+        if (!$this->input->is_ajax_request()) show_404();
+        
+        $id = $this->input->post('id');
+        if (!$id || !is_numeric($id)) {
+            echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+            return;
+        }
+        
+        $this->db->where('id', $id);
+        $this->db->update('renja_rekap2_output', ['deleted_at' => date('Y-m-d H:i:s')]);
+        echo json_encode(['success' => true, 'message' => 'Data berhasil dihapus']);
+    }
+
+    public function rekap2_output_get() {
+        if (!$this->input->is_ajax_request()) show_404();
+        
+        $id = $this->input->post('id');
+        if (!$id || !is_numeric($id)) {
+            echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+            return;
+        }
+        
+        $this->db->where('id', $id);
+        $this->db->where('deleted_at IS NULL');
+        $data = $this->db->get('renja_rekap2_output')->row_array();
+        
+        echo json_encode(['success' => true, 'data' => $data]);
+    }
+
+    // ============================================================
+    // CRUD KEGIATAN REKAP 2
+    // ============================================================
+    public function rekap2_kegiatan_save() {
+        if (!$this->input->is_ajax_request()) show_404();
+        
+        $this->form_validation->set_rules('id_rekap2', 'ID Rekap 2', 'required|numeric');
+        $this->form_validation->set_rules('kode', 'Kode', 'required|max_length[20]');
+        $this->form_validation->set_rules('nama_kegiatan', 'Nama Kegiatan', 'trim|required');
+        
+        if ($this->form_validation->run() == FALSE) {
+            echo json_encode(['success' => false, 'message' => strip_tags(validation_errors())]);
+            return;
+        }
+        
+        $id = $this->input->post('id');
+        $sources = ['rpp', 'nbp', 'blu', 'ln', 'rm', 'ppdn', 'hibah', 'phbs', 'snh', 'nt'];
+        
+        $data = [
+            'id_rekap2' => $this->input->post('id_rekap2'),
+            'kode' => $this->input->post('kode'),
+            'nama_kegiatan' => $this->input->post('nama_kegiatan'),
+            'tahun_2026' => $this->input->post('tahun_2026') ?: 0,
+            'tahun_2027' => $this->input->post('tahun_2027') ?: 0,
+            'tahun_2028' => $this->input->post('tahun_2028') ?: 0
+        ];
+        
+        $total = 0;
+        foreach ($sources as $source) {
+            $value = $this->input->post($source) ?: 0;
+            $data[$source] = $value;
+            $total += (float)$value;
+        }
+        $data['total'] = $total;
+        
+        if ($id && is_numeric($id)) {
+            $this->db->where('id', $id);
+            $this->db->update('renja_rekap2_kegiatan', $data);
+        } else {
+            $data['created_at'] = date('Y-m-d H:i:s');
+            $this->db->insert('renja_rekap2_kegiatan', $data);
+        }
+        
+        echo json_encode(['success' => true, 'total' => $total, 'message' => 'Data kegiatan berhasil disimpan']);
+    }
+
+    public function rekap2_kegiatan_delete() {
+        if (!$this->input->is_ajax_request()) show_404();
+        
+        $id = $this->input->post('id');
+        if (!$id || !is_numeric($id)) {
+            echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+            return;
+        }
+        
+        $this->db->where('id', $id);
+        $this->db->update('renja_rekap2_kegiatan', ['deleted_at' => date('Y-m-d H:i:s')]);
+        echo json_encode(['success' => true, 'message' => 'Data kegiatan berhasil dihapus']);
+    }
+
+    public function rekap2_kegiatan_get() {
+        if (!$this->input->is_ajax_request()) show_404();
+        
+        $id = $this->input->post('id');
+        if (!$id || !is_numeric($id)) {
+            echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+            return;
+        }
+        
+        $this->db->where('id', $id);
+        $this->db->where('deleted_at IS NULL');
+        $data = $this->db->get('renja_rekap2_kegiatan')->row_array();
+        
+        echo json_encode(['success' => true, 'data' => $data]);
+    }
+
+    // ============================================================
+    // GET REKAP 2 BY TAHUN
+    // ============================================================
+    public function rekap2_get_by_tahun() {
+        if (!$this->input->is_ajax_request()) show_404();
+        
+        $tahun = $this->input->post('tahun');
+        $id_kementerian = $_SESSION['IdKementerian'] ?? 0;
+        
+        if (!$tahun) {
+            echo json_encode(['success' => false, 'message' => 'Tahun tidak valid']);
+            return;
+        }
+        
+        $this->db->where('id_kementerian', $id_kementerian);
+        $this->db->where('tahun', $tahun);
+        $this->db->where('deleted_at IS NULL');
+        $renja = $this->db->get('renja_kl')->row_array();
+        
+        if (!$renja) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Data Renja tahun ' . $tahun . ' belum dibuat. Silahkan buat di Rekap 1 terlebih dahulu.',
+                'can_create' => true
+            ]);
+            return;
+        }
+        
+        $this->db->where('id_renja', $renja['id']);
+        $this->db->where('deleted_at IS NULL');
+        $rekap2 = $this->db->get('renja_rekap2')->row_array();
+        
+        if (!$rekap2) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Data Rekap 2 untuk tahun ' . $tahun . ' belum diisi.',
+                'can_create' => true,
+                'id_renja' => $renja['id']
+            ]);
+            return;
+        }
+        
+        $this->db->where('id_rekap2', $rekap2['id']);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->order_by('kode', 'ASC');
+        $prioritas = $this->db->get('renja_rekap2_prioritas')->result_array();
+        
+        $this->db->where('id_rekap2', $rekap2['id']);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->order_by('kode', 'ASC');
+        $sasaran = $this->db->get('renja_rekap2_sasaran_program')->result_array();
+        
+        $this->db->where('id_rekap2', $rekap2['id']);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->order_by('kode', 'ASC');
+        $output = $this->db->get('renja_rekap2_output')->result_array();
+        
+        $this->db->where('id_rekap2', $rekap2['id']);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->order_by('kode', 'ASC');
+        $kegiatan = $this->db->get('renja_rekap2_kegiatan')->result_array();
+        
+        $total_prioritas = array_sum(array_column($prioritas, 'alokasi'));
+        $total_sasaran = array_sum(array_column($sasaran, 'alokasi'));
+        $total_output = array_sum(array_column($output, 'alokasi'));
+        $total_kegiatan = array_sum(array_column($kegiatan, 'total'));
+        
+        echo json_encode([
+            'success' => true,
+            'data' => [
+                'rekap2' => $rekap2,
+                'prioritas' => $prioritas,
+                'sasaran' => $sasaran,
+                'output' => $output,
+                'kegiatan' => $kegiatan,
+                'total_prioritas' => $total_prioritas,
+                'total_sasaran' => $total_sasaran,
+                'total_output' => $total_output,
+                'total_kegiatan' => $total_kegiatan
+            ]
+        ]);
+    }
+
+    // ============================================================
+    // CREATE REKAP 2
+    // ============================================================
+    public function rekap2_create() {
+        if (!$this->input->is_ajax_request()) show_404();
+        
+        $id_renja = $this->input->post('id_renja');
+        $tahun = $this->input->post('tahun');
+        
+        if (!$id_renja || !is_numeric($id_renja)) {
+            echo json_encode(['success' => false, 'message' => 'ID Renja tidak valid']);
+            return;
+        }
+        
+        $this->db->where('id_renja', $id_renja);
+        $this->db->where('deleted_at IS NULL');
+        $exists = $this->db->get('renja_rekap2')->row_array();
+        
+        if ($exists) {
+            echo json_encode(['success' => false, 'message' => 'Data Rekap 2 sudah ada']);
+            return;
+        }
+        
+        $data = [
+            'id_renja' => $id_renja,
+            'id_kementerian' => $_SESSION['IdKementerian'] ?? 0,
+            'tahun' => $tahun,
+            'created_at' => date('Y-m-d H:i:s')
+        ];
+        
+        $this->db->insert('renja_rekap2', $data);
+        $new_id = $this->db->insert_id();
+        
+        if ($new_id) {
+            echo json_encode([
+                'success' => true,
+                'id' => $new_id,
+                'message' => 'Data Rekap 2 tahun ' . $tahun . ' berhasil dibuat'
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Gagal membuat data']);
+        }
+    }
+    // ============================================================
+// REKAP 3 - KEGIATAN K/L
+// ============================================================
+public function renjaanggaranrekap3() {
+    $Header['Halaman'] = 'Renja Anggaran Rekap 3';
+    
+    $id_kementerian = $_SESSION['IdKementerian'] ?? 0;
+    
+    $Data = [
+        'UserKementerianName' => '-',
+        'UserPeriode' => '-',
+        'UserTahunMulai' => null,
+        'UserTahunAkhir' => null,
+        'TahunList' => [],
+        'TahunStatus' => [],
+        'Rekap3' => null,
+        'SasaranKegiatan' => [],
+        'Rincian' => [],
+        'Pendanaan' => [],
+        'SumberDana' => [],
+        'CurrentTahun' => date('Y'),
+        'IdKementerian' => $id_kementerian,
+        'IdRenja' => null
+    ];
+    
+    if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1 && $id_kementerian) {
+        $this->db->where('Id', $id_kementerian);
+        $this->db->where('deleted_at IS NULL');
+        $kementerian = $this->db->get('kementerian')->row_array();
+        
+        if ($kementerian) {
+            $Data['UserKementerianName'] = $kementerian['NamaKementerian'] ?? '-';
+            $Data['UserPeriode'] = ($kementerian['TahunMulai'] ?? '-') . ' - ' . ($kementerian['TahunAkhir'] ?? '-');
+            $Data['UserTahunMulai'] = $kementerian['TahunMulai'];
+            $Data['UserTahunAkhir'] = $kementerian['TahunAkhir'];
+            
+            for ($t = $kementerian['TahunMulai']; $t <= $kementerian['TahunAkhir']; $t++) {
+                $Data['TahunList'][] = $t;
+                
+                $this->db->where('id_kementerian', $id_kementerian);
+                $this->db->where('tahun', $t);
+                $this->db->where('deleted_at IS NULL');
+                $renja = $this->db->get('renja_kl')->row_array();
+                
+                if ($renja) {
+                    $this->db->where('id_renja', $renja['id']);
+                    $this->db->where('deleted_at IS NULL');
+                    $rekap3 = $this->db->get('renja_rekap3')->row_array();
+                    $Data['TahunStatus'][$t] = $rekap3 ? 'filled' : 'renja_only';
+                } else {
+                    $Data['TahunStatus'][$t] = 'empty';
+                }
+            }
+            
+            $tahun_display = $this->input->get('tahun') ?? date('Y');
+            
+            if (in_array($tahun_display, $Data['TahunList'])) {
+                $this->db->where('id_kementerian', $id_kementerian);
+                $this->db->where('tahun', $tahun_display);
+                $this->db->where('deleted_at IS NULL');
+                $renja = $this->db->get('renja_kl')->row_array();
+                
+                if ($renja) {
+                    $Data['IdRenja'] = $renja['id'];
+                    $Data['CurrentTahun'] = $tahun_display;
+                    
+                    $this->db->where('id_renja', $renja['id']);
+                    $this->db->where('deleted_at IS NULL');
+                    $rekap3 = $this->db->get('renja_rekap3')->row_array();
+                    
+                    if ($rekap3) {
+                        $Data['Rekap3'] = $rekap3;
+                        $this->loadRekap3Data($rekap3['id'], $Data);
+                    }
+                }
+            }
+        }
+    }
+    
+    $Data['csrf_name'] = $this->security->get_csrf_token_name();
+    $Data['csrf_hash'] = $this->security->get_csrf_hash();
+    
+    $this->load->view('Kementerian/header', $Header);
+    $this->load->view('Kementerian/renjaanggaranrekap3', $Data);
+}
+
+private function loadRekap3Data($id_rekap3, &$Data) {
+    $this->db->where('id_rekap3', $id_rekap3);
+    $this->db->where('deleted_at IS NULL');
+    $this->db->order_by('kode', 'ASC');
+    $Data['SasaranKegiatan'] = $this->db->get('renja_rekap3_sasaran_kegiatan')->result_array();
+    
+    $this->db->where('id_rekap3', $id_rekap3);
+    $this->db->where('deleted_at IS NULL');
+    $this->db->order_by('kode', 'ASC');
+    $Data['Rincian'] = $this->db->get('renja_rekap3_rincian')->result_array();
+    
+    $this->db->where('id_rekap3', $id_rekap3);
+    $this->db->where('deleted_at IS NULL');
+    $this->db->order_by('kode', 'ASC');
+    $Data['Pendanaan'] = $this->db->get('renja_rekap3_pendanaan')->result_array();
+    
+    $this->db->where('id_rekap3', $id_rekap3);
+    $this->db->where('deleted_at IS NULL');
+    $this->db->order_by('kode', 'ASC');
+    $Data['SumberDana'] = $this->db->get('renja_rekap3_sumber_dana')->result_array();
+}
+
+// ============================================================
+// CRUD REKAP 3 UTAMA
+// ============================================================
+public function rekap3_save() {
+    if (!$this->input->is_ajax_request()) show_404();
+    
+    $this->form_validation->set_rules('id_renja', 'ID Renja', 'required|numeric');
+    $this->form_validation->set_rules('program', 'Program', 'trim');
+    $this->form_validation->set_rules('sasaran_program', 'Sasaran Program', 'trim');
+    $this->form_validation->set_rules('kegiatan', 'Kegiatan', 'trim');
+    $this->form_validation->set_rules('unit_organisasi', 'Unit Organisasi', 'trim');
+    
+    if ($this->form_validation->run() == FALSE) {
+        echo json_encode(['success' => false, 'message' => strip_tags(validation_errors())]);
+        return;
+    }
+    
+    $id = $this->input->post('id');
+    $data = [
+        'id_renja' => $this->input->post('id_renja'),
+        'id_kementerian' => $_SESSION['IdKementerian'] ?? 0,
+        'tahun' => $this->input->post('tahun'),
+        'program' => $this->input->post('program'),
+        'sasaran_program' => $this->input->post('sasaran_program'),
+        'kegiatan' => $this->input->post('kegiatan'),
+        'unit_organisasi' => $this->input->post('unit_organisasi')
+    ];
+    
+    if ($id && is_numeric($id)) {
+        $this->db->where('id', $id);
+        $this->db->update('renja_rekap3', $data);
+    } else {
+        $data['created_at'] = date('Y-m-d H:i:s');
+        $this->db->insert('renja_rekap3', $data);
+        $id = $this->db->insert_id();
+    }
+    
+    echo json_encode(['success' => true, 'id' => $id, 'message' => 'Data Rekap 3 berhasil disimpan']);
+}
+
+public function rekap3_get() {
+    if (!$this->input->is_ajax_request()) show_404();
+    
+    $id_renja = $this->input->post('id_renja');
+    if (!$id_renja || !is_numeric($id_renja)) {
+        echo json_encode(['success' => false, 'message' => 'ID Renja tidak valid']);
+        return;
+    }
+    
+    $this->db->where('id_renja', $id_renja);
+    $this->db->where('deleted_at IS NULL');
+    $data = $this->db->get('renja_rekap3')->row_array();
+    
+    echo json_encode(['success' => true, 'data' => $data]);
+}
+
+public function rekap3_create() {
+    if (!$this->input->is_ajax_request()) show_404();
+    
+    $id_renja = $this->input->post('id_renja');
+    $tahun = $this->input->post('tahun');
+    
+    if (!$id_renja || !is_numeric($id_renja)) {
+        echo json_encode(['success' => false, 'message' => 'ID Renja tidak valid']);
+        return;
+    }
+    
+    $this->db->where('id_renja', $id_renja);
+    $this->db->where('deleted_at IS NULL');
+    $exists = $this->db->get('renja_rekap3')->row_array();
+    
+    if ($exists) {
+        echo json_encode(['success' => false, 'message' => 'Data Rekap 3 sudah ada']);
+        return;
+    }
+    
+    $data = [
+        'id_renja' => $id_renja,
+        'id_kementerian' => $_SESSION['IdKementerian'] ?? 0,
+        'tahun' => $tahun,
+        'created_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->insert('renja_rekap3', $data);
+    $new_id = $this->db->insert_id();
+    
+    if ($new_id) {
+        echo json_encode(['success' => true, 'id' => $new_id, 'message' => 'Data Rekap 3 tahun ' . $tahun . ' berhasil dibuat']);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Gagal membuat data']);
+    }
+}
+
+// ============================================================
+// CRUD SASARAN KEGIATAN (IKK) - REKAP 3
+// ============================================================
+public function rekap3_sasaran_save() {
+    if (!$this->input->is_ajax_request()) show_404();
+    
+    $this->form_validation->set_rules('id_rekap3', 'ID Rekap 3', 'required|numeric');
+    $this->form_validation->set_rules('kode', 'Kode', 'required|max_length[20]');
+    $this->form_validation->set_rules('nama_sasaran', 'Nama Sasaran', 'trim|required');
+    $this->form_validation->set_rules('alokasi', 'Alokasi', 'numeric');
+    
+    if ($this->form_validation->run() == FALSE) {
+        echo json_encode(['success' => false, 'message' => strip_tags(validation_errors())]);
+        return;
+    }
+    
+    $id = $this->input->post('id');
+    $data = [
+        'id_rekap3' => $this->input->post('id_rekap3'),
+        'kode' => $this->input->post('kode'),
+        'nama_sasaran' => $this->input->post('nama_sasaran'),
+        'indikator_kinerja' => $this->input->post('indikator_kinerja'),
+        'target' => $this->input->post('target'),
+        'alokasi' => $this->input->post('alokasi') ?: 0
+    ];
+    
+    if ($id && is_numeric($id)) {
+        $this->db->where('id', $id);
+        $this->db->update('renja_rekap3_sasaran_kegiatan', $data);
+    } else {
+        $data['created_at'] = date('Y-m-d H:i:s');
+        $this->db->insert('renja_rekap3_sasaran_kegiatan', $data);
+    }
+    
+    echo json_encode(['success' => true, 'message' => 'Data sasaran kegiatan berhasil disimpan']);
+}
+
+public function rekap3_sasaran_delete() {
+    if (!$this->input->is_ajax_request()) show_404();
+    
+    $id = $this->input->post('id');
+    if (!$id || !is_numeric($id)) {
+        echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+        return;
+    }
+    
+    $this->db->where('id', $id);
+    $this->db->update('renja_rekap3_sasaran_kegiatan', ['deleted_at' => date('Y-m-d H:i:s')]);
+    echo json_encode(['success' => true, 'message' => 'Data berhasil dihapus']);
+}
+
+public function rekap3_sasaran_get() {
+    if (!$this->input->is_ajax_request()) show_404();
+    
+    $id = $this->input->post('id');
+    if (!$id || !is_numeric($id)) {
+        echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+        return;
+    }
+    
+    $this->db->where('id', $id);
+    $this->db->where('deleted_at IS NULL');
+    $data = $this->db->get('renja_rekap3_sasaran_kegiatan')->row_array();
+    
+    echo json_encode(['success' => true, 'data' => $data]);
+}
+
+// ============================================================
+// CRUD RINCIAN KEGIATAN - REKAP 3
+// ============================================================
+public function rekap3_rincian_save() {
+    if (!$this->input->is_ajax_request()) show_404();
+    
+    $this->form_validation->set_rules('id_rekap3', 'ID Rekap 3', 'required|numeric');
+    $this->form_validation->set_rules('kode', 'Kode', 'required|max_length[50]');
+    
+    if ($this->form_validation->run() == FALSE) {
+        echo json_encode(['success' => false, 'message' => strip_tags(validation_errors())]);
+        return;
+    }
+    
+    $id = $this->input->post('id');
+    $data = [
+        'id_rekap3' => $this->input->post('id_rekap3'),
+        'kode' => $this->input->post('kode'),
+        'sasaran_kegiatan' => $this->input->post('sasaran_kegiatan'),
+        'klasifikasi_rincian_output' => $this->input->post('klasifikasi_rincian_output'),
+        'rincian_output' => $this->input->post('rincian_output'),
+        'komponen' => $this->input->post('komponen'),
+        'provinsi' => $this->input->post('provinsi'),
+        'kabupaten_kota' => $this->input->post('kabupaten_kota'),
+        'nawacita' => $this->input->post('nawacita'),
+        'prioritas_nasional' => $this->input->post('prioritas_nasional'),
+        'program_prioritas' => $this->input->post('program_prioritas'),
+        'kegiatan_prioritas' => $this->input->post('kegiatan_prioritas'),
+        'proyek_prioritas' => $this->input->post('proyek_prioritas'),
+        'dukungan_tematik' => $this->input->post('dukungan_tematik'),
+        'janji_presiden' => $this->input->post('janji_presiden'),
+        'alokasi' => $this->input->post('alokasi') ?: 0
+    ];
+    
+    if ($id && is_numeric($id)) {
+        $this->db->where('id', $id);
+        $this->db->update('renja_rekap3_rincian', $data);
+    } else {
+        $data['created_at'] = date('Y-m-d H:i:s');
+        $this->db->insert('renja_rekap3_rincian', $data);
+    }
+    
+    echo json_encode(['success' => true, 'message' => 'Data rincian kegiatan berhasil disimpan']);
+}
+
+public function rekap3_rincian_delete() {
+    if (!$this->input->is_ajax_request()) show_404();
+    
+    $id = $this->input->post('id');
+    if (!$id || !is_numeric($id)) {
+        echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+        return;
+    }
+    
+    $this->db->where('id', $id);
+    $this->db->update('renja_rekap3_rincian', ['deleted_at' => date('Y-m-d H:i:s')]);
+    echo json_encode(['success' => true, 'message' => 'Data berhasil dihapus']);
+}
+
+public function rekap3_rincian_get() {
+    if (!$this->input->is_ajax_request()) show_404();
+    
+    $id = $this->input->post('id');
+    if (!$id || !is_numeric($id)) {
+        echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+        return;
+    }
+    
+    $this->db->where('id', $id);
+    $this->db->where('deleted_at IS NULL');
+    $data = $this->db->get('renja_rekap3_rincian')->row_array();
+    
+    echo json_encode(['success' => true, 'data' => $data]);
+}
+
+// ============================================================
+// CRUD PERHITUNGAN PENDANAAN - REKAP 3
+// ============================================================
+public function rekap3_pendanaan_save() {
+    if (!$this->input->is_ajax_request()) show_404();
+    
+    $this->form_validation->set_rules('id_rekap3', 'ID Rekap 3', 'required|numeric');
+    $this->form_validation->set_rules('kode', 'Kode', 'required|max_length[50]');
+    
+    if ($this->form_validation->run() == FALSE) {
+        echo json_encode(['success' => false, 'message' => strip_tags(validation_errors())]);
+        return;
+    }
+    
+    $id = $this->input->post('id');
+    $data = [
+        'id_rekap3' => $this->input->post('id_rekap3'),
+        'kode' => $this->input->post('kode'),
+        'sasaran_kegiatan' => $this->input->post('sasaran_kegiatan'),
+        'klasifikasi_rincian_output' => $this->input->post('klasifikasi_rincian_output'),
+        'rincian_output' => $this->input->post('rincian_output'),
+        'komponen' => $this->input->post('komponen'),
+        'volume_target' => $this->input->post('volume_target'),
+        'satuan' => $this->input->post('satuan'),
+        'satuan_biaya' => $this->input->post('satuan_biaya') ?: 0,
+        'alokasi_2024' => $this->input->post('alokasi_2024') ?: 0,
+        'target_2025' => $this->input->post('target_2025'),
+        'target_2026' => $this->input->post('target_2026'),
+        'target_2027' => $this->input->post('target_2027'),
+        'alokasi_2025' => $this->input->post('alokasi_2025') ?: 0,
+        'alokasi_2026' => $this->input->post('alokasi_2026') ?: 0,
+        'alokasi_2027' => $this->input->post('alokasi_2027') ?: 0
+    ];
+    
+    if ($id && is_numeric($id)) {
+        $this->db->where('id', $id);
+        $this->db->update('renja_rekap3_pendanaan', $data);
+    } else {
+        $data['created_at'] = date('Y-m-d H:i:s');
+        $this->db->insert('renja_rekap3_pendanaan', $data);
+    }
+    
+    echo json_encode(['success' => true, 'message' => 'Data perhitungan pendanaan berhasil disimpan']);
+}
+
+public function rekap3_pendanaan_delete() {
+    if (!$this->input->is_ajax_request()) show_404();
+    
+    $id = $this->input->post('id');
+    if (!$id || !is_numeric($id)) {
+        echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+        return;
+    }
+    
+    $this->db->where('id', $id);
+    $this->db->update('renja_rekap3_pendanaan', ['deleted_at' => date('Y-m-d H:i:s')]);
+    echo json_encode(['success' => true, 'message' => 'Data berhasil dihapus']);
+}
+
+public function rekap3_pendanaan_get() {
+    if (!$this->input->is_ajax_request()) show_404();
+    
+    $id = $this->input->post('id');
+    if (!$id || !is_numeric($id)) {
+        echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+        return;
+    }
+    
+    $this->db->where('id', $id);
+    $this->db->where('deleted_at IS NULL');
+    $data = $this->db->get('renja_rekap3_pendanaan')->row_array();
+    
+    echo json_encode(['success' => true, 'data' => $data]);
+}
+
+// ============================================================
+// CRUD SUMBER DANA - REKAP 3
+// ============================================================
+public function rekap3_sumber_dana_save() {
+    if (!$this->input->is_ajax_request()) show_404();
+    
+    $this->form_validation->set_rules('id_rekap3', 'ID Rekap 3', 'required|numeric');
+    $this->form_validation->set_rules('kode', 'Kode', 'required|max_length[50]');
+    
+    if ($this->form_validation->run() == FALSE) {
+        echo json_encode(['success' => false, 'message' => strip_tags(validation_errors())]);
+        return;
+    }
+    
+    $sources = ['rpp', 'nbp', 'blu', 'ln', 'rm', 'ppdn', 'hibah', 'phbs', 'snh', 'nt'];
+    $id = $this->input->post('id');
+    $data = [
+        'id_rekap3' => $this->input->post('id_rekap3'),
+        'kode' => $this->input->post('kode'),
+        'sasaran_kegiatan' => $this->input->post('sasaran_kegiatan'),
+        'klasifikasi_rincian_output' => $this->input->post('klasifikasi_rincian_output'),
+        'rincian_output' => $this->input->post('rincian_output'),
+        'komponen' => $this->input->post('komponen'),
+        'jenis_komponen' => $this->input->post('jenis_komponen')
+    ];
+    
+    $total = 0;
+    foreach ($sources as $source) {
+        $value = $this->input->post($source) ?: 0;
+        $data[$source] = $value;
+        $total += (float)$value;
+    }
+    $data['total'] = $total;
+    
+    if ($id && is_numeric($id)) {
+        $this->db->where('id', $id);
+        $this->db->update('renja_rekap3_sumber_dana', $data);
+    } else {
+        $data['created_at'] = date('Y-m-d H:i:s');
+        $this->db->insert('renja_rekap3_sumber_dana', $data);
+    }
+    
+    echo json_encode(['success' => true, 'total' => $total, 'message' => 'Data sumber dana berhasil disimpan']);
+}
+
+public function rekap3_sumber_dana_delete() {
+    if (!$this->input->is_ajax_request()) show_404();
+    
+    $id = $this->input->post('id');
+    if (!$id || !is_numeric($id)) {
+        echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+        return;
+    }
+    
+    $this->db->where('id', $id);
+    $this->db->update('renja_rekap3_sumber_dana', ['deleted_at' => date('Y-m-d H:i:s')]);
+    echo json_encode(['success' => true, 'message' => 'Data berhasil dihapus']);
+}
+
+public function rekap3_sumber_dana_get() {
+    if (!$this->input->is_ajax_request()) show_404();
+    
+    $id = $this->input->post('id');
+    if (!$id || !is_numeric($id)) {
+        echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+        return;
+    }
+    
+    $this->db->where('id', $id);
+    $this->db->where('deleted_at IS NULL');
+    $data = $this->db->get('renja_rekap3_sumber_dana')->row_array();
+    
+    echo json_encode(['success' => true, 'data' => $data]);
+}
+
+// ============================================================
+// GET REKAP 3 BY TAHUN
+// ============================================================
+public function rekap3_get_by_tahun() {
+    if (!$this->input->is_ajax_request()) show_404();
+    
+    $tahun = $this->input->post('tahun');
+    $id_kementerian = $_SESSION['IdKementerian'] ?? 0;
+    
+    if (!$tahun) {
+        echo json_encode(['success' => false, 'message' => 'Tahun tidak valid']);
+        return;
+    }
+    
+    $this->db->where('id_kementerian', $id_kementerian);
+    $this->db->where('tahun', $tahun);
+    $this->db->where('deleted_at IS NULL');
+    $renja = $this->db->get('renja_kl')->row_array();
+    
+    if (!$renja) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Data Renja tahun ' . $tahun . ' belum dibuat. Silahkan buat di Rekap 1 terlebih dahulu.',
+            'can_create' => true
+        ]);
+        return;
+    }
+    
+    $this->db->where('id_renja', $renja['id']);
+    $this->db->where('deleted_at IS NULL');
+    $rekap3 = $this->db->get('renja_rekap3')->row_array();
+    
+    if (!$rekap3) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Data Rekap 3 untuk tahun ' . $tahun . ' belum diisi.',
+            'can_create' => true,
+            'id_renja' => $renja['id']
+        ]);
+        return;
+    }
+    
+    $this->db->where('id_rekap3', $rekap3['id']);
+    $this->db->where('deleted_at IS NULL');
+    $this->db->order_by('kode', 'ASC');
+    $sasaran = $this->db->get('renja_rekap3_sasaran_kegiatan')->result_array();
+    
+    $this->db->where('id_rekap3', $rekap3['id']);
+    $this->db->where('deleted_at IS NULL');
+    $this->db->order_by('kode', 'ASC');
+    $rincian = $this->db->get('renja_rekap3_rincian')->result_array();
+    
+    $this->db->where('id_rekap3', $rekap3['id']);
+    $this->db->where('deleted_at IS NULL');
+    $this->db->order_by('kode', 'ASC');
+    $pendanaan = $this->db->get('renja_rekap3_pendanaan')->result_array();
+    
+    $this->db->where('id_rekap3', $rekap3['id']);
+    $this->db->where('deleted_at IS NULL');
+    $this->db->order_by('kode', 'ASC');
+    $sumber_dana = $this->db->get('renja_rekap3_sumber_dana')->result_array();
+    
+    $total_sasaran = array_sum(array_column($sasaran, 'alokasi'));
+    $total_rincian = array_sum(array_column($rincian, 'alokasi'));
+    $total_pendanaan = array_sum(array_column($pendanaan, 'alokasi_2024'));
+    $total_sumber_dana = array_sum(array_column($sumber_dana, 'total'));
+    
+    echo json_encode([
+        'success' => true,
+        'data' => [
+            'rekap3' => $rekap3,
+            'sasaran' => $sasaran,
+            'rincian' => $rincian,
+            'pendanaan' => $pendanaan,
+            'sumber_dana' => $sumber_dana,
+            'total_sasaran' => $total_sasaran,
+            'total_rincian' => $total_rincian,
+            'total_pendanaan' => $total_pendanaan,
+            'total_sumber_dana' => $total_sumber_dana
+        ]
+    ]);
+}
 }
 ?>
