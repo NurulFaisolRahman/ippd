@@ -93,36 +93,36 @@
                                         <td style="vertical-align: middle;">
                                             <?php if (!empty($key['NamaKementerian'])): ?>
                                                 <?php foreach (explode('; ', $key['NamaKementerian']) as $kem): ?>
-                                                    <span class="badge badge-info" style="background-color:#17a2b8;color:#fff;padding:2px 8px;border-radius:12px;font-size:11px;display:inline-block;margin:1px;">
+                                                    <span style="display:inline-block;margin:1px;padding:2px 4px;font-size:12px;">
                                                         <?= html_escape($kem) ?>
                                                     </span>
                                                 <?php endforeach; ?>
                                             <?php else: ?>
-                                                <span class="text-muted">-</span>
+                                                <span style="color:#999;">-</span>
                                             <?php endif; ?>
                                         </td>
                                         <td style="vertical-align: middle;">
-                                            <!-- SOLUSI: Menggunakan toggle button sederhana -->
                                             <div class="permasalahan-wrapper">
-                                                <button class="btn btn-sm btn-info toggle-permasalahan" data-target="#collapse_<?= $rowId ?>">
-                                                    <span class="toggle-icon">▶</span> 
+                                                <button class="toggle-permasalahan" data-target="#collapse_<?= $rowId ?>" style="background:none;border:none;padding:0;font-size:13px;cursor:pointer;color:#337ab7;text-decoration:none;">
                                                     <?php if (!empty($permIds)): ?>
                                                         <?= count($permIds) ?> Permasalahan
                                                     <?php else: ?>
                                                         0 Permasalahan
                                                     <?php endif; ?>
                                                 </button>
-                                                <div id="collapse_<?= $rowId ?>" class="permasalahan-list" style="display:none; margin-top: 8px;">
+                                                <div id="collapse_<?= $rowId ?>" class="permasalahan-list" style="display:none; margin-top: 5px;">
                                                     <?php if (!empty($permIds)): ?>
-                                                        <?php foreach ($permIds as $permId): ?>
-                                                            <?php if (isset($Permasalahan[$permId])): ?>
-                                                                <span class="badge badge-success" style="background-color:#28a745;color:#fff;padding:2px 8px;border-radius:12px;font-size:11px;display:inline-block;margin:2px;">
-                                                                    <?= html_escape($Permasalahan[$permId]) ?>
-                                                                </span>
-                                                            <?php endif; ?>
-                                                        <?php endforeach; ?>
+                                                        <ul style="margin:0;padding-left:20px;list-style-type:disc;">
+                                                            <?php foreach ($permIds as $permId): ?>
+                                                                <?php if (isset($Permasalahan[$permId])): ?>
+                                                                    <li style="margin:2px 0;padding:2px 4px;font-size:12px;text-align:left;">
+                                                                        <?= html_escape($Permasalahan[$permId]) ?>
+                                                                    </li>
+                                                                <?php endif; ?>
+                                                            <?php endforeach; ?>
+                                                        </ul>
                                                     <?php else: ?>
-                                                        <span class="text-muted">Tidak ada permasalahan nasional</span>
+                                                        <span style="color:#999;">Tidak ada permasalahan nasional</span>
                                                     <?php endif; ?>
                                                 </div>
                                             </div>
@@ -410,12 +410,6 @@
         .modal-content {
             color: #000;
         }
-        .badge-info {
-            background-color: #17a2b8 !important;
-        }
-        .badge-success {
-            background-color: #28a745 !important;
-        }
         .loading {
             display: inline-block;
             width: 20px;
@@ -484,34 +478,31 @@
             }
         }
         
-        /* STYLE UNTUK TOGGLE PERMASALAHAN */
+        /* STYLE UNTUK TOGGLE PERMASALAHAN - SEPERTI TEKS BIASA */
         .toggle-permasalahan {
-            background-color: #f5f7f8;
-            color: #000000;
-            border: none;
-            padding: 4px 12px;
-            border-radius: 4px;
+            background: none !important;
+            border: none !important;
+            padding: 0 !important;
             font-size: 13px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            color: #337ab7;
+            text-decoration: none;
         }
         .toggle-permasalahan:hover {
-            background-color: #138496;
-            color: #fff;
+            text-decoration: underline;
         }
-        .toggle-permasalahan .toggle-icon {
-            display: inline-block;
-            transition: transform 0.3s ease;
-            margin-right: 3px;
+        
+        /* Style untuk list permasalahan dengan bullet pointer rata kiri */
+        .permasalahan-list ul {
+            margin: 0;
+            padding-left: 20px;
+            list-style-type: disc;
         }
-        .toggle-permasalahan.active .toggle-icon {
-            transform: rotate(90deg);
-        }
-        .permasalahan-list {
-            background-color: #f8f9fa;
-            padding: 8px 10px;
-            border-radius: 4px;
-            border-left: 3px solid #17a2b8;
+        .permasalahan-list ul li {
+            margin: 2px 0;
+            padding: 2px 4px;
+            font-size: 12px;
+            text-align: left;
         }
     </style>
 
@@ -816,6 +807,102 @@
                 error: function(xhr) {
                     alert("Terjadi kesalahan: " + xhr.statusText);
                     $("#InputPermasalahanPokok").prop('disabled', false).html('<b>SIMPAN</b>');
+                }
+            });
+        });
+
+        // ============================================================
+        // EVENT UNTUK PERIODE NASIONAL DI MODAL EDIT
+        // ============================================================
+        $("#EditPeriodePermasalahanNasional").change(function() {
+            var tahunMulai = $(this).val();
+            if (tahunMulai == "") {
+                $("#EditKementerian").html('<option value="">-- Pilih Kementerian --</option>');
+                $("#EditListPermasalahanNasional").html('');
+                return;
+            }
+            
+            $.ajax({
+                url: BaseURL + "Daerah/GetKementerian",
+                type: "POST",
+                data: { 
+                    TahunMulai: tahunMulai,
+                    [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE 
+                },
+                beforeSend: function() {
+                    $("#EditKementerian").html('<option value="">Memuat...</option>').prop('disabled', true);
+                },
+                success: function(Respon) {
+                    try {
+                        var Data = JSON.parse(Respon);
+                        var Kementerian = '<option value="">-- Pilih Kementerian --</option>';
+                        for (var i = 0; i < Data.length; i++) {
+                            Kementerian += '<option value="'+Data[i].Id+'">'+Data[i].NamaKementerian+'</option>';
+                        }
+                        $("#EditKementerian").html(Kementerian).prop('disabled', false);
+                        // Reset list permasalahan
+                        $("#EditListPermasalahanNasional").html('');
+                    } catch(e) {
+                        alert("Gagal memuat data kementerian");
+                        $("#EditKementerian").html('<option value="">-- Pilih Kementerian --</option>').prop('disabled', false);
+                    }
+                },
+                error: function() {
+                    alert("Gagal memuat data kementerian");
+                    $("#EditKementerian").html('<option value="">-- Pilih Kementerian --</option>').prop('disabled', false);
+                }
+            });
+        });
+
+        // ============================================================
+        // LOAD PERMASALAHAN NASIONAL UNTUK EDIT (KETIKA KEMENTERIAN BERUBAH)
+        // ============================================================
+        $("#EditKementerian").change(function() {
+            var idKementerian = $(this).val();
+            // Ambil data permasalahan yang tersimpan
+            var permasalahanData = $("#EditPermasalahanData").val() || '';
+            
+            if (idKementerian == "") {
+                $("#EditListPermasalahanNasional").html('');
+                return;
+            }
+            
+            $.ajax({
+                url: BaseURL + "Daerah/GetPermasalahanPokokNasional",
+                type: "POST",
+                data: { 
+                    Id: idKementerian,
+                    [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE 
+                },
+                beforeSend: function() {
+                    $("#EditListPermasalahanNasional").html('<div class="text-center"><span class="loading"></span> Memuat...</div>');
+                },
+                success: function(Respon) {
+                    try {
+                        var Data = JSON.parse(Respon);
+                        var selectedPermasalahan = permasalahanData ? permasalahanData.split("$") : [];
+                        var PermasalahanHTML = '';
+                        
+                        if (Data.length > 0) {
+                            for (var i = 0; i < Data.length; i++) {
+                                var checked = selectedPermasalahan.includes(String(Data[i].Id)) ? 'checked' : '';
+                                PermasalahanHTML += '<label style="display:block;margin:5px 0;">';
+                                PermasalahanHTML += '<input type="checkbox" name="EditPermasalahan" value="'+Data[i].Id+'" '+checked+'> ';
+                                PermasalahanHTML += Data[i].NamaPermasalahanPokok;
+                                PermasalahanHTML += '</label>';
+                            }
+                        } else {
+                            PermasalahanHTML = '<span class="text-muted">Tidak ada permasalahan untuk kementerian ini</span>';
+                        }
+                        $("#EditListPermasalahanNasional").html(PermasalahanHTML);
+                    } catch(e) {
+                        alert("Gagal memuat data permasalahan");
+                        $("#EditListPermasalahanNasional").html('');
+                    }
+                },
+                error: function() {
+                    alert("Gagal memuat data permasalahan");
+                    $("#EditListPermasalahanNasional").html('');
                 }
             });
         });

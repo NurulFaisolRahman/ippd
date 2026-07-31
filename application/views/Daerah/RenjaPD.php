@@ -1,648 +1,471 @@
-<?php $this->load->view('Daerah/sidebar'); ?>
-<?php $this->load->view('Daerah/Cssumum'); ?>
-
-<!-- Select2 CSS -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-
-<style>
-    .table-renja th, .table-renja td { 
-        vertical-align: middle; 
-        text-align: center; 
-        border: 1px solid #dee2e6; 
-        padding: 6px; 
-        font-size: 12px;
-    }
-    .table-renja .uraian { 
-        text-align: left !important; 
-        padding-left: 10px !important; 
-    }
-    .table-renja .rp { white-space: nowrap; font-weight: 500; text-align: right; }
-    .btn-aksi { padding: 3px 6px; font-size: 0.8rem; margin: 0 1px; }
-    .filter-row .form-control { height: 38px; }
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Renja Perangkat Daerah</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    .btn-group-aksi {
-        display: flex;
-        justify-content: center;
-        gap: 3px;
-        flex-wrap: wrap;
-    }
+    <?php $this->load->view('Daerah/Cssumum'); ?>
     
-    .header-row {
-        background-color: #f8f9fa;
-        font-weight: bold;
-        cursor: pointer;
-        transition: background-color 0.2s ease;
-    }
+    <!-- Select2 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
     
-    .header-row:hover {
-        background-color: #e9ecef;
-    }
-    
-    .header-row .toggle-icon {
-        transition: transform 0.3s ease;
-        display: inline-block;
-        margin-right: 8px;
-        font-size: 14px;
-    }
-    
-    .header-row .toggle-icon.collapsed {
-        transform: rotate(-90deg);
-    }
-    
-    .header-row .toggle-icon.expanded {
-        transform: rotate(0deg);
-    }
-    
-    .detail-row {
-        background-color: #ffffff;
-        transition: background-color 0.2s ease;
-    }
-    
-    .detail-row:hover {
-        background-color: #f5f5f5;
-    }
-    
-    .detail-row.detail-hidden {
-        display: none !important;
-    }
-    
-    .badge-detail {
-        background-color: #17a2b8;
-        color: white;
-        padding: 2px 8px;
-        border-radius: 12px;
-        font-size: 11px;
-    }
-    
-    .btn-add-detail {
-        padding: 2px 10px;
-        font-size: 11px;
-    }
-    
-    .no-data {
-        padding: 30px 0;
-        color: #999;
-    }
-    
-    .modal-lg-custom {
-        max-width: 95%;
-        width: 95%;
-    }
-    
-    .nomenklatur-container {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-        background: #f9f9f9;
-    }
-    
-    .nomenklatur-container .panel-heading {
-        background: #e7f3ff;
-        padding: 10px;
-        margin: -15px -15px 15px -15px;
-        border-radius: 8px 8px 0 0;
-        border-bottom: 1px solid #d1e7ff;
-    }
-    
-    .nav-tabs {
-        margin-bottom: 20px;
-    }
-    
-    .nav-tabs > li > a {
-        font-weight: 500;
-    }
-    
-    .info-nomenklatur {
-        background: #d1ecf1;
-        color: #0c5460;
-        padding: 8px 12px;
-        border-radius: 4px;
-        margin-top: 10px;
-        font-size: 12px;
-    }
-    
-    .cascading-select {
-        margin-bottom: 15px;
-    }
-    
-    .cascading-select label {
-        font-weight: 600;
-        margin-bottom: 5px;
-    }
-    
-    .breadcrumb-nomenklatur {
-        background: #e9ecef;
-        padding: 10px 15px;
-        border-radius: 5px;
-        margin-bottom: 15px;
-    }
-    
-    .breadcrumb-nomenklatur .badge {
-        background: #007bff;
-        margin-right: 5px;
-    }
-    
-    .preview-panel {
-        background: #e8f5e9;
-        border: 1px solid #c8e6c9;
-        border-radius: 8px;
-    }
-    
-    .preview-panel .panel-heading {
-        background: #c8e6c9;
-        border-bottom: 1px solid #a5d6a7;
-        border-radius: 8px 8px 0 0;
-    }
-    
-    .preview-panel .form-control[readonly] {
-        background-color: #f1f8e9;
-    }
-    
-    .btn-group-aksi .btn {
-        min-width: 30px;
-        padding: 4px 8px;
-        cursor: pointer !important;
-        pointer-events: auto !important;
-        z-index: 10 !important;
-        position: relative !important;
-    }
-    
-    .btn-group-aksi .btn i {
-        font-size: 14px;
-    }
-    
-    .btn-add-detail, .BtnEditHeader, .BtnHapusHeader, .BtnEditDetail, .BtnHapusDetail {
-        cursor: pointer !important;
-        pointer-events: auto !important;
-        z-index: 10 !important;
-        position: relative !important;
-    }
-    
-    .btn-add-detail:hover, .BtnEditHeader:hover, .BtnHapusHeader:hover, 
-    .BtnEditDetail:hover, .BtnHapusDetail:hover {
-        opacity: 0.8 !important;
-        transform: scale(1.05) !important;
-        transition: all 0.2s ease !important;
-    }
-    
-    .btn-group-aksi {
-        position: relative !important;
-        z-index: 5 !important;
-    }
-    
-    .btn-inline-add {
-        padding: 2px 6px;
-        font-size: 10px;
-        margin: 0;
-    }
-    
-    .table-detail-indikator .btn {
-        padding: 2px 5px;
-        font-size: 10px;
-    }
-    
-    .table-detail-indikator td {
-        vertical-align: middle;
-        padding: 4px;
-    }
-    
-    .loading-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.3);
-        z-index: 9999;
-        display: none;
-        justify-content: center;
-        align-items: center;
-    }
-    .loading-overlay .spinner {
-        background: white;
-        padding: 30px 40px;
-        border-radius: 10px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-        text-align: center;
-    }
-    .loading-overlay .spinner i {
-        font-size: 40px;
-        color: #007bff;
-        animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
-    .detail-container {
-        padding: 5px 5px 5px 30px;
-        overflow-x: auto;
-    }
-    
-    .detail-container .table {
-        min-width: 1400px;
-    }
-
-    @media (max-width: 768px) {
-        .table-renja {
-            font-size: 10px;
+    <style>
+        /* ===== STYLE UTAMA ===== */
+        .table-renja th, .table-renja td { 
+            vertical-align: middle; 
+            text-align: center; 
+            border: 1px solid #dee2e6; 
+            padding: 6px; 
+            font-size: 12px;
         }
-        .table-renja th, .table-renja td {
-            padding: 4px;
+        .table-renja .uraian { 
+            text-align: left !important; 
+            padding-left: 10px !important; 
         }
-        .btn-aksi {
-            font-size: 0.7rem;
-            padding: 2px 4px;
+        .table-renja .rp { white-space: nowrap; font-weight: 500; text-align: right; }
+        
+        /* ===== HEADER ROW ===== */
+        .header-row {
+            background-color: #f8f9fa !important;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
         }
-    }
-    
-    .mode-indicator {
-        display: inline-block;
-        padding: 4px 12px;
-        border-radius: 4px;
-        font-size: 12px;
-        font-weight: bold;
-        margin-left: 10px;
-    }
-    .mode-tambah {
-        background: #d4edda;
-        color: #155724;
-    }
-    .mode-edit {
-        background: #fff3cd;
-        color: #856404;
-    }
-    
-    .BtnEditHeader.active-edit {
-        background-color: #ffc107 !important;
-        box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.5);
-    }
-
-    /* Select2 Customization */
-    .select2-container--default .select2-selection--single {
-        height: 38px !important;
-        border: 1px solid #ced4da !important;
-        border-radius: 4px !important;
-    }
-    .select2-container--default .select2-selection--single .select2-selection__rendered {
-        line-height: 36px !important;
-        padding-left: 12px !important;
-    }
-    .select2-container--default .select2-selection--single .select2-selection__arrow {
-        height: 36px !important;
-    }
-    .select2-dropdown {
-        z-index: 9999 !important;
-    }
-    .select2-container--default .select2-results__option--highlighted[aria-selected] {
-        background-color: #007bff !important;
-    }
-
-    /* Toggle header row style */
-    .header-row .header-clickable {
-        cursor: pointer;
-        user-select: none;
-    }
-    
-    .header-row .header-clickable:hover {
-        background-color: rgba(0,0,0,0.02);
-    }
-    
-    .toggle-indicator {
-        display: inline-block;
-        width: 20px;
-        text-align: center;
-        font-weight: bold;
-        color: #17a2b8;
-        transition: transform 0.3s ease;
-        cursor: pointer;
-    }
-    
-    /* ===== STYLE UNTUK KOLOM INDIKATOR KINERJA ===== */
-    .col-indikator-nomenklatur {
-        width: 12%;
-        min-width: 120px;
-        max-width: 180px;
-        word-wrap: break-word;
-        white-space: normal;
-        text-align: left !important;
-        vertical-align: middle !important;
-        background-color: #f8f9fa !important;
-        font-size: 10px;
-        padding: 4px 6px !important;
-    }
-    
-    .col-indikator-nomenklatur .label-nomenklatur {
-        font-weight: 700;
-        color: #1a5276;
-        font-size: 10px;
-        display: block;
-        margin-bottom: 3px;
-        border-bottom: 1px solid #1a5276;
-        padding-bottom: 2px;
-    }
-    
-    .col-indikator-nomenklatur .item-indikator {
-        display: block;
-        padding: 3px 0;
-        border-bottom: 1px dashed #dee2e6;
-        font-size: 10px;
-    }
-    
-    .col-indikator-nomenklatur .item-indikator:last-child {
-        border-bottom: none;
-    }
-    
-    .col-indikator-nomenklatur .item-indikator .indikator-text {
-        font-weight: 500;
-        color: #2c3e50;
-    }
-    
-    .col-indikator-nomenklatur .item-indikator .indikator-satuan {
-        font-size: 9px;
-        color: #6c757d;
-        background: #e9ecef;
-        padding: 1px 5px;
-        border-radius: 8px;
-        margin-left: 3px;
-    }
-    
-    .col-indikator-nomenklatur .badge-jumlah {
-        background: #1a5276;
-        color: white;
-        font-size: 9px;
-        padding: 1px 6px;
-        border-radius: 8px;
-        margin-left: 3px;
-    }
-    
-    /* Style untuk header tabel detail - lebih rapi dan kecil */
-    .table-detail-indikator thead th {
-        background-color: #f8f9fa;
-        font-size: 9px;
-        padding: 3px 4px;
-        text-align: center;
-        vertical-align: middle;
-        border: 1px solid #dee2e6;
-    }
-    
-    .table-detail-indikator thead th.rowspan-header {
-        background-color: #e9ecef;
-        font-weight: 700;
-        font-size: 9px;
-    }
-    
-    .table-detail-indikator thead th.sub-header {
-        background-color: #f1f3f5;
-        font-weight: 600;
-        font-size: 8px;
-    }
-    
-    .table-detail-indikator thead th.header-indikator {
-        background-color: #d4e6f1;
-        font-weight: 700;
-        font-size: 9px;
-        color: #1a5276;
-        padding: 3px 4px;
-    }
-    
-    .table-detail-indikator thead th.header-indikator small {
-        font-size: 8px;
-    }
-    
-    /* Row indikator dalam detail */
-    .row-indikator-detail {
-        transition: background-color 0.2s ease;
-    }
-    
-    .row-indikator-detail:hover {
-        background-color: #f0f8ff;
-    }
-    
-    .row-indikator-detail td {
-        padding: 4px 3px;
-        font-size: 10px;
-    }
-    
-    .row-indikator-detail .col-indikator-kinerja-item {
-        text-align: left;
-        padding-left: 8px !important;
-        padding-right: 8px !important;
-        font-size: 10px;
-        background-color: #fafafa !important;
-    }
-    
-    .row-indikator-detail .col-indikator-kinerja-item .indikator-item {
-        display: block;
-        line-height: 1.3;
-    }
-    
-    .row-indikator-detail .col-indikator-kinerja-item .indikator-item .text-indikator {
-        display: block;
-        line-height: 1.3;
-    }
-    
-    .row-indikator-detail .col-indikator-kinerja-item .indikator-item .text-indikator .satuan-label {
-        font-size: 8px;
-        color: #6c757d;
-        background: #e9ecef;
-        padding: 1px 5px;
-        border-radius: 8px;
-        display: inline-block;
-        margin-top: 1px;
-    }
-    
-    /* Kolom lainnya diperkecil */
-    .table-detail-indikator td {
-        font-size: 9px;
-        padding: 3px 4px;
-    }
-    
-    .table-detail-indikator td.rp {
-        font-size: 9px;
-        white-space: nowrap;
-    }
-
-    /* ===== LOKASI DROPDOWN STYLING - TIDAK TERPOTONG ===== */
-    .lokasi-container {
-        display: flex;
-        align-items: flex-start;
-        gap: 6px;
-        padding: 4px 8px;
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-        background: #fff;
-        min-height: 34px;
-        height: auto;
-        max-height: 80px;
-        overflow-y: auto;
-    }
-
-    .lokasi-container .btn-select-lokasi {
-        padding: 2px 10px;
-        font-size: 11px;
-        white-space: nowrap;
-        height: 26px;
-        line-height: 22px;
-        flex-shrink: 0;
-        margin-top: 2px;
-    }
-
-    .lokasi-container #SelectedLokasiText {
-        font-size: 12px;
-        color: #2c3e50;
-        font-weight: 500;
-        white-space: normal;
-        word-wrap: break-word;
-        word-break: break-word;
-        line-height: 1.5;
-        padding: 3px 0;
-        flex: 1;
-        max-height: 60px;
-        overflow-y: auto;
-    }
-
-    .lokasi-container #RemoveLokasiBtn {
-        cursor: pointer;
-        color: #e74c3c;
-        font-size: 16px;
-        font-weight: bold;
-        line-height: 1;
-        padding: 2px 4px;
-        flex-shrink: 0;
-        margin-top: 2px;
-        transition: transform 0.2s ease;
-    }
-
-    .lokasi-container #RemoveLokasiBtn:hover {
-        color: #c0392b;
-        transform: scale(1.2);
-    }
-
-    .lokasi-container .text-muted {
-        font-size: 12px;
-        color: #999;
-        padding: 3px 0;
-    }
-
-    /* ===== PERBAIKAN SCROLL MODAL ===== */
-    .modal-body {
-        max-height: 70vh;
-        overflow-y: auto;
-        padding: 20px 25px;
-    }
-
-    #ModalDetail .modal-body {
-        max-height: 70vh;
-        overflow-y: auto;
-        padding: 15px 20px;
-    }
-
-    .modal-content {
-        max-height: 95vh;
-        overflow: hidden;
-    }
-
-    .modal-open {
-        overflow: auto !important;
-    }
-
-    .modal-open .modal {
-        overflow-y: auto !important;
-    }
-
-    .modal-header {
-        flex-shrink: 0;
-    }
-
-    .modal-footer {
-        flex-shrink: 0;
-        border-top: 1px solid #e5e5e5;
-        padding: 10px 20px;
-        background: #fafafa;
-        border-radius: 0 0 4px 4px;
-    }
-
-    /* Fix untuk Select2 agar tidak menghalangi scroll */
-    .select2-container--open {
-        z-index: 99999 !important;
-    }
-
-    /* Modal Lokasi */
-    .modal-lokasi .modal-body {
-        padding: 20px 25px;
-        max-height: 60vh;
-        overflow-y: auto;
-    }
-
-    .modal-lokasi .modal-header {
-        background: #f8f9fa;
-        border-bottom: 2px solid #e9ecef;
-        flex-shrink: 0;
-    }
-
-    .modal-lokasi .modal-footer {
-        flex-shrink: 0;
-    }
-
-    .lokasi-tab {
-        margin-top: 10px;
-    }
-
-    .lokasi-tab .nav-tabs > li > a {
-        padding: 8px 15px;
-        font-size: 13px;
-    }
-
-    .lokasi-tab .tab-content {
-        padding: 15px 0;
-    }
-
-    #LokasiInfo {
-        margin-top: 10px;
-        padding: 10px;
-        background: #e8f0fe;
-        border-radius: 4px;
-        display: none;
-    }
-
-    #LokasiInfo strong {
-        color: #1a5276;
-    }
-
-    #LokasiInfoText {
-        font-weight: 500;
-        color: #2c3e50;
-    }
-
-    /* Responsive Lokasi */
-    @media (max-width: 768px) {
-        .lokasi-container {
-            flex-wrap: wrap;
-            padding: 4px 6px;
-            max-height: 100px;
+        .header-row:hover {
+            background-color: #e9ecef !important;
         }
-        .lokasi-container .btn-select-lokasi {
-            font-size: 10px;
-            padding: 1px 8px;
-            height: 24px;
-            line-height: 22px;
+        .header-row.status-normal {
+            border-left: 4px solid #28a745;
         }
-        .lokasi-container #SelectedLokasiText {
+        .header-row.status-edited {
+            background-color: #fff3cd !important;
+            border-left: 4px solid #f39c12;
+        }
+        .header-row.status-edited:hover {
+            background-color: #ffeaa7 !important;
+        }
+        
+        /* ===== DETAIL ROW ===== */
+        .detail-row {
+            background-color: #ffffff;
+            transition: background-color 0.2s ease;
+        }
+        .detail-row:hover {
+            background-color: #f5f5f5;
+        }
+        .detail-row.detail-hidden {
+            display: none !important;
+        }
+        .detail-container {
+            padding: 5px 5px 5px 30px;
+            overflow-x: auto;
+        }
+        .detail-container .table {
+            min-width: 1500px;
+        }
+        
+        /* ===== BADGE ===== */
+        .badge-detail {
+            background-color: #17a2b8;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
             font-size: 11px;
         }
+        .badge-status {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .badge-status-normal {
+            background: #d4edda;
+            color: #155724;
+        }
+        .badge-status-edited {
+            background: #ffc107;
+            color: #856404;
+        }
+        
+        /* ===== BADGE DI INDIKATOR ===== */
+        .badge-daerah-edit {
+            background-color: #f39c12;
+            color: #fff;
+            font-size: 9px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-top: 4px;
+            display: block;
+            width: 100%;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.4;
+            box-sizing: border-box;
+        }
+        .badge-daerah-edit i {
+            margin-right: 3px;
+        }
+        .badge-edit-time {
+            font-size: 8px;
+            font-weight: 400;
+            opacity: 0.9;
+            display: inline-block;
+            margin-top: 1px;
+        }
+        
+        /* ===== ROW INDIKATOR ===== */
+        .row-indikator-detail.status-normal {
+            background-color: #ffffff !important;
+        }
+        .row-indikator-detail.status-edited {
+            background-color: #fff3cd !important;
+            border-left: 4px solid #f39c12 !important;
+        }
+        .row-indikator-detail.status-edited td {
+            background-color: #fff3cd !important;
+        }
+        .row-indikator-detail .col-indikator-kinerja-item {
+            text-align: left;
+            padding-left: 8px !important;
+            padding-right: 8px !important;
+            font-size: 10px;
+            background-color: #fafafa !important;
+        }
+        .row-indikator-detail .col-indikator-kinerja-item .indikator-item {
+            display: block;
+            line-height: 1.3;
+        }
+        .row-indikator-detail .col-indikator-kinerja-item .indikator-item .text-indikator {
+            display: block;
+            line-height: 1.3;
+        }
+        
+        /* ===== TABEL DETAIL INDIKATOR ===== */
+        .table-detail-indikator thead th {
+            background-color: #f8f9fa;
+            font-size: 9px;
+            padding: 3px 4px;
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #dee2e6;
+        }
+        .table-detail-indikator thead th.rowspan-header {
+            background-color: #e9ecef;
+            font-weight: 700;
+            font-size: 9px;
+        }
+        .table-detail-indikator thead th.sub-header {
+            background-color: #f1f3f5;
+            font-weight: 600;
+            font-size: 8px;
+        }
+        .table-detail-indikator thead th.header-indikator {
+            background-color: #d4e6f1;
+            font-weight: 700;
+            font-size: 9px;
+            color: #1a5276;
+            padding: 3px 4px;
+        }
+        .table-detail-indikator td {
+            padding: 4px 3px;
+            font-size: 10px;
+        }
+        .table-detail-indikator td.rp {
+            font-size: 9px;
+            white-space: nowrap;
+        }
+        
+        /* ===== CSS UNTUK KOLOM BIDANG & PENGAMPU ===== */
+.bidang-pengampu-cell {
+    font-size: 9px;
+    min-width: 180px;
+    max-width: 250px;
+    white-space: normal;
+    word-wrap: break-word;
+    line-height: 1.4;
+}
+
+.bidang-pengampu-cell .bidang-label {
+    font-weight: 700;
+    color: #1a5276;
+    display: block;
+}
+
+.bidang-pengampu-cell .pengampu-label {
+    font-weight: 700;
+    color: #8e44ad;
+    display: block;
+    margin-top: 3px;
+}
+
+.bidang-pengampu-cell .pengampu-detail {
+    display: block;
+    padding-left: 8px;
+}
+
+.bidang-pengampu-cell .jabatan-text {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.bidang-pengampu-cell .nama-text {
+    font-weight: 400;
+    color: #34495e;
+}
+
+.bidang-pengampu-cell .pengampu-simple {
+    display: block;
+    padding-left: 8px;
+    color: #34495e;
+}
+        
+        /* ===== PENGAMPU INFO MODAL ===== */
+        .pengampu-info-modal {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: #f0f8ff;
+            border-radius: 4px;
+            border-left: 3px solid #007bff;
+            display: none;
+            font-size: 12px;
+        }
+        .pengampu-info-modal .label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .pengampu-info-modal .nama {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .pengampu-info-modal .jabatan {
+            color: #6c757d;
+            margin-left: 5px;
+        }
+        .pengampu-info-modal .nip {
+            color: #999;
+            font-size: 10px;
+            margin-left: 5px;
+        }
+        
+        /* ===== LOKASI ===== */
+        .lokasi-container {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            padding: 4px 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            background: #fff;
+            min-height: 34px;
+            height: auto;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+        .lokasi-container .btn-select-lokasi {
+            padding: 2px 10px;
+            font-size: 11px;
+            white-space: nowrap;
+            height: 26px;
+            line-height: 22px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .lokasi-container #SelectedLokasiText {
+            font-size: 12px;
+            color: #2c3e50;
+            font-weight: 500;
+            white-space: normal;
+            word-wrap: break-word;
+            word-break: break-word;
+            line-height: 1.5;
+            padding: 3px 0;
+            flex: 1;
+            max-height: 60px;
+            overflow-y: auto;
+        }
+        .lokasi-container #RemoveLokasiBtn {
+            cursor: pointer;
+            color: #e74c3c;
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 1;
+            padding: 2px 4px;
+            flex-shrink: 0;
+            margin-top: 2px;
+            transition: transform 0.2s ease;
+        }
+        .lokasi-container #RemoveLokasiBtn:hover {
+            color: #c0392b;
+            transform: scale(1.2);
+        }
+        .lokasi-container .text-muted {
+            font-size: 12px;
+            color: #999;
+            padding: 3px 0;
+        }
+        
+        /* ===== SELECT2 ===== */
+        .select2-container--default .select2-selection--single {
+            height: 38px !important;
+            border: 1px solid #ced4da !important;
+            border-radius: 4px !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 36px !important;
+            padding-left: 12px !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px !important;
+        }
+        .select2-dropdown {
+            z-index: 9999 !important;
+        }
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #007bff !important;
+        }
+        
+        /* ===== MODAL ===== */
         .modal-body {
-            max-height: 60vh;
-            padding: 15px;
+            max-height: 70vh;
+            overflow-y: auto;
+            padding: 15px 20px;
         }
-        #ModalDetail .modal-body {
-            max-height: 60vh;
-            padding: 10px 15px;
+        .modal-content {
+            max-height: 95vh;
+            overflow: hidden;
         }
-    }
-</style>
+        .modal-open {
+            overflow: auto !important;
+        }
+        .modal-open .modal {
+            overflow-y: auto !important;
+        }
+        .modal-header {
+            flex-shrink: 0;
+        }
+        .modal-footer {
+            flex-shrink: 0;
+            border-top: 1px solid #e5e5e5;
+            padding: 10px 20px;
+            background: #fafafa;
+            border-radius: 0 0 4px 4px;
+        }
+        .modal-lg-custom {
+            max-width: 95%;
+            width: 95%;
+        }
+        
+        /* ===== FILTER ===== */
+        .filter-section {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #dee2e6;
+        }
+        .filter-section .filter-label {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 5px;
+            color: #495057;
+        }
+        .filter-section select {
+            height: 38px;
+            font-size: 13px;
+        }
+        .info-badge {
+            background: #17a2b8;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-left: 5px;
+        }
+        
+        /* ===== LAINNYA ===== */
+        .btn-aksi { padding: 3px 6px; font-size: 0.8rem; margin: 0 1px; }
+        .btn-group-aksi {
+            display: flex;
+            justify-content: center;
+            gap: 3px;
+            flex-wrap: wrap;
+        }
+        .btn-add-detail {
+            padding: 2px 10px;
+            font-size: 11px;
+        }
+        .no-data {
+            padding: 30px 0;
+            color: #999;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.3);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .loading-overlay .spinner {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        .loading-overlay .spinner i {
+            font-size: 40px;
+            color: #007bff;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .table-renja {
+                font-size: 10px;
+            }
+            .table-renja th, .table-renja td {
+                padding: 4px;
+            }
+            .btn-aksi {
+                font-size: 0.7rem;
+                padding: 2px 4px;
+            }
+            .modal-body {
+                max-height: 60vh;
+                padding: 10px 15px;
+            }
+            .badge-status {
+                font-size: 8px;
+                padding: 2px 6px;
+            }
+            .bidang-pengampu-cell {
+                font-size: 8px;
+            }
+            .bidang-pengampu-cell .text-jabatan {
+                font-size: 7px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<?php $this->load->view('Daerah/sidebar'); ?>
 
 <!-- LOADING OVERLAY -->
 <div class="loading-overlay" id="loadingOverlay">
@@ -659,106 +482,158 @@
                 <div class="col-lg-12">
                     <div class="data-table-list">
 
-                        <!-- FILTER WILAYAH -->
+                        <!-- ============================================================ -->
+                        <!-- FILTER WILAYAH (Sebelum Login)                               -->
+                        <!-- ============================================================ -->
                         <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-                            <div class="form-example-wrap" style="margin-bottom: 20px;">
-                                <div class="form-example-int form-horizental">
-                                    <div class="form-group">
-                                        <div class="row filter-row">
-                                            <div class="col-lg-3 col-md-6">
-                                                <div class="filter-group">
-                                                    <label for="Provinsi"><b>Provinsi</b></label>
-                                                    <select class="form-control filter-select" id="Provinsi">
-                                                        <option value="">Pilih Provinsi</option>
-                                                        <?php foreach ($Provinsi as $prov) { ?>
-                                                            <option value="<?= html_escape($prov['Kode']) ?>"
-                                                                <?= (!empty($KodeWilayah) && substr($KodeWilayah,0,2)==$prov['Kode']) ? 'selected' : '' ?>>
-                                                                <?= html_escape($prov['Nama']) ?>
-                                                            </option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-3 col-md-6">
-                                                <div class="filter-group">
-                                                    <label for="KabKota"><b>Kab/Kota</b></label>
-                                                    <select class="form-control filter-select" id="KabKota">
-                                                        <option value="">Pilih Kab/Kota</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-2 col-md-6">
-                                                <div class="filter-group" style="margin-top: 28px;">
-                                                    <button class="btn btn-primary notika-btn-primary btn-block" id="Filter">
-                                                        <b>Filter</b>
-                                                    </button>
-                                                </div>
-                                            </div>
+                            <div class="filter-section">
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-6">
+                                        <div class="filter-group">
+                                            <label class="filter-label" for="Provinsi"><b>Provinsi</b></label>
+                                            <select class="form-control" id="Provinsi">
+                                                <option value="">Pilih Provinsi</option>
+                                                <?php foreach ($Provinsi as $prov) { ?>
+                                                    <option value="<?= html_escape($prov['Kode']) ?>"
+                                                        <?= (!empty($KodeWilayah) && substr($KodeWilayah,0,2)==$prov['Kode']) ? 'selected' : '' ?>>
+                                                        <?= html_escape($prov['Nama']) ?>
+                                                    </option>
+                                                <?php } ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 col-md-6">
+                                        <div class="filter-group">
+                                            <label class="filter-label" for="KabKota"><b>Kab/Kota</b></label>
+                                            <select class="form-control" id="KabKota">
+                                                <option value="">Pilih Kab/Kota</option>
+                                                <?php if (!empty($KodeWilayah)) { 
+                                                    $selected_kab = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+                                                ?>
+                                                    <option value="<?= html_escape($KodeWilayah) ?>" selected>
+                                                        <?= html_escape($selected_kab['Nama'] ?? $KodeWilayah) ?>
+                                                    </option>
+                                                <?php } ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 col-md-6" id="FilterInstansiGroupBefore" style="display: <?= !empty($KodeWilayah) ? 'block' : 'none' ?>;">
+                                        <div class="filter-group">
+                                            <label class="filter-label" for="FilterInstansiBeforeLogin"><b>Filter Instansi</b></label>
+                                            <select class="form-control" id="FilterInstansiBeforeLogin">
+                                                <option value="">-- Semua Instansi --</option>
+                                                <?php 
+                                                if (!empty($KodeWilayah)) {
+                                                    $instansi_list = $this->db->select('id, nama')
+                                                        ->from('akun_instansi')
+                                                        ->where('kodewilayah', $KodeWilayah)
+                                                        ->where('Level', 4)
+                                                        ->where('deleted_at IS NULL')
+                                                        ->order_by('nama', 'ASC')
+                                                        ->get()
+                                                        ->result_array();
+                                                    
+                                                    $filter_instansi_id = $this->input->get('instansi_id', TRUE);
+                                                    foreach ($instansi_list as $ins) {
+                                                        $selected = ($filter_instansi_id == $ins['id']) ? 'selected' : '';
+                                                        echo '<option value="' . html_escape($ins['id']) . '" ' . $selected . '>' . html_escape($ins['nama']) . '</option>';
+                                                    }
+                                                }
+                                                ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2 col-md-6">
+                                        <div class="filter-group" style="margin-top: 28px;">
+                                            <button class="btn btn-primary btn-block" id="Filter">
+                                                <b>Filter</b>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <?php if (!empty($KodeWilayah)) { ?>
+                                <?php
+                                    $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+                                    $nama_wilayah = $wilayah ? html_escape($wilayah['Nama']) : 'Wilayah Tidak Ditemukan';
+                                ?>
+                                <div class="alert alert-info" style="margin-bottom: 20px;">
+                                    <strong>Wilayah terpilih:</strong> <?= $nama_wilayah ?>
+                                    <?php 
+                                    $filter_instansi_id = $this->input->get('instansi_id', TRUE);
+                                    if (!empty($filter_instansi_id)) { 
+                                        $instansi_terpilih = $this->db->select('nama')->from('akun_instansi')->where('id', $filter_instansi_id)->get()->row_array();
+                                    ?>
+                                        <br><strong>Instansi terpilih:</strong> <?= htmlspecialchars($instansi_terpilih['nama'] ?? '-') ?>
+                                    <?php } ?>
+                                </div>
+                            <?php } ?>
                         <?php } ?>
 
-                        <!-- FILTER INSTANSI -->
+                        <!-- ============================================================ -->
+                        <!-- FILTER INSTANSI (Sudah Login, Bukan Role 4)                  -->
+                        <!-- ============================================================ -->
                         <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
-                            <div class="form-example-wrap" style="margin-bottom: 20px;">
-                                <div class="form-example-int form-horizental">
-                                    <div class="form-group">
-                                        <div class="row filter-row">
-                                            <div class="col-lg-4 col-md-6">
-                                                <div class="filter-group">
-                                                    <label for="FilterInstansi"><b>Filter Instansi</b></label>
-                                                    <select class="form-control filter-select" id="FilterInstansi">
-                                                        <option value="">-- Semua Instansi --</option>
-                                                        <?php foreach ($ListInstansi as $ins) { ?>
-                                                            <option value="<?= $ins['id'] ?>" <?= ($FilterInstansiId == $ins['id']) ? 'selected' : '' ?>>
-                                                                <?= html_escape($ins['nama']) ?>
-                                                            </option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-2 col-md-6">
-                                                <div class="filter-group" style="margin-top: 28px;">
-                                                    <button class="btn btn-info notika-btn-info btn-block" id="FilterInstansiBtn">
-                                                        <b>Tampilkan</b>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-2 col-md-6">
-                                                <div class="filter-group" style="margin-top: 28px;">
-                                                    <button class="btn btn-default notika-btn-default btn-block" id="ResetFilterBtn">
-                                                        <b>Reset</b>
-                                                    </button>
-                                                </div>
-                                            </div>
+                            <div class="filter-section">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="filter-group">
+                                            <label class="filter-label" for="FilterInstansi">
+                                                <b>Filter Instansi</b>
+                                                
+                                            </label>
+                                            <select class="form-control" id="FilterInstansi">
+                                                <option value="">-- Semua Instansi --</option>
+                                                <?php foreach ($ListInstansi as $ins) { ?>
+                                                    <option value="<?= $ins['id'] ?>" <?= ($FilterInstansiId == $ins['id']) ? 'selected' : '' ?>>
+                                                        <?= html_escape($ins['nama']) ?>
+                                                    </option>
+                                                <?php } ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="filter-group" style="margin-top: 28px;">
+                                            <button class="btn btn-primary btn-block" id="FilterInstansiBtn">
+                                                <i class="fa fa-search"></i> Filter
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="filter-group" style="margin-top: 28px;">
+                                            <button class="btn btn-default btn-block" id="ResetFilterBtn">
+                                                <i class="fa fa-times"></i> Reset
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         <?php } ?>
 
-                        <!-- INFO INSTANSI -->
+                        <!-- ============================================================ -->
+                        <!-- INFO INSTANSI (Role 4)                                       -->
+                        <!-- ============================================================ -->
                         <?php if ($IsRole4 && !empty($NamaInstansi)) { ?>
                             <div class="alert alert-success" style="margin-bottom: 20px;">
                                 <i class="fa fa-building"></i> <strong>Instansi:</strong> <?= htmlspecialchars($NamaInstansi) ?>
                             </div>
                         <?php } ?>
 
-                        <!-- TOMBOL TAMBAH HEADER & EXPAND/COLLAPSE ALL -->
+                        <!-- ============================================================ -->
+                        <!-- TOMBOL TAMBAH HEADER                                         -->
+                        <!-- ============================================================ -->
                         <?php if ($IsRole4) { ?>
-                            <div class="basic-tb-hd">
-                                <div class="button-icon-btn sm-res-mg-t-30" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-                                    <button class="btn btn-success" id="BtnTambahHeader">
-                                        <i class="notika-icon bi-plus-lg"></i> <b>Tambah Header Renja</b>
-                                    </button>
-                                </div>
+                            <div style="margin-bottom: 20px;">
+                                <button class="btn btn-success" id="BtnTambahHeader">
+                                    <i class="notika-icon notika-plus"></i> <b>Tambah Header Renja</b>
+                                </button>
                             </div>
-                            <br>
                         <?php } ?>
 
-                        <!-- TABEL RENJA -->
+                        <!-- ============================================================ -->
+                        <!-- TABEL RENJA DENGAN KOLOM STATUS                              -->
+                        <!-- ============================================================ -->
                         <div class="table-responsive">
                             <table id="data-table-basic" class="table table-striped table-renja">
                                 <thead>
@@ -767,16 +642,30 @@
                                         <th style="min-width:200px;">Tujuan/Sasaran/Program/Kegiatan/Sub Kegiatan Perangkat Daerah</th>
                                         <th style="width:80px;">Jumlah Indikator</th>
                                         <?php if ($IsRole4) { ?>
+                                            <th style="width:80px;">STATUS</th>
                                             <th style="width:120px;">AKSI</th>
                                         <?php } ?>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php if (!empty($RenjaData)) { ?>
-                                        <?php 
-                                        $no = 1;
-                                        foreach ($RenjaData as $row) { ?>
-                                            <tr class="header-row" data-header-id="<?= $row['id'] ?>" data-expanded="false">
+                                        <?php foreach ($RenjaData as $row) { 
+                                            $hasNotif = false;
+                                            $statusClass = 'status-normal';
+                                            if (!empty($row['details'])) {
+                                                foreach ($row['details'] as $det) {
+                                                    if (!empty($det['edited_by_daerah']) && $det['edited_by_daerah'] == 1) {
+                                                        $hasNotif = true;
+                                                        $statusClass = 'status-edited';
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        ?>
+                                            <!-- HEADER ROW -->
+                                            <tr class="header-row <?= $statusClass ?>" 
+                                                data-header-id="<?= $row['id'] ?>" 
+                                                data-expanded="false">
                                                 <td class="text-left header-clickable" onclick="toggleDetails('<?= $row['id'] ?>', this)">
                                                     <strong><?= html_escape($row['kode_rekening'] ?: '-') ?></strong>
                                                 </td>
@@ -793,12 +682,9 @@
                                                         $display_text = $row['sasaran'];
                                                     } elseif (!empty($row['tujuan'])) {
                                                         $display_text = $row['tujuan'];
-                                                    }
-                                                    
-                                                    if (empty($display_text)) {
+                                                    } else {
                                                         $display_text = '-';
                                                     }
-                                                    
                                                     echo nl2br(html_escape($display_text));
                                                     ?>
                                                 </td>
@@ -808,6 +694,19 @@
                                                     </span>
                                                 </td>
                                                 <?php if ($IsRole4) { ?>
+                                                    <!-- KOLOM STATUS HEADER -->
+                                                    <td class="text-center">
+                                                        <?php if ($hasNotif) { ?>
+                                                            <span class="badge-status badge-status-edited">
+                                                                <i class="fa fa-edit"></i> Diedit Daerah
+                                                            </span>
+                                                        <?php } else { ?>
+                                                            <span class="badge-status badge-status-normal">
+                                                                <i class="fa fa-check-circle"></i> Normal
+                                                            </span>
+                                                        <?php } ?>
+                                                    </td>
+                                                    <!-- KOLOM AKSI HEADER -->
                                                     <td class="text-center">
                                                         <div class="btn-group-aksi">
                                                             <button class="btn btn-warning btn-sm BtnEditHeader"
@@ -834,12 +733,12 @@
                                                 <?php } ?>
                                             </tr>
                                             
-                                            <!-- DETAIL ROW -->
+                                            <!-- DETAIL ROW - INDIKATOR -->
                                             <?php if (!empty($row['details'])) { ?>
                                                 <tr class="detail-row detail-hidden" data-header-id="<?= $row['id'] ?>">
                                                     <td colspan="6" style="padding:0;">
                                                         <div class="detail-container">
-                                                            <table class="table table-bordered table-condensed table-detail-indikator" style="margin:0; font-size:10px; min-width:1400px;">
+                                                            <table class="table table-bordered table-condensed table-detail-indikator" style="margin:0; font-size:10px; min-width:1500px;">
                                                                 <thead>
                                                                     <tr>
                                                                         <th rowspan="2" class="header-indikator" style="width:12%; vertical-align:middle; min-width:120px;">
@@ -853,16 +752,17 @@
                                                                         <th colspan="2" style="width:8%;text-align:center;background:#e9ecef; font-size:9px;">Ranwal Renja</th>
                                                                         <th colspan="2" style="width:8%;text-align:center;background:#e9ecef; font-size:9px;">Rancangan Renja</th>
                                                                         <th colspan="2" style="width:8%;text-align:center;background:#e9ecef; font-size:9px;">Ranhir Renja</th>
-                                                                        <th colspan="2" style="width:8%;text-align:center;background:#e9ecef; font-size:9px;">Renja Tahun 2026</th>
-                                                                        <th colspan="2" style="width:8%;text-align:center;background:#e9ecef; font-size:9px;">DPA Murni 2026</th>
+                                                                        <th colspan="2" style="width:8%;text-align:center;background:#e9ecef; font-size:9px;">Renja</th>
+                                                                        <th colspan="2" style="width:8%;text-align:center;background:#e9ecef; font-size:9px;">DPA Murni</th>
                                                                         
                                                                         <th rowspan="2" style="width:4%;vertical-align:middle; font-size:9px;">Sumber</th>
                                                                         
-                                                                        <th colspan="2" style="width:8%;text-align:center;background:#e9ecef; font-size:9px;">DPA Perubahan 2026</th>
+                                                                        <th colspan="2" style="width:8%;text-align:center;background:#e9ecef; font-size:9px;">DPA Perubahan</th>
                                                                         
-                                                                        <th rowspan="2" style="width:6%;vertical-align:middle; font-size:9px;">Bidang & Pengampu</th>
+                                                                        <th rowspan="2" style="width:10%;vertical-align:middle; font-size:9px; min-width:120px;">Bidang & Pengampu</th>
                                                                         
                                                                         <?php if ($IsRole4) { ?>
+                                                                            <th rowspan="2" style="width:5%;vertical-align:middle; font-size:9px;">STATUS</th>
                                                                             <th rowspan="2" style="width:4%;vertical-align:middle; font-size:9px;">AKSI</th>
                                                                         <?php } ?>
                                                                     </tr>
@@ -882,75 +782,147 @@
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
-                                                                    <?php foreach ($row['details'] as $index => $detail) { ?>
-                                                                        <tr class="row-indikator-detail" data-detail-id="<?= $detail['id'] ?>">
+                                                                    <?php foreach ($row['details'] as $index => $detail) { 
+                                                                        $isEdited = !empty($detail['edited_by_daerah']) && $detail['edited_by_daerah'] == 1;
+                                                                        $statusClassRow = $isEdited ? 'status-edited' : 'status-normal';
+                                                                        
+                                                                        // Format lokasi
+                                                                        $lokasi_text = '-';
+                                                                        if (!empty($detail['lokasi'])) {
+                                                                            if (strpos($detail['lokasi'], 'manual_') === 0) {
+                                                                                $lokasi_text = $detail['lokasi_nama'] ?? $detail['lokasi'];
+                                                                            } else {
+                                                                                $lokasi_data = $this->db->select('Nama')->from('kodewilayah')->where('Kode', $detail['lokasi'])->get()->row_array();
+                                                                                $lokasi_text = $lokasi_data ? $lokasi_data['Nama'] : $detail['lokasi'];
+                                                                            }
+                                                                        }
+                                                                    ?>
+                                                                        <tr class="row-indikator-detail <?= $statusClassRow ?>" 
+                                                                            data-detail-id="<?= $detail['id'] ?>" 
+                                                                            data-edited="<?= $isEdited ? '1' : '0' ?>">
+                                                                            
+                                                                            <!-- INDIKATOR KINERJA -->
                                                                             <td class="col-indikator-kinerja-item">
                                                                                 <div class="indikator-item">
                                                                                     <span class="text-indikator">
                                                                                         <?= nl2br(html_escape($detail['indikator_kinerja'] ?? '-')) ?>
-                                                                                        <?php if (!empty($detail['satuan'])) { ?>
+                                                                                        <?php if (!empty($detail['sumber_data_id'])) { ?>
+                                                                                            <span class="badge badge-info" style="font-size:7px; background:#17a2b8; color:#fff;" 
+                                                                                                title="ID sumber dari Renja PD: <?= $detail['sumber_data_id'] ?>">
+                                                                                                <i class="fa fa-link"></i>
+                                                                                            </span>
                                                                                         <?php } ?>
                                                                                     </span>
+                                                                                    <?php if ($isEdited) { ?>
+                                                                                        <div class="badge-daerah-edit">
+                                                                                            <i class="fa fa-edit"></i> Diedit Daerah
+                                                                                            <br>
+                                                                                            <span class="badge-edit-time"><?= date('d/m/Y H:i', strtotime($detail['daerah_edit_time'])) ?></span>
+                                                                                        </div>
+                                                                                    <?php } ?>
                                                                                 </div>
                                                                             </td>
-                                                                            <td></td>
-                                                                            <td>
-                                                                                <?php 
-                                                                                $lokasi_text = '-';
-                                                                                if (!empty($detail['lokasi'])) {
-                                                                                    $lokasi_data = $this->db->select('Nama')->from('kodewilayah')->where('Kode', $detail['lokasi'])->get()->row_array();
-                                                                                    if ($lokasi_data) {
-                                                                                        $lokasi_text = $lokasi_data['Nama'];
-                                                                                    } else {
-                                                                                        $lokasi_text = !empty($detail['lokasi_nama']) ? $detail['lokasi_nama'] : $detail['lokasi'];
-                                                                                    }
-                                                                                }
-                                                                                echo html_escape($lokasi_text);
-                                                                                ?>
-                                                                            </td>
+                                                                            
+                                                                            <td><?= html_escape($detail['satuan'] ?? '-') ?></td>
+                                                                            <td><?= html_escape($lokasi_text) ?></td>
                                                                             <td><?= html_escape($detail['prioritas_daerah'] ?? '-') ?></td>
                                                                             <td><?= html_escape($detail['prioritas_nasional'] ?? '-') ?></td>
+                                                                            
+                                                                            <!-- RANWAL RENJA -->
                                                                             <td class="text-left"><?= nl2br(html_escape($detail['ranwal_kinerja'] ?? '-')) ?></td>
                                                                             <td class="rp"><?= !empty($detail['ranwal_rp']) ? 'Rp ' . number_format($detail['ranwal_rp'], 0, ',', '.') : '-' ?></td>
+                                                                            
+                                                                            <!-- RANCANGAN RENJA -->
                                                                             <td class="text-left"><?= nl2br(html_escape($detail['rancangan_kinerja'] ?? '-')) ?></td>
                                                                             <td class="rp"><?= !empty($detail['rancangan_rp']) ? 'Rp ' . number_format($detail['rancangan_rp'], 0, ',', '.') : '-' ?></td>
+                                                                            
+                                                                            <!-- RANHIR RENJA -->
                                                                             <td class="text-left"><?= nl2br(html_escape($detail['ranhir_kinerja'] ?? '-')) ?></td>
                                                                             <td class="rp"><?= !empty($detail['ranhir_rp']) ? 'Rp ' . number_format($detail['ranhir_rp'], 0, ',', '.') : '-' ?></td>
+                                                                            
+                                                                            <!-- RENJA -->
                                                                             <td class="text-left"><?= nl2br(html_escape($detail['renja_kinerja'] ?? '-')) ?></td>
                                                                             <td class="rp"><?= !empty($detail['renja_rp']) ? 'Rp ' . number_format($detail['renja_rp'], 0, ',', '.') : '-' ?></td>
+                                                                            
+                                                                            <!-- DPA MURNI -->
                                                                             <td class="text-left"><?= nl2br(html_escape($detail['dpa_murni_kinerja'] ?? '-')) ?></td>
                                                                             <td class="rp"><?= !empty($detail['dpa_murni_rp']) ? 'Rp ' . number_format($detail['dpa_murni_rp'], 0, ',', '.') : '-' ?></td>
+                                                                            
+                                                                            <!-- SUMBER DANA -->
                                                                             <td><?= html_escape($detail['sumber_dana'] ?? '-') ?></td>
+                                                                            
+                                                                            <!-- DPA PERUBAHAN -->
                                                                             <td class="text-left"><?= nl2br(html_escape($detail['dpa_perubahan_kinerja'] ?? '-')) ?></td>
                                                                             <td class="rp"><?= !empty($detail['dpa_perubahan_rp']) ? 'Rp ' . number_format($detail['dpa_perubahan_rp'], 0, ',', '.') : '-' ?></td>
-                                                                            <td>
+                                                                            
+                                                                            <!-- ===== BIDANG & PENGAMPU - TAMPILKAN JABATAN DAN NAMA ===== -->
+                                                                            <td class="bidang-pengampu-cell">
                                                                                 <?php 
-                                                                                $bidang = '';
-                                                                                $bidang_nama = '';
-                                                                                if (!empty($detail['bidang_pengampu']) && is_numeric($detail['bidang_pengampu'])) {
-                                                                                    $bidang_data = $this->db->select('nama')->from('akun_instansi')->where('id', $detail['bidang_pengampu'])->get()->row_array();
-                                                                                    $bidang_nama = $bidang_data ? $bidang_data['nama'] : '';
+                                                                                $bidang_text = '';
+                                                                                $jabatan_text = '';
+                                                                                $nama_text = '';
+                                                                                
+                                                                                // Data Bidang
+                                                                                if (!empty($detail['bidang_pengampu_nama'])) {
+                                                                                    $bidang_text = html_escape($detail['bidang_pengampu_nama']);
                                                                                 }
-                                                                                $pengampu_nama = '';
-                                                                                if (!empty($detail['pengampu']) && is_numeric($detail['pengampu'])) {
-                                                                                    $pengampu_data = $this->db->select('nama')->from('akun_karyawan')->where('id', $detail['pengampu'])->get()->row_array();
-                                                                                    $pengampu_nama = $pengampu_data ? $pengampu_data['nama'] : '';
+                                                                                
+                                                                                // Data Pengampu - TAMPILKAN JABATAN DAN NAMA
+                                                                                $pengampu_nama = $detail['pengampu_nama'] ?? '';
+                                                                                $pengampu_jabatan = $detail['pengampu_jabatan'] ?? '';
+                                                                                
+                                                                                if (!empty($pengampu_nama) && !empty($pengampu_jabatan)) {
+                                                                                    // Ada jabatan dan nama
+                                                                                    $jabatan_text = html_escape($pengampu_jabatan);
+                                                                                    $nama_text = html_escape($pengampu_nama);
+                                                                                } elseif (!empty($pengampu_nama)) {
+                                                                                    // Hanya nama
+                                                                                    $nama_text = html_escape($pengampu_nama);
                                                                                 }
-                                                                                if (!empty($bidang_nama)) {
-                                                                                    $bidang .= 'Bidang: ' . $bidang_nama;
+                                                                                
+                                                                                // Output
+                                                                                if ($bidang_text) {
+                                                                                    echo '<span class="bidang-label">Bidang: ' . $bidang_text . '</span>';
                                                                                 }
-                                                                                if (!empty($pengampu_nama)) {
-                                                                                    $bidang .= ($bidang ? "\n" : '') . 'Pengampu: ' . $pengampu_nama;
+                                                                                
+                                                                                if ($jabatan_text && $nama_text) {
+                                                                                    echo '<span class="pengampu-label">Pengampu:</span>';
+                                                                                    echo '<span class="pengampu-detail">';
+                                                                                    echo '<span class="jabatan-text">' . $jabatan_text . '</span>';
+                                                                                    echo '<span class="nama-text"> - ' . $nama_text . '</span>';
+                                                                                    echo '</span>';
+                                                                                } elseif ($nama_text) {
+                                                                                    echo '<span class="pengampu-label">Pengampu:</span>';
+                                                                                    echo '<span class="pengampu-simple">' . $nama_text . '</span>';
                                                                                 }
-                                                                                echo nl2br(html_escape($bidang ?: '-'));
+                                                                                
+                                                                                if (empty($bidang_text) && empty($nama_text)) {
+                                                                                    echo '-';
+                                                                                }
                                                                                 ?>
                                                                             </td>
+                                                                            
                                                                             <?php if ($IsRole4) { ?>
+                                                                                <!-- STATUS DETAIL -->
+                                                                                <td>
+                                                                                    <?php if ($isEdited) { ?>
+                                                                                        <span class="badge-status badge-status-edited">
+                                                                                            <i class="fa fa-edit"></i> Diedit Daerah
+                                                                                        </span>
+                                                                                    <?php } else { ?>
+                                                                                        <span class="badge-status badge-status-normal">
+                                                                                            <i class="fa fa-check-circle"></i> Normal
+                                                                                        </span>
+                                                                                    <?php } ?>
+                                                                                </td>
+                                                                                
+                                                                                <!-- AKSI DETAIL -->
                                                                                 <td>
                                                                                     <div class="btn-group-aksi">
                                                                                         <button class="btn btn-warning btn-xs BtnEditDetail"
                                                                                             data-id="<?= $detail['id'] ?>"
                                                                                             data-header-id="<?= $row['id'] ?>"
+                                                                                            data-edited="<?= $isEdited ? '1' : '0' ?>"
                                                                                             title="Edit Indikator"
                                                                                             type="button">
                                                                                             <i class="notika-icon notika-edit"></i>
@@ -992,7 +964,12 @@
                                     <?php } else { ?>
                                         <tr>
                                             <td colspan="6" class="text-center no-data">
-                                                <i>Belum ada data Renja</i>
+                                                <i class="fa fa-inbox" style="font-size: 40px; display: block; color: #ddd;"></i>
+                                                <strong>Belum ada data Renja</strong>
+                                                <?php if ($IsRole4) { ?>
+                                                    <br>
+                                                    <small class="text-muted">Klik tombol <strong>"Tambah Header Renja"</strong> untuk mulai mengisi data.</small>
+                                                <?php } ?>
                                             </td>
                                         </tr>
                                     <?php } ?>
@@ -1008,10 +985,10 @@
 </div>
 
 <!-- ============================================================ -->
-<!-- MODAL HEADER -->
+<!-- MODAL HEADER                                                  -->
 <!-- ============================================================ -->
 <div class="modal fade" id="ModalHeader" role="dialog">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg" style="position: absolute;left: 50%;top: 45%;transform: translate(-50%, -50%);">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -1023,28 +1000,19 @@
             <div class="modal-body">
                 <input type="hidden" id="HeaderId" value="0">
                 <input type="hidden" id="IsEditMode" value="0">
-                <input type="hidden" id="EditIdFromButton" value="0">
-                <input type="hidden" id="ModeNomenklatur" value="1">
-                
-                <div class="alert alert-info">
-                    <i class="fa fa-info-circle"></i> 
-                    <strong>Kode Rekening = NO</strong> 
-                    <span class="text-muted">(Isi Kode Rekening atau pilih dari nomenklatur)</span>
-                </div>
                 
                 <ul class="nav nav-tabs" id="headerTab">
-                    <li class="active"><a href="#tab_nomenklatur_header" data-toggle="tab">📋 Pilih dari Nomenklatur (Berjenjang)</a></li>
+                    <li class="active"><a href="#tab_nomenklatur_header" data-toggle="tab">📋 Pilih dari Nomenklatur</a></li>
                     <li><a href="#tab_manual_header" data-toggle="tab">✏️ Isi Manual</a></li>
                 </ul>
                 
                 <div class="tab-content" style="margin-top: 20px;">
                     
-                    <!-- TAB NOMENKLATUR BERJENJANG -->
+                    <!-- TAB NOMENKLATUR -->
                     <div class="tab-pane fade in active" id="tab_nomenklatur_header">
                         <div class="nomenklatur-container">
                             <div class="panel-heading">
                                 <b>📋 Pilih dari Nomenklatur (Berjenjang)</b>
-                                <small class="text-muted">(Pilih urusan, bidang urusan, program, kegiatan, sub kegiatan)</small>
                             </div>
                             <div class="panel-body">
                                 
@@ -1102,18 +1070,18 @@
                             </div>
                             <div class="panel-body">
                                 <div class="form-group">
-                                    <label><b>Kode Rekening (NO)</b> <span class="text-muted">(otomatis)</span></label>
+                                    <label><b>Kode Rekening (NO)</b></label>
                                     <input type="text" class="form-control" id="preview_kode_header" readonly style="background:#f1f8e9; font-family: monospace;">
                                 </div>
                                 <div class="form-group">
-                                    <label><b>Uraian Lengkap</b> <span class="text-muted">(otomatis)</span></label>
+                                    <label><b>Uraian Lengkap</b></label>
                                     <textarea class="form-control" id="preview_uraian_header" rows="4" readonly style="background:#f1f8e9;"></textarea>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- TAB MANUAL INPUT -->
+                    <!-- TAB MANUAL -->
                     <div class="tab-pane fade" id="tab_manual_header">
                         <div class="panel panel-default">
                             <div class="panel-heading">
@@ -1123,7 +1091,6 @@
                                 <div class="form-group">
                                     <label><b>Kode Rekening (NO)</b></label>
                                     <input type="text" class="form-control" id="KodeRekeningManual" placeholder="Isi kode rekening manual...">
-                                    <small class="text-muted">Isi jika tidak menggunakan nomenklatur</small>
                                 </div>
                                 <div class="form-group">
                                     <label><b>TUJUAN</b></label>
@@ -1178,10 +1145,10 @@
 </div>
 
 <!-- ============================================================ -->
-<!-- MODAL DETAIL (INDIKATOR) - DENGAN SCROLL -->
+<!-- MODAL DETAIL                                                  -->
 <!-- ============================================================ -->
 <div class="modal fade" id="ModalDetail" role="dialog">
-    <div class="modal-dialog modal-lg-custom">
+    <div class="modal-dialog modal-lg-custom" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
         <div class="modal-content" style="max-height: 95vh; overflow: hidden;">
             <div class="modal-header" style="flex-shrink: 0;">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -1198,12 +1165,11 @@
                         <div class="form-group">
                             <label><b>Indikator Kinerja</b> <span class="text-danger">*</span></label>
                             <textarea class="form-control" id="IndikatorKinerja" rows="3" placeholder="Masukkan indikator kinerja..."></textarea>
-                            <small class="text-muted">Masukkan satu indikator kinerja sebagai satu kesatuan nomenklatur</small>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Row 2: Satuan, Lokasi, Prioritas Daerah -->
+                <!-- SATUAN & LOKASI & PRIORITAS -->
                 <div class="row">
                     <div class="col-md-3">
                         <div class="form-group">
@@ -1238,7 +1204,7 @@
                     </div>
                 </div>
                 
-                <!-- Row 3: Prioritas Nasional, Sumber Dana -->
+                <!-- PRIORITAS NASIONAL & SUMBER DANA -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
@@ -1255,6 +1221,8 @@
                 </div>
                 
                 <hr>
+                
+                <!-- RANWAL RENJA -->
                 <h5><b>RANWAL RENJA</b></h5>
                 <div class="row">
                     <div class="col-md-6">
@@ -1271,6 +1239,7 @@
                     </div>
                 </div>
                 
+                <!-- RANCANGAN RENJA -->
                 <h5><b>RANCANGAN RENJA</b></h5>
                 <div class="row">
                     <div class="col-md-6">
@@ -1287,6 +1256,7 @@
                     </div>
                 </div>
                 
+                <!-- RANHIR RENJA -->
                 <h5><b>RANHIR RENJA</b></h5>
                 <div class="row">
                     <div class="col-md-6">
@@ -1303,7 +1273,8 @@
                     </div>
                 </div>
                 
-                <h5><b>RENJA TAHUN 2026</b></h5>
+                <!-- RENJA -->
+                <h5><b>RENJA</b></h5>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
@@ -1319,7 +1290,8 @@
                     </div>
                 </div>
                 
-                <h5><b>DPA MURNI 2026</b></h5>
+                <!-- DPA MURNI -->
+                <h5><b>DPA MURNI</b></h5>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
@@ -1335,7 +1307,8 @@
                     </div>
                 </div>
                 
-                <h5><b>DPA PERUBAHAN 2026</b></h5>
+                <!-- DPA PERUBAHAN -->
+                <h5><b>DPA PERUBAHAN</b></h5>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
@@ -1351,8 +1324,11 @@
                     </div>
                 </div>
                 
-                <!-- BIDANG PENGAMPU & PENGAMPU -->
                 <hr>
+                
+                <!-- ============================================================ -->
+                <!-- BIDANG PENGAMPU & PENGAMPU - DENGAN INFO JABATAN              -->
+                <!-- ============================================================ -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
@@ -1371,6 +1347,17 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- ============================================================ -->
+                <!-- INFO PENGAMPU - MENAMPILKAN JABATAN & NIP                     -->
+                <!-- ============================================================ -->
+                <div class="pengampu-info-modal" id="PengampuInfoModal">
+                    <span class="label">Pengampu:</span>
+                    <span class="nama" id="PengampuModalNama"></span>
+                    <span class="jabatan" id="PengampuModalJabatan"></span>
+                    <span class="nip" id="PengampuModalNip"></span>
+                </div>
+                
             </div>
             <div class="modal-footer" style="flex-shrink: 0; border-top: 1px solid #e5e5e5; padding: 10px 20px;">
                 <button type="button" class="btn btn-default" data-dismiss="modal"><b>BATAL</b></button>
@@ -1381,7 +1368,7 @@
 </div>
 
 <!-- ============================================================ -->
-<!-- MODAL PILIH LOKASI -->
+<!-- MODAL LOKASI                                                  -->
 <!-- ============================================================ -->
 <div class="modal fade modal-lokasi" id="ModalLokasi" role="dialog">
     <div class="modal-dialog modal-md">
@@ -1460,7 +1447,7 @@
 </div>
 
 <!-- ============================================================ -->
-<!-- JAVASCRIPT -->
+<!-- JAVASCRIPT                                                    -->
 <!-- ============================================================ -->
 <script src="<?= base_url('js/vendor/jquery-1.12.4.min.js') ?>"></script>
 <script src="<?= base_url('js/bootstrap.min.js') ?>"></script>
@@ -1526,43 +1513,16 @@ function escapeHtml(text) {
 function toggleDetails(headerId, element) {
     var $headerRow = $('tr.header-row[data-header-id="' + headerId + '"]');
     var $detailRows = $('tr.detail-row[data-header-id="' + headerId + '"]');
-    var $toggleIcon = $('#toggle-icon-' + headerId);
     
     var isExpanded = $headerRow.data('expanded') === true;
     
     if (isExpanded) {
         $detailRows.addClass('detail-hidden');
         $headerRow.data('expanded', false);
-        $toggleIcon.removeClass('expanded').addClass('collapsed').text('▶');
     } else {
         $detailRows.removeClass('detail-hidden');
         $headerRow.data('expanded', true);
-        $toggleIcon.removeClass('collapsed').addClass('expanded').text('▼');
     }
-}
-
-function expandAll() {
-    $('tr.header-row').each(function() {
-        var headerId = $(this).data('header-id');
-        var $detailRows = $('tr.detail-row[data-header-id="' + headerId + '"]');
-        var $toggleIcon = $('#toggle-icon-' + headerId);
-        
-        $detailRows.removeClass('detail-hidden');
-        $(this).data('expanded', true);
-        $toggleIcon.removeClass('collapsed').addClass('expanded').text('▼');
-    });
-}
-
-function collapseAll() {
-    $('tr.header-row').each(function() {
-        var headerId = $(this).data('header-id');
-        var $detailRows = $('tr.detail-row[data-header-id="' + headerId + '"]');
-        var $toggleIcon = $('#toggle-icon-' + headerId);
-        
-        $detailRows.addClass('detail-hidden');
-        $(this).data('expanded', false);
-        $toggleIcon.removeClass('expanded').addClass('collapsed').text('▶');
-    });
 }
 
 // ================================================================
@@ -1678,10 +1638,8 @@ function setSelectedLokasi(kode, nama) {
     $('#SelectedLokasiText').text(nama).show();
     $('#RemoveLokasiBtn').show();
     
-    // Trigger resize untuk refresh scroll
     setTimeout(function() {
         $(window).trigger('resize');
-        $('#ModalDetail .modal-body').scrollTop(0);
     }, 100);
 }
 
@@ -1691,14 +1649,8 @@ function removeSelectedLokasi() {
     $('#SelectedLokasiText').hide().text('');
     $('#RemoveLokasiBtn').hide();
     $('#LokasiPlaceholder').show();
-    
-    // Trigger resize untuk refresh scroll
-    setTimeout(function() {
-        $(window).trigger('resize');
-    }, 100);
 }
 
-// EVENT LOKASI
 $('#LokasiProvinsi').change(function() {
     var kodeProvinsi = $(this).val();
     loadKabKota(kodeProvinsi, '');
@@ -1739,59 +1691,6 @@ $('#BtnPilihLokasi').click(function() {
     $('#ModalLokasi').modal('hide');
 });
 
-// ================================================================
-// FIX SCROLL PADA MODAL SETELAH PILIH LOKASI
-// ================================================================
-
-// Saat modal lokasi ditutup, pastikan modal detail bisa scroll
-$('#ModalLokasi').on('hidden.bs.modal', function() {
-    // Trigger resize untuk refresh scroll
-    $(window).trigger('resize');
-    
-    // Pastikan body tidak terkunci
-    $('body').removeClass('modal-open');
-    $('body').css('overflow', 'auto');
-    $('html').css('overflow', 'auto');
-    
-    // Refresh modal detail
-    var $modalDetail = $('#ModalDetail');
-    if ($modalDetail.hasClass('in')) {
-        $modalDetail.find('.modal-body').scrollTop(0);
-        $modalDetail.find('.modal-body').focus();
-    }
-});
-
-// Saat modal detail ditampilkan, pastikan scroll berfungsi
-$('#ModalDetail').on('shown.bs.modal', function() {
-    var $body = $(this).find('.modal-body');
-    $body.css('max-height', '70vh');
-    $body.css('overflow-y', 'auto');
-    
-    // Enable scroll pada body
-    $('body').css('overflow', 'auto');
-    $('html').css('overflow', 'auto');
-});
-
-// Fix untuk Select2 agar tidak mengganggu scroll
-$(document).on('select2:open', function(e) {
-    var $select = $(e.target);
-    var $modal = $select.closest('.modal');
-    if ($modal.length) {
-        $modal.css('overflow-y', 'auto');
-    }
-});
-
-// Saat modal detail dibuka, pastikan tidak ada scroll lock
-$(document).on('show.bs.modal', '#ModalDetail', function() {
-    $('body').css('overflow', 'auto');
-    $('html').css('overflow', 'auto');
-});
-
-$(document).on('hidden.bs.modal', '#ModalDetail', function() {
-    $('body').css('overflow', 'auto');
-    $('html').css('overflow', 'auto');
-});
-
 $('#ModalLokasi').on('shown.bs.modal', function() {
     if ($('#LokasiProvinsi option').length <= 1) {
         loadProvinsi('');
@@ -1799,7 +1698,7 @@ $('#ModalLokasi').on('shown.bs.modal', function() {
 });
 
 // ================================================================
-// FUNGSI NOMENKLATUR (HEADER)
+// FUNGSI NOMENKLATUR
 // ================================================================
 function getNomenklatur(level, callback) {
     if (nomenklaturCache['level' + level]) {
@@ -1836,8 +1735,7 @@ function getNomenklatur(level, callback) {
             isLoadingNomenklatur = false;
             if (callback) callback(res);
         },
-        error: function(xhr, status, error) {
-            console.log('Gagal memuat level ' + level + ':', error);
+        error: function() {
             isLoadingNomenklatur = false;
             if (callback) callback([]);
         }
@@ -2025,13 +1923,12 @@ $('#header_select_sub_kegiatan').change(function() {
 });
 
 function loadEditNomenklatur(kodeRekening, callback) {
-    if (kodeRekening === null || kodeRekening === undefined) {
+    if (kodeRekening === null || kodeRekening === undefined || kodeRekening === '') {
         if (callback) callback();
         return;
     }
     
     var kodeStr = String(kodeRekening).trim();
-    
     if (kodeStr === '') {
         if (callback) callback();
         return;
@@ -2071,20 +1968,7 @@ function loadEditNomenklatur(kodeRekening, callback) {
             $select.trigger('change');
             if (cb) cb();
         } else {
-            $select.find('option').each(function() {
-                var val = $(this).val();
-                if (val && value && val.indexOf(value) === 0) {
-                    $(this).prop('selected', true);
-                    found = true;
-                }
-            });
-            
-            if (found) {
-                $select.trigger('change');
-                if (cb) cb();
-            } else {
-                if (cb) cb();
-            }
+            if (cb) cb();
         }
     }
     
@@ -2234,11 +2118,14 @@ function loadEditNomenklatur(kodeRekening, callback) {
 // FILTER WILAYAH
 // ================================================================
 <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
+    
     $("#Provinsi").change(function() {
         if ($(this).val() === "") {
             $("#KabKota").html('<option value="">Pilih Kab/Kota</option>');
+            $("#FilterInstansiGroupBefore").hide();
             return;
         }
+        
         $.ajax({
             url: BaseURL + "Instansi/GetListKabKota",
             type: "POST",
@@ -2246,6 +2133,7 @@ function loadEditNomenklatur(kodeRekening, callback) {
             dataType: 'json',
             beforeSend: function() { 
                 $("#KabKota").prop('disabled', true).html('<option value="">Memuat...</option>');
+                $("#FilterInstansiGroupBefore").hide();
             },
             success: function(Data) {
                 var KabKota = '<option value="">Pilih Kab/Kota</option>';
@@ -2255,29 +2143,124 @@ function loadEditNomenklatur(kodeRekening, callback) {
                     }
                 }
                 $("#KabKota").html(KabKota).prop('disabled', false);
+                
+                <?php if (!empty($KodeWilayah)) { ?>
+                    $("#KabKota").val("<?= $KodeWilayah ?>").trigger('change');
+                <?php } ?>
             },
-            error: function() { alert("Gagal memuat data Kab/Kota"); }
+            error: function() { 
+                alert("Gagal memuat data Kab/Kota");
+                $("#KabKota").prop('disabled', false).html('<option value="">Pilih Kab/Kota</option>');
+            }
         });
     });
 
+    $("#KabKota").change(function() {
+        var kabKotaKode = $(this).val();
+        if (kabKotaKode === "") {
+            $("#FilterInstansiGroupBefore").hide();
+            $("#FilterInstansiBeforeLogin").html('<option value="">-- Semua Instansi --</option>');
+            return;
+        }
+
+        $("#FilterInstansiBeforeLogin").html('<option value="">Memuat...</option>');
+        $("#FilterInstansiGroupBefore").show();
+
+        $.ajax({
+            url: BaseURL + "Instansi/GetListInstansiLevel4",
+            type: "POST",
+            data: { 
+                kode_wilayah: kabKotaKode, 
+                [CSRF_NAME]: CSRF_TOKEN 
+            },
+            dataType: 'json',
+            success: function(Data) {
+                var options = '<option value="">-- Semua Instansi --</option>';
+                if (Data && Data.length > 0) {
+                    for (let i = 0; i < Data.length; i++) {
+                        var urlParams = new URLSearchParams(window.location.search);
+                        var instansiParam = urlParams.get('instansi_id');
+                        var selected = (instansiParam == Data[i].id) ? 'selected' : '';
+                        if (!selected && CURRENT_FILTER_INSTANSI == Data[i].id) {
+                            selected = 'selected';
+                        }
+                        options += '<option value="' + Data[i].id + '" ' + selected + '>' + 
+                                   escapeHtml(Data[i].nama) + '</option>';
+                    }
+                } else {
+                    options += '<option value="" disabled>Tidak ada Instansi</option>';
+                }
+                $("#FilterInstansiBeforeLogin").html(options);
+                $("#FilterInstansiGroupBefore").show();
+            },
+            error: function() {
+                $("#FilterInstansiBeforeLogin").html('<option value="">-- Semua Instansi --</option>');
+                $("#FilterInstansiGroupBefore").show();
+            }
+        });
+    });
+
+    <?php if (!empty($KodeWilayah)) { ?>
+        var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
+        var kodeKab  = "<?= $KodeWilayah ?>";
+        $("#Provinsi").val(kodeProv).trigger('change');
+        setTimeout(function() {
+            $("#KabKota").val(kodeKab).trigger('change');
+            <?php if (!empty($FilterInstansiId)) { ?>
+                setTimeout(function() {
+                    if ($("#FilterInstansiBeforeLogin option[value='<?= $FilterInstansiId ?>']").length > 0) {
+                        $("#FilterInstansiBeforeLogin").val("<?= $FilterInstansiId ?>");
+                    }
+                }, 500);
+            <?php } ?>
+        }, 300);
+    <?php } ?>
+
     $("#Filter").click(function() {
-        if ($("#Provinsi").val() === "") { alert("Mohon Pilih Provinsi"); return; }
-        if ($("#KabKota").val() === "") { alert("Mohon Pilih Kab/Kota"); return; }
+        var provinsi = $("#Provinsi").val();
+        var kabKota = $("#KabKota").val();
+        var instansiId = $("#FilterInstansiBeforeLogin").val();
+        
+        if (provinsi === "") { 
+            alert("Mohon Pilih Provinsi"); 
+            return; 
+        }
+        if (kabKota === "") { 
+            alert("Mohon Pilih Kab/Kota"); 
+            return; 
+        }
+
+        $("#Filter").prop('disabled', true).text('Memuat...');
         
         $.ajax({
             url: BaseURL + "Instansi/SetTempKodeWilayah",
             type: "POST",
-            data: { KodeWilayah: $("#KabKota").val(), [CSRF_NAME]: CSRF_TOKEN },
+            data: { 
+                KodeWilayah: kabKota,
+                InstansiId: instansiId || '',
+                [CSRF_NAME]: CSRF_TOKEN 
+            },
+            dataType: 'json',
             success: function(res) {
-                if (res === '1') {
-                    window.location.href = BaseURL + "Instansi/RenjaPD";
+                if (res === '1' || res === 1) {
+                    var redirectUrl = BaseURL + "Instansi/RenjaPD";
+                    if (instansiId && instansiId != '') {
+                        redirectUrl += "?instansi_id=" + instansiId;
+                    }
+                    window.location.href = redirectUrl;
                 } else {
                     alert(res || "Gagal menyimpan filter wilayah!");
+                    $("#Filter").prop('disabled', false).text('Filter');
                 }
             },
-            error: function() { alert("Gagal menghubungi server!"); }
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                alert("Gagal menghubungi server! Status: " + status);
+                $("#Filter").prop('disabled', false).text('Filter');
+            }
         });
     });
+
 <?php } ?>
 
 <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
@@ -2301,7 +2284,6 @@ $(document).off('click', '#BtnTambahHeader').on('click', '#BtnTambahHeader', fun
     __editHeaderId = 0;
     $('#HeaderId').val(0);
     $('#IsEditMode').val(0);
-    $('#EditIdFromButton').val(0);
     $('#ModalHeaderTitle').text('Tambah Header Renja PD');
     $('#ModeIndicator').removeClass('mode-edit').addClass('mode-tambah').text('TAMBAH');
     
@@ -2348,7 +2330,6 @@ $(document).off('click', '.BtnEditHeader').on('click', '.BtnEditHeader', functio
     __editHeaderId = id;
     $('#HeaderId').val(id);
     $('#IsEditMode').val(1);
-    $('#EditIdFromButton').val(id);
     
     $('.BtnEditHeader').removeClass('active-edit');
     $btn.addClass('active-edit');
@@ -2423,7 +2404,7 @@ $(document).off('click', '.BtnEditHeader').on('click', '.BtnEditHeader', functio
 });
 
 // ================================================================
-// TOMBOL HAPUS HEADER - MODIFIED (No Alert, Direct Refresh)
+// TOMBOL HAPUS HEADER
 // ================================================================
 $(document).off('click', '.BtnHapusHeader').on('click', '.BtnHapusHeader', function(e) {
     e.preventDefault();
@@ -2451,16 +2432,14 @@ $(document).off('click', '.BtnHapusHeader').on('click', '.BtnHapusHeader', funct
         success: function(res) {
             hideLoading();
             if (res.status === "success") {
-                // LANGSUNG REFRESH TANPA ALERT
                 location.reload();
             } else {
                 alert(res.message || "Gagal hapus!");
             }
         },
-        error: function(xhr, status, error) {
+        error: function() {
             hideLoading();
-            console.error('Error:', xhr.responseText);
-            alert("Terjadi kesalahan saat menghapus data: " + error);
+            alert("Terjadi kesalahan saat menghapus data");
         }
     });
 });
@@ -2478,18 +2457,12 @@ $(document).off('click', '.btn-add-detail').on('click', '.btn-add-detail', funct
     $('#DetailHeaderInfo').text('Kode Rekening: ' + kodeRekening);
     $('#ModalDetailTitle').text('Tambah Indikator');
     
-    // Reset semua field
     $('#IndikatorKinerja, #Satuan, #PrioritasDaerah, #PrioritasNasional, #RanwalKinerja, #RanwalRp, #RancanganKinerja, #RancanganRp, #RanhirKinerja, #RanhirRp, #RenjaKinerja, #RenjaRp, #DpaMurniKinerja, #DpaMurniRp, #SumberDana, #DpaPerubahanKinerja, #DpaPerubahanRp').val('');
-    
-    // Reset lokasi
     removeSelectedLokasi();
-    
-    // Reset dropdown
     $('#BidangPengampu').val('').trigger('change');
     $('#PengampuGroup').hide();
     $('#Pengampu').val('').trigger('change');
-    
-    // Load data bidang pengampu
+    $('#PengampuInfoModal').hide();
     loadBidangPengampuOptions('');
     
     $('#ModalDetail').modal('show');
@@ -2529,7 +2502,6 @@ $(document).off('click', '.BtnEditDetail').on('click', '.BtnEditDetail', functio
                 $('#IndikatorKinerja').val(d.indikator_kinerja || '');
                 $('#Satuan').val(d.satuan || '');
                 
-                // Set lokasi
                 if (d.lokasi) {
                     if (d.lokasi.indexOf('manual_') === 0) {
                         setSelectedLokasi(d.lokasi, d.lokasi_nama || d.lokasi);
@@ -2572,7 +2544,6 @@ $(document).off('click', '.BtnEditDetail').on('click', '.BtnEditDetail', functio
                 $('#DpaPerubahanKinerja').val(d.dpa_perubahan_kinerja || '');
                 $('#DpaPerubahanRp').val(d.dpa_perubahan_rp ? new Intl.NumberFormat('id-ID').format(d.dpa_perubahan_rp) : '');
                 
-                // LOAD DROPDOWN BIDANG PENGAMPU & PENGAMPU
                 var bidangPengampu = d.bidang_pengampu || '';
                 var pengampu = d.pengampu || '';
                 
@@ -2587,6 +2558,7 @@ $(document).off('click', '.BtnEditDetail').on('click', '.BtnEditDetail', functio
                     loadBidangPengampuOptions('');
                     $('#PengampuGroup').hide();
                     $('#Pengampu').val('').trigger('change');
+                    $('#PengampuInfoModal').hide();
                 }
                 
                 $('#ModalDetail').modal('show');
@@ -2594,16 +2566,15 @@ $(document).off('click', '.BtnEditDetail').on('click', '.BtnEditDetail', functio
                 alert(res.message || 'Gagal memuat data indikator');
             }
         },
-        error: function(xhr, status, error) {
+        error: function() {
             hideLoading();
-            console.error('Error:', xhr.responseText);
-            alert("Terjadi kesalahan saat memuat data: " + error);
+            alert("Terjadi kesalahan saat memuat data");
         }
     });
 });
 
 // ================================================================
-// TOMBOL HAPUS DETAIL - MODIFIED (No Alert, Direct Refresh)
+// TOMBOL HAPUS DETAIL
 // ================================================================
 $(document).off('click', '.BtnHapusDetail').on('click', '.BtnHapusDetail', function(e) {
     e.preventDefault();
@@ -2629,33 +2600,26 @@ $(document).off('click', '.BtnHapusDetail').on('click', '.BtnHapusDetail', funct
         success: function(res) {
             hideLoading();
             if (res.status === "success") {
-                // LANGSUNG REFRESH TANPA ALERT
                 location.reload();
             } else {
                 alert(res.message || "Gagal hapus!");
             }
         },
-        error: function(xhr, status, error) {
+        error: function() {
             hideLoading();
-            console.error('Error:', xhr.responseText);
-            alert("Terjadi kesalahan saat menghapus data: " + error);
+            alert("Terjadi kesalahan saat menghapus data");
         }
     });
 });
 
 // ================================================================
-// TOMBOL SIMPAN HEADER - MODIFIED (No Alert, Direct Refresh)
+// SIMPAN HEADER
 // ================================================================
 $(document).off('click', '#BtnSimpanHeader').on('click', '#BtnSimpanHeader', function(e) {
     e.preventDefault();
     
     var id = parseInt($('#HeaderId').val()) || __editHeaderId || 0;
     var isEdit = (id > 0);
-    
-    if (id > 0) {
-        isEdit = true;
-        $('#IsEditMode').val(1);
-    }
     
     if ($('#tab_nomenklatur_header').hasClass('active')) {
         var kode = $('#header_select_sub_kegiatan').val();
@@ -2724,7 +2688,6 @@ $(document).off('click', '#BtnSimpanHeader').on('click', '#BtnSimpanHeader', fun
         success: function(res) {
             hideLoading();
             if (res.status === "success") {
-                // LANGSUNG REFRESH TANPA ALERT
                 __editHeaderId = 0;
                 $('#HeaderId').val(0);
                 $('#IsEditMode').val(0);
@@ -2734,16 +2697,15 @@ $(document).off('click', '#BtnSimpanHeader').on('click', '#BtnSimpanHeader', fun
                 alert(res.message || "Gagal menyimpan header");
             }
         },
-        error: function(xhr, status, error) {
+        error: function() {
             hideLoading();
-            console.error('Error:', xhr.responseText);
-            alert("Terjadi kesalahan saat menyimpan header: " + error);
+            alert("Terjadi kesalahan saat menyimpan header");
         }
     });
 });
 
 // ================================================================
-// TOMBOL SIMPAN DETAIL - MODIFIED (No Alert, Direct Refresh)
+// SIMPAN DETAIL
 // ================================================================
 $(document).off('click', '#BtnSimpanDetail').on('click', '#BtnSimpanDetail', function(e) {
     e.preventDefault();
@@ -2792,53 +2754,47 @@ $(document).off('click', '#BtnSimpanDetail').on('click', '#BtnSimpanDetail', fun
         success: function(res) {
             hideLoading();
             if (res.status === "success") {
-                // LANGSUNG REFRESH TANPA ALERT
                 location.reload();
             } else {
                 alert(res.message || "Gagal menyimpan indikator");
             }
         },
-        error: function(xhr, status, error) {
+        error: function() {
             hideLoading();
-            console.error('Error detail:', xhr.responseText);
-            alert("Terjadi kesalahan saat menyimpan indikator: " + error);
+            alert("Terjadi kesalahan saat menyimpan indikator");
         }
     });
 });
 
 // ================================================================
-// SELECT2 INIT
+// SELECT2 - BIDANG PENGAMPU & PENGAMPU DENGAN JABATAN
 // ================================================================
-function initSelect2(selector, placeholder = 'Pilih...') {
+function initSelect2(selector, placeholder) {
     if ($(selector).hasClass('select2-hidden-accessible')) {
         $(selector).select2('destroy');
     }
     $(selector).select2({
-        placeholder: placeholder,
+        placeholder: placeholder || 'Pilih...',
         dropdownParent: $('#ModalDetail'),
         width: '100%',
         allowClear: true
     });
 }
 
-// ================================================================
-// DROPDOWN BIDANG PENGAMPU & PENGAMPU
-// ================================================================
-function loadBidangPengampuOptions(selectedId = '') {
+function loadBidangPengampuOptions(selectedId) {
+    $('#BidangPengampu').html('<option value="">Loading...</option>');
+    
     $.ajax({
         url: BaseURL + 'Instansi/getDaftarDinasRenja',
         type: 'GET',
         dataType: 'json',
-        beforeSend: function() {
-            $('#BidangPengampu').html('<option value="">Loading...</option>');
-        },
         success: function(data) {
-            let options = '<option value="">-- Pilih Bidang Pengampu --</option>';
+            var options = '<option value="">-- Pilih Bidang Pengampu --</option>';
             
             if (data && data.length > 0) {
                 $.each(data, function(index, item) {
-                    let selected = (String(item.id) === String(selectedId)) ? 'selected' : '';
-                    options += `<option value="${item.id}" ${selected}>${escapeHtml(item.nama)}</option>`;
+                    var selected = (String(item.id) === String(selectedId)) ? 'selected' : '';
+                    options += '<option value="' + item.id + '" ' + selected + '>' + escapeHtml(item.nama) + '</option>';
                 });
             } else {
                 options += '<option value="" disabled>Tidak ada data Dinas</option>';
@@ -2852,6 +2808,7 @@ function loadBidangPengampuOptions(selectedId = '') {
             } else {
                 $('#PengampuGroup').hide();
                 $('#Pengampu').val('').trigger('change');
+                $('#PengampuInfoModal').hide();
             }
         },
         error: function() {
@@ -2861,10 +2818,11 @@ function loadBidangPengampuOptions(selectedId = '') {
     });
 }
 
-function loadPengampuByBidang(dinasId, selectedPelaksanaId = '') {
+function loadPengampuByBidang(dinasId, selectedPelaksanaId) {
     if (!dinasId) {
         $('#PengampuGroup').hide();
         $('#Pengampu').html('<option value="">-- Pilih Pengampu --</option>');
+        $('#PengampuInfoModal').hide();
         initSelect2('#Pengampu', 'Pilih Pengampu...');
         return;
     }
@@ -2874,25 +2832,35 @@ function loadPengampuByBidang(dinasId, selectedPelaksanaId = '') {
     $.ajax({
         url: BaseURL + 'Instansi/getPelaksanaByDinasRenja',
         type: 'POST',
-        data: { dinas_id: dinasId },
+        data: { 
+            dinas_id: dinasId,
+            [CSRF_NAME]: CSRF_TOKEN 
+        },
         dataType: 'json',
         beforeSend: function() {
             $('#Pengampu').html('<option value="">Loading...</option>');
         },
         success: function(data) {
-            let options = '<option value="">-- Pilih Pengampu --</option>';
+            var options = '<option value="">-- Pilih Pengampu --</option>';
             
             if (data && data.length > 0) {
                 $.each(data, function(index, item) {
-                    let selected = (String(item.id) === String(selectedPelaksanaId)) ? 'selected' : '';
-                    let displayText = item.nama;
+                    var selected = (String(item.id) === String(selectedPelaksanaId)) ? 'selected' : '';
+                    var displayText = item.nama;
                     if (item.jabatan) {
                         displayText += ' - ' + item.jabatan;
                     }
-                    if (item.nama_dinas) {
-                        displayText += ' (' + item.nama_dinas + ')';
+                    if (item.nip) {
+                        displayText += ' (' + item.nip + ')';
                     }
-                    options += `<option value="${item.id}" ${selected}>${escapeHtml(displayText)}</option>`;
+                    if (item.nama_dinas) {
+                        displayText += ' - ' + item.nama_dinas;
+                    }
+                    options += '<option value="' + item.id + '" ' + selected + 
+                               ' data-nama="' + escapeHtml(item.nama) + '"' +
+                               ' data-jabatan="' + escapeHtml(item.jabatan || '') + '"' +
+                               ' data-nip="' + escapeHtml(item.nip || '') + '">' + 
+                               escapeHtml(displayText) + '</option>';
                 });
             } else {
                 options += '<option value="" disabled>Tidak ada pelaksana</option>';
@@ -2904,30 +2872,55 @@ function loadPengampuByBidang(dinasId, selectedPelaksanaId = '') {
             if (selectedPelaksanaId) {
                 $('#Pengampu').val(selectedPelaksanaId).trigger('change');
             }
+            
+            // Tampilkan info jika ada pengampu terpilih
+            if (selectedPelaksanaId) {
+                var $selected = $('#Pengampu option[value="' + selectedPelaksanaId + '"]');
+                var nama = $selected.data('nama') || '';
+                var jabatan = $selected.data('jabatan') || '';
+                var nip = $selected.data('nip') || '';
+                
+                if (nama) {
+                    $('#PengampuInfoModal').show();
+                    $('#PengampuModalNama').text(nama);
+                    $('#PengampuModalJabatan').text(jabatan ? ' - ' + jabatan : '');
+                    $('#PengampuModalNip').text(nip ? ' (NIP: ' + nip + ')' : '');
+                }
+            }
         },
         error: function() {
             $('#Pengampu').html('<option value="">Gagal memuat data</option>');
+            $('#PengampuInfoModal').hide();
             initSelect2('#Pengampu', 'Pilih Pengampu...');
         }
     });
 }
 
+// ================================================================
+// EVENT CHANGE BIDANG PENGAMPU
+// ================================================================
 $(document).off('change', '#BidangPengampu').on('change', '#BidangPengampu', function() {
-    let dinasId = $(this).val();
+    var dinasId = $(this).val();
     loadPengampuByBidang(dinasId, '');
 });
 
 // ================================================================
-// EXPAND / COLLAPSE ALL
+// EVENT CHANGE PENGAMPU - TAMPILKAN JABATAN DI MODAL
 // ================================================================
-$('#BtnExpandAll').on('click', function(e) {
-    e.preventDefault();
-    expandAll();
-});
-
-$('#BtnCollapseAll').on('click', function(e) {
-    e.preventDefault();
-    collapseAll();
+$(document).off('change', '#Pengampu').on('change', '#Pengampu', function() {
+    var selected = $(this).find('option:selected');
+    var nama = selected.data('nama') || '';
+    var jabatan = selected.data('jabatan') || '';
+    var nip = selected.data('nip') || '';
+    
+    if (nama) {
+        $('#PengampuInfoModal').show();
+        $('#PengampuModalNama').text(nama);
+        $('#PengampuModalJabatan').text(jabatan ? ' - ' + jabatan : '');
+        $('#PengampuModalNip').text(nip ? ' (NIP: ' + nip + ')' : '');
+    } else {
+        $('#PengampuInfoModal').hide();
+    }
 });
 
 // ================================================================
@@ -2942,123 +2935,52 @@ $(document).on('input', '.format-rupiah', function() {
 });
 
 // ================================================================
-// INIT DATATABLE
+// DATATABLE
 // ================================================================
-if ($('#data-table-basic').length > 0) {
-    try {
-        if ($.fn.DataTable.isDataTable('#data-table-basic')) {
-            $('#data-table-basic').DataTable().destroy();
-        }
-        
-        $('#data-table-basic').DataTable({
-            "pageLength": 10,
-            "ordering": false,
-            "stateSave": false,
-            "scrollX": true,
-            "scrollY": "400px",
-            "scrollCollapse": true,
-            "language": {
-                "emptyTable": "Tidak ada data",
-                "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                "infoEmpty": "Tidak ada",
-                "paginate": {
-                    "first": "Pertama",
-                    "last": "Terakhir",
-                    "next": "Berikutnya",
-                    "previous": "Sebelumnya"
-                }
-            },
-            "drawCallback": function(settings) {
-                $('.btn-add-detail, .BtnEditHeader, .BtnHapusHeader, .BtnEditDetail, .BtnHapusDetail').css({
-                    'cursor': 'pointer',
-                    'pointer-events': 'auto'
-                });
+$(document).ready(function() {
+    if ($('#data-table-basic').length > 0) {
+        try {
+            if ($.fn.DataTable.isDataTable('#data-table-basic')) {
+                $('#data-table-basic').DataTable().destroy();
             }
-        });
-    } catch(e) {
-        console.log("DataTable error:", e);
-    }
-}
-
-// ================================================================
-// MODAL SHOWN EVENTS
-// ================================================================
-$('#ModalDetail').on('shown.bs.modal', function() {
-    if (!$('#BidangPengampu').hasClass('select2-hidden-accessible')) {
-        initSelect2('#BidangPengampu', 'Pilih Bidang Pengampu...');
-    }
-    if (!$('#Pengampu').hasClass('select2-hidden-accessible')) {
-        initSelect2('#Pengampu', 'Pilih Pengampu...');
-    }
-});
-
-$('#ModalHeader').on('show.bs.modal', function(e) {
-    var button = $(e.relatedTarget);
-    if (button && button.attr('id') === 'BtnTambahHeader') {
-        $('#HeaderId').val(0);
-        $('#IsEditMode').val(0);
-        $('#ModalHeaderTitle').text('Tambah Header Renja PD');
-        $('#ModeIndicator').removeClass('mode-edit').addClass('mode-tambah').text('TAMBAH');
-    }
-});
-
-// ================================================================
-// SWITCH TAB - SYNC DATA
-// ================================================================
-$('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
-    var target = $(e.target).attr('href');
-    
-    if (target === '#tab_nomenklatur_header') {
-        var manualKode = $('#KodeRekeningManual').val().trim();
-        var manualTujuan = $('#TujuanManual').val().trim();
-        var manualSasaran = $('#SasaranManual').val().trim();
-        var manualProgram = $('#ProgramManual').val().trim();
-        var manualKegiatan = $('#KegiatanManual').val().trim();
-        var manualSub = $('#SubKegiatanManual').val().trim();
-        
-        if (manualKode) {
-            loadEditNomenklatur(manualKode);
-        } else if (manualTujuan || manualSasaran || manualProgram || manualKegiatan || manualSub) {
-            loadHeaderUrusan(function() {
-                if (manualTujuan) {
-                    $('#header_select_urusan option').each(function() {
-                        var text = $(this).text().toLowerCase();
-                        var search = manualTujuan.toLowerCase();
-                        if (text.indexOf(search) > -1) {
-                            $(this).prop('selected', true);
-                            $('#header_select_urusan').trigger('change');
-                            return false;
-                        }
+            
+            $('#data-table-basic').DataTable({
+                "pageLength": 10,
+                "ordering": false,
+                "stateSave": false,
+                "scrollX": true,
+                "scrollY": "400px",
+                "scrollCollapse": true,
+                "language": {
+                    "emptyTable": "Tidak ada data",
+                    "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                    "infoEmpty": "Tidak ada",
+                    "paginate": {
+                        "first": "Pertama",
+                        "last": "Terakhir",
+                        "next": "Berikutnya",
+                        "previous": "Sebelumnya"
+                    }
+                },
+                "drawCallback": function(settings) {
+                    $('.btn-add-detail, .BtnEditHeader, .BtnHapusHeader, .BtnEditDetail, .BtnHapusDetail').css({
+                        'cursor': 'pointer',
+                        'pointer-events': 'auto'
                     });
                 }
             });
-        } else {
-            loadHeaderUrusan();
-        }
-    } else if (target === '#tab_manual_header') {
-        var previewKode = $('#preview_kode_header').val();
-        var previewUraian = $('#preview_uraian_header').val();
-        
-        if (previewKode && !$('#KodeRekeningManual').val()) {
-            $('#KodeRekeningManual').val(previewKode);
-        }
-        
-        if (previewUraian) {
-            var urusan = $('#header_select_urusan option:selected').text().split(' - ').slice(1).join(' - ');
-            var sasaranText = $('#header_select_bidang_urusan option:selected').text().split(' - ').slice(1).join(' - ');
-            var programText = $('#header_select_program option:selected').text().split(' - ').slice(1).join(' - ');
-            var kegiatanText = $('#header_select_kegiatan option:selected').text().split(' - ').slice(1).join(' - ');
-            var subText = $('#header_select_sub_kegiatan option:selected').text().split(' - ').slice(1).join(' - ');
-            
-            if (urusan && !$('#TujuanManual').val()) $('#TujuanManual').val(urusan);
-            if (sasaranText && !$('#SasaranManual').val()) $('#SasaranManual').val(sasaranText);
-            if (programText && !$('#ProgramManual').val()) $('#ProgramManual').val(programText);
-            if (kegiatanText && !$('#KegiatanManual').val()) $('#KegiatanManual').val(kegiatanText);
-            if (subText && !$('#SubKegiatanManual').val()) $('#SubKegiatanManual').val(subText);
+        } catch(e) {
+            console.log("DataTable error:", e);
         }
     }
+    
+    // Inisialisasi modal lokasi
+    $('#ModalLokasi').on('shown.bs.modal', function() {
+        if ($('#LokasiProvinsi option').length <= 1) {
+            loadProvinsi('');
+        }
+    });
 });
-
 </script>
 
 </body>

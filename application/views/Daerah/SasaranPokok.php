@@ -72,7 +72,9 @@
                             </div>
                         </div>
 
-                        <!-- Tabel -->
+                        <!-- ============================================================
+                        TABEL SASARAN POKOK DAN IUP (DIPERBAIKI)
+                        ============================================================ -->
                         <div class="table-responsive">
                             <table id="data-table-basic" class="table table-striped table-bordered">
                                 <thead>
@@ -97,7 +99,7 @@
                                     <?php 
                                     $No = 1;
                                     
-                                    // Group IUP per Sasaran Pokok
+                                    // 🔴 GROUP IUP per Sasaran Pokok
                                     $IUPGrouped = [];
                                     foreach ($IUP as $iup) {
                                         $IUPGrouped[$iup['IdSasaranPokok']][] = $iup;
@@ -113,17 +115,20 @@
                                         }
                                     }
                                     
-                                    // Group Sasaran Pokok berdasarkan Misi
+                                    // 🔴 GROUP Sasaran Pokok berdasarkan Misi
                                     $sasaranByMisi = [];
                                     foreach ($SasaranPokok as $sp) {
                                         $sasaranByMisi[$sp['IdMisi']][] = $sp;
                                     }
                                     
-                                    // Hitung rowspan untuk setiap Sasaran Pokok
+                                    // 🔴 HITUNG ROWSPAN DENGAN BENAR
                                     $sasaranRowspan = [];
                                     foreach ($SasaranPokok as $sp) {
-                                        $jumlahIUP = isset($IUPGrouped[$sp['Id']]) ? count($IUPGrouped[$sp['Id']]) : 0;
-                                        $sasaranRowspan[$sp['Id']] = $jumlahIUP > 0 ? $jumlahIUP : 1;
+                                        // Ambil IUP untuk sasaran ini
+                                        $iupForSasaran = isset($IUPGrouped[$sp['Id']]) ? $IUPGrouped[$sp['Id']] : [];
+                                        
+                                        // Rowspan = jumlah IUP, minimal 1
+                                        $sasaranRowspan[$sp['Id']] = !empty($iupForSasaran) ? count($iupForSasaran) : 1;
                                     }
                                     
                                     // Hitung rowspan untuk setiap Misi
@@ -136,21 +141,14 @@
                                         $misiRowspan[$idMisi] = $total;
                                     }
                                     
-                                    // Group Misi per Periode
-                                    $misiByPeriode = [];
-                                    foreach ($SasaranPokok as $sp) {
-                                        $periodeKey = $sp['Periode'] ?? '-';
-                                        $misiByPeriode[$periodeKey][$sp['IdMisi']] = $sp;
-                                    }
-                                    
                                     // Hitung rowspan untuk setiap Periode
                                     $periodeRowspan = [];
-                                    foreach ($misiByPeriode as $periode => $misiList) {
-                                        $total = 0;
-                                        foreach ($misiList as $idMisi => $sp) {
-                                            $total += $misiRowspan[$idMisi];
+                                    foreach ($SasaranPokok as $sp) {
+                                        $periodeKey = $sp['Periode'] ?? '-';
+                                        if (!isset($periodeRowspan[$periodeKey])) {
+                                            $periodeRowspan[$periodeKey] = 0;
                                         }
-                                        $periodeRowspan[$periode] = $total;
+                                        $periodeRowspan[$periodeKey] += $sasaranRowspan[$sp['Id']];
                                     }
                                     
                                     $hasAksi = (isset($_SESSION['Level']) && $_SESSION['Level'] == 3);
@@ -179,24 +177,20 @@
                                             
                                             $counterSasaran++;
                                             $nomorSasaran = $counterSasaran;
+                                            $key = $sp['Periode'] . '_' . $sp['IdMisi'];
                                             
                                             if (empty($iupList)) {
+                                                // Tanpa IUP
                                                 ?>
                                                 <tr>
-                                                    <?php
-                                                        $key = $sp['Periode'] . '_' . $sp['IdMisi'];
-                                                    ?>
                                                     <?php if ($isNewMisi) { ?>
                                                         <td class="text-center" rowspan="<?= $rowspanMisi ?>">
-                                                            <?= $NomorMisi[$key] ?>
+                                                            <?= $NomorMisi[$key] ?? '' ?>
                                                         </td>
                                                     <?php } ?>
-                                                                                                            
+                                                                                    
                                                     <?php if ($isNewPeriode) { ?>
-                                                        <?php 
-                                                        $periodeRowspanCount = isset($periodeRowspan[$sp['Periode']]) ? $periodeRowspan[$sp['Periode']] : 1;
-                                                        ?>
-                                                        <td rowspan="<?= $periodeRowspanCount ?>" style="vertical-align: middle;">
+                                                        <td rowspan="<?= $periodeRowspan[$sp['Periode']] ?? 1 ?>" style="vertical-align: middle;">
                                                             <?= html_escape($sp['Periode'] ?? '-') ?>
                                                         </td>
                                                     <?php } ?>
@@ -226,6 +220,7 @@
                                                         </td>
                                                     <?php } ?>
                                                     
+                                                    <!-- 🔴 SASARAN POKOK -->
                                                     <td>
                                                         <?= html_escape($sp['SasaranPokok']) ?>
                                                         <?php if ($hasAksi) { ?>
@@ -240,6 +235,8 @@
                                                             </button>
                                                         <?php } ?>
                                                     </td>
+                                                    
+                                                    <!-- 🔴 KOSONGKAN KOLOM IUP -->
                                                     <td class="text-center">-</td>
                                                     <td class="text-center">-</td>
                                                     <td class="text-center">-</td>
@@ -277,24 +274,19 @@
                                                 </tr>
                                                 <?php
                                             } else {
+                                                // 🔴 ADA IUP - TAMPILKAN SEMUA IUP
                                                 $iupCount = count($iupList);
                                                 foreach ($iupList as $i => $iup) {
                                                     ?>
                                                     <tr>
-                                                        <?php
-                                                        $key = $sp['Periode'] . '_' . $sp['IdMisi'];
-                                                        ?>
                                                         <?php if ($i == 0 && $isNewMisi) { ?>
                                                             <td class="text-center" rowspan="<?= $rowspanMisi ?>">
-                                                                <?= $NomorMisi[$key] ?>
+                                                                <?= $NomorMisi[$key] ?? '' ?>
                                                             </td>
                                                         <?php } ?>
                                                         
                                                         <?php if ($isNewPeriode && $i == 0) { ?>
-                                                            <?php 
-                                                            $periodeRowspanCount = isset($periodeRowspan[$sp['Periode']]) ? $periodeRowspan[$sp['Periode']] : 1;
-                                                            ?>
-                                                            <td rowspan="<?= $periodeRowspanCount ?>" style="vertical-align: middle;">
+                                                            <td rowspan="<?= $periodeRowspan[$sp['Periode']] ?? 1 ?>" style="vertical-align: middle;">
                                                                 <?= html_escape($sp['Periode'] ?? '-') ?>
                                                             </td>
                                                         <?php } ?>
@@ -309,7 +301,7 @@
                                                                                 data-idmisi="<?= $sp['IdMisi'] ?>" 
                                                                                 style="font-size:10px; padding:2px 8px;" 
                                                                                 title="Edit Periode dan Misi">
-                                                                            <i class="notika-icon notika-edit"></i> 
+                                                                            <i class="notika-icon notika-edit"></i>
                                                                         </button>
                                                                         <button class="btn btn-xs btn-danger HapusPeriodeMisi" 
                                                                                 data-idmisi="<?= $sp['IdMisi'] ?>"
@@ -317,15 +309,16 @@
                                                                                 data-misi="<?= html_escape($sp['Misi']) ?>"
                                                                                 style="font-size:10px; padding:2px 8px;" 
                                                                                 title="Hapus Periode dan Misi">
-                                                                            <i class="notika-icon notika-trash"></i> 
+                                                                            <i class="notika-icon notika-trash"></i>
                                                                         </button>
                                                                     </div>
                                                                 <?php } ?>
                                                             </td>
                                                         <?php } ?>
                                                         
+                                                        <!-- 🔴 SASARAN POKOK - TAMPILKAN HANYA DI BARIS PERTAMA -->
                                                         <?php if ($i == 0) { ?>
-                                                            <td>
+                                                            <td rowspan="<?= $rowspanSasaran ?>" style="vertical-align: middle;">
                                                                 <?= html_escape($sp['SasaranPokok']) ?>
                                                                 <?php if ($hasAksi) { ?>
                                                                     <br>
@@ -341,7 +334,8 @@
                                                             </td>
                                                         <?php } ?>
                                                         
-                                                        <td><?= html_escape($iup['Indikator']) ?></td>
+                                                        <!-- 🔴 IUP - TAMPILKAN DI SETIAP BARIS -->
+                                                        <td><?= html_escape($iup['Indikator'] ?? '-') ?></td>
                                                         <td><?= html_escape($iup['Satuan'] ?? '-') ?></td>
                                                         <td class="text-center"><?= html_escape($iup['Target_Tahap_I'] ?? '-') ?></td>
                                                         <td class="text-center"><?= html_escape($iup['Target_Tahap_II'] ?? '-') ?></td>
@@ -349,6 +343,7 @@
                                                         <td class="text-center"><?= html_escape($iup['Target_Tahap_IV'] ?? '-') ?></td>
                                                         
                                                         <?php if ($hasAksi) { ?>
+                                                            <!-- 🔴 AKSI SASARAN - TAMPILKAN HANYA DI BARIS PERTAMA -->
                                                             <?php if ($i == 0) { ?>
                                                                 <td class="text-center" rowspan="<?= $rowspanSasaran ?>" style="vertical-align: middle;">
                                                                     <div style="display:flex; gap:3px; justify-content:center; flex-wrap:wrap;">
@@ -362,6 +357,7 @@
                                                                 </td>
                                                             <?php } ?>
                                                             
+                                                            <!-- 🔴 AKSI IUP - TAMPILKAN DI SETIAP BARIS -->
                                                             <td class="text-center" style="vertical-align: middle;">
                                                                 <div style="display:flex; gap:3px; justify-content:center; flex-wrap:wrap;">
                                                                     <?php if ($i == 0) { ?>
@@ -518,7 +514,7 @@ MODAL INPUT SASARAN POKOK (QUICK - DI DALAM TABEL)
 </div>
 
 <!-- ============================================================
-MODAL INPUT IUP
+MODAL INPUT IUP (DIPERBAIKI)
 ============================================================ -->
 <div class="modal fade" id="ModalInputIUP" role="dialog">
     <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);overflow-x: hidden;overflow-y: auto;max-height: 600px;">
@@ -528,9 +524,25 @@ MODAL INPUT IUP
                 <h4 class="modal-title"><b>Tambah Indikator Utama Pembangunan (IUP)</b></h4>
             </div>
             <div class="modal-body">
+                <!-- 🔴 HIDDEN FIELD UNTUK ID SASARAN -->
                 <input type="hidden" id="InputIUPIdSasaran" value="">
                 <input type="hidden" id="InputIUPIdMisi" value="">
                 <input type="hidden" id="InputIUPVisiId" value="">
+
+                <!-- 🔴 TAMPILKAN INFORMASI SASARAN -->
+                <div class="alert alert-info" style="margin-bottom: 15px;">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Periode:</strong> <span id="InfoPeriodeIUP" class="text-primary">-</span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Misi:</strong> <span id="InfoMisiIUP" class="text-primary">-</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 8px;">
+                        <strong>Sasaran Pokok:</strong> <span id="InfoSasaranIUP" class="text-primary">-</span>
+                    </div>
+                </div>
 
                 <div class="form-group">
                     <div class="row">
@@ -602,9 +614,8 @@ MODAL INPUT IUP
 </div>
 
 <!-- ============================================================
-MODAL EDIT PERIODE DAN MISI (SAMA DENGAN FORM INPUT)
+MODAL EDIT PERIODE DAN MISI
 ============================================================ -->
-<!-- Modal Edit Periode dan Misi -->
 <div class="modal fade" id="ModalEditPeriodeMisi" role="dialog">
     <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);overflow-x: hidden;overflow-y: auto;max-height: 600px;">
         <div class="modal-content">
@@ -616,13 +627,11 @@ MODAL EDIT PERIODE DAN MISI (SAMA DENGAN FORM INPUT)
                 <input type="hidden" id="EditIdMisi" value="">
                 <input type="hidden" id="EditVisiIdLama" value="">
                 
-                <!-- Informasi Misi Lama -->
                 <div class="alert alert-info" style="margin-bottom: 15px;">
                     <strong>Misi yang akan diedit:</strong><br>
                     <span id="EditMisiLamaInfo" class="text-primary">-</span>
                 </div>
                 
-                <!-- Periode (Dropdown) -->
                 <div class="form-group">
                     <div class="row">
                         <div class="col-lg-3">
@@ -641,7 +650,6 @@ MODAL EDIT PERIODE DAN MISI (SAMA DENGAN FORM INPUT)
                     </div>
                 </div>
                 
-                <!-- Misi (Dropdown) -->
                 <div class="form-group">
                     <div class="row">
                         <div class="col-lg-3">
@@ -669,8 +677,7 @@ MODAL EDIT PERIODE DAN MISI (SAMA DENGAN FORM INPUT)
 </div>
 
 <!-- ============================================================
-MODAL KONFIRMASI HAPUS PERIODE DAN MISI
-============================================================ -->
+MODAL KONFIRMASI HAPUS PERIODE DAN MISI============================================================ -->
 <div class="modal fade" id="ModalHapusPeriodeMisi" role="dialog">
     <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
         <div class="modal-content">
@@ -830,245 +837,231 @@ MODAL EDIT IUP
 <!-- CSS -->
 <style>
     /* ==============================================
-   MODAL STYLING - Tombol Close Terlihat
+   MODAL STYLING
    ============================================== */
-.modal {
-    text-align: center;
-    padding: 0!important;
-}
-.modal:before {
-    content: '';
-    display: inline-block;
-    height: 100%;
-    vertical-align: middle;
-    margin-right: -4px;
-}
-.modal-dialog {
-    display: inline-block;
-    text-align: left;
-    vertical-align: middle;
-    width: 700px; 
-    max-width: 95%; 
-}
-.modal-lg {
-    width: 95% !important;
-    max-width: 1200px !important;
-}
+    .modal {
+        text-align: center;
+        padding: 0!important;
+    }
+    .modal:before {
+        content: '';
+        display: inline-block;
+        height: 100%;
+        vertical-align: middle;
+        margin-right: -4px;
+    }
+    .modal-dialog {
+        display: inline-block;
+        text-align: left;
+        vertical-align: middle;
+        width: 700px; 
+        max-width: 95%; 
+    }
+    .modal-lg {
+        width: 95% !important;
+        max-width: 1200px !important;
+    }
 
-/* TOMBOL CLOSE - JELAS TERLIHAT */
-.modal-header {
-    position: relative !important;
-    padding: 15px 20px !important;
-    border-bottom: 1px solid #e5e5e5 !important;
-    background: #fafafa !important;
-    border-radius: 4px 4px 0 0 !important;
-}
+    .modal-header {
+        position: relative !important;
+        padding: 15px 20px !important;
+        border-bottom: 1px solid #e5e5e5 !important;
+        background: #fafafa !important;
+        border-radius: 4px 4px 0 0 !important;
+    }
 
-.modal-header .close {
-    position: absolute !important;
-    right: 15px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    font-size: 28px !important;
-    font-weight: 700 !important;
-    line-height: 1 !important;
-    color: #333 !important;
-    text-shadow: none !important;
-    opacity: 0.6 !important;
-    background: transparent !important;
-    border: none !important;
-    padding: 0 !important;
-    z-index: 10 !important;
-    cursor: pointer !important;
-    width: 35px !important;
-    height: 35px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border-radius: 50% !important;
-    transition: all 0.3s ease !important;
-}
+    .modal-header .close {
+        position: absolute !important;
+        right: 15px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        font-size: 28px !important;
+        font-weight: 700 !important;
+        line-height: 1 !important;
+        color: #333 !important;
+        text-shadow: none !important;
+        opacity: 0.6 !important;
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        z-index: 10 !important;
+        cursor: pointer !important;
+        width: 35px !important;
+        height: 35px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 50% !important;
+        transition: all 0.3s ease !important;
+    }
 
-.modal-header .close:hover {
-    opacity: 1 !important;
-    background: rgba(0,0,0,0.08) !important;
-    transform: translateY(-50%) rotate(90deg) !important;
-}
+    .modal-header .close:hover {
+        opacity: 1 !important;
+        background: rgba(0,0,0,0.08) !important;
+        transform: translateY(-50%) rotate(90deg) !important;
+    }
 
-.modal-header .close:focus {
-    outline: none !important;
-    opacity: 0.8 !important;
-}
+    .modal-header .close:focus {
+        outline: none !important;
+        opacity: 0.8 !important;
+    }
 
-.modal-header .close span {
-    display: inline-block !important;
-    font-size: 30px !important;
-    line-height: 1 !important;
-}
+    .modal-header .close span {
+        display: inline-block !important;
+        font-size: 30px !important;
+        line-height: 1 !important;
+    }
 
-.modal-header h2 {
-    font-size: 20px;
-    color: #333;
-    font-weight: 600;
-    margin: 0;
-    padding-right: 40px;
-}
+    .modal-header h4.modal-title {
+        font-size: 18px;
+        margin: 0;
+        padding-right: 40px;
+        font-weight: 600;
+    }
 
-/* Untuk modal dengan judul kecil */
-.modal-header h4.modal-title {
-    font-size: 18px;
-    margin: 0;
-    padding-right: 40px;
-    font-weight: 600;
-}
+    .modal-body {
+        padding: 20px 25px !important;
+        max-height: calc(100vh - 200px);
+        overflow-y: auto;
+    }
 
-/* Modal body */
-.modal-body {
-    padding: 20px 25px !important;
-    max-height: calc(100vh - 200px);
-    overflow-y: auto;
-}
+    .modal-footer {
+        padding: 12px 20px !important;
+        border-top: 1px solid #e5e5e5 !important;
+        background: #fafafa !important;
+        border-radius: 0 0 4px 4px !important;
+    }
 
-/* Modal footer */
-.modal-footer {
-    padding: 12px 20px !important;
-    border-top: 1px solid #e5e5e5 !important;
-    background: #fafafa !important;
-    border-radius: 0 0 4px 4px !important;
-}
-
-.filter-row {
-    display: flex;
-    align-items: flex-end;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-.filter-group {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-.filter-group label {
-    font-size: 14px;
-    margin-bottom: 5px;
-}
-.filter-select {
-    width: 260px;
-    font-size: 14px;
-    padding: 5px 8px;
-}
-@media (max-width: 768px) {
     .filter-row {
+        display: flex;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .filter-group {
+        display: flex;
         flex-direction: column;
-        gap: 15px;
+        align-items: flex-start;
+    }
+    .filter-group label {
+        font-size: 14px;
+        margin-bottom: 5px;
     }
     .filter-select {
-        width: 100%;
+        width: 260px;
+        font-size: 14px;
+        padding: 5px 8px;
     }
-}
-.table th {
-    text-align: center;
-    vertical-align: middle;
-}
-.table td {
-    vertical-align: middle;
-}
-.modal-body {
-    padding: 20px 30px;
-}
-.modal-dialog {
-    max-width: 800px;
-}
-.text-danger {
-    color: #ff0000;
-}
-.btn-sm {
-    padding: 4px 10px;
-    font-size: 12px;
-    margin: 1px;
-}
-.btn-xs {
-    padding: 2px 8px;
-    font-size: 10px;
-    line-height: 1.4;
-}
-.btn-xs i {
-    font-size: 10px;
-}
-.alert-info {
-    background-color: #d9edf7;
-    border-color: #bce8f1;
-    color: #31708f;
-    padding: 10px 15px;
-    border-radius: 4px;
-    margin-bottom: 15px;
-}
-.alert-info strong {
-    color: #005c99;
-}
-.alert-info .text-primary {
-    color: #005c99;
-    font-weight: bold;
-}
-.alert-danger {
-    background-color: #f2dede;
-    border-color: #ebcccc;
-    color: #a94442;
-}
-.label {
-    display: inline-block;
-    padding: 3px 8px;
-    font-size: 11px;
-    font-weight: bold;
-    border-radius: 3px;
-}
-.label-success {
-    background-color: #5cb85c;
-    color: #fff;
-}
-.btn-amber {
-    background-color: #ffbf00;
-    color: #333;
-}
-.btn-amber:hover {
-    background-color: #e6ac00;
-    color: #333;
-}
-.basic-tb-hd {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    margin-bottom: 15px;
-}
-.basic-tb-hd h2 {
-    margin: 0;
-}
-.button-icon-btn {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-.table .btn-sm {
-    padding: 2px 6px;
-    font-size: 11px;
-    line-height: 1.4;
-}
-.table .btn-sm i {
-    font-size: 11px;
-}
+    @media (max-width: 768px) {
+        .filter-row {
+            flex-direction: column;
+            gap: 15px;
+        }
+        .filter-select {
+            width: 100%;
+        }
+    }
+    .table th {
+        text-align: center;
+        vertical-align: middle;
+    }
+    .table td {
+        vertical-align: middle;
+    }
+    .modal-body {
+        padding: 20px 30px;
+    }
+    .modal-dialog {
+        max-width: 800px;
+    }
+    .text-danger {
+        color: #ff0000;
+    }
+    .btn-sm {
+        padding: 4px 10px;
+        font-size: 12px;
+        margin: 1px;
+    }
+    .btn-xs {
+        padding: 2px 8px;
+        font-size: 10px;
+        line-height: 1.4;
+    }
+    .btn-xs i {
+        font-size: 10px;
+    }
+    .alert-info {
+        background-color: #d9edf7;
+        border-color: #bce8f1;
+        color: #31708f;
+        padding: 10px 15px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }
+    .alert-info strong {
+        color: #005c99;
+    }
+    .alert-info .text-primary {
+        color: #005c99;
+        font-weight: bold;
+    }
+    .alert-danger {
+        background-color: #f2dede;
+        border-color: #ebcccc;
+        color: #a94442;
+    }
+    .label {
+        display: inline-block;
+        padding: 3px 8px;
+        font-size: 11px;
+        font-weight: bold;
+        border-radius: 3px;
+    }
+    .label-success {
+        background-color: #5cb85c;
+        color: #fff;
+    }
+    .btn-amber {
+        background-color: #ffbf00;
+        color: #333;
+    }
+    .btn-amber:hover {
+        background-color: #e6ac00;
+        color: #333;
+    }
+    .basic-tb-hd {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 15px;
+    }
+    .basic-tb-hd h2 {
+        margin: 0;
+    }
+    .button-icon-btn {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .table .btn-sm {
+        padding: 2px 6px;
+        font-size: 11px;
+        line-height: 1.4;
+    }
+    .table .btn-sm i {
+        font-size: 11px;
+    }
 </style>
 
 <!-- ============================================================
-JAVASCRIPT
+JAVASCRIPT (DIPERBAIKI)
 ============================================================ -->
 <script src="<?= base_url('assets/js/vendor/jquery-1.12.4.min.js') ?>"></script>
 <script src="<?= base_url('assets/js/bootstrap.min.js') ?>"></script>
 <script src="<?= base_url('assets/js/data-table/jquery.dataTables.min.js') ?>"></script>
 <script src="<?= base_url('assets/js/data-table/data-table-act.js') ?>"></script>
 <script src="<?= base_url('assets/js/main.js') ?>"></script>
-<link rel="stylesheet" href="<?= base_url('assets/css/glightbox.min.css') ?>">
-<script src="<?= base_url('assets/js/glightbox.min.js') ?>"></script>
 
 <script>
 var BaseURL = '<?= base_url() ?>';
@@ -1112,11 +1105,11 @@ jQuery(document).ready(function($) {
 
     $("#Filter").click(function() {
         if ($("#Provinsi").val() === "") {
-            showNotification("Mohon Pilih Provinsi", "warning");
+            alert("Mohon Pilih Provinsi");
             return;
         }
         if ($("#KabKota").val() === "") {
-            showNotification("Mohon Pilih Kab/Kota", "warning");
+            alert("Mohon Pilih Kab/Kota");
             return;
         }
         
@@ -1134,52 +1127,16 @@ jQuery(document).ready(function($) {
                 if (Respon.trim() === '1' || Respon.trim() === 'success') {
                     window.location.href = BaseURL + "Daerah/SasaranPokok";
                 } else {
-                    showNotification(Respon || "Gagal menyimpan filter wilayah!", "error");
+                    alert(Respon || "Gagal menyimpan filter wilayah!");
                     $("#Filter").prop('disabled', false).html('<b>Filter</b>');
                 }
             },
             error: function() {
-                showNotification("Gagal menghubungi server!", "error");
+                alert("Gagal menghubungi server!");
                 $("#Filter").prop('disabled', false).html('<b>Filter</b>');
             }
         });
     });
-
-    function showNotification(message, type) {
-        var container = $('#notification-container');
-        if (container.length === 0) {
-            container = $('<div id="notification-container" style="position:fixed;top:20px;right:20px;z-index:9999;max-width:400px;"></div>');
-            $('body').append(container);
-        }
-        
-        var bgColor = type === 'error' ? '#f44336' : (type === 'warning' ? '#ff9800' : '#4CAF50');
-        var icon = type === 'error' ? '✕' : (type === 'warning' ? '⚠' : '✓');
-        
-        var notification = $('<div class="notification" style="background:'+bgColor+';color:white;padding:12px 18px;margin-bottom:8px;border-radius:5px;box-shadow:0 2px 8px rgba(0,0,0,0.2);animation:slideIn 0.3s ease;display:flex;align-items:center;gap:10px;">' +
-            '<span style="font-weight:bold;font-size:18px;">' + icon + '</span>' +
-            '<span>' + message + '</span>' +
-            '</div>');
-        
-        container.append(notification);
-        
-        setTimeout(function() {
-            notification.fadeOut(400, function() {
-                $(this).remove();
-                if (container.children().length === 0) {
-                    container.remove();
-                }
-            });
-        }, 3000);
-    }
-
-    var style = document.createElement('style');
-    style.textContent = `
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-    `;
-    document.head.appendChild(style);
 
     <?php if (!empty($KodeWilayah)) { ?>
         var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
@@ -1276,7 +1233,7 @@ jQuery(document).ready(function($) {
                     if (result.status === 'success') {
                         window.location.reload();
                     } else {
-                        alert(result.message);
+                        alert(result.message || 'Terjadi kesalahan');
                         $("#BtnInputSasaran").prop('disabled', false).text('SIMPAN');
                     }
                 } catch(e) {
@@ -1291,7 +1248,7 @@ jQuery(document).ready(function($) {
     });
 
     // ============================================================
-    // TOMBOL TAMBAH SASARAN QUICK (DI DALAM TABEL - DI KOLOM SASARAN)
+    // TOMBOL TAMBAH SASARAN QUICK
     // ============================================================
     $(document).on("click", ".TambahSasaranRow", function() {
         var idMisi = $(this).data('idmisi');
@@ -1310,7 +1267,7 @@ jQuery(document).ready(function($) {
     });
 
     // ============================================================
-    // INPUT SASARAN POKOK - QUICK (DI DALAM TABEL)
+    // INPUT SASARAN POKOK - QUICK
     // ============================================================
     $("#BtnInputSasaranQuick").click(function() {
         var idMisi = $("#InputSasaranIdMisiQuick").val();
@@ -1341,7 +1298,7 @@ jQuery(document).ready(function($) {
                     if (result.status === 'success') {
                         window.location.reload();
                     } else {
-                        alert(result.message);
+                        alert(result.message || 'Terjadi kesalahan');
                         $("#BtnInputSasaranQuick").prop('disabled', false).text('SIMPAN');
                     }
                 } catch(e) {
@@ -1356,7 +1313,7 @@ jQuery(document).ready(function($) {
     });
 
     // ============================================================
-    // INPUT IUP
+    // TOMBOL TAMBAH IUP (DIPERBAIKI)
     // ============================================================
     $(document).on("click", ".TambahIUP", function() {
         var idSasaran = $(this).data('id');
@@ -1366,6 +1323,17 @@ jQuery(document).ready(function($) {
         var misi = $(this).data('misi');
         var sasaran = $(this).data('sasaran');
         
+        // 🔴 DEBUG: Cek apakah ID Sasaran terbaca
+        console.log('ID Sasaran:', idSasaran);
+        console.log('ID Misi:', idMisi);
+        console.log('Sasaran:', sasaran);
+        
+        if (!idSasaran || idSasaran == "" || idSasaran == "0" || idSasaran == null) {
+            alert("⚠️ ID Sasaran tidak valid! Silahkan refresh halaman.");
+            return;
+        }
+        
+        // Reset form
         $("#InputIndikatorIUP").val('');
         $("#InputSatuanIUP").val('');
         $("#InputTarget1IUP").val('');
@@ -1373,15 +1341,25 @@ jQuery(document).ready(function($) {
         $("#InputTarget3IUP").val('');
         $("#InputTarget4IUP").val('');
         
+        // 🔴 SET HIDDEN FIELD DENGAN ID SASARAN
         $("#InputIUPIdSasaran").val(idSasaran);
         $("#InputIUPIdMisi").val(idMisi);
-        $("#InputIUPVisiId").val(visiId);
+        $("#InputIUPVisiId").val(visiId || '');
+        
+        // 🔴 TAMPILKAN INFORMASI DI MODAL
+        $("#InfoPeriodeIUP").text(periode || '-');
+        $("#InfoMisiIUP").text(misi || '-');
+        $("#InfoSasaranIUP").text(sasaran || '-');
         
         $('#ModalInputIUP').modal('show');
     });
 
+    // ============================================================
+    // INPUT IUP (DIPERBAIKI)
+    // ============================================================
     $("#BtnInputIUP").click(function() {
-        var idSasaran = $("#InputIUPIdSasaran").val();
+        // 🔴 AMBIL ID SASARAN DARI HIDDEN FIELD
+        var idSasaranPokok = $("#InputIUPIdSasaran").val();
         var indikator = $("#InputIndikatorIUP").val().trim();
         var satuan = $("#InputSatuanIUP").val().trim();
         var target1 = $("#InputTarget1IUP").val().trim();
@@ -1389,8 +1367,12 @@ jQuery(document).ready(function($) {
         var target3 = $("#InputTarget3IUP").val().trim();
         var target4 = $("#InputTarget4IUP").val().trim();
 
-        if (idSasaran == "" || idSasaran == "0" || idSasaran == null) {
-            alert("⚠️ Sasaran Pokok tidak valid!");
+        // 🔴 DEBUG
+        console.log('ID Sasaran yang dikirim:', idSasaranPokok);
+        console.log('Indikator:', indikator);
+
+        if (idSasaranPokok == "" || idSasaranPokok == "0" || idSasaranPokok == null) {
+            alert("⚠️ ID Sasaran tidak valid! Silahkan refresh halaman.");
             return;
         }
 
@@ -1399,8 +1381,9 @@ jQuery(document).ready(function($) {
             return;
         }
 
+        // 🔴 PASTIKAN KEY SESUAI DENGAN CONTROLLER
         var data = {
-            IdSasaranPokok: idSasaran,
+            IdSasaranPokok: idSasaranPokok,
             Indikator: indikator,
             Satuan: satuan,
             Target1: target1,
@@ -1410,275 +1393,229 @@ jQuery(document).ready(function($) {
             [CSRF_NAME]: CSRF_TOKEN
         };
 
+        console.log('Data yang dikirim ke server:', data);
+
         $("#BtnInputIUP").prop('disabled', true).text('Menyimpan...');
         
         $.post(BaseURL + "Daerah/InputIUP", data)
             .done(function(Respon) {
+                console.log('Response server:', Respon);
                 try {
                     var result = JSON.parse(Respon);
                     if (result.status === 'success') {
                         window.location.reload();
                     } else {
-                        alert(result.message);
+                        alert(result.message || 'Terjadi kesalahan');
                         $("#BtnInputIUP").prop('disabled', false).text('SIMPAN');
                     }
                 } catch(e) {
-                    alert("Terjadi kesalahan pada server!");
+                    alert("Terjadi kesalahan pada server: " + Respon);
                     $("#BtnInputIUP").prop('disabled', false).text('SIMPAN');
                 }
             })
-            .fail(function() {
+            .fail(function(jqXHR, textStatus, errorThrown) {
+                console.error('Error:', textStatus, errorThrown);
                 alert("Terjadi kesalahan pada server!");
                 $("#BtnInputIUP").prop('disabled', false).text('SIMPAN');
             });
     });
 
-// ============================================================
-// EDIT PERIODE DAN MISI
-// ============================================================
-$(document).on("click", ".EditPeriodeMisi", function() {
-    var idMisi = $(this).data('idmisi');
-    
-    console.log('EditPeriodeMisi clicked, ID:', idMisi);
-    
-    // Reset form
-    $("#EditIdMisi").val('');
-    $("#EditVisiIdLama").val('');
-    $("#EditPeriodeSelect").val('');
-    $("#EditMisiSelect").html('<option value="">-- Pilih Periode Terlebih Dahulu --</option>');
-    $("#EditMisiSelect").prop('disabled', true);
-    $("#EditMisiLamaInfo").text('Memuat...');
-    
-    // Ambil data misi untuk ditampilkan di form edit
-    $.ajax({
-        url: BaseURL + "Daerah/GetDataPeriodeMisiEdit",
-        type: "POST",
-        data: { 
-            IdMisi: idMisi, 
-            [CSRF_NAME]: CSRF_TOKEN 
-        },
-        dataType: "json",
-        beforeSend: function() {
-            $('#ModalEditPeriodeMisi').modal('show');
-            $("#BtnEditPeriodeMisi").prop('disabled', true).text('Memuat...');
-        },
-        success: function(response) {
-            console.log('Response GetDataPeriodeMisiEdit:', response);
-            
-            if (response.status === 'success') {
-                var data = response.data;
+    // ============================================================
+    // EDIT PERIODE DAN MISI
+    // ============================================================
+    $(document).on("click", ".EditPeriodeMisi", function() {
+        var idMisi = $(this).data('idmisi');
+        
+        console.log('EditPeriodeMisi clicked, ID:', idMisi);
+        
+        $("#EditIdMisi").val('');
+        $("#EditVisiIdLama").val('');
+        $("#EditPeriodeSelect").val('');
+        $("#EditMisiSelect").html('<option value="">-- Pilih Periode Terlebih Dahulu --</option>');
+        $("#EditMisiSelect").prop('disabled', true);
+        $("#EditMisiLamaInfo").text('Memuat...');
+        
+        $.ajax({
+            url: BaseURL + "Daerah/GetDataPeriodeMisiEdit",
+            type: "POST",
+            data: { 
+                IdMisi: idMisi, 
+                [CSRF_NAME]: CSRF_TOKEN 
+            },
+            dataType: "json",
+            beforeSend: function() {
+                $('#ModalEditPeriodeMisi').modal('show');
+                $("#BtnEditPeriodeMisi").prop('disabled', true).text('Memuat...');
+            },
+            success: function(response) {
+                console.log('Response GetDataPeriodeMisiEdit:', response);
                 
-                // Set ID Misi Lama
-                $("#EditIdMisi").val(data.MisiId);
-                $("#EditVisiIdLama").val(data.VisiId);
-                
-                // Tampilkan informasi misi yang akan diedit
-                $("#EditMisiLamaInfo").text(data.Misi || 'Misi tidak ditemukan');
-                
-                // Set periode yang dipilih (visi dari misi lama)
-                $("#EditPeriodeSelect").val(data.VisiId);
-                
-                // Load misi berdasarkan periode yang dipilih
-                loadMisiForEdit(data.VisiId, data.MisiId);
-                
-                $("#BtnEditPeriodeMisi").prop('disabled', false).text('UPDATE');
-            } else {
-                alert('Error: ' + (response.message || 'Gagal mengambil data'));
+                if (response.status === 'success') {
+                    var data = response.data;
+                    
+                    $("#EditIdMisi").val(data.MisiId);
+                    $("#EditVisiIdLama").val(data.VisiId);
+                    $("#EditMisiLamaInfo").text(data.Misi || 'Misi tidak ditemukan');
+                    $("#EditPeriodeSelect").val(data.VisiId);
+                    
+                    loadMisiForEdit(data.VisiId, data.MisiId);
+                    
+                    $("#BtnEditPeriodeMisi").prop('disabled', false).text('UPDATE');
+                } else {
+                    alert('Error: ' + (response.message || 'Gagal mengambil data'));
+                    $('#ModalEditPeriodeMisi').modal('hide');
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error('AJAX Error:', {
+                    status: jqXHR.status,
+                    statusText: jqXHR.statusText,
+                    responseText: jqXHR.responseText,
+                    errorThrown: errorThrown
+                });
+                alert('Gagal mengambil data: ' + textStatus);
                 $('#ModalEditPeriodeMisi').modal('hide');
             }
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-            console.error('AJAX Error:', {
-                status: jqXHR.status,
-                statusText: jqXHR.statusText,
-                responseText: jqXHR.responseText,
-                errorThrown: errorThrown
-            });
-            
-            var errorMsg = 'Gagal mengambil data: ';
-            if (jqXHR.status === 404) {
-                errorMsg += 'Endpoint tidak ditemukan (404)';
-            } else if (jqXHR.status === 500) {
-                errorMsg += 'Server error (500)';
-            } else if (jqXHR.status === 0) {
-                errorMsg += 'Koneksi gagal';
-            } else {
-                errorMsg += textStatus || 'Unknown error';
-            }
-            
-            alert(errorMsg);
-            $('#ModalEditPeriodeMisi').modal('hide');
-        }
+        });
     });
-});
 
-// Function untuk load misi di form edit
-function loadMisiForEdit(periodeId, selectedMisiId) {
-    var $misiSelect = $("#EditMisiSelect");
-    
-    console.log('loadMisiForEdit - periodeId:', periodeId, 'selectedMisiId:', selectedMisiId);
-    
-    if (periodeId == "" || periodeId == null || periodeId == "0") {
-        $misiSelect.html('<option value="">-- Pilih Periode Terlebih Dahulu --</option>');
-        $misiSelect.prop('disabled', true);
-        return;
-    }
-    
-    $.ajax({
-        url: BaseURL + "Daerah/GetMisiByPeriodeSasaranPokok",
-        type: "POST",
-        data: { 
-            Id: periodeId, 
-            [CSRF_NAME]: CSRF_TOKEN 
-        },
-        dataType: "json",
-        beforeSend: function() { 
+    function loadMisiForEdit(periodeId, selectedMisiId) {
+        var $misiSelect = $("#EditMisiSelect");
+        
+        console.log('loadMisiForEdit - periodeId:', periodeId, 'selectedMisiId:', selectedMisiId);
+        
+        if (periodeId == "" || periodeId == null || periodeId == "0") {
+            $misiSelect.html('<option value="">-- Pilih Periode Terlebih Dahulu --</option>');
             $misiSelect.prop('disabled', true);
-            $misiSelect.html('<option value="">Memuat data...</option>');
-        },
-        success: function(response) {
-            console.log('GetMisiByPeriodeSasaranPokok response:', response);
-            
-            var Data = response;
-            // Jika response adalah array langsung
-            if (!Array.isArray(Data)) {
-                // Jika response adalah object dengan data property
-                if (Data.data && Array.isArray(Data.data)) {
-                    Data = Data.data;
-                } else {
-                    Data = [];
-                }
-            }
-            
-            var Misi = '<option value="">-- Pilih Misi --</option>';
-            if (Data.length > 0) {
-                for (let i = 0; i < Data.length; i++) {
-                    var selected = (Data[i].Id == selectedMisiId) ? 'selected' : '';
-                    Misi += '<option value="' + Data[i].Id + '" ' + selected + '>' + Data[i].Misi + '</option>';
-                }
-            } else {
-                Misi = '<option value="">Tidak ada misi untuk periode ini</option>';
-            }
-            $misiSelect.html(Misi).prop('disabled', false);
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-            console.error('Error loadMisiForEdit:', textStatus, errorThrown);
-            $misiSelect.html('<option value="">Gagal memuat data</option>').prop('disabled', false);
+            return;
         }
-    });
-}
-
-// Ketika periode berubah di form edit, update misi
-$(document).on("change", "#EditPeriodeSelect", function() {
-    var periodeId = $(this).val();
-    console.log('Periode changed:', periodeId);
-    loadMisiForEdit(periodeId, '');
-});
-
-// Submit Edit Periode dan Misi
-$("#BtnEditPeriodeMisi").click(function() {
-    var idMisiLama = $("#EditIdMisi").val();
-    var visiIdBaru = $("#EditPeriodeSelect").val();
-    var idMisiBaru = $("#EditMisiSelect").val();
-    
-    console.log('Submit Edit:', {
-        idMisiLama: idMisiLama,
-        visiIdBaru: visiIdBaru,
-        idMisiBaru: idMisiBaru
-    });
-    
-    if (!idMisiLama || idMisiLama == "") {
-        alert("⚠️ Data misi tidak valid!");
-        return;
-    }
-    
-    if (!visiIdBaru || visiIdBaru == "") {
-        alert("⚠️ Periode harus dipilih!");
-        return;
-    }
-    
-    if (!idMisiBaru || idMisiBaru == "") {
-        alert("⚠️ Misi harus dipilih!");
-        return;
-    }
-    
-    // Konfirmasi
-    var misiLamaText = $("#EditMisiLamaInfo").text();
-    var misiBaruText = $("#EditMisiSelect option:selected").text();
-    
-    if (!confirm("Anda akan mengubah misi dari:\n\n" + 
-                 "MISI LAMA: " + misiLamaText + "\n\n" +
-                 "Menjadi:\n" +
-                 "MISI BARU: " + misiBaruText + "\n\n" +
-                 "⚠️ Semua Sasaran Pokok yang terkait dengan misi lama akan dipindahkan ke misi baru.\n\n" +
-                 "Lanjutkan?")) {
-        return;
-    }
-    
-    var data = {
-        IdMisi: idMisiLama,
-        VisiId: visiIdBaru,
-        MisiId: idMisiBaru,
-        [CSRF_NAME]: CSRF_TOKEN
-    };
-    
-    console.log('Data yang dikirim ke EditPeriodeMisi:', data);
-    
-    $("#BtnEditPeriodeMisi").prop('disabled', true).text('Menyimpan...');
-    
-    $.ajax({
-        url: BaseURL + "Daerah/EditPeriodeMisi",
-        type: "POST",
-        data: data,
-        dataType: "json",
-        timeout: 30000, // 30 second timeout
-        success: function(response) {
-            console.log('Response EditPeriodeMisi:', response);
-            
-            if (response.status === 'success') {
-                alert("✅ " + response.message);
-                window.location.reload();
-            } else {
-                alert("Error: " + (response.message || 'Terjadi kesalahan'));
-                $("#BtnEditPeriodeMisi").prop('disabled', false).text('UPDATE');
-            }
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-            console.error('AJAX Error EditPeriodeMisi:', {
-                status: jqXHR.status,
-                statusText: jqXHR.statusText,
-                responseText: jqXHR.responseText,
-                errorThrown: errorThrown
-            });
-            
-            var errorMsg = 'Terjadi kesalahan: ';
-            if (jqXHR.status === 404) {
-                errorMsg += 'Endpoint tidak ditemukan (404)';
-            } else if (jqXHR.status === 500) {
-                errorMsg += 'Server error (500) - Cek log server';
-            } else if (jqXHR.status === 0) {
-                errorMsg += 'Koneksi gagal - Periksa network';
-            } else {
-                errorMsg += textStatus || 'Unknown error';
-            }
-            
-            if (jqXHR.responseText) {
-                try {
-                    var resp = JSON.parse(jqXHR.responseText);
-                    if (resp.message) errorMsg = resp.message;
-                } catch(e) {
-                    // Jika response bukan JSON, tampilkan raw response
-                    if (jqXHR.responseText.length < 200) {
-                        errorMsg += '\n\nResponse: ' + jqXHR.responseText;
+        
+        $.ajax({
+            url: BaseURL + "Daerah/GetMisiByPeriodeSasaranPokok",
+            type: "POST",
+            data: { 
+                Id: periodeId, 
+                [CSRF_NAME]: CSRF_TOKEN 
+            },
+            dataType: "json",
+            beforeSend: function() { 
+                $misiSelect.prop('disabled', true);
+                $misiSelect.html('<option value="">Memuat data...</option>');
+            },
+            success: function(response) {
+                console.log('GetMisiByPeriodeSasaranPokok response:', response);
+                
+                var Data = response;
+                if (!Array.isArray(Data)) {
+                    if (Data.data && Array.isArray(Data.data)) {
+                        Data = Data.data;
+                    } else {
+                        Data = [];
                     }
                 }
+                
+                var Misi = '<option value="">-- Pilih Misi --</option>';
+                if (Data.length > 0) {
+                    for (let i = 0; i < Data.length; i++) {
+                        var selected = (Data[i].Id == selectedMisiId) ? 'selected' : '';
+                        Misi += '<option value="' + Data[i].Id + '" ' + selected + '>' + Data[i].Misi + '</option>';
+                    }
+                } else {
+                    Misi = '<option value="">Tidak ada misi untuk periode ini</option>';
+                }
+                $misiSelect.html(Misi).prop('disabled', false);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error('Error loadMisiForEdit:', textStatus, errorThrown);
+                $misiSelect.html('<option value="">Gagal memuat data</option>').prop('disabled', false);
             }
-            
-            alert(errorMsg);
-            $("#BtnEditPeriodeMisi").prop('disabled', false).text('UPDATE');
-        }
+        });
+    }
+
+    $(document).on("change", "#EditPeriodeSelect", function() {
+        var periodeId = $(this).val();
+        console.log('Periode changed:', periodeId);
+        loadMisiForEdit(periodeId, '');
     });
-});
+
+    $("#BtnEditPeriodeMisi").click(function() {
+        var idMisiLama = $("#EditIdMisi").val();
+        var visiIdBaru = $("#EditPeriodeSelect").val();
+        var idMisiBaru = $("#EditMisiSelect").val();
+        
+        console.log('Submit Edit:', {
+            idMisiLama: idMisiLama,
+            visiIdBaru: visiIdBaru,
+            idMisiBaru: idMisiBaru
+        });
+        
+        if (!idMisiLama || idMisiLama == "") {
+            alert("⚠️ Data misi tidak valid!");
+            return;
+        }
+        
+        if (!visiIdBaru || visiIdBaru == "") {
+            alert("⚠️ Periode harus dipilih!");
+            return;
+        }
+        
+        if (!idMisiBaru || idMisiBaru == "") {
+            alert("⚠️ Misi harus dipilih!");
+            return;
+        }
+        
+        var misiLamaText = $("#EditMisiLamaInfo").text();
+        var misiBaruText = $("#EditMisiSelect option:selected").text();
+        
+        if (!confirm("Anda akan mengubah misi dari:\n\n" + 
+                     "MISI LAMA: " + misiLamaText + "\n\n" +
+                     "Menjadi:\n" +
+                     "MISI BARU: " + misiBaruText + "\n\n" +
+                     "⚠️ Semua Sasaran Pokok yang terkait dengan misi lama akan dipindahkan ke misi baru.\n\n" +
+                     "Lanjutkan?")) {
+            return;
+        }
+        
+        var data = {
+            IdMisi: idMisiLama,
+            VisiId: visiIdBaru,
+            MisiId: idMisiBaru,
+            [CSRF_NAME]: CSRF_TOKEN
+        };
+        
+        console.log('Data yang dikirim ke EditPeriodeMisi:', data);
+        
+        $("#BtnEditPeriodeMisi").prop('disabled', true).text('Menyimpan...');
+        
+        $.ajax({
+            url: BaseURL + "Daerah/EditPeriodeMisi",
+            type: "POST",
+            data: data,
+            dataType: "json",
+            timeout: 30000,
+            success: function(response) {
+                console.log('Response EditPeriodeMisi:', response);
+                
+                if (response.status === 'success') {
+                    alert("✅ " + response.message);
+                    window.location.reload();
+                } else {
+                    alert("Error: " + (response.message || 'Terjadi kesalahan'));
+                    $("#BtnEditPeriodeMisi").prop('disabled', false).text('UPDATE');
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error('AJAX Error EditPeriodeMisi:', {
+                    status: jqXHR.status,
+                    statusText: jqXHR.statusText,
+                    responseText: jqXHR.responseText,
+                    errorThrown: errorThrown
+                });
+                alert('Terjadi kesalahan: ' + textStatus);
+                $("#BtnEditPeriodeMisi").prop('disabled', false).text('UPDATE');
+            }
+        });
+    });
 
     // ============================================================
     // HAPUS PERIODE DAN MISI
@@ -1717,7 +1654,7 @@ $("#BtnEditPeriodeMisi").click(function() {
                     if (result.status === 'success') {
                         window.location.reload();
                     } else {
-                        alert(result.message);
+                        alert(result.message || 'Terjadi kesalahan');
                         $("#BtnHapusPeriodeMisi").prop('disabled', false).text('YA, HAPUS');
                     }
                 } catch(e) {
@@ -1790,7 +1727,7 @@ $("#BtnEditPeriodeMisi").click(function() {
                     if (result.status === 'success') {
                         window.location.reload();
                     } else {
-                        alert(result.message);
+                        alert(result.message || 'Terjadi kesalahan');
                         $("#BtnEditSasaran").prop('disabled', false).text('UPDATE');
                     }
                 } catch(e) {
@@ -1880,7 +1817,7 @@ $("#BtnEditPeriodeMisi").click(function() {
                     if (result.status === 'success') {
                         window.location.reload();
                     } else {
-                        alert(result.message);
+                        alert(result.message || 'Terjadi kesalahan');
                         $("#BtnEditIUP").prop('disabled', false).text('UPDATE');
                     }
                 } catch(e) {
@@ -1913,7 +1850,7 @@ $("#BtnEditPeriodeMisi").click(function() {
                 if (result.status === 'success') {
                     window.location.reload();
                 } else {
-                    alert(result.message);
+                    alert(result.message || 'Terjadi kesalahan');
                 }
             } catch(e) {
                 alert("Terjadi kesalahan pada server!");
@@ -1942,7 +1879,7 @@ $("#BtnEditPeriodeMisi").click(function() {
                 if (result.status === 'success') {
                     window.location.reload();
                 } else {
-                    alert(result.message);
+                    alert(result.message || 'Terjadi kesalahan');
                 }
             } catch(e) {
                 alert("Terjadi kesalahan pada server!");
@@ -1972,6 +1909,7 @@ $("#BtnEditPeriodeMisi").click(function() {
         $("#BtnInputSasaranQuick").prop('disabled', false).text('SIMPAN');
     });
 
+    // 🔴 RESET MODAL IUP
     $('#ModalInputIUP').on('hidden.bs.modal', function() {
         $("#InputIndikatorIUP").val('');
         $("#InputSatuanIUP").val('');
@@ -1982,6 +1920,9 @@ $("#BtnEditPeriodeMisi").click(function() {
         $("#InputIUPIdSasaran").val('');
         $("#InputIUPIdMisi").val('');
         $("#InputIUPVisiId").val('');
+        $("#InfoPeriodeIUP").text('-');
+        $("#InfoMisiIUP").text('-');
+        $("#InfoSasaranIUP").text('-');
         $("#BtnInputIUP").prop('disabled', false).text('SIMPAN');
     });
 
@@ -2019,7 +1960,8 @@ $("#BtnEditPeriodeMisi").click(function() {
     });
 
 });
-</script>
+</script> 
+
 
 </body>
 </html>

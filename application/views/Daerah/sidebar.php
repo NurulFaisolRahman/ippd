@@ -276,6 +276,22 @@
             .sidebar-toggle {
                 left: 15px;
             }
+
+            /* Submenu level 2 */
+            .sidebar-submenu .sidebar-dropdown > a{
+                padding-left:25px;
+                font-size:14px;
+            }
+
+            .sidebar-submenu .sidebar-submenu a{
+                padding-left:45px;
+                font-size:13px;
+            }
+
+            .sidebar-submenu .sidebar-dropdown .fa-chevron-down{
+                margin-left:auto;
+                font-size:12px;
+}
             
             .sidebar-mini .sidebar-toggle {
                 left: calc(var(--sidebar-mini-width) - 20px);
@@ -342,15 +358,58 @@
             </li>
 
             <li class="sidebar-dropdown">
-                <a href="#">
-                    <i class="bi bi-file-text-fill"></i>
-                    <span>RKPD</span>
-                    <i class="fa fa-chevron-down"></i>
-                </a>
-                <div class="sidebar-submenu">
-                    <a href="<?=base_url('#')?>">Form RKPD</a>
-                </div>
-            </li>
+    <a href="#">
+        <i class="bi bi-file-text-fill"></i>
+        <span>RKPD</span>
+        <i class="fa fa-chevron-down"></i>
+    </a>
+
+    <div class="sidebar-submenu">
+
+        <!-- Rancangan Awal -->
+        <div class="sidebar-dropdown">
+            <a href="#">
+                <span>Rancangan Awal</span>
+                <i class="fa fa-chevron-down"></i>
+            </a>
+
+            <div class="sidebar-submenu">
+                <a href="<?=base_url('Daerah/TemaPembangunan')?>">Tema Pembangunan</a>
+                <a href="<?=base_url('Daerah/PaguUrusan')?>">Input Pagu Anggaran</a>
+                <a href="<?=base_url('Daerah/IKDTahunBerjalan')?>">Data IKD Tahun Berjalan</a>
+                <a href="<?=base_url('Daerah/RanwalRKPD')?>">Rancangan Awal RKPD</a>
+            </div>
+        </div>
+
+        <!-- Rancangan RKPD -->
+        <div class="sidebar-dropdown">
+            <a href="#">
+                <span>Rancangan RKPD</span>
+                <i class="fa fa-chevron-down"></i>
+            </a>
+
+            <div class="sidebar-submenu">
+                <a href="<?=base_url('Daerah/RancanganRKPD')?>">Rancangan RKPD</a>
+                <!-- Tambahkan menu lain jika ada -->
+            </div>
+        </div>
+
+        <!-- Rancangan Akhir -->
+        <div class="sidebar-dropdown">
+            <a href="#">
+                <span>Rancangan Akhir</span>
+                <i class="fa fa-chevron-down"></i>
+            </a>
+
+            <div class="sidebar-submenu">
+                <a href="<?=base_url('Daerah/RankhirRKPD')?>">Rancangan Akhir RKPD</a>
+                <a href="<?=base_url('Daerah/PaguUrusanRankhir')?>">Pagu Urusan Rankhir RKPD</a>
+                <!-- Tambahkan menu lain jika ada -->
+            </div>
+        </div>
+
+    </div>
+</li>
 
              <li class="sidebar-dropdown">
                 <a href="#">
@@ -382,7 +441,9 @@
                     <i class="fa fa-chevron-down"></i>
                 </a>
                 <div class="sidebar-submenu">
-                    <a href="<?=base_url('Instansi/RenjaPD')?>">Menu Renja</a>
+                    <a href="<?=base_url('Instansi/RenjaPD')?>">Ranwal Renja</a>
+                    <a href="<?=base_url('Instansi/RancanganRenjaPD')?>">Rancangan Renja</a>
+                    <a href="<?=base_url('Instansi/RancanganAkhirRenjaPD')?>">Rankhir Renja</a>
                 </div>
             </li>
 
@@ -438,22 +499,76 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // Toggle dropdown klik (hanya saat sidebar tidak mini)
-  document.querySelectorAll('.sidebar-dropdown > a').forEach(a => {
+  // Toggle dropdown klik (hanya saat sidebar tidak mini)
+document.querySelectorAll('.sidebar-dropdown > a').forEach(a => {
+
     a.addEventListener('click', function (e) {
-      if (body.classList.contains('sidebar-mini')) return; // mini mode pakai hover
 
-      e.preventDefault();
-      const li = this.closest('.sidebar-dropdown');
+        if (body.classList.contains('sidebar-mini')) return;
 
-      // close siblings
-      const siblings = Array.from(li.parentElement.children).filter(el => el !== li);
-      siblings.forEach(s => closeDropdown(s));
+        e.preventDefault();
 
-      // toggle current
-      if (li.classList.contains('active')) closeDropdown(li);
-      else openDropdown(li);
+        const li = this.parentElement;
+        const submenu = li.querySelector(':scope > .sidebar-submenu');
+
+        if (!submenu) return;
+
+        const isOpen = li.classList.contains('active');
+
+        // Jika yang diklik adalah menu level utama
+        if (li.parentElement.classList.contains('sidebar-menu')) {
+
+            // Tutup semua menu utama
+            document.querySelectorAll('.sidebar-menu > .sidebar-dropdown').forEach(item => {
+
+                item.classList.remove('active');
+
+                const sm = item.querySelector(':scope > .sidebar-submenu');
+                if (sm) sm.classList.remove('show');
+
+                const icon = item.querySelector(':scope > a .fa-chevron-down');
+                if (icon) icon.style.transform = 'rotate(0deg)';
+
+                // Tutup seluruh submenu level 2
+                item.querySelectorAll('.sidebar-dropdown').forEach(child => {
+                    child.classList.remove('active');
+
+                    const childMenu = child.querySelector(':scope > .sidebar-submenu');
+                    if (childMenu) childMenu.classList.remove('show');
+
+                    const childIcon = child.querySelector(':scope > a .fa-chevron-down');
+                    if (childIcon) childIcon.style.transform = 'rotate(0deg)';
+                });
+
+            });
+
+        } else {
+
+            // Jika submenu level 2 (Rancangan Awal, dll)
+            li.parentElement.querySelectorAll(':scope > .sidebar-dropdown').forEach(item => {
+
+                item.classList.remove('active');
+
+                const sm = item.querySelector(':scope > .sidebar-submenu');
+                if (sm) sm.classList.remove('show');
+
+                const icon = item.querySelector(':scope > a .fa-chevron-down');
+                if (icon) icon.style.transform = 'rotate(0deg)';
+            });
+
+        }
+
+        if (!isOpen) {
+            li.classList.add('active');
+            submenu.classList.add('show');
+
+            const icon = this.querySelector('.fa-chevron-down');
+            if (icon) icon.style.transform = 'rotate(180deg)';
+        }
+
     });
-  });
+
+});
 
   // Highlight menu aktif berdasarkan URL
   const currentPath = window.location.pathname.replace(/\/+$/, '');
@@ -467,8 +582,14 @@ document.addEventListener('DOMContentLoaded', function () {
       link.style.fontWeight = 'bold';
 
       // open parent dropdown
-      const parentLi = link.closest('.sidebar-dropdown');
-      if (parentLi) openDropdown(parentLi);
+      let parent = link.closest('.sidebar-dropdown');
+
+while (parent) {
+    openDropdown(parent);
+
+    const next = parent.parentElement.closest('.sidebar-dropdown');
+    parent = next;
+}
     }
   });
 });
