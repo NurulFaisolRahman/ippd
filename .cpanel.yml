@@ -1,4 +1,0 @@
-deployment:
-  tasks:
-    - export DEPLOYPATH=/home/smartgov/public_html/ippd/
-    - /bin/cp -R * $DEPLOYPATH
