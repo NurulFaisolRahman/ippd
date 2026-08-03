@@ -7719,71 +7719,99 @@ public function HapusUrusanPD() {
 }
 
  public function ProgramPD()
-    {
-        $Header['Halaman'] = 'Daerah';
+{
+    $Header['Halaman'] = 'Daerah';
 
-        // dropdown provinsi
-        $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
+    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
 
-        $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] :
-                       (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+    $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] :
+                   (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
 
-        $Data['KodeWilayah'] = '';
-        $Data['NamaWilayah'] = '';
-        $Data['Urusan'] = [];
-        $Data['Sasaran'] = [];
-        $Data['ProgramPD'] = [];
+    $Data['KodeWilayah'] = '';
+    $Data['NamaWilayah'] = '';
+    $Data['Urusan'] = [];
+    $Data['Sasaran'] = [];
+    $Data['ProgramPD'] = [];
 
-        if ($KodeWilayah) {
-            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-            if ($wilayah) {
-                $Data['KodeWilayah'] = $KodeWilayah;
-                $Data['NamaWilayah'] = $wilayah['Nama'];
+    if ($KodeWilayah) {
+        $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+        if ($wilayah) {
+            $Data['KodeWilayah'] = $KodeWilayah;
+            $Data['NamaWilayah'] = $wilayah['Nama'];
 
-                // dropdown urusan
-                $Data['Urusan'] = $this->db
-                    ->where('deleted_at IS NULL', null, false)
-                    ->order_by('nama_urusan', 'ASC')
-                    ->get('urusan_pd')
-                    ->result_array();
+            $Data['Urusan'] = $this->db
+                ->where('deleted_at IS NULL', null, false)
+                ->order_by('nama_urusan', 'ASC')
+                ->get('urusan_pd')
+                ->result_array();
 
-                // dropdown sasaran
-                $Data['Sasaran'] = $this->db
-                    ->where('KodeWilayah', $KodeWilayah)
-                    ->where('deleted_at IS NULL', null, false)
-                    ->order_by('Id', 'ASC')
-                    ->get('sasaranrpjmd')
-                    ->result_array();
+            $Data['Sasaran'] = $this->db
+                ->where('KodeWilayah', $KodeWilayah)
+                ->where('deleted_at IS NULL', null, false)
+                ->order_by('Id', 'ASC')
+                ->get('sasaranrpjmd')
+                ->result_array();
 
-              $Data['ProgramPD'] = $this->db->query("
-                    SELECT 
-                        p.*,
-                        s.Sasaran,
-                        (
-                        SELECT GROUP_CONCAT(u.nama_urusan ORDER BY u.nama_urusan SEPARATOR '<br>')
-                        FROM urusan_pd u
-                        WHERE FIND_IN_SET(u.id, p.urusan_id)
-                        ) AS nama_urusan
-                    FROM program_pd p
-                    LEFT JOIN sasaranrpjmd s ON s.Id = p.sasaran_id
-                    WHERE p.deleted_at IS NULL
-                    AND p.kodewilayah = ?
-                    ORDER BY p.id ASC
-                ", [$KodeWilayah])->result_array();
+            // ================================================================
+            // QUERY DENGAN KOLOM bidang_urusan_id
+            // ================================================================
+            $Data['ProgramPD'] = $this->db->query("
+                SELECT 
+                    p.*,
+                    s.Sasaran,
+                    -- Ambil Urusan (Level 1) 
+                    (
+                        SELECT n1.Nomenklatur 
+                        FROM nomenklaturprovinsi n1 
+                        WHERE n1.Kode = SUBSTRING_INDEX(p.urusan_id, '.', 1)
+                        AND n1.Kode NOT LIKE '%.%'
+                        AND LENGTH(n1.Kode) = 1
+                        LIMIT 1
+                    ) AS nama_urusan,
+                    -- Ambil Bidang Urusan dari kolom bidang_urusan_id
+                    (
+                        SELECT n2.Nomenklatur 
+                        FROM nomenklaturprovinsi n2 
+                        WHERE n2.Kode = p.bidang_urusan_id
+                        AND (LENGTH(n2.Kode) - LENGTH(REPLACE(n2.Kode, '.', ''))) = 1
+                        LIMIT 1
+                    ) AS nama_bidang_urusan,
+                    -- Kode Urusan (Level 1)
+                    SUBSTRING_INDEX(p.urusan_id, '.', 1) AS kode_urusan,
+                    -- Kode Bidang Urusan (dari kolom bidang_urusan_id)
+                    p.bidang_urusan_id AS kode_bidang_urusan,
+                    -- Kode Program (Level 3) jika ada
+                    CASE 
+                        WHEN (LENGTH(p.urusan_id) - LENGTH(REPLACE(p.urusan_id, '.', ''))) >= 2 
+                        THEN p.urusan_id
+                        ELSE NULL
+                    END AS kode_program,
+                    -- Nama Program dari nomenklatur jika kode program ada
+                    (
+                        SELECT n3.Nomenklatur 
+                        FROM nomenklaturprovinsi n3 
+                        WHERE n3.Kode = p.urusan_id
+                        AND (LENGTH(n3.Kode) - LENGTH(REPLACE(n3.Kode, '.', ''))) = 2
+                        LIMIT 1
+                    ) AS nama_program
+                FROM program_pd p
+                LEFT JOIN sasaranrpjmd s ON s.Id = p.sasaran_id
+                WHERE p.deleted_at IS NULL
+                AND p.kodewilayah = ?
+                ORDER BY p.id ASC
+            ", [$KodeWilayah])->result_array();
 
-            }
         }
-
-        $this->load->view('Daerah/header', $Header);
-        $this->load->view('Daerah/program_pd', $Data);
     }
 
- public function InputProgramPD()
-{
+    $this->load->view('Daerah/header', $Header);
+    $this->load->view('Daerah/program_pd', $Data);
+}
+
+ public function InputProgramPD() {
     if (!$this->input->is_ajax_request()) show_404();
 
     try {
-
         $kodeWilayah = $_SESSION['KodeWilayah'] ?? '';
         if (!$kodeWilayah) throw new Exception("Kode wilayah tidak ditemukan!");
 
@@ -7798,7 +7826,32 @@ public function HapusUrusanPD() {
         if (!is_array($programArr) || count($programArr) < 1)
             throw new Exception("Minimal isi 1 program!");
 
-        $urusanCSV = implode(",", array_unique(array_map("intval", $urusanArr)));
+        // Ambil kode urusan (level 1)
+        $urusanCSV = implode(",", array_unique(array_map("trim", $urusanArr)));
+        
+        // ============================================================
+        // PERBAIKAN: Ambil bidang urusan dari POST
+        // ============================================================
+        $bidangArr = $this->input->post("bidang_urusan_id");
+        $bidangUrusanCSV = null;
+        
+        if (!empty($bidangArr) && is_array($bidangArr)) {
+            $bidangArr = array_filter(array_map("trim", $bidangArr), function($val) {
+                return !empty($val);
+            });
+            if (!empty($bidangArr)) {
+                $bidangUrusanCSV = implode(",", array_unique($bidangArr));
+            }
+        }
+
+        // Jika tidak ada bidang urusan dari POST, coba ambil dari urusanArr
+        if (empty($bidangUrusanCSV)) {
+            $bidangUrusanArr = array_filter($urusanArr, function($kode) {
+                $dotCount = substr_count($kode, '.');
+                return $dotCount === 1; // Hanya yang memiliki 1 titik (bidang urusan)
+            });
+            $bidangUrusanCSV = !empty($bidangUrusanArr) ? implode(",", array_unique(array_map("trim", $bidangUrusanArr))) : null;
+        }
 
         foreach ($programArr as $p) {
             $p = trim($p);
@@ -7808,6 +7861,7 @@ public function HapusUrusanPD() {
                 "kodewilayah" => $kodeWilayah,
                 "sasaran_id"  => $sasaran_id,
                 "urusan_id"   => $urusanCSV,
+                "bidang_urusan_id" => $bidangUrusanCSV,
                 "program_pd"  => $p,
                 "created_at"  => date("Y-m-d H:i:s"),
                 "updated_at"  => date("Y-m-d H:i:s"),
@@ -7821,36 +7875,134 @@ public function HapusUrusanPD() {
     }
 }
 
-
-
-public function EditProgramPD()
-{
+public function EditProgramPD() {
     if (!$this->input->is_ajax_request()) show_404();
 
-    $id = (int)$this->input->post("id");
-    $sasaran_id = (int)$this->input->post("sasaran_id");
+    $id = (int)$this->input->post("id", TRUE);
+    $sasaran_id = (int)$this->input->post("sasaran_id", TRUE);
+    $urusanArr = $this->input->post("urusan_id", TRUE);
+    $programArr = $this->input->post("program_pd", TRUE);
+    $bidangArr = $this->input->post("bidang_urusan_id", TRUE);
 
-    $urusanArr = $this->input->post("urusan_id");
-    $programArr = $this->input->post("program_pd");
+    // ============================================================
+    // VALIDASI
+    // ============================================================
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    
+    if (!$sasaran_id) {
+        echo json_encode(['status' => 'error', 'message' => 'Sasaran wajib dipilih!']);
+        return;
+    }
 
-    if (!$id) exit("ID tidak valid!");
-    if (!$sasaran_id) exit("Sasaran wajib!");
+    if (empty($urusanArr) || !is_array($urusanArr) || count($urusanArr) < 1) {
+        echo json_encode(['status' => 'error', 'message' => 'Minimal pilih 1 urusan!']);
+        return;
+    }
 
-    $urusanCSV = implode(",", $urusanArr);
+    if (empty($programArr) || !is_array($programArr) || count($programArr) < 1) {
+        echo json_encode(['status' => 'error', 'message' => 'Minimal isi 1 program!']);
+        return;
+    }
 
-    // karena edit hanya 1 program
+    // ============================================================
+    // PROSES URUSAN
+    // ============================================================
+    $urusanArr = array_filter(array_map("trim", $urusanArr), function($val) {
+        return !empty($val);
+    });
+    
+    if (empty($urusanArr)) {
+        echo json_encode(['status' => 'error', 'message' => 'Urusan tidak valid!']);
+        return;
+    }
+
+    $urusanCSV = implode(",", array_unique($urusanArr));
+
+    // ============================================================
+    // PROSES BIDANG URUSAN
+    // ============================================================
+    $bidangUrusanCSV = null;
+    
+    if (!empty($bidangArr) && is_array($bidangArr)) {
+        $bidangArr = array_filter(array_map("trim", $bidangArr), function($val) {
+            return !empty($val);
+        });
+        if (!empty($bidangArr)) {
+            $bidangUrusanCSV = implode(",", array_unique($bidangArr));
+        }
+    }
+
+    if (empty($bidangUrusanCSV)) {
+        $bidangUrusanArr = array_filter($urusanArr, function($kode) {
+            $dotCount = substr_count($kode, '.');
+            return $dotCount === 1;
+        });
+        if (!empty($bidangUrusanArr)) {
+            $bidangUrusanCSV = implode(",", array_unique($bidangUrusanArr));
+        }
+    }
+
+    // ============================================================
+    // PROSES PROGRAM - PERBAIKAN: Simpan teks program
+    // ============================================================
     $programText = trim($programArr[0]);
+    
+    if (empty($programText)) {
+        echo json_encode(['status' => 'error', 'message' => 'Program PD wajib diisi!']);
+        return;
+    }
 
-    $this->db->where("id", $id)->update("program_pd", [
+    // ============================================================
+    // PREPARE DATA UPDATE
+    // ============================================================
+    $data = [
         "sasaran_id" => $sasaran_id,
         "urusan_id"  => $urusanCSV,
-        "program_pd" => $programText,
+        "program_pd" => $programText, // SIMPAN TEKS PROGRAM
         "updated_at" => date("Y-m-d H:i:s")
-    ]);
+    ];
 
-    echo "1";
+    if (!empty($bidangUrusanCSV)) {
+        $data["bidang_urusan_id"] = $bidangUrusanCSV;
+    } else {
+        $data["bidang_urusan_id"] = null;
+    }
+
+    log_message('debug', 'EditProgramPD - Data update: ' . print_r($data, true));
+
+    // ============================================================
+    // EKSEKUSI UPDATE
+    // ============================================================
+    $this->db->where("id", $id);
+    $result = $this->db->update("program_pd", $data);
+
+    if ($result) {
+        $affected = $this->db->affected_rows();
+        
+        // Ambil data terbaru untuk dikirim ke view
+        $updatedData = $this->db
+            ->where("id", $id)
+            ->get("program_pd")
+            ->row_array();
+        
+        echo json_encode([
+            'status' => 'success',
+            'message' => $affected > 0 ? 'Data berhasil diupdate!' : 'Tidak ada perubahan data!',
+            'affected' => $affected,
+            'data' => $updatedData
+        ]);
+    } else {
+        $error = $this->db->error();
+        log_message('error', 'EditProgramPD - DB Error: ' . $error['message']);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Gagal update data: ' . $error['message']
+        ]);
+    }
 }
-
 
 
     public function HapusProgramPD()
@@ -7878,6 +8030,133 @@ public function EditProgramPD()
             echo $e->getMessage();
         }
     }
+
+    /**
+ * Helper function untuk mendapatkan nama dari kode nomenklatur
+ */
+private function getNomenklaturName($kode) {
+    if (empty($kode)) return '';
+    $data = $this->db->select('Nomenklatur')
+        ->where('Kode', $kode)
+        ->get('nomenklaturprovinsi')
+        ->row_array();
+    return $data ? $data['Nomenklatur'] : $kode;
+}
+
+
+/**
+ * Helper function untuk mendapatkan semua urusan dari CSV
+ */
+private function getUrusanNames($urusanCsv) {
+    if (empty($urusanCsv)) return [];
+    $ids = array_filter(array_map('trim', explode(',', $urusanCsv)));
+    $names = [];
+    foreach ($ids as $kode) {
+        $dotCount = substr_count($kode, '.');
+        if ($dotCount === 0) { // Level 1 - Urusan
+            $name = $this->getNomenklaturName($kode);
+            if ($name) $names[] = $name;
+        }
+    }
+    return $names;
+}
+
+/**
+ * Helper function untuk mendapatkan semua bidang urusan dari CSV
+ */
+private function getBidangUrusanNames($urusanCsv) {
+    if (empty($urusanCsv)) return [];
+    $ids = array_filter(array_map('trim', explode(',', $urusanCsv)));
+    $names = [];
+    foreach ($ids as $kode) {
+        $dotCount = substr_count($kode, '.');
+        if ($dotCount === 1) { // Level 2 - Bidang Urusan
+            $name = $this->getNomenklaturName($kode);
+            if ($name) $names[] = $name;
+        }
+    }
+    return $names;
+}
+
+    
+
+   // ============================================================
+// NOMENKLATUR UNTUK PROGRAM PD - PERBAIKAN TOTAL
+// ============================================================
+
+public function getNomenklaturProgramPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $level = (int)$this->input->post('level');
+    $parent_kode = $this->input->post('parent_kode');
+    
+    if ($level < 1 || $level > 3) {
+        echo json_encode([]);
+        return;
+    }
+    
+    $this->db->select('Kode, Nomenklatur');
+    $this->db->from('nomenklaturprovinsi');
+    
+    if ($level == 1) {
+        // Urusan: 0 titik (contoh: 1, 2, 3, ...)
+        $this->db->where('Kode NOT LIKE', '%.%');
+        $this->db->where('LENGTH(Kode) = 1');
+        $this->db->order_by('Kode', 'ASC');
+    } elseif ($level == 2) {
+        // Bidang Urusan: 1 titik (contoh: 1.01, 1.02, 1.03, ...)
+        $this->db->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 1);
+        if ($parent_kode) {
+            $this->db->where('Kode LIKE', $parent_kode . '.%');
+        }
+        $this->db->order_by('Kode', 'ASC');
+    } elseif ($level == 3) {
+        // Program: 2 titik (contoh: 1.01.02, 1.01.03, ...)
+        $this->db->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 2);
+        if ($parent_kode) {
+            $this->db->where('Kode LIKE', $parent_kode . '.%');
+        }
+        $this->db->order_by('Kode', 'ASC');
+    }
+    
+    $data = $this->db->get()->result_array();
+    
+    echo json_encode($data);
+}
+
+/**
+ * Get Nomenklatur Detail by Kode (AJAX)
+ * Untuk mendapatkan detail saat edit
+ */
+public function getNomenklaturDetailProgramPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $kode = $this->input->post('kode', TRUE);
+    
+    if (empty($kode)) {
+        echo json_encode(['status' => 'error', 'message' => 'Kode tidak ditemukan']);
+        return;
+    }
+    
+    $data = $this->db
+        ->select('Kode, Nomenklatur')
+        ->from('nomenklaturprovinsi')
+        ->where('Kode', $kode)
+        ->get()
+        ->row_array();
+    
+    if ($data) {
+        echo json_encode(['status' => 'success', 'data' => $data]);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+    }
+}
 
 
         // =====================================================================
@@ -13705,6 +13984,1600 @@ public function GetListInstansiLevel4() {
     echo json_encode($instansi);
     exit;
 }
+
+    // ============================================================
+    // HALAMAN UTAMA KONSISTENSI PROGRAM
+    // ============================================================
+    
+    public function KonsistensiProgram() {
+    $Header['Halaman'] = 'Konsistensi Program RPJMD dan RKPD';
+    
+    $KodeWilayah = $this->_getKodeWilayah();
+    
+    $Data['Provinsi'] = $this->db
+        ->where("Kode LIKE '__'")
+        ->order_by('Nama')
+        ->get('kodewilayah')
+        ->result_array();
+    
+    $Data['KodeWilayah'] = $KodeWilayah;
+    $Data['NamaWilayah'] = '';
+    $Data['TahunAktif'] = date('Y');
+    
+    $Data['ListInstansi'] = [];
+    if (!empty($KodeWilayah)) {
+        $Data['ListInstansi'] = $this->db->select('id, nama')
+            ->from('akun_instansi')
+            ->where('kodewilayah', $KodeWilayah)
+            ->where('Level', 4)
+            ->where('deleted_at IS NULL')
+            ->order_by('nama', 'ASC')
+            ->get()
+            ->result_array();
+    }
+    
+    $Data['KonsistensiData'] = [];
+    $filter_instansi = $this->input->get('instansi_id', TRUE);
+    $tahun = $this->input->get('tahun', TRUE) ?: date('Y');
+    $Data['TahunAktif'] = $tahun;
+    
+    if (!empty($KodeWilayah)) {
+        $this->db->select('h.*, a.nama as instansi_nama')
+            ->from('konsistensi_program_header h')
+            ->join('akun_instansi a', 'a.id = h.id_instansi', 'left')
+            ->where('h.kode_wilayah', $KodeWilayah)
+            ->where('h.tahun', $tahun)
+            ->where('h.deleted_at IS NULL');
+        
+        if (!empty($filter_instansi)) {
+            $this->db->where('h.id_instansi', (int)$filter_instansi);
+        }
+        
+        $headers = $this->db->order_by('h.id', 'ASC')->get()->result_array();
+        
+        // Kelompokkan data berdasarkan Urusan untuk mendapatkan urutan yang benar
+        $groupedData = [];
+        $urusanCounter = 0;
+        
+        foreach ($headers as &$header) {
+            // Ambil nama dari nomenklatur
+            $header['urusan_rpjmd_nama'] = $this->getNomenklaturName($header['urusan_rpjmd_kode'] ?? '');
+            $header['bidang_rpjmd_nama'] = $this->getNomenklaturName($header['bidang_urusan_rpjmd_kode'] ?? '');
+            $header['program_rpjmd_nama'] = $header['program_rpjmd_text'] ?? $this->getNomenklaturName($header['program_rpjmd_kode'] ?? '');
+            
+            $header['urusan_rkpd_nama'] = $this->getNomenklaturName($header['urusan_rkpd_kode'] ?? '');
+            $header['bidang_rkpd_nama'] = $this->getNomenklaturName($header['bidang_urusan_rkpd_kode'] ?? '');
+            $header['program_rkpd_nama'] = $header['program_rkpd_text'] ?? $this->getNomenklaturName($header['program_rkpd_kode'] ?? '');
+            
+            // Tentukan level
+            $hasProgram = !empty($header['program_rpjmd_kode']) || !empty($header['program_rpjmd_text']);
+            $hasBidang = !empty($header['bidang_urusan_rpjmd_kode']);
+            $hasUrusan = !empty($header['urusan_rpjmd_kode']);
+            
+            $level = 1;
+            if ($hasProgram) $level = 3;
+            elseif ($hasBidang) $level = 2;
+            
+            $header['level'] = $level;
+            
+            // Tentukan kode yang akan ditampilkan sebagai No
+            if ($level == 1) {
+                $header['no_display'] = $header['urusan_rpjmd_kode'] ?? '';
+            } elseif ($level == 2) {
+                $header['no_display'] = $header['bidang_urusan_rpjmd_kode'] ?? '';
+            } else {
+                $header['no_display'] = $header['program_rpjmd_kode'] ?? '';
+            }
+            
+            // Detail RPJMD
+            $header['rpjmd_details'] = $this->db
+                ->select('*')
+                ->from('konsistensi_program_detail')
+                ->where('header_id', $header['id'])
+                ->where('jenis', 'rpjmd')
+                ->where('deleted_at IS NULL')
+                ->order_by('urutan', 'ASC')
+                ->get()
+                ->result_array();
+            
+            // Detail RKPD
+            $header['rkpd_details'] = $this->db
+                ->select('*')
+                ->from('konsistensi_program_detail')
+                ->where('header_id', $header['id'])
+                ->where('jenis', 'rkpd')
+                ->where('deleted_at IS NULL')
+                ->order_by('urutan', 'ASC')
+                ->get()
+                ->result_array();
+        }
+        
+        $Data['KonsistensiData'] = $headers;
+    }
+    
+    if (!empty($KodeWilayah)) {
+        $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+        $Data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
+    }
+    
+    $this->load->view('Daerah/header', $Header);
+    $this->load->view('Daerah/KonsistensiProgram', $Data);
+}
+
+        // ============================================================
+    // INPUT KONSISTENSI PROGRAM - DENGAN DEBUG LENGKAP
+    // ============================================================
+    
+    public function InputKonsistensiProgram() {
+        // Aktifkan error reporting
+        error_reporting(E_ALL);
+        ini_set('display_errors', 1);
+        ini_set('log_errors', 1);
+        ini_set('error_log', 'application/logs/php_errors.log');
+        
+        // Log untuk debugging
+        log_message('debug', '=== InputKonsistensiProgram dipanggil ===');
+        log_message('debug', 'POST data: ' . print_r($_POST, true));
+        
+        // Cek AJAX
+        if (!$this->input->is_ajax_request()) {
+            log_message('error', 'Bukan AJAX request');
+            show_404();
+            return;
+        }
+        
+        // Set header JSON
+        header('Content-Type: application/json');
+        
+        try {
+            $KodeWilayah = $this->_checkSessionWilayah();
+            if (!$KodeWilayah) {
+                log_message('error', 'Wilayah belum dipilih');
+                return;
+            }
+            
+            log_message('debug', 'KodeWilayah: ' . $KodeWilayah);
+            
+            // ============================================================
+            // AMBIL DATA DARI POST
+            // ============================================================
+            $urusan_rpjmd_kode = trim($this->input->post('urusan_rpjmd_kode', TRUE) ?: '');
+            $bidang_rpjmd_kode = trim($this->input->post('bidang_rpjmd_kode', TRUE) ?: '');
+            $program_rpjmd_kode = trim($this->input->post('program_rpjmd_kode', TRUE) ?: '');
+            $program_rpjmd_text = trim($this->input->post('program_rpjmd_text', TRUE) ?: '');
+            
+            $pagu_program_rpjmd = $this->formatRupiahToNumber($this->input->post('pagu_program_rpjmd', TRUE));
+            
+            $urusan_rkpd_kode = trim($this->input->post('urusan_rkpd_kode', TRUE) ?: '');
+            $bidang_rkpd_kode = trim($this->input->post('bidang_rkpd_kode', TRUE) ?: '');
+            $program_rkpd_kode = trim($this->input->post('program_rkpd_kode', TRUE) ?: '');
+            $program_rkpd_text = trim($this->input->post('program_rkpd_text', TRUE) ?: '');
+            
+            $pagu_program_rkpd = $this->formatRupiahToNumber($this->input->post('pagu_program_rkpd', TRUE));
+            
+            $keterangan = trim($this->input->post('keterangan', TRUE) ?: '');
+            $id_instansi = $this->input->post('id_instansi', TRUE) ?: null;
+            $tahun = $this->input->post('tahun', TRUE) ?: date('Y');
+            
+            log_message('debug', 'urusan_rpjmd_kode: ' . $urusan_rpjmd_kode);
+            log_message('debug', 'bidang_rpjmd_kode: ' . $bidang_rpjmd_kode);
+            log_message('debug', 'program_rpjmd_text: ' . $program_rpjmd_text);
+            log_message('debug', 'pagu_program_rpjmd: ' . $pagu_program_rpjmd);
+            log_message('debug', 'pagu_program_rkpd: ' . $pagu_program_rkpd);
+            
+            // Validasi: minimal salah satu diisi
+            $hasRpjmd = !empty($urusan_rpjmd_kode) || !empty($bidang_rpjmd_kode) || !empty($program_rpjmd_text);
+            $hasRkpd = !empty($urusan_rkpd_kode) || !empty($bidang_rkpd_kode) || !empty($program_rkpd_text);
+            
+            if (!$hasRpjmd && !$hasRkpd) {
+                echo json_encode(['status' => 'error', 'message' => 'Urusan/Program RPJMD atau RKPD harus diisi!']);
+                return;
+            }
+            
+            // Hitung selisih
+            $totalPaguRpjmd = $pagu_program_rpjmd ?? 0;
+            $totalPaguRkpd = $pagu_program_rkpd ?? 0;
+            $selisih = $totalPaguRkpd - $totalPaguRpjmd;
+            
+            // ============================================================
+            // DATA INDIKATOR
+            // ============================================================
+            $indikator_rpjmd = $this->input->post('indikator_rpjmd', TRUE);
+            $target_rpjmd = $this->input->post('target_rpjmd', TRUE);
+            $satuan_rpjmd = $this->input->post('satuan_rpjmd', TRUE);
+            
+            $indikator_rkpd = $this->input->post('indikator_rkpd', TRUE);
+            $target_rkpd = $this->input->post('target_rkpd', TRUE);
+            $satuan_rkpd = $this->input->post('satuan_rkpd', TRUE);
+            
+            log_message('debug', 'indikator_rpjmd: ' . print_r($indikator_rpjmd, true));
+            log_message('debug', 'indikator_rkpd: ' . print_r($indikator_rkpd, true));
+            
+            // ============================================================
+            // CEK STRUKTUR TABEL
+            // ============================================================
+            // Cek apakah tabel konsistensi_program_header ada
+            $tableExists = $this->db->query("SHOW TABLES LIKE 'konsistensi_program_header'")->num_rows();
+            if ($tableExists == 0) {
+                throw new Exception('Tabel konsistensi_program_header tidak ditemukan! Silahkan buat tabel terlebih dahulu.');
+            }
+            
+            // Cek kolom yang ada di tabel
+            $columns = $this->db->query("SHOW COLUMNS FROM konsistensi_program_header")->result_array();
+            $columnNames = array_column($columns, 'Field');
+            log_message('debug', 'Kolom yang ada: ' . print_r($columnNames, true));
+            
+            // ============================================================
+            // MULAI TRANSAKSI
+            // ============================================================
+            $this->db->trans_start();
+            
+            // Insert Header
+            $header_data = [
+                'kode_wilayah' => $KodeWilayah,
+                'id_instansi' => $id_instansi,
+                'urusan_rpjmd_kode' => $urusan_rpjmd_kode ?: null,
+                'bidang_urusan_rpjmd_kode' => $bidang_rpjmd_kode ?: null,
+                'program_rpjmd_kode' => $program_rpjmd_kode ?: null,
+                'program_rpjmd_text' => $program_rpjmd_text ?: null,
+                'pagu_program_rpjmd' => $pagu_program_rpjmd,
+                'urusan_rkpd_kode' => $urusan_rkpd_kode ?: null,
+                'bidang_urusan_rkpd_kode' => $bidang_rkpd_kode ?: null,
+                'program_rkpd_kode' => $program_rkpd_kode ?: null,
+                'program_rkpd_text' => $program_rkpd_text ?: null,
+                'pagu_program_rkpd' => $pagu_program_rkpd,
+                'selisih' => $selisih,
+                'keterangan' => $keterangan,
+                'tahun' => $tahun,
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+            
+            // Hanya kirim kolom yang ada di tabel
+            $filtered_data = array_intersect_key($header_data, array_flip($columnNames));
+            
+            log_message('debug', 'Data yang akan diinsert: ' . print_r($filtered_data, true));
+            
+            $insert = $this->db->insert('konsistensi_program_header', $filtered_data);
+            
+            if (!$insert) {
+                $error = $this->db->error();
+                log_message('error', 'DB Insert Error: ' . $error['message']);
+                throw new Exception('Gagal menyimpan header: ' . $error['message']);
+            }
+            
+            $header_id = $this->db->insert_id();
+            
+            log_message('debug', 'Header ID: ' . $header_id);
+            
+            if (!$header_id) {
+                throw new Exception('Gagal mendapatkan ID header!');
+            }
+            
+            // ============================================================
+            // CEK TABEL DETAIL
+            // ============================================================
+            $detailTableExists = $this->db->query("SHOW TABLES LIKE 'konsistensi_program_detail'")->num_rows();
+            if ($detailTableExists == 0) {
+                throw new Exception('Tabel konsistensi_program_detail tidak ditemukan!');
+            }
+            
+            // Cek kolom detail
+            $detailColumns = $this->db->query("SHOW COLUMNS FROM konsistensi_program_detail")->result_array();
+            $detailColumnNames = array_column($detailColumns, 'Field');
+            log_message('debug', 'Kolom detail yang ada: ' . print_r($detailColumnNames, true));
+            
+            // ============================================================
+            // INSERT DETAIL RPJMD
+            // ============================================================
+            if (!empty($indikator_rpjmd) && is_array($indikator_rpjmd)) {
+                $urutan = 0;
+                foreach ($indikator_rpjmd as $key => $indikator) {
+                    if (empty(trim($indikator))) continue;
+                    
+                    $detail_data = [
+                        'header_id' => $header_id,
+                        'jenis' => 'rpjmd',
+                        'indikator' => trim($indikator),
+                        'target' => isset($target_rpjmd[$key]) ? trim($target_rpjmd[$key]) : null,
+                        'satuan' => isset($satuan_rpjmd[$key]) ? trim($satuan_rpjmd[$key]) : null,
+                        'urutan' => $urutan++,
+                        'created_at' => date('Y-m-d H:i:s')
+                    ];
+                    
+                    $filtered_detail = array_intersect_key($detail_data, array_flip($detailColumnNames));
+                    $this->db->insert('konsistensi_program_detail', $filtered_detail);
+                    log_message('debug', 'Insert detail RPJMD - affected: ' . $this->db->affected_rows());
+                }
+            }
+            
+            // ============================================================
+            // INSERT DETAIL RKPD
+            // ============================================================
+            if (!empty($indikator_rkpd) && is_array($indikator_rkpd)) {
+                $urutan = 0;
+                foreach ($indikator_rkpd as $key => $indikator) {
+                    if (empty(trim($indikator))) continue;
+                    
+                    $detail_data = [
+                        'header_id' => $header_id,
+                        'jenis' => 'rkpd',
+                        'indikator' => trim($indikator),
+                        'target' => isset($target_rkpd[$key]) ? trim($target_rkpd[$key]) : null,
+                        'satuan' => isset($satuan_rkpd[$key]) ? trim($satuan_rkpd[$key]) : null,
+                        'urutan' => $urutan++,
+                        'created_at' => date('Y-m-d H:i:s')
+                    ];
+                    
+                    $filtered_detail = array_intersect_key($detail_data, array_flip($detailColumnNames));
+                    $this->db->insert('konsistensi_program_detail', $filtered_detail);
+                    log_message('debug', 'Insert detail RKPD - affected: ' . $this->db->affected_rows());
+                }
+            }
+            
+            $this->db->trans_complete();
+            
+            if ($this->db->trans_status() === FALSE) {
+                $error = $this->db->error();
+                log_message('error', 'Transaksi gagal: ' . $error['message']);
+                throw new Exception('Gagal menyimpan data! Error: ' . $error['message']);
+            }
+            
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Data berhasil disimpan!',
+                'id' => $header_id
+            ]);
+            
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            log_message('error', 'InputKonsistensiProgram Exception: ' . $e->getMessage());
+            log_message('error', 'Trace: ' . $e->getTraceAsString());
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    // ============================================================
+    // EDIT KONSISTENSI PROGRAM
+    // ============================================================
+    public function EditKonsistensiProgram() {
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+    
+    log_message('debug', '=== EditKonsistensiProgram dipanggil ===');
+    log_message('debug', 'POST data: ' . print_r($_POST, true));
+    
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    header('Content-Type: application/json');
+    
+    try {
+        $KodeWilayah = $this->_checkSessionWilayah();
+        if (!$KodeWilayah) {
+            return;
+        }
+        
+        $id = (int)$this->input->post('id', TRUE);
+        
+        if ($id <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+            return;
+        }
+        
+        // Cek data ada
+        $existing = $this->db
+            ->where('id', $id)
+            ->where('kode_wilayah', $KodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->get('konsistensi_program_header')
+            ->row_array();
+        
+        if (!$existing) {
+            throw new Exception('Data tidak ditemukan!');
+        }
+        
+        // ============================================================
+        // AMBIL DATA DARI POST
+        // ============================================================
+        $urusan_rpjmd_kode = trim($this->input->post('urusan_rpjmd_kode', TRUE) ?: '');
+        $bidang_rpjmd_kode = trim($this->input->post('bidang_rpjmd_kode', TRUE) ?: '');
+        $program_rpjmd_kode = trim($this->input->post('program_rpjmd_kode', TRUE) ?: '');
+        $program_rpjmd_text = trim($this->input->post('program_rpjmd_text', TRUE) ?: '');
+        
+        $urusan_rkpd_kode = trim($this->input->post('urusan_rkpd_kode', TRUE) ?: '');
+        $bidang_rkpd_kode = trim($this->input->post('bidang_rkpd_kode', TRUE) ?: '');
+        $program_rkpd_kode = trim($this->input->post('program_rkpd_kode', TRUE) ?: '');
+        $program_rkpd_text = trim($this->input->post('program_rkpd_text', TRUE) ?: '');
+        
+        $pagu_program_rpjmd = $this->formatRupiahToNumber($this->input->post('pagu_program_rpjmd', TRUE));
+        $pagu_program_rkpd = $this->formatRupiahToNumber($this->input->post('pagu_program_rkpd', TRUE));
+        $selisih = ($pagu_program_rkpd ?? 0) - ($pagu_program_rpjmd ?? 0);
+        
+        $id_instansi = $this->input->post('id_instansi', TRUE) ?: null;
+        $tahun = $this->input->post('tahun', TRUE) ?: date('Y');
+        $keterangan = trim($this->input->post('keterangan', TRUE) ?: '');
+        
+        // ============================================================
+        // UPDATE HEADER - FLEKSIBEL
+        // ============================================================
+        $header_data = [
+            'id_instansi' => $id_instansi,
+            'tahun' => $tahun,
+            'keterangan' => $keterangan,
+            'pagu_program_rpjmd' => $pagu_program_rpjmd,
+            'pagu_program_rkpd' => $pagu_program_rkpd,
+            'selisih' => $selisih,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        // RPJMD - FLEKSIBEL
+        if (!empty($program_rpjmd_kode)) {
+            $header_data['program_rpjmd_kode'] = $program_rpjmd_kode;
+            $header_data['program_rpjmd_text'] = null;
+            $header_data['bidang_urusan_rpjmd_kode'] = $bidang_rpjmd_kode ?: null;
+            $header_data['urusan_rpjmd_kode'] = $urusan_rpjmd_kode ?: null;
+        } 
+        else if (!empty($program_rpjmd_text)) {
+            $header_data['program_rpjmd_text'] = $program_rpjmd_text;
+            $header_data['program_rpjmd_kode'] = null;
+            $header_data['bidang_urusan_rpjmd_kode'] = null;
+            $header_data['urusan_rpjmd_kode'] = null;
+        }
+        else if (!empty($bidang_rpjmd_kode)) {
+            $header_data['bidang_urusan_rpjmd_kode'] = $bidang_rpjmd_kode;
+            $header_data['program_rpjmd_kode'] = null;
+            $header_data['program_rpjmd_text'] = null;
+            $header_data['urusan_rpjmd_kode'] = $urusan_rpjmd_kode ?: null;
+        }
+        else if (!empty($urusan_rpjmd_kode)) {
+            $header_data['urusan_rpjmd_kode'] = $urusan_rpjmd_kode;
+            $header_data['bidang_urusan_rpjmd_kode'] = null;
+            $header_data['program_rpjmd_kode'] = null;
+            $header_data['program_rpjmd_text'] = null;
+        }
+        else {
+            $header_data['urusan_rpjmd_kode'] = null;
+            $header_data['bidang_urusan_rpjmd_kode'] = null;
+            $header_data['program_rpjmd_kode'] = null;
+            $header_data['program_rpjmd_text'] = null;
+        }
+        
+        // RKPD - SAMA
+        if (!empty($program_rkpd_kode)) {
+            $header_data['program_rkpd_kode'] = $program_rkpd_kode;
+            $header_data['program_rkpd_text'] = null;
+            $header_data['bidang_urusan_rkpd_kode'] = $bidang_rkpd_kode ?: null;
+            $header_data['urusan_rkpd_kode'] = $urusan_rkpd_kode ?: null;
+        } 
+        else if (!empty($program_rkpd_text)) {
+            $header_data['program_rkpd_text'] = $program_rkpd_text;
+            $header_data['program_rkpd_kode'] = null;
+            $header_data['bidang_urusan_rkpd_kode'] = null;
+            $header_data['urusan_rkpd_kode'] = null;
+        }
+        else if (!empty($bidang_rkpd_kode)) {
+            $header_data['bidang_urusan_rkpd_kode'] = $bidang_rkpd_kode;
+            $header_data['program_rkpd_kode'] = null;
+            $header_data['program_rkpd_text'] = null;
+            $header_data['urusan_rkpd_kode'] = $urusan_rkpd_kode ?: null;
+        }
+        else if (!empty($urusan_rkpd_kode)) {
+            $header_data['urusan_rkpd_kode'] = $urusan_rkpd_kode;
+            $header_data['bidang_urusan_rkpd_kode'] = null;
+            $header_data['program_rkpd_kode'] = null;
+            $header_data['program_rkpd_text'] = null;
+        }
+        else {
+            $header_data['urusan_rkpd_kode'] = null;
+            $header_data['bidang_urusan_rkpd_kode'] = null;
+            $header_data['program_rkpd_kode'] = null;
+            $header_data['program_rkpd_text'] = null;
+        }
+        
+        // ============================================================
+        // UPDATE HEADER
+        // ============================================================
+        $this->db->where('id', $id);
+        $this->db->where('kode_wilayah', $KodeWilayah);
+        $this->db->update('konsistensi_program_header', $header_data);
+        
+        // ============================================================
+        // UPDATE DETAIL
+        // ============================================================
+        $this->db->where('header_id', $id)->update('konsistensi_program_detail', [
+            'deleted_at' => date('Y-m-d H:i:s')
+        ]);
+        
+        // Insert detail RPJMD
+        $indikator_rpjmd = $this->input->post('indikator_rpjmd', TRUE);
+        $target_rpjmd = $this->input->post('target_rpjmd', TRUE);
+        $satuan_rpjmd = $this->input->post('satuan_rpjmd', TRUE);
+        
+        if (!empty($indikator_rpjmd) && is_array($indikator_rpjmd)) {
+            $urutan = 0;
+            foreach ($indikator_rpjmd as $key => $indikator) {
+                if (empty(trim($indikator))) continue;
+                
+                $this->db->insert('konsistensi_program_detail', [
+                    'header_id' => $id,
+                    'jenis' => 'rpjmd',
+                    'indikator' => trim($indikator),
+                    'target' => isset($target_rpjmd[$key]) ? trim($target_rpjmd[$key]) : null,
+                    'satuan' => isset($satuan_rpjmd[$key]) ? trim($satuan_rpjmd[$key]) : null,
+                    'urutan' => $urutan++,
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+            }
+        }
+        
+        // Insert detail RKPD
+        $indikator_rkpd = $this->input->post('indikator_rkpd', TRUE);
+        $target_rkpd = $this->input->post('target_rkpd', TRUE);
+        $satuan_rkpd = $this->input->post('satuan_rkpd', TRUE);
+        
+        if (!empty($indikator_rkpd) && is_array($indikator_rkpd)) {
+            $urutan = 0;
+            foreach ($indikator_rkpd as $key => $indikator) {
+                if (empty(trim($indikator))) continue;
+                
+                $this->db->insert('konsistensi_program_detail', [
+                    'header_id' => $id,
+                    'jenis' => 'rkpd',
+                    'indikator' => trim($indikator),
+                    'target' => isset($target_rkpd[$key]) ? trim($target_rkpd[$key]) : null,
+                    'satuan' => isset($satuan_rkpd[$key]) ? trim($satuan_rkpd[$key]) : null,
+                    'urutan' => $urutan++,
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+            }
+        }
+        
+        // ============================================================
+        // ✅ AMBIL DATA TERBARU LENGKAP DENGAN DETAIL
+        // ============================================================
+        $updatedData = $this->db
+            ->where('id', $id)
+            ->where('kode_wilayah', $KodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->get('konsistensi_program_header')
+            ->row_array();
+        
+        // Ambil detail RPJMD
+        $updatedData['rpjmd_details'] = $this->db
+            ->where('header_id', $id)
+            ->where('jenis', 'rpjmd')
+            ->where('deleted_at IS NULL')
+            ->order_by('urutan', 'ASC')
+            ->get('konsistensi_program_detail')
+            ->result_array();
+        
+        // Ambil detail RKPD
+        $updatedData['rkpd_details'] = $this->db
+            ->where('header_id', $id)
+            ->where('jenis', 'rkpd')
+            ->where('deleted_at IS NULL')
+            ->order_by('urutan', 'ASC')
+            ->get('konsistensi_program_detail')
+            ->result_array();
+        
+        // Ambil nama instansi
+        if ($updatedData['id_instansi']) {
+            $instansi = $this->db
+                ->select('nama')
+                ->where('id', $updatedData['id_instansi'])
+                ->get('akun_instansi')
+                ->row_array();
+            $updatedData['instansi_nama'] = $instansi ? $instansi['nama'] : '';
+        } else {
+            $updatedData['instansi_nama'] = '';
+        }
+        
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Data berhasil diupdate!',
+            'data' => $updatedData
+        ]);
+        
+    } catch (Exception $e) {
+        $this->db->trans_rollback();
+        log_message('error', 'EditKonsistensiProgram Exception: ' . $e->getMessage());
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+        ]);
+    }
+}
+
+    // ============================================================
+    // HAPUS KONSISTENSI PROGRAM
+    // ============================================================
+    
+    public function HapusKonsistensiProgram() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        header('Content-Type: application/json');
+        
+        try {
+            $KodeWilayah = $this->_checkSessionWilayah();
+            if (!$KodeWilayah) {
+                return;
+            }
+            
+            $id = (int)$this->input->post('id', TRUE);
+            
+            if ($id <= 0) {
+                echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+                return;
+            }
+            
+            // Cek data ada
+            $existing = $this->db
+                ->where('id', $id)
+                ->where('kode_wilayah', $KodeWilayah)
+                ->where('deleted_at IS NULL')
+                ->get('konsistensi_program_header')
+                ->row_array();
+            
+            if (!$existing) {
+                echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
+                return;
+            }
+            
+            // Soft delete header
+            $this->db->where('id', $id);
+            $this->db->where('kode_wilayah', $KodeWilayah);
+            $this->db->update('konsistensi_program_header', [
+                'deleted_at' => date('Y-m-d H:i:s')
+            ]);
+            
+            // Soft delete detail
+            $this->db->where('header_id', $id);
+            $this->db->update('konsistensi_program_detail', [
+                'deleted_at' => date('Y-m-d H:i:s')
+            ]);
+            
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Data berhasil dihapus!'
+            ]);
+            
+        } catch (Exception $e) {
+            log_message('error', 'HapusKonsistensiProgram Exception: ' . $e->getMessage());
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+public function GetKonsistensiProgramById() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    header('Content-Type: application/json');
+    
+    try {
+        $KodeWilayah = $this->_checkSessionWilayah();
+        if (!$KodeWilayah) {
+            return;
+        }
+        
+        $id = (int)$this->input->post('id', TRUE);
+        
+        if ($id <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+            return;
+        }
+        
+        // ============================================================
+        // AMBIL HEADER
+        // ============================================================
+        $header = $this->db
+            ->where('id', $id)
+            ->where('kode_wilayah', $KodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->get('konsistensi_program_header')
+            ->row_array();
+        
+        if (!$header) {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
+            return;
+        }
+        
+        // ============================================================
+        // AMBIL NAMA DARI NOMENKLATUR
+        // ============================================================
+        $header['urusan_rpjmd_nama'] = $this->getNomenklaturName($header['urusan_rpjmd_kode'] ?? '');
+        $header['bidang_rpjmd_nama'] = $this->getNomenklaturName($header['bidang_urusan_rpjmd_kode'] ?? '');
+        $header['program_rpjmd_nama'] = $header['program_rpjmd_text'] ?? $this->getNomenklaturName($header['program_rpjmd_kode'] ?? '');
+        
+        $header['urusan_rkpd_nama'] = $this->getNomenklaturName($header['urusan_rkpd_kode'] ?? '');
+        $header['bidang_rkpd_nama'] = $this->getNomenklaturName($header['bidang_urusan_rkpd_kode'] ?? '');
+        $header['program_rkpd_nama'] = $header['program_rkpd_text'] ?? $this->getNomenklaturName($header['program_rkpd_kode'] ?? '');
+        
+        // ============================================================
+        // PASTIKAN KODE DAN TEXT TERKIRIM
+        // ============================================================
+        // RPJMD
+        $header['urusan_rpjmd_kode'] = $header['urusan_rpjmd_kode'] ?? '';
+        $header['bidang_urusan_rpjmd_kode'] = $header['bidang_urusan_rpjmd_kode'] ?? '';
+        $header['program_rpjmd_kode'] = $header['program_rpjmd_kode'] ?? '';
+        $header['program_rpjmd_text'] = $header['program_rpjmd_text'] ?? '';
+        
+        // RKPD
+        $header['urusan_rkpd_kode'] = $header['urusan_rkpd_kode'] ?? '';
+        $header['bidang_urusan_rkpd_kode'] = $header['bidang_urusan_rkpd_kode'] ?? '';
+        $header['program_rkpd_kode'] = $header['program_rkpd_kode'] ?? '';
+        $header['program_rkpd_text'] = $header['program_rkpd_text'] ?? '';
+        
+        // ============================================================
+        // AMBIL DETAIL INDIKATOR
+        // ============================================================
+        $header['rpjmd_details'] = $this->db
+            ->where('header_id', $id)
+            ->where('jenis', 'rpjmd')
+            ->where('deleted_at IS NULL')
+            ->order_by('urutan', 'ASC')
+            ->get('konsistensi_program_detail')
+            ->result_array();
+        
+        $header['rkpd_details'] = $this->db
+            ->where('header_id', $id)
+            ->where('jenis', 'rkpd')
+            ->where('deleted_at IS NULL')
+            ->order_by('urutan', 'ASC')
+            ->get('konsistensi_program_detail')
+            ->result_array();
+        
+        // ============================================================
+        // KIRIM RESPONSE
+        // ============================================================
+        echo json_encode([
+            'status' => 'success',
+            'data' => $header
+        ]);
+        
+    } catch (Exception $e) {
+        log_message('error', 'GetKonsistensiProgramById Exception: ' . $e->getMessage());
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+        ]);
+    }
+}
+
+    /**
+     * Format Rupiah ke Number
+     */
+    private function formatRupiahToNumber($value) {
+        if (empty($value)) return null;
+        $clean = str_replace(['Rp', ' ', '.', ','], '', $value);
+        if (!is_numeric($clean)) return null;
+        return (float)$clean;
+    }
+
+
+// ============================================================
+// KONSISTENSI TUJUAN DAN SASARAN
+// ============================================================
+public function KonsistensiTujuan() {
+    $Header['Halaman'] = 'Konsistensi Tujuan dan Sasaran';
+    
+    $KodeWilayah = $this->_getKodeWilayah();
+    $tahun = $this->input->get('tahun', TRUE) ?: date('Y');
+    
+    // Data untuk filter
+    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
+    $Data['KodeWilayah'] = $KodeWilayah;
+    $Data['TahunAktif'] = $tahun;
+    
+    // Ambil Nama Wilayah
+    $Data['NamaWilayah'] = '';
+    if ($KodeWilayah) {
+        $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+        $Data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
+    }
+    
+    // ============================================================
+    // AMBIL DATA TUJUAN RPJMD UNTUK DROPDOWN
+    // ============================================================
+    $Data['ListTujuan'] = [];
+    $Data['ListSasaran'] = [];
+    
+    if ($KodeWilayah) {
+        // Tujuan RPJMD
+        $Data['ListTujuan'] = $this->db
+            ->select('t.Id, t.Tujuan, t.TahunMulai, t.TahunAkhir')
+            ->from('tujuanrpjmd t')
+            ->join('misirpjmd m', 'm.Id = t._Id AND m.KodeWilayah = t.KodeWilayah', 'inner')
+            ->join('visirpjmd v', 'v.Id = m._Id AND v.KodeWilayah = m.KodeWilayah', 'inner')
+            ->where('t.KodeWilayah', $KodeWilayah)
+            ->where('t.deleted_at IS NULL')
+            ->where('m.deleted_at IS NULL')
+            ->where('v.deleted_at IS NULL')
+            ->order_by('t.Id', 'ASC')
+            ->get()
+            ->result_array();
+        
+        // Sasaran RPJMD
+        $Data['ListSasaran'] = $this->db
+            ->select('s.Id, s.Sasaran, s._Id as TujuanId, t.Tujuan as TujuanParent')
+            ->from('sasaranrpjmd s')
+            ->join('tujuanrpjmd t', 't.Id = s._Id AND t.KodeWilayah = s.KodeWilayah', 'inner')
+            ->where('s.KodeWilayah', $KodeWilayah)
+            ->where('s.deleted_at IS NULL')
+            ->where('t.deleted_at IS NULL')
+            ->order_by('t.Id', 'ASC')
+            ->order_by('s.Id', 'ASC')
+            ->get()
+            ->result_array();
+    }
+    
+    // ============================================================
+    // AMBIL DATA KONSISTENSI - DENGAN INFORMASI PARENT
+    // ============================================================
+    $Data['KonsistensiData'] = [];
+    
+    if ($KodeWilayah) {
+        // Ambil SEMUA data header (Tujuan dan Sasaran)
+        $headers = $this->db
+            ->select('h.*, a.nama as instansi_nama')
+            ->from('konsistensi_tujuan_header h')
+            ->join('akun_instansi a', 'a.id = h.id_instansi', 'left')
+            ->where('h.kode_wilayah', $KodeWilayah)
+            ->where('h.tahun', $tahun)
+            ->where('h.deleted_at IS NULL')
+            ->order_by('h.id', 'ASC')
+            ->get()
+            ->result_array();
+        
+        // Ambil detail indikator untuk setiap header
+        foreach ($headers as &$header) {
+            $header['rpjmd_details'] = $this->db
+                ->where('header_id', $header['id'])
+                ->where('jenis', 'rpjmd')
+                ->where('deleted_at IS NULL')
+                ->order_by('urutan', 'ASC')
+                ->get('konsistensi_tujuan_detail')
+                ->result_array();
+            
+            $header['rkpd_details'] = $this->db
+                ->where('header_id', $header['id'])
+                ->where('jenis', 'rkpd')
+                ->where('deleted_at IS NULL')
+                ->order_by('urutan', 'ASC')
+                ->get('konsistensi_tujuan_detail')
+                ->result_array();
+        }
+        
+        $Data['KonsistensiData'] = $headers;
+    }
+    
+    // Instansi untuk dropdown
+    $Data['ListInstansi'] = [];
+    if ($KodeWilayah) {
+        $Data['ListInstansi'] = $this->db
+            ->select('id, nama')
+            ->from('akun_instansi')
+            ->where('kodewilayah', $KodeWilayah)
+            ->where('Level', 4)
+            ->where('deleted_at IS NULL')
+            ->order_by('nama', 'ASC')
+            ->get()
+            ->result_array();
+    }
+    
+    $this->load->view('Daerah/header', $Header);
+    $this->load->view('Daerah/KonsistensiTujuan', $Data);
+}
+
+// ============================================================
+// INPUT TUJUAN (Level 1) - DENGAN ID RPJMD YANG BENAR
+// ============================================================
+public function InputTujuanKonsistensi() {
+    // Aktifkan error reporting
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+    
+    // Log untuk debugging
+    log_message('debug', '=== InputTujuanKonsistensi dipanggil ===');
+    log_message('debug', 'POST data: ' . print_r($_POST, true));
+    
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    header('Content-Type: application/json');
+    
+    try {
+        $KodeWilayah = $this->_checkSessionWilayah();
+        if (!$KodeWilayah) {
+            return;
+        }
+        
+        // ============================================================
+        // AMBIL DATA DARI POST
+        // ============================================================
+        $idRpjmd = (int)$this->input->post('id_rpjmd', TRUE);
+        $rpjmdText = trim($this->input->post('rpjmd_text', TRUE));
+        $rkpdText = trim($this->input->post('rkpd_text', TRUE));
+        $idInstansi = $this->input->post('id_instansi', TRUE) ?: null;
+        $tahun = $this->input->post('tahun', TRUE) ?: date('Y');
+        $keterangan = trim($this->input->post('keterangan', TRUE));
+        
+        // Ambil indikator dari POST
+        $indikatorRpjmd = $this->input->post('indikator_rpjmd', TRUE);
+        $satuanRpjmd = $this->input->post('satuan_rpjmd', TRUE);
+        $targetRpjmd = $this->input->post('target_rpjmd', TRUE);
+        
+        $indikatorRkpd = $this->input->post('indikator_rkpd', TRUE);
+        $satuanRkpd = $this->input->post('satuan_rkpd', TRUE);
+        $targetRkpd = $this->input->post('target_rkpd', TRUE);
+        
+        log_message('debug', 'id_rpjmd: ' . $idRpjmd);
+        log_message('debug', 'rpjmd_text: ' . $rpjmdText);
+        log_message('debug', 'rkpd_text: ' . $rkpdText);
+        
+        // ============================================================
+        // PROSES RPJMD
+        // ============================================================
+        if ($idRpjmd > 0) {
+            $rpjmdData = $this->db->where('Id', $idRpjmd)->get('tujuanrpjmd')->row_array();
+            if (!$rpjmdData) {
+                throw new Exception('Tujuan RPJMD tidak ditemukan!');
+            }
+            $rpjmdText = $rpjmdData['Tujuan'];
+            $tujuanRpjmdId = $idRpjmd;
+        } elseif (empty($rpjmdText)) {
+            throw new Exception('Tujuan RPJMD harus diisi!');
+        } else {
+            // Jika manual, cek apakah ada di database
+            $existingRpjmd = $this->db
+                ->where('Tujuan', $rpjmdText)
+                ->where('KodeWilayah', $KodeWilayah)
+                ->where('deleted_at IS NULL')
+                ->get('tujuanrpjmd')
+                ->row_array();
+            
+            if ($existingRpjmd) {
+                $tujuanRpjmdId = $existingRpjmd['Id'];
+            } else {
+                $tujuanRpjmdId = null;
+            }
+        }
+        
+        if (empty($rkpdText)) {
+            throw new Exception('Tujuan RKPD harus diisi!');
+        }
+        
+        // ============================================================
+        // INSERT HEADER - TUJUAN (Level 1)
+        // ============================================================
+        $headerData = [
+            'kode_wilayah' => $KodeWilayah,
+            'id_instansi' => $idInstansi,
+            'tahun' => $tahun,
+            'level' => 1, // TUJUAN
+            'tujuan_rpjmd_id' => $tujuanRpjmdId ?? null,
+            'tujuan_rpjmd_text' => $rpjmdText,
+            'tujuan_rkpd_text' => $rkpdText,
+            'keterangan' => $keterangan,
+            'created_at' => date('Y-m-d H:i:s')
+        ];
+        
+        log_message('debug', 'Header data: ' . print_r($headerData, true));
+        
+        $this->db->insert('konsistensi_tujuan_header', $headerData);
+        $headerId = $this->db->insert_id();
+        
+        if (!$headerId) {
+            throw new Exception('Gagal menyimpan header!');
+        }
+        
+        // ============================================================
+        // INSERT INDIKATOR RPJMD
+        // ============================================================
+        if (!empty($indikatorRpjmd) && is_array($indikatorRpjmd)) {
+            $urutan = 0;
+            foreach ($indikatorRpjmd as $key => $indikator) {
+                if (empty(trim($indikator))) continue;
+                
+                $detailData = [
+                    'header_id' => $headerId,
+                    'jenis' => 'rpjmd',
+                    'indikator' => trim($indikator),
+                    'satuan' => isset($satuanRpjmd[$key]) ? trim($satuanRpjmd[$key]) : null,
+                    'target' => isset($targetRpjmd[$key]) ? trim($targetRpjmd[$key]) : null,
+                    'urutan' => $urutan++,
+                    'created_at' => date('Y-m-d H:i:s')
+                ];
+                
+                $this->db->insert('konsistensi_tujuan_detail', $detailData);
+            }
+        }
+        
+        // ============================================================
+        // INSERT INDIKATOR RKPD
+        // ============================================================
+        if (!empty($indikatorRkpd) && is_array($indikatorRkpd)) {
+            $urutan = 0;
+            foreach ($indikatorRkpd as $key => $indikator) {
+                if (empty(trim($indikator))) continue;
+                
+                $detailData = [
+                    'header_id' => $headerId,
+                    'jenis' => 'rkpd',
+                    'indikator' => trim($indikator),
+                    'satuan' => isset($satuanRkpd[$key]) ? trim($satuanRkpd[$key]) : null,
+                    'target' => isset($targetRkpd[$key]) ? trim($targetRkpd[$key]) : null,
+                    'urutan' => $urutan++,
+                    'created_at' => date('Y-m-d H:i:s')
+                ];
+                
+                $this->db->insert('konsistensi_tujuan_detail', $detailData);
+            }
+        }
+        
+        // ============================================================
+        // RESPONSE SUKSES
+        // ============================================================
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Tujuan berhasil ditambahkan!',
+            'id' => $headerId,
+            'tujuan_rpjmd_id' => $tujuanRpjmdId
+        ]);
+        
+    } catch (Exception $e) {
+        log_message('error', 'InputTujuanKonsistensi Exception: ' . $e->getMessage());
+        log_message('error', 'Trace: ' . $e->getTraceAsString());
+        
+        echo json_encode([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ]);
+    }
+}
+
+// ============================================================
+// INPUT SASARAN (Level 2) - DENGAN PARENT TUJUAN YANG BENAR
+// ============================================================
+public function InputSasaranKonsistensi() {
+    // Aktifkan error reporting
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+    
+    // Log untuk debugging
+    log_message('debug', '=== InputSasaranKonsistensi dipanggil ===');
+    log_message('debug', 'POST data: ' . print_r($_POST, true));
+    
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    header('Content-Type: application/json');
+    
+    try {
+        $KodeWilayah = $this->_checkSessionWilayah();
+        if (!$KodeWilayah) {
+            return;
+        }
+        
+        // ============================================================
+        // AMBIL DATA DARI POST
+        // ============================================================
+        $parentTujuanId = (int)$this->input->post('parent_tujuan_id', TRUE);
+        $idRpjmd = (int)$this->input->post('id_rpjmd', TRUE);
+        $rpjmdText = trim($this->input->post('rpjmd_text', TRUE));
+        $rkpdText = trim($this->input->post('rkpd_text', TRUE));
+        $idInstansi = $this->input->post('id_instansi', TRUE) ?: null;
+        $tahun = $this->input->post('tahun', TRUE) ?: date('Y');
+        $keterangan = trim($this->input->post('keterangan', TRUE));
+        
+        // Ambil indikator dari POST
+        $indikatorRpjmd = $this->input->post('indikator_rpjmd', TRUE);
+        $satuanRpjmd = $this->input->post('satuan_rpjmd', TRUE);
+        $targetRpjmd = $this->input->post('target_rpjmd', TRUE);
+        
+        $indikatorRkpd = $this->input->post('indikator_rkpd', TRUE);
+        $satuanRkpd = $this->input->post('satuan_rkpd', TRUE);
+        $targetRkpd = $this->input->post('target_rkpd', TRUE);
+        
+        log_message('debug', 'parent_tujuan_id: ' . $parentTujuanId);
+        log_message('debug', 'id_rpjmd: ' . $idRpjmd);
+        log_message('debug', 'rpjmd_text: ' . $rpjmdText);
+        log_message('debug', 'rkpd_text: ' . $rkpdText);
+        
+        // ============================================================
+        // VALIDASI
+        // ============================================================
+        if ($parentTujuanId <= 0) {
+            throw new Exception('Tujuan induk tidak valid!');
+        }
+        
+        // ============================================================
+        // CEK APAKAH TUJUAN INDUK ADA DI TABEL konsistensi_tujuan_header
+        // ============================================================
+        $parentExists = $this->db
+            ->where('id', $parentTujuanId)
+            ->where('kode_wilayah', $KodeWilayah)
+            ->where('level', 1)  // Hanya Tujuan (level 1)
+            ->where('deleted_at IS NULL')
+            ->get('konsistensi_tujuan_header')
+            ->row_array();
+        
+        if (!$parentExists) {
+            throw new Exception('Tujuan induk tidak ditemukan! Pastikan Tujuan dengan ID ' . $parentTujuanId . ' sudah ada.');
+        }
+        
+        // ============================================================
+        // AMBIL ID TUJUAN RPJMD DARI PARENT
+        // ============================================================
+        $tujuanRpjmdId = $parentExists['tujuan_rpjmd_id'];
+        
+        if (empty($tujuanRpjmdId)) {
+            throw new Exception('Tujuan RPJMD induk tidak memiliki ID yang valid!');
+        }
+        
+        log_message('debug', 'tujuanRpjmdId dari parent: ' . $tujuanRpjmdId);
+        
+        // ============================================================
+        // PROSES RPJMD
+        // ============================================================
+        if ($idRpjmd > 0) {
+            $rpjmdData = $this->db->where('Id', $idRpjmd)->get('sasaranrpjmd')->row_array();
+            if (!$rpjmdData) {
+                throw new Exception('Sasaran RPJMD tidak ditemukan!');
+            }
+            $rpjmdText = $rpjmdData['Sasaran'];
+        } elseif (empty($rpjmdText)) {
+            throw new Exception('Sasaran RPJMD harus diisi!');
+        }
+        
+        if (empty($rkpdText)) {
+            throw new Exception('Sasaran RKPD harus diisi!');
+        }
+        
+        // ============================================================
+        // CEK DUPLIKAT - Apakah sasaran dengan teks yang sama sudah ada?
+        // ============================================================
+        $duplicateCheck = $this->db
+            ->where('kode_wilayah', $KodeWilayah)
+            ->where('tahun', $tahun)
+            ->where('level', 2)
+            ->where('sasaran_rpjmd_text', $rpjmdText)
+            ->where('deleted_at IS NULL')
+            ->get('konsistensi_tujuan_header')
+            ->num_rows();
+        
+        if ($duplicateCheck > 0) {
+            // Tidak di-throw, hanya peringatan - bisa di-comment jika tidak diinginkan
+            log_message('debug', 'Sasaran dengan teks yang sama sudah ada: ' . $rpjmdText);
+        }
+        
+        // ============================================================
+        // INSERT HEADER - SASARAN DENGAN PARENT TUJUAN
+        // ============================================================
+        $headerData = [
+            'kode_wilayah' => $KodeWilayah,
+            'id_instansi' => $idInstansi,
+            'tahun' => $tahun,
+            'level' => 2,  // SASARAN
+            'parent_tujuan_id' => $parentTujuanId, // SIMPAN ID PARENT DI TABEL
+            'tujuan_rpjmd_id' => $tujuanRpjmdId, // ID Tujuan RPJMD dari parent
+            'sasaran_rpjmd_id' => $idRpjmd > 0 ? $idRpjmd : null,
+            'sasaran_rpjmd_text' => $rpjmdText,
+            'sasaran_rkpd_text' => $rkpdText,
+            'keterangan' => $keterangan,
+            'created_at' => date('Y-m-d H:i:s')
+        ];
+        
+        log_message('debug', 'Header data yang akan diinsert: ' . print_r($headerData, true));
+        
+        // Cek apakah kolom parent_tujuan_id ada di tabel
+        $columns = $this->db->query("SHOW COLUMNS FROM konsistensi_tujuan_header LIKE 'parent_tujuan_id'")->num_rows();
+        if ($columns == 0) {
+            // Jika kolom tidak ada, hapus dari array
+            unset($headerData['parent_tujuan_id']);
+            log_message('debug', 'Kolom parent_tujuan_id tidak ada, dihapus dari data insert');
+        }
+        
+        $this->db->insert('konsistensi_tujuan_header', $headerData);
+        $headerId = $this->db->insert_id();
+        
+        if (!$headerId) {
+            $error = $this->db->error();
+            log_message('error', 'Gagal insert header: ' . $error['message']);
+            throw new Exception('Gagal menyimpan header: ' . $error['message']);
+        }
+        
+        log_message('debug', 'Header berhasil diinsert dengan ID: ' . $headerId);
+        
+        // ============================================================
+        // INSERT INDIKATOR RPJMD
+        // ============================================================
+        if (!empty($indikatorRpjmd) && is_array($indikatorRpjmd)) {
+            $urutan = 0;
+            foreach ($indikatorRpjmd as $key => $indikator) {
+                if (empty(trim($indikator))) continue;
+                
+                $detailData = [
+                    'header_id' => $headerId,
+                    'jenis' => 'rpjmd',
+                    'indikator' => trim($indikator),
+                    'satuan' => isset($satuanRpjmd[$key]) ? trim($satuanRpjmd[$key]) : null,
+                    'target' => isset($targetRpjmd[$key]) ? trim($targetRpjmd[$key]) : null,
+                    'urutan' => $urutan++,
+                    'created_at' => date('Y-m-d H:i:s')
+                ];
+                
+                $this->db->insert('konsistensi_tujuan_detail', $detailData);
+                log_message('debug', 'Insert detail RPJMD - affected: ' . $this->db->affected_rows());
+            }
+        }
+        
+        // ============================================================
+        // INSERT INDIKATOR RKPD
+        // ============================================================
+        if (!empty($indikatorRkpd) && is_array($indikatorRkpd)) {
+            $urutan = 0;
+            foreach ($indikatorRkpd as $key => $indikator) {
+                if (empty(trim($indikator))) continue;
+                
+                $detailData = [
+                    'header_id' => $headerId,
+                    'jenis' => 'rkpd',
+                    'indikator' => trim($indikator),
+                    'satuan' => isset($satuanRkpd[$key]) ? trim($satuanRkpd[$key]) : null,
+                    'target' => isset($targetRkpd[$key]) ? trim($targetRkpd[$key]) : null,
+                    'urutan' => $urutan++,
+                    'created_at' => date('Y-m-d H:i:s')
+                ];
+                
+                $this->db->insert('konsistensi_tujuan_detail', $detailData);
+                log_message('debug', 'Insert detail RKPD - affected: ' . $this->db->affected_rows());
+            }
+        }
+        
+        // ============================================================
+        // RESPONSE SUKSES
+        // ============================================================
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Sasaran berhasil ditambahkan!',
+            'id' => $headerId,
+            'parent_tujuan_id' => $parentTujuanId
+        ]);
+        
+    } catch (Exception $e) {
+        log_message('error', 'InputSasaranKonsistensi Exception: ' . $e->getMessage());
+        log_message('error', 'Trace: ' . $e->getTraceAsString());
+        
+        echo json_encode([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ]);
+    }
+}
+
+// ============================================================
+// GET DATA BY ID (UNTUK EDIT) - DENGAN RPJMD_ID
+// ============================================================
+public function GetKonsistensiTujuanById() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', TRUE);
+    $KodeWilayah = $this->_getKodeWilayah();
+    
+    if ($id <= 0 || empty($KodeWilayah)) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid']);
+        return;
+    }
+    
+    $header = $this->db
+        ->where('id', $id)
+        ->where('kode_wilayah', $KodeWilayah)
+        ->where('deleted_at IS NULL')
+        ->get('konsistensi_tujuan_header')
+        ->row_array();
+    
+    if (!$header) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+        return;
+    }
+    
+    // Ambil detail indikator
+    $header['rpjmd_details'] = $this->db
+        ->where('header_id', $id)
+        ->where('jenis', 'rpjmd')
+        ->where('deleted_at IS NULL')
+        ->order_by('urutan', 'ASC')
+        ->get('konsistensi_tujuan_detail')
+        ->result_array();
+    
+    $header['rkpd_details'] = $this->db
+        ->where('header_id', $id)
+        ->where('jenis', 'rkpd')
+        ->where('deleted_at IS NULL')
+        ->order_by('urutan', 'ASC')
+        ->get('konsistensi_tujuan_detail')
+        ->result_array();
+    
+    // Ambil nama RPJMD
+    if ($header['level'] == 1 && $header['tujuan_rpjmd_id']) {
+        $tujuan = $this->db->where('Id', $header['tujuan_rpjmd_id'])->get('tujuanrpjmd')->row_array();
+        $header['rpjmd_text'] = $tujuan ? $tujuan['Tujuan'] : $header['tujuan_rpjmd_text'];
+        $header['rpjmd_id'] = $header['tujuan_rpjmd_id']; // TAMBAHKAN INI
+    } elseif ($header['level'] == 2 && $header['sasaran_rpjmd_id']) {
+        $sasaran = $this->db->where('Id', $header['sasaran_rpjmd_id'])->get('sasaranrpjmd')->row_array();
+        $header['rpjmd_text'] = $sasaran ? $sasaran['Sasaran'] : $header['sasaran_rpjmd_text'];
+        $header['rpjmd_id'] = $header['sasaran_rpjmd_id']; // TAMBAHKAN INI
+    } else {
+        $header['rpjmd_text'] = $header['level'] == 1 ? $header['tujuan_rpjmd_text'] : $header['sasaran_rpjmd_text'];
+        $header['rpjmd_id'] = null;
+    }
+    
+    $header['rkpd_text'] = $header['level'] == 1 ? $header['tujuan_rkpd_text'] : $header['sasaran_rkpd_text'];
+    
+    echo json_encode(['status' => 'success', 'data' => $header]);
+}
+
+
+// ============================================================
+// UPDATE KONSISTENSI - DENGAN INDIKATOR DINAMIS
+// ============================================================
+public function UpdateKonsistensiTujuan() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    header('Content-Type: application/json');
+    
+    try {
+        $KodeWilayah = $this->_checkSessionWilayah();
+        if (!$KodeWilayah) return;
+        
+        $id = (int)$this->input->post('id', TRUE);
+        if ($id <= 0) {
+            throw new Exception('ID tidak valid!');
+        }
+        
+        $existing = $this->db
+            ->where('id', $id)
+            ->where('kode_wilayah', $KodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->get('konsistensi_tujuan_header')
+            ->row_array();
+        
+        if (!$existing) {
+            throw new Exception('Data tidak ditemukan!');
+        }
+        
+        $level = $existing['level'];
+        $rpjmdText = trim($this->input->post('rpjmd_text', TRUE));
+        $rkpdText = trim($this->input->post('rkpd_text', TRUE));
+        $idRpjmd = (int)$this->input->post('id_rpjmd', TRUE);
+        $idInstansi = $this->input->post('id_instansi', TRUE) ?: null;
+        $tahun = $this->input->post('tahun', TRUE) ?: date('Y');
+        $keterangan = trim($this->input->post('keterangan', TRUE));
+        
+        // Jika ada ID RPJMD, ambil dari database
+        if ($idRpjmd > 0) {
+            if ($level == 1) {
+                $rpjmdData = $this->db->where('Id', $idRpjmd)->get('tujuanrpjmd')->row_array();
+                if ($rpjmdData) {
+                    $rpjmdText = $rpjmdData['Tujuan'];
+                }
+            } else {
+                $rpjmdData = $this->db->where('Id', $idRpjmd)->get('sasaranrpjmd')->row_array();
+                if ($rpjmdData) {
+                    $rpjmdText = $rpjmdData['Sasaran'];
+                }
+            }
+        }
+        
+        if (empty($rpjmdText)) {
+            throw new Exception('Tujuan/Sasaran RPJMD harus diisi!');
+        }
+        if (empty($rkpdText)) {
+            throw new Exception('Tujuan/Sasaran RKPD harus diisi!');
+        }
+        
+        $updateData = [
+            'id_instansi' => $idInstansi,
+            'tahun' => $tahun,
+            'keterangan' => $keterangan,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        // Update berdasarkan level
+        if ($level == 1) {
+            $updateData['tujuan_rpjmd_text'] = $rpjmdText;
+            $updateData['tujuan_rkpd_text'] = $rkpdText;
+            $updateData['tujuan_rpjmd_id'] = $idRpjmd > 0 ? $idRpjmd : null;
+            $updateData['sasaran_rpjmd_id'] = null;
+        } else {
+            $updateData['sasaran_rpjmd_text'] = $rpjmdText;
+            $updateData['sasaran_rkpd_text'] = $rkpdText;
+            $updateData['sasaran_rpjmd_id'] = $idRpjmd > 0 ? $idRpjmd : null;
+            $updateData['tujuan_rpjmd_id'] = $existing['tujuan_rpjmd_id'];
+        }
+        
+        $this->db->where('id', $id);
+        $this->db->where('kode_wilayah', $KodeWilayah);
+        $this->db->update('konsistensi_tujuan_header', $updateData);
+        
+        // ============================================================
+        // SOFT DELETE DETAIL LAMA
+        // ============================================================
+        $this->db->where('header_id', $id)->update('konsistensi_tujuan_detail', [
+            'deleted_at' => date('Y-m-d H:i:s')
+        ]);
+        
+        // ============================================================
+        // INSERT DETAIL RPJMD - SEMUA INDIKATOR
+        // ============================================================
+        $indikatorRpjmd = $this->input->post('indikator_rpjmd', TRUE);
+        $satuanRpjmd = $this->input->post('satuan_rpjmd', TRUE);
+        $targetRpjmd = $this->input->post('target_rpjmd', TRUE);
+        
+        if (!empty($indikatorRpjmd) && is_array($indikatorRpjmd)) {
+            $urutan = 0;
+            foreach ($indikatorRpjmd as $key => $indikator) {
+                if (empty(trim($indikator))) continue;
+                
+                $this->db->insert('konsistensi_tujuan_detail', [
+                    'header_id' => $id,
+                    'jenis' => 'rpjmd',
+                    'indikator' => trim($indikator),
+                    'satuan' => isset($satuanRpjmd[$key]) ? trim($satuanRpjmd[$key]) : null,
+                    'target' => isset($targetRpjmd[$key]) ? trim($targetRpjmd[$key]) : null,
+                    'urutan' => $urutan++,
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+            }
+        }
+        
+        // ============================================================
+        // INSERT DETAIL RKPD - SEMUA INDIKATOR
+        // ============================================================
+        $indikatorRkpd = $this->input->post('indikator_rkpd', TRUE);
+        $satuanRkpd = $this->input->post('satuan_rkpd', TRUE);
+        $targetRkpd = $this->input->post('target_rkpd', TRUE);
+        
+        if (!empty($indikatorRkpd) && is_array($indikatorRkpd)) {
+            $urutan = 0;
+            foreach ($indikatorRkpd as $key => $indikator) {
+                if (empty(trim($indikator))) continue;
+                
+                $this->db->insert('konsistensi_tujuan_detail', [
+                    'header_id' => $id,
+                    'jenis' => 'rkpd',
+                    'indikator' => trim($indikator),
+                    'satuan' => isset($satuanRkpd[$key]) ? trim($satuanRkpd[$key]) : null,
+                    'target' => isset($targetRkpd[$key]) ? trim($targetRkpd[$key]) : null,
+                    'urutan' => $urutan++,
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+            }
+        }
+        
+        // ============================================================
+        // AMBIL DATA TERBARU UNTUK RESPONSE
+        // ============================================================
+        $updatedData = $this->db
+            ->where('id', $id)
+            ->where('kode_wilayah', $KodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->get('konsistensi_tujuan_header')
+            ->row_array();
+        
+        $updatedData['rpjmd_details'] = $this->db
+            ->where('header_id', $id)
+            ->where('jenis', 'rpjmd')
+            ->where('deleted_at IS NULL')
+            ->order_by('urutan', 'ASC')
+            ->get('konsistensi_tujuan_detail')
+            ->result_array();
+        
+        $updatedData['rkpd_details'] = $this->db
+            ->where('header_id', $id)
+            ->where('jenis', 'rkpd')
+            ->where('deleted_at IS NULL')
+            ->order_by('urutan', 'ASC')
+            ->get('konsistensi_tujuan_detail')
+            ->result_array();
+        
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Data berhasil diupdate!',
+            'data' => $updatedData
+        ]);
+        
+    } catch (Exception $e) {
+        log_message('error', 'UpdateKonsistensiTujuan: ' . $e->getMessage());
+        echo json_encode([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ]);
+    }
+}
+
+// ============================================================
+// HAPUS KONSISTENSI
+// ============================================================
+public function HapusKonsistensiTujuan() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', TRUE);
+    $KodeWilayah = $this->_getKodeWilayah();
+    
+    if ($id <= 0 || empty($KodeWilayah)) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak valid']);
+        return;
+    }
+    
+    $this->db->where('id', $id)->where('kode_wilayah', $KodeWilayah)->update('konsistensi_tujuan_header', [
+        'deleted_at' => date('Y-m-d H:i:s')
+    ]);
+    
+    $this->db->where('header_id', $id)->update('konsistensi_tujuan_detail', [
+        'deleted_at' => date('Y-m-d H:i:s')
+    ]);
+    
+    echo json_encode(['status' => 'success', 'message' => 'Data berhasil dihapus']);
+}
+
+// ============================================================
+// AJAX: GET SASARAN BY TUJUAN (UNTUK DROPDOWN SASARAN)
+// ============================================================
+public function GetSasaranByTujuanKonsistensi() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $tujuanId = (int)$this->input->post('tujuan_id', TRUE);
+    $kodeWilayah = $this->_getKodeWilayah();
+    
+    if ($tujuanId <= 0 || empty($kodeWilayah)) {
+        echo json_encode([]);
+        return;
+    }
+    
+    // Ambil data sasaran berdasarkan tujuan_id dari tabel sasaranrpjmd
+    $data = $this->db
+        ->select('s.Id, s.Sasaran')
+        ->from('sasaranrpjmd s')
+        ->where('s._Id', $tujuanId)
+        ->where('s.KodeWilayah', $kodeWilayah)
+        ->where('s.deleted_at IS NULL')
+        ->order_by('s.Id', 'ASC')
+        ->get()
+        ->result_array();
+    
+    echo json_encode($data);
+}
+
 
 
 }

@@ -164,6 +164,18 @@
             transition: transform var(--transition-speed) ease;
             margin-left: auto;
         }
+
+                /* Icon repeat - Font Awesome */
+        .fa-repeat {
+            color: #20c997;
+            font-size: 18px;
+        }
+
+        /* Icon repeat - Bootstrap Icons */
+        .bi-arrow-repeat {
+            color: #20c997;
+            font-size: 1.5rem;
+        }
         
         /* Toggle Button */
         .sidebar-toggle {
@@ -358,58 +370,70 @@
             </li>
 
             <li class="sidebar-dropdown">
-    <a href="#">
-        <i class="bi bi-file-text-fill"></i>
-        <span>RKPD</span>
-        <i class="fa fa-chevron-down"></i>
-    </a>
-
-    <div class="sidebar-submenu">
-
-        <!-- Rancangan Awal -->
-        <div class="sidebar-dropdown">
             <a href="#">
-                <span>Rancangan Awal</span>
+                <i class="bi bi-file-text-fill"></i>
+                <span>RKPD</span>
                 <i class="fa fa-chevron-down"></i>
             </a>
 
-            <div class="sidebar-submenu">
-                <a href="<?=base_url('Daerah/TemaPembangunan')?>">Tema Pembangunan</a>
-                <a href="<?=base_url('Daerah/PaguUrusan')?>">Input Pagu Anggaran</a>
-                <a href="<?=base_url('Daerah/IKDTahunBerjalan')?>">Data IKD Tahun Berjalan</a>
-                <a href="<?=base_url('Daerah/RanwalRKPD')?>">Rancangan Awal RKPD</a>
-            </div>
-        </div>
+                <div class="sidebar-submenu">
 
-        <!-- Rancangan RKPD -->
-        <div class="sidebar-dropdown">
-            <a href="#">
-                <span>Rancangan RKPD</span>
-                <i class="fa fa-chevron-down"></i>
-            </a>
+                    <!-- Rancangan Awal -->
+                    <div class="sidebar-dropdown">
+                        <a href="#">
+                            <span>Rancangan Awal</span>
+                            <i class="fa fa-chevron-down"></i>
+                        </a>
 
-            <div class="sidebar-submenu">
-                <a href="<?=base_url('Daerah/RancanganRKPD')?>">Rancangan RKPD</a>
-                <!-- Tambahkan menu lain jika ada -->
-            </div>
-        </div>
+                        <div class="sidebar-submenu">
+                            <a href="<?=base_url('Daerah/TemaPembangunan')?>">Tema Pembangunan</a>
+                            <a href="<?=base_url('Daerah/PaguUrusan')?>">Input Pagu Anggaran</a>
+                            <a href="<?=base_url('Daerah/IKDTahunBerjalan')?>">Data IKD Tahun Berjalan</a>
+                            <a href="<?=base_url('Daerah/RanwalRKPD')?>">Rancangan Awal RKPD</a>
+                        </div>
+                    </div>
 
-        <!-- Rancangan Akhir -->
-        <div class="sidebar-dropdown">
-            <a href="#">
-                <span>Rancangan Akhir</span>
-                <i class="fa fa-chevron-down"></i>
-            </a>
+                    <!-- Rancangan RKPD -->
+                    <div class="sidebar-dropdown">
+                        <a href="#">
+                            <span>Rancangan RKPD</span>
+                            <i class="fa fa-chevron-down"></i>
+                        </a>
 
-            <div class="sidebar-submenu">
-                <a href="<?=base_url('Daerah/RankhirRKPD')?>">Rancangan Akhir RKPD</a>
-                <a href="<?=base_url('Daerah/PaguUrusanRankhir')?>">Pagu Urusan Rankhir RKPD</a>
-                <!-- Tambahkan menu lain jika ada -->
-            </div>
-        </div>
+                        <div class="sidebar-submenu">
+                            <a href="<?=base_url('Daerah/RancanganRKPD')?>">Rancangan RKPD</a>
+                            <!-- Tambahkan menu lain jika ada -->
+                        </div>
+                    </div>
 
-    </div>
-</li>
+                    <!-- Rancangan Akhir -->
+                    <div class="sidebar-dropdown">
+                        <a href="#">
+                            <span>Rancangan Akhir</span>
+                            <i class="fa fa-chevron-down"></i>
+                        </a>
+
+                        <div class="sidebar-submenu">
+                            <a href="<?=base_url('Daerah/RankhirRKPD')?>">Rancangan Akhir RKPD</a>
+                            <a href="<?=base_url('Daerah/PaguUrusanRankhir')?>">Pagu Urusan Rankhir RKPD</a>
+                            <!-- Tambahkan menu lain jika ada -->
+                        </div>
+                    </div>
+
+                </div>
+            </li>
+
+            <li class="sidebar-dropdown">
+                <a href="#">
+                    <i class="menu-icon fa fa-repeat"></i>
+                    <span>Konsistensi/Keselarasan RKPD </span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Daerah/KonsistensiProgram')?>">Konsistensi Program RPJMD dan RKPD</a>
+                    <a href="<?=base_url('Daerah/KonsistensiTujuan')?>">Konsistensi Tujuan RPJMD dan RKPD</a>
+                </div>
+            </li>
 
              <li class="sidebar-dropdown">
                 <a href="#">

@@ -994,7 +994,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <h4>
                     <b id="ModalHeaderTitle">Tambah Header Renja PD</b>
-                    <span class="mode-indicator mode-tambah" id="ModeIndicator">TAMBAH</span>
                 </h4>
             </div>
             <div class="modal-body">
