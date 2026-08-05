@@ -298,6 +298,9 @@
                         <a href="<?=base_url('Kementerian/IsuNasional')?>">Isu Nasional</a>
                         <a href="<?=base_url('Kementerian/IsuRegional')?>">Isu Regional</a>
                         <a href="<?=base_url('Kementerian/IsuStrategis')?>">Isu Strategis</a>
+                        <a href="<?=base_url('Kementerian/Renstra')?>">Rencana Strategis</a>
+                        <a href="<?=base_url('Kementerian/Pendanaan')?>">Pendanaan</a>
+                        <a href="<?=base_url('Kementerian/MatriksKinerja')?>">Matriks Kinerja</a>
                         <a href="<?=base_url('Kementerian/Renstra')?>">Renstra</a>
                         <a href="<?=base_url('Kementerian/RenstraAnggaran')?>">Anggaran</a>
                         <br>

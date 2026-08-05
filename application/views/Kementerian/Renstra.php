@@ -278,7 +278,6 @@
                                             Belum ada data Renstra
                                         </td>
                                     </tr>
->>>>>>> edbc646 (Perubahan modul Kementerian)
                                 <?php endif; ?>
                             </td>
                             <td></td>
@@ -604,9 +603,7 @@
 <script>
 var BaseURL = '<?= base_url() ?>';
 
-<<<<<<< HEAD
-// ===================== Tambah PN =====================
-=======
+
 // Inisialisasi DataTable
 $(document).ready(function() {
     var table = $('#renstraTable').DataTable({
@@ -695,7 +692,6 @@ $(document).ready(function() {
 });
 
 // Tambah PN
->>>>>>> edbc646 (Perubahan modul Kementerian)
 $("#formAddPN").submit(function(e) {
     e.preventDefault();
     var formData = $(this).serialize();
@@ -983,4 +979,3 @@ $(document).on('click', '.btnDeleteProP', function() {
     margin-right: 5px;
 }
 </style>
->>>>>>> edbc646 (Perubahan modul Kementerian)
