@@ -432,6 +432,11 @@
                 <div class="sidebar-submenu">
                     <a href="<?=base_url('Daerah/KonsistensiProgram')?>">Konsistensi Program RPJMD dan RKPD</a>
                     <a href="<?=base_url('Daerah/KonsistensiTujuan')?>">Konsistensi Tujuan RPJMD dan RKPD</a>
+                    <a href="<?=base_url('Daerah/KeselarasanRAKORTEKBANG')?>">Keselarasan RAKORTEKBANG</a>
+                    <a href="<?=base_url('Daerah/KeselarasanMakro')?>">Keselarasan Target Makro</a>
+                    <a href="<?=base_url('Daerah/KeselarasanIndikatorUtama')?>">Keselarasan Indikator Utama</a>
+                    <a href="<?=base_url('Daerah/KeselarasanPrioritas')?>">Keselarasan Kegiatan Prioritas Utama</a>
+                    <a href="<?=base_url('Daerah/KeselarasanIntervensi')?>">Keselarasan Intervensi Kewilayahan</a>
                 </div>
             </li>
 
