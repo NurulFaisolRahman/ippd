@@ -9,6 +9,28 @@
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <div class="data-table-list">
 
+                        <!-- NOTIFIKASI FLASH DATA -->
+                        <?php if ($this->session->flashdata('success')) { ?>
+                            <div class="alert alert-success alert-dismissible fade in" role="alert">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <i class="fa fa-check-circle"></i> <?= $this->session->flashdata('success') ?>
+                            </div>
+                        <?php } ?>
+
+                        <?php if ($this->session->flashdata('error')) { ?>
+                            <div class="alert alert-danger alert-dismissible fade in" role="alert">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <i class="fa fa-exclamation-circle"></i> <?= $this->session->flashdata('error') ?>
+                            </div>
+                        <?php } ?>
+
+                        <?php if ($this->session->flashdata('warning')) { ?>
+                            <div class="alert alert-warning alert-dismissible fade in" role="alert">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <i class="fa fa-warning"></i> <?= $this->session->flashdata('warning') ?>
+                            </div>
+                        <?php } ?>
+
                         <!-- FILTER PROVINSI & KAB/KOTA -->
                         <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
                             <div class="form-example-wrap" style="margin-bottom: 15px;">
@@ -66,7 +88,7 @@
                             <div class="button-icon-btn sm-res-mg-t-30">
                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                                     <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputKaryawan">
-                                        <i class="notika-icon bi-plus-lg"></i> <b>Tambah Karyawan</b>
+                                        <i class="notika-icon bi-plus-lg"></i> <b>Tambah Pegawai</b>
                                     </button>
                                 <?php } ?>
                             </div>
@@ -78,8 +100,9 @@
                                     <tr>
                                         <th class="text-center">No</th>
                                         <th>NIP</th>
-                                        <th>Nama Karyawan</th>
+                                        <th>Nama Pegawai</th>
                                         <th>Jabatan</th>
+                                        <th>Satuan Unit Kerja</th>
                                         <th>Dinas Terkait</th>
                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                                             <th>Password</th>
@@ -97,6 +120,7 @@
                                             <td style="vertical-align:middle;"><?= html_escape($key['nip']) ?></td>
                                             <td style="vertical-align:middle;"><?= html_escape($key['nama']) ?></td>
                                             <td style="vertical-align:middle;"><?= html_escape($key['jabatan']) ?></td>
+                                            <td style="vertical-align:middle;"><?= isset($key['satuan_unit_kerja']) && !empty($key['satuan_unit_kerja']) ? html_escape($key['satuan_unit_kerja']) : '-' ?></td>
                                             <td style="vertical-align:middle;"><?= isset($key['dinas_nama']) ? $key['dinas_nama'] : '-' ?></td>
                                             
                                             <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
@@ -112,6 +136,7 @@
                                                             data-nip="<?= htmlspecialchars($key['nip'], ENT_QUOTES) ?>"
                                                             data-nama="<?= htmlspecialchars($key['nama'], ENT_QUOTES) ?>"
                                                             data-jabatan="<?= htmlspecialchars($key['jabatan'], ENT_QUOTES) ?>"
+                                                            data-satuan-unit-kerja="<?= htmlspecialchars($key['satuan_unit_kerja'] ?? '', ENT_QUOTES) ?>"
                                                             data-tahun-mulai="<?= $key['tahun_mulai'] ?>"
                                                             data-tahun-akhir="<?= $key['tahun_akhir'] ?>"
                                                             data-dinas-ids="<?= isset($key['dinas_id']) ? htmlspecialchars($key['dinas_id'], ENT_QUOTES) : '' ?>">
@@ -135,9 +160,11 @@
         </div>
     </div>
 
+    <!-- ============================================================ -->
     <!-- MODAL INPUT KARYAWAN -->
+    <!-- ============================================================ -->
     <div class="modal fade" id="ModalInputKaryawan" role="dialog">
-    <div class="modal-dialog modal-md" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);">
+        <div class="modal-dialog modal-md" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -145,11 +172,12 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-example-wrap">
+                        <!-- NIP -->
                         <div class="form-example-int form-horizental">
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>NIP</b></label>
+                                        <label class="hrzn-fm"><b>NIP</b> <span style="color:red;">*</span></label>
                                     </div>
                                     <div class="col-lg-8">
                                         <input type="text" class="form-control input-sm" id="NIP" placeholder="Masukkan NIP">
@@ -158,11 +186,12 @@
                             </div>
                         </div>
 
+                        <!-- Nama -->
                         <div class="form-example-int form-horizental">
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Nama</b></label>
+                                        <label class="hrzn-fm"><b>Nama</b> <span style="color:red;">*</span></label>
                                     </div>
                                     <div class="col-lg-8">
                                         <input type="text" class="form-control input-sm" id="Nama" placeholder="Masukkan Nama Lengkap">
@@ -171,11 +200,12 @@
                             </div>
                         </div>
 
+                        <!-- Jabatan -->
                         <div class="form-example-int form-horizental">
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Jabatan</b></label>
+                                        <label class="hrzn-fm"><b>Jabatan</b> <span style="color:red;">*</span></label>
                                     </div>
                                     <div class="col-lg-8">
                                         <input type="text" class="form-control input-sm" id="Jabatan" placeholder="Masukkan Jabatan">
@@ -184,11 +214,26 @@
                             </div>
                         </div>
 
+                        <!-- Satuan Unit Kerja -->
                         <div class="form-example-int form-horizental">
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Password</b></label>
+                                        <label class="hrzn-fm"><b>Satuan Unit Kerja</b></label>
+                                    </div>
+                                    <div class="col-lg-8">
+                                        <input type="text" class="form-control input-sm" id="SatuanUnitKerja" placeholder="Contoh: Sub Bagian Perencanaan">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="form-example-int form-horizental">
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-lg-3">
+                                        <label class="hrzn-fm"><b>Password</b> <span style="color:red;">*</span></label>
                                     </div>
                                     <div class="col-lg-8">
                                         <input type="text" class="form-control input-sm" id="Password" placeholder="Masukkan Password">
@@ -197,11 +242,12 @@
                             </div>
                         </div>
 
+                        <!-- Dinas Terkait -->
                         <div class="form-example-int form-horizental">
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Dinas Terkait</b></label>
+                                        <label class="hrzn-fm"><b>Dinas Terkait</b> <span style="color:red;">*</span></label>
                                     </div>
                                     <div class="col-lg-8">
                                         <div id="dinasContainerAdd"></div>
@@ -216,11 +262,12 @@
                             </div>
                         </div>
 
+                        <!-- Tahun Mulai -->
                         <div class="form-example-int form-horizental">
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Tahun Mulai</b></label>
+                                        <label class="hrzn-fm"><b>Tahun Mulai</b> <span style="color:red;">*</span></label>
                                     </div>
                                     <div class="col-lg-8">
                                         <input type="text" class="form-control input-sm" id="TahunMulai" placeholder="Contoh: 2020">
@@ -229,11 +276,12 @@
                             </div>
                         </div>
 
+                        <!-- Tahun Akhir -->
                         <div class="form-example-int form-horizental">
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Tahun Akhir</b></label>
+                                        <label class="hrzn-fm"><b>Tahun Akhir</b> <span style="color:red;">*</span></label>
                                     </div>
                                     <div class="col-lg-8">
                                         <input type="text" class="form-control input-sm" id="TahunAkhir" placeholder="Contoh: 2025">
@@ -256,9 +304,11 @@
         </div>
     </div>
 
+    <!-- ============================================================ -->
     <!-- MODAL EDIT KARYAWAN -->
+    <!-- ============================================================ -->
     <div class="modal fade" id="ModalEditKaryawan" role="dialog">
-    <div class="modal-dialog modal-md" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);">
+        <div class="modal-dialog modal-md" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -268,11 +318,12 @@
                     <div class="form-example-wrap">
                         <input type="hidden" id="Id">
 
+                        <!-- NIP -->
                         <div class="form-example-int form-horizental">
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>NIP</b></label>
+                                        <label class="hrzn-fm"><b>NIP</b> <span style="color:red;">*</span></label>
                                     </div>
                                     <div class="col-lg-8">
                                         <input type="text" class="form-control input-sm" id="_NIP" placeholder="Masukkan NIP">
@@ -281,11 +332,12 @@
                             </div>
                         </div>
 
+                        <!-- Nama -->
                         <div class="form-example-int form-horizental">
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Nama</b></label>
+                                        <label class="hrzn-fm"><b>Nama</b> <span style="color:red;">*</span></label>
                                     </div>
                                     <div class="col-lg-8">
                                         <input type="text" class="form-control input-sm" id="_Nama" placeholder="Masukkan Nama Lengkap">
@@ -294,11 +346,12 @@
                             </div>
                         </div>
 
+                        <!-- Jabatan -->
                         <div class="form-example-int form-horizental">
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Jabatan</b></label>
+                                        <label class="hrzn-fm"><b>Jabatan</b> <span style="color:red;">*</span></label>
                                     </div>
                                     <div class="col-lg-8">
                                         <input type="text" class="form-control input-sm" id="_Jabatan" placeholder="Masukkan Jabatan">
@@ -307,6 +360,21 @@
                             </div>
                         </div>
 
+                        <!-- Satuan Unit Kerja -->
+                        <div class="form-example-int form-horizental">
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-lg-3">
+                                        <label class="hrzn-fm"><b>Satuan Unit Kerja</b></label>
+                                    </div>
+                                    <div class="col-lg-8">
+                                        <input type="text" class="form-control input-sm" id="_SatuanUnitKerja" placeholder="Contoh: Sub Bagian Perencanaan">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Password -->
                         <div class="form-example-int form-horizental">
                             <div class="form-group">
                                 <div class="row">
@@ -320,11 +388,12 @@
                             </div>
                         </div>
 
+                        <!-- Dinas Terkait -->
                         <div class="form-example-int form-horizental">
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Dinas Terkait</b></label>
+                                        <label class="hrzn-fm"><b>Dinas Terkait</b> <span style="color:red;">*</span></label>
                                     </div>
                                     <div class="col-lg-8">
                                         <div id="dinasContainerEdit"></div>
@@ -339,11 +408,12 @@
                             </div>
                         </div>
 
+                        <!-- Tahun Mulai -->
                         <div class="form-example-int form-horizental">
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Tahun Mulai</b></label>
+                                        <label class="hrzn-fm"><b>Tahun Mulai</b> <span style="color:red;">*</span></label>
                                     </div>
                                     <div class="col-lg-8">
                                         <input type="text" class="form-control input-sm" id="_TahunMulai">
@@ -352,11 +422,12 @@
                             </div>
                         </div>
 
+                        <!-- Tahun Akhir -->
                         <div class="form-example-int form-horizental">
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Tahun Akhir</b></label>
+                                        <label class="hrzn-fm"><b>Tahun Akhir</b> <span style="color:red;">*</span></label>
                                     </div>
                                     <div class="col-lg-8">
                                         <input type="text" class="form-control input-sm" id="_TahunAkhir">
@@ -380,6 +451,9 @@
     </div>
 </div>
 
+<!-- ============================================================ -->
+<!-- STYLE CUSTOM -->
+<!-- ============================================================ -->
 <style>
     .filter-row {
         display: flex;
@@ -401,6 +475,15 @@
         font-size: 14px;
         padding: 5px 8px;
     }
+    .dinas-row {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 6px;
+        align-items: center;
+    }
+    .dinas-row select {
+        flex: 1;
+    }
     @media (max-width:768px) {
         .filter-row {
             flex-direction: column;
@@ -410,8 +493,38 @@
             width: 100%;
         }
     }
+    /* Alert styling */
+    .alert {
+        margin-bottom: 15px;
+        border-radius: 4px;
+        padding: 12px 20px;
+    }
+    .alert-success {
+        background-color: #dff0d8;
+        border-color: #d6e9c6;
+        color: #3c763d;
+    }
+    .alert-danger {
+        background-color: #f2dede;
+        border-color: #ebccd1;
+        color: #a94442;
+    }
+    .alert-warning {
+        background-color: #fcf8e3;
+        border-color: #faebcc;
+        color: #8a6d3b;
+    }
+    .alert i {
+        margin-right: 8px;
+    }
+    .fade.in {
+        opacity: 1;
+    }
 </style>
 
+<!-- ============================================================ -->
+<!-- JAVASCRIPT -->
+<!-- ============================================================ -->
 <script src="../js/vendor/jquery-1.12.4.min.js"></script>
 <script src="../js/bootstrap.min.js"></script>
 <script src="../js/data-table/jquery.dataTables.min.js"></script>
@@ -423,8 +536,11 @@
     var CSRF_NAME = '<?= $this->security->get_csrf_token_name() ?>';
     var DINAS_LIST = <?= json_encode($DaftarDinas) ?>;
 
+    // ============================================================
+    // FUNGSI BANTUAN DINAS
+    // ============================================================
     function buildDinasSelect(nameAttr, selectedId) {
-        var html = '<div class="dinas-row" style="display:flex; gap:8px; margin-bottom:6px;">';
+        var html = '<div class="dinas-row">';
         html += '<select class="form-control input-sm dinas-select" name="' + nameAttr + '[]" style="flex:1;">';
         html += '<option value="">-- Pilih Dinas --</option>';
 
@@ -463,13 +579,19 @@
         });
     }
 
+    // ============================================================
+    // DOCUMENT READY
+    // ============================================================
     jQuery(document).ready(function($) {
         var table = $('#data-table-basic').DataTable();
 
-        // INIT
+        // INIT DINAS CONTAINER
         initDinasContainer('dinasContainerAdd', 'dinas_id', []);
+        initDinasContainer('dinasContainerEdit', 'dinas_id', []);
 
-        // FILTER WILAYAH
+        // ============================================================
+        // FILTER WILAYAH (jika belum login)
+        // ============================================================
         <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
             $("#Provinsi").change(function() {
                 if ($(this).val() === "") {
@@ -497,8 +619,14 @@
             $("#FilterWilayah").click(function() {
                 var prov = $("#Provinsi").val();
                 var kab = $("#KabKota").val();
-                if (!prov) return alert("Pilih Provinsi");
-                if (!kab) return alert("Pilih Kab/Kota");
+                if (!prov) {
+                    window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=error&msg=' + encodeURIComponent('Pilih Provinsi terlebih dahulu!');
+                    return;
+                }
+                if (!kab) {
+                    window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=error&msg=' + encodeURIComponent('Pilih Kab/Kota terlebih dahulu!');
+                    return;
+                }
 
                 $.ajax({
                     url: BaseURL + "Daerah/SetTempKodeWilayah",
@@ -508,13 +636,22 @@
                         [CSRF_NAME]: CSRF_TOKEN
                     },
                     success: function(res) {
-                        if (res === '1') window.location.reload();
+                        if (res === '1' || res === 'success') {
+                            window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=success&msg=' + encodeURIComponent('Wilayah berhasil dipilih!');
+                        } else {
+                            window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=error&msg=' + encodeURIComponent('Gagal memilih wilayah!');
+                        }
+                    },
+                    error: function() {
+                        window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=error&msg=' + encodeURIComponent('Terjadi kesalahan saat memilih wilayah!');
                     }
                 });
             });
         <?php } ?>
 
-        // TAMBAH ROW DINAS
+        // ============================================================
+        // TAMBAH / HAPUS ROW DINAS
+        // ============================================================
         $(document).on('click', '#addDinasRowAdd', function() {
             $('#dinasContainerAdd').append(buildDinasSelect('dinas_id', null));
         });
@@ -527,22 +664,48 @@
             $(this).closest('.dinas-row').remove();
         });
 
-        // SIMPAN
+        // ============================================================
+        // INPUT / SIMPAN - LANGSUNG RELOAD
+        // ============================================================
         $("#Input").click(function() {
             var dinas = collectDinas('dinasContainerAdd');
 
-            if (!$("#NIP").val()) return alert('NIP wajib diisi!');
-            if (!$("#Nama").val()) return alert('Nama wajib diisi!');
-            if (!$("#Jabatan").val()) return alert('Jabatan wajib diisi!');
-            if (!$("#Password").val()) return alert('Password wajib diisi!');
-            if (dinas.length < 1) return alert('Pilih minimal 1 dinas!');
-            if (!$("#TahunMulai").val()) return alert('Tahun Mulai wajib diisi!');
-            if (!$("#TahunAkhir").val()) return alert('Tahun Akhir wajib diisi!');
+            // Validasi
+            if (!$("#NIP").val()) {
+                window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=error&msg=' + encodeURIComponent('NIP wajib diisi!');
+                return;
+            }
+            if (!$("#Nama").val()) {
+                window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=error&msg=' + encodeURIComponent('Nama wajib diisi!');
+                return;
+            }
+            if (!$("#Jabatan").val()) {
+                window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=error&msg=' + encodeURIComponent('Jabatan wajib diisi!');
+                return;
+            }
+            if (!$("#Password").val()) {
+                window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=error&msg=' + encodeURIComponent('Password wajib diisi!');
+                return;
+            }
+            if (dinas.length < 1) {
+                window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=error&msg=' + encodeURIComponent('Pilih minimal 1 dinas!');
+                return;
+            }
+            if (!$("#TahunMulai").val()) {
+                window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=error&msg=' + encodeURIComponent('Tahun Mulai wajib diisi!');
+                return;
+            }
+            if (!$("#TahunAkhir").val()) {
+                window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=error&msg=' + encodeURIComponent('Tahun Akhir wajib diisi!');
+                return;
+            }
 
+            // Submit data
             $.post(BaseURL + "Daerah/InputKaryawan", {
                 nip: $("#NIP").val(),
                 nama: $("#Nama").val(),
                 jabatan: $("#Jabatan").val(),
+                satuan_unit_kerja: $("#SatuanUnitKerja").val(),
                 password: $("#Password").val(),
                 tahun_mulai: $("#TahunMulai").val(),
                 tahun_akhir: $("#TahunAkhir").val(),
@@ -550,20 +713,24 @@
                 [CSRF_NAME]: CSRF_TOKEN
             }).done(function(res) {
                 if (res == '1') {
-                    alert('Data berhasil disimpan!');
-                    window.location.reload();
+                    window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=success&msg=' + encodeURIComponent('Data berhasil disimpan!');
                 } else {
-                    alert(res);
+                    window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=error&msg=' + encodeURIComponent(res || 'Gagal menyimpan data!');
                 }
+            }).fail(function() {
+                window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=error&msg=' + encodeURIComponent('Terjadi kesalahan pada server!');
             });
         });
 
-        // EDIT
+        // ============================================================
+        // EDIT - AMBIL DATA
+        // ============================================================
         $(document).on("click", ".Edit", function() {
             $("#Id").val($(this).data('id'));
             $("#_NIP").val($(this).data('nip'));
             $("#_Nama").val($(this).data('nama'));
             $("#_Jabatan").val($(this).data('jabatan'));
+            $("#_SatuanUnitKerja").val($(this).data('satuan-unit-kerja') || '');
             $("#_Password").val("");
             $("#_TahunMulai").val($(this).data('tahun-mulai'));
             $("#_TahunAkhir").val($(this).data('tahun-akhir'));
@@ -575,49 +742,89 @@
             $('#ModalEditKaryawan').modal("show");
         });
 
+        // ============================================================
+        // UPDATE / EDIT - LANGSUNG RELOAD
+        // ============================================================
         $("#Edit").click(function() {
             var dinas = collectDinas('dinasContainerEdit');
 
-            if (!$("#_NIP").val()) return alert('NIP wajib diisi!');
-            if (!$("#_Nama").val()) return alert('Nama wajib diisi!');
-            if (!$("#_Jabatan").val()) return alert('Jabatan wajib diisi!');
-            if (dinas.length < 1) return alert('Pilih minimal 1 dinas!');
-            if (!$("#_TahunMulai").val()) return alert('Tahun Mulai wajib diisi!');
-            if (!$("#_TahunAkhir").val()) return alert('Tahun Akhir wajib diisi!');
+            // Validasi
+            if (!$("#_NIP").val()) {
+                window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=error&msg=' + encodeURIComponent('NIP wajib diisi!');
+                $('#ModalEditKaryawan').modal('hide');
+                return;
+            }
+            if (!$("#_Nama").val()) {
+                window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=error&msg=' + encodeURIComponent('Nama wajib diisi!');
+                $('#ModalEditKaryawan').modal('hide');
+                return;
+            }
+            if (!$("#_Jabatan").val()) {
+                window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=error&msg=' + encodeURIComponent('Jabatan wajib diisi!');
+                $('#ModalEditKaryawan').modal('hide');
+                return;
+            }
+            if (dinas.length < 1) {
+                window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=error&msg=' + encodeURIComponent('Pilih minimal 1 dinas!');
+                $('#ModalEditKaryawan').modal('hide');
+                return;
+            }
+            if (!$("#_TahunMulai").val()) {
+                window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=error&msg=' + encodeURIComponent('Tahun Mulai wajib diisi!');
+                $('#ModalEditKaryawan').modal('hide');
+                return;
+            }
+            if (!$("#_TahunAkhir").val()) {
+                window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=error&msg=' + encodeURIComponent('Tahun Akhir wajib diisi!');
+                $('#ModalEditKaryawan').modal('hide');
+                return;
+            }
 
+            // Submit data
             $.post(BaseURL + "Daerah/EditKaryawan", {
                 id: $("#Id").val(),
                 nip: $("#_NIP").val(),
                 nama: $("#_Nama").val(),
                 jabatan: $("#_Jabatan").val(),
+                satuan_unit_kerja: $("#_SatuanUnitKerja").val(),
                 password: $("#_Password").val(),
                 tahun_mulai: $("#_TahunMulai").val(),
                 tahun_akhir: $("#_TahunAkhir").val(),
                 dinas_id: dinas,
                 [CSRF_NAME]: CSRF_TOKEN
             }).done(function(res) {
+                $('#ModalEditKaryawan').modal('hide');
                 if (res == '1') {
-                    alert('Data berhasil diupdate!');
-                    window.location.reload();
+                    window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=success&msg=' + encodeURIComponent('Data berhasil diupdate!');
                 } else {
-                    alert(res);
+                    window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=error&msg=' + encodeURIComponent(res || 'Gagal update data!');
                 }
+            }).fail(function() {
+                $('#ModalEditKaryawan').modal('hide');
+                window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=error&msg=' + encodeURIComponent('Terjadi kesalahan pada server!');
             });
         });
 
-        // HAPUS
+        // ============================================================
+        // HAPUS - LANGSUNG RELOAD
+        // ============================================================
         $(document).on('click', '.Hapus', function() {
+            var id = $(this).data('id');
+            
+            // Konfirmasi dengan modal confirm bawaan browser
             if (!confirm("Yakin ingin menghapus data ini?")) return;
+
             $.post(BaseURL + "Daerah/HapusKaryawan", {
-                id: $(this).data('id'),
+                id: id,
                 [CSRF_NAME]: CSRF_TOKEN
             }).done(function(res) {
                 if (res == '1') {
-                    alert('Data berhasil dihapus!');
-                    window.location.reload();
+                    window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=success&msg=' + encodeURIComponent('Data berhasil dihapus!');
                 } else {
-                    alert(res);
+                    window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=error&msg=' + encodeURIComponent(res || 'Gagal menghapus data!');
                 }
+            }).fail(function() {
+                window.location.href = BaseURL + 'Daerah/Akun_Karyawan?flash=error&msg=' + encodeURIComponent('Terjadi kesalahan pada server!');
             });
         });
     });

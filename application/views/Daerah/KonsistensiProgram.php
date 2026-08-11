@@ -60,7 +60,7 @@
     }
     
     /* ============================================================
-       PAGU INPUT - HANYA 1
+       PAGU INPUT
        ============================================================ */
     .pagu-input-group {
         background: #f8f9fa;
@@ -107,26 +107,106 @@
     }
     
     /* ============================================================
-       INDIKATOR ROW
+       INDIKATOR ROW - DENGAN AUTO-FILL STYLE
        ============================================================ */
-    .indikator-row {
+    .indikator-detail-row {
         background: #f8f9fa;
-        padding: 10px;
-        border-radius: 5px;
-        margin-bottom: 10px;
-        border: 1px solid #e9ecef;
+        padding: 15px 15px 10px 15px;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        margin-bottom: 12px;
+        transition: all 0.3s ease;
+        position: relative;
     }
-    .indikator-row .btn {
+    .indikator-detail-row:hover {
+        border-color: #17a2b8;
+        box-shadow: 0 2px 8px rgba(23,162,184,0.15);
+    }
+    
+    /* Style untuk indikator yang diisi otomatis dari Program PD */
+    .indikator-detail-row.auto-filled {
+        border-left: 5px solid #28a745;
+        background: #f0fff4;
+        padding-top: 38px;
+    }
+    
+    .indikator-detail-row.auto-filled .auto-badge {
+        position: absolute;
+        top: 6px;
+        left: 12px;
+        font-size: 10px;
+        font-weight: 600;
+        color: #155724;
+        background: #d4edda;
+        padding: 3px 14px;
+        border-radius: 12px;
+        display: inline-block;
+        border: 1px solid #b8daff;
+        letter-spacing: 0.3px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    .indikator-detail-row.auto-filled .auto-source {
+        font-size: 10px;
+        color: #6c757d;
+        display: block;
+        margin-top: 10px;
+        padding-top: 8px;
+        border-top: 1px dashed #dee2e6;
+        font-style: italic;
+    }
+    
+    .indikator-detail-row:not(.auto-filled) {
+        padding-top: 15px;
+    }
+    
+    .indikator-detail-row .btn-remove-detail {
+        position: absolute;
+        top: 5px;
+        right: 8px;
+        padding: 3px 10px;
+        font-size: 14px;
+        line-height: 1.3;
+        border-radius: 4px;
+        z-index: 5;
+        background: transparent;
+        border: none;
+        color: #dc3545;
+        transition: all 0.3s ease;
+    }
+    .indikator-detail-row .btn-remove-detail:hover {
+        background: #dc3545;
+        color: #fff;
+        transform: scale(1.05);
+    }
+    
+    .indikator-detail-row .row-fields {
         margin-top: 5px;
+    }
+    .indikator-detail-row .row-fields .form-control {
+        font-size: 13px;
+        height: 36px;
+    }
+    .indikator-detail-row .row-fields textarea.form-control {
+        height: 38px;
+        resize: vertical;
+    }
+    
+    .indikator-detail-row .field-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 3px;
+        display: block;
     }
     
     /* ============================================================
-       TABEL STYLE - HIRARKI
+       TABEL STYLE
        ============================================================ */
     .table-konsistensi th {
         background: #f8f9fa;
         font-weight: 600;
-        font-size: 11px;
+        font-size: 10px;
         text-align: center;
         vertical-align: middle;
         padding: 6px 4px;
@@ -134,40 +214,57 @@
     }
     .table-konsistensi td {
         vertical-align: middle;
-        font-size: 12px;
+        font-size: 11px;
         padding: 6px 8px;
         border: 1px solid #dee2e6;
     }
     
-    /* Hirarki Level */
+    .header-rpjmd {
+        background-color: #28a745 !important;
+        color: #fff !important;
+        text-align: center !important;
+        font-weight: bold;
+        font-size: 11px;
+    }
+    .header-rkpd {
+        background-color: #ffc107 !important;
+        color: #333 !important;
+        text-align: center !important;
+        font-weight: bold;
+        font-size: 11px;
+    }
+    .sub-header {
+        background-color: #e9ecef !important;
+        font-weight: 600;
+        font-size: 9px;
+    }
+    .sub-header th {
+        background-color: #e9ecef !important;
+        font-weight: 600;
+        font-size: 9px;
+        text-align: center !important;
+    }
+    
     .level-1 {
         background-color: #e8f0fe;
         font-weight: 700;
-        font-size: 14px;
+        font-size: 13px;
         color: #1a5276;
     }
     .level-2 {
         background-color: #f0f8ff;
         font-weight: 600;
-        font-size: 13px;
+        font-size: 12px;
         color: #0c5460;
-        padding-left: 30px !important;
+        padding-left: 25px !important;
     }
     .level-3 {
         background-color: #ffffff;
         font-weight: 400;
-        font-size: 12px;
+        font-size: 11px;
         color: #495057;
-        padding-left: 55px !important;
+        padding-left: 45px !important;
     }
-    
-    .level-1 .text-pagu { font-weight: 700; font-size: 14px; color: #1a5276; }
-    .level-2 .text-pagu { font-weight: 600; font-size: 13px; color: #0c5460; }
-    .level-3 .text-pagu { font-weight: 500; font-size: 12px; color: #155724; }
-    
-    .level-1 .row-label { font-weight: 700; color: #1a5276; }
-    .level-2 .row-label { font-weight: 600; color: #0c5460; padding-left: 15px; }
-    .level-3 .row-label { font-weight: 400; color: #495057; padding-left: 30px; }
     
     .pagu-display {
         padding: 2px 8px;
@@ -178,11 +275,6 @@
     }
     .pagu-display-rpjmd { background: #d4edda; color: #155724; }
     .pagu-display-rkpd { background: #fff3cd; color: #856404; }
-    .pagu-display-total { background: #e8daef; color: #6c3483; }
-    
-    .text-danger { color: #dc3545; }
-    .text-success { color: #28a745; }
-    .text-muted { color: #6c757d; }
     
     .badge-kode {
         background: #e9ecef;
@@ -191,7 +283,11 @@
         padding: 2px 8px;
         border-radius: 10px;
         font-weight: normal;
+        font-family: monospace;
     }
+    .badge-kode.badge-rpjmd { background: #28a745; color: #fff; }
+    .badge-kode.badge-rkpd { background: #ffc107; color: #333; }
+    
     .badge-selisih {
         background: #f8d7da;
         color: #721c24;
@@ -204,16 +300,14 @@
         background: #d4edda;
         color: #155724;
     }
-    .badge-level {
-        font-size: 9px;
-        padding: 2px 8px;
-        border-radius: 10px;
-        font-weight: 600;
-        margin-right: 5px;
+    
+    .text-wrap {
+        white-space: normal;
+        word-wrap: break-word;
+        max-width: 150px;
     }
-    .badge-urusan { background: #cce5ff; color: #004085; }
-    .badge-bidang { background: #d1ecf1; color: #0c5460; }
-    .badge-program { background: #d4edda; color: #155724; }
+    .text-left { text-align: left !important; }
+    .text-center { text-align: center !important; }
     
     .btn-group-flex {
         display: flex;
@@ -223,9 +317,30 @@
         flex-wrap: nowrap;
     }
     
-    /* ============================================================
-       MODAL POSITION - DI ATAS HEADER
-       ============================================================ */
+    .empty-state {
+        text-align: center;
+        padding: 40px 0;
+        color: #6c757d;
+    }
+    .empty-state i {
+        font-size: 48px;
+        display: block;
+        color: #dee2e6;
+        margin-bottom: 15px;
+    }
+    
+    .detail-counter-badge {
+        display: inline-block;
+        background: #17a2b8;
+        color: #fff;
+        padding: 2px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+        margin-left: 10px;
+    }
+    
+    /* Modal */
     .modal.fixed-modal {
         position: fixed;
         top: 0;
@@ -247,7 +362,6 @@
         max-width: 95%;
         width: 95%;
     }
-    
     .preview-field { display: none; }
     
     .nav-tabs > li > a {
@@ -263,41 +377,6 @@
     .tab-content {
         padding: 15px 0;
     }
-    
-    /* Expand/Collapse */
-    .toggle-detail {
-        cursor: pointer;
-        color: #007bff;
-        font-size: 12px;
-        margin-left: 5px;
-    }
-    .toggle-detail:hover {
-        text-decoration: underline;
-    }
-    .detail-indikator {
-        display: none;
-        padding: 5px 0 5px 15px;
-    }
-    .detail-indikator.show {
-        display: block;
-    }
-    .detail-indikator .ind-item {
-        padding: 3px 0;
-        border-bottom: 1px dashed #e9ecef;
-        font-size: 11px;
-    }
-    .detail-indikator .ind-item:last-child {
-        border-bottom: none;
-    }
-    
-    /* No Hirarki */
-    .no-hirarki {
-        font-weight: 600;
-        font-size: 12px;
-    }
-    .no-hirarki .no-urusan { color: #1a5276; }
-    .no-hirarki .no-bidang { color: #0c5460; padding-left: 5px; }
-    .no-hirarki .no-program { color: #155724; padding-left: 10px; }
     
     /* Loading */
     .loading-overlay {
@@ -324,12 +403,29 @@
         .filter-row { flex-direction: column; gap: 15px; }
         .filter-select { width: 100%; }
         .modal-lg-custom { max-width: 98%; width: 98%; }
-        .table-konsistensi td { font-size: 10px; padding: 4px 4px; }
+        .table-konsistensi td { font-size: 9px; padding: 4px 4px; }
         .level-2 { padding-left: 15px !important; }
         .level-3 { padding-left: 30px !important; }
         .pagu-input-group .pagu-input { width: 100%; }
         .pagu-input-group .pagu-label { display: block; min-width: auto; }
         .modal.fixed-modal .modal-dialog { margin: 10px auto; }
+        .table-konsistensi th { font-size: 8px; padding: 4px 2px; }
+        .text-wrap { max-width: 80px; }
+        .indikator-detail-row.auto-filled {
+            padding-top: 45px;
+        }
+        .indikator-detail-row.auto-filled .auto-badge {
+            font-size: 9px;
+            padding: 2px 10px;
+            top: 4px;
+            left: 8px;
+        }
+        .indikator-detail-row .btn-remove-detail {
+            top: 3px;
+            right: 5px;
+            font-size: 12px;
+            padding: 2px 8px;
+        }
     }
 </style>
 
@@ -387,7 +483,9 @@
                             <option value="">-- Semua Tahun --</option>
                             <?php 
                             $currentYear = date('Y');
-                            for ($y = $currentYear; $y >= $currentYear - 10; $y--) { ?>
+                            $startYear = $currentYear - 5;
+                            $endYear = $currentYear + 5;
+                            for ($y = $startYear; $y <= $endYear; $y++) { ?>
                               <option value="<?= $y ?>" <?= ($TahunAktif == $y) ? 'selected' : '' ?>>
                                 <?= $y ?>
                               </option>
@@ -440,256 +538,275 @@
             <br>
 
             <!-- ============================================================
-TABEL DATA - HIRARKI 3 LEVEL DENGAN NOMOR ASLI NOMENKLATUR
-============================================================ -->
-<div class="table-responsive">
-  <table id="data-table-konsistensi" class="table table-striped table-bordered table-konsistensi">
-    <thead>
-      <tr>
-        <th style="width:60px; text-align:center;">No</th>
-        <th style="width:200px; text-align:center;">URUSAN/PROGRAM RPJMD</th>
-        <th style="width:180px; text-align:center;">INDIKATOR</th>
-        <th style="width:150px; text-align:center;">TARGET DAN SATUAN</th>
-        <th style="width:150px; text-align:center;">PAGU PROGRAM</th>
-        <th style="width:200px; text-align:center;">URUSAN/PROGRAM RKPD</th>
-        <th style="width:180px; text-align:center;">INDIKATOR</th>
-        <th style="width:150px; text-align:center;">PAGU PROGRAM</th>
-        <th style="width:130px; text-align:center;">SELISIH</th>
-        <th style="width:120px; text-align:center;">KETERANGAN</th>
-        <th style="width:140px; text-align:center;">PERANGKAT DAERAH</th>
-        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-        <th style="width:80px; text-align:center;">AKSI</th>
-        <?php } ?>
-      </tr>
-    </thead>
-    <tbody>
-    <?php if (!empty($KonsistensiData)) { ?>
-    <?php 
-    // Inisialisasi counter untuk urutan
-    $urusanCounter = 0;
-    $bidangCounter = [];
-    $programCounter = [];
-    $currentUrusan = '';
-    
-    foreach ($KonsistensiData as $row) { 
-      // Tentukan level
-      $hasProgram = !empty($row['program_rpjmd_kode']) || !empty($row['program_rpjmd_text']);
-      $hasBidang = !empty($row['bidang_urusan_rpjmd_kode']);
-      $hasUrusan = !empty($row['urusan_rpjmd_kode']);
-      
-      $level = 1; // Default: Urusan
-      if ($hasProgram) $level = 3;
-      elseif ($hasBidang) $level = 2;
-      
-      $levelClass = 'level-' . $level;
-      
-      // Tentukan no display
-      if ($level == 1) {
-          $noDisplay = $row['urusan_rpjmd_kode'] ?? '';
-          $urusanCounter++;
-          $currentUrusan = $row['urusan_rpjmd_kode'] ?? '';
-          $bidangCounter[$currentUrusan] = 0;
-          $programCounter[$currentUrusan] = [];
-      } elseif ($level == 2) {
-          $noDisplay = $row['bidang_urusan_rpjmd_kode'] ?? '';
-          if (!isset($bidangCounter[$currentUrusan])) {
-              $bidangCounter[$currentUrusan] = 0;
-          }
-          $bidangCounter[$currentUrusan]++;
-          $bidangKey = $row['bidang_urusan_rpjmd_kode'] ?? '';
-          if (!isset($programCounter[$bidangKey])) {
-              $programCounter[$bidangKey] = 0;
-          }
-      } else {
-          $noDisplay = $row['program_rpjmd_kode'] ?? '';
-          $bidangKey = $row['bidang_urusan_rpjmd_kode'] ?? '';
-          if (!isset($programCounter[$bidangKey])) {
-              $programCounter[$bidangKey] = 0;
-          }
-          $programCounter[$bidangKey]++;
-      }
-      
-      if ($level == 1) {
-          $rpjmdName = $row['urusan_rpjmd_nama'] ?? '-';
-          $rkpdName = $row['urusan_rkpd_nama'] ?? '-';
-          $paguRpjmd = $row['pagu_program_rpjmd'] ?? 0;
-          $paguRkpd = $row['pagu_program_rkpd'] ?? 0;
-          $badgeLevel = 'urusan';
-          $levelText = 'URUSAN';
-      } elseif ($level == 2) {
-          $rpjmdName = $row['bidang_rpjmd_nama'] ?? '-';
-          $rkpdName = $row['bidang_rkpd_nama'] ?? '-';
-          $paguRpjmd = $row['pagu_program_rpjmd'] ?? 0;
-          $paguRkpd = $row['pagu_program_rkpd'] ?? 0;
-          $badgeLevel = 'bidang';
-          $levelText = 'BIDANG';
-      } else {
-          $rpjmdName = $row['program_rpjmd_nama'] ?? '-';
-          $rkpdName = $row['program_rkpd_nama'] ?? '-';
-          $paguRpjmd = $row['pagu_program_rpjmd'] ?? 0;
-          $paguRkpd = $row['pagu_program_rkpd'] ?? 0;
-          $badgeLevel = 'program';
-          $levelText = 'PROGRAM';
-      }
-      
-      $selisih = ($paguRpjmd && $paguRkpd) ? $paguRkpd - $paguRpjmd : null;
-      ?>
-      <tr class="data-row <?= $levelClass ?>" data-id="<?= $row['id'] ?>" data-level="<?= $level ?>">
-        <td class="text-center no-hirarki" style="font-weight:bold; font-size:13px;">
-          <span class="no-<?= $badgeLevel ?>"><?= html_escape($noDisplay) ?></span>
-        </td>
-        
-        <!-- RPJMD -->
-        <td class="row-label">
-          <span class="badge-level badge-<?= $badgeLevel ?>">
-            <?= $levelText ?>
-          </span>
-          <?= nl2br(html_escape($rpjmdName)) ?>
-          <?php if (!empty($row['urusan_rpjmd_kode']) || !empty($row['bidang_urusan_rpjmd_kode']) || !empty($row['program_rpjmd_kode'])): ?>
-            <br>
-            <?php if (!empty($row['program_rpjmd_kode'])): ?>
-              <span class="badge-kode"><?= html_escape($row['program_rpjmd_kode']) ?></span>
-            <?php elseif (!empty($row['bidang_urusan_rpjmd_kode'])): ?>
-              <span class="badge-kode"><?= html_escape($row['bidang_urusan_rpjmd_kode']) ?></span>
-            <?php elseif (!empty($row['urusan_rpjmd_kode'])): ?>
-              <span class="badge-kode"><?= html_escape($row['urusan_rpjmd_kode']) ?></span>
-            <?php endif; ?>
-          <?php endif; ?>
-        </td>
-        
-        <!-- INDIKATOR RPJMD -->
-        <td class="text-indikator">
-          <?php if (!empty($row['rpjmd_details'])): ?>
-            <span class="toggle-detail" data-target="rpjmd-<?= $row['id'] ?>">
-              <i class="fa fa-plus-circle"></i> <?= count($row['rpjmd_details']) ?> indikator
-            </span>
-            <div class="detail-indikator" id="rpjmd-<?= $row['id'] ?>">
-              <?php foreach ($row['rpjmd_details'] as $d) { ?>
-                <div class="ind-item"><?= html_escape($d['indikator']) ?></div>
-              <?php } ?>
-            </div>
-          <?php else: ?>
-            <span class="text-muted">-</span>
-          <?php endif; ?>
-        </td>
-        
-        <!-- TARGET DAN SATUAN RPJMD -->
-        <td>
-          <?php if (!empty($row['rpjmd_details'])): ?>
-            <?php foreach ($row['rpjmd_details'] as $d) { ?>
-              <div style="margin-bottom:3px; padding-bottom:3px; border-bottom:1px dashed #f0f0f0;">
-                <?php if (!empty($d['target']) && !empty($d['satuan'])) { ?>
-                  <strong><?= html_escape($d['target']) ?></strong> <?= html_escape($d['satuan']) ?>
+            TABEL DATA
+            ============================================================ -->
+            <div class="table-responsive">
+              <table id="data-table-konsistensi" class="table table-striped table-bordered table-konsistensi">
+                <thead>
+                  <tr>
+                    <th rowspan="2" style="width:40px; vertical-align:middle; text-align:center;">NO</th>
+                    <th rowspan="2" style="min-width:160px; vertical-align:middle; text-align:center;">URUSAN/PROGRAM<br>RPJMD</th>
+                    <th colspan="4" class="header-rpjmd" style="text-align:center; vertical-align:middle;">
+                        RPJMD
+                    </th>
+                    <th rowspan="2" style="min-width:160px; vertical-align:middle; text-align:center;">URUSAN/PROGRAM<br>RKPD</th>
+                    <th colspan="4" class="header-rkpd" style="text-align:center; vertical-align:middle;">
+                        RKPD
+                    </th>
+                    <th rowspan="2" style="width:70px; vertical-align:middle; text-align:center;">SELISIH</th>
+                    <th rowspan="2" style="min-width:100px; vertical-align:middle; text-align:center;">KETERANGAN</th>
+                    <th rowspan="2" style="min-width:120px; vertical-align:middle; text-align:center;">PERANGKAT<br>DAERAH</th>
+                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                    <th rowspan="2" style="width:70px; vertical-align:middle; text-align:center;">AKSI</th>
+                    <?php } ?>
+                  </tr>
+                  <tr>
+                    <th class="sub-header" style="min-width:100px;">INDIKATOR</th>
+                    <th class="sub-header" style="min-width:80px;">TARGET</th>
+                    <th class="sub-header" style="min-width:80px;">SATUAN</th>
+                    <th class="sub-header" style="min-width:90px;">PAGU PROGRAM</th>
+                    <th class="sub-header" style="min-width:100px;">INDIKATOR</th>
+                    <th class="sub-header" style="min-width:80px;">TARGET</th>
+                    <th class="sub-header" style="min-width:80px;">SATUAN</th>
+                    <th class="sub-header" style="min-width:90px;">PAGU PROGRAM</th>
+                  </tr>
+                </thead>
+                <tbody>
+                <?php if (!empty($KonsistensiData)) { 
+                  $flatData = [];
+                  foreach ($KonsistensiData as $row) {
+                      $rpjmdDetails = $row['rpjmd_details'] ?? [];
+                      $rkpdDetails = $row['rkpd_details'] ?? [];
+                      $maxRows = max(count($rpjmdDetails), count($rkpdDetails), 1);
+                      
+                      for ($i = 0; $i < $maxRows; $i++) {
+                          $flatData[] = [
+                              'header' => $row,
+                              'rpjmd_detail' => isset($rpjmdDetails[$i]) ? $rpjmdDetails[$i] : null,
+                              'rkpd_detail' => isset($rkpdDetails[$i]) ? $rkpdDetails[$i] : null,
+                              'is_first' => ($i == 0),
+                              'rowspan' => $maxRows
+                          ];
+                      }
+                  }
+                  
+                  $rowNumber = 1;
+                  foreach ($flatData as $index => $item) { 
+                    $row = $item['header'];
+                    $rpjmdDetail = $item['rpjmd_detail'];
+                    $rkpdDetail = $item['rkpd_detail'];
+                    $isFirst = $item['is_first'];
+                    $rowspan = $item['rowspan'];
+                    
+                    $hasProgram = !empty($row['program_rpjmd_kode']) || !empty($row['program_rpjmd_text']);
+                    $hasBidang = !empty($row['bidang_urusan_rpjmd_kode']);
+                    $hasUrusan = !empty($row['urusan_rpjmd_kode']);
+                    
+                    $level = 1;
+                    if ($hasProgram) $level = 3;
+                    elseif ($hasBidang) $level = 2;
+                    
+                    $levelClass = 'level-' . $level;
+                    
+                    if ($level == 1) {
+                        $noDisplay = $row['urusan_rpjmd_kode'] ?? '';
+                        $rpjmdName = $row['urusan_rpjmd_nama'] ?? '-';
+                        $rkpdName = $row['urusan_rkpd_nama'] ?? '-';
+                    } elseif ($level == 2) {
+                        $noDisplay = $row['bidang_urusan_rpjmd_kode'] ?? '';
+                        $rpjmdName = $row['bidang_rpjmd_nama'] ?? '-';
+                        $rkpdName = $row['bidang_rkpd_nama'] ?? '-';
+                    } else {
+                        $noDisplay = $row['program_rpjmd_kode'] ?? '';
+                        $rpjmdName = $row['program_rpjmd_nama'] ?? '-';
+                        $rkpdName = $row['program_rkpd_nama'] ?? '-';
+                    }
+                    
+                    $paguRpjmd = $row['pagu_program_rpjmd'] ?? 0;
+                    $paguRkpd = $row['pagu_program_rkpd'] ?? 0;
+                    $selisih = ($paguRpjmd && $paguRkpd) ? $paguRkpd - $paguRpjmd : null;
+                    ?>
+                    <tr class="data-row <?= $levelClass ?>" data-id="<?= $row['id'] ?>" data-level="<?= $level ?>">
+                      <?php if ($isFirst) { ?>
+                        <td rowspan="<?= $rowspan ?>" class="text-center" style="font-weight:bold; font-size:12px; vertical-align:middle;">
+                          <?= html_escape($noDisplay) ?>
+                        </td>
+                      <?php } ?>
+                      
+                      <?php if ($isFirst) { ?>
+                        <td rowspan="<?= $rowspan ?>" class="row-label text-left" style="vertical-align:middle;">
+                          <?php 
+                          $kodeDisplay = '';
+                          if (!empty($row['program_rpjmd_kode'])) {
+                              $kodeDisplay = $row['program_rpjmd_kode'];
+                          } elseif (!empty($row['bidang_urusan_rpjmd_kode'])) {
+                              $kodeDisplay = $row['bidang_urusan_rpjmd_kode'];
+                          } elseif (!empty($row['urusan_rpjmd_kode'])) {
+                              $kodeDisplay = $row['urusan_rpjmd_kode'];
+                          }
+                          if ($kodeDisplay): ?>
+                            <span class="badge-kode badge-rpjmd"><?= html_escape($kodeDisplay) ?></span>
+                            <br>
+                          <?php endif; ?>
+                          <?= nl2br(html_escape($rpjmdName)) ?>
+                        </td>
+                      <?php } ?>
+                      
+                      <td class="text-indikator text-left">
+                        <?php if ($rpjmdDetail && !empty($rpjmdDetail['indikator'])): ?>
+                          <?= html_escape($rpjmdDetail['indikator']) ?>
+                        <?php else: ?>
+                          <span class="text-muted">-</span>
+                        <?php endif; ?>
+                      </td>
+                      
+                      <td class="text-left">
+                        <?php if ($rpjmdDetail && !empty($rpjmdDetail['target'])): ?>
+                          <strong><?= html_escape($rpjmdDetail['target']) ?></strong>
+                        <?php else: ?>
+                          <span class="text-muted">-</span>
+                        <?php endif; ?>
+                      </td>
+                      
+                      <td class="text-left">
+                        <?php if ($rpjmdDetail && !empty($rpjmdDetail['satuan'])): ?>
+                          <?= html_escape($rpjmdDetail['satuan']) ?>
+                        <?php else: ?>
+                          <span class="text-muted">-</span>
+                        <?php endif; ?>
+                      </td>
+                      
+                      <?php if ($isFirst) { ?>
+                        <td rowspan="<?= $rowspan ?>" class="text-pagu text-center" style="vertical-align:middle;">
+                          <?php if ($paguRpjmd > 0): ?>
+                            <span class="pagu-display pagu-display-rpjmd">
+                              <?= number_format($paguRpjmd, 0, ',', '.') ?>
+                            </span>
+                          <?php else: ?>
+                            <span class="text-muted">-</span>
+                          <?php endif; ?>
+                        </td>
+                      <?php } ?>
+                      
+                      <?php if ($isFirst) { ?>
+                        <td rowspan="<?= $rowspan ?>" class="row-label text-left" style="vertical-align:middle;">
+                          <?php 
+                          $kodeDisplay = '';
+                          if (!empty($row['program_rkpd_kode'])) {
+                              $kodeDisplay = $row['program_rkpd_kode'];
+                          } elseif (!empty($row['bidang_urusan_rkpd_kode'])) {
+                              $kodeDisplay = $row['bidang_urusan_rkpd_kode'];
+                          } elseif (!empty($row['urusan_rkpd_kode'])) {
+                              $kodeDisplay = $row['urusan_rkpd_kode'];
+                          }
+                          if ($kodeDisplay): ?>
+                            <span class="badge-kode badge-rkpd"><?= html_escape($kodeDisplay) ?></span>
+                            <br>
+                          <?php endif; ?>
+                          <?= nl2br(html_escape($rkpdName)) ?>
+                        </td>
+                      <?php } ?>
+                      
+                      <td class="text-indikator text-left">
+                        <?php if ($rkpdDetail && !empty($rkpdDetail['indikator'])): ?>
+                          <?= html_escape($rkpdDetail['indikator']) ?>
+                        <?php else: ?>
+                          <span class="text-muted">-</span>
+                        <?php endif; ?>
+                      </td>
+                      
+                      <td class="text-left">
+                        <?php if ($rkpdDetail && !empty($rkpdDetail['target'])): ?>
+                          <strong><?= html_escape($rkpdDetail['target']) ?></strong>
+                        <?php else: ?>
+                          <span class="text-muted">-</span>
+                        <?php endif; ?>
+                      </td>
+                      
+                      <td class="text-left">
+                        <?php if ($rkpdDetail && !empty($rkpdDetail['satuan'])): ?>
+                          <?= html_escape($rkpdDetail['satuan']) ?>
+                        <?php else: ?>
+                          <span class="text-muted">-</span>
+                        <?php endif; ?>
+                      </td>
+                      
+                      <?php if ($isFirst) { ?>
+                        <td rowspan="<?= $rowspan ?>" class="text-pagu text-center" style="vertical-align:middle;">
+                          <?php if ($paguRkpd > 0): ?>
+                            <span class="pagu-display pagu-display-rkpd">
+                              <?= number_format($paguRkpd, 0, ',', '.') ?>
+                            </span>
+                          <?php else: ?>
+                            <span class="text-muted">-</span>
+                          <?php endif; ?>
+                        </td>
+                      <?php } ?>
+                      
+                      <?php if ($isFirst) { ?>
+                        <td rowspan="<?= $rowspan ?>" class="text-center" style="vertical-align:middle;">
+                          <?php if ($selisih !== null): ?>
+                            <span class="badge-selisih <?= ($selisih < 0) ? '' : 'badge-selisih-plus' ?>">
+                              <?= ($selisih > 0 ? '+' : '') . number_format($selisih, 0, ',', '.') ?>
+                            </span>
+                          <?php else: ?>
+                            <span class="text-muted">-</span>
+                          <?php endif; ?>
+                        </td>
+                      <?php } ?>
+                      
+                      <?php if ($isFirst) { ?>
+                        <td rowspan="<?= $rowspan ?>" class="text-left text-wrap" style="vertical-align:middle;">
+                          <?= nl2br(html_escape($row['keterangan'] ?? '')) ?>
+                        </td>
+                      <?php } ?>
+                      
+                      <?php if ($isFirst) { ?>
+                        <td rowspan="<?= $rowspan ?>" class="text-left" style="vertical-align:middle;">
+                          <?= html_escape($row['perangkat_daerah'] ?? $row['instansi_nama'] ?? '') ?>
+                        </td>
+                      <?php } ?>
+                      
+                      <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                      <?php if ($isFirst) { ?>
+                        <td rowspan="<?= $rowspan ?>" class="text-center" style="vertical-align:middle;">
+                          <div class="btn-group-flex">
+                            <button class="btn btn-warning btn-sm BtnEdit" 
+                                    data-id="<?= html_escape($row['id']) ?>"
+                                    data-toggle="tooltip" title="Edit">
+                              <i class="notika-icon notika-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm BtnHapus" 
+                                    data-id="<?= html_escape($row['id']) ?>"
+                                    data-toggle="tooltip" title="Hapus">
+                              <i class="notika-icon notika-trash"></i>
+                            </button>
+                          </div>
+                        </td>
+                      <?php } ?>
+                      <?php } ?>
+                    </tr>
+                  <?php } ?>
                 <?php } else { ?>
-                  <span class="text-muted">-</span>
+                  <tr>
+                    <td colspan="<?= (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) ? '15' : '14' ?>" class="text-center" style="padding:40px 0;">
+                      <div class="empty-state">
+                        <i class="notika-icon notika-file"></i>
+                        <h4><b>Belum ada data</b></h4>
+                        <p class="text-muted">
+                          <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3 && !empty($KodeWilayah)) { ?>
+                            Klik tombol <strong>"Tambah Konsistensi Program"</strong> untuk mulai mengisi data.
+                          <?php } else { ?>
+                            Pilih wilayah terlebih dahulu untuk melihat data.
+                          <?php } ?>
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
                 <?php } ?>
-              </div>
-            <?php } ?>
-          <?php else: ?>
-            <span class="text-muted">-</span>
-          <?php endif; ?>
-        </td>
-        
-        <!-- PAGU RPJMD -->
-        <td class="text-pagu text-center">
-          <?php if ($paguRpjmd > 0): ?>
-            <span class="pagu-display pagu-display-rpjmd">
-              <?= number_format($paguRpjmd, 0, ',', '.') ?>
-            </span>
-          <?php else: ?>
-            <span class="text-muted">-</span>
-          <?php endif; ?>
-        </td>
-        
-        <!-- RKPD -->
-        <td class="row-label">
-          <?= nl2br(html_escape($rkpdName)) ?>
-          <?php if (!empty($row['urusan_rkpd_kode']) || !empty($row['bidang_urusan_rkpd_kode']) || !empty($row['program_rkpd_kode'])): ?>
-            <br>
-            <?php if (!empty($row['program_rkpd_kode'])): ?>
-              <span class="badge-kode"><?= html_escape($row['program_rkpd_kode']) ?></span>
-            <?php elseif (!empty($row['bidang_urusan_rkpd_kode'])): ?>
-              <span class="badge-kode"><?= html_escape($row['bidang_urusan_rkpd_kode']) ?></span>
-            <?php elseif (!empty($row['urusan_rkpd_kode'])): ?>
-              <span class="badge-kode"><?= html_escape($row['urusan_rkpd_kode']) ?></span>
-            <?php endif; ?>
-          <?php endif; ?>
-        </td>
-        
-        <!-- INDIKATOR RKPD -->
-        <td class="text-indikator">
-          <?php if (!empty($row['rkpd_details'])): ?>
-            <span class="toggle-detail" data-target="rkpd-<?= $row['id'] ?>">
-              <i class="fa fa-plus-circle"></i> <?= count($row['rkpd_details']) ?> indikator
-            </span>
-            <div class="detail-indikator" id="rkpd-<?= $row['id'] ?>">
-              <?php foreach ($row['rkpd_details'] as $d) { ?>
-                <div class="ind-item"><?= html_escape($d['indikator']) ?></div>
-              <?php } ?>
+                </tbody>
+              </table>
             </div>
-          <?php else: ?>
-            <span class="text-muted">-</span>
-          <?php endif; ?>
-        </td>
-        
-        <!-- PAGU RKPD -->
-        <td class="text-pagu text-center">
-          <?php if ($paguRkpd > 0): ?>
-            <span class="pagu-display pagu-display-rkpd">
-              <?= number_format($paguRkpd, 0, ',', '.') ?>
-            </span>
-          <?php else: ?>
-            <span class="text-muted">-</span>
-          <?php endif; ?>
-        </td>
-        
-        <!-- SELISIH -->
-        <td class="text-center">
-          <?php if ($selisih !== null): ?>
-            <span class="badge-selisih <?= ($selisih < 0) ? '' : 'badge-selisih-plus' ?>">
-              <?= ($selisih > 0 ? '+' : '') . number_format($selisih, 0, ',', '.') ?>
-            </span>
-          <?php else: ?>
-            <span class="text-muted">-</span>
-          <?php endif; ?>
-        </td>
-        
-        <!-- KETERANGAN -->
-        <td><?= nl2br(html_escape($row['keterangan'] ?? '')) ?></td>
-        
-        <!-- PERANGKAT DAERAH -->
-        <td><?= html_escape($row['perangkat_daerah'] ?? $row['instansi_nama'] ?? '') ?></td>
-        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-        <!-- AKSI -->
-        <td class="text-center">
-          <div class="btn-group-flex">
-            <button class="btn btn-warning btn-sm BtnEdit" 
-                    data-id="<?= html_escape($row['id']) ?>"
-                    data-toggle="tooltip" title="Edit">
-              <i class="notika-icon notika-edit"></i>
-            </button>
-            <button class="btn btn-danger btn-sm BtnHapus" 
-                    data-id="<?= html_escape($row['id']) ?>"
-                    data-toggle="tooltip" title="Hapus">
-              <i class="notika-icon notika-trash"></i>
-            </button>
-          </div>
-          <?php } ?>
-        </td>
-      </tr>
-    <?php } ?>
-    <?php } else { ?>
-      <tr>
-        <td colspan="12" class="text-center" style="padding:30px;">
-          <i class="notika-icon notika-info" style="font-size:24px; display:block;"></i>
-          <span style="font-size:16px; color:#999;">Belum ada data</span>
-          <br><small class="text-muted">Klik tombol "Tambah Konsistensi Program" untuk menambahkan data</small>
-        </td>
-      </tr>
-    <?php } ?>
-    </tbody>
-  </table>
-</div>
 
           </div>
         </div>
@@ -699,23 +816,20 @@ TABEL DATA - HIRARKI 3 LEVEL DENGAN NOMOR ASLI NOMENKLATUR
 </div>
 
 <!-- ================================================================
-MODAL INPUT - POSISI FIXED DI ATAS HEADER
+MODAL INPUT
 ================================================================ -->
 <div class="modal fade fixed-modal" id="ModalInput" role="dialog">
   <div class="modal-dialog modal-lg-custom">
     <div class="modal-content">
-      <div class="modal-header" style="background:#28a745; color:#fff;">
-        <button type="button" class="close" data-dismiss="modal" style="color:#fff;">&times;</button>
+      <div class="modal-header" style="background:#28a745; color:#fff; border-radius: 6px 6px 0 0;">
+        <button type="button" class="close" data-dismiss="modal" style="color:#fff; opacity:1;">&times;</button>
         <h4><b><i class="notika-icon bi-plus-lg"></i> Tambah Konsistensi Program</b></h4>
-        <small style="color:#fff;">Pagu hanya 1 (untuk level Bidang Urusan atau Program)</small>
+        <span id="IndikatorCounterBadge" class="detail-counter-badge">0 Indikator</span>
       </div>
 
       <div class="modal-body">
         <form id="FormInput">
 
-          <!-- ============================================================
-          HEADER: Instansi & Tahun
-          ============================================================ -->
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
@@ -734,7 +848,9 @@ MODAL INPUT - POSISI FIXED DI ATAS HEADER
                 <select name="tahun" class="form-control" id="InputTahun">
                   <?php 
                   $currentYear = date('Y');
-                  for ($y = $currentYear; $y >= $currentYear - 10; $y--) { ?>
+                  $startYear = $currentYear - 5;
+                  $endYear = $currentYear + 5;
+                  for ($y = $startYear; $y <= $endYear; $y++) { ?>
                     <option value="<?= $y ?>" <?= ($TahunAktif == $y) ? 'selected' : '' ?>>
                       <?= $y ?>
                     </option>
@@ -744,9 +860,6 @@ MODAL INPUT - POSISI FIXED DI ATAS HEADER
             </div>
           </div>
 
-          <!-- ============================================================
-          KOLOM RPJMD & RKPD
-          ============================================================ -->
           <div class="row">
             
             <!-- KOLOM RPJMD -->
@@ -754,10 +867,12 @@ MODAL INPUT - POSISI FIXED DI ATAS HEADER
               <div class="panel panel-primary">
                 <div class="panel-heading">
                   <h4 class="panel-title"><b>📋 URUSAN/PROGRAM RPJMD</b></h4>
+                  <small style="color:#155724; display:block; font-size:11px; margin-top:3px;">
+                    💡 Pilih Program untuk otomatis mengisi Indikator dari Program PD
+                  </small>
                 </div>
                 <div class="panel-body">
 
-                  <!-- Tabs: Nomenklatur / Manual -->
                   <ul class="nav nav-tabs" id="rpjmdTab">
                     <li class="active"><a href="#tab_rpjmd_nomenklatur" data-toggle="tab">📂 Pilih Nomenklatur</a></li>
                     <li><a href="#tab_rpjmd_manual" data-toggle="tab">✏️ Isi Manual</a></li>
@@ -765,7 +880,6 @@ MODAL INPUT - POSISI FIXED DI ATAS HEADER
 
                   <div class="tab-content">
 
-                    <!-- Tab Nomenklatur RPJMD -->
                     <div class="tab-pane fade in active" id="tab_rpjmd_nomenklatur">
                       <div class="nomenklatur-container">
                         <div class="breadcrumb-nomenklatur" style="margin-top:10px;">
@@ -800,18 +914,15 @@ MODAL INPUT - POSISI FIXED DI ATAS HEADER
                       </div>
                     </div>
 
-                    <!-- Tab Manual RPJMD -->
                     <div class="tab-pane fade" id="tab_rpjmd_manual">
                       <div class="manual-input-group" style="margin-top:10px;">
                         <div class="form-group">
                           <label><b>Kode Urusan</b></label>
                           <input type="text" class="form-control" id="urusan_manual_rpjmd" placeholder="Contoh: 1">
-                          <small class="text-muted">Contoh: 1, 2, 3, dst</small>
                         </div>
                         <div class="form-group">
                           <label><b>Kode Bidang Urusan</b></label>
                           <input type="text" class="form-control" id="bidang_manual_rpjmd" placeholder="Contoh: 1.01">
-                          <small class="text-muted">Contoh: 1.01, 1.02, 2.01, dst</small>
                         </div>
                         <div class="form-group">
                           <label><b>Program PD</b></label>
@@ -822,40 +933,22 @@ MODAL INPUT - POSISI FIXED DI ATAS HEADER
 
                   </div>
 
-                  <!-- ============================================================
-                  PAGU - HANYA 1
-                  ============================================================ -->
                   <div class="pagu-input-group">
                     <span class="pagu-label">💰 Pagu Program</span>
                     <span class="pagu-level-badge" style="font-size:10px; padding:2px 10px; border-radius:10px; background:#d4edda; color:#155724; margin-right:10px;">Rp</span>
                     <div class="pagu-input">
                       <input type="text" name="pagu_program_rpjmd" class="form-control rupiah" id="InputPaguRPJMD" placeholder="0">
                     </div>
-                    <small class="text-muted" style="display:block; margin-top:5px;">Pagu untuk level yang dipilih (Bidang Urusan atau Program)</small>
                   </div>
 
-                  <!-- Indikator RPJMD -->
                   <div class="form-group" style="margin-top:15px;">
-                    <label><b>Indikator, Target, dan Satuan</b></label>
-                    <div class="indikator-wrapper-rpjmd">
-                      <div class="indikator-row">
-                        <textarea name="indikator_rpjmd[]" class="form-control" placeholder="Indikator" rows="2"></textarea>
-                        <div class="row" style="margin-top:5px;">
-                          <div class="col-md-6">
-                            <input type="text" name="target_rpjmd[]" class="form-control" placeholder="Target">
-                          </div>
-                          <div class="col-md-6">
-                            <input type="text" name="satuan_rpjmd[]" class="form-control" placeholder="Satuan">
-                          </div>
-                        </div>
-                        <button type="button" class="btn btn-success btn-sm BtnAddIndikator" data-target="rpjmd">
-                          <i class="notika-icon bi-plus-lg"></i> Tambah Indikator
-                        </button>
-                      </div>
-                    </div>
+                    <label><b>Indikator, Target, dan Satuan RPJMD</b></label>
+                    <div id="rpjmdDetailContainer"></div>
+                    <button type="button" class="btn btn-success btn-sm" id="BtnTambahRpjmdDetail">
+                      <i class="notika-icon bi-plus-lg"></i> Tambah Indikator RPJMD
+                    </button>
                   </div>
 
-                  <!-- Hidden Fields -->
                   <div class="preview-field">
                     <input type="hidden" id="preview_urusan_rpjmd" value="">
                     <input type="hidden" id="preview_bidang_rpjmd" value="">
@@ -872,10 +965,12 @@ MODAL INPUT - POSISI FIXED DI ATAS HEADER
               <div class="panel panel-warning">
                 <div class="panel-heading">
                   <h4 class="panel-title"><b>📋 URUSAN/PROGRAM RKPD</b></h4>
+                  <small style="color:#856404; display:block; font-size:11px; margin-top:3px;">
+                    💡 Pilih Program untuk otomatis mengisi Indikator dari Program PD
+                  </small>
                 </div>
                 <div class="panel-body">
 
-                  <!-- Tabs: Nomenklatur / Manual -->
                   <ul class="nav nav-tabs" id="rkpdTab">
                     <li class="active"><a href="#tab_rkpd_nomenklatur" data-toggle="tab">📂 Pilih Nomenklatur</a></li>
                     <li><a href="#tab_rkpd_manual" data-toggle="tab">✏️ Isi Manual</a></li>
@@ -883,7 +978,6 @@ MODAL INPUT - POSISI FIXED DI ATAS HEADER
 
                   <div class="tab-content">
 
-                    <!-- Tab Nomenklatur RKPD -->
                     <div class="tab-pane fade in active" id="tab_rkpd_nomenklatur">
                       <div class="nomenklatur-container">
                         <div class="breadcrumb-nomenklatur" style="margin-top:10px;">
@@ -918,18 +1012,15 @@ MODAL INPUT - POSISI FIXED DI ATAS HEADER
                       </div>
                     </div>
 
-                    <!-- Tab Manual RKPD -->
                     <div class="tab-pane fade" id="tab_rkpd_manual">
                       <div class="manual-input-group" style="margin-top:10px;">
                         <div class="form-group">
                           <label><b>Kode Urusan</b></label>
                           <input type="text" class="form-control" id="urusan_manual_rkpd" placeholder="Contoh: 1">
-                          <small class="text-muted">Contoh: 1, 2, 3, dst</small>
                         </div>
                         <div class="form-group">
                           <label><b>Kode Bidang Urusan</b></label>
                           <input type="text" class="form-control" id="bidang_manual_rkpd" placeholder="Contoh: 1.01">
-                          <small class="text-muted">Contoh: 1.01, 1.02, 2.01, dst</small>
                         </div>
                         <div class="form-group">
                           <label><b>Program PD</b></label>
@@ -940,40 +1031,22 @@ MODAL INPUT - POSISI FIXED DI ATAS HEADER
 
                   </div>
 
-                  <!-- ============================================================
-                  PAGU - HANYA 1
-                  ============================================================ -->
                   <div class="pagu-input-group" style="border-left-color:#856404;">
                     <span class="pagu-label">💰 Pagu Program</span>
                     <span class="pagu-level-badge" style="font-size:10px; padding:2px 10px; border-radius:10px; background:#fff3cd; color:#856404; margin-right:10px;">Rp</span>
                     <div class="pagu-input">
                       <input type="text" name="pagu_program_rkpd" class="form-control rupiah" id="InputPaguRKPD" placeholder="0">
                     </div>
-                    <small class="text-muted" style="display:block; margin-top:5px;">Pagu untuk level yang dipilih (Bidang Urusan atau Program)</small>
                   </div>
 
-                  <!-- Indikator RKPD -->
                   <div class="form-group" style="margin-top:15px;">
-                    <label><b>Indikator, Target, dan Satuan</b></label>
-                    <div class="indikator-wrapper-rkpd">
-                      <div class="indikator-row">
-                        <textarea name="indikator_rkpd[]" class="form-control" placeholder="Indikator" rows="2"></textarea>
-                        <div class="row" style="margin-top:5px;">
-                          <div class="col-md-6">
-                            <input type="text" name="target_rkpd[]" class="form-control" placeholder="Target">
-                          </div>
-                          <div class="col-md-6">
-                            <input type="text" name="satuan_rkpd[]" class="form-control" placeholder="Satuan">
-                          </div>
-                        </div>
-                        <button type="button" class="btn btn-success btn-sm BtnAddIndikator" data-target="rkpd">
-                          <i class="notika-icon bi-plus-lg"></i> Tambah Indikator
-                        </button>
-                      </div>
-                    </div>
+                    <label><b>Indikator, Target, dan Satuan RKPD</b></label>
+                    <div id="rkpdDetailContainer"></div>
+                    <button type="button" class="btn btn-success btn-sm" id="BtnTambahRkpdDetail">
+                      <i class="notika-icon bi-plus-lg"></i> Tambah Indikator RKPD
+                    </button>
                   </div>
 
-                  <!-- Hidden Fields -->
                   <div class="preview-field">
                     <input type="hidden" id="preview_urusan_rkpd" value="">
                     <input type="hidden" id="preview_bidang_rkpd" value="">
@@ -987,17 +1060,11 @@ MODAL INPUT - POSISI FIXED DI ATAS HEADER
 
           </div>
 
-          <!-- ============================================================
-          KETERANGAN
-          ============================================================ -->
           <div class="form-group">
             <label><b>Keterangan</b></label>
             <textarea name="keterangan" class="form-control" id="InputKeterangan" rows="2" placeholder="Keterangan..."></textarea>
           </div>
 
-          <!-- ============================================================
-          TOMBOL
-          ============================================================ -->
           <div class="btn-group-center" style="display:flex; justify-content:center; gap:10px; margin-top:15px;">
             <button type="button" class="btn btn-success notika-btn-success" id="BtnSimpan"><b>SIMPAN</b></button>
             <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
@@ -1010,24 +1077,21 @@ MODAL INPUT - POSISI FIXED DI ATAS HEADER
 </div>
 
 <!-- ================================================================
-MODAL EDIT - POSISI FIXED DI ATAS HEADER
+MODAL EDIT
 ================================================================ -->
 <div class="modal fade fixed-modal" id="ModalEdit" role="dialog">
   <div class="modal-dialog modal-lg-custom">
     <div class="modal-content">
-      <div class="modal-header" style="background:#ffc107; color:#333;">
+      <div class="modal-header" style="background:#ffc107; color:#333; border-radius: 6px 6px 0 0;">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
         <h4><b><i class="notika-icon notika-edit"></i> Edit Konsistensi Program</b></h4>
-        <small>Pagu hanya 1 (untuk level Bidang Urusan atau Program)</small>
+        <span id="EditIndikatorCounterBadge" class="detail-counter-badge">0 Indikator</span>
       </div>
 
       <div class="modal-body">
         <form id="FormEdit">
           <input type="hidden" name="id" id="EditId">
 
-          <!-- ============================================================
-          HEADER: Instansi & Tahun
-          ============================================================ -->
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
@@ -1046,7 +1110,9 @@ MODAL EDIT - POSISI FIXED DI ATAS HEADER
                 <select name="tahun" id="EditTahun" class="form-control">
                   <?php 
                   $currentYear = date('Y');
-                  for ($y = $currentYear; $y >= $currentYear - 10; $y--) { ?>
+                  $startYear = $currentYear - 5;
+                  $endYear = $currentYear + 5;
+                  for ($y = $startYear; $y <= $endYear; $y++) { ?>
                     <option value="<?= $y ?>"><?= $y ?></option>
                   <?php } ?>
                 </select>
@@ -1054,16 +1120,15 @@ MODAL EDIT - POSISI FIXED DI ATAS HEADER
             </div>
           </div>
 
-          <!-- ============================================================
-          KOLOM RPJMD & RKPD
-          ============================================================ -->
           <div class="row">
             
-            <!-- KOLOM RPJMD -->
             <div class="col-md-6">
               <div class="panel panel-primary">
                 <div class="panel-heading">
                   <h4 class="panel-title"><b>📋 URUSAN/PROGRAM RPJMD</b></h4>
+                  <small style="color:#155724; display:block; font-size:11px; margin-top:3px;">
+                    💡 Ganti Program untuk otomatis mengisi Indikator dari Program PD
+                  </small>
                 </div>
                 <div class="panel-body">
 
@@ -1074,7 +1139,6 @@ MODAL EDIT - POSISI FIXED DI ATAS HEADER
 
                   <div class="tab-content">
 
-                    <!-- Tab Nomenklatur RPJMD Edit -->
                     <div class="tab-pane fade in active" id="tab_rpjmd_nomenklatur_edit">
                       <div class="nomenklatur-container">
                         <div class="breadcrumb-nomenklatur" style="margin-top:10px;">
@@ -1109,7 +1173,6 @@ MODAL EDIT - POSISI FIXED DI ATAS HEADER
                       </div>
                     </div>
 
-                    <!-- Tab Manual RPJMD Edit -->
                     <div class="tab-pane fade" id="tab_rpjmd_manual_edit">
                       <div class="manual-input-group" style="margin-top:10px;">
                         <div class="form-group">
@@ -1129,9 +1192,6 @@ MODAL EDIT - POSISI FIXED DI ATAS HEADER
 
                   </div>
 
-                  <!-- ============================================================
-                  PAGU - HANYA 1
-                  ============================================================ -->
                   <div class="pagu-input-group">
                     <span class="pagu-label">💰 Pagu Program</span>
                     <span class="pagu-level-badge" style="font-size:10px; padding:2px 10px; border-radius:10px; background:#d4edda; color:#155724; margin-right:10px;">Rp</span>
@@ -1140,12 +1200,11 @@ MODAL EDIT - POSISI FIXED DI ATAS HEADER
                     </div>
                   </div>
 
-                  <!-- Indikator RPJMD -->
                   <div class="form-group" style="margin-top:15px;">
-                    <label><b>Indikator, Target, dan Satuan</b></label>
-                    <div class="indikator-wrapper-rpjmd-edit"></div>
-                    <button type="button" class="btn btn-success btn-sm BtnAddIndikatorEdit" data-target="rpjmd">
-                      <i class="notika-icon bi-plus-lg"></i> Tambah Indikator
+                    <label><b>Indikator, Target, dan Satuan RPJMD</b></label>
+                    <div id="rpjmdDetailContainerEdit"></div>
+                    <button type="button" class="btn btn-success btn-sm" id="BtnTambahRpjmdDetailEdit">
+                      <i class="notika-icon bi-plus-lg"></i> Tambah Indikator RPJMD
                     </button>
                   </div>
 
@@ -1160,11 +1219,13 @@ MODAL EDIT - POSISI FIXED DI ATAS HEADER
               </div>
             </div>
 
-            <!-- KOLOM RKPD -->
             <div class="col-md-6">
               <div class="panel panel-warning">
                 <div class="panel-heading">
                   <h4 class="panel-title"><b>📋 URUSAN/PROGRAM RKPD</b></h4>
+                  <small style="color:#856404; display:block; font-size:11px; margin-top:3px;">
+                    💡 Ganti Program untuk otomatis mengisi Indikator dari Program PD
+                  </small>
                 </div>
                 <div class="panel-body">
 
@@ -1175,7 +1236,6 @@ MODAL EDIT - POSISI FIXED DI ATAS HEADER
 
                   <div class="tab-content">
 
-                    <!-- Tab Nomenklatur RKPD Edit -->
                     <div class="tab-pane fade in active" id="tab_rkpd_nomenklatur_edit">
                       <div class="nomenklatur-container">
                         <div class="breadcrumb-nomenklatur" style="margin-top:10px;">
@@ -1210,7 +1270,6 @@ MODAL EDIT - POSISI FIXED DI ATAS HEADER
                       </div>
                     </div>
 
-                    <!-- Tab Manual RKPD Edit -->
                     <div class="tab-pane fade" id="tab_rkpd_manual_edit">
                       <div class="manual-input-group" style="margin-top:10px;">
                         <div class="form-group">
@@ -1230,9 +1289,6 @@ MODAL EDIT - POSISI FIXED DI ATAS HEADER
 
                   </div>
 
-                  <!-- ============================================================
-                  PAGU - HANYA 1
-                  ============================================================ -->
                   <div class="pagu-input-group" style="border-left-color:#856404;">
                     <span class="pagu-label">💰 Pagu Program</span>
                     <span class="pagu-level-badge" style="font-size:10px; padding:2px 10px; border-radius:10px; background:#fff3cd; color:#856404; margin-right:10px;">Rp</span>
@@ -1241,12 +1297,11 @@ MODAL EDIT - POSISI FIXED DI ATAS HEADER
                     </div>
                   </div>
 
-                  <!-- Indikator RKPD -->
                   <div class="form-group" style="margin-top:15px;">
-                    <label><b>Indikator, Target, dan Satuan</b></label>
-                    <div class="indikator-wrapper-rkpd-edit"></div>
-                    <button type="button" class="btn btn-success btn-sm BtnAddIndikatorEdit" data-target="rkpd">
-                      <i class="notika-icon bi-plus-lg"></i> Tambah Indikator
+                    <label><b>Indikator, Target, dan Satuan RKPD</b></label>
+                    <div id="rkpdDetailContainerEdit"></div>
+                    <button type="button" class="btn btn-success btn-sm" id="BtnTambahRkpdDetailEdit">
+                      <i class="notika-icon bi-plus-lg"></i> Tambah Indikator RKPD
                     </button>
                   </div>
 
@@ -1263,17 +1318,11 @@ MODAL EDIT - POSISI FIXED DI ATAS HEADER
 
           </div>
 
-          <!-- ============================================================
-          KETERANGAN
-          ============================================================ -->
           <div class="form-group">
             <label><b>Keterangan</b></label>
             <textarea name="keterangan" id="EditKeterangan" class="form-control" rows="2"></textarea>
           </div>
 
-          <!-- ============================================================
-          TOMBOL
-          ============================================================ -->
           <div class="btn-group-center" style="display:flex; justify-content:center; gap:10px; margin-top:15px;">
             <button type="button" class="btn btn-success notika-btn-success" id="BtnUpdate"><b>UPDATE</b></button>
             <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
@@ -1286,7 +1335,7 @@ MODAL EDIT - POSISI FIXED DI ATAS HEADER
 </div>
 
 <!-- ================================================================
-JAVASCRIPT - VERSION WITH FIXES
+JAVASCRIPT
 ================================================================ -->
 <script src="../js/vendor/jquery-1.12.4.min.js"></script>
 <script src="../js/bootstrap.min.js"></script>
@@ -1300,12 +1349,80 @@ var BaseURL = '<?= base_url() ?>';
 var CSRF_TOKEN = '<?= $this->security->get_csrf_hash() ?>';
 var CSRF_NAME = '<?= $this->security->get_csrf_token_name() ?>';
 var KODE_WILAYAH = '<?= addslashes($KodeWilayah ?? '') ?>';
+var TAHUN_AKTIF = '<?= addslashes($TahunAktif ?? date('Y')) ?>';
 
 // Cache nomenklatur
 var nomenklaturCache = {};
 
 // ============================================================
-// FUNGSI GET NOMENKLATUR
+// HELPER FUNCTIONS
+// ============================================================
+function escapeHtml(text) {
+    if (text === null || text === undefined) return '';
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function showNotification(message, type) {
+    $('#notification-toast').remove();
+    
+    var bgColor = '#28a745';
+    var icon = '✅';
+    if (type === 'error') {
+        bgColor = '#dc3545';
+        icon = '❌';
+    } else if (type === 'info') {
+        bgColor = '#17a2b8';
+        icon = 'ℹ️';
+    } else if (type === 'warning') {
+        bgColor = '#ffc107';
+        icon = '⚠️';
+    }
+    
+    var html = `
+        <div id="notification-toast" style="
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 99999;
+            background: ${bgColor};
+            color: #fff;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            font-size: 14px;
+            max-width: 450px;
+            animation: slideInRight 0.5s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        ">
+            <span style="font-size:20px;">${icon}</span>
+            <span>${message}</span>
+            <button onclick="$('#notification-toast').remove()" style="
+                background: none;
+                border: none;
+                color: #fff;
+                font-size: 18px;
+                cursor: pointer;
+                margin-left: 10px;
+            ">&times;</button>
+        </div>
+    `;
+    
+    $('body').append(html);
+    
+    setTimeout(function() {
+        $('#notification-toast').fadeOut(500, function() { $(this).remove(); });
+    }, 5000);
+}
+
+// ============================================================
+// GET NOMENKLATUR
 // ============================================================
 function getNomenklaturProgramPD(level, parentKode, callback) {
     var cacheKey = 'level' + level + '_' + (parentKode || 'root');
@@ -1336,96 +1453,7 @@ function getNomenklaturProgramPD(level, parentKode, callback) {
 }
 
 // ============================================================
-// ✅ FIX: UPDATE PATH DISPLAY - Dengan pengecekan elemen
-// ============================================================
-function updatePathDisplay(prefix) {
-    // AMBIL DARI DROPDOWN
-    var urusanVal = $('#' + prefix + '_select_urusan').val() || '';
-    var urusanText = $('#' + prefix + '_select_urusan option:selected').text() || '';
-    
-    var bidangVal = $('#' + prefix + '_select_bidang').val() || '';
-    var bidangText = $('#' + prefix + '_select_bidang option:selected').text() || '';
-    
-    var programVal = $('#' + prefix + '_select_program').val() || '';
-    var programTextSel = $('#' + prefix + '_select_program option:selected').text() || '';
-
-    console.log('🔍 updatePathDisplay - ' + prefix);
-    console.log('  urusanVal:', urusanVal);
-    console.log('  bidangVal:', bidangVal);
-    console.log('  programVal:', programVal);
-
-    // ============================================================
-    // TENTUKAN TYPE
-    // ============================================================
-    var isRpjmd = prefix.indexOf('rpjmd') !== -1;
-    var type = isRpjmd ? 'rpjmd' : 'rkpd';
-    var editSuffix = prefix.indexOf('_edit') !== -1 ? '_edit' : '';
-    
-    // ============================================================
-    // ✅ FIX: UPDATE PREVIEW FIELDS - CEK ELEMEN EXIST
-    // ============================================================
-    // RPJMD
-    if (type === 'rpjmd') {
-        if (editSuffix) {
-            // Edit mode - CEK ELEMEN EXIST
-            var elUrusan = $('#preview_urusan_rpjmd_edit');
-            var elBidang = $('#preview_bidang_rpjmd_edit');
-            var elProgram = $('#preview_program_rpjmd_edit');
-            var elProgramText = $('#preview_program_text_rpjmd_edit');
-            
-            if (elUrusan.length > 0) elUrusan.val(urusanVal);
-            if (elBidang.length > 0) elBidang.val(bidangVal);
-            if (elProgram.length > 0) elProgram.val(programVal);
-            if (elProgramText.length > 0 && programVal) {
-                elProgramText.val(programTextSel || '');
-            }
-        } else {
-            // Input mode
-            $('#preview_urusan_rpjmd').val(urusanVal);
-            $('#preview_bidang_rpjmd').val(bidangVal);
-            $('#preview_program_rpjmd').val(programVal);
-            if (programVal) {
-                $('#preview_program_text_rpjmd').val(programTextSel || '');
-            }
-        }
-    }
-    
-    // RKPD
-    if (type === 'rkpd') {
-        if (editSuffix) {
-            var elUrusan = $('#preview_urusan_rkpd_edit');
-            var elBidang = $('#preview_bidang_rkpd_edit');
-            var elProgram = $('#preview_program_rkpd_edit');
-            var elProgramText = $('#preview_program_text_rkpd_edit');
-            
-            if (elUrusan.length > 0) elUrusan.val(urusanVal);
-            if (elBidang.length > 0) elBidang.val(bidangVal);
-            if (elProgram.length > 0) elProgram.val(programVal);
-            if (elProgramText.length > 0 && programVal) {
-                elProgramText.val(programTextSel || '');
-            }
-        } else {
-            $('#preview_urusan_rkpd').val(urusanVal);
-            $('#preview_bidang_rkpd').val(bidangVal);
-            $('#preview_program_rkpd').val(programVal);
-            if (programVal) {
-                $('#preview_program_text_rkpd').val(programTextSel || '');
-            }
-        }
-    }
-
-    console.log('✅ PREVIEW FIELDS - ' + prefix + ':');
-    console.log('  preview_urusan:', type === 'rpjmd' ? 
-        (editSuffix ? $('#preview_urusan_rpjmd_edit').val() : $('#preview_urusan_rpjmd').val()) : 
-        (editSuffix ? $('#preview_urusan_rkpd_edit').val() : $('#preview_urusan_rkpd').val()));
-    console.log('  preview_program:', type === 'rpjmd' ? 
-        (editSuffix ? $('#preview_program_rpjmd_edit').val() : $('#preview_program_rpjmd').val()) : 
-        (editSuffix ? $('#preview_program_rkpd_edit').val() : $('#preview_program_rkpd').val()));
-}
-
-
-// ============================================================
-// FUNGSI LOAD LEVEL - FIXED
+// LOAD LEVEL NOMENKLATUR
 // ============================================================
 function loadLevel(prefix, level, parentKode) {
     var selectId = prefix + '_select_' + 
@@ -1461,15 +1489,59 @@ function loadLevel(prefix, level, parentKode) {
 }
 
 // ============================================================
-// FUNGSI LOAD EDIT NOMENKLATUR - FIXED
+// UPDATE PATH DISPLAY
+// ============================================================
+function updatePathDisplay(prefix) {
+    var urusanVal = $('#' + prefix + '_select_urusan').val() || '';
+    var bidangVal = $('#' + prefix + '_select_bidang').val() || '';
+    var programVal = $('#' + prefix + '_select_program').val() || '';
+    var programTextSel = $('#' + prefix + '_select_program option:selected').text() || '';
+
+    var isRpjmd = prefix.indexOf('rpjmd') !== -1;
+    var type = isRpjmd ? 'rpjmd' : 'rkpd';
+    var editSuffix = prefix.indexOf('_edit') !== -1 ? '_edit' : '';
+    
+    if (type === 'rpjmd') {
+        if (editSuffix) {
+            $('#preview_urusan_rpjmd_edit').val(urusanVal);
+            $('#preview_bidang_rpjmd_edit').val(bidangVal);
+            $('#preview_program_rpjmd_edit').val(programVal);
+            if (programVal) {
+                $('#preview_program_text_rpjmd_edit').val(programTextSel || '');
+            }
+        } else {
+            $('#preview_urusan_rpjmd').val(urusanVal);
+            $('#preview_bidang_rpjmd').val(bidangVal);
+            $('#preview_program_rpjmd').val(programVal);
+            if (programVal) {
+                $('#preview_program_text_rpjmd').val(programTextSel || '');
+            }
+        }
+    }
+    
+    if (type === 'rkpd') {
+        if (editSuffix) {
+            $('#preview_urusan_rkpd_edit').val(urusanVal);
+            $('#preview_bidang_rkpd_edit').val(bidangVal);
+            $('#preview_program_rkpd_edit').val(programVal);
+            if (programVal) {
+                $('#preview_program_text_rkpd_edit').val(programTextSel || '');
+            }
+        } else {
+            $('#preview_urusan_rkpd').val(urusanVal);
+            $('#preview_bidang_rkpd').val(bidangVal);
+            $('#preview_program_rkpd').val(programVal);
+            if (programVal) {
+                $('#preview_program_text_rkpd').val(programTextSel || '');
+            }
+        }
+    }
+}
+
+// ============================================================
+// LOAD EDIT NOMENKLATUR
 // ============================================================
 function loadEditNomenklatur(prefix, kodeUrusan, kodeBidang, kodeProgram, programText) {
-    console.log('📂 loadEditNomenklatur -', prefix);
-    console.log('  kodeUrusan:', kodeUrusan);
-    console.log('  kodeBidang:', kodeBidang);
-    console.log('  kodeProgram:', kodeProgram);
-    console.log('  programText:', programText);
-    
     var selectUrusan = $('#' + prefix + '_select_urusan');
     var selectBidang = $('#' + prefix + '_select_bidang');
     var selectProgram = $('#' + prefix + '_select_program');
@@ -1482,18 +1554,15 @@ function loadEditNomenklatur(prefix, kodeUrusan, kodeBidang, kodeProgram, progra
     var type = isRpjmd ? 'rpjmd' : 'rkpd';
     var editSuffix = prefix.indexOf('_edit') !== -1 ? '_edit' : '';
     
-    // Set manual fields
     $('#urusan_manual' + editSuffix + '_' + type).val(kodeUrusan || '');
     $('#bidang_manual' + editSuffix + '_' + type).val(kodeBidang || '');
     $('#program_manual' + editSuffix + '_' + type).val(programText || '');
 
-    // Jika tidak ada kode urusan, tampilkan kosong
     if (!kodeUrusan) {
         loadLevel(prefix, 1, '');
         return;
     }
 
-    // Load Urusan
     getNomenklaturProgramPD(1, '', function(res) {
         var options = '<option value="">-- Pilih Urusan --</option>';
         if (res && res.length > 0) {
@@ -1539,82 +1608,490 @@ function loadEditNomenklatur(prefix, kodeUrusan, kodeBidang, kodeProgram, progra
 }
 
 // ============================================================
-// FUNGSI RENDER INDIKATOR EDIT
+// FUNGSI TAMBAH INDIKATOR - DENGAN AUTO-FILL
 // ============================================================
-function renderIndikatorEdit(jenis, details) {
-    var wrapper = jenis == 'rpjmd' ? 
-        '.indikator-wrapper-rpjmd-edit' : 
-        '.indikator-wrapper-rkpd-edit';
+function addRpjmdDetailRow(data) {
+    var id = data ? data.id : 0;
+    var indikator = data ? data.indikator : '';
+    var target = data ? data.target : '';
+    var satuan = data ? data.satuan : '';
+    var isAutoFilled = data ? data.auto_filled : false;
     
-    var container = $(wrapper);
-    container.html('');
+    var autoClass = isAutoFilled ? 'auto-filled' : '';
+    var autoBadge = isAutoFilled ? '<span class="auto-badge">📥 Dari Program PD</span>' : '';
+    var autoSource = isAutoFilled ? '<span class="auto-source">📋 Data otomatis dari Program PD</span>' : '';
     
-    if (details && details.length > 0) {
-        $.each(details, function(i, item) {
-            var row = `
-                <div class="indikator-row">
-                    <textarea name="indikator_${jenis}[]" class="form-control" rows="2">${escapeHtml(item.indikator || '')}</textarea>
-                    <div class="row" style="margin-top:5px;">
-                        <div class="col-md-6">
-                            <input type="text" name="target_${jenis}[]" class="form-control" value="${escapeHtml(item.target || '')}" placeholder="Target">
-                        </div>
-                        <div class="col-md-6">
-                            <input type="text" name="satuan_${jenis}[]" class="form-control" value="${escapeHtml(item.satuan || '')}" placeholder="Satuan">
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-danger btn-sm BtnRemoveIndikator" style="margin-top:5px;">
-                        <i class="notika-icon notika-trash"></i> Hapus
-                    </button>
+    var html = `
+        <div class="indikator-detail-row ${autoClass}">
+            <input type="hidden" class="detail-row-id" value="${id}">
+            ${autoBadge}
+            <button type="button" class="btn btn-danger btn-sm btn-remove-detail btn-remove-rpjmd-detail" title="Hapus Indikator">
+                <i class="notika-icon notika-trash"></i>
+            </button>
+            <div class="row row-fields" style="margin-top: ${isAutoFilled ? '5px' : '0'};">
+                <div class="col-md-12">
+                    <span class="field-label">Indikator Outcome</span>
+                    <input type="text" name="rpjmd_indikator[]" class="form-control" placeholder="Indikator RPJMD" value="${escapeHtml(indikator)}">
                 </div>
-            `;
-            container.append(row);
-        });
-    } else {
-        container.html(`
-            <div class="indikator-row">
-                <textarea name="indikator_${jenis}[]" class="form-control" rows="2" placeholder="Indikator"></textarea>
-                <div class="row" style="margin-top:5px;">
-                    <div class="col-md-6">
-                        <input type="text" name="target_${jenis}[]" class="form-control" placeholder="Target">
-                    </div>
-                    <div class="col-md-6">
-                        <input type="text" name="satuan_${jenis}[]" class="form-control" placeholder="Satuan">
-                    </div>
-                </div>
-                <button type="button" class="btn btn-success btn-sm BtnAddIndikatorEdit" data-target="${jenis}">
-                    <i class="notika-icon bi-plus-lg"></i> Tambah Indikator
-                </button>
             </div>
-        `);
-    }
+            <div class="row row-fields" style="margin-top:8px;">
+                <div class="col-md-6">
+                    <span class="field-label">Target</span>
+                    <input type="text" name="rpjmd_target[]" class="form-control" placeholder="Target" value="${escapeHtml(target)}">
+                </div>
+                <div class="col-md-6">
+                    <span class="field-label">Satuan</span>
+                    <input type="text" name="rpjmd_satuan[]" class="form-control" placeholder="Satuan" value="${escapeHtml(satuan)}">
+                </div>
+            </div>
+            ${autoSource}
+        </div>
+    `;
+    
+    $('#rpjmdDetailContainer').append(html);
+    updateIndikatorCounter();
+}
+
+function addRkpdDetailRow(data) {
+    var id = data ? data.id : 0;
+    var indikator = data ? data.indikator : '';
+    var target = data ? data.target : '';
+    var satuan = data ? data.satuan : '';
+    var isAutoFilled = data ? data.auto_filled : false;
+    
+    var autoClass = isAutoFilled ? 'auto-filled' : '';
+    var autoBadge = isAutoFilled ? '<span class="auto-badge">📥 Dari Program PD</span>' : '';
+    var autoSource = isAutoFilled ? '<span class="auto-source">📋 Data otomatis dari Program PD</span>' : '';
+    
+    var html = `
+        <div class="indikator-detail-row ${autoClass}">
+            <input type="hidden" class="detail-row-id" value="${id}">
+            ${autoBadge}
+            <button type="button" class="btn btn-danger btn-sm btn-remove-detail btn-remove-rkpd-detail" title="Hapus Indikator">
+                <i class="notika-icon notika-trash"></i>
+            </button>
+            <div class="row row-fields" style="margin-top: ${isAutoFilled ? '5px' : '0'};">
+                <div class="col-md-12">
+                    <span class="field-label">Indikator Outcome</span>
+                    <input type="text" name="rkpd_indikator[]" class="form-control" placeholder="Indikator RKPD" value="${escapeHtml(indikator)}">
+                </div>
+            </div>
+            <div class="row row-fields" style="margin-top:8px;">
+                <div class="col-md-6">
+                    <span class="field-label">Target</span>
+                    <input type="text" name="rkpd_target[]" class="form-control" placeholder="Target" value="${escapeHtml(target)}">
+                </div>
+                <div class="col-md-6">
+                    <span class="field-label">Satuan</span>
+                    <input type="text" name="rkpd_satuan[]" class="form-control" placeholder="Satuan" value="${escapeHtml(satuan)}">
+                </div>
+            </div>
+            ${autoSource}
+        </div>
+    `;
+    
+    $('#rkpdDetailContainer').append(html);
+    updateIndikatorCounter();
+}
+
+function addRpjmdDetailEditRow(data) {
+    var id = data ? data.id : 0;
+    var indikator = data ? data.indikator : '';
+    var target = data ? data.target : '';
+    var satuan = data ? data.satuan : '';
+    var isAutoFilled = data ? data.auto_filled : false;
+    
+    var autoClass = isAutoFilled ? 'auto-filled' : '';
+    var autoBadge = isAutoFilled ? '<span class="auto-badge">📥 Dari Program PD</span>' : '';
+    var autoSource = isAutoFilled ? '<span class="auto-source">📋 Data otomatis dari Program PD</span>' : '';
+    
+    var html = `
+        <div class="indikator-detail-row ${autoClass}">
+            <input type="hidden" class="detail-row-id" value="${id}">
+            ${autoBadge}
+            <button type="button" class="btn btn-danger btn-sm btn-remove-detail btn-remove-rpjmd-detail-edit" title="Hapus Indikator">
+                <i class="notika-icon notika-trash"></i>
+            </button>
+            <div class="row row-fields" style="margin-top: ${isAutoFilled ? '5px' : '0'};">
+                <div class="col-md-12">
+                    <span class="field-label">Indikator Outcome</span>
+                    <input type="text" name="rpjmd_indikator_edit[]" class="form-control" placeholder="Indikator RPJMD" value="${escapeHtml(indikator)}">
+                </div>
+            </div>
+            <div class="row row-fields" style="margin-top:8px;">
+                <div class="col-md-6">
+                    <span class="field-label">Target</span>
+                    <input type="text" name="rpjmd_target_edit[]" class="form-control" placeholder="Target" value="${escapeHtml(target)}">
+                </div>
+                <div class="col-md-6">
+                    <span class="field-label">Satuan</span>
+                    <input type="text" name="rpjmd_satuan_edit[]" class="form-control" placeholder="Satuan" value="${escapeHtml(satuan)}">
+                </div>
+            </div>
+            ${autoSource}
+        </div>
+    `;
+    
+    $('#rpjmdDetailContainerEdit').append(html);
+    updateEditIndikatorCounter();
+}
+
+function addRkpdDetailEditRow(data) {
+    var id = data ? data.id : 0;
+    var indikator = data ? data.indikator : '';
+    var target = data ? data.target : '';
+    var satuan = data ? data.satuan : '';
+    var isAutoFilled = data ? data.auto_filled : false;
+    
+    var autoClass = isAutoFilled ? 'auto-filled' : '';
+    var autoBadge = isAutoFilled ? '<span class="auto-badge">📥 Dari Program PD</span>' : '';
+    var autoSource = isAutoFilled ? '<span class="auto-source">📋 Data otomatis dari Program PD</span>' : '';
+    
+    var html = `
+        <div class="indikator-detail-row ${autoClass}">
+            <input type="hidden" class="detail-row-id" value="${id}">
+            ${autoBadge}
+            <button type="button" class="btn btn-danger btn-sm btn-remove-detail btn-remove-rkpd-detail-edit" title="Hapus Indikator">
+                <i class="notika-icon notika-trash"></i>
+            </button>
+            <div class="row row-fields" style="margin-top: ${isAutoFilled ? '5px' : '0'};">
+                <div class="col-md-12">
+                    <span class="field-label">Indikator Outcome</span>
+                    <input type="text" name="rkpd_indikator_edit[]" class="form-control" placeholder="Indikator RKPD" value="${escapeHtml(indikator)}">
+                </div>
+            </div>
+            <div class="row row-fields" style="margin-top:8px;">
+                <div class="col-md-6">
+                    <span class="field-label">Target</span>
+                    <input type="text" name="rkpd_target_edit[]" class="form-control" placeholder="Target" value="${escapeHtml(target)}">
+                </div>
+                <div class="col-md-6">
+                    <span class="field-label">Satuan</span>
+                    <input type="text" name="rkpd_satuan_edit[]" class="form-control" placeholder="Satuan" value="${escapeHtml(satuan)}">
+                </div>
+            </div>
+            ${autoSource}
+        </div>
+    `;
+    
+    $('#rkpdDetailContainerEdit').append(html);
+    updateEditIndikatorCounter();
 }
 
 // ============================================================
-// EVENT NOMENKLATUR
+// UPDATE COUNTER BADGE
+// ============================================================
+function updateIndikatorCounter() {
+    var count = $('#rpjmdDetailContainer .indikator-detail-row').length;
+    $('#IndikatorCounterBadge').text(count + ' Indikator');
+}
+
+function updateEditIndikatorCounter() {
+    var count = $('#rpjmdDetailContainerEdit .indikator-detail-row').length;
+    $('#EditIndikatorCounterBadge').text(count + ' Indikator');
+}
+
+// ============================================================
+// LOAD INDIKATOR DARI PROGRAM PD - AUTO FILL
+// ============================================================
+function loadIndikatorFromProgramPD(prefix, kodeProgram) {
+    if (!kodeProgram || kodeProgram === '') {
+        var containerId = prefix + 'DetailContainer';
+        $('#' + containerId).empty();
+        if (prefix === 'rpjmd') {
+            addRpjmdDetailRow(null);
+            updateIndikatorCounter();
+        } else {
+            addRkpdDetailRow(null);
+        }
+        return;
+    }
+    
+    var tahun = $('#InputTahun').val() || TAHUN_AKTIF;
+    
+    var loadingHtml = '<div class="text-center" style="padding:20px;"><i class="fa fa-spinner fa-spin"></i> Memuat indikator dari Program PD...</div>';
+    var containerId = prefix + 'DetailContainer';
+    $('#' + containerId).html(loadingHtml);
+    
+    $.ajax({
+        url: BaseURL + "Daerah/getIndikatorProgramPD",
+        type: "POST",
+        data: {
+            kode_program: kodeProgram,
+            tahun: tahun,
+            [CSRF_NAME]: CSRF_TOKEN
+        },
+        dataType: 'json',
+        success: function(res) {
+            if (res.status === 'success' && res.data) {
+                var indikatorList = res.data.indikator || [];
+                $('#' + containerId).empty();
+                
+                if (indikatorList.length > 0) {
+                    for (var i = 0; i < indikatorList.length; i++) {
+                        var item = indikatorList[i];
+                        var data = {
+                            indikator: item.indikator || '',
+                            target: item.target || '',
+                            satuan: item.satuan || '',
+                            auto_filled: true
+                        };
+                        
+                        if (prefix === 'rpjmd') {
+                            addRpjmdDetailRow(data);
+                        } else {
+                            addRkpdDetailRow(data);
+                        }
+                    }
+                    
+                    if (prefix === 'rpjmd') {
+                        updateIndikatorCounter();
+                    }
+                    
+                    var msg = '✅ ' + indikatorList.length + ' indikator terisi otomatis dari Program PD (Tahun ' + tahun + ')';
+                    showNotification(msg, 'success');
+                    
+                } else {
+                    if (prefix === 'rpjmd') {
+                        addRpjmdDetailRow(null);
+                        updateIndikatorCounter();
+                    } else {
+                        addRkpdDetailRow(null);
+                    }
+                    showNotification('ℹ️ Tidak ada indikator untuk Program ini di tahun ' + tahun, 'info');
+                }
+            } else {
+                $('#' + containerId).empty();
+                if (prefix === 'rpjmd') {
+                    addRpjmdDetailRow(null);
+                    updateIndikatorCounter();
+                } else {
+                    addRkpdDetailRow(null);
+                }
+                showNotification(res.message || 'Gagal memuat indikator', 'error');
+            }
+        },
+        error: function(xhr) {
+            console.error('Error loadIndikatorFromProgramPD:', xhr.responseText);
+            $('#' + containerId).empty();
+            if (prefix === 'rpjmd') {
+                addRpjmdDetailRow(null);
+                updateIndikatorCounter();
+            } else {
+                addRkpdDetailRow(null);
+            }
+            showNotification('Terjadi kesalahan saat memuat indikator', 'error');
+        }
+    });
+}
+
+// ============================================================
+// LOAD INDIKATOR DARI PROGRAM PD UNTUK EDIT
+// ============================================================
+function loadIndikatorFromProgramPDEdit(prefix, kodeProgram) {
+    if (!kodeProgram || kodeProgram === '') {
+        var containerId = prefix + 'DetailContainerEdit';
+        $('#' + containerId).empty();
+        if (prefix === 'rpjmd') {
+            addRpjmdDetailEditRow(null);
+            updateEditIndikatorCounter();
+        } else {
+            addRkpdDetailEditRow(null);
+        }
+        return;
+    }
+    
+    var tahun = $('#EditTahun').val() || TAHUN_AKTIF;
+    
+    var loadingHtml = '<div class="text-center" style="padding:20px;"><i class="fa fa-spinner fa-spin"></i> Memuat indikator...</div>';
+    var containerId = prefix + 'DetailContainerEdit';
+    $('#' + containerId).html(loadingHtml);
+    
+    $.ajax({
+        url: BaseURL + "Daerah/getIndikatorProgramPD",
+        type: "POST",
+        data: {
+            kode_program: kodeProgram,
+            tahun: tahun,
+            [CSRF_NAME]: CSRF_TOKEN
+        },
+        dataType: 'json',
+        success: function(res) {
+            if (res.status === 'success' && res.data) {
+                var indikatorList = res.data.indikator || [];
+                $('#' + containerId).empty();
+                
+                if (indikatorList.length > 0) {
+                    for (var i = 0; i < indikatorList.length; i++) {
+                        var item = indikatorList[i];
+                        var data = {
+                            indikator: item.indikator || '',
+                            target: item.target || '',
+                            satuan: item.satuan || '',
+                            auto_filled: true
+                        };
+                        
+                        if (prefix === 'rpjmd') {
+                            addRpjmdDetailEditRow(data);
+                        } else {
+                            addRkpdDetailEditRow(data);
+                        }
+                    }
+                    
+                    if (prefix === 'rpjmd') {
+                        updateEditIndikatorCounter();
+                    }
+                    
+                    showNotification('✅ ' + indikatorList.length + ' indikator terisi (Tahun ' + tahun + ')', 'success');
+                } else {
+                    if (prefix === 'rpjmd') {
+                        addRpjmdDetailEditRow(null);
+                        updateEditIndikatorCounter();
+                    } else {
+                        addRkpdDetailEditRow(null);
+                    }
+                    showNotification('ℹ️ Tidak ada indikator untuk Program ini di tahun ' + tahun, 'info');
+                }
+            } else {
+                $('#' + containerId).empty();
+                if (prefix === 'rpjmd') {
+                    addRpjmdDetailEditRow(null);
+                    updateEditIndikatorCounter();
+                } else {
+                    addRkpdDetailEditRow(null);
+                }
+            }
+        },
+        error: function(xhr) {
+            console.error('Error loadIndikatorFromProgramPDEdit:', xhr.responseText);
+            $('#' + containerId).empty();
+            if (prefix === 'rpjmd') {
+                addRpjmdDetailEditRow(null);
+                updateEditIndikatorCounter();
+            } else {
+                addRkpdDetailEditRow(null);
+            }
+        }
+    });
+}
+
+// ============================================================
+// FUNGSI RESET FORM
+// ============================================================
+function resetFormInput() {
+    $('#InputInstansi').val('');
+    $('#InputTahun').val(TAHUN_AKTIF);
+    $('#InputPaguRPJMD').val('');
+    $('#InputPaguRKPD').val('');
+    $('#InputKeterangan').val('');
+    
+    $('#preview_urusan_rpjmd').val('');
+    $('#preview_bidang_rpjmd').val('');
+    $('#preview_program_rpjmd').val('');
+    $('#preview_program_text_rpjmd').val('');
+    $('#preview_urusan_rkpd').val('');
+    $('#preview_bidang_rkpd').val('');
+    $('#preview_program_rkpd').val('');
+    $('#preview_program_text_rkpd').val('');
+    
+    $('#urusan_manual_rpjmd').val('');
+    $('#bidang_manual_rpjmd').val('');
+    $('#program_manual_rpjmd').val('');
+    $('#urusan_manual_rkpd').val('');
+    $('#bidang_manual_rkpd').val('');
+    $('#program_manual_rkpd').val('');
+    
+    $('#rpjmdDetailContainer').empty();
+    addRpjmdDetailRow(null);
+    $('#rkpdDetailContainer').empty();
+    addRkpdDetailRow(null);
+    
+    updateIndikatorCounter();
+    
+    nomenklaturCache = {};
+    loadLevel('rpjmd', 1, '');
+    loadLevel('rkpd', 1, '');
+}
+
+// ============================================================
+// CSS ANIMASI
+// ============================================================
+$('head').append(`
+    <style>
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+`);
+
+// ============================================================
+// EVENT: TAMBAH INDIKATOR
+// ============================================================
+$(document).on('click', '#BtnTambahRpjmdDetail', function(e) {
+    e.preventDefault();
+    addRpjmdDetailRow(null);
+});
+
+$(document).on('click', '#BtnTambahRkpdDetail', function(e) {
+    e.preventDefault();
+    addRkpdDetailRow(null);
+});
+
+$(document).on('click', '#BtnTambahRpjmdDetailEdit', function(e) {
+    e.preventDefault();
+    addRpjmdDetailEditRow(null);
+});
+
+$(document).on('click', '#BtnTambahRkpdDetailEdit', function(e) {
+    e.preventDefault();
+    addRkpdDetailEditRow(null);
+});
+
+// ============================================================
+// EVENT: HAPUS INDIKATOR
+// ============================================================
+$(document).on('click', '.btn-remove-rpjmd-detail', function() {
+    $(this).closest('.indikator-detail-row').remove();
+    updateIndikatorCounter();
+});
+
+$(document).on('click', '.btn-remove-rkpd-detail', function() {
+    $(this).closest('.indikator-detail-row').remove();
+    updateIndikatorCounter();
+});
+
+$(document).on('click', '.btn-remove-rpjmd-detail-edit', function() {
+    $(this).closest('.indikator-detail-row').remove();
+    updateEditIndikatorCounter();
+});
+
+$(document).on('click', '.btn-remove-rkpd-detail-edit', function() {
+    $(this).closest('.indikator-detail-row').remove();
+    updateEditIndikatorCounter();
+});
+
+// ============================================================
+// EVENT: NOMENKLATUR CHANGE
 // ============================================================
 $(document).on('change', '[id$="_select_urusan"]', function() {
     var id = $(this).attr('id');
     var prefix = id.replace('_select_urusan', '');
     var kode = $(this).val();
     
-    // Hapus bidang dan program
     $('#' + prefix + '_select_bidang').html('<option value="">-- Pilih Bidang Urusan --</option>').prop('disabled', true);
     $('#' + prefix + '_select_program').html('<option value="">-- Pilih Program --</option>').prop('disabled', true);
     
     if (kode && kode !== '') {
         loadLevel(prefix, 2, kode);
     } else {
-        // Kosongkan semua
         var isRpjmd = prefix.indexOf('rpjmd') !== -1;
         var type = isRpjmd ? 'rpjmd' : 'rkpd';
         var editSuffix = prefix.indexOf('_edit') !== -1 ? '_edit' : '';
-        
-        // Kosongkan preview fields
         $('#preview_urusan' + editSuffix + '_' + type).val('');
         $('#preview_bidang' + editSuffix + '_' + type).val('');
         $('#preview_program' + editSuffix + '_' + type).val('');
         $('#preview_program_text' + editSuffix + '_' + type).val('');
-        
         updatePathDisplay(prefix);
     }
 });
@@ -1629,100 +2106,133 @@ $(document).on('change', '[id$="_select_bidang"]', function() {
     if (kode && kode !== '') {
         loadLevel(prefix, 3, kode);
     } else {
-        // Kosongkan program
         var isRpjmd = prefix.indexOf('rpjmd') !== -1;
         var type = isRpjmd ? 'rpjmd' : 'rkpd';
         var editSuffix = prefix.indexOf('_edit') !== -1 ? '_edit' : '';
-        
         $('#preview_program' + editSuffix + '_' + type).val('');
         $('#preview_program_text' + editSuffix + '_' + type).val('');
-        
         updatePathDisplay(prefix);
     }
 });
 
-$(document).on('change', '[id$="_select_program"]', function() {
-    var id = $(this).attr('id');
-    var prefix = id.replace('_select_program', '');
-    
-    // ✅ UPDATE PREVIEW FIELDS LANGSUNG
-    var programVal = $(this).val() || '';
-    var programText = $(this).find('option:selected').text() || '';
-    
-    var isRpjmd = prefix.indexOf('rpjmd') !== -1;
-    var type = isRpjmd ? 'rpjmd' : 'rkpd';
-    var editSuffix = prefix.indexOf('_edit') !== -1 ? '_edit' : '';
-    
-    $('#preview_program' + editSuffix + '_' + type).val(programVal);
-    if (programVal) {
-        $('#preview_program_text' + editSuffix + '_' + type).val(programText);
+// ============================================================
+// EVENT: PROGRAM CHANGED - AUTO FILL INDIKATOR
+// ============================================================
+$(document).on('change', '#rpjmd_select_program', function() {
+    var kodeProgram = $(this).val();
+    if (kodeProgram && kodeProgram !== '') {
+        var programText = $(this).find('option:selected').text() || '';
+        var msg = '📥 Mengambil indikator untuk Program: ' + programText;
+        showNotification(msg, 'info');
+        loadIndikatorFromProgramPD('rpjmd', kodeProgram);
     } else {
-        $('#preview_program_text' + editSuffix + '_' + type).val('');
+        $('#rpjmdDetailContainer').empty();
+        addRpjmdDetailRow(null);
+        updateIndikatorCounter();
+    }
+});
+
+$(document).on('change', '#rkpd_select_program', function() {
+    var kodeProgram = $(this).val();
+    if (kodeProgram && kodeProgram !== '') {
+        var programText = $(this).find('option:selected').text() || '';
+        var msg = '📥 Mengambil indikator untuk Program: ' + programText;
+        showNotification(msg, 'info');
+        loadIndikatorFromProgramPD('rkpd', kodeProgram);
+    } else {
+        $('#rkpdDetailContainer').empty();
+        addRkpdDetailRow(null);
+    }
+});
+
+// ============================================================
+// EVENT: TAHUN CHANGED - RELOAD INDIKATOR
+// ============================================================
+$(document).on('change', '#InputTahun', function() {
+    var tahun = $(this).val();
+    
+    var rpjmdProgram = $('#rpjmd_select_program').val();
+    if (rpjmdProgram && rpjmdProgram !== '') {
+        loadIndikatorFromProgramPD('rpjmd', rpjmdProgram);
     }
     
-    console.log('📝 Program selected:', programVal, '|', programText);
-    
-    updatePathDisplay(prefix);
-});
-// ============================================================
-// INDIKATOR ROW MANAGEMENT
-// ============================================================
-$(document).on('click', '.BtnAddIndikator', function() {
-    var target = $(this).data('target');
-    var wrapper = target == 'rpjmd' ? '.indikator-wrapper-rpjmd' : '.indikator-wrapper-rkpd';
-    var name = target == 'rpjmd' ? 'rpjmd' : 'rkpd';
-    
-    var newRow = `
-        <div class="indikator-row">
-            <textarea name="indikator_${name}[]" class="form-control" placeholder="Indikator" rows="2"></textarea>
-            <div class="row" style="margin-top:5px;">
-                <div class="col-md-6">
-                    <input type="text" name="target_${name}[]" class="form-control" placeholder="Target">
-                </div>
-                <div class="col-md-6">
-                    <input type="text" name="satuan_${name}[]" class="form-control" placeholder="Satuan">
-                </div>
-            </div>
-            <button type="button" class="btn btn-danger btn-sm BtnRemoveIndikator" style="margin-top:5px;">
-                <i class="notika-icon notika-trash"></i> Hapus
-            </button>
-        </div>
-    `;
-    
-    $(wrapper).append(newRow);
+    var rkpdProgram = $('#rkpd_select_program').val();
+    if (rkpdProgram && rkpdProgram !== '') {
+        loadIndikatorFromProgramPD('rkpd', rkpdProgram);
+    }
 });
 
-$(document).on('click', '.BtnAddIndikatorEdit', function() {
-    var target = $(this).data('target');
-    var wrapper = target == 'rpjmd' ? '.indikator-wrapper-rpjmd-edit' : '.indikator-wrapper-rkpd-edit';
-    var name = target == 'rpjmd' ? 'rpjmd' : 'rkpd';
+$(document).on('change', '#EditTahun', function() {
+    var tahun = $(this).val();
     
-    var newRow = `
-        <div class="indikator-row">
-            <textarea name="indikator_${name}[]" class="form-control" placeholder="Indikator" rows="2"></textarea>
-            <div class="row" style="margin-top:5px;">
-                <div class="col-md-6">
-                    <input type="text" name="target_${name}[]" class="form-control" placeholder="Target">
-                </div>
-                <div class="col-md-6">
-                    <input type="text" name="satuan_${name}[]" class="form-control" placeholder="Satuan">
-                </div>
-            </div>
-            <button type="button" class="btn btn-danger btn-sm BtnRemoveIndikator" style="margin-top:5px;">
-                <i class="notika-icon notika-trash"></i> Hapus
-            </button>
-        </div>
-    `;
+    var rpjmdProgram = $('#rpjmd_edit_select_program').val();
+    if (rpjmdProgram && rpjmdProgram !== '') {
+        loadIndikatorFromProgramPDEdit('rpjmd', rpjmdProgram);
+    }
     
-    $(wrapper).append(newRow);
-});
-
-$(document).on('click', '.BtnRemoveIndikator', function() {
-    $(this).closest('.indikator-row').remove();
+    var rkpdProgram = $('#rkpd_edit_select_program').val();
+    if (rkpdProgram && rkpdProgram !== '') {
+        loadIndikatorFromProgramPDEdit('rkpd', rkpdProgram);
+    }
 });
 
 // ============================================================
-// FORMAT RUPIAH
+// EVENT: EDIT PROGRAM CHANGED - DENGAN KONFIRMASI
+// ============================================================
+$(document).on('change', '#rpjmd_edit_select_program', function() {
+    var kodeProgram = $(this).val();
+    if (kodeProgram && kodeProgram !== '') {
+        // Hitung jumlah indikator yang sudah ada
+        var existingRows = $('#rpjmdDetailContainerEdit .indikator-detail-row').length;
+        var hasData = false;
+        
+        // Cek apakah ada data yang terisi
+        $('#rpjmdDetailContainerEdit .indikator-detail-row').each(function() {
+            var indikator = $(this).find('input[name="rpjmd_indikator_edit[]"]').val();
+            if (indikator && indikator.trim() !== '') {
+                hasData = true;
+                return false;
+            }
+        });
+        
+        if (hasData) {
+            if (!confirm('Mengganti program akan MENGGANTI indikator yang sudah diisi. Lanjutkan?')) {
+                $(this).val($(this).data('previous-value') || '');
+                return;
+            }
+        }
+        $(this).data('previous-value', kodeProgram);
+        loadIndikatorFromProgramPDEdit('rpjmd', kodeProgram);
+    }
+});
+
+$(document).on('change', '#rkpd_edit_select_program', function() {
+    var kodeProgram = $(this).val();
+    if (kodeProgram && kodeProgram !== '') {
+        var existingRows = $('#rkpdDetailContainerEdit .indikator-detail-row').length;
+        var hasData = false;
+        
+        $('#rkpdDetailContainerEdit .indikator-detail-row').each(function() {
+            var indikator = $(this).find('input[name="rkpd_indikator_edit[]"]').val();
+            if (indikator && indikator.trim() !== '') {
+                hasData = true;
+                return false;
+            }
+        });
+        
+        if (hasData) {
+            if (!confirm('Mengganti program akan MENGGANTI indikator yang sudah diisi. Lanjutkan?')) {
+                $(this).val($(this).data('previous-value') || '');
+                return;
+            }
+        }
+        $(this).data('previous-value', kodeProgram);
+        loadIndikatorFromProgramPDEdit('rkpd', kodeProgram);
+    }
+});
+
+// ============================================================
+// EVENT: FORMAT RUPIAH
 // ============================================================
 $(document).on('input', '.rupiah', function() {
     var value = $(this).val().replace(/[^0-9]/g, '');
@@ -1734,508 +2244,401 @@ $(document).on('input', '.rupiah', function() {
 });
 
 // ============================================================
-// TOGGLE DETAIL INDIKATOR
+// FILTER WILAYAH
 // ============================================================
-$(document).on('click', '.toggle-detail', function() {
-    var target = $(this).data('target');
-    $('#' + target).toggleClass('show');
-    var icon = $(this).find('i');
-    if (icon.hasClass('fa-plus-circle')) {
-        icon.removeClass('fa-plus-circle').addClass('fa-minus-circle');
-    } else {
-        icon.removeClass('fa-minus-circle').addClass('fa-plus-circle');
-    }
-});
-
-// ============================================================
-// HELPER ESCAPE HTML
-// ============================================================
-function escapeHtml(text) {
-    if (text === null || text === undefined) return '';
-    return String(text)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-// ============================================================
-// JQUERY READY
-// ============================================================
-jQuery(document).ready(function($){
-
-    // DataTable
-    if ($('#data-table-konsistensi').length > 0) {
-        try {
-            if ($.fn.DataTable.isDataTable('#data-table-konsistensi')) {
-                $('#data-table-konsistensi').DataTable().destroy();
-            }
-            $('#data-table-konsistensi').DataTable({
-                "pageLength": 10,
-                "ordering": true,
-                "language": {
-                    "emptyTable": "Tidak ada data",
-                    "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                    "infoEmpty": "Tidak ada data",
-                    "paginate": {
-                        "first": "Pertama",
-                        "last": "Terakhir",
-                        "next": "Berikutnya",
-                        "previous": "Sebelumnya"
+<?php if (!isset($_SESSION['KodeWilayah'])) { ?>
+    $("#Provinsi").change(function() {
+        if ($(this).val() === "") {
+            $("#KabKota").html('<option value="">Pilih Kab/Kota</option>');
+            return;
+        }
+        $.ajax({
+            url: BaseURL + "Daerah/GetListKabKota",
+            type: "POST",
+            data: { Kode: $(this).val(), [CSRF_NAME]: CSRF_TOKEN },
+            beforeSend: function() { $("#KabKota").prop('disabled', true); },
+            success: function(res) {
+                var Data = (typeof res === 'string') ? JSON.parse(res) : res;
+                var KabKota = '<option value="">Pilih Kab/Kota</option>';
+                if (Data.length > 0) {
+                    for (let i = 0; i < Data.length; i++) {
+                        KabKota += '<option value="' + Data[i].Kode + '">' + Data[i].Nama + '</option>';
                     }
-                },
-                "columnDefs": [
-                    { "orderable": false, "targets": [0, 1, 2, 3, 5, 6, 8, 9, 10, 11] }
-                ]
-            });
-        } catch(e) { console.log("DataTable error:", e); }
-    }
-
-    // ============================================================
-    // TOMBOL TAMBAH - BUKA MODAL
-    // ============================================================
-    $('#BtnTambahKonsistensi').click(function() {
-        resetFormInput();
-        $('#ModalInput').modal({
-            backdrop: 'static',
-            keyboard: false
-        }).css('display', 'block').addClass('in');
-        $('body').addClass('modal-open');
+                }
+                $("#KabKota").html(KabKota).prop('disabled', false);
+            },
+            error: function() {
+                console.error("Gagal memuat data Kab/Kota");
+                $("#KabKota").prop('disabled', false);
+            }
+        });
     });
 
-    // ============================================================
-    // FUNGSI RESET FORM
-    // ============================================================
-    function resetFormInput() {
-        $('#InputInstansi').val('');
-        $('#InputTahun').val('<?= $TahunAktif ?>');
-        $('#InputPaguRPJMD').val('');
-        $('#InputPaguRKPD').val('');
-        $('#InputKeterangan').val('');
-        
-        $('.indikator-wrapper-rpjmd').html(`
-            <div class="indikator-row">
-                <textarea name="indikator_rpjmd[]" class="form-control" placeholder="Indikator" rows="2"></textarea>
-                <div class="row" style="margin-top:5px;">
-                    <div class="col-md-6">
-                        <input type="text" name="target_rpjmd[]" class="form-control" placeholder="Target">
-                    </div>
-                    <div class="col-md-6">
-                        <input type="text" name="satuan_rpjmd[]" class="form-control" placeholder="Satuan">
-                    </div>
-                </div>
-                <button type="button" class="btn btn-success btn-sm BtnAddIndikator" data-target="rpjmd">
-                    <i class="notika-icon bi-plus-lg"></i> Tambah Indikator
-                </button>
-            </div>
-        `);
-        
-        $('.indikator-wrapper-rkpd').html(`
-            <div class="indikator-row">
-                <textarea name="indikator_rkpd[]" class="form-control" placeholder="Indikator" rows="2"></textarea>
-                <div class="row" style="margin-top:5px;">
-                    <div class="col-md-6">
-                        <input type="text" name="target_rkpd[]" class="form-control" placeholder="Target">
-                    </div>
-                    <div class="col-md-6">
-                        <input type="text" name="satuan_rkpd[]" class="form-control" placeholder="Satuan">
-                    </div>
-                </div>
-                <button type="button" class="btn btn-success btn-sm BtnAddIndikator" data-target="rkpd">
-                    <i class="notika-icon bi-plus-lg"></i> Tambah Indikator
-                </button>
-            </div>
-        `);
-        
-        nomenklaturCache = {};
-        loadLevel('rpjmd', 1, '');
-        loadLevel('rkpd', 1, '');
-    }
-
-    // ============================================================
-    // FILTER
-    // ============================================================
-    <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-        $("#Provinsi").change(function() {
-            if ($(this).val() === "") {
-                $("#KabKota").html('<option value="">Pilih Kab/Kota</option>');
-                return;
-            }
-            $.ajax({
-                url: BaseURL + "Daerah/GetListKabKota",
-                type: "POST",
-                data: { Kode: $(this).val(), [CSRF_NAME]: CSRF_TOKEN },
-                beforeSend: function() { $("#KabKota").prop('disabled', true); },
-                success: function(res) {
-                    var Data = (typeof res === 'string') ? JSON.parse(res) : res;
-                    var KabKota = '<option value="">Pilih Kab/Kota</option>';
-                    if (Data.length > 0) {
-                        for (let i = 0; i < Data.length; i++) {
-                            KabKota += '<option value="' + Data[i].Kode + '">' + Data[i].Nama + '</option>';
-                        }
-                    }
-                    $("#KabKota").html(KabKota).prop('disabled', false);
-                },
-                error: function() {
-                    console.error("Gagal memuat data Kab/Kota");
-                    $("#KabKota").prop('disabled', false);
-                }
-            });
-        });
-
-        $("#FilterBtn").click(function() {
-            if ($("#Provinsi").val() === "") {
-                alert("Mohon Pilih Provinsi");
-                return;
-            }
-            if ($("#KabKota").val() === "") {
-                alert("Mohon Pilih Kab/Kota");
-                return;
-            }
-
-            var kodeWilayah = $("#KabKota").val();
-            var instansiId = $("#FilterInstansi").val();
-            var tahun = $("#TahunFilter").val();
-
-            $.ajax({
-                url: BaseURL + "Daerah/SetTempKodeWilayah",
-                type: "POST",
-                data: { KodeWilayah: kodeWilayah, [CSRF_NAME]: CSRF_TOKEN },
-                async: false
-            });
-
-            var redirectUrl = BaseURL + "Daerah/KonsistensiProgram";
-            var params = [];
-            if (instansiId && instansiId != '') params.push("instansi_id=" + instansiId);
-            if (tahun && tahun != '') params.push("tahun=" + tahun);
-            if (params.length > 0) redirectUrl += "?" + params.join('&');
-            
-            window.location.href = redirectUrl;
-        });
-
-        <?php if (!empty($KodeWilayah)) { ?>
-            var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
-            var kodeKab  = "<?= $KodeWilayah ?>";
-            $("#Provinsi").val(kodeProv);
-
-            $.ajax({
-                url: BaseURL + "Daerah/GetListKabKota",
-                type: "POST",
-                data: { Kode: kodeProv, [CSRF_NAME]: CSRF_TOKEN },
-                success: function(res) {
-                    var Data = (typeof res === 'string') ? JSON.parse(res) : res;
-                    var KabKota = '<option value="">Pilih Kab/Kota</option>';
-                    if (Data.length > 0) {
-                        for (let i = 0; i < Data.length; i++) {
-                            var selected = (Data[i].Kode === kodeKab) ? 'selected' : '';
-                            KabKota += '<option value="' + Data[i].Kode + '" ' + selected + '>' + Data[i].Nama + '</option>';
-                        }
-                    }
-                    $("#KabKota").html(KabKota);
-                }
-            });
-        <?php } ?>
-    <?php } ?>
-
-    // ============================================================
-    // SIMPAN
-    // ============================================================
-    $("#BtnSimpan").click(function() {
-        var btn = $(this);
-        btn.prop('disabled', true).text('Menyimpan...');
-
-        var urusanRpjmd = $('#preview_urusan_rpjmd').val();
-        var bidangRpjmd = $('#preview_bidang_rpjmd').val();
-        var programRpjmd = $('#preview_program_rpjmd').val();
-        var programRpjmdText = $('#preview_program_text_rpjmd').val();
-        
-        var urusanRkpd = $('#preview_urusan_rkpd').val();
-        var bidangRkpd = $('#preview_bidang_rkpd').val();
-        var programRkpd = $('#preview_program_rkpd').val();
-        var programRkpdText = $('#preview_program_text_rkpd').val();
-
-        // Cek tab manual
-        var rpjmdTab = $('#rpjmdTab .tab-pane.active').attr('id');
-        if (rpjmdTab === 'tab_rpjmd_manual') {
-            urusanRpjmd = $('#urusan_manual_rpjmd').val().trim();
-            bidangRpjmd = $('#bidang_manual_rpjmd').val().trim();
-            programRpjmdText = $('#program_manual_rpjmd').val().trim();
-            programRpjmd = '';
+    $("#FilterBtn").click(function() {
+        if ($("#Provinsi").val() === "") {
+            alert("Mohon Pilih Provinsi");
+            return;
         }
-
-        var rkpdTab = $('#rkpdTab .tab-pane.active').attr('id');
-        if (rkpdTab === 'tab_rkpd_manual') {
-            urusanRkpd = $('#urusan_manual_rkpd').val().trim();
-            bidangRkpd = $('#bidang_manual_rkpd').val().trim();
-            programRkpdText = $('#program_manual_rkpd').val().trim();
-            programRkpd = '';
-        }
-
-        var hasRpjmd = urusanRpjmd || bidangRpjmd || programRpjmd || programRpjmdText;
-        var hasRkpd = urusanRkpd || bidangRkpd || programRkpd || programRkpdText;
-
-        if (!hasRpjmd && !hasRkpd) {
-            alert("Urusan/Program RPJMD atau RKPD harus diisi!");
-            btn.prop('disabled', false).text('SIMPAN');
+        if ($("#KabKota").val() === "") {
+            alert("Mohon Pilih Kab/Kota");
             return;
         }
 
-        // Kumpulkan indikator
-        var indikatorRpjmd = [], targetRpjmd = [], satuanRpjmd = [];
-        $('.indikator-wrapper-rpjmd .indikator-row').each(function() {
-            var indikator = $(this).find('textarea[name="indikator_rpjmd[]"]').val();
-            if (indikator && indikator.trim() !== '') {
-                indikatorRpjmd.push(indikator.trim());
-                targetRpjmd.push($(this).find('input[name="target_rpjmd[]"]').val() || '');
-                satuanRpjmd.push($(this).find('input[name="satuan_rpjmd[]"]').val() || '');
-            }
-        });
-
-        var indikatorRkpd = [], targetRkpd = [], satuanRkpd = [];
-        $('.indikator-wrapper-rkpd .indikator-row').each(function() {
-            var indikator = $(this).find('textarea[name="indikator_rkpd[]"]').val();
-            if (indikator && indikator.trim() !== '') {
-                indikatorRkpd.push(indikator.trim());
-                targetRkpd.push($(this).find('input[name="target_rkpd[]"]').val() || '');
-                satuanRkpd.push($(this).find('input[name="satuan_rkpd[]"]').val() || '');
-            }
-        });
-
-        var payload = {
-            urusan_rpjmd_kode: urusanRpjmd,
-            bidang_rpjmd_kode: bidangRpjmd,
-            program_rpjmd_kode: programRpjmd,
-            program_rpjmd_text: programRpjmdText,
-            pagu_program_rpjmd: $('#InputPaguRPJMD').val(),
-            
-            urusan_rkpd_kode: urusanRkpd,
-            bidang_rkpd_kode: bidangRkpd,
-            program_rkpd_kode: programRkpd,
-            program_rkpd_text: programRkpdText,
-            pagu_program_rkpd: $('#InputPaguRKPD').val(),
-            
-            id_instansi: $('#InputInstansi').val(),
-            tahun: $('#InputTahun').val(),
-            keterangan: $('#InputKeterangan').val(),
-            
-            indikator_rpjmd: indikatorRpjmd,
-            target_rpjmd: targetRpjmd,
-            satuan_rpjmd: satuanRpjmd,
-            
-            indikator_rkpd: indikatorRkpd,
-            target_rkpd: targetRkpd,
-            satuan_rkpd: satuanRkpd,
-            [CSRF_NAME]: CSRF_TOKEN
-        };
+        var kodeWilayah = $("#KabKota").val();
+        var tahun = $("#TahunFilter").val();
 
         $.ajax({
-            url: BaseURL + "Daerah/InputKonsistensiProgram",
+            url: BaseURL + "Daerah/SetTempKodeWilayah",
             type: "POST",
-            data: payload,
-            dataType: 'json',
+            data: { KodeWilayah: kodeWilayah, [CSRF_NAME]: CSRF_TOKEN },
+            async: false
+        });
+
+        var redirectUrl = BaseURL + "Daerah/KonsistensiProgram";
+        if (tahun && tahun != '') redirectUrl += "?tahun=" + tahun;
+        window.location.href = redirectUrl;
+    });
+
+    <?php if (!empty($KodeWilayah)) { ?>
+        var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
+        var kodeKab  = "<?= $KodeWilayah ?>";
+        $("#Provinsi").val(kodeProv);
+
+        $.ajax({
+            url: BaseURL + "Daerah/GetListKabKota",
+            type: "POST",
+            data: { Kode: kodeProv, [CSRF_NAME]: CSRF_TOKEN },
             success: function(res) {
-                if (res.status == 'success') {
-                    alert(res.message);
-                    window.location.reload();
-                } else {
-                    alert(res.message || 'Gagal menyimpan data!');
-                    btn.prop('disabled', false).text('SIMPAN');
+                var Data = (typeof res === 'string') ? JSON.parse(res) : res;
+                var KabKota = '<option value="">Pilih Kab/Kota</option>';
+                if (Data.length > 0) {
+                    for (let i = 0; i < Data.length; i++) {
+                        var selected = (Data[i].Kode === kodeKab) ? 'selected' : '';
+                        KabKota += '<option value="' + Data[i].Kode + '" ' + selected + '>' + Data[i].Nama + '</option>';
+                    }
                 }
-            },
-            error: function(xhr) {
-                alert('Terjadi kesalahan: ' + xhr.responseText);
+                $("#KabKota").html(KabKota);
+            }
+        });
+    <?php } ?>
+<?php } ?>
+
+// ============================================================
+// TOMBOL TAMBAH - BUKA MODAL
+// ============================================================
+$('#BtnTambahKonsistensi').click(function() {
+    resetFormInput();
+    $('#ModalInput').modal({
+        backdrop: 'static',
+        keyboard: false
+    }).css('display', 'block').addClass('in');
+    $('body').addClass('modal-open');
+});
+
+// ============================================================
+// SIMPAN
+// ============================================================
+$("#BtnSimpan").click(function() {
+    var btn = $(this);
+    btn.prop('disabled', true).text('Menyimpan...');
+
+    var urusanRpjmd = $('#preview_urusan_rpjmd').val();
+    var bidangRpjmd = $('#preview_bidang_rpjmd').val();
+    var programRpjmd = $('#preview_program_rpjmd').val();
+    var programRpjmdText = $('#preview_program_text_rpjmd').val();
+    
+    var urusanRkpd = $('#preview_urusan_rkpd').val();
+    var bidangRkpd = $('#preview_bidang_rkpd').val();
+    var programRkpd = $('#preview_program_rkpd').val();
+    var programRkpdText = $('#preview_program_text_rkpd').val();
+
+    var rpjmdTab = $('#rpjmdTab .tab-pane.active').attr('id');
+    if (rpjmdTab === 'tab_rpjmd_manual') {
+        urusanRpjmd = $('#urusan_manual_rpjmd').val().trim();
+        bidangRpjmd = $('#bidang_manual_rpjmd').val().trim();
+        programRpjmdText = $('#program_manual_rpjmd').val().trim();
+        programRpjmd = '';
+    }
+
+    var rkpdTab = $('#rkpdTab .tab-pane.active').attr('id');
+    if (rkpdTab === 'tab_rkpd_manual') {
+        urusanRkpd = $('#urusan_manual_rkpd').val().trim();
+        bidangRkpd = $('#bidang_manual_rkpd').val().trim();
+        programRkpdText = $('#program_manual_rkpd').val().trim();
+        programRkpd = '';
+    }
+
+    var hasRpjmd = urusanRpjmd || bidangRpjmd || programRpjmd || programRpjmdText;
+    var hasRkpd = urusanRkpd || bidangRkpd || programRkpd || programRkpdText;
+
+    if (!hasRpjmd && !hasRkpd) {
+        alert("Urusan/Program RPJMD atau RKPD harus diisi!");
+        btn.prop('disabled', false).text('SIMPAN');
+        return;
+    }
+
+    // Kumpulkan indikator RPJMD
+    var indikatorRpjmd = [], targetRpjmd = [], satuanRpjmd = [];
+    $('#rpjmdDetailContainer .indikator-detail-row').each(function() {
+        var indikator = $(this).find('input[name="rpjmd_indikator[]"]').val();
+        if (indikator && indikator.trim() !== '') {
+            indikatorRpjmd.push(indikator.trim());
+            targetRpjmd.push($(this).find('input[name="rpjmd_target[]"]').val() || '');
+            satuanRpjmd.push($(this).find('input[name="rpjmd_satuan[]"]').val() || '');
+        }
+    });
+
+    var indikatorRkpd = [], targetRkpd = [], satuanRkpd = [];
+    $('#rkpdDetailContainer .indikator-detail-row').each(function() {
+        var indikator = $(this).find('input[name="rkpd_indikator[]"]').val();
+        if (indikator && indikator.trim() !== '') {
+            indikatorRkpd.push(indikator.trim());
+            targetRkpd.push($(this).find('input[name="rkpd_target[]"]').val() || '');
+            satuanRkpd.push($(this).find('input[name="rkpd_satuan[]"]').val() || '');
+        }
+    });
+
+    if (indikatorRpjmd.length === 0 && indikatorRkpd.length === 0) {
+        alert('Minimal 1 Indikator untuk RPJMD atau RKPD harus diisi!');
+        btn.prop('disabled', false).text('SIMPAN');
+        return;
+    }
+
+    var payload = {
+        urusan_rpjmd_kode: urusanRpjmd,
+        bidang_rpjmd_kode: bidangRpjmd,
+        program_rpjmd_kode: programRpjmd,
+        program_rpjmd_text: programRpjmdText,
+        pagu_program_rpjmd: $('#InputPaguRPJMD').val().replace(/[^0-9]/g, ''),
+        
+        urusan_rkpd_kode: urusanRkpd,
+        bidang_rkpd_kode: bidangRkpd,
+        program_rkpd_kode: programRkpd,
+        program_rkpd_text: programRkpdText,
+        pagu_program_rkpd: $('#InputPaguRKPD').val().replace(/[^0-9]/g, ''),
+        
+        id_instansi: $('#InputInstansi').val(),
+        tahun: $('#InputTahun').val(),
+        keterangan: $('#InputKeterangan').val(),
+        
+        indikator_rpjmd: indikatorRpjmd,
+        target_rpjmd: targetRpjmd,
+        satuan_rpjmd: satuanRpjmd,
+        
+        indikator_rkpd: indikatorRkpd,
+        target_rkpd: targetRkpd,
+        satuan_rkpd: satuanRkpd,
+        [CSRF_NAME]: CSRF_TOKEN
+    };
+
+    $.ajax({
+        url: BaseURL + "Daerah/InputKonsistensiProgram",
+        type: "POST",
+        data: payload,
+        dataType: 'json',
+        success: function(res) {
+            if (res.status == 'success') {
+                showNotification(res.message, 'success');
+                setTimeout(function() { window.location.reload(); }, 1500);
+            } else {
+                alert(res.message || 'Gagal menyimpan data!');
                 btn.prop('disabled', false).text('SIMPAN');
             }
-        });
+        },
+        error: function(xhr) {
+            alert('Terjadi kesalahan: ' + xhr.responseText);
+            btn.prop('disabled', false).text('SIMPAN');
+        }
     });
+});
 
-    // ============================================================
-    // EDIT - FIXED VERSION
-    // ============================================================
-    $(document).on("click", ".BtnEdit", function() {
-        var id = $(this).data('id');
-        if (!id) { alert('ID tidak valid!'); return; }
+// ============================================================
+// EDIT
+// ============================================================
+$(document).on("click", ".BtnEdit", function() {
+    var id = $(this).data('id');
+    if (!id) { alert('ID tidak valid!'); return; }
 
-        var btn = $(this);
-        btn.prop('disabled', true).html('<i class="notika-icon notika-edit"></i>');
+    var btn = $(this);
+    btn.prop('disabled', true).html('<i class="notika-icon notika-edit"></i>');
 
-        // Reset form
-        $('#EditId').val('');
-        $('#EditInstansi').val('');
-        $('#EditTahun').val('');
-        $('#EditKeterangan').val('');
-        $('#EditPaguRPJMD').val('');
-        $('#EditPaguRKPD').val('');
-        
-        // Reset preview fields
-        $('#preview_urusan_rpjmd_edit').val('');
-        $('#preview_bidang_rpjmd_edit').val('');
-        $('#preview_program_rpjmd_edit').val('');
-        $('#preview_program_text_rpjmd_edit').val('');
-        $('#preview_urusan_rkpd_edit').val('');
-        $('#preview_bidang_rkpd_edit').val('');
-        $('#preview_program_rkpd_edit').val('');
-        $('#preview_program_text_rkpd_edit').val('');
-        
-        // Reset manual fields
-        $('#urusan_manual_rpjmd_edit').val('');
-        $('#bidang_manual_rpjmd_edit').val('');
-        $('#program_manual_rpjmd_edit').val('');
-        $('#urusan_manual_rkpd_edit').val('');
-        $('#bidang_manual_rkpd_edit').val('');
-        $('#program_manual_rkpd_edit').val('');
+    $('#EditId').val('');
+    $('#EditInstansi').val('');
+    $('#EditTahun').val('');
+    $('#EditKeterangan').val('');
+    $('#EditPaguRPJMD').val('');
+    $('#EditPaguRKPD').val('');
+    
+    $('#rpjmdDetailContainerEdit').empty();
+    $('#rkpdDetailContainerEdit').empty();
+    
+    $('#preview_urusan_rpjmd_edit').val('');
+    $('#preview_bidang_rpjmd_edit').val('');
+    $('#preview_program_rpjmd_edit').val('');
+    $('#preview_program_text_rpjmd_edit').val('');
+    $('#preview_urusan_rkpd_edit').val('');
+    $('#preview_bidang_rkpd_edit').val('');
+    $('#preview_program_rkpd_edit').val('');
+    $('#preview_program_text_rkpd_edit').val('');
+    
+    $('#urusan_manual_rpjmd_edit').val('');
+    $('#bidang_manual_rpjmd_edit').val('');
+    $('#program_manual_rpjmd_edit').val('');
+    $('#urusan_manual_rkpd_edit').val('');
+    $('#bidang_manual_rkpd_edit').val('');
+    $('#program_manual_rkpd_edit').val('');
 
-        $.ajax({
-            url: BaseURL + "Daerah/GetKonsistensiProgramById",
-            type: "POST",
-            data: { 
-                id: id, 
-                [CSRF_NAME]: CSRF_TOKEN 
-            },
-            dataType: 'json',
-            success: function(res) {
-                if (res.status == 'success' && res.data) {
-                    var d = res.data;
-                    
-                    // ============================================================
-                    // ISI FORM DENGAN DATA
-                    // ============================================================
-                    $("#EditId").val(d.id);
-                    $("#EditInstansi").val(d.id_instansi || '');
-                    $("#EditTahun").val(d.tahun || '');
-                    $("#EditKeterangan").val(d.keterangan || '');
-                    $("#EditPaguRPJMD").val(d.pagu_program_rpjmd ? 'Rp ' + parseInt(d.pagu_program_rpjmd).toLocaleString('id-ID') : '');
-                    $("#EditPaguRKPD").val(d.pagu_program_rkpd ? 'Rp ' + parseInt(d.pagu_program_rkpd).toLocaleString('id-ID') : '');
-                    
-                    // ============================================================
-                    // SIMPAN DATA KE PREVIEW FIELDS
-                    // ============================================================
-                    // RPJMD
-                    var rpjmdData = {
-                        urusan: d.urusan_rpjmd_kode || '',
-                        bidang: d.bidang_urusan_rpjmd_kode || '',
-                        program: d.program_rpjmd_kode || '',
-                        program_text: d.program_rpjmd_text || ''
-                    };
-                    
-                    // RKPD
-                    var rkpdData = {
-                        urusan: d.urusan_rkpd_kode || '',
-                        bidang: d.bidang_urusan_rkpd_kode || '',
-                        program: d.program_rkpd_kode || '',
-                        program_text: d.program_rkpd_text || ''
-                    };
-                    
-                    // ============================================================
-                    // SET PREVIEW FIELDS
-                    // ============================================================
-                    $('#preview_urusan_rpjmd_edit').val(rpjmdData.urusan);
-                    $('#preview_bidang_rpjmd_edit').val(rpjmdData.bidang);
-                    $('#preview_program_rpjmd_edit').val(rpjmdData.program);
-                    $('#preview_program_text_rpjmd_edit').val(rpjmdData.program_text);
-                    
-                    $('#preview_urusan_rkpd_edit').val(rkpdData.urusan);
-                    $('#preview_bidang_rkpd_edit').val(rkpdData.bidang);
-                    $('#preview_program_rkpd_edit').val(rkpdData.program);
-                    $('#preview_program_text_rkpd_edit').val(rkpdData.program_text);
-                    
-                    // ============================================================
-                    // SET MANUAL FIELDS (untuk backup)
-                    // ============================================================
-                    $('#urusan_manual_rpjmd_edit').val(rpjmdData.urusan);
-                    $('#bidang_manual_rpjmd_edit').val(rpjmdData.bidang);
-                    $('#program_manual_rpjmd_edit').val(rpjmdData.program_text);
-                    
-                    $('#urusan_manual_rkpd_edit').val(rkpdData.urusan);
-                    $('#bidang_manual_rkpd_edit').val(rkpdData.bidang);
-                    $('#program_manual_rkpd_edit').val(rkpdData.program_text);
+    $.ajax({
+        url: BaseURL + "Daerah/GetKonsistensiProgramById",
+        type: "POST",
+        data: { id: id, [CSRF_NAME]: CSRF_TOKEN },
+        dataType: 'json',
+        success: function(res) {
+            if (res.status == 'success' && res.data) {
+                var d = res.data;
+                
+                $("#EditId").val(d.id);
+                $("#EditInstansi").val(d.id_instansi || '');
+                $("#EditTahun").val(d.tahun || '');
+                $("#EditKeterangan").val(d.keterangan || '');
+                $("#EditPaguRPJMD").val(d.pagu_program_rpjmd ? 'Rp ' + parseInt(d.pagu_program_rpjmd).toLocaleString('id-ID') : '');
+                $("#EditPaguRKPD").val(d.pagu_program_rkpd ? 'Rp ' + parseInt(d.pagu_program_rkpd).toLocaleString('id-ID') : '');
+                
+                var rpjmdData = {
+                    urusan: d.urusan_rpjmd_kode || '',
+                    bidang: d.bidang_urusan_rpjmd_kode || '',
+                    program: d.program_rpjmd_kode || '',
+                    program_text: d.program_rpjmd_text || ''
+                };
+                
+                var rkpdData = {
+                    urusan: d.urusan_rkpd_kode || '',
+                    bidang: d.bidang_urusan_rkpd_kode || '',
+                    program: d.program_rkpd_kode || '',
+                    program_text: d.program_rkpd_text || ''
+                };
+                
+                $('#preview_urusan_rpjmd_edit').val(rpjmdData.urusan);
+                $('#preview_bidang_rpjmd_edit').val(rpjmdData.bidang);
+                $('#preview_program_rpjmd_edit').val(rpjmdData.program);
+                $('#preview_program_text_rpjmd_edit').val(rpjmdData.program_text);
+                
+                $('#preview_urusan_rkpd_edit').val(rkpdData.urusan);
+                $('#preview_bidang_rkpd_edit').val(rkpdData.bidang);
+                $('#preview_program_rkpd_edit').val(rkpdData.program);
+                $('#preview_program_text_rkpd_edit').val(rkpdData.program_text);
+                
+                $('#urusan_manual_rpjmd_edit').val(rpjmdData.urusan);
+                $('#bidang_manual_rpjmd_edit').val(rpjmdData.bidang);
+                $('#program_manual_rpjmd_edit').val(rpjmdData.program_text);
+                
+                $('#urusan_manual_rkpd_edit').val(rkpdData.urusan);
+                $('#bidang_manual_rkpd_edit').val(rkpdData.bidang);
+                $('#program_manual_rkpd_edit').val(rkpdData.program_text);
 
-                    // ============================================================
-                    // LOAD NOMENKLATUR DENGAN DATA YANG ADA
-                    // ============================================================
-                    nomenklaturCache = {};
-                    
-                    // Load RPJMD dengan data existing
-                    loadEditNomenklatur('rpjmd_edit', 
-                        rpjmdData.urusan, 
-                        rpjmdData.bidang, 
-                        rpjmdData.program,
-                        rpjmdData.program_text
-                    );
-                    
-                    // Load RKPD dengan data existing
-                    loadEditNomenklatur('rkpd_edit',
-                        rkpdData.urusan,
-                        rkpdData.bidang,
-                        rkpdData.program,
-                        rkpdData.program_text
-                    );
+                nomenklaturCache = {};
+                
+                loadEditNomenklatur('rpjmd_edit', 
+                    rpjmdData.urusan, 
+                    rpjmdData.bidang, 
+                    rpjmdData.program,
+                    rpjmdData.program_text
+                );
+                
+                loadEditNomenklatur('rkpd_edit',
+                    rkpdData.urusan,
+                    rkpdData.bidang,
+                    rkpdData.program,
+                    rkpdData.program_text
+                );
 
-                    // ============================================================
-                    // RENDER INDIKATOR
-                    // ============================================================
-                    renderIndikatorEdit('rpjmd', d.rpjmd_details || []);
-                    renderIndikatorEdit('rkpd', d.rkpd_details || []);
-                    
-                    // ============================================================
-                    // Tentukan tab yang aktif berdasarkan data yang ada
-                    // ============================================================
-                    var hasRpjmdKode = rpjmdData.urusan || rpjmdData.bidang || rpjmdData.program;
-                    var hasRpjmdText = rpjmdData.program_text;
-                    
-                    if (hasRpjmdText && !hasRpjmdKode) {
-                        $('#rpjmdTabEdit a[href="#tab_rpjmd_manual_edit"]').tab('show');
-                        $('#info_nomenklatur_rpjmd_edit').hide();
-                    } else {
-                        $('#rpjmdTabEdit a[href="#tab_rpjmd_nomenklatur_edit"]').tab('show');
-                    }
-                    
-                    var hasRkpdKode = rkpdData.urusan || rkpdData.bidang || rkpdData.program;
-                    var hasRkpdText = rkpdData.program_text;
-                    
-                    if (hasRkpdText && !hasRkpdKode) {
-                        $('#rkpdTabEdit a[href="#tab_rkpd_manual_edit"]').tab('show');
-                        $('#info_nomenklatur_rkpd_edit').hide();
-                    } else {
-                        $('#rkpdTabEdit a[href="#tab_rkpd_nomenklatur_edit"]').tab('show');
-                    }
-
-                    // ============================================================
-                    // TAMPILKAN MODAL
-                    // ============================================================
-                    $('#ModalEdit').modal({
-                        backdrop: 'static',
-                        keyboard: false
-                    }).css('display', 'block').addClass('in');
-                    $('body').addClass('modal-open');
-                    
+                // ✅ RENDER INDIKATOR RPJMD - TANPA AUTO-FILL
+                if (d.rpjmd_details && d.rpjmd_details.length > 0) {
+                    $.each(d.rpjmd_details, function(i, item) {
+                        addRpjmdDetailEditRow(item);
+                    });
                 } else {
-                    alert(res.message || 'Gagal mengambil data!');
+                    addRpjmdDetailEditRow(null);
                 }
-                btn.prop('disabled', false).html('<i class="notika-icon notika-edit"></i>');
-            },
-            error: function(xhr) {
-                console.error('Error:', xhr.responseText);
-                alert('Terjadi kesalahan: ' + xhr.responseText);
-                btn.prop('disabled', false).html('<i class="notika-icon notika-edit"></i>');
-            }
-        });
-    });
+                
+                // ✅ RENDER INDIKATOR RKPD - TANPA AUTO-FILL
+                if (d.rkpd_details && d.rkpd_details.length > 0) {
+                    $.each(d.rkpd_details, function(i, item) {
+                        addRkpdDetailEditRow(item);
+                    });
+                } else {
+                    addRkpdDetailEditRow(null);
+                }
+                
+                updateEditIndikatorCounter();
 
-    // ============================================================
-    // UPDATE - FIXED VERSION
-    // ============================================================
-    $("#BtnUpdate").click(function() {
+                // ✅ HANYA JIKA DATA BERASAL DARI PROGRAM PD, BARU LOAD AUTO-FILL
+                // Tapi jangan auto-fill jika data manual
+                var isFromProgramPD = d.is_from_program_pd || false;
+                
+                if (isFromProgramPD && rpjmdData.program) {
+                    // Jika data dari Program PD, tawarkan untuk reload
+                    if (confirm('Data ini berasal dari Program PD. Apakah Anda ingin memperbarui indikator dari Program PD?')) {
+                        loadIndikatorFromProgramPDEdit('rpjmd', rpjmdData.program);
+                    }
+                }
+                
+                if (isFromProgramPD && rkpdData.program) {
+                    if (confirm('Data ini berasal dari Program PD. Apakah Anda ingin memperbarui indikator dari Program PD?')) {
+                        loadIndikatorFromProgramPDEdit('rkpd', rkpdData.program);
+                    }
+                }
+
+                // Tentukan tab aktif
+                var hasRpjmdKode = rpjmdData.urusan || rpjmdData.bidang || rpjmdData.program;
+                var hasRpjmdText = rpjmdData.program_text;
+                
+                if (hasRpjmdText && !hasRpjmdKode) {
+                    $('#rpjmdTabEdit a[href="#tab_rpjmd_manual_edit"]').tab('show');
+                    $('#info_nomenklatur_rpjmd_edit').hide();
+                } else {
+                    $('#rpjmdTabEdit a[href="#tab_rpjmd_nomenklatur_edit"]').tab('show');
+                }
+                
+                var hasRkpdKode = rkpdData.urusan || rkpdData.bidang || rkpdData.program;
+                var hasRkpdText = rkpdData.program_text;
+                
+                if (hasRkpdText && !hasRkpdKode) {
+                    $('#rkpdTabEdit a[href="#tab_rkpd_manual_edit"]').tab('show');
+                    $('#info_nomenklatur_rkpd_edit').hide();
+                } else {
+                    $('#rkpdTabEdit a[href="#tab_rkpd_nomenklatur_edit"]').tab('show');
+                }
+
+                $('#ModalEdit').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                }).css('display', 'block').addClass('in');
+                $('body').addClass('modal-open');
+                
+            } else {
+                alert(res.message || 'Gagal mengambil data!');
+            }
+            btn.prop('disabled', false).html('<i class="notika-icon notika-edit"></i>');
+        },
+        error: function(xhr) {
+            console.error('Error:', xhr.responseText);
+            alert('Terjadi kesalahan: ' + xhr.responseText);
+            btn.prop('disabled', false).html('<i class="notika-icon notika-edit"></i>');
+        }
+    });
+});
+
+// ============================================================
+// UPDATE
+// ============================================================
+$("#BtnUpdate").click(function() {
     var id = $("#EditId").val();
     if (!id) { alert('ID tidak valid!'); return; }
 
     var btn = $(this);
     btn.prop('disabled', true).text('Menyimpan...');
 
-    // ============================================================
-    // ✅ FIX: AMBIL DARI PREVIEW FIELDS
-    // ============================================================
     var urusanRpjmd = $('#preview_urusan_rpjmd_edit').val() || '';
     var bidangRpjmd = $('#preview_bidang_rpjmd_edit').val() || '';
     var programRpjmd = $('#preview_program_rpjmd_edit').val() || '';
@@ -2246,9 +2649,6 @@ jQuery(document).ready(function($){
     var programRkpd = $('#preview_program_rkpd_edit').val() || '';
     var programRkpdText = $('#preview_program_text_rkpd_edit').val() || '';
 
-    // ============================================================
-    // ✅ FIX: CEK TAB MANUAL - Jika manual, ambil dari manual fields
-    // ============================================================
     var rpjmdTabActive = $('#rpjmdTabEdit .tab-pane.active').attr('id');
     if (rpjmdTabActive === 'tab_rpjmd_manual_edit') {
         var manualUrusan = $('#urusan_manual_rpjmd_edit').val().trim();
@@ -2277,74 +2677,54 @@ jQuery(document).ready(function($){
         }
     }
 
-    // ============================================================
-    // ✅ FIX: LOG UNTUK DEBUG
-    // ============================================================
-    console.log('=== UPDATE DATA ===');
-    console.log('urusanRpjmd:', urusanRpjmd);
-    console.log('bidangRpjmd:', bidangRpjmd);
-    console.log('programRpjmd:', programRpjmd);
-    console.log('programRpjmdText:', programRpjmdText);
-    console.log('urusanRkpd:', urusanRkpd);
-    console.log('bidangRkpd:', bidangRkpd);
-    console.log('programRkpd:', programRkpd);
-    console.log('programRkpdText:', programRkpdText);
+    var hasRpjmd = urusanRpjmd || bidangRpjmd || programRpjmd || programRpjmdText;
+    var hasRkpd = urusanRkpd || bidangRkpd || programRkpd || programRkpdText;
 
-    // ============================================================
-    // ✅ FIX: VALIDASI - Cek dengan benar
-    // ============================================================
-var hasRpjmd = urusanRpjmd || bidangRpjmd || programRpjmd || programRpjmdText;
-var hasRkpd = urusanRkpd || bidangRkpd || programRkpd || programRkpdText;
+    if (!hasRpjmd && !hasRkpd) {
+        alert('Urusan/Program RPJMD atau RKPD harus diisi!');
+        btn.prop('disabled', false).text('UPDATE');
+        return;
+    }
 
-console.log('hasRpjmd:', hasRpjmd, '| nilai:', {urusanRpjmd, bidangRpjmd, programRpjmd, programRpjmdText});
-console.log('hasRkpd:', hasRkpd, '| nilai:', {urusanRkpd, bidangRkpd, programRkpd, programRkpdText});
-
-// ✅ VALIDASI: Cukup salah satu yang terisi
-if (!hasRpjmd && !hasRkpd) {
-    alert('Urusan/Program RPJMD atau RKPD harus diisi!');
-    btn.prop('disabled', false).text('UPDATE');
-    return;
-}
-
-    // ============================================================
-    // KUMPULKAN INDIKATOR
-    // ============================================================
     var indikatorRpjmd = [], targetRpjmd = [], satuanRpjmd = [];
-    $('.indikator-wrapper-rpjmd-edit .indikator-row').each(function() {
-        var indikator = $(this).find('textarea[name="indikator_rpjmd[]"]').val();
+    $('#rpjmdDetailContainerEdit .indikator-detail-row').each(function() {
+        var indikator = $(this).find('input[name="rpjmd_indikator_edit[]"]').val();
         if (indikator && indikator.trim() !== '') {
             indikatorRpjmd.push(indikator.trim());
-            targetRpjmd.push($(this).find('input[name="target_rpjmd[]"]').val() || '');
-            satuanRpjmd.push($(this).find('input[name="satuan_rpjmd[]"]').val() || '');
+            targetRpjmd.push($(this).find('input[name="rpjmd_target_edit[]"]').val() || '');
+            satuanRpjmd.push($(this).find('input[name="rpjmd_satuan_edit[]"]').val() || '');
         }
     });
 
     var indikatorRkpd = [], targetRkpd = [], satuanRkpd = [];
-    $('.indikator-wrapper-rkpd-edit .indikator-row').each(function() {
-        var indikator = $(this).find('textarea[name="indikator_rkpd[]"]').val();
+    $('#rkpdDetailContainerEdit .indikator-detail-row').each(function() {
+        var indikator = $(this).find('input[name="rkpd_indikator_edit[]"]').val();
         if (indikator && indikator.trim() !== '') {
             indikatorRkpd.push(indikator.trim());
-            targetRkpd.push($(this).find('input[name="target_rkpd[]"]').val() || '');
-            satuanRkpd.push($(this).find('input[name="satuan_rkpd[]"]').val() || '');
+            targetRkpd.push($(this).find('input[name="rkpd_target_edit[]"]').val() || '');
+            satuanRkpd.push($(this).find('input[name="rkpd_satuan_edit[]"]').val() || '');
         }
     });
 
-    // ============================================================
-    // BUAT PAYLOAD
-    // ============================================================
+    if (indikatorRpjmd.length === 0 && indikatorRkpd.length === 0) {
+        alert('Minimal 1 Indikator untuk RPJMD atau RKPD harus diisi!');
+        btn.prop('disabled', false).text('UPDATE');
+        return;
+    }
+
     var payload = {
         id: id,
         urusan_rpjmd_kode: urusanRpjmd,
         bidang_rpjmd_kode: bidangRpjmd,
         program_rpjmd_kode: programRpjmd,
         program_rpjmd_text: programRpjmdText,
-        pagu_program_rpjmd: $('#EditPaguRPJMD').val(),
+        pagu_program_rpjmd: $('#EditPaguRPJMD').val().replace(/[^0-9]/g, ''),
         
         urusan_rkpd_kode: urusanRkpd,
         bidang_rkpd_kode: bidangRkpd,
         program_rkpd_kode: programRkpd,
         program_rkpd_text: programRkpdText,
-        pagu_program_rkpd: $('#EditPaguRKPD').val(),
+        pagu_program_rkpd: $('#EditPaguRKPD').val().replace(/[^0-9]/g, ''),
         
         id_instansi: $('#EditInstansi').val(),
         tahun: $('#EditTahun').val(),
@@ -2360,11 +2740,6 @@ if (!hasRpjmd && !hasRkpd) {
         [CSRF_NAME]: CSRF_TOKEN
     };
 
-    console.log('Payload dikirim:', payload);
-
-    // ============================================================
-    // KIRIM AJAX
-    // ============================================================
     $.ajax({
         url: BaseURL + "Daerah/EditKonsistensiProgram",
         type: "POST",
@@ -2372,8 +2747,8 @@ if (!hasRpjmd && !hasRkpd) {
         dataType: 'json',
         success: function(res) {
             if (res.status == 'success') {
-                alert(res.message);
-                window.location.reload();
+                showNotification(res.message, 'success');
+                setTimeout(function() { window.location.reload(); }, 1500);
             } else {
                 alert(res.message || 'Gagal update data!');
                 btn.prop('disabled', false).text('UPDATE');
@@ -2387,60 +2762,85 @@ if (!hasRpjmd && !hasRkpd) {
     });
 });
 
+// ============================================================
+// HAPUS
+// ============================================================
+$(document).on("click", ".BtnHapus", function() {
+    var id = $(this).data('id');
+    if (!id) { alert('ID tidak valid!'); return; }
+    if (!confirm('Yakin hapus data ini?')) return;
 
-    // ============================================================
-    // HAPUS
-    // ============================================================
-    $(document).on("click", ".BtnHapus", function() {
-        var id = $(this).data('id');
-        if (!id) { alert('ID tidak valid!'); return; }
-        if (!confirm('Yakin hapus data ini?')) return;
+    var btn = $(this);
+    btn.prop('disabled', true).html('<i class="notika-icon notika-trash"></i>');
 
-        var btn = $(this);
-        btn.prop('disabled', true).html('<i class="notika-icon notika-trash"></i>');
-
-        $.ajax({
-            url: BaseURL + "Daerah/HapusKonsistensiProgram",
-            type: "POST",
-            data: { id: id, [CSRF_NAME]: CSRF_TOKEN },
-            dataType: 'json',
-            success: function(res) {
-                if (res.status == 'success') {
-                    alert(res.message);
-                    window.location.reload();
-                } else {
-                    alert(res.message || 'Gagal hapus data!');
-                    btn.prop('disabled', false).html('<i class="notika-icon notika-trash"></i>');
-                }
-            },
-            error: function(xhr) {
-                alert('Terjadi kesalahan: ' + xhr.responseText);
+    $.ajax({
+        url: BaseURL + "Daerah/HapusKonsistensiProgram",
+        type: "POST",
+        data: { id: id, [CSRF_NAME]: CSRF_TOKEN },
+        dataType: 'json',
+        success: function(res) {
+            if (res.status == 'success') {
+                showNotification(res.message, 'success');
+                setTimeout(function() { window.location.reload(); }, 1000);
+            } else {
+                alert(res.message || 'Gagal hapus data!');
                 btn.prop('disabled', false).html('<i class="notika-icon notika-trash"></i>');
             }
-        });
+        },
+        error: function(xhr) {
+            alert('Terjadi kesalahan: ' + xhr.responseText);
+            btn.prop('disabled', false).html('<i class="notika-icon notika-trash"></i>');
+        }
     });
+});
 
-    // ============================================================
-    // RESET CACHE
-    // ============================================================
-    $('#ModalInput').on('hidden.bs.modal', function() {
-        nomenklaturCache = {};
-        $('body').removeClass('modal-open');
-    });
+// ============================================================
+// RESET CACHE ON MODAL CLOSE
+// ============================================================
+$('#ModalInput').on('hidden.bs.modal', function() {
+    nomenklaturCache = {};
+    $('body').removeClass('modal-open');
+});
 
-    $('#ModalEdit').on('hidden.bs.modal', function() {
-        nomenklaturCache = {};
-        $('body').removeClass('modal-open');
-    });
+$('#ModalEdit').on('hidden.bs.modal', function() {
+    nomenklaturCache = {};
+    $('body').removeClass('modal-open');
+});
 
-    // ============================================================
-    // LOAD INITIAL DATA
-    // ============================================================
+// ============================================================
+// LOAD INITIAL DATA
+// ============================================================
+$(document).ready(function() {
     loadLevel('rpjmd', 1, '');
     loadLevel('rkpd', 1, '');
+    
+    // DataTable
+    if ($('#data-table-konsistensi').length > 0) {
+        try {
+            if ($.fn.DataTable.isDataTable('#data-table-konsistensi')) {
+                $('#data-table-konsistensi').DataTable().destroy();
+            }
+            $('#data-table-konsistensi').DataTable({
+                "pageLength": 10,
+                "ordering": false,
+                "stateSave": false,
+                "scrollX": true,
+                "language": {
+                    "emptyTable": "Tidak ada data",
+                    "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                    "infoEmpty": "Tidak ada data",
+                    "paginate": {
+                        "first": "Pertama",
+                        "last": "Terakhir",
+                        "next": "Berikutnya",
+                        "previous": "Sebelumnya"
+                    }
+                }
+            });
+        } catch(e) { console.log("DataTable error:", e); }
+    }
+});
 
-}); // End document ready
 </script>
-
 </body>
 </html>

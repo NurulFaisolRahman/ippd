@@ -11,12 +11,12 @@
     .filter-select { width:260px; font-size:14px; padding:5px 8px; }
     
     /* ============================================================
-       TABEL KONSISTENSI TUJUAN/SASARAN
+       TABEL KONSISTENSI TUJUAN/SASARAN - MULTIPLE ROWS INDIKATOR
        ============================================================ */
     .table-konsistensi-tujuan th {
         background: #f8f9fa;
         font-weight: 700;
-        font-size: 11px;
+        font-size: 10px;
         text-align: center;
         vertical-align: middle;
         padding: 6px 4px;
@@ -24,7 +24,7 @@
     }
     .table-konsistensi-tujuan td {
         vertical-align: middle;
-        font-size: 12px;
+        font-size: 11px;
         padding: 6px 8px;
         border: 1px solid #dee2e6;
     }
@@ -85,25 +85,35 @@
     }
     
     /* ============================================================
-       INDIKATOR LIST - DENGAN BULLET
+       INDIKATOR ITEM - PER BARIS
        ============================================================ */
-    .indikator-list {
-        font-size: 11px;
-        padding-left: 5px;
+    .indikator-item {
+        padding: 3px 0;
     }
-    .indikator-list .ind-item {
-        padding: 2px 0;
+    .indikator-item:not(:last-child) {
         border-bottom: 1px dashed #f0f0f0;
-        display: flex;
-        align-items: flex-start;
     }
-    .indikator-list .ind-item:last-child {
-        border-bottom: none;
+    .indikator-item .ind-nama {
+        display: block;
+        font-size: 11px;
+        color: #333;
     }
-    .indikator-list .ind-item .bullet {
-        color: #007bff;
-        margin-right: 5px;
-        font-weight: bold;
+    
+    .satuan-item {
+        padding: 3px 0;
+        font-size: 11px;
+    }
+    .satuan-item:not(:last-child) {
+        border-bottom: 1px dashed #f0f0f0;
+    }
+    
+    .target-item {
+        padding: 3px 0;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .target-item:not(:last-child) {
+        border-bottom: 1px dashed #f0f0f0;
     }
     
     /* ============================================================
@@ -116,8 +126,24 @@
         margin-bottom: 10px;
         border: 1px solid #e9ecef;
         position: relative;
+        transition: all 0.3s ease;
+    }
+    .indikator-row:hover {
+        border-color: #17a2b8;
+        box-shadow: 0 2px 8px rgba(23,162,184,0.15);
     }
     .indikator-row .btn { margin-top: 5px; }
+    
+    .indikator-counter-badge {
+        display: inline-block;
+        background: #17a2b8;
+        color: #fff;
+        padding: 2px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+        margin-left: 10px;
+    }
     
     /* ============================================================
        MODAL
@@ -203,13 +229,14 @@
     @media (max-width: 768px) {
         .filter-row { flex-direction: column; gap: 15px; }
         .filter-select { width: 100%; }
-        .table-konsistensi-tujuan td { font-size: 10px; padding: 4px 4px; }
+        .table-konsistensi-tujuan td { font-size: 9px; padding: 4px 4px; }
         .level-sasaran .row-label { padding-left: 15px !important; }
         .btn-aksi-group { flex-direction: column; }
         .btn-aksi-group .btn { width: 100%; }
         .modal-lg-custom .modal-body .row .col-md-6 { margin-bottom: 15px; }
         .filter-tujuan-sasaran { flex-direction: column; align-items: stretch; }
         .filter-tujuan-sasaran select { width: 100%; }
+        .indikator-row .row .col-md-6 { margin-bottom: 8px; }
     }
 </style>
 
@@ -311,7 +338,7 @@
             <br>
 
             <!-- ============================================================
-            TABEL DATA - PENOMORAN HIERARKI (1, 1.1, 1.2, 2, 2.1, 2.2, dst)
+            TABEL DATA - MULTIPLE ROWS INDIKATOR
             ============================================================ -->
             <div class="table-responsive">
               <table id="data-table" class="table table-striped table-bordered table-konsistensi-tujuan">
@@ -410,12 +437,27 @@
                         $sasaranGrouped[$tujuanNomor][] = $sasaran;
                     }
                     
-                    // STEP 3: Gabungkan data
+                    // STEP 3: Gabungkan data dengan multiple rows untuk indikator
                     $sortedData = [];
                     foreach ($tujuanList as $row) {
                         $row['is_tujuan'] = true;
-                        $sortedData[] = $row;
                         
+                        // Dapatkan detail indikator
+                        $rpjmdDetails = $row['rpjmd_details'] ?? [];
+                        $rkpdDetails = $row['rkpd_details'] ?? [];
+                        $maxRows = max(count($rpjmdDetails), count($rkpdDetails), 1);
+                        
+                        // Tambahkan baris untuk setiap indikator
+                        for ($i = 0; $i < $maxRows; $i++) {
+                            $newRow = $row;
+                            $newRow['rpjmd_detail'] = isset($rpjmdDetails[$i]) ? $rpjmdDetails[$i] : null;
+                            $newRow['rkpd_detail'] = isset($rkpdDetails[$i]) ? $rkpdDetails[$i] : null;
+                            $newRow['is_first'] = ($i == 0);
+                            $newRow['rowspan'] = $maxRows;
+                            $sortedData[] = $newRow;
+                        }
+                        
+                        // Tambahkan sasaran di bawah tujuan
                         $tujuanNomor = $row['no_display'];
                         if (isset($sasaranGrouped[$tujuanNomor])) {
                             $sasaranCounter = 0;
@@ -423,7 +465,20 @@
                                 $sasaranCounter++;
                                 $sasaran['no_display'] = $tujuanNomor . '.' . $sasaranCounter;
                                 $sasaran['is_tujuan'] = false;
-                                $sortedData[] = $sasaran;
+                                
+                                // Dapatkan detail indikator sasaran
+                                $rpjmdDetailsS = $sasaran['rpjmd_details'] ?? [];
+                                $rkpdDetailsS = $sasaran['rkpd_details'] ?? [];
+                                $maxRowsS = max(count($rpjmdDetailsS), count($rkpdDetailsS), 1);
+                                
+                                for ($i = 0; $i < $maxRowsS; $i++) {
+                                    $newSasaran = $sasaran;
+                                    $newSasaran['rpjmd_detail'] = isset($rpjmdDetailsS[$i]) ? $rpjmdDetailsS[$i] : null;
+                                    $newSasaran['rkpd_detail'] = isset($rkpdDetailsS[$i]) ? $rkpdDetailsS[$i] : null;
+                                    $newSasaran['is_first'] = ($i == 0);
+                                    $newSasaran['rowspan'] = $maxRowsS;
+                                    $sortedData[] = $newSasaran;
+                                }
                             }
                         }
                     }
@@ -433,6 +488,8 @@
                         $isTujuan = ($row['level'] == 1);
                         $levelClass = $isTujuan ? 'level-tujuan' : 'level-sasaran';
                         $badgeLevel = $isTujuan ? 'TUJUAN' : 'SASARAN';
+                        $isFirst = $row['is_first'] ?? true;
+                        $rowspan = $row['rowspan'] ?? 1;
                         
                         // Ambil teks RPJMD
                         $rpjmdText = '';
@@ -454,130 +511,114 @@
                         
                         $rkpdText = $isTujuan ? ($row['tujuan_rkpd_text'] ?? '') : ($row['sasaran_rkpd_text'] ?? '');
                         
-                        // Ambil detail indikator
-                        $rpjmdDetails = $row['rpjmd_details'] ?? [];
-                        $rkpdDetails = $row['rkpd_details'] ?? [];
-                        
-                        // ID untuk tombol Tambah Sasaran
-                        $tujuanIdForButton = $isTujuan ? $row['id'] : 0;
+                        // Ambil detail indikator per baris
+                        $rpjmdDetail = $row['rpjmd_detail'] ?? null;
+                        $rkpdDetail = $row['rkpd_detail'] ?? null;
                     ?>
                       <tr class="<?= $levelClass ?>" data-id="<?= $row['id'] ?>" data-level="<?= $row['level'] ?>">
-                        <td class="text-center no-display"><?= $row['no_display'] ?></td>
+                        <!-- NO - hanya di baris pertama -->
+                        <?php if ($isFirst) { ?>
+                          <td rowspan="<?= $rowspan ?>" class="text-center no-display"><?= $row['no_display'] ?></td>
+                        <?php } ?>
                         
-                        <!-- RPJMD -->
-                        <td class="row-label">
-                          <span class="badge-<?= $isTujuan ? 'tujuan' : 'sasaran' ?>"><?= $badgeLevel ?></span>
-                          <?= nl2br(html_escape($rpjmdText)) ?>
-                        </td>
+                        <!-- RPJMD - hanya di baris pertama -->
+                        <?php if ($isFirst) { ?>
+                          <td rowspan="<?= $rowspan ?>" class="row-label">
+                            <span class="badge-<?= $isTujuan ? 'tujuan' : 'sasaran' ?>"><?= $badgeLevel ?></span>
+                            <?= nl2br(html_escape($rpjmdText)) ?>
+                          </td>
+                        <?php } ?>
                         
+                        <!-- INDIKATOR RPJMD - per baris -->
                         <td class="text-indikator">
-                          <?php if (!empty($rpjmdDetails)): ?>
-                            <div class="indikator-list">
-                              <?php foreach ($rpjmdDetails as $d) { ?>
-                                <div class="ind-item">
-                                  <span class="bullet">•</span>
-                                  <?= html_escape($d['indikator']) ?>
-                                </div>
-                              <?php } ?>
+                          <?php if ($rpjmdDetail && !empty($rpjmdDetail['indikator'])): ?>
+                            <div class="indikator-item">
+                              <span class="ind-nama"><?= html_escape($rpjmdDetail['indikator']) ?></span>
                             </div>
                           <?php else: ?>
                             <span class="text-muted">-</span>
                           <?php endif; ?>
                         </td>
                         
+                        <!-- SATUAN RPJMD - per baris -->
                         <td>
-                          <?php if (!empty($rpjmdDetails)): ?>
-                            <?php foreach ($rpjmdDetails as $d) { ?>
-                              <div style="border-bottom:1px dashed #f0f0f0; padding:2px 0;">
-                                <?= html_escape($d['satuan'] ?? '-') ?>
-                              </div>
-                            <?php } ?>
+                          <?php if ($rpjmdDetail && !empty($rpjmdDetail['satuan'])): ?>
+                            <div class="satuan-item"><?= html_escape($rpjmdDetail['satuan']) ?></div>
                           <?php else: ?>
                             <span class="text-muted">-</span>
                           <?php endif; ?>
                         </td>
                         
+                        <!-- TARGET RPJMD - per baris -->
                         <td>
-                          <?php if (!empty($rpjmdDetails)): ?>
-                            <?php foreach ($rpjmdDetails as $d) { ?>
-                              <div style="border-bottom:1px dashed #f0f0f0; padding:2px 0;">
-                                <?= html_escape($d['target'] ?? '-') ?>
-                              </div>
-                            <?php } ?>
+                          <?php if ($rpjmdDetail && !empty($rpjmdDetail['target'])): ?>
+                            <div class="target-item"><?= html_escape($rpjmdDetail['target']) ?></div>
                           <?php else: ?>
                             <span class="text-muted">-</span>
                           <?php endif; ?>
                         </td>
                         
-                        <!-- RKPD -->
-                        <td class="row-label"><?= nl2br(html_escape($rkpdText)) ?></td>
+                        <!-- RKPD - hanya di baris pertama -->
+                        <?php if ($isFirst) { ?>
+                          <td rowspan="<?= $rowspan ?>" class="row-label"><?= nl2br(html_escape($rkpdText)) ?></td>
+                        <?php } ?>
                         
+                        <!-- INDIKATOR RKPD - per baris -->
                         <td class="text-indikator">
-                          <?php if (!empty($rkpdDetails)): ?>
-                            <div class="indikator-list">
-                              <?php foreach ($rkpdDetails as $d) { ?>
-                                <div class="ind-item">
-                                  <span class="bullet">•</span>
-                                  <?= html_escape($d['indikator']) ?>
-                                </div>
-                              <?php } ?>
+                          <?php if ($rkpdDetail && !empty($rkpdDetail['indikator'])): ?>
+                            <div class="indikator-item">
+                              <span class="ind-nama"><?= html_escape($rkpdDetail['indikator']) ?></span>
                             </div>
                           <?php else: ?>
                             <span class="text-muted">-</span>
                           <?php endif; ?>
                         </td>
                         
+                        <!-- SATUAN RKPD - per baris -->
                         <td>
-                          <?php if (!empty($rkpdDetails)): ?>
-                            <?php foreach ($rkpdDetails as $d) { ?>
-                              <div style="border-bottom:1px dashed #f0f0f0; padding:2px 0;">
-                                <?= html_escape($d['satuan'] ?? '-') ?>
-                              </div>
-                            <?php } ?>
+                          <?php if ($rkpdDetail && !empty($rkpdDetail['satuan'])): ?>
+                            <div class="satuan-item"><?= html_escape($rkpdDetail['satuan']) ?></div>
                           <?php else: ?>
                             <span class="text-muted">-</span>
                           <?php endif; ?>
                         </td>
                         
+                        <!-- TARGET RKPD - per baris -->
                         <td>
-                          <?php if (!empty($rkpdDetails)): ?>
-                            <?php foreach ($rkpdDetails as $d) { ?>
-                              <div style="border-bottom:1px dashed #f0f0f0; padding:2px 0;">
-                                <?= html_escape($d['target'] ?? '-') ?>
-                              </div>
-                            <?php } ?>
+                          <?php if ($rkpdDetail && !empty($rkpdDetail['target'])): ?>
+                            <div class="target-item"><?= html_escape($rkpdDetail['target']) ?></div>
                           <?php else: ?>
                             <span class="text-muted">-</span>
                           <?php endif; ?>
                         </td>
                         
                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                        <td class="text-center">
-                          <div class="btn-aksi-group">
-                            <?php if ($isTujuan) { ?>
-                            <!-- Tombol Tambah Sasaran - hanya untuk baris Tujuan -->
-                            <button class="btn btn-success btn-sm BtnTambahSasaran" 
-                                    data-id="<?= $row['id'] ?>"
-                                    data-no="<?= $row['no_display'] ?>"
-                                    data-tujuan="<?= html_escape($rpjmdText) ?>"
-                                    title="Tambah Sasaran">
-                              <i class="fa fa-plus"></i> Sasaran
-                            </button>
-                            <?php } ?>
-                            <!-- Tombol Edit -->
-                            <button class="btn btn-warning btn-sm BtnEdit" 
-                                    data-id="<?= $row['id'] ?>"
-                                    title="Edit">
-                              <i class="fa fa-edit"></i>
-                            </button>
-                            <!-- Tombol Hapus -->
-                            <button class="btn btn-danger btn-sm BtnHapus" 
-                                    data-id="<?= $row['id'] ?>"
-                                    title="Hapus">
-                              <i class="fa fa-trash"></i>
-                            </button>
-                          </div>
-                        </td>
+                        <!-- AKSI - hanya di baris pertama -->
+                        <?php if ($isFirst) { ?>
+                          <td rowspan="<?= $rowspan ?>" class="text-center">
+                            <div class="btn-aksi-group">
+                              <?php if ($isTujuan) { ?>
+                              <button class="btn btn-success btn-sm BtnTambahSasaran" 
+                                      data-id="<?= $row['id'] ?>"
+                                      data-no="<?= $row['no_display'] ?>"
+                                      data-tujuan="<?= html_escape($rpjmdText) ?>"
+                                      title="Tambah Sasaran">
+                                <i class="fa fa-plus"></i> Sasaran
+                              </button>
+                              <?php } ?>
+                              <button class="btn btn-warning btn-sm BtnEdit" 
+                                      data-id="<?= $row['id'] ?>"
+                                      title="Edit">
+                                <i class="fa fa-edit"></i>
+                              </button>
+                              <button class="btn btn-danger btn-sm BtnHapus" 
+                                      data-id="<?= $row['id'] ?>"
+                                      title="Hapus">
+                                <i class="fa fa-trash"></i>
+                              </button>
+                            </div>
+                          </td>
+                        <?php } ?>
                         <?php } ?>
                       </tr>
                     <?php } ?>
@@ -603,7 +644,6 @@
 
 <!-- ================================================================
 MODAL TAMBAH TUJUAN - 2 KOLOM (RPJMD KIRI | RKPD KANAN)
-TANPA PERANGKAT DAERAH
 ================================================================ -->
 <div class="modal fade fixed-modal" id="ModalTambahTujuan" role="dialog">
   <div class="modal-dialog modal-lg-custom">
@@ -611,12 +651,13 @@ TANPA PERANGKAT DAERAH
       <div class="modal-header" style="background:#28a745; color:#fff;">
         <button type="button" class="close" data-dismiss="modal" style="color:#fff;">&times;</button>
         <h4><b><i class="notika-icon bi-plus-lg"></i> Tambah Tujuan</b></h4>
+        <span id="TujuanIndikatorCounter" class="indikator-counter-badge">0 Indikator</span>
       </div>
 
       <div class="modal-body">
         <form id="FormTambahTujuan">
 
-          <!-- Header: Tahun (tanpa Perangkat Daerah) -->
+          <!-- Header: Tahun -->
           <div class="row">
             <div class="col-md-12">
               <div class="form-group">
@@ -634,9 +675,7 @@ TANPA PERANGKAT DAERAH
             </div>
           </div>
 
-          <!-- ============================================================
-          2 KOLOM: KIRI RPJMD | KANAN RKPD
-          ============================================================ -->
+          <!-- 2 KOLOM: KIRI RPJMD | KANAN RKPD -->
           <div class="row">
             
             <!-- KOLOM KIRI: RPJMD -->
@@ -665,7 +704,7 @@ TANPA PERANGKAT DAERAH
                     <textarea id="TujuanRpjmdText" class="form-control" rows="2" placeholder="Isi Tujuan RPJMD"></textarea>
                   </div>
                   
-                  <!-- Indikator RPJMD -->
+                  <!-- Indikator RPJMD - MULTIPLE ROWS -->
                   <div class="form-group" style="margin-top:10px;">
                     <label><b>Indikator, Satuan, dan Target</b></label>
                     <div id="TujuanIndikatorWrapperRpjmd">
@@ -706,7 +745,7 @@ TANPA PERANGKAT DAERAH
                     <textarea id="TujuanRkpdText" class="form-control" rows="2" placeholder="Isi Tujuan RKPD"></textarea>
                   </div>
                   
-                  <!-- Indikator RKPD -->
+                  <!-- Indikator RKPD - MULTIPLE ROWS -->
                   <div class="form-group" style="margin-top:10px;">
                     <label><b>Indikator, Satuan, dan Target</b></label>
                     <div id="TujuanIndikatorWrapperRkpd">
@@ -755,7 +794,6 @@ TANPA PERANGKAT DAERAH
 
 <!-- ================================================================
 MODAL TAMBAH SASARAN - 2 KOLOM (RPJMD KIRI | RKPD KANAN)
-TANPA PERANGKAT DAERAH
 ================================================================ -->
 <div class="modal fade fixed-modal" id="ModalTambahSasaran" role="dialog">
   <div class="modal-dialog modal-lg-custom">
@@ -763,14 +801,15 @@ TANPA PERANGKAT DAERAH
       <div class="modal-header" style="background:#28a745; color:#fff;">
         <button type="button" class="close" data-dismiss="modal" style="color:#fff;">&times;</button>
         <h4><b><i class="notika-icon bi-plus-lg"></i> Tambah Sasaran</b></h4>
-        <small style="color:#fff;" id="SasaranParentInfo">Untuk Tujuan: </small>
+        <span id="SasaranIndikatorCounter" class="indikator-counter-badge">0 Indikator</span>
+        <small style="color:#fff; display:block; margin-top:5px;" id="SasaranParentInfo">Untuk Tujuan: </small>
       </div>
 
       <div class="modal-body">
         <form id="FormTambahSasaran">
           <input type="hidden" id="SasaranParentId" value="">
 
-          <!-- Header: Tahun (tanpa Perangkat Daerah) -->
+          <!-- Header: Tahun -->
           <div class="row">
             <div class="col-md-12">
               <div class="form-group">
@@ -786,9 +825,7 @@ TANPA PERANGKAT DAERAH
             </div>
           </div>
 
-          <!-- ============================================================
-          2 KOLOM: KIRI RPJMD | KANAN RKPD
-          ============================================================ -->
+          <!-- 2 KOLOM: KIRI RPJMD | KANAN RKPD -->
           <div class="row">
             
             <!-- KOLOM KIRI: RPJMD -->
@@ -828,7 +865,7 @@ TANPA PERANGKAT DAERAH
                     <textarea id="SasaranRpjmdText" class="form-control" rows="2" placeholder="Isi Sasaran RPJMD"></textarea>
                   </div>
                   
-                  <!-- Indikator RPJMD -->
+                  <!-- Indikator RPJMD - MULTIPLE ROWS -->
                   <div class="form-group" style="margin-top:10px;">
                     <label><b>Indikator, Satuan, dan Target</b></label>
                     <div id="SasaranIndikatorWrapperRpjmd">
@@ -869,7 +906,7 @@ TANPA PERANGKAT DAERAH
                     <textarea id="SasaranRkpdText" class="form-control" rows="2" placeholder="Isi Sasaran RKPD"></textarea>
                   </div>
                   
-                  <!-- Indikator RKPD -->
+                  <!-- Indikator RKPD - MULTIPLE ROWS -->
                   <div class="form-group" style="margin-top:10px;">
                     <label><b>Indikator, Satuan, dan Target</b></label>
                     <div id="SasaranIndikatorWrapperRkpd">
@@ -917,9 +954,7 @@ TANPA PERANGKAT DAERAH
 </div>
 
 <!-- ================================================================
-MODAL EDIT - 2 KOLOM (RPJMD KIRI | RKPD KANAN) 
-DENGAN DROPDOWN PRE-SELECTED DAN FITUR TAMBAH INDIKATOR DINAMIS
-TANPA PERANGKAT DAERAH
+MODAL EDIT - 2 KOLOM (RPJMD KIRI | RKPD KANAN)
 ================================================================ -->
 <div class="modal fade fixed-modal" id="ModalEdit" role="dialog">
   <div class="modal-dialog modal-lg-custom">
@@ -927,6 +962,7 @@ TANPA PERANGKAT DAERAH
       <div class="modal-header" style="background:#ffc107; color:#333;">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
         <h4><b><i class="notika-icon notika-edit"></i> Edit Konsistensi</b></h4>
+        <span id="EditIndikatorCounter" class="indikator-counter-badge">0 Indikator</span>
       </div>
 
       <div class="modal-body">
@@ -935,7 +971,7 @@ TANPA PERANGKAT DAERAH
           <input type="hidden" name="level" id="EditLevel">
           <input type="hidden" name="parent_tujuan_id" id="EditParentTujuanId">
 
-          <!-- Header: Tahun (tanpa Perangkat Daerah) -->
+          <!-- Header: Tahun -->
           <div class="row">
             <div class="col-md-12">
               <div class="form-group">
@@ -949,9 +985,7 @@ TANPA PERANGKAT DAERAH
             </div>
           </div>
 
-          <!-- ============================================================
-          2 KOLOM: KIRI RPJMD | KANAN RKPD
-          ============================================================ -->
+          <!-- 2 KOLOM: KIRI RPJMD | KANAN RKPD -->
           <div class="row">
             
             <!-- KOLOM KIRI: RPJMD -->
@@ -972,7 +1006,7 @@ TANPA PERANGKAT DAERAH
                     <small class="text-muted" style="margin-left:5px;">Pilih jenis data RPJMD</small>
                   </div>
                   
-                  <!-- Dropdown Pilih dari Data RPJMD - Dengan data pre-selected -->
+                  <!-- Dropdown Pilih dari Data RPJMD -->
                   <div class="form-group">
                     <label><b>Pilih dari Data RPJMD</b></label>
                     <select class="form-control" id="EditRpjmdDropdown">
@@ -1084,8 +1118,6 @@ function escapeHtml(text) {
 // FUNGSI CREATE INDIKATOR ROW
 // ============================================================
 function createIndikatorRow(type, data) {
-    // type: 'rpjmd' atau 'rkpd'
-    // data: object { indikator, satuan, target }
     data = data || {};
     
     var row = `
@@ -1112,18 +1144,28 @@ function createIndikatorRow(type, data) {
 }
 
 // ============================================================
+// UPDATE COUNTER BADGE
+// ============================================================
+function updateIndikatorCounter(containerSelector, counterSelector) {
+    var count = $(containerSelector + ' .indikator-row').length;
+    $(counterSelector).text(count + ' Indikator');
+}
+
+// ============================================================
 // INDIKATOR ROW MANAGEMENT - TUJUAN TAMBAH
 // ============================================================
 $(document).on('click', '.BtnAddIndikatorTujuanRpjmd', function() {
     var wrapper = '#TujuanIndikatorWrapperRpjmd';
     var newRow = createIndikatorRow('rpjmd');
     $(wrapper).append(newRow);
+    updateIndikatorCounter('#TujuanIndikatorWrapperRpjmd', '#TujuanIndikatorCounter');
 });
 
 $(document).on('click', '.BtnAddIndikatorTujuanRkpd', function() {
     var wrapper = '#TujuanIndikatorWrapperRkpd';
     var newRow = createIndikatorRow('rkpd');
     $(wrapper).append(newRow);
+    updateIndikatorCounter('#TujuanIndikatorWrapperRkpd', '#TujuanIndikatorCounter');
 });
 
 // ============================================================
@@ -1133,12 +1175,14 @@ $(document).on('click', '.BtnAddIndikatorSasaranRpjmd', function() {
     var wrapper = '#SasaranIndikatorWrapperRpjmd';
     var newRow = createIndikatorRow('rpjmd');
     $(wrapper).append(newRow);
+    updateIndikatorCounter('#SasaranIndikatorWrapperRpjmd', '#SasaranIndikatorCounter');
 });
 
 $(document).on('click', '.BtnAddIndikatorSasaranRkpd', function() {
     var wrapper = '#SasaranIndikatorWrapperRkpd';
     var newRow = createIndikatorRow('rkpd');
     $(wrapper).append(newRow);
+    updateIndikatorCounter('#SasaranIndikatorWrapperRkpd', '#SasaranIndikatorCounter');
 });
 
 // ============================================================
@@ -1148,19 +1192,25 @@ $(document).on('click', '.BtnAddIndikatorEditRpjmd', function() {
     var wrapper = '#EditIndikatorWrapperRpjmd';
     var newRow = createIndikatorRow('rpjmd');
     $(wrapper).append(newRow);
+    updateIndikatorCounter('#EditIndikatorWrapperRpjmd', '#EditIndikatorCounter');
 });
 
 $(document).on('click', '.BtnAddIndikatorEditRkpd', function() {
     var wrapper = '#EditIndikatorWrapperRkpd';
     var newRow = createIndikatorRow('rkpd');
     $(wrapper).append(newRow);
+    updateIndikatorCounter('#EditIndikatorWrapperRkpd', '#EditIndikatorCounter');
 });
 
 // ============================================================
 // INDIKATOR ROW MANAGEMENT - HAPUS
 // ============================================================
 $(document).on('click', '.BtnRemoveIndikator', function() {
-    $(this).closest('.indikator-row').remove();
+    var row = $(this).closest('.indikator-row');
+    var container = row.closest('div[id$="IndikatorWrapperRpjmd"], div[id$="IndikatorWrapperRkpd"]');
+    row.remove();
+    var counterSelector = container.closest('.modal-body').find('.indikator-counter-badge');
+    updateIndikatorCounter('#' + container.attr('id'), counterSelector);
 });
 
 // ============================================================
@@ -1203,6 +1253,8 @@ $('#BtnTambahTujuan').click(function() {
     // Reset indikator wrapper - 1 row default
     $('#TujuanIndikatorWrapperRpjmd').html(createIndikatorRow('rpjmd'));
     $('#TujuanIndikatorWrapperRkpd').html(createIndikatorRow('rkpd'));
+    updateIndikatorCounter('#TujuanIndikatorWrapperRpjmd', '#TujuanIndikatorCounter');
+    updateIndikatorCounter('#TujuanIndikatorWrapperRkpd', '#TujuanIndikatorCounter');
     
     $('#ModalTambahTujuan').modal({
         backdrop: 'static',
@@ -1211,7 +1263,7 @@ $('#BtnTambahTujuan').click(function() {
 });
 
 // ============================================================
-// SIMPAN TUJUAN (tanpa id_instansi)
+// SIMPAN TUJUAN
 // ============================================================
 $('#BtnSimpanTujuan').click(function() {
     var btn = $(this);
@@ -1256,6 +1308,12 @@ $('#BtnSimpanTujuan').click(function() {
         }
     });
     
+    if (indikatorRpjmd.length === 0 && indikatorRkpd.length === 0) {
+        alert('Minimal tambahkan 1 indikator!');
+        btn.prop('disabled', false).text('SIMPAN');
+        return;
+    }
+    
     var payload = {
         id_rpjmd: idRpjmd || 0,
         rpjmd_text: rpjmdText,
@@ -1296,27 +1354,24 @@ $('#BtnSimpanTujuan').click(function() {
 // TAMBAH SASARAN - OPEN MODAL
 // ============================================================
 $(document).on('click', '.BtnTambahSasaran', function() {
-    // Ambil data dari tombol
     var parentId = $(this).data('id');
     var parentNo = $(this).data('no');
     var parentTujuan = $(this).data('tujuan');
     
-    // Set informasi parent di modal
     $('#SasaranParentId').val(parentId);
     $('#SasaranParentInfo').html('Untuk Tujuan: <strong>' + parentNo + '. ' + escapeHtml(parentTujuan) + '</strong>');
     
-    // Reset form
     $('#SasaranTahun').val('<?= $TahunAktif ?>');
     $('#SasaranRpjmdDropdown').val('');
     $('#SasaranRpjmdText').val('');
     $('#SasaranRkpdText').val('');
     $('#SasaranKeterangan').val('');
     
-    // Reset indikator wrapper - 1 row default
     $('#SasaranIndikatorWrapperRpjmd').html(createIndikatorRow('rpjmd'));
     $('#SasaranIndikatorWrapperRkpd').html(createIndikatorRow('rkpd'));
+    updateIndikatorCounter('#SasaranIndikatorWrapperRpjmd', '#SasaranIndikatorCounter');
+    updateIndikatorCounter('#SasaranIndikatorWrapperRkpd', '#SasaranIndikatorCounter');
     
-    // Tampilkan modal
     $('#ModalTambahSasaran').modal({
         backdrop: 'static',
         keyboard: false
@@ -1324,7 +1379,7 @@ $(document).on('click', '.BtnTambahSasaran', function() {
 });
 
 // ============================================================
-// SIMPAN SASARAN (tanpa id_instansi)
+// SIMPAN SASARAN
 // ============================================================
 $('#BtnSimpanSasaran').click(function() {
     var btn = $(this);
@@ -1353,7 +1408,6 @@ $('#BtnSimpanSasaran').click(function() {
         return;
     }
     
-    // Kumpulkan indikator RPJMD
     var indikatorRpjmd = [], satuanRpjmd = [], targetRpjmd = [];
     $('#SasaranIndikatorWrapperRpjmd .indikator-row').each(function() {
         var ind = $(this).find('input[name="indikator_rpjmd[]"]').val();
@@ -1364,7 +1418,6 @@ $('#BtnSimpanSasaran').click(function() {
         }
     });
     
-    // Kumpulkan indikator RKPD
     var indikatorRkpd = [], satuanRkpd = [], targetRkpd = [];
     $('#SasaranIndikatorWrapperRkpd .indikator-row').each(function() {
         var ind = $(this).find('input[name="indikator_rkpd[]"]').val();
@@ -1374,6 +1427,12 @@ $('#BtnSimpanSasaran').click(function() {
             targetRkpd.push($(this).find('input[name="target_rkpd[]"]').val() || '');
         }
     });
+    
+    if (indikatorRpjmd.length === 0 && indikatorRkpd.length === 0) {
+        alert('Minimal tambahkan 1 indikator!');
+        btn.prop('disabled', false).text('SIMPAN');
+        return;
+    }
     
     var payload = {
         parent_tujuan_id: parentId,
@@ -1413,7 +1472,7 @@ $('#BtnSimpanSasaran').click(function() {
 });
 
 // ============================================================
-// FUNGSI UPDATE DROPDOWN EDIT DENGAN PRE-SELECTED
+// FUNGSI UPDATE DROPDOWN EDIT
 // ============================================================
 function updateEditDropdown(level, selectedId) {
     var dropdown = $('#EditRpjmdDropdown');
@@ -1440,14 +1499,12 @@ function updateEditDropdown(level, selectedId) {
 }
 
 // ============================================================
-// EDIT - OPEN MODAL DENGAN DROPDOWN PRE-SELECTED
-// DAN RENDER INDIKATOR DINAMIS
+// EDIT - OPEN MODAL
 // ============================================================
 $(document).on('click', '.BtnEdit', function() {
     var id = $(this).data('id');
     if (!id) return;
     
-    // Reset form
     $('#EditId').val('');
     $('#EditLevel').val('');
     $('#EditParentTujuanId').val('');
@@ -1457,11 +1514,9 @@ $(document).on('click', '.BtnEdit', function() {
     $('#EditKeterangan').val('');
     $('#EditFilterRpjmd').val(1);
     
-    // Kosongkan indikator wrapper
     $('#EditIndikatorWrapperRpjmd').html('');
     $('#EditIndikatorWrapperRkpd').html('');
     
-    // Ambil data dari server
     $.ajax({
         url: BaseURL + "Daerah/GetKonsistensiTujuanById",
         type: "POST",
@@ -1471,7 +1526,6 @@ $(document).on('click', '.BtnEdit', function() {
             if (res.status == 'success' && res.data) {
                 var d = res.data;
                 
-                // ISI FORM DENGAN DATA
                 $('#EditId').val(d.id);
                 $('#EditLevel').val(d.level);
                 $('#EditParentTujuanId').val(d.parent_tujuan_id || '');
@@ -1480,15 +1534,10 @@ $(document).on('click', '.BtnEdit', function() {
                 $('#EditRkpdText').val(d.rkpd_text || '');
                 $('#EditKeterangan').val(d.keterangan || '');
                 
-                // SET FILTER SESUAI LEVEL
                 $('#EditFilterRpjmd').val(d.level);
-                
-                // UPDATE DROPDOWN DENGAN DATA YANG ADA - PRE-SELECTED
                 updateEditDropdown(d.level, d.rpjmd_id);
                 
-                // ============================================================
                 // RENDER INDIKATOR RPJMD
-                // ============================================================
                 var rpjmdDetails = d.rpjmd_details || [];
                 if (rpjmdDetails.length > 0) {
                     $('#EditIndikatorWrapperRpjmd').html('');
@@ -1501,13 +1550,10 @@ $(document).on('click', '.BtnEdit', function() {
                         $('#EditIndikatorWrapperRpjmd').append(row);
                     });
                 } else {
-                    // Jika tidak ada data, tambahkan 1 row kosong
                     $('#EditIndikatorWrapperRpjmd').html(createIndikatorRow('rpjmd'));
                 }
                 
-                // ============================================================
                 // RENDER INDIKATOR RKPD
-                // ============================================================
                 var rkpdDetails = d.rkpd_details || [];
                 if (rkpdDetails.length > 0) {
                     $('#EditIndikatorWrapperRkpd').html('');
@@ -1523,7 +1569,9 @@ $(document).on('click', '.BtnEdit', function() {
                     $('#EditIndikatorWrapperRkpd').html(createIndikatorRow('rkpd'));
                 }
                 
-                // TAMPILKAN MODAL
+                updateIndikatorCounter('#EditIndikatorWrapperRpjmd', '#EditIndikatorCounter');
+                updateIndikatorCounter('#EditIndikatorWrapperRkpd', '#EditIndikatorCounter');
+                
                 $('#ModalEdit').modal({
                     backdrop: 'static',
                     keyboard: false
@@ -1566,7 +1614,7 @@ $('#EditRpjmdDropdown').change(function() {
 });
 
 // ============================================================
-// UPDATE (tanpa id_instansi)
+// UPDATE
 // ============================================================
 $('#BtnUpdate').click(function() {
     var id = $('#EditId').val();
@@ -1583,7 +1631,6 @@ $('#BtnUpdate').click(function() {
     var keterangan = $('#EditKeterangan').val();
     var parentTujuanId = $('#EditParentTujuanId').val();
     
-    // Jika dropdown dipilih, ambil teksnya
     if (idRpjmd) {
         var data = (level == 1) ? LIST_TUJUAN : LIST_SASARAN;
         var found = $.grep(data, function(item) { return item.Id == idRpjmd; });
@@ -1603,7 +1650,6 @@ $('#BtnUpdate').click(function() {
         return;
     }
     
-    // Kumpulkan indikator RPJMD
     var indikatorRpjmd = [], satuanRpjmd = [], targetRpjmd = [];
     $('#EditIndikatorWrapperRpjmd .indikator-row').each(function() {
         var ind = $(this).find('input[name="indikator_rpjmd[]"]').val();
@@ -1614,7 +1660,6 @@ $('#BtnUpdate').click(function() {
         }
     });
     
-    // Kumpulkan indikator RKPD
     var indikatorRkpd = [], satuanRkpd = [], targetRkpd = [];
     $('#EditIndikatorWrapperRkpd .indikator-row').each(function() {
         var ind = $(this).find('input[name="indikator_rkpd[]"]').val();
@@ -1624,6 +1669,12 @@ $('#BtnUpdate').click(function() {
             targetRkpd.push($(this).find('input[name="target_rkpd[]"]').val() || '');
         }
     });
+    
+    if (indikatorRpjmd.length === 0 && indikatorRkpd.length === 0) {
+        alert('Minimal tambahkan 1 indikator!');
+        btn.prop('disabled', false).text('UPDATE');
+        return;
+    }
     
     var payload = {
         id: id,
