@@ -5218,7 +5218,7 @@
         ]);
     }
 
-    public function Akun_Karyawan()
+public function Akun_Karyawan()
 {
     $Header['Halaman'] = 'Kelola Karyawan';
 
@@ -5229,10 +5229,7 @@
         $KodeWilayah = $_SESSION['TempKodeWilayah'];
     }
 
-    // KIRIM KE VIEW
     $Data['KodeWilayah'] = $KodeWilayah;
-
-    // PROVINSI
     $Data['Provinsi'] = $this->db
         ->select('Kode, Nama')
         ->where('LENGTH(Kode)=2', null, false)
@@ -5248,7 +5245,6 @@
         return;
     }
 
-    // AMBIL DATA DINAS DARI akun_instansi
     $Data['DaftarDinas'] = $this->db
         ->select('id, nama, tahun_mulai, tahun_akhir')
         ->where('kodewilayah', $KodeWilayah)
@@ -5257,22 +5253,19 @@
         ->get('akun_instansi')
         ->result_array();
 
-    // AKUN KARYAWAN - TAMBAHKAN satuan_unit_kerja
     $Data['Karyawan'] = $this->db
-        ->select('id, kodewilayah, nama, nip, jabatan, satuan_unit_kerja, password, tahun_mulai, tahun_akhir, Level, dinas_id, created_at, updated_at, deleted_at')
+        ->select('id, kodewilayah, nama, nip, eselon, jabatan, satuan_unit_kerja, password, tahun_mulai, tahun_akhir, Level, dinas_id, created_at, updated_at, deleted_at')
         ->where('kodewilayah', $KodeWilayah)
         ->where('deleted_at IS NULL', null, false)
         ->order_by('id', 'ASC')
         ->get('akun_karyawan')
         ->result_array();
 
-    // MAP DINAS ID => NAMA
     $mapDinas = [];
     foreach ($Data['DaftarDinas'] as $d) {
         $mapDinas[$d['id']] = $d['nama'];
     }
 
-    // TAMBAHKAN dinas_nama UNTUK VIEW
     foreach ($Data['Karyawan'] as &$k) {
         $ids = [];
         if (!empty($k['dinas_id'])) {
@@ -5293,7 +5286,7 @@
     $this->load->view('Daerah/Akun_Karyawan', $Data);
 }
 
-        public function InputKaryawan()
+ public function InputKaryawan()
 {
     $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : null;
     if (!$KodeWilayah) {
@@ -5319,6 +5312,7 @@
 
     $nama = trim((string)$this->input->post('nama', TRUE));
     $nip  = trim((string)$this->input->post('nip', TRUE));
+    $eselon = trim((string)$this->input->post('eselon', TRUE));
     $jabatan = trim((string)$this->input->post('jabatan', TRUE));
     $satuan_unit_kerja = trim((string)$this->input->post('satuan_unit_kerja', TRUE));
     $pwd  = trim((string)$this->input->post('password', TRUE));
@@ -5335,13 +5329,11 @@
         echo 'Jabatan wajib diisi!';
         return;
     }
-    // Satuan Unit Kerja TIDAK WAJIB
     if ($pwd === '') {
         echo 'Password wajib diisi!';
         return;
     }
 
-    // CEK NIP UNIK
     $cekNip = $this->db
         ->where('nip', $nip)
         ->where('kodewilayah', $KodeWilayah)
@@ -5354,7 +5346,6 @@
         return;
     }
 
-    // DINAS TERKAIT
     $dinasArr = $this->input->post('dinas_id');
     if (!is_array($dinasArr) || count(array_filter($dinasArr)) < 1) {
         echo 'Dinas terkait wajib dipilih minimal 1!';
@@ -5378,8 +5369,9 @@
         'kodewilayah'   => $KodeWilayah,
         'nama'          => $nama,
         'nip'           => $nip,
+        'eselon'        => $eselon ?: null,
         'jabatan'       => $jabatan,
-        'satuan_unit_kerja' => $satuan_unit_kerja, 
+        'satuan_unit_kerja' => $satuan_unit_kerja,
         'password'      => password_hash($pwd, PASSWORD_DEFAULT),
         'tahun_mulai'   => $tahunMulai,
         'tahun_akhir'   => $tahunAkhir,
@@ -5393,7 +5385,7 @@
     echo $this->db->affected_rows() ? '1' : 'Gagal Menyimpan Data!';
 }
 
-        public function EditKaryawan()
+public function EditKaryawan()
 {
     $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : null;
     if (!$KodeWilayah) {
@@ -5425,8 +5417,9 @@
 
     $nama = trim((string)$this->input->post('nama', TRUE));
     $nip = trim((string)$this->input->post('nip', TRUE));
+    $eselon = trim((string)$this->input->post('eselon', TRUE));
     $jabatan = trim((string)$this->input->post('jabatan', TRUE));
-    $satuan_unit_kerja = trim((string)$this->input->post('satuan_unit_kerja', TRUE)); 
+    $satuan_unit_kerja = trim((string)$this->input->post('satuan_unit_kerja', TRUE));
 
     if ($nama === '') {
         echo 'Nama karyawan wajib diisi!';
@@ -5440,7 +5433,6 @@
         echo 'Jabatan wajib diisi!';
         return;
     }
-    // Satuan Unit Kerja TIDAK WAJIB
 
     $exist = $this->db->where('id', $id)
         ->where('kodewilayah', $KodeWilayah)
@@ -5453,7 +5445,6 @@
         return;
     }
 
-    // CEK DUPLIKAT NIP
     $cekNip = $this->db
         ->where('nip', $nip)
         ->where('id !=', $id)
@@ -5467,7 +5458,6 @@
         return;
     }
 
-    // DINAS TERKAIT
     $dinasArr = $this->input->post('dinas_id');
     if (!is_array($dinasArr) || count(array_filter($dinasArr)) < 1) {
         echo 'Dinas terkait wajib dipilih minimal 1!';
@@ -5490,6 +5480,7 @@
     $data = [
         'nama'          => $nama,
         'nip'           => $nip,
+        'eselon'        => $eselon ?: null,
         'jabatan'       => $jabatan,
         'satuan_unit_kerja' => $satuan_unit_kerja,
         'tahun_mulai'   => $tahunMulai,
@@ -8854,101 +8845,105 @@ public function PotensiDaerah() {
     // ============================================================
     
     public function program_input_program() {
-        if (!$this->input->is_ajax_request()) show_404();
-        
-        $kodeWilayah = $this->_checkSessionWilayah();
-        if (!$kodeWilayah) return;
-        
-        $bidangId = (int)$this->input->post('bidang_urusan_id', TRUE);
-        $kode = trim($this->input->post('kode_program', TRUE));
-        $nama = trim($this->input->post('nama_program', TRUE));
-        
-        if ($bidangId <= 0) {
-            echo json_encode(['status' => 'error', 'message' => 'Bidang Urusan tidak valid!']);
-            return;
-        }
-        if (empty($nama)) {
-            echo json_encode(['status' => 'error', 'message' => 'Nama Program harus diisi!']);
-            return;
-        }
-        
-        // Cek duplikat
-        $exists = $this->db
-            ->where('kode_wilayah', $kodeWilayah)
-            ->where('bidang_urusan_id', $bidangId)
-            ->where('nama_program', $nama)
-            ->where('deleted_at IS NULL')
-            ->get('program_data')
-            ->num_rows();
-        
-        if ($exists > 0) {
-            echo json_encode(['status' => 'error', 'message' => 'Program sudah ada di Bidang ini!']);
-            return;
-        }
-        
-        $data = [
-            'kode_wilayah' => $kodeWilayah,
-            'bidang_urusan_id' => $bidangId,
-            'kode_program' => $kode ?: null,
-            'nama_program' => $nama,
-            'created_at' => date('Y-m-d H:i:s')
-        ];
-        
-        $this->db->insert('program_data', $data);
-        $programId = $this->db->insert_id();
-        
-        if ($programId) {
-            // Proses Indikator
-            $this->_program_proses_indikator($programId, $kodeWilayah);
-            
-            echo json_encode([
-                'status' => 'success',
-                'message' => 'Program dan Indikator berhasil ditambahkan!',
-                'id' => $programId
-            ]);
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan Program!']);
-        }
+    if (!$this->input->is_ajax_request()) show_404();
+    
+    $kodeWilayah = $this->_checkSessionWilayah();
+    if (!$kodeWilayah) return;
+    
+    $bidangId = (int)$this->input->post('bidang_urusan_id', TRUE);
+    $kode = trim($this->input->post('kode_program', TRUE));
+    $nama = trim($this->input->post('nama_program', TRUE));
+    $outcome = trim($this->input->post('outcome', TRUE)); // ← OUTCOME
+    
+    if ($bidangId <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Bidang Urusan tidak valid!']);
+        return;
     }
-
-    public function program_edit_program() {
-        if (!$this->input->is_ajax_request()) show_404();
+    if (empty($nama)) {
+        echo json_encode(['status' => 'error', 'message' => 'Nama Program harus diisi!']);
+        return;
+    }
+    
+    // Cek duplikat
+    $exists = $this->db
+        ->where('kode_wilayah', $kodeWilayah)
+        ->where('bidang_urusan_id', $bidangId)
+        ->where('nama_program', $nama)
+        ->where('deleted_at IS NULL')
+        ->get('program_data')
+        ->num_rows();
+    
+    if ($exists > 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Program sudah ada di Bidang ini!']);
+        return;
+    }
+    
+    $data = [
+        'kode_wilayah' => $kodeWilayah,
+        'bidang_urusan_id' => $bidangId,
+        'kode_program' => $kode ?: null,
+        'nama_program' => $nama,
+        'outcome' => $outcome ?: null, // ← SIMPAN OUTCOME
+        'created_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->insert('program_data', $data);
+    $programId = $this->db->insert_id();
+    
+    if ($programId) {
+        // Proses Indikator (tanpa outcome)
+        $this->_program_proses_indikator($programId, $kodeWilayah);
         
-        $kodeWilayah = $this->_checkSessionWilayah();
-        if (!$kodeWilayah) return;
-        
-        $id = (int)$this->input->post('id', TRUE);
-        $bidangId = (int)$this->input->post('bidang_urusan_id', TRUE);
-        $kode = trim($this->input->post('kode_program', TRUE));
-        $nama = trim($this->input->post('nama_program', TRUE));
-        
-        if ($id <= 0) {
-            echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
-            return;
-        }
-        if ($bidangId <= 0) {
-            echo json_encode(['status' => 'error', 'message' => 'Bidang Urusan tidak valid!']);
-            return;
-        }
-        if (empty($nama)) {
-            echo json_encode(['status' => 'error', 'message' => 'Nama Program harus diisi!']);
-            return;
-        }
-        
-        $this->db->where('id', $id);
-        $this->db->where('kode_wilayah', $kodeWilayah);
-        $this->db->update('program_data', [
-            'bidang_urusan_id' => $bidangId,
-            'kode_program' => $kode ?: null,
-            'nama_program' => $nama,
-            'updated_at' => date('Y-m-d H:i:s')
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Program dan Indikator berhasil ditambahkan!',
+            'id' => $programId
         ]);
-        
-        // Proses indikator
-        $this->_program_proses_indikator($id, $kodeWilayah);
-        
-        echo json_encode(['status' => 'success', 'message' => 'Program berhasil diupdate!']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan Program!']);
     }
+}
+
+public function program_edit_program() {
+    if (!$this->input->is_ajax_request()) show_404();
+    
+    $kodeWilayah = $this->_checkSessionWilayah();
+    if (!$kodeWilayah) return;
+    
+    $id = (int)$this->input->post('id', TRUE);
+    $bidangId = (int)$this->input->post('bidang_urusan_id', TRUE);
+    $kode = trim($this->input->post('kode_program', TRUE));
+    $nama = trim($this->input->post('nama_program', TRUE));
+    $outcome = trim($this->input->post('outcome', TRUE)); // ← OUTCOME
+    
+    if ($id <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    if ($bidangId <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Bidang Urusan tidak valid!']);
+        return;
+    }
+    if (empty($nama)) {
+        echo json_encode(['status' => 'error', 'message' => 'Nama Program harus diisi!']);
+        return;
+    }
+    
+    $this->db->where('id', $id);
+    $this->db->where('kode_wilayah', $kodeWilayah);
+    $this->db->update('program_data', [
+        'bidang_urusan_id' => $bidangId,
+        'kode_program' => $kode ?: null,
+        'nama_program' => $nama,
+        'outcome' => $outcome ?: null, // ← UPDATE OUTCOME
+        'updated_at' => date('Y-m-d H:i:s')
+    ]);
+    
+    // Proses indikator (tanpa outcome)
+    $this->_program_proses_indikator($id, $kodeWilayah);
+    
+    echo json_encode(['status' => 'success', 'message' => 'Program berhasil diupdate!']);
+}
 
     public function program_hapus_program() {
         if (!$this->input->is_ajax_request()) show_404();
@@ -9002,7 +8997,7 @@ private function parseRupiah($rupiah) {
     // FUNGSI BANTUAN PROSES INDIKATOR
     // ============================================================
  private function _program_proses_indikator($programId, $kodeWilayah) {
-    // Ambil data indikator dari POST
+    // Ambil data indikator dari POST (TANPA OUTCOME)
     $indikatorIds = $this->input->post('indikator_id', TRUE);
     $indikator = $this->input->post('indikator', TRUE);
     $satuan = $this->input->post('satuan', TRUE);
@@ -9032,9 +9027,7 @@ private function parseRupiah($rupiah) {
     
     $now = date('Y-m-d H:i:s');
     
-    // ============================================================
-    // STEP 1: KUMPULKAN ID INDIKATOR YANG DIKIRIM DARI FORM
-    // ============================================================
+    // KUMPULKAN ID INDIKATOR YANG DIKIRIM DARI FORM
     $submittedIds = [];
     foreach ($indikator as $key => $text) {
         if (empty(trim($text))) continue;
@@ -9044,25 +9037,19 @@ private function parseRupiah($rupiah) {
         }
     }
     
-    // ============================================================
-    // STEP 2: SOFT DELETE INDIKATOR YANG TIDAK ADA DI FORM
-    // (Yang dihapus user dari UI)
-    // ============================================================
+    // SOFT DELETE INDIKATOR YANG TIDAK ADA DI FORM
     if (!empty($submittedIds)) {
         $this->db->where('program_id', $programId);
         $this->db->where('kode_wilayah', $kodeWilayah);
         $this->db->where_not_in('id', $submittedIds);
         $this->db->update('program_indikator', ['deleted_at' => $now]);
     } else {
-        // Jika tidak ada ID yang dikirim, hapus semua
         $this->db->where('program_id', $programId);
         $this->db->where('kode_wilayah', $kodeWilayah);
         $this->db->update('program_indikator', ['deleted_at' => $now]);
     }
     
-    // ============================================================
-    // STEP 3: INSERT ATAU UPDATE INDIKATOR
-    // ============================================================
+    // INSERT ATAU UPDATE INDIKATOR (TANPA OUTCOME)
     $urutan = 10;
     foreach ($indikator as $key => $text) {
         if (empty(trim($text))) continue;
@@ -9090,17 +9077,11 @@ private function parseRupiah($rupiah) {
         ];
         
         if ($id > 0) {
-            // ============================================================
-            // ✅ UPDATE: Set updated_at
-            // ============================================================
             $data['updated_at'] = $now;
             $this->db->where('id', $id);
             $this->db->where('program_id', $programId);
             $this->db->update('program_indikator', $data);
         } else {
-            // ============================================================
-            // ✅ INSERT: Set created_at
-            // ============================================================
             $data['created_at'] = $now;
             $this->db->insert('program_indikator', $data);
         }
@@ -9135,11 +9116,24 @@ private function _program_format_pagu($value) {
         return;
     }
     
+    // ============================================================
+    // AMBIL DATA PROGRAM - TERMASUK OUTCOME
+    // ============================================================
     $program = $this->db
-        ->where('id', $id)
-        ->where('kode_wilayah', $kodeWilayah)
-        ->where('deleted_at IS NULL')
-        ->get('program_data')
+        ->select('
+            p.*,
+            b.nama_bidang,
+            b.kode_bidang,
+            u.nama_urusan,
+            u.kode_urusan
+        ')
+        ->from('program_data p')
+        ->join('program_bidang_urusan b', 'b.id = p.bidang_urusan_id', 'left')
+        ->join('program_urusan u', 'u.id = b.urusan_id', 'left')
+        ->where('p.id', $id)
+        ->where('p.kode_wilayah', $kodeWilayah)
+        ->where('p.deleted_at IS NULL')
+        ->get()
         ->row_array();
     
     if (!$program) {
@@ -9147,55 +9141,49 @@ private function _program_format_pagu($value) {
         return;
     }
     
-    // Ambil indikator
+    // ============================================================
+    // AMBIL INDIKATOR (Tanpa Outcome)
+    // ============================================================
     $program['indikator'] = $this->db
+        ->select('
+            id,
+            program_id,
+            indikator,
+            satuan,
+            kondisi_awal,
+            target_2026, pagu_2026,
+            target_2027, pagu_2027,
+            target_2028, pagu_2028,
+            target_2029, pagu_2029,
+            target_2030, pagu_2030,
+            perangkat_daerah_id,
+            urutan
+        ')
         ->where('program_id', $id)
         ->where('kode_wilayah', $kodeWilayah)
         ->where('deleted_at IS NULL')
         ->order_by('urutan', 'ASC')
+        ->order_by('id', 'ASC')
         ->get('program_indikator')
         ->result_array();
     
-    // ✅ PASTIKAN PAGU DIKIRIM SEBAGAI ANGKA (bukan string format)
+    // ============================================================
+    // FORMAT PAGU
+    // ============================================================
     foreach ($program['indikator'] as &$ind) {
-        // Jika pagu disimpan sebagai string dengan koma, konversi ke float
-        if (isset($ind['pagu_2026']) && is_string($ind['pagu_2026'])) {
-            $ind['pagu_2026'] = floatval(str_replace(['.', ','], '', $ind['pagu_2026']));
-        }
-        if (isset($ind['pagu_2027']) && is_string($ind['pagu_2027'])) {
-            $ind['pagu_2027'] = floatval(str_replace(['.', ','], '', $ind['pagu_2027']));
-        }
-        if (isset($ind['pagu_2028']) && is_string($ind['pagu_2028'])) {
-            $ind['pagu_2028'] = floatval(str_replace(['.', ','], '', $ind['pagu_2028']));
-        }
-        if (isset($ind['pagu_2029']) && is_string($ind['pagu_2029'])) {
-            $ind['pagu_2029'] = floatval(str_replace(['.', ','], '', $ind['pagu_2029']));
-        }
-        if (isset($ind['pagu_2030']) && is_string($ind['pagu_2030'])) {
-            $ind['pagu_2030'] = floatval(str_replace(['.', ','], '', $ind['pagu_2030']));
+        $paguFields = ['pagu_2026', 'pagu_2027', 'pagu_2028', 'pagu_2029', 'pagu_2030'];
+        foreach ($paguFields as $field) {
+            if (isset($ind[$field])) {
+                if (is_string($ind[$field])) {
+                    $clean = str_replace(['.', ','], '', $ind[$field]);
+                    $ind[$field] = is_numeric($clean) ? (float)$clean : null;
+                } elseif (is_numeric($ind[$field])) {
+                    $ind[$field] = (float)$ind[$field];
+                }
+            }
         }
     }
-    
-    // Ambil bidang urusan
-    $bidang = $this->db
-        ->where('id', $program['bidang_urusan_id'])
-        ->where('kode_wilayah', $kodeWilayah)
-        ->where('deleted_at IS NULL')
-        ->get('program_bidang_urusan')
-        ->row_array();
-    
-    if ($bidang) {
-        $program['bidang'] = $bidang;
-        $urusan = $this->db
-            ->where('id', $bidang['urusan_id'])
-            ->where('kode_wilayah', $kodeWilayah)
-            ->where('deleted_at IS NULL')
-            ->get('program_urusan')
-            ->row_array();
-        if ($urusan) {
-            $program['urusan'] = $urusan;
-        }
-    }
+    unset($ind);
     
     echo json_encode(['status' => 'success', 'data' => $program]);
 }

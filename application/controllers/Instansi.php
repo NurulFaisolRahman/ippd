@@ -4506,220 +4506,6 @@ public function HapusIkkPD() {
     echo $this->db->affected_rows() > 0 ? '1' : 'Gagal menghapus data!';
 }
 
-// =====================================================
-// MENU RENSTRA PD
-// =====================================================
-
-/**
- * Halaman Menu Renstra PD
- */
-public function MenuRenstra() {
-    $Header['Halaman'] = 'Menu Renstra PD';
-    
-    $KodeWilayah = $this->get_kode_wilayah();
-    $instansi_id = $this->get_instansi_id();
-    $is_logged_in = $this->is_logged_in();
-    $is_role_4 = $this->is_role_4();
-    $filter_instansi_id = $this->input->get('instansi_id', TRUE);
-    
-    $data['KodeWilayah'] = $KodeWilayah;
-    $data['InstansiId'] = $instansi_id;
-    $data['IsLoggedIn'] = $is_logged_in;
-    $data['IsRole4'] = $is_role_4;
-    $data['FilterInstansiId'] = $filter_instansi_id;
-    $data['NamaInstansi'] = isset($_SESSION['NamaInstansi']) ? $_SESSION['NamaInstansi'] : '';
-    
-    // Ambil nama wilayah
-    $data['NamaWilayah'] = '';
-    if ($KodeWilayah) {
-        $wilayah = $this->db->select('Nama')->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-        $data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
-    }
-    
-    // Data provinsi untuk dropdown filter
-    $data['Provinsi'] = $this->db->where("Kode LIKE '__'")
-                                 ->order_by('Nama')
-                                 ->get('kodewilayah')
-                                 ->result_array();
-    
-    // Daftar instansi untuk filter
-    $data['ListInstansi'] = [];
-    if (!$is_role_4 && $KodeWilayah) {
-        $data['ListInstansi'] = $this->db->select('id, nama')
-            ->from('akun_instansi')
-            ->where('kodewilayah', $KodeWilayah)
-            ->where('deleted_at IS NULL')
-            ->order_by('nama', 'ASC')
-            ->get()
-            ->result_array();
-    }
-    
-    // ========== AMBIL DATA ANGGARAN RENSTRA ==========
-    $data['anggaran'] = [];
-    
-    if ($KodeWilayah) {
-        $query = $this->db->from('menurenstrapd')
-            ->where('KodeWilayah', $KodeWilayah)
-            ->where('deleted_at IS NULL');
-        
-        if ($is_role_4 && $instansi_id) {
-            $query->where('id_instansi', $instansi_id);
-        } elseif (!empty($filter_instansi_id)) {
-            $query->where('id_instansi', (int)$filter_instansi_id);
-        }
-        
-        $data['anggaran'] = $query->order_by('Id', 'ASC')->get()->result_array();
-    }
-    
-    $this->load->view('Daerah/header', $Header);
-    $this->load->view('Daerah/MenuRenstra', $data);
-}
-
-/**
- * Simpan/Update Data Menu Renstra (AJAX) - HANYA UNTUK ROLE 4
- */
-public function simpanMenuRenstra() {
-    if (!$this->input->is_ajax_request()) {
-        show_404();
-        return;
-    }
-    
-    if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menambah/mengedit data.']);
-        return;
-    }
-    
-    $KodeWilayah = $this->get_kode_wilayah();
-    $instansi_id = $this->get_instansi_id();
-    
-    if (!$KodeWilayah) {
-        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih']);
-        return;
-    }
-    
-    if (!$instansi_id) {
-        echo json_encode(['status' => 'error', 'message' => 'Data instansi tidak ditemukan!']);
-        return;
-    }
-    
-    $Id = (int)$this->input->post('Id');
-    
-    // ✅ PERUBAHAN: NoManual boleh kosong (tidak wajib diisi)
-    $NoManual = trim($this->input->post('NoManual'));
-    $Uraian = trim($this->input->post('Uraian'));
-    $IndikatorKinerja = trim($this->input->post('IndikatorKinerja'));
-    $Satuan = trim($this->input->post('Satuan'));
-    $Keterangan = trim($this->input->post('Keterangan'));
-    
-    // ✅ HANYA URAIAN YANG WAJIB DIISI
-    if (empty($Uraian)) {
-        echo json_encode(['status' => 'error', 'message' => 'Uraian tidak boleh kosong']);
-        return;
-    }
-    
-    // ✅ NoManual boleh NULL jika kosong
-    $data = [
-        'KodeWilayah'      => $KodeWilayah,
-        'id_instansi'      => $instansi_id,
-        'NoManual'         => !empty($NoManual) ? $NoManual : null,  // ← NULL jika kosong
-        'Uraian'           => $Uraian,
-        'IndikatorKinerja' => $IndikatorKinerja,
-        'Satuan'           => $Satuan,
-        'Keterangan'       => $Keterangan,
-        'updated_at'       => date('Y-m-d H:i:s')
-    ];
-    
-    // Target dan pagu tahunan
-    for ($thn = 2025; $thn <= 2030; $thn++) {
-        $data["Target$thn"] = $this->input->post("Target$thn") ?: null;
-        $data["Rp$thn"] = $this->input->post("Rp$thn") ?: null;
-    }
-    
-    if ($Id > 0) {
-        // Validasi kepemilikan data untuk edit
-        $existing = $this->db->where('Id', $Id)
-            ->where('KodeWilayah', $KodeWilayah)
-            ->where('deleted_at IS NULL')
-            ->get('menurenstrapd')
-            ->row_array();
-        
-        if (!$existing) {
-            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
-            return;
-        }
-        
-        if ($existing['id_instansi'] != $instansi_id) {
-            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda hanya dapat mengedit data instansi sendiri.']);
-            return;
-        }
-        
-        $this->db->where('Id', $Id)
-                 ->where('KodeWilayah', $KodeWilayah)
-                 ->update('menurenstrapd', $data);
-    } else {
-        $data['created_at'] = date('Y-m-d H:i:s');
-        $this->db->insert('menurenstrapd', $data);
-    }
-    
-    $affected = $this->db->affected_rows();
-    echo json_encode([
-        'status'  => $affected > 0 ? 'success' : 'error',
-        'message' => $affected > 0 ? 'Data berhasil disimpan' : 'Tidak ada perubahan'
-    ]);
-}
-
-/**
- * Hapus Data Menu Renstra (AJAX) - HANYA UNTUK ROLE 4
- */
-public function hapusMenuRenstra() {
-    if (!$this->input->is_ajax_request()) {
-        show_404();
-        return;
-    }
-    
-    if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menghapus data.']);
-        return;
-    }
-    
-    $Id = (int)$this->input->post('Id');
-    $KodeWilayah = $this->get_kode_wilayah();
-    $instansi_id = $this->get_instansi_id();
-    
-    if (!$Id || !$KodeWilayah) {
-        echo json_encode(['status' => 'error', 'message' => 'Parameter tidak lengkap']);
-        return;
-    }
-    
-    // Validasi kepemilikan data
-    $existing = $this->db->where('Id', $Id)
-        ->where('KodeWilayah', $KodeWilayah)
-        ->where('deleted_at IS NULL')
-        ->get('menurenstrapd')
-        ->row_array();
-    
-    if (!$existing) {
-        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
-        return;
-    }
-    
-    if ($existing['id_instansi'] != $instansi_id) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda hanya dapat menghapus data instansi sendiri.']);
-        return;
-    }
-    
-    $this->db->where('Id', $Id)
-             ->where('KodeWilayah', $KodeWilayah)
-             ->update('menurenstrapd', [
-                 'deleted_at' => date('Y-m-d H:i:s')
-             ]);
-    
-    echo json_encode([
-        'status'  => $this->db->affected_rows() > 0 ? 'success' : 'error',
-        'message' => $this->db->affected_rows() > 0 ? 'Data berhasil dihapus' : 'Data tidak ditemukan'
-    ]);
-}
-
 /**
  * Get Nomenklatur Berdasarkan Level (AJAX) - Untuk semua role
  */
@@ -9835,7 +9621,2381 @@ public function HapusRancanganAkhirDetail() {
     exit;
 }
 
+// =====================================================
+// PERJANJIAN KINERJA (PK) - CRUD dengan Popup Modal
+// =====================================================
 
+/**
+ * Halaman Daftar Perjanjian Kinerja
+ */
+public function PerjanjianKinerja() {
+    $Header['Halaman'] = 'Perjanjian Kinerja';
+    
+    $KodeWilayah = $this->get_kode_wilayah();
+    $instansi_id = $this->get_instansi_id();
+    $is_logged_in = $this->is_logged_in();
+    $is_role_4 = $this->is_role_4();
+    $level = isset($_SESSION['Level']) ? $_SESSION['Level'] : null;
+    $filter_instansi_id = $this->input->get('instansi_id', TRUE);
+    
+    $data['KodeWilayah'] = $KodeWilayah;
+    $data['InstansiId'] = $instansi_id;
+    $data['IsLoggedIn'] = $is_logged_in;
+    $data['IsRole4'] = $is_role_4;
+    $data['Level'] = $level;
+    $data['FilterInstansiId'] = $filter_instansi_id;
+    $data['NamaInstansi'] = isset($_SESSION['NamaInstansi']) ? $_SESSION['NamaInstansi'] : '';
+    
+    // Ambil nama wilayah
+    $data['NamaWilayah'] = '';
+    if ($KodeWilayah) {
+        $wilayah = $this->db->select('Nama')->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+        $data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
+    }
+    
+    // Data provinsi untuk dropdown filter
+    $data['Provinsi'] = $this->db->where("Kode LIKE '__'")
+                                 ->order_by('Nama')
+                                 ->get('kodewilayah')
+                                 ->result_array();
+    
+    // Daftar instansi untuk filter (hanya untuk non-role 4)
+    $data['ListInstansi'] = [];
+    if (!$is_role_4 && $KodeWilayah) {
+        $data['ListInstansi'] = $this->db->select('id, nama')
+            ->from('akun_instansi')
+            ->where('kodewilayah', $KodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->order_by('nama', 'ASC')
+            ->get()
+            ->result_array();
+    }
+    
+    // ========== AMBIL DATA PERJANJIAN KINERJA ==========
+    $data['PKData'] = [];
+    
+    if ($KodeWilayah) {
+        $this->db->select("
+            pk.*,
+            k.nama as karyawan_nama,
+            k.nip as karyawan_nip,
+            k.jabatan as karyawan_jabatan,
+            k.satuan_unit_kerja as karyawan_satuan,
+            k.eselon as karyawan_eselon,
+            a.nama as atasan_nama,
+            a.nip as atasan_nip,
+            a.jabatan as atasan_jabatan,
+            a.satuan_unit_kerja as atasan_satuan,
+            inst.nama as instansi_nama
+        ");
+        $this->db->from('perjanjian_kinerja pk');
+        $this->db->join('akun_karyawan k', 'k.id = pk.id_karyawan', 'left');
+        $this->db->join('akun_karyawan a', 'a.id = pk.id_atasan', 'left');
+        $this->db->join('akun_instansi inst', 'inst.id = pk.id_instansi', 'left');
+        $this->db->where('pk.kode_wilayah', $KodeWilayah);
+        $this->db->where('pk.deleted_at IS NULL');
+        
+        // Filter berdasarkan instansi
+        if ($is_role_4 && $instansi_id) {
+            $this->db->where('pk.id_instansi', $instansi_id);
+        } elseif (!empty($filter_instansi_id)) {
+            $this->db->where('pk.id_instansi', (int)$filter_instansi_id);
+        }
+        
+        $this->db->order_by('pk.id', 'DESC');
+        $data['PKData'] = $this->db->get()->result_array();
+    }
+    
+    // ========== AMBIL DAFTAR KARYAWAN UNTUK DROPDOWN MODAL ==========
+    $data['karyawan_list'] = [];
+    $data['atasan_list'] = [];
+    
+    if ($KodeWilayah && $instansi_id) {
+        // Daftar pegawai (yang bisa dibuatkan PK)
+        $data['karyawan_list'] = $this->db->select('id, nama, nip, jabatan, satuan_unit_kerja, eselon')
+            ->from('akun_karyawan')
+            ->where('kodewilayah', $KodeWilayah)
+            ->where('dinas_id', $instansi_id)
+            ->where('deleted_at IS NULL')
+            ->order_by('nama', 'ASC')
+            ->get()
+            ->result_array();
+        
+        // Daftar atasan (Level 3)
+        $data['atasan_list'] = $this->db->select('id, nama, nip, jabatan, satuan_unit_kerja, eselon')
+            ->from('akun_karyawan')
+            ->where('kodewilayah', $KodeWilayah)
+            ->where('dinas_id', $instansi_id)
+            ->where('Level', 4)
+            ->where('deleted_at IS NULL')
+            ->order_by('nama', 'ASC')
+            ->get()
+            ->result_array();
+    }
+    
+    $this->load->view('Daerah/header', $Header);
+    $this->load->view('Daerah/PerjanjianKinerja', $data);
+}
+
+/**
+ * Simpan Perjanjian Kinerja (AJAX) - via Modal Popup
+ */
+public function SimpanPK() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    if (!$this->can_crud()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menyimpan data.']);
+        return;
+    }
+    
+    $KodeWilayah = $this->get_kode_wilayah();
+    $instansi_id = $this->get_instansi_id();
+    
+    if (!$KodeWilayah) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih']);
+        return;
+    }
+    
+    if (!$instansi_id) {
+        echo json_encode(['status' => 'error', 'message' => 'Data instansi tidak ditemukan!']);
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', TRUE);
+    $id_karyawan = (int)$this->input->post('id_karyawan', TRUE);
+    $id_atasan = (int)$this->input->post('id_atasan', TRUE);
+    $tahun = (int)$this->input->post('tahun', TRUE) ?: date('Y');
+    $periode_awal = trim($this->input->post('periode_awal', TRUE));
+    $periode_akhir = trim($this->input->post('periode_akhir', TRUE));
+    $anggaran = str_replace(['Rp', ' ', '.', ','], '', $this->input->post('anggaran', TRUE));
+    $jenis_pk = trim($this->input->post('jenis_pk', TRUE)); // manual input
+    $sasaran = trim($this->input->post('sasaran', TRUE));
+    $sasaran_program = trim($this->input->post('sasaran_program', TRUE));
+    $pernyataan = trim($this->input->post('pernyataan', TRUE));
+    
+    // Validasi
+    if (!$id_karyawan) {
+        echo json_encode(['status' => 'error', 'message' => 'Pilih pegawai terlebih dahulu!']);
+        return;
+    }
+    if (!$id_atasan) {
+        echo json_encode(['status' => 'error', 'message' => 'Pilih atasan langsung!']);
+        return;
+    }
+    if (empty($sasaran)) {
+        echo json_encode(['status' => 'error', 'message' => 'Sasaran harus diisi!']);
+        return;
+    }
+    if (empty($jenis_pk)) {
+        echo json_encode(['status' => 'error', 'message' => 'Jenis Perjanjian harus diisi!']);
+        return;
+    }
+    
+    // Konfigurasi upload
+    $upload_path = './uploads/pk/';
+    if (!is_dir($upload_path)) {
+        mkdir($upload_path, 0777, true);
+    }
+    
+    $config['upload_path'] = $upload_path;
+    $config['allowed_types'] = 'pdf|doc|docx|jpg|png|jpeg';
+    $config['max_size'] = 5120; // 5MB
+    $this->load->library('upload', $config);
+    
+    $dokumen_definitif = null;
+    $dokumen_lampiran = null;
+    
+    // Upload dokumen definitif
+    if (!empty($_FILES['dokumen_definitif']['name'])) {
+        $_FILES['file_definitif'] = $_FILES['dokumen_definitif'];
+        if ($this->upload->do_upload('file_definitif')) {
+            $upload_data = $this->upload->data();
+            $dokumen_definitif = 'uploads/pk/' . $upload_data['file_name'];
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Upload dokumen definitif gagal: ' . $this->upload->display_errors('', '')]);
+            return;
+        }
+    }
+    
+    // Upload dokumen lampiran
+    if (!empty($_FILES['dokumen_lampiran']['name'])) {
+        $_FILES['file_lampiran'] = $_FILES['dokumen_lampiran'];
+        if ($this->upload->do_upload('file_lampiran')) {
+            $upload_data = $this->upload->data();
+            $dokumen_lampiran = 'uploads/pk/' . $upload_data['file_name'];
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Upload dokumen lampiran gagal: ' . $this->upload->display_errors('', '')]);
+            return;
+        }
+    }
+    
+    $data = [
+        'id_karyawan' => $id_karyawan,
+        'id_atasan' => $id_atasan,
+        'id_instansi' => $instansi_id,
+        'kode_wilayah' => $KodeWilayah,
+        'tahun' => $tahun,
+        'periode_awal' => $periode_awal,
+        'periode_akhir' => $periode_akhir,
+        'anggaran' => $anggaran ? (float)$anggaran : null,
+        'jenis_pk' => $jenis_pk,
+        'sasaran' => $sasaran,
+        'sasaran_program' => $sasaran_program,
+        'pernyataan' => $pernyataan,
+        'updated_at' => date('Y-m-d H:i:s')
+    ];
+    
+    if ($dokumen_definitif) $data['dokumen_definitif'] = $dokumen_definitif;
+    if ($dokumen_lampiran) $data['dokumen_lampiran'] = $dokumen_lampiran;
+    
+    if ($id > 0) {
+        // Update
+        $existing = $this->db->where('id', $id)
+            ->where('kode_wilayah', $KodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->get('perjanjian_kinerja')
+            ->row();
+        if (!$existing) {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
+            return;
+        }
+        if ($existing->created_by != $instansi_id) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda hanya dapat mengedit data sendiri.']);
+            return;
+        }
+        $this->db->where('id', $id)->update('perjanjian_kinerja', $data);
+        $message = 'Data berhasil diperbarui';
+    } else {
+        // Insert
+        $data['created_by'] = $instansi_id;
+        $data['created_at'] = date('Y-m-d H:i:s');
+        $data['status'] = 'menunggu';
+        $this->db->insert('perjanjian_kinerja', $data);
+        $id = $this->db->insert_id();
+        $message = 'Data berhasil ditambahkan';
+    }
+    
+    echo json_encode(['status' => 'success', 'message' => $message, 'id' => $id]);
+}
+
+/**
+ * Get Data PK by ID (AJAX) - untuk edit modal
+ */
+public function GetPKById() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', TRUE);
+    $KodeWilayah = $this->get_kode_wilayah();
+    
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid']);
+        return;
+    }
+    
+    $data = $this->db->select('
+            pk.*, 
+            k.nama as karyawan_nama, 
+            k.nip as karyawan_nip, 
+            k.jabatan as karyawan_jabatan,
+            k.satuan_unit_kerja as karyawan_satuan,
+            a.nama as atasan_nama, 
+            a.nip as atasan_nip, 
+            a.jabatan as atasan_jabatan,
+            a.satuan_unit_kerja as atasan_satuan
+        ')
+        ->from('perjanjian_kinerja pk')
+        ->join('akun_karyawan k', 'k.id = pk.id_karyawan', 'left')
+        ->join('akun_karyawan a', 'a.id = pk.id_atasan', 'left')
+        ->where('pk.id', $id)
+        ->where('pk.kode_wilayah', $KodeWilayah)
+        ->where('pk.deleted_at IS NULL')
+        ->get()
+        ->row_array();
+    
+    if ($data) {
+        echo json_encode(['status' => 'success', 'data' => $data]);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+    }
+}
+
+/**
+ * Hapus Perjanjian Kinerja (AJAX) - soft delete
+ */
+public function HapusPK() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    if (!$this->can_crud()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak!']);
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', TRUE);
+    $KodeWilayah = $this->get_kode_wilayah();
+    $instansi_id = $this->get_instansi_id();
+    
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid']);
+        return;
+    }
+    
+    $pk = $this->db->where('id', $id)
+        ->where('kode_wilayah', $KodeWilayah)
+        ->where('deleted_at IS NULL')
+        ->get('perjanjian_kinerja')
+        ->row();
+    
+    if (!$pk) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+        return;
+    }
+    
+    if ($pk->created_by != $instansi_id) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak!']);
+        return;
+    }
+    
+    $this->db->where('id', $id)->update('perjanjian_kinerja', ['deleted_at' => date('Y-m-d H:i:s')]);
+    
+    echo json_encode(['status' => 'success', 'message' => 'Data berhasil dihapus']);
+}
+
+/**
+ * Update Status PK (AJAX) - hanya untuk Level 3
+ */
+public function UpdateStatusPK() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 3) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya atasan yang dapat mengubah status.']);
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', TRUE);
+    $status = $this->input->post('status', TRUE);
+    
+    if (!in_array($status, ['menunggu', 'ditinjau', 'disetujui'])) {
+        echo json_encode(['status' => 'error', 'message' => 'Status tidak valid']);
+        return;
+    }
+    
+    $this->db->where('id', $id)->update('perjanjian_kinerja', [
+        'status' => $status,
+        'updated_at' => date('Y-m-d H:i:s')
+    ]);
+    
+    echo json_encode(['status' => 'success', 'message' => 'Status berhasil diupdate']);
+}
+
+/**
+ * Ambil data dokumen PK (AJAX)
+ */
+public function GetDokumenPK() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', TRUE);
+    $KodeWilayah = $this->get_kode_wilayah();
+    
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid']);
+        return;
+    }
+    
+    $data = $this->db->select('dokumen_definitif, dokumen_lampiran')
+        ->from('perjanjian_kinerja')
+        ->where('id', $id)
+        ->where('kode_wilayah', $KodeWilayah)
+        ->where('deleted_at IS NULL')
+        ->get()
+        ->row_array();
+    
+    if ($data) {
+        echo json_encode(['status' => 'success', 'data' => $data]);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+    }
+}
+
+/**
+ * Ambil data karyawan berdasarkan ID (AJAX) - untuk auto fill di modal
+ */
+public function GetDataKaryawan() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', TRUE);
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid']);
+        return;
+    }
+    
+    $karyawan = $this->db->select('id, nama, nip, jabatan, satuan_unit_kerja, eselon, dinas_id')
+        ->from('akun_karyawan')
+        ->where('id', $id)
+        ->where('deleted_at IS NULL')
+        ->get()
+        ->row_array();
+    
+    if ($karyawan) {
+        echo json_encode(['status' => 'success', 'data' => $karyawan]);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+    }
+}
+
+// =====================================================
+// RENSTRA PERANGKAT DAERAH (PD) - CRUD TANPA JSON
+// =====================================================
+
+public function MenuRenstraPD() {
+    $Header['Halaman'] = 'Menu Renstra PD';
+    
+    $KodeWilayah = $this->get_kode_wilayah();
+    $instansi_id = $this->get_instansi_id();
+    $is_logged_in = $this->is_logged_in();
+    $is_role_4 = $this->is_role_4();
+    $level = isset($_SESSION['Level']) ? $_SESSION['Level'] : null;
+    $filter_instansi_id = $this->input->get('instansi_id', TRUE);
+    
+    $data['KodeWilayah'] = $KodeWilayah;
+    $data['InstansiId'] = $instansi_id;
+    $data['IsLoggedIn'] = $is_logged_in;
+    $data['IsRole4'] = $is_role_4;
+    $data['Level'] = $level;
+    $data['FilterInstansiId'] = $filter_instansi_id;
+    $data['NamaInstansi'] = isset($_SESSION['NamaInstansi']) ? $_SESSION['NamaInstansi'] : '';
+    
+    // Ambil nama wilayah
+    $data['NamaWilayah'] = '';
+    if ($KodeWilayah) {
+        $wilayah = $this->db->select('Nama')->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+        $data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
+    }
+    
+    // Data provinsi untuk dropdown filter
+    $data['Provinsi'] = $this->db->where("Kode LIKE '__'")
+                                 ->order_by('Nama')
+                                 ->get('kodewilayah')
+                                 ->result_array();
+    
+    // Daftar instansi untuk filter
+    $data['ListInstansi'] = [];
+    if (!$is_role_4 && $KodeWilayah) {
+        $data['ListInstansi'] = $this->db->select('id, nama')
+            ->from('akun_instansi')
+            ->where('kodewilayah', $KodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->order_by('nama', 'ASC')
+            ->get()
+            ->result_array();
+    }
+    
+    // Ambil data Renstra PD dengan indikator dan outcome
+    $data['RenstraData'] = $this->getRenstraPDData($KodeWilayah, $instansi_id, $is_role_4, $filter_instansi_id);
+    
+    $this->load->view('Daerah/header', $Header);
+    $this->load->view('Daerah/MenuRenstraPD', $data);
+}
+
+private function getRenstraPDData($KodeWilayah, $instansi_id, $is_role_4, $filter_instansi_id) {
+    $result = [];
+    
+    if (!$KodeWilayah) {
+        return $result;
+    }
+    
+    // Query Tujuan
+    $this->db->select('*');
+    $this->db->from('renstra_tujuan');
+    $this->db->where('kode_wilayah', $KodeWilayah);
+    $this->db->where('deleted_at IS NULL');
+    
+    if ($is_role_4 && $instansi_id) {
+        $this->db->where('id_instansi', $instansi_id);
+    } elseif (!empty($filter_instansi_id)) {
+        $this->db->where('id_instansi', (int)$filter_instansi_id);
+    }
+    
+    $tujuan_list = $this->db->order_by('id', 'ASC')->get()->result_array();
+    
+    foreach ($tujuan_list as &$tujuan) {
+        // Ambil Sasaran
+        $tujuan['sasaran_list'] = $this->getRenstraSasaranWithPrograms($tujuan['id'], $KodeWilayah);
+    }
+    
+    return $tujuan_list;
+}
+
+private function getRenstraSasaranWithPrograms($tujuan_id, $KodeWilayah) {
+    $result = [];
+    
+    $this->db->select('*');
+    $this->db->from('renstra_sasaran');
+    $this->db->where('tujuan_id', $tujuan_id);
+    $this->db->where('deleted_at IS NULL');
+    
+    $sasaran_list = $this->db->order_by('id', 'ASC')->get()->result_array();
+    
+    foreach ($sasaran_list as &$sasaran) {
+        // Ambil Program beserta indikator dan outcome
+        $sasaran['program_list'] = $this->getRenstraProgramWithIndikatorAndOutcome($sasaran['id']);
+    }
+    
+    return $sasaran_list;
+}
+
+private function getRenstraProgramWithIndikatorAndOutcome($sasaran_id) {
+    $result = [];
+    
+    $this->db->select('p.*');
+    $this->db->from('renstra_program p');
+    $this->db->where('p.sasaran_id', $sasaran_id);
+    $this->db->where('p.deleted_at IS NULL');
+    
+    $program_list = $this->db->order_by('p.id', 'ASC')->get()->result_array();
+    
+    foreach ($program_list as &$program) {
+        // Ambil outcome dan nama dari program_data berdasarkan kode_program
+        $program['outcome'] = '';
+        if (!empty($program['kode_program'])) {
+            $program_data = $this->db
+                ->select('outcome, nama_program')
+                ->where('kode_program', $program['kode_program'])
+                ->where('deleted_at IS NULL')
+                ->get('program_data')
+                ->row_array();
+            if ($program_data) {
+                $program['outcome'] = $program_data['outcome'] ?? '';
+                // Jika nama program kosong di renstra_program, ambil dari program_data
+                if (empty($program['nama'])) {
+                    $program['nama'] = $program_data['nama_program'] ?? '';
+                }
+            }
+        }
+        
+        // Ambil semua indikator dari tabel renstra_program_indikator
+        $program['indikator_list'] = $this->db
+            ->where('program_id', $program['id'])
+            ->where('deleted_at IS NULL')
+            ->order_by('urutan', 'ASC')
+            ->order_by('id', 'ASC')
+            ->get('renstra_program_indikator')
+            ->result_array();
+        
+        // Ambil Kegiatan
+        $program['kegiatan_list'] = $this->getRenstraKegiatanWithSub($program['id']);
+    }
+    
+    return $program_list;
+}
+
+private function getRenstraKegiatanWithSub($program_id) {
+    $result = [];
+    
+    $this->db->select('*');
+    $this->db->from('renstra_kegiatan');
+    $this->db->where('program_id', $program_id);
+    $this->db->where('deleted_at IS NULL');
+    
+    $kegiatan_list = $this->db->order_by('id', 'ASC')->get()->result_array();
+    
+    foreach ($kegiatan_list as &$kegiatan) {
+        $kegiatan['sub_kegiatan_list'] = $this->getRenstraSubKegiatan($kegiatan['id']);
+    }
+    
+    return $kegiatan_list;
+}
+
+private function getRenstraSubKegiatan($kegiatan_id) {
+    $this->db->select('*');
+    $this->db->from('renstra_sub_kegiatan');
+    $this->db->where('kegiatan_id', $kegiatan_id);
+    $this->db->where('deleted_at IS NULL');
+    
+    return $this->db->order_by('id', 'ASC')->get()->result_array();
+}
+
+/**
+ * Ambil Sasaran berdasarkan Tujuan ID
+ */
+private function getRenstraSasaranByTujuan($tujuan_id) {
+    $result = [];
+    
+    $this->db->select('*');
+    $this->db->from('renstra_sasaran');
+    $this->db->where('tujuan_id', $tujuan_id);
+    $this->db->where('deleted_at IS NULL');
+    
+    $sasaran_list = $this->db->order_by('id', 'ASC')->get()->result_array();
+    
+    foreach ($sasaran_list as &$sasaran) {
+        $sasaran['program_list'] = $this->getRenstraProgramBySasaran($sasaran['id']);
+    }
+    
+    return $sasaran_list;
+}
+
+/**
+ * Ambil Program berdasarkan Sasaran ID
+ */
+private function getRenstraProgramBySasaran($sasaran_id) {
+    $result = [];
+    
+    $this->db->select('*');
+    $this->db->from('renstra_program');
+    $this->db->where('sasaran_id', $sasaran_id);
+    $this->db->where('deleted_at IS NULL');
+    
+    $program_list = $this->db->order_by('id', 'ASC')->get()->result_array();
+    
+    foreach ($program_list as &$program) {
+        $program['kegiatan_list'] = $this->getRenstraKegiatanByProgram($program['id']);
+    }
+    
+    return $program_list;
+}
+
+/**
+ * Ambil Kegiatan berdasarkan Program ID
+ */
+private function getRenstraKegiatanByProgram($program_id) {
+    $result = [];
+    
+    $this->db->select('*');
+    $this->db->from('renstra_kegiatan');
+    $this->db->where('program_id', $program_id);
+    $this->db->where('deleted_at IS NULL');
+    
+    $kegiatan_list = $this->db->order_by('id', 'ASC')->get()->result_array();
+    
+    foreach ($kegiatan_list as &$kegiatan) {
+        $kegiatan['sub_kegiatan_list'] = $this->getRenstraSubKegiatanByKegiatan($kegiatan['id']);
+    }
+    
+    return $kegiatan_list;
+}
+
+/**
+ * Ambil Sub Kegiatan berdasarkan Kegiatan ID
+ */
+private function getRenstraSubKegiatanByKegiatan($kegiatan_id) {
+    $result = [];
+    
+    $this->db->select('*');
+    $this->db->from('renstra_sub_kegiatan');
+    $this->db->where('kegiatan_id', $kegiatan_id);
+    $this->db->where('deleted_at IS NULL');
+    
+    $sub_list = $this->db->order_by('id', 'ASC')->get()->result_array();
+    
+    return $sub_list;
+}
+
+// =====================================================
+// CRUD HELPER - Ambil Data POST untuk Target
+// =====================================================
+
+private function getTargetData() {
+    return [
+        'indikator' => trim($this->input->post('indikator', TRUE)),
+        'satuan' => trim($this->input->post('satuan', TRUE)),
+        'target_2025' => trim($this->input->post('target_2025', TRUE)),
+        'target_2026' => trim($this->input->post('target_2026', TRUE)),
+        'target_2027' => trim($this->input->post('target_2027', TRUE)),
+        'target_2028' => trim($this->input->post('target_2028', TRUE)),
+        'target_2029' => trim($this->input->post('target_2029', TRUE)),
+        'target_2030' => trim($this->input->post('target_2030', TRUE))
+    ];
+}
+
+private function getAnggaranData() {
+    return [
+        'anggaran_2025' => trim($this->input->post('anggaran_2025', TRUE)),
+        'anggaran_2026' => trim($this->input->post('anggaran_2026', TRUE)),
+        'anggaran_2027' => trim($this->input->post('anggaran_2027', TRUE)),
+        'anggaran_2028' => trim($this->input->post('anggaran_2028', TRUE)),
+        'anggaran_2029' => trim($this->input->post('anggaran_2029', TRUE)),
+        'anggaran_2030' => trim($this->input->post('anggaran_2030', TRUE))
+    ];
+}
+
+// =====================================================
+// CRUD: TUJUAN RENSTRA PD
+// =====================================================
+
+public function tambahRenstraTujuanPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    if (!$this->can_crud()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menambah data.']);
+        return;
+    }
+    $KodeWilayah = $this->get_kode_wilayah();
+    $instansi_id = $this->get_instansi_id();
+    if (!$KodeWilayah) {
+        echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih']);
+        return;
+    }
+    if (!$instansi_id) {
+        echo json_encode(['status' => 'error', 'message' => 'Data instansi tidak ditemukan!']);
+        return;
+    }
+    
+    $sasaran_rpjmd_id = $this->input->post('sasaran_rpjmd_id', TRUE) ?: null;
+    $uraian = trim($this->input->post('uraian', TRUE));
+    $bidang_id = $this->input->post('bidang_id', TRUE) ?: null;
+    $indikator = trim($this->input->post('indikator', TRUE));
+    $satuan = trim($this->input->post('satuan', TRUE));
+    
+    if (empty($uraian)) {
+        echo json_encode(['status' => 'error', 'message' => 'Uraian Tujuan wajib diisi!']);
+        return;
+    }
+    
+    // Parse anggaran
+    $anggaran = [];
+    for ($y = 2025; $y <= 2030; $y++) {
+        $anggaran["anggaran_$y"] = $this->parseRupiah($this->input->post("anggaran_$y", TRUE));
+    }
+    
+    $data = [
+        'kode_wilayah'   => $KodeWilayah,
+        'id_instansi'    => $instansi_id,
+        'sasaran_rpjmd_id' => $sasaran_rpjmd_id,
+        'uraian'         => $uraian,
+        'bidang_id'      => $bidang_id,
+        'indikator'      => $indikator,
+        'satuan'         => $satuan,
+        'target_2025'    => $this->input->post('target_2025', TRUE),
+        'target_2026'    => $this->input->post('target_2026', TRUE),
+        'target_2027'    => $this->input->post('target_2027', TRUE),
+        'target_2028'    => $this->input->post('target_2028', TRUE),
+        'target_2029'    => $this->input->post('target_2029', TRUE),
+        'target_2030'    => $this->input->post('target_2030', TRUE),
+        'anggaran_2025'  => $anggaran['anggaran_2025'],
+        'anggaran_2026'  => $anggaran['anggaran_2026'],
+        'anggaran_2027'  => $anggaran['anggaran_2027'],
+        'anggaran_2028'  => $anggaran['anggaran_2028'],
+        'anggaran_2029'  => $anggaran['anggaran_2029'],
+        'anggaran_2030'  => $anggaran['anggaran_2030'],
+        'created_at'     => date('Y-m-d H:i:s'),
+        'updated_at'     => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->insert('renstra_tujuan', $data);
+    $insert_id = $this->db->insert_id();
+    if ($insert_id) {
+        echo json_encode(['status' => 'success', 'message' => 'Tujuan berhasil ditambahkan', 'data' => ['id' => $insert_id]]);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data!']);
+    }
+    exit;
+}
+
+public function editRenstraTujuanPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    if (!$this->can_crud()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat mengedit data.']);
+        return;
+    }
+    $id = (int)$this->input->post('id', TRUE);
+    $instansi_id = $this->get_instansi_id();
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    $existing = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('renstra_tujuan')->row();
+    if (!$existing) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
+        return;
+    }
+    if ($existing->id_instansi != $instansi_id) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Data bukan milik instansi Anda.']);
+        return;
+    }
+    
+    $sasaran_rpjmd_id = $this->input->post('sasaran_rpjmd_id', TRUE) ?: null;
+    $uraian = trim($this->input->post('uraian', TRUE));
+    $bidang_id = $this->input->post('bidang_id', TRUE) ?: null;
+    $indikator = trim($this->input->post('indikator', TRUE));
+    $satuan = trim($this->input->post('satuan', TRUE));
+    
+    if (empty($uraian)) {
+        echo json_encode(['status' => 'error', 'message' => 'Uraian Tujuan wajib diisi!']);
+        return;
+    }
+    
+    $anggaran = [];
+    for ($y = 2025; $y <= 2030; $y++) {
+        $anggaran["anggaran_$y"] = $this->parseRupiah($this->input->post("anggaran_$y", TRUE));
+    }
+    
+    $data = [
+        'sasaran_rpjmd_id' => $sasaran_rpjmd_id,
+        'uraian'         => $uraian,
+        'bidang_id'      => $bidang_id,
+        'indikator'      => $indikator,
+        'satuan'         => $satuan,
+        'target_2025'    => $this->input->post('target_2025', TRUE),
+        'target_2026'    => $this->input->post('target_2026', TRUE),
+        'target_2027'    => $this->input->post('target_2027', TRUE),
+        'target_2028'    => $this->input->post('target_2028', TRUE),
+        'target_2029'    => $this->input->post('target_2029', TRUE),
+        'target_2030'    => $this->input->post('target_2030', TRUE),
+        'anggaran_2025'  => $anggaran['anggaran_2025'],
+        'anggaran_2026'  => $anggaran['anggaran_2026'],
+        'anggaran_2027'  => $anggaran['anggaran_2027'],
+        'anggaran_2028'  => $anggaran['anggaran_2028'],
+        'anggaran_2029'  => $anggaran['anggaran_2029'],
+        'anggaran_2030'  => $anggaran['anggaran_2030'],
+        'updated_at'     => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->where('id', $id)->update('renstra_tujuan', $data);
+    echo json_encode(['status' => 'success', 'message' => 'Tujuan berhasil diperbarui']);
+    exit;
+}
+
+public function hapusRenstraTujuanPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    if (!$this->can_crud()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menghapus data.']);
+        return;
+    }
+    $id = (int)$this->input->post('id', TRUE);
+    $instansi_id = $this->get_instansi_id();
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    $existing = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('renstra_tujuan')->row();
+    if (!$existing) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
+        return;
+    }
+    if ($existing->id_instansi != $instansi_id) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Data bukan milik instansi Anda.']);
+        return;
+    }
+    $this->db->where('id', $id)->update('renstra_tujuan', ['deleted_at' => date('Y-m-d H:i:s')]);
+    echo json_encode(['status' => 'success', 'message' => 'Tujuan berhasil dihapus']);
+    exit;
+}
+
+public function getRenstraTujuanPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    $id = (int)$this->input->post('id', TRUE);
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    $data = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('renstra_tujuan')->row_array();
+    if ($data) {
+        // Format anggaran untuk tampilan
+        foreach (['2025','2026','2027','2028','2029','2030'] as $thn) {
+            $field = 'anggaran_'.$thn;
+            $data[$field.'_formatted'] = $this->formatRupiah($data[$field] ?? null);
+        }
+        echo json_encode(['status' => 'success', 'data' => $data]);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+    }
+    exit;
+}
+
+// =====================================================
+// CRUD: SASARAN RENSTRA PD
+// =====================================================
+public function tambahRenstraSasaranPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    if (!$this->can_crud()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menambah data.']);
+        return;
+    }
+    $tujuan_id = (int)$this->input->post('tujuan_id', TRUE);
+    $uraian = trim($this->input->post('uraian', TRUE));
+    $bidang_id = $this->input->post('bidang_id', TRUE); // 🔥 PERBAIKAN: gunakan bidang_id
+    if (!$tujuan_id) {
+        echo json_encode(['status' => 'error', 'message' => 'Tujuan tidak valid!']);
+        return;
+    }
+    if (empty($uraian)) {
+        echo json_encode(['status' => 'error', 'message' => 'Uraian Sasaran wajib diisi!']);
+        return;
+    }
+    $anggaran = [];
+    for ($y = 2025; $y <= 2030; $y++) {
+        $anggaran["anggaran_$y"] = $this->parseRupiah($this->input->post("anggaran_$y", TRUE));
+    }
+    $data = [
+        'tujuan_id'      => $tujuan_id,
+        'uraian'         => $uraian,
+        'bidang_id'      => $bidang_id, // 🔥 PERBAIKAN: gunakan bidang_id
+        'indikator'      => $this->input->post('indikator', TRUE),
+        'satuan'         => $this->input->post('satuan', TRUE),
+        'target_2025'    => $this->input->post('target_2025', TRUE),
+        'target_2026'    => $this->input->post('target_2026', TRUE),
+        'target_2027'    => $this->input->post('target_2027', TRUE),
+        'target_2028'    => $this->input->post('target_2028', TRUE),
+        'target_2029'    => $this->input->post('target_2029', TRUE),
+        'target_2030'    => $this->input->post('target_2030', TRUE),
+        'anggaran_2025'  => $anggaran['anggaran_2025'],
+        'anggaran_2026'  => $anggaran['anggaran_2026'],
+        'anggaran_2027'  => $anggaran['anggaran_2027'],
+        'anggaran_2028'  => $anggaran['anggaran_2028'],
+        'anggaran_2029'  => $anggaran['anggaran_2029'],
+        'anggaran_2030'  => $anggaran['anggaran_2030'],
+        'created_at'     => date('Y-m-d H:i:s'),
+        'updated_at'     => date('Y-m-d H:i:s')
+    ];
+    $this->db->insert('renstra_sasaran', $data);
+    $insert_id = $this->db->insert_id();
+    if ($insert_id) {
+        echo json_encode(['status' => 'success', 'message' => 'Sasaran berhasil ditambahkan', 'data' => ['id' => $insert_id]]);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data!']);
+    }
+    exit;
+}
+
+public function editRenstraSasaranPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    if (!$this->can_crud()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat mengedit data.']);
+        return;
+    }
+    $id = (int)$this->input->post('id', TRUE);
+    $instansi_id = $this->get_instansi_id();
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    $existing = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('renstra_sasaran')->row();
+    if (!$existing) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
+        return;
+    }
+    $tujuan = $this->db->where('id', $existing->tujuan_id)->where('deleted_at IS NULL')->get('renstra_tujuan')->row();
+    if (!$tujuan || $tujuan->id_instansi != $instansi_id) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Data bukan milik instansi Anda.']);
+        return;
+    }
+    $uraian = trim($this->input->post('uraian', TRUE));
+    $bidang_id = $this->input->post('bidang_id', TRUE); // 🔥 PERBAIKAN: gunakan bidang_id
+    if (empty($uraian)) {
+        echo json_encode(['status' => 'error', 'message' => 'Uraian Sasaran wajib diisi!']);
+        return;
+    }
+    $anggaran = [];
+    for ($y = 2025; $y <= 2030; $y++) {
+        $anggaran["anggaran_$y"] = $this->parseRupiah($this->input->post("anggaran_$y", TRUE));
+    }
+    $data = [
+        'uraian'         => $uraian,
+        'bidang_id'      => $bidang_id, // 🔥 PERBAIKAN: gunakan bidang_id
+        'indikator'      => $this->input->post('indikator', TRUE),
+        'satuan'         => $this->input->post('satuan', TRUE),
+        'target_2025'    => $this->input->post('target_2025', TRUE),
+        'target_2026'    => $this->input->post('target_2026', TRUE),
+        'target_2027'    => $this->input->post('target_2027', TRUE),
+        'target_2028'    => $this->input->post('target_2028', TRUE),
+        'target_2029'    => $this->input->post('target_2029', TRUE),
+        'target_2030'    => $this->input->post('target_2030', TRUE),
+        'anggaran_2025'  => $anggaran['anggaran_2025'],
+        'anggaran_2026'  => $anggaran['anggaran_2026'],
+        'anggaran_2027'  => $anggaran['anggaran_2027'],
+        'anggaran_2028'  => $anggaran['anggaran_2028'],
+        'anggaran_2029'  => $anggaran['anggaran_2029'],
+        'anggaran_2030'  => $anggaran['anggaran_2030'],
+        'updated_at'     => date('Y-m-d H:i:s')
+    ];
+    $this->db->where('id', $id)->update('renstra_sasaran', $data);
+    echo json_encode(['status' => 'success', 'message' => 'Sasaran berhasil diperbarui']);
+    exit;
+}
+
+public function hapusRenstraSasaranPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    if (!$this->can_crud()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menghapus data.']);
+        return;
+    }
+    $id = (int)$this->input->post('id', TRUE);
+    $instansi_id = $this->get_instansi_id();
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    $existing = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('renstra_sasaran')->row();
+    if (!$existing) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
+        return;
+    }
+    $tujuan = $this->db->where('id', $existing->tujuan_id)->where('deleted_at IS NULL')->get('renstra_tujuan')->row();
+    if (!$tujuan || $tujuan->id_instansi != $instansi_id) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Data bukan milik instansi Anda.']);
+        return;
+    }
+    $this->db->where('id', $id)->update('renstra_sasaran', ['deleted_at' => date('Y-m-d H:i:s')]);
+    echo json_encode(['status' => 'success', 'message' => 'Sasaran berhasil dihapus']);
+    exit;
+}
+
+public function getRenstraSasaranPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    $id = (int)$this->input->post('id', TRUE);
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    $data = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('renstra_sasaran')->row_array();
+    if ($data) {
+        foreach (['2025','2026','2027','2028','2029','2030'] as $thn) {
+            $field = 'anggaran_'.$thn;
+            $data[$field.'_formatted'] = $this->formatRupiah($data[$field] ?? null);
+        }
+        echo json_encode(['status' => 'success', 'data' => $data]);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+    }
+    exit;
+}
+
+public function tambahRenstraProgramPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    if (!$this->can_crud()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menambah data.']);
+        return;
+    }
+    
+    $sasaran_id = (int)$this->input->post('sasaran_id', TRUE);
+    $nama = trim($this->input->post('nama', TRUE));
+    $outcome = trim($this->input->post('outcome', TRUE));
+    $kode_program = trim($this->input->post('kode_program', TRUE));
+    $bidang_id = $this->input->post('bidang_id', TRUE); // 🔥 TAMBAHKAN
+    $indikator_list_json = $this->input->post('indikator_list', TRUE);
+    
+    if (!$sasaran_id) {
+        echo json_encode(['status' => 'error', 'message' => 'Sasaran tidak valid!']);
+        return;
+    }
+    if (empty($nama)) {
+        echo json_encode(['status' => 'error', 'message' => 'Nama Program wajib diisi!']);
+        return;
+    }
+    
+    $this->db->trans_start();
+    
+    try {
+        // Insert Program
+        $data = [
+            'sasaran_id' => $sasaran_id,
+            'nama' => $nama,
+            'kode_program' => $kode_program ?: null,
+            'bidang_id' => $bidang_id, // 🔥 TAMBAHKAN
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        $this->db->insert('renstra_program', $data);
+        $program_id = $this->db->insert_id();
+        
+        if ($program_id) {
+            // Simpan outcome ke tabel program_data jika perlu
+            if (!empty($kode_program) && !empty($outcome)) {
+                $exists = $this->db->where('kode_program', $kode_program)
+                    ->where('deleted_at IS NULL')
+                    ->get('program_data')
+                    ->row();
+                
+                if ($exists) {
+                    $this->db->where('kode_program', $kode_program)
+                        ->update('program_data', [
+                            'nama_program' => $nama,
+                            'outcome' => $outcome,
+                            'updated_at' => date('Y-m-d H:i:s')
+                        ]);
+                } else {
+                    $this->db->insert('program_data', [
+                        'kode_wilayah' => $this->get_kode_wilayah(),
+                        'kode_program' => $kode_program,
+                        'nama_program' => $nama,
+                        'outcome' => $outcome,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+                }
+            }
+            
+            // Insert indikator dari JSON
+            $indikator_list = json_decode($indikator_list_json, true);
+            if (is_array($indikator_list) && !empty($indikator_list)) {
+                $urutan = 10;
+                foreach ($indikator_list as $ind) {
+                    $ind_data = [
+                        'program_id' => $program_id,
+                        'indikator' => $ind['indikator'] ?? '',
+                        'satuan' => $ind['satuan'] ?? '',
+                        'target_2026' => $ind['target_2026'] ?? null,
+                        'target_2027' => $ind['target_2027'] ?? null,
+                        'target_2028' => $ind['target_2028'] ?? null,
+                        'target_2029' => $ind['target_2029'] ?? null,
+                        'target_2030' => $ind['target_2030'] ?? null,
+                        'anggaran_2026' => $ind['anggaran_2026'] ?? null,
+                        'anggaran_2027' => $ind['anggaran_2027'] ?? null,
+                        'anggaran_2028' => $ind['anggaran_2028'] ?? null,
+                        'anggaran_2029' => $ind['anggaran_2029'] ?? null,
+                        'anggaran_2030' => $ind['anggaran_2030'] ?? null,
+                        'urutan' => $urutan,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ];
+                    $this->db->insert('renstra_program_indikator', $ind_data);
+                    $urutan += 10;
+                }
+            }
+            
+            $this->db->trans_complete();
+            
+            if ($this->db->trans_status() === FALSE) {
+                throw new Exception('Gagal menyimpan data');
+            }
+            
+            echo json_encode(['status' => 'success', 'message' => 'Program berhasil ditambahkan', 'data' => ['id' => $program_id]]);
+        } else {
+            throw new Exception('Gagal menyimpan program');
+        }
+    } catch (Exception $e) {
+        $this->db->trans_rollback();
+        echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+    }
+    exit;
+}
+
+public function editRenstraProgramPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    if (!$this->can_crud()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat mengedit data.']);
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', TRUE);
+    $nama = trim($this->input->post('nama', TRUE));
+    $outcome = trim($this->input->post('outcome', TRUE));
+    $kode_program = trim($this->input->post('kode_program', TRUE));
+    $bidang_id = $this->input->post('bidang_id', TRUE); // 🔥 TAMBAHKAN
+    $indikator_list_json = $this->input->post('indikator_list', TRUE);
+    
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    if (empty($nama)) {
+        echo json_encode(['status' => 'error', 'message' => 'Nama Program wajib diisi!']);
+        return;
+    }
+    
+    // Cek kepemilikan
+    $existing = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('renstra_program')->row();
+    if (!$existing) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
+        return;
+    }
+    
+    $instansi_id = $this->get_instansi_id();
+    $sasaran = $this->db->where('id', $existing->sasaran_id)->where('deleted_at IS NULL')->get('renstra_sasaran')->row();
+    if ($sasaran) {
+        $tujuan = $this->db->where('id', $sasaran->tujuan_id)->where('deleted_at IS NULL')->get('renstra_tujuan')->row();
+        if (!$tujuan || $tujuan->id_instansi != $instansi_id) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Data bukan milik instansi Anda.']);
+            return;
+        }
+    }
+    
+    $this->db->trans_start();
+    
+    try {
+        // Update Program
+        $this->db->where('id', $id)->update('renstra_program', [
+            'nama' => $nama,
+            'kode_program' => $kode_program ?: null,
+            'bidang_id' => $bidang_id, // 🔥 TAMBAHKAN
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+        
+        // Update outcome di program_data
+        if (!empty($kode_program) && !empty($outcome)) {
+            $exists = $this->db->where('kode_program', $kode_program)
+                ->where('deleted_at IS NULL')
+                ->get('program_data')
+                ->row();
+            
+            if ($exists) {
+                $this->db->where('kode_program', $kode_program)
+                    ->update('program_data', [
+                        'nama_program' => $nama,
+                        'outcome' => $outcome,
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+            } else {
+                $this->db->insert('program_data', [
+                    'kode_wilayah' => $this->get_kode_wilayah(),
+                    'kode_program' => $kode_program,
+                    'nama_program' => $nama,
+                    'outcome' => $outcome,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s')
+                ]);
+            }
+        }
+        
+        // Hapus indikator lama (soft delete)
+        $this->db->where('program_id', $id)->update('renstra_program_indikator', [
+            'deleted_at' => date('Y-m-d H:i:s')
+        ]);
+        
+        // Insert indikator baru
+        $indikator_list = json_decode($indikator_list_json, true);
+        if (is_array($indikator_list) && !empty($indikator_list)) {
+            $urutan = 10;
+            foreach ($indikator_list as $ind) {
+                $ind_data = [
+                    'program_id' => $id,
+                    'indikator' => $ind['indikator'] ?? '',
+                    'satuan' => $ind['satuan'] ?? '',
+                    'target_2026' => $ind['target_2026'] ?? null,
+                    'target_2027' => $ind['target_2027'] ?? null,
+                    'target_2028' => $ind['target_2028'] ?? null,
+                    'target_2029' => $ind['target_2029'] ?? null,
+                    'target_2030' => $ind['target_2030'] ?? null,
+                    'anggaran_2026' => $ind['anggaran_2026'] ?? null,
+                    'anggaran_2027' => $ind['anggaran_2027'] ?? null,
+                    'anggaran_2028' => $ind['anggaran_2028'] ?? null,
+                    'anggaran_2029' => $ind['anggaran_2029'] ?? null,
+                    'anggaran_2030' => $ind['anggaran_2030'] ?? null,
+                    'urutan' => $urutan,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+                $this->db->insert('renstra_program_indikator', $ind_data);
+                $urutan += 10;
+            }
+        }
+        
+        $this->db->trans_complete();
+        
+        if ($this->db->trans_status() === FALSE) {
+            throw new Exception('Gagal menyimpan data');
+        }
+        
+        echo json_encode(['status' => 'success', 'message' => 'Program berhasil diperbarui']);
+    } catch (Exception $e) {
+        $this->db->trans_rollback();
+        echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+    }
+    exit;
+}
+
+public function hapusRenstraProgramPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    if (!$this->can_crud()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menghapus data.']);
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', TRUE);
+    $instansi_id = $this->get_instansi_id();
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    
+    // Cek kepemilikan data
+    $existing = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('renstra_program')->row();
+    if (!$existing) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
+        return;
+    }
+    
+    // Cek kepemilikan melalui sasaran -> tujuan
+    $sasaran = $this->db->where('id', $existing->sasaran_id)->where('deleted_at IS NULL')->get('renstra_sasaran')->row();
+    if ($sasaran) {
+        $tujuan = $this->db->where('id', $sasaran->tujuan_id)->where('deleted_at IS NULL')->get('renstra_tujuan')->row();
+        if (!$tujuan || $tujuan->id_instansi != $instansi_id) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Data bukan milik instansi Anda.']);
+            return;
+        }
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak valid!']);
+        return;
+    }
+    
+    // Soft delete program
+    $this->db->where('id', $id)->update('renstra_program', ['deleted_at' => date('Y-m-d H:i:s')]);
+    
+    // Soft delete semua indikator
+    $this->db->where('program_id', $id)->update('renstra_program_indikator', ['deleted_at' => date('Y-m-d H:i:s')]);
+    
+    echo json_encode(['status' => 'success', 'message' => 'Program berhasil dihapus']);
+    exit;
+}
+
+public function getRenstraProgramPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    $id = (int)$this->input->post('id', TRUE);
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    
+    // Ambil data program
+    $program = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('renstra_program')->row_array();
+    
+    if ($program) {
+        // Ambil semua indikator dari tabel renstra_program_indikator
+        $program['indikator_list'] = $this->db
+            ->where('program_id', $id)
+            ->where('deleted_at IS NULL')
+            ->order_by('urutan', 'ASC')
+            ->order_by('id', 'ASC')
+            ->get('renstra_program_indikator')
+            ->result_array();
+        
+        // Ambil outcome dari program_data
+        if (!empty($program['kode_program'])) {
+            $program_data = $this->db
+                ->select('outcome, nama_program')
+                ->where('kode_program', $program['kode_program'])
+                ->where('deleted_at IS NULL')
+                ->get('program_data')
+                ->row_array();
+            if ($program_data) {
+                $program['outcome'] = $program_data['outcome'] ?? '';
+                if (empty($program['nama']) && !empty($program_data['nama_program'])) {
+                    $program['nama'] = $program_data['nama_program'];
+                }
+            }
+        }
+        
+        // 🔥 TAMBAHKAN: Ambil nama bidang jika ada
+        if (!empty($program['bidang_id'])) {
+            $bidang = $this->db->select('nama, jabatan')->where('id', $program['bidang_id'])->get('akun_karyawan')->row_array();
+            $program['bidang_nama'] = $bidang ? $bidang['nama'] . ($bidang['jabatan'] ? ' - ' . $bidang['jabatan'] : '') : '';
+        }
+        
+        // Format anggaran untuk setiap indikator
+        foreach ($program['indikator_list'] as &$ind) {
+            foreach (['2026','2027','2028','2029','2030'] as $thn) {
+                $field = 'anggaran_'.$thn;
+                if (!empty($ind[$field])) {
+                    $ind[$field.'_formatted'] = 'Rp ' . number_format((float)$ind[$field], 0, ',', '.');
+                } else {
+                    $ind[$field.'_formatted'] = '';
+                }
+            }
+        }
+        
+        echo json_encode(['status' => 'success', 'data' => $program]);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+    }
+    exit;
+}
+
+// =====================================================
+// CRUD: KEGIATAN RENSTRA PD
+// =====================================================
+public function tambahRenstraKegiatanPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    if (!$this->can_crud()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menambah data.']);
+        return;
+    }
+    
+    $program_id = (int)$this->input->post('program_id', TRUE);
+    $nama = trim($this->input->post('nama', TRUE));
+    $sasaran = trim($this->input->post('sasaran', TRUE)); // TAMBAHKAN
+    $bidang_id = $this->input->post('bidang_id', TRUE);
+    $indikator = trim($this->input->post('indikator', TRUE));
+    $satuan = trim($this->input->post('satuan', TRUE));
+    
+    if (!$program_id) {
+        echo json_encode(['status' => 'error', 'message' => 'Program tidak valid!']);
+        return;
+    }
+    if (empty($nama)) {
+        echo json_encode(['status' => 'error', 'message' => 'Nama Kegiatan wajib diisi!']);
+        return;
+    }
+    
+    // Parse anggaran
+    $anggaran = [];
+    for ($y = 2025; $y <= 2030; $y++) {
+        $anggaran["anggaran_$y"] = $this->parseRupiah($this->input->post("anggaran_$y", TRUE));
+    }
+    
+    $data = [
+        'program_id'     => $program_id,
+        'nama'           => $nama,
+        'sasaran'        => $sasaran, // TAMBAHKAN
+        'bidang_id'      => $bidang_id,
+        'indikator'      => $indikator,
+        'satuan'         => $satuan,
+        'target_2025'    => $this->input->post('target_2025', TRUE),
+        'target_2026'    => $this->input->post('target_2026', TRUE),
+        'target_2027'    => $this->input->post('target_2027', TRUE),
+        'target_2028'    => $this->input->post('target_2028', TRUE),
+        'target_2029'    => $this->input->post('target_2029', TRUE),
+        'target_2030'    => $this->input->post('target_2030', TRUE),
+        'anggaran_2025'  => $anggaran['anggaran_2025'],
+        'anggaran_2026'  => $anggaran['anggaran_2026'],
+        'anggaran_2027'  => $anggaran['anggaran_2027'],
+        'anggaran_2028'  => $anggaran['anggaran_2028'],
+        'anggaran_2029'  => $anggaran['anggaran_2029'],
+        'anggaran_2030'  => $anggaran['anggaran_2030'],
+        'created_at'     => date('Y-m-d H:i:s'),
+        'updated_at'     => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->insert('renstra_kegiatan', $data);
+    $insert_id = $this->db->insert_id();
+    
+    if ($insert_id) {
+        echo json_encode(['status' => 'success', 'message' => 'Kegiatan berhasil ditambahkan', 'data' => ['id' => $insert_id]]);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data!']);
+    }
+    exit;
+}
+
+public function editRenstraKegiatanPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    if (!$this->can_crud()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat mengedit data.']);
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', TRUE);
+    $instansi_id = $this->get_instansi_id();
+    
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    
+    // Cek kepemilikan data
+    $existing = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('renstra_kegiatan')->row();
+    if (!$existing) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
+        return;
+    }
+    
+    // Cek kepemilikan melalui program -> sasaran -> tujuan
+    $program = $this->db->where('id', $existing->program_id)->where('deleted_at IS NULL')->get('renstra_program')->row();
+    if ($program) {
+        $sasaran = $this->db->where('id', $program->sasaran_id)->where('deleted_at IS NULL')->get('renstra_sasaran')->row();
+        if ($sasaran) {
+            $tujuan = $this->db->where('id', $sasaran->tujuan_id)->where('deleted_at IS NULL')->get('renstra_tujuan')->row();
+            if (!$tujuan || $tujuan->id_instansi != $instansi_id) {
+                echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Data bukan milik instansi Anda.']);
+                return;
+            }
+        }
+    }
+    
+    $nama = trim($this->input->post('nama', TRUE));
+    $sasaran = trim($this->input->post('sasaran', TRUE)); // TAMBAHKAN
+    $bidang_id = $this->input->post('bidang_id', TRUE);
+    $indikator = trim($this->input->post('indikator', TRUE));
+    $satuan = trim($this->input->post('satuan', TRUE));
+    
+    if (empty($nama)) {
+        echo json_encode(['status' => 'error', 'message' => 'Nama Kegiatan wajib diisi!']);
+        return;
+    }
+    
+    // Parse anggaran
+    $anggaran = [];
+    for ($y = 2025; $y <= 2030; $y++) {
+        $anggaran["anggaran_$y"] = $this->parseRupiah($this->input->post("anggaran_$y", TRUE));
+    }
+    
+    $data = [
+        'nama'           => $nama,
+        'sasaran'        => $sasaran, // TAMBAHKAN
+        'bidang_id'      => $bidang_id,
+        'indikator'      => $indikator,
+        'satuan'         => $satuan,
+        'target_2025'    => $this->input->post('target_2025', TRUE),
+        'target_2026'    => $this->input->post('target_2026', TRUE),
+        'target_2027'    => $this->input->post('target_2027', TRUE),
+        'target_2028'    => $this->input->post('target_2028', TRUE),
+        'target_2029'    => $this->input->post('target_2029', TRUE),
+        'target_2030'    => $this->input->post('target_2030', TRUE),
+        'anggaran_2025'  => $anggaran['anggaran_2025'],
+        'anggaran_2026'  => $anggaran['anggaran_2026'],
+        'anggaran_2027'  => $anggaran['anggaran_2027'],
+        'anggaran_2028'  => $anggaran['anggaran_2028'],
+        'anggaran_2029'  => $anggaran['anggaran_2029'],
+        'anggaran_2030'  => $anggaran['anggaran_2030'],
+        'updated_at'     => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->where('id', $id)->update('renstra_kegiatan', $data);
+    echo json_encode(['status' => 'success', 'message' => 'Kegiatan berhasil diperbarui']);
+    exit;
+}
+
+public function hapusRenstraKegiatanPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    if (!$this->can_crud()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menghapus data.']);
+        return;
+    }
+    $id = (int)$this->input->post('id', TRUE);
+    $instansi_id = $this->get_instansi_id();
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    $existing = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('renstra_kegiatan')->row();
+    if (!$existing) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
+        return;
+    }
+    // Cek kepemilikan
+    $program = $this->db->where('id', $existing->program_id)->where('deleted_at IS NULL')->get('renstra_program')->row();
+    if ($program) {
+        $sasaran = $this->db->where('id', $program->sasaran_id)->where('deleted_at IS NULL')->get('renstra_sasaran')->row();
+        if ($sasaran) {
+            $tujuan = $this->db->where('id', $sasaran->tujuan_id)->where('deleted_at IS NULL')->get('renstra_tujuan')->row();
+            if (!$tujuan || $tujuan->id_instansi != $instansi_id) {
+                echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Data bukan milik instansi Anda.']);
+                return;
+            }
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak valid!']);
+            return;
+        }
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak valid!']);
+        return;
+    }
+    $this->db->where('id', $id)->update('renstra_kegiatan', ['deleted_at' => date('Y-m-d H:i:s')]);
+    echo json_encode(['status' => 'success', 'message' => 'Kegiatan berhasil dihapus']);
+    exit;
+}
+
+public function getRenstraKegiatanPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', TRUE);
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    
+    // Pastikan SELECT menyertakan sasaran
+    $data = $this->db->select('*, sasaran')
+        ->where('id', $id)
+        ->where('deleted_at IS NULL')
+        ->get('renstra_kegiatan')
+        ->row_array();
+    
+    if ($data) {
+        // Format anggaran untuk tampilan
+        foreach (['2025','2026','2027','2028','2029','2030'] as $thn) {
+            $field = 'anggaran_'.$thn;
+            $data[$field.'_formatted'] = $this->formatRupiah($data[$field] ?? null);
+        }
+        echo json_encode(['status' => 'success', 'data' => $data]);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+    }
+    exit;
+}
+
+// =====================================================
+// CRUD: SUB KEGIATAN RENSTRA PD
+// =====================================================
+
+public function tambahRenstraSubKegiatanPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    if (!$this->can_crud()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menambah data.']);
+        return;
+    }
+    
+    $kegiatan_id = (int)$this->input->post('kegiatan_id', TRUE);
+    $nama = trim($this->input->post('nama', TRUE));
+    $sasaran = trim($this->input->post('sasaran', TRUE)); // TAMBAHKAN
+    $bidang_id = $this->input->post('bidang_id', TRUE);
+    $indikator = trim($this->input->post('indikator', TRUE));
+    $satuan = trim($this->input->post('satuan', TRUE));
+    
+    if (!$kegiatan_id) {
+        echo json_encode(['status' => 'error', 'message' => 'Kegiatan tidak valid!']);
+        return;
+    }
+    if (empty($nama)) {
+        echo json_encode(['status' => 'error', 'message' => 'Nama Sub Kegiatan wajib diisi!']);
+        return;
+    }
+    
+    // Parse anggaran
+    $anggaran = [];
+    for ($y = 2025; $y <= 2030; $y++) {
+        $anggaran["anggaran_$y"] = $this->parseRupiah($this->input->post("anggaran_$y", TRUE));
+    }
+    
+    $data = [
+        'kegiatan_id'    => $kegiatan_id,
+        'nama'           => $nama,
+        'sasaran'        => $sasaran, // TAMBAHKAN
+        'bidang_id'      => $bidang_id,
+        'indikator'      => $indikator,
+        'satuan'         => $satuan,
+        'target_2025'    => $this->input->post('target_2025', TRUE),
+        'target_2026'    => $this->input->post('target_2026', TRUE),
+        'target_2027'    => $this->input->post('target_2027', TRUE),
+        'target_2028'    => $this->input->post('target_2028', TRUE),
+        'target_2029'    => $this->input->post('target_2029', TRUE),
+        'target_2030'    => $this->input->post('target_2030', TRUE),
+        'anggaran_2025'  => $anggaran['anggaran_2025'],
+        'anggaran_2026'  => $anggaran['anggaran_2026'],
+        'anggaran_2027'  => $anggaran['anggaran_2027'],
+        'anggaran_2028'  => $anggaran['anggaran_2028'],
+        'anggaran_2029'  => $anggaran['anggaran_2029'],
+        'anggaran_2030'  => $anggaran['anggaran_2030'],
+        'created_at'     => date('Y-m-d H:i:s'),
+        'updated_at'     => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->insert('renstra_sub_kegiatan', $data);
+    $insert_id = $this->db->insert_id();
+    
+    if ($insert_id) {
+        echo json_encode(['status' => 'success', 'message' => 'Sub Kegiatan berhasil ditambahkan', 'data' => ['id' => $insert_id]]);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data!']);
+    }
+    exit;
+}
+
+public function editRenstraSubKegiatanPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    if (!$this->can_crud()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat mengedit data.']);
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', TRUE);
+    $instansi_id = $this->get_instansi_id();
+    
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    
+    // Cek kepemilikan data
+    $existing = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('renstra_sub_kegiatan')->row();
+    if (!$existing) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
+        return;
+    }
+    
+    // Cek kepemilikan melalui kegiatan -> program -> sasaran -> tujuan
+    $kegiatan = $this->db->where('id', $existing->kegiatan_id)->where('deleted_at IS NULL')->get('renstra_kegiatan')->row();
+    if ($kegiatan) {
+        $program = $this->db->where('id', $kegiatan->program_id)->where('deleted_at IS NULL')->get('renstra_program')->row();
+        if ($program) {
+            $sasaran = $this->db->where('id', $program->sasaran_id)->where('deleted_at IS NULL')->get('renstra_sasaran')->row();
+            if ($sasaran) {
+                $tujuan = $this->db->where('id', $sasaran->tujuan_id)->where('deleted_at IS NULL')->get('renstra_tujuan')->row();
+                if (!$tujuan || $tujuan->id_instansi != $instansi_id) {
+                    echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Data bukan milik instansi Anda.']);
+                    return;
+                }
+            }
+        }
+    }
+    
+    $nama = trim($this->input->post('nama', TRUE));
+    $sasaran = trim($this->input->post('sasaran', TRUE)); // TAMBAHKAN
+    $bidang_id = $this->input->post('bidang_id', TRUE);
+    $indikator = trim($this->input->post('indikator', TRUE));
+    $satuan = trim($this->input->post('satuan', TRUE));
+    
+    if (empty($nama)) {
+        echo json_encode(['status' => 'error', 'message' => 'Nama Sub Kegiatan wajib diisi!']);
+        return;
+    }
+    
+    // Parse anggaran
+    $anggaran = [];
+    for ($y = 2025; $y <= 2030; $y++) {
+        $anggaran["anggaran_$y"] = $this->parseRupiah($this->input->post("anggaran_$y", TRUE));
+    }
+    
+    $data = [
+        'nama'           => $nama,
+        'sasaran'        => $sasaran, // TAMBAHKAN
+        'bidang_id'      => $bidang_id,
+        'indikator'      => $indikator,
+        'satuan'         => $satuan,
+        'target_2025'    => $this->input->post('target_2025', TRUE),
+        'target_2026'    => $this->input->post('target_2026', TRUE),
+        'target_2027'    => $this->input->post('target_2027', TRUE),
+        'target_2028'    => $this->input->post('target_2028', TRUE),
+        'target_2029'    => $this->input->post('target_2029', TRUE),
+        'target_2030'    => $this->input->post('target_2030', TRUE),
+        'anggaran_2025'  => $anggaran['anggaran_2025'],
+        'anggaran_2026'  => $anggaran['anggaran_2026'],
+        'anggaran_2027'  => $anggaran['anggaran_2027'],
+        'anggaran_2028'  => $anggaran['anggaran_2028'],
+        'anggaran_2029'  => $anggaran['anggaran_2029'],
+        'anggaran_2030'  => $anggaran['anggaran_2030'],
+        'updated_at'     => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->where('id', $id)->update('renstra_sub_kegiatan', $data);
+    echo json_encode(['status' => 'success', 'message' => 'Sub Kegiatan berhasil diperbarui']);
+    exit;
+}
+
+public function hapusRenstraSubKegiatanPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    if (!$this->can_crud()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menghapus data.']);
+        return;
+    }
+    $id = (int)$this->input->post('id', TRUE);
+    $instansi_id = $this->get_instansi_id();
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    $existing = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('renstra_sub_kegiatan')->row();
+    if (!$existing) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
+        return;
+    }
+    // Cek kepemilikan
+    $kegiatan = $this->db->where('id', $existing->kegiatan_id)->where('deleted_at IS NULL')->get('renstra_kegiatan')->row();
+    if ($kegiatan) {
+        $program = $this->db->where('id', $kegiatan->program_id)->where('deleted_at IS NULL')->get('renstra_program')->row();
+        if ($program) {
+            $sasaran = $this->db->where('id', $program->sasaran_id)->where('deleted_at IS NULL')->get('renstra_sasaran')->row();
+            if ($sasaran) {
+                $tujuan = $this->db->where('id', $sasaran->tujuan_id)->where('deleted_at IS NULL')->get('renstra_tujuan')->row();
+                if (!$tujuan || $tujuan->id_instansi != $instansi_id) {
+                    echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Data bukan milik instansi Anda.']);
+                    return;
+                }
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Data tidak valid!']);
+                return;
+            }
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak valid!']);
+            return;
+        }
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak valid!']);
+        return;
+    }
+    $this->db->where('id', $id)->update('renstra_sub_kegiatan', ['deleted_at' => date('Y-m-d H:i:s')]);
+    echo json_encode(['status' => 'success', 'message' => 'Sub Kegiatan berhasil dihapus']);
+    exit;
+}
+
+public function getRenstraSubKegiatanPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', TRUE);
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    
+    // Pastikan SELECT menyertakan sasaran
+    $data = $this->db->select('*, sasaran')
+        ->where('id', $id)
+        ->where('deleted_at IS NULL')
+        ->get('renstra_sub_kegiatan')
+        ->row_array();
+    
+    if ($data) {
+        // Format anggaran untuk tampilan
+        foreach (['2025','2026','2027','2028','2029','2030'] as $thn) {
+            $field = 'anggaran_'.$thn;
+            $data[$field.'_formatted'] = $this->formatRupiah($data[$field] ?? null);
+        }
+        echo json_encode(['status' => 'success', 'data' => $data]);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+    }
+    exit;
+}
+// =====================================================
+// GET DATA UNTUK DROPDOWN
+// =====================================================
+
+public function getSasaranRPJMD() {
+    try {
+        // Cek AJAX request
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        // Ambil KodeWilayah dari session
+        $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : null;
+        
+        // Jika tidak ada KodeWilayah, coba ambil dari TempKodeWilayah
+        if (empty($KodeWilayah)) {
+            $KodeWilayah = isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : null;
+        }
+        
+        // Jika masih kosong, return empty
+        if (empty($KodeWilayah)) {
+            $this->output->set_content_type('application/json')->set_output(json_encode([]));
+            return;
+        }
+        
+        // Query dengan pengecekan tabel
+        $this->db->select('Id, Sasaran');
+        $this->db->from('sasaranrpjmd');
+        $this->db->where('KodeWilayah', $KodeWilayah);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->order_by('Sasaran', 'ASC');
+        $query = $this->db->get();
+        
+        // Cek apakah query berhasil
+        if (!$query) {
+            $error = $this->db->error();
+            log_message('error', 'getSasaranRPJMD: ' . $error['message']);
+            $this->output->set_content_type('application/json')->set_output(json_encode([]));
+            return;
+        }
+        
+        $sasaran = $query->result_array();
+        
+        // Kirim response
+        $this->output->set_content_type('application/json')->set_output(json_encode($sasaran));
+        
+    } catch (Exception $e) {
+        log_message('error', 'getSasaranRPJMD Error: ' . $e->getMessage());
+        $this->output->set_content_type('application/json')->set_output(json_encode([]));
+    }
+}
+
+// =====================================================
+// GET BIDANG/SUB/KOORDINATOR DARI AKUN_KARYAWAN
+// =====================================================
+
+public function getBidangList() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $KodeWilayah = $this->get_kode_wilayah();
+    $instansi_id = $this->get_instansi_id();
+    
+    if (!$KodeWilayah) {
+        echo json_encode([]);
+        return;
+    }
+    
+    // Ambil data bidang dari akun_karyawan
+    $this->db->select('id, nama, nip, jabatan, satuan_unit_kerja')
+        ->from('akun_karyawan')
+        ->where('kodewilayah', $KodeWilayah)
+        ->where('deleted_at IS NULL')
+        ->where('jabatan IS NOT NULL')
+        ->where('jabatan != ""')
+        ->order_by('jabatan', 'ASC')
+        ->order_by('nama', 'ASC');
+    
+    // Jika role 4, filter berdasarkan instansi
+    if ($this->is_role_4() && $instansi_id) {
+        $this->db->where('dinas_id', $instansi_id);
+    }
+    
+    $bidang = $this->db->get()->result_array();
+    
+    echo json_encode($bidang);
+    exit;
+}
+
+// =====================================================
+// GET DETAIL BIDANG BY ID (UNTUK EDIT)
+// =====================================================
+
+public function getBidangDetail() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', TRUE);
+    $KodeWilayah = $this->get_kode_wilayah();
+    
+    if (!$id || !$KodeWilayah) {
+        echo json_encode([]);
+        return;
+    }
+    
+    $data = $this->db
+        ->select('id, nama, nip, jabatan, satuan_unit_kerja')
+        ->from('akun_karyawan')
+        ->where('id', $id)
+        ->where('kodewilayah', $KodeWilayah)
+        ->where('deleted_at IS NULL')
+        ->get()
+        ->row_array();
+    
+    echo json_encode($data);
+    exit;
+}
+
+// ================================================================
+// GET INDIKATOR DARI PROGRAM PD (UNTUK RENSTRA)
+// ================================================================
+
+public function getIndikatorProgramPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    try {
+        $KodeWilayah = $this->get_kode_wilayah();
+        if (empty($KodeWilayah)) {
+            echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+            return;
+        }
+        
+        $kodeProgram = trim($this->input->post('kode_program', TRUE));
+        $tahun = (int)$this->input->post('tahun', TRUE) ?: date('Y');
+        
+        if (empty($kodeProgram)) {
+            echo json_encode(['status' => 'error', 'message' => 'Kode Program tidak valid!']);
+            return;
+        }
+        
+        // Validasi tahun (2026-2030)
+        $validYears = [2026, 2027, 2028, 2029, 2030];
+        if (!in_array($tahun, $validYears)) {
+            $tahun = 2026;
+        }
+        
+        // Cari program berdasarkan kode_program
+        $program = $this->db
+            ->select('p.*, b.nama_bidang, b.kode_bidang, u.nama_urusan, u.kode_urusan')
+            ->from('program_data p')
+            ->join('program_bidang_urusan b', 'b.id = p.bidang_urusan_id', 'left')
+            ->join('program_urusan u', 'u.id = b.urusan_id', 'left')
+            ->where('p.kode_wilayah', $KodeWilayah)
+            ->where('p.kode_program', $kodeProgram)
+            ->where('p.deleted_at IS NULL')
+            ->get()
+            ->row_array();
+        
+        if (!$program) {
+            // Coba cari berdasarkan nama
+            $program = $this->db
+                ->select('p.*, b.nama_bidang, b.kode_bidang, u.nama_urusan, u.kode_urusan')
+                ->from('program_data p')
+                ->join('program_bidang_urusan b', 'b.id = p.bidang_urusan_id', 'left')
+                ->join('program_urusan u', 'u.id = b.urusan_id', 'left')
+                ->where('p.kode_wilayah', $KodeWilayah)
+                ->where('p.nama_program LIKE', '%' . $kodeProgram . '%')
+                ->where('p.deleted_at IS NULL')
+                ->get()
+                ->row_array();
+        }
+        
+        if (!$program) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Program tidak ditemukan!'
+            ]);
+            return;
+        }
+        
+        // Ambil indikator dari program_indikator - HANYA KOLOM 2026-2030
+        $targetField = 'target_' . $tahun;
+        $paguField = 'pagu_' . $tahun;
+        
+        // Cek apakah kolom target tahun ada
+        $columns = $this->db->query("SHOW COLUMNS FROM program_indikator LIKE 'target_" . $tahun . "'")->num_rows();
+        
+        if ($columns > 0) {
+            $indikator = $this->db
+                ->select('id, indikator, satuan, kondisi_awal, ' . $targetField . ' as target, ' . $paguField . ' as pagu')
+                ->where('program_id', $program['id'])
+                ->where('kode_wilayah', $KodeWilayah)
+                ->where('deleted_at IS NULL')
+                ->order_by('urutan', 'ASC')
+                ->order_by('id', 'ASC')
+                ->get('program_indikator')
+                ->result_array();
+        } else {
+            // Fallback: ambil semua dan filter di PHP
+            $allIndikator = $this->db
+                ->select('*')
+                ->where('program_id', $program['id'])
+                ->where('kode_wilayah', $KodeWilayah)
+                ->where('deleted_at IS NULL')
+                ->order_by('urutan', 'ASC')
+                ->get('program_indikator')
+                ->result_array();
+            
+            $indikator = [];
+            foreach ($allIndikator as $row) {
+                $indikator[] = [
+                    'id' => $row['id'],
+                    'indikator' => $row['indikator'],
+                    'satuan' => $row['satuan'],
+                    'kondisi_awal' => $row['kondisi_awal'],
+                    'target' => $row['target_' . $tahun] ?? '',
+                    'pagu' => $row['pagu_' . $tahun] ?? null
+                ];
+            }
+        }
+        
+        // Format pagu
+        foreach ($indikator as &$item) {
+            if (!empty($item['pagu']) && is_numeric($item['pagu'])) {
+                $item['pagu_formatted'] = 'Rp ' . number_format((float)$item['pagu'], 0, ',', '.');
+            } else {
+                $item['pagu_formatted'] = '';
+            }
+        }
+        
+        echo json_encode([
+            'status' => 'success',
+            'data' => [
+                'program' => $program,
+                'indikator' => $indikator,
+                'tahun' => $tahun
+            ]
+        ]);
+        
+    } catch (Exception $e) {
+        log_message('error', 'getIndikatorProgramPD: ' . $e->getMessage());
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+        ]);
+    }
+}
+
+// ================================================================
+// GET INDIKATOR PROGRAM PD UNTUK RENSTRA (DENGAN MULTI INDIKATOR)
+// ================================================================
+
+public function getIndikatorProgramPDRenstra() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    try {
+        $KodeWilayah = $this->get_kode_wilayah();
+        if (empty($KodeWilayah)) {
+            echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+            return;
+        }
+        
+        $kodeProgram = trim($this->input->post('kode_program', TRUE));
+        $tahun = (int)$this->input->post('tahun', TRUE) ?: 2026;
+        
+        if (empty($kodeProgram)) {
+            echo json_encode(['status' => 'error', 'message' => 'Kode Program tidak valid!']);
+            return;
+        }
+        
+        // Validasi tahun (2026-2030)
+        $validYears = [2026, 2027, 2028, 2029, 2030];
+        if (!in_array($tahun, $validYears)) {
+            $tahun = 2026;
+        }
+        
+        // Cari program berdasarkan kode_program
+        $program = $this->db
+            ->select('p.*, b.nama_bidang, b.kode_bidang, u.nama_urusan, u.kode_urusan')
+            ->from('program_data p')
+            ->join('program_bidang_urusan b', 'b.id = p.bidang_urusan_id', 'left')
+            ->join('program_urusan u', 'u.id = b.urusan_id', 'left')
+            ->where('p.kode_wilayah', $KodeWilayah)
+            ->where('p.kode_program', $kodeProgram)
+            ->where('p.deleted_at IS NULL')
+            ->get()
+            ->row_array();
+        
+        if (!$program) {
+            // Coba cari berdasarkan nama
+            $program = $this->db
+                ->select('p.*, b.nama_bidang, b.kode_bidang, u.nama_urusan, u.kode_urusan')
+                ->from('program_data p')
+                ->join('program_bidang_urusan b', 'b.id = p.bidang_urusan_id', 'left')
+                ->join('program_urusan u', 'u.id = b.urusan_id', 'left')
+                ->where('p.kode_wilayah', $KodeWilayah)
+                ->where('p.nama_program LIKE', '%' . $kodeProgram . '%')
+                ->where('p.deleted_at IS NULL')
+                ->get()
+                ->row_array();
+        }
+        
+        if (!$program) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Program tidak ditemukan!'
+            ]);
+            return;
+        }
+        
+        // Ambil SEMUA indikator dari program_indikator
+        $indikator = $this->db
+            ->select('id, indikator, satuan, kondisi_awal, 
+                     target_2026, target_2027, target_2028, target_2029, target_2030,
+                     pagu_2026, pagu_2027, pagu_2028, pagu_2029, pagu_2030')
+            ->where('program_id', $program['id'])
+            ->where('kode_wilayah', $KodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->order_by('urutan', 'ASC')
+            ->order_by('id', 'ASC')
+            ->get('program_indikator')
+            ->result_array();
+        
+        // Format data untuk response
+        foreach ($indikator as &$item) {
+            // Format pagu ke Rupiah
+            foreach ([2026, 2027, 2028, 2029, 2030] as $y) {
+                $paguField = 'pagu_' . $y;
+                if (!empty($item[$paguField]) && is_numeric($item[$paguField])) {
+                    $item[$paguField . '_formatted'] = 'Rp ' . number_format((float)$item[$paguField], 0, ',', '.');
+                } else {
+                    $item[$paguField . '_formatted'] = '';
+                }
+            }
+        }
+        
+        echo json_encode([
+            'status' => 'success',
+            'data' => [
+                'program' => $program,
+                'indikator' => $indikator,
+                'tahun' => $tahun
+            ]
+        ]);
+        
+    } catch (Exception $e) {
+        log_message('error', 'getIndikatorProgramPDRenstra: ' . $e->getMessage());
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+        ]);
+    }
+}
+
+// ================================================================
+// GET PROGRAM DETAIL BY KODE (UNTUK MENDAPATKAN OUTCOME)
+// ================================================================
+
+public function getProgramDetailByKode() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    try {
+        $KodeWilayah = $this->get_kode_wilayah();
+        if (empty($KodeWilayah)) {
+            echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+            return;
+        }
+        
+        $kodeProgram = trim($this->input->post('kode_program', TRUE));
+        
+        if (empty($kodeProgram)) {
+            echo json_encode(['status' => 'error', 'message' => 'Kode Program tidak valid!']);
+            return;
+        }
+        
+        // Cari program berdasarkan kode_program
+        $program = $this->db
+            ->select('id, kode_program, nama_program, outcome')
+            ->from('program_data')
+            ->where('kode_wilayah', $KodeWilayah)
+            ->where('kode_program', $kodeProgram)
+            ->where('deleted_at IS NULL')
+            ->get()
+            ->row_array();
+        
+        if ($program) {
+            echo json_encode([
+                'status' => 'success',
+                'data' => $program
+            ]);
+        } else {
+            // Coba cari berdasarkan LIKE jika tidak ditemukan exact
+            $program = $this->db
+                ->select('id, kode_program, nama_program, outcome')
+                ->from('program_data')
+                ->where('kode_wilayah', $KodeWilayah)
+                ->like('kode_program', $kodeProgram, 'after')
+                ->where('deleted_at IS NULL')
+                ->limit(1)
+                ->get()
+                ->row_array();
+            
+            if ($program) {
+                echo json_encode([
+                    'status' => 'success',
+                    'data' => $program
+                ]);
+            } else {
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Program tidak ditemukan!'
+                ]);
+            }
+        }
+        
+    } catch (Exception $e) {
+        log_message('error', 'getProgramDetailByKode: ' . $e->getMessage());
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+        ]);
+    }
+}
+
+// ================================================================
+// GET INDIKATOR DARI PROGRAM PD (UNTUK RENSTRA)
+// ================================================================
+
+/**
+ * Helper untuk mendapatkan nama dari kode nomenklatur
+ */
+private function getNomenklaturName($kode) {
+    if (empty($kode)) return '';
+    $data = $this->db->select('Nomenklatur')
+        ->where('Kode', $kode)
+        ->get('nomenklaturprovinsi')
+        ->row_array();
+    return $data ? $data['Nomenklatur'] : $kode;
+}
+
+/**
+ * Format angka Rupiah ke number
+ */
+private function formatRupiahToNumber($value) {
+    if (empty($value)) return null;
+    $clean = str_replace(['Rp', ' ', '.', ','], '', $value);
+    if (!is_numeric($clean)) return null;
+    return (float)$clean;
+}
+
+/**
+ * Format angka ke format Rupiah untuk display
+ */
+private function formatRupiah($angka) {
+    if (empty($angka) && $angka !== 0 && $angka !== '0') {
+        return '';
+    }
+    return 'Rp ' . number_format((float)$angka, 0, ',', '.');
+}
+
+/**
+ * Parse angka dari format Rupiah ke float
+ */
+private function parseRupiah($rupiah) {
+    if (empty($rupiah)) return null;
+    $clean = str_replace(['Rp', ' ', '.', ','], '', $rupiah);
+    if (!is_numeric($clean)) return null;
+    return (float)$clean;
+}
 
 }
 ?>

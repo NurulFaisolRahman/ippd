@@ -101,6 +101,7 @@
                                         <th class="text-center">No</th>
                                         <th>NIP</th>
                                         <th>Nama Pegawai</th>
+                                        <th>Eselon</th>
                                         <th>Jabatan</th>
                                         <th>Satuan Unit Kerja</th>
                                         <th>Dinas Terkait</th>
@@ -119,6 +120,12 @@
                                             <td class="text-center" style="vertical-align:middle;"><?= $No++ ?></td>
                                             <td style="vertical-align:middle;"><?= html_escape($key['nip']) ?></td>
                                             <td style="vertical-align:middle;"><?= html_escape($key['nama']) ?></td>
+                                            <td style="vertical-align:middle;">
+                                                <?php 
+                                                    $eselon = $key['eselon'] ?? '';
+                                                    echo !empty($eselon) ? html_escape($eselon) : '-';
+                                                ?>
+                                            </td>
                                             <td style="vertical-align:middle;"><?= html_escape($key['jabatan']) ?></td>
                                             <td style="vertical-align:middle;"><?= isset($key['satuan_unit_kerja']) && !empty($key['satuan_unit_kerja']) ? html_escape($key['satuan_unit_kerja']) : '-' ?></td>
                                             <td style="vertical-align:middle;"><?= isset($key['dinas_nama']) ? $key['dinas_nama'] : '-' ?></td>
@@ -135,6 +142,7 @@
                                                             data-id="<?= $key['id'] ?>"
                                                             data-nip="<?= htmlspecialchars($key['nip'], ENT_QUOTES) ?>"
                                                             data-nama="<?= htmlspecialchars($key['nama'], ENT_QUOTES) ?>"
+                                                            data-eselon="<?= htmlspecialchars($key['eselon'] ?? '', ENT_QUOTES) ?>"
                                                             data-jabatan="<?= htmlspecialchars($key['jabatan'], ENT_QUOTES) ?>"
                                                             data-satuan-unit-kerja="<?= htmlspecialchars($key['satuan_unit_kerja'] ?? '', ENT_QUOTES) ?>"
                                                             data-tahun-mulai="<?= $key['tahun_mulai'] ?>"
@@ -195,6 +203,20 @@
                                     </div>
                                     <div class="col-lg-8">
                                         <input type="text" class="form-control input-sm" id="Nama" placeholder="Masukkan Nama Lengkap">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Eselon - INPUT MANUAL -->
+                        <div class="form-example-int form-horizental">
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-lg-3">
+                                        <label class="hrzn-fm"><b>Eselon</b></label>
+                                    </div>
+                                    <div class="col-lg-8">
+                                        <input type="text" class="form-control input-sm" id="Eselon" placeholder="Contoh: Eselon II, Eselon III, Non Eselon">
                                     </div>
                                 </div>
                             </div>
@@ -341,6 +363,20 @@
                                     </div>
                                     <div class="col-lg-8">
                                         <input type="text" class="form-control input-sm" id="_Nama" placeholder="Masukkan Nama Lengkap">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Eselon - INPUT MANUAL -->
+                        <div class="form-example-int form-horizental">
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-lg-3">
+                                        <label class="hrzn-fm"><b>Eselon</b></label>
+                                    </div>
+                                    <div class="col-lg-8">
+                                        <input type="text" class="form-control input-sm" id="_Eselon" placeholder="Contoh: Eselon II, Eselon III, Non Eselon">
                                     </div>
                                 </div>
                             </div>
@@ -704,6 +740,7 @@
             $.post(BaseURL + "Daerah/InputKaryawan", {
                 nip: $("#NIP").val(),
                 nama: $("#Nama").val(),
+                eselon: $("#Eselon").val(),
                 jabatan: $("#Jabatan").val(),
                 satuan_unit_kerja: $("#SatuanUnitKerja").val(),
                 password: $("#Password").val(),
@@ -729,6 +766,7 @@
             $("#Id").val($(this).data('id'));
             $("#_NIP").val($(this).data('nip'));
             $("#_Nama").val($(this).data('nama'));
+            $("#_Eselon").val($(this).data('eselon') || '');
             $("#_Jabatan").val($(this).data('jabatan'));
             $("#_SatuanUnitKerja").val($(this).data('satuan-unit-kerja') || '');
             $("#_Password").val("");
@@ -785,6 +823,7 @@
                 id: $("#Id").val(),
                 nip: $("#_NIP").val(),
                 nama: $("#_Nama").val(),
+                eselon: $("#_Eselon").val(),
                 jabatan: $("#_Jabatan").val(),
                 satuan_unit_kerja: $("#_SatuanUnitKerja").val(),
                 password: $("#_Password").val(),
