@@ -8475,86 +8475,102 @@ public function PotensiDaerah() {
     // ============================================================
     
     public function ProgramPD() {
-        $Header['Halaman'] = 'Program PD';
+    $Header['Halaman'] = 'Program PD';
+    
+    $KodeWilayah = $this->_getKodeWilayah();
+    
+    $Data['KodeWilayah'] = $KodeWilayah;
+    $Data['NamaWilayah'] = '';
+    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
+    
+    // Perangkat Daerah untuk dropdown
+    $Data['PerangkatDaerah'] = [];
+    if ($KodeWilayah) {
+        $Data['PerangkatDaerah'] = $this->db
+            ->select('id, nama')
+            ->from('akun_instansi')
+            ->where('kodewilayah', $KodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->order_by('nama', 'ASC')
+            ->get()
+            ->result_array();
         
-        $KodeWilayah = $this->_getKodeWilayah();
+        $Data['NamaWilayah'] = $this->db->select('Nama')->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array()['Nama'] ?? '';
+    }
+    
+    // ============================================================
+    // AMBIL DATA LENGKAP DENGAN STRUKTUR OUTCOME → INDIKATOR
+    // ============================================================
+    $Data['ListData'] = [];
+    
+    if ($KodeWilayah) {
+        // Ambil semua Urusan
+        $urusan = $this->db
+            ->where('kode_wilayah', $KodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->order_by('id', 'ASC')
+            ->get('program_urusan')
+            ->result_array();
         
-        $Data['KodeWilayah'] = $KodeWilayah;
-        $Data['NamaWilayah'] = '';
-        $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
-        
-        // Perangkat Daerah untuk dropdown
-        $Data['PerangkatDaerah'] = [];
-        if ($KodeWilayah) {
-            $Data['PerangkatDaerah'] = $this->db
-                ->select('id, nama')
-                ->from('akun_instansi')
-                ->where('kodewilayah', $KodeWilayah)
-                ->where('deleted_at IS NULL')
-                ->order_by('nama', 'ASC')
-                ->get()
-                ->result_array();
-            
-            $Data['NamaWilayah'] = $this->db->select('Nama')->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array()['Nama'] ?? '';
-        }
-        
-        // ============================================================
-        // AMBIL DATA LENGKAP DENGAN JOIN
-        // ============================================================
-        $Data['ListData'] = [];
-        
-        if ($KodeWilayah) {
-            // Ambil semua Urusan
-            $urusan = $this->db
+        foreach ($urusan as &$u) {
+            // Ambil Bidang Urusan
+            $u['bidang'] = $this->db
+                ->where('urusan_id', $u['id'])
                 ->where('kode_wilayah', $KodeWilayah)
                 ->where('deleted_at IS NULL')
                 ->order_by('id', 'ASC')
-                ->get('program_urusan')
+                ->get('program_bidang_urusan')
                 ->result_array();
             
-            foreach ($urusan as &$u) {
-                // Ambil Bidang Urusan
-                $u['bidang'] = $this->db
-                    ->where('urusan_id', $u['id'])
+            foreach ($u['bidang'] as &$b) {
+                // Ambil Program
+                $b['program'] = $this->db
+                    ->where('bidang_urusan_id', $b['id'])
                     ->where('kode_wilayah', $KodeWilayah)
                     ->where('deleted_at IS NULL')
                     ->order_by('id', 'ASC')
-                    ->get('program_bidang_urusan')
+                    ->get('program_data')
                     ->result_array();
                 
-                foreach ($u['bidang'] as &$b) {
-                    // Ambil Program
-                    $b['program'] = $this->db
-                        ->where('bidang_urusan_id', $b['id'])
-                        ->where('kode_wilayah', $KodeWilayah)
+                foreach ($b['program'] as &$p) {
+                    // ============================================================
+                    // PERBAIKAN: Ambil OUTCOME terlebih dahulu
+                    // ============================================================
+                    $p['outcomes'] = $this->db
+                        ->select('*')
+                        ->from('program_outcome')
+                        ->where('program_id', $p['id'])
                         ->where('deleted_at IS NULL')
-                        ->order_by('id', 'ASC')
-                        ->get('program_data')
+                        ->order_by('urutan', 'ASC')
+                        ->get()
                         ->result_array();
                     
-                    foreach ($b['program'] as &$p) {
-                        // Ambil Indikator
-                        $p['indikator'] = $this->db
+                    // Untuk setiap outcome, ambil indikator
+                    foreach ($p['outcomes'] as &$outcome) {
+                        $outcome['indikators'] = $this->db
                             ->select('pi.*, ai.nama as perangkat_daerah_nama')
                             ->from('program_indikator pi')
                             ->join('akun_instansi ai', 'ai.id = pi.perangkat_daerah_id', 'left')
-                            ->where('pi.program_id', $p['id'])
-                            ->where('pi.kode_wilayah', $KodeWilayah)
+                            ->where('pi.outcome_id', $outcome['id'])
                             ->where('pi.deleted_at IS NULL')
                             ->order_by('pi.urutan', 'ASC')
-                            ->order_by('pi.id', 'ASC')
                             ->get()
                             ->result_array();
                     }
+                    unset($outcome);
                 }
+                unset($p);
             }
-            
-            $Data['ListData'] = $urusan;
+            unset($b);
         }
+        unset($u);
         
-        $this->load->view('Daerah/header', $Header);
-        $this->load->view('Daerah/Program_pd', $Data);
+        $Data['ListData'] = $urusan;
     }
+    
+    $this->load->view('Daerah/header', $Header);
+    $this->load->view('Daerah/Program_pd', $Data);
+}
 
     // ============================================================
     // 1. CRUD URUSAN (Level 1)
@@ -8843,8 +8859,16 @@ public function PotensiDaerah() {
     // ============================================================
     // 3. CRUD PROGRAM + INDIKATOR (Level 3)
     // ============================================================
-    
-    public function program_input_program() {
+ // ============================================================
+// PROGRAM PD - DENGAN MULTIPLE OUTCOME & INDIKATOR
+// ============================================================
+
+/**
+ * INPUT PROGRAM + OUTCOME + INDIKATOR
+ * POST: bidang_urusan_id, kode_program, nama_program,
+ *       outcomes[][outcome_text], outcomes[][indikators][][indikator, satuan, kondisi_awal, target_2026, pagu_2026, ...]
+ */
+public function program_input_program() {
     if (!$this->input->is_ajax_request()) show_404();
     
     $kodeWilayah = $this->_checkSessionWilayah();
@@ -8853,57 +8877,97 @@ public function PotensiDaerah() {
     $bidangId = (int)$this->input->post('bidang_urusan_id', TRUE);
     $kode = trim($this->input->post('kode_program', TRUE));
     $nama = trim($this->input->post('nama_program', TRUE));
-    $outcome = trim($this->input->post('outcome', TRUE)); // ← OUTCOME
+    $outcomes = $this->input->post('outcomes', TRUE); // array multidimensi
     
-    if ($bidangId <= 0) {
-        echo json_encode(['status' => 'error', 'message' => 'Bidang Urusan tidak valid!']);
-        return;
-    }
-    if (empty($nama)) {
-        echo json_encode(['status' => 'error', 'message' => 'Nama Program harus diisi!']);
+    if ($bidangId <= 0 || empty($nama)) {
+        echo json_encode(['status' => 'error', 'message' => 'Data program tidak lengkap!']);
         return;
     }
     
-    // Cek duplikat
-    $exists = $this->db
-        ->where('kode_wilayah', $kodeWilayah)
-        ->where('bidang_urusan_id', $bidangId)
-        ->where('nama_program', $nama)
-        ->where('deleted_at IS NULL')
-        ->get('program_data')
-        ->num_rows();
+    $this->db->trans_start();
     
-    if ($exists > 0) {
-        echo json_encode(['status' => 'error', 'message' => 'Program sudah ada di Bidang ini!']);
-        return;
-    }
-    
-    $data = [
+    // Insert program
+    $dataProgram = [
         'kode_wilayah' => $kodeWilayah,
         'bidang_urusan_id' => $bidangId,
         'kode_program' => $kode ?: null,
         'nama_program' => $nama,
-        'outcome' => $outcome ?: null, // ← SIMPAN OUTCOME
         'created_at' => date('Y-m-d H:i:s')
     ];
-    
-    $this->db->insert('program_data', $data);
+    $this->db->insert('program_data', $dataProgram);
     $programId = $this->db->insert_id();
     
-    if ($programId) {
-        // Proses Indikator (tanpa outcome)
-        $this->_program_proses_indikator($programId, $kodeWilayah);
-        
-        echo json_encode([
-            'status' => 'success',
-            'message' => 'Program dan Indikator berhasil ditambahkan!',
-            'id' => $programId
-        ]);
+    if (!$programId) {
+        $this->db->trans_rollback();
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan program!']);
+        return;
+    }
+    
+    // Proses outcomes
+    if (!empty($outcomes) && is_array($outcomes)) {
+        $urutanOutcome = 10;
+        foreach ($outcomes as $outcome) {
+            $outcomeText = trim($outcome['outcome_text'] ?? '');
+            if (empty($outcomeText)) continue;
+            
+            // Insert outcome
+            $dataOutcome = [
+                'program_id' => $programId,
+                'outcome_text' => $outcomeText,
+                'urutan' => $urutanOutcome,
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+            $this->db->insert('program_outcome', $dataOutcome);
+            $outcomeId = $this->db->insert_id();
+            $urutanOutcome += 10;
+            
+            // Proses indikator per outcome
+            $indikators = $outcome['indikators'] ?? [];
+            if (!empty($indikators) && is_array($indikators)) {
+                $urutanInd = 10;
+                foreach ($indikators as $ind) {
+                    if (empty(trim($ind['indikator'] ?? ''))) continue;
+                    
+                    $dataInd = [
+                        'outcome_id' => $outcomeId,
+                        'indikator' => trim($ind['indikator']),
+                        'satuan' => trim($ind['satuan'] ?? ''),
+                        'kondisi_awal' => trim($ind['kondisi_awal'] ?? ''),
+                        'target_2026' => trim($ind['target_2026'] ?? ''),
+                        'pagu_2026' => $this->_program_format_pagu($ind['pagu_2026'] ?? null),
+                        'target_2027' => trim($ind['target_2027'] ?? ''),
+                        'pagu_2027' => $this->_program_format_pagu($ind['pagu_2027'] ?? null),
+                        'target_2028' => trim($ind['target_2028'] ?? ''),
+                        'pagu_2028' => $this->_program_format_pagu($ind['pagu_2028'] ?? null),
+                        'target_2029' => trim($ind['target_2029'] ?? ''),
+                        'pagu_2029' => $this->_program_format_pagu($ind['pagu_2029'] ?? null),
+                        'target_2030' => trim($ind['target_2030'] ?? ''),
+                        'pagu_2030' => $this->_program_format_pagu($ind['pagu_2030'] ?? null),
+                        'perangkat_daerah_id' => isset($ind['perangkat_daerah_id']) ? (int)$ind['perangkat_daerah_id'] : null,
+                        'urutan' => $urutanInd,
+                        'created_at' => date('Y-m-d H:i:s')
+                    ];
+                    $this->db->insert('program_indikator', $dataInd);
+                    $urutanInd += 10;
+                }
+            }
+        }
+    }
+    
+    $this->db->trans_complete();
+    
+    if ($this->db->trans_status() === FALSE) {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data!']);
     } else {
-        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan Program!']);
+        echo json_encode(['status' => 'success', 'message' => 'Program berhasil ditambahkan!', 'id' => $programId]);
     }
 }
 
+/**
+ * EDIT PROGRAM + OUTCOME + INDIKATOR
+ * POST: id, bidang_urusan_id, kode_program, nama_program,
+ *       outcomes[][id, outcome_text, deleted, indikators[][id, indikator, ...]]
+ */
 public function program_edit_program() {
     if (!$this->input->is_ajax_request()) show_404();
     
@@ -8914,64 +8978,472 @@ public function program_edit_program() {
     $bidangId = (int)$this->input->post('bidang_urusan_id', TRUE);
     $kode = trim($this->input->post('kode_program', TRUE));
     $nama = trim($this->input->post('nama_program', TRUE));
-    $outcome = trim($this->input->post('outcome', TRUE)); // ← OUTCOME
+    $outcomes = $this->input->post('outcomes', TRUE);
     
+    if ($id <= 0 || $bidangId <= 0 || empty($nama)) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak lengkap!']);
+        return;
+    }
+    
+    // Cek program ada
+    $program = $this->db->where('id', $id)->where('kode_wilayah', $kodeWilayah)->where('deleted_at IS NULL')->get('program_data')->row_array();
+    if (!$program) {
+        echo json_encode(['status' => 'error', 'message' => 'Program tidak ditemukan!']);
+        return;
+    }
+    
+    $this->db->trans_start();
+    
+    // Update program
+    $this->db->where('id', $id)->update('program_data', [
+        'bidang_urusan_id' => $bidangId,
+        'kode_program' => $kode ?: null,
+        'nama_program' => $nama,
+        'updated_at' => date('Y-m-d H:i:s')
+    ]);
+    
+    // Ambil semua outcome yang ada untuk program ini
+    $existingOutcomes = $this->db->select('id')->where('program_id', $id)->where('deleted_at IS NULL')->get('program_outcome')->result_array();
+    $existingOutcomeIds = array_column($existingOutcomes, 'id');
+    
+    $newOutcomeIds = [];
+    $urutanOutcome = 10;
+    
+    // Proses outcomes yang dikirim
+    if (!empty($outcomes) && is_array($outcomes)) {
+        foreach ($outcomes as $outcome) {
+            $outcomeId = isset($outcome['id']) ? (int)$outcome['id'] : 0;
+            $outcomeText = trim($outcome['outcome_text'] ?? '');
+            if (empty($outcomeText)) continue;
+            
+            $isDeleted = isset($outcome['deleted']) && $outcome['deleted'] == 1;
+            
+            if ($outcomeId > 0 && !$isDeleted) {
+                // Update existing outcome
+                $this->db->where('id', $outcomeId)->where('program_id', $id)->update('program_outcome', [
+                    'outcome_text' => $outcomeText,
+                    'urutan' => $urutanOutcome,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ]);
+                $newOutcomeIds[] = $outcomeId;
+                $urutanOutcome += 10;
+            } elseif ($outcomeId > 0 && $isDeleted) {
+                // Hapus outcome (soft delete)
+                $this->db->where('id', $outcomeId)->where('program_id', $id)->update('program_outcome', ['deleted_at' => date('Y-m-d H:i:s')]);
+                // Hapus indikator terkait
+                $this->db->where('outcome_id', $outcomeId)->update('program_indikator', ['deleted_at' => date('Y-m-d H:i:s')]);
+                continue;
+            } else {
+                // Insert new outcome
+                $dataOutcome = [
+                    'program_id' => $id,
+                    'outcome_text' => $outcomeText,
+                    'urutan' => $urutanOutcome,
+                    'created_at' => date('Y-m-d H:i:s')
+                ];
+                $this->db->insert('program_outcome', $dataOutcome);
+                $outcomeId = $this->db->insert_id();
+                $newOutcomeIds[] = $outcomeId;
+                $urutanOutcome += 10;
+            }
+            
+            // Sekarang proses indikator untuk outcome ini
+            $indikators = $outcome['indikators'] ?? [];
+            if (!empty($indikators) && is_array($indikators)) {
+                // Ambil indikator yang sudah ada untuk outcome ini
+                $existingInds = $this->db->select('id')->where('outcome_id', $outcomeId)->where('deleted_at IS NULL')->get('program_indikator')->result_array();
+                $existingIndIds = array_column($existingInds, 'id');
+                $newIndIds = [];
+                $urutanInd = 10;
+                
+                foreach ($indikators as $ind) {
+                    $indId = isset($ind['id']) ? (int)$ind['id'] : 0;
+                    $indText = trim($ind['indikator'] ?? '');
+                    if (empty($indText)) continue;
+                    
+                    $isDeletedInd = isset($ind['deleted']) && $ind['deleted'] == 1;
+                    
+                    if ($indId > 0 && !$isDeletedInd) {
+                        // Update existing
+                        $this->db->where('id', $indId)->where('outcome_id', $outcomeId)->update('program_indikator', [
+                            'indikator' => $indText,
+                            'satuan' => trim($ind['satuan'] ?? ''),
+                            'kondisi_awal' => trim($ind['kondisi_awal'] ?? ''),
+                            'target_2026' => trim($ind['target_2026'] ?? ''),
+                            'pagu_2026' => $this->_program_format_pagu($ind['pagu_2026'] ?? null),
+                            'target_2027' => trim($ind['target_2027'] ?? ''),
+                            'pagu_2027' => $this->_program_format_pagu($ind['pagu_2027'] ?? null),
+                            'target_2028' => trim($ind['target_2028'] ?? ''),
+                            'pagu_2028' => $this->_program_format_pagu($ind['pagu_2028'] ?? null),
+                            'target_2029' => trim($ind['target_2029'] ?? ''),
+                            'pagu_2029' => $this->_program_format_pagu($ind['pagu_2029'] ?? null),
+                            'target_2030' => trim($ind['target_2030'] ?? ''),
+                            'pagu_2030' => $this->_program_format_pagu($ind['pagu_2030'] ?? null),
+                            'perangkat_daerah_id' => isset($ind['perangkat_daerah_id']) ? (int)$ind['perangkat_daerah_id'] : null,
+                            'urutan' => $urutanInd,
+                            'updated_at' => date('Y-m-d H:i:s')
+                        ]);
+                        $newIndIds[] = $indId;
+                    } elseif ($indId > 0 && $isDeletedInd) {
+                        // Hapus indikator
+                        $this->db->where('id', $indId)->where('outcome_id', $outcomeId)->update('program_indikator', ['deleted_at' => date('Y-m-d H:i:s')]);
+                        continue;
+                    } else {
+                        // Insert new indikator
+                        $dataInd = [
+                            'outcome_id' => $outcomeId,
+                            'indikator' => $indText,
+                            'satuan' => trim($ind['satuan'] ?? ''),
+                            'kondisi_awal' => trim($ind['kondisi_awal'] ?? ''),
+                            'target_2026' => trim($ind['target_2026'] ?? ''),
+                            'pagu_2026' => $this->_program_format_pagu($ind['pagu_2026'] ?? null),
+                            'target_2027' => trim($ind['target_2027'] ?? ''),
+                            'pagu_2027' => $this->_program_format_pagu($ind['pagu_2027'] ?? null),
+                            'target_2028' => trim($ind['target_2028'] ?? ''),
+                            'pagu_2028' => $this->_program_format_pagu($ind['pagu_2028'] ?? null),
+                            'target_2029' => trim($ind['target_2029'] ?? ''),
+                            'pagu_2029' => $this->_program_format_pagu($ind['pagu_2029'] ?? null),
+                            'target_2030' => trim($ind['target_2030'] ?? ''),
+                            'pagu_2030' => $this->_program_format_pagu($ind['pagu_2030'] ?? null),
+                            'perangkat_daerah_id' => isset($ind['perangkat_daerah_id']) ? (int)$ind['perangkat_daerah_id'] : null,
+                            'urutan' => $urutanInd,
+                            'created_at' => date('Y-m-d H:i:s')
+                        ];
+                        $this->db->insert('program_indikator', $dataInd);
+                        $newIndIds[] = $this->db->insert_id();
+                    }
+                    $urutanInd += 10;
+                }
+                
+                // Hapus indikator yang tidak ada di daftar baru (soft delete)
+                $deletedInds = array_diff($existingIndIds, $newIndIds);
+                if (!empty($deletedInds)) {
+                    $this->db->where_in('id', $deletedInds)->where('outcome_id', $outcomeId)->update('program_indikator', ['deleted_at' => date('Y-m-d H:i:s')]);
+                }
+            } else {
+                // Tidak ada indikator, hapus semua indikator yang ada untuk outcome ini
+                $this->db->where('outcome_id', $outcomeId)->update('program_indikator', ['deleted_at' => date('Y-m-d H:i:s')]);
+            }
+        }
+    }
+    
+    // Hapus outcome yang tidak ada di daftar baru
+    $deletedOutcomes = array_diff($existingOutcomeIds, $newOutcomeIds);
+    if (!empty($deletedOutcomes)) {
+        $this->db->where_in('id', $deletedOutcomes)->where('program_id', $id)->update('program_outcome', ['deleted_at' => date('Y-m-d H:i:s')]);
+        // Hapus indikator yang terkait
+        $this->db->where_in('outcome_id', $deletedOutcomes)->update('program_indikator', ['deleted_at' => date('Y-m-d H:i:s')]);
+    }
+    
+    $this->db->trans_complete();
+    
+    if ($this->db->trans_status() === FALSE) {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal mengupdate data!']);
+    } else {
+        echo json_encode(['status' => 'success', 'message' => 'Program berhasil diupdate!']);
+    }
+}
+
+/**
+ * GET PROGRAM BY ID (dengan outcomes dan indikators)
+ */
+public function program_get_by_id() {
+    if (!$this->input->is_ajax_request()) show_404();
+    
+    $id = (int)$this->input->post('id', TRUE);
+    $kodeWilayah = $this->_getKodeWilayah();
+    
+    if ($id <= 0 || empty($kodeWilayah)) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak valid']);
+        return;
+    }
+    
+    $program = $this->db
+        ->select('p.*, b.nama_bidang, b.kode_bidang, u.nama_urusan, u.kode_urusan')
+        ->from('program_data p')
+        ->join('program_bidang_urusan b', 'b.id = p.bidang_urusan_id', 'left')
+        ->join('program_urusan u', 'u.id = b.urusan_id', 'left')
+        ->where('p.id', $id)
+        ->where('p.kode_wilayah', $kodeWilayah)
+        ->where('p.deleted_at IS NULL')
+        ->get()
+        ->row_array();
+    
+    if (!$program) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+        return;
+    }
+    
+    // Ambil outcomes
+    $outcomes = $this->db
+        ->select('*')
+        ->where('program_id', $id)
+        ->where('deleted_at IS NULL')
+        ->order_by('urutan', 'ASC')
+        ->get('program_outcome')
+        ->result_array();
+    
+    foreach ($outcomes as &$out) {
+        $out['indikators'] = $this->db
+            ->select('*, id as indikator_id')
+            ->where('outcome_id', $out['id'])
+            ->where('deleted_at IS NULL')
+            ->order_by('urutan', 'ASC')
+            ->get('program_indikator')
+            ->result_array();
+    }
+    $program['outcomes'] = $outcomes;
+    
+    echo json_encode(['status' => 'success', 'data' => $program]);
+}
+
+/**
+ * HAPUS PROGRAM (soft delete) + semua outcome & indikator
+ */
+public function program_hapus_program() {
+    if (!$this->input->is_ajax_request()) show_404();
+    
+    $kodeWilayah = $this->_checkSessionWilayah();
+    if (!$kodeWilayah) return;
+    
+    $id = (int)$this->input->post('id', TRUE);
     if ($id <= 0) {
         echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
         return;
     }
-    if ($bidangId <= 0) {
-        echo json_encode(['status' => 'error', 'message' => 'Bidang Urusan tidak valid!']);
-        return;
+    
+    $now = date('Y-m-d H:i:s');
+    $this->db->trans_start();
+    
+    // Soft delete program
+    $this->db->where('id', $id)->where('kode_wilayah', $kodeWilayah)->update('program_data', ['deleted_at' => $now]);
+    
+    // Ambil outcome IDs
+    $outcomeIds = $this->db->select('id')->where('program_id', $id)->where('deleted_at IS NULL')->get('program_outcome')->result_array();
+    if ($outcomeIds) {
+        $ids = array_column($outcomeIds, 'id');
+        // Soft delete outcomes
+        $this->db->where_in('id', $ids)->update('program_outcome', ['deleted_at' => $now]);
+        // Soft delete indikators
+        $this->db->where_in('outcome_id', $ids)->update('program_indikator', ['deleted_at' => $now]);
     }
-    if (empty($nama)) {
-        echo json_encode(['status' => 'error', 'message' => 'Nama Program harus diisi!']);
-        return;
+    
+    $this->db->trans_complete();
+    
+    if ($this->db->trans_status() === FALSE) {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus data!']);
+    } else {
+        echo json_encode(['status' => 'success', 'message' => 'Data berhasil dihapus!']);
     }
-    
-    $this->db->where('id', $id);
-    $this->db->where('kode_wilayah', $kodeWilayah);
-    $this->db->update('program_data', [
-        'bidang_urusan_id' => $bidangId,
-        'kode_program' => $kode ?: null,
-        'nama_program' => $nama,
-        'outcome' => $outcome ?: null, // ← UPDATE OUTCOME
-        'updated_at' => date('Y-m-d H:i:s')
-    ]);
-    
-    // Proses indikator (tanpa outcome)
-    $this->_program_proses_indikator($id, $kodeWilayah);
-    
-    echo json_encode(['status' => 'success', 'message' => 'Program berhasil diupdate!']);
 }
 
-    public function program_hapus_program() {
-        if (!$this->input->is_ajax_request()) show_404();
-        
-        $kodeWilayah = $this->_checkSessionWilayah();
-        if (!$kodeWilayah) return;
-        
-        $id = (int)$this->input->post('id', TRUE);
-        
-        if ($id <= 0) {
-            echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
-            return;
-        }
-        
-        $now = date('Y-m-d H:i:s');
-        
-        // Soft delete program
-        $this->db->where('id', $id);
-        $this->db->where('kode_wilayah', $kodeWilayah);
-        $this->db->update('program_data', ['deleted_at' => $now]);
-        
-        // Soft delete semua indikator terkait
-        $this->db->where('program_id', $id);
-        $this->db->where('kode_wilayah', $kodeWilayah);
-        $this->db->update('program_indikator', ['deleted_at' => $now]);
-        
-        echo json_encode(['status' => 'success', 'message' => 'Program dan Indikator berhasil dihapus!']);
+/**
+ * HAPUS OUTCOME (soft delete) + indikator terkait
+ */
+public function program_hapus_outcome() {
+    if (!$this->input->is_ajax_request()) show_404();
+    
+    $kodeWilayah = $this->_checkSessionWilayah();
+    if (!$kodeWilayah) return;
+    
+    $id = (int)$this->input->post('id', TRUE);
+    if ($id <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
     }
+    
+    // Cek outcome milik wilayah ini
+    $outcome = $this->db
+        ->select('po.*')
+        ->from('program_outcome po')
+        ->join('program_data p', 'p.id = po.program_id')
+        ->where('po.id', $id)
+        ->where('p.kode_wilayah', $kodeWilayah)
+        ->where('po.deleted_at IS NULL')
+        ->get()
+        ->row_array();
+    
+    if (!$outcome) {
+        echo json_encode(['status' => 'error', 'message' => 'Outcome tidak ditemukan!']);
+        return;
+    }
+    
+    $now = date('Y-m-d H:i:s');
+    $this->db->trans_start();
+    
+    // Soft delete outcome
+    $this->db->where('id', $id)->update('program_outcome', ['deleted_at' => $now]);
+    // Soft delete indikator
+    $this->db->where('outcome_id', $id)->update('program_indikator', ['deleted_at' => $now]);
+    
+    $this->db->trans_complete();
+    
+    if ($this->db->trans_status() === FALSE) {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus outcome!']);
+    } else {
+        echo json_encode(['status' => 'success', 'message' => 'Outcome berhasil dihapus!']);
+    }
+}
+
+/**
+ * HAPUS INDIKATOR (soft delete)
+ */
+public function program_hapus_indikator() {
+    if (!$this->input->is_ajax_request()) show_404();
+    
+    $kodeWilayah = $this->_checkSessionWilayah();
+    if (!$kodeWilayah) return;
+    
+    $id = (int)$this->input->post('id', TRUE);
+    if ($id <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+    }
+    
+    // Cek indikator milik wilayah ini
+    $ind = $this->db
+        ->select('pi.*')
+        ->from('program_indikator pi')
+        ->join('program_outcome po', 'po.id = pi.outcome_id')
+        ->join('program_data p', 'p.id = po.program_id')
+        ->where('pi.id', $id)
+        ->where('p.kode_wilayah', $kodeWilayah)
+        ->where('pi.deleted_at IS NULL')
+        ->get()
+        ->row_array();
+    
+    if (!$ind) {
+        echo json_encode(['status' => 'error', 'message' => 'Indikator tidak ditemukan!']);
+        return;
+    }
+    
+    $this->db->where('id', $id)->update('program_indikator', ['deleted_at' => date('Y-m-d H:i:s')]);
+    
+    echo json_encode(['status' => 'success', 'message' => 'Indikator berhasil dihapus!']);
+}
+
+/**
+ * TAMBAH OUTCOME KE PROGRAM YANG SUDAH ADA
+ */
+public function program_tambah_outcome() {
+    if (!$this->input->is_ajax_request()) show_404();
+    
+    $kodeWilayah = $this->_checkSessionWilayah();
+    if (!$kodeWilayah) return;
+    
+    $programId = (int)$this->input->post('program_id', TRUE);
+    $outcomeText = trim($this->input->post('outcome_text', TRUE));
+    
+    if ($programId <= 0 || empty($outcomeText)) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak lengkap!']);
+        return;
+    }
+    
+    // Cek program
+    $program = $this->db->where('id', $programId)->where('kode_wilayah', $kodeWilayah)->where('deleted_at IS NULL')->get('program_data')->row_array();
+    if (!$program) {
+        echo json_encode(['status' => 'error', 'message' => 'Program tidak ditemukan!']);
+        return;
+    }
+    
+    // Urutan terakhir
+    $lastUrutan = $this->db->select_max('urutan')->where('program_id', $programId)->where('deleted_at IS NULL')->get('program_outcome')->row()->urutan;
+    $urutan = ($lastUrutan ? $lastUrutan + 10 : 10);
+    
+    $data = [
+        'program_id' => $programId,
+        'outcome_text' => $outcomeText,
+        'urutan' => $urutan,
+        'created_at' => date('Y-m-d H:i:s')
+    ];
+    $this->db->insert('program_outcome', $data);
+    $outcomeId = $this->db->insert_id();
+    
+    if ($outcomeId) {
+        echo json_encode(['status' => 'success', 'message' => 'Outcome berhasil ditambahkan!', 'id' => $outcomeId]);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menambahkan outcome!']);
+    }
+}
+
+/**
+ * TAMBAH INDIKATOR KE OUTCOME YANG SUDAH ADA
+ */
+public function program_tambah_indikator() {
+    if (!$this->input->is_ajax_request()) show_404();
+    
+    $kodeWilayah = $this->_checkSessionWilayah();
+    if (!$kodeWilayah) return;
+    
+    $outcomeId = (int)$this->input->post('outcome_id', TRUE);
+    $indikator = trim($this->input->post('indikator', TRUE));
+    $satuan = trim($this->input->post('satuan', TRUE));
+    $kondisiAwal = trim($this->input->post('kondisi_awal', TRUE));
+    $target2026 = trim($this->input->post('target_2026', TRUE));
+    $pagu2026 = $this->_program_format_pagu($this->input->post('pagu_2026', TRUE));
+    $target2027 = trim($this->input->post('target_2027', TRUE));
+    $pagu2027 = $this->_program_format_pagu($this->input->post('pagu_2027', TRUE));
+    $target2028 = trim($this->input->post('target_2028', TRUE));
+    $pagu2028 = $this->_program_format_pagu($this->input->post('pagu_2028', TRUE));
+    $target2029 = trim($this->input->post('target_2029', TRUE));
+    $pagu2029 = $this->_program_format_pagu($this->input->post('pagu_2029', TRUE));
+    $target2030 = trim($this->input->post('target_2030', TRUE));
+    $pagu2030 = $this->_program_format_pagu($this->input->post('pagu_2030', TRUE));
+    $perangkatDaerahId = $this->input->post('perangkat_daerah_id', TRUE) ?: null;
+    
+    if ($outcomeId <= 0 || empty($indikator)) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak lengkap!']);
+        return;
+    }
+    
+    // Cek outcome
+    $outcome = $this->db
+        ->select('po.*')
+        ->from('program_outcome po')
+        ->join('program_data p', 'p.id = po.program_id')
+        ->where('po.id', $outcomeId)
+        ->where('p.kode_wilayah', $kodeWilayah)
+        ->where('po.deleted_at IS NULL')
+        ->get()
+        ->row_array();
+    
+    if (!$outcome) {
+        echo json_encode(['status' => 'error', 'message' => 'Outcome tidak ditemukan!']);
+        return;
+    }
+    
+    $lastUrutan = $this->db->select_max('urutan')->where('outcome_id', $outcomeId)->where('deleted_at IS NULL')->get('program_indikator')->row()->urutan;
+    $urutan = ($lastUrutan ? $lastUrutan + 10 : 10);
+    
+    $data = [
+        'outcome_id' => $outcomeId,
+        'indikator' => $indikator,
+        'satuan' => $satuan,
+        'kondisi_awal' => $kondisiAwal,
+        'target_2026' => $target2026,
+        'pagu_2026' => $pagu2026,
+        'target_2027' => $target2027,
+        'pagu_2027' => $pagu2027,
+        'target_2028' => $target2028,
+        'pagu_2028' => $pagu2028,
+        'target_2029' => $target2029,
+        'pagu_2029' => $pagu2029,
+        'target_2030' => $target2030,
+        'pagu_2030' => $pagu2030,
+        'perangkat_daerah_id' => $perangkatDaerahId,
+        'urutan' => $urutan,
+        'created_at' => date('Y-m-d H:i:s')
+    ];
+    $this->db->insert('program_indikator', $data);
+    $indId = $this->db->insert_id();
+    
+    if ($indId) {
+        echo json_encode(['status' => 'success', 'message' => 'Indikator berhasil ditambahkan!', 'id' => $indId]);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menambahkan indikator!']);
+    }
+}
+
 
     /**
  * Format angka ke format Rupiah untuk display
@@ -9101,92 +9573,7 @@ private function _program_format_pagu($value) {
     return (float)$clean;
 }
 
-    // ============================================================
-    // GET DATA FOR EDIT
-    // ============================================================
-    
-    public function program_get_by_id() {
-    if (!$this->input->is_ajax_request()) show_404();
-    
-    $id = (int)$this->input->post('id', TRUE);
-    $kodeWilayah = $this->_getKodeWilayah();
-    
-    if ($id <= 0 || empty($kodeWilayah)) {
-        echo json_encode(['status' => 'error', 'message' => 'Data tidak valid']);
-        return;
-    }
-    
-    // ============================================================
-    // AMBIL DATA PROGRAM - TERMASUK OUTCOME
-    // ============================================================
-    $program = $this->db
-        ->select('
-            p.*,
-            b.nama_bidang,
-            b.kode_bidang,
-            u.nama_urusan,
-            u.kode_urusan
-        ')
-        ->from('program_data p')
-        ->join('program_bidang_urusan b', 'b.id = p.bidang_urusan_id', 'left')
-        ->join('program_urusan u', 'u.id = b.urusan_id', 'left')
-        ->where('p.id', $id)
-        ->where('p.kode_wilayah', $kodeWilayah)
-        ->where('p.deleted_at IS NULL')
-        ->get()
-        ->row_array();
-    
-    if (!$program) {
-        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
-        return;
-    }
-    
-    // ============================================================
-    // AMBIL INDIKATOR (Tanpa Outcome)
-    // ============================================================
-    $program['indikator'] = $this->db
-        ->select('
-            id,
-            program_id,
-            indikator,
-            satuan,
-            kondisi_awal,
-            target_2026, pagu_2026,
-            target_2027, pagu_2027,
-            target_2028, pagu_2028,
-            target_2029, pagu_2029,
-            target_2030, pagu_2030,
-            perangkat_daerah_id,
-            urutan
-        ')
-        ->where('program_id', $id)
-        ->where('kode_wilayah', $kodeWilayah)
-        ->where('deleted_at IS NULL')
-        ->order_by('urutan', 'ASC')
-        ->order_by('id', 'ASC')
-        ->get('program_indikator')
-        ->result_array();
-    
-    // ============================================================
-    // FORMAT PAGU
-    // ============================================================
-    foreach ($program['indikator'] as &$ind) {
-        $paguFields = ['pagu_2026', 'pagu_2027', 'pagu_2028', 'pagu_2029', 'pagu_2030'];
-        foreach ($paguFields as $field) {
-            if (isset($ind[$field])) {
-                if (is_string($ind[$field])) {
-                    $clean = str_replace(['.', ','], '', $ind[$field]);
-                    $ind[$field] = is_numeric($clean) ? (float)$clean : null;
-                } elseif (is_numeric($ind[$field])) {
-                    $ind[$field] = (float)$ind[$field];
-                }
-            }
-        }
-    }
-    unset($ind);
-    
-    echo json_encode(['status' => 'success', 'data' => $program]);
-}
+   
 
     // ============================================================
     // GET DROPDOWN DATA
@@ -9258,35 +9645,7 @@ private function _program_format_pagu($value) {
         echo json_encode($data);
     }
 
-    // ============================================================
-    // HAPUS INDIKATOR
-    // ============================================================
     
-    public function program_hapus_indikator() {
-        if (!$this->input->is_ajax_request()) show_404();
-        
-        $kodeWilayah = $this->_checkSessionWilayah();
-        if (!$kodeWilayah) return;
-        
-        $id = (int)$this->input->post('id', TRUE);
-        
-        if ($id <= 0) {
-            echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
-            return;
-        }
-        
-        $this->db->where('id', $id);
-        $this->db->where('kode_wilayah', $kodeWilayah);
-        $this->db->update('program_indikator', [
-            'deleted_at' => date('Y-m-d H:i:s')
-        ]);
-        
-        if ($this->db->affected_rows() > 0) {
-            echo json_encode(['status' => 'success', 'message' => 'Indikator berhasil dihapus!']);
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus indikator!']);
-        }
-    }
 
         /**
      * Helper function untuk mendapatkan nama dari kode nomenklatur

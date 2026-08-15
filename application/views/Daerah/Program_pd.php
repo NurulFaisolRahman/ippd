@@ -3,16 +3,13 @@
 
 <style>
     /* ============================================================
-      STYLE PROGRAM PD - TABEL SEPERTI GAMBAR
+      STYLE PROGRAM PD - DENGAN OUTCOME & INDIKATOR
     ============================================================ */
     .filter-row { display:flex; align-items:flex-end; flex-wrap:wrap; gap:10px; }
     .filter-group { display:flex; flex-direction:column; align-items:flex-start; }
     .filter-group label { font-size:14px; margin-bottom:5px; }
     .filter-select { width:260px; font-size:14px; padding:5px 8px; }
     
-    /* ============================================================
-      TABEL UTAMA
-    ============================================================ */
     .program-table {
         width: 100%;
         border-collapse: collapse;
@@ -33,159 +30,86 @@
         vertical-align: middle;
         text-align: center;
     }
-    .program-table .text-left {
-        text-align: left;
-        padding-left: 8px;
-    }
-    .program-table .text-right {
-        text-align: right;
-        padding-right: 8px;
-    }
+    .program-table .text-left { text-align: left; padding-left: 8px; }
+    .program-table .text-right { text-align: right; padding-right: 8px; }
     
-    /* Warna berdasarkan level */
-    .program-table .row-urusan {
-        background: #f8f9fa;
-        font-weight: 600;
-    }
-    .program-table .row-urusan td {
-        border-bottom: 2px solid #007bff;
-    }
+    /* Warna level */
+    .program-table .row-urusan { background: #f8f9fa; font-weight: 600; }
+    .program-table .row-urusan td { border-bottom: 2px solid #007bff; }
     .program-table .row-urusan .badge-urusan {
-        background: #007bff;
-        color: #fff;
-        padding: 2px 8px;
-        border-radius: 10px;
-        font-size: 10px;
+        background: #007bff; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 10px;
     }
     .program-table .row-urusan .total-pagu-urusan {
-        color: #007bff;
-        font-weight: 700;
-        font-size: 11px;
+        color: #007bff; font-weight: 700; font-size: 11px;
     }
     
-    .program-table .row-bidang {
-        background: #fafbfc;
-    }
+    .program-table .row-bidang { background: #fafbfc; }
     .program-table .row-bidang .badge-bidang {
-        background: #28a745;
-        color: #fff;
-        padding: 2px 6px;
-        border-radius: 8px;
-        font-size: 9px;
+        background: #28a745; color: #fff; padding: 2px 6px; border-radius: 8px; font-size: 9px;
     }
-    .program-table .row-bidang .nama-bidang {
-        font-weight: 500;
-        color: #2c3e50;
-    }
+    .program-table .row-bidang .nama-bidang { font-weight: 500; color: #2c3e50; }
     .program-table .row-bidang .total-pagu-bidang {
-        color: #28a745;
-        font-weight: 700;
-        font-size: 11px;
+        color: #28a745; font-weight: 700; font-size: 11px;
     }
     
-    .program-table .row-program {
-        background: #fff;
-        border-left: 3px solid #17a2b8;
+    .program-table .row-program { 
+        background: #eef7ff; 
+        border-left: 3px solid #0d6efd;
+        border-bottom: 2px solid #0d6efd;
     }
     .program-table .row-program .badge-program {
-        background: #17a2b8;
-        color: #fff;
-        padding: 2px 6px;
-        border-radius: 8px;
-        font-size: 9px;
+        background: #0d6efd; color: #fff; padding: 2px 6px; border-radius: 8px; font-size: 9px;
     }
     .program-table .row-program .nama-program {
-        font-weight: 500;
-        color: #1a5276;
-    }
-    .program-table .row-program .outcome-text {
-        font-size: 10px;
-        color: #1a5276;
-        font-weight: 400;
-        display: block;
-        margin-top: 3px;
-    }
-    .program-table .row-program .outcome-label {
-        background: #e8f0fe;
-        color: #1a5276;
-        padding: 1px 6px;
-        border-radius: 3px;
-        font-size: 8px;
-        margin-right: 3px;
+        font-weight: 600; color: #0b2b4a;
     }
     
-    .program-table .row-indikator {
-        background: #fafafa;
-        border-left: 3px solid #ffc107;
+    .program-table .row-outcome { 
+        background: #f0faf0; 
+        border-left: 3px solid #198754;
     }
+    .program-table .row-outcome .outcome-text {
+        font-weight: 500; color: #0a3622;
+        padding-left: 20px;
+    }
+    .program-table .row-outcome .badge-outcome {
+        background: #198754; color: #fff; padding: 2px 6px; border-radius: 8px; font-size: 9px;
+    }
+    
+    .program-table .row-indikator { background: #fff; border-left: 3px solid #ffc107; }
     .program-table .row-indikator .indikator-text {
-        font-weight: 400;
-        color: #2c3e50;
-        padding-left: 8px;
+        font-weight: 400; color: #2c3e50; padding-left: 8px;
     }
     
-    /* Pagu */
-    .program-table .pagu-col {
-        color: #1a5276;
-        font-weight: 500;
-        font-size: 10px;
-    }
+    .program-table .pagu-col { color: #1a5276; font-weight: 500; font-size: 10px; }
     
-    /* Badge PD */
     .program-table .badge-pd {
-        background: #e9ecef;
-        color: #495057;
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-size: 9px;
+        background: #e9ecef; color: #495057; padding: 2px 6px; border-radius: 4px; font-size: 9px;
         display: inline-block;
     }
-    .program-table .badge-empty {
-        color: #adb5bd;
-        font-size: 9px;
-    }
+    .program-table .badge-empty { color: #adb5bd; font-size: 9px; }
     
-    /* Aksi */
-    .program-table .col-aksi {
-        text-align: center;
-        vertical-align: middle;
-        min-width: 80px;
-    }
-    .program-table .btn-aksi {
-        padding: 1px 4px;
-        font-size: 9px;
-        margin: 1px;
-        border: none;
-        border-radius: 3px;
-    }
-    .program-table .btn-group-aksi {
-        display: inline-flex;
-        gap: 1px;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
+    .program-table .col-aksi { text-align: center; vertical-align: middle; min-width: 80px; }
+    .program-table .btn-aksi { padding: 1px 4px; font-size: 9px; margin: 1px; border: none; border-radius: 3px; }
+    .program-table .btn-group-aksi { display: inline-flex; gap: 1px; flex-wrap: wrap; justify-content: center; }
     
-    /* Level indent */
+    /* Indentasi */
     .level-urusan { padding-left: 5px; }
     .level-bidang { padding-left: 25px; }
     .level-program { padding-left: 45px; }
-    .level-indikator { padding-left: 65px; }
+    .level-outcome { padding-left: 45px; }
+    .level-indikator { padding-left: 45px; }
     
-    /* Warna border kiri */
     .border-urusan { border-left: 4px solid #007bff !important; }
     .border-bidang { border-left: 4px solid #28a745 !important; }
-    .border-program { border-left: 4px solid #17a2b8 !important; }
+    .border-program { border-left: 4px solid #0d6efd !important; }
+    .border-outcome { border-left: 4px solid #198754 !important; }
     .border-indikator { border-left: 4px solid #ffc107 !important; }
-    
-    /* ============================================================
-      MODAL FIXED
-    ============================================================ */
+
+    /* MODAL FIXED */
     .modal.fixed-modal {
         position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        top: 0; left: 0; right: 0; bottom: 0;
         z-index: 99999;
         background: rgba(0,0,0,0.6);
         display: none !important;
@@ -194,11 +118,7 @@
         align-items: center;
         justify-content: center;
     }
-
-    .modal.fixed-modal.show {
-        display: flex !important;
-    }
-
+    .modal.fixed-modal.show { display: flex !important; }
     .modal.fixed-modal .modal-dialog {
         margin: 0 auto;
         position: relative;
@@ -208,7 +128,6 @@
         display: flex;
         flex-direction: column;
     }
-
     .modal.fixed-modal .modal-content {
         max-height: calc(100vh - 40px);
         display: flex;
@@ -218,7 +137,6 @@
         background: #fff;
         position: relative;
     }
-
     .modal.fixed-modal .modal-header {
         flex-shrink: 0;
         border-radius: 8px 8px 0 0;
@@ -229,7 +147,6 @@
         top: 0;
         z-index: 10;
     }
-
     .modal.fixed-modal .modal-header .close {
         color: #fff;
         opacity: 0.8;
@@ -240,18 +157,13 @@
         border: none;
         padding: 0 10px;
     }
-
-    .modal.fixed-modal .modal-header .close:hover {
-        opacity: 1;
-    }
-
+    .modal.fixed-modal .modal-header .close:hover { opacity: 1; }
     .modal.fixed-modal .modal-body {
         flex: 1;
         overflow-y: auto;
         padding: 20px;
         max-height: calc(100vh - 200px);
     }
-
     .modal.fixed-modal .modal-footer {
         flex-shrink: 0;
         border-radius: 0 0 8px 8px;
@@ -262,46 +174,19 @@
         bottom: 0;
         z-index: 10;
     }
-
     .modal.fixed-modal .modal-dialog.modal-md { max-width: 600px; }
     .modal.fixed-modal .modal-dialog.modal-lg-custom { max-width: 95%; width: 95%; }
     .modal.fixed-modal .modal-dialog.modal-xl-custom { max-width: 98%; width: 98%; }
-
-    /* Animasi */
-    .modal.fixed-modal.show .modal-dialog {
-        animation: modalSlideIn 0.3s ease;
-    }
-
+    .modal.fixed-modal.show .modal-dialog { animation: modalSlideIn 0.3s ease; }
     @keyframes modalSlideIn {
-        from {
-            transform: translateY(-30px) scale(0.95);
-            opacity: 0;
-        }
-        to {
-            transform: translateY(0) scale(1);
-            opacity: 1;
-        }
+        from { transform: translateY(-30px) scale(0.95); opacity: 0; }
+        to { transform: translateY(0) scale(1); opacity: 1; }
     }
+    .modal.fixed-modal .modal-body::-webkit-scrollbar { width: 6px; }
+    .modal.fixed-modal .modal-body::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+    .modal.fixed-modal .modal-body::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
+    .modal.fixed-modal .modal-body::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
 
-    /* Scrollbar */
-    .modal.fixed-modal .modal-body::-webkit-scrollbar {
-        width: 6px;
-    }
-    .modal.fixed-modal .modal-body::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 3px;
-    }
-    .modal.fixed-modal .modal-body::-webkit-scrollbar-thumb {
-        background: #c1c1c1;
-        border-radius: 3px;
-    }
-    .modal.fixed-modal .modal-body::-webkit-scrollbar-thumb:hover {
-        background: #a8a8a8;
-    }
-
-    /* ============================================================
-      NOMENKLATUR STYLE
-    ============================================================ */
     .nomenklatur-container { padding: 10px 0; }
     .breadcrumb-nomenklatur {
         background: #f8f9fa;
@@ -312,66 +197,50 @@
         font-size: 13px;
     }
     .breadcrumb-nomenklatur .badge-path {
-        background: #007bff;
-        color: #fff;
-        padding: 3px 10px;
-        border-radius: 4px;
-        margin-right: 8px;
-        font-size: 11px;
+        background: #007bff; color: #fff; padding: 3px 10px; border-radius: 4px; margin-right: 8px; font-size: 11px;
     }
     .cascading-select { margin-bottom: 10px; }
     .cascading-select select { height: 38px; font-size: 13px; }
     .cascading-select label { font-weight: 600; font-size: 12px; color: #495057; margin-bottom: 3px; }
     .nomenklatur-info {
-        background: #e8f0fe;
-        padding: 10px 15px;
-        border-radius: 4px;
-        margin-top: 10px;
-        border-left: 3px solid #007bff;
-        display: none;
+        background: #e8f0fe; padding: 10px 15px; border-radius: 4px; margin-top: 10px;
+        border-left: 3px solid #007bff; display: none;
     }
     .nomenklatur-info strong { color: #1a5276; }
 
-    /* ============================================================
-      OUTCOME FIELD STYLE
-    ============================================================ */
-    .outcome-field {
-        margin-top: 15px;
+    /* OUTCOME & INDIKATOR DI MODAL */
+    .outcome-group {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 15px;
         margin-bottom: 15px;
+        position: relative;
     }
-    .outcome-field .outcome-label {
-        font-weight: 600;
-        color: #1a5276;
-        font-size: 14px;
+    .outcome-group .btn-remove-outcome {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        padding: 4px 12px;
+        font-size: 16px;
+        line-height: 1.2;
+        min-width: 30px;
+        min-height: 30px;
+        border-radius: 5px;
+        z-index: 10;
     }
-    .outcome-field .outcome-textarea {
-        resize: vertical;
-        min-height: 60px;
-        border-color: #17a2b8;
-        background: #f8f9fa;
+    .outcome-group .btn-remove-outcome:hover {
+        transform: scale(1.05);
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
     }
-    .outcome-field .outcome-textarea:focus {
-        border-color: #17a2b8;
-        box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25);
-    }
-    .outcome-field .help-text {
-        font-size: 11px;
-        color: #6c757d;
-        margin-top: 3px;
-    }
-
-    /* ============================================================
-      INDIKATOR ROW (TANPA OUTCOME)
-    ============================================================ */
     .indikator-row {
-        background: #f8f9fa;
+        background: #fff;
         padding: 30px 15px 10px 15px;
         border-radius: 5px;
         margin-bottom: 10px;
         border: 1px solid #dee2e6;
         position: relative;
     }
-
     .indikator-row .btn-remove-indikator {
         position: absolute;
         top: 8px;
@@ -384,47 +253,24 @@
         border-radius: 5px;
         z-index: 10;
     }
-
     .indikator-row .btn-remove-indikator:hover {
         transform: scale(1.05);
         box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
     }
-
-    .indikator-row .row:first-child {
-        margin-right: 50px;
-    }
-
+    .indikator-row .row:first-child { margin-right: 50px; }
     .indikator-row .form-group { margin-bottom: 5px; }
     .indikator-row .form-control-sm { font-size: 12px; height: 30px; padding: 2px 8px; }
     .indikator-row textarea.form-control-sm { height: 38px; resize: vertical; }
+    .outcome-group .outcome-textarea { resize: vertical; min-height: 50px; }
 
-    /* ============================================================
-      BUTTON GROUP & EMPTY STATE
-    ============================================================ */
-    .btn-group-center {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 15px;
-        margin-top: 20px;
-        padding: 10px 0;
-    }
+    .btn-group-center { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px; padding: 10px 0; }
     .btn-group-center .btn { min-width: 120px; }
-
-    .empty-state {
-        text-align: center;
-        padding: 40px 20px;
-        color: #6c757d;
-    }
+    .empty-state { text-align: center; padding: 40px 20px; color: #6c757d; }
     .empty-state .icon { font-size: 48px; margin-bottom: 15px; color: #dee2e6; }
     .empty-state h5 { color: #495057; }
-
     .table-scroll { overflow-x: auto; margin-top: 5px; }
     .table-scroll .program-table { min-width: 1400px; }
 
-    /* ============================================================
-      RESPONSIVE
-    ============================================================ */
     @media (max-width: 768px) {
         .filter-row { flex-direction:column; gap:15px; }
         .filter-select { width:100%; }
@@ -437,23 +283,60 @@
         .level-urusan { padding-left: 3px; }
         .level-bidang { padding-left: 15px; }
         .level-program { padding-left: 30px; }
-        .level-indikator { padding-left: 45px; }
+        .level-outcome { padding-left: 30px; }
+        .level-indikator { padding-left: 30px; }
         .modal.fixed-modal { padding: 10px; }
         .modal.fixed-modal .modal-dialog { max-height: calc(100vh - 20px); }
         .modal.fixed-modal .modal-content { max-height: calc(100vh - 20px); }
         .modal.fixed-modal .modal-body { max-height: calc(100vh - 160px); padding: 15px; }
         .indikator-row .btn-remove-indikator {
-            padding: 4px 10px;
-            font-size: 14px;
-            min-width: 30px;
-            min-height: 30px;
+            padding: 4px 10px; font-size: 14px; min-width: 30px; min-height: 30px;
         }
-        .indikator-row .row:first-child {
-            margin-right: 40px;
+        .indikator-row .row:first-child { margin-right: 40px; }
+        .outcome-group .btn-remove-outcome {
+            padding: 4px 10px; font-size: 14px; min-width: 30px; min-height: 30px;
         }
-        .outcome-field .outcome-textarea {
-            min-height: 40px;
-        }
+    }
+    
+    /* Style untuk program dan outcome dalam satu kolom */
+    .program-outcome-cell {
+        text-align: left;
+        padding: 4px 8px;
+    }
+    .program-name {
+        font-weight: 600;
+        color: #0b2b4a;
+        display: block;
+    }
+    .outcome-name {
+        font-weight: 500;
+        color: #0a3622;
+        display: block;
+        padding-left: 0px;
+    }
+    .badge-outcome-sm {
+        background: #198754; 
+        color: #fff; 
+        padding: 1px 6px; 
+        border-radius: 8px; 
+        font-size: 8px;
+        margin-right: 4px;
+    }
+    .badge-program-sm {
+        background: #0d6efd; 
+        color: #fff; 
+        padding: 1px 6px; 
+        border-radius: 8px; 
+        font-size: 8px;
+        margin-right: 4px;
+    }
+    .badge-indikator-sm {
+        background: #ffc107; 
+        color: #212529; 
+        padding: 1px 6px; 
+        border-radius: 8px; 
+        font-size: 8px;
+        margin-right: 4px;
     }
 </style>
 
@@ -462,12 +345,9 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-
                     <div class="data-table-list">
 
-                        <!-- ============================================================
-                            FILTER WILAYAH
-                        ============================================================ -->
+                        <!-- FILTER WILAYAH -->
                         <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
                             <div class="form-example-wrap" style="margin-bottom: 20px;">
                                 <div class="form-example-int form-horizental">
@@ -479,15 +359,11 @@
                                                     <select class="form-control filter-select" id="Provinsi">
                                                         <option value="">Pilih Provinsi</option>
                                                         <?php foreach ($Provinsi as $prov) { ?>
-                                                            <option value="<?= html_escape($prov['Kode']) ?>"
-                                                                <?= (!empty($KodeWilayah) && substr($KodeWilayah, 0, 2) == $prov['Kode']) ? 'selected' : '' ?>>
-                                                                <?= html_escape($prov['Nama']) ?>
-                                                            </option>
+                                                            <option value="<?= html_escape($prov['Kode']) ?>" <?= (!empty($KodeWilayah) && substr($KodeWilayah, 0, 2) == $prov['Kode']) ? 'selected' : '' ?>><?= html_escape($prov['Nama']) ?></option>
                                                         <?php } ?>
                                                     </select>
                                                 </div>
                                             </div>
-
                                             <div class="col-lg-3 col-md-6">
                                                 <div class="filter-group">
                                                     <label for="KabKota"><b>Kab/Kota</b></label>
@@ -496,34 +372,24 @@
                                                     </select>
                                                 </div>
                                             </div>
-
                                             <div class="col-lg-2 col-md-6">
                                                 <div class="filter-group" style="margin-top: 28px;">
-                                                    <button class="btn btn-primary notika-btn-primary btn-block" id="Filter">
-                                                        <b>Filter</b>
-                                                    </button>
+                                                    <button class="btn btn-primary notika-btn-primary btn-block" id="Filter"><b>Filter</b></button>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
                             <?php if (!empty($KodeWilayah)) { ?>
-                                <?php
-                                    $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-                                    $nama_wilayah = $wilayah ? html_escape($wilayah['Nama']) : 'Wilayah Tidak Ditemukan';
-                                ?>
+                                <?php $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array(); ?>
                                 <div class="alert alert-info" style="margin-bottom: 20px;">
-                                    <strong>Wilayah terpilih:</strong> <?= $nama_wilayah ?>
+                                    <strong>Wilayah terpilih:</strong> <?= html_escape($wilayah['Nama'] ?? 'Wilayah Tidak Ditemukan') ?>
                                 </div>
                             <?php } ?>
                         <?php } ?>
-                        <!-- END FILTER -->
 
-                        <!-- ============================================================
-                            TOMBOL TAMBAH URUSAN
-                        ============================================================ -->
+                        <!-- TOMBOL TAMBAH URUSAN -->
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
@@ -534,23 +400,21 @@
                             </div>
                         </div>
 
-                        <!-- ============================================================
-                            TABEL DATA - PERANGKAT DAERAH HANYA 1 PER PROGRAM
-                        ============================================================ -->
+                        <!-- TABEL DATA -->
                         <div id="ListDataContainer">
                             <?php if (empty($ListData)) { ?>
                                 <div class="empty-state">
                                     <div class="icon">📋</div>
                                     <h5>Belum ada data</h5>
-                                    <p>Silakan tambahkan data terlebih dahulu</p>
+                                    <p>Silakan tambahkan data terlebih dahulu atau pilih wilayah yang benar.</p>
                                 </div>
                             <?php } else { ?>
                                 <div class="table-scroll">
                                     <table class="program-table">
                                         <thead>
                                             <tr>
-                                                <th style="width:15%;">BIDANG URUSAN / PROGRAM / OUTCOME</th>
-                                                <th style="width:12%;">INDIKATOR OUTCOME</th>
+                                                <th style="width:15%;">URUSAN / BIDANG / PROGRAM / OUTCOME</th>
+                                                <th style="width:10%;">INDIKATOR</th>
                                                 <th style="width:5%;">SATUAN</th>
                                                 <th style="width:7%;">KONDISI AWAL</th>
                                                 <th colspan="2" style="width:7%;">2026</th>
@@ -564,20 +428,12 @@
                                                 <?php } ?>
                                             </tr>
                                             <tr>
-                                                <th></th>
-                                                <th></th>
-                                                <th></th>
-                                                <th></th>
-                                                <th>TARGET</th>
-                                                <th>PAGU</th>
-                                                <th>TARGET</th>
-                                                <th>PAGU</th>
-                                                <th>TARGET</th>
-                                                <th>PAGU</th>
-                                                <th>TARGET</th>
-                                                <th>PAGU</th>
-                                                <th>TARGET</th>
-                                                <th>PAGU</th>
+                                                <th></th><th></th><th></th><th></th>
+                                                <th>TARGET</th><th>PAGU</th>
+                                                <th>TARGET</th><th>PAGU</th>
+                                                <th>TARGET</th><th>PAGU</th>
+                                                <th>TARGET</th><th>PAGU</th>
+                                                <th>TARGET</th><th>PAGU</th>
                                                 <th></th>
                                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                                                     <th class="col-aksi"></th>
@@ -586,29 +442,26 @@
                                         </thead>
                                         <tbody>
                                             <?php 
-                                            foreach ($ListData as $urusan) { 
+                                            foreach ($ListData as $urusan) {
                                                 $hasBidang = !empty($urusan['bidang']);
                                                 
-                                                // HITUNG TOTAL PAGU URUSAN
-                                                $urusanTotal = [
-                                                    '2026' => 0,
-                                                    '2027' => 0,
-                                                    '2028' => 0,
-                                                    '2029' => 0,
-                                                    '2030' => 0
-                                                ];
-                                                
+                                                // Hitung total pagu urusan
+                                                $urusanTotal = ['2026'=>0,'2027'=>0,'2028'=>0,'2029'=>0,'2030'=>0];
                                                 if ($hasBidang) {
                                                     foreach ($urusan['bidang'] as $bidang) {
                                                         if (!empty($bidang['program'])) {
                                                             foreach ($bidang['program'] as $program) {
-                                                                if (!empty($program['indikator'])) {
-                                                                    foreach ($program['indikator'] as $ind) {
-                                                                        $urusanTotal['2026'] += (float)($ind['pagu_2026'] ?? 0);
-                                                                        $urusanTotal['2027'] += (float)($ind['pagu_2027'] ?? 0);
-                                                                        $urusanTotal['2028'] += (float)($ind['pagu_2028'] ?? 0);
-                                                                        $urusanTotal['2029'] += (float)($ind['pagu_2029'] ?? 0);
-                                                                        $urusanTotal['2030'] += (float)($ind['pagu_2030'] ?? 0);
+                                                                if (!empty($program['outcomes'])) {
+                                                                    foreach ($program['outcomes'] as $outcome) {
+                                                                        if (!empty($outcome['indikators'])) {
+                                                                            foreach ($outcome['indikators'] as $ind) {
+                                                                                $urusanTotal['2026'] += (float)($ind['pagu_2026'] ?? 0);
+                                                                                $urusanTotal['2027'] += (float)($ind['pagu_2027'] ?? 0);
+                                                                                $urusanTotal['2028'] += (float)($ind['pagu_2028'] ?? 0);
+                                                                                $urusanTotal['2029'] += (float)($ind['pagu_2029'] ?? 0);
+                                                                                $urusanTotal['2030'] += (float)($ind['pagu_2030'] ?? 0);
+                                                                            }
+                                                                        }
                                                                     }
                                                                 }
                                                             }
@@ -616,379 +469,231 @@
                                                     }
                                                 }
                                             ?>
-                                                <!-- ============================================================
-                                                    ROW URUSAN
-                                                ============================================================ -->
+                                                <!-- ROW URUSAN -->
                                                 <tr class="row-urusan border-urusan">
                                                     <td class="text-left level-urusan" colspan="2">
-                                                        <span class="badge-urusan">
-                                                            <?= html_escape($urusan['kode_urusan']) ?>
-                                                        </span>
-                                                        <strong>
-                                                            <?= html_escape($urusan['nama_urusan']) ?>
-                                                        </strong>
+                                                        <span class="badge-urusan"><?= html_escape($urusan['kode_urusan']) ?></span>
+                                                        <strong><?= html_escape($urusan['nama_urusan']) ?></strong>
                                                     </td>
-
-                                                    <!-- SATUAN -->
+                                                    <td></td><td></td>
+                                                    <td></td><td class="pagu-col total-pagu-urusan"><?= $urusanTotal['2026'] > 0 ? number_format($urusanTotal['2026'],0,',','.') : '-' ?></td>
+                                                    <td></td><td class="pagu-col total-pagu-urusan"><?= $urusanTotal['2027'] > 0 ? number_format($urusanTotal['2027'],0,',','.') : '-' ?></td>
+                                                    <td></td><td class="pagu-col total-pagu-urusan"><?= $urusanTotal['2028'] > 0 ? number_format($urusanTotal['2028'],0,',','.') : '-' ?></td>
+                                                    <td></td><td class="pagu-col total-pagu-urusan"><?= $urusanTotal['2029'] > 0 ? number_format($urusanTotal['2029'],0,',','.') : '-' ?></td>
+                                                    <td></td><td class="pagu-col total-pagu-urusan"><?= $urusanTotal['2030'] > 0 ? number_format($urusanTotal['2030'],0,',','.') : '-' ?></td>
                                                     <td></td>
-
-                                                    <!-- KONDISI AWAL -->
-                                                    <td></td>
-                                                    <!-- 2026 -->
-                                                    <td></td>
-                                                    <td class="pagu-col total-pagu-urusan">
-                                                        <?= $urusanTotal['2026'] > 0
-                                                            ? number_format($urusanTotal['2026'], 0, ',', '.')
-                                                            : '-' ?>
-                                                    </td>
-
-                                                    <!-- 2027 -->
-                                                    <td></td>
-                                                    <td class="pagu-col total-pagu-urusan">
-                                                        <?= $urusanTotal['2027'] > 0
-                                                            ? number_format($urusanTotal['2027'], 0, ',', '.')
-                                                            : '-' ?>
-                                                    </td>
-
-                                                    <!-- 2028 -->
-                                                    <td></td>
-                                                    <td class="pagu-col total-pagu-urusan">
-                                                        <?= $urusanTotal['2028'] > 0
-                                                            ? number_format($urusanTotal['2028'], 0, ',', '.')
-                                                            : '-' ?>
-                                                    </td>
-
-                                                    <!-- 2029 -->
-                                                    <td></td>
-                                                    <td class="pagu-col total-pagu-urusan">
-                                                        <?= $urusanTotal['2029'] > 0
-                                                            ? number_format($urusanTotal['2029'], 0, ',', '.')
-                                                            : '-' ?>
-                                                    </td>
-
-                                                    <!-- 2030 -->
-                                                    <td></td>
-                                                    <td class="pagu-col total-pagu-urusan">
-                                                        <?= $urusanTotal['2030'] > 0
-                                                            ? number_format($urusanTotal['2030'], 0, ',', '.')
-                                                            : '-' ?>
-                                                    </td>
-
-                                                    <!-- PERANGKAT DAERAH -->
-                                                    <td></td>
-
-                                                    <!-- AKSI -->
                                                     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                                                         <td class="col-aksi">
                                                             <div class="btn-group-aksi">
-                                                                <button class="btn btn-sm btn-success btn-aksi BtnTambahBidang"
-                                                                    data-urusan-id="<?= $urusan['id'] ?>"
-                                                                    data-kode-urusan="<?= html_escape($urusan['kode_urusan']) ?>"
-                                                                    data-nama-urusan="<?= html_escape($urusan['nama_urusan']) ?>"
-                                                                    title="Tambah Bidang">
-                                                                    <i class="notika-icon bi-plus-lg"></i>
-                                                                </button>
-
-                                                                <button class="btn btn-sm btn-warning btn-aksi BtnEditUrusan"
-                                                                    data-id="<?= $urusan['id'] ?>"
-                                                                    data-kode="<?= html_escape($urusan['kode_urusan']) ?>"
-                                                                    data-nama="<?= html_escape($urusan['nama_urusan']) ?>"
-                                                                    title="Edit Urusan">
-                                                                    <i class="notika-icon notika-edit"></i>
-                                                                </button>
-
-                                                                <button class="btn btn-sm btn-danger btn-aksi BtnHapusUrusan"
-                                                                    data-id="<?= $urusan['id'] ?>"
-                                                                    title="Hapus Urusan">
-                                                                    <i class="notika-icon notika-trash"></i>
-                                                                </button>
+                                                                <button class="btn btn-sm btn-success btn-aksi BtnTambahBidang" data-urusan-id="<?= $urusan['id'] ?>" data-kode-urusan="<?= html_escape($urusan['kode_urusan']) ?>" data-nama-urusan="<?= html_escape($urusan['nama_urusan']) ?>" title="Tambah Bidang"><i class="notika-icon bi-plus-lg"></i></button>
+                                                                <button class="btn btn-sm btn-warning btn-aksi BtnEditUrusan" data-id="<?= $urusan['id'] ?>" data-kode="<?= html_escape($urusan['kode_urusan']) ?>" data-nama="<?= html_escape($urusan['nama_urusan']) ?>" title="Edit Urusan"><i class="notika-icon notika-edit"></i></button>
+                                                                <button class="btn btn-sm btn-danger btn-aksi BtnHapusUrusan" data-id="<?= $urusan['id'] ?>" title="Hapus Urusan"><i class="notika-icon notika-trash"></i></button>
                                                             </div>
                                                         </td>
                                                     <?php } ?>
                                                 </tr>
 
-                                                <!-- ============================================================
-                                                    BIDANG URUSAN
-                                                ============================================================ -->
                                                 <?php if ($hasBidang) { ?>
-                                                    <?php foreach ($urusan['bidang'] as $bidang) { ?>
-                                                        <?php 
+                                                    <?php foreach ($urusan['bidang'] as $bidang) { 
                                                         $hasProgram = !empty($bidang['program']);
-                                                        
-                                                        // HITUNG TOTAL PAGU BIDANG
-                                                        $bidangTotal = [
-                                                            '2026' => 0,
-                                                            '2027' => 0,
-                                                            '2028' => 0,
-                                                            '2029' => 0,
-                                                            '2030' => 0
-                                                        ];
-                                                        
+                                                        $bidangTotal = ['2026'=>0,'2027'=>0,'2028'=>0,'2029'=>0,'2030'=>0];
                                                         if ($hasProgram) {
                                                             foreach ($bidang['program'] as $program) {
-                                                                if (!empty($program['indikator'])) {
-                                                                    foreach ($program['indikator'] as $ind) {
-                                                                        $bidangTotal['2026'] += (float)($ind['pagu_2026'] ?? 0);
-                                                                        $bidangTotal['2027'] += (float)($ind['pagu_2027'] ?? 0);
-                                                                        $bidangTotal['2028'] += (float)($ind['pagu_2028'] ?? 0);
-                                                                        $bidangTotal['2029'] += (float)($ind['pagu_2029'] ?? 0);
-                                                                        $bidangTotal['2030'] += (float)($ind['pagu_2030'] ?? 0);
+                                                                if (!empty($program['outcomes'])) {
+                                                                    foreach ($program['outcomes'] as $outcome) {
+                                                                        if (!empty($outcome['indikators'])) {
+                                                                            foreach ($outcome['indikators'] as $ind) {
+                                                                                $bidangTotal['2026'] += (float)($ind['pagu_2026'] ?? 0);
+                                                                                $bidangTotal['2027'] += (float)($ind['pagu_2027'] ?? 0);
+                                                                                $bidangTotal['2028'] += (float)($ind['pagu_2028'] ?? 0);
+                                                                                $bidangTotal['2029'] += (float)($ind['pagu_2029'] ?? 0);
+                                                                                $bidangTotal['2030'] += (float)($ind['pagu_2030'] ?? 0);
+                                                                            }
+                                                                        }
                                                                     }
                                                                 }
                                                             }
                                                         }
-                                                        ?>
+                                                    ?>
+                                                        <!-- ROW BIDANG -->
                                                         <tr class="row-bidang border-bidang">
                                                             <td class="text-left level-bidang" colspan="2">
-                                                                <span class="badge-bidang">
-                                                                    <?= html_escape($bidang['kode_bidang']) ?>
-                                                                </span>
-                                                                <span class="nama-bidang">
-                                                                    <?= html_escape($bidang['nama_bidang']) ?>
-                                                                </span>
+                                                                <span class="badge-bidang"><?= html_escape($bidang['kode_bidang']) ?></span>
+                                                                <span class="nama-bidang"><?= html_escape($bidang['nama_bidang']) ?></span>
                                                             </td>
-
-                                                            <!-- SATUAN -->
+                                                            <td></td><td></td>
+                                                            <td></td><td class="pagu-col total-pagu-bidang"><?= $bidangTotal['2026'] > 0 ? number_format($bidangTotal['2026'],0,',','.') : '-' ?></td>
+                                                            <td></td><td class="pagu-col total-pagu-bidang"><?= $bidangTotal['2027'] > 0 ? number_format($bidangTotal['2027'],0,',','.') : '-' ?></td>
+                                                            <td></td><td class="pagu-col total-pagu-bidang"><?= $bidangTotal['2028'] > 0 ? number_format($bidangTotal['2028'],0,',','.') : '-' ?></td>
+                                                            <td></td><td class="pagu-col total-pagu-bidang"><?= $bidangTotal['2029'] > 0 ? number_format($bidangTotal['2029'],0,',','.') : '-' ?></td>
+                                                            <td></td><td class="pagu-col total-pagu-bidang"><?= $bidangTotal['2030'] > 0 ? number_format($bidangTotal['2030'],0,',','.') : '-' ?></td>
                                                             <td></td>
-
-                                                            <!-- KONDISI AWAL -->
-                                                            <td></td>
-                                                            <!-- 2026 -->
-                                                            <td></td>
-                                                            <td class="pagu-col total-pagu-bidang">
-                                                                <?= $bidangTotal['2026'] > 0
-                                                                    ? number_format($bidangTotal['2026'], 0, ',', '.')
-                                                                    : '-' ?>
-                                                            </td>
-
-                                                            <!-- 2027 -->
-                                                            <td></td>
-                                                            <td class="pagu-col total-pagu-bidang">
-                                                                <?= $bidangTotal['2027'] > 0
-                                                                    ? number_format($bidangTotal['2027'], 0, ',', '.')
-                                                                    : '-' ?>
-                                                            </td>
-
-                                                            <!-- 2028 -->
-                                                            <td></td>
-                                                            <td class="pagu-col total-pagu-bidang">
-                                                                <?= $bidangTotal['2028'] > 0
-                                                                    ? number_format($bidangTotal['2028'], 0, ',', '.')
-                                                                    : '-' ?>
-                                                            </td>
-
-                                                            <!-- 2029 -->
-                                                            <td></td>
-                                                            <td class="pagu-col total-pagu-bidang">
-                                                                <?= $bidangTotal['2029'] > 0
-                                                                    ? number_format($bidangTotal['2029'], 0, ',', '.')
-                                                                    : '-' ?>
-                                                            </td>
-
-                                                            <!-- 2030 -->
-                                                            <td></td>
-                                                            <td class="pagu-col total-pagu-bidang">
-                                                                <?= $bidangTotal['2030'] > 0
-                                                                    ? number_format($bidangTotal['2030'], 0, ',', '.')
-                                                                    : '-' ?>
-                                                            </td>
-
-                                                            <!-- PERANGKAT DAERAH -->
-                                                            <td></td>
-
-                                                            <!-- AKSI -->
                                                             <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                                                                 <td class="col-aksi">
                                                                     <div class="btn-group-aksi">
-                                                                        <button class="btn btn-sm btn-info btn-aksi BtnTambahProgram"
-                                                                            data-bidang-id="<?= $bidang['id'] ?>"
-                                                                            data-kode-bidang="<?= html_escape($bidang['kode_bidang']) ?>"
-                                                                            data-nama-bidang="<?= html_escape($bidang['nama_bidang']) ?>"
-                                                                            data-urusan-id="<?= $urusan['id'] ?>"
-                                                                            title="Tambah Program">
-                                                                            <i class="notika-icon bi-plus-lg"></i>
-                                                                        </button>
-
-                                                                        <button class="btn btn-sm btn-warning btn-aksi BtnEditBidang"
-                                                                            data-id="<?= $bidang['id'] ?>"
-                                                                            data-urusan-id="<?= $urusan['id'] ?>"
-                                                                            data-kode="<?= html_escape($bidang['kode_bidang']) ?>"
-                                                                            data-nama="<?= html_escape($bidang['nama_bidang']) ?>"
-                                                                            title="Edit Bidang">
-                                                                            <i class="notika-icon notika-edit"></i>
-                                                                        </button>
-
-                                                                        <button class="btn btn-sm btn-danger btn-aksi BtnHapusBidang"
-                                                                            data-id="<?= $bidang['id'] ?>"
-                                                                            title="Hapus Bidang">
-                                                                            <i class="notika-icon notika-trash"></i>
-                                                                        </button>
+                                                                        <button class="btn btn-sm btn-info btn-aksi BtnTambahProgram" data-bidang-id="<?= $bidang['id'] ?>" data-kode-bidang="<?= html_escape($bidang['kode_bidang']) ?>" data-nama-bidang="<?= html_escape($bidang['nama_bidang']) ?>" data-urusan-id="<?= $urusan['id'] ?>" title="Tambah Program"><i class="notika-icon bi-plus-lg"></i></button>
+                                                                        <button class="btn btn-sm btn-warning btn-aksi BtnEditBidang" data-id="<?= $bidang['id'] ?>" data-urusan-id="<?= $urusan['id'] ?>" data-kode="<?= html_escape($bidang['kode_bidang']) ?>" data-nama="<?= html_escape($bidang['nama_bidang']) ?>" title="Edit Bidang"><i class="notika-icon notika-edit"></i></button>
+                                                                        <button class="btn btn-sm btn-danger btn-aksi BtnHapusBidang" data-id="<?= $bidang['id'] ?>" title="Hapus Bidang"><i class="notika-icon notika-trash"></i></button>
                                                                     </div>
                                                                 </td>
                                                             <?php } ?>
                                                         </tr>
 
-                                                        <!-- ============================================================
-                                                            PROGRAM + INDIKATOR - PERANGKAT DAERAH HANYA 1 PER PROGRAM
-                                                        ============================================================ -->
                                                         <?php if ($hasProgram) { ?>
-                                                            <?php foreach ($bidang['program'] as $program) { ?>
-                                                                <?php 
-                                                                $indikatorList = $program['indikator'] ?? [];
-                                                                $indikatorCount = count($indikatorList);
-                                                                $rowspan = max($indikatorCount, 1);
-                                                                $hasOutcome = !empty($program['outcome']);
+                                                            <?php foreach ($bidang['program'] as $program) { 
+                                                                $outcomes = $program['outcomes'] ?? [];
                                                                 
-                                                                // AMBIL PERANGKAT DAERAH DARI INDIKATOR PERTAMA
-                                                                $pdNama = '';
-                                                                $pdId = '';
-                                                                if (!empty($indikatorList[0]['perangkat_daerah_nama'])) {
-                                                                    $pdNama = $indikatorList[0]['perangkat_daerah_nama'];
-                                                                    $pdId = $indikatorList[0]['perangkat_daerah_id'] ?? '';
+                                                                // Hitung total indikator
+                                                                $totalIndikator = 0;
+                                                                $firstOutcomePdId = null;
+                                                                $firstOutcomePdName = null;
+                                                                
+                                                                foreach ($outcomes as $out) {
+                                                                    $totalIndikator += count($out['indikators'] ?? []);
                                                                 }
                                                                 
-                                                                if ($indikatorCount > 0) {
-                                                                    $firstIndikator = $indikatorList[0];
-                                                                ?>
-                                                                    <!-- PROGRAM + INDIKATOR PERTAMA -->
-                                                                    <tr class="row-program border-program">
-                                                                        <td class="text-left level-program" style="padding-left:45px;" rowspan="<?= $rowspan ?>">
-                                                                            <?php if (!empty($program['kode_program'])) { ?>
-                                                                                <span class="badge-program"><?= html_escape($program['kode_program']) ?></span>
-                                                                            <?php } ?>
-                                                                            <span class="nama-program"><?= html_escape($program['nama_program']) ?></span>
-                                                                            <?php if ($hasOutcome) { ?>
-                                                                                <small class="outcome-text">
-                                                                                    <span class="outcome-label">Outcome:</span>
-                                                                                    <?= html_escape($program['outcome']) ?>
-                                                                                </small>
-                                                                            <?php } ?>
-                                                                        </td>
-                                                                        
-                                                                        <td class="indikator-text" style="text-align:left; padding-left:5px;">
-                                                                            <?= html_escape($firstIndikator['indikator'] ?? '-') ?>
-                                                                        </td>
-                                                                        <td><?= html_escape($firstIndikator['satuan'] ?? '-') ?></td>
-                                                                        <td><?= html_escape($firstIndikator['kondisi_awal'] ?? '-') ?></td>
-                                                                        <td><?= html_escape($firstIndikator['target_2026'] ?? '-') ?></td>
-                                                                        <td class="pagu-col"><?= !empty($firstIndikator['pagu_2026']) ? number_format($firstIndikator['pagu_2026'], 0, ',', '.') : '-' ?></td>
-                                                                        <td><?= html_escape($firstIndikator['target_2027'] ?? '-') ?></td>
-                                                                        <td class="pagu-col"><?= !empty($firstIndikator['pagu_2027']) ? number_format($firstIndikator['pagu_2027'], 0, ',', '.') : '-' ?></td>
-                                                                        <td><?= html_escape($firstIndikator['target_2028'] ?? '-') ?></td>
-                                                                        <td class="pagu-col"><?= !empty($firstIndikator['pagu_2028']) ? number_format($firstIndikator['pagu_2028'], 0, ',', '.') : '-' ?></td>
-                                                                        <td><?= html_escape($firstIndikator['target_2029'] ?? '-') ?></td>
-                                                                        <td class="pagu-col"><?= !empty($firstIndikator['pagu_2029']) ? number_format($firstIndikator['pagu_2029'], 0, ',', '.') : '-' ?></td>
-                                                                        <td><?= html_escape($firstIndikator['target_2030'] ?? '-') ?></td>
-                                                                        <td class="pagu-col"><?= !empty($firstIndikator['pagu_2030']) ? number_format($firstIndikator['pagu_2030'], 0, ',', '.') : '-' ?></td>
-                                                                        
-                                                                        <!-- PERANGKAT DAERAH - HANYA 1 PER PROGRAM (ROWSPAN) -->
-                                                                        <td class="pd-col" rowspan="<?= $rowspan ?>">
-                                                                            <?php if (!empty($pdNama)) { ?>
-                                                                                <span class="badge-pd"><?= html_escape($pdNama) ?></span>
-                                                                            <?php } else { ?>
-                                                                                <span class="badge-empty">-</span>
-                                                                            <?php } ?>
-                                                                        </td>
-
-                                                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                                                            <td class="col-aksi" rowspan="<?= $rowspan ?>">
-                                                                                <div class="btn-group-aksi">
-                                                                                    <button class="btn btn-sm btn-success btn-aksi BtnEditProgram" 
-                                                                                            data-id="<?= $program['id'] ?>"
-                                                                                            data-bidang-id="<?= $bidang['id'] ?>"
-                                                                                            data-kode="<?= html_escape($program['kode_program'] ?? '') ?>"
-                                                                                            data-nama="<?= html_escape($program['nama_program']) ?>"
-                                                                                            data-outcome="<?= html_escape($program['outcome'] ?? '') ?>"
-                                                                                            title="Edit Program">
-                                                                                        <i class="notika-icon notika-edit"></i>
-                                                                                    </button>
-                                                                                    <button class="btn btn-sm btn-danger btn-aksi BtnHapusProgram" 
-                                                                                            data-id="<?= $program['id'] ?>"
-                                                                                            title="Hapus Program">
-                                                                                        <i class="notika-icon notika-trash"></i>
-                                                                                    </button>
-                                                                                </div>
-                                                                            </td>
-                                                                        <?php } ?>
-                                                                    </tr>
-                                                                    
-                                                                    <!-- INDIKATOR SELANJUTNYA (TANPA PERANGKAT DAERAH) -->
-                                                                    <?php for ($i = 1; $i < $indikatorCount; $i++) { 
-                                                                        $ind = $indikatorList[$i];
+                                                                // Jika tidak ada indikator sama sekali
+                                                                if ($totalIndikator == 0) {
                                                                     ?>
-                                                                        <tr class="row-indikator border-indikator">
-                                                                            <td class="indikator-text" style="text-align:left; padding-left:5px;">
-                                                                                <?= html_escape($ind['indikator'] ?? '-') ?>
-                                                                            </td>
-                                                                            <td><?= html_escape($ind['satuan'] ?? '-') ?></td>
-                                                                            <td><?= html_escape($ind['kondisi_awal'] ?? '-') ?></td>
-                                                                            <td><?= html_escape($ind['target_2026'] ?? '-') ?></td>
-                                                                            <td class="pagu-col"><?= !empty($ind['pagu_2026']) ? number_format($ind['pagu_2026'], 0, ',', '.') : '-' ?></td>
-                                                                            <td><?= html_escape($ind['target_2027'] ?? '-') ?></td>
-                                                                            <td class="pagu-col"><?= !empty($ind['pagu_2027']) ? number_format($ind['pagu_2027'], 0, ',', '.') : '-' ?></td>
-                                                                            <td><?= html_escape($ind['target_2028'] ?? '-') ?></td>
-                                                                            <td class="pagu-col"><?= !empty($ind['pagu_2028']) ? number_format($ind['pagu_2028'], 0, ',', '.') : '-' ?></td>
-                                                                            <td><?= html_escape($ind['target_2029'] ?? '-') ?></td>
-                                                                            <td class="pagu-col"><?= !empty($ind['pagu_2029']) ? number_format($ind['pagu_2029'], 0, ',', '.') : '-' ?></td>
-                                                                            <td><?= html_escape($ind['target_2030'] ?? '-') ?></td>
-                                                                            <td class="pagu-col"><?= !empty($ind['pagu_2030']) ? number_format($ind['pagu_2030'], 0, ',', '.') : '-' ?></td>
-                                                                            <!-- KOSONGKAN KOLOM PERANGKAT DAERAH UNTUK INDIKATOR LAINNYA -->
-                                                                            
-                                                                        </tr>
-                                                                    <?php } ?>
-                                                                    
-                                                                <?php } else { 
-                                                                    // PROGRAM TANPA INDIKATOR
-                                                                ?>
                                                                     <tr class="row-program border-program">
                                                                         <td class="text-left level-program" style="padding-left:45px;">
                                                                             <?php if (!empty($program['kode_program'])) { ?>
                                                                                 <span class="badge-program"><?= html_escape($program['kode_program']) ?></span>
                                                                             <?php } ?>
                                                                             <span class="nama-program"><?= html_escape($program['nama_program']) ?></span>
-                                                                            <?php if ($hasOutcome) { ?>
-                                                                                <small class="outcome-text">
-                                                                                    <span class="outcome-label">Outcome:</span>
-                                                                                    <?= html_escape($program['outcome']) ?>
-                                                                                </small>
-                                                                            <?php } ?>
                                                                         </td>
-                                                                        <!-- KOSONGKAN SEMUA KOLOM INDIKATOR -->
-                                                                        <td colspan="13" style="text-align:center;"></td>
-                                                                        <td>
-                                                                            <?php if (!empty($pdNama)) { ?>
-                                                                                <span class="badge-pd"><?= html_escape($pdNama) ?></span>
-                                                                            <?php } else { ?>
-                                                                                <span class="badge-empty">-</span>
-                                                                            <?php } ?>
-                                                                        </td>
+                                                                        <td colspan="13" style="text-align:center; color:#999;">Tidak ada outcome/indikator</td>
+                                                                        <td><span class="badge-empty">-</span></td>
                                                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                                                                             <td class="col-aksi">
                                                                                 <div class="btn-group-aksi">
-                                                                                    <button class="btn btn-sm btn-success btn-aksi BtnEditProgram" 
-                                                                                            data-id="<?= $program['id'] ?>"
-                                                                                            data-bidang-id="<?= $bidang['id'] ?>"
-                                                                                            data-kode="<?= html_escape($program['kode_program'] ?? '') ?>"
-                                                                                            data-nama="<?= html_escape($program['nama_program']) ?>"
-                                                                                            data-outcome="<?= html_escape($program['outcome'] ?? '') ?>"
-                                                                                            title="Edit Program">
-                                                                                        <i class="notika-icon notika-edit"></i>
-                                                                                    </button>
-                                                                                    <button class="btn btn-sm btn-danger btn-aksi BtnHapusProgram" 
-                                                                                            data-id="<?= $program['id'] ?>"
-                                                                                            title="Hapus Program">
-                                                                                        <i class="notika-icon notika-trash"></i>
-                                                                                    </button>
+                                                                                    <button class="btn btn-sm btn-success btn-aksi BtnEditProgram" data-id="<?= $program['id'] ?>" data-bidang-id="<?= $bidang['id'] ?>" data-kode="<?= html_escape($program['kode_program'] ?? '') ?>" data-nama="<?= html_escape($program['nama_program']) ?>" title="Edit Program"><i class="notika-icon notika-edit"></i></button>
+                                                                                    <button class="btn btn-sm btn-danger btn-aksi BtnHapusProgram" data-id="<?= $program['id'] ?>" title="Hapus Program"><i class="notika-icon notika-trash"></i></button>
                                                                                 </div>
                                                                             </td>
                                                                         <?php } ?>
                                                                     </tr>
-                                                                <?php } ?>
-                                                            <?php } ?>
-                                                        <?php } ?>
-                                                    <?php } ?>
-                                                <?php } ?>
-                                            <?php } ?>
+                                                                    <?php
+                                                                    continue;
+                                                                }
+                                                                
+                                                                // Tampilkan PROGRAM hanya sekali (baris pertama)
+                                                                $isFirstOutcome = true;
+                                                                
+                                                                // Looping outcomes
+                                                                foreach ($outcomes as $outIndex => $outcome) {
+                                                                    $indikators = $outcome['indikators'] ?? [];
+                                                                    if (empty($indikators)) continue;
+                                                                    
+                                                                    // Ambil PD dari indikator pertama di outcome ini
+                                                                    $firstIndikator = $indikators[0];
+                                                                    $pdNama = !empty($firstIndikator['perangkat_daerah_nama']) ? $firstIndikator['perangkat_daerah_nama'] : '-';
+                                                                    $pdId = !empty($firstIndikator['perangkat_daerah_id']) ? $firstIndikator['perangkat_daerah_id'] : '';
+                                                                    
+                                                                    // Hitung rowspan untuk outcome ini = jumlah indikator dalam outcome ini
+                                                                    $outcomeRowspan = count($indikators);
+                                                                    
+                                                                    // Tampilkan baris OUTCOME + INDIKATOR PERTAMA
+                                                                    ?>
+                                                                    <tr class="row-outcome border-outcome">
+                                                                        <td class="text-left program-outcome-cell" style="padding-left:45px;">
+                                                                            <?php if ($isFirstOutcome) { ?>
+                                                                                <!-- Tampilkan Program hanya di baris outcome pertama -->
+                                                                                <?php if (!empty($program['kode_program'])) { ?>
+                                                                                    <span class="badge-program-sm"><?= html_escape($program['kode_program']) ?></span>
+                                                                                <?php } ?>
+                                                                                <span class="program-name"><?= html_escape($program['nama_program']) ?></span>
+                                                                            <?php } ?>
+                                                                            <!-- Tampilkan Outcome di bawah Program -->
+                                                                            <span class="outcome-name">
+                                                                                <span class="badge-outcome-sm">Outcome <?= $outIndex+1 ?></span>
+                                                                                <?= html_escape($outcome['outcome_text']) ?>
+                                                                            </span>
+                                                                        </td>
+                                                                        
+                                                                        <!-- Kolom INDIKATOR PERTAMA -->
+                                                                        <td class="indikator-text" style="text-align:left; padding-left:5px;">
+                                                                            <span class="badge-indikator-sm">Indikator 1</span>
+                                                                            <?= html_escape($firstIndikator['indikator'] ?? '-') ?>
+                                                                        </td>
+                                                                        <td><?= html_escape($firstIndikator['satuan'] ?? '-') ?></td>
+                                                                        <td><?= html_escape($firstIndikator['kondisi_awal'] ?? '-') ?></td>
+                                                                        <td><?= html_escape($firstIndikator['target_2026'] ?? '-') ?></td>
+                                                                        <td class="pagu-col"><?= !empty($firstIndikator['pagu_2026']) ? number_format($firstIndikator['pagu_2026'],0,',','.') : '-' ?></td>
+                                                                        <td><?= html_escape($firstIndikator['target_2027'] ?? '-') ?></td>
+                                                                        <td class="pagu-col"><?= !empty($firstIndikator['pagu_2027']) ? number_format($firstIndikator['pagu_2027'],0,',','.') : '-' ?></td>
+                                                                        <td><?= html_escape($firstIndikator['target_2028'] ?? '-') ?></td>
+                                                                        <td class="pagu-col"><?= !empty($firstIndikator['pagu_2028']) ? number_format($firstIndikator['pagu_2028'],0,',','.') : '-' ?></td>
+                                                                        <td><?= html_escape($firstIndikator['target_2029'] ?? '-') ?></td>
+                                                                        <td class="pagu-col"><?= !empty($firstIndikator['pagu_2029']) ? number_format($firstIndikator['pagu_2029'],0,',','.') : '-' ?></td>
+                                                                        <td><?= html_escape($firstIndikator['target_2030'] ?? '-') ?></td>
+                                                                        <td class="pagu-col"><?= !empty($firstIndikator['pagu_2030']) ? number_format($firstIndikator['pagu_2030'],0,',','.') : '-' ?></td>
+                                                                        
+                                                                        <!-- PERANGKAT DAERAH - HANYA 1 PER OUTCOME (ROWSPAN) -->
+                                                                        <td class="pd-col" rowspan="<?= $outcomeRowspan ?>">
+                                                                            <?php if (!empty($pdNama)) { ?>
+                                                                                <span class="badge-pd" data-pd-id="<?= $pdId ?>"><?= html_escape($pdNama) ?></span>
+                                                                            <?php } else { ?>
+                                                                                <span class="badge-empty">-</span>
+                                                                            <?php } ?>
+                                                                        </td>
+                                                                        
+                                                                        <!-- AKSI - HANYA DI OUTCOME PERTAMA (ROWSPAN) -->
+                                                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                                                                            <?php if ($isFirstOutcome) { ?>
+                                                                                <td class="col-aksi" rowspan="<?= $totalIndikator ?>">
+                                                                                    <div class="btn-group-aksi">
+                                                                                        <button class="btn btn-sm btn-success btn-aksi BtnEditProgram" data-id="<?= $program['id'] ?>" data-bidang-id="<?= $bidang['id'] ?>" data-kode="<?= html_escape($program['kode_program'] ?? '') ?>" data-nama="<?= html_escape($program['nama_program']) ?>" title="Edit Program"><i class="notika-icon notika-edit"></i></button>
+                                                                                        <button class="btn btn-sm btn-danger btn-aksi BtnHapusProgram" data-id="<?= $program['id'] ?>" title="Hapus Program"><i class="notika-icon notika-trash"></i></button>
+                                                                                    </div>
+                                                                                </td>
+                                                                            <?php } ?>
+                                                                        <?php } ?>
+                                                                    </tr>
+                                                                    
+                                                                    <?php
+                                                                    // Tampilkan sisa indikator dari outcome ini (jika ada) - TANPA PERANGKAT DAERAH
+                                                                    if (count($indikators) > 1) {
+                                                                        for ($i = 1; $i < count($indikators); $i++) {
+                                                                            $indikator = $indikators[$i];
+                                                                            ?>
+                                                                            <tr class="row-indikator border-indikator">
+                                                                                <td class="text-left" style="padding-left:65px;">
+                                                                                    <!-- Kosongkan kolom program/outcome untuk indikator tambahan -->
+                                                                                </td>
+                                                                                
+                                                                                <!-- Kolom INDIKATOR -->
+                                                                                <td class="indikator-text" style="text-align:left; padding-left:5px;">
+                                                                                    <span class="badge-indikator-sm">Indikator <?= $i+1 ?></span>
+                                                                                    <?= html_escape($indikator['indikator'] ?? '-') ?>
+                                                                                </td>
+                                                                                <td><?= html_escape($indikator['satuan'] ?? '-') ?></td>
+                                                                                <td><?= html_escape($indikator['kondisi_awal'] ?? '-') ?></td>
+                                                                                <td><?= html_escape($indikator['target_2026'] ?? '-') ?></td>
+                                                                                <td class="pagu-col"><?= !empty($indikator['pagu_2026']) ? number_format($indikator['pagu_2026'],0,',','.') : '-' ?></td>
+                                                                                <td><?= html_escape($indikator['target_2027'] ?? '-') ?></td>
+                                                                                <td class="pagu-col"><?= !empty($indikator['pagu_2027']) ? number_format($indikator['pagu_2027'],0,',','.') : '-' ?></td>
+                                                                                <td><?= html_escape($indikator['target_2028'] ?? '-') ?></td>
+                                                                                <td class="pagu-col"><?= !empty($indikator['pagu_2028']) ? number_format($indikator['pagu_2028'],0,',','.') : '-' ?></td>
+                                                                                <td><?= html_escape($indikator['target_2029'] ?? '-') ?></td>
+                                                                                <td class="pagu-col"><?= !empty($indikator['pagu_2029']) ? number_format($indikator['pagu_2029'],0,',','.') : '-' ?></td>
+                                                                                <td><?= html_escape($indikator['target_2030'] ?? '-') ?></td>
+                                                                                <td class="pagu-col"><?= !empty($indikator['pagu_2030']) ? number_format($indikator['pagu_2030'],0,',','.') : '-' ?></td>
+                                                                                
+                                                                                <!-- KOSONGKAN KOLOM PD (karena rowspan per outcome) -->
+                                                                            </tr>
+                                                                            <?php
+                                                                        }
+                                                                    }
+                                                                    
+                                                                    $isFirstOutcome = false;
+                                                                }
+                                                            } // end foreach program
+                                                        } // end if hasProgram
+                                                    } // end foreach bidang
+                                                } // end if hasBidang
+                                            } // end foreach urusan
+                                            ?>
                                         </tbody>
                                     </table>
                                 </div>
@@ -996,11 +701,11 @@
                         </div>
 
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
+</div>
 
     <!-- ============================================================
         MODAL URUSAN
@@ -1080,7 +785,7 @@
     </div>
 
     <!-- ============================================================
-        MODAL PROGRAM + INDIKATOR
+        MODAL PROGRAM + OUTCOME + INDIKATOR
     ============================================================ -->
     <div class="modal fixed-modal" id="ModalProgram" role="dialog" style="display:none;">
         <div class="modal-dialog modal-xl-custom">
@@ -1113,19 +818,15 @@
                         </div>
                     </div>
                     
-                    <div class="outcome-field">
-                        <label class="outcome-label"><b>Outcome</b></label>
-                        <textarea class="form-control outcome-textarea" id="OutcomeProgram" rows="3" placeholder="Masukkan Outcome Program" style="resize:vertical;"></textarea>
-                        <small class="help-text">Outcome adalah hasil yang diharapkan dari program ini.</small>
-                    </div>
-                    
                     <hr>
                     
                     <div class="form-group">
-                        <label><b>INDIKATOR OUTCOME</b></label>
-                        <div id="IndikatorContainer"></div>
-                        <button type="button" class="btn btn-sm btn-info" id="BtnTambahIndikator">
-                            <i class="notika-icon bi-plus-lg"></i> Tambah Indikator
+                        <label><b>OUTCOME & INDIKATOR</b></label>
+                        <div id="OutcomeContainer">
+                            <!-- Outcome groups akan ditambahkan di sini -->
+                        </div>
+                        <button type="button" class="btn btn-sm btn-success" id="BtnTambahOutcome">
+                            <i class="notika-icon bi-plus-lg"></i> Tambah Outcome
                         </button>
                     </div>
                     
@@ -1150,11 +851,12 @@
 var BaseURL = '<?= base_url() ?>';
 var CSRF_TOKEN = '<?= $this->security->get_csrf_hash() ?>';
 var CSRF_NAME = '<?= $this->security->get_csrf_token_name() ?>';
+var counterOutcome = 0;
+var counterIndikator = 0;
 
 // ============================================================
 // FUNGSI BANTUAN
 // ============================================================
-
 function escapeHtml(text) {
     if (text === null || text === undefined) return '';
     return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;")
@@ -1171,7 +873,6 @@ function formatRupiah(angka) {
 // ============================================================
 // NOMENKLATUR CACHE
 // ============================================================
-
 var nomenklaturCache = {};
 
 function getNomenklatur(level, parentKode, callback) {
@@ -1189,16 +890,9 @@ function getNomenklatur(level, parentKode, callback) {
             nomenklaturCache[cacheKey] = res;
             if (callback) callback(res);
         },
-        error: function(xhr, status, error) {
-            console.error('Error getNomenklatur:', error);
-            if (callback) callback([]);
-        }
+        error: function() { if (callback) callback([]); }
     });
 }
-
-// ============================================================
-// LOAD LEVEL NOMENKLATUR
-// ============================================================
 
 function loadLevelUrusan() {
     var cacheKey = 'level1_root';
@@ -1271,10 +965,6 @@ function renderProgramOptions(res) {
     updatePathDisplayProgram();
 }
 
-// ============================================================
-// UPDATE PATH DISPLAY
-// ============================================================
-
 function updatePathDisplayUrusan() {
     var val = $('#UrusanKodeSelect').val();
     var text = $('#UrusanKodeSelect option:selected').text();
@@ -1323,15 +1013,13 @@ function updatePathDisplayProgram() {
 // ============================================================
 // EVENT NOMENKLATUR
 // ============================================================
-
-$(document).on('change', '#UrusanKodeSelect', function() { updatePathDisplayUrusan(); });
-$(document).on('change', '#BidangKodeSelect', function() { updatePathDisplayBidang(); });
-$(document).on('change', '#ProgramKodeSelect', function() { updatePathDisplayProgram(); });
+$(document).on('change', '#UrusanKodeSelect', updatePathDisplayUrusan);
+$(document).on('change', '#BidangKodeSelect', updatePathDisplayBidang);
+$(document).on('change', '#ProgramKodeSelect', updatePathDisplayProgram);
 
 // ============================================================
 // FILTER WILAYAH
 // ============================================================
-
 <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
 $("#Provinsi").change(function() {
     if ($(this).val() === "") { $("#KabKota").html('<option value="">Pilih Kab/Kota</option>'); return; }
@@ -1350,7 +1038,7 @@ $("#Provinsi").change(function() {
             }
             $("#KabKota").html(KabKota).prop('disabled', false);
         },
-        error: function() { console.error("Gagal memuat data Kab/Kota"); $("#KabKota").prop('disabled', false); }
+        error: function() { $("#KabKota").prop('disabled', false); }
     });
 });
 
@@ -1394,41 +1082,29 @@ $.ajax({
 // ============================================================
 // FUNGSI SHOW/HIDE FIXED MODAL
 // ============================================================
-
 function showFixedModal(selector) {
     var $modal = $(selector);
-    
     $('.modal-backdrop').remove();
-    
     $modal.css('display', 'flex');
     $modal.addClass('show');
-    
     var $backdrop = $('<div class="modal-backdrop fade in"></div>');
     $('body').append($backdrop);
     $('body').addClass('modal-open');
-    
     $modal.scrollTop(0);
 }
 
 function hideFixedModal(selector) {
     var $modal = $(selector);
-    
     $modal.removeClass('show');
     $modal.css('display', 'none');
     $('body').removeClass('modal-open');
     $('.modal-backdrop').remove();
 }
 
-// ============================================================
-// EVENT HANDLER UNTUK MODAL
-// ============================================================
-
-$(document).on('click', '.modal.fixed-modal .close', function(e) {
+$(document).on('click', '.modal.fixed-modal .close, .modal.fixed-modal .btn-batal', function(e) {
     e.preventDefault();
     var $modal = $(this).closest('.modal.fixed-modal');
-    if ($modal.length) {
-        hideFixedModal('#' + $modal.attr('id'));
-    }
+    if ($modal.length) hideFixedModal('#' + $modal.attr('id'));
 });
 
 $(document).on('click', '.modal.fixed-modal', function(e) {
@@ -1437,18 +1113,9 @@ $(document).on('click', '.modal.fixed-modal', function(e) {
     }
 });
 
-$(document).on('click', '.modal.fixed-modal .btn-batal', function(e) {
-    e.preventDefault();
-    var $modal = $(this).closest('.modal.fixed-modal');
-    if ($modal.length) {
-        hideFixedModal('#' + $modal.attr('id'));
-    }
-});
-
 // ============================================================
 // CRUD URUSAN
 // ============================================================
-
 $('#BtnTambahUrusan').click(function() {
     $('#ModalUrusanTitle').text('Tambah Urusan');
     $('#UrusanId').val('');
@@ -1464,20 +1131,13 @@ $(document).on('click', '.BtnEditUrusan', function() {
     var id = $(this).data('id');
     var kode = $(this).data('kode');
     var nama = $(this).data('nama');
-    
     $('#ModalUrusanTitle').text('Edit Urusan');
     $('#UrusanId').val(id);
-    
     nomenklaturCache = {};
     loadLevelUrusan();
-    
     setTimeout(function() {
-        if (kode) {
-            $('#UrusanKodeSelect').val(kode);
-            updatePathDisplayUrusan();
-        }
+        if (kode) { $('#UrusanKodeSelect').val(kode); updatePathDisplayUrusan(); }
     }, 500);
-    
     showFixedModal('#ModalUrusan');
 });
 
@@ -1505,8 +1165,7 @@ $(document).on('click', '.BtnHapusUrusan', function() {
     $.post(BaseURL + "Daerah/program_hapus_urusan", { id: id, [CSRF_NAME]: CSRF_TOKEN })
         .done(function(res) {
             try { var result = typeof res === 'string' ? JSON.parse(res) : res; } catch(e) { var result = res; }
-            if (result.status === 'success') { window.location.reload(); }
-            else { alert(result.message || 'Gagal menghapus!'); }
+            if (result.status === 'success') { window.location.reload(); } else { alert(result.message || 'Gagal menghapus!'); }
         })
         .fail(function() { alert('Terjadi kesalahan!'); });
 });
@@ -1514,7 +1173,6 @@ $(document).on('click', '.BtnHapusUrusan', function() {
 // ============================================================
 // CRUD BIDANG URUSAN
 // ============================================================
-
 $(document).on('click', '.BtnTambahBidang', function() {
     var urusanId = $(this).data('urusan-id');
     var kodeUrusan = $(this).data('kode-urusan');
@@ -1536,14 +1194,9 @@ $(document).on('click', '.BtnEditBidang', function() {
     var urusanId = $(this).data('urusan-id');
     var kode = $(this).data('kode');
     var nama = $(this).data('nama');
-    
     $('#ModalBidangTitle').text('Edit Bidang Urusan');
     $('#BidangId').val(id);
     $('#BidangUrusanId').val(urusanId);
-    
-    var urusanNama = '';
-    var urusanKode = '';
-    
     $.ajax({
         url: BaseURL + "Daerah/program_get_urusan_by_id",
         type: "POST",
@@ -1551,26 +1204,17 @@ $(document).on('click', '.BtnEditBidang', function() {
         dataType: 'json',
         success: function(res) {
             if (res.status === 'success' && res.data) {
-                urusanKode = res.data.kode_urusan || '';
-                urusanNama = res.data.nama_urusan || '';
+                var urusanKode = res.data.kode_urusan || '';
+                var urusanNama = res.data.nama_urusan || '';
                 $('#BidangUrusanNama').val(urusanKode + ' - ' + urusanNama);
-                
                 nomenklaturCache = {};
                 loadLevelBidang(urusanKode);
-                
                 setTimeout(function() {
-                    if (kode) {
-                        $('#BidangKodeSelect').val(kode);
-                        updatePathDisplayBidang();
-                    }
+                    if (kode) { $('#BidangKodeSelect').val(kode); updatePathDisplayBidang(); }
                 }, 500);
             }
-        },
-        error: function() {
-            alert('Gagal memuat data Urusan!');
         }
     });
-    
     showFixedModal('#ModalBidangUrusan');
 });
 
@@ -1599,78 +1243,131 @@ $(document).on('click', '.BtnHapusBidang', function() {
     $.post(BaseURL + "Daerah/program_hapus_bidang_urusan", { id: id, [CSRF_NAME]: CSRF_TOKEN })
         .done(function(res) {
             try { var result = typeof res === 'string' ? JSON.parse(res) : res; } catch(e) { var result = res; }
-            if (result.status === 'success') { window.location.reload(); }
-            else { alert(result.message || 'Gagal menghapus!'); }
+            if (result.status === 'success') { window.location.reload(); } else { alert(result.message || 'Gagal menghapus!'); }
         })
         .fail(function() { alert('Terjadi kesalahan!'); });
 });
 
 // ============================================================
-// CRUD PROGRAM + INDIKATOR
+// FUNGSI OUTCOME & INDIKATOR DI MODAL
 // ============================================================
 
-var indikatorCounter = 0;
-
-function addIndikatorRow(data) {
-    var counter = indikatorCounter++;
-    var html = '<div class="indikator-row" id="indikator_row_' + counter + '">';
-    
-    html += '<input type="hidden" class="indikator-id" id="indikator_id_' + counter + '" value="' + (data ? (data.id || '') : '') + '">';
-    
-    html += '<button type="button" class="btn btn-danger btn-sm btn-remove-indikator" data-row="' + counter + '" title="Hapus Indikator">×</button>';
-    
-    html += '<div class="row">';
-    html += '<div class="col-md-12"><div class="form-group"><label>Indikator Outcome</label><textarea class="form-control form-control-sm" id="indikator_' + counter + '" rows="2">' + (data ? escapeHtml(data.indikator || '') : '') + '</textarea></div></div>';
+function addOutcome(data) {
+    var id = data && data.id ? data.id : '';
+    var text = data && data.outcome_text ? escapeHtml(data.outcome_text) : '';
+    var indikators = data && data.indikators ? data.indikators : [];
+    var counter = counterOutcome++;
+    var html = '<div class="outcome-group" id="outcome_group_' + counter + '">';
+    html += '<input type="hidden" class="outcome-id" value="' + id + '">';
+    html += '<button type="button" class="btn btn-danger btn-sm btn-remove-outcome" data-group="' + counter + '" title="Hapus Outcome">×</button>';
+    html += '<div class="form-group">';
+    html += '<label><b>Outcome</b></label>';
+    html += '<textarea class="form-control outcome-textarea" id="outcome_text_' + counter + '" rows="2" placeholder="Tulis Outcome Program">' + text + '</textarea>';
     html += '</div>';
-    
-    html += '<div class="row">';
-    html += '<div class="col-md-6"><div class="form-group"><label>Satuan</label><input type="text" class="form-control form-control-sm" id="satuan_' + counter + '" value="' + (data ? escapeHtml(data.satuan || '') : '') + '"></div></div>';
-    html += '<div class="col-md-6"><div class="form-group"><label>Kondisi Awal</label><input type="text" class="form-control form-control-sm" id="kondisi_awal_' + counter + '" value="' + (data ? escapeHtml(data.kondisi_awal || '') : '') + '"></div></div>';
-    html += '</div>';
-    
-    var years = ['2026', '2027', '2028', '2029', '2030'];
-    html += '<div class="row">';
-    for (var i = 0; i < years.length; i++) {
-        var y = years[i];
-        var targetVal = data ? escapeHtml(data['target_' + y] || '') : '';
-        var paguVal = data ? (data['pagu_' + y] || '') : '';
-        
-        var paguFormatted = '';
-        if (paguVal) {
-            var num = parseFloat(paguVal);
-            if (!isNaN(num)) {
-                paguFormatted = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-            }
+    html += '<div class="indikator-list" id="indikator_list_' + counter + '">';
+    // Tambahkan indikator
+    if (indikators.length > 0) {
+        for (var i = 0; i < indikators.length; i++) {
+            html += generateIndikatorRow(counter, indikators[i]);
         }
-        
-        html += '<div class="col-md-2"><div class="form-group"><label style="font-size:11px; color:#007bff;">' + y + '</label><div class="row"><div class="col-xs-6" style="padding-right:3px;"><input type="text" class="form-control form-control-sm" id="target_' + y + '_' + counter + '" placeholder="Target" value="' + targetVal + '"></div><div class="col-xs-6" style="padding-left:3px;"><input type="text" class="form-control form-control-sm pagu-input" id="pagu_' + y + '_' + counter + '" placeholder="Pagu" value="' + paguFormatted + '"></div></div></div></div>';
+    } else {
+        html += generateIndikatorRow(counter, null);
     }
     html += '</div>';
+    html += '<button type="button" class="btn btn-sm btn-primary tambah-indikator" data-group="' + counter + '"><i class="notika-icon bi-plus-lg"></i> Tambah Indikator</button>';
+    html += '</div>';
+    $('#OutcomeContainer').append(html);
+    initPaguInputs();
+}
+
+function generateIndikatorRow(groupId, data) {
+    var id = data && data.id ? data.id : '';
+    var indikator = data && data.indikator ? escapeHtml(data.indikator) : '';
+    var satuan = data && data.satuan ? escapeHtml(data.satuan) : '';
+    var kondisiAwal = data && data.kondisi_awal ? escapeHtml(data.kondisi_awal) : '';
+    var target2026 = data && data.target_2026 ? escapeHtml(data.target_2026) : '';
+    var pagu2026 = data && data.pagu_2026 ? data.pagu_2026 : '';
+    var pagu2026Formatted = pagu2026 ? pagu2026.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '';
+    var target2027 = data && data.target_2027 ? escapeHtml(data.target_2027) : '';
+    var pagu2027 = data && data.pagu_2027 ? data.pagu_2027 : '';
+    var pagu2027Formatted = pagu2027 ? pagu2027.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '';
+    var target2028 = data && data.target_2028 ? escapeHtml(data.target_2028) : '';
+    var pagu2028 = data && data.pagu_2028 ? data.pagu_2028 : '';
+    var pagu2028Formatted = pagu2028 ? pagu2028.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '';
+    var target2029 = data && data.target_2029 ? escapeHtml(data.target_2029) : '';
+    var pagu2029 = data && data.pagu_2029 ? data.pagu_2029 : '';
+    var pagu2029Formatted = pagu2029 ? pagu2029.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '';
+    var target2030 = data && data.target_2030 ? escapeHtml(data.target_2030) : '';
+    var pagu2030 = data && data.pagu_2030 ? data.pagu_2030 : '';
+    var pagu2030Formatted = pagu2030 ? pagu2030.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '';
+    var pdId = data && data.perangkat_daerah_id ? data.perangkat_daerah_id : '';
     
+    var counter = counterIndikator++;
+    var html = '<div class="indikator-row" id="indikator_row_' + counter + '">';
+    html += '<input type="hidden" class="indikator-id" value="' + id + '">';
+    html += '<button type="button" class="btn btn-danger btn-sm btn-remove-indikator" data-row="' + counter + '" title="Hapus Indikator">×</button>';
     html += '<div class="row">';
-    html += '<div class="col-md-6"><div class="form-group"><label>Perangkat Daerah</label><select class="form-control form-control-sm" id="perangkat_daerah_' + counter + '"><option value="">-- Pilih Perangkat Daerah --</option>';
+    html += '<div class="col-md-12"><div class="form-group"><label>Indikator</label><textarea class="form-control form-control-sm indikator-textarea" id="indikator_' + counter + '" rows="2">' + indikator + '</textarea></div></div>';
+    html += '</div>';
+    html += '<div class="row">';
+    html += '<div class="col-md-6"><div class="form-group"><label>Satuan</label><input type="text" class="form-control form-control-sm satuan-input" id="satuan_' + counter + '" value="' + satuan + '"></div></div>';
+    html += '<div class="col-md-6"><div class="form-group"><label>Kondisi Awal</label><input type="text" class="form-control form-control-sm kondisi-input" id="kondisi_awal_' + counter + '" value="' + kondisiAwal + '"></div></div>';
+    html += '</div>';
+    html += '<div class="row">';
+    var years = ['2026','2027','2028','2029','2030'];
+    var targetVals = [target2026, target2027, target2028, target2029, target2030];
+    var paguFormatted = [pagu2026Formatted, pagu2027Formatted, pagu2028Formatted, pagu2029Formatted, pagu2030Formatted];
+    for (var y = 0; y < years.length; y++) {
+        html += '<div class="col-md-2"><div class="form-group"><label style="font-size:11px; color:#007bff;">' + years[y] + '</label><div class="row"><div class="col-xs-6" style="padding-right:3px;"><input type="text" class="form-control form-control-sm target-input" id="target_' + years[y] + '_' + counter + '" placeholder="Target" value="' + targetVals[y] + '"></div><div class="col-xs-6" style="padding-left:3px;"><input type="text" class="form-control form-control-sm pagu-input" id="pagu_' + years[y] + '_' + counter + '" placeholder="Pagu" value="' + paguFormatted[y] + '"></div></div></div></div>';
+    }
+    html += '</div>';
+    html += '<div class="row">';
+    html += '<div class="col-md-6"><div class="form-group"><label>Perangkat Daerah</label><select class="form-control form-control-sm pd-select" id="perangkat_daerah_' + counter + '"><option value="">-- Pilih Perangkat Daerah --</option>';
     <?php foreach ($PerangkatDaerah as $pd) { ?>
-    html += '<option value="<?= $pd['id'] ?>" ' + (data && data.perangkat_daerah_id == <?= $pd['id'] ?> ? 'selected' : '') + '><?= html_escape($pd['nama']) ?></option>';
+    html += '<option value="<?= $pd['id'] ?>" ' + (pdId == <?= $pd['id'] ?> ? 'selected' : '') + '><?= html_escape($pd['nama']) ?></option>';
     <?php } ?>
-    html += '</select></div></div></div></div>';
-    
-    $('#IndikatorContainer').append(html);
-    
+    html += '</select></div></div></div>';
+    html += '</div>';
+    return html;
+}
+
+function initPaguInputs() {
     $('.pagu-input').off('keyup').on('keyup', function() {
         var val = $(this).val().replace(/[^0-9]/g, '');
-        if (val) {
-            $(this).val(val.replace(/\B(?=(\d{3})+(?!\d))/g, "."));
-        }
+        if (val) { $(this).val(val.replace(/\B(?=(\d{3})+(?!\d))/g, ".")); }
     });
 }
 
-$('#BtnTambahIndikator').click(function() { addIndikatorRow(null); });
+// Tambah Outcome
+$('#BtnTambahOutcome').click(function() {
+    addOutcome({ indikators: [] });
+});
 
+// Tambah Indikator per Outcome
+$(document).on('click', '.tambah-indikator', function() {
+    var groupId = $(this).data('group');
+    var listId = '#indikator_list_' + groupId;
+    $(listId).append(generateIndikatorRow(groupId, null));
+    initPaguInputs();
+});
+
+// Hapus Outcome
+$(document).on('click', '.btn-remove-outcome', function() {
+    if (!confirm('Hapus Outcome ini beserta semua indikatornya?')) return;
+    var group = $(this).data('group');
+    $('#outcome_group_' + group).remove();
+});
+
+// Hapus Indikator
 $(document).on('click', '.btn-remove-indikator', function() {
     if (!confirm('Hapus indikator ini?')) return;
     var row = $(this).data('row');
     $('#indikator_row_' + row).remove();
 });
+
+// ============================================================
+// CRUD PROGRAM + OUTCOME + INDIKATOR
+// ============================================================
 
 $(document).on('click', '.BtnTambahProgram', function() {
     var bidangId = $(this).data('bidang-id');
@@ -1683,9 +1380,9 @@ $(document).on('click', '.BtnTambahProgram', function() {
     $('#ProgramKodeSelect').val('');
     $('#path_display_program').html('Belum ada yang dipilih');
     $('#info_nomenklatur_program').hide();
-    $('#OutcomeProgram').val('');
-    $('#IndikatorContainer').html('');
-    indikatorCounter = 0;
+    $('#OutcomeContainer').html('');
+    counterOutcome = 0;
+    counterIndikator = 0;
     nomenklaturCache = {};
     loadLevelProgram(kodeBidang);
     showFixedModal('#ModalProgram');
@@ -1696,43 +1393,14 @@ $(document).on('click', '.BtnEditProgram', function() {
     var bidangId = $(this).data('bidang-id');
     var kode = $(this).data('kode');
     var nama = $(this).data('nama');
-    var outcome = $(this).data('outcome') || '';
-    
     $('#ModalProgramTitle').text('Edit Program');
     $('#ProgramId').val(id);
     $('#ProgramBidangId').val(bidangId);
-    $('#OutcomeProgram').val(outcome);
+    $('#OutcomeContainer').html('');
+    counterOutcome = 0;
+    counterIndikator = 0;
     
-    $.ajax({
-        url: BaseURL + "Daerah/program_get_bidang_by_id",
-        type: "POST",
-        data: { id: bidangId, [CSRF_NAME]: CSRF_TOKEN },
-        dataType: 'json',
-        success: function(res) {
-            if (res.status === 'success' && res.data) {
-                var kodeBidang = res.data.kode_bidang || '';
-                var namaBidang = res.data.nama_bidang || '';
-                $('#ProgramBidangInfo').text(kodeBidang + ' - ' + namaBidang);
-                
-                nomenklaturCache = {};
-                loadLevelProgram(kodeBidang);
-                
-                setTimeout(function() {
-                    if (kode) {
-                        $('#ProgramKodeSelect').val(kode);
-                        updatePathDisplayProgram();
-                    }
-                }, 500);
-            }
-        },
-        error: function() {
-            alert('Gagal memuat data Bidang!');
-        }
-    });
-
-    $('#IndikatorContainer').html('');
-    indikatorCounter = 0;
-    
+    // Ambil data program lengkap
     $.ajax({
         url: BaseURL + "Daerah/program_get_by_id",
         type: "POST",
@@ -1740,19 +1408,29 @@ $(document).on('click', '.BtnEditProgram', function() {
         dataType: 'json',
         success: function(res) {
             if (res.status === 'success' && res.data) {
-                var data = res.data;
-                if (data.indikator && data.indikator.length > 0) {
-                    for (var i = 0; i < data.indikator.length; i++) {
-                        addIndikatorRow(data.indikator[i]);
+                var program = res.data;
+                $('#ProgramBidangInfo').text((program.kode_bidang || '') + ' - ' + (program.nama_bidang || ''));
+                // Load program select
+                nomenklaturCache = {};
+                loadLevelProgram(program.kode_bidang || '');
+                setTimeout(function() {
+                    if (program.kode_program) {
+                        $('#ProgramKodeSelect').val(program.kode_program);
+                        updatePathDisplayProgram();
                     }
+                }, 500);
+                // Load outcomes
+                if (program.outcomes && program.outcomes.length > 0) {
+                    for (var i = 0; i < program.outcomes.length; i++) {
+                        addOutcome(program.outcomes[i]);
+                    }
+                } else {
+                    addOutcome({ indikators: [] });
                 }
             }
         },
-        error: function() {
-            console.error('Gagal load data program');
-        }
+        error: function() { alert('Gagal memuat data program!'); }
     });
-    
     showFixedModal('#ModalProgram');
 });
 
@@ -1761,54 +1439,80 @@ $('#BtnSimpanProgram').click(function() {
     var bidangId = $('#ProgramBidangId').val();
     var kode = $('#ProgramKodeSelect').val();
     var nama = $('#ProgramKodeSelect option:selected').text().split(' - ').slice(1).join(' - ');
-    var outcome = $('#OutcomeProgram').val().trim();
-    
     if (!kode) { alert('Program harus dipilih!'); return; }
     if (!nama) { alert('Nama Program tidak valid!'); return; }
     
-    var indikatorData = [];
-    var rows = $('#IndikatorContainer .indikator-row');
-    
-    if (rows.length === 0) {
-        alert('Minimal tambahkan 1 Indikator Outcome!');
-        return;
-    }
-    
-    rows.each(function() {
-        var rowId = $(this).attr('id').replace('indikator_row_', '');
-        var indikator = $('#indikator_' + rowId).val().trim();
-        if (!indikator) return;
-        
-        var indikatorId = $('#indikator_id_' + rowId).val() || '';
-        
-        var pagu2026 = $('#pagu_2026_' + rowId).val().replace(/\./g, '');
-        var pagu2027 = $('#pagu_2027_' + rowId).val().replace(/\./g, '');
-        var pagu2028 = $('#pagu_2028_' + rowId).val().replace(/\./g, '');
-        var pagu2029 = $('#pagu_2029_' + rowId).val().replace(/\./g, '');
-        var pagu2030 = $('#pagu_2030_' + rowId).val().replace(/\./g, '');
-        
-        var data = {
-            id: indikatorId,
-            indikator: indikator,
-            satuan: $('#satuan_' + rowId).val().trim(),
-            kondisi_awal: $('#kondisi_awal_' + rowId).val().trim(),
-            target_2026: $('#target_2026_' + rowId).val().trim(),
-            pagu_2026: pagu2026 || null,
-            target_2027: $('#target_2027_' + rowId).val().trim(),
-            pagu_2027: pagu2027 || null,
-            target_2028: $('#target_2028_' + rowId).val().trim(),
-            pagu_2028: pagu2028 || null,
-            target_2029: $('#target_2029_' + rowId).val().trim(),
-            pagu_2029: pagu2029 || null,
-            target_2030: $('#target_2030_' + rowId).val().trim(),
-            pagu_2030: pagu2030 || null,
-            perangkat_daerah_id: $('#perangkat_daerah_' + rowId).val()
-        };
-        indikatorData.push(data);
+    // Kumpulkan data outcomes
+    var outcomes = [];
+    var hasError = false;
+    $('.outcome-group').each(function() {
+        var group = $(this);
+        var outcomeId = group.find('.outcome-id').val();
+        var outcomeText = group.find('.outcome-textarea').val().trim();
+        if (!outcomeText) {
+            hasError = true;
+            alert('Outcome tidak boleh kosong!');
+            return false;
+        }
+        var indikators = [];
+        group.find('.indikator-row').each(function() {
+            var row = $(this);
+            var indId = row.find('.indikator-id').val();
+            var indText = row.find('.indikator-textarea').val().trim();
+            if (!indText) {
+                hasError = true;
+                alert('Indikator tidak boleh kosong!');
+                return false;
+            }
+            var satuan = row.find('.satuan-input').val().trim();
+            var kondisi = row.find('.kondisi-input').val().trim();
+            var target2026 = row.find('#target_2026_' + row.attr('id').replace('indikator_row_', '')).val().trim();
+            var pagu2026 = row.find('#pagu_2026_' + row.attr('id').replace('indikator_row_', '')).val().replace(/\./g, '');
+            var target2027 = row.find('#target_2027_' + row.attr('id').replace('indikator_row_', '')).val().trim();
+            var pagu2027 = row.find('#pagu_2027_' + row.attr('id').replace('indikator_row_', '')).val().replace(/\./g, '');
+            var target2028 = row.find('#target_2028_' + row.attr('id').replace('indikator_row_', '')).val().trim();
+            var pagu2028 = row.find('#pagu_2028_' + row.attr('id').replace('indikator_row_', '')).val().replace(/\./g, '');
+            var target2029 = row.find('#target_2029_' + row.attr('id').replace('indikator_row_', '')).val().trim();
+            var pagu2029 = row.find('#pagu_2029_' + row.attr('id').replace('indikator_row_', '')).val().replace(/\./g, '');
+            var target2030 = row.find('#target_2030_' + row.attr('id').replace('indikator_row_', '')).val().trim();
+            var pagu2030 = row.find('#pagu_2030_' + row.attr('id').replace('indikator_row_', '')).val().replace(/\./g, '');
+            var pdId = row.find('.pd-select').val();
+            
+            indikators.push({
+                id: indId,
+                indikator: indText,
+                satuan: satuan,
+                kondisi_awal: kondisi,
+                target_2026: target2026,
+                pagu_2026: pagu2026 || null,
+                target_2027: target2027,
+                pagu_2027: pagu2027 || null,
+                target_2028: target2028,
+                pagu_2028: pagu2028 || null,
+                target_2029: target2029,
+                pagu_2029: pagu2029 || null,
+                target_2030: target2030,
+                pagu_2030: pagu2030 || null,
+                perangkat_daerah_id: pdId || null
+            });
+        });
+        if (hasError) return false;
+        outcomes.push({
+            id: outcomeId,
+            outcome_text: outcomeText,
+            indikators: indikators
+        });
     });
     
-    if (indikatorData.length === 0) {
-        alert('Minimal 1 Indikator dengan data lengkap!');
+    if (hasError) return;
+    
+    // Cek apakah ada outcome dengan indikator
+    var totalInd = 0;
+    for (var oi = 0; oi < outcomes.length; oi++) {
+        totalInd += outcomes[oi].indikators.length;
+    }
+    if (totalInd === 0) {
+        alert('Minimal tambahkan 1 Indikator!');
         return;
     }
     
@@ -1818,79 +1522,38 @@ $('#BtnSimpanProgram').click(function() {
         bidang_urusan_id: bidangId,
         kode_program: kode,
         nama_program: nama,
-        outcome: outcome,
-        
-        indikator_id: indikatorData.map(function(d) { return d.id; }),
-        indikator: indikatorData.map(function(d) { return d.indikator; }),
-        satuan: indikatorData.map(function(d) { return d.satuan; }),
-        kondisi_awal: indikatorData.map(function(d) { return d.kondisi_awal; }),
-        target_2026: indikatorData.map(function(d) { return d.target_2026; }),
-        pagu_2026: indikatorData.map(function(d) { return d.pagu_2026; }),
-        target_2027: indikatorData.map(function(d) { return d.target_2027; }),
-        pagu_2027: indikatorData.map(function(d) { return d.pagu_2027; }),
-        target_2028: indikatorData.map(function(d) { return d.target_2028; }),
-        pagu_2028: indikatorData.map(function(d) { return d.pagu_2028; }),
-        target_2029: indikatorData.map(function(d) { return d.target_2029; }),
-        pagu_2029: indikatorData.map(function(d) { return d.pagu_2029; }),
-        target_2030: indikatorData.map(function(d) { return d.target_2030; }),
-        pagu_2030: indikatorData.map(function(d) { return d.pagu_2030; }),
-        perangkat_daerah_id: indikatorData.map(function(d) { return d.perangkat_daerah_id; }),
+        outcomes: outcomes,
         [CSRF_NAME]: CSRF_TOKEN
     };
     
     $('#BtnSimpanProgram').prop('disabled', true).text('MENYIMPAN...');
-    
     $.post(url, data)
         .done(function(res) {
-            try { 
-                var result = typeof res === 'string' ? JSON.parse(res) : res; 
-            } catch(e) { 
-                var result = res; 
-            }
-            
-            if (result.status === 'success') { 
-                hideFixedModal('#ModalProgram'); 
-                window.location.reload(); 
-            } else { 
-                alert(result.message || 'Gagal menyimpan!'); 
-                $('#BtnSimpanProgram').prop('disabled', false).text('SIMPAN PROGRAM'); 
+            try { var result = typeof res === 'string' ? JSON.parse(res) : res; } catch(e) { var result = res; }
+            if (result.status === 'success') {
+                hideFixedModal('#ModalProgram');
+                window.location.reload();
+            } else {
+                alert(result.message || 'Gagal menyimpan!');
+                $('#BtnSimpanProgram').prop('disabled', false).text('SIMPAN PROGRAM');
             }
         })
-        .fail(function() { 
-            alert('Terjadi kesalahan!'); 
-            $('#BtnSimpanProgram').prop('disabled', false).text('SIMPAN PROGRAM'); 
+        .fail(function() {
+            alert('Terjadi kesalahan!');
+            $('#BtnSimpanProgram').prop('disabled', false).text('SIMPAN PROGRAM');
         });
 });
 
 // ============================================================
-// HAPUS PROGRAM & INDIKATOR
+// HAPUS PROGRAM
 // ============================================================
-
 $(document).on('click', '.BtnHapusProgram', function() {
-    if (!confirm('Yakin ingin menghapus Program ini?')) return;
+    if (!confirm('Yakin ingin menghapus Program ini beserta semua Outcome dan Indikator?')) return;
     var id = $(this).data('id');
     $.post(BaseURL + "Daerah/program_hapus_program", { id: id, [CSRF_NAME]: CSRF_TOKEN })
         .done(function(res) {
             try { var result = typeof res === 'string' ? JSON.parse(res) : res; } catch(e) { var result = res; }
-            if (result.status === 'success') { window.location.reload(); }
-            else { alert(result.message || 'Gagal menghapus!'); }
-        })
-        .fail(function() { alert('Terjadi kesalahan!'); });
-});
-
-$(document).on('click', '.BtnHapusIndikator', function() {
-    if (!confirm('Yakin ingin menghapus Indikator ini?')) return;
-    var id = $(this).data('id');
-    var row = $(this).closest('tr');
-    $.post(BaseURL + "Daerah/program_hapus_indikator", { id: id, [CSRF_NAME]: CSRF_TOKEN })
-        .done(function(res) {
-            try { var result = typeof res === 'string' ? JSON.parse(res) : res; } catch(e) { var result = res; }
-            if (result.status === 'success') {
-                row.remove();
-                if ($('.program-table tbody tr.row-indikator').length === 0) {
-                    window.location.reload();
-                }
-            } else { alert(result.message || 'Gagal menghapus!'); }
+            if (result.status === 'success') { window.location.reload(); } else { alert(result.message || 'Gagal menghapus!'); }
         })
         .fail(function() { alert('Terjadi kesalahan!'); });
 });
@@ -1898,7 +1561,6 @@ $(document).on('click', '.BtnHapusIndikator', function() {
 // ============================================================
 // RESET MODAL
 // ============================================================
-
 $(document).on('hidden.bs.modal', '.modal.fixed-modal', function() {
     $('#BtnSimpanUrusan').prop('disabled', false).text('SIMPAN');
     $('#BtnSimpanBidang').prop('disabled', false).text('SIMPAN');
@@ -1907,7 +1569,7 @@ $(document).on('hidden.bs.modal', '.modal.fixed-modal', function() {
 });
 
 $(document).ready(function() {
-    console.log('ProgramPD ready - Perangkat Daerah hanya 1 per program');
+    console.log('ProgramPD ready - Mendukung Multiple Outcome & Indikator');
 });
 </script>
 

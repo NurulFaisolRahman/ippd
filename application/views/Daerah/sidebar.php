@@ -447,7 +447,7 @@
                     <i class="fa fa-chevron-down"></i>
                 </a>
                 <div class="sidebar-submenu">
-                    <a href="<?=base_url('Instansi/PerjanjianKinerja')?>">Daftar PK</a>
+                    <a href="<?=base_url('Instansi/PerjanjianKinerjaPD')?>">Daftar PK</a>
                 </div>
             </li>
 
