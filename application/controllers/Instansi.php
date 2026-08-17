@@ -25,7 +25,14 @@ class Instansi extends CI_Controller {
      * Cek apakah user memiliki role 4 (Instansi)
      */
     private function is_role_4() {
-        return $this->is_logged_in() && isset($_SESSION['Level']) && $_SESSION['Level'] == 4;
+        return $this->is_logged_in() && isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 4;
+    }
+
+    /**
+     * Cek apakah user memiliki role 3 (Akun Daerah / Verifikator)
+     */
+    private function is_role_3() {
+        return $this->is_logged_in() && isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 3;
     }
 
     /**
@@ -9724,6 +9731,9 @@ public function MenuRenstraPD() {
     $is_role_4 = $this->is_role_4();
     $level = isset($_SESSION['Level']) ? $_SESSION['Level'] : null;
     $filter_instansi_id = $this->input->get('instansi_id', TRUE);
+    if (empty($filter_instansi_id) && isset($_SESSION['TempInstansiId']) && !empty($_SESSION['TempInstansiId'])) {
+        $filter_instansi_id = $_SESSION['TempInstansiId'];
+    }
     
     $data['KodeWilayah'] = $KodeWilayah;
     $data['InstansiId'] = $instansi_id;
@@ -12800,12 +12810,18 @@ public function PerjanjianKinerjaPD() {
     $instansi_id = $this->get_instansi_id();
     $is_logged_in = $this->is_logged_in();
     $is_role_4 = $this->is_role_4();
+    $is_role_3 = $this->is_role_3();
     $filter_instansi_id = $this->input->get('instansi_id', TRUE);
+    if (empty($filter_instansi_id) && isset($_SESSION['TempInstansiId']) && !empty($_SESSION['TempInstansiId'])) {
+        $filter_instansi_id = $_SESSION['TempInstansiId'];
+    }
     
     $data['KodeWilayah'] = $KodeWilayah;
     $data['InstansiId'] = $instansi_id;
     $data['IsLoggedIn'] = $is_logged_in;
     $data['IsRole4'] = $is_role_4;
+    $data['IsRole3'] = $is_role_3;
+    $data['UserLevel'] = isset($_SESSION['Level']) ? (int)$_SESSION['Level'] : 0;
     $data['FilterInstansiId'] = $filter_instansi_id;
     $data['NamaInstansi'] = isset($_SESSION['NamaInstansi']) ? $_SESSION['NamaInstansi'] : '';
     
@@ -12838,12 +12854,15 @@ public function PerjanjianKinerjaPD() {
     $data['PerjanjianKinerja'] = [];
     if ($KodeWilayah) {
         $this->db->select('pk.*, 
-            p.nama as pengampu_nama, p.nip as pengampu_nip, p.jabatan as pengampu_jabatan,
+            i.nama as nama_instansi,
+            p.nama as pengampu_nama, p.nip as pengampu_nip, p.jabatan as pengampu_jabatan, p.eselon as eselon,
             a.nama as atasan_nama, a.nip as atasan_nip, a.jabatan as atasan_jabatan')
             ->from('perjanjian_kinerja pk')
+            ->join('akun_instansi i', 'i.id = pk.id_instansi', 'left')
             ->join('akun_karyawan p', 'p.id = pk.pegawai_pengampu_id', 'left')
             ->join('akun_karyawan a', 'a.id = pk.atasan_langsung_id', 'left')
-            ->where('pk.kode_wilayah', $KodeWilayah);
+            ->where('pk.kode_wilayah', $KodeWilayah)
+            ->where('pk.deleted_at IS NULL');
         
         if ($is_role_4 && $instansi_id) {
             $this->db->where('pk.id_instansi', $instansi_id);
@@ -12857,7 +12876,7 @@ public function PerjanjianKinerjaPD() {
     // Data untuk dropdown pegawai pengampu
     $data['PegawaiList'] = [];
     if ($KodeWilayah) {
-        $this->db->select('id, nama, nip, jabatan, satuan_unit_kerja, dinas_id')
+        $this->db->select('id, nama, nip, jabatan, eselon, satuan_unit_kerja, dinas_id')
             ->from('akun_karyawan')
             ->where('kodewilayah', $KodeWilayah)
             ->where('deleted_at IS NULL');
@@ -12885,7 +12904,7 @@ public function getSasaranByLevel() {
     $is_role_4 = $this->is_role_4();
     
     if (!$kode_wilayah || !$level) {
-        echo json_encode(['status' => 'error', 'message' => 'Parameter tidak lengkap']);
+        echo json_encode(['status' => 'error', 'message' => 'Parameter tidak lengkap: kode_wilayah=' . ($kode_wilayah ?: 'null') . ', level=' . ($level ?: 'null') . ', session_level=' . (isset($_SESSION['Level']) ? $_SESSION['Level'] : 'null') . ', instansi_id=' . ($instansi_id ?: 'null')]);
         return;
     }
     
@@ -12897,94 +12916,192 @@ public function getSasaranByLevel() {
     
     // Tentukan field target berdasarkan tahun
     $target_field = 'target_' . $tahun;
-    // Validasi kolom target (opsional, pastikan ada)
     
     $result = [];
     
-    if ($level == 'program') {
-        // Ambil semua program
-        $this->db->select('p.id, p.nama as nama, s.uraian as sasaran, k.jabatan as sub_unit');
-        $this->db->from('renstra_program p');
-        $this->db->join('renstra_sasaran s', 's.id = p.sasaran_id', 'left');
-        $this->db->join('renstra_tujuan t', 't.id = s.tujuan_id', 'left');
-        $this->db->join('akun_karyawan k', 'k.id = s.bidang_id', 'left');
-        $this->db->where('t.kode_wilayah', $kode_wilayah);
-        $this->db->where('p.deleted_at IS NULL');
-        $this->db->where('s.deleted_at IS NULL');
-        $this->db->where('t.deleted_at IS NULL');
-        if ($is_role_4 && $instansi_id) {
-            $this->db->where('t.id_instansi', $instansi_id);
+    try {
+        if ($level == 'program') {
+            // Ambil semua program
+            $this->db->select('p.id, p.nama as nama, k.jabatan as sub_unit');
+            $this->db->from('renstra_program p');
+            $this->db->join('renstra_sasaran s', 's.id = p.sasaran_id', 'left');
+            $this->db->join('renstra_tujuan t', 't.id = s.tujuan_id', 'left');
+            $this->db->join('akun_karyawan k', 'k.id = s.bidang_id', 'left');
+            $this->db->where('t.kode_wilayah', $kode_wilayah);
+            $this->db->where('p.deleted_at IS NULL');
+            $this->db->where('s.deleted_at IS NULL');
+            $this->db->where('t.deleted_at IS NULL');
+            if ($is_role_4 && $instansi_id) {
+                $this->db->where('t.id_instansi', $instansi_id);
+            }
+            $programs = $this->db->get()->result_array();
+            
+            // Cek keberadaan kolom target di renstra_program_indikator
+            $escaped_field = $this->db->escape($target_field);
+            $col_exists = $this->db->query("SHOW COLUMNS FROM `renstra_program_indikator` LIKE $escaped_field")->num_rows() > 0;
+            $select_target = $col_exists ? "$target_field as target" : "NULL as target";
+            
+            // Untuk setiap program, ambil outcome dan indikator per outcome
+            foreach ($programs as &$prog) {
+                // Ambil sasaran / outcome dari renstra_program_outcome
+                $outcomes = $this->db->select('id, outcome_text')
+                    ->from('renstra_program_outcome')
+                    ->where('program_id', $prog['id'])
+                    ->where('deleted_at IS NULL')
+                    ->order_by('urutan', 'ASC')
+                    ->get()
+                    ->result_array();
+                
+                $all_indikators = [];
+                foreach ($outcomes as &$out) {
+                    $out_indikators = $this->db->select("id, indikator, satuan, $select_target")
+                        ->from('renstra_program_indikator')
+                        ->where('outcome_id', $out['id'])
+                        ->where('deleted_at IS NULL')
+                        ->order_by('urutan', 'ASC')
+                        ->get()
+                        ->result_array();
+                    $out['indikator_list'] = $out_indikators;
+                    foreach ($out_indikators as $oi) {
+                        $all_indikators[] = $oi;
+                    }
+                }
+                
+                $prog['outcomes'] = $outcomes;
+                $prog['sasaran'] = !empty($outcomes) ? implode('; ', array_column($outcomes, 'outcome_text')) : '';
+                $prog['indikator_list'] = $all_indikators;
+            }
+            $result = $programs;
+
+        } elseif ($level == 'kegiatan') {
+            // Ambil semua kegiatan
+            $this->db->select('k.id, k.nama as nama, ak.jabatan as sub_unit');
+            $this->db->from('renstra_kegiatan k');
+            $this->db->join('renstra_program p', 'p.id = k.program_id', 'left');
+            $this->db->join('renstra_sasaran s', 's.id = p.sasaran_id', 'left');
+            $this->db->join('renstra_tujuan t', 't.id = s.tujuan_id', 'left');
+            $this->db->join('akun_karyawan ak', 'ak.id = k.bidang_id', 'left');
+            $this->db->where('t.kode_wilayah', $kode_wilayah);
+            $this->db->where('k.deleted_at IS NULL');
+            $this->db->where('p.deleted_at IS NULL');
+            $this->db->where('s.deleted_at IS NULL');
+            $this->db->where('t.deleted_at IS NULL');
+            if ($is_role_4 && $instansi_id) {
+                $this->db->where('t.id_instansi', $instansi_id);
+            }
+            $rows = $this->db->get()->result_array();
+            
+            // Cek keberadaan kolom target di renstra_kegiatan_indikator
+            $escaped_field = $this->db->escape($target_field);
+            $col_exists = $this->db->query("SHOW COLUMNS FROM `renstra_kegiatan_indikator` LIKE $escaped_field")->num_rows() > 0;
+            $select_target = $col_exists ? "$target_field as target" : "NULL as target";
+            
+            // Untuk setiap kegiatan, ambil sasaran dan indikator per sasaran
+            foreach ($rows as &$row) {
+                $sasarans = $this->db->select('id, sasaran_text')
+                    ->from('renstra_kegiatan_sasaran')
+                    ->where('kegiatan_id', $row['id'])
+                    ->where('deleted_at IS NULL')
+                    ->order_by('urutan', 'ASC')
+                    ->get()
+                    ->result_array();
+                
+                $all_indikators = [];
+                foreach ($sasarans as &$sas) {
+                    $sas_indikators = $this->db->select("id, indikator, satuan, $select_target")
+                        ->from('renstra_kegiatan_indikator')
+                        ->where('sasaran_id', $sas['id'])
+                        ->where('deleted_at IS NULL')
+                        ->order_by('urutan', 'ASC')
+                        ->get()
+                        ->result_array();
+                    $sas['indikator_list'] = $sas_indikators;
+                    foreach ($sas_indikators as $si) {
+                        $all_indikators[] = $si;
+                    }
+                }
+                
+                $row['sasaran_list'] = $sasarans;
+                $row['sasaran'] = !empty($sasarans) ? implode('; ', array_column($sasarans, 'sasaran_text')) : '';
+                $row['indikator_list'] = $all_indikators;
+            }
+            $result = $rows;
+
+        } elseif ($level == 'sub_kegiatan') {
+            // Ambil semua sub kegiatan
+            $this->db->select('sk.id, sk.nama as nama, ak.jabatan as sub_unit');
+            $this->db->from('renstra_sub_kegiatan sk');
+            $this->db->join('renstra_kegiatan k', 'k.id = sk.kegiatan_id', 'left');
+            $this->db->join('renstra_program p', 'p.id = k.program_id', 'left');
+            $this->db->join('renstra_sasaran s', 's.id = p.sasaran_id', 'left');
+            $this->db->join('renstra_tujuan t', 't.id = s.tujuan_id', 'left');
+            $this->db->join('akun_karyawan ak', 'ak.id = sk.bidang_id', 'left');
+            $this->db->where('t.kode_wilayah', $kode_wilayah);
+            $this->db->where('sk.deleted_at IS NULL');
+            $this->db->where('k.deleted_at IS NULL');
+            $this->db->where('p.deleted_at IS NULL');
+            $this->db->where('s.deleted_at IS NULL');
+            $this->db->where('t.deleted_at IS NULL');
+            if ($is_role_4 && $instansi_id) {
+                $this->db->where('t.id_instansi', $instansi_id);
+            }
+            $rows = $this->db->get()->result_array();
+            
+            // Cek keberadaan kolom target di renstra_sub_kegiatan_indikator
+            $escaped_field = $this->db->escape($target_field);
+            $col_exists = $this->db->query("SHOW COLUMNS FROM `renstra_sub_kegiatan_indikator` LIKE $escaped_field")->num_rows() > 0;
+            $select_target = $col_exists ? "$target_field as target" : "NULL as target";
+            
+            // Untuk setiap sub kegiatan, ambil sasaran dan indikator per sasaran
+            foreach ($rows as &$row) {
+                $sasarans = $this->db->select('id, sasaran_text')
+                    ->from('renstra_sub_kegiatan_sasaran')
+                    ->where('sub_kegiatan_id', $row['id'])
+                    ->where('deleted_at IS NULL')
+                    ->order_by('urutan', 'ASC')
+                    ->get()
+                    ->result_array();
+                
+                $all_indikators = [];
+                foreach ($sasarans as &$sas) {
+                    $sas_indikators = $this->db->select("id, indikator, satuan, $select_target")
+                        ->from('renstra_sub_kegiatan_indikator')
+                        ->where('sasaran_id', $sas['id'])
+                        ->where('deleted_at IS NULL')
+                        ->order_by('urutan', 'ASC')
+                        ->get()
+                        ->result_array();
+                    $sas['indikator_list'] = $sas_indikators;
+                    foreach ($sas_indikators as $si) {
+                        $all_indikators[] = $si;
+                    }
+                }
+                
+                $row['sasaran_list'] = $sasarans;
+                $row['sasaran'] = !empty($sasarans) ? implode('; ', array_column($sasarans, 'sasaran_text')) : '';
+                $row['indikator_list'] = $all_indikators;
+            }
+            $result = $rows;
         }
-        $programs = $this->db->get()->result_array();
-        
-        // Untuk setiap program, ambil semua indikator
-        foreach ($programs as &$prog) {
-            $indikator = $this->db->select("indikator, satuan, $target_field as target")
-                ->from('renstra_program_indikator')
-                ->where('program_id', $prog['id'])
-                ->where('deleted_at IS NULL')
-                ->order_by('urutan', 'ASC')
-                ->get()
-                ->result_array();
-            $prog['indikator_list'] = $indikator;
-        }
-        $result = $programs;
-    } elseif ($level == 'kegiatan') {
-        // Ambil kegiatan dengan indikator (satu per kegiatan)
-        $this->db->select("k.id, k.nama as nama, k.sasaran, ak.jabatan as sub_unit, 
-                           k.indikator, k.satuan, k.$target_field as target");
-        $this->db->from('renstra_kegiatan k');
-        $this->db->join('renstra_program p', 'p.id = k.program_id', 'left');
-        $this->db->join('renstra_sasaran s', 's.id = p.sasaran_id', 'left');
-        $this->db->join('renstra_tujuan t', 't.id = s.tujuan_id', 'left');
-        $this->db->join('akun_karyawan ak', 'ak.id = k.bidang_id', 'left');
-        $this->db->where('t.kode_wilayah', $kode_wilayah);
-        $this->db->where('k.deleted_at IS NULL');
-        $this->db->where('p.deleted_at IS NULL');
-        $this->db->where('s.deleted_at IS NULL');
-        $this->db->where('t.deleted_at IS NULL');
-        if ($is_role_4 && $instansi_id) {
-            $this->db->where('t.id_instansi', $instansi_id);
-        }
-        $rows = $this->db->get()->result_array();
-        // Ubah menjadi format indikator_list
-        foreach ($rows as &$row) {
-            $row['indikator_list'] = [
-                ['indikator' => $row['indikator'], 'satuan' => $row['satuan'], 'target' => $row['target']]
-            ];
-            unset($row['indikator'], $row['satuan'], $row['target']);
-        }
-        $result = $rows;
-    } elseif ($level == 'sub_kegiatan') {
-        // Ambil sub kegiatan dengan indikator (satu per sub kegiatan)
-        $this->db->select("sk.id, sk.nama as nama, sk.sasaran, ak.jabatan as sub_unit, 
-                           sk.indikator, sk.satuan, sk.$target_field as target");
-        $this->db->from('renstra_sub_kegiatan sk');
-        $this->db->join('renstra_kegiatan k', 'k.id = sk.kegiatan_id', 'left');
-        $this->db->join('renstra_program p', 'p.id = k.program_id', 'left');
-        $this->db->join('renstra_sasaran s', 's.id = p.sasaran_id', 'left');
-        $this->db->join('renstra_tujuan t', 't.id = s.tujuan_id', 'left');
-        $this->db->join('akun_karyawan ak', 'ak.id = sk.bidang_id', 'left');
-        $this->db->where('t.kode_wilayah', $kode_wilayah);
-        $this->db->where('sk.deleted_at IS NULL');
-        $this->db->where('k.deleted_at IS NULL');
-        $this->db->where('p.deleted_at IS NULL');
-        $this->db->where('s.deleted_at IS NULL');
-        $this->db->where('t.deleted_at IS NULL');
-        if ($is_role_4 && $instansi_id) {
-            $this->db->where('t.id_instansi', $instansi_id);
-        }
-        $rows = $this->db->get()->result_array();
-        foreach ($rows as &$row) {
-            $row['indikator_list'] = [
-                ['indikator' => $row['indikator'], 'satuan' => $row['satuan'], 'target' => $row['target']]
-            ];
-            unset($row['indikator'], $row['satuan'], $row['target']);
-        }
-        $result = $rows;
+    } catch (Exception $e) {
+        log_message('error', 'getSasaranByLevel Exception: ' . $e->getMessage());
+        echo json_encode(['status' => 'error', 'message' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+        return;
     }
     
-    echo json_encode(['status' => 'success', 'data' => $result]);
+    echo json_encode([
+        'status' => 'success',
+        'data' => $result,
+        '_debug' => [
+            'kode_wilayah' => $kode_wilayah,
+            'instansi_id' => $instansi_id,
+            'is_role_4' => $is_role_4,
+            'level' => $level,
+            'tahun' => $tahun,
+            'target_field' => $target_field,
+            'count' => count($result),
+        ]
+    ]);
     exit;
 }
 
@@ -12993,15 +13110,15 @@ public function getSasaranByLevel() {
  */
 public function simpanPerjanjianKinerja() {
     if (!$this->input->is_ajax_request()) show_404();
-    if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak!']);
+    if (!$this->can_crud() || !$this->is_role_4()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Akun Instansi (Role 4) yang berhak menambah data.']);
         return;
     }
     
     $KodeWilayah = $this->get_kode_wilayah();
     $instansi_id = $this->get_instansi_id();
     if (!$KodeWilayah || !$instansi_id) {
-        echo json_encode(['status' => 'error', 'message' => 'Data tidak lengkap']);
+        echo json_encode(['status' => 'error', 'message' => 'Sesi wilayah atau instansi tidak valid']);
         return;
     }
     
@@ -13014,44 +13131,48 @@ public function simpanPerjanjianKinerja() {
     $sasaran_level = $this->input->post('sasaran_level', TRUE);
     $sasaran_data = $this->input->post('sasaran_data', TRUE); // JSON string
     $sub_unit = trim($this->input->post('sub_unit', TRUE));
-    $status = $this->input->post('status', TRUE);
     
-    // Validasi
+    // Validasi input
     if (!$pegawai_pengampu_id || !$atasan_langsung_id || !$jenis_perjanjian || !$periode_awal || !$periode_akhir || !$sasaran_level || empty($sasaran_data)) {
         echo json_encode(['status' => 'error', 'message' => 'Semua field wajib diisi!']);
         return;
     }
     
-    // Upload dokumen
-    $dokumen_utama = '';
-    $dokumen_lampiran = '';
-    $config['upload_path'] = './uploads/perjanjian_kinerja/';
-    $config['allowed_types'] = 'pdf|doc|docx|jpg|png|jpeg';
-    $config['max_size'] = 2048;
-    $config['encrypt_name'] = TRUE;
-    $this->load->library('upload', $config);
-    if (!is_dir($config['upload_path'])) {
-        mkdir($config['upload_path'], 0777, TRUE);
-    }
-    
-    if (isset($_FILES['dokumen_utama']) && $_FILES['dokumen_utama']['error'] === UPLOAD_ERR_OK) {
-        if ($this->upload->do_upload('dokumen_utama')) {
-            $dokumen_utama = $this->upload->data('file_name');
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'Upload dokumen utama gagal: ' . $this->upload->display_errors('', '')]);
-            return;
+    // Upload Dokumen Helper
+    $upload_helper = function($fieldName) {
+        if (!isset($_FILES[$fieldName]) || $_FILES[$fieldName]['error'] !== UPLOAD_ERR_OK) {
+            return null;
         }
-    }
-    if (isset($_FILES['dokumen_lampiran']) && $_FILES['dokumen_lampiran']['error'] === UPLOAD_ERR_OK) {
-        if ($this->upload->do_upload('dokumen_lampiran')) {
-            $dokumen_lampiran = $this->upload->data('file_name');
-        } else {
-            if ($dokumen_utama) unlink($config['upload_path'] . $dokumen_utama);
-            echo json_encode(['status' => 'error', 'message' => 'Upload dokumen lampiran gagal: ' . $this->upload->display_errors('', '')]);
-            return;
+        $config['upload_path'] = './uploads/perjanjian_kinerja/';
+        $config['allowed_types'] = 'pdf|doc|docx|jpg|png|jpeg';
+        $config['max_size'] = 5120; // 5MB
+        $config['encrypt_name'] = TRUE;
+        $this->load->library('upload', $config);
+        $this->upload->initialize($config);
+        
+        if (!is_dir($config['upload_path'])) {
+            mkdir($config['upload_path'], 0777, TRUE);
         }
-    }
+        
+        if ($this->upload->do_upload($fieldName)) {
+            return $this->upload->data('file_name');
+        }
+        return false;
+    };
+
+    // Upload Definitif (PK Murni)
+    $dok_utama = $upload_helper('dokumen_utama');
+    $dok_lampiran = $upload_helper('dokumen_lampiran');
+
+    // Upload PK Perubahan
+    $dok_perubahan_utama = $upload_helper('dokumen_perubahan_utama');
+    $dok_perubahan_lampiran = $upload_helper('dokumen_perubahan_lampiran');
+
+    // Upload PK PLT
+    $dok_plt_utama = $upload_helper('dokumen_plt_utama');
+    $dok_plt_lampiran = $upload_helper('dokumen_plt_lampiran');
     
+    $doc_time = time();
     $data = [
         'kode_wilayah' => $KodeWilayah,
         'id_instansi' => $instansi_id,
@@ -13064,26 +13185,30 @@ public function simpanPerjanjianKinerja() {
         'sasaran_level' => $sasaran_level,
         'sasaran_data' => $sasaran_data,
         'sub_unit' => $sub_unit,
-        'status' => $status,
-        'definitif_doc_id' => ($jenis_perjanjian == 'PK Murni') ? 'DOC-' . time() : null,
-        'pk_perubahan_doc_id' => ($jenis_perjanjian == 'PK Perubahan') ? 'DOC-' . time() : null,
-        'pk_plt_doc_id' => ($jenis_perjanjian == 'PK PLT') ? 'DOC-' . time() : null,
-        'dokumen_utama' => $dokumen_utama,
-        'dokumen_lampiran' => $dokumen_lampiran,
+        'status' => 'menunggu', // Default status saat input data selalu otomatis 'menunggu'
+        'definitif_doc_id' => ($dok_utama || $jenis_perjanjian == 'PK Murni') ? 'DOC-' . $doc_time : null,
+        'pk_perubahan_doc_id' => ($dok_perubahan_utama || $jenis_perjanjian == 'PK Perubahan') ? 'DOC-P-' . $doc_time : null,
+        'pk_plt_doc_id' => ($dok_plt_utama || $jenis_perjanjian == 'PK PLT') ? 'DOC-PLT-' . $doc_time : null,
+        'dokumen_utama' => $dok_utama ?: null,
+        'dokumen_lampiran' => $dok_lampiran ?: null,
+        'dokumen_perubahan_utama' => $dok_perubahan_utama ?: null,
+        'dokumen_perubahan_lampiran' => $dok_perubahan_lampiran ?: null,
+        'dokumen_plt_utama' => $dok_plt_utama ?: null,
+        'dokumen_plt_lampiran' => $dok_plt_lampiran ?: null,
         'created_at' => date('Y-m-d H:i:s'),
         'updated_at' => date('Y-m-d H:i:s')
     ];
     
     $this->db->insert('perjanjian_kinerja', $data);
     if ($this->db->affected_rows() > 0) {
-        echo json_encode(['status' => 'success', 'message' => 'Perjanjian Kinerja berhasil disimpan']);
+        echo json_encode(['status' => 'success', 'message' => 'Perjanjian Kinerja berhasil disimpan dengan status Menunggu']);
     } else {
         echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data']);
     }
 }
 
 /**
- * Get Perjanjian Kinerja by ID (AJAX) - untuk edit
+ * Get Perjanjian Kinerja by ID (AJAX) - untuk edit & detail
  */
 public function getPerjanjianKinerja() {
     if (!$this->input->is_ajax_request()) show_404();
@@ -13092,8 +13217,31 @@ public function getPerjanjianKinerja() {
         echo json_encode(['status' => 'error', 'message' => 'ID tidak valid']);
         return;
     }
-    $data = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('perjanjian_kinerja')->row_array();
+    $data = $this->db
+        ->select('pk.*, 
+            p.nama as pengampu_nama, p.nip as pengampu_nip, p.jabatan as pengampu_jabatan, p.satuan_unit_kerja as pengampu_satuan, p.eselon as pengampu_eselon,
+            a.nama as atasan_nama, a.nip as atasan_nip, a.jabatan as atasan_jabatan, a.satuan_unit_kerja as atasan_satuan')
+        ->from('perjanjian_kinerja pk')
+        ->join('akun_karyawan p', 'p.id = pk.pegawai_pengampu_id', 'left')
+        ->join('akun_karyawan a', 'a.id = pk.atasan_langsung_id', 'left')
+        ->where('pk.id', $id)
+        ->where('pk.deleted_at IS NULL')
+        ->get()
+        ->row_array();
+        
     if ($data) {
+        // URLs Dokumen Definitif
+        $data['dokumen_utama_url'] = !empty($data['dokumen_utama']) ? base_url('uploads/perjanjian_kinerja/' . $data['dokumen_utama']) : '';
+        $data['dokumen_lampiran_url'] = !empty($data['dokumen_lampiran']) ? base_url('uploads/perjanjian_kinerja/' . $data['dokumen_lampiran']) : '';
+        
+        // URLs Dokumen PK Perubahan
+        $data['dokumen_perubahan_utama_url'] = !empty($data['dokumen_perubahan_utama']) ? base_url('uploads/perjanjian_kinerja/' . $data['dokumen_perubahan_utama']) : '';
+        $data['dokumen_perubahan_lampiran_url'] = !empty($data['dokumen_perubahan_lampiran']) ? base_url('uploads/perjanjian_kinerja/' . $data['dokumen_perubahan_lampiran']) : '';
+        
+        // URLs Dokumen PK PLT
+        $data['dokumen_plt_utama_url'] = !empty($data['dokumen_plt_utama']) ? base_url('uploads/perjanjian_kinerja/' . $data['dokumen_plt_utama']) : '';
+        $data['dokumen_plt_lampiran_url'] = !empty($data['dokumen_plt_lampiran']) ? base_url('uploads/perjanjian_kinerja/' . $data['dokumen_plt_lampiran']) : '';
+        
         echo json_encode(['status' => 'success', 'data' => $data]);
     } else {
         echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
@@ -13101,12 +13249,12 @@ public function getPerjanjianKinerja() {
 }
 
 /**
- * Update Perjanjian Kinerja (AJAX)
+ * Update Perjanjian Kinerja (AJAX) - Hanya Akun Instansi Role 4 pada wilayah terkait
  */
 public function updatePerjanjianKinerja() {
     if (!$this->input->is_ajax_request()) show_404();
-    if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak!']);
+    if (!$this->can_crud() || !$this->is_role_4()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Akun Instansi (Role 4) pada wilayah ini yang berhak mengedit data.']);
         return;
     }
     
@@ -13116,10 +13264,13 @@ public function updatePerjanjianKinerja() {
         return;
     }
     
-    // Cek kepemilikan
+    $KodeWilayah = $this->get_kode_wilayah();
+    $instansi_id = $this->get_instansi_id();
+    
+    // Cek kepemilikan data instansi dan wilayah
     $existing = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('perjanjian_kinerja')->row();
-    if (!$existing || $existing->id_instansi != $this->get_instansi_id()) {
-        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan atau bukan milik Anda']);
+    if (!$existing || $existing->id_instansi != $instansi_id || $existing->kode_wilayah != $KodeWilayah) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Data tidak ditemukan atau bukan milik Instansi Anda pada wilayah ini.']);
         return;
     }
     
@@ -13132,44 +13283,87 @@ public function updatePerjanjianKinerja() {
     $sasaran_level = $this->input->post('sasaran_level', TRUE);
     $sasaran_data = $this->input->post('sasaran_data', TRUE);
     $sub_unit = trim($this->input->post('sub_unit', TRUE));
-    $status = $this->input->post('status', TRUE);
     
-    // Upload dokumen baru jika ada
-    $config['upload_path'] = './uploads/perjanjian_kinerja/';
-    $config['allowed_types'] = 'pdf|doc|docx|jpg|png|jpeg';
-    $config['max_size'] = 2048;
-    $config['encrypt_name'] = TRUE;
-    $this->load->library('upload', $config);
-    if (!is_dir($config['upload_path'])) {
-        mkdir($config['upload_path'], 0777, TRUE);
+    // Helper upload & delete file
+    $upload_path = './uploads/perjanjian_kinerja/';
+    if (!is_dir($upload_path)) {
+        mkdir($upload_path, 0777, TRUE);
     }
-    
-    $dokumen_utama = $existing->dokumen_utama;
-    $dokumen_lampiran = $existing->dokumen_lampiran;
-    
-    if (isset($_FILES['dokumen_utama']) && $_FILES['dokumen_utama']['error'] === UPLOAD_ERR_OK) {
-        if ($dokumen_utama && file_exists($config['upload_path'] . $dokumen_utama)) {
-            unlink($config['upload_path'] . $dokumen_utama);
+
+    $upload_helper = function($fieldName, $existingFile, $deleteFlag) use ($upload_path) {
+        // 1. Jika ada upload file baru
+        if (isset($_FILES[$fieldName]) && $_FILES[$fieldName]['error'] === UPLOAD_ERR_OK) {
+            $config['upload_path'] = $upload_path;
+            $config['allowed_types'] = 'pdf|doc|docx|jpg|png|jpeg';
+            $config['max_size'] = 5120;
+            $config['encrypt_name'] = TRUE;
+            $this->load->library('upload', $config);
+            $this->upload->initialize($config);
+            
+            if ($this->upload->do_upload($fieldName)) {
+                // Hapus file lama jika ada
+                if ($existingFile && file_exists($upload_path . $existingFile)) {
+                    @unlink($upload_path . $existingFile);
+                }
+                return $this->upload->data('file_name');
+            }
         }
-        if ($this->upload->do_upload('dokumen_utama')) {
-            $dokumen_utama = $this->upload->data('file_name');
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'Upload dokumen utama gagal: ' . $this->upload->display_errors('', '')]);
-            return;
+        
+        // 2. Jika user meminta hapus file lama (tanpa upload baru)
+        if ($deleteFlag == 1) {
+            if ($existingFile && file_exists($upload_path . $existingFile)) {
+                @unlink($upload_path . $existingFile);
+            }
+            return null;
         }
+
+        // 3. Pertahankan file lama
+        return $existingFile;
+    };
+
+    $del_utama = (int)$this->input->post('delete_dokumen_utama', TRUE);
+    $del_lampiran = (int)$this->input->post('delete_dokumen_lampiran', TRUE);
+    $del_perubahan_utama = (int)$this->input->post('delete_dokumen_perubahan_utama', TRUE);
+    $del_perubahan_lampiran = (int)$this->input->post('delete_dokumen_perubahan_lampiran', TRUE);
+    $del_plt_utama = (int)$this->input->post('delete_dokumen_plt_utama', TRUE);
+    $del_plt_lampiran = (int)$this->input->post('delete_dokumen_plt_lampiran', TRUE);
+
+    // Definitif
+    $dok_utama = $upload_helper('dokumen_utama', $existing->dokumen_utama, $del_utama);
+    $dok_lampiran = $upload_helper('dokumen_lampiran', $existing->dokumen_lampiran, $del_lampiran);
+
+    // PK Perubahan
+    $dok_perubahan_utama = $upload_helper('dokumen_perubahan_utama', $existing->dokumen_perubahan_utama, $del_perubahan_utama);
+    $dok_perubahan_lampiran = $upload_helper('dokumen_perubahan_lampiran', $existing->dokumen_perubahan_lampiran, $del_perubahan_lampiran);
+
+    // PK PLT
+    $dok_plt_utama = $upload_helper('dokumen_plt_utama', $existing->dokumen_plt_utama, $del_plt_utama);
+    $dok_plt_lampiran = $upload_helper('dokumen_plt_lampiran', $existing->dokumen_plt_lampiran, $del_plt_lampiran);
+
+    $doc_time = time();
+    
+    // Hitung doc_id
+    $definitif_doc_id = $existing->definitif_doc_id;
+    if ($dok_utama || $dok_lampiran) {
+        if (!$definitif_doc_id) $definitif_doc_id = 'DOC-' . $doc_time;
+    } else {
+        $definitif_doc_id = ($jenis_perjanjian == 'PK Murni') ? ($definitif_doc_id ?: 'DOC-' . $doc_time) : null;
     }
-    if (isset($_FILES['dokumen_lampiran']) && $_FILES['dokumen_lampiran']['error'] === UPLOAD_ERR_OK) {
-        if ($dokumen_lampiran && file_exists($config['upload_path'] . $dokumen_lampiran)) {
-            unlink($config['upload_path'] . $dokumen_lampiran);
-        }
-        if ($this->upload->do_upload('dokumen_lampiran')) {
-            $dokumen_lampiran = $this->upload->data('file_name');
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'Upload dokumen lampiran gagal: ' . $this->upload->display_errors('', '')]);
-            return;
-        }
+
+    $pk_perubahan_doc_id = $existing->pk_perubahan_doc_id;
+    if ($dok_perubahan_utama || $dok_perubahan_lampiran) {
+        if (!$pk_perubahan_doc_id) $pk_perubahan_doc_id = 'DOC-P-' . $doc_time;
+    } else {
+        $pk_perubahan_doc_id = ($jenis_perjanjian == 'PK Perubahan') ? ($pk_perubahan_doc_id ?: 'DOC-P-' . $doc_time) : null;
     }
-    
+
+    $pk_plt_doc_id = $existing->pk_plt_doc_id;
+    if ($dok_plt_utama || $dok_plt_lampiran) {
+        if (!$pk_plt_doc_id) $pk_plt_doc_id = 'DOC-PLT-' . $doc_time;
+    } else {
+        $pk_plt_doc_id = ($jenis_perjanjian == 'PK PLT') ? ($pk_plt_doc_id ?: 'DOC-PLT-' . $doc_time) : null;
+    }
+
     $data = [
         'pegawai_pengampu_id' => $pegawai_pengampu_id,
         'atasan_langsung_id' => $atasan_langsung_id,
@@ -13180,45 +13374,96 @@ public function updatePerjanjianKinerja() {
         'sasaran_level' => $sasaran_level,
         'sasaran_data' => $sasaran_data,
         'sub_unit' => $sub_unit,
-        'status' => $status,
-        'dokumen_utama' => $dokumen_utama,
-        'dokumen_lampiran' => $dokumen_lampiran,
+        'definitif_doc_id' => $definitif_doc_id,
+        'pk_perubahan_doc_id' => $pk_perubahan_doc_id,
+        'pk_plt_doc_id' => $pk_plt_doc_id,
+        'dokumen_utama' => $dok_utama,
+        'dokumen_lampiran' => $dok_lampiran,
+        'dokumen_perubahan_utama' => $dok_perubahan_utama,
+        'dokumen_perubahan_lampiran' => $dok_perubahan_lampiran,
+        'dokumen_plt_utama' => $dok_plt_utama,
+        'dokumen_plt_lampiran' => $dok_plt_lampiran,
         'updated_at' => date('Y-m-d H:i:s')
     ];
     
     $this->db->where('id', $id)->update('perjanjian_kinerja', $data);
-    echo json_encode(['status' => 'success', 'message' => 'Data berhasil diperbarui']);
+    echo json_encode(['status' => 'success', 'message' => 'Perjanjian Kinerja berhasil diperbarui']);
 }
 
 /**
- * Hapus Perjanjian Kinerja (AJAX)
+ * Hapus Perjanjian Kinerja (AJAX) - Hanya Akun Instansi Role 4 pada wilayah terkait
  */
 public function hapusPerjanjianKinerja() {
     if (!$this->input->is_ajax_request()) show_404();
-    if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak!']);
+    if (!$this->can_crud() || !$this->is_role_4()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Akun Instansi (Role 4) pada wilayah ini yang berhak menghapus data.']);
         return;
     }
+    
     $id = (int)$this->input->post('id', TRUE);
     if (!$id) {
         echo json_encode(['status' => 'error', 'message' => 'ID tidak valid']);
         return;
     }
+    
+    $KodeWilayah = $this->get_kode_wilayah();
+    $instansi_id = $this->get_instansi_id();
+    
     $existing = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('perjanjian_kinerja')->row();
-    if (!$existing || $existing->id_instansi != $this->get_instansi_id()) {
-        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan atau bukan milik Anda']);
+    if (!$existing || $existing->id_instansi != $instansi_id || $existing->kode_wilayah != $KodeWilayah) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Data tidak ditemukan atau bukan milik Instansi Anda pada wilayah ini.']);
         return;
     }
-    // Hapus file
+    
+    // Hapus file fisik
     $path = './uploads/perjanjian_kinerja/';
-    if ($existing->dokumen_utama && file_exists($path . $existing->dokumen_utama)) {
-        unlink($path . $existing->dokumen_utama);
+    $files = [$existing->dokumen_utama, $existing->dokumen_lampiran, $existing->dokumen_perubahan_utama, $existing->dokumen_perubahan_lampiran, $existing->dokumen_plt_utama, $existing->dokumen_plt_lampiran];
+    foreach ($files as $f) {
+        if ($f && file_exists($path . $f)) {
+            @unlink($path . $f);
+        }
     }
-    if ($existing->dokumen_lampiran && file_exists($path . $existing->dokumen_lampiran)) {
-        unlink($path . $existing->dokumen_lampiran);
-    }
+    
     $this->db->where('id', $id)->update('perjanjian_kinerja', ['deleted_at' => date('Y-m-d H:i:s')]);
     echo json_encode(['status' => 'success', 'message' => 'Data berhasil dihapus']);
+}
+
+/**
+ * Update Status Perjanjian Kinerja (AJAX) - Khusus Akun Daerah Level 3
+ */
+public function updateStatusPerjanjianKinerja() {
+    if (!$this->input->is_ajax_request()) show_404();
+    if (!$this->is_role_3()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Akun Daerah (Level 3) yang berhak mengubah status verifikasi.']);
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', TRUE);
+    $status = strtolower(trim($this->input->post('status', TRUE)));
+    
+    if (!$id || !in_array($status, ['menunggu', 'disetujui', 'ditolak'])) {
+        echo json_encode(['status' => 'error', 'message' => 'Status atau ID tidak valid!']);
+        return;
+    }
+    
+    $KodeWilayah = $this->get_kode_wilayah();
+    $existing = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('perjanjian_kinerja')->row();
+    
+    if (!$existing || $existing->kode_wilayah != $KodeWilayah) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan atau berada di luar wilayah Anda.']);
+        return;
+    }
+    
+    $this->db->where('id', $id)->update('perjanjian_kinerja', [
+        'status' => $status,
+        'updated_at' => date('Y-m-d H:i:s')
+    ]);
+    
+    echo json_encode([
+        'status' => 'success', 
+        'message' => 'Status Perjanjian Kinerja berhasil diubah menjadi ' . ucfirst($status),
+        'new_status' => $status
+    ]);
 }
 
 }

@@ -263,9 +263,9 @@ function hitungTotalAnggaranProgram($program) {
 
                         <!-- FILTER WILAYAH -->
                         <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-                            <div class="form-example-wrap" style="margin-bottom:20px;">
-                                <div class="row filter-row">
-                                    <div class="col-lg-3 col-md-6">
+                            <div class="form-example-wrap" style="margin-bottom:20px; background:#fff; padding:15px 20px; border-radius:6px; border:1px solid #e2e8f0; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                                <div class="row filter-row" style="display:flex; align-items:flex-end; flex-wrap:wrap; gap:12px;">
+                                    <div class="col-lg-3 col-md-4 col-sm-6">
                                         <div class="filter-group">
                                             <label for="Provinsi"><b>Provinsi</b></label>
                                             <select class="form-control filter-select" id="Provinsi">
@@ -278,7 +278,7 @@ function hitungTotalAnggaranProgram($program) {
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-lg-3 col-md-6">
+                                    <div class="col-lg-3 col-md-4 col-sm-6">
                                         <div class="filter-group">
                                             <label for="KabKota"><b>Kab/Kota</b></label>
                                             <select class="form-control filter-select" id="KabKota">
@@ -286,13 +286,37 @@ function hitungTotalAnggaranProgram($program) {
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-lg-2 col-md-6">
-                                        <div class="filter-group" style="margin-top:28px;">
-                                            <button class="btn btn-primary btn-block" id="Filter"><b>Filter</b></button>
+                                    <div class="col-lg-3 col-md-4 col-sm-6" id="FilterInstansiGroup" style="display: none;">
+                                        <div class="filter-group">
+                                            <label for="FilterInstansiBeforeLogin"><b>Instansi / Perangkat Daerah</b></label>
+                                            <select class="form-control filter-select" id="FilterInstansiBeforeLogin">
+                                                <option value="">-- Semua Instansi --</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2 col-md-3 col-sm-6">
+                                        <div class="filter-group">
+                                            <button class="btn btn-primary btn-block" id="Filter" style="font-weight:600;"><i class="fa fa-filter"></i> Filter</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <?php if (!empty($KodeWilayah)) { ?>
+                                <?php
+                                    $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+                                    $nama_wilayah = $wilayah ? html_escape($wilayah['Nama']) : 'Wilayah Tidak Ditemukan';
+                                ?>
+                                <div class="alert alert-info" style="margin-bottom: 20px; font-size:13px;">
+                                    <strong><i class="fa fa-map-marker"></i> Wilayah terpilih:</strong> <?= $nama_wilayah ?>
+                                    <?php 
+                                    if (!empty($FilterInstansiId)) { 
+                                        $instansi_terpilih = $this->db->select('nama')->from('akun_instansi')->where('id', $FilterInstansiId)->get()->row_array();
+                                    ?>
+                                        | <strong><i class="fa fa-building"></i> Instansi:</strong> <?= htmlspecialchars($instansi_terpilih['nama'] ?? '-') ?>
+                                    <?php } ?>
+                                </div>
+                            <?php } ?>
                         <?php } ?>
 
                         <!-- FILTER INSTANSI -->
@@ -591,53 +615,63 @@ function hitungTotalAnggaranProgram($program) {
                                                                 
                                                                 <!-- 2026 -->
                                                                 <td><?= html_escape($firstIndikator['target_2026'] ?? '-') ?></td>
-                                                                <td class="pagu-col">
-                                                                    <?php if ($isFirstProgramRow && !empty($totalAnggaranProgram['2026'])): ?>
-                                                                        <?= number_format($totalAnggaranProgram['2026'], 0, ',', '.') ?>
-                                                                    <?php else: ?>
-                                                                        -
-                                                                    <?php endif; ?>
-                                                                </td>
+                                                                <?php if ($isFirstRow) { ?>
+                                                                    <td class="pagu-col" rowspan="<?= $totalIndikatorProgram ?>">
+                                                                        <?php if (!empty($totalAnggaranProgram['2026'])): ?>
+                                                                            <?= number_format($totalAnggaranProgram['2026'], 0, ',', '.') ?>
+                                                                        <?php else: ?>
+                                                                            -
+                                                                        <?php endif; ?>
+                                                                    </td>
+                                                                <?php } ?>
                                                                 
                                                                 <!-- 2027 -->
                                                                 <td><?= html_escape($firstIndikator['target_2027'] ?? '-') ?></td>
-                                                                <td class="pagu-col">
-                                                                    <?php if ($isFirstProgramRow && !empty($totalAnggaranProgram['2027'])): ?>
-                                                                        <?= number_format($totalAnggaranProgram['2027'], 0, ',', '.') ?>
-                                                                    <?php else: ?>
-                                                                        -
-                                                                    <?php endif; ?>
-                                                                </td>
+                                                                <?php if ($isFirstRow) { ?>
+                                                                    <td class="pagu-col" rowspan="<?= $totalIndikatorProgram ?>">
+                                                                        <?php if (!empty($totalAnggaranProgram['2027'])): ?>
+                                                                            <?= number_format($totalAnggaranProgram['2027'], 0, ',', '.') ?>
+                                                                        <?php else: ?>
+                                                                            -
+                                                                        <?php endif; ?>
+                                                                    </td>
+                                                                <?php } ?>
                                                                 
                                                                 <!-- 2028 -->
                                                                 <td><?= html_escape($firstIndikator['target_2028'] ?? '-') ?></td>
-                                                                <td class="pagu-col">
-                                                                    <?php if ($isFirstProgramRow && !empty($totalAnggaranProgram['2028'])): ?>
-                                                                        <?= number_format($totalAnggaranProgram['2028'], 0, ',', '.') ?>
-                                                                    <?php else: ?>
-                                                                        -
-                                                                    <?php endif; ?>
-                                                                </td>
+                                                                <?php if ($isFirstRow) { ?>
+                                                                    <td class="pagu-col" rowspan="<?= $totalIndikatorProgram ?>">
+                                                                        <?php if (!empty($totalAnggaranProgram['2028'])): ?>
+                                                                            <?= number_format($totalAnggaranProgram['2028'], 0, ',', '.') ?>
+                                                                        <?php else: ?>
+                                                                            -
+                                                                        <?php endif; ?>
+                                                                    </td>
+                                                                <?php } ?>
                                                                 
                                                                 <!-- 2029 -->
                                                                 <td><?= html_escape($firstIndikator['target_2029'] ?? '-') ?></td>
-                                                                <td class="pagu-col">
-                                                                    <?php if ($isFirstProgramRow && !empty($totalAnggaranProgram['2029'])): ?>
-                                                                        <?= number_format($totalAnggaranProgram['2029'], 0, ',', '.') ?>
-                                                                    <?php else: ?>
-                                                                        -
-                                                                    <?php endif; ?>
-                                                                </td>
+                                                                <?php if ($isFirstRow) { ?>
+                                                                    <td class="pagu-col" rowspan="<?= $totalIndikatorProgram ?>">
+                                                                        <?php if (!empty($totalAnggaranProgram['2029'])): ?>
+                                                                            <?= number_format($totalAnggaranProgram['2029'], 0, ',', '.') ?>
+                                                                        <?php else: ?>
+                                                                            -
+                                                                        <?php endif; ?>
+                                                                    </td>
+                                                                <?php } ?>
                                                                 
                                                                 <!-- 2030 -->
                                                                 <td><?= html_escape($firstIndikator['target_2030'] ?? '-') ?></td>
-                                                                <td class="pagu-col">
-                                                                    <?php if ($isFirstProgramRow && !empty($totalAnggaranProgram['2030'])): ?>
-                                                                        <?= number_format($totalAnggaranProgram['2030'], 0, ',', '.') ?>
-                                                                    <?php else: ?>
-                                                                        -
-                                                                    <?php endif; ?>
-                                                                </td>
+                                                                <?php if ($isFirstRow) { ?>
+                                                                    <td class="pagu-col" rowspan="<?= $totalIndikatorProgram ?>">
+                                                                        <?php if (!empty($totalAnggaranProgram['2030'])): ?>
+                                                                            <?= number_format($totalAnggaranProgram['2030'], 0, ',', '.') ?>
+                                                                        <?php else: ?>
+                                                                            -
+                                                                        <?php endif; ?>
+                                                                    </td>
+                                                                <?php } ?>
                                                                 
                                                                 <!-- AKSI PROGRAM - ROWSPAN TOTAL INDIKATOR -->
                                                                 <?php if ($IsRole4 && $isFirstRow) { ?>
@@ -654,7 +688,7 @@ function hitungTotalAnggaranProgram($program) {
                                                             
                                                             <?php
                                                             // ============================================================
-                                                            // INDIKATOR KE-2, KE-3, DST UNTUK OUTCOME YANG SAMA
+                                                             // INDIKATOR KE-2, KE-3, DST UNTUK OUTCOME YANG SAMA
                                                             // ============================================================
                                                             if (count($indikator_list) > 1) {
                                                                 for ($i = 1; $i < count($indikator_list); $i++) {
@@ -674,23 +708,18 @@ function hitungTotalAnggaranProgram($program) {
                                                                         
                                                                         <!-- 2026 -->
                                                                         <td><?= html_escape($indikator['target_2026'] ?? '-') ?></td>
-                                                                        <td class="pagu-col">-</td>
                                                                         
                                                                         <!-- 2027 -->
                                                                         <td><?= html_escape($indikator['target_2027'] ?? '-') ?></td>
-                                                                        <td class="pagu-col">-</td>
                                                                         
                                                                         <!-- 2028 -->
                                                                         <td><?= html_escape($indikator['target_2028'] ?? '-') ?></td>
-                                                                        <td class="pagu-col">-</td>
                                                                         
                                                                         <!-- 2029 -->
                                                                         <td><?= html_escape($indikator['target_2029'] ?? '-') ?></td>
-                                                                        <td class="pagu-col">-</td>
                                                                         
                                                                         <!-- 2030 -->
                                                                         <td><?= html_escape($indikator['target_2030'] ?? '-') ?></td>
-                                                                        <td class="pagu-col">-</td>
                                                                     </tr>
                                                                     <?php
                                                                 }
@@ -1728,17 +1757,24 @@ function resetSubKegiatanDropdowns() {
 $(document).ready(function() {
 
     <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
+    var CURRENT_FILTER_INSTANSI = "<?= !empty($FilterInstansiId) ? $FilterInstansiId : '' ?>";
+
     $("#Provinsi").change(function() {
-        if ($(this).val() === "") {
+        var provinsiKode = $(this).val();
+        if (provinsiKode === "") {
             $("#KabKota").html('<option value="">Pilih Kab/Kota</option>');
+            $("#FilterInstansiGroup").hide();
             return;
         }
         $.ajax({
             url: BaseURL + "Instansi/GetListKabKota",
             type: "POST",
-            data: { Kode: $(this).val(), [CSRF_NAME]: CSRF_TOKEN },
+            data: { Kode: provinsiKode, [CSRF_NAME]: CSRF_TOKEN },
             dataType: 'json',
-            beforeSend: function() { $("#KabKota").prop('disabled', true).html('<option value="">Memuat...</option>'); },
+            beforeSend: function() { 
+                $("#KabKota").prop('disabled', true).html('<option value="">Memuat...</option>');
+                $("#FilterInstansiGroup").hide();
+            },
             success: function(Data) {
                 var options = '<option value="">Pilih Kab/Kota</option>';
                 if (Data && Data.length > 0) {
@@ -1747,6 +1783,43 @@ $(document).ready(function() {
                     }
                 }
                 $("#KabKota").html(options).prop('disabled', false);
+            },
+            error: function() {
+                alert("Gagal memuat data Kab/Kota");
+                $("#KabKota").html('<option value="">Pilih Kab/Kota</option>').prop('disabled', false);
+            }
+        });
+    });
+
+    $("#KabKota").change(function() {
+        var kabKotaKode = $(this).val();
+        if (kabKotaKode === "") {
+            $("#FilterInstansiGroup").hide();
+            return;
+        }
+        $.ajax({
+            url: BaseURL + "Instansi/GetListInstansiLevel4",
+            type: "POST",
+            data: { kode_wilayah: kabKotaKode, [CSRF_NAME]: CSRF_TOKEN },
+            dataType: 'json',
+            beforeSend: function() { 
+                $("#FilterInstansiBeforeLogin").html('<option value="">Memuat...</option>');
+                $("#FilterInstansiGroup").show();
+            },
+            success: function(Data) {
+                var options = '<option value="">-- Semua Instansi --</option>';
+                if (Data && Data.length > 0) {
+                    for (var i = 0; i < Data.length; i++) {
+                        var selected = (CURRENT_FILTER_INSTANSI == Data[i].id) ? 'selected' : '';
+                        options += '<option value="' + Data[i].id + '" ' + selected + '>' + Data[i].nama + '</option>';
+                    }
+                }
+                $("#FilterInstansiBeforeLogin").html(options);
+                $("#FilterInstansiGroup").show();
+            },
+            error: function() {
+                alert("Gagal memuat data Instansi");
+                $("#FilterInstansiBeforeLogin").html('<option value="">-- Semua Instansi --</option>');
             }
         });
     });
@@ -1755,7 +1828,7 @@ $(document).ready(function() {
         if ($("#Provinsi").val() === "") { alert("Mohon Pilih Provinsi"); return; }
         if ($("#KabKota").val() === "") { alert("Mohon Pilih Kab/Kota"); return; }
         var kodeWilayah = $("#KabKota").val();
-        var instansiId = $("#FilterInstansi").val() || "";
+        var instansiId = $("#FilterInstansiBeforeLogin").val() || "";
         $.ajax({
             url: BaseURL + "Instansi/SetTempKodeWilayah",
             type: "POST",
@@ -1771,9 +1844,25 @@ $(document).ready(function() {
                     $("#Filter").prop('disabled', false).text('Filter');
                 }
             },
-            error: function() { alert("Gagal menghubungi server!"); }
+            error: function() { alert("Gagal menghubungi server!"); $("#Filter").prop('disabled', false).text('Filter'); }
         });
     });
+
+    <?php if (!empty($KodeWilayah)) { ?>
+        var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
+        var kodeKab  = "<?= $KodeWilayah ?>";
+        $("#Provinsi").val(kodeProv).trigger('change');
+        setTimeout(function() {
+            $("#KabKota").val(kodeKab).trigger('change');
+            <?php if (!empty($FilterInstansiId)) { ?>
+                setTimeout(function() {
+                    if ($("#FilterInstansiBeforeLogin option[value='<?= $FilterInstansiId ?>']").length > 0) {
+                        $("#FilterInstansiBeforeLogin").val("<?= $FilterInstansiId ?>");
+                    }
+                }, 800);
+            <?php } ?>
+        }, 500);
+    <?php } ?>
     <?php } ?>
 
     <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>

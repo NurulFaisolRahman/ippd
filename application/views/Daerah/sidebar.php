@@ -440,17 +440,6 @@
                 </div>
             </li>
 
-            <li class="sidebar-dropdown">
-                <a href="#">
-                    <i class="bi bi-file-check"></i>
-                    <span>Perjanjian Kinerja</span>
-                    <i class="fa fa-chevron-down"></i>
-                </a>
-                <div class="sidebar-submenu">
-                    <a href="<?=base_url('Instansi/PerjanjianKinerjaPD')?>">Daftar PK</a>
-                </div>
-            </li>
-
              <li class="sidebar-dropdown">
                 <a href="#">
                     <i class="bi bi-briefcase-fill"></i>
@@ -471,6 +460,17 @@
                     <a href="<?=base_url('Instansi/IkuPD')?>">IKU PD</a>
                     <a href="<?=base_url('Instansi/IkkPD')?>">IKK PD</a>
                     <a href="<?=base_url('Instansi/MenuRenstraPD')?>">Menu Renstra PD</a>
+                </div>
+            </li>
+
+             <li class="sidebar-dropdown">
+                <a href="#">
+                    <i class="bi bi-file-check"></i>
+                    <span>Perjanjian Kinerja</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Instansi/PerjanjianKinerjaPD')?>">Daftar PK</a>
                 </div>
             </li>
 
