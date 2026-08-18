@@ -1832,7 +1832,7 @@ $(document).ready(function() {
     });
 
     // Klik kolom dokumen atau tombol Detail dari tabel (Langsung munculkan pop-up sesuai tipe dokumen)
-    $(document).on('click', '.cell-doc-clickable, function() {
+    $(document).on('click', '.cell-doc-clickable', function() {
         var id = $(this).data('id');
         var docType = $(this).data('doctype') || 'definitif'; // 'definitif', 'perubahan', atau 'plt'
         var initialSlide = $(this).data('slide') || 'utama';
