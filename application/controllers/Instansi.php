@@ -9818,6 +9818,17 @@ private function getRenstraPDDataWithOutcome($KodeWilayah, $instansi_id, $is_rol
     $tujuan_list = $this->db->order_by('id', 'ASC')->get()->result_array();
     
     foreach ($tujuan_list as &$tujuan) {
+        // Ambil Indikator Tujuan
+        $tujuan['indikators'] = $this->db
+            ->select('*')
+            ->from('renstra_tujuan_indikator')
+            ->where('tujuan_id', $tujuan['id'])
+            ->where('deleted_at IS NULL')
+            ->order_by('urutan', 'ASC')
+            ->order_by('id', 'ASC')
+            ->get()
+            ->result_array();
+
         // 2. Ambil Sasaran per Tujuan
         $tujuan['sasaran_list'] = $this->getRenstraSasaranWithProgramsOutcomeFull($tujuan['id'], $KodeWilayah);
     }
@@ -9835,6 +9846,17 @@ private function getRenstraSasaranWithProgramsOutcomeFull($tujuan_id, $KodeWilay
     $sasaran_list = $this->db->order_by('id', 'ASC')->get()->result_array();
     
     foreach ($sasaran_list as &$sasaran) {
+        // Ambil Indikator Sasaran
+        $sasaran['indikators'] = $this->db
+            ->select('*')
+            ->from('renstra_sasaran_indikator')
+            ->where('sasaran_id', $sasaran['id'])
+            ->where('deleted_at IS NULL')
+            ->order_by('urutan', 'ASC')
+            ->order_by('id', 'ASC')
+            ->get()
+            ->result_array();
+
         // Ambil Program dengan OUTCOME, INDIKATOR, KEGIATAN, & SUB KEGIATAN
         $sasaran['program_list'] = $this->getRenstraProgramWithFullData($sasaran['id']);
     }
@@ -10364,40 +10386,52 @@ public function tambahRenstraTujuanPD() {
     $sasaran_rpjmd_id = $this->input->post('sasaran_rpjmd_id', TRUE) ?: null;
     $uraian = trim($this->input->post('uraian', TRUE));
     $bidang_id = $this->input->post('bidang_id', TRUE) ?: null;
-    $indikator = trim($this->input->post('indikator', TRUE));
-    $satuan = trim($this->input->post('satuan', TRUE));
     
     if (empty($uraian)) {
         echo json_encode(['status' => 'error', 'message' => 'Uraian Tujuan wajib diisi!']);
         return;
     }
     
-    // Parse anggaran
-    $anggaran = [];
-    for ($y = 2025; $y <= 2030; $y++) {
-        $anggaran["anggaran_$y"] = $this->parseRupiah($this->input->post("anggaran_$y", TRUE));
+    // Parse Indikators
+    $indikators_raw = $this->input->post('indikators');
+    if (is_string($indikators_raw)) {
+        $indikators_data = json_decode($indikators_raw, true) ?: [];
+    } elseif (is_array($indikators_raw)) {
+        $indikators_data = $indikators_raw;
+    } else {
+        $indikators_data = [];
+    }
+
+    // Fallback if single indicator sent
+    if (empty($indikators_data) && !empty(trim($this->input->post('indikator', TRUE)))) {
+        $indikators_data[] = [
+            'indikator'    => trim($this->input->post('indikator', TRUE)),
+            'satuan'       => trim($this->input->post('satuan', TRUE)),
+            'kondisi_awal' => trim($this->input->post('kondisi_awal', TRUE)),
+            'target_2026'  => trim($this->input->post('target_2026', TRUE)),
+            'target_2027'  => trim($this->input->post('target_2027', TRUE)),
+            'target_2028'  => trim($this->input->post('target_2028', TRUE)),
+            'target_2029'  => trim($this->input->post('target_2029', TRUE)),
+            'target_2030'  => trim($this->input->post('target_2030', TRUE)),
+        ];
     }
     
+    $first_ind = $indikators_data[0] ?? [];
+
     $data = [
         'kode_wilayah'   => $KodeWilayah,
         'id_instansi'    => $instansi_id,
         'sasaran_rpjmd_id' => $sasaran_rpjmd_id,
         'uraian'         => $uraian,
         'bidang_id'      => $bidang_id,
-        'indikator'      => $indikator,
-        'satuan'         => $satuan,
-        'target_2025'    => $this->input->post('target_2025', TRUE),
-        'target_2026'    => $this->input->post('target_2026', TRUE),
-        'target_2027'    => $this->input->post('target_2027', TRUE),
-        'target_2028'    => $this->input->post('target_2028', TRUE),
-        'target_2029'    => $this->input->post('target_2029', TRUE),
-        'target_2030'    => $this->input->post('target_2030', TRUE),
-        'anggaran_2025'  => $anggaran['anggaran_2025'],
-        'anggaran_2026'  => $anggaran['anggaran_2026'],
-        'anggaran_2027'  => $anggaran['anggaran_2027'],
-        'anggaran_2028'  => $anggaran['anggaran_2028'],
-        'anggaran_2029'  => $anggaran['anggaran_2029'],
-        'anggaran_2030'  => $anggaran['anggaran_2030'],
+        'indikator'      => $first_ind['indikator'] ?? '',
+        'satuan'         => $first_ind['satuan'] ?? '',
+        'kondisi_awal'   => $first_ind['kondisi_awal'] ?? '',
+        'target_2026'    => $first_ind['target_2026'] ?? '',
+        'target_2027'    => $first_ind['target_2027'] ?? '',
+        'target_2028'    => $first_ind['target_2028'] ?? '',
+        'target_2029'    => $first_ind['target_2029'] ?? '',
+        'target_2030'    => $first_ind['target_2030'] ?? '',
         'created_at'     => date('Y-m-d H:i:s'),
         'updated_at'     => date('Y-m-d H:i:s')
     ];
@@ -10405,6 +10439,29 @@ public function tambahRenstraTujuanPD() {
     $this->db->insert('renstra_tujuan', $data);
     $insert_id = $this->db->insert_id();
     if ($insert_id) {
+        // Insert into renstra_tujuan_indikator
+        $urutan = 10;
+        foreach ($indikators_data as $ind) {
+            $indText = trim($ind['indikator'] ?? '');
+            if (empty($indText)) continue;
+            $this->db->insert('renstra_tujuan_indikator', [
+                'tujuan_id'          => $insert_id,
+                'perangkat_daerah_id'=> $instansi_id,
+                'indikator'          => $indText,
+                'satuan'             => trim($ind['satuan'] ?? ''),
+                'kondisi_awal'       => trim($ind['kondisi_awal'] ?? ''),
+                'target_2026'        => trim($ind['target_2026'] ?? ''),
+                'target_2027'        => trim($ind['target_2027'] ?? ''),
+                'target_2028'        => trim($ind['target_2028'] ?? ''),
+                'target_2029'        => trim($ind['target_2029'] ?? ''),
+                'target_2030'        => trim($ind['target_2030'] ?? ''),
+                'urutan'             => $urutan,
+                'created_at'         => date('Y-m-d H:i:s'),
+                'updated_at'         => date('Y-m-d H:i:s')
+            ]);
+            $urutan += 10;
+        }
+
         echo json_encode(['status' => 'success', 'message' => 'Tujuan berhasil ditambahkan', 'data' => ['id' => $insert_id]]);
     } else {
         echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data!']);
@@ -10440,41 +10497,79 @@ public function editRenstraTujuanPD() {
     $sasaran_rpjmd_id = $this->input->post('sasaran_rpjmd_id', TRUE) ?: null;
     $uraian = trim($this->input->post('uraian', TRUE));
     $bidang_id = $this->input->post('bidang_id', TRUE) ?: null;
-    $indikator = trim($this->input->post('indikator', TRUE));
-    $satuan = trim($this->input->post('satuan', TRUE));
     
     if (empty($uraian)) {
         echo json_encode(['status' => 'error', 'message' => 'Uraian Tujuan wajib diisi!']);
         return;
     }
     
-    $anggaran = [];
-    for ($y = 2025; $y <= 2030; $y++) {
-        $anggaran["anggaran_$y"] = $this->parseRupiah($this->input->post("anggaran_$y", TRUE));
+    // Parse Indikators
+    $indikators_raw = $this->input->post('indikators');
+    if (is_string($indikators_raw)) {
+        $indikators_data = json_decode($indikators_raw, true) ?: [];
+    } elseif (is_array($indikators_raw)) {
+        $indikators_data = $indikators_raw;
+    } else {
+        $indikators_data = [];
+    }
+
+    if (empty($indikators_data) && !empty(trim($this->input->post('indikator', TRUE)))) {
+        $indikators_data[] = [
+            'indikator'    => trim($this->input->post('indikator', TRUE)),
+            'satuan'       => trim($this->input->post('satuan', TRUE)),
+            'kondisi_awal' => trim($this->input->post('kondisi_awal', TRUE)),
+            'target_2026'  => trim($this->input->post('target_2026', TRUE)),
+            'target_2027'  => trim($this->input->post('target_2027', TRUE)),
+            'target_2028'  => trim($this->input->post('target_2028', TRUE)),
+            'target_2029'  => trim($this->input->post('target_2029', TRUE)),
+            'target_2030'  => trim($this->input->post('target_2030', TRUE)),
+        ];
     }
     
+    $first_ind = $indikators_data[0] ?? [];
+
     $data = [
         'sasaran_rpjmd_id' => $sasaran_rpjmd_id,
         'uraian'         => $uraian,
         'bidang_id'      => $bidang_id,
-        'indikator'      => $indikator,
-        'satuan'         => $satuan,
-        'target_2025'    => $this->input->post('target_2025', TRUE),
-        'target_2026'    => $this->input->post('target_2026', TRUE),
-        'target_2027'    => $this->input->post('target_2027', TRUE),
-        'target_2028'    => $this->input->post('target_2028', TRUE),
-        'target_2029'    => $this->input->post('target_2029', TRUE),
-        'target_2030'    => $this->input->post('target_2030', TRUE),
-        'anggaran_2025'  => $anggaran['anggaran_2025'],
-        'anggaran_2026'  => $anggaran['anggaran_2026'],
-        'anggaran_2027'  => $anggaran['anggaran_2027'],
-        'anggaran_2028'  => $anggaran['anggaran_2028'],
-        'anggaran_2029'  => $anggaran['anggaran_2029'],
-        'anggaran_2030'  => $anggaran['anggaran_2030'],
+        'indikator'      => $first_ind['indikator'] ?? '',
+        'satuan'         => $first_ind['satuan'] ?? '',
+        'kondisi_awal'   => $first_ind['kondisi_awal'] ?? '',
+        'target_2026'    => $first_ind['target_2026'] ?? '',
+        'target_2027'    => $first_ind['target_2027'] ?? '',
+        'target_2028'    => $first_ind['target_2028'] ?? '',
+        'target_2029'    => $first_ind['target_2029'] ?? '',
+        'target_2030'    => $first_ind['target_2030'] ?? '',
         'updated_at'     => date('Y-m-d H:i:s')
     ];
     
     $this->db->where('id', $id)->update('renstra_tujuan', $data);
+
+    // Update renstra_tujuan_indikator
+    $this->db->where('tujuan_id', $id)->update('renstra_tujuan_indikator', ['deleted_at' => date('Y-m-d H:i:s')]);
+    
+    $urutan = 10;
+    foreach ($indikators_data as $ind) {
+        $indText = trim($ind['indikator'] ?? '');
+        if (empty($indText)) continue;
+        $this->db->insert('renstra_tujuan_indikator', [
+            'tujuan_id'          => $id,
+            'perangkat_daerah_id'=> $instansi_id,
+            'indikator'          => $indText,
+            'satuan'             => trim($ind['satuan'] ?? ''),
+            'kondisi_awal'       => trim($ind['kondisi_awal'] ?? ''),
+            'target_2026'        => trim($ind['target_2026'] ?? ''),
+            'target_2027'        => trim($ind['target_2027'] ?? ''),
+            'target_2028'        => trim($ind['target_2028'] ?? ''),
+            'target_2029'        => trim($ind['target_2029'] ?? ''),
+            'target_2030'        => trim($ind['target_2030'] ?? ''),
+            'urutan'             => $urutan,
+            'created_at'         => date('Y-m-d H:i:s'),
+            'updated_at'         => date('Y-m-d H:i:s')
+        ]);
+        $urutan += 10;
+    }
+
     echo json_encode(['status' => 'success', 'message' => 'Tujuan berhasil diperbarui']);
     exit;
 }
@@ -10504,6 +10599,7 @@ public function hapusRenstraTujuanPD() {
         return;
     }
     $this->db->where('id', $id)->update('renstra_tujuan', ['deleted_at' => date('Y-m-d H:i:s')]);
+    $this->db->where('tujuan_id', $id)->update('renstra_tujuan_indikator', ['deleted_at' => date('Y-m-d H:i:s')]);
     echo json_encode(['status' => 'success', 'message' => 'Tujuan berhasil dihapus']);
     exit;
 }
@@ -10520,11 +10616,32 @@ public function getRenstraTujuanPD() {
     }
     $data = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('renstra_tujuan')->row_array();
     if ($data) {
-        // Format anggaran untuk tampilan
-        foreach (['2025','2026','2027','2028','2029','2030'] as $thn) {
-            $field = 'anggaran_'.$thn;
-            $data[$field.'_formatted'] = $this->formatRupiah($data[$field] ?? null);
+        // Ambil Indikators
+        $indikators = $this->db
+            ->select('*')
+            ->from('renstra_tujuan_indikator')
+            ->where('tujuan_id', $id)
+            ->where('deleted_at IS NULL')
+            ->order_by('urutan', 'ASC')
+            ->order_by('id', 'ASC')
+            ->get()
+            ->result_array();
+            
+        // Fallback jika belum ada di tabel indikator
+        if (empty($indikators) && !empty($data['indikator'])) {
+            $indikators[] = [
+                'id'           => 0,
+                'indikator'    => $data['indikator'],
+                'satuan'       => $data['satuan'] ?? '',
+                'kondisi_awal' => $data['kondisi_awal'] ?? '',
+                'target_2026'  => $data['target_2026'] ?? '',
+                'target_2027'  => $data['target_2027'] ?? '',
+                'target_2028'  => $data['target_2028'] ?? '',
+                'target_2029'  => $data['target_2029'] ?? '',
+                'target_2030'  => $data['target_2030'] ?? ''
+            ];
         }
+        $data['indikators'] = $indikators;
         echo json_encode(['status' => 'success', 'data' => $data]);
     } else {
         echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
@@ -10546,7 +10663,9 @@ public function tambahRenstraSasaranPD() {
     }
     $tujuan_id = (int)$this->input->post('tujuan_id', TRUE);
     $uraian = trim($this->input->post('uraian', TRUE));
-    $bidang_id = $this->input->post('bidang_id', TRUE); // 🔥 PERBAIKAN: gunakan bidang_id
+    $bidang_id = $this->input->post('bidang_id', TRUE);
+    $instansi_id = $this->get_instansi_id();
+    
     if (!$tujuan_id) {
         echo json_encode(['status' => 'error', 'message' => 'Tujuan tidak valid!']);
         return;
@@ -10555,34 +10674,72 @@ public function tambahRenstraSasaranPD() {
         echo json_encode(['status' => 'error', 'message' => 'Uraian Sasaran wajib diisi!']);
         return;
     }
-    $anggaran = [];
-    for ($y = 2025; $y <= 2030; $y++) {
-        $anggaran["anggaran_$y"] = $this->parseRupiah($this->input->post("anggaran_$y", TRUE));
+    
+    // Parse Indikators
+    $indikators_raw = $this->input->post('indikators');
+    if (is_string($indikators_raw)) {
+        $indikators_data = json_decode($indikators_raw, true) ?: [];
+    } elseif (is_array($indikators_raw)) {
+        $indikators_data = $indikators_raw;
+    } else {
+        $indikators_data = [];
     }
+
+    if (empty($indikators_data) && !empty(trim($this->input->post('indikator', TRUE)))) {
+        $indikators_data[] = [
+            'indikator'    => trim($this->input->post('indikator', TRUE)),
+            'satuan'       => trim($this->input->post('satuan', TRUE)),
+            'kondisi_awal' => trim($this->input->post('kondisi_awal', TRUE)),
+            'target_2026'  => trim($this->input->post('target_2026', TRUE)),
+            'target_2027'  => trim($this->input->post('target_2027', TRUE)),
+            'target_2028'  => trim($this->input->post('target_2028', TRUE)),
+            'target_2029'  => trim($this->input->post('target_2029', TRUE)),
+            'target_2030'  => trim($this->input->post('target_2030', TRUE)),
+        ];
+    }
+    
+    $first_ind = $indikators_data[0] ?? [];
+
     $data = [
         'tujuan_id'      => $tujuan_id,
         'uraian'         => $uraian,
-        'bidang_id'      => $bidang_id, // 🔥 PERBAIKAN: gunakan bidang_id
-        'indikator'      => $this->input->post('indikator', TRUE),
-        'satuan'         => $this->input->post('satuan', TRUE),
-        'target_2025'    => $this->input->post('target_2025', TRUE),
-        'target_2026'    => $this->input->post('target_2026', TRUE),
-        'target_2027'    => $this->input->post('target_2027', TRUE),
-        'target_2028'    => $this->input->post('target_2028', TRUE),
-        'target_2029'    => $this->input->post('target_2029', TRUE),
-        'target_2030'    => $this->input->post('target_2030', TRUE),
-        'anggaran_2025'  => $anggaran['anggaran_2025'],
-        'anggaran_2026'  => $anggaran['anggaran_2026'],
-        'anggaran_2027'  => $anggaran['anggaran_2027'],
-        'anggaran_2028'  => $anggaran['anggaran_2028'],
-        'anggaran_2029'  => $anggaran['anggaran_2029'],
-        'anggaran_2030'  => $anggaran['anggaran_2030'],
+        'bidang_id'      => $bidang_id,
+        'indikator'      => $first_ind['indikator'] ?? '',
+        'satuan'         => $first_ind['satuan'] ?? '',
+        'kondisi_awal'   => $first_ind['kondisi_awal'] ?? '',
+        'target_2026'    => $first_ind['target_2026'] ?? '',
+        'target_2027'    => $first_ind['target_2027'] ?? '',
+        'target_2028'    => $first_ind['target_2028'] ?? '',
+        'target_2029'    => $first_ind['target_2029'] ?? '',
+        'target_2030'    => $first_ind['target_2030'] ?? '',
         'created_at'     => date('Y-m-d H:i:s'),
         'updated_at'     => date('Y-m-d H:i:s')
     ];
     $this->db->insert('renstra_sasaran', $data);
     $insert_id = $this->db->insert_id();
     if ($insert_id) {
+        $urutan = 10;
+        foreach ($indikators_data as $ind) {
+            $indText = trim($ind['indikator'] ?? '');
+            if (empty($indText)) continue;
+            $this->db->insert('renstra_sasaran_indikator', [
+                'sasaran_id'         => $insert_id,
+                'perangkat_daerah_id'=> $instansi_id,
+                'indikator'          => $indText,
+                'satuan'             => trim($ind['satuan'] ?? ''),
+                'kondisi_awal'       => trim($ind['kondisi_awal'] ?? ''),
+                'target_2026'        => trim($ind['target_2026'] ?? ''),
+                'target_2027'        => trim($ind['target_2027'] ?? ''),
+                'target_2028'        => trim($ind['target_2028'] ?? ''),
+                'target_2029'        => trim($ind['target_2029'] ?? ''),
+                'target_2030'        => trim($ind['target_2030'] ?? ''),
+                'urutan'             => $urutan,
+                'created_at'         => date('Y-m-d H:i:s'),
+                'updated_at'         => date('Y-m-d H:i:s')
+            ]);
+            $urutan += 10;
+        }
+
         echo json_encode(['status' => 'success', 'message' => 'Sasaran berhasil ditambahkan', 'data' => ['id' => $insert_id]]);
     } else {
         echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data!']);
@@ -10616,35 +10773,77 @@ public function editRenstraSasaranPD() {
         return;
     }
     $uraian = trim($this->input->post('uraian', TRUE));
-    $bidang_id = $this->input->post('bidang_id', TRUE); // 🔥 PERBAIKAN: gunakan bidang_id
+    $bidang_id = $this->input->post('bidang_id', TRUE);
     if (empty($uraian)) {
         echo json_encode(['status' => 'error', 'message' => 'Uraian Sasaran wajib diisi!']);
         return;
     }
-    $anggaran = [];
-    for ($y = 2025; $y <= 2030; $y++) {
-        $anggaran["anggaran_$y"] = $this->parseRupiah($this->input->post("anggaran_$y", TRUE));
+    
+    // Parse Indikators
+    $indikators_raw = $this->input->post('indikators');
+    if (is_string($indikators_raw)) {
+        $indikators_data = json_decode($indikators_raw, true) ?: [];
+    } elseif (is_array($indikators_raw)) {
+        $indikators_data = $indikators_raw;
+    } else {
+        $indikators_data = [];
     }
+
+    if (empty($indikators_data) && !empty(trim($this->input->post('indikator', TRUE)))) {
+        $indikators_data[] = [
+            'indikator'    => trim($this->input->post('indikator', TRUE)),
+            'satuan'       => trim($this->input->post('satuan', TRUE)),
+            'kondisi_awal' => trim($this->input->post('kondisi_awal', TRUE)),
+            'target_2026'  => trim($this->input->post('target_2026', TRUE)),
+            'target_2027'  => trim($this->input->post('target_2027', TRUE)),
+            'target_2028'  => trim($this->input->post('target_2028', TRUE)),
+            'target_2029'  => trim($this->input->post('target_2029', TRUE)),
+            'target_2030'  => trim($this->input->post('target_2030', TRUE)),
+        ];
+    }
+    
+    $first_ind = $indikators_data[0] ?? [];
+
     $data = [
         'uraian'         => $uraian,
-        'bidang_id'      => $bidang_id, // 🔥 PERBAIKAN: gunakan bidang_id
-        'indikator'      => $this->input->post('indikator', TRUE),
-        'satuan'         => $this->input->post('satuan', TRUE),
-        'target_2025'    => $this->input->post('target_2025', TRUE),
-        'target_2026'    => $this->input->post('target_2026', TRUE),
-        'target_2027'    => $this->input->post('target_2027', TRUE),
-        'target_2028'    => $this->input->post('target_2028', TRUE),
-        'target_2029'    => $this->input->post('target_2029', TRUE),
-        'target_2030'    => $this->input->post('target_2030', TRUE),
-        'anggaran_2025'  => $anggaran['anggaran_2025'],
-        'anggaran_2026'  => $anggaran['anggaran_2026'],
-        'anggaran_2027'  => $anggaran['anggaran_2027'],
-        'anggaran_2028'  => $anggaran['anggaran_2028'],
-        'anggaran_2029'  => $anggaran['anggaran_2029'],
-        'anggaran_2030'  => $anggaran['anggaran_2030'],
+        'bidang_id'      => $bidang_id,
+        'indikator'      => $first_ind['indikator'] ?? '',
+        'satuan'         => $first_ind['satuan'] ?? '',
+        'kondisi_awal'   => $first_ind['kondisi_awal'] ?? '',
+        'target_2026'    => $first_ind['target_2026'] ?? '',
+        'target_2027'    => $first_ind['target_2027'] ?? '',
+        'target_2028'    => $first_ind['target_2028'] ?? '',
+        'target_2029'    => $first_ind['target_2029'] ?? '',
+        'target_2030'    => $first_ind['target_2030'] ?? '',
         'updated_at'     => date('Y-m-d H:i:s')
     ];
     $this->db->where('id', $id)->update('renstra_sasaran', $data);
+
+    // Update renstra_sasaran_indikator
+    $this->db->where('sasaran_id', $id)->update('renstra_sasaran_indikator', ['deleted_at' => date('Y-m-d H:i:s')]);
+    
+    $urutan = 10;
+    foreach ($indikators_data as $ind) {
+        $indText = trim($ind['indikator'] ?? '');
+        if (empty($indText)) continue;
+        $this->db->insert('renstra_sasaran_indikator', [
+            'sasaran_id'         => $id,
+            'perangkat_daerah_id'=> $instansi_id,
+            'indikator'          => $indText,
+            'satuan'             => trim($ind['satuan'] ?? ''),
+            'kondisi_awal'       => trim($ind['kondisi_awal'] ?? ''),
+            'target_2026'        => trim($ind['target_2026'] ?? ''),
+            'target_2027'        => trim($ind['target_2027'] ?? ''),
+            'target_2028'        => trim($ind['target_2028'] ?? ''),
+            'target_2029'        => trim($ind['target_2029'] ?? ''),
+            'target_2030'        => trim($ind['target_2030'] ?? ''),
+            'urutan'             => $urutan,
+            'created_at'         => date('Y-m-d H:i:s'),
+            'updated_at'         => date('Y-m-d H:i:s')
+        ]);
+        $urutan += 10;
+    }
+
     echo json_encode(['status' => 'success', 'message' => 'Sasaran berhasil diperbarui']);
     exit;
 }
@@ -10675,6 +10874,7 @@ public function hapusRenstraSasaranPD() {
         return;
     }
     $this->db->where('id', $id)->update('renstra_sasaran', ['deleted_at' => date('Y-m-d H:i:s')]);
+    $this->db->where('sasaran_id', $id)->update('renstra_sasaran_indikator', ['deleted_at' => date('Y-m-d H:i:s')]);
     echo json_encode(['status' => 'success', 'message' => 'Sasaran berhasil dihapus']);
     exit;
 }
@@ -10691,10 +10891,30 @@ public function getRenstraSasaranPD() {
     }
     $data = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('renstra_sasaran')->row_array();
     if ($data) {
-        foreach (['2025','2026','2027','2028','2029','2030'] as $thn) {
-            $field = 'anggaran_'.$thn;
-            $data[$field.'_formatted'] = $this->formatRupiah($data[$field] ?? null);
+        $indikators = $this->db
+            ->select('*')
+            ->from('renstra_sasaran_indikator')
+            ->where('sasaran_id', $id)
+            ->where('deleted_at IS NULL')
+            ->order_by('urutan', 'ASC')
+            ->order_by('id', 'ASC')
+            ->get()
+            ->result_array();
+            
+        if (empty($indikators) && !empty($data['indikator'])) {
+            $indikators[] = [
+                'id'           => 0,
+                'indikator'    => $data['indikator'],
+                'satuan'       => $data['satuan'] ?? '',
+                'kondisi_awal' => $data['kondisi_awal'] ?? '',
+                'target_2026'  => $data['target_2026'] ?? '',
+                'target_2027'  => $data['target_2027'] ?? '',
+                'target_2028'  => $data['target_2028'] ?? '',
+                'target_2029'  => $data['target_2029'] ?? '',
+                'target_2030'  => $data['target_2030'] ?? ''
+            ];
         }
+        $data['indikators'] = $indikators;
         echo json_encode(['status' => 'success', 'data' => $data]);
     } else {
         echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);

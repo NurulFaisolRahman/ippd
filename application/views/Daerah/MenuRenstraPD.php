@@ -79,6 +79,7 @@ function hitungTotalAnggaranProgram($program) {
 }
 .renstra-table .text-left { text-align: left; padding-left: 8px; }
 .renstra-table .text-right { text-align: right; padding-right: 8px; }
+.renstra-table .cell-no { font-weight: 600; font-size: 11px; white-space: nowrap; padding: 4px 6px; }
 
 /* Warna level */
 .row-tujuan { background: #e3f2fd; font-weight: 700; border-bottom: 2px solid #1565c0; }
@@ -400,71 +401,162 @@ function hitungTotalAnggaranProgram($program) {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php if (!empty($RenstraData)) { 
-                                            $no_tujuan = 1;
-                                            foreach ($RenstraData as $tujuan) { 
-                                                $tujuan_id = $tujuan['id'] ?? 0;
-                                                $tujuan_uraian = $tujuan['uraian'] ?? '';
-                                        ?>
-                                            <!-- ROW TUJUAN -->
-                                            <tr class="row-tujuan border-tujuan">
-                                                <td class="cell-no"><?= $no_tujuan ?></td>
-                                                <td class="text-left level-tujuan">
-                                                    <span class="badge-tujuan">Tujuan <?= $no_tujuan ?></span>
-                                                    <strong><?= html_escape($tujuan_uraian) ?></strong>
-                                                </td>
-                                                <td></td><td></td><td></td>
-                                                <td></td><td></td><td></td><td></td>
-                                                <td></td><td></td><td></td><td></td>
-                                                <td></td><td></td>
-                                                <?php if ($IsRole4) { ?>
-                                                    <td class="col-aksi">
-                                                        <div class="btn-group-aksi">
-                                                            <button class="btn btn-sm btn-success btn-aksi btnTambahSasaran" data-tujuan-id="<?= $tujuan_id ?>" title="Tambah Sasaran"><i class="fa fa-plus"></i></button>
-                                                            <button class="btn btn-sm btn-warning btn-aksi btnEditTujuan" data-id="<?= $tujuan_id ?>" title="Edit Tujuan"><i class="fa fa-edit"></i></button>
-                                                            <button class="btn btn-sm btn-danger btn-aksi btnHapusTujuan" data-id="<?= $tujuan_id ?>" title="Hapus Tujuan"><i class="fa fa-trash"></i></button>
-                                                        </div>
-                                                    </td>
-                                                <?php } ?>
-                                            </tr>
+                                         <?php if (!empty($RenstraData)) { 
+                                             $no_tujuan = 1;
+                                             foreach ($RenstraData as $tujuan) { 
+                                                 $tujuan_id = $tujuan['id'] ?? 0;
+                                                 $tujuan_uraian = $tujuan['uraian'] ?? '';
+                                                 $tujuan_indikators = $tujuan['indikators'] ?? [];
+                                                 $tujuanRowspan = count($tujuan_indikators) > 0 ? count($tujuan_indikators) : 1;
+                                                 $firstIndTujuan = $tujuan_indikators[0] ?? null;
+                                         ?>
+                                             <!-- ROW TUJUAN (Baris Pertama) -->
+                                             <tr class="row-tujuan border-tujuan">
+                                                 <td class="cell-no" rowspan="<?= $tujuanRowspan ?>"><?= $no_tujuan ?></td>
+                                                 <td class="text-left level-tujuan" rowspan="<?= $tujuanRowspan ?>">
+                                                     <span class="badge-tujuan">Tujuan <?= $no_tujuan ?></span>
+                                                     <strong><?= html_escape($tujuan_uraian) ?></strong>
+                                                 </td>
+                                                 <!-- INDIKATOR -->
+                                                 <td class="indikator-text" style="text-align:left; padding-left:5px;"><?= html_escape($firstIndTujuan['indikator'] ?? ($tujuan['indikator'] ?? '-')) ?></td>
+                                                 <!-- SATUAN -->
+                                                 <td><?= html_escape($firstIndTujuan['satuan'] ?? ($tujuan['satuan'] ?? '-')) ?></td>
+                                                 <!-- KONDISI AWAL -->
+                                                 <td><?= html_escape($firstIndTujuan['kondisi_awal'] ?? ($tujuan['kondisi_awal'] ?? '-')) ?></td>
+                                                 <!-- 2026 -->
+                                                 <td><?= html_escape($firstIndTujuan['target_2026'] ?? ($tujuan['target_2026'] ?? '-')) ?></td>
+                                                 <td class="pagu-col">-</td>
+                                                 <!-- 2027 -->
+                                                 <td><?= html_escape($firstIndTujuan['target_2027'] ?? ($tujuan['target_2027'] ?? '-')) ?></td>
+                                                 <td class="pagu-col">-</td>
+                                                 <!-- 2028 -->
+                                                 <td><?= html_escape($firstIndTujuan['target_2028'] ?? ($tujuan['target_2028'] ?? '-')) ?></td>
+                                                 <td class="pagu-col">-</td>
+                                                 <!-- 2029 -->
+                                                 <td><?= html_escape($firstIndTujuan['target_2029'] ?? ($tujuan['target_2029'] ?? '-')) ?></td>
+                                                 <td class="pagu-col">-</td>
+                                                 <!-- 2030 -->
+                                                 <td><?= html_escape($firstIndTujuan['target_2030'] ?? ($tujuan['target_2030'] ?? '-')) ?></td>
+                                                 <td class="pagu-col">-</td>
+                                                 <?php if ($IsRole4) { ?>
+                                                     <td class="col-aksi" rowspan="<?= $tujuanRowspan ?>">
+                                                         <div class="btn-group-aksi">
+                                                             <button class="btn btn-sm btn-success btn-aksi btnTambahSasaran" data-tujuan-id="<?= $tujuan_id ?>" title="Tambah Sasaran"><i class="fa fa-plus"></i></button>
+                                                             <button class="btn btn-sm btn-warning btn-aksi btnEditTujuan" data-id="<?= $tujuan_id ?>" title="Edit Tujuan"><i class="fa fa-edit"></i></button>
+                                                             <button class="btn btn-sm btn-danger btn-aksi btnHapusTujuan" data-id="<?= $tujuan_id ?>" title="Hapus Tujuan"><i class="fa fa-trash"></i></button>
+                                                         </div>
+                                                     </td>
+                                                 <?php } ?>
+                                             </tr>
 
-                                            <?php 
-                                            $sasaran_list = $tujuan['sasaran_list'] ?? [];
-                                            if (!empty($sasaran_list)) {
-                                                $no_sasaran = 1;
-                                                foreach ($sasaran_list as $sasaran) {
-                                                    $sasaran_id = $sasaran['id'] ?? 0;
-                                                    $sasaran_uraian = $sasaran['uraian'] ?? '';
-                                            ?>
-                                                <!-- ROW SASARAN -->
-                                                <tr class="row-sasaran border-sasaran">
-                                                    <td class="cell-no"><?= $no_tujuan . '.' . $no_sasaran ?></td>
-                                                    <td class="text-left level-sasaran">
-                                                        <span class="badge-sasaran">Sasaran <?= $no_sasaran ?></span>
-                                                        <?= html_escape($sasaran_uraian) ?>
-                                                    </td>
-                                                    <td></td><td></td><td></td>
-                                                    <td></td><td></td><td></td><td></td>
-                                                    <td></td><td></td><td></td><td></td>
-                                                    <td></td><td></td>
-                                                    <?php if ($IsRole4) { ?>
-                                                        <td class="col-aksi">
-                                                            <div class="btn-group-aksi">
-                                                                <button class="btn btn-sm btn-success btn-aksi btnTambahProgram" data-sasaran-id="<?= $sasaran_id ?>" title="Tambah Program"><i class="fa fa-plus"></i></button>
-                                                                <button class="btn btn-sm btn-warning btn-aksi btnEditSasaran" data-id="<?= $sasaran_id ?>" title="Edit Sasaran"><i class="fa fa-edit"></i></button>
-                                                                <button class="btn btn-sm btn-danger btn-aksi btnHapusSasaran" data-id="<?= $sasaran_id ?>" title="Hapus Sasaran"><i class="fa fa-trash"></i></button>
-                                                            </div>
-                                                        </td>
-                                                    <?php } ?>
-                                                </tr>
+                                             <?php 
+                                             // Baris Indikator Tujuan ke-2, 3, dst
+                                             if (count($tujuan_indikators) > 1) {
+                                                 for ($ti = 1; $ti < count($tujuan_indikators); $ti++) {
+                                                     $indT = $tujuan_indikators[$ti];
+                                             ?>
+                                                 <tr class="row-tujuan border-tujuan">
+                                                     <td class="indikator-text" style="text-align:left; padding-left:5px;"><?= html_escape($indT['indikator'] ?? '-') ?></td>
+                                                     <td><?= html_escape($indT['satuan'] ?? '-') ?></td>
+                                                     <td><?= html_escape($indT['kondisi_awal'] ?? '-') ?></td>
+                                                     <td><?= html_escape($indT['target_2026'] ?? '-') ?></td>
+                                                     <td class="pagu-col">-</td>
+                                                     <td><?= html_escape($indT['target_2027'] ?? '-') ?></td>
+                                                     <td class="pagu-col">-</td>
+                                                     <td><?= html_escape($indT['target_2028'] ?? '-') ?></td>
+                                                     <td class="pagu-col">-</td>
+                                                     <td><?= html_escape($indT['target_2029'] ?? '-') ?></td>
+                                                     <td class="pagu-col">-</td>
+                                                     <td><?= html_escape($indT['target_2030'] ?? '-') ?></td>
+                                                     <td class="pagu-col">-</td>
+                                                 </tr>
+                                             <?php 
+                                                 }
+                                             }
+                                             ?>
 
-                                                <?php 
+                                             <?php 
+                                             $sasaran_list = $tujuan['sasaran_list'] ?? [];
+                                             if (!empty($sasaran_list)) {
+                                                 $no_sasaran = 1;
+                                                 foreach ($sasaran_list as $sasaran) {
+                                                     $sasaran_id = $sasaran['id'] ?? 0;
+                                                     $sasaran_uraian = $sasaran['uraian'] ?? '';
+                                                     $sasaran_indikators = $sasaran['indikators'] ?? [];
+                                                     $sasaranRowspan = count($sasaran_indikators) > 0 ? count($sasaran_indikators) : 1;
+                                                     $firstIndSasaran = $sasaran_indikators[0] ?? null;
+                                             ?>
+                                                 <!-- ROW SASARAN (Baris Pertama) -->
+                                                 <tr class="row-sasaran border-sasaran">
+                                                     <td class="cell-no" rowspan="<?= $sasaranRowspan ?>"><?= $no_tujuan . '.' . $no_sasaran ?></td>
+                                                     <td class="text-left level-sasaran" rowspan="<?= $sasaranRowspan ?>">
+                                                         <span class="badge-sasaran">Sasaran <?= $no_sasaran ?></span>
+                                                         <?= html_escape($sasaran_uraian) ?>
+                                                     </td>
+                                                     <!-- INDIKATOR -->
+                                                     <td class="indikator-text" style="text-align:left; padding-left:5px;"><?= html_escape($firstIndSasaran['indikator'] ?? ($sasaran['indikator'] ?? '-')) ?></td>
+                                                     <!-- SATUAN -->
+                                                     <td><?= html_escape($firstIndSasaran['satuan'] ?? ($sasaran['satuan'] ?? '-')) ?></td>
+                                                     <!-- KONDISI AWAL -->
+                                                     <td><?= html_escape($firstIndSasaran['kondisi_awal'] ?? ($sasaran['kondisi_awal'] ?? '-')) ?></td>
+                                                     <!-- 2026 -->
+                                                     <td><?= html_escape($firstIndSasaran['target_2026'] ?? ($sasaran['target_2026'] ?? '-')) ?></td>
+                                                     <td class="pagu-col">-</td>
+                                                     <!-- 2027 -->
+                                                     <td><?= html_escape($firstIndSasaran['target_2027'] ?? ($sasaran['target_2027'] ?? '-')) ?></td>
+                                                     <td class="pagu-col">-</td>
+                                                     <!-- 2028 -->
+                                                     <td><?= html_escape($firstIndSasaran['target_2028'] ?? ($sasaran['target_2028'] ?? '-')) ?></td>
+                                                     <td class="pagu-col">-</td>
+                                                     <!-- 2029 -->
+                                                     <td><?= html_escape($firstIndSasaran['target_2029'] ?? ($sasaran['target_2029'] ?? '-')) ?></td>
+                                                     <td class="pagu-col">-</td>
+                                                     <!-- 2030 -->
+                                                     <td><?= html_escape($firstIndSasaran['target_2030'] ?? ($sasaran['target_2030'] ?? '-')) ?></td>
+                                                     <td class="pagu-col">-</td>
+                                                     <?php if ($IsRole4) { ?>
+                                                         <td class="col-aksi" rowspan="<?= $sasaranRowspan ?>">
+                                                             <div class="btn-group-aksi">
+                                                                 <button class="btn btn-sm btn-success btn-aksi btnTambahProgram" data-sasaran-id="<?= $sasaran_id ?>" title="Tambah Program"><i class="fa fa-plus"></i></button>
+                                                                 <button class="btn btn-sm btn-warning btn-aksi btnEditSasaran" data-id="<?= $sasaran_id ?>" title="Edit Sasaran"><i class="fa fa-edit"></i></button>
+                                                                 <button class="btn btn-sm btn-danger btn-aksi btnHapusSasaran" data-id="<?= $sasaran_id ?>" title="Hapus Sasaran"><i class="fa fa-trash"></i></button>
+                                                             </div>
+                                                         </td>
+                                                     <?php } ?>
+                                                 </tr>
+
+                                                 <?php 
+                                                 // Baris Indikator Sasaran ke-2, 3, dst
+                                                 if (count($sasaran_indikators) > 1) {
+                                                     for ($si = 1; $si < count($sasaran_indikators); $si++) {
+                                                         $indS = $sasaran_indikators[$si];
+                                                 ?>
+                                                     <tr class="row-sasaran border-sasaran">
+                                                         <td class="indikator-text" style="text-align:left; padding-left:5px;"><?= html_escape($indS['indikator'] ?? '-') ?></td>
+                                                         <td><?= html_escape($indS['satuan'] ?? '-') ?></td>
+                                                         <td><?= html_escape($indS['kondisi_awal'] ?? '-') ?></td>
+                                                         <td><?= html_escape($indS['target_2026'] ?? '-') ?></td>
+                                                         <td class="pagu-col">-</td>
+                                                         <td><?= html_escape($indS['target_2027'] ?? '-') ?></td>
+                                                         <td class="pagu-col">-</td>
+                                                         <td><?= html_escape($indS['target_2028'] ?? '-') ?></td>
+                                                         <td class="pagu-col">-</td>
+                                                         <td><?= html_escape($indS['target_2029'] ?? '-') ?></td>
+                                                         <td class="pagu-col">-</td>
+                                                         <td><?= html_escape($indS['target_2030'] ?? '-') ?></td>
+                                                         <td class="pagu-col">-</td>
+                                                     </tr>
+                                                 <?php 
+                                                     }
+                                                 }
+                                                 ?>
+                                                <?php
                                                 $program_list = $sasaran['program_list'] ?? [];
                                                 if (!empty($program_list)) {
                                                     $no_program = 1;
                                                     foreach ($program_list as $program) {
                                                         $program_id = $program['id'] ?? 0;
-                                                        $program_nama = $program['nama'] ?? '';
+                                                        $program_nama = preg_replace('/^(\d+(\.\d+)*)\s*[-–—:]?\s*/', '', $program['nama'] ?? '');
                                                         $program_kode = $program['kode_program'] ?? '';
                                                         $outcomes = $program['outcomes'] ?? [];
                                                         $kegiatan_list = $program['kegiatan_list'] ?? [];
@@ -484,12 +576,8 @@ function hitungTotalAnggaranProgram($program) {
                                                         if ($totalIndikator == 0 && empty($kegiatan_list)) {
                                                             ?>
                                                             <tr class="row-program border-program">
-                                                                <td class="cell-no"><?= $no_tujuan . '.' . $no_sasaran . '.' . $no_program ?></td>
+                                                                <td class="cell-no"><?= !empty($program_kode) ? html_escape($program_kode) : ($no_tujuan . '.' . $no_sasaran . '.' . $no_program) ?></td>
                                                                 <td class="text-left level-program">
-                                                                    <?php if (!empty($program_kode)) { ?>
-                                                                        <span class="badge-program"><?= html_escape($program_kode) ?></span>
-                                                                    <?php } ?>
-                                                                    <span class="badge-program">Program <?= $no_program ?></span>
                                                                     <span class="nama-program"><?= html_escape($program_nama) ?></span>
                                                                 </td>
                                                                 <td colspan="13" style="text-align:center; color:#999;">Tidak ada outcome/indikator</td>
@@ -528,12 +616,8 @@ function hitungTotalAnggaranProgram($program) {
                                                         if ($totalIndikatorProgram == 0 && empty($kegiatan_list)) {
                                                             ?>
                                                             <tr class="row-program border-program">
-                                                                <td class="cell-no"><?= $no_tujuan . '.' . $no_sasaran . '.' . $no_program ?></td>
+                                                                <td class="cell-no"><?= !empty($program_kode) ? html_escape($program_kode) : ($no_tujuan . '.' . $no_sasaran . '.' . $no_program) ?></td>
                                                                 <td class="text-left level-program">
-                                                                    <?php if (!empty($program_kode)) { ?>
-                                                                        <span class="badge-program"><?= html_escape($program_kode) ?></span>
-                                                                    <?php } ?>
-                                                                    <span class="badge-program">Program <?= $no_program ?></span>
                                                                     <span class="nama-program"><?= html_escape($program_nama) ?></span>
                                                                 </td>
                                                                 <td colspan="13" style="text-align:center; color:#999;">Tidak ada outcome/indikator</td>
@@ -564,7 +648,7 @@ function hitungTotalAnggaranProgram($program) {
                                                         foreach ($outcomes as $outIndex => $outcome) {
                                                             $indikator_list = $outcome['indikator_list'] ?? [];
                                                             
-                                                            // Lewati outcome tanpa indikator
+                                                             // Lewati outcome tanpa indikator
                                                             if (empty($indikator_list)) {
                                                                 continue;
                                                             }
@@ -578,7 +662,7 @@ function hitungTotalAnggaranProgram($program) {
                                                                 <!-- NOMOR - HANYA SEKALI PER PROGRAM -->
                                                                 <?php if ($isFirstRow) { ?>
                                                                     <td class="cell-no" rowspan="<?= $totalIndikatorProgram ?>">
-                                                                        <?= $no_tujuan . '.' . $no_sasaran . '.' . $no_program ?>
+                                                                        <?= !empty($program_kode) ? html_escape($program_kode) : ($no_tujuan . '.' . $no_sasaran . '.' . $no_program) ?>
                                                                     </td>
                                                                 <?php } ?>
                                                                 
@@ -587,17 +671,13 @@ function hitungTotalAnggaranProgram($program) {
                                                                     <?php if ($isFirstRow) { ?>
                                                                         <!-- PROGRAM (hanya muncul di baris pertama) -->
                                                                         <div class="program-title" style="margin-bottom:5px;">
-                                                                            <?php if (!empty($program_kode)) { ?>
-                                                                                <span class="badge-program"><?= html_escape($program_kode) ?></span>
-                                                                            <?php } ?>
-                                                                            <span class="badge-program">Program <?= $no_program ?></span>
                                                                             <span class="nama-program"><?= html_escape($program_nama) ?></span>
                                                                         </div>
                                                                     <?php } ?>
                                                                     
                                                                     <!-- OUTCOME (muncul di setiap baris pertama tiap outcome) -->
                                                                     <div class="outcome-title" style="margin-top:<?= $isFirstRow ? '3px' : '0' ?>;">
-                                                                        <span class="badge-outcome">Outcome <?= $outcomeIndex+1 ?></span>
+                                                                        <span class="badge-outcome">Sasaran <?= $outcomeIndex+1 ?></span>
                                                                         <?= html_escape($outcome['outcome_text']) ?>
                                                                     </div>
                                                                 </td>
@@ -688,7 +768,7 @@ function hitungTotalAnggaranProgram($program) {
                                                             
                                                             <?php
                                                             // ============================================================
-                                                             // INDIKATOR KE-2, KE-3, DST UNTUK OUTCOME YANG SAMA
+                                                            // INDIKATOR KE-2, KE-3, DST UNTUK OUTCOME YANG SAMA
                                                             // ============================================================
                                                             if (count($indikator_list) > 1) {
                                                                 for ($i = 1; $i < count($indikator_list); $i++) {
@@ -741,7 +821,8 @@ function hitungTotalAnggaranProgram($program) {
                                                         foreach ($kegiatan_list as $kegiatan) {
 
                                                             $kegiatan_id   = $kegiatan['id'] ?? 0;
-                                                            $kegiatan_nama = $kegiatan['nama'] ?? '';
+                                                            $kegiatan_nama = preg_replace('/^(\d+(\.\d+)*)\s*[-–—:]?\s*/', '', $kegiatan['nama'] ?? '');
+                                                            $kegiatan_kode = $kegiatan['kode_nomenklatur'] ?? ($kegiatan['kode_kegiatan'] ?? '');
 
                                                             $kegiatan_sasaran_list = $kegiatan['sasaran_list'] ?? [];
                                                             $sub_kegiatan_list     = $kegiatan['sub_kegiatan_list'] ?? [];
@@ -759,7 +840,7 @@ function hitungTotalAnggaranProgram($program) {
                                                                 ?>
                                                                 <tr class="row-kegiatan border-kegiatan">
                                                                     <td class="cell-no">
-                                                                        <?= $no_tujuan . '.' . $no_sasaran . '.' . $no_program . '.' . $no_kegiatan ?>
+                                                                        <?= !empty($kegiatan_kode) ? html_escape($kegiatan_kode) : ($no_tujuan . '.' . $no_sasaran . '.' . $no_program . '.' . $no_kegiatan) ?>
                                                                     </td>
                                                                     <td class="text-left level-kegiatan">
                                                                         <?= html_escape($kegiatan_nama) ?>
@@ -799,7 +880,7 @@ function hitungTotalAnggaranProgram($program) {
                                                                 ?>
                                                                 <tr class="row-kegiatan border-kegiatan">
                                                                     <td class="cell-no">
-                                                                        <?= $no_tujuan . '.' . $no_sasaran . '.' . $no_program . '.' . $no_kegiatan ?>
+                                                                        <?= !empty($kegiatan_kode) ? html_escape($kegiatan_kode) : ($no_tujuan . '.' . $no_sasaran . '.' . $no_program . '.' . $no_kegiatan) ?>
                                                                     </td>
                                                                     <td class="text-left level-kegiatan">
                                                                         <?= html_escape($kegiatan_nama) ?>
@@ -861,7 +942,7 @@ function hitungTotalAnggaranProgram($program) {
 
                                                                     <?php if ($firstSasaran) { ?>
                                                                         <td class="cell-no" rowspan="<?= $kegiatanTotalRows ?>">
-                                                                            <?= $no_tujuan . '.' . $no_sasaran . '.' . $no_program . '.' . $no_kegiatan ?>
+                                                                            <?= !empty($kegiatan_kode) ? html_escape($kegiatan_kode) : ($no_tujuan . '.' . $no_sasaran . '.' . $no_program . '.' . $no_kegiatan) ?>
                                                                         </td>
                                                                     <?php } ?>
 
@@ -1025,7 +1106,8 @@ function hitungTotalAnggaranProgram($program) {
                                                             foreach ($sub_kegiatan_list as $sub) {
 
                                                                 $sub_id   = $sub['id'] ?? 0;
-                                                                $sub_nama = $sub['nama'] ?? '';
+                                                                $sub_nama = preg_replace('/^(\d+(\.\d+)*)\s*[-–—:]?\s*/', '', $sub['nama'] ?? '');
+                                                                $sub_kode = $sub['kode_nomenklatur'] ?? ($sub['kode_sub_kegiatan'] ?? ($sub['kode_subkegiatan'] ?? ''));
 
                                                                 $sub_sasaran_list = $sub['sasaran_list'] ?? [];
 
@@ -1038,7 +1120,7 @@ function hitungTotalAnggaranProgram($program) {
                                                                     <tr class="row-subkegiatan border-subkegiatan">
                                                                         <!-- NOMOR -->
                                                                         <td class="cell-no">
-                                                                            <?= $no_tujuan . '.' . $no_sasaran . '.' . $no_program . '.' . $no_kegiatan . '.' . $no_sub ?>
+                                                                            <?= !empty($sub_kode) ? html_escape($sub_kode) : ($no_tujuan . '.' . $no_sasaran . '.' . $no_program . '.' . $no_kegiatan . '.' . $no_sub) ?>
                                                                         </td>
                                                                         <!-- SUB KEGIATAN -->
                                                                         <td class="text-left level-subkegiatan">
@@ -1087,7 +1169,7 @@ function hitungTotalAnggaranProgram($program) {
                                                                     <tr class="row-subkegiatan border-subkegiatan">
                                                                         <!-- NOMOR -->
                                                                         <td class="cell-no">
-                                                                            <?= $no_tujuan . '.' . $no_sasaran . '.' . $no_program . '.' . $no_kegiatan . '.' . $no_sub ?>
+                                                                            <?= !empty($sub_kode) ? html_escape($sub_kode) : ($no_tujuan . '.' . $no_sasaran . '.' . $no_program . '.' . $no_kegiatan . '.' . $no_sub) ?>
                                                                         </td>
                                                                         <!-- SUB KEGIATAN -->
                                                                         <td class="text-left level-subkegiatan">
@@ -1157,7 +1239,7 @@ function hitungTotalAnggaranProgram($program) {
 
                                                                         <?php if ($firstSubSasaran) { ?>
                                                                             <td class="cell-no" rowspan="<?= $subTotalRows ?>">
-                                                                                <?= $no_tujuan . '.' . $no_sasaran . '.' . $no_program . '.' . $no_kegiatan . '.' . $no_sub ?>
+                                                                                <?= !empty($sub_kode) ? html_escape($sub_kode) : ($no_tujuan . '.' . $no_sasaran . '.' . $no_program . '.' . $no_kegiatan . '.' . $no_sub) ?>
                                                                             </td>
                                                                         <?php } ?>
 
@@ -1403,6 +1485,16 @@ function hitungTotalAnggaranProgram($program) {
                         <option value="">-- Pilih Bidang --</option>
                     </select>
                 </div>
+                <hr>
+                <div class="form-group">
+                    <label><b>INDIKATOR TUJUAN</b></label>
+                    <div class="indikator-list" id="tujuan_indikator_list">
+                        <!-- Indikator rows akan ditambahkan di sini -->
+                    </div>
+                    <button type="button" class="btn btn-sm btn-primary" id="btnTambahIndikatorTujuan">
+                        <i class="fa fa-plus"></i> Tambah Indikator
+                    </button>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default btn-batal" data-dismiss="modal">Batal</button>
@@ -1434,6 +1526,16 @@ function hitungTotalAnggaranProgram($program) {
                     <select class="form-control" id="sasaran_bidang_id">
                         <option value="">-- Pilih Bidang --</option>
                     </select>
+                </div>
+                <hr>
+                <div class="form-group">
+                    <label><b>INDIKATOR SASARAN</b></label>
+                    <div class="indikator-list" id="sasaran_indikator_list">
+                        <!-- Indikator rows akan ditambahkan di sini -->
+                    </div>
+                    <button type="button" class="btn btn-sm btn-primary" id="btnTambahIndikatorSasaran">
+                        <i class="fa fa-plus"></i> Tambah Indikator
+                    </button>
                 </div>
             </div>
             <div class="modal-footer">
@@ -2844,12 +2946,122 @@ $(document).ready(function() {
     });
 
     // ==============================================
+    // FUNGSI INDIKATOR DI MODAL TUJUAN
+    // ==============================================
+    var counterTujuanIndikator = 0;
+    function generateTujuanIndikatorRow(data) {
+        var id = data && data.id ? data.id : '';
+        var indikator = data && data.indikator ? escapeHtml(data.indikator) : '';
+        var satuan = data && data.satuan ? escapeHtml(data.satuan) : '';
+        var kondisiAwal = data && data.kondisi_awal ? escapeHtml(data.kondisi_awal) : '';
+        var target2026 = data && data.target_2026 ? escapeHtml(data.target_2026) : '';
+        var target2027 = data && data.target_2027 ? escapeHtml(data.target_2027) : '';
+        var target2028 = data && data.target_2028 ? escapeHtml(data.target_2028) : '';
+        var target2029 = data && data.target_2029 ? escapeHtml(data.target_2029) : '';
+        var target2030 = data && data.target_2030 ? escapeHtml(data.target_2030) : '';
+        
+        var counter = counterTujuanIndikator++;
+        var html = '<div class="indikator-row" id="tujuan_indikator_row_' + counter + '">';
+        html += '<input type="hidden" class="tujuan-indikator-id" value="' + id + '">';
+        html += '<button type="button" class="btn btn-danger btn-sm btn-remove-indikator btn-remove-tujuan-indikator" data-row="' + counter + '" title="Hapus Indikator">×</button>';
+        
+        html += '<div class="row"><div class="col-md-12"><div class="form-group"><label>Indikator</label>';
+        html += '<textarea class="form-control form-control-sm indikator-textarea" id="tujuan_indikator_' + counter + '" rows="2" placeholder="Nama indikator tujuan...">' + indikator + '</textarea>';
+        html += '</div></div></div>';
+        
+        html += '<div class="row">';
+        html += '<div class="col-md-6"><div class="form-group"><label>Satuan</label><input type="text" class="form-control form-control-sm satuan-input" id="tujuan_satuan_' + counter + '" placeholder="contoh: %, Nilai, Indeks" value="' + satuan + '"></div></div>';
+        html += '<div class="col-md-6"><div class="form-group"><label>Kondisi Awal</label><input type="text" class="form-control form-control-sm kondisi-input" id="tujuan_kondisi_awal_' + counter + '" placeholder="Kondisi awal..." value="' + kondisiAwal + '"></div></div>';
+        html += '</div>';
+        
+        html += '<div class="row">';
+        var years = ['2026','2027','2028','2029','2030'];
+        var targetVals = [target2026, target2027, target2028, target2029, target2030];
+        for (var y = 0; y < years.length; y++) {
+            html += '<div class="col-md-2" style="width:20%;"><div class="form-group"><label style="font-size:11px; color:#007bff;">' + years[y] + '</label>';
+            html += '<input type="text" class="form-control form-control-sm target-input" id="tujuan_target_' + years[y] + '_' + counter + '" placeholder="Target ' + years[y] + '" value="' + targetVals[y] + '">';
+            html += '</div></div>';
+        }
+        html += '</div>';
+        html += '</div>';
+        return html;
+    }
+
+    $(document).on("click", "#btnTambahIndikatorTujuan", function() {
+        $("#tujuan_indikator_list").append(generateTujuanIndikatorRow(null));
+    });
+
+    $(document).on("click", ".btn-remove-tujuan-indikator", function() {
+        if ($("#tujuan_indikator_list .indikator-row").length <= 1) {
+            alert("Minimal 1 indikator harus ada!");
+            return;
+        }
+        $(this).closest(".indikator-row").remove();
+    });
+
+    // ==============================================
+    // FUNGSI INDIKATOR DI MODAL SASARAN
+    // ==============================================
+    var counterSasaranIndikator = 0;
+    function generateSasaranIndikatorRow(data) {
+        var id = data && data.id ? data.id : '';
+        var indikator = data && data.indikator ? escapeHtml(data.indikator) : '';
+        var satuan = data && data.satuan ? escapeHtml(data.satuan) : '';
+        var kondisiAwal = data && data.kondisi_awal ? escapeHtml(data.kondisi_awal) : '';
+        var target2026 = data && data.target_2026 ? escapeHtml(data.target_2026) : '';
+        var target2027 = data && data.target_2027 ? escapeHtml(data.target_2027) : '';
+        var target2028 = data && data.target_2028 ? escapeHtml(data.target_2028) : '';
+        var target2029 = data && data.target_2029 ? escapeHtml(data.target_2029) : '';
+        var target2030 = data && data.target_2030 ? escapeHtml(data.target_2030) : '';
+        
+        var counter = counterSasaranIndikator++;
+        var html = '<div class="indikator-row" id="sasaran_indikator_row_' + counter + '">';
+        html += '<input type="hidden" class="sasaran-indikator-id" value="' + id + '">';
+        html += '<button type="button" class="btn btn-danger btn-sm btn-remove-indikator btn-remove-sasaran-indikator" data-row="' + counter + '" title="Hapus Indikator">×</button>';
+        
+        html += '<div class="row"><div class="col-md-12"><div class="form-group"><label>Indikator</label>';
+        html += '<textarea class="form-control form-control-sm indikator-textarea" id="sasaran_indikator_' + counter + '" rows="2" placeholder="Nama indikator sasaran...">' + indikator + '</textarea>';
+        html += '</div></div></div>';
+        
+        html += '<div class="row">';
+        html += '<div class="col-md-6"><div class="form-group"><label>Satuan</label><input type="text" class="form-control form-control-sm satuan-input" id="sasaran_satuan_' + counter + '" placeholder="contoh: %, Nilai, Indeks" value="' + satuan + '"></div></div>';
+        html += '<div class="col-md-6"><div class="form-group"><label>Kondisi Awal</label><input type="text" class="form-control form-control-sm kondisi-input" id="sasaran_kondisi_awal_' + counter + '" placeholder="Kondisi awal..." value="' + kondisiAwal + '"></div></div>';
+        html += '</div>';
+        
+        html += '<div class="row">';
+        var years = ['2026','2027','2028','2029','2030'];
+        var targetVals = [target2026, target2027, target2028, target2029, target2030];
+        for (var y = 0; y < years.length; y++) {
+            html += '<div class="col-md-2" style="width:20%;"><div class="form-group"><label style="font-size:11px; color:#007bff;">' + years[y] + '</label>';
+            html += '<input type="text" class="form-control form-control-sm target-input" id="sasaran_target_' + years[y] + '_' + counter + '" placeholder="Target ' + years[y] + '" value="' + targetVals[y] + '">';
+            html += '</div></div>';
+        }
+        html += '</div>';
+        html += '</div>';
+        return html;
+    }
+
+    $(document).on("click", "#btnTambahIndikatorSasaran", function() {
+        $("#sasaran_indikator_list").append(generateSasaranIndikatorRow(null));
+    });
+
+    $(document).on("click", ".btn-remove-sasaran-indikator", function() {
+        if ($("#sasaran_indikator_list .indikator-row").length <= 1) {
+            alert("Minimal 1 indikator harus ada!");
+            return;
+        }
+        $(this).closest(".indikator-row").remove();
+    });
+
+    // ==============================================
     // CRUD TUJUAN
     // ==============================================
     $("#btnTambahTujuan").click(function() {
         $("#modalTujuanTitle").text("Tambah Tujuan PD");
         $("#tujuan_id").val('');
         $("#tujuan_uraian").val('');
+        $("#tujuan_indikator_list").empty();
+        $("#tujuan_indikator_list").append(generateTujuanIndikatorRow(null));
         loadSasaranRPJMD('tujuan_sasaran_rpjmd_id', null);
         loadBidangList('tujuan_bidang_id', null);
         showFixedModal('#modalTujuan');
@@ -2868,6 +3080,17 @@ $(document).ready(function() {
                     $("#modalTujuanTitle").text("Edit Tujuan PD");
                     $("#tujuan_id").val(res.data.id);
                     $("#tujuan_uraian").val(res.data.uraian || '');
+                    $("#tujuan_indikator_list").empty();
+                    
+                    var inds = res.data.indikators || [];
+                    if (inds.length > 0) {
+                        $.each(inds, function(i, ind) {
+                            $("#tujuan_indikator_list").append(generateTujuanIndikatorRow(ind));
+                        });
+                    } else {
+                        $("#tujuan_indikator_list").append(generateTujuanIndikatorRow(null));
+                    }
+
                     loadSasaranRPJMD('tujuan_sasaran_rpjmd_id', res.data.sasaran_rpjmd_id);
                     loadBidangList('tujuan_bidang_id', res.data.bidang_id || null);
                     showFixedModal('#modalTujuan');
@@ -2902,13 +3125,37 @@ $(document).ready(function() {
     });
 
     $("#btnSimpanTujuan").click(function() {
-        $(this).prop('disabled', true).text('Menyimpan...');
         var id = $("#tujuan_id").val();
+        var uraian = $("#tujuan_uraian").val();
+        if (!uraian || !uraian.trim()) {
+            alert("Uraian Tujuan wajib diisi!");
+            return;
+        }
+
+        var indikators = [];
+        $("#tujuan_indikator_list .indikator-row").each(function() {
+            var indText = $(this).find(".indikator-textarea").val();
+            if (indText && indText.trim()) {
+                indikators.push({
+                    indikator: indText.trim(),
+                    satuan: $(this).find(".satuan-input").val(),
+                    kondisi_awal: $(this).find(".kondisi-input").val(),
+                    target_2026: $(this).find(".target-input:eq(0)").val(),
+                    target_2027: $(this).find(".target-input:eq(1)").val(),
+                    target_2028: $(this).find(".target-input:eq(2)").val(),
+                    target_2029: $(this).find(".target-input:eq(3)").val(),
+                    target_2030: $(this).find(".target-input:eq(4)").val()
+                });
+            }
+        });
+
+        $(this).prop('disabled', true).text('Menyimpan...');
         var data = {
             id: id,
             sasaran_rpjmd_id: $("#tujuan_sasaran_rpjmd_id").val(),
-            uraian: $("#tujuan_uraian").val(),
+            uraian: uraian,
             bidang_id: $("#tujuan_bidang_id").val(),
+            indikators: JSON.stringify(indikators),
             [CSRF_NAME]: CSRF_TOKEN
         };
         var url = id ? BaseURL + "Instansi/editRenstraTujuanPD" : BaseURL + "Instansi/tambahRenstraTujuanPD";
@@ -2944,6 +3191,8 @@ $(document).ready(function() {
         $("#sasaran_id").val('');
         $("#sasaran_tujuan_id").val(tujuanId);
         $("#sasaran_uraian").val('');
+        $("#sasaran_indikator_list").empty();
+        $("#sasaran_indikator_list").append(generateSasaranIndikatorRow(null));
         loadBidangList('sasaran_bidang_id', null);
         showFixedModal('#modalSasaran');
     });
@@ -2962,6 +3211,17 @@ $(document).ready(function() {
                     $("#sasaran_id").val(res.data.id);
                     $("#sasaran_tujuan_id").val(res.data.tujuan_id);
                     $("#sasaran_uraian").val(res.data.uraian || '');
+                    $("#sasaran_indikator_list").empty();
+
+                    var inds = res.data.indikators || [];
+                    if (inds.length > 0) {
+                        $.each(inds, function(i, ind) {
+                            $("#sasaran_indikator_list").append(generateSasaranIndikatorRow(ind));
+                        });
+                    } else {
+                        $("#sasaran_indikator_list").append(generateSasaranIndikatorRow(null));
+                    }
+
                     loadBidangList('sasaran_bidang_id', res.data.bidang_id || null);
                     showFixedModal('#modalSasaran');
                 } else {
@@ -2995,13 +3255,37 @@ $(document).ready(function() {
     });
 
     $("#btnSimpanSasaran").click(function() {
-        $(this).prop('disabled', true).text('Menyimpan...');
         var id = $("#sasaran_id").val();
+        var uraian = $("#sasaran_uraian").val();
+        if (!uraian || !uraian.trim()) {
+            alert("Uraian Sasaran wajib diisi!");
+            return;
+        }
+
+        var indikators = [];
+        $("#sasaran_indikator_list .indikator-row").each(function() {
+            var indText = $(this).find(".indikator-textarea").val();
+            if (indText && indText.trim()) {
+                indikators.push({
+                    indikator: indText.trim(),
+                    satuan: $(this).find(".satuan-input").val(),
+                    kondisi_awal: $(this).find(".kondisi-input").val(),
+                    target_2026: $(this).find(".target-input:eq(0)").val(),
+                    target_2027: $(this).find(".target-input:eq(1)").val(),
+                    target_2028: $(this).find(".target-input:eq(2)").val(),
+                    target_2029: $(this).find(".target-input:eq(3)").val(),
+                    target_2030: $(this).find(".target-input:eq(4)").val()
+                });
+            }
+        });
+
+        $(this).prop('disabled', true).text('Menyimpan...');
         var data = {
             id: id,
             tujuan_id: $("#sasaran_tujuan_id").val(),
-            uraian: $("#sasaran_uraian").val(),
+            uraian: uraian,
             bidang_id: $("#sasaran_bidang_id").val(),
+            indikators: JSON.stringify(indikators),
             [CSRF_NAME]: CSRF_TOKEN
         };
         var url = id ? BaseURL + "Instansi/editRenstraSasaranPD" : BaseURL + "Instansi/tambahRenstraSasaranPD";
