@@ -68,6 +68,93 @@
         content: 'Rp ';
         font-size: 12px;
     }
+    
+    /* ============ DROPDOWN TITIK TIGA ============ */
+    .dropdown-aksi {
+        position: relative;
+        display: inline-block;
+    }
+    .dropdown-aksi .btn-titik-tiga {
+        background: transparent;
+        border: none;
+        padding: 4px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        color: #718096;
+        transition: all 0.2s ease;
+        font-size: 16px;
+        line-height: 1;
+        font-weight: 400;
+    }
+    .dropdown-aksi .btn-titik-tiga:hover {
+        background: #edf2f7;
+        color: #2d3748;
+    }
+    .dropdown-aksi .btn-titik-tiga:focus {
+        outline: none;
+    }
+    .dropdown-aksi .menu-dropdown {
+        position: absolute;
+        right: 0;
+        top: 100%;
+        min-width: 160px;
+        background: white;
+        border-radius: 6px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+        border: 1px solid #edf2f7;
+        padding: 4px 0;
+        display: none;
+        z-index: 1000;
+        margin-top: 4px;
+        text-align: left;
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .dropdown-aksi .menu-dropdown.show {
+        display: block;
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .dropdown-aksi .item-dropdown {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        color: #2d3748;
+        font-size: 12px;
+        transition: all 0.2s ease;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        font-weight: 500;
+    }
+    .dropdown-aksi .item-dropdown:hover {
+        background: #f7fafc;
+    }
+    .dropdown-aksi .item-dropdown i {
+        width: 16px;
+        font-size: 13px;
+        color: #718096;
+    }
+    .dropdown-aksi .item-dropdown.text-danger {
+        color: #dc3545;
+    }
+    .dropdown-aksi .item-dropdown.text-danger i {
+        color: #dc3545;
+    }
+    .dropdown-aksi .item-dropdown.text-danger:hover {
+        background: #fef2f2;
+    }
+    .dropdown-aksi .divider-dropdown {
+        height: 1px;
+        background: #edf2f7;
+        margin: 4px 0;
+    }
+    /* =========================================== */
+    
     .akumulasi-box {
         background: linear-gradient(135deg, #0c8d1f 0%, #0db762 100%);
         color: white;
@@ -154,13 +241,19 @@
         100% { transform: rotate(360deg); }
     }
     @media print {
-        .btn, .no-print {
+        .btn, .no-print, .dropdown-aksi {
             display: none !important;
         }
         .akumulasi-box {
             background: #667eea !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+        }
+    }
+    @media (max-width: 768px) {
+        .dropdown-aksi .menu-dropdown {
+            right: -10px;
+            min-width: 150px;
         }
     }
 </style>
@@ -207,9 +300,6 @@
                     <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalRenja">
                         <i class="notika-icon notika-edit"></i> <b>Buat/Edit Renja</b>
                     </button>
-                    <!-- <button type="button" class="btn btn-primary notika-btn-primary" onclick="loadAkumulasi()">
-                        <i class="notika-icon notika-analytics"></i> <b>Akumulasi Anggaran</b>
-                    </button> -->
                     <?php if (!empty($Renja)): ?>
                     <button type="button" class="btn btn-info notika-btn-info" onclick="window.print()">
                         <i class="notika-icon notika-print"></i> <b>Cetak</b>
@@ -241,7 +331,6 @@
                                 $tahun_mulai = $UserTahunMulai ?? ($tahun_sekarang - 4);
                                 $tahun_akhir = $UserTahunAkhir ?? $tahun_sekarang;
                                 
-                                // Tampilkan semua tahun dalam periode
                                 for ($t = $tahun_mulai; $t <= $tahun_akhir; $t++): 
                                     $active = ($t == ($Renja['tahun'] ?? $tahun_sekarang)) ? 'active' : '';
                                 ?>
@@ -320,16 +409,23 @@
                                         <td><?= htmlspecialchars($p['nama_prioritas']) ?></td>
                                         <td class="text-right uang-besar"><?= number_format($p['alokasi'], 0, ',', '.') ?></td>
                                         <td class="text-center">
-                                            <button class="btn btn-xs btn-warning edit-prioritas" 
-                                                data-id="<?= $p['id'] ?>"
-                                                data-kode="<?= htmlspecialchars($p['kode']) ?>"
-                                                data-nama="<?= htmlspecialchars($p['nama_prioritas']) ?>"
-                                                data-alokasi="<?= $p['alokasi'] ?>">
-                                                <i class="notika-icon notika-edit"></i>
-                                            </button>
-                                            <button class="btn btn-xs btn-danger delete-prioritas" data-id="<?= $p['id'] ?>">
-                                                <i class="notika-icon notika-trash"></i>
-                                            </button>
+                                            <div class="dropdown-aksi">
+                                                <button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)">
+                                                    <i class="fa fa-ellipsis-v"></i>
+                                                </button>
+                                                <div class="menu-dropdown">
+                                                    <button class="item-dropdown edit-prioritas" 
+                                                        data-id="<?= $p['id'] ?>"
+                                                        data-kode="<?= htmlspecialchars($p['kode']) ?>"
+                                                        data-nama="<?= htmlspecialchars($p['nama_prioritas']) ?>"
+                                                        data-alokasi="<?= $p['alokasi'] ?>">
+                                                        <i class="fa fa-pencil"></i> Edit
+                                                    </button>
+                                                    <button class="item-dropdown text-danger delete-prioritas" data-id="<?= $p['id'] ?>">
+                                                        <i class="fa fa-trash"></i> Hapus
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>
@@ -386,18 +482,25 @@
                                         <td class="text-right"><?= number_format($s['target'], 2, ',', '.') ?></td>
                                         <td class="text-right uang-besar"><?= number_format($s['alokasi'], 0, ',', '.') ?></td>
                                         <td class="text-center">
-                                            <button class="btn btn-xs btn-warning edit-sasaran"
-                                                data-id="<?= $s['id'] ?>"
-                                                data-kode="<?= htmlspecialchars($s['kode']) ?>"
-                                                data-nama="<?= htmlspecialchars($s['nama_sasaran']) ?>"
-                                                data-indikator="<?= htmlspecialchars($s['indikator_kinerja']) ?>"
-                                                data-target="<?= $s['target'] ?>"
-                                                data-alokasi="<?= $s['alokasi'] ?>">
-                                                <i class="notika-icon notika-edit"></i>
-                                            </button>
-                                            <button class="btn btn-xs btn-danger delete-sasaran" data-id="<?= $s['id'] ?>">
-                                                <i class="notika-icon notika-trash"></i>
-                                            </button>
+                                            <div class="dropdown-aksi">
+                                                <button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)">
+                                                    <i class="fa fa-ellipsis-v"></i>
+                                                </button>
+                                                <div class="menu-dropdown">
+                                                    <button class="item-dropdown edit-sasaran"
+                                                        data-id="<?= $s['id'] ?>"
+                                                        data-kode="<?= htmlspecialchars($s['kode']) ?>"
+                                                        data-nama="<?= htmlspecialchars($s['nama_sasaran']) ?>"
+                                                        data-indikator="<?= htmlspecialchars($s['indikator_kinerja']) ?>"
+                                                        data-target="<?= $s['target'] ?>"
+                                                        data-alokasi="<?= $s['alokasi'] ?>">
+                                                        <i class="fa fa-pencil"></i> Edit
+                                                    </button>
+                                                    <button class="item-dropdown text-danger delete-sasaran" data-id="<?= $s['id'] ?>">
+                                                        <i class="fa fa-trash"></i> Hapus
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>
@@ -492,18 +595,25 @@
                                                     <?php endforeach; ?>
                                                     <td class="text-right uang-besar"><?= number_format($pd['total'], 0, ',', '.') ?></td>
                                                     <td class="text-center">
-                                                        <button class="btn btn-xs btn-warning edit-pendanaan"
-                                                            data-id="<?= $pd['id'] ?>"
-                                                            data-id_program="<?= $program['id'] ?>"
-                                                            data-tahun="<?= $pd['tahun'] ?>"
-                                                            <?php foreach ($sources as $src): ?>
-                                                            data-<?= $src ?>="<?= $pd[$src] ?? 0 ?>"
-                                                            <?php endforeach; ?>>
-                                                            <i class="notika-icon notika-edit"></i>
-                                                        </button>
-                                                        <button class="btn btn-xs btn-danger delete-pendanaan" data-id="<?= $pd['id'] ?>">
-                                                            <i class="notika-icon notika-trash"></i>
-                                                        </button>
+                                                        <div class="dropdown-aksi">
+                                                            <button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)">
+                                                                <i class="fa fa-ellipsis-v"></i>
+                                                            </button>
+                                                            <div class="menu-dropdown">
+                                                                <button class="item-dropdown edit-pendanaan"
+                                                                    data-id="<?= $pd['id'] ?>"
+                                                                    data-id_program="<?= $program['id'] ?>"
+                                                                    data-tahun="<?= $pd['tahun'] ?>"
+                                                                    <?php foreach ($sources as $src): ?>
+                                                                    data-<?= $src ?>="<?= $pd[$src] ?? 0 ?>"
+                                                                    <?php endforeach; ?>>
+                                                                    <i class="fa fa-pencil"></i> Edit
+                                                                </button>
+                                                                <button class="item-dropdown text-danger delete-pendanaan" data-id="<?= $pd['id'] ?>">
+                                                                    <i class="fa fa-trash"></i> Hapus
+                                                                </button>
+                                                            </div>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                                 <?php endforeach; ?>
@@ -821,6 +931,31 @@ var IdRenja = <?= json_encode($Renja['id'] ?? null) ?>;
 var CurrentTahun = <?= json_encode($Renja['tahun'] ?? date('Y')) ?>;
 
 // ============================================================
+// FUNGSI TOGGLE DROPDOWN
+// ============================================================
+function toggleDropdown(button) {
+    event.stopPropagation();
+    var menu = button.nextElementSibling;
+    var isOpen = menu.classList.contains('show');
+    
+    // Close all other dropdowns
+    document.querySelectorAll('.menu-dropdown.show').forEach(function(m) {
+        if (m !== menu) m.classList.remove('show');
+    });
+    
+    menu.classList.toggle('show');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.dropdown-aksi')) {
+        document.querySelectorAll('.menu-dropdown.show').forEach(function(menu) {
+            menu.classList.remove('show');
+        });
+    }
+});
+
+// ============================================================
 // FUNGSI UTILITY
 // ============================================================
 function formatNumber(num, decimals = 0) {
@@ -910,8 +1045,12 @@ function renderData(data) {
             html += '<td>' + escapeHtml(p.nama_prioritas) + '</td>';
             html += '<td class="text-right uang-besar">' + formatNumber(p.alokasi) + '</td>';
             html += '<td class="text-center">';
-            html += '<button class="btn btn-xs btn-warning edit-prioritas" data-id="' + p.id + '" data-kode="' + escapeHtml(p.kode) + '" data-nama="' + escapeHtml(p.nama_prioritas) + '" data-alokasi="' + p.alokasi + '"><i class="notika-icon notika-edit"></i></button> ';
-            html += '<button class="btn btn-xs btn-danger delete-prioritas" data-id="' + p.id + '"><i class="notika-icon notika-trash"></i></button>';
+            html += '<div class="dropdown-aksi">';
+            html += '<button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)"><i class="fa fa-ellipsis-v"></i></button>';
+            html += '<div class="menu-dropdown">';
+            html += '<button class="item-dropdown edit-prioritas" data-id="' + p.id + '" data-kode="' + escapeHtml(p.kode) + '" data-nama="' + escapeHtml(p.nama_prioritas) + '" data-alokasi="' + p.alokasi + '"><i class="fa fa-pencil"></i> Edit</button>';
+            html += '<button class="item-dropdown text-danger delete-prioritas" data-id="' + p.id + '"><i class="fa fa-trash"></i> Hapus</button>';
+            html += '</div></div>';
             html += '</td></tr>';
         });
     } else {
@@ -939,8 +1078,12 @@ function renderData(data) {
             html += '<td class="text-right">' + formatNumber(s.target, 2) + '</td>';
             html += '<td class="text-right uang-besar">' + formatNumber(s.alokasi) + '</td>';
             html += '<td class="text-center">';
-            html += '<button class="btn btn-xs btn-warning edit-sasaran" data-id="' + s.id + '" data-kode="' + escapeHtml(s.kode) + '" data-nama="' + escapeHtml(s.nama_sasaran) + '" data-indikator="' + escapeHtml(s.indikator_kinerja) + '" data-target="' + s.target + '" data-alokasi="' + s.alokasi + '"><i class="notika-icon notika-edit"></i></button> ';
-            html += '<button class="btn btn-xs btn-danger delete-sasaran" data-id="' + s.id + '"><i class="notika-icon notika-trash"></i></button>';
+            html += '<div class="dropdown-aksi">';
+            html += '<button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)"><i class="fa fa-ellipsis-v"></i></button>';
+            html += '<div class="menu-dropdown">';
+            html += '<button class="item-dropdown edit-sasaran" data-id="' + s.id + '" data-kode="' + escapeHtml(s.kode) + '" data-nama="' + escapeHtml(s.nama_sasaran) + '" data-indikator="' + escapeHtml(s.indikator_kinerja) + '" data-target="' + s.target + '" data-alokasi="' + s.alokasi + '"><i class="fa fa-pencil"></i> Edit</button>';
+            html += '<button class="item-dropdown text-danger delete-sasaran" data-id="' + s.id + '"><i class="fa fa-trash"></i> Hapus</button>';
+            html += '</div></div>';
             html += '</td></tr>';
         });
     } else {
@@ -993,12 +1136,16 @@ function renderData(data) {
                     });
                     html += '<td class="text-right uang-besar">' + formatNumber(pd.total) + '</td>';
                     html += '<td class="text-center">';
-                    html += '<button class="btn btn-xs btn-warning edit-pendanaan" data-id="' + pd.id + '" data-id_program="' + program.id + '" data-tahun="' + pd.tahun + '"';
+                    html += '<div class="dropdown-aksi">';
+                    html += '<button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)"><i class="fa fa-ellipsis-v"></i></button>';
+                    html += '<div class="menu-dropdown">';
+                    html += '<button class="item-dropdown edit-pendanaan" data-id="' + pd.id + '" data-id_program="' + program.id + '" data-tahun="' + pd.tahun + '"';
                     sources.forEach(function(src) {
                         html += ' data-' + src + '="' + (pd[src] || 0) + '"';
                     });
-                    html += '><i class="notika-icon notika-edit"></i></button> ';
-                    html += '<button class="btn btn-xs btn-danger delete-pendanaan" data-id="' + pd.id + '"><i class="notika-icon notika-trash"></i></button>';
+                    html += '><i class="fa fa-pencil"></i> Edit</button>';
+                    html += '<button class="item-dropdown text-danger delete-pendanaan" data-id="' + pd.id + '"><i class="fa fa-trash"></i> Hapus</button>';
+                    html += '</div></div>';
                     html += '</td></tr>';
                 });
             } else {

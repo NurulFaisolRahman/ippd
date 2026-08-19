@@ -35,7 +35,6 @@
                         <!-- Header dengan Button -->
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
-                                <!-- Tombol Filter hanya untuk yang tidak login atau Admin -->
                                 <?php if (!isset($_SESSION['Level']) || $_SESSION['Level'] == 0): ?>
                                     <button type="button" class="btn btn-primary notika-btn-primary" id="FilterKementerian">
                                         <i class="notika-icon notika-search"></i> 
@@ -46,7 +45,6 @@
                                     </button>
                                 <?php endif; ?>
                                 
-                                <!-- Tombol Input untuk yang login (Admin atau Kementerian) -->
                                 <?php if (isset($_SESSION['Level']) && ($_SESSION['Level'] == 0 || $_SESSION['Level'] == 1)): ?>
                                     <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputProgram">
                                         <i class="notika-icon notika-edit"></i> <b>Input Program Strategis</b>
@@ -55,7 +53,7 @@
                             </div>
                         </div>
 
-                        <!-- Modal Filter (hanya untuk yang tidak login atau Admin) -->
+                        <!-- Modal Filter -->
                         <?php if (!isset($_SESSION['Level']) || $_SESSION['Level'] == 0): ?>
                         <div class="modal fade" id="ModalFilter" tabindex="-1" role="dialog" aria-hidden="true">
                             <div class="modal-dialog modals-default">
@@ -66,7 +64,6 @@
                                     </div>
                                     <div class="modal-body">
                                         <div class="form-example-wrap">
-                                            <!-- Filter Periode -->
                                             <div class="form-example-int">
                                                 <div class="form-group">
                                                     <label><b>Periode</b></label>
@@ -84,7 +81,6 @@
                                                     </select>
                                                 </div>
                                             </div>
-                                            <!-- Filter Kementerian -->
                                             <div class="form-example-int">
                                                 <div class="form-group">
                                                     <label><b>Kementerian</b></label>
@@ -103,7 +99,6 @@
                                                     <?php endif; ?>
                                                 </div>
                                             </div>
-                                            <!-- Buttons -->
                                             <div class="form-example-int mg-t-20">
                                                 <button type="button" class="btn btn-success notika-btn-success" id="ApplyFilter">
                                                     Terapkan Filter
@@ -149,7 +144,6 @@
                                         <td style="vertical-align: top;">
                                             <div style="display: flex; flex-direction: column; height: 100%;">
                                                 <div style="display: flex; justify-content: center; gap: 5px; margin-bottom: 5px;">
-                                                    <!-- Tombol Tambah Lokasi hanya untuk pemilik data atau Admin -->
                                                     <?php if (isset($_SESSION['Level']) && ($_SESSION['Level'] == 0 || $_SESSION['Level'] == 1)): ?>
                                                         <?php 
                                                         $showTambahLokasi = false;
@@ -195,9 +189,7 @@
                                         </td>
                                         <td style="vertical-align: top;">
                                             <div style="display: flex; flex-direction: column; height: 100%;">
-                                                <div style="display: flex; justify-content: center; gap: 5px; margin-bottom: 5px;">
-                                                    <!-- Buttons are handled in Provinsi column -->
-                                                </div>
+                                                <div style="display: flex; justify-content: center; gap: 5px; margin-bottom: 5px;"></div>
                                                 <div style="flex-grow: 1; overflow: auto; text-align: start;">
                                                     <?php if (!empty($key['NamaKota']) && $key['NamaKota'] != '-'): ?>
                                                         <?= htmlspecialchars($key['NamaKota']) ?>
@@ -218,7 +210,6 @@
                                         <td style="vertical-align: middle;">
                                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
                                                 <?php 
-                                                // Tampilkan tombol edit hanya untuk pemilik data atau Admin
                                                 $showEdit = false;
                                                 if ($_SESSION['Level'] == 0) {
                                                     $showEdit = true;
@@ -250,7 +241,6 @@
                                                 <?php endif; ?>
                                                 
                                                 <?php 
-                                                // Tampilkan tombol hapus hanya untuk pemilik data atau Admin
                                                 $showDelete = false;
                                                 if ($_SESSION['Level'] == 0) {
                                                     $showDelete = true;
@@ -297,7 +287,6 @@
                 <div class="modal-body">
                     <form id="formInputProgram">
                         <div class="form-example-wrap">
-                            <!-- Lokasi -->
                             <div class="form-example-int form-horizental">
                                 <div class="form-group">
                                     <div class="row">
@@ -333,7 +322,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Nama Program -->
                             <div class="form-example-int form-horizental">
                                 <div class="form-group">
                                     <div class="row">
@@ -348,7 +336,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Admin: Pilih Periode dan Kementerian (jika tidak ada filter) -->
                             <?php if ($_SESSION['Level'] == 0 && !($CurrentPeriode && $CurrentKementerian)): ?>
                             <div class="form-example-int form-horizental">
                                 <div class="form-group">
@@ -388,7 +375,6 @@
                                 </div>
                             </div>
                             <?php endif; ?>
-                            <!-- Target Inputs -->
                             <div class="form-example-int form-horizental">
                                 <div class="form-group">
                                     <div class="row">
@@ -424,7 +410,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Hidden Inputs -->
                             <?php if ($_SESSION['Level'] == 1): ?>
                                 <input type="hidden" name="IdKementerian" value="<?= isset($_SESSION['IdKementerian']) ? $_SESSION['IdKementerian'] : '' ?>">
                             <?php endif; ?>
@@ -461,7 +446,6 @@
                         <input type="hidden" id="EditTahunMulai" name="TahunMulai">
                         <input type="hidden" id="EditTahunAkhir" name="TahunAkhir">
                         <div class="form-example-wrap">
-                            <!-- Lokasi -->
                             <div class="form-example-int form-horizental">
                                 <div class="form-group">
                                     <div class="row">
@@ -469,14 +453,11 @@
                                             <label class="hrzn-fm"><b>Lokasi</b></label>
                                         </div>
                                         <div class="col-lg-9">
-                                            <div id="edit-lokasi-container">
-                                                <!-- Rows will be added dynamically -->
-                                            </div>
+                                            <div id="edit-lokasi-container"></div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <!-- Nama Program -->
                             <div class="form-example-int form-horizental">
                                 <div class="form-group">
                                     <div class="row">
@@ -491,7 +472,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Target Inputs -->
                             <div class="form-example-int form-horizental">
                                 <div class="form-group">
                                     <div class="row">
@@ -556,9 +536,7 @@
                 <div class="modal-body">
                     <form id="FormTambahLokasi">
                         <input type="hidden" id="LokasiId" name="Id">
-                        <div id="lokasi-table-container">
-                            <!-- Rows will be added dynamically -->
-                        </div>
+                        <div id="lokasi-table-container"></div>
                         <div class="form-group text-right">
                             <button type="button" class="btn btn-success btn-add-lokasi-row">
                                 <i class="notika-icon notika-plus-symbol"></i> Tambah Lokasi
@@ -582,9 +560,7 @@
                 </div>
                 <div class="modal-body">
                     <div id="lokasi-detail-container">
-                        <ul class="list-group">
-                            <!-- Data will be populated dynamically -->
-                        </ul>
+                        <ul class="list-group"></ul>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -606,314 +582,494 @@
     <script src="../js/main.js"></script>
     <script src="../js/data-table/jquery.dataTables.min.js"></script>
     
- <script>
-/* ============================================================
- * GLOBAL VARIABLE
- * ============================================================ */
-var BaseURL = <?= json_encode(base_url()) ?>;
-var CurrentPeriode = <?= json_encode($CurrentPeriode ?? '') ?>;
-var CurrentKementerian = <?= json_encode($CurrentKementerian ?? '') ?>;
-var UserLevel = <?= json_encode($_SESSION['Level'] ?? -1) ?>;
-var UserKementerian = <?= json_encode($_SESSION['IdKementerian'] ?? '') ?>;
-var ProvinsiData = <?= json_encode($Provinsi ?? []) ?>;
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-$(document).ready(function () {
-
+    <script>
     /* ============================================================
-     * HELPER
+     * GLOBAL VARIABLE
      * ============================================================ */
-    function getPeriodeAktif() {
-        if (CurrentPeriode) return CurrentPeriode.split("|");
+    var BaseURL = <?= json_encode(base_url()) ?>;
+    var CurrentPeriode = <?= json_encode($CurrentPeriode ?? '') ?>;
+    var CurrentKementerian = <?= json_encode($CurrentKementerian ?? '') ?>;
+    var UserLevel = <?= json_encode($_SESSION['Level'] ?? -1) ?>;
+    var UserKementerian = <?= json_encode($_SESSION['IdKementerian'] ?? '') ?>;
+    var ProvinsiData = <?= json_encode($Provinsi ?? []) ?>;
 
-        var p = $("#InputPeriode").val();
-        if (!p) {
-            alert("Periode belum dipilih. Silakan pilih periode terlebih dahulu.");
-            return null;
-        }
-        return p.split("|");
-    }
+    $(document).ready(function () {
 
-    /* ============================================================
-     * DATATABLE (WAJIB AMAN)
-     * ============================================================ */
-    function initDataTable() {
-
-        if ($.fn.DataTable.isDataTable("#data-table-basic")) {
-            $("#data-table-basic").DataTable().clear().destroy();
-        }
-
-        $("#data-table-basic").DataTable({
-            pageLength: 10,
-            ordering: true,
-            searching: true,
-            language: {
-                search: "Cari:",
-                lengthMenu: "Tampilkan _MENU_ data",
-                zeroRecords: "Data tidak ditemukan",
-                info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                paginate: {
-                    next: "Selanjutnya",
-                    previous: "Sebelumnya"
+        /* ============================================================
+         * SWEETALERT2 FUNCTIONS
+         * ============================================================ */
+        function showToast(icon, title, message, timer = 3000) {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: timer,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer);
+                    toast.addEventListener('mouseleave', Swal.resumeTimer);
                 }
-            }
-        });
-    }
-
-    initDataTable();
-
-    /* ============================================================
-     * FILTER
-     * ============================================================ */
-    $("#FilterKementerian").click(() => $("#ModalFilter").modal("show"));
-
-    $("#ApplyFilter").click(function () {
-        let url = BaseURL + "Kementerian/ProgramStrategis?";
-        if ($("#FilterPeriode").val()) url += "periode=" + $("#FilterPeriode").val() + "&";
-        if ($("#FilterKementerianSelect").val()) url += "kementerian=" + $("#FilterKementerianSelect").val();
-        window.location.href = url;
-    });
-
-    $("#ResetFilter").click(() => {
-        window.location.href = BaseURL + "Kementerian/ProgramStrategis";
-    });
-
-    /* ============================================================
-     * PROVINSI & KOTA
-     * ============================================================ */
-    function populateProvinsi(select) {
-        select.empty().append('<option value="">Pilih Provinsi (Opsional)</option>');
-        ProvinsiData.forEach(p => {
-            select.append(`<option value="${p.Kode}">${p.Nama}</option>`);
-        });
-    }
-
-    function populateKota(kodeProv, select, selected = "") {
-        if (!kodeProv) {
-            select.prop("disabled", true)
-                  .html('<option value="">Pilih Kota/Kabupaten (Opsional)</option>');
-            return;
-        }
-
-        $.post(BaseURL + "Kementerian/GetKotaByProvinsi", {
-            kode_provinsi: kodeProv
-        }).done(function (res) {
-            let data = JSON.parse(res);
-            select.empty().append('<option value="">Pilih Kota/Kabupaten (Opsional)</option>');
-            data.forEach(k => {
-                let sel = (k.Kode == selected) ? "selected" : "";
-                select.append(`<option value="${k.Kode}" ${sel}>${k.Nama}</option>`);
             });
-            select.prop("disabled", false);
+
+            Toast.fire({
+                icon: icon,
+                title: title,
+                text: message
+            });
+        }
+
+        function showLoading(message = 'Memproses...') {
+            Swal.fire({
+                title: message,
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+        }
+
+        function closeLoading() {
+            Swal.close();
+        }
+
+        function showConfirmDelete(title, text, callback) {
+            Swal.fire({
+                title: title,
+                html: text,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    callback();
+                }
+            });
+        }
+
+        /* ============================================================
+         * HELPER
+         * ============================================================ */
+        function getPeriodeAktif() {
+            if (CurrentPeriode) return CurrentPeriode.split("|");
+
+            var p = $("#InputPeriode").val();
+            if (!p) {
+                showToast('warning', 'Peringatan', 'Periode belum dipilih. Silakan pilih periode terlebih dahulu.');
+                return null;
+            }
+            return p.split("|");
+        }
+
+        /* ============================================================
+         * DATATABLE
+         * ============================================================ */
+        function initDataTable() {
+            if ($.fn.DataTable.isDataTable("#data-table-basic")) {
+                $("#data-table-basic").DataTable().clear().destroy();
+            }
+
+            $("#data-table-basic").DataTable({
+                pageLength: 10,
+                ordering: true,
+                searching: true,
+                language: {
+                    search: "Cari:",
+                    lengthMenu: "Tampilkan _MENU_ data",
+                    zeroRecords: "Data tidak ditemukan",
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                    paginate: {
+                        next: "Selanjutnya",
+                        previous: "Sebelumnya"
+                    }
+                }
+            });
+        }
+
+        initDataTable();
+
+        /* ============================================================
+         * FILTER
+         * ============================================================ */
+        $("#FilterKementerian").click(() => $("#ModalFilter").modal("show"));
+
+        $("#ApplyFilter").click(function () {
+            let url = BaseURL + "Kementerian/ProgramStrategis?";
+            if ($("#FilterPeriode").val()) url += "periode=" + $("#FilterPeriode").val() + "&";
+            if ($("#FilterKementerianSelect").val()) url += "kementerian=" + $("#FilterKementerianSelect").val();
+            window.location.href = url;
         });
-    }
 
-    function addLokasiRow(container, prov = "", kota = "") {
-        let row = $(`
-            <div class="form-group lokasi-row">
-                <div class="row">
-                    <div class="col-md-5">
-                        <select class="form-control provinsi-select" name="KodeWilayah[]"></select>
-                    </div>
-                    <div class="col-md-5">
-                        <select class="form-control kota-select" name="KodeKota[]" disabled>
-                            <option value="">Pilih Kota/Kabupaten (Opsional)</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2" style="padding-top:25px">
-                        <button type="button" class="btn btn-danger btn-remove-row">
-                            <i class="notika-icon notika-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `);
+        $("#ResetFilter").click(() => {
+            window.location.href = BaseURL + "Kementerian/ProgramStrategis";
+        });
 
-        populateProvinsi(row.find(".provinsi-select"));
-
-        if (prov) {
-            row.find(".provinsi-select").val(prov);
-            populateKota(prov, row.find(".kota-select"), kota);
+        /* ============================================================
+         * PROVINSI & KOTA
+         * ============================================================ */
+        function populateProvinsi(select) {
+            select.empty().append('<option value="">Pilih Provinsi (Opsional)</option>');
+            ProvinsiData.forEach(p => {
+                select.append(`<option value="${p.Kode}">${p.Nama}</option>`);
+            });
         }
 
-        container.append(row);
-    }
-
-    $(document).on("change", ".provinsi-select", function () {
-        populateKota(
-            $(this).val(),
-            $(this).closest(".lokasi-row").find(".kota-select")
-        );
-    });
-
-    $(document).on("click", ".btn-add-lokasi", () => addLokasiRow($("#lokasi-container")));
-    $(document).on("click", ".btn-remove-row", function () {
-        $(this).closest(".lokasi-row").remove();
-    });
-
-    /* ============================================================
-     * INPUT PROGRAM STRATEGIS (FIX)
-     * ============================================================ */
-    $("#formInputProgram").submit(function (e) {
-        e.preventDefault();
-
-        if ($("#NamaProgram").val() === "") {
-            alert("Nama Program wajib diisi!");
-            return;
-        }
-
-        let periode = getPeriodeAktif();
-        if (!periode) return;
-
-        let fd = new FormData(this);
-        fd.append("TahunMulai", periode[0]);
-        fd.append("TahunAkhir", periode[1]);
-
-        if (UserLevel == 0) {
-            let k = CurrentKementerian || $("#InputKementerian").val();
-            if (!k) {
-                alert("Kementerian wajib dipilih!");
+        function populateKota(kodeProv, select, selected = "") {
+            if (!kodeProv) {
+                select.prop("disabled", true)
+                      .html('<option value="">Pilih Kota/Kabupaten (Opsional)</option>');
                 return;
             }
-            fd.append("IdKementerian", k);
-        } else {
-            fd.append("IdKementerian", UserKementerian);
+
+            $.post(BaseURL + "Kementerian/GetKotaByProvinsi", {
+                kode_provinsi: kodeProv
+            }).done(function (res) {
+                let data = JSON.parse(res);
+                select.empty().append('<option value="">Pilih Kota/Kabupaten (Opsional)</option>');
+                data.forEach(k => {
+                    let sel = (k.Kode == selected) ? "selected" : "";
+                    select.append(`<option value="${k.Kode}" ${sel}>${k.Nama}</option>`);
+                });
+                select.prop("disabled", false);
+            });
         }
 
-        $.ajax({
-            url: BaseURL + "Kementerian/InputProgram",
-            type: "POST",
-            data: fd,
-            processData: false,
-            contentType: false,
-            success: function (res) {
-                if (res == "1") {
-                    $("#ModalInputProgram").modal("hide");
-                    setTimeout(() => location.reload(), 300);
-                } else {
-                    alert(res);
-                }
+        function addLokasiRow(container, prov = "", kota = "") {
+            let row = $(`
+                <div class="form-group lokasi-row">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <select class="form-control provinsi-select" name="KodeWilayah[]"></select>
+                        </div>
+                        <div class="col-md-5">
+                            <select class="form-control kota-select" name="KodeKota[]" disabled>
+                                <option value="">Pilih Kota/Kabupaten (Opsional)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2" style="padding-top:25px">
+                            <button type="button" class="btn btn-danger btn-remove-row">
+                                <i class="notika-icon notika-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `);
+
+            populateProvinsi(row.find(".provinsi-select"));
+
+            if (prov) {
+                row.find(".provinsi-select").val(prov);
+                populateKota(prov, row.find(".kota-select"), kota);
             }
-        });
-    });
 
-    /* ============================================================
-     * EDIT PROGRAM (AKTIF KEMBALI)
-     * ============================================================ */
-    $(document).on("click", ".Edit", function () {
-
-        $("#EditId").val($(this).data("id"));
-        $("#EditNamaProgram").val($(this).data("program"));
-
-        $("#EditTargetTahun1").val($(this).data("target1"));
-        $("#EditTargetTahun2").val($(this).data("target2"));
-        $("#EditTargetTahun3").val($(this).data("target3"));
-        $("#EditTargetTahun4").val($(this).data("target4"));
-        $("#EditTargetTahun5").val($(this).data("target5"));
-
-        $("#EditTahunMulai").val($(this).data("tahunmulai"));
-        $("#EditTahunAkhir").val($(this).data("tahunakhir"));
-
-        $("#edit-lokasi-container").empty();
-
-        let prov = ($(this).data("provinsi") || "").split(",");
-        let kota = ($(this).data("kota") || "").split(",");
-
-        if (prov[0]) {
-            prov.forEach((p, i) => addLokasiRow($("#edit-lokasi-container"), p, kota[i]));
-        } else {
-            addLokasiRow($("#edit-lokasi-container"));
+            container.append(row);
         }
 
-        $("#ModalEditProgram").modal("show");
-    });
-
-    $("#formEditProgram").submit(function (e) {
-        e.preventDefault();
-
-        let fd = new FormData(this);
-
-        $.ajax({
-            url: BaseURL + "Kementerian/UpdateProgram",
-            type: "POST",
-            data: fd,
-            processData: false,
-            contentType: false,
-            success: res => res == "1" ? location.reload() : alert(res)
+        $(document).on("change", ".provinsi-select", function () {
+            populateKota(
+                $(this).val(),
+                $(this).closest(".lokasi-row").find(".kota-select")
+            );
         });
-    });
 
-    $(document).on("click", ".TambahLokasi", function () {
+        $(document).on("click", ".btn-add-lokasi", () => addLokasiRow($("#lokasi-container")));
+        
+        $(document).on("click", ".btn-remove-row", function () {
+            $(this).closest(".lokasi-row").remove();
+        });
 
-    $("#LokasiId").val($(this).data("id"));
-    $("#lokasi-table-container").empty();
+        /* ============================================================
+         * INPUT PROGRAM STRATEGIS
+         * ============================================================ */
+        $("#formInputProgram").submit(function (e) {
+            e.preventDefault();
 
-    let prov = ($(this).data("provinsi") || "").split(",");
-    let kota = ($(this).data("kota") || "").split(",");
+            if ($("#NamaProgram").val().trim() === "") {
+                showToast('warning', 'Peringatan', 'Nama Program wajib diisi!');
+                return;
+            }
 
-    if (prov[0]) {
-        prov.forEach((p,i)=>addLokasiRow($("#lokasi-table-container"), p, kota[i]));
-    } else {
-        addLokasiRow($("#lokasi-table-container"));
-    }
+            let periode = getPeriodeAktif();
+            if (!periode) return;
 
-    $("#ModalTambahLokasi").modal("show");
-});
+            let fd = new FormData(this);
+            fd.append("TahunMulai", periode[0]);
+            fd.append("TahunAkhir", periode[1]);
 
-$(".btn-add-lokasi-row").click(() => addLokasiRow($("#lokasi-table-container")));
-
-$("#FormTambahLokasi").submit(function (e) {
-    e.preventDefault();
-
-    $.post(BaseURL + "Kementerian/UpdateLokasiForProgram", $(this).serialize())
-        .done(res => res=="1" ? location.reload() : alert(res));
-});
-
-    /* ============================================================
-     * DETAIL LOKASI
-     * ============================================================ */
-    $(document).on("click", ".DetailLokasi", function () {
-
-        $("#lokasi-detail-container ul").html('<li class="list-group-item">Memuat...</li>');
-        $("#ModalDetailLokasi").modal("show");
-
-        $.post(BaseURL + "Kementerian/GetLokasiByIds", {
-            ProvinsiIds: $(this).data("provinsi"),
-            KotaIds: $(this).data("kota")
-        }).done(function (res) {
-
-            let data = JSON.parse(res);
-            let html = "";
-
-            if (!data.length) {
-                html = '<li class="list-group-item text-muted">Tidak ada data lokasi</li>';
+            if (UserLevel == 0) {
+                let k = CurrentKementerian || $("#InputKementerian").val();
+                if (!k) {
+                    showToast('warning', 'Peringatan', 'Kementerian wajib dipilih!');
+                    return;
+                }
+                fd.append("IdKementerian", k);
             } else {
-                data.forEach(d => {
-                    html += `
-                        <li class="list-group-item">
-                            <b>Provinsi:</b> ${d.Provinsi}<br>
-                            <b>Kota/Kabupaten:</b> ${d.Kota}
-                        </li>`;
+                fd.append("IdKementerian", UserKementerian);
+            }
+
+            showLoading('Menyimpan data...');
+
+            $.ajax({
+                url: BaseURL + "Kementerian/InputProgram",
+                type: "POST",
+                data: fd,
+                processData: false,
+                contentType: false,
+                success: function (res) {
+                    closeLoading();
+                    var response = res.trim();
+                    
+                    if (response === "1") {
+                        showToast('success', 'Berhasil!', 'Data program strategis berhasil disimpan', 2000);
+                        $("#ModalInputProgram").modal("hide");
+                        setTimeout(() => location.reload(), 1500);
+                    } else if (response === "0") {
+                        showToast('error', 'Gagal!', 'Gagal menyimpan data');
+                    } else {
+                        showToast('error', 'Error!', response || 'Terjadi kesalahan saat menyimpan data');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    closeLoading();
+                    showToast('error', 'Error!', 'Terjadi kesalahan pada server: ' + status);
+                    console.error('Input error:', xhr.responseText);
+                }
+            });
+        });
+
+        /* ============================================================
+         * EDIT PROGRAM
+         * ============================================================ */
+        $(document).on("click", ".Edit", function () {
+            $("#EditId").val($(this).data("id"));
+            $("#EditNamaProgram").val($(this).data("program"));
+
+            $("#EditTargetTahun1").val($(this).data("target1"));
+            $("#EditTargetTahun2").val($(this).data("target2"));
+            $("#EditTargetTahun3").val($(this).data("target3"));
+            $("#EditTargetTahun4").val($(this).data("target4"));
+            $("#EditTargetTahun5").val($(this).data("target5"));
+
+            $("#EditTahunMulai").val($(this).data("tahunmulai"));
+            $("#EditTahunAkhir").val($(this).data("tahunakhir"));
+
+            $("#edit-lokasi-container").empty();
+
+            let prov = ($(this).data("provinsi") || "").split(",");
+            let kota = ($(this).data("kota") || "").split(",");
+
+            if (prov[0]) {
+                prov.forEach((p, i) => addLokasiRow($("#edit-lokasi-container"), p, kota[i]));
+            } else {
+                addLokasiRow($("#edit-lokasi-container"));
+            }
+
+            $("#ModalEditProgram").modal("show");
+        });
+
+        $("#formEditProgram").submit(function (e) {
+            e.preventDefault();
+
+            if ($("#EditNamaProgram").val().trim() === "") {
+                showToast('warning', 'Peringatan', 'Nama Program wajib diisi!');
+                return;
+            }
+
+            let fd = new FormData(this);
+            
+            showLoading('Mengupdate data...');
+
+            $.ajax({
+                url: BaseURL + "Kementerian/UpdateProgram",
+                type: "POST",
+                data: fd,
+                processData: false,
+                contentType: false,
+                success: function (res) {
+                    closeLoading();
+                    var response = res.trim();
+                    
+                    if (response === "1") {
+                        showToast('success', 'Berhasil!', 'Data program berhasil diupdate', 2000);
+                        $("#ModalEditProgram").modal("hide");
+                        setTimeout(() => location.reload(), 1500);
+                    } else if (response === "0") {
+                        showToast('error', 'Gagal!', 'Gagal mengupdate data');
+                    } else {
+                        showToast('error', 'Error!', response || 'Terjadi kesalahan saat update data');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    closeLoading();
+                    showToast('error', 'Error!', 'Terjadi kesalahan pada server: ' + status);
+                    console.error('Update error:', xhr.responseText);
+                }
+            });
+        });
+
+        /* ============================================================
+         * TAMBAH LOKASI
+         * ============================================================ */
+        $(document).on("click", ".TambahLokasi", function () {
+            $("#LokasiId").val($(this).data("id"));
+            $("#lokasi-table-container").empty();
+
+            let prov = ($(this).data("provinsi") || "").split(",");
+            let kota = ($(this).data("kota") || "").split(",");
+
+            if (prov[0]) {
+                prov.forEach((p, i) => addLokasiRow($("#lokasi-table-container"), p, kota[i]));
+            } else {
+                addLokasiRow($("#lokasi-table-container"));
+            }
+
+            $("#ModalTambahLokasi").modal("show");
+        });
+
+        $(".btn-add-lokasi-row").click(() => addLokasiRow($("#lokasi-table-container")));
+
+        $("#FormTambahLokasi").submit(function (e) {
+            e.preventDefault();
+            
+            showLoading('Menyimpan lokasi...');
+
+            $.post(BaseURL + "Kementerian/UpdateLokasiForProgram", $(this).serialize())
+                .done(function(res) {
+                    closeLoading();
+                    var response = res.trim();
+                    
+                    if (response === "1") {
+                        showToast('success', 'Berhasil!', 'Lokasi berhasil diupdate', 2000);
+                        $("#ModalTambahLokasi").modal("hide");
+                        setTimeout(() => location.reload(), 1500);
+                    } else if (response === "0") {
+                        showToast('error', 'Gagal!', 'Gagal mengupdate lokasi');
+                    } else {
+                        showToast('error', 'Error!', response || 'Terjadi kesalahan saat update lokasi');
+                    }
+                })
+                .fail(function(xhr, status, error) {
+                    closeLoading();
+                    showToast('error', 'Error!', 'Terjadi kesalahan pada server: ' + status);
+                    console.error('Lokasi error:', xhr.responseText);
+                });
+        });
+
+        /* ============================================================
+         * DETAIL LOKASI
+         * ============================================================ */
+        $(document).on("click", ".DetailLokasi", function () {
+            $("#lokasi-detail-container ul").html('<li class="list-group-item text-center"><i class="fa fa-spinner fa-spin"></i> Memuat...</li>');
+            $("#ModalDetailLokasi").modal("show");
+
+            $.post(BaseURL + "Kementerian/GetLokasiByIds", {
+                ProvinsiIds: $(this).data("provinsi"),
+                KotaIds: $(this).data("kota")
+            }).done(function (res) {
+                try {
+                    let data = JSON.parse(res);
+                    let html = "";
+
+                    if (!data || !data.length) {
+                        html = '<li class="list-group-item text-muted text-center">Tidak ada data lokasi</li>';
+                    } else {
+                        data.forEach(d => {
+                            html += `
+                                <li class="list-group-item">
+                                    <b>Provinsi:</b> ${d.Provinsi || '-'}<br>
+                                    <b>Kota/Kabupaten:</b> ${d.Kota || '-'}
+                                </li>`;
+                        });
+                    }
+
+                    $("#lokasi-detail-container ul").html(html);
+                } catch(e) {
+                    $("#lokasi-detail-container ul").html('<li class="list-group-item text-danger">Gagal memuat data lokasi</li>');
+                    console.error('Parse error:', e);
+                }
+            }).fail(function(xhr, status, error) {
+                $("#lokasi-detail-container ul").html('<li class="list-group-item text-danger">Terjadi kesalahan saat memuat data</li>');
+                console.error('Detail error:', xhr.responseText);
+            });
+        });
+
+        /* ============================================================
+         * DELETE PROGRAM - FIXED WITH SWEETALERT
+         * ============================================================ */
+        $(document).on("click", ".Hapus", function () {
+            var id = $(this).data("id");
+            var program = $(this).data("program");
+            
+            showConfirmDelete(
+                'Hapus Program Strategis?',
+                `Apakah Anda yakin ingin menghapus program "<strong>${program}</strong>"?<br><small style="color: #999;">Data yang dihapus tidak dapat dikembalikan!</small>`,
+                function() {
+                    showLoading('Menghapus data...');
+                    
+                    $.post(BaseURL + "Kementerian/DeleteProgram", { Id: id })
+                        .done(function(res) {
+                            closeLoading();
+                            var response = res.trim();
+                            
+                            if (response === "1") {
+                                showToast('success', 'Terhapus!', 'Program strategis berhasil dihapus', 2000);
+                                setTimeout(() => location.reload(), 1500);
+                            } else if (response === "0") {
+                                showToast('error', 'Gagal!', 'Data tidak dapat dihapus');
+                            } else {
+                                showToast('error', 'Error!', response || 'Terjadi kesalahan saat menghapus data');
+                            }
+                        })
+                        .fail(function(xhr, status, error) {
+                            closeLoading();
+                            showToast('error', 'Error!', 'Terjadi kesalahan pada server: ' + status);
+                            console.error('Delete error:', xhr.responseText);
+                        });
+                }
+            );
+        });
+
+        /* ============================================================
+         * LOAD KEMENTERIAN UNTUK INPUT
+         * ============================================================ */
+        $("#InputPeriode").change(function() {
+            var periode = $(this).val();
+            if (periode) {
+                $.post(BaseURL + "Kementerian/GetKementerianByPeriode", {
+                    periode: periode
+                }).done(function(res) {
+                    try {
+                        var data = JSON.parse(res);
+                        var select = $("#InputKementerian");
+                        select.empty().append('<option value="">-- Pilih Kementerian --</option>');
+                        data.forEach(k => {
+                            select.append(`<option value="${k.Id}">${k.NamaKementerian}</option>`);
+                        });
+                    } catch(e) {
+                        console.error('Error parsing response:', e);
+                    }
                 });
             }
-
-            $("#lokasi-detail-container ul").html(html);
         });
-    });
 
-    /* ============================================================
-     * DELETE
-     * ============================================================ */
-    $(document).on("click", ".Hapus", function () {
-        if (!confirm("Yakin hapus data ini?")) return;
-        $.post(BaseURL + "Kementerian/DeleteProgram", { Id: $(this).data("id") })
-            .done(res => res == "1" ? location.reload() : alert(res));
-    });
+        /* ============================================================
+         * INIT
+         * ============================================================ */
+        if (CurrentPeriode && CurrentKementerian) {
+            // Already filtered
+        }
 
-});
-</script>
+        console.log('Program Strategis loaded successfully with SweetAlert2!');
+    });
+    </script>
 
 </div>
 </body>
 </html>
-
-

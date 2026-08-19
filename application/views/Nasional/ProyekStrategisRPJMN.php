@@ -32,7 +32,7 @@ if (!function_exists('renderPengampu')) {
         display: inline-block;
         text-align: left;
         vertical-align: middle;
-        width: 800px; /* Diperlebar karena form indikator banyak kolomnya */
+        width: 800px;
         max-width: 95%; 
     }
     .modal-header h2 {
@@ -78,19 +78,99 @@ if (!function_exists('renderPengampu')) {
         filter: brightness(0.96); 
     }
 
-    /* CSS Button & Badge Enhancements */
-    .btn-action {
-        border-radius: 5px;
-        margin: 0 2px;
-        transition: all 0.3s ease;
-        padding: 4px 8px;
-        font-size: 12px;
-        font-weight: 600;
+    /* ============ CSS BUTTON DROPDOWN TITIK TIGA ============ */
+    .btn-action-dropdown {
+        position: relative;
+        display: inline-block;
     }
-    .btn-action:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    
+    .btn-action-dropdown .dropdown-toggle-btn {
+        background: transparent;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        color: #718096;
+        transition: all 0.2s ease;
+        font-size: 18px;
+        line-height: 1;
+        font-weight: 400;
     }
+    .btn-action-dropdown .dropdown-toggle-btn:hover {
+        background: #edf2f7;
+        color: #2d3748;
+    }
+    .btn-action-dropdown .dropdown-toggle-btn:focus {
+        outline: none;
+    }
+    
+    .btn-action-dropdown .dropdown-menu-custom {
+        position: absolute;
+        right: 0;
+        top: 100%;
+        min-width: 180px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+        border: 1px solid #edf2f7;
+        padding: 6px 0;
+        display: none;
+        z-index: 1000;
+        margin-top: 4px;
+        text-align: left;
+    }
+    .btn-action-dropdown .dropdown-menu-custom.show {
+        display: block;
+    }
+    
+    .btn-action-dropdown .dropdown-item-custom {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 16px;
+        color: #2d3748;
+        text-decoration: none;
+        font-size: 13px;
+        transition: all 0.2s ease;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        font-weight: 500;
+    }
+    .btn-action-dropdown .dropdown-item-custom:hover {
+        background: #f7fafc;
+        color: #1a2332;
+    }
+    .btn-action-dropdown .dropdown-item-custom i {
+        width: 18px;
+        font-size: 14px;
+        color: #718096;
+    }
+    .btn-action-dropdown .dropdown-item-custom.text-danger {
+        color: #dc3545;
+    }
+    .btn-action-dropdown .dropdown-item-custom.text-danger i {
+        color: #dc3545;
+    }
+    .btn-action-dropdown .dropdown-item-custom.text-danger:hover {
+        background: #fef2f2;
+    }
+    .btn-action-dropdown .dropdown-item-custom .badge-label {
+        font-size: 10px;
+        background: #e2e8f0;
+        color: #4a5568;
+        padding: 1px 8px;
+        border-radius: 10px;
+        margin-left: auto;
+    }
+    .btn-action-dropdown .dropdown-divider-custom {
+        height: 1px;
+        background: #edf2f7;
+        margin: 4px 0;
+    }
+    /* ======================================================== */
     
     /* Warna penanda level hierarki (Kiri Border) */
     .border-pn { border-left: 4px solid #8bc34a !important; }
@@ -135,6 +215,18 @@ if (!function_exists('renderPengampu')) {
         color: #d9534f !important; 
         background-color: transparent !important;
     }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .btn-action-dropdown .dropdown-menu-custom {
+            right: -10px;
+            min-width: 160px;
+        }
+        #hierarki-table > tbody > tr > td {
+            padding: 8px 6px;
+            font-size: 12px;
+        }
+    }
 </style>
 
 <!-- Load Library Select2 CSS -->
@@ -167,7 +259,7 @@ if (!function_exists('renderPengampu')) {
                                     <th style="width: 7%;" class="text-center">T.Akhir</th>
                                     <th style="width: 12%;">Pengampu</th>
                                     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
-                                    <th style="width: 20%;" class="text-center">Aksi</th>
+                                    <th style="width: 8%;" class="text-center">Aksi</th>
                                     <?php } ?>
                                 </tr>
                             </thead>
@@ -187,10 +279,26 @@ if (!function_exists('renderPengampu')) {
                                         </td>
                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                         <td class="text-center">
-                                            <button class="btn btn-sm btn-success TambahSasaran btn-action" data-id="<?= $pn['Id'] ?>" data-tipe="PN" title="Tambah Sasaran"><i class="fa fa-plus"></i> Sas</button>
-                                            <button class="btn btn-sm btn-success TambahPP btn-action" data-id="<?= $pn['Id'] ?>" title="Tambah Program Prioritas"><i class="fa fa-plus"></i> PP</button>
-                                            <button class="btn btn-sm btn-info EditPN btn-action" data-id="<?= $pn['Id'] ?>" data-idvisi="<?= $pn['_IdVisi'] ?>" data-pn="<?= $pn['PrioritasNasional'] ?>" title="Edit"><i class="fa fa-edit"></i></button>
-                                            <button class="btn btn-sm btn-danger HapusPN btn-action" data-id="<?= $pn['Id'] ?>" title="Hapus"><i class="fa fa-trash"></i></button>
+                                            <div class="btn-action-dropdown">
+                                                <button class="dropdown-toggle-btn" onclick="toggleDropdown(this)">
+                                                    <i class="fa fa-ellipsis-v"></i>
+                                                </button>
+                                                <div class="dropdown-menu-custom">
+                                                    <button class="dropdown-item-custom TambahSasaran" data-id="<?= $pn['Id'] ?>" data-tipe="PN">
+                                                        <i class="fa fa-plus-circle"></i> Tambah Sasaran
+                                                    </button>
+                                                    <button class="dropdown-item-custom TambahPP" data-id="<?= $pn['Id'] ?>">
+                                                        <i class="fa fa-plus-circle"></i> Tambah Program Prioritas
+                                                    </button>
+                                                    <div class="dropdown-divider-custom"></div>
+                                                    <button class="dropdown-item-custom EditPN" data-id="<?= $pn['Id'] ?>" data-idvisi="<?= $pn['_IdVisi'] ?>" data-pn="<?= $pn['PrioritasNasional'] ?>">
+                                                        <i class="fa fa-pencil"></i> Edit
+                                                    </button>
+                                                    <button class="dropdown-item-custom text-danger HapusPN" data-id="<?= $pn['Id'] ?>">
+                                                        <i class="fa fa-trash"></i> Hapus
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </td>
                                         <?php } ?>
                                     </tr>
@@ -204,9 +312,23 @@ if (!function_exists('renderPengampu')) {
                                             </td>
                                             <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                             <td class="text-center">
-                                                <button class="btn btn-sm btn-success TambahIndikator btn-action" data-id="<?= $sasPN['Id'] ?>" data-tipe="PN" title="Tambah Indikator"><i class="fa fa-plus"></i> Indikator</button>
-                                                <button class="btn btn-sm btn-info EditSasaran btn-action" data-id="<?= $sasPN['Id'] ?>" data-tipe="PN" data-parentid="<?= $pn['Id'] ?>" data-sasaran="<?= $sasPN['Sasaran'] ?>" title="Edit"><i class="fa fa-edit"></i></button>
-                                                <button class="btn btn-sm btn-danger HapusSasaran btn-action" data-id="<?= $sasPN['Id'] ?>" data-tipe="PN" title="Hapus"><i class="fa fa-trash"></i></button>
+                                                <div class="btn-action-dropdown">
+                                                    <button class="dropdown-toggle-btn" onclick="toggleDropdown(this)">
+                                                        <i class="fa fa-ellipsis-v"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu-custom">
+                                                        <button class="dropdown-item-custom TambahIndikator" data-id="<?= $sasPN['Id'] ?>" data-tipe="PN">
+                                                            <i class="fa fa-plus-circle"></i> Tambah Indikator
+                                                        </button>
+                                                        <div class="dropdown-divider-custom"></div>
+                                                        <button class="dropdown-item-custom EditSasaran" data-id="<?= $sasPN['Id'] ?>" data-tipe="PN" data-parentid="<?= $pn['Id'] ?>" data-sasaran="<?= $sasPN['Sasaran'] ?>">
+                                                            <i class="fa fa-pencil"></i> Edit
+                                                        </button>
+                                                        <button class="dropdown-item-custom text-danger HapusSasaran" data-id="<?= $sasPN['Id'] ?>" data-tipe="PN">
+                                                            <i class="fa fa-trash"></i> Hapus
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </td>
                                             <?php } ?>
                                         </tr>
@@ -222,8 +344,19 @@ if (!function_exists('renderPengampu')) {
                                                 <td><small><?= renderPengampu($indPN['Pengampu'], $mapKemen) ?></small></td>
                                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                                 <td class="text-center">
-                                                    <button class="btn btn-sm btn-info EditIndikator btn-action" data-id="<?= $indPN['Id'] ?>" data-tipe="PN" data-parentid="<?= $sasPN['Id'] ?>" data-indikator="<?= $indPN['Indikator'] ?>" data-satuan="<?= $indPN['Satuan'] ?>" data-baseline="<?= $indPN['Baseline'] ?>" data-targetawal="<?= $indPN['TargetAwal'] ?>" data-targetakhir="<?= $indPN['TargetAkhir'] ?>" data-pengampu="<?= htmlspecialchars($indPN['Pengampu'], ENT_QUOTES, 'UTF-8') ?>" title="Edit"><i class="fa fa-edit"></i></button>
-                                                    <button class="btn btn-sm btn-danger HapusIndikator btn-action" data-id="<?= $indPN['Id'] ?>" data-tipe="PN" title="Hapus"><i class="fa fa-trash"></i></button>
+                                                    <div class="btn-action-dropdown">
+                                                        <button class="dropdown-toggle-btn" onclick="toggleDropdown(this)">
+                                                            <i class="fa fa-ellipsis-v"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu-custom">
+                                                            <button class="dropdown-item-custom EditIndikator" data-id="<?= $indPN['Id'] ?>" data-tipe="PN" data-parentid="<?= $sasPN['Id'] ?>" data-indikator="<?= $indPN['Indikator'] ?>" data-satuan="<?= $indPN['Satuan'] ?>" data-baseline="<?= $indPN['Baseline'] ?>" data-targetawal="<?= $indPN['TargetAwal'] ?>" data-targetakhir="<?= $indPN['TargetAkhir'] ?>" data-pengampu="<?= htmlspecialchars($indPN['Pengampu'], ENT_QUOTES, 'UTF-8') ?>">
+                                                                <i class="fa fa-pencil"></i> Edit
+                                                            </button>
+                                                            <button class="dropdown-item-custom text-danger HapusIndikator" data-id="<?= $indPN['Id'] ?>" data-tipe="PN">
+                                                                <i class="fa fa-trash"></i> Hapus
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 </td>
                                                 <?php } ?>
                                             </tr>
@@ -239,10 +372,26 @@ if (!function_exists('renderPengampu')) {
                                             </td>
                                             <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                             <td class="text-center">
-                                                <button class="btn btn-sm btn-success TambahSasaran btn-action" data-id="<?= $pp['Id'] ?>" data-tipe="PP" title="Tambah Sasaran"><i class="fa fa-plus"></i> Sas</button>
-                                                <button class="btn btn-sm btn-success TambahKP btn-action" data-id="<?= $pp['Id'] ?>" title="Tambah Kegiatan Prioritas"><i class="fa fa-plus"></i> KP</button>
-                                                <button class="btn btn-sm btn-info EditPP btn-action" data-id="<?= $pp['Id'] ?>" data-idpn="<?= $pn['Id'] ?>" data-pp="<?= $pp['ProgramPrioritas'] ?>" title="Edit"><i class="fa fa-edit"></i></button>
-                                                <button class="btn btn-sm btn-danger HapusPP btn-action" data-id="<?= $pp['Id'] ?>" title="Hapus"><i class="fa fa-trash"></i></button>
+                                                <div class="btn-action-dropdown">
+                                                    <button class="dropdown-toggle-btn" onclick="toggleDropdown(this)">
+                                                        <i class="fa fa-ellipsis-v"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu-custom">
+                                                        <button class="dropdown-item-custom TambahSasaran" data-id="<?= $pp['Id'] ?>" data-tipe="PP">
+                                                            <i class="fa fa-plus-circle"></i> Tambah Sasaran
+                                                        </button>
+                                                        <button class="dropdown-item-custom TambahKP" data-id="<?= $pp['Id'] ?>">
+                                                            <i class="fa fa-plus-circle"></i> Tambah Kegiatan Prioritas
+                                                        </button>
+                                                        <div class="dropdown-divider-custom"></div>
+                                                        <button class="dropdown-item-custom EditPP" data-id="<?= $pp['Id'] ?>" data-idpn="<?= $pn['Id'] ?>" data-pp="<?= $pp['ProgramPrioritas'] ?>">
+                                                            <i class="fa fa-pencil"></i> Edit
+                                                        </button>
+                                                        <button class="dropdown-item-custom text-danger HapusPP" data-id="<?= $pp['Id'] ?>">
+                                                            <i class="fa fa-trash"></i> Hapus
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </td>
                                             <?php } ?>
                                         </tr>
@@ -256,9 +405,23 @@ if (!function_exists('renderPengampu')) {
                                                 </td>
                                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                                 <td class="text-center">
-                                                    <button class="btn btn-sm btn-success TambahIndikator btn-action" data-id="<?= $sasPP['Id'] ?>" data-tipe="PP" title="Tambah Indikator"><i class="fa fa-plus"></i> Indikator</button>
-                                                    <button class="btn btn-sm btn-info EditSasaran btn-action" data-id="<?= $sasPP['Id'] ?>" data-tipe="PP" data-parentid="<?= $pp['Id'] ?>" data-sasaran="<?= $sasPP['Sasaran'] ?>" title="Edit"><i class="fa fa-edit"></i></button>
-                                                    <button class="btn btn-sm btn-danger HapusSasaran btn-action" data-id="<?= $sasPP['Id'] ?>" data-tipe="PP" title="Hapus"><i class="fa fa-trash"></i></button>
+                                                    <div class="btn-action-dropdown">
+                                                        <button class="dropdown-toggle-btn" onclick="toggleDropdown(this)">
+                                                            <i class="fa fa-ellipsis-v"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu-custom">
+                                                            <button class="dropdown-item-custom TambahIndikator" data-id="<?= $sasPP['Id'] ?>" data-tipe="PP">
+                                                                <i class="fa fa-plus-circle"></i> Tambah Indikator
+                                                            </button>
+                                                            <div class="dropdown-divider-custom"></div>
+                                                            <button class="dropdown-item-custom EditSasaran" data-id="<?= $sasPP['Id'] ?>" data-tipe="PP" data-parentid="<?= $pp['Id'] ?>" data-sasaran="<?= $sasPP['Sasaran'] ?>">
+                                                                <i class="fa fa-pencil"></i> Edit
+                                                            </button>
+                                                            <button class="dropdown-item-custom text-danger HapusSasaran" data-id="<?= $sasPP['Id'] ?>" data-tipe="PP">
+                                                                <i class="fa fa-trash"></i> Hapus
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 </td>
                                                 <?php } ?>
                                             </tr>
@@ -274,8 +437,19 @@ if (!function_exists('renderPengampu')) {
                                                     <td><small><?= renderPengampu($indPP['Pengampu'], $mapKemen) ?></small></td>
                                                     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                                     <td class="text-center">
-                                                        <button class="btn btn-sm btn-info EditIndikator btn-action" data-id="<?= $indPP['Id'] ?>" data-tipe="PP" data-parentid="<?= $sasPP['Id'] ?>" data-indikator="<?= $indPP['Indikator'] ?>" data-satuan="<?= $indPP['Satuan'] ?>" data-baseline="<?= $indPP['Baseline'] ?>" data-targetawal="<?= $indPP['TargetAwal'] ?>" data-targetakhir="<?= $indPP['TargetAkhir'] ?>" data-pengampu="<?= htmlspecialchars($indPP['Pengampu'], ENT_QUOTES, 'UTF-8') ?>" title="Edit"><i class="fa fa-edit"></i></button>
-                                                        <button class="btn btn-sm btn-danger HapusIndikator btn-action" data-id="<?= $indPP['Id'] ?>" data-tipe="PP" title="Hapus"><i class="fa fa-trash"></i></button>
+                                                        <div class="btn-action-dropdown">
+                                                            <button class="dropdown-toggle-btn" onclick="toggleDropdown(this)">
+                                                                <i class="fa fa-ellipsis-v"></i>
+                                                            </button>
+                                                            <div class="dropdown-menu-custom">
+                                                                <button class="dropdown-item-custom EditIndikator" data-id="<?= $indPP['Id'] ?>" data-tipe="PP" data-parentid="<?= $sasPP['Id'] ?>" data-indikator="<?= $indPP['Indikator'] ?>" data-satuan="<?= $indPP['Satuan'] ?>" data-baseline="<?= $indPP['Baseline'] ?>" data-targetawal="<?= $indPP['TargetAwal'] ?>" data-targetakhir="<?= $indPP['TargetAkhir'] ?>" data-pengampu="<?= htmlspecialchars($indPP['Pengampu'], ENT_QUOTES, 'UTF-8') ?>">
+                                                                    <i class="fa fa-pencil"></i> Edit
+                                                                </button>
+                                                                <button class="dropdown-item-custom text-danger HapusIndikator" data-id="<?= $indPP['Id'] ?>" data-tipe="PP">
+                                                                    <i class="fa fa-trash"></i> Hapus
+                                                                </button>
+                                                            </div>
+                                                        </div>
                                                     </td>
                                                     <?php } ?>
                                                 </tr>
@@ -291,10 +465,26 @@ if (!function_exists('renderPengampu')) {
                                                 </td>
                                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                                 <td class="text-center">
-                                                    <button class="btn btn-sm btn-success TambahSasaran btn-action" data-id="<?= $kp['Id'] ?>" data-tipe="KP" title="Tambah Sasaran"><i class="fa fa-plus"></i> Sas</button>
-                                                    <button class="btn btn-sm btn-success TambahProyek btn-action" data-id="<?= $kp['Id'] ?>" title="Tambah Proyek Prioritas"><i class="fa fa-plus"></i> Proyek</button>
-                                                    <button class="btn btn-sm btn-info EditKP btn-action" data-id="<?= $kp['Id'] ?>" data-idpp="<?= $pp['Id'] ?>" data-kp="<?= $kp['KegiatanPrioritas'] ?>" title="Edit"><i class="fa fa-edit"></i></button>
-                                                    <button class="btn btn-sm btn-danger HapusKP btn-action" data-id="<?= $kp['Id'] ?>" title="Hapus"><i class="fa fa-trash"></i></button>
+                                                    <div class="btn-action-dropdown">
+                                                        <button class="dropdown-toggle-btn" onclick="toggleDropdown(this)">
+                                                            <i class="fa fa-ellipsis-v"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu-custom">
+                                                            <button class="dropdown-item-custom TambahSasaran" data-id="<?= $kp['Id'] ?>" data-tipe="KP">
+                                                                <i class="fa fa-plus-circle"></i> Tambah Sasaran
+                                                            </button>
+                                                            <button class="dropdown-item-custom TambahProyek" data-id="<?= $kp['Id'] ?>">
+                                                                <i class="fa fa-plus-circle"></i> Tambah Proyek Prioritas
+                                                            </button>
+                                                            <div class="dropdown-divider-custom"></div>
+                                                            <button class="dropdown-item-custom EditKP" data-id="<?= $kp['Id'] ?>" data-idpp="<?= $pp['Id'] ?>" data-kp="<?= $kp['KegiatanPrioritas'] ?>">
+                                                                <i class="fa fa-pencil"></i> Edit
+                                                            </button>
+                                                            <button class="dropdown-item-custom text-danger HapusKP" data-id="<?= $kp['Id'] ?>">
+                                                                <i class="fa fa-trash"></i> Hapus
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 </td>
                                                 <?php } ?>
                                             </tr>
@@ -308,9 +498,23 @@ if (!function_exists('renderPengampu')) {
                                                     </td>
                                                     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                                     <td class="text-center">
-                                                        <button class="btn btn-sm btn-success TambahIndikator btn-action" data-id="<?= $sasKP['Id'] ?>" data-tipe="KP" title="Tambah Indikator"><i class="fa fa-plus"></i> Indikator</button>
-                                                        <button class="btn btn-sm btn-info EditSasaran btn-action" data-id="<?= $sasKP['Id'] ?>" data-tipe="KP" data-parentid="<?= $kp['Id'] ?>" data-sasaran="<?= $sasKP['Sasaran'] ?>" title="Edit"><i class="fa fa-edit"></i></button>
-                                                        <button class="btn btn-sm btn-danger HapusSasaran btn-action" data-id="<?= $sasKP['Id'] ?>" data-tipe="KP" title="Hapus"><i class="fa fa-trash"></i></button>
+                                                        <div class="btn-action-dropdown">
+                                                            <button class="dropdown-toggle-btn" onclick="toggleDropdown(this)">
+                                                                <i class="fa fa-ellipsis-v"></i>
+                                                            </button>
+                                                            <div class="dropdown-menu-custom">
+                                                                <button class="dropdown-item-custom TambahIndikator" data-id="<?= $sasKP['Id'] ?>" data-tipe="KP">
+                                                                    <i class="fa fa-plus-circle"></i> Tambah Indikator
+                                                                </button>
+                                                                <div class="dropdown-divider-custom"></div>
+                                                                <button class="dropdown-item-custom EditSasaran" data-id="<?= $sasKP['Id'] ?>" data-tipe="KP" data-parentid="<?= $kp['Id'] ?>" data-sasaran="<?= $sasKP['Sasaran'] ?>">
+                                                                    <i class="fa fa-pencil"></i> Edit
+                                                                </button>
+                                                                <button class="dropdown-item-custom text-danger HapusSasaran" data-id="<?= $sasKP['Id'] ?>" data-tipe="KP">
+                                                                    <i class="fa fa-trash"></i> Hapus
+                                                                </button>
+                                                            </div>
+                                                        </div>
                                                     </td>
                                                     <?php } ?>
                                                 </tr>
@@ -326,8 +530,19 @@ if (!function_exists('renderPengampu')) {
                                                         <td><small><?= renderPengampu($indKP['Pengampu'], $mapKemen) ?></small></td>
                                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                                         <td class="text-center">
-                                                            <button class="btn btn-sm btn-info EditIndikator btn-action" data-id="<?= $indKP['Id'] ?>" data-tipe="KP" data-parentid="<?= $sasKP['Id'] ?>" data-indikator="<?= $indKP['Indikator'] ?>" data-satuan="<?= $indKP['Satuan'] ?>" data-baseline="<?= $indKP['Baseline'] ?>" data-targetawal="<?= $indKP['TargetAwal'] ?>" data-targetakhir="<?= $indKP['TargetAkhir'] ?>" data-pengampu="<?= htmlspecialchars($indKP['Pengampu'], ENT_QUOTES, 'UTF-8') ?>" title="Edit"><i class="fa fa-edit"></i></button>
-                                                            <button class="btn btn-sm btn-danger HapusIndikator btn-action" data-id="<?= $indKP['Id'] ?>" data-tipe="KP" title="Hapus"><i class="fa fa-trash"></i></button>
+                                                            <div class="btn-action-dropdown">
+                                                                <button class="dropdown-toggle-btn" onclick="toggleDropdown(this)">
+                                                                    <i class="fa fa-ellipsis-v"></i>
+                                                                </button>
+                                                                <div class="dropdown-menu-custom">
+                                                                    <button class="dropdown-item-custom EditIndikator" data-id="<?= $indKP['Id'] ?>" data-tipe="KP" data-parentid="<?= $sasKP['Id'] ?>" data-indikator="<?= $indKP['Indikator'] ?>" data-satuan="<?= $indKP['Satuan'] ?>" data-baseline="<?= $indKP['Baseline'] ?>" data-targetawal="<?= $indKP['TargetAwal'] ?>" data-targetakhir="<?= $indKP['TargetAkhir'] ?>" data-pengampu="<?= htmlspecialchars($indKP['Pengampu'], ENT_QUOTES, 'UTF-8') ?>">
+                                                                        <i class="fa fa-pencil"></i> Edit
+                                                                    </button>
+                                                                    <button class="dropdown-item-custom text-danger HapusIndikator" data-id="<?= $indKP['Id'] ?>" data-tipe="KP">
+                                                                        <i class="fa fa-trash"></i> Hapus
+                                                                    </button>
+                                                                </div>
+                                                            </div>
                                                         </td>
                                                         <?php } ?>
                                                     </tr>
@@ -343,8 +558,19 @@ if (!function_exists('renderPengampu')) {
                                                     </td>
                                                     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                                     <td class="text-center">
-                                                        <button class="btn btn-sm btn-info EditProyek btn-action" data-id="<?= $proy['Id'] ?>" data-idkp="<?= $kp['Id'] ?>" data-proyek="<?= $proy['ProyekPrioritas'] ?>" title="Edit"><i class="fa fa-edit"></i> Edit</button>
-                                                        <button class="btn btn-sm btn-danger HapusProyek btn-action" data-id="<?= $proy['Id'] ?>" title="Hapus"><i class="fa fa-trash"></i> Hapus</button>
+                                                        <div class="btn-action-dropdown">
+                                                            <button class="dropdown-toggle-btn" onclick="toggleDropdown(this)">
+                                                                <i class="fa fa-ellipsis-v"></i>
+                                                            </button>
+                                                            <div class="dropdown-menu-custom">
+                                                                <button class="dropdown-item-custom EditProyek" data-id="<?= $proy['Id'] ?>" data-idkp="<?= $kp['Id'] ?>" data-proyek="<?= $proy['ProyekPrioritas'] ?>">
+                                                                    <i class="fa fa-pencil"></i> Edit
+                                                                </button>
+                                                                <button class="dropdown-item-custom text-danger HapusProyek" data-id="<?= $proy['Id'] ?>">
+                                                                    <i class="fa fa-trash"></i> Hapus
+                                                                </button>
+                                                            </div>
+                                                        </div>
                                                     </td>
                                                     <?php } ?>
                                                 </tr>
@@ -711,6 +937,29 @@ if (!function_exists('renderPengampu')) {
         sessionStorage.setItem('expandedRowsProyekStrategis', JSON.stringify(expanded)); 
     }
 
+    // Toggle Dropdown untuk tombol titik tiga
+    function toggleDropdown(button) {
+        event.stopPropagation();
+        var menu = button.nextElementSibling;
+        var isOpen = menu.classList.contains('show');
+        
+        // Close all other dropdowns
+        document.querySelectorAll('.dropdown-menu-custom.show').forEach(function(m) {
+            if (m !== menu) m.classList.remove('show');
+        });
+        
+        menu.classList.toggle('show');
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.btn-action-dropdown')) {
+            document.querySelectorAll('.dropdown-menu-custom.show').forEach(function(menu) {
+                menu.classList.remove('show');
+            });
+        }
+    });
+
     $(document).ready(function() {
         var BaseURL = '<?= base_url() ?>'; 
 
@@ -734,7 +983,7 @@ if (!function_exists('renderPengampu')) {
         // Otomatis Expand saat klik tombol Tambah sub-level
         $('#hierarki-table tbody').on('click', '.TambahPP, .TambahKP, .TambahProyek, .TambahSasaran, .TambahIndikator', function() {
             var parentRow = $(this).closest('tr')[0];
-            if (parentRow.getAttribute('data-expanded') !== 'true') {
+            if (parentRow && parentRow.getAttribute('data-expanded') !== 'true') {
                 toggleLevel(parentRow.getAttribute('data-id'), parentRow);
             }
         });
@@ -873,14 +1122,14 @@ if (!function_exists('renderPengampu')) {
         // ============================================== SCRIPT UNIVERSAL SASARAN (PN, PP, KP)
         $('#hierarki-table tbody').on('click', '.TambahSasaran', function() {
             $('#IdParentSasaran').val($(this).data('id'));
-            $('#TipeLevelSasaran').val($(this).data('tipe')); // Menyimpan tipe "PN", "PP", atau "KP"
+            $('#TipeLevelSasaran').val($(this).data('tipe'));
             $('#ModalInputSasaran').modal('show');
         });
 
         $("#SimpanSasaran").click(function() {
             var tipe = $("#TipeLevelSasaran").val();
             var Data = { Sasaran: $("#UniversalSasaran").val() };
-            Data["_Id" + tipe] = $("#IdParentSasaran").val(); // Dinamis: _IdPN, _IdPP, atau _IdKP
+            Data["_Id" + tipe] = $("#IdParentSasaran").val();
             
             $.post(BaseURL+"Nasional/InputPS_Sasaran" + tipe, Data).done(function(Respon) {
                 if(Respon=='1') window.location.reload(); else alert(Respon);
@@ -917,8 +1166,8 @@ if (!function_exists('renderPengampu')) {
         // ============================================== SCRIPT UNIVERSAL INDIKATOR (PN, PP, KP)
         $('#hierarki-table tbody').on('click', '.TambahIndikator', function() {
             $('#IdSasaranParent').val($(this).data('id'));
-            $('#TipeLevelIndikator').val($(this).data('tipe')); // Menyimpan tipe "PN", "PP", atau "KP"
-            $('#Pengampu').val(null).trigger('change'); // Kosongkan pilihan saat nambah baru
+            $('#TipeLevelIndikator').val($(this).data('tipe'));
+            $('#Pengampu').val(null).trigger('change');
             $('#ModalInputIndikator').modal('show');
         });
 
@@ -928,9 +1177,9 @@ if (!function_exists('renderPengampu')) {
                 Indikator: $("#UniversalIndikator").val(), Satuan: $("#Satuan").val(), 
                 Baseline: $("#Baseline").val(), TargetAwal: $("#TargetAwal").val(), 
                 TargetAkhir: $("#TargetAkhir").val(), 
-                Pengampu: $("#Pengampu").val() ? JSON.stringify($("#Pengampu").val()) : '[]' // Convert jadi JSON array 
+                Pengampu: $("#Pengampu").val() ? JSON.stringify($("#Pengampu").val()) : '[]'
             };
-            Data["_IdSasaran" + tipe] = $("#IdSasaranParent").val(); // Dinamis: _IdSasaranPN, dll.
+            Data["_IdSasaran" + tipe] = $("#IdSasaranParent").val();
             
             $.post(BaseURL+"Nasional/InputPS_Indikator" + tipe, Data).done(function(Respon) {
                 if(Respon=='1') window.location.reload(); else alert(Respon);
@@ -948,7 +1197,6 @@ if (!function_exists('renderPengampu')) {
             $("#_TargetAwal").val($(this).data('targetawal'));
             $("#_TargetAkhir").val($(this).data('targetakhir'));
             
-            // Logika mengisi array Select2
             var pengampuData = $(this).data('pengampu');
             var pengampuArr = [];
             try {
@@ -958,7 +1206,6 @@ if (!function_exists('renderPengampu')) {
                     pengampuArr = pengampuData;
                 }
             } catch(e) {
-                // Fallback kalau data jadul pakai koma biasa
                 pengampuArr = pengampuData ? pengampuData.split(',') : [];
             }
             $('#_Pengampu').val(pengampuArr).trigger('change');

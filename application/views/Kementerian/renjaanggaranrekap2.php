@@ -56,6 +56,94 @@
     .table-notika .total-row { background: #e8f0fe !important; font-weight: 600; }
     .table-notika .total-row td { border-top: 2px solid #4a90d9; }
     
+    /* ============ DROPDOWN TITIK TIGA ============ */
+    .dropdown-aksi {
+        position: relative;
+        display: inline-block;
+    }
+    .dropdown-aksi .btn-titik-tiga {
+        background: transparent;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        color: #718096;
+        transition: all 0.2s ease;
+        font-size: 18px;
+        line-height: 1;
+        font-weight: 400;
+    }
+    .dropdown-aksi .btn-titik-tiga:hover {
+        background: #edf2f7;
+        color: #2d3748;
+    }
+    .dropdown-aksi .btn-titik-tiga:focus {
+        outline: none;
+    }
+    .dropdown-aksi .menu-dropdown {
+        position: absolute;
+        right: 0;
+        top: 100%;
+        min-width: 170px;
+        background: white;
+        border-radius: 6px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+        border: 1px solid #edf2f7;
+        padding: 6px 0;
+        display: none;
+        z-index: 1000;
+        margin-top: 4px;
+        text-align: left;
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .dropdown-aksi .menu-dropdown.show {
+        display: block;
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .dropdown-aksi .item-dropdown {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 16px;
+        color: #2d3748;
+        text-decoration: none;
+        font-size: 13px;
+        transition: all 0.2s ease;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        font-weight: 500;
+    }
+    .dropdown-aksi .item-dropdown:hover {
+        background: #f7fafc;
+        color: #1a2332;
+    }
+    .dropdown-aksi .item-dropdown i {
+        width: 18px;
+        font-size: 14px;
+        color: #718096;
+    }
+    .dropdown-aksi .item-dropdown.text-danger {
+        color: #dc3545;
+    }
+    .dropdown-aksi .item-dropdown.text-danger i {
+        color: #dc3545;
+    }
+    .dropdown-aksi .item-dropdown.text-danger:hover {
+        background: #fef2f2;
+    }
+    .dropdown-aksi .divider-dropdown {
+        height: 1px;
+        background: #edf2f7;
+        margin: 4px 0;
+    }
+    /* =========================================== */
+    
     .btn-notika {
         display: inline-flex;
         align-items: center;
@@ -198,9 +286,13 @@
         .year-nav .year-btn { min-width: 36px; padding: 3px 6px; font-size: 12px; }
         .table-notika { font-size: 12px; }
         .table-notika thead th, .table-notika tbody td { padding: 6px 8px; }
+        .dropdown-aksi .menu-dropdown {
+            right: -10px;
+            min-width: 150px;
+        }
     }
     @media print {
-        .btn-notika, .no-print { display: none !important; }
+        .btn-notika, .no-print, .dropdown-aksi { display: none !important; }
         .akumulasi-box { background: #4a90d9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
 </style>
@@ -384,15 +476,24 @@
                                             <td><?= htmlspecialchars($p['program_prioritas'] ?? '-') ?></td>
                                             <td class="text-right"><?= number_format($p['alokasi'], 0, ',', '.') ?></td>
                                             <td class="text-center">
-                                                <button class="btn-notika btn-notika-warning btn-notika-xs edit-prioritas" 
-                                                    data-id="<?= $p['id'] ?>"
-                                                    data-kode="<?= htmlspecialchars($p['kode']) ?>"
-                                                    data-nama="<?= htmlspecialchars($p['nama_prioritas']) ?>"
-                                                    data-program="<?= htmlspecialchars($p['program_prioritas'] ?? '') ?>"
-                                                    data-alokasi="<?= $p['alokasi'] ?>">
-                                                    ✎
-                                                </button>
-                                                <button class="btn-notika btn-notika-danger btn-notika-xs delete-prioritas" data-id="<?= $p['id'] ?>">×</button>
+                                                <div class="dropdown-aksi">
+                                                    <button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)">
+                                                        <i class="fa fa-ellipsis-v"></i>
+                                                    </button>
+                                                    <div class="menu-dropdown">
+                                                        <button class="item-dropdown edit-prioritas" 
+                                                            data-id="<?= $p['id'] ?>"
+                                                            data-kode="<?= htmlspecialchars($p['kode']) ?>"
+                                                            data-nama="<?= htmlspecialchars($p['nama_prioritas']) ?>"
+                                                            data-program="<?= htmlspecialchars($p['program_prioritas'] ?? '') ?>"
+                                                            data-alokasi="<?= $p['alokasi'] ?>">
+                                                            <i class="fa fa-pencil"></i> Edit
+                                                        </button>
+                                                        <button class="item-dropdown text-danger delete-prioritas" data-id="<?= $p['id'] ?>">
+                                                            <i class="fa fa-trash"></i> Hapus
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </td>
                                         </tr>
                                         <?php endforeach; ?>
@@ -446,16 +547,25 @@
                                             <td class="text-center"><?= htmlspecialchars($s['target'] ?? '-') ?></td>
                                             <td class="text-right"><?= number_format($s['alokasi'], 0, ',', '.') ?></td>
                                             <td class="text-center">
-                                                <button class="btn-notika btn-notika-warning btn-notika-xs edit-sasaran"
-                                                    data-id="<?= $s['id'] ?>"
-                                                    data-kode="<?= htmlspecialchars($s['kode']) ?>"
-                                                    data-nama="<?= htmlspecialchars($s['nama_sasaran']) ?>"
-                                                    data-indikator="<?= htmlspecialchars($s['indikator_kinerja'] ?? '') ?>"
-                                                    data-target="<?= htmlspecialchars($s['target'] ?? '') ?>"
-                                                    data-alokasi="<?= $s['alokasi'] ?>">
-                                                    ✎
-                                                </button>
-                                                <button class="btn-notika btn-notika-danger btn-notika-xs delete-sasaran" data-id="<?= $s['id'] ?>">×</button>
+                                                <div class="dropdown-aksi">
+                                                    <button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)">
+                                                        <i class="fa fa-ellipsis-v"></i>
+                                                    </button>
+                                                    <div class="menu-dropdown">
+                                                        <button class="item-dropdown edit-sasaran"
+                                                            data-id="<?= $s['id'] ?>"
+                                                            data-kode="<?= htmlspecialchars($s['kode']) ?>"
+                                                            data-nama="<?= htmlspecialchars($s['nama_sasaran']) ?>"
+                                                            data-indikator="<?= htmlspecialchars($s['indikator_kinerja'] ?? '') ?>"
+                                                            data-target="<?= htmlspecialchars($s['target'] ?? '') ?>"
+                                                            data-alokasi="<?= $s['alokasi'] ?>">
+                                                            <i class="fa fa-pencil"></i> Edit
+                                                        </button>
+                                                        <button class="item-dropdown text-danger delete-sasaran" data-id="<?= $s['id'] ?>">
+                                                            <i class="fa fa-trash"></i> Hapus
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </td>
                                         </tr>
                                         <?php endforeach; ?>
@@ -507,15 +617,24 @@
                                             <td><?= htmlspecialchars($o['indikator_output'] ?? '-') ?></td>
                                             <td class="text-right"><?= number_format($o['alokasi'], 0, ',', '.') ?></td>
                                             <td class="text-center">
-                                                <button class="btn-notika btn-notika-warning btn-notika-xs edit-output"
-                                                    data-id="<?= $o['id'] ?>"
-                                                    data-kode="<?= htmlspecialchars($o['kode']) ?>"
-                                                    data-nama="<?= htmlspecialchars($o['nama_output']) ?>"
-                                                    data-indikator="<?= htmlspecialchars($o['indikator_output'] ?? '') ?>"
-                                                    data-alokasi="<?= $o['alokasi'] ?>">
-                                                    ✎
-                                                </button>
-                                                <button class="btn-notika btn-notika-danger btn-notika-xs delete-output" data-id="<?= $o['id'] ?>">×</button>
+                                                <div class="dropdown-aksi">
+                                                    <button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)">
+                                                        <i class="fa fa-ellipsis-v"></i>
+                                                    </button>
+                                                    <div class="menu-dropdown">
+                                                        <button class="item-dropdown edit-output"
+                                                            data-id="<?= $o['id'] ?>"
+                                                            data-kode="<?= htmlspecialchars($o['kode']) ?>"
+                                                            data-nama="<?= htmlspecialchars($o['nama_output']) ?>"
+                                                            data-indikator="<?= htmlspecialchars($o['indikator_output'] ?? '') ?>"
+                                                            data-alokasi="<?= $o['alokasi'] ?>">
+                                                            <i class="fa fa-pencil"></i> Edit
+                                                        </button>
+                                                        <button class="item-dropdown text-danger delete-output" data-id="<?= $o['id'] ?>">
+                                                            <i class="fa fa-trash"></i> Hapus
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </td>
                                         </tr>
                                         <?php endforeach; ?>
@@ -587,19 +706,28 @@
                                             <td class="text-right"><?= number_format($k['tahun_2027'] ?? 0, 0, ',', '.') ?></td>
                                             <td class="text-right"><?= number_format($k['tahun_2028'] ?? 0, 0, ',', '.') ?></td>
                                             <td class="text-center">
-                                                <button class="btn-notika btn-notika-warning btn-notika-xs edit-kegiatan"
-                                                    data-id="<?= $k['id'] ?>"
-                                                    data-kode="<?= htmlspecialchars($k['kode']) ?>"
-                                                    data-nama="<?= htmlspecialchars($k['nama_kegiatan']) ?>"
-                                                    <?php foreach ($sources as $src): ?>
-                                                    data-<?= $src ?>="<?= $k[$src] ?? 0 ?>"
-                                                    <?php endforeach; ?>
-                                                    data-tahun_2026="<?= $k['tahun_2026'] ?? 0 ?>"
-                                                    data-tahun_2027="<?= $k['tahun_2027'] ?? 0 ?>"
-                                                    data-tahun_2028="<?= $k['tahun_2028'] ?? 0 ?>">
-                                                    ✎
-                                                </button>
-                                                <button class="btn-notika btn-notika-danger btn-notika-xs delete-kegiatan" data-id="<?= $k['id'] ?>">×</button>
+                                                <div class="dropdown-aksi">
+                                                    <button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)">
+                                                        <i class="fa fa-ellipsis-v"></i>
+                                                    </button>
+                                                    <div class="menu-dropdown">
+                                                        <button class="item-dropdown edit-kegiatan"
+                                                            data-id="<?= $k['id'] ?>"
+                                                            data-kode="<?= htmlspecialchars($k['kode']) ?>"
+                                                            data-nama="<?= htmlspecialchars($k['nama_kegiatan']) ?>"
+                                                            <?php foreach ($sources as $src): ?>
+                                                            data-<?= $src ?>="<?= $k[$src] ?? 0 ?>"
+                                                            <?php endforeach; ?>
+                                                            data-tahun_2026="<?= $k['tahun_2026'] ?? 0 ?>"
+                                                            data-tahun_2027="<?= $k['tahun_2027'] ?? 0 ?>"
+                                                            data-tahun_2028="<?= $k['tahun_2028'] ?? 0 ?>">
+                                                            <i class="fa fa-pencil"></i> Edit
+                                                        </button>
+                                                        <button class="item-dropdown text-danger delete-kegiatan" data-id="<?= $k['id'] ?>">
+                                                            <i class="fa fa-trash"></i> Hapus
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </td>
                                         </tr>
                                         <?php endforeach; ?>
@@ -961,6 +1089,31 @@ var CurrentTahun = <?= json_encode($CurrentTahun) ?>;
 var IdRenja = <?= json_encode($IdRenja ?? null) ?>;
 
 // ============================================================
+// FUNGSI TOGGLE DROPDOWN
+// ============================================================
+function toggleDropdown(button) {
+    event.stopPropagation();
+    var menu = button.nextElementSibling;
+    var isOpen = menu.classList.contains('show');
+    
+    // Close all other dropdowns
+    document.querySelectorAll('.menu-dropdown.show').forEach(function(m) {
+        if (m !== menu) m.classList.remove('show');
+    });
+    
+    menu.classList.toggle('show');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.dropdown-aksi')) {
+        document.querySelectorAll('.menu-dropdown.show').forEach(function(menu) {
+            menu.classList.remove('show');
+        });
+    }
+});
+
+// ============================================================
 // FUNGSI UTILITY
 // ============================================================
 function formatNumber(num) {
@@ -1101,17 +1254,6 @@ window.loadAkumulasi = function() {
         return;
     }
     
-    // Hitung total dari tabel yang sudah ada
-    var total_prioritas = 0;
-    var total_sasaran = 0;
-    var total_output = 0;
-    var total_kegiatan = 0;
-    
-    $('.table-notika tbody tr').each(function() {
-        // Ini hanya perkiraan, sebaiknya dari server
-    });
-    
-    // Gunakan data dari server via AJAX
     $.ajax({
         url: BaseURL + "Kementerian/rekap2_get_by_tahun",
         type: "POST",
@@ -1339,7 +1481,6 @@ function updateTotalKegiatan() {
         var val = parseFloat($(this).val()) || 0;
         total += val;
     });
-    // Tambahkan prakiraan kebutuhan
     var val2026 = parseFloat($('#Kegiatan2026').val()) || 0;
     var val2027 = parseFloat($('#Kegiatan2027').val()) || 0;
     var val2028 = parseFloat($('#Kegiatan2028').val()) || 0;
