@@ -252,8 +252,31 @@
         ->get()
         ->row_array();
 
-      $LoginInfo = $row['Username'] ?? '';
+      $LoginInfo = $row['Username'] ?? ($_SESSION['Username'] ?? '');
+    } else {
+      $LoginInfo = $_SESSION['Username'] ?? '';
     }
+  } elseif (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 4) {
+    if (!empty($_SESSION['NamaInstansi'])) {
+      $LoginInfo = $_SESSION['NamaInstansi'];
+    } elseif (!empty($_SESSION['IdInstansi'])) {
+      $rowInstansi = $this->db->select('nama')
+        ->from('akun_instansi')
+        ->where('id', $_SESSION['IdInstansi'])
+        ->where('deleted_at IS NULL', null, false)
+        ->limit(1)
+        ->get()
+        ->row_array();
+      $LoginInfo = $rowInstansi['nama'] ?? ($_SESSION['Username'] ?? 'Instansi');
+    } elseif (!empty($_SESSION['Username'])) {
+      $LoginInfo = $_SESSION['Username'];
+    } else {
+      $LoginInfo = 'Instansi';
+    }
+  } elseif (!empty($_SESSION['NamaInstansi'])) {
+    $LoginInfo = $_SESSION['NamaInstansi'];
+  } elseif (!empty($_SESSION['Username'])) {
+    $LoginInfo = $_SESSION['Username'];
   }
 ?>
 

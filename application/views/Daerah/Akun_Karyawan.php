@@ -86,7 +86,7 @@
 
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
-                                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                                <?php if (isset($_SESSION['Level']) && in_array($_SESSION['Level'], [3, 4])) { ?>
                                     <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputKaryawan">
                                         <i class="notika-icon bi-plus-lg"></i> <b>Tambah Pegawai</b>
                                     </button>
@@ -104,8 +104,9 @@
                                         <th>Eselon</th>
                                         <th>Jabatan</th>
                                         <th>Satuan Unit Kerja</th>
+                                        <th>Bidang / Sub Kegiatan</th>
                                         <th>Dinas Terkait</th>
-                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                                        <?php if (isset($_SESSION['Level']) && in_array($_SESSION['Level'], [3, 4])) { ?>
                                             <th>Password</th>
                                             <th>Tahun Mulai</th>
                                             <th>Tahun Akhir</th>
@@ -128,9 +129,10 @@
                                             </td>
                                             <td style="vertical-align:middle;"><?= html_escape($key['jabatan']) ?></td>
                                             <td style="vertical-align:middle;"><?= isset($key['satuan_unit_kerja']) && !empty($key['satuan_unit_kerja']) ? html_escape($key['satuan_unit_kerja']) : '-' ?></td>
+                                            <td style="vertical-align:middle;"><?= isset($key['bidang_sub_koordinator']) && !empty($key['bidang_sub_koordinator']) ? html_escape($key['bidang_sub_koordinator']) : '-' ?></td>
                                             <td style="vertical-align:middle;"><?= isset($key['dinas_nama']) ? $key['dinas_nama'] : '-' ?></td>
                                             
-                                            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                                            <?php if (isset($_SESSION['Level']) && in_array($_SESSION['Level'], [3, 4])) { ?>
                                                 <td style="vertical-align: middle; font-size: 11px; max-width: 150px; overflow: hidden; text-overflow: ellipsis;">
                                                     <?= substr($key['password'], 0, 20) ?>...
                                                 </td>
@@ -145,6 +147,7 @@
                                                             data-eselon="<?= htmlspecialchars($key['eselon'] ?? '', ENT_QUOTES) ?>"
                                                             data-jabatan="<?= htmlspecialchars($key['jabatan'], ENT_QUOTES) ?>"
                                                             data-satuan-unit-kerja="<?= htmlspecialchars($key['satuan_unit_kerja'] ?? '', ENT_QUOTES) ?>"
+                                                            data-bidang-sub-koordinator="<?= htmlspecialchars($key['bidang_sub_koordinator'] ?? '', ENT_QUOTES) ?>"
                                                             data-tahun-mulai="<?= $key['tahun_mulai'] ?>"
                                                             data-tahun-akhir="<?= $key['tahun_akhir'] ?>"
                                                             data-dinas-ids="<?= isset($key['dinas_id']) ? htmlspecialchars($key['dinas_id'], ENT_QUOTES) : '' ?>">
@@ -245,6 +248,20 @@
                                     </div>
                                     <div class="col-lg-8">
                                         <input type="text" class="form-control input-sm" id="SatuanUnitKerja" placeholder="Contoh: Sub Bagian Perencanaan">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bidang / Sub Kegiatan -->
+                        <div class="form-example-int form-horizental">
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-lg-3">
+                                        <label class="hrzn-fm"><b>Bidang / Sub Kegiatan</b></label>
+                                    </div>
+                                    <div class="col-lg-8">
+                                        <input type="text" class="form-control input-sm" id="BidangSubKoordinator" placeholder="Contoh: Bidang Pendidikan Dasar">
                                     </div>
                                 </div>
                             </div>
@@ -405,6 +422,20 @@
                                     </div>
                                     <div class="col-lg-8">
                                         <input type="text" class="form-control input-sm" id="_SatuanUnitKerja" placeholder="Contoh: Sub Bagian Perencanaan">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bidang / Sub Kegiatan -->
+                        <div class="form-example-int form-horizental">
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-lg-3">
+                                        <label class="hrzn-fm"><b>Bidang / Sub Kegiatan</b></label>
+                                    </div>
+                                    <div class="col-lg-8">
+                                        <input type="text" class="form-control input-sm" id="_BidangSubKoordinator" placeholder="Contoh: Bidang Pendidikan Dasar">
                                     </div>
                                 </div>
                             </div>
@@ -743,6 +774,7 @@
                 eselon: $("#Eselon").val(),
                 jabatan: $("#Jabatan").val(),
                 satuan_unit_kerja: $("#SatuanUnitKerja").val(),
+                bidang_sub_koordinator: $("#BidangSubKoordinator").val(),
                 password: $("#Password").val(),
                 tahun_mulai: $("#TahunMulai").val(),
                 tahun_akhir: $("#TahunAkhir").val(),
@@ -769,6 +801,7 @@
             $("#_Eselon").val($(this).data('eselon') || '');
             $("#_Jabatan").val($(this).data('jabatan'));
             $("#_SatuanUnitKerja").val($(this).data('satuan-unit-kerja') || '');
+            $("#_BidangSubKoordinator").val($(this).data('bidang-sub-koordinator') || '');
             $("#_Password").val("");
             $("#_TahunMulai").val($(this).data('tahun-mulai'));
             $("#_TahunAkhir").val($(this).data('tahun-akhir'));
@@ -826,6 +859,7 @@
                 eselon: $("#_Eselon").val(),
                 jabatan: $("#_Jabatan").val(),
                 satuan_unit_kerja: $("#_SatuanUnitKerja").val(),
+                bidang_sub_koordinator: $("#_BidangSubKoordinator").val(),
                 password: $("#_Password").val(),
                 tahun_mulai: $("#_TahunMulai").val(),
                 tahun_akhir: $("#_TahunAkhir").val(),

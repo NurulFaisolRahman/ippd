@@ -4531,7 +4531,7 @@ public function getNomenklaturByLevel() {
     }
     
     $this->db->select('Kode, Nomenklatur');
-    $this->db->from('nomenklaturprovinsi');
+    $this->db->from('nomenklaturkabupaten');
     
     // Logika khusus untuk struktur data dengan lompatan titik
     if ($level == 1) {
@@ -4588,8 +4588,8 @@ public function getNomenklaturDetail() {
     }
     
     $data = $this->db
-        ->select('Kode, Nomenklatur')
-        ->from('nomenklaturprovinsi')
+        ->select('Kode, Nomenklatur, Kinerja, Indikator, Satuan')
+        ->from('nomenklaturkabupaten')
         ->where('Kode', $kode)
         ->get()
         ->row_array();
@@ -7057,7 +7057,7 @@ public function RenjaPD() {
     // ==============================
     $data['NomenklaturData'] = $this->db
         ->select('Kode, Nomenklatur')
-        ->from('nomenklaturprovinsi')
+        ->from('nomenklaturkabupaten')
         ->order_by('Kode', 'ASC')
         ->get()
         ->result_array();
@@ -7177,23 +7177,23 @@ public function tambahRenjaHeader() {
         
         // Ambil nama dari kode
         if ($urusan_kode) {
-            $urusan = $this->db->select('Nomenklatur')->from('nomenklaturprovinsi')->where('Kode', $urusan_kode)->get()->row_array();
+            $urusan = $this->db->select('Nomenklatur')->from('nomenklaturkabupaten')->where('Kode', $urusan_kode)->get()->row_array();
             $tujuan = $urusan ? $urusan['Nomenklatur'] : '';
         }
         if ($bidang_kode) {
-            $bidang = $this->db->select('Nomenklatur')->from('nomenklaturprovinsi')->where('Kode', $bidang_kode)->get()->row_array();
+            $bidang = $this->db->select('Nomenklatur')->from('nomenklaturkabupaten')->where('Kode', $bidang_kode)->get()->row_array();
             $sasaran = $bidang ? $bidang['Nomenklatur'] : '';
         }
         if ($program_kode) {
-            $prog = $this->db->select('Nomenklatur')->from('nomenklaturprovinsi')->where('Kode', $program_kode)->get()->row_array();
+            $prog = $this->db->select('Nomenklatur')->from('nomenklaturkabupaten')->where('Kode', $program_kode)->get()->row_array();
             $program = $prog ? $prog['Nomenklatur'] : '';
         }
         if ($kegiatan_kode) {
-            $keg = $this->db->select('Nomenklatur')->from('nomenklaturprovinsi')->where('Kode', $kegiatan_kode)->get()->row_array();
+            $keg = $this->db->select('Nomenklatur')->from('nomenklaturkabupaten')->where('Kode', $kegiatan_kode)->get()->row_array();
             $kegiatan = $keg ? $keg['Nomenklatur'] : '';
         }
         if ($sub_kegiatan_kode) {
-            $sub = $this->db->select('Nomenklatur')->from('nomenklaturprovinsi')->where('Kode', $sub_kegiatan_kode)->get()->row_array();
+            $sub = $this->db->select('Nomenklatur')->from('nomenklaturkabupaten')->where('Kode', $sub_kegiatan_kode)->get()->row_array();
             $sub_kegiatan = $sub ? $sub['Nomenklatur'] : '';
         }
         
@@ -7350,23 +7350,23 @@ public function editRenjaHeader() {
         
         // Ambil nama dari kode
         if ($urusan_kode) {
-            $urusan = $this->db->select('Nomenklatur')->from('nomenklaturprovinsi')->where('Kode', $urusan_kode)->get()->row_array();
+            $urusan = $this->db->select('Nomenklatur')->from('nomenklaturkabupaten')->where('Kode', $urusan_kode)->get()->row_array();
             $tujuan = $urusan ? $urusan['Nomenklatur'] : '';
         }
         if ($bidang_kode) {
-            $bidang = $this->db->select('Nomenklatur')->from('nomenklaturprovinsi')->where('Kode', $bidang_kode)->get()->row_array();
+            $bidang = $this->db->select('Nomenklatur')->from('nomenklaturkabupaten')->where('Kode', $bidang_kode)->get()->row_array();
             $sasaran = $bidang ? $bidang['Nomenklatur'] : '';
         }
         if ($program_kode) {
-            $prog = $this->db->select('Nomenklatur')->from('nomenklaturprovinsi')->where('Kode', $program_kode)->get()->row_array();
+            $prog = $this->db->select('Nomenklatur')->from('nomenklaturkabupaten')->where('Kode', $program_kode)->get()->row_array();
             $program = $prog ? $prog['Nomenklatur'] : '';
         }
         if ($kegiatan_kode) {
-            $keg = $this->db->select('Nomenklatur')->from('nomenklaturprovinsi')->where('Kode', $kegiatan_kode)->get()->row_array();
+            $keg = $this->db->select('Nomenklatur')->from('nomenklaturkabupaten')->where('Kode', $kegiatan_kode)->get()->row_array();
             $kegiatan = $keg ? $keg['Nomenklatur'] : '';
         }
         if ($sub_kegiatan_kode) {
-            $sub = $this->db->select('Nomenklatur')->from('nomenklaturprovinsi')->where('Kode', $sub_kegiatan_kode)->get()->row_array();
+            $sub = $this->db->select('Nomenklatur')->from('nomenklaturkabupaten')->where('Kode', $sub_kegiatan_kode)->get()->row_array();
             $sub_kegiatan = $sub ? $sub['Nomenklatur'] : '';
         }
         
@@ -8211,8 +8211,8 @@ public function getNomenklaturByLevelRenja() {
         return;
     }
     
-    $this->db->select('Kode, Nomenklatur');
-    $this->db->from('nomenklaturprovinsi');
+    $this->db->select('Kode, Nomenklatur, Kinerja, Indikator, Satuan');
+    $this->db->from('nomenklaturkabupaten');
     // TIDAK ADA FILTER deleted_at
     
     if ($level == 1) {
@@ -8388,7 +8388,7 @@ public function RancanganRenjaPD() {
     // Data nomenklatur untuk dropdown
     $data['NomenklaturData'] = $this->db
         ->select('Kode, Nomenklatur')
-        ->from('nomenklaturprovinsi')
+        ->from('nomenklaturkabupaten')
         ->order_by('Kode', 'ASC')
         ->get()
         ->result_array();
@@ -9118,7 +9118,7 @@ public function RancanganAkhirRenjaPD() {
     // Data nomenklatur untuk dropdown
     $data['NomenklaturData'] = $this->db
         ->select('Kode, Nomenklatur')
-        ->from('nomenklaturprovinsi')
+        ->from('nomenklaturkabupaten')
         ->order_by('Kode', 'ASC')
         ->get()
         ->result_array();
@@ -12577,18 +12577,15 @@ public function getBidangList() {
     }
     
     // Ambil data bidang dari akun_karyawan
-    $this->db->select('id, nama, nip, jabatan, satuan_unit_kerja')
+    $this->db->select('id, nama, nip, jabatan, satuan_unit_kerja, bidang_sub_koordinator')
         ->from('akun_karyawan')
         ->where('kodewilayah', $KodeWilayah)
         ->where('deleted_at IS NULL')
-        ->where('jabatan IS NOT NULL')
-        ->where('jabatan != ""')
-        ->order_by('jabatan', 'ASC')
         ->order_by('nama', 'ASC');
     
     // Jika role 4, filter berdasarkan instansi
     if ($this->is_role_4() && $instansi_id) {
-        $this->db->where('dinas_id', $instansi_id);
+        $this->db->where("FIND_IN_SET('$instansi_id', dinas_id) > 0");
     }
     
     $bidang = $this->db->get()->result_array();
@@ -12616,7 +12613,7 @@ public function getBidangDetail() {
     }
     
     $data = $this->db
-        ->select('id, nama, nip, jabatan, satuan_unit_kerja')
+        ->select('id, nama, nip, jabatan, satuan_unit_kerja, bidang_sub_koordinator')
         ->from('akun_karyawan')
         ->where('id', $id)
         ->where('kodewilayah', $KodeWilayah)
@@ -12981,7 +12978,7 @@ private function getNomenklaturName($kode) {
     if (empty($kode)) return '';
     $data = $this->db->select('Nomenklatur')
         ->where('Kode', $kode)
-        ->get('nomenklaturprovinsi')
+        ->get('nomenklaturkabupaten')
         ->row_array();
     return $data ? $data['Nomenklatur'] : $kode;
 }
@@ -13142,7 +13139,7 @@ public function getSasaranByLevel() {
     try {
         if ($level == 'program') {
             // Ambil semua program
-            $this->db->select('p.id, p.nama as nama, k.jabatan as sub_unit');
+            $this->db->select("p.id, p.nama as nama, COALESCE(NULLIF(k.bidang_sub_koordinator, ''), NULLIF(k.satuan_unit_kerja, ''), k.jabatan) as sub_unit", false);
             $this->db->from('renstra_program p');
             $this->db->join('renstra_sasaran s', 's.id = p.sasaran_id', 'left');
             $this->db->join('renstra_tujuan t', 't.id = s.tujuan_id', 'left');
@@ -13195,7 +13192,7 @@ public function getSasaranByLevel() {
 
         } elseif ($level == 'kegiatan') {
             // Ambil semua kegiatan
-            $this->db->select('k.id, k.nama as nama, ak.jabatan as sub_unit');
+            $this->db->select("k.id, k.nama as nama, COALESCE(NULLIF(ak.bidang_sub_koordinator, ''), NULLIF(ak.satuan_unit_kerja, ''), ak.jabatan) as sub_unit", false);
             $this->db->from('renstra_kegiatan k');
             $this->db->join('renstra_program p', 'p.id = k.program_id', 'left');
             $this->db->join('renstra_sasaran s', 's.id = p.sasaran_id', 'left');
@@ -13249,7 +13246,7 @@ public function getSasaranByLevel() {
 
         } elseif ($level == 'sub_kegiatan') {
             // Ambil semua sub kegiatan
-            $this->db->select('sk.id, sk.nama as nama, ak.jabatan as sub_unit');
+            $this->db->select("sk.id, sk.nama as nama, COALESCE(NULLIF(ak.bidang_sub_koordinator, ''), NULLIF(ak.satuan_unit_kerja, ''), ak.jabatan) as sub_unit", false);
             $this->db->from('renstra_sub_kegiatan sk');
             $this->db->join('renstra_kegiatan k', 'k.id = sk.kegiatan_id', 'left');
             $this->db->join('renstra_program p', 'p.id = k.program_id', 'left');
@@ -13406,9 +13403,9 @@ public function simpanPerjanjianKinerja() {
         'sasaran_data' => $sasaran_data,
         'sub_unit' => $sub_unit,
         'status' => 'menunggu', // Default status saat input data selalu otomatis 'menunggu'
-        'definitif_doc_id' => ($dok_utama || $jenis_perjanjian == 'PK Murni') ? 'DOC-' . $doc_time : null,
-        'pk_perubahan_doc_id' => ($dok_perubahan_utama || $jenis_perjanjian == 'PK Perubahan') ? 'DOC-P-' . $doc_time : null,
-        'pk_plt_doc_id' => ($dok_plt_utama || $jenis_perjanjian == 'PK PLT') ? 'DOC-PLT-' . $doc_time : null,
+        'definitif_doc_id' => ($dok_utama || $dok_lampiran) ? 'DOC-' . $doc_time : null,
+        'pk_perubahan_doc_id' => ($dok_perubahan_utama || $dok_perubahan_lampiran) ? 'DOC-P-' . $doc_time : null,
+        'pk_plt_doc_id' => ($dok_plt_utama || $dok_plt_lampiran) ? 'DOC-PLT-' . $doc_time : null,
         'dokumen_utama' => $dok_utama ?: null,
         'dokumen_lampiran' => $dok_lampiran ?: null,
         'dokumen_perubahan_utama' => $dok_perubahan_utama ?: null,
@@ -13440,7 +13437,7 @@ public function getPerjanjianKinerja() {
     $data = $this->db
         ->select('pk.*, 
             p.nama as pengampu_nama, p.nip as pengampu_nip, p.jabatan as pengampu_jabatan, p.satuan_unit_kerja as pengampu_satuan, p.eselon as pengampu_eselon,
-            a.nama as atasan_nama, a.nip as atasan_nip, a.jabatan as atasan_jabatan, a.satuan_unit_kerja as atasan_satuan')
+            a.nama as atasan_nama, a.nip as atasan_nip, a.jabatan as atasan_jabatan, a.satuan_unit_kerja as atasan_satuan, a.eselon as atasan_eselon')
         ->from('perjanjian_kinerja pk')
         ->join('akun_karyawan p', 'p.id = pk.pegawai_pengampu_id', 'left')
         ->join('akun_karyawan a', 'a.id = pk.atasan_langsung_id', 'left')
@@ -13567,21 +13564,21 @@ public function updatePerjanjianKinerja() {
     if ($dok_utama || $dok_lampiran) {
         if (!$definitif_doc_id) $definitif_doc_id = 'DOC-' . $doc_time;
     } else {
-        $definitif_doc_id = ($jenis_perjanjian == 'PK Murni') ? ($definitif_doc_id ?: 'DOC-' . $doc_time) : null;
+        $definitif_doc_id = null;
     }
 
     $pk_perubahan_doc_id = $existing->pk_perubahan_doc_id;
     if ($dok_perubahan_utama || $dok_perubahan_lampiran) {
         if (!$pk_perubahan_doc_id) $pk_perubahan_doc_id = 'DOC-P-' . $doc_time;
     } else {
-        $pk_perubahan_doc_id = ($jenis_perjanjian == 'PK Perubahan') ? ($pk_perubahan_doc_id ?: 'DOC-P-' . $doc_time) : null;
+        $pk_perubahan_doc_id = null;
     }
 
     $pk_plt_doc_id = $existing->pk_plt_doc_id;
     if ($dok_plt_utama || $dok_plt_lampiran) {
         if (!$pk_plt_doc_id) $pk_plt_doc_id = 'DOC-PLT-' . $doc_time;
     } else {
-        $pk_plt_doc_id = ($jenis_perjanjian == 'PK PLT') ? ($pk_plt_doc_id ?: 'DOC-PLT-' . $doc_time) : null;
+        $pk_plt_doc_id = null;
     }
 
     $data = [

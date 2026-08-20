@@ -4240,7 +4240,7 @@
         
         $data = $this->db
             ->select('Kode, Nomenklatur')
-            ->from('nomenklaturprovinsi')
+            ->from('nomenklaturkabupaten')
             ->where('Kode NOT LIKE', '%.%')
             ->where('LENGTH(Kode) = 1')
             ->order_by('Kode', 'ASC')
@@ -4269,7 +4269,7 @@
         
         $data = $this->db
             ->select('Kode, Nomenklatur')
-            ->from('nomenklaturprovinsi')
+            ->from('nomenklaturkabupaten')
             ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 1)
             ->where('Kode LIKE', $kodeUrusan . '.%')
             ->order_by('Kode', 'ASC')
@@ -4298,7 +4298,7 @@
         
         $data = $this->db
             ->select('Kode, Nomenklatur')
-            ->from('nomenklaturprovinsi')
+            ->from('nomenklaturkabupaten')
             ->where('Kode', $kode)
             ->get()
             ->row_array();
@@ -4380,7 +4380,7 @@
                 foreach ($kodes as $kode) {
                     $nama = $this->db
                         ->select('Nomenklatur')
-                        ->from('nomenklaturprovinsi')
+                        ->from('nomenklaturkabupaten')
                         ->where('Kode', $kode)
                         ->get()
                         ->row_array();
@@ -4938,7 +4938,7 @@
             if (!empty($bidangUrusanArr)) {
                 $validBidang = $this->db->where_in('Kode', $bidangUrusanArr)
                     ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 1)
-                    ->count_all_results('nomenklaturprovinsi');
+                    ->count_all_results('nomenklaturkabupaten');
                 
                 if ($validBidang !== count($bidangUrusanArr)) {
                     echo json_encode(['status' => 'error', 'message' => 'Bidang Urusan tidak valid!']);
@@ -5084,7 +5084,7 @@
             if (!empty($bidangUrusanArr)) {
                 $validBidang = $this->db->where_in('Kode', $bidangUrusanArr)
                     ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 1)
-                    ->count_all_results('nomenklaturprovinsi');
+                    ->count_all_results('nomenklaturkabupaten');
                 
                 if ($validBidang !== count($bidangUrusanArr)) {
                     echo json_encode(['status' => 'error', 'message' => 'Bidang Urusan tidak valid!']);
@@ -5254,7 +5254,7 @@ public function Akun_Karyawan()
         ->result_array();
 
     $Data['Karyawan'] = $this->db
-        ->select('id, kodewilayah, nama, nip, eselon, jabatan, satuan_unit_kerja, password, tahun_mulai, tahun_akhir, Level, dinas_id, created_at, updated_at, deleted_at')
+        ->select('id, kodewilayah, nama, nip, eselon, jabatan, satuan_unit_kerja, bidang_sub_koordinator, password, tahun_mulai, tahun_akhir, Level, dinas_id, created_at, updated_at, deleted_at')
         ->where('kodewilayah', $KodeWilayah)
         ->where('deleted_at IS NULL', null, false)
         ->order_by('id', 'ASC')
@@ -5315,6 +5315,7 @@ public function Akun_Karyawan()
     $eselon = trim((string)$this->input->post('eselon', TRUE));
     $jabatan = trim((string)$this->input->post('jabatan', TRUE));
     $satuan_unit_kerja = trim((string)$this->input->post('satuan_unit_kerja', TRUE));
+    $bidang_sub_koordinator = trim((string)$this->input->post('bidang_sub_koordinator', TRUE));
     $pwd  = trim((string)$this->input->post('password', TRUE));
 
     if ($nama === '') {
@@ -5372,6 +5373,7 @@ public function Akun_Karyawan()
         'eselon'        => $eselon ?: null,
         'jabatan'       => $jabatan,
         'satuan_unit_kerja' => $satuan_unit_kerja,
+        'bidang_sub_koordinator' => $bidang_sub_koordinator ?: null,
         'password'      => password_hash($pwd, PASSWORD_DEFAULT),
         'tahun_mulai'   => $tahunMulai,
         'tahun_akhir'   => $tahunAkhir,
@@ -5420,6 +5422,7 @@ public function EditKaryawan()
     $eselon = trim((string)$this->input->post('eselon', TRUE));
     $jabatan = trim((string)$this->input->post('jabatan', TRUE));
     $satuan_unit_kerja = trim((string)$this->input->post('satuan_unit_kerja', TRUE));
+    $bidang_sub_koordinator = trim((string)$this->input->post('bidang_sub_koordinator', TRUE));
 
     if ($nama === '') {
         echo 'Nama karyawan wajib diisi!';
@@ -5483,6 +5486,7 @@ public function EditKaryawan()
         'eselon'        => $eselon ?: null,
         'jabatan'       => $jabatan,
         'satuan_unit_kerja' => $satuan_unit_kerja,
+        'bidang_sub_koordinator' => $bidang_sub_koordinator ?: null,
         'tahun_mulai'   => $tahunMulai,
         'tahun_akhir'   => $tahunAkhir,
         'dinas_id'      => implode(',', $dinasArr),
@@ -9654,7 +9658,7 @@ private function _program_format_pagu($value) {
         if (empty($kode)) return '';
         $data = $this->db->select('Nomenklatur')
             ->where('Kode', $kode)
-            ->get('nomenklaturprovinsi')
+            ->get('nomenklaturkabupaten')
             ->row_array();
         return $data ? $data['Nomenklatur'] : $kode;
     }
@@ -9777,7 +9781,7 @@ public function program_get_bidang_by_id() {
         }
         
         $this->db->select('Kode, Nomenklatur');
-        $this->db->from('nomenklaturprovinsi');
+        $this->db->from('nomenklaturkabupaten');
         
         if ($level == 1) {
             // Urusan: 0 titik (contoh: 1, 2, 3, ...)
@@ -9824,7 +9828,7 @@ public function program_get_bidang_by_id() {
         
         $data = $this->db
             ->select('Kode, Nomenklatur')
-            ->from('nomenklaturprovinsi')
+            ->from('nomenklaturkabupaten')
             ->where('Kode', $kode)
             ->get()
             ->row_array();
@@ -12807,11 +12811,11 @@ public function program_get_bidang_by_id() {
     }
 
     // ============================================================
-    // NOMENKLATUR UNTUK PAGU URUSAN - MENGGUNAKAN nomenklaturprovinsi
+    // NOMENKLATUR UNTUK PAGU URUSAN - MENGGUNAKAN nomenklaturkabupaten
     // ============================================================
 
     /**
-     * GET URUSAN (LEVEL 1) - DARI nomenklaturprovinsi
+     * GET URUSAN (LEVEL 1) - DARI nomenklaturkabupaten
      * Level 1 = Urusan (0 titik, panjang 1)
      */
     public function getUrusanPagu() {
@@ -12829,10 +12833,10 @@ public function program_get_bidang_by_id() {
                 return;
             }
             
-            // Ambil dari nomenklaturprovinsi - Level 1 = Urusan
+            // Ambil dari nomenklaturkabupaten - Level 1 = Urusan
             $data = $this->db
                 ->select('Kode, Nomenklatur')
-                ->from('nomenklaturprovinsi')
+                ->from('nomenklaturkabupaten')
                 ->where('Kode NOT LIKE', '%.%')  // 0 titik
                 ->where('LENGTH(Kode) = 1')      // Panjang 1 digit
                 ->order_by('Kode', 'ASC')
@@ -12850,7 +12854,7 @@ public function program_get_bidang_by_id() {
     }
 
     /**
-     * GET BIDANG URUSAN (LEVEL 2) - DARI nomenklaturprovinsi
+     * GET BIDANG URUSAN (LEVEL 2) - DARI nomenklaturkabupaten
      * Level 2 = Bidang Urusan (1 titik)
      */
     public function getBidangUrusanPagu() {
@@ -12869,10 +12873,10 @@ public function program_get_bidang_by_id() {
                 return;
             }
             
-            // Ambil dari nomenklaturprovinsi - Level 2 = Bidang Urusan (1 titik)
+            // Ambil dari nomenklaturkabupaten - Level 2 = Bidang Urusan (1 titik)
             $data = $this->db
                 ->select('Kode, Nomenklatur')
-                ->from('nomenklaturprovinsi')
+                ->from('nomenklaturkabupaten')
                 ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 1)  // 1 titik
                 ->where('Kode LIKE', $kodeUrusan . '.%')
                 ->order_by('Kode', 'ASC')
@@ -12916,7 +12920,7 @@ public function program_get_bidang_by_id() {
                 // Level 1: Urusan
                 $urusan = $this->db
                     ->select('Kode, Nomenklatur')
-                    ->from('nomenklaturprovinsi')
+                    ->from('nomenklaturkabupaten')
                     ->where('Kode', $kode)
                     ->where('Kode NOT LIKE', '%.%')
                     ->get()
@@ -12931,7 +12935,7 @@ public function program_get_bidang_by_id() {
                 // Level 2: Bidang Urusan
                 $bidang = $this->db
                     ->select('Kode, Nomenklatur')
-                    ->from('nomenklaturprovinsi')
+                    ->from('nomenklaturkabupaten')
                     ->where('Kode', $kode)
                     ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 1)
                     ->get()
@@ -12945,7 +12949,7 @@ public function program_get_bidang_by_id() {
                     // Ambil urusan parent (level 1)
                     $urusan = $this->db
                         ->select('Kode, Nomenklatur')
-                        ->from('nomenklaturprovinsi')
+                        ->from('nomenklaturkabupaten')
                         ->where('Kode', $parts[0])
                         ->where('Kode NOT LIKE', '%.%')
                         ->get()
@@ -17879,7 +17883,7 @@ public function GetKonsistensiProgramById() {
                     $nomenklatur = $this->db
                         ->select('Nomenklatur')
                         ->where('Kode', $kode_sub_kegiatan)
-                        ->get('nomenklaturprovinsi')
+                        ->get('nomenklaturkabupaten')
                         ->row_array();
                     if ($nomenklatur) {
                         $sub_kegiatan = $nomenklatur['Nomenklatur'];
@@ -18067,7 +18071,7 @@ public function GetKonsistensiProgramById() {
                     $nomenklatur = $this->db
                         ->select('Nomenklatur')
                         ->where('Kode', $kode_sub_kegiatan)
-                        ->get('nomenklaturprovinsi')
+                        ->get('nomenklaturkabupaten')
                         ->row_array();
                     if ($nomenklatur) {
                         $sub_kegiatan = $nomenklatur['Nomenklatur'];
@@ -18425,9 +18429,9 @@ public function GetKonsistensiProgramById() {
             return;
         }
         
-        // Ambil data sub kegiatan (Level 5) dari nomenklaturprovinsi
+        // Ambil data sub kegiatan (Level 5) dari nomenklaturkabupaten
         $this->db->select('Kode, Nomenklatur, Kinerja, Indikator, Satuan, Kewenangan');
-        $this->db->from('nomenklaturprovinsi');
+        $this->db->from('nomenklaturkabupaten');
         
         // Filter: hanya yang memiliki 5 titik (Sub Kegiatan)
         $this->db->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 5);
@@ -18474,7 +18478,7 @@ public function GetKonsistensiProgramById() {
     // Ambil data sub kegiatan
     $subKegiatan = $this->db
         ->select('Kode, Nomenklatur')
-        ->from('nomenklaturprovinsi')
+        ->from('nomenklaturkabupaten')
         ->where('Kode', $kodeSubKegiatan)
         ->where('deleted_at IS NULL', null, false)
         ->get()
@@ -18497,7 +18501,7 @@ public function GetKonsistensiProgramById() {
         $kodeKegiatan = implode('.', array_slice($parts, 0, 4));
         $kegData = $this->db
             ->select('Nomenklatur')
-            ->from('nomenklaturprovinsi')
+            ->from('nomenklaturkabupaten')
             ->where('Kode', $kodeKegiatan)
             ->where('deleted_at IS NULL', null, false)
             ->get()
@@ -18512,7 +18516,7 @@ public function GetKonsistensiProgramById() {
         $kodeProgram = implode('.', array_slice($parts, 0, 3));
         $progData = $this->db
             ->select('Nomenklatur')
-            ->from('nomenklaturprovinsi')
+            ->from('nomenklaturkabupaten')
             ->where('Kode', $kodeProgram)
             ->where('deleted_at IS NULL', null, false)
             ->get()
@@ -18615,7 +18619,7 @@ public function GetKonsistensiProgramById() {
                 $nomenklatur = $this->db
                     ->select('Nomenklatur')
                     ->where('Kode', $kode_sub_kegiatan)
-                    ->get('nomenklaturprovinsi')
+                    ->get('nomenklaturkabupaten')
                     ->row_array();
                 if ($nomenklatur) {
                     $sub_kegiatan = $nomenklatur['Nomenklatur'];
@@ -18758,7 +18762,7 @@ public function GetKonsistensiProgramById() {
                 $nomenklatur = $this->db
                     ->select('Nomenklatur')
                     ->where('Kode', $kode_sub_kegiatan)
-                    ->get('nomenklaturprovinsi')
+                    ->get('nomenklaturkabupaten')
                     ->row_array();
                 if ($nomenklatur) {
                     $sub_kegiatan = $nomenklatur['Nomenklatur'];
@@ -20135,10 +20139,10 @@ public function HapusPerihalKabKota() {
     log_message('debug', 'getNomenklaturHierarki - level: ' . $level . ', parent: ' . $parentKode);
     
     $this->db->select('Kode, Nomenklatur');
-    $this->db->from('nomenklaturprovinsi');
+    $this->db->from('nomenklaturkabupaten');
     
     // Filter deleted_at jika ada
-    if ($this->db->field_exists('deleted_at', 'nomenklaturprovinsi')) {
+    if ($this->db->field_exists('deleted_at', 'nomenklaturkabupaten')) {
         $this->db->where('deleted_at IS NULL', null, false);
     }
     
@@ -20186,9 +20190,9 @@ public function getProgramList() {
     }
     
     $this->db->select('Kode, Nomenklatur');
-    $this->db->from('nomenklaturprovinsi');
+    $this->db->from('nomenklaturkabupaten');
     $this->db->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 2);
-    if ($this->db->field_exists('deleted_at', 'nomenklaturprovinsi')) {
+    if ($this->db->field_exists('deleted_at', 'nomenklaturkabupaten')) {
         $this->db->where('deleted_at IS NULL', null, false);
     }
     $this->db->order_by('Kode', 'ASC');
@@ -20215,12 +20219,12 @@ public function getKegiatanByProgram() {
     }
     
     $this->db->select('Kode, Nomenklatur');
-    $this->db->from('nomenklaturprovinsi');
+    $this->db->from('nomenklaturkabupaten');
     $this->db->where('Kode LIKE', $kodeProgram . '.%');
     // Kegiatan: 3 atau 4 titik
     $this->db->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) >=', 3);
     $this->db->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) <=', 4);
-    if ($this->db->field_exists('deleted_at', 'nomenklaturprovinsi')) {
+    if ($this->db->field_exists('deleted_at', 'nomenklaturkabupaten')) {
         $this->db->where('deleted_at IS NULL', null, false);
     }
     $this->db->order_by('Kode', 'ASC');
@@ -20250,11 +20254,11 @@ public function getSubKegiatanByKegiatan() {
     }
     
     $this->db->select('Kode, Nomenklatur');
-    $this->db->from('nomenklaturprovinsi');
+    $this->db->from('nomenklaturkabupaten');
     $this->db->where('Kode LIKE', $kodeKegiatan . '.%');
     // Sub Kegiatan: 5 titik
     $this->db->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 5);
-    if ($this->db->field_exists('deleted_at', 'nomenklaturprovinsi')) {
+    if ($this->db->field_exists('deleted_at', 'nomenklaturkabupaten')) {
         $this->db->where('deleted_at IS NULL', null, false);
     }
     $this->db->order_by('Kode', 'ASC');
@@ -20417,7 +20421,7 @@ public function getSubKegiatanByKegiatan() {
                 if (!empty($kode)) {
                     $subData = $this->db
                         ->select('Kode, Nomenklatur')
-                        ->from('nomenklaturprovinsi')
+                        ->from('nomenklaturkabupaten')
                         ->where('Kode', $kode)
                         ->get()
                         ->row_array();
@@ -20433,7 +20437,7 @@ public function getSubKegiatanByKegiatan() {
                 if (!empty($kegKode)) {
                     $kegData = $this->db
                         ->select('Nomenklatur')
-                        ->from('nomenklaturprovinsi')
+                        ->from('nomenklaturkabupaten')
                         ->where('Kode', $kegKode)
                         ->get()
                         ->row_array();
@@ -20449,7 +20453,7 @@ public function getSubKegiatanByKegiatan() {
                 if (!empty($progKode)) {
                     $progData = $this->db
                         ->select('Nomenklatur')
-                        ->from('nomenklaturprovinsi')
+                        ->from('nomenklaturkabupaten')
                         ->where('Kode', $progKode)
                         ->get()
                         ->row_array();
@@ -20646,7 +20650,7 @@ public function getSubKegiatanByKegiatan() {
                 if (!empty($kode)) {
                     $subData = $this->db
                         ->select('Kode, Nomenklatur')
-                        ->from('nomenklaturprovinsi')
+                        ->from('nomenklaturkabupaten')
                         ->where('Kode', $kode)
                         ->get()
                         ->row_array();
@@ -20662,7 +20666,7 @@ public function getSubKegiatanByKegiatan() {
                 if (!empty($kegKode)) {
                     $kegData = $this->db
                         ->select('Nomenklatur')
-                        ->from('nomenklaturprovinsi')
+                        ->from('nomenklaturkabupaten')
                         ->where('Kode', $kegKode)
                         ->get()
                         ->row_array();
@@ -20678,7 +20682,7 @@ public function getSubKegiatanByKegiatan() {
                 if (!empty($progKode)) {
                     $progData = $this->db
                         ->select('Nomenklatur')
-                        ->from('nomenklaturprovinsi')
+                        ->from('nomenklaturkabupaten')
                         ->where('Kode', $progKode)
                         ->get()
                         ->row_array();
@@ -21640,7 +21644,7 @@ public function InputDetailIntervensi() {
         $program = '';
         if (!empty($kodeProgram)) {
             $progData = $this->db->select('Nomenklatur')
-                ->from('nomenklaturprovinsi')
+                ->from('nomenklaturkabupaten')
                 ->where('Kode', $kodeProgram)
                 ->get()
                 ->row_array();
@@ -21652,7 +21656,7 @@ public function InputDetailIntervensi() {
         $kegiatan = '';
         if (!empty($kodeKegiatan)) {
             $kegData = $this->db->select('Nomenklatur')
-                ->from('nomenklaturprovinsi')
+                ->from('nomenklaturkabupaten')
                 ->where('Kode', $kodeKegiatan)
                 ->get()
                 ->row_array();
@@ -21664,7 +21668,7 @@ public function InputDetailIntervensi() {
         $subKegiatan = '';
         if (!empty($kodeSubKegiatan)) {
             $subData = $this->db->select('Nomenklatur')
-                ->from('nomenklaturprovinsi')
+                ->from('nomenklaturkabupaten')
                 ->where('Kode', $kodeSubKegiatan)
                 ->get()
                 ->row_array();
@@ -21780,7 +21784,7 @@ public function UpdateDetailIntervensi() {
         $program = '';
         if (!empty($kodeProgram)) {
             $progData = $this->db->select('Nomenklatur')
-                ->from('nomenklaturprovinsi')
+                ->from('nomenklaturkabupaten')
                 ->where('Kode', $kodeProgram)
                 ->get()
                 ->row_array();
@@ -21792,7 +21796,7 @@ public function UpdateDetailIntervensi() {
         $kegiatan = '';
         if (!empty($kodeKegiatan)) {
             $kegData = $this->db->select('Nomenklatur')
-                ->from('nomenklaturprovinsi')
+                ->from('nomenklaturkabupaten')
                 ->where('Kode', $kodeKegiatan)
                 ->get()
                 ->row_array();
@@ -21804,7 +21808,7 @@ public function UpdateDetailIntervensi() {
         $subKegiatan = '';
         if (!empty($kodeSubKegiatan)) {
             $subData = $this->db->select('Nomenklatur')
-                ->from('nomenklaturprovinsi')
+                ->from('nomenklaturkabupaten')
                 ->where('Kode', $kodeSubKegiatan)
                 ->get()
                 ->row_array();

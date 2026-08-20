@@ -485,7 +485,13 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php if (!empty($PerjanjianKinerja)) {
+                                        <?php 
+                                        $namaBulan = [
+                                            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April', 
+                                            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus', 
+                                            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                                        ];
+                                        if (!empty($PerjanjianKinerja)) {
                                             $no = 1;
                                             foreach ($PerjanjianKinerja as $pk) {
                                                 $status_class = '';
@@ -494,9 +500,9 @@
                                                 elseif ($status_text == 'menunggu')  $status_class = 'status-menunggu';
                                                 elseif ($status_text == 'ditolak')   $status_class = 'status-ditolak';
 
-                                                $hasDefinitif = (!empty($pk['dokumen_utama']) || !empty($pk['dokumen_lampiran']) || !empty($pk['definitif_doc_id']) || $pk['jenis_perjanjian'] == 'PK Murni');
-                                                $hasPerubahan = (!empty($pk['dokumen_perubahan_utama']) || !empty($pk['dokumen_perubahan_lampiran']) || !empty($pk['pk_perubahan_doc_id']));
-                                                $hasPLT = (!empty($pk['dokumen_plt_utama']) || !empty($pk['dokumen_plt_lampiran']) || !empty($pk['pk_plt_doc_id']));
+                                                $hasDefinitif = (!empty($pk['dokumen_utama']) || !empty($pk['dokumen_lampiran']));
+                                                $hasPerubahan = (!empty($pk['dokumen_perubahan_utama']) || !empty($pk['dokumen_perubahan_lampiran']));
+                                                $hasPLT = (!empty($pk['dokumen_plt_utama']) || !empty($pk['dokumen_plt_lampiran']));
 
                                                 $docDefinitif = $pk['definitif_doc_id'] ?: ('DOC-' . $pk['id']);
                                                 $docPerubahan = $pk['pk_perubahan_doc_id'] ?: ('DOC-P-' . $pk['id']);
@@ -513,8 +519,8 @@
                                                 <span style="font-size:12px; color:#2563eb;"><?= htmlspecialchars($pk['pengampu_jabatan'] ?? '-') ?></span>
                                             </td>
                                             <td style="text-align:center; vertical-align:middle; font-weight:600;"><?= $pk['eselon'] ?? '-' ?></td>
-                                            <td style="text-align:center; vertical-align:middle;"><?= date('F', mktime(0,0,0, (int)$pk['periode_awal'], 1)) ?></td>
-                                            <td style="text-align:center; vertical-align:middle;"><?= date('F', mktime(0,0,0, (int)$pk['periode_akhir'], 1)) ?></td>
+                                            <td style="text-align:center; vertical-align:middle;"><?= $namaBulan[(int)$pk['periode_awal']] ?? '-' ?></td>
+                                            <td style="text-align:center; vertical-align:middle;"><?= $namaBulan[(int)$pk['periode_akhir']] ?? '-' ?></td>
                                             
                                             <!-- Definitif (PK Murni) -->
                                             <?php if ($hasDefinitif) { ?>
@@ -627,22 +633,28 @@
                     </select>
                 </div>
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="form-group">
                             <label>NIP Pegawai</label>
                             <input type="text" class="form-control" id="pengampu_nip" readonly>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="form-group">
                             <label>Jabatan Pegawai</label>
                             <input type="text" class="form-control" id="pengampu_jabatan" readonly>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="form-group">
                             <label>Eselon</label>
                             <input type="text" class="form-control" id="pengampu_eselon" readonly style="font-weight:700; color:#1e40af; background:#eff6ff;" placeholder="-">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Satuan Unit Kerja</label>
+                            <input type="text" class="form-control" id="pengampu_satuan_unit_kerja" readonly placeholder="-">
                         </div>
                     </div>
                 </div>
@@ -656,23 +668,36 @@
                         <option value="<?= $a['id'] ?>"
                                 data-nip="<?= htmlspecialchars($a['nip'] ?? '') ?>"
                                 data-jabatan="<?= htmlspecialchars($a['jabatan'] ?? '') ?>"
+                                data-eselon="<?= htmlspecialchars($a['eselon'] ?? '') ?>"
                                 data-satuan="<?= htmlspecialchars($a['satuan_unit_kerja'] ?? '') ?>">
-                            <?= htmlspecialchars($a['nama']) ?> (NIP: <?= $a['nip'] ?>) - <?= htmlspecialchars($a['jabatan']) ?>
+                            <?= htmlspecialchars($a['nama']) ?> (NIP: <?= $a['nip'] ?>) - <?= htmlspecialchars($a['jabatan']) ?><?= !empty($a['eselon']) ? ' [' . $a['eselon'] . ']' : '' ?>
                         </option>
                         <?php } ?>
                     </select>
                 </div>
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <div class="form-group">
                             <label>NIP Atasan</label>
                             <input type="text" class="form-control" id="atasan_nip" readonly>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <div class="form-group">
                             <label>Jabatan Atasan</label>
                             <input type="text" class="form-control" id="atasan_jabatan" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Eselon Atasan</label>
+                            <input type="text" class="form-control" id="atasan_eselon" readonly style="font-weight:700; color:#1e40af; background:#eff6ff;" placeholder="-">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Satuan Unit Kerja</label>
+                            <input type="text" class="form-control" id="atasan_satuan_unit_kerja" readonly placeholder="-">
                         </div>
                     </div>
                 </div>
@@ -720,7 +745,7 @@
                         <label><b>Periode Awal</b></label>
                         <select class="form-control" id="periode_awal">
                             <?php for ($i=1; $i<=12; $i++) { ?>
-                            <option value="<?= $i ?>"><?= date('F', mktime(0,0,0,$i,1)) ?></option>
+                            <option value="<?= $i ?>"><?= $namaBulan[$i] ?? $i ?></option>
                             <?php } ?>
                         </select>
                     </div>
@@ -728,7 +753,7 @@
                         <label><b>Periode Akhir</b></label>
                         <select class="form-control" id="periode_akhir">
                             <?php for ($i=1; $i<=12; $i++) { ?>
-                            <option value="<?= $i ?>"><?= date('F', mktime(0,0,0,$i,1)) ?></option>
+                            <option value="<?= $i ?>"><?= $namaBulan[$i] ?? $i ?></option>
                             <?php } ?>
                         </select>
                     </div>
@@ -1298,6 +1323,7 @@ $(document).ready(function() {
             $('#pengampu_nip').val(selected.data('nip') || '');
             $('#pengampu_jabatan').val(selected.data('jabatan') || '');
             $('#pengampu_eselon').val(selected.data('eselon') || '-');
+            $('#pengampu_satuan_unit_kerja').val(selected.data('satuan') || '');
             $('#nip_pengampu').val(selected.data('nip') || '');
             $('#nama_pengampu').val(selected.data('nama') || '');
             $('#jabatan_pengampu').val(selected.data('jabatan') || '');
@@ -1315,9 +1341,10 @@ $(document).ready(function() {
         var selected = $(this).find('option:selected');
         var id = $(this).val();
         if (id) {
-            $('#nip_atasan').val(selected.data('nip') || '');
-            $('#nama_atasan').val(selected.data('nama') || '');
-            $('#jabatan_atasan').val(selected.data('jabatan') || '');
+            $('#atasan_nip').val(selected.data('nip') || '');
+            $('#atasan_jabatan').val(selected.data('jabatan') || '');
+            $('#atasan_eselon').val(selected.data('eselon') || '-');
+            $('#atasan_satuan_unit_kerja').val(selected.data('satuan') || '');
             $('#satuan_unit_kerja_atasan').val(selected.data('satuan') || '');
         } else {
             clearAtasanDetail();
@@ -1575,15 +1602,17 @@ $(document).ready(function() {
         $('#pengampu_nip').val('');
         $('#pengampu_jabatan').val('');
         $('#pengampu_eselon').val('');
+        $('#pengampu_satuan_unit_kerja').val('');
         $('#nip_pengampu').val('');
         $('#nama_pengampu').val('');
         $('#jabatan_pengampu').val('');
     }
 
     function clearAtasanDetail() {
-        $('#nip_atasan').val('');
-        $('#nama_atasan').val('');
-        $('#jabatan_atasan').val('');
+        $('#atasan_nip').val('');
+        $('#atasan_jabatan').val('');
+        $('#atasan_eselon').val('');
+        $('#atasan_satuan_unit_kerja').val('');
     }
 
     // ============================================================
@@ -1737,6 +1766,14 @@ $(document).ready(function() {
                     $('#pk_id').val(data.id);
                     $('#pegawai_pengampu_id').val(data.pegawai_pengampu_id).trigger('change');
                     $('#atasan_langsung_id').val(data.atasan_langsung_id).trigger('change');
+                    if (data.pengampu_nip) $('#pengampu_nip').val(data.pengampu_nip);
+                    if (data.pengampu_jabatan) $('#pengampu_jabatan').val(data.pengampu_jabatan);
+                    if (data.pengampu_eselon) $('#pengampu_eselon').val(data.pengampu_eselon);
+                    if (data.pengampu_satuan) $('#pengampu_satuan_unit_kerja').val(data.pengampu_satuan);
+                    if (data.atasan_nip) $('#atasan_nip').val(data.atasan_nip);
+                    if (data.atasan_jabatan) $('#atasan_jabatan').val(data.atasan_jabatan);
+                    if (data.atasan_eselon) $('#atasan_eselon').val(data.atasan_eselon);
+                    if (data.atasan_satuan) $('#atasan_satuan_unit_kerja').val(data.atasan_satuan);
                     $('#jenis_perjanjian').val(data.jenis_perjanjian);
                     $('#periode_awal').val(data.periode_awal);
                     $('#periode_akhir').val(data.periode_akhir);
