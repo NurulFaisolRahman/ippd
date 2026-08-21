@@ -104,7 +104,7 @@
                                         <th>Eselon</th>
                                         <th>Jabatan</th>
                                         <th>Satuan Unit Kerja</th>
-                                        <th>Bidang / Sub Kegiatan</th>
+                                        <th>Bidang / Sub / Kegiatan</th>
                                         <th>Dinas Terkait</th>
                                         <?php if (isset($_SESSION['Level']) && in_array($_SESSION['Level'], [3, 4])) { ?>
                                             <th>Password</th>

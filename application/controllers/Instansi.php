@@ -36,18 +36,35 @@ class Instansi extends CI_Controller {
     }
 
     /**
-     * Cek apakah user bisa melakukan CRUD (hanya role 4)
+     * Cek apakah user bisa melakukan CRUD (role 4 atau role 3/admin dengan instansi aktif)
      */
     private function can_crud() {
-        return $this->is_role_4();
+        if ($this->is_role_4()) {
+            return true;
+        }
+        if ($this->is_role_3() || (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 0)) {
+            $instansi_id = $this->get_instansi_id();
+            return !empty($instansi_id);
+        }
+        return false;
     }
 
     /**
-     * Mendapatkan ID instansi dari session (hanya untuk role 4)
+     * Mendapatkan ID instansi dari session atau parameter filter
      */
     private function get_instansi_id() {
         if ($this->is_role_4()) {
-            return isset($_SESSION['IdInstansi']) ? $_SESSION['IdInstansi'] : null;
+            return isset($_SESSION['IdInstansi']) ? (int)$_SESSION['IdInstansi'] : null;
+        }
+        if (isset($_SESSION['TempInstansiId']) && !empty($_SESSION['TempInstansiId'])) {
+            return (int)$_SESSION['TempInstansiId'];
+        }
+        $filter_instansi = $this->input->get('instansi_id', TRUE) ?: $this->input->post('instansi_id', TRUE);
+        if (!empty($filter_instansi) && is_numeric($filter_instansi)) {
+            return (int)$filter_instansi;
+        }
+        if (isset($_SESSION['FilterInstansiId']) && !empty($_SESSION['FilterInstansiId'])) {
+            return (int)$_SESSION['FilterInstansiId'];
         }
         return null;
     }
@@ -9738,7 +9755,7 @@ public function MenuRenstraPD() {
     $data['KodeWilayah'] = $KodeWilayah;
     $data['InstansiId'] = $instansi_id;
     $data['IsLoggedIn'] = $is_logged_in;
-    $data['IsRole4'] = $is_role_4;
+    $data['IsRole4'] = $is_role_4 || ($is_logged_in && !empty($filter_instansi_id));
     $data['Level'] = $level;
     $data['FilterInstansiId'] = $filter_instansi_id;
     $data['NamaInstansi'] = isset($_SESSION['NamaInstansi']) ? $_SESSION['NamaInstansi'] : '';
@@ -10369,7 +10386,7 @@ public function tambahRenstraTujuanPD() {
         return;
     }
     if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menambah data.']);
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda tidak memiliki izin untuk menambah data.']);
         return;
     }
     $KodeWilayah = $this->get_kode_wilayah();
@@ -10379,12 +10396,12 @@ public function tambahRenstraTujuanPD() {
         return;
     }
     if (!$instansi_id) {
-        echo json_encode(['status' => 'error', 'message' => 'Data instansi tidak ditemukan!']);
+        echo json_encode(['status' => 'error', 'message' => 'Data instansi tidak ditemukan! Silakan pilih filter instansi terlebih dahulu.']);
         return;
     }
     
     $sasaran_rpjmd_id = $this->input->post('sasaran_rpjmd_id', TRUE) ?: null;
-    $uraian = trim($this->input->post('uraian', TRUE));
+    $uraian = trim($this->input->post('uraian', TRUE) ?? '');
     $bidang_id = $this->input->post('bidang_id', TRUE) ?: null;
     
     if (empty($uraian)) {
@@ -10403,30 +10420,33 @@ public function tambahRenstraTujuanPD() {
     }
 
     // Fallback if single indicator sent
-    if (empty($indikators_data) && !empty(trim($this->input->post('indikator', TRUE)))) {
+    $single_ind = $this->input->post('indikator', TRUE);
+    if (empty($indikators_data) && !empty($single_ind)) {
         $indikators_data[] = [
-            'indikator'    => trim($this->input->post('indikator', TRUE)),
-            'satuan'       => trim($this->input->post('satuan', TRUE)),
-            'kondisi_awal' => trim($this->input->post('kondisi_awal', TRUE)),
-            'target_2026'  => trim($this->input->post('target_2026', TRUE)),
-            'target_2027'  => trim($this->input->post('target_2027', TRUE)),
-            'target_2028'  => trim($this->input->post('target_2028', TRUE)),
-            'target_2029'  => trim($this->input->post('target_2029', TRUE)),
-            'target_2030'  => trim($this->input->post('target_2030', TRUE)),
+            'indikator'    => trim($single_ind ?? ''),
+            'satuan'       => trim($this->input->post('satuan', TRUE) ?? ''),
+            'kondisi_awal' => trim($this->input->post('kondisi_awal', TRUE) ?? ''),
+            'target_2026'  => trim($this->input->post('target_2026', TRUE) ?? ''),
+            'target_2027'  => trim($this->input->post('target_2027', TRUE) ?? ''),
+            'target_2028'  => trim($this->input->post('target_2028', TRUE) ?? ''),
+            'target_2029'  => trim($this->input->post('target_2029', TRUE) ?? ''),
+            'target_2030'  => trim($this->input->post('target_2030', TRUE) ?? ''),
         ];
     }
     
     $first_ind = $indikators_data[0] ?? [];
-
+    
+    // Pastikan semua kolom yang di-insert sesuai dengan struktur tabel renstra_tujuan
     $data = [
         'kode_wilayah'   => $KodeWilayah,
         'id_instansi'    => $instansi_id,
         'sasaran_rpjmd_id' => $sasaran_rpjmd_id,
         'uraian'         => $uraian,
         'bidang_id'      => $bidang_id,
+        'bidang'         => null, // kolom bidang (tambahkan karena ada di tabel)
         'indikator'      => $first_ind['indikator'] ?? '',
         'satuan'         => $first_ind['satuan'] ?? '',
-        'kondisi_awal'   => $first_ind['kondisi_awal'] ?? '',
+        'target_2025'    => '', // kosongkan karena tidak ada di POST
         'target_2026'    => $first_ind['target_2026'] ?? '',
         'target_2027'    => $first_ind['target_2027'] ?? '',
         'target_2028'    => $first_ind['target_2028'] ?? '',
@@ -10436,36 +10456,65 @@ public function tambahRenstraTujuanPD() {
         'updated_at'     => date('Y-m-d H:i:s')
     ];
     
-    $this->db->insert('renstra_tujuan', $data);
-    $insert_id = $this->db->insert_id();
-    if ($insert_id) {
-        // Insert into renstra_tujuan_indikator
-        $urutan = 10;
-        foreach ($indikators_data as $ind) {
-            $indText = trim($ind['indikator'] ?? '');
-            if (empty($indText)) continue;
-            $this->db->insert('renstra_tujuan_indikator', [
-                'tujuan_id'          => $insert_id,
-                'perangkat_daerah_id'=> $instansi_id,
-                'indikator'          => $indText,
-                'satuan'             => trim($ind['satuan'] ?? ''),
-                'kondisi_awal'       => trim($ind['kondisi_awal'] ?? ''),
-                'target_2026'        => trim($ind['target_2026'] ?? ''),
-                'target_2027'        => trim($ind['target_2027'] ?? ''),
-                'target_2028'        => trim($ind['target_2028'] ?? ''),
-                'target_2029'        => trim($ind['target_2029'] ?? ''),
-                'target_2030'        => trim($ind['target_2030'] ?? ''),
-                'urutan'             => $urutan,
-                'created_at'         => date('Y-m-d H:i:s'),
-                'updated_at'         => date('Y-m-d H:i:s')
-            ]);
-            $urutan += 10;
-        }
-
-        echo json_encode(['status' => 'success', 'message' => 'Tujuan berhasil ditambahkan', 'data' => ['id' => $insert_id]]);
-    } else {
-        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data!']);
+    $this->db->trans_strict(FALSE); // agar tidak error jika tidak support transaksi
+    $this->db->trans_start();
+    
+    $insert = $this->db->insert('renstra_tujuan', $data);
+    if (!$insert) {
+        $error = $this->db->error();
+        log_message('error', 'Insert renstra_tujuan gagal: ' . $error['message']);
+        $this->db->trans_rollback();
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan tujuan: ' . $error['message']]);
+        return;
     }
+    $insert_id = $this->db->insert_id();
+    if (!$insert_id) {
+        $this->db->trans_rollback();
+        echo json_encode(['status' => 'error', 'message' => 'Gagal mendapatkan ID tujuan']);
+        return;
+    }
+    
+    // Insert indikator
+    $urutan = 10;
+    foreach ($indikators_data as $ind) {
+        $indText = trim($ind['indikator'] ?? '');
+        if (empty($indText)) continue;
+        $indData = [
+            'tujuan_id'          => $insert_id,
+            'perangkat_daerah_id'=> $instansi_id,
+            'indikator'          => $indText,
+            'satuan'             => trim($ind['satuan'] ?? ''),
+            'kondisi_awal'       => trim($ind['kondisi_awal'] ?? ''),
+            'target_2025'        => '', // kosong
+            'target_2026'        => trim($ind['target_2026'] ?? ''),
+            'target_2027'        => trim($ind['target_2027'] ?? ''),
+            'target_2028'        => trim($ind['target_2028'] ?? ''),
+            'target_2029'        => trim($ind['target_2029'] ?? ''),
+            'target_2030'        => trim($ind['target_2030'] ?? ''),
+            'urutan'             => $urutan,
+            'created_at'         => date('Y-m-d H:i:s'),
+            'updated_at'         => date('Y-m-d H:i:s')
+        ];
+        $indInsert = $this->db->insert('renstra_tujuan_indikator', $indData);
+        if (!$indInsert) {
+            $error = $this->db->error();
+            log_message('error', 'Insert indikator gagal: ' . $error['message']);
+            $this->db->trans_rollback();
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan indikator: ' . $error['message']]);
+            return;
+        }
+        $urutan += 10;
+    }
+    
+    $this->db->trans_complete();
+    if ($this->db->trans_status() === FALSE) {
+        $error = $this->db->error();
+        log_message('error', 'Transaksi gagal: ' . $error['message']);
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data: ' . $error['message']]);
+        return;
+    }
+    
+    echo json_encode(['status' => 'success', 'message' => 'Tujuan berhasil ditambahkan', 'data' => ['id' => $insert_id]]);
     exit;
 }
 
@@ -10475,27 +10524,35 @@ public function editRenstraTujuanPD() {
         return;
     }
     if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat mengedit data.']);
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda tidak memiliki izin untuk mengedit data.']);
         return;
     }
+    
     $id = (int)$this->input->post('id', TRUE);
     $instansi_id = $this->get_instansi_id();
+    
     if (!$id) {
         echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
         return;
     }
+    
+    // Cek apakah data ada dan milik instansi ini
     $existing = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('renstra_tujuan')->row();
     if (!$existing) {
         echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
         return;
     }
-    if ($existing->id_instansi != $instansi_id) {
+    if ($this->is_role_4() && $existing->id_instansi != $instansi_id) {
         echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Data bukan milik instansi Anda.']);
         return;
     }
+    // Jika instansi_id dari session kosong, gunakan dari data existing
+    if (!$instansi_id) {
+        $instansi_id = $existing->id_instansi;
+    }
     
     $sasaran_rpjmd_id = $this->input->post('sasaran_rpjmd_id', TRUE) ?: null;
-    $uraian = trim($this->input->post('uraian', TRUE));
+    $uraian = trim($this->input->post('uraian', TRUE) ?? '');
     $bidang_id = $this->input->post('bidang_id', TRUE) ?: null;
     
     if (empty($uraian)) {
@@ -10512,29 +10569,32 @@ public function editRenstraTujuanPD() {
     } else {
         $indikators_data = [];
     }
-
-    if (empty($indikators_data) && !empty(trim($this->input->post('indikator', TRUE)))) {
+    
+    // Fallback if single indicator sent
+    $single_ind = $this->input->post('indikator', TRUE);
+    if (empty($indikators_data) && !empty($single_ind)) {
         $indikators_data[] = [
-            'indikator'    => trim($this->input->post('indikator', TRUE)),
-            'satuan'       => trim($this->input->post('satuan', TRUE)),
-            'kondisi_awal' => trim($this->input->post('kondisi_awal', TRUE)),
-            'target_2026'  => trim($this->input->post('target_2026', TRUE)),
-            'target_2027'  => trim($this->input->post('target_2027', TRUE)),
-            'target_2028'  => trim($this->input->post('target_2028', TRUE)),
-            'target_2029'  => trim($this->input->post('target_2029', TRUE)),
-            'target_2030'  => trim($this->input->post('target_2030', TRUE)),
+            'indikator'    => trim($single_ind ?? ''),
+            'satuan'       => trim($this->input->post('satuan', TRUE) ?? ''),
+            'kondisi_awal' => trim($this->input->post('kondisi_awal', TRUE) ?? ''),
+            'target_2026'  => trim($this->input->post('target_2026', TRUE) ?? ''),
+            'target_2027'  => trim($this->input->post('target_2027', TRUE) ?? ''),
+            'target_2028'  => trim($this->input->post('target_2028', TRUE) ?? ''),
+            'target_2029'  => trim($this->input->post('target_2029', TRUE) ?? ''),
+            'target_2030'  => trim($this->input->post('target_2030', TRUE) ?? ''),
         ];
     }
     
     $first_ind = $indikators_data[0] ?? [];
-
+    
     $data = [
         'sasaran_rpjmd_id' => $sasaran_rpjmd_id,
         'uraian'         => $uraian,
         'bidang_id'      => $bidang_id,
+        'bidang'         => null,
         'indikator'      => $first_ind['indikator'] ?? '',
         'satuan'         => $first_ind['satuan'] ?? '',
-        'kondisi_awal'   => $first_ind['kondisi_awal'] ?? '',
+        'target_2025'    => '',
         'target_2026'    => $first_ind['target_2026'] ?? '',
         'target_2027'    => $first_ind['target_2027'] ?? '',
         'target_2028'    => $first_ind['target_2028'] ?? '',
@@ -10543,21 +10603,34 @@ public function editRenstraTujuanPD() {
         'updated_at'     => date('Y-m-d H:i:s')
     ];
     
-    $this->db->where('id', $id)->update('renstra_tujuan', $data);
-
-    // Update renstra_tujuan_indikator
+    $this->db->trans_strict(FALSE);
+    $this->db->trans_start();
+    
+    // Update tujuan
+    $update = $this->db->where('id', $id)->update('renstra_tujuan', $data);
+    if (!$update) {
+        $error = $this->db->error();
+        log_message('error', 'Update renstra_tujuan gagal: ' . $error['message']);
+        $this->db->trans_rollback();
+        echo json_encode(['status' => 'error', 'message' => 'Gagal memperbarui tujuan: ' . $error['message']]);
+        return;
+    }
+    
+    // Soft delete indikator lama
     $this->db->where('tujuan_id', $id)->update('renstra_tujuan_indikator', ['deleted_at' => date('Y-m-d H:i:s')]);
     
+    // Insert indikator baru
     $urutan = 10;
     foreach ($indikators_data as $ind) {
         $indText = trim($ind['indikator'] ?? '');
         if (empty($indText)) continue;
-        $this->db->insert('renstra_tujuan_indikator', [
+        $indData = [
             'tujuan_id'          => $id,
             'perangkat_daerah_id'=> $instansi_id,
             'indikator'          => $indText,
             'satuan'             => trim($ind['satuan'] ?? ''),
             'kondisi_awal'       => trim($ind['kondisi_awal'] ?? ''),
+            'target_2025'        => '',
             'target_2026'        => trim($ind['target_2026'] ?? ''),
             'target_2027'        => trim($ind['target_2027'] ?? ''),
             'target_2028'        => trim($ind['target_2028'] ?? ''),
@@ -10566,10 +10639,26 @@ public function editRenstraTujuanPD() {
             'urutan'             => $urutan,
             'created_at'         => date('Y-m-d H:i:s'),
             'updated_at'         => date('Y-m-d H:i:s')
-        ]);
+        ];
+        $indInsert = $this->db->insert('renstra_tujuan_indikator', $indData);
+        if (!$indInsert) {
+            $error = $this->db->error();
+            log_message('error', 'Insert indikator gagal: ' . $error['message']);
+            $this->db->trans_rollback();
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan indikator: ' . $error['message']]);
+            return;
+        }
         $urutan += 10;
     }
-
+    
+    $this->db->trans_complete();
+    if ($this->db->trans_status() === FALSE) {
+        $error = $this->db->error();
+        log_message('error', 'Transaksi gagal: ' . $error['message']);
+        echo json_encode(['status' => 'error', 'message' => 'Gagal memperbarui data: ' . $error['message']]);
+        return;
+    }
+    
     echo json_encode(['status' => 'success', 'message' => 'Tujuan berhasil diperbarui']);
     exit;
 }
@@ -10594,7 +10683,7 @@ public function hapusRenstraTujuanPD() {
         echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
         return;
     }
-    if ($existing->id_instansi != $instansi_id) {
+    if ($this->is_role_4() && $existing->id_instansi != $instansi_id) {
         echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Data bukan milik instansi Anda.']);
         return;
     }
@@ -10658,12 +10747,13 @@ public function tambahRenstraSasaranPD() {
         return;
     }
     if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menambah data.']);
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda tidak memiliki izin untuk menambah data.']);
         return;
     }
+    
     $tujuan_id = (int)$this->input->post('tujuan_id', TRUE);
-    $uraian = trim($this->input->post('uraian', TRUE));
-    $bidang_id = $this->input->post('bidang_id', TRUE);
+    $uraian = trim($this->input->post('uraian', TRUE) ?? '');
+    $bidang_id = $this->input->post('bidang_id', TRUE) ?: null;
     $instansi_id = $this->get_instansi_id();
     
     if (!$tujuan_id) {
@@ -10675,6 +10765,18 @@ public function tambahRenstraSasaranPD() {
         return;
     }
     
+    // Auto resolve instansi_id dari tujuan jika tidak ada di session
+    if (!$instansi_id) {
+        $tujuan = $this->db->where('id', $tujuan_id)->get('renstra_tujuan')->row();
+        if ($tujuan && !empty($tujuan->id_instansi)) {
+            $instansi_id = (int)$tujuan->id_instansi;
+        }
+    }
+    if (!$instansi_id) {
+        echo json_encode(['status' => 'error', 'message' => 'Data instansi tidak ditemukan!']);
+        return;
+    }
+    
     // Parse Indikators
     $indikators_raw = $this->input->post('indikators');
     if (is_string($indikators_raw)) {
@@ -10684,29 +10786,32 @@ public function tambahRenstraSasaranPD() {
     } else {
         $indikators_data = [];
     }
-
-    if (empty($indikators_data) && !empty(trim($this->input->post('indikator', TRUE)))) {
+    
+    // Fallback jika hanya satu indikator dikirim
+    $single_ind = $this->input->post('indikator', TRUE);
+    if (empty($indikators_data) && !empty($single_ind)) {
         $indikators_data[] = [
-            'indikator'    => trim($this->input->post('indikator', TRUE)),
-            'satuan'       => trim($this->input->post('satuan', TRUE)),
-            'kondisi_awal' => trim($this->input->post('kondisi_awal', TRUE)),
-            'target_2026'  => trim($this->input->post('target_2026', TRUE)),
-            'target_2027'  => trim($this->input->post('target_2027', TRUE)),
-            'target_2028'  => trim($this->input->post('target_2028', TRUE)),
-            'target_2029'  => trim($this->input->post('target_2029', TRUE)),
-            'target_2030'  => trim($this->input->post('target_2030', TRUE)),
+            'indikator'    => trim($single_ind ?? ''),
+            'satuan'       => trim($this->input->post('satuan', TRUE) ?? ''),
+            'kondisi_awal' => trim($this->input->post('kondisi_awal', TRUE) ?? ''),
+            'target_2026'  => trim($this->input->post('target_2026', TRUE) ?? ''),
+            'target_2027'  => trim($this->input->post('target_2027', TRUE) ?? ''),
+            'target_2028'  => trim($this->input->post('target_2028', TRUE) ?? ''),
+            'target_2029'  => trim($this->input->post('target_2029', TRUE) ?? ''),
+            'target_2030'  => trim($this->input->post('target_2030', TRUE) ?? ''),
         ];
     }
     
     $first_ind = $indikators_data[0] ?? [];
-
+    
     $data = [
         'tujuan_id'      => $tujuan_id,
         'uraian'         => $uraian,
         'bidang_id'      => $bidang_id,
+        'bidang'         => null,
         'indikator'      => $first_ind['indikator'] ?? '',
         'satuan'         => $first_ind['satuan'] ?? '',
-        'kondisi_awal'   => $first_ind['kondisi_awal'] ?? '',
+        'target_2025'    => '',
         'target_2026'    => $first_ind['target_2026'] ?? '',
         'target_2027'    => $first_ind['target_2027'] ?? '',
         'target_2028'    => $first_ind['target_2028'] ?? '',
@@ -10715,35 +10820,66 @@ public function tambahRenstraSasaranPD() {
         'created_at'     => date('Y-m-d H:i:s'),
         'updated_at'     => date('Y-m-d H:i:s')
     ];
-    $this->db->insert('renstra_sasaran', $data);
-    $insert_id = $this->db->insert_id();
-    if ($insert_id) {
-        $urutan = 10;
-        foreach ($indikators_data as $ind) {
-            $indText = trim($ind['indikator'] ?? '');
-            if (empty($indText)) continue;
-            $this->db->insert('renstra_sasaran_indikator', [
-                'sasaran_id'         => $insert_id,
-                'perangkat_daerah_id'=> $instansi_id,
-                'indikator'          => $indText,
-                'satuan'             => trim($ind['satuan'] ?? ''),
-                'kondisi_awal'       => trim($ind['kondisi_awal'] ?? ''),
-                'target_2026'        => trim($ind['target_2026'] ?? ''),
-                'target_2027'        => trim($ind['target_2027'] ?? ''),
-                'target_2028'        => trim($ind['target_2028'] ?? ''),
-                'target_2029'        => trim($ind['target_2029'] ?? ''),
-                'target_2030'        => trim($ind['target_2030'] ?? ''),
-                'urutan'             => $urutan,
-                'created_at'         => date('Y-m-d H:i:s'),
-                'updated_at'         => date('Y-m-d H:i:s')
-            ]);
-            $urutan += 10;
-        }
-
-        echo json_encode(['status' => 'success', 'message' => 'Sasaran berhasil ditambahkan', 'data' => ['id' => $insert_id]]);
-    } else {
-        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data!']);
+    
+    $this->db->trans_strict(FALSE);
+    $this->db->trans_start();
+    
+    $insert = $this->db->insert('renstra_sasaran', $data);
+    if (!$insert) {
+        $error = $this->db->error();
+        log_message('error', 'Insert renstra_sasaran gagal: ' . $error['message']);
+        $this->db->trans_rollback();
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan sasaran: ' . $error['message']]);
+        return;
     }
+    $insert_id = $this->db->insert_id();
+    if (!$insert_id) {
+        $this->db->trans_rollback();
+        echo json_encode(['status' => 'error', 'message' => 'Gagal mendapatkan ID sasaran']);
+        return;
+    }
+    
+    // Insert indikator sasaran
+    $urutan = 10;
+    foreach ($indikators_data as $ind) {
+        $indText = trim($ind['indikator'] ?? '');
+        if (empty($indText)) continue;
+        $indData = [
+            'sasaran_id'         => $insert_id,
+            'perangkat_daerah_id'=> $instansi_id,
+            'indikator'          => $indText,
+            'satuan'             => trim($ind['satuan'] ?? ''),
+            'kondisi_awal'       => trim($ind['kondisi_awal'] ?? ''),
+            'target_2025'        => '',
+            'target_2026'        => trim($ind['target_2026'] ?? ''),
+            'target_2027'        => trim($ind['target_2027'] ?? ''),
+            'target_2028'        => trim($ind['target_2028'] ?? ''),
+            'target_2029'        => trim($ind['target_2029'] ?? ''),
+            'target_2030'        => trim($ind['target_2030'] ?? ''),
+            'urutan'             => $urutan,
+            'created_at'         => date('Y-m-d H:i:s'),
+            'updated_at'         => date('Y-m-d H:i:s')
+        ];
+        $indInsert = $this->db->insert('renstra_sasaran_indikator', $indData);
+        if (!$indInsert) {
+            $error = $this->db->error();
+            log_message('error', 'Insert indikator sasaran gagal: ' . $error['message']);
+            $this->db->trans_rollback();
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan indikator sasaran: ' . $error['message']]);
+            return;
+        }
+        $urutan += 10;
+    }
+    
+    $this->db->trans_complete();
+    if ($this->db->trans_status() === FALSE) {
+        $error = $this->db->error();
+        log_message('error', 'Transaksi gagal: ' . $error['message']);
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data: ' . $error['message']]);
+        return;
+    }
+    
+    echo json_encode(['status' => 'success', 'message' => 'Sasaran berhasil ditambahkan', 'data' => ['id' => $insert_id]]);
     exit;
 }
 
@@ -10753,27 +10889,37 @@ public function editRenstraSasaranPD() {
         return;
     }
     if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat mengedit data.']);
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda tidak memiliki izin untuk mengedit data.']);
         return;
     }
+    
     $id = (int)$this->input->post('id', TRUE);
     $instansi_id = $this->get_instansi_id();
+    
     if (!$id) {
         echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
         return;
     }
+    
+    // Cek apakah data ada dan milik instansi ini (via tujuan)
     $existing = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('renstra_sasaran')->row();
     if (!$existing) {
         echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
         return;
     }
+    // Cek kepemilikan melalui tujuan
     $tujuan = $this->db->where('id', $existing->tujuan_id)->where('deleted_at IS NULL')->get('renstra_tujuan')->row();
-    if (!$tujuan || $tujuan->id_instansi != $instansi_id) {
+    if ($this->is_role_4() && (!$tujuan || $tujuan->id_instansi != $instansi_id)) {
         echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Data bukan milik instansi Anda.']);
         return;
     }
-    $uraian = trim($this->input->post('uraian', TRUE));
-    $bidang_id = $this->input->post('bidang_id', TRUE);
+    if (!$instansi_id && $tujuan) {
+        $instansi_id = $tujuan->id_instansi;
+    }
+    
+    $uraian = trim($this->input->post('uraian', TRUE) ?? '');
+    $bidang_id = $this->input->post('bidang_id', TRUE) ?: null;
+    
     if (empty($uraian)) {
         echo json_encode(['status' => 'error', 'message' => 'Uraian Sasaran wajib diisi!']);
         return;
@@ -10788,28 +10934,30 @@ public function editRenstraSasaranPD() {
     } else {
         $indikators_data = [];
     }
-
-    if (empty($indikators_data) && !empty(trim($this->input->post('indikator', TRUE)))) {
+    
+    $single_ind = $this->input->post('indikator', TRUE);
+    if (empty($indikators_data) && !empty($single_ind)) {
         $indikators_data[] = [
-            'indikator'    => trim($this->input->post('indikator', TRUE)),
-            'satuan'       => trim($this->input->post('satuan', TRUE)),
-            'kondisi_awal' => trim($this->input->post('kondisi_awal', TRUE)),
-            'target_2026'  => trim($this->input->post('target_2026', TRUE)),
-            'target_2027'  => trim($this->input->post('target_2027', TRUE)),
-            'target_2028'  => trim($this->input->post('target_2028', TRUE)),
-            'target_2029'  => trim($this->input->post('target_2029', TRUE)),
-            'target_2030'  => trim($this->input->post('target_2030', TRUE)),
+            'indikator'    => trim($single_ind ?? ''),
+            'satuan'       => trim($this->input->post('satuan', TRUE) ?? ''),
+            'kondisi_awal' => trim($this->input->post('kondisi_awal', TRUE) ?? ''),
+            'target_2026'  => trim($this->input->post('target_2026', TRUE) ?? ''),
+            'target_2027'  => trim($this->input->post('target_2027', TRUE) ?? ''),
+            'target_2028'  => trim($this->input->post('target_2028', TRUE) ?? ''),
+            'target_2029'  => trim($this->input->post('target_2029', TRUE) ?? ''),
+            'target_2030'  => trim($this->input->post('target_2030', TRUE) ?? ''),
         ];
     }
     
     $first_ind = $indikators_data[0] ?? [];
-
+    
     $data = [
         'uraian'         => $uraian,
         'bidang_id'      => $bidang_id,
+        'bidang'         => null,
         'indikator'      => $first_ind['indikator'] ?? '',
         'satuan'         => $first_ind['satuan'] ?? '',
-        'kondisi_awal'   => $first_ind['kondisi_awal'] ?? '',
+        'target_2025'    => '',
         'target_2026'    => $first_ind['target_2026'] ?? '',
         'target_2027'    => $first_ind['target_2027'] ?? '',
         'target_2028'    => $first_ind['target_2028'] ?? '',
@@ -10817,21 +10965,34 @@ public function editRenstraSasaranPD() {
         'target_2030'    => $first_ind['target_2030'] ?? '',
         'updated_at'     => date('Y-m-d H:i:s')
     ];
-    $this->db->where('id', $id)->update('renstra_sasaran', $data);
-
-    // Update renstra_sasaran_indikator
+    
+    $this->db->trans_strict(FALSE);
+    $this->db->trans_start();
+    
+    $update = $this->db->where('id', $id)->update('renstra_sasaran', $data);
+    if (!$update) {
+        $error = $this->db->error();
+        log_message('error', 'Update renstra_sasaran gagal: ' . $error['message']);
+        $this->db->trans_rollback();
+        echo json_encode(['status' => 'error', 'message' => 'Gagal memperbarui sasaran: ' . $error['message']]);
+        return;
+    }
+    
+    // Soft delete indikator lama
     $this->db->where('sasaran_id', $id)->update('renstra_sasaran_indikator', ['deleted_at' => date('Y-m-d H:i:s')]);
     
+    // Insert indikator baru
     $urutan = 10;
     foreach ($indikators_data as $ind) {
         $indText = trim($ind['indikator'] ?? '');
         if (empty($indText)) continue;
-        $this->db->insert('renstra_sasaran_indikator', [
+        $indData = [
             'sasaran_id'         => $id,
             'perangkat_daerah_id'=> $instansi_id,
             'indikator'          => $indText,
             'satuan'             => trim($ind['satuan'] ?? ''),
             'kondisi_awal'       => trim($ind['kondisi_awal'] ?? ''),
+            'target_2025'        => '',
             'target_2026'        => trim($ind['target_2026'] ?? ''),
             'target_2027'        => trim($ind['target_2027'] ?? ''),
             'target_2028'        => trim($ind['target_2028'] ?? ''),
@@ -10840,10 +11001,26 @@ public function editRenstraSasaranPD() {
             'urutan'             => $urutan,
             'created_at'         => date('Y-m-d H:i:s'),
             'updated_at'         => date('Y-m-d H:i:s')
-        ]);
+        ];
+        $indInsert = $this->db->insert('renstra_sasaran_indikator', $indData);
+        if (!$indInsert) {
+            $error = $this->db->error();
+            log_message('error', 'Insert indikator sasaran gagal: ' . $error['message']);
+            $this->db->trans_rollback();
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan indikator sasaran: ' . $error['message']]);
+            return;
+        }
         $urutan += 10;
     }
-
+    
+    $this->db->trans_complete();
+    if ($this->db->trans_status() === FALSE) {
+        $error = $this->db->error();
+        log_message('error', 'Transaksi gagal: ' . $error['message']);
+        echo json_encode(['status' => 'error', 'message' => 'Gagal memperbarui data: ' . $error['message']]);
+        return;
+    }
+    
     echo json_encode(['status' => 'success', 'message' => 'Sasaran berhasil diperbarui']);
     exit;
 }
@@ -10869,7 +11046,7 @@ public function hapusRenstraSasaranPD() {
         return;
     }
     $tujuan = $this->db->where('id', $existing->tujuan_id)->where('deleted_at IS NULL')->get('renstra_tujuan')->row();
-    if (!$tujuan || $tujuan->id_instansi != $instansi_id) {
+    if ($this->is_role_4() && (!$tujuan || $tujuan->id_instansi != $instansi_id)) {
         echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Data bukan milik instansi Anda.']);
         return;
     }
@@ -11108,7 +11285,7 @@ public function editRenstraProgramPD() {
     $sasaran = $this->db->where('id', $existing->sasaran_id)->get('renstra_sasaran')->row();
     if ($sasaran) {
         $tujuan = $this->db->where('id', $sasaran->tujuan_id)->get('renstra_tujuan')->row();
-        if (!$tujuan || $tujuan->id_instansi != $instansi_id) {
+        if ($this->is_role_4() && (!$tujuan || $tujuan->id_instansi != $instansi_id)) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Data bukan milik instansi Anda.']);
             return;
         }
@@ -11327,7 +11504,7 @@ public function hapusRenstraProgramPD() {
     $sasaran = $this->db->where('id', $existing->sasaran_id)->where('deleted_at IS NULL')->get('renstra_sasaran')->row();
     if ($sasaran) {
         $tujuan = $this->db->where('id', $sasaran->tujuan_id)->where('deleted_at IS NULL')->get('renstra_tujuan')->row();
-        if (!$tujuan || $tujuan->id_instansi != $instansi_id) {
+        if ($this->is_role_4() && (!$tujuan || $tujuan->id_instansi != $instansi_id)) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Data bukan milik instansi Anda.']);
             return;
         }
@@ -11653,7 +11830,7 @@ public function editRenstraKegiatanPD() {
         $sasaran = $this->db->where('id', $program->sasaran_id)->get('renstra_sasaran')->row();
         if ($sasaran) {
             $tujuan = $this->db->where('id', $sasaran->tujuan_id)->get('renstra_tujuan')->row();
-            if (!$tujuan || $tujuan->id_instansi != $instansi_id) {
+            if ($this->is_role_4() && (!$tujuan || $tujuan->id_instansi != $instansi_id)) {
                 echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Data bukan milik instansi Anda.']);
                 return;
             }
@@ -11957,7 +12134,7 @@ public function hapusRenstraKegiatanPD() {
         $sasaran = $this->db->where('id', $program->sasaran_id)->where('deleted_at IS NULL')->get('renstra_sasaran')->row();
         if ($sasaran) {
             $tujuan = $this->db->where('id', $sasaran->tujuan_id)->where('deleted_at IS NULL')->get('renstra_tujuan')->row();
-            if (!$tujuan || $tujuan->id_instansi != $instansi_id) {
+            if ($this->is_role_4() && (!$tujuan || $tujuan->id_instansi != $instansi_id)) {
                 echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Data bukan milik instansi Anda.']);
                 return;
             }
@@ -12169,7 +12346,7 @@ public function editRenstraSubKegiatanPD() {
             $sasaran = $this->db->where('id', $program->sasaran_id)->get('renstra_sasaran')->row();
             if ($sasaran) {
                 $tujuan = $this->db->where('id', $sasaran->tujuan_id)->get('renstra_tujuan')->row();
-                if (!$tujuan || $tujuan->id_instansi != $instansi_id) {
+                if ($this->is_role_4() && (!$tujuan || $tujuan->id_instansi != $instansi_id)) {
                     echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Data bukan milik instansi Anda.']);
                     return;
                 }
@@ -12479,7 +12656,7 @@ public function hapusRenstraSubKegiatanPD() {
             $sasaran = $this->db->where('id', $program->sasaran_id)->where('deleted_at IS NULL')->get('renstra_sasaran')->row();
             if ($sasaran) {
                 $tujuan = $this->db->where('id', $sasaran->tujuan_id)->where('deleted_at IS NULL')->get('renstra_tujuan')->row();
-                if (!$tujuan || $tujuan->id_instansi != $instansi_id) {
+                if ($this->is_role_4() && (!$tujuan || $tujuan->id_instansi != $instansi_id)) {
                     echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Data bukan milik instansi Anda.']);
                     return;
                 }
