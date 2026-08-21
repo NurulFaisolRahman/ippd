@@ -79,6 +79,7 @@ function hitungTotalAnggaranProgram($program) {
 }
 .renstra-table .text-left { text-align: left; padding-left: 8px; }
 .renstra-table .text-right { text-align: right; padding-right: 8px; }
+.renstra-table .cell-no { font-weight: 600; font-size: 11px; white-space: nowrap; padding: 4px 6px; }
 
 /* Warna level */
 .row-tujuan { background: #e3f2fd; font-weight: 700; border-bottom: 2px solid #1565c0; }
@@ -117,16 +118,16 @@ function hitungTotalAnggaranProgram($program) {
 
 /* Indentasi */
 .level-tujuan { padding-left: 5px; }
-.level-sasaran { padding-left: 25px; }
-.level-program { padding-left: 45px; }
-.level-outcome { padding-left: 65px; }
-.level-indikator { padding-left: 65px; }
-.level-kegiatan { padding-left: 85px; }
-.level-kegiatan-sasaran { padding-left: 105px; }
-.level-kegiatan-indikator { padding-left: 125px; }
-.level-subkegiatan { padding-left: 105px; }
-.level-subkegiatan-sasaran { padding-left: 125px; }
-.level-subkegiatan-indikator { padding-left: 145px; }
+.level-sasaran { padding-left: 5px; }
+.level-program { padding-left: 5px; }
+.level-outcome { padding-left: 5px; }
+.level-indikator { padding-left: 5px; }
+.level-kegiatan { padding-left: 5px; }
+.level-kegiatan-sasaran { padding-left: 5px; }
+.level-kegiatan-indikator { padding-left: 5px; }
+.level-subkegiatan { padding-left: 5px; }
+.level-subkegiatan-sasaran { padding-left: 5px; }
+.level-subkegiatan-indikator { padding-left: 5px; }
 
 .border-tujuan { border-left: 4px solid #1565c0 !important; }
 .border-sasaran { border-left: 4px solid #7b1fa2 !important; }
@@ -400,71 +401,162 @@ function hitungTotalAnggaranProgram($program) {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php if (!empty($RenstraData)) { 
-                                            $no_tujuan = 1;
-                                            foreach ($RenstraData as $tujuan) { 
-                                                $tujuan_id = $tujuan['id'] ?? 0;
-                                                $tujuan_uraian = $tujuan['uraian'] ?? '';
-                                        ?>
-                                            <!-- ROW TUJUAN -->
-                                            <tr class="row-tujuan border-tujuan">
-                                                <td class="cell-no"><?= $no_tujuan ?></td>
-                                                <td class="text-left level-tujuan">
-                                                    <span class="badge-tujuan">Tujuan <?= $no_tujuan ?></span>
-                                                    <strong><?= html_escape($tujuan_uraian) ?></strong>
-                                                </td>
-                                                <td></td><td></td><td></td>
-                                                <td></td><td></td><td></td><td></td>
-                                                <td></td><td></td><td></td><td></td>
-                                                <td></td><td></td>
-                                                <?php if ($IsRole4) { ?>
-                                                    <td class="col-aksi">
-                                                        <div class="btn-group-aksi">
-                                                            <button class="btn btn-sm btn-success btn-aksi btnTambahSasaran" data-tujuan-id="<?= $tujuan_id ?>" title="Tambah Sasaran"><i class="fa fa-plus"></i></button>
-                                                            <button class="btn btn-sm btn-warning btn-aksi btnEditTujuan" data-id="<?= $tujuan_id ?>" title="Edit Tujuan"><i class="fa fa-edit"></i></button>
-                                                            <button class="btn btn-sm btn-danger btn-aksi btnHapusTujuan" data-id="<?= $tujuan_id ?>" title="Hapus Tujuan"><i class="fa fa-trash"></i></button>
-                                                        </div>
-                                                    </td>
-                                                <?php } ?>
-                                            </tr>
+                                         <?php if (!empty($RenstraData)) { 
+                                             $no_tujuan = 1;
+                                             foreach ($RenstraData as $tujuan) { 
+                                                 $tujuan_id = $tujuan['id'] ?? 0;
+                                                 $tujuan_uraian = $tujuan['uraian'] ?? '';
+                                                 $tujuan_indikators = $tujuan['indikators'] ?? [];
+                                                 $tujuanRowspan = count($tujuan_indikators) > 0 ? count($tujuan_indikators) : 1;
+                                                 $firstIndTujuan = $tujuan_indikators[0] ?? null;
+                                         ?>
+                                             <!-- ROW TUJUAN (Baris Pertama) -->
+                                             <tr class="row-tujuan border-tujuan">
+                                                 <td class="cell-no" rowspan="<?= $tujuanRowspan ?>"><?= $no_tujuan ?></td>
+                                                 <td class="text-left level-tujuan" rowspan="<?= $tujuanRowspan ?>">
+                                                     <span class="badge-tujuan">Tujuan <?= $no_tujuan ?></span>
+                                                     <strong><?= html_escape($tujuan_uraian) ?></strong>
+                                                 </td>
+                                                 <!-- INDIKATOR -->
+                                                 <td class="indikator-text" style="text-align:left; padding-left:5px;"><?= html_escape($firstIndTujuan['indikator'] ?? ($tujuan['indikator'] ?? '-')) ?></td>
+                                                 <!-- SATUAN -->
+                                                 <td><?= html_escape($firstIndTujuan['satuan'] ?? ($tujuan['satuan'] ?? '-')) ?></td>
+                                                 <!-- KONDISI AWAL -->
+                                                 <td><?= html_escape($firstIndTujuan['kondisi_awal'] ?? ($tujuan['kondisi_awal'] ?? '-')) ?></td>
+                                                 <!-- 2026 -->
+                                                 <td><?= html_escape($firstIndTujuan['target_2026'] ?? ($tujuan['target_2026'] ?? '-')) ?></td>
+                                                 <td class="pagu-col">-</td>
+                                                 <!-- 2027 -->
+                                                 <td><?= html_escape($firstIndTujuan['target_2027'] ?? ($tujuan['target_2027'] ?? '-')) ?></td>
+                                                 <td class="pagu-col">-</td>
+                                                 <!-- 2028 -->
+                                                 <td><?= html_escape($firstIndTujuan['target_2028'] ?? ($tujuan['target_2028'] ?? '-')) ?></td>
+                                                 <td class="pagu-col">-</td>
+                                                 <!-- 2029 -->
+                                                 <td><?= html_escape($firstIndTujuan['target_2029'] ?? ($tujuan['target_2029'] ?? '-')) ?></td>
+                                                 <td class="pagu-col">-</td>
+                                                 <!-- 2030 -->
+                                                 <td><?= html_escape($firstIndTujuan['target_2030'] ?? ($tujuan['target_2030'] ?? '-')) ?></td>
+                                                 <td class="pagu-col">-</td>
+                                                 <?php if ($IsRole4) { ?>
+                                                     <td class="col-aksi" rowspan="<?= $tujuanRowspan ?>">
+                                                         <div class="btn-group-aksi">
+                                                             <button class="btn btn-sm btn-success btn-aksi btnTambahSasaran" data-tujuan-id="<?= $tujuan_id ?>" title="Tambah Sasaran"><i class="fa fa-plus"></i></button>
+                                                             <button class="btn btn-sm btn-warning btn-aksi btnEditTujuan" data-id="<?= $tujuan_id ?>" title="Edit Tujuan"><i class="fa fa-edit"></i></button>
+                                                             <button class="btn btn-sm btn-danger btn-aksi btnHapusTujuan" data-id="<?= $tujuan_id ?>" title="Hapus Tujuan"><i class="fa fa-trash"></i></button>
+                                                         </div>
+                                                     </td>
+                                                 <?php } ?>
+                                             </tr>
 
-                                            <?php 
-                                            $sasaran_list = $tujuan['sasaran_list'] ?? [];
-                                            if (!empty($sasaran_list)) {
-                                                $no_sasaran = 1;
-                                                foreach ($sasaran_list as $sasaran) {
-                                                    $sasaran_id = $sasaran['id'] ?? 0;
-                                                    $sasaran_uraian = $sasaran['uraian'] ?? '';
-                                            ?>
-                                                <!-- ROW SASARAN -->
-                                                <tr class="row-sasaran border-sasaran">
-                                                    <td class="cell-no"><?= $no_tujuan . '.' . $no_sasaran ?></td>
-                                                    <td class="text-left level-sasaran">
-                                                        <span class="badge-sasaran">Sasaran <?= $no_sasaran ?></span>
-                                                        <?= html_escape($sasaran_uraian) ?>
-                                                    </td>
-                                                    <td></td><td></td><td></td>
-                                                    <td></td><td></td><td></td><td></td>
-                                                    <td></td><td></td><td></td><td></td>
-                                                    <td></td><td></td>
-                                                    <?php if ($IsRole4) { ?>
-                                                        <td class="col-aksi">
-                                                            <div class="btn-group-aksi">
-                                                                <button class="btn btn-sm btn-success btn-aksi btnTambahProgram" data-sasaran-id="<?= $sasaran_id ?>" title="Tambah Program"><i class="fa fa-plus"></i></button>
-                                                                <button class="btn btn-sm btn-warning btn-aksi btnEditSasaran" data-id="<?= $sasaran_id ?>" title="Edit Sasaran"><i class="fa fa-edit"></i></button>
-                                                                <button class="btn btn-sm btn-danger btn-aksi btnHapusSasaran" data-id="<?= $sasaran_id ?>" title="Hapus Sasaran"><i class="fa fa-trash"></i></button>
-                                                            </div>
-                                                        </td>
-                                                    <?php } ?>
-                                                </tr>
+                                             <?php 
+                                             // Baris Indikator Tujuan ke-2, 3, dst
+                                             if (count($tujuan_indikators) > 1) {
+                                                 for ($ti = 1; $ti < count($tujuan_indikators); $ti++) {
+                                                     $indT = $tujuan_indikators[$ti];
+                                             ?>
+                                                 <tr class="row-tujuan border-tujuan">
+                                                     <td class="indikator-text" style="text-align:left; padding-left:5px;"><?= html_escape($indT['indikator'] ?? '-') ?></td>
+                                                     <td><?= html_escape($indT['satuan'] ?? '-') ?></td>
+                                                     <td><?= html_escape($indT['kondisi_awal'] ?? '-') ?></td>
+                                                     <td><?= html_escape($indT['target_2026'] ?? '-') ?></td>
+                                                     <td class="pagu-col">-</td>
+                                                     <td><?= html_escape($indT['target_2027'] ?? '-') ?></td>
+                                                     <td class="pagu-col">-</td>
+                                                     <td><?= html_escape($indT['target_2028'] ?? '-') ?></td>
+                                                     <td class="pagu-col">-</td>
+                                                     <td><?= html_escape($indT['target_2029'] ?? '-') ?></td>
+                                                     <td class="pagu-col">-</td>
+                                                     <td><?= html_escape($indT['target_2030'] ?? '-') ?></td>
+                                                     <td class="pagu-col">-</td>
+                                                 </tr>
+                                             <?php 
+                                                 }
+                                             }
+                                             ?>
 
-                                                <?php 
+                                             <?php 
+                                             $sasaran_list = $tujuan['sasaran_list'] ?? [];
+                                             if (!empty($sasaran_list)) {
+                                                 $no_sasaran = 1;
+                                                 foreach ($sasaran_list as $sasaran) {
+                                                     $sasaran_id = $sasaran['id'] ?? 0;
+                                                     $sasaran_uraian = $sasaran['uraian'] ?? '';
+                                                     $sasaran_indikators = $sasaran['indikators'] ?? [];
+                                                     $sasaranRowspan = count($sasaran_indikators) > 0 ? count($sasaran_indikators) : 1;
+                                                     $firstIndSasaran = $sasaran_indikators[0] ?? null;
+                                             ?>
+                                                 <!-- ROW SASARAN (Baris Pertama) -->
+                                                 <tr class="row-sasaran border-sasaran">
+                                                     <td class="cell-no" rowspan="<?= $sasaranRowspan ?>"><?= $no_tujuan . '.' . $no_sasaran ?></td>
+                                                     <td class="text-left level-sasaran" rowspan="<?= $sasaranRowspan ?>">
+                                                         <span class="badge-sasaran">Sasaran <?= $no_sasaran ?></span>
+                                                         <?= html_escape($sasaran_uraian) ?>
+                                                     </td>
+                                                     <!-- INDIKATOR -->
+                                                     <td class="indikator-text" style="text-align:left; padding-left:5px;"><?= html_escape($firstIndSasaran['indikator'] ?? ($sasaran['indikator'] ?? '-')) ?></td>
+                                                     <!-- SATUAN -->
+                                                     <td><?= html_escape($firstIndSasaran['satuan'] ?? ($sasaran['satuan'] ?? '-')) ?></td>
+                                                     <!-- KONDISI AWAL -->
+                                                     <td><?= html_escape($firstIndSasaran['kondisi_awal'] ?? ($sasaran['kondisi_awal'] ?? '-')) ?></td>
+                                                     <!-- 2026 -->
+                                                     <td><?= html_escape($firstIndSasaran['target_2026'] ?? ($sasaran['target_2026'] ?? '-')) ?></td>
+                                                     <td class="pagu-col">-</td>
+                                                     <!-- 2027 -->
+                                                     <td><?= html_escape($firstIndSasaran['target_2027'] ?? ($sasaran['target_2027'] ?? '-')) ?></td>
+                                                     <td class="pagu-col">-</td>
+                                                     <!-- 2028 -->
+                                                     <td><?= html_escape($firstIndSasaran['target_2028'] ?? ($sasaran['target_2028'] ?? '-')) ?></td>
+                                                     <td class="pagu-col">-</td>
+                                                     <!-- 2029 -->
+                                                     <td><?= html_escape($firstIndSasaran['target_2029'] ?? ($sasaran['target_2029'] ?? '-')) ?></td>
+                                                     <td class="pagu-col">-</td>
+                                                     <!-- 2030 -->
+                                                     <td><?= html_escape($firstIndSasaran['target_2030'] ?? ($sasaran['target_2030'] ?? '-')) ?></td>
+                                                     <td class="pagu-col">-</td>
+                                                     <?php if ($IsRole4) { ?>
+                                                         <td class="col-aksi" rowspan="<?= $sasaranRowspan ?>">
+                                                             <div class="btn-group-aksi">
+                                                                 <button class="btn btn-sm btn-success btn-aksi btnTambahProgram" data-sasaran-id="<?= $sasaran_id ?>" title="Tambah Program"><i class="fa fa-plus"></i></button>
+                                                                 <button class="btn btn-sm btn-warning btn-aksi btnEditSasaran" data-id="<?= $sasaran_id ?>" title="Edit Sasaran"><i class="fa fa-edit"></i></button>
+                                                                 <button class="btn btn-sm btn-danger btn-aksi btnHapusSasaran" data-id="<?= $sasaran_id ?>" title="Hapus Sasaran"><i class="fa fa-trash"></i></button>
+                                                             </div>
+                                                         </td>
+                                                     <?php } ?>
+                                                 </tr>
+
+                                                 <?php 
+                                                 // Baris Indikator Sasaran ke-2, 3, dst
+                                                 if (count($sasaran_indikators) > 1) {
+                                                     for ($si = 1; $si < count($sasaran_indikators); $si++) {
+                                                         $indS = $sasaran_indikators[$si];
+                                                 ?>
+                                                     <tr class="row-sasaran border-sasaran">
+                                                         <td class="indikator-text" style="text-align:left; padding-left:5px;"><?= html_escape($indS['indikator'] ?? '-') ?></td>
+                                                         <td><?= html_escape($indS['satuan'] ?? '-') ?></td>
+                                                         <td><?= html_escape($indS['kondisi_awal'] ?? '-') ?></td>
+                                                         <td><?= html_escape($indS['target_2026'] ?? '-') ?></td>
+                                                         <td class="pagu-col">-</td>
+                                                         <td><?= html_escape($indS['target_2027'] ?? '-') ?></td>
+                                                         <td class="pagu-col">-</td>
+                                                         <td><?= html_escape($indS['target_2028'] ?? '-') ?></td>
+                                                         <td class="pagu-col">-</td>
+                                                         <td><?= html_escape($indS['target_2029'] ?? '-') ?></td>
+                                                         <td class="pagu-col">-</td>
+                                                         <td><?= html_escape($indS['target_2030'] ?? '-') ?></td>
+                                                         <td class="pagu-col">-</td>
+                                                     </tr>
+                                                 <?php 
+                                                     }
+                                                 }
+                                                 ?>
+                                                <?php
                                                 $program_list = $sasaran['program_list'] ?? [];
                                                 if (!empty($program_list)) {
                                                     $no_program = 1;
                                                     foreach ($program_list as $program) {
                                                         $program_id = $program['id'] ?? 0;
-                                                        $program_nama = $program['nama'] ?? '';
+                                                        $program_nama = preg_replace('/^(\d+(\.\d+)*)\s*[-–—:]?\s*/', '', $program['nama'] ?? '');
                                                         $program_kode = $program['kode_program'] ?? '';
                                                         $outcomes = $program['outcomes'] ?? [];
                                                         $kegiatan_list = $program['kegiatan_list'] ?? [];
@@ -484,19 +576,15 @@ function hitungTotalAnggaranProgram($program) {
                                                         if ($totalIndikator == 0 && empty($kegiatan_list)) {
                                                             ?>
                                                             <tr class="row-program border-program">
-                                                                <td class="cell-no"><?= $no_tujuan . '.' . $no_sasaran . '.' . $no_program ?></td>
+                                                                <td class="cell-no"><?= !empty($program_kode) ? html_escape($program_kode) : ($no_tujuan . '.' . $no_sasaran . '.' . $no_program) ?></td>
                                                                 <td class="text-left level-program">
-                                                                    <?php if (!empty($program_kode)) { ?>
-                                                                        <span class="badge-program"><?= html_escape($program_kode) ?></span>
-                                                                    <?php } ?>
-                                                                    <span class="badge-program">Program <?= $no_program ?></span>
                                                                     <span class="nama-program"><?= html_escape($program_nama) ?></span>
                                                                 </td>
                                                                 <td colspan="13" style="text-align:center; color:#999;">Tidak ada outcome/indikator</td>
                                                                 <?php if ($IsRole4) { ?>
                                                                     <td class="col-aksi">
                                                                         <div class="btn-group-aksi">
-                                                                            <button class="btn btn-sm btn-primary btn-aksi btnTambahKegiatan" data-program-id="<?= $program_id ?>" title="Tambah Kegiatan"><i class="fa fa-plus"></i></button>
+                                                                            <button class="btn btn-sm btn-primary btn-aksi btnTambahKegiatan" data-program-id="<?= $program_id ?>" data-program-kode="<?= html_escape($program_kode) ?>" data-program-nama="<?= html_escape($program_nama) ?>" title="Tambah Kegiatan"><i class="fa fa-plus"></i></button>
                                                                             <button class="btn btn-sm btn-warning btn-aksi btnEditProgram" data-id="<?= $program_id ?>" title="Edit Program"><i class="fa fa-edit"></i></button>
                                                                             <button class="btn btn-sm btn-danger btn-aksi btnHapusProgram" data-id="<?= $program_id ?>" title="Hapus Program"><i class="fa fa-trash"></i></button>
                                                                             
@@ -528,19 +616,15 @@ function hitungTotalAnggaranProgram($program) {
                                                         if ($totalIndikatorProgram == 0 && empty($kegiatan_list)) {
                                                             ?>
                                                             <tr class="row-program border-program">
-                                                                <td class="cell-no"><?= $no_tujuan . '.' . $no_sasaran . '.' . $no_program ?></td>
+                                                                <td class="cell-no"><?= !empty($program_kode) ? html_escape($program_kode) : ($no_tujuan . '.' . $no_sasaran . '.' . $no_program) ?></td>
                                                                 <td class="text-left level-program">
-                                                                    <?php if (!empty($program_kode)) { ?>
-                                                                        <span class="badge-program"><?= html_escape($program_kode) ?></span>
-                                                                    <?php } ?>
-                                                                    <span class="badge-program">Program <?= $no_program ?></span>
                                                                     <span class="nama-program"><?= html_escape($program_nama) ?></span>
                                                                 </td>
                                                                 <td colspan="13" style="text-align:center; color:#999;">Tidak ada outcome/indikator</td>
                                                                 <?php if ($IsRole4) { ?>
                                                                     <td class="col-aksi">
                                                                         <div class="btn-group-aksi">
-                                                                            <button class="btn btn-sm btn-primary btn-aksi btnTambahKegiatan" data-program-id="<?= $program_id ?>" title="Tambah Kegiatan"><i class="fa fa-plus"></i></button>
+                                                                            <button class="btn btn-sm btn-primary btn-aksi btnTambahKegiatan" data-program-id="<?= $program_id ?>" data-program-kode="<?= html_escape($program_kode) ?>" data-program-nama="<?= html_escape($program_nama) ?>" title="Tambah Kegiatan"><i class="fa fa-plus"></i></button>
                                                                             <button class="btn btn-sm btn-warning btn-aksi btnEditProgram" data-id="<?= $program_id ?>" title="Edit Program"><i class="fa fa-edit"></i></button>
                                                                             <button class="btn btn-sm btn-danger btn-aksi btnHapusProgram" data-id="<?= $program_id ?>" title="Hapus Program"><i class="fa fa-trash"></i></button>
                                                                             
@@ -564,7 +648,7 @@ function hitungTotalAnggaranProgram($program) {
                                                         foreach ($outcomes as $outIndex => $outcome) {
                                                             $indikator_list = $outcome['indikator_list'] ?? [];
                                                             
-                                                            // Lewati outcome tanpa indikator
+                                                             // Lewati outcome tanpa indikator
                                                             if (empty($indikator_list)) {
                                                                 continue;
                                                             }
@@ -578,26 +662,22 @@ function hitungTotalAnggaranProgram($program) {
                                                                 <!-- NOMOR - HANYA SEKALI PER PROGRAM -->
                                                                 <?php if ($isFirstRow) { ?>
                                                                     <td class="cell-no" rowspan="<?= $totalIndikatorProgram ?>">
-                                                                        <?= $no_tujuan . '.' . $no_sasaran . '.' . $no_program ?>
+                                                                        <?= !empty($program_kode) ? html_escape($program_kode) : ($no_tujuan . '.' . $no_sasaran . '.' . $no_program) ?>
                                                                     </td>
                                                                 <?php } ?>
                                                                 
                                                                 <!-- PROGRAM + OUTCOME - SATU KOLOM -->
-                                                                <td class="text-left" style="padding-left:45px;" rowspan="<?= $outcomeRowspan ?>">
+                                                                <td class="text-left level-program" rowspan="<?= $outcomeRowspan ?>">
                                                                     <?php if ($isFirstRow) { ?>
                                                                         <!-- PROGRAM (hanya muncul di baris pertama) -->
                                                                         <div class="program-title" style="margin-bottom:5px;">
-                                                                            <?php if (!empty($program_kode)) { ?>
-                                                                                <span class="badge-program"><?= html_escape($program_kode) ?></span>
-                                                                            <?php } ?>
-                                                                            <span class="badge-program">Program <?= $no_program ?></span>
                                                                             <span class="nama-program"><?= html_escape($program_nama) ?></span>
                                                                         </div>
                                                                     <?php } ?>
                                                                     
                                                                     <!-- OUTCOME (muncul di setiap baris pertama tiap outcome) -->
                                                                     <div class="outcome-title" style="margin-top:<?= $isFirstRow ? '3px' : '0' ?>;">
-                                                                        <span class="badge-outcome">Outcome <?= $outcomeIndex+1 ?></span>
+                                                                        <span class="badge-outcome">Outcome</span>
                                                                         <?= html_escape($outcome['outcome_text']) ?>
                                                                     </div>
                                                                 </td>
@@ -677,7 +757,7 @@ function hitungTotalAnggaranProgram($program) {
                                                                 <?php if ($IsRole4 && $isFirstRow) { ?>
                                                                     <td class="col-aksi" rowspan="<?= $totalIndikatorProgram ?>">
                                                                         <div class="btn-group-aksi">
-                                                                            <button class="btn btn-sm btn-primary btn-aksi btnTambahKegiatan" data-program-id="<?= $program_id ?>" title="Tambah Kegiatan"><i class="fa fa-plus"></i></button>
+                                                                            <button class="btn btn-sm btn-primary btn-aksi btnTambahKegiatan" data-program-id="<?= $program_id ?>" data-program-kode="<?= html_escape($program_kode) ?>" data-program-nama="<?= html_escape($program_nama) ?>" title="Tambah Kegiatan"><i class="fa fa-plus"></i></button>
                                                                             <button class="btn btn-sm btn-warning btn-aksi btnEditProgram" data-id="<?= $program_id ?>" title="Edit Program"><i class="fa fa-edit"></i></button>
                                                                             <button class="btn btn-sm btn-danger btn-aksi btnHapusProgram" data-id="<?= $program_id ?>" title="Hapus Program"><i class="fa fa-trash"></i></button>
                                                                             
@@ -688,7 +768,7 @@ function hitungTotalAnggaranProgram($program) {
                                                             
                                                             <?php
                                                             // ============================================================
-                                                             // INDIKATOR KE-2, KE-3, DST UNTUK OUTCOME YANG SAMA
+                                                            // INDIKATOR KE-2, KE-3, DST UNTUK OUTCOME YANG SAMA
                                                             // ============================================================
                                                             if (count($indikator_list) > 1) {
                                                                 for ($i = 1; $i < count($indikator_list); $i++) {
@@ -741,7 +821,8 @@ function hitungTotalAnggaranProgram($program) {
                                                         foreach ($kegiatan_list as $kegiatan) {
 
                                                             $kegiatan_id   = $kegiatan['id'] ?? 0;
-                                                            $kegiatan_nama = $kegiatan['nama'] ?? '';
+                                                            $kegiatan_nama = preg_replace('/^(\d+(\.\d+)*)\s*[-–—:]?\s*/', '', $kegiatan['nama'] ?? '');
+                                                            $kegiatan_kode = $kegiatan['kode_nomenklatur'] ?? ($kegiatan['kode_kegiatan'] ?? '');
 
                                                             $kegiatan_sasaran_list = $kegiatan['sasaran_list'] ?? [];
                                                             $sub_kegiatan_list     = $kegiatan['sub_kegiatan_list'] ?? [];
@@ -759,7 +840,7 @@ function hitungTotalAnggaranProgram($program) {
                                                                 ?>
                                                                 <tr class="row-kegiatan border-kegiatan">
                                                                     <td class="cell-no">
-                                                                        <?= $no_tujuan . '.' . $no_sasaran . '.' . $no_program . '.' . $no_kegiatan ?>
+                                                                        <?= !empty($kegiatan_kode) ? html_escape($kegiatan_kode) : ($no_tujuan . '.' . $no_sasaran . '.' . $no_program . '.' . $no_kegiatan) ?>
                                                                     </td>
                                                                     <td class="text-left level-kegiatan">
                                                                         <?= html_escape($kegiatan_nama) ?>
@@ -770,8 +851,8 @@ function hitungTotalAnggaranProgram($program) {
                                                                     <?php if ($IsRole4) { ?>
                                                                         <td class="col-aksi">
                                                                             <div class="btn-group-aksi">
-                                                                                <button class="btn btn-sm btn-success btn-aksi btnTambahSubKegiatan" data-kegiatan-id="<?= $kegiatan_id ?>" title="Tambah Sub Kegiatan"><i class="fa fa-plus"></i></button>
-                                                                                <button class="btn btn-sm btn-warning btn-aksi btnEditKegiatan" data-id="<?= $kegiatan_id ?>" title="Edit Kegiatan"><i class="fa fa-edit"></i></button>
+                                                                                <button class="btn btn-sm btn-success btn-aksi btnTambahSubKegiatan" data-kegiatan-id="<?= $kegiatan_id ?>" data-kegiatan-kode="<?= html_escape($kegiatan_kode) ?>" data-kegiatan-nama="<?= html_escape($kegiatan_nama) ?>" title="Tambah Sub Kegiatan"><i class="fa fa-plus"></i></button>
+                                                                                <button class="btn btn-sm btn-warning btn-aksi btnEditKegiatan" data-id="<?= $kegiatan_id ?>" data-program-id="<?= $program_id ?>" data-program-kode="<?= html_escape($program_kode) ?>" data-program-nama="<?= html_escape($program_nama) ?>" title="Edit Kegiatan"><i class="fa fa-edit"></i></button>
                                                                                 <button class="btn btn-sm btn-danger btn-aksi btnHapusKegiatan" data-id="<?= $kegiatan_id ?>" title="Hapus Kegiatan"><i class="fa fa-trash"></i></button>
                                                                             </div>
                                                                         </td>
@@ -799,7 +880,7 @@ function hitungTotalAnggaranProgram($program) {
                                                                 ?>
                                                                 <tr class="row-kegiatan border-kegiatan">
                                                                     <td class="cell-no">
-                                                                        <?= $no_tujuan . '.' . $no_sasaran . '.' . $no_program . '.' . $no_kegiatan ?>
+                                                                        <?= !empty($kegiatan_kode) ? html_escape($kegiatan_kode) : ($no_tujuan . '.' . $no_sasaran . '.' . $no_program . '.' . $no_kegiatan) ?>
                                                                     </td>
                                                                     <td class="text-left level-kegiatan">
                                                                         <?= html_escape($kegiatan_nama) ?>
@@ -810,8 +891,8 @@ function hitungTotalAnggaranProgram($program) {
                                                                     <?php if ($IsRole4) { ?>
                                                                         <td class="col-aksi">
                                                                             <div class="btn-group-aksi">
-                                                                                <button class="btn btn-sm btn-success btn-aksi btnTambahSubKegiatan" data-kegiatan-id="<?= $kegiatan_id ?>"><i class="fa fa-plus"></i></button>
-                                                                                <button class="btn btn-sm btn-warning btn-aksi btnEditKegiatan" data-id="<?= $kegiatan_id ?>"><i class="fa fa-edit"></i></button>
+                                                                                <button class="btn btn-sm btn-success btn-aksi btnTambahSubKegiatan" data-kegiatan-id="<?= $kegiatan_id ?>" data-kegiatan-kode="<?= html_escape($kegiatan_kode) ?>" data-kegiatan-nama="<?= html_escape($kegiatan_nama) ?>"><i class="fa fa-plus"></i></button>
+                                                                                <button class="btn btn-sm btn-warning btn-aksi btnEditKegiatan" data-id="<?= $kegiatan_id ?>" data-program-id="<?= $program_id ?>" data-program-kode="<?= html_escape($program_kode) ?>" data-program-nama="<?= html_escape($program_nama) ?>"><i class="fa fa-edit"></i></button>
                                                                                 <button class="btn btn-sm btn-danger btn-aksi btnHapusKegiatan" data-id="<?= $kegiatan_id ?>"><i class="fa fa-trash"></i></button>
                                                                             </div>
                                                                         </td>
@@ -861,7 +942,7 @@ function hitungTotalAnggaranProgram($program) {
 
                                                                     <?php if ($firstSasaran) { ?>
                                                                         <td class="cell-no" rowspan="<?= $kegiatanTotalRows ?>">
-                                                                            <?= $no_tujuan . '.' . $no_sasaran . '.' . $no_program . '.' . $no_kegiatan ?>
+                                                                            <?= !empty($kegiatan_kode) ? html_escape($kegiatan_kode) : ($no_tujuan . '.' . $no_sasaran . '.' . $no_program . '.' . $no_kegiatan) ?>
                                                                         </td>
                                                                     <?php } ?>
 
@@ -879,7 +960,7 @@ function hitungTotalAnggaranProgram($program) {
                                                                             </div>
                                                                             <!-- SASARAN 1 -->
                                                                             <div class="sasaran-title">
-                                                                                <span class="badge-kegiatan-sasaran">Sasaran <?= $ksIndex + 1 ?></span>
+                                                                                <span class="badge-kegiatan-sasaran">Output</span>
                                                                                 <?= html_escape($ks['sasaran_text'] ?? '') ?>
                                                                             </div>
                                                                         <?php } else { ?>
@@ -963,8 +1044,8 @@ function hitungTotalAnggaranProgram($program) {
                                                                     <?php if ($firstSasaran && $IsRole4) { ?>
                                                                         <td class="col-aksi" rowspan="<?= $kegiatanTotalRows ?>">
                                                                             <div class="btn-group-aksi">
-                                                                                <button class="btn btn-sm btn-success btn-aksi btnTambahSubKegiatan" data-kegiatan-id="<?= $kegiatan_id ?>" title="Tambah Sub Kegiatan"><i class="fa fa-plus"></i></button>
-                                                                                <button class="btn btn-sm btn-warning btn-aksi btnEditKegiatan" data-id="<?= $kegiatan_id ?>" title="Edit Kegiatan"><i class="fa fa-edit"></i></button>
+                                                                                <button class="btn btn-sm btn-success btn-aksi btnTambahSubKegiatan" data-kegiatan-id="<?= $kegiatan_id ?>" data-kegiatan-kode="<?= html_escape($kegiatan_kode) ?>" data-kegiatan-nama="<?= html_escape($kegiatan_nama) ?>" title="Tambah Sub Kegiatan"><i class="fa fa-plus"></i></button>
+                                                                                <button class="btn btn-sm btn-warning btn-aksi btnEditKegiatan" data-id="<?= $kegiatan_id ?>" data-program-id="<?= $program_id ?>" data-program-kode="<?= html_escape($program_kode) ?>" data-program-nama="<?= html_escape($program_nama) ?>" title="Edit Kegiatan"><i class="fa fa-edit"></i></button>
                                                                                 <button class="btn btn-sm btn-danger btn-aksi btnHapusKegiatan" data-id="<?= $kegiatan_id ?>" title="Hapus Kegiatan"><i class="fa fa-trash"></i></button>
                                                                             </div>
                                                                         </td>
@@ -1025,7 +1106,8 @@ function hitungTotalAnggaranProgram($program) {
                                                             foreach ($sub_kegiatan_list as $sub) {
 
                                                                 $sub_id   = $sub['id'] ?? 0;
-                                                                $sub_nama = $sub['nama'] ?? '';
+                                                                $sub_nama = preg_replace('/^(\d+(\.\d+)*)\s*[-–—:]?\s*/', '', $sub['nama'] ?? '');
+                                                                $sub_kode = $sub['kode_nomenklatur'] ?? ($sub['kode_sub_kegiatan'] ?? ($sub['kode_subkegiatan'] ?? ''));
 
                                                                 $sub_sasaran_list = $sub['sasaran_list'] ?? [];
 
@@ -1038,7 +1120,7 @@ function hitungTotalAnggaranProgram($program) {
                                                                     <tr class="row-subkegiatan border-subkegiatan">
                                                                         <!-- NOMOR -->
                                                                         <td class="cell-no">
-                                                                            <?= $no_tujuan . '.' . $no_sasaran . '.' . $no_program . '.' . $no_kegiatan . '.' . $no_sub ?>
+                                                                            <?= !empty($sub_kode) ? html_escape($sub_kode) : ($no_tujuan . '.' . $no_sasaran . '.' . $no_program . '.' . $no_kegiatan . '.' . $no_sub) ?>
                                                                         </td>
                                                                         <!-- SUB KEGIATAN -->
                                                                         <td class="text-left level-subkegiatan">
@@ -1054,7 +1136,7 @@ function hitungTotalAnggaranProgram($program) {
                                                                         <?php if ($IsRole4) { ?>
                                                                             <td class="col-aksi">
                                                                                 <div class="btn-group-aksi">
-                                                                                    <button class="btn btn-sm btn-warning btn-aksi btnEditSubKegiatan" data-id="<?= $sub_id ?>" title="Edit Sub Kegiatan"><i class="fa fa-edit"></i></button>
+                                                                                    <button class="btn btn-sm btn-warning btn-aksi btnEditSubKegiatan" data-id="<?= $sub_id ?>" data-kegiatan-id="<?= $kegiatan_id ?>" data-kegiatan-kode="<?= html_escape($kegiatan_kode) ?>" data-kegiatan-nama="<?= html_escape($kegiatan_nama) ?>" title="Edit Sub Kegiatan"><i class="fa fa-edit"></i></button>
                                                                                     <button class="btn btn-sm btn-danger btn-aksi btnHapusSubKegiatan" data-id="<?= $sub_id ?>" title="Hapus Sub Kegiatan"><i class="fa fa-trash"></i></button>
                                                                                 </div>
                                                                             </td>
@@ -1087,7 +1169,7 @@ function hitungTotalAnggaranProgram($program) {
                                                                     <tr class="row-subkegiatan border-subkegiatan">
                                                                         <!-- NOMOR -->
                                                                         <td class="cell-no">
-                                                                            <?= $no_tujuan . '.' . $no_sasaran . '.' . $no_program . '.' . $no_kegiatan . '.' . $no_sub ?>
+                                                                            <?= !empty($sub_kode) ? html_escape($sub_kode) : ($no_tujuan . '.' . $no_sasaran . '.' . $no_program . '.' . $no_kegiatan . '.' . $no_sub) ?>
                                                                         </td>
                                                                         <!-- SUB KEGIATAN -->
                                                                         <td class="text-left level-subkegiatan">
@@ -1101,7 +1183,7 @@ function hitungTotalAnggaranProgram($program) {
                                                                         <?php if ($IsRole4) { ?>
                                                                             <td class="col-aksi">
                                                                                 <div class="btn-group-aksi">
-                                                                                    <button class="btn btn-sm btn-warning btn-aksi btnEditSubKegiatan" data-id="<?= $sub_id ?>"><i class="fa fa-edit"></i></button>
+                                                                                    <button class="btn btn-sm btn-warning btn-aksi btnEditSubKegiatan" data-id="<?= $sub_id ?>" data-kegiatan-id="<?= $kegiatan_id ?>" data-kegiatan-kode="<?= html_escape($kegiatan_kode) ?>" data-kegiatan-nama="<?= html_escape($kegiatan_nama) ?>"><i class="fa fa-edit"></i></button>
                                                                                     <button class="btn btn-sm btn-danger btn-aksi btnHapusSubKegiatan" data-id="<?= $sub_id ?>"><i class="fa fa-trash"></i></button>
                                                                                 </div>
                                                                             </td>
@@ -1157,7 +1239,7 @@ function hitungTotalAnggaranProgram($program) {
 
                                                                         <?php if ($firstSubSasaran) { ?>
                                                                             <td class="cell-no" rowspan="<?= $subTotalRows ?>">
-                                                                                <?= $no_tujuan . '.' . $no_sasaran . '.' . $no_program . '.' . $no_kegiatan . '.' . $no_sub ?>
+                                                                                <?= !empty($sub_kode) ? html_escape($sub_kode) : ($no_tujuan . '.' . $no_sasaran . '.' . $no_program . '.' . $no_kegiatan . '.' . $no_sub) ?>
                                                                             </td>
                                                                         <?php } ?>
 
@@ -1183,7 +1265,7 @@ function hitungTotalAnggaranProgram($program) {
                                                                                 ============================================= -->
 
                                                                             <div class="sasaran-subkegiatan-title">
-                                                                                <span class="badge-subkegiatan-sasaran">Sasaran <?= $ssIndex + 1 ?></span>
+                                                                                <span class="badge-subkegiatan-sasaran">Kinerja</span>
                                                                                 <?= html_escape($ss['sasaran_text'] ?? '') ?>
                                                                             </div>
 
@@ -1263,7 +1345,7 @@ function hitungTotalAnggaranProgram($program) {
                                                                             <td class="col-aksi" rowspan="<?= $subTotalRows ?>">
                                                                                 <div class="btn-group-aksi">
                                                                                     <!-- EDIT -->
-                                                                                    <button class="btn btn-sm btn-warning btn-aksi btnEditSubKegiatan" data-id="<?= $sub_id ?>" title="Edit Sub Kegiatan"><i class="fa fa-edit"></i></button>
+                                                                                    <button class="btn btn-sm btn-warning btn-aksi btnEditSubKegiatan" data-id="<?= $sub_id ?>" data-kegiatan-id="<?= $kegiatan_id ?>" data-kegiatan-kode="<?= html_escape($kegiatan_kode) ?>" data-kegiatan-nama="<?= html_escape($kegiatan_nama) ?>" title="Edit Sub Kegiatan"><i class="fa fa-edit"></i></button>
                                                                                     <!-- HAPUS -->
                                                                                     <button class="btn btn-sm btn-danger btn-aksi btnHapusSubKegiatan" data-id="<?= $sub_id ?>" title="Hapus Sub Kegiatan"><i class="fa fa-trash"></i></button>
                                                                                 </div>
@@ -1398,10 +1480,20 @@ function hitungTotalAnggaranProgram($program) {
                     <textarea class="form-control" id="tujuan_uraian" rows="3"></textarea>
                 </div>
                 <div class="form-group">
-                    <label><b>Bidang / Sub / Koordinator</b></label>
+                    <label><b>Bidang / Sub Kegiatan</b></label>
                     <select class="form-control" id="tujuan_bidang_id">
-                        <option value="">-- Pilih Bidang --</option>
+                        <option value="">-- Pilih Bidang / Sub Kegiatan --</option>
                     </select>
+                </div>
+                <hr>
+                <div class="form-group">
+                    <label><b>INDIKATOR TUJUAN</b></label>
+                    <div class="indikator-list" id="tujuan_indikator_list">
+                        <!-- Indikator rows akan ditambahkan di sini -->
+                    </div>
+                    <button type="button" class="btn btn-sm btn-primary" id="btnTambahIndikatorTujuan">
+                        <i class="fa fa-plus"></i> Tambah Indikator
+                    </button>
                 </div>
             </div>
             <div class="modal-footer">
@@ -1430,10 +1522,20 @@ function hitungTotalAnggaranProgram($program) {
                     <textarea class="form-control" id="sasaran_uraian" rows="3"></textarea>
                 </div>
                 <div class="form-group">
-                    <label><b>Bidang / Sub / Koordinator</b></label>
+                    <label><b>Bidang / Sub Kegiatan</b></label>
                     <select class="form-control" id="sasaran_bidang_id">
-                        <option value="">-- Pilih Bidang --</option>
+                        <option value="">-- Pilih Bidang / Sub Kegiatan --</option>
                     </select>
+                </div>
+                <hr>
+                <div class="form-group">
+                    <label><b>INDIKATOR SASARAN</b></label>
+                    <div class="indikator-list" id="sasaran_indikator_list">
+                        <!-- Indikator rows akan ditambahkan di sini -->
+                    </div>
+                    <button type="button" class="btn btn-sm btn-primary" id="btnTambahIndikatorSasaran">
+                        <i class="fa fa-plus"></i> Tambah Indikator
+                    </button>
                 </div>
             </div>
             <div class="modal-footer">
@@ -1507,9 +1609,9 @@ function hitungTotalAnggaranProgram($program) {
                 </div>
                 
                 <div class="form-group">
-                    <label><b>Bidang / Sub / Koordinator</b></label>
+                    <label><b>Bidang / Sub Kegiatan</b></label>
                     <select class="form-control" id="program_bidang_id">
-                        <option value="">-- Pilih Bidang --</option>
+                        <option value="">-- Pilih Bidang / Sub Kegiatan --</option>
                     </select>
                 </div>
                 
@@ -1549,39 +1651,21 @@ function hitungTotalAnggaranProgram($program) {
                 <input type="hidden" id="kegiatan_program_id">
                 <input type="hidden" id="kegiatan_nama_hidden" value="">
                 
-                <!-- NOMENKLATUR CASCADING UNTUK KEGIATAN -->
+                <!-- NOMENKLATUR KEGIATAN -->
                 <div class="nomenklatur-container">
-                    <div class="breadcrumb-nomenklatur">
-                        <span class="badge-path">📁 Pilih Kegiatan dari Nomenklatur</span>
-                        <span id="kegiatan_path_display">Belum ada yang dipilih</span>
+                    <div class="alert alert-info" style="margin-bottom: 12px; padding: 10px 15px; border-left: 4px solid #17a2b8; background-color: #e8f4f8; border-radius: 4px;">
+                        <span style="font-size: 11px; text-transform: uppercase; font-weight: bold; color: #0c5460; display: block;"><i class="fa fa-folder-open"></i> Program Induk</span>
+                        <strong id="kegiatan_parent_program_display" style="font-size: 13px; color: #0c5460;">-</strong>
                     </div>
-                    <div class="row">
-                        <div class="col-md-3 cascading-select">
-                            <label><b>1. Urusan</b></label>
-                            <select class="form-control" id="kegiatan_select_urusan">
-                                <option value="">-- Pilih Urusan --</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3 cascading-select">
-                            <label><b>2. Bidang Urusan</b></label>
-                            <select class="form-control" id="kegiatan_select_bidang" disabled>
-                                <option value="">-- Pilih Bidang Urusan --</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3 cascading-select">
-                            <label><b>3. Program</b></label>
-                            <select class="form-control" id="kegiatan_select_program" disabled>
-                                <option value="">-- Pilih Program --</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3 cascading-select">
-                            <label><b>4. Kegiatan</b></label>
-                            <select class="form-control" id="kegiatan_select_kegiatan" disabled>
-                                <option value="">-- Pilih Kegiatan --</option>
-                            </select>
-                        </div>
+                    
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label><b>Pilih Nomenklatur Kegiatan</b> <span class="text-danger">*</span></label>
+                        <select class="form-control" id="kegiatan_select_kegiatan">
+                            <option value="">-- Pilih Kegiatan --</option>
+                        </select>
                     </div>
-                    <div class="nomenklatur-info" id="kegiatan_info_nomenklatur" style="display:none;">
+                    
+                    <div class="nomenklatur-info" id="kegiatan_info_nomenklatur" style="display:none; margin-top:8px;">
                         <strong>📌 Kegiatan terpilih:</strong> <span id="kegiatan_selected_text"></span>
                     </div>
                 </div>
@@ -1589,9 +1673,9 @@ function hitungTotalAnggaranProgram($program) {
                 <hr>
                 
                 <div class="form-group">
-                    <label><b>Bidang / Sub / Koordinator</b></label>
+                    <label><b>Bidang / Sub Kegiatan</b></label>
                     <select class="form-control" id="kegiatan_bidang_id">
-                        <option value="">-- Pilih Bidang --</option>
+                        <option value="">-- Pilih Bidang / Sub Kegiatan --</option>
                     </select>
                 </div>
                 
@@ -1632,45 +1716,21 @@ function hitungTotalAnggaranProgram($program) {
                 <input type="hidden" id="subkegiatan_nama_hidden" value="">
                 <input type="hidden" id="subkegiatan_kode_nomenklatur" value="">
                 
-                <!-- NOMENKLATUR CASCADING UNTUK SUB KEGIATAN -->
+                <!-- NOMENKLATUR SUB KEGIATAN -->
                 <div class="nomenklatur-container">
-                    <div class="breadcrumb-nomenklatur">
-                        <span class="badge-path">📁 Pilih Sub Kegiatan dari Nomenklatur</span>
-                        <span id="subkegiatan_path_display">Belum ada yang dipilih</span>
+                    <div class="alert alert-success" style="margin-bottom: 12px; padding: 10px 15px; border-left: 4px solid #28a745; background-color: #eafaf1; border-radius: 4px;">
+                        <span style="font-size: 11px; text-transform: uppercase; font-weight: bold; color: #155724; display: block;"><i class="fa fa-folder-open"></i> Kegiatan Induk</span>
+                        <strong id="subkegiatan_parent_kegiatan_display" style="font-size: 13px; color: #155724;">-</strong>
                     </div>
-                    <div class="row">
-                        <div class="col-md-2 cascading-select">
-                            <label><b>1. Urusan</b></label>
-                            <select class="form-control" id="subkegiatan_select_urusan">
-                                <option value="">-- Pilih Urusan --</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2 cascading-select">
-                            <label><b>2. Bidang</b></label>
-                            <select class="form-control" id="subkegiatan_select_bidang" disabled>
-                                <option value="">-- Pilih Bidang --</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2 cascading-select">
-                            <label><b>3. Program</b></label>
-                            <select class="form-control" id="subkegiatan_select_program" disabled>
-                                <option value="">-- Pilih Program --</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3 cascading-select">
-                            <label><b>4. Kegiatan</b></label>
-                            <select class="form-control" id="subkegiatan_select_kegiatan" disabled>
-                                <option value="">-- Pilih Kegiatan --</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3 cascading-select">
-                            <label><b>5. Sub Kegiatan</b></label>
-                            <select class="form-control" id="subkegiatan_select_subkegiatan" disabled>
-                                <option value="">-- Pilih Sub Kegiatan --</option>
-                            </select>
-                        </div>
+                    
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label><b>Pilih Nomenklatur Sub Kegiatan</b> <span class="text-danger">*</span></label>
+                        <select class="form-control" id="subkegiatan_select_subkegiatan">
+                            <option value="">-- Pilih Sub Kegiatan --</option>
+                        </select>
                     </div>
-                    <div class="nomenklatur-info" id="subkegiatan_info_nomenklatur" style="display:none;">
+                    
+                    <div class="nomenklatur-info" id="subkegiatan_info_nomenklatur" style="display:none; margin-top:8px;">
                         <strong>📌 Sub Kegiatan terpilih:</strong> <span id="subkegiatan_selected_text"></span>
                     </div>
                 </div>
@@ -1678,9 +1738,9 @@ function hitungTotalAnggaranProgram($program) {
                 <hr>
                 
                 <div class="form-group">
-                    <label><b>Bidang / Sub / Koordinator</b></label>
+                    <label><b>Bidang / Sub Kegiatan</b></label>
                     <select class="form-control" id="subkegiatan_bidang_id">
-                        <option value="">-- Pilih Bidang --</option>
+                        <option value="">-- Pilih Bidang / Sub Kegiatan --</option>
                     </select>
                 </div>
                 
@@ -1731,10 +1791,8 @@ var nomenklaturCacheSub = {};
 // FUNGSI RESET DROPDOWN
 // ==============================================
 function resetKegiatanDropdowns() {
-    $('#kegiatan_select_bidang').html('<option value="">-- Pilih Bidang Urusan --</option>').prop('disabled', true);
-    $('#kegiatan_select_program').html('<option value="">-- Pilih Program --</option>').prop('disabled', true);
-    $('#kegiatan_select_kegiatan').html('<option value="">-- Pilih Kegiatan --</option>').prop('disabled', true);
-    $('#kegiatan_path_display').text('Belum ada yang dipilih');
+    $('#kegiatan_select_kegiatan').html('<option value="">-- Pilih Kegiatan --</option>').prop('disabled', false);
+    $('#kegiatan_parent_program_display').text('-');
     $('#kegiatan_info_nomenklatur').hide();
     $('#kegiatan_selected_text').text('');
     $('#kegiatan_nama_hidden').val('');
@@ -1742,11 +1800,8 @@ function resetKegiatanDropdowns() {
 }
 
 function resetSubKegiatanDropdowns() {
-    $('#subkegiatan_select_bidang').html('<option value="">-- Pilih Bidang --</option>').prop('disabled', true);
-    $('#subkegiatan_select_program').html('<option value="">-- Pilih Program --</option>').prop('disabled', true);
-    $('#subkegiatan_select_kegiatan').html('<option value="">-- Pilih Kegiatan --</option>').prop('disabled', true);
-    $('#subkegiatan_select_subkegiatan').html('<option value="">-- Pilih Sub Kegiatan --</option>').prop('disabled', true);
-    $('#subkegiatan_path_display').text('Belum ada yang dipilih');
+    $('#subkegiatan_select_subkegiatan').html('<option value="">-- Pilih Sub Kegiatan --</option>').prop('disabled', false);
+    $('#subkegiatan_parent_kegiatan_display').text('-');
     $('#subkegiatan_info_nomenklatur').hide();
     $('#subkegiatan_selected_text').text('');
     $('#subkegiatan_nama_hidden').val('');
@@ -1909,11 +1964,12 @@ $(document).ready(function() {
                 $("#" + selectId).html('<option value="">Memuat...</option>').prop('disabled', true);
             },
             success: function(data) {
-                var options = '<option value="">-- Pilih Bidang --</option>';
+                var options = '<option value="">-- Pilih Bidang / Sub Kegiatan --</option>';
                 if (data && data.length > 0) {
                     for (var i = 0; i < data.length; i++) {
                         var selected = (selectedValue && data[i].id == selectedValue) ? 'selected' : '';
-                        var label = data[i].nama + (data[i].jabatan ? ' - ' + data[i].jabatan : '');
+                        var info = data[i].bidang_sub_koordinator || data[i].satuan_unit_kerja || data[i].jabatan || '';
+                        var label = data[i].nama + (info ? ' - ' + info : '');
                         options += '<option value="' + data[i].id + '" ' + selected + '>' + label + '</option>';
                     }
                 }
@@ -2094,7 +2150,7 @@ $(document).ready(function() {
     }
 
     // ==============================================
-    // NOMENKLATUR CASCADING - FUNGSI KEGIATAN
+    // NOMENKLATUR KEGIATAN
     // ==============================================
     function getNomenklaturKegiatan(level, parentKode, callback) {
         var cacheKey = 'keg_level' + level + '_' + (parentKode || 'root');
@@ -2121,178 +2177,122 @@ $(document).ready(function() {
         });
     }
 
-    function loadKegiatanLevel(level, parentKode, callback) {
-        var selectId = level == 1 ? 'kegiatan_select_urusan' : 
-                       (level == 2 ? 'kegiatan_select_bidang' : 
-                       (level == 3 ? 'kegiatan_select_program' : 'kegiatan_select_kegiatan'));
+    function loadKegiatanDropdown(parentKode, selectedKode, callback) {
+        var $select = $('#kegiatan_select_kegiatan');
+        $select.html('<option value="">Memuat data Kegiatan...</option>').prop('disabled', true);
         
-        if (level == 1) {
-            $('#kegiatan_select_bidang').html('<option value="">-- Pilih Bidang Urusan --</option>').prop('disabled', true);
-            $('#kegiatan_select_program').html('<option value="">-- Pilih Program --</option>').prop('disabled', true);
-            $('#kegiatan_select_kegiatan').html('<option value="">-- Pilih Kegiatan --</option>').prop('disabled', true);
-            $('#kegiatan_path_display').text('Belum ada yang dipilih');
-            $('#kegiatan_info_nomenklatur').hide();
-            $('#kegiatan_nama_hidden').val('');
-        } else if (level == 2) {
-            $('#kegiatan_select_program').html('<option value="">-- Pilih Program --</option>').prop('disabled', true);
-            $('#kegiatan_select_kegiatan').html('<option value="">-- Pilih Kegiatan --</option>').prop('disabled', true);
-        } else if (level == 3) {
-            $('#kegiatan_select_kegiatan').html('<option value="">-- Pilih Kegiatan --</option>').prop('disabled', true);
-        }
-        
-        if (!parentKode && level > 1) {
-            $('#' + selectId).html('<option value="">-- Pilih --</option>').prop('disabled', true);
-            if (callback) callback([]);
-            return;
-        }
-        
-        getNomenklaturKegiatan(level, parentKode, function(res) {
-            var options = '<option value="">-- Pilih ' + 
-                (level == 1 ? 'Urusan' : (level == 2 ? 'Bidang Urusan' : (level == 3 ? 'Program' : 'Kegiatan'))) + 
-                ' --</option>';
-            if (res && res.length > 0) {
-                for (var i = 0; i < res.length; i++) {
-                    options += '<option value="' + res[i].Kode + '">' + res[i].Kode + ' - ' + res[i].Nomenklatur + '</option>';
-                }
+        getNomenklaturKegiatan(4, parentKode, function(res) {
+            if ((!res || res.length === 0) && parentKode) {
+                getNomenklaturKegiatan(4, '', function(fallbackRes) {
+                    populateKegiatanSelect(fallbackRes || [], selectedKode);
+                    if (callback) callback(fallbackRes || []);
+                });
+            } else {
+                populateKegiatanSelect(res || [], selectedKode);
+                if (callback) callback(res || []);
             }
-            $('#' + selectId).html(options).prop('disabled', false);
-            if (callback) callback(res);
         });
     }
 
-    function updateKegiatanPath() {
-        var urusan = $('#kegiatan_select_urusan option:selected').text();
-        var bidang = $('#kegiatan_select_bidang option:selected').text();
-        var program = $('#kegiatan_select_program option:selected').text();
-        var kegiatan = $('#kegiatan_select_kegiatan option:selected').text();
+    function populateKegiatanSelect(items, selectedKode) {
+        var $select = $('#kegiatan_select_kegiatan');
+        var options = '<option value="">-- Pilih Kegiatan --</option>';
+        var foundSelected = false;
         
-        var parts = [];
-        if (urusan && urusan.indexOf('--') == -1) parts.push(urusan);
-        if (bidang && bidang.indexOf('--') == -1) parts.push(bidang);
-        if (program && program.indexOf('--') == -1) parts.push(program);
-        if (kegiatan && kegiatan.indexOf('--') == -1) parts.push(kegiatan);
-        
-        $('#kegiatan_path_display').text(parts.length ? parts.join(' → ') : 'Belum ada yang dipilih');
-        
-        if (kegiatan && kegiatan.indexOf('--') == -1) {
-            $('#kegiatan_info_nomenklatur').show();
-            $('#kegiatan_selected_text').text(kegiatan);
-            var nama = kegiatan.replace(/^\d+(\.\d+){3}\s*-\s*/, '');
-            nama = nama.replace(/^\d+(\.\d+){2,3}\s*-\s*/, '');
-            $('#kegiatan_nama_hidden').val(nama);
-        } else {
-            $('#kegiatan_info_nomenklatur').hide();
-            $('#kegiatan_selected_text').text('');
-            $('#kegiatan_nama_hidden').val('');
+        if (items && items.length > 0) {
+            for (var i = 0; i < items.length; i++) {
+                var isSel = (selectedKode && items[i].Kode === selectedKode) ? ' selected' : '';
+                if (isSel) foundSelected = true;
+                options += '<option value="' + escapeHtml(items[i].Kode) + '"' + isSel + '>' + 
+                           escapeHtml(items[i].Kode + ' - ' + items[i].Nomenklatur) + '</option>';
+            }
         }
+        $select.html(options).prop('disabled', false);
+        
+        if (selectedKode && !foundSelected && items && items.length > 0) {
+            $select.find('option').each(function() {
+                if ($(this).val() === selectedKode) {
+                    $select.val(selectedKode);
+                    return false;
+                }
+            });
+        }
+        $select.trigger('change');
     }
 
     // ==============================================
-    // NOMENKLATUR CASCADING - FUNGSI SUB KEGIATAN (FIX)
+    // NOMENKLATUR SUB KEGIATAN
     // ==============================================
     function getNomenklaturSub(level, parentKode, callback) {
-    var cacheKey = 'sub_level' + level + '_' + (parentKode || 'root');
-    if (nomenklaturCacheSub[cacheKey]) {
-        if (callback) callback(nomenklaturCacheSub[cacheKey]);
-        return;
-    }
-    $.ajax({
-        url: BaseURL + "Instansi/getNomenklaturByLevelRenja",
-        type: "POST",
-        data: {
-            level: level,
-            parent_kode: parentKode || '',
-            [CSRF_NAME]: CSRF_TOKEN
-        },
-        dataType: 'json',
-        success: function(res) {
-            nomenklaturCacheSub[cacheKey] = res || [];
-            if (callback) callback(res || []);
-        },
-        error: function() {
-            if (callback) callback([]);
-        }
-    });
-}
-
-    function loadSubLevel(level, parentKode, callback) {
-        var selectId = level == 1 ? 'subkegiatan_select_urusan' : 
-                       (level == 2 ? 'subkegiatan_select_bidang' : 
-                       (level == 3 ? 'subkegiatan_select_program' : 
-                       (level == 4 ? 'subkegiatan_select_kegiatan' : 'subkegiatan_select_subkegiatan')));
-        
-        if (level == 1) {
-            $('#subkegiatan_select_bidang').html('<option value="">-- Pilih Bidang --</option>').prop('disabled', true);
-            $('#subkegiatan_select_program').html('<option value="">-- Pilih Program --</option>').prop('disabled', true);
-            $('#subkegiatan_select_kegiatan').html('<option value="">-- Pilih Kegiatan --</option>').prop('disabled', true);
-            $('#subkegiatan_select_subkegiatan').html('<option value="">-- Pilih Sub Kegiatan --</option>').prop('disabled', true);
-            $('#subkegiatan_path_display').text('Belum ada yang dipilih');
-            $('#subkegiatan_info_nomenklatur').hide();
-            $('#subkegiatan_nama_hidden').val('');
-            $('#subkegiatan_kode_nomenklatur').val('');
-        } else if (level == 2) {
-            $('#subkegiatan_select_program').html('<option value="">-- Pilih Program --</option>').prop('disabled', true);
-            $('#subkegiatan_select_kegiatan').html('<option value="">-- Pilih Kegiatan --</option>').prop('disabled', true);
-            $('#subkegiatan_select_subkegiatan').html('<option value="">-- Pilih Sub Kegiatan --</option>').prop('disabled', true);
-        } else if (level == 3) {
-            $('#subkegiatan_select_kegiatan').html('<option value="">-- Pilih Kegiatan --</option>').prop('disabled', true);
-            $('#subkegiatan_select_subkegiatan').html('<option value="">-- Pilih Sub Kegiatan --</option>').prop('disabled', true);
-        } else if (level == 4) {
-            $('#subkegiatan_select_subkegiatan').html('<option value="">-- Pilih Sub Kegiatan --</option>').prop('disabled', true);
-        }
-        
-        if (!parentKode && level > 1) {
-            $('#' + selectId).html('<option value="">-- Pilih --</option>').prop('disabled', true);
-            if (callback) callback([]);
+        var cacheKey = 'sub_level' + level + '_' + (parentKode || 'root');
+        if (nomenklaturCacheSub[cacheKey]) {
+            if (callback) callback(nomenklaturCacheSub[cacheKey]);
             return;
         }
-        
-        getNomenklaturSub(level, parentKode, function(res) {
-            var options = '<option value="">-- Pilih ' + 
-                (level == 1 ? 'Urusan' : (level == 2 ? 'Bidang' : (level == 3 ? 'Program' : (level == 4 ? 'Kegiatan' : 'Sub Kegiatan')))) + 
-                ' --</option>';
-            if (res && res.length > 0) {
-                for (var i = 0; i < res.length; i++) {
-                    options += '<option value="' + res[i].Kode + '">' + res[i].Kode + ' - ' + res[i].Nomenklatur + '</option>';
-                }
+        $.ajax({
+            url: BaseURL + "Instansi/getNomenklaturByLevelRenja",
+            type: "POST",
+            data: {
+                level: level,
+                parent_kode: parentKode || '',
+                [CSRF_NAME]: CSRF_TOKEN
+            },
+            dataType: 'json',
+            success: function(res) {
+                nomenklaturCacheSub[cacheKey] = res || [];
+                if (callback) callback(res || []);
+            },
+            error: function() {
+                if (callback) callback([]);
             }
-            $('#' + selectId).html(options).prop('disabled', false);
-            if (callback) callback(res);
         });
     }
 
-    function updateSubPath() {
-        var urusan = $('#subkegiatan_select_urusan option:selected').text();
-        var bidang = $('#subkegiatan_select_bidang option:selected').text();
-        var program = $('#subkegiatan_select_program option:selected').text();
-        var kegiatan = $('#subkegiatan_select_kegiatan option:selected').text();
-        var sub = $('#subkegiatan_select_subkegiatan option:selected').text();
-        var parts = [];
-        if (urusan && urusan.indexOf('--') == -1) parts.push(urusan);
-        if (bidang && bidang.indexOf('--') == -1) parts.push(bidang);
-        if (program && program.indexOf('--') == -1) parts.push(program);
-        if (kegiatan && kegiatan.indexOf('--') == -1) parts.push(kegiatan);
-        if (sub && sub.indexOf('--') == -1) parts.push(sub);
-        $('#subkegiatan_path_display').text(parts.length ? parts.join(' → ') : 'Belum ada yang dipilih');
+    function loadSubKegiatanDropdown(parentKode, selectedKode, callback) {
+        var $select = $('#subkegiatan_select_subkegiatan');
+        $select.html('<option value="">Memuat data Sub Kegiatan...</option>').prop('disabled', true);
         
-        var subKode = $('#subkegiatan_select_subkegiatan').val();
-        if (subKode) {
-            $('#subkegiatan_kode_nomenklatur').val(subKode);
-        }
+        getNomenklaturSub(5, parentKode, function(res) {
+            if ((!res || res.length === 0) && parentKode) {
+                getNomenklaturSub(5, '', function(fallbackRes) {
+                    populateSubKegiatanSelect(fallbackRes || [], selectedKode);
+                    if (callback) callback(fallbackRes || []);
+                });
+            } else {
+                populateSubKegiatanSelect(res || [], selectedKode);
+                if (callback) callback(res || []);
+            }
+        });
+    }
+
+    function populateSubKegiatanSelect(items, selectedKode) {
+        var $select = $('#subkegiatan_select_subkegiatan');
+        var options = '<option value="">-- Pilih Sub Kegiatan --</option>';
+        var foundSelected = false;
         
-        if (sub && sub.indexOf('--') == -1) {
-            $('#subkegiatan_info_nomenklatur').show();
-            $('#subkegiatan_selected_text').text(sub);
-            var nama = sub.replace(/^\d+(\.\d+){4}\s*-\s*/, '');
-            nama = nama.replace(/^\d+(\.\d+){3,4}\s*-\s*/, '');
-            $('#subkegiatan_nama_hidden').val(nama);
-        } else {
-            $('#subkegiatan_info_nomenklatur').hide();
-            $('#subkegiatan_selected_text').text('');
-            if (!subKode) {
-                $('#subkegiatan_nama_hidden').val('');
+        if (items && items.length > 0) {
+            for (var i = 0; i < items.length; i++) {
+                var isSel = (selectedKode && items[i].Kode === selectedKode) ? ' selected' : '';
+                if (isSel) foundSelected = true;
+                options += '<option value="' + escapeHtml(items[i].Kode) + '"' + isSel + 
+                           ' data-kinerja="' + escapeHtml(items[i].Kinerja || '') + '"' +
+                           ' data-indikator="' + escapeHtml(items[i].Indikator || '') + '"' +
+                           ' data-satuan="' + escapeHtml(items[i].Satuan || '') + '"' +
+                           '>' + 
+                           escapeHtml(items[i].Kode + ' - ' + items[i].Nomenklatur) + '</option>';
             }
         }
+        $select.html(options).prop('disabled', false);
+        
+        if (selectedKode && !foundSelected && items && items.length > 0) {
+            $select.find('option').each(function() {
+                if ($(this).val() === selectedKode) {
+                    $select.val(selectedKode);
+                    return false;
+                }
+            });
+        }
+        $select.trigger('change');
     }
 
     // ==============================================
@@ -2348,100 +2348,76 @@ $(document).ready(function() {
     });
 
     // ==============================================
-    // EVENT NOMENKLATUR KEGIATAN
+    // EVENT CHANGE NOMENKLATUR KEGIATAN & SUB KEGIATAN
     // ==============================================
-    $(document).on('change', '#kegiatan_select_urusan', function() {
-        var val = $(this).val();
-        if (val) loadKegiatanLevel(2, val);
-        else {
-            $('#kegiatan_select_bidang').html('<option value="">-- Pilih Bidang Urusan --</option>').prop('disabled', true);
-            $('#kegiatan_select_program').html('<option value="">-- Pilih Program --</option>').prop('disabled', true);
-            $('#kegiatan_select_kegiatan').html('<option value="">-- Pilih Kegiatan --</option>').prop('disabled', true);
-        }
-        updateKegiatanPath();
-    });
-
-    $(document).on('change', '#kegiatan_select_bidang', function() {
-        var val = $(this).val();
-        if (val) loadKegiatanLevel(3, val);
-        else {
-            $('#kegiatan_select_program').html('<option value="">-- Pilih Program --</option>').prop('disabled', true);
-            $('#kegiatan_select_kegiatan').html('<option value="">-- Pilih Kegiatan --</option>').prop('disabled', true);
-        }
-        updateKegiatanPath();
-    });
-
-    $(document).on('change', '#kegiatan_select_program', function() {
-        var val = $(this).val();
-        if (val) loadKegiatanLevel(4, val);
-        else {
-            $('#kegiatan_select_kegiatan').html('<option value="">-- Pilih Kegiatan --</option>').prop('disabled', true);
-        }
-        updateKegiatanPath();
-    });
-
     $(document).on('change', '#kegiatan_select_kegiatan', function() {
-        updateKegiatanPath();
-    });
-
-    // ==============================================
-    // EVENT NOMENKLATUR SUB KEGIATAN (FIX)
-    // ==============================================
-    $(document).on('change', '#subkegiatan_select_urusan', function() {
-        var val = $(this).val();
-        if (val) {
-            loadSubLevel(2, val);
+        var selectedVal = $(this).val();
+        var selectedText = $(this).find('option:selected').text();
+        
+        if (selectedVal && selectedText && selectedText.indexOf('--') === -1) {
+            $('#kegiatan_selected_text').text(selectedText);
+            $('#kegiatan_info_nomenklatur').show();
+            var nama = selectedText.replace(/^\d+(\.\d+){2,4}\s*-\s*/, '').trim();
+            $('#kegiatan_nama_hidden').val(nama);
         } else {
-            $('#subkegiatan_select_bidang').html('<option value="">-- Pilih Bidang --</option>').prop('disabled', true);
-            $('#subkegiatan_select_program').html('<option value="">-- Pilih Program --</option>').prop('disabled', true);
-            $('#subkegiatan_select_kegiatan').html('<option value="">-- Pilih Kegiatan --</option>').prop('disabled', true);
-            $('#subkegiatan_select_subkegiatan').html('<option value="">-- Pilih Sub Kegiatan --</option>').prop('disabled', true);
-            $('#subkegiatan_nama_hidden').val('');
-            $('#subkegiatan_kode_nomenklatur').val('');
+            $('#kegiatan_selected_text').text('');
+            $('#kegiatan_info_nomenklatur').hide();
+            $('#kegiatan_nama_hidden').val('');
         }
-        updateSubPath();
-    });
-
-    $(document).on('change', '#subkegiatan_select_bidang', function() {
-        var val = $(this).val();
-        if (val) {
-            loadSubLevel(3, val);
-        } else {
-            $('#subkegiatan_select_program').html('<option value="">-- Pilih Program --</option>').prop('disabled', true);
-            $('#subkegiatan_select_kegiatan').html('<option value="">-- Pilih Kegiatan --</option>').prop('disabled', true);
-            $('#subkegiatan_select_subkegiatan').html('<option value="">-- Pilih Sub Kegiatan --</option>').prop('disabled', true);
-        }
-        updateSubPath();
-    });
-
-    $(document).on('change', '#subkegiatan_select_program', function() {
-        var val = $(this).val();
-        if (val) {
-            loadSubLevel(4, val);
-        } else {
-            $('#subkegiatan_select_kegiatan').html('<option value="">-- Pilih Kegiatan --</option>').prop('disabled', true);
-            $('#subkegiatan_select_subkegiatan').html('<option value="">-- Pilih Sub Kegiatan --</option>').prop('disabled', true);
-        }
-        updateSubPath();
-    });
-
-    $(document).on('change', '#subkegiatan_select_kegiatan', function() {
-        var val = $(this).val();
-        if (val) {
-            loadSubLevel(5, val);
-        } else {
-            $('#subkegiatan_select_subkegiatan').html('<option value="">-- Pilih Sub Kegiatan --</option>').prop('disabled', true);
-            $('#subkegiatan_nama_hidden').val('');
-            $('#subkegiatan_kode_nomenklatur').val('');
-        }
-        updateSubPath();
     });
 
     $(document).on('change', '#subkegiatan_select_subkegiatan', function() {
-        updateSubPath();
-        var kode = $(this).val();
-        if (kode) {
-            $('#subkegiatan_kode_nomenklatur').val(kode);
+        var selectedVal = $(this).val();
+        var selectedText = $(this).find('option:selected').text();
+        var selectedOption = $(this).find('option:selected');
+        
+        if (selectedVal && selectedText && selectedText.indexOf('--') === -1) {
+            $('#subkegiatan_selected_text').text(selectedText);
+            $('#subkegiatan_info_nomenklatur').show();
+            var nama = selectedText.replace(/^\d+(\.\d+){3,5}\s*-\s*/, '').trim();
+            $('#subkegiatan_nama_hidden').val(nama);
+            $('#subkegiatan_kode_nomenklatur').val(selectedVal);
+
+            var dataKinerja = selectedOption.data('kinerja') || '';
+            var dataIndikator = selectedOption.data('indikator') || '';
+            var dataSatuan = selectedOption.data('satuan') || '';
+
+            var isEditing = $('#subkegiatan_id').val() !== '';
+
+            if (!isEditing) {
+                // Tambah baru: otomatis isi Kinerja, Indikator, dan Satuan dari data nomenklatur
+                $('#SubKegiatanSasaranContainer').html('');
+                counterSubKegiatanSasaran = 0;
+                counterSubKegiatanIndikator = 0;
+                addSubKegiatanSasaran({
+                    sasaran_text: dataKinerja,
+                    indikators: [
+                        {
+                            indikator: dataIndikator,
+                            satuan: dataSatuan
+                        }
+                    ]
+                });
+            } else {
+                // Saat edit: jika field sasaran / indikator / satuan kosong, isi otomatis
+                var $sasaranText = $('.outcome-textarea[id^="subkegiatan_sasaran_text_"]').first();
+                if ($sasaranText.length && !$sasaranText.val().trim() && dataKinerja) {
+                    $sasaranText.val(dataKinerja);
+                }
+                var $indText = $('.indikator-textarea[id^="subkegiatan_indikator_"]').first();
+                if ($indText.length && !$indText.val().trim() && dataIndikator) {
+                    $indText.val(dataIndikator);
+                }
+                var $satText = $('input[id^="subkegiatan_satuan_"]').first();
+                if ($satText.length && !$satText.val().trim() && dataSatuan) {
+                    $satText.val(dataSatuan);
+                }
+            }
+        } else {
+            $('#subkegiatan_selected_text').text('');
+            $('#subkegiatan_info_nomenklatur').hide();
+            $('#subkegiatan_nama_hidden').val('');
+            $('#subkegiatan_kode_nomenklatur').val('');
         }
     });
 
@@ -2533,7 +2509,7 @@ $(document).ready(function() {
         html += '<button type="button" class="btn btn-danger btn-sm btn-remove-outcome" data-group="' + counter + '" data-type="kegiatan" title="Hapus Sasaran">×</button>';
         
         html += '<div class="form-group">';
-        html += '<label><b>Sasaran (Outcome)</b> <span class="text-danger">*</span></label>';
+        html += '<label><b>Sasaran (Output)</b> <span class="text-danger">*</span></label>';
         html += '<textarea class="form-control outcome-textarea" id="kegiatan_sasaran_text_' + counter + '" rows="2" placeholder="Tulis Sasaran/Outcome">' + text + '</textarea>';
         html += '</div>';
         
@@ -2607,7 +2583,7 @@ $(document).ready(function() {
         html += '<button type="button" class="btn btn-danger btn-sm btn-remove-outcome" data-group="' + counter + '" data-type="subkegiatan" title="Hapus Sasaran">×</button>';
         
         html += '<div class="form-group">';
-        html += '<label><b>Sasaran (Outcome)</b> <span class="text-danger">*</span></label>';
+        html += '<label><b>Sasaran (Kinerja)</b> <span class="text-danger">*</span></label>';
         html += '<textarea class="form-control outcome-textarea" id="subkegiatan_sasaran_text_' + counter + '" rows="2" placeholder="Tulis Sasaran/Outcome">' + text + '</textarea>';
         html += '</div>';
         
@@ -2844,12 +2820,122 @@ $(document).ready(function() {
     });
 
     // ==============================================
+    // FUNGSI INDIKATOR DI MODAL TUJUAN
+    // ==============================================
+    var counterTujuanIndikator = 0;
+    function generateTujuanIndikatorRow(data) {
+        var id = data && data.id ? data.id : '';
+        var indikator = data && data.indikator ? escapeHtml(data.indikator) : '';
+        var satuan = data && data.satuan ? escapeHtml(data.satuan) : '';
+        var kondisiAwal = data && data.kondisi_awal ? escapeHtml(data.kondisi_awal) : '';
+        var target2026 = data && data.target_2026 ? escapeHtml(data.target_2026) : '';
+        var target2027 = data && data.target_2027 ? escapeHtml(data.target_2027) : '';
+        var target2028 = data && data.target_2028 ? escapeHtml(data.target_2028) : '';
+        var target2029 = data && data.target_2029 ? escapeHtml(data.target_2029) : '';
+        var target2030 = data && data.target_2030 ? escapeHtml(data.target_2030) : '';
+        
+        var counter = counterTujuanIndikator++;
+        var html = '<div class="indikator-row" id="tujuan_indikator_row_' + counter + '">';
+        html += '<input type="hidden" class="tujuan-indikator-id" value="' + id + '">';
+        html += '<button type="button" class="btn btn-danger btn-sm btn-remove-indikator btn-remove-tujuan-indikator" data-row="' + counter + '" title="Hapus Indikator">×</button>';
+        
+        html += '<div class="row"><div class="col-md-12"><div class="form-group"><label>Indikator</label>';
+        html += '<textarea class="form-control form-control-sm indikator-textarea" id="tujuan_indikator_' + counter + '" rows="2" placeholder="Nama indikator tujuan...">' + indikator + '</textarea>';
+        html += '</div></div></div>';
+        
+        html += '<div class="row">';
+        html += '<div class="col-md-6"><div class="form-group"><label>Satuan</label><input type="text" class="form-control form-control-sm satuan-input" id="tujuan_satuan_' + counter + '" placeholder="contoh: %, Nilai, Indeks" value="' + satuan + '"></div></div>';
+        html += '<div class="col-md-6"><div class="form-group"><label>Kondisi Awal</label><input type="text" class="form-control form-control-sm kondisi-input" id="tujuan_kondisi_awal_' + counter + '" placeholder="Kondisi awal..." value="' + kondisiAwal + '"></div></div>';
+        html += '</div>';
+        
+        html += '<div class="row">';
+        var years = ['2026','2027','2028','2029','2030'];
+        var targetVals = [target2026, target2027, target2028, target2029, target2030];
+        for (var y = 0; y < years.length; y++) {
+            html += '<div class="col-md-2" style="width:20%;"><div class="form-group"><label style="font-size:11px; color:#007bff;">' + years[y] + '</label>';
+            html += '<input type="text" class="form-control form-control-sm target-input" id="tujuan_target_' + years[y] + '_' + counter + '" placeholder="Target ' + years[y] + '" value="' + targetVals[y] + '">';
+            html += '</div></div>';
+        }
+        html += '</div>';
+        html += '</div>';
+        return html;
+    }
+
+    $(document).on("click", "#btnTambahIndikatorTujuan", function() {
+        $("#tujuan_indikator_list").append(generateTujuanIndikatorRow(null));
+    });
+
+    $(document).on("click", ".btn-remove-tujuan-indikator", function() {
+        if ($("#tujuan_indikator_list .indikator-row").length <= 1) {
+            alert("Minimal 1 indikator harus ada!");
+            return;
+        }
+        $(this).closest(".indikator-row").remove();
+    });
+
+    // ==============================================
+    // FUNGSI INDIKATOR DI MODAL SASARAN
+    // ==============================================
+    var counterSasaranIndikator = 0;
+    function generateSasaranIndikatorRow(data) {
+        var id = data && data.id ? data.id : '';
+        var indikator = data && data.indikator ? escapeHtml(data.indikator) : '';
+        var satuan = data && data.satuan ? escapeHtml(data.satuan) : '';
+        var kondisiAwal = data && data.kondisi_awal ? escapeHtml(data.kondisi_awal) : '';
+        var target2026 = data && data.target_2026 ? escapeHtml(data.target_2026) : '';
+        var target2027 = data && data.target_2027 ? escapeHtml(data.target_2027) : '';
+        var target2028 = data && data.target_2028 ? escapeHtml(data.target_2028) : '';
+        var target2029 = data && data.target_2029 ? escapeHtml(data.target_2029) : '';
+        var target2030 = data && data.target_2030 ? escapeHtml(data.target_2030) : '';
+        
+        var counter = counterSasaranIndikator++;
+        var html = '<div class="indikator-row" id="sasaran_indikator_row_' + counter + '">';
+        html += '<input type="hidden" class="sasaran-indikator-id" value="' + id + '">';
+        html += '<button type="button" class="btn btn-danger btn-sm btn-remove-indikator btn-remove-sasaran-indikator" data-row="' + counter + '" title="Hapus Indikator">×</button>';
+        
+        html += '<div class="row"><div class="col-md-12"><div class="form-group"><label>Indikator</label>';
+        html += '<textarea class="form-control form-control-sm indikator-textarea" id="sasaran_indikator_' + counter + '" rows="2" placeholder="Nama indikator sasaran...">' + indikator + '</textarea>';
+        html += '</div></div></div>';
+        
+        html += '<div class="row">';
+        html += '<div class="col-md-6"><div class="form-group"><label>Satuan</label><input type="text" class="form-control form-control-sm satuan-input" id="sasaran_satuan_' + counter + '" placeholder="contoh: %, Nilai, Indeks" value="' + satuan + '"></div></div>';
+        html += '<div class="col-md-6"><div class="form-group"><label>Kondisi Awal</label><input type="text" class="form-control form-control-sm kondisi-input" id="sasaran_kondisi_awal_' + counter + '" placeholder="Kondisi awal..." value="' + kondisiAwal + '"></div></div>';
+        html += '</div>';
+        
+        html += '<div class="row">';
+        var years = ['2026','2027','2028','2029','2030'];
+        var targetVals = [target2026, target2027, target2028, target2029, target2030];
+        for (var y = 0; y < years.length; y++) {
+            html += '<div class="col-md-2" style="width:20%;"><div class="form-group"><label style="font-size:11px; color:#007bff;">' + years[y] + '</label>';
+            html += '<input type="text" class="form-control form-control-sm target-input" id="sasaran_target_' + years[y] + '_' + counter + '" placeholder="Target ' + years[y] + '" value="' + targetVals[y] + '">';
+            html += '</div></div>';
+        }
+        html += '</div>';
+        html += '</div>';
+        return html;
+    }
+
+    $(document).on("click", "#btnTambahIndikatorSasaran", function() {
+        $("#sasaran_indikator_list").append(generateSasaranIndikatorRow(null));
+    });
+
+    $(document).on("click", ".btn-remove-sasaran-indikator", function() {
+        if ($("#sasaran_indikator_list .indikator-row").length <= 1) {
+            alert("Minimal 1 indikator harus ada!");
+            return;
+        }
+        $(this).closest(".indikator-row").remove();
+    });
+
+    // ==============================================
     // CRUD TUJUAN
     // ==============================================
     $("#btnTambahTujuan").click(function() {
         $("#modalTujuanTitle").text("Tambah Tujuan PD");
         $("#tujuan_id").val('');
         $("#tujuan_uraian").val('');
+        $("#tujuan_indikator_list").empty();
+        $("#tujuan_indikator_list").append(generateTujuanIndikatorRow(null));
         loadSasaranRPJMD('tujuan_sasaran_rpjmd_id', null);
         loadBidangList('tujuan_bidang_id', null);
         showFixedModal('#modalTujuan');
@@ -2868,6 +2954,17 @@ $(document).ready(function() {
                     $("#modalTujuanTitle").text("Edit Tujuan PD");
                     $("#tujuan_id").val(res.data.id);
                     $("#tujuan_uraian").val(res.data.uraian || '');
+                    $("#tujuan_indikator_list").empty();
+                    
+                    var inds = res.data.indikators || [];
+                    if (inds.length > 0) {
+                        $.each(inds, function(i, ind) {
+                            $("#tujuan_indikator_list").append(generateTujuanIndikatorRow(ind));
+                        });
+                    } else {
+                        $("#tujuan_indikator_list").append(generateTujuanIndikatorRow(null));
+                    }
+
                     loadSasaranRPJMD('tujuan_sasaran_rpjmd_id', res.data.sasaran_rpjmd_id);
                     loadBidangList('tujuan_bidang_id', res.data.bidang_id || null);
                     showFixedModal('#modalTujuan');
@@ -2902,13 +2999,37 @@ $(document).ready(function() {
     });
 
     $("#btnSimpanTujuan").click(function() {
-        $(this).prop('disabled', true).text('Menyimpan...');
         var id = $("#tujuan_id").val();
+        var uraian = $("#tujuan_uraian").val();
+        if (!uraian || !uraian.trim()) {
+            alert("Uraian Tujuan wajib diisi!");
+            return;
+        }
+
+        var indikators = [];
+        $("#tujuan_indikator_list .indikator-row").each(function() {
+            var indText = $(this).find(".indikator-textarea").val();
+            if (indText && indText.trim()) {
+                indikators.push({
+                    indikator: indText.trim(),
+                    satuan: $(this).find(".satuan-input").val(),
+                    kondisi_awal: $(this).find(".kondisi-input").val(),
+                    target_2026: $(this).find(".target-input:eq(0)").val(),
+                    target_2027: $(this).find(".target-input:eq(1)").val(),
+                    target_2028: $(this).find(".target-input:eq(2)").val(),
+                    target_2029: $(this).find(".target-input:eq(3)").val(),
+                    target_2030: $(this).find(".target-input:eq(4)").val()
+                });
+            }
+        });
+
+        $(this).prop('disabled', true).text('Menyimpan...');
         var data = {
             id: id,
             sasaran_rpjmd_id: $("#tujuan_sasaran_rpjmd_id").val(),
-            uraian: $("#tujuan_uraian").val(),
+            uraian: uraian,
             bidang_id: $("#tujuan_bidang_id").val(),
+            indikators: JSON.stringify(indikators),
             [CSRF_NAME]: CSRF_TOKEN
         };
         var url = id ? BaseURL + "Instansi/editRenstraTujuanPD" : BaseURL + "Instansi/tambahRenstraTujuanPD";
@@ -2944,6 +3065,8 @@ $(document).ready(function() {
         $("#sasaran_id").val('');
         $("#sasaran_tujuan_id").val(tujuanId);
         $("#sasaran_uraian").val('');
+        $("#sasaran_indikator_list").empty();
+        $("#sasaran_indikator_list").append(generateSasaranIndikatorRow(null));
         loadBidangList('sasaran_bidang_id', null);
         showFixedModal('#modalSasaran');
     });
@@ -2962,6 +3085,17 @@ $(document).ready(function() {
                     $("#sasaran_id").val(res.data.id);
                     $("#sasaran_tujuan_id").val(res.data.tujuan_id);
                     $("#sasaran_uraian").val(res.data.uraian || '');
+                    $("#sasaran_indikator_list").empty();
+
+                    var inds = res.data.indikators || [];
+                    if (inds.length > 0) {
+                        $.each(inds, function(i, ind) {
+                            $("#sasaran_indikator_list").append(generateSasaranIndikatorRow(ind));
+                        });
+                    } else {
+                        $("#sasaran_indikator_list").append(generateSasaranIndikatorRow(null));
+                    }
+
                     loadBidangList('sasaran_bidang_id', res.data.bidang_id || null);
                     showFixedModal('#modalSasaran');
                 } else {
@@ -2995,13 +3129,37 @@ $(document).ready(function() {
     });
 
     $("#btnSimpanSasaran").click(function() {
-        $(this).prop('disabled', true).text('Menyimpan...');
         var id = $("#sasaran_id").val();
+        var uraian = $("#sasaran_uraian").val();
+        if (!uraian || !uraian.trim()) {
+            alert("Uraian Sasaran wajib diisi!");
+            return;
+        }
+
+        var indikators = [];
+        $("#sasaran_indikator_list .indikator-row").each(function() {
+            var indText = $(this).find(".indikator-textarea").val();
+            if (indText && indText.trim()) {
+                indikators.push({
+                    indikator: indText.trim(),
+                    satuan: $(this).find(".satuan-input").val(),
+                    kondisi_awal: $(this).find(".kondisi-input").val(),
+                    target_2026: $(this).find(".target-input:eq(0)").val(),
+                    target_2027: $(this).find(".target-input:eq(1)").val(),
+                    target_2028: $(this).find(".target-input:eq(2)").val(),
+                    target_2029: $(this).find(".target-input:eq(3)").val(),
+                    target_2030: $(this).find(".target-input:eq(4)").val()
+                });
+            }
+        });
+
+        $(this).prop('disabled', true).text('Menyimpan...');
         var data = {
             id: id,
             tujuan_id: $("#sasaran_tujuan_id").val(),
-            uraian: $("#sasaran_uraian").val(),
+            uraian: uraian,
             bidang_id: $("#sasaran_bidang_id").val(),
+            indikators: JSON.stringify(indikators),
             [CSRF_NAME]: CSRF_TOKEN
         };
         var url = id ? BaseURL + "Instansi/editRenstraSasaranPD" : BaseURL + "Instansi/tambahRenstraSasaranPD";
@@ -3369,18 +3527,24 @@ $(document).ready(function() {
 
     $(document).on("click", ".btnTambahKegiatan", function() {
         var programId = $(this).data('program-id');
+        var programKode = $(this).data('program-kode') || '';
+        var programNama = $(this).data('program-nama') || '';
+
         $("#modalKegiatanTitle").text("Tambah Kegiatan");
         $("#kegiatan_id").val('');
         $("#kegiatan_program_id").val(programId);
         $("#kegiatan_nama_hidden").val('');
         
+        var displayProgram = (programKode ? programKode + ' - ' : '') + (programNama || '-');
+
         counterKegiatanSasaran = 0;
         counterKegiatanIndikator = 0;
         $('#KegiatanSasaranContainer').html('');
         addKegiatanSasaran({ indikators: [] });
         
         resetKegiatanDropdowns();
-        loadKegiatanLevel(1, '');
+        $("#kegiatan_parent_program_display").text(displayProgram);
+        loadKegiatanDropdown(programKode, '');
         loadBidangList('kegiatan_bidang_id', null);
         showFixedModal('#modalKegiatan');
     });
@@ -3390,6 +3554,8 @@ $(document).ready(function() {
     // ================================================================
     $(document).on("click", ".btnEditKegiatan", function() {
         var id = $(this).data('id');
+        var btnProgramKode = $(this).data('program-kode') || '';
+        var btnProgramNama = $(this).data('program-nama') || '';
         if (!id) {
             alert('ID tidak valid!');
             return;
@@ -3411,96 +3577,24 @@ $(document).ready(function() {
                     
                     var kodeNomenklatur = kegiatan.kode_nomenklatur || '';
                     var namaKegiatan = kegiatan.nama || '';
+                    var programKode = kegiatan.kode_program || btnProgramKode;
+                    var programNama = kegiatan.program_nama || btnProgramNama;
+                    
+                    var displayProgram = (programKode ? programKode + ' - ' : '') + (programNama || '-');
+                    $("#kegiatan_parent_program_display").text(displayProgram);
                     
                     // Reset cache
                     nomenklaturCacheKegiatan = {};
                     
-                    // Fungsi untuk mengisi dropdown secara bertahap
-                    function fillKegiatanDropdowns(level, parts) {
-                        if (level >= parts.length) {
-                            var $select = $('#kegiatan_select_kegiatan');
-                            if ($select.val()) {
-                                var selectedText = $select.find('option:selected').text();
-                                if (selectedText && selectedText.indexOf('--') === -1) {
-                                    $('#kegiatan_selected_text').text(selectedText);
-                                    $('#kegiatan_info_nomenklatur').show();
-                                    $('#kegiatan_path_display').text(selectedText);
-                                    var nama = selectedText.replace(/^\d+(\.\d+){3}\s*-\s*/, '');
-                                    nama = nama.replace(/^\d+(\.\d+){2,3}\s*-\s*/, '');
-                                    $('#kegiatan_nama_hidden').val(nama);
-                                }
-                            }
-                            return;
-                        }
-
-                        var kode;
-                        if (level == 4 && parts.length >= 5) {
-                            kode = parts.slice(0, 5).join('.');
-                        } else {
-                            kode = parts.slice(0, level).join('.');
-                        }
-
-                        var selectId = level == 1 ? 'kegiatan_select_urusan' :
-                                       (level == 2 ? 'kegiatan_select_bidang' :
-                                       (level == 3 ? 'kegiatan_select_program' :
-                                       'kegiatan_select_kegiatan'));
-
-                        var checkCount = 0;
-                        var maxChecks = 30;
-                        var checkInterval = setInterval(function() {
-                            var $select = $('#' + selectId);
-                            var optionExists = false;
-
-                            $select.find('option').each(function() {
-                                if ($(this).val() === kode) {
-                                    optionExists = true;
+                    loadKegiatanDropdown(programKode, kodeNomenklatur, function(items) {
+                        if (!kodeNomenklatur && namaKegiatan) {
+                            $('#kegiatan_select_kegiatan option').each(function() {
+                                if ($(this).text().indexOf(namaKegiatan) !== -1) {
+                                    $(this).prop('selected', true);
+                                    $('#kegiatan_select_kegiatan').trigger('change');
                                     return false;
                                 }
                             });
-
-                            if (optionExists && !$select.prop('disabled')) {
-                                $select.val(kode);
-                                $select.trigger('change');
-                                clearInterval(checkInterval);
-
-                                setTimeout(function() {
-                                    if (level < parts.length) {
-                                        fillKegiatanDropdowns(level + 1, parts);
-                                    }
-                                }, 500);
-                            }
-
-                            checkCount++;
-                            if (checkCount >= maxChecks) {
-                                clearInterval(checkInterval);
-                                var namaKegiatan = $('#kegiatan_nama_hidden').val() || '';
-                                if (namaKegiatan) {
-                                    $('#kegiatan_selected_text').text(namaKegiatan);
-                                    $('#kegiatan_info_nomenklatur').show();
-                                    $('#kegiatan_path_display').text('Nama Kegiatan: ' + namaKegiatan);
-                                    $('#kegiatan_nama_hidden').val(namaKegiatan);
-                                }
-                            }
-                        }, 200);
-                    }
-                    
-                    loadKegiatanLevel(1, '', function() {
-                        if (kodeNomenklatur) {
-                            var parts = kodeNomenklatur.split('.');
-                            
-                            if (parts.length < 4) {
-                                $('#kegiatan_selected_text').text(namaKegiatan || kodeNomenklatur);
-                                $('#kegiatan_info_nomenklatur').show();
-                                $('#kegiatan_path_display').text('Kode: ' + kodeNomenklatur + ' - ' + (namaKegiatan || ''));
-                                $('#kegiatan_nama_hidden').val(namaKegiatan || kodeNomenklatur);
-                            } else {
-                                fillKegiatanDropdowns(1, parts);
-                            }
-                        } else if (namaKegiatan) {
-                            $('#kegiatan_selected_text').text(namaKegiatan);
-                            $('#kegiatan_info_nomenklatur').show();
-                            $('#kegiatan_path_display').text('Nama Kegiatan: ' + namaKegiatan);
-                            $('#kegiatan_nama_hidden').val(namaKegiatan);
                         }
                     });
                     
@@ -3562,8 +3656,7 @@ $(document).ready(function() {
         if (!nama) {
             var selectedText = $('#kegiatan_selected_text').text();
             if (selectedText && selectedText.indexOf('--') === -1) {
-                nama = selectedText.replace(/^\d+(\.\d+){3}\s*-\s*/, '');
-                nama = nama.replace(/^\d+(\.\d+){2,3}\s*-\s*/, '');
+                nama = selectedText.replace(/^\d+(\.\d+){2,4}\s*-\s*/, '').trim();
             }
         }
         
@@ -3682,11 +3775,16 @@ $(document).ready(function() {
 
     $(document).on("click", ".btnTambahSubKegiatan", function() {
         var kegiatanId = $(this).data('kegiatan-id');
+        var kegiatanKode = $(this).data('kegiatan-kode') || '';
+        var kegiatanNama = $(this).data('kegiatan-nama') || '';
+
         $("#modalSubKegiatanTitle").text("Tambah Sub Kegiatan");
         $("#subkegiatan_id").val('');
         $("#subkegiatan_kegiatan_id").val(kegiatanId);
         $("#subkegiatan_nama_hidden").val('');
         $("#subkegiatan_kode_nomenklatur").val('');
+        
+        var displayKegiatan = (kegiatanKode ? kegiatanKode + ' - ' : '') + (kegiatanNama || '-');
         
         counterSubKegiatanSasaran = 0;
         counterSubKegiatanIndikator = 0;
@@ -3694,288 +3792,102 @@ $(document).ready(function() {
         addSubKegiatanSasaran({ indikators: [] });
         
         resetSubKegiatanDropdowns();
-        loadSubLevel(1, '');
+        $("#subkegiatan_parent_kegiatan_display").text(displayKegiatan);
+        loadSubKegiatanDropdown(kegiatanKode, '');
         loadBidangList('subkegiatan_bidang_id', null);
         showFixedModal('#modalSubKegiatan');
     });
 
-// ================================================================
-// EDIT SUB KEGIATAN - DENGAN PERBAIKAN PEMBAGIAN KODE (FIX TOTAL)
-// ================================================================
-$(document).on("click", ".btnEditSubKegiatan", function() {
-    var id = $(this).data('id');
-    if (!id) {
-        alert('ID tidak valid!');
-        return;
-    }
-    
-    console.log('=== EDIT SUB KEGIATAN ===');
-    console.log('ID Sub Kegiatan:', id);
-    
-    // Reset semua dropdown terlebih dahulu
-    resetSubKegiatanDropdowns();
-    
-    // Tampilkan loading
-    showFixedModal('#modalSubKegiatan');
-    $('#subkegiatan_path_display').text('Memuat data...');
-    
-    $.ajax({
-        url: BaseURL + "Instansi/getRenstraSubKegiatanById",
-        type: "POST",
-        data: { id: id, [CSRF_NAME]: CSRF_TOKEN },
-        dataType: "json",
-        success: function(res) {
-            console.log('Response dari server:', res);
-            
-            if (res.status === "success" && res.data) {
-                var sub = res.data;
-                console.log('Data Sub Kegiatan:', sub);
-                
-                $("#modalSubKegiatanTitle").text("Edit Sub Kegiatan");
-                $("#subkegiatan_id").val(sub.id);
-                $("#subkegiatan_kegiatan_id").val(sub.kegiatan_id);
-                
-                var kodeNomenklatur = sub.kode_nomenklatur || '';
-                var namaSub = sub.nama || '';
-                
-                // ============================================================
-                // JIKA KODE_NOMENKLATUR NULL, EKSTRAK DARI NAMA
-                // ============================================================
-                if (!kodeNomenklatur && namaSub) {
-                    // Ekstrak kode dari nama (ambil bagian sebelum " - ")
-                    var partsFromName = namaSub.split(' - ');
-                    if (partsFromName.length > 0) {
-                        // Cek apakah bagian pertama adalah kode (berisi angka dan titik)
-                        var potentialCode = partsFromName[0].trim();
-                        if (/^[\d\.]+$/.test(potentialCode)) {
-                            kodeNomenklatur = potentialCode;
-                            console.log('Kode diekstrak dari nama:', kodeNomenklatur);
-                        }
-                    }
-                }
-                
-                console.log('Kode Nomenklatur (setelah ekstrak):', kodeNomenklatur);
-                console.log('Nama Sub:', namaSub);
-                
-                // Reset cache
-                nomenklaturCacheSub = {};
-                
-                // Jika ada kode nomenklatur (baik dari DB atau hasil ekstrak), gunakan untuk mengisi dropdown
-                if (kodeNomenklatur) {
-                    var parts = kodeNomenklatur.split('.');
-                    console.log('Parts dari kode nomenklatur:', parts);
-                    console.log('Jumlah parts:', parts.length);
+    // ================================================================
+    // EDIT SUB KEGIATAN - DENGAN NOMENKLATUR LANGSUNG
+    // ================================================================
+    $(document).on("click", ".btnEditSubKegiatan", function() {
+        var id = $(this).data('id');
+        var btnKegiatanKode = $(this).data('kegiatan-kode') || '';
+        var btnKegiatanNama = $(this).data('kegiatan-nama') || '';
+        if (!id) {
+            alert('ID tidak valid!');
+            return;
+        }
+        
+        // Reset semua dropdown terlebih dahulu
+        resetSubKegiatanDropdowns();
+        
+        $.ajax({
+            url: BaseURL + "Instansi/getRenstraSubKegiatanById",
+            type: "POST",
+            data: { id: id, [CSRF_NAME]: CSRF_TOKEN },
+            dataType: "json",
+            success: function(res) {
+                if (res.status === "success" && res.data) {
+                    var sub = res.data;
                     
-                    // ============================================================
-                    // FUNGSI UNTUK MENGISI DROPDOWN MENGGUNAKAN API
-                    // ============================================================
-                    function loadDropdownLevel(level, callback) {
-                        console.log('=== loadDropdownLevel level ' + level + ' ===');
-                        
-                        // Jika level sudah selesai (lebih dari 5)
-                        if (level > 5) {
-                            console.log('Selesai mengisi semua level');
-                            // Set nilai sub kegiatan yang dipilih
-                            var $subSelect = $('#subkegiatan_select_subkegiatan');
-                            
-                            if ($subSelect.val()) {
-                                var selectedText = $subSelect.find('option:selected').text();
-                                if (selectedText && selectedText.indexOf('--') === -1) {
-                                    $('#subkegiatan_selected_text').text(selectedText);
-                                    $('#subkegiatan_info_nomenklatur').show();
-                                    $('#subkegiatan_path_display').text(selectedText);
-                                    var nama = selectedText.replace(/^\d+(\.\d+){4}\s*-\s*/, '');
-                                    nama = nama.replace(/^\d+(\.\d+){3,4}\s*-\s*/, '');
-                                    $('#subkegiatan_nama_hidden').val(nama);
-                                    $('#subkegiatan_kode_nomenklatur').val($subSelect.val());
-                                }
-                            } else if (namaSub) {
-                                $('#subkegiatan_selected_text').text(namaSub);
-                                $('#subkegiatan_info_nomenklatur').show();
-                                $('#subkegiatan_path_display').text(namaSub);
-                                $('#subkegiatan_nama_hidden').val(namaSub);
-                                if (kodeNomenklatur) {
-                                    $('#subkegiatan_kode_nomenklatur').val(kodeNomenklatur);
-                                }
+                    $("#modalSubKegiatanTitle").text("Edit Sub Kegiatan");
+                    $("#subkegiatan_id").val(sub.id);
+                    $("#subkegiatan_kegiatan_id").val(sub.kegiatan_id);
+                    
+                    var kodeNomenklatur = sub.kode_nomenklatur || '';
+                    var namaSub = sub.nama || '';
+                    var kegiatanKode = sub.kegiatan_kode || btnKegiatanKode;
+                    var kegiatanNama = sub.kegiatan_nama || btnKegiatanNama;
+                    
+                    var displayKegiatan = (kegiatanKode ? kegiatanKode + ' - ' : '') + (kegiatanNama || '-');
+                    $("#subkegiatan_parent_kegiatan_display").text(displayKegiatan);
+                    
+                    if (!kodeNomenklatur && namaSub) {
+                        var partsFromName = namaSub.split(' - ');
+                        if (partsFromName.length > 0) {
+                            var potentialCode = partsFromName[0].trim();
+                            if (/^[\d\.]+$/.test(potentialCode)) {
+                                kodeNomenklatur = potentialCode;
                             }
-                            if (callback) callback();
-                            return;
                         }
-
-                        // ============================================================
-                        // Tentukan kode berdasarkan level:
-                        // Level 1: 1 bagian (1)
-                        // Level 2: 2 bagian (1.01)
-                        // Level 3: 3 bagian (1.01.02)
-                        // Level 4: 4 bagian (1.01.02.1) - KEGIATAN
-                        // Level 5: 5 bagian (1.01.02.1.01) - SUB KEGIATAN
-                        // ============================================================
-                        var kode;
-                        if (level == 1) {
-                            kode = parts[0];
-                        } else if (level == 2) {
-                            kode = parts.slice(0, 2).join('.');
-                        } else if (level == 3) {
-                            kode = parts.slice(0, 3).join('.');
-                        } else if (level == 4) {
-                            // Level 4: Kegiatan - ambil 4 bagian (1.01.02.1)
-                            kode = parts.slice(0, 4).join('.');
-                        } else if (level == 5) {
-                            // Level 5: Sub Kegiatan - ambil semua bagian (1.01.02.1.01)
-                            kode = parts.join('.');
-                        }
-                        console.log('Kode untuk level ' + level + ':', kode);
-
-                        var selectId = '';
-                        var label = '';
-                        if (level == 1) {
-                            selectId = 'subkegiatan_select_urusan';
-                            label = 'Urusan';
-                        } else if (level == 2) {
-                            selectId = 'subkegiatan_select_bidang';
-                            label = 'Bidang';
-                        } else if (level == 3) {
-                            selectId = 'subkegiatan_select_program';
-                            label = 'Program';
-                        } else if (level == 4) {
-                            selectId = 'subkegiatan_select_kegiatan';
-                            label = 'Kegiatan';
-                        } else if (level == 5) {
-                            selectId = 'subkegiatan_select_subkegiatan';
-                            label = 'Sub Kegiatan';
-                        }
-
-                        // Tentukan parent kode
-                        var parentKode = '';
-                        if (level == 2) {
-                            parentKode = parts[0];
-                        } else if (level == 3) {
-                            parentKode = parts.slice(0, 2).join('.');
-                        } else if (level == 4) {
-                            parentKode = parts.slice(0, 3).join('.');
-                        } else if (level == 5) {
-                            parentKode = parts.slice(0, 4).join('.');
-                        }
-                        console.log('Parent Kode untuk level ' + level + ':', parentKode);
-
-                        // Panggil API untuk mendapatkan data
-                        $.ajax({
-                            url: BaseURL + "Instansi/getNomenklaturByLevelRenja",
-                            type: "POST",
-                            data: {
-                                level: level,
-                                parent_kode: parentKode || '',
-                                [CSRF_NAME]: CSRF_TOKEN
-                            },
-                            dataType: 'json',
-                            success: function(resData) {
-                                console.log('Data level ' + level + ':', resData);
-                                
-                                var $select = $('#' + selectId);
-                                var options = '<option value="">-- Pilih ' + label + ' --</option>';
-                                
-                                if (resData && resData.length > 0) {
-                                    for (var i = 0; i < resData.length; i++) {
-                                        var selected = (resData[i].Kode === kode) ? ' selected' : '';
-                                        options += '<option value="' + resData[i].Kode + '"' + selected + '>' + 
-                                                   resData[i].Kode + ' - ' + resData[i].Nomenklatur + '</option>';
-                                    }
-                                }
-                                $select.html(options).prop('disabled', false);
-                                
-                                // Cek apakah kode ada
-                                var optionExists = false;
-                                $select.find('option').each(function() {
-                                    if ($(this).val() === kode) {
-                                        optionExists = true;
-                                        return false;
-                                    }
-                                });
-                                
-                                if (optionExists) {
-                                    $select.val(kode);
-                                    $select.trigger('change');
-                                    console.log('Level ' + level + ' berhasil diisi:', kode);
-                                } else {
-                                    console.log('Level ' + level + ' tidak ditemukan kode:', kode);
-                                    // Cari berdasarkan prefix
-                                    $select.find('option').each(function() {
-                                        var val = $(this).val();
-                                        if (val && kode.indexOf(val) === 0) {
-                                            $select.val(val);
-                                            $select.trigger('change');
-                                            console.log('Level ' + level + ' ditemukan dengan prefix:', val);
-                                            return false;
-                                        }
-                                    });
-                                }
-                                
-                                // Lanjut ke level berikutnya
-                                setTimeout(function() {
-                                    loadDropdownLevel(level + 1, callback);
-                                }, 300);
-                            },
-                            error: function(xhr, status, error) {
-                                console.error('Error loading level ' + level + ':', error);
-                                setTimeout(function() {
-                                    loadDropdownLevel(level + 1, callback);
-                                }, 300);
-                            }
-                        });
                     }
                     
-                    // ============================================================
-                    // MULAI PROSES PENGISIAN DROPDOWN
-                    // ============================================================
-                    loadDropdownLevel(1);
+                    // Reset cache
+                    nomenklaturCacheSub = {};
                     
-                } else if (namaSub) {
-                    console.log('Tidak ada kode nomenklatur, hanya nama:', namaSub);
-                    $('#subkegiatan_selected_text').text(namaSub);
-                    $('#subkegiatan_info_nomenklatur').show();
-                    $('#subkegiatan_path_display').text('Nama Sub Kegiatan: ' + namaSub);
-                    $('#subkegiatan_nama_hidden').val(namaSub);
-                    loadSubLevel(1, '');
-                } else {
-                    console.log('Tidak ada data nomenklatur sama sekali');
-                    $('#subkegiatan_path_display').text('Tidak ada data nomenklatur');
-                    loadSubLevel(1, '');
-                }
-                
-                // ==============================================
-                // LOAD SASARAN & INDIKATOR
-                // ==============================================
-                $('#SubKegiatanSasaranContainer').html('');
-                counterSubKegiatanSasaran = 0;
-                counterSubKegiatanIndikator = 0;
-                
-                if (sub.sasaran_list && sub.sasaran_list.length > 0) {
-                    console.log('Jumlah sasaran:', sub.sasaran_list.length);
-                    for (var i = 0; i < sub.sasaran_list.length; i++) {
-                        var sas = sub.sasaran_list[i];
-                        sas.indikators = sas.indikators || [];
-                        addSubKegiatanSasaran(sas);
+                    loadSubKegiatanDropdown(kegiatanKode, kodeNomenklatur, function(items) {
+                        if (!kodeNomenklatur && namaSub) {
+                            $('#subkegiatan_select_subkegiatan option').each(function() {
+                                if ($(this).text().indexOf(namaSub) !== -1) {
+                                    $(this).prop('selected', true);
+                                    $('#subkegiatan_select_subkegiatan').trigger('change');
+                                    return false;
+                                }
+                            });
+                        }
+                    });
+                    
+                    // LOAD SASARAN & INDIKATOR
+                    $('#SubKegiatanSasaranContainer').html('');
+                    counterSubKegiatanSasaran = 0;
+                    counterSubKegiatanIndikator = 0;
+                    
+                    if (sub.sasaran_list && sub.sasaran_list.length > 0) {
+                        for (var i = 0; i < sub.sasaran_list.length; i++) {
+                            var sas = sub.sasaran_list[i];
+                            sas.indikators = sas.indikators || [];
+                            addSubKegiatanSasaran(sas);
+                        }
+                    } else {
+                        addSubKegiatanSasaran({ indikators: [] });
                     }
+                    
+                    loadBidangList('subkegiatan_bidang_id', sub.bidang_id || null);
+                    showFixedModal('#modalSubKegiatan');
                 } else {
-                    console.log('Tidak ada sasaran');
-                    addSubKegiatanSasaran({ indikators: [] });
+                    alert(res.message || 'Gagal mengambil data!');
+                    hideFixedModal('#modalSubKegiatan');
                 }
-                
-                loadBidangList('subkegiatan_bidang_id', sub.bidang_id || null);
-                
-            } else {
-                alert(res.message || 'Gagal mengambil data!');
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', error);
+                alert('Terjadi kesalahan: ' + error);
                 hideFixedModal('#modalSubKegiatan');
             }
-        },
-        error: function(xhr, status, error) {
-            console.error('AJAX Error:', error);
-            console.error('Response:', xhr.responseText);
-            alert('Terjadi kesalahan: ' + error);
-            hideFixedModal('#modalSubKegiatan');
-        }
+        });
     });
-});
 
     $(document).on("click", ".btnHapusSubKegiatan", function() {
         if (!confirm("Yakin hapus Sub Kegiatan ini?")) return;
@@ -4002,13 +3914,12 @@ $(document).on("click", ".btnEditSubKegiatan", function() {
         var kegiatan_id = $("#subkegiatan_kegiatan_id").val();
         var bidang_id = $("#subkegiatan_bidang_id").val();
         var nama = $("#subkegiatan_nama_hidden").val() || '';
-        var kodeNomenklatur = $("#subkegiatan_kode_nomenklatur").val() || '';
+        var kodeNomenklatur = $("#subkegiatan_kode_nomenklatur").val() || $('#subkegiatan_select_subkegiatan').val() || '';
         
         if (!nama) {
-            var selectedText = $('#subkegiatan_selected_text').text();
+            var selectedText = $('#subkegiatan_selected_text').text() || $('#subkegiatan_select_subkegiatan option:selected').text();
             if (selectedText && selectedText.indexOf('--') === -1) {
-                nama = selectedText.replace(/^\d+(\.\d+){4}\s*-\s*/, '');
-                nama = nama.replace(/^\d+(\.\d+){3,4}\s*-\s*/, '');
+                nama = selectedText.replace(/^\d+(\.\d+){3,5}\s*-\s*/, '').trim();
             }
         }
         
