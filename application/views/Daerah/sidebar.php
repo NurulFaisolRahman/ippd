@@ -514,6 +514,18 @@
                 </div>
             </li>
 
+            <li class="sidebar-dropdown">
+                <a href="#">
+                    <i class="menu-icon fa fa-sitemap"></i>
+                    <span>Sub Kegiatan</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Daerah/BelanjaSubKegiatan')?>">Belanja Sub Kegiatan</a>
+            
+                </div>
+            </li>
+
         </ul>
     </div>
 </div>

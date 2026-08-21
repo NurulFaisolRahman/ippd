@@ -232,7 +232,7 @@
         <div class="navbar-container">
             <a href="/ippd/Beranda" class="navbar-brand">
                 <i class="fas fa-chart-line"></i>
-                IPPD
+                IPPD1
             </a>
             <div class="navbar-menu">
                 
