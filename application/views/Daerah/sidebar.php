@@ -45,16 +45,13 @@
         .sidebar-wrapper {
             width: var(--sidebar-width);
             background-color: #f8f9fa;
-            height: 100vh;
-            padding-top: 70px;
-            overflow-y: auto;
-
-            padding-top: 0;
-            position: fixed;
-            left: 0;
-            top: 0;
-            padding-top: 70px;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            height: calc(100vh - 64px) !important;
+            position: fixed !important;
+            left: 0 !important;
+            top: 64px !important;
+            margin-top: 0 !important;
+            border-top: none !important;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.08);
             z-index: 999;
             overflow-y: auto;
             transition: all var(--transition-speed) ease;
@@ -369,6 +366,29 @@
                 </div>
             </li>
 
+             <li class="sidebar-dropdown">
+                <a href="#">
+                    <i class="bi bi-briefcase-fill"></i>
+                    <span>Renstra</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Instansi/PermasalahanPD')?>">Permasalahan PD</a>
+                    <a href="<?=base_url('Instansi/IsuStrategisPD')?>">Isu Strategis PD</a>
+                    <a href="<?=base_url('Instansi/TujuanPD')?>">Tujuan PD</a>
+                    <a href="<?=base_url('Instansi/SasaranPD')?>">Sasaran PD</a>
+                    <a href="<?=base_url('Instansi/TujuanSasaranPD')?>">NSPK, Tujuan & Sasaran PD</a>
+                    <a href="<?=base_url('Instansi/ArahKebijakanPD')?>">Strategi & Arah Kebijakan</a>
+                    <a href="<?=base_url('Instansi/NSPKOperasionalisasiPD')?>">Operasionalisasi NSPK</a>
+                    <a href="<?=base_url('Instansi/RumusanRenstraPD')?>">Rumusan Renstra PD</a>
+                    <a href="<?=base_url('Instansi/RencanaProgramPendanaan')?>">Rencana Program Pendanaan</a>
+                    <a href="<?=base_url('Instansi/SubKegiatanPrioritas')?>">Sub Kegiatan Prioritas</a>
+                    <a href="<?=base_url('Instansi/IkuPD')?>">IKU PD</a>
+                    <a href="<?=base_url('Instansi/IkkPD')?>">IKK PD</a>
+                    <a href="<?=base_url('Instansi/MenuRenstraPD')?>">Menu Renstra PD</a>
+                </div>
+            </li>
+
             <li class="sidebar-dropdown">
             <a href="#">
                 <i class="bi bi-file-text-fill"></i>
@@ -425,6 +445,19 @@
 
             <li class="sidebar-dropdown">
                 <a href="#">
+                    <i class="bi bi-file-text-fill"></i>
+                    <span>Renja</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Instansi/RenjaPD')?>">Ranwal Renja</a>
+                    <a href="<?=base_url('Instansi/RancanganRenjaPD')?>">Rancangan Renja</a>
+                    <a href="<?=base_url('Instansi/RancanganAkhirRenjaPD')?>">Rankhir Renja</a>
+                </div>
+            </li>
+
+            <li class="sidebar-dropdown">
+                <a href="#">
                     <i class="menu-icon fa fa-repeat"></i>
                     <span>Konsistensi/Keselarasan RKPD </span>
                     <i class="fa fa-chevron-down"></i>
@@ -442,48 +475,12 @@
 
              <li class="sidebar-dropdown">
                 <a href="#">
-                    <i class="bi bi-briefcase-fill"></i>
-                    <span>Renstra</span>
-                    <i class="fa fa-chevron-down"></i>
-                </a>
-                <div class="sidebar-submenu">
-                    <a href="<?=base_url('Instansi/PermasalahanPD')?>">Permasalahan PD</a>
-                    <a href="<?=base_url('Instansi/IsuStrategisPD')?>">Isu Strategis PD</a>
-                    <a href="<?=base_url('Instansi/TujuanPD')?>">Tujuan PD</a>
-                    <a href="<?=base_url('Instansi/SasaranPD')?>">Sasaran PD</a>
-                    <a href="<?=base_url('Instansi/TujuanSasaranPD')?>">NSPK, Tujuan & Sasaran PD</a>
-                    <a href="<?=base_url('Instansi/ArahKebijakanPD')?>">Strategi & Arah Kebijakan</a>
-                    <a href="<?=base_url('Instansi/NSPKOperasionalisasiPD')?>">Operasionalisasi NSPK</a>
-                    <a href="<?=base_url('Instansi/RumusanRenstraPD')?>">Rumusan Renstra PD</a>
-                    <a href="<?=base_url('Instansi/RencanaProgramPendanaan')?>">Rencana Program Pendanaan</a>
-                    <a href="<?=base_url('Instansi/SubKegiatanPrioritas')?>">Sub Kegiatan Prioritas</a>
-                    <a href="<?=base_url('Instansi/IkuPD')?>">IKU PD</a>
-                    <a href="<?=base_url('Instansi/IkkPD')?>">IKK PD</a>
-                    <a href="<?=base_url('Instansi/MenuRenstraPD')?>">Menu Renstra PD</a>
-                </div>
-            </li>
-
-             <li class="sidebar-dropdown">
-                <a href="#">
                     <i class="bi bi-file-check"></i>
                     <span>Perjanjian Kinerja</span>
                     <i class="fa fa-chevron-down"></i>
                 </a>
                 <div class="sidebar-submenu">
                     <a href="<?=base_url('Instansi/PerjanjianKinerjaPD')?>">Daftar PK</a>
-                </div>
-            </li>
-
-            <li class="sidebar-dropdown">
-                <a href="#">
-                    <i class="bi bi-file-text-fill"></i>
-                    <span>Renja</span>
-                    <i class="fa fa-chevron-down"></i>
-                </a>
-                <div class="sidebar-submenu">
-                    <a href="<?=base_url('Instansi/RenjaPD')?>">Ranwal Renja</a>
-                    <a href="<?=base_url('Instansi/RancanganRenjaPD')?>">Rancangan Renja</a>
-                    <a href="<?=base_url('Instansi/RancanganAkhirRenjaPD')?>">Rankhir Renja</a>
                 </div>
             </li>
 
