@@ -1,2256 +1,2256 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+
+$is_logged_in = isset($IsLoggedIn) ? $IsLoggedIn : (isset($_SESSION['Level']));
+$is_role_4 = isset($IsRole4) ? $IsRole4 : (isset($_SESSION['Level']) && $_SESSION['Level'] == 4);
+$ActiveInstansiId = isset($ActiveInstansiId) ? $ActiveInstansiId : (isset($FilterInstansiId) ? $FilterInstansiId : (isset($InstansiId) ? $InstansiId : null));
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Ranwal RKPD</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    
-    <?php $this->load->view('Daerah/Cssumum'); ?>
-    
-    <!-- Select2 CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-    
-    <style>
-        /* ===== OVERRIDE UNTUK POPUP DI ATAS HEADER ===== */
-        .modal {
-            z-index: 999999 !important;
-        }
-        
-        .modal-backdrop {
-            z-index: 999998 !important;
-        }
-        
-        .modal-open .modal {
-            overflow-y: auto !important;
-        }
-        
-        .modal-dialog {
-            margin: 30px auto !important;
-            position: relative !important;
-        }
-        
-        .modal.fade.in {
-            display: block !important;
-        }
-        
-        .modal-backdrop.fade.in {
-            opacity: 0.5 !important;
-        }
-        
-        .main-content {
-            position: relative;
-            z-index: 1;
-        }
-        
-        .dataTables_wrapper {
-            position: relative;
-            z-index: 1;
-        }
+<?php $this->load->view('Daerah/sidebar'); ?>
+<?php $this->load->view('Daerah/Cssumum'); ?>
+  
+  <style>
+  :root {
+    --brand-dark: #1e3d34;
+    --brand-green: #2d6a4f;
+    --brand-emerald: #40916c;
+    --brand-mint: #74c69d;
+    --brand-soft: #d8f3dc;
+    --brand-surface: #f2fbf5;
+    --brand-border: #b7e4c7;
+    --brand-deep: #081c15;
 
-        /* ===== PERBAIKAN SELECT2 DI DALAM MODAL ===== */
-        .select2-container--default .select2-dropdown {
-            position: fixed !important;
-            top: auto !important;
-            bottom: auto !important;
-            left: auto !important;
-            right: auto !important;
-            z-index: 9999999 !important;
-            max-height: 300px !important;
-            overflow-y: auto !important;
-        }
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
 
-        .select2-container--default .select2-dropdown--above {
-            bottom: 100% !important;
-            top: auto !important;
-        }
+    --white: #ffffff;
+    --amber-soft: #fef3c7;
+    --amber-border: #fcd34d;
+    --amber-text: #92400e;
 
-        .select2-container--default .select2-dropdown--below {
-            top: 100% !important;
-            bottom: auto !important;
-        }
+    --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+    --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.06);
+  }
 
-        .select2-modal-dropdown {
-            z-index: 9999999 !important;
-        }
+  body {
+    background: #f4f7f6;
+    color: var(--slate-800);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
 
-        .select2-container--open {
-            z-index: 9999999 !important;
-        }
+  .main-content {
+    margin-left: var(--sidebar-width, 280px);
+    padding: 24px;
+    min-height: 100vh;
+    transition: all var(--transition-speed, 0.3s) ease;
+  }
+  .sidebar-mini .main-content {
+    margin-left: var(--sidebar-mini-width, 70px);
+  }
 
-        .modal-body .select2-container--open {
-            position: relative !important;
-            z-index: 9999999 !important;
-        }
+  .renja-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
 
-        .modal.fade.in {
-            overflow-y: auto !important;
-        }
+  /* ============ TOPBAR ============ */
+  .topbar {
+    background: var(--white);
+    border: 1px solid var(--slate-200);
+    border-radius: 12px;
+    padding: 18px 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  .topbar-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .app-title h1 {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--brand-dark);
+    margin: 0 0 4px 0;
+    letter-spacing: -0.2px;
+  }
+  .app-title span {
+    font-size: 13px;
+    color: var(--slate-500);
+  }
+  .topbar-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .rpjmd-select {
+    height: 38px;
+    padding: 0 14px;
+    border: 1px solid var(--slate-200);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--slate-700);
+    background: var(--white);
+    cursor: pointer;
+  }
+  .year-tabs {
+    display: inline-flex;
+    background: var(--slate-100);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 3px;
+  }
+  .year-tab {
+    border: none;
+    background: transparent;
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--slate-600);
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .year-tab:hover {
+    color: var(--brand-dark);
+  }
+  .year-tab.active {
+    background: var(--white);
+    color: var(--brand-dark);
+    box-shadow: var(--shadow-xs);
+    font-weight: 700;
+  }
 
-        .modal-open .modal {
-            overflow-y: auto !important;
-        }
+  .btn-sync {
+    height: 38px;
+    padding: 0 14px;
+    background: #0284c7;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .btn-sync:hover {
+    background: #0369a1;
+  }
 
-        .select2-container--open .select2-dropdown {
-            position: fixed !important;
-            z-index: 9999999 !important;
-            max-height: 300px !important;
-            overflow-y: auto !important;
-        }
+  /* ============ PAGU SUMMARY ============ */
+  .pagu-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+  }
+  .pagu-item {
+    background: var(--white);
+    border: 1px solid var(--slate-200);
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+  .pagu-item::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 4px;
+    background: var(--slate-300);
+  }
+  .pagu-item.status-balanced::before { background: var(--brand-green); }
+  .pagu-item.status-remaining::before { background: #0284c7; }
+  .pagu-item.status-over::before { background: #dc2626; }
 
-        .modal-backdrop {
-            z-index: 999998 !important;
-        }
+  .pagu-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+  .pagu-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--slate-900);
+    letter-spacing: -.3px;
+  }
+  .pagu-sub {
+    font-size: 12px;
+    color: var(--slate-500);
+  }
 
-        .modal-body {
-            overflow-y: auto !important;
-            max-height: 70vh !important;
-            padding-right: 15px !important;
-        }
+  /* ============ CARD / TABLE CONTAINER ============ */
+  .table-card {
+    background: var(--white);
+    border: 1px solid var(--slate-200);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .table-toolbar {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--slate-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .table-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .table-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-toolbar {
+    height: 34px;
+    padding: 0 12px;
+    border: 1px solid var(--slate-200);
+    background: var(--white);
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--slate-700);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all .15s;
+  }
+  .btn-toolbar:hover {
+    background: var(--slate-50);
+    border-color: var(--slate-300);
+  }
 
-        .select2-container--open .select2-dropdown {
-            position: fixed !important;
-            top: auto !important;
-            bottom: auto !important;
-            left: auto !important;
-            right: auto !important;
-        }
+  .table-container {
+    overflow-x: auto;
+    max-height: 72vh;
+  }
+  .renja-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 12.5px;
+  }
+  .renja-table th,
+  .renja-table td {
+    padding: 8px 10px;
+    border-right: 1px solid var(--slate-200);
+    border-bottom: 1px solid var(--slate-200);
+    vertical-align: top;
+  }
+  .renja-table th:first-child,
+  .renja-table td:first-child {
+    border-left: none;
+  }
 
-        /* ===== STYLE UTAMA ===== */
-        .table-ranwal th, .table-ranwal td { 
-            vertical-align: middle; 
-            text-align: center; 
-            border: 1px solid #dee2e6; 
-            padding: 6px; 
-            font-size: 12px;
-        }
-        .table-ranwal .uraian { 
-            text-align: left !important; 
-            padding-left: 10px !important; 
-        }
-        .table-ranwal .rp { white-space: nowrap; font-weight: 500; text-align: right; }
-        
-        .btn-aksi { padding: 3px 6px; font-size: 0.8rem; margin: 0 1px; }
-        .filter-row .form-control { height: 38px; }
-        
-        .btn-group-aksi {
-            display: flex;
-            justify-content: center;
-            gap: 3px;
-            flex-wrap: wrap;
-        }
-        
-        .header-row {
-            background-color: #f8f9fa;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-        
-        .header-row:hover {
-            background-color: #e9ecef;
-        }
-        
-        .header-row.has-edit {
-            background-color: #fff3cd !important;
-            border-left: 4px solid #ffc107;
-        }
-        
-        .header-row.has-edit:hover {
-            background-color: #ffeaa7 !important;
-        }
-        
-        .header-row .toggle-icon {
-            transition: transform 0.3s ease;
-            display: inline-block;
-            margin-right: 8px;
-            font-size: 14px;
-        }
-        
-        .header-row .toggle-icon.collapsed {
-            transform: rotate(-90deg);
-        }
-        
-        .header-row .toggle-icon.expanded {
-            transform: rotate(0deg);
-        }
-        
-        .detail-row {
-            background-color: #ffffff;
-            transition: background-color 0.2s ease;
-        }
-        
-        .detail-row:hover {
-            background-color: #f5f5f5;
-        }
-        
-        .detail-row.detail-hidden {
-            display: none !important;
-        }
-        
-        .badge-detail {
-            background-color: #17a2b8;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-        }
-        
-        .badge-edit {
-            background-color: #ffc107;
-            color: #856404;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: bold;
-        }
-        
-        .badge-edit i {
-            margin-right: 3px;
-        }
-        
-        .no-data {
-            padding: 30px 0;
-            color: #999;
-        }
-        
-        .modal-lg-custom {
-            max-width: 95%;
-            width: 95%;
-        }
-        
-        .mode-indicator {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-            margin-left: 10px;
-        }
-        .mode-edit {
-            background: #fff3cd;
-            color: #856404;
-        }
-        
-        .col-indikator-kinerja-item {
-            text-align: left;
-            padding-left: 8px !important;
-            padding-right: 8px !important;
-            font-size: 10px;
-            background-color: #fafafa !important;
-        }
-        
-        .indikator-item {
-            display: block;
-            line-height: 1.3;
-        }
-        
-        .indikator-item .text-indikator {
-            display: block;
-            line-height: 1.3;
-        }
-        
-        .table-detail-indikator thead th {
-            background-color: #f8f9fa;
-            font-size: 9px;
-            padding: 3px 4px;
-            text-align: center;
-            vertical-align: middle;
-            border: 1px solid #dee2e6;
-        }
-        
-        .table-detail-indikator thead th.header-indikator {
-            background-color: #d4e6f1;
-            font-weight: 700;
-            font-size: 9px;
-            color: #1a5276;
-            padding: 3px 4px;
-        }
-        
-        .table-detail-indikator td {
-            font-size: 9px;
-            padding: 3px 4px;
-        }
-        
-        .table-detail-indikator td.rp {
-            font-size: 9px;
-            white-space: nowrap;
-        }
-        
-        .row-indikator-detail:hover {
-            background-color: #f0f8ff;
-        }
-        
-        .row-indikator-detail.edited-by-daerah {
-            background-color: #fff3cd !important;
-        }
-        
-        .row-indikator-detail.edited-by-daerah:hover {
-            background-color: #ffeaa7 !important;
-        }
-        
-        .detail-container {
-            padding: 5px 5px 5px 30px;
-            overflow-x: auto;
-        }
-        
-        .detail-container .table {
-            min-width: 1400px;
-        }
+  .renja-table thead th {
+    background: #f8fafc;
+    color: var(--slate-700);
+    font-weight: 700;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    text-align: center;
+    vertical-align: middle;
+  }
+  .renja-table thead tr:nth-child(2) th {
+    top: 36px;
+    z-index: 10;
+  }
 
-        /* ===== CSS UNTUK KOLOM BIDANG & PENGAMPU ===== */
-        .bidang-pengampu-cell {
-            font-size: 9px;
-            min-width: 180px;
-            max-width: 250px;
-            white-space: normal;
-            word-wrap: break-word;
-            line-height: 1.4;
-            text-align: left !important;
-            padding: 4px 6px !important;
-        }
+  /* Sticky first column (Kode) */
+  .renja-table th:first-child,
+  .renja-table td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    background: inherit;
+    width: 110px;
+    min-width: 110px;
+    max-width: 110px;
+    font-family: "SFMono-Regular", Consolas, "Courier New", monospace;
+  }
+  .renja-table thead th:first-child {
+    z-index: 20;
+    background: #f8fafc;
+  }
 
-        .bidang-pengampu-cell .bidang-label {
-            font-weight: 700;
-            color: #1a5276;
-            display: block;
-            font-size: 9px;
-        }
+  .renja-table td.cell-uraian {
+    width: 320px;
+    min-width: 320px;
+  }
 
-        .bidang-pengampu-cell .pengampu-label {
-            font-weight: 700;
-            color: #8e44ad;
-            display: block;
-            margin-top: 3px;
-            font-size: 9px;
-        }
+  /* Row Styling */
+  .row-pd td{
+    background: var(--brand-dark) !important;
+    color: #fff !important;
+    font-size: 14.5px;
+    font-weight: 800;
+    letter-spacing: .3px;
+    padding: 12px 14px;
+    position: static;
+  }
+  .row-section td{
+    background: var(--brand-soft) !important;
+    color: var(--brand-deep) !important;
+    font-weight: 700;
+    font-size: 12.6px;
+    padding: 8px 14px;
+    border-top: 1px solid var(--brand-border);
+    position: static;
+  }
+  .row-tujuan{ background: var(--white); }
+  .row-tujuan td:first-child{ box-shadow: inset 3px 0 0 var(--brand-green); }
+  .row-sasaran{ background: var(--white); }
+  .row-sasaran td:first-child{ box-shadow: inset 3px 0 0 var(--brand-dark); }
 
-        .bidang-pengampu-cell .pengampu-detail {
-            display: block;
-            padding-left: 8px;
-            font-size: 9px;
-        }
+  .row-urusan td {
+    background: var(--brand-green) !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    font-size: 12.8px;
+  }
+  .row-urusan td:first-child { 
+    background: var(--brand-green) !important; 
+    color: #ffffff !important;
+  }
+  .row-urusan .cell-anggaran-auto { color: #ffffff !important; }
 
-        .bidang-pengampu-cell .jabatan-text {
-            font-weight: 600;
-            color: #2c3e50;
-            font-size: 9px;
-        }
+  .row-bidang td {
+    background: var(--brand-soft) !important;
+    color: var(--brand-deep) !important;
+    font-weight: 700;
+    font-size: 12.6px;
+    padding-left: 20px;
+  }
+  .row-bidang td:first-child { 
+    background: var(--brand-soft) !important; 
+    color: var(--brand-deep) !important;
+  }
 
-        .bidang-pengampu-cell .nama-text {
-            font-weight: 400;
-            color: #34495e;
-            font-size: 9px;
-        }
+  .row-program td {
+    background: #ffffff;
+    font-weight: 600;
+    color: var(--slate-900);
+  }
+  .row-program td:first-child { font-weight: 700; }
+  .row-program .cell-uraian { padding-left: 20px; }
 
-        .bidang-pengampu-cell .pengampu-simple {
-            display: block;
-            padding-left: 8px;
-            color: #34495e;
-            font-size: 9px;
-        }
+  .row-kegiatan td {
+    background: #fafcfb;
+    color: var(--slate-800);
+  }
+  .row-kegiatan .cell-uraian { padding-left: 36px; }
 
-        .bidang-pengampu-cell .text-muted {
-            color: #999;
-            font-size: 9px;
-        }
+  .row-subkegiatan td {
+    background: #ffffff;
+    color: var(--slate-700);
+  }
+  .row-subkegiatan .cell-uraian { padding-left: 52px; font-size: 12px; }
 
-        /* ===== PENGAMPU INFO MODAL ===== */
-        .pengampu-info-modal {
-            margin-top: 8px;
-            padding: 8px 12px;
-            background: #f0f8ff;
-            border-radius: 4px;
-            border-left: 3px solid #007bff;
-            display: none;
-            font-size: 12px;
-        }
-        .pengampu-info-modal .label {
-            font-weight: 600;
-            color: #495057;
-        }
-        .pengampu-info-modal .nama {
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        .pengampu-info-modal .jabatan {
-            color: #6c757d;
-            margin-left: 5px;
-        }
-        .pengampu-info-modal .nip {
-            color: #999;
-            font-size: 10px;
-            margin-left: 5px;
-        }
+  .row-subkegiatan:hover td,
+  .row-kegiatan:hover td,
+  .row-program:hover td {
+    background: #f1f8f5;
+  }
 
-        /* ===== LOKASI ===== */
-        .lokasi-container {
-            display: flex;
-            align-items: flex-start;
-            gap: 6px;
-            padding: 4px 8px;
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-            background: #fff;
-            min-height: 34px;
-            height: auto;
-            max-height: 80px;
-            overflow-y: auto;
-        }
-        
-        .lokasi-container .btn-select-lokasi {
-            padding: 2px 10px;
-            font-size: 11px;
-            white-space: nowrap;
-            height: 26px;
-            line-height: 22px;
-            flex-shrink: 0;
-            margin-top: 2px;
-        }
-        
-        .lokasi-container #SelectedLokasiText {
-            font-size: 12px;
-            color: #2c3e50;
-            font-weight: 500;
-            white-space: normal;
-            word-wrap: break-word;
-            word-break: break-word;
-            line-height: 1.5;
-            padding: 3px 0;
-            flex: 1;
-            max-height: 60px;
-            overflow-y: auto;
-        }
-        
-        .lokasi-container #RemoveLokasiBtn {
-            cursor: pointer;
-            color: #e74c3c;
-            font-size: 16px;
-            font-weight: bold;
-            line-height: 1;
-            padding: 2px 4px;
-            flex-shrink: 0;
-            margin-top: 2px;
-            transition: transform 0.2s ease;
-        }
-        
-        .lokasi-container #RemoveLokasiBtn:hover {
-            color: #c0392b;
-            transform: scale(1.2);
-        }
-        
-        .lokasi-container .text-muted {
-            font-size: 12px;
-            color: #999;
-            padding: 3px 0;
-        }
+  .cell-uraian {
+    line-height: 1.45;
+  }
+  .label-tag {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--brand-green);
+    text-transform: uppercase;
+    margin-right: 4px;
+    letter-spacing: .3px;
+  }
+  .sub .label-tag {
+    color: #0284c7;
+  }
 
-        /* ===== EDIT NOTIFICATION ===== */
-        .edit-notification {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            border-radius: 4px;
-            padding: 10px 15px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .edit-notification i {
-            color: #856404;
-            font-size: 18px;
-        }
-        
-        .edit-notification .text {
-            color: #856404;
-            font-size: 13px;
-        }
+  .cell-anggaran-auto {
+    color: var(--brand-deep);
+    font-weight: 700;
+    text-align: right;
+    cursor: help;
+  }
+  .cell-anggaran-input {
+    color: var(--slate-900);
+    font-weight: 700;
+    text-align: right;
+  }
 
-        /* ===== MODAL ===== */
-        .modal-body {
-            max-height: 70vh;
-            overflow-y: auto;
-            padding: 15px 20px;
-        }
+  .text-center { text-align: center; }
+  .text-right { text-align: right; }
 
-        #ModalEditRanwal .modal-body {
-            max-height: 70vh;
-            overflow-y: auto;
-            padding: 15px 20px;
-        }
+  .toggle-btn-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .toggle-chevron {
+    width: 14px;
+    height: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .15s ease;
+  }
+  .toggle-chevron.collapsed {
+    transform: rotate(-90deg);
+  }
+  .collapse-badge {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 1px 7px;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.06);
+    color: inherit;
+    margin-left: 6px;
+  }
+  .row-urusan .collapse-badge { background: rgba(255,255,255,0.25); color: #fff; }
 
-        .modal-content {
-            max-height: 95vh;
-            overflow: hidden;
-        }
+  .cell-pengampu {
+    font-size: 11.5px;
+    color: var(--slate-700);
+    line-height: 1.35;
+  }
+  .pengampu-name {
+    font-size: 11px;
+    color: var(--slate-500);
+  }
 
-        .modal-open {
-            overflow: auto !important;
-        }
+  .btn-aksi {
+    padding: 3px 8px;
+    font-size: 11.5px;
+    border-radius: 5px;
+  }
 
-        .modal-open .modal {
-            overflow-y: auto !important;
-        }
+  /* Badge Notif Perubahan di RKPD */
+  .badge-rkpd-changed {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #fffbeb;
+    color: #b45309;
+    border: 1px solid #fde68a;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 5px;
+    cursor: help;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    line-height: 1.3;
+    max-width: 100%;
+    word-break: break-word;
+  }
+  .badge-rkpd-changed i {
+    color: #d97706;
+    font-size: 12px;
+  }
 
-        .modal-header {
-            flex-shrink: 0;
-        }
+  /* ============ MODAL ============ */
+  .modal-backdrop-custom {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(2px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    padding: 20px;
+  }
+  .modal-backdrop-custom.open {
+    display: flex;
+  }
+  .modal-dialog-custom {
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: var(--shadow-xl);
+    width: 100%;
+    max-width: 780px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: modalIn .18s ease;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(.96) translateY(8px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .modal-header-custom {
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--slate-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--slate-50);
+  }
+  .modal-header-custom h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--brand-dark);
+  }
+  .modal-close-btn {
+    border: none;
+    background: transparent;
+    font-size: 20px;
+    color: var(--slate-400);
+    cursor: pointer;
+    line-height: 1;
+  }
+  .modal-close-btn:hover { color: var(--slate-700); }
+  .modal-body-custom {
+    padding: 20px 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .modal-footer-custom {
+    padding: 14px 22px;
+    border-top: 1px solid var(--slate-200);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    background: var(--slate-50);
+  }
 
-        .modal-footer {
-            flex-shrink: 0;
-            border-top: 1px solid #e5e5e5;
-            padding: 10px 20px;
-            background: #fafafa;
-            border-radius: 0 0 4px 4px;
-        }
+  .form-group-custom {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .form-group-custom label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--slate-700);
+  }
+  .form-control-custom {
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid var(--slate-300);
+    border-radius: 7px;
+    font-size: 13px;
+    color: var(--slate-800);
+    background: var(--white);
+    outline: none;
+    transition: border-color .15s;
+  }
+  .form-control-custom:focus {
+    border-color: var(--brand-green);
+    box-shadow: 0 0 0 3px rgba(45,106,79,0.12);
+  }
+  textarea.form-control-custom {
+    height: auto;
+    padding: 8px 12px;
+  }
+  .form-row-custom {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+  }
 
-        .select2-container--open {
-            z-index: 99999 !important;
-        }
+  .btn-primary-custom {
+    height: 38px;
+    padding: 0 18px;
+    background: var(--brand-green);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .btn-primary-custom:hover { background: var(--brand-dark); }
+  .btn-secondary-custom {
+    height: 38px;
+    padding: 0 16px;
+    background: var(--slate-200);
+    color: var(--slate-700);
+    border: none;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-secondary-custom:hover { background: var(--slate-300); }
 
-        .modal-lokasi .modal-body {
-            padding: 20px 25px;
-            max-height: 60vh;
-            overflow-y: auto;
-        }
+  .loading-shade {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255,255,255,0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+  }
+  .loading-shade.active { display: flex; }
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--slate-200);
+    border-top-color: var(--brand-green);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-        .modal-lokasi .modal-header {
-            background: #f8f9fa;
-            border-bottom: 2px solid #e9ecef;
-            flex-shrink: 0;
-        }
-
-        .modal-lokasi .modal-footer {
-            flex-shrink: 0;
-        }
-
-        .lokasi-tab {
-            margin-top: 10px;
-        }
-
-        .lokasi-tab .nav-tabs > li > a {
-            padding: 8px 15px;
-            font-size: 13px;
-        }
-
-        .lokasi-tab .tab-content {
-            padding: 15px 0;
-        }
-
-        #LokasiInfo {
-            margin-top: 10px;
-            padding: 10px;
-            background: #e8f0fe;
-            border-radius: 4px;
-            display: none;
-        }
-
-        #LokasiInfo strong {
-            color: #1a5276;
-        }
-
-        #LokasiInfoText {
-            font-weight: 500;
-            color: #2c3e50;
-        }
-
-        @media (max-width: 768px) {
-            .table-ranwal {
-                font-size: 10px;
-            }
-            .table-ranwal th, .table-ranwal td {
-                padding: 4px;
-            }
-            .btn-aksi {
-                font-size: 0.7rem;
-                padding: 2px 4px;
-            }
-            .bidang-pengampu-cell {
-                font-size: 8px;
-                min-width: 120px;
-            }
-            .bidang-pengampu-cell .jabatan-text,
-            .bidang-pengampu-cell .nama-text {
-                font-size: 8px;
-            }
-        }
-    </style>
+  .toast-custom {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--slate-900);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: var(--shadow-lg);
+    display: none;
+    z-index: 999999;
+  }
+  .toast-custom.show { display: block; animation: toastIn .2s ease; }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
 </head>
-
 <body>
 
-<?php $this->load->view('Daerah/sidebar'); ?>
-
-<!-- LOADING OVERLAY -->
-<div class="loading-overlay" id="loadingOverlay">
-    <div class="spinner">
-        <i class="notika-icon notika-refresh"></i>
-        <h4>Memuat data...</h4>
-    </div>
-</div>
-
 <div class="main-content">
-    <div class="data-table-area">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="data-table-list">
+  <div class="renja-wrapper">
 
-                        <!-- ============================================================ -->
-                        <!-- FILTER WILAYAH (Sebelum Login)                                -->
-                        <!-- ============================================================ -->
-                        <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-                            <div class="filter-section">
-                                <div class="row">
-                                    <div class="col-lg-3 col-md-6">
-                                        <div class="filter-group">
-                                            <label class="filter-label" for="Provinsi"><b>Provinsi</b></label>
-                                            <select class="form-control" id="Provinsi">
-                                                <option value="">Pilih Provinsi</option>
-                                                <?php foreach ($Provinsi as $prov) { ?>
-                                                    <option value="<?= html_escape($prov['Kode']) ?>"
-                                                        <?= (!empty($KodeWilayah) && substr($KodeWilayah,0,2)==$prov['Kode']) ? 'selected' : '' ?>>
-                                                        <?= html_escape($prov['Nama']) ?>
-                                                    </option>
-                                                <?php } ?>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-3 col-md-6">
-                                        <div class="filter-group">
-                                            <label class="filter-label" for="KabKota"><b>Kab/Kota</b></label>
-                                            <select class="form-control" id="KabKota">
-                                                <option value="">Pilih Kab/Kota</option>
-                                                <?php if (!empty($KodeWilayah)) { 
-                                                    $selected_kab = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-                                                ?>
-                                                    <option value="<?= html_escape($KodeWilayah) ?>" selected>
-                                                        <?= html_escape($selected_kab['Nama'] ?? $KodeWilayah) ?>
-                                                    </option>
-                                                <?php } ?>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-3 col-md-6" id="FilterInstansiGroupBefore" style="display: <?= !empty($KodeWilayah) ? 'block' : 'none' ?>;">
-                                        <div class="filter-group">
-                                            <label class="filter-label" for="FilterInstansiBeforeLogin"><b>Filter Instansi</b></label>
-                                            <select class="form-control" id="FilterInstansiBeforeLogin">
-                                                <option value="">-- Semua Instansi --</option>
-                                                <?php 
-                                                if (!empty($KodeWilayah)) {
-                                                    $instansi_list = $this->db->select('id, nama')
-                                                        ->from('akun_instansi')
-                                                        ->where('kodewilayah', $KodeWilayah)
-                                                        ->where('Level', 4)
-                                                        ->where('deleted_at IS NULL')
-                                                        ->order_by('nama', 'ASC')
-                                                        ->get()
-                                                        ->result_array();
-                                                    
-                                                    $filter_instansi_id = $this->input->get('instansi_id', TRUE);
-                                                    foreach ($instansi_list as $ins) {
-                                                        $selected = ($filter_instansi_id == $ins['id']) ? 'selected' : '';
-                                                        echo '<option value="' . html_escape($ins['id']) . '" ' . $selected . '>' . html_escape($ins['nama']) . '</option>';
-                                                    }
-                                                }
-                                                ?>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-2 col-md-6">
-                                        <div class="filter-group" style="margin-top: 28px;">
-                                            <button class="btn btn-primary btn-block" id="Filter">
-                                                <b>Filter</b>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <?php if (!empty($KodeWilayah)) { ?>
-                                <?php
-                                    $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-                                    $nama_wilayah = $wilayah ? html_escape($wilayah['Nama']) : 'Wilayah Tidak Ditemukan';
-                                ?>
-                                <div class="alert alert-info" style="margin-bottom: 20px;">
-                                    <strong>Wilayah terpilih:</strong> <?= $nama_wilayah ?>
-                                    <?php 
-                                    $filter_instansi_id = $this->input->get('instansi_id', TRUE);
-                                    if (!empty($filter_instansi_id)) { 
-                                        $instansi_terpilih = $this->db->select('nama')->from('akun_instansi')->where('id', $filter_instansi_id)->get()->row_array();
-                                    ?>
-                                        <br><strong>Instansi terpilih:</strong> <?= htmlspecialchars($instansi_terpilih['nama'] ?? '-') ?>
-                                    <?php } ?>
-                                </div>
-                            <?php } ?>
-                        <?php } ?>
-
-                        <!-- ============================================================ -->
-                        <!-- FILTER INSTANSI (Sudah Login, Bukan Role 4)                  -->
-                        <!-- ============================================================ -->
-                        <?php 
-                        $is_role_4 = isset($_SESSION['Level']) && $_SESSION['Level'] == 4;
-                        if (isset($_SESSION['KodeWilayah']) && !$is_role_4 && !empty($ListInstansi)) { ?>
-                            <div class="filter-section">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="filter-group">
-                                            <label class="filter-label" for="FilterInstansi"><b>Filter Instansi</b></label>
-                                            <select class="form-control" id="FilterInstansi">
-                                                <option value="">-- Semua Instansi --</option>
-                                                <?php foreach ($ListInstansi as $ins) { 
-                                                    $selected = ($this->input->get('instansi_id') == $ins['id']) ? 'selected' : '';
-                                                ?>
-                                                    <option value="<?= $ins['id'] ?>" <?= $selected ?>>
-                                                        <?= html_escape($ins['nama']) ?>
-                                                    </option>
-                                                <?php } ?>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <div class="filter-group" style="margin-top: 28px;">
-                                            <button class="btn btn-primary btn-block" id="FilterInstansiBtn">
-                                                <i class="fa fa-search"></i> Tampilkan
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <div class="filter-group" style="margin-top: 28px;">
-                                            <button class="btn btn-default btn-block" id="ResetFilterBtn">
-                                                <i class="fa fa-times"></i> Reset
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php } ?>
-
-                        <!-- ============================================================ -->
-                        <!-- INFO INSTANSI (Role 4)                                       -->
-                        <!-- ============================================================ -->
-                        <?php if ($is_role_4 && isset($_SESSION['NamaInstansi'])) { ?>
-                            <div class="alert alert-success" style="margin-bottom: 20px;">
-                                <i class="fa fa-building"></i> <strong>Instansi:</strong> <?= htmlspecialchars($_SESSION['NamaInstansi']) ?>
-                            </div>
-                        <?php } ?>
-
-                        <!-- ============================================================ -->
-                        <!-- NOTIFIKASI EDIT OLEH DAERAH                                 -->
-                        <!-- ============================================================ -->
-                        <?php 
-                        $has_edited = false;
-                        $total_edited = 0;
-                        foreach ($RenjaData as $row) {
-                            if (!empty($row['details'])) {
-                                foreach ($row['details'] as $detail) {
-                                    if (!empty($detail['edited_by_daerah']) && $detail['edited_by_daerah'] == 1) {
-                                        $has_edited = true;
-                                        $total_edited++;
-                                    }
-                                }
-                            }
-                        }
-                        ?>
-                        
-                        <?php if ($has_edited): ?>
-                        <div class="edit-notification">
-                            <i class="fa fa-info-circle"></i>
-                            <span class="text">
-                                <strong>Perhatian:</strong> Terdapat <strong><?= $total_edited ?></strong> indikator yang telah diedit oleh Daerah. 
-                                Data yang telah diedit akan ditandai dengan latar belakang <span style="background:#fff3cd; padding:2px 8px; border-radius:4px;">kuning</span> pada tabel di bawah.
-                            </span>
-                        </div>
-                        <?php endif; ?>
-
-                        <!-- ============================================================ -->
-                        <!-- JUDUL HALAMAN                                               -->
-                        <!-- ============================================================ -->
-                        <div class="basic-tb-hd">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <h2><i class="fa fa-file-text"></i> Ranwal RKPD</h2>
-                                    <p class="text-muted">
-                                        <i class="fa fa-info-circle"></i> 
-                                        Data diambil dari menu Renja Perangkat Daerah.
-                                    </p>
-                                </div>
-                            </div>
-                            <hr>
-                        </div>
-
-                        <!-- ============================================================ -->
-                        <!-- TABEL RANWAL RKPD                                            -->
-                        <!-- ============================================================ -->
-                        <div class="table-responsive">
-                            <table id="data-table-basic" class="table table-striped table-ranwal">
-                                <thead>
-                                    <tr>
-                                        <th style="min-width:120px;">Kode Rekening</th>
-                                        <th style="min-width:200px;">Tujuan/Sasaran/Program/Kegiatan/Sub Kegiatan</th>
-                                        <th style="width:80px;">Jumlah Indikator</th>
-                                        <?php if (!empty($KodeWilayah) && isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                        <th style="width:80px;">Status</th>
-                                        <th style="width:80px;">AKSI</th>
-                                        <?php } ?>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php if (!empty($RenjaData)) { ?>
-                                        <?php foreach ($RenjaData as $row) { 
-                                            $has_edit_header = false;
-                                            if (!empty($row['details'])) {
-                                                foreach ($row['details'] as $det) {
-                                                    if (!empty($det['edited_by_daerah']) && $det['edited_by_daerah'] == 1) {
-                                                        $has_edit_header = true;
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                        ?>
-                                            <tr class="header-row <?= $has_edit_header ? 'has-edit' : '' ?>" 
-                                                data-header-id="<?= $row['id'] ?>" 
-                                                data-expanded="false">
-                                                <td class="text-left header-clickable" onclick="toggleDetails('<?= $row['id'] ?>', this)">
-                                                    <strong><?= html_escape($row['kode_rekening'] ?: '-') ?></strong>
-                                                </td>
-                                                <td class="uraian header-clickable" onclick="toggleDetails('<?= $row['id'] ?>', this)">
-                                                    <?php 
-                                                    $display_text = '';
-                                                    if (!empty($row['sub_kegiatan'])) {
-                                                        $display_text = $row['sub_kegiatan'];
-                                                    } elseif (!empty($row['kegiatan'])) {
-                                                        $display_text = $row['kegiatan'];
-                                                    } elseif (!empty($row['program'])) {
-                                                        $display_text = $row['program'];
-                                                    } elseif (!empty($row['sasaran'])) {
-                                                        $display_text = $row['sasaran'];
-                                                    } elseif (!empty($row['tujuan'])) {
-                                                        $display_text = $row['tujuan'];
-                                                    } else {
-                                                        $display_text = '-';
-                                                    }
-                                                    echo nl2br(html_escape($display_text));
-                                                    ?>
-                                                </td>
-                                                <td class="text-center header-clickable" onclick="toggleDetails('<?= $row['id'] ?>', this)">
-                                                    <span class="badge badge-detail">
-                                                        <i class="fa fa-list"></i> <?= $row['detail_count'] ?? 0 ?>
-                                                    </span>
-                                                </td>
-                                                <?php if (!empty($KodeWilayah) && isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                                <td class="text-center">
-                                                    <?php if ($has_edit_header) { ?>
-                                                        <span class="badge" style="background: #ffc107; color: #856404;">
-                                                            <i class="fa fa-edit"></i> Diedit Daerah
-                                                        </span>
-                                                    <?php } else { ?>
-                                                        <span class="badge" style="background: #28a745; color: #fff;">
-                                                            <i class="fa fa-check"></i> Normal
-                                                        </span>
-                                                    <?php } ?>
-                                                </td>
-                                                <td class="text-center">
-                                                    <span class="text-muted" style="font-size: 9px;">
-                                                        <i class="fa fa-arrow-right"></i> Klik indikator
-                                                    </span>
-                                                </td>
-                                                <?php } ?>
-                                            </tr>
-                                            
-                                            <!-- DETAIL ROW -->
-                                            <?php if (!empty($row['details'])) { ?>
-                                                <tr class="detail-row detail-hidden" data-header-id="<?= $row['id'] ?>">
-                                                    <td colspan="6" style="padding:0;">
-                                                        <div class="detail-container">
-                                                            <table class="table table-bordered table-condensed table-detail-indikator" style="margin:0; font-size:10px; min-width:1400px;">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th rowspan="2" class="header-indikator" style="width:12%; vertical-align:middle; min-width:120px;">
-                                                                            <span style="font-size:10px; font-weight:800;">INDIKATOR KINERJA</span>
-                                                                            <br><small style="font-weight:400;">(Dengan edit oleh Daerah)</small>
-                                                                        </th>
-                                                                        <th rowspan="2" style="width:5%;vertical-align:middle; font-size:9px;">Satuan</th>
-                                                                        <th rowspan="2" style="width:8%;vertical-align:middle; font-size:9px;">Lokasi</th>
-                                                                        <th rowspan="2" style="width:6%;vertical-align:middle; font-size:9px;">Prioritas Daerah</th>
-                                                                        <th rowspan="2" style="width:6%;vertical-align:middle; font-size:9px;">Prioritas Nasional</th>
-                                                                        
-                                                                        <th colspan="2" style="width:8%;text-align:center;background:#e9ecef; font-size:9px;">Ranwal Renja</th>
-                                                                        <th colspan="2" style="width:8%;text-align:center;background:#e9ecef; font-size:9px;">Rancangan Renja</th>
-                                                                        <th colspan="2" style="width:8%;text-align:center;background:#e9ecef; font-size:9px;">Ranhir Renja</th>
-                                                                        <th colspan="2" style="width:8%;text-align:center;background:#e9ecef; font-size:9px;">Renja</th>
-                                                                        <th colspan="2" style="width:8%;text-align:center;background:#e9ecef; font-size:9px;">DPA Murni</th>
-                                                                        
-                                                                        <th rowspan="2" style="width:4%;vertical-align:middle; font-size:9px;">Sumber</th>
-                                                                        
-                                                                        <th colspan="2" style="width:8%;text-align:center;background:#e9ecef; font-size:9px;">DPA Perubahan</th>
-                                                                        
-                                                                        <!-- ===== KOLOM BIDANG & PENGAMPU DIPERLEBAR ===== -->
-                                                                        <th rowspan="2" style="width:12%;vertical-align:middle; font-size:9px; min-width:180px;">
-                                                                            Bidang &amp; Pengampu
-                                                                            <br><small style="font-weight:400; font-size:7px; color:#6c757d;">(Jabatan - Nama)</small>
-                                                                        </th>
-                                                                        
-                                                                        <?php if (!empty($KodeWilayah) && isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                                                        <th rowspan="2" style="width:4%;vertical-align:middle; font-size:9px;">AKSI</th>
-                                                                        <?php } ?>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <th style="width:4%;text-align:center;font-size:7px;background:#f1f3f5;">Kinerja</th>
-                                                                        <th style="width:4%;text-align:center;font-size:7px;background:#f1f3f5;">Rp</th>
-                                                                        <th style="width:4%;text-align:center;font-size:7px;background:#f1f3f5;">Kinerja</th>
-                                                                        <th style="width:4%;text-align:center;font-size:7px;background:#f1f3f5;">Rp</th>
-                                                                        <th style="width:4%;text-align:center;font-size:7px;background:#f1f3f5;">Kinerja</th>
-                                                                        <th style="width:4%;text-align:center;font-size:7px;background:#f1f3f5;">Rp</th>
-                                                                        <th style="width:4%;text-align:center;font-size:7px;background:#f1f3f5;">Kinerja</th>
-                                                                        <th style="width:4%;text-align:center;font-size:7px;background:#f1f3f5;">Rp</th>
-                                                                        <th style="width:4%;text-align:center;font-size:7px;background:#f1f3f5;">Kinerja</th>
-                                                                        <th style="width:4%;text-align:center;font-size:7px;background:#f1f3f5;">Rp</th>
-                                                                        <th style="width:4%;text-align:center;font-size:7px;background:#f1f3f5;">Kinerja</th>
-                                                                        <th style="width:4%;text-align:center;font-size:7px;background:#f1f3f5;">Rp</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    <?php foreach ($row['details'] as $index => $detail) { 
-                                                                        $is_edited = !empty($detail['edited_by_daerah']) && $detail['edited_by_daerah'] == 1;
-                                                                        
-                                                                        $lokasi_text = '-';
-                                                                        if (!empty($detail['lokasi'])) {
-                                                                            if (strpos($detail['lokasi'], 'manual_') === 0) {
-                                                                                $lokasi_text = $detail['lokasi_nama'] ?? $detail['lokasi'];
-                                                                            } else {
-                                                                                $lokasi_data = $this->db->select('Nama')->from('kodewilayah')->where('Kode', $detail['lokasi'])->get()->row_array();
-                                                                                $lokasi_text = $lokasi_data ? $lokasi_data['Nama'] : $detail['lokasi'];
-                                                                            }
-                                                                        }
-                                                                    ?>
-                                                                        <tr class="row-indikator-detail <?= $is_edited ? 'edited-by-daerah' : '' ?>" 
-                                                                            data-detail-id="<?= $detail['id'] ?>">
-                                                                            
-                                                                            <td class="col-indikator-kinerja-item">
-                                                                                <div class="indikator-item">
-                                                                                    <span class="text-indikator">
-                                                                                        <?= nl2br(html_escape($detail['indikator_kinerja'] ?? '-')) ?>
-                                                                                        <?php if (!empty($detail['sumber_data_id'])) { ?>
-                                                                                            <span class="badge badge-info" style="font-size:7px; background:#17a2b8; color:#fff;" 
-                                                                                                title="ID sumber dari Renja PD: <?= $detail['sumber_data_id'] ?>">
-                                                                                                <i class="fa fa-link"></i>
-                                                                                            </span>
-                                                                                        <?php } ?>
-                                                                                    </span>
-                                                                                    <?php if ($is_edited) { ?>
-                                                                                        <div class="badge-daerah-edit" style="background-color: #f39c12; color: #fff; font-size: 8px; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: block; text-align: center;">
-                                                                                            <i class="fa fa-edit"></i> Diedit Daerah
-                                                                                            <?php if (!empty($detail['daerah_edit_time'])) { ?>
-                                                                                                <br><small style="font-size: 7px;"><?= date('d/m/Y H:i', strtotime($detail['daerah_edit_time'])) ?></small>
-                                                                                            <?php } ?>
-                                                                                        </div>
-                                                                                    <?php } ?>
-                                                                                </div>
-                                                                            </td>
-                                                                            
-                                                                            <td><?= html_escape($detail['satuan'] ?? '-') ?></td>
-                                                                            <td><?= html_escape($lokasi_text) ?></td>
-                                                                            <td><?= html_escape($detail['prioritas_daerah'] ?? '-') ?></td>
-                                                                            <td><?= html_escape($detail['prioritas_nasional'] ?? '-') ?></td>
-                                                                            
-                                                                            <td class="text-left"><?= nl2br(html_escape($detail['ranwal_kinerja'] ?? '-')) ?></td>
-                                                                            <td class="rp"><?= !empty($detail['ranwal_rp']) ? 'Rp ' . number_format($detail['ranwal_rp'], 0, ',', '.') : '-' ?></td>
-                                                                            <td class="text-left"><?= nl2br(html_escape($detail['rancangan_kinerja'] ?? '-')) ?></td>
-                                                                            <td class="rp"><?= !empty($detail['rancangan_rp']) ? 'Rp ' . number_format($detail['rancangan_rp'], 0, ',', '.') : '-' ?></td>
-                                                                            <td class="text-left"><?= nl2br(html_escape($detail['ranhir_kinerja'] ?? '-')) ?></td>
-                                                                            <td class="rp"><?= !empty($detail['ranhir_rp']) ? 'Rp ' . number_format($detail['ranhir_rp'], 0, ',', '.') : '-' ?></td>
-                                                                            <td class="text-left"><?= nl2br(html_escape($detail['renja_kinerja'] ?? '-')) ?></td>
-                                                                            <td class="rp"><?= !empty($detail['renja_rp']) ? 'Rp ' . number_format($detail['renja_rp'], 0, ',', '.') : '-' ?></td>
-                                                                            <td class="text-left"><?= nl2br(html_escape($detail['dpa_murni_kinerja'] ?? '-')) ?></td>
-                                                                            <td class="rp"><?= !empty($detail['dpa_murni_rp']) ? 'Rp ' . number_format($detail['dpa_murni_rp'], 0, ',', '.') : '-' ?></td>
-                                                                            <td><?= html_escape($detail['sumber_dana'] ?? '-') ?></td>
-                                                                            <td class="text-left"><?= nl2br(html_escape($detail['dpa_perubahan_kinerja'] ?? '-')) ?></td>
-                                                                            <td class="rp"><?= !empty($detail['dpa_perubahan_rp']) ? 'Rp ' . number_format($detail['dpa_perubahan_rp'], 0, ',', '.') : '-' ?></td>
-                                                                            
-                                                                            <!-- ===== BIDANG & PENGAMPU - TAMPILKAN JABATAN DAN NAMA ===== -->
-                                                                            <td class="bidang-pengampu-cell">
-                                                                                <?php 
-                                                                                $bidang_text = '';
-                                                                                $jabatan_text = '';
-                                                                                $nama_text = '';
-                                                                                
-                                                                                // Data Bidang
-                                                                                if (!empty($detail['bidang_pengampu_nama'])) {
-                                                                                    $bidang_text = html_escape($detail['bidang_pengampu_nama']);
-                                                                                }
-                                                                                
-                                                                                // Data Pengampu - TAMPILKAN JABATAN DAN NAMA
-                                                                                $pengampu_nama = $detail['pengampu_nama'] ?? '';
-                                                                                $pengampu_jabatan = $detail['pengampu_jabatan'] ?? '';
-                                                                                
-                                                                                if (!empty($pengampu_nama) && !empty($pengampu_jabatan)) {
-                                                                                    // Ada jabatan dan nama
-                                                                                    $jabatan_text = html_escape($pengampu_jabatan);
-                                                                                    $nama_text = html_escape($pengampu_nama);
-                                                                                } elseif (!empty($pengampu_nama)) {
-                                                                                    // Hanya nama
-                                                                                    $nama_text = html_escape($pengampu_nama);
-                                                                                }
-                                                                                
-                                                                                // Output
-                                                                                if ($bidang_text) {
-                                                                                    echo '<span class="bidang-label text-center">Bidang: ' . $bidang_text . '</span>';
-                                                                                }
-                                                                                
-                                                                                if ($jabatan_text && $nama_text) {
-                                                                                    echo '<span class="pengampu-label text-center">Pengampu:</span>';
-                                                                                    echo '<span class="pengampu-detail text-center">';
-                                                                                    echo '<span class="jabatan-text text-center">' . $jabatan_text . '</span>';
-                                                                                    echo '<span class="nama-text text-center"> - ' . $nama_text . '</span>';
-                                                                                    echo '</span>';
-                                                                                } elseif ($nama_text) {
-                                                                                    echo '<span class="pengampu-label text-center">Pengampu:</span>';
-                                                                                    echo '<span class="pengampu-simple text-center">' . $nama_text . '</span>';
-                                                                                }
-                                                                                
-                                                                                if (empty($bidang_text) && empty($nama_text)) {
-                                                                                    echo '<span class="text-muted">-</span>';
-                                                                                }
-                                                                                ?>
-                                                                            </td>
-                                                                            
-                                                                            <?php if (!empty($KodeWilayah) && isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                                                            <td>
-                                                                                <div class="btn-group-aksi">
-                                                                                    <button class="btn btn-warning btn-xs BtnEditRanwal"
-                                                                                        data-id="<?= $detail['id'] ?>"
-                                                                                        data-header-id="<?= $row['id'] ?>"
-                                                                                        title="Edit Data"
-                                                                                        type="button">
-                                                                                        <i class="notika-icon notika-edit"></i>
-                                                                                    </button>
-                                                                                    <button class="btn btn-danger btn-xs BtnHapusRanwal"
-                                                                                        data-id="<?= $detail['id'] ?>"
-                                                                                        data-indikator="<?= html_escape(substr($detail['indikator_kinerja'] ?? '-', 0, 50)) ?>"
-                                                                                        title="Hapus Data"
-                                                                                        type="button">
-                                                                                        <i class="notika-icon notika-trash"></i>
-                                                                                    </button>
-                                                                                </div>
-                                                                            </td>
-                                                                            <?php } ?>
-                                                                        </tr>
-                                                                    <?php } ?>
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            <?php } ?>
-                                            
-                                        <?php } ?>
-                                    <?php } else { ?>
-                                        <tr>
-                                            <td colspan="6" class="text-center no-data">
-                                                <i class="fa fa-inbox" style="font-size: 40px; display: block; color: #ddd;"></i>
-                                                <strong>Belum ada data Renja yang diinput oleh Instansi</strong>
-                                                <br>
-                                                <small class="text-muted">
-                                                    Data akan otomatis muncul saat Instansi membuat Renja.
-                                                </small>
-                                            </td>
-                                        </tr>
-                                    <?php } ?>
-                                </tbody>
-                            </table>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
+    <!-- ============ FILTER SECTION ============ -->
+    <?php if (!$IsLoggedIn || !isset($_SESSION['KodeWilayah'])) { ?>
+      <!-- Filter Wilayah (Provinsi, Kab/Kota, dan Instansi) - SEBELUM LOGIN -->
+      <div class="filter-card-custom" style="background:#fff; border-radius:12px; padding:18px 24px; margin-bottom:18px; box-shadow:var(--shadow-sm); border:1px solid var(--slate-200);">
+        <div class="filter-header-title" style="font-size:14px; font-weight:700; color:var(--slate-800); margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+          <i class="fa fa-filter" style="color:var(--brand-green);"></i> Filter Wilayah &amp; Instansi
         </div>
-    </div>
-</div>
+        <div class="row" style="display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end;">
+          <div class="col-filter" style="flex:1; min-width:200px;">
+            <label style="font-size:12px; font-weight:600; color:var(--slate-600); margin-bottom:5px; display:block;">Provinsi</label>
+            <select class="form-control filter-select-custom" id="Provinsi" style="width:100%; height:38px; border-radius:8px; border:1px solid var(--slate-200); font-size:13px; padding:6px 10px;">
+              <option value="">Pilih Provinsi</option>
+              <?php if (!empty($Provinsi)) { foreach ($Provinsi as $prov) { ?>
+                <option value="<?= html_escape($prov['Kode']) ?>" <?= (!empty($KodeWilayah) && substr($KodeWilayah,0,2)==$prov['Kode']) ? 'selected' : '' ?>>
+                  <?= html_escape($prov['Nama']) ?>
+                </option>
+              <?php }} ?>
+            </select>
+          </div>
 
-<!-- ============================================================ -->
-<!-- MODAL EDIT RANWAL                                              -->
-<!-- ============================================================ -->
-<div class="modal fade" id="ModalEditRanwal" role="dialog" style="z-index: 999999 !important;">
-    <div class="modal-dialog modal-lg" style="position: relative; margin: 30px auto !important; max-width: 900px;">
-        <div class="modal-content" style="max-height: 100vh; overflow: hidden; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
-            <div class="modal-header" style="flex-shrink: 0; background: #f8f9fa; border-bottom: 2px solid #dee2e6; border-radius: 8px 8px 0 0;">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4><b><i class="fa fa-edit" style="color: #ffc107;"></i> Edit Ranwal RKPD</b></h4>
-                <small id="EditHeaderInfo" class="text-muted"></small>
-                <div class="alert alert-warning" style="margin-top: 10px; padding: 8px 12px; font-size: 12px;">
-                    <i class="fa fa-info-circle"></i> 
-                    Perubahan akan ditandai dan muncul di menu <strong>Ranwal Renja Perangkat Daerah</strong> sebagai notifikasi.
-                </div>
-            </div>
-            <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 15px 20px;">
-                <input type="hidden" id="EditDetailId" value="0">
-                <input type="hidden" id="EditHeaderId" value="0">
-                
-                <!-- INDIKATOR KINERJA -->
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label><b>Indikator Kinerja</b> <span class="text-danger">*</span></label>
-                            <textarea class="form-control" id="EditIndikatorKinerja" rows="3" placeholder="Masukkan indikator kinerja..."></textarea>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- SATUAN & LOKASI & PRIORITAS DAERAH -->
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label><b>Satuan</b></label>
-                            <input type="text" class="form-control" id="EditSatuan" placeholder="%" style="height: 34px;">
-                        </div>
-                    </div>
-                    <div class="col-md-5">
-                        <div class="form-group">
-                            <label><b>Lokasi</b></label>
-                            <div class="lokasi-container">
-                                <button type="button" class="btn btn-info btn-xs btn-select-lokasi" 
-                                        data-toggle="modal" data-target="#ModalLokasi" 
-                                        style="padding: 2px 10px; font-size: 11px; white-space: nowrap; height: 26px; line-height: 22px; flex-shrink: 0; margin-top: 2px;">
-                                    <i class="fa fa-map-marker"></i> Pilih
-                                </button>
-                                
-                                <span id="EditLokasiPlaceholder" class="text-muted" style="font-size: 12px; color: #999; padding: 3px 0;">Belum ada</span>
-                                <span id="EditSelectedLokasiText" style="display: none; font-size: 12px; color: #2c3e50; font-weight: 500; white-space: normal; word-wrap: break-word; word-break: break-word; line-height: 1.5; padding: 3px 0; flex: 1; max-height: 60px; overflow-y: auto;"></span>
-                                <span id="EditRemoveLokasiBtn" style="display: none; cursor: pointer; color: #e74c3c; font-size: 16px; font-weight: bold; line-height: 1; padding: 2px 4px; flex-shrink: 0; margin-top: 2px;" onclick="removeEditLokasi()">✖</span>
-                                
-                                <input type="hidden" id="EditLokasiKode" value="">
-                                <input type="hidden" id="EditLokasiNama" value="">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label><b>Prioritas Daerah</b></label>
-                            <input type="text" class="form-control" id="EditPrioritasDaerah" placeholder="Prioritas daerah..." style="height: 34px;">
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- PRIORITAS NASIONAL & SUMBER DANA -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label><b>Prioritas Nasional</b></label>
-                            <input type="text" class="form-control" id="EditPrioritasNasional" placeholder="Prioritas nasional..." style="height: 34px;">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label><b>Sumber Dana</b></label>
-                            <input type="text" class="form-control" id="EditSumberDana" placeholder="APBD / APBN / dll" style="height: 34px;">
-                        </div>
-                    </div>
-                </div>
-                
-                <hr>
-                
-                <!-- RANWAL RENJA -->
-                <h5><b>RANWAL RENJA</b></h5>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label><b>Kinerja</b></label>
-                            <textarea class="form-control" id="EditRanwalKinerja" rows="2" placeholder="Kinerja Ranwal..."></textarea>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label><b>Rp</b></label>
-                            <input type="text" class="form-control format-rupiah" id="EditRanwalRp" placeholder="0">
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- RANCANGAN RENJA -->
-                <h5><b>RANCANGAN RENJA</b></h5>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label><b>Kinerja</b></label>
-                            <textarea class="form-control" id="EditRancanganKinerja" rows="2" placeholder="Kinerja Rancangan..."></textarea>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label><b>Rp</b></label>
-                            <input type="text" class="form-control format-rupiah" id="EditRancanganRp" placeholder="0">
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- RANHIR RENJA -->
-                <h5><b>RANHIR RENJA</b></h5>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label><b>Kinerja</b></label>
-                            <textarea class="form-control" id="EditRanhirKinerja" rows="2" placeholder="Kinerja Ranhir..."></textarea>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label><b>Rp</b></label>
-                            <input type="text" class="form-control format-rupiah" id="EditRanhirRp" placeholder="0">
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- RENJA -->
-                <h5><b>RENJA</b></h5>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label><b>Kinerja</b></label>
-                            <textarea class="form-control" id="EditRenjaKinerja" rows="2" placeholder="Kinerja Renja..."></textarea>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label><b>Rp</b></label>
-                            <input type="text" class="form-control format-rupiah" id="EditRenjaRp" placeholder="0">
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- DPA MURNI -->
-                <h5><b>DPA MURNI</b></h5>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label><b>Kinerja</b></label>
-                            <textarea class="form-control" id="EditDpaMurniKinerja" rows="2" placeholder="Kinerja DPA Murni..."></textarea>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label><b>Rp</b></label>
-                            <input type="text" class="form-control format-rupiah" id="EditDpaMurniRp" placeholder="0">
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- DPA PERUBAHAN -->
-                <h5><b>DPA PERUBAHAN</b></h5>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label><b>Kinerja</b></label>
-                            <textarea class="form-control" id="EditDpaPerubahanKinerja" rows="2" placeholder="Kinerja DPA Perubahan..."></textarea>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label><b>Rp</b></label>
-                            <input type="text" class="form-control format-rupiah" id="EditDpaPerubahanRp" placeholder="0">
-                        </div>
-                    </div>
-                </div>
-                
-                <hr>
-                
-                <!-- ============================================================ -->
-                <!-- BIDANG PENGAMPU & PENGAMPU - DENGAN INFO JABATAN              -->
-                <!-- ============================================================ -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label><b>Bidang Pengampu</b></label>
-                            <select class="form-control select2-bidang" id="EditBidangPengampu" style="width: 100%;">
-                                <option value="">-- Pilih Bidang Pengampu --</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group" id="EditPengampuGroup" style="display: none;">
-                            <label><b>Pengampu</b></label>
-                            <select class="form-control select2-pengampu" id="EditPengampu" style="width: 100%;">
-                                <option value="">-- Pilih Pengampu --</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- ============================================================ -->
-                <!-- INFO PENGAMPU - MENAMPILKAN JABATAN & NIP                     -->
-                <!-- ============================================================ -->
-                <div class="pengampu-info-modal" id="EditPengampuInfo">
-                    <span class="label">Pengampu:</span>
-                    <span class="nama" id="EditPengampuNama"></span>
-                    <span class="jabatan" id="EditPengampuJabatan"></span>
-                    <span class="nip" id="EditPengampuNip"></span>
-                </div>
-                
-            </div>
-            <div class="modal-footer" style="flex-shrink: 0; border-top: 1px solid #e5e5e5; padding: 10px 20px; background: #fafafa; border-radius: 0 0 8px 8px;">
-                <button type="button" class="btn btn-default" data-dismiss="modal"><b>BATAL</b></button>
-                <button class="btn btn-warning" id="BtnSimpanEditRanwal"><b><i class="fa fa-save"></i> SIMPAN PERUBAHAN</b></button>
-            </div>
+          <div class="col-filter" style="flex:1; min-width:200px;">
+            <label style="font-size:12px; font-weight:600; color:var(--slate-600); margin-bottom:5px; display:block;">Kabupaten / Kota</label>
+            <select class="form-control filter-select-custom" id="KabKota" style="width:100%; height:38px; border-radius:8px; border:1px solid var(--slate-200); font-size:13px; padding:6px 10px;">
+              <option value="">Pilih Kab/Kota</option>
+            </select>
+          </div>
+
+          <div class="col-filter" id="FilterInstansiGroup" style="flex:1.2; min-width:220px; <?= empty($KodeWilayah) ? 'display:none;' : '' ?>">
+            <label style="font-size:12px; font-weight:600; color:var(--slate-600); margin-bottom:5px; display:block;">Perangkat Daerah / Instansi</label>
+            <select class="form-control filter-select-custom" id="FilterInstansiBeforeLogin" style="width:100%; height:38px; border-radius:8px; border:1px solid var(--slate-200); font-size:13px; padding:6px 10px;">
+              <option value="">-- Pilih Instansi --</option>
+              <?php if (!empty($ListInstansi)) { foreach ($ListInstansi as $ins) { ?>
+                <option value="<?= $ins['id'] ?>" <?= ($ActiveInstansiId == $ins['id']) ? 'selected' : '' ?>>
+                  <?= html_escape($ins['nama']) ?>
+                </option>
+              <?php }} ?>
+            </select>
+          </div>
+
+          <div class="col-filter" style="width:auto;">
+            <button type="button" class="btn btn-primary-custom" id="Filter" style="height:38px; padding:0 22px; font-size:13px;">
+              <i class="fa fa-search"></i> Filter
+            </button>
+          </div>
         </div>
-    </div>
-</div>
 
-<!-- ============================================================ -->
-<!-- MODAL PILIH LOKASI                                            -->
-<!-- ============================================================ -->
-<div class="modal fade modal-lokasi" id="ModalLokasi" role="dialog" style="z-index: 9999999 !important;">
-    <div class="modal-dialog modal-md" style="position: relative; margin: 30px auto !important;">
-        <div class="modal-content" style="max-height: 90vh; overflow: hidden; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
-            <div class="modal-header" style="flex-shrink: 0; background: #f8f9fa; border-bottom: 2px solid #e9ecef; border-radius: 8px 8px 0 0;">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4><b><i class="fa fa-map-marker"></i> Pilih Lokasi</b></h4>
-                <small>Pilih Provinsi dan Kab/Kota</small>
-            </div>
-            <div class="modal-body" style="max-height: 60vh; overflow-y: auto; padding: 20px 25px;">
-                <div class="lokasi-tab">
-                    <ul class="nav nav-tabs" id="lokasiTab">
-                        <li class="active"><a href="#tab_pilih_lokasi_edit" data-toggle="tab">📋 Pilih dari Daftar</a></li>
-                        <li><a href="#tab_manual_lokasi_edit" data-toggle="tab">✏️ Isi Manual</a></li>
-                    </ul>
-                    
-                    <div class="tab-content">
-                        <!-- TAB PILIH DARI DAFTAR -->
-                        <div class="tab-pane fade in active" id="tab_pilih_lokasi_edit">
-                            <div style="margin-top: 15px;">
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <label><b>Provinsi</b></label>
-                                            <select class="form-control" id="EditLokasiProvinsi">
-                                                <option value="">-- Pilih Provinsi --</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <label><b>Kab/Kota</b></label>
-                                            <select class="form-control" id="EditLokasiKabKota" disabled>
-                                                <option value="">-- Pilih Kab/Kota --</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div id="EditLokasiInfo" style="display:none; margin-top: 10px; padding: 10px; background: #e8f0fe; border-radius: 4px;">
-                                    <strong>Lokasi Terpilih:</strong><br>
-                                    <span id="EditLokasiInfoText">-</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- TAB MANUAL -->
-                        <div class="tab-pane fade" id="tab_manual_lokasi_edit">
-                            <div class="panel panel-default" style="margin-top: 15px;">
-                                <div class="panel-heading">
-                                    <b>✏️ Isi Lokasi Manual</b>
-                                </div>
-                                <div class="panel-body">
-                                    <div class="form-group">
-                                        <label><b>Nama Lokasi</b></label>
-                                        <input type="text" class="form-control" id="EditLokasiManualInput" 
-                                               placeholder="Contoh: Kabupaten Bandung, Provinsi Jawa Barat">
-                                        <small class="text-muted">Isi manual jika lokasi tidak tersedia di daftar</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer" style="flex-shrink: 0; border-top: 1px solid #e5e5e5; padding: 10px 20px; background: #fafafa; border-radius: 0 0 8px 8px;">
-                <button type="button" class="btn btn-default" data-dismiss="modal">BATAL</button>
-                <button type="button" class="btn btn-success" id="BtnPilihLokasiEdit">
-                    <b><i class="fa fa-check"></i> PILIH LOKASI</b>
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ============================================================ -->
-<!-- JAVASCRIPT                                                    -->
-<!-- ============================================================ -->
-<script src="<?= base_url('js/vendor/jquery-1.12.4.min.js') ?>"></script>
-<script src="<?= base_url('js/bootstrap.min.js') ?>"></script>
-<script src="<?= base_url('js/data-table/jquery.dataTables.min.js') ?>"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-
-<script>
-var BaseURL    = "<?= base_url() ?>";
-var CSRF_NAME  = "<?= $this->security->get_csrf_token_name() ?>";
-var CSRF_TOKEN = "<?= $this->security->get_csrf_hash() ?>";
-var KODE_WILAYAH = '<?= $KodeWilayah ?? '' ?>';
-var IS_ROLE_4 = '<?= $is_role_4 ?? false ?>';
-
-// Cache data lokasi
-var editLokasiCache = {
-    provinsi: null,
-    kabkota: {}
-};
-
-function showLoading() {
-    $('#loadingOverlay').css('display', 'flex');
-}
-
-function hideLoading() {
-    $('#loadingOverlay').css('display', 'none');
-}
-
-function escapeHtml(text) {
-    if (!text) return '';
-    var map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
-    };
-    return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
-}
-
-// ================================================================
-// TOGGLE DETAILS
-// ================================================================
-function toggleDetails(headerId, element) {
-    var $headerRow = $('tr.header-row[data-header-id="' + headerId + '"]');
-    var $detailRows = $('tr.detail-row[data-header-id="' + headerId + '"]');
-    
-    var isExpanded = $headerRow.data('expanded') === true;
-    
-    if (isExpanded) {
-        $detailRows.addClass('detail-hidden');
-        $headerRow.data('expanded', false);
-    } else {
-        $detailRows.removeClass('detail-hidden');
-        $headerRow.data('expanded', true);
-    }
-}
-
-// ================================================================
-// FUNGSI LOKASI (EDIT)
-// ================================================================
-
-function loadEditProvinsi(selectedKode) {
-    $('#EditLokasiProvinsi').html('<option value="">Memuat...</option>').prop('disabled', true);
-    
-    $.ajax({
-        url: BaseURL + "Daerah/getProvinsiList",
-        type: "GET",
-        dataType: "json",
-        success: function(data) {
-            var options = '<option value="">-- Pilih Provinsi --</option>';
-            if (data && data.length > 0) {
-                $.each(data, function(index, item) {
-                    var selected = (item.Kode === selectedKode) ? 'selected' : '';
-                    options += `<option value="${item.Kode}" ${selected}>${escapeHtml(item.Nama)}</option>`;
-                });
-                editLokasiCache.provinsi = data;
-            }
-            $('#EditLokasiProvinsi').html(options).prop('disabled', false);
-            if (selectedKode) {
-                $('#EditLokasiProvinsi').val(selectedKode).trigger('change');
-            }
-        },
-        error: function() {
-            $('#EditLokasiProvinsi').html('<option value="">Gagal memuat data provinsi</option>').prop('disabled', false);
-        }
-    });
-}
-
-function loadEditKabKota(kodeProvinsi, selectedKode) {
-    if (!kodeProvinsi) {
-        $('#EditLokasiKabKota').html('<option value="">-- Pilih Kab/Kota --</option>').prop('disabled', true);
-        $('#EditLokasiInfo').hide();
-        return;
-    }
-    
-    if (editLokasiCache.kabkota[kodeProvinsi]) {
-        populateEditKabKota(editLokasiCache.kabkota[kodeProvinsi], selectedKode);
-        return;
-    }
-    
-    $('#EditLokasiKabKota').html('<option value="">Memuat...</option>').prop('disabled', true);
-    
-    $.ajax({
-        url: BaseURL + "Daerah/getKabKotaByProvinsi",
-        type: "POST",
-        data: { 
-            kode_provinsi: kodeProvinsi,
-            [CSRF_NAME]: CSRF_TOKEN 
-        },
-        dataType: "json",
-        success: function(data) {
-            editLokasiCache.kabkota[kodeProvinsi] = data;
-            populateEditKabKota(data, selectedKode);
-        },
-        error: function() {
-            $('#EditLokasiKabKota').html('<option value="">Gagal memuat data kab/kota</option>').prop('disabled', false);
-        }
-    });
-}
-
-function populateEditKabKota(data, selectedKode) {
-    var options = '<option value="">-- Pilih Kab/Kota --</option>';
-    if (data && data.length > 0) {
-        $.each(data, function(index, item) {
-            var selected = (item.Kode === selectedKode) ? 'selected' : '';
-            options += `<option value="${item.Kode}" ${selected}>${escapeHtml(item.Nama)}</option>`;
-        });
-    } else {
-        options += '<option value="" disabled>Tidak ada Kab/Kota</option>';
-    }
-    $('#EditLokasiKabKota').html(options).prop('disabled', false);
-    if (selectedKode) {
-        $('#EditLokasiKabKota').val(selectedKode).trigger('change');
-    }
-    updateEditLokasiInfo();
-}
-
-function updateEditLokasiInfo() {
-    var provinsiKode = $('#EditLokasiProvinsi').val();
-    var provinsiNama = $('#EditLokasiProvinsi option:selected').text();
-    var kabKotaKode = $('#EditLokasiKabKota').val();
-    var kabKotaNama = $('#EditLokasiKabKota option:selected').text();
-    
-    if (provinsiKode && provinsiKode !== '' && kabKotaKode && kabKotaKode !== '') {
-        var infoText = kabKotaNama + ', ' + provinsiNama;
-        $('#EditLokasiInfoText').text(infoText);
-        $('#EditLokasiInfo').show();
-    } else if (provinsiKode && provinsiKode !== '') {
-        $('#EditLokasiInfoText').text(provinsiNama + ' (Pilih Kab/Kota)');
-        $('#EditLokasiInfo').show();
-    } else {
-        $('#EditLokasiInfo').hide();
-    }
-}
-
-function setEditSelectedLokasi(kode, nama) {
-    $('#EditLokasiKode').val(kode);
-    $('#EditLokasiNama').val(nama);
-    $('#EditLokasiPlaceholder').hide();
-    $('#EditSelectedLokasiText').text(nama).show();
-    $('#EditRemoveLokasiBtn').show();
-}
-
-function removeEditLokasi() {
-    $('#EditLokasiKode').val('');
-    $('#EditLokasiNama').val('');
-    $('#EditSelectedLokasiText').hide().text('');
-    $('#EditRemoveLokasiBtn').hide();
-    $('#EditLokasiPlaceholder').show();
-}
-
-// EVENT LOKASI EDIT
-$('#EditLokasiProvinsi').change(function() {
-    var kodeProvinsi = $(this).val();
-    loadEditKabKota(kodeProvinsi, '');
-});
-
-$('#EditLokasiKabKota').change(function() {
-    updateEditLokasiInfo();
-});
-
-$('#BtnPilihLokasiEdit').click(function() {
-    var activeTab = $('#lokasiTab .active a').attr('href');
-    
-    if (activeTab === '#tab_pilih_lokasi_edit') {
-        var provinsiKode = $('#EditLokasiProvinsi').val();
-        var provinsiNama = $('#EditLokasiProvinsi option:selected').text();
-        var kabKotaKode = $('#EditLokasiKabKota').val();
-        var kabKotaNama = $('#EditLokasiKabKota option:selected').text();
-        
-        if (!provinsiKode || provinsiKode === '' || !kabKotaKode || kabKotaKode === '') {
-            alert('Silakan pilih Provinsi dan Kab/Kota terlebih dahulu!');
-            return;
-        }
-        
-        var fullName = kabKotaNama + ', ' + provinsiNama;
-        setEditSelectedLokasi(kabKotaKode, fullName);
-        
-    } else if (activeTab === '#tab_manual_lokasi_edit') {
-        var manualInput = $('#EditLokasiManualInput').val().trim();
-        if (!manualInput) {
-            alert('Silakan isi nama lokasi!');
-            return;
-        }
-        setEditSelectedLokasi('manual_' + Date.now(), manualInput);
-    }
-    
-    $('#ModalLokasi').modal('hide');
-});
-
-$('#ModalLokasi').on('shown.bs.modal', function() {
-    if ($('#EditLokasiProvinsi option').length <= 1) {
-        loadEditProvinsi('');
-    }
-});
-
-// ================================================================
-// FILTER WILAYAH
-// ================================================================
-<?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-    
-    $("#Provinsi").change(function() {
-        if ($(this).val() === "") {
-            $("#KabKota").html('<option value="">Pilih Kab/Kota</option>');
-            $("#FilterInstansiGroupBefore").hide();
-            return;
-        }
-        
-        $.ajax({
-            url: BaseURL + "Instansi/GetListKabKota",
-            type: "POST",
-            data: { Kode: $(this).val(), [CSRF_NAME]: CSRF_TOKEN },
-            dataType: 'json',
-            beforeSend: function() { 
-                $("#KabKota").prop('disabled', true).html('<option value="">Memuat...</option>');
-                $("#FilterInstansiGroupBefore").hide();
-            },
-            success: function(Data) {
-                var KabKota = '<option value="">Pilih Kab/Kota</option>';
-                if (Data && Data.length > 0) {
-                    for (let i = 0; i < Data.length; i++) {
-                        KabKota += '<option value="' + Data[i].Kode + '">' + Data[i].Nama + '</option>';
-                    }
-                }
-                $("#KabKota").html(KabKota).prop('disabled', false);
-                
-                <?php if (!empty($KodeWilayah)) { ?>
-                    $("#KabKota").val("<?= $KodeWilayah ?>").trigger('change');
-                <?php } ?>
-            },
-            error: function() { 
-                alert("Gagal memuat data Kab/Kota");
-                $("#KabKota").prop('disabled', false).html('<option value="">Pilih Kab/Kota</option>');
-            }
-        });
-    });
-
-    $("#KabKota").change(function() {
-        var kabKotaKode = $(this).val();
-        if (kabKotaKode === "") {
-            $("#FilterInstansiGroupBefore").hide();
-            $("#FilterInstansiBeforeLogin").html('<option value="">-- Semua Instansi --</option>');
-            return;
-        }
-
-        $("#FilterInstansiBeforeLogin").html('<option value="">Memuat...</option>');
-        $("#FilterInstansiGroupBefore").show();
-
-        $.ajax({
-            url: BaseURL + "Instansi/GetListInstansiLevel4",
-            type: "POST",
-            data: { 
-                kode_wilayah: kabKotaKode, 
-                [CSRF_NAME]: CSRF_TOKEN 
-            },
-            dataType: 'json',
-            success: function(Data) {
-                var options = '<option value="">-- Semua Instansi --</option>';
-                if (Data && Data.length > 0) {
-                    var urlParams = new URLSearchParams(window.location.search);
-                    var instansiParam = urlParams.get('instansi_id');
-                    for (let i = 0; i < Data.length; i++) {
-                        var selected = (instansiParam == Data[i].id) ? 'selected' : '';
-                        options += '<option value="' + Data[i].id + '" ' + selected + '>' + 
-                                   escapeHtml(Data[i].nama) + '</option>';
-                    }
-                } else {
-                    options += '<option value="" disabled>Tidak ada Instansi</option>';
-                }
-                $("#FilterInstansiBeforeLogin").html(options);
-                $("#FilterInstansiGroupBefore").show();
-            },
-            error: function() {
-                $("#FilterInstansiBeforeLogin").html('<option value="">-- Semua Instansi --</option>');
-                $("#FilterInstansiGroupBefore").show();
-            }
-        });
-    });
-
-    <?php if (!empty($KodeWilayah)) { ?>
-        var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
-        var kodeKab  = "<?= $KodeWilayah ?>";
-        $("#Provinsi").val(kodeProv).trigger('change');
-        setTimeout(function() {
-            $("#KabKota").val(kodeKab).trigger('change');
+        <?php if (!empty($KodeWilayah)) { ?>
+          <div style="margin-top:14px; padding:10px 14px; background:var(--brand-surface); border-left:4px solid var(--brand-green); border-radius:6px; font-size:12.5px; color:var(--slate-700);">
+            <strong>Wilayah Terpilih:</strong> <?= html_escape($NamaWilayah) ?>
             <?php 
-            $filter_instansi_id = $this->input->get('instansi_id', TRUE);
-            if (!empty($filter_instansi_id)) { ?>
-                setTimeout(function() {
-                    if ($("#FilterInstansiBeforeLogin option[value='<?= $filter_instansi_id ?>']").length > 0) {
-                        $("#FilterInstansiBeforeLogin").val("<?= $filter_instansi_id ?>");
-                    }
-                }, 500);
-            <?php } ?>
-        }, 300);
+            if (!empty($ActiveInstansiId)) { 
+              $instansi_terpilih = $this->db->select('nama')->from('akun_instansi')->where('id', (int)$ActiveInstansiId)->get()->row_array();
+              if ($instansi_terpilih) {
+            ?>
+              &nbsp;|&nbsp; <strong>Instansi:</strong> <?= html_escape($instansi_terpilih['nama']) ?>
+            <?php }} ?>
+          </div>
+        <?php } ?>
+      </div>
+    <?php } else { ?>
+      <!-- Filter Instansi Saja - SETELAH LOGIN SEBAGAI DAERAH -->
+      <?php if (!$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
+        <div class="filter-card-custom" style="background:#fff; border-radius:12px; padding:16px 24px; margin-bottom:18px; box-shadow:var(--shadow-sm); border:1px solid var(--slate-200);">
+          <div class="row" style="display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end;">
+            <div class="col-filter" style="flex:1; min-width:260px;">
+              <label style="font-size:12px; font-weight:600; color:var(--slate-600); margin-bottom:5px; display:block;">
+                <i class="fa fa-building" style="color:var(--brand-green); margin-right:4px;"></i> Pilih Perangkat Daerah / Instansi
+              </label>
+              <select class="form-control filter-select-custom" id="FilterInstansi" style="width:100%; height:38px; border-radius:8px; border:1px solid var(--slate-200); font-size:13px; padding:6px 10px;">
+                <?php foreach ($ListInstansi as $ins) { ?>
+                  <option value="<?= $ins['id'] ?>" <?= ($ActiveInstansiId == $ins['id']) ? 'selected' : '' ?>>
+                    <?= html_escape($ins['nama']) ?>
+                  </option>
+                <?php } ?>
+              </select>
+            </div>
+            <div class="col-filter" style="width:auto;">
+              <button type="button" class="btn btn-primary-custom" id="FilterInstansiBtn" style="height:38px; padding:0 20px; font-size:13px;">
+                <i class="fa fa-filter"></i> Terapkan
+              </button>
+            </div>
+          </div>
+        </div>
+      <?php } ?>
     <?php } ?>
 
-    $("#Filter").click(function() {
-        var provinsi = $("#Provinsi").val();
-        var kabKota = $("#KabKota").val();
-        var instansiId = $("#FilterInstansiBeforeLogin").val();
-        
-        if (provinsi === "") { alert("Mohon Pilih Provinsi"); return; }
-        if (kabKota === "") { alert("Mohon Pilih Kab/Kota"); return; }
+    <!-- ============ TOPBAR ============ -->
+    <div class="topbar">
+      <div class="topbar-row">
+        <div class="app-title">
+          <h1>Rancangan Awal Rencana Kerja Pemerintah Daerah (Ranwal RKPD)</h1>
+          <span>Data Program, Kegiatan, dan Sub Kegiatan bersumber dari Ranwal Renja Perangkat Daerah &mdash; menampilkan Ranwal RKPD Tahun <b id="activeYearLabel"><?= html_escape($TahunAktif) ?></b></span>
+        </div>
+        <div class="topbar-controls">
+          <select id="rpjmdSelect" class="rpjmd-select">
+            <option>RPJMD 2025-2029</option>
+          </select>
+          <div class="year-tabs" id="yearTabs"></div>
+          <button type="button" id="btnSyncData" class="btn-sync" title="Cocokkan / Sinkronkan Ulang Data RKPD dengan Renja">
+            <i class="fa fa-refresh"></i> Sinkronkan Renja
+          </button>
+        </div>
+      </div>
+    </div>
 
-        $("#Filter").prop('disabled', true).text('Memuat...');
-        
-        $.ajax({
-            url: BaseURL + "Instansi/SetTempKodeWilayah",
-            type: "POST",
-            data: { 
-                KodeWilayah: kabKota,
-                InstansiId: instansiId || '',
-                [CSRF_NAME]: CSRF_TOKEN 
-            },
-            dataType: 'json',
-            success: function(res) {
-                if (res === '1' || res === 1) {
-                    var redirectUrl = BaseURL + "Daerah/RanwalRKPD";
-                    if (instansiId && instansiId != '') {
-                        redirectUrl += "?instansi_id=" + instansiId;
-                    }
-                    window.location.href = redirectUrl;
-                } else {
-                    alert(res || "Gagal menyimpan filter wilayah!");
-                    $("#Filter").prop('disabled', false).text('Filter');
-                }
-            },
-            error: function() {
-                alert("Gagal menghubungi server!");
-                $("#Filter").prop('disabled', false).text('Filter');
+    <!-- ============ RINGKASAN PAGU ANGGARAN ============ -->
+    <div class="pagu-summary">
+      <div class="pagu-item">
+        <span class="pagu-label">Pagu Anggaran Tahun <span id="paguTahunLabel"><?= html_escape($TahunAktif) ?></span></span>
+        <span class="pagu-value" id="paguAnggaranValue">Rp 0</span>
+        <span class="pagu-sub">Total Pagu Ditetapkan di Pagu Urusan</span>
+      </div>
+      <div class="pagu-item">
+        <span class="pagu-label">Total Anggaran Ranwal RKPD</span>
+        <span class="pagu-value" id="paguTerinputValue">Rp 0</span>
+        <span class="pagu-sub" id="paguTerinputPercent">0% dari Pagu Anggaran</span>
+      </div>
+      <div class="pagu-item" id="paguSelisihItem">
+        <span class="pagu-label" id="paguSelisihLabel">Selisih Anggaran</span>
+        <span class="pagu-value" id="paguSelisihValue">Rp 0</span>
+        <span class="pagu-sub" id="paguSelisihSub">Perhitungan otomatis</span>
+      </div>
+    </div>
+
+    <!-- ============ TABLE CARD ============ -->
+    <div class="table-card">
+      <div class="table-toolbar">
+        <div class="table-toolbar-left">
+          <button class="btn-toolbar" id="btnExpandAll"><i class="fa fa-expand"></i> Buka Semua</button>
+          <button class="btn-toolbar" id="btnCollapseAll"><i class="fa fa-compress"></i> Tutup Semua</button>
+        </div>
+        <div class="table-toolbar-right">
+          <span style="font-size:12.5px; color:var(--slate-500);">Perangkat Daerah: <b id="pdNameLabel" style="color:var(--brand-dark);"><?= html_escape($NamaInstansi) ?></b></span>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="renja-table" id="renjaTable">
+          <thead>
+            <tr>
+              <th rowspan="2">Kode</th>
+              <th rowspan="2">Urusan / Bidang Urusan / Program / Kegiatan / Sub Kegiatan</th>
+              <th rowspan="2">Indikator Kinerja</th>
+              <th colspan="2"> Ranwal Renja</th>
+              <th rowspan="2">Pagu Anggaran (Rp)</th>
+              <th rowspan="2">Lokasi</th>
+              <th rowspan="2">Sumber Pendanaan</th>
+              <th colspan="3">Prioritas &amp; Sasaran</th>
+              <th colspan="2">Prakiraan Maju Anggaran</th>
+              <th rowspan="2">Pengampu</th>
+              <th rowspan="2" style="width:70px;">Opsi</th>
+            </tr>
+            <tr>
+              <th>Satuan</th>
+              <th>Target</th>
+              <th>Daerah</th>
+              <th>Nasional</th>
+              <th>Kelompok Sasaran</th>
+              <th>Target</th>
+              <th>Pagu (Rp)</th>
+            </tr>
+          </thead>
+          <tbody id="renjaBody">
+            <tr>
+              <td colspan="15" class="text-center" style="padding:40px; color:var(--slate-400);">Memuat data Ranwal RKPD...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============ MODAL EDIT KEGIATAN ============ -->
+<div class="modal-backdrop-custom" id="modalKegiatan">
+  <div class="modal-dialog-custom">
+    <div class="modal-header-custom">
+      <h3><i class="fa fa-pencil-square-o" style="color:var(--brand-green);"></i> Edit Kegiatan (Ranwal RKPD)</h3>
+      <button type="button" class="modal-close-btn" data-close="modalKegiatan">&times;</button>
+    </div>
+    <div class="modal-body-custom">
+      <div class="form-group-custom">
+        <label>Kode &amp; Nomenklatur Kegiatan</label>
+        <input type="text" class="form-control-custom" id="kegKodeNama" readonly style="background:#f1f5f9;">
+      </div>
+
+      <div class="form-group-custom">
+        <label>Indikator Kinerja Kegiatan</label>
+        <textarea class="form-control-custom" id="kegIndikator" rows="2"></textarea>
+      </div>
+
+      <div class="form-row-custom">
+        <div class="form-group-custom">
+          <label>Target Kinerja</label>
+          <input type="text" class="form-control-custom" id="kegTarget">
+        </div>
+        <div class="form-group-custom">
+          <label>Satuan</label>
+          <input type="text" class="form-control-custom" id="kegSatuan">
+        </div>
+      </div>
+
+      <div class="form-row-custom">
+        <div class="form-group-custom">
+          <label>Prioritas Nasional</label>
+          <select class="form-control-custom" id="kegPrioritasNasional"></select>
+        </div>
+        <div class="form-group-custom">
+          <label>Kelompok Sasaran</label>
+          <input type="text" class="form-control-custom" id="kegKelompokSasaran">
+        </div>
+      </div>
+
+      <div class="form-group-custom">
+        <label>Pengampu (Bidang / Koordinator)</label>
+        <input type="text" class="form-control-custom" id="kegPengampu" readonly style="background:#f1f5f9;">
+      </div>
+    </div>
+    <div class="modal-footer-custom">
+      <button type="button" class="btn-secondary-custom" data-close="modalKegiatan">Batal</button>
+      <button type="button" class="btn-primary-custom" id="btnSaveKegiatan"><i class="fa fa-save"></i> Simpan Ranwal RKPD</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL EDIT SUB KEGIATAN ============ -->
+<div class="modal-backdrop-custom" id="modalSubKegiatan">
+  <div class="modal-dialog-custom">
+    <div class="modal-header-custom">
+      <h3><i class="fa fa-pencil-square-o" style="color:var(--brand-green);"></i> Edit Sub Kegiatan (Ranwal RKPD)</h3>
+      <button type="button" class="modal-close-btn" data-close="modalSubKegiatan">&times;</button>
+    </div>
+    <div class="modal-body-custom">
+      <div class="form-group-custom">
+        <label>Kode &amp; Nomenklatur Sub Kegiatan</label>
+        <input type="text" class="form-control-custom" id="subKodeNama" readonly style="background:#f1f5f9;">
+      </div>
+
+      <div class="form-group-custom">
+        <label>Indikator Sub Kegiatan</label>
+        <textarea class="form-control-custom" id="subIndikator" rows="2"></textarea>
+      </div>
+
+      <div class="form-row-custom">
+        <div class="form-group-custom">
+          <label>Target Kinerja</label>
+          <input type="text" class="form-control-custom" id="subTarget">
+        </div>
+        <div class="form-group-custom">
+          <label>Satuan</label>
+          <input type="text" class="form-control-custom" id="subSatuan">
+        </div>
+      </div>
+
+      <div class="form-row-custom">
+        <div class="form-group-custom">
+          <label>Pagu Anggaran Tahun Berjalan (Rp)</label>
+          <input type="text" class="form-control-custom" id="subAnggaran" style="font-weight:700; color:var(--brand-dark);">
+        </div>
+        <div class="form-group-custom">
+          <label>Prakiraan Maju N+1 (Rp)</label>
+          <input type="text" class="form-control-custom" id="subAnggaranN1">
+        </div>
+      </div>
+
+      <div class="form-row-custom">
+        <div class="form-group-custom">
+          <label>Prioritas Provinsi</label>
+          <select class="form-control-custom" id="subPrioritasProvinsi"></select>
+        </div>
+        <div class="form-group-custom">
+          <label>Prioritas Kabupaten / Kota</label>
+          <select class="form-control-custom" id="subPrioritasKabKota"></select>
+        </div>
+      </div>
+
+      <div class="form-row-custom">
+        <div class="form-group-custom">
+          <label>Sumber Pendanaan</label>
+          <select class="form-control-custom" id="subSumberDana"></select>
+        </div>
+        <div class="form-group-custom">
+          <label>Lokasi Pelaksanaan</label>
+          <select class="form-control-custom" id="subLokasiPelaksanaan"></select>
+        </div>
+      </div>
+
+      <div class="form-row-custom" id="detailLokasiRow">
+        <div class="form-group-custom">
+          <label>Kabupaten / Kota</label>
+          <input type="text" class="form-control-custom" id="subKabKota" readonly style="background:#f1f5f9; cursor:not-allowed; font-weight:500;" placeholder="Kabupaten/Kota">
+        </div>
+        <div class="form-group-custom">
+          <label>Kecamatan</label>
+          <select class="form-control-custom" id="subKecamatan"></select>
+        </div>
+        <div class="form-group-custom">
+          <label>Desa / Kelurahan</label>
+          <select class="form-control-custom" id="subDesa"></select>
+        </div>
+      </div>
+
+      <div class="form-row-custom">
+        <div class="form-group-custom">
+          <label>Waktu Mulai Pelaksanaan</label>
+          <select class="form-control-custom" id="subBulanMulai"></select>
+        </div>
+        <div class="form-group-custom">
+          <label>Waktu Selesai Pelaksanaan</label>
+          <select class="form-control-custom" id="subBulanSelesai"></select>
+        </div>
+      </div>
+
+      <div class="form-group-custom">
+        <label>Pengampu (Bidang / Koordinator)</label>
+        <input type="text" class="form-control-custom" id="subPengampu" readonly style="background:#f1f5f9;">
+      </div>
+    </div>
+    <div class="modal-footer-custom">
+      <button type="button" class="btn-secondary-custom" data-close="modalSubKegiatan">Batal</button>
+      <button type="button" class="btn-primary-custom" id="btnSaveSubKegiatan"><i class="fa fa-save"></i> Simpan Ranwal RKPD</button>
+    </div>
+  </div>
+</div>
+
+<div class="loading-shade" id="loadingShade"><div class="loading-spinner"></div></div>
+<div class="toast-custom" id="toast"></div>
+
+<script>
+const BASE_URL = "<?= base_url() ?>";
+const CSRF_NAME = '<?= $this->security->get_csrf_token_name() ?>';
+const CSRF_TOKEN = '<?= $this->security->get_csrf_hash() ?>';
+let activeInstansiId = <?= json_encode($ActiveInstansiId) ?>;
+const CURRENT_KODE_WILAYAH = <?= json_encode($KodeWilayah) ?>;
+const CURRENT_NAMA_WILAYAH = <?= json_encode($NamaWilayah ?? '') ?>;
+
+/* =========================================================================
+   KONFIGURASI DATA REFERENSI
+   ========================================================================= */
+const PRIORITAS_NASIONAL = [
+  "Memperkokoh Ideologi Pancasila, Demokrasi, dan Hak Asasi Manusia (HAM)",
+  "Memantapkan Sistem Pertahanan Keamanan Negara dan Mendorong Kemandirian Bangsa",
+  "Meningkatkan Lapangan Kerja Berkualitas dan Melanjutkan Pengembangan Infrastruktur",
+  "Memperkuat Pembangunan Sumber Daya Manusia (SDM), Sains, dan Teknologi",
+  "Melanjutkan Hilirisasi dan Industrialisasi untuk Kemandirian Ekonomi Bangsa",
+  "Membangun dari Desa dan dari Bawah untuk Pemerataan Ekonomi",
+  "Memperkuat Reformasi Politik, Hukum, dan Birokrasi, serta Memperkuat Pencegahan dan Pemberantasan Korupsi, Narkoba, Judi, dan Penyelundupan",
+  "Memperkuat Penyelarasan Kehidupan dengan Lingkungan, Alam, dan Budaya, serta Peningkatan Toleransi Antarumat Beragama"
+];
+
+const PRIORITAS_PROVINSI = [
+  "Peningkatan Daya Saing Ekonomi Daerah",
+  "Pengembangan Infrastruktur dan Konektivitas Wilayah",
+  "Peningkatan Kualitas Sumber Daya Manusia",
+  "Reformasi Birokrasi dan Tata Kelola Pemerintahan",
+  "Pelestarian Lingkungan Hidup dan Ketahanan Bencana"
+];
+
+const PRIORITAS_KABKOTA = [
+  "Penguatan UMKM dan Ekonomi Kerakyatan",
+  "Peningkatan Pelayanan Publik Berbasis Digital",
+  "Penataan Kawasan Perdagangan dan Jasa",
+  "Peningkatan Investasi dan Kemudahan Berusaha",
+  "Peningkatan Kualitas Lingkungan Perkotaan"
+];
+
+const SUMBER_DANA = ["PAD","DAU","DAK Fisik","DAK Non Fisik","DBH","DID","Lain-lain Pendapatan Daerah yang Sah","Pinjaman Daerah"];
+const LOKASI_PELAKSANAAN = ["Dalam Kabupaten/Kota","Lintas Kecamatan","Lintas Kabupaten/Kota dalam Provinsi","Lintas Provinsi"];
+const BULAN = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+
+const WILAYAH = {
+  "Kabupaten Cirebon": {
+    "Sumber": ["Sumber","Gegunung","Kemantren","Matangaji","Sidawangi"],
+    "Kedawung": ["Kedawung","Kalikoa","Tuk","Sutawinangun"],
+    "Palimanan": ["Palimanan Timur","Pegagan","Ciawi","Panembahan"]
+  },
+  "Kota Bekasi": {
+    "Bekasi Timur": ["Duren Jaya","Aren Jaya","Margahayu"],
+    "Bekasi Barat": ["Bintara","Bintara Jaya","Kranji"],
+    "Medan Satria": ["Harapan Mulya","Medan Satria","Pejuang"]
+  },
+  "Kabupaten Bekasi": {
+    "Cikarang Pusat": ["Sukamahi","Pasirranji","Hegarmukti"],
+    "Cikarang Barat": ["Telaga Asih","Telagamurni","Kalijaya"]
+  }
+};
+
+/* =========================================================================
+   STATE DATA UTAMA
+   ========================================================================= */
+let renjaData = {
+  perangkatDaerah: <?= json_encode($NamaInstansi) ?>,
+  tahunAktif: <?= (int)$TahunAktif ?>,
+  tahunList: [2026, 2027, 2028, 2029, 2030],
+  paguAnggaran: 0,
+  rincianPagu: [],
+  prioritasNasionalList: [],
+  prioritasProvinsiList: [],
+  prioritasKabKotaList: [],
+  urusan: []
+};
+
+let collapsedKeys = new Set();
+let autoCollapsedApplied = false;
+
+/* =========================================================================
+   HELPER FORMATTING & NUMBER
+   ========================================================================= */
+function esc(str){
+  if(str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
+}
+
+function fmtRp(val){
+  const num = Number(val) || 0;
+  return 'Rp ' + num.toLocaleString('id-ID');
+}
+
+function formatRibuan(val){
+  const num = String(val || "").replace(/[^\d]/g,'');
+  return num ? Number(num).toLocaleString('id-ID') : '';
+}
+function parseRibuan(val){
+  const num = String(val || "").replace(/[^\d]/g,'');
+  return num || '0';
+}
+function toNumber(val){
+  if(val === undefined || val === null) return 0;
+  const num = String(val).replace(/[^\d]/g,'');
+  return num ? Number(num) : 0;
+}
+function fmtRpMaju(val){
+  return toNumber(val) === 0 ? '-' : fmtRp(val);
+}
+
+/* =========================================================================
+   ANGGARAN BERJENJANG (CASCADING BUDGET)
+   ========================================================================= */
+function sumKegiatanRp(k){
+  return (k.subKegiatan || []).reduce(function(total, sk){
+    return total + toNumber(sk.rp);
+  }, 0);
+}
+function sumKegiatanMajuRp(k){
+  return (k.subKegiatan || []).reduce(function(total, sk){
+    return total + toNumber(sk.anggaranN1);
+  }, 0);
+}
+
+function sumProgramRp(p){
+  return (p.kegiatan || []).reduce(function(total, k){
+    return total + sumKegiatanRp(k);
+  }, 0);
+}
+function sumProgramMajuRp(p){
+  return (p.kegiatan || []).reduce(function(total, k){
+    return total + sumKegiatanMajuRp(k);
+  }, 0);
+}
+
+function sumBidangRp(b){
+  return (b.program || []).reduce(function(total, p){
+    return total + sumProgramRp(p);
+  }, 0);
+}
+function sumBidangMajuRp(b){
+  return (b.program || []).reduce(function(total, p){
+    return total + sumProgramMajuRp(p);
+  }, 0);
+}
+
+function sumUrusanRp(u){
+  return (u.bidang || []).reduce(function(total, b){
+    return total + sumBidangRp(b);
+  }, 0);
+}
+function sumUrusanMajuRp(u){
+  return (u.bidang || []).reduce(function(total, b){
+    return total + sumBidangMajuRp(b);
+  }, 0);
+}
+
+function sumTotalRp(){
+  return (renjaData.urusan || []).reduce(function(total, u){
+    return total + sumUrusanRp(u);
+  }, 0);
+}
+
+/* =========================================================================
+   LOKASI & SUMBER DANA AGGREGATOR
+   ========================================================================= */
+function stripKodeWilayah(str){
+  if(!str) return '';
+  return str.replace(/^[\d\.]+\s*-\s*/, '').replace(/\s*\([\d\.]+\)$/, '').trim();
+}
+
+function subKegiatanLokasiText(sk){
+  const parts = [];
+  const desa = stripKodeWilayah(sk.desa);
+  const kec = stripKodeWilayah(sk.kecamatan);
+  const kab = stripKodeWilayah(sk.kabKota);
+  if(desa) parts.push(desa);
+  if(kec) parts.push('Kec. ' + kec);
+  if(kab) parts.push(kab);
+  if(parts.length > 0) return parts.join(', ');
+  if(sk.lokasiPelaksanaan) return stripKodeWilayah(sk.lokasiPelaksanaan);
+  return stripKodeWilayah(sk.lokasi || '');
+}
+
+function kegiatanLokasi(k){
+  const lokSet = new Set();
+  (k.subKegiatan || []).forEach(function(sk){
+    const l = subKegiatanLokasiText(sk);
+    if(l && l !== '-') lokSet.add(l);
+  });
+  return Array.from(lokSet).join('; ') || '-';
+}
+
+function kegiatanSumberDana(k){
+  const sdSet = new Set();
+  (k.subKegiatan || []).forEach(function(sk){
+    if(sk.sumberDana && sk.sumberDana !== '-') sdSet.add(sk.sumberDana);
+  });
+  return Array.from(sdSet).join('; ') || '-';
+}
+
+function programLokasi(p){
+  const lokSet = new Set();
+  (p.kegiatan || []).forEach(function(k){
+    const l = kegiatanLokasi(k);
+    if(l && l !== '-') lokSet.add(l);
+  });
+  return Array.from(lokSet).join('; ') || '-';
+}
+
+function programSumberDana(p){
+  const sdSet = new Set();
+  (p.kegiatan || []).forEach(function(k){
+    const sd = kegiatanSumberDana(k);
+    if(sd && sd !== '-') sdSet.add(sd);
+  });
+  return Array.from(sdSet).join('; ') || '-';
+}
+
+/* =========================================================================
+   ROW COUNTER
+   ========================================================================= */
+function countProgramRows(p){
+  let sub = 0;
+  (p.kegiatan || []).forEach(function(k){
+    sub += (k.subKegiatan || []).length;
+  });
+  return { kegiatan: (p.kegiatan || []).length, sub: sub };
+}
+
+function countUrusanRows(u){
+  let prog = 0, keg = 0, sub = 0;
+  (u.bidang || []).forEach(function(b){
+    prog += (b.program || []).length;
+    (b.program || []).forEach(function(p){
+      keg += (p.kegiatan || []).length;
+      (p.kegiatan || []).forEach(function(k){
+        sub += (k.subKegiatan || []).length;
+      });
+    });
+  });
+  return { program: prog, kegiatan: keg, sub: sub };
+}
+
+/* =========================================================================
+   FIND ENTITIES
+   ========================================================================= */
+function findKegiatan(kegiatanId){
+  for(let u of (renjaData.urusan || [])){
+    for(let b of (u.bidang || [])){
+      for(let p of (b.program || [])){
+        for(let k of (p.kegiatan || [])){
+          if(k.id === kegiatanId || String(k.db_id) === String(kegiatanId)){
+            return { urusan: u, bidang: b, program: p, kegiatan: k };
+          }
+        }
+      }
+    }
+  }
+  return null;
+}
+
+function findSubKegiatan(subId, kegiatanId){
+  for(let u of (renjaData.urusan || [])){
+    for(let b of (u.bidang || [])){
+      for(let p of (b.program || [])){
+        for(let k of (p.kegiatan || [])){
+          if(!kegiatanId || k.id === kegiatanId || String(k.db_id) === String(kegiatanId)){
+            for(let sk of (k.subKegiatan || [])){
+              if(sk.id === subId || String(sk.db_id) === String(subId)){
+                return { urusan: u, bidang: b, program: p, kegiatan: k, subKegiatan: sk };
+              }
             }
+          }
+        }
+      }
+    }
+  }
+  return null;
+}
+
+/* =========================================================================
+   DOM MANIPULATION (SURGICAL RE-RENDER)
+   ========================================================================= */
+function replaceRow(selector, htmlString){
+  const oldRow = document.querySelector(selector);
+  if(!oldRow) return;
+  const temp = document.createElement('tbody');
+  temp.innerHTML = htmlString.trim();
+  const newRow = temp.firstElementChild;
+  if(newRow){
+    oldRow.parentNode.replaceChild(newRow, oldRow);
+  }
+}
+
+function refreshSubKegiatanRow(subId, kegiatanId){
+  const found = findSubKegiatan(subId, kegiatanId);
+  if(!found) return;
+  replaceRow('tr[data-row-key="sub:' + found.subKegiatan.id + '"]', subKegiatanRow(found.subKegiatan, found.kegiatan));
+}
+
+function refreshKegiatanRow(kegiatanId){
+  const found = findKegiatan(kegiatanId);
+  if(!found) return;
+  replaceRow('tr[data-row-key="keg:' + found.kegiatan.id + '"]', kegiatanRow(found.kegiatan));
+}
+
+function refreshSubKegiatanChain(subId, kegiatanId){
+  const foundSub = findSubKegiatan(subId, kegiatanId);
+  if(!foundSub) return;
+  replaceRow('tr[data-row-key="sub:' + foundSub.subKegiatan.id + '"]', subKegiatanRow(foundSub.subKegiatan, foundSub.kegiatan));
+
+  const foundKeg = findKegiatan(kegiatanId);
+  if(!foundKeg) return;
+  replaceRow('tr[data-row-key="keg:' + foundKeg.kegiatan.id + '"]', kegiatanRow(foundKeg.kegiatan));
+  replaceRow('tr[data-row-key="prog:' + foundKeg.program.kode + '"]', programRow(foundKeg.program));
+  replaceRow('tr[data-row-key="bid:' + foundKeg.bidang.kode + '"]', bidangRow(foundKeg.bidang));
+  replaceRow('tr[data-row-key="uru:' + foundKeg.urusan.kode + '"]', urusanRow(foundKeg.urusan));
+
+  renderPaguSummary();
+}
+
+/* =========================================================================
+   RINGKASAN PAGU ANGGARAN
+   ========================================================================= */
+function renderPaguSummary(){
+  const pagu = toNumber(renjaData.paguAnggaran);
+  const terinput = sumTotalRp();
+  const selisih = pagu - terinput;
+  const persen = pagu > 0 ? Math.round((terinput / pagu) * 1000) / 10 : 0;
+
+  document.getElementById('paguAnggaranValue').textContent = fmtRp(pagu);
+  document.getElementById('paguTerinputValue').textContent = fmtRp(terinput);
+  document.getElementById('paguTerinputPercent').textContent = persen + '% dari Pagu Anggaran';
+
+  const item = document.getElementById('paguSelisihItem');
+  const labelEl = document.getElementById('paguSelisihLabel');
+  const valueEl = document.getElementById('paguSelisihValue');
+  const subEl = document.getElementById('paguSelisihSub');
+
+  item.classList.remove('status-balanced', 'status-remaining', 'status-over');
+  if(selisih === 0){
+    item.classList.add('status-balanced');
+    labelEl.textContent = 'Status Anggaran';
+    valueEl.textContent = 'SEIMBANG';
+    subEl.textContent = 'Total terinput pas dengan pagu anggaran';
+  } else if(selisih > 0){
+    item.classList.add('status-remaining');
+    labelEl.textContent = 'Sisa Pagu Anggaran';
+    valueEl.textContent = fmtRp(selisih);
+    subEl.textContent = 'Belum dialokasikan ke Sub Kegiatan';
+  } else {
+    item.classList.add('status-over');
+    labelEl.textContent = 'Kelebihan Anggaran';
+    valueEl.textContent = fmtRp(Math.abs(selisih));
+    subEl.textContent = 'Total melebihi pagu anggaran!';
+  }
+}
+
+/* =========================================================================
+   AUTO-COLLAPSE
+   ========================================================================= */
+function applyAutoCollapseIfNeeded(){
+  if(autoCollapsedApplied) return;
+  const urusanList = renjaData.urusan || [];
+  if(urusanList.length > 2){
+    urusanList.slice(1).forEach(function(u){
+      collapsedKeys.add('u:' + u.kode);
+    });
+  }
+  autoCollapsedApplied = true;
+}
+
+function chevronIcon(isCollapsed){
+  const cls = isCollapsed ? 'toggle-chevron collapsed' : 'toggle-chevron';
+  return '<span class="' + cls + '"><i class="fa fa-chevron-down"></i></span>';
+}
+
+/* =========================================================================
+   HTML BUILDERS
+   ========================================================================= */
+function urusanRow(u){
+  const total = sumUrusanRp(u);
+  const totalMaju = sumUrusanMajuRp(u);
+  const key = 'u:' + u.kode;
+  const isCollapsed = collapsedKeys.has(key);
+  const c = countUrusanRows(u);
+  const badge = isCollapsed
+    ? '<span class="collapse-badge">' + c.program + ' Program &middot; ' + c.kegiatan + ' Kegiatan &middot; ' + c.sub + ' Sub Kegiatan</span>'
+    : '';
+  return '<tr class="row-urusan" data-toggle-key="' + esc(key) + '" data-row-key="uru:' + esc(u.kode) + '">' +
+    '<td>' + esc(u.kode) + '</td>' +
+    '<td colspan="4"><span class="toggle-btn-inline">' + chevronIcon(isCollapsed) + esc(u.nama) + badge + '</span></td>' +
+    '<td class="text-right cell-anggaran-auto" title="Total otomatis dari seluruh Bidang Urusan di bawahnya">' + esc(fmtRp(total)) + '</td>' +
+    '<td colspan="5"></td>' +
+    '<td class="text-center">-</td>' +
+    '<td class="text-right cell-anggaran-auto" title="Total otomatis dari seluruh Bidang Urusan di bawahnya (Anggaran N+1)">' + esc(fmtRpMaju(totalMaju)) + '</td>' +
+    '<td colspan="2"></td>' +
+    '</tr>';
+}
+
+function bidangRow(b){
+  const total = sumBidangRp(b);
+  const totalMaju = sumBidangMajuRp(b);
+  return '<tr class="row-bidang" data-row-key="bid:' + esc(b.kode) + '">' +
+    '<td>' + esc(b.kode) + '</td>' +
+    '<td colspan="4">' + esc(b.nama) + '</td>' +
+    '<td class="text-right cell-anggaran-auto" title="Total otomatis dari seluruh Program di bawahnya">' + esc(fmtRp(total)) + '</td>' +
+    '<td colspan="5"></td>' +
+    '<td class="text-center">-</td>' +
+    '<td class="text-right cell-anggaran-auto" title="Total otomatis dari seluruh Program di bawahnya (Anggaran N+1)">' + esc(fmtRpMaju(totalMaju)) + '</td>' +
+    '<td colspan="2"></td>' +
+    '</tr>';
+}
+
+function programRow(p){
+  const total = sumProgramRp(p);
+  const totalMaju = sumProgramMajuRp(p);
+  const key = 'p:' + p.kode;
+  const isCollapsed = collapsedKeys.has(key);
+  const c = countProgramRows(p);
+  const badge = isCollapsed
+    ? '<span class="collapse-badge">' + c.kegiatan + ' Kegiatan &middot; ' + c.sub + ' Sub Kegiatan</span>'
+    : '';
+  const pengampuNama = p.namaPengampu ? ('<br><span class="pengampu-name">@ ' + esc(p.namaPengampu) + '</span>') : '';
+  const pengampuLabel = p.pengampu && p.pengampu !== '-' ? ('<strong>' + esc(p.pengampu) + '</strong>') : '-';
+
+  return '<tr class="row-program" data-toggle-key="' + esc(key) + '" data-row-key="prog:' + esc(p.kode) + '">' +
+    '<td>' + esc(p.kode) + '</td>' +
+    '<td class="cell-uraian"><span class="toggle-btn-inline">' + chevronIcon(isCollapsed) + esc(p.nama) + badge + '</span></td>' +
+    '<td>' + esc(p.indikator) + '</td>' +
+    '<td class="text-center">' + esc(p.satuan) + '</td>' +
+    '<td class="text-center">' + esc(p.kinerja) + '</td>' +
+    '<td class="text-right cell-anggaran-auto" title="Total otomatis dari seluruh Kegiatan di bawahnya">' + esc(fmtRp(total)) + '</td>' +
+    '<td class="cell-anggaran-auto" title="Digabung otomatis dari Lokasi seluruh Sub Kegiatan di bawahnya">' + esc(programLokasi(p)) + '</td>' +
+    '<td class="text-center cell-anggaran-auto" title="Digabung otomatis dari Sumber Pendanaan seluruh Sub Kegiatan di bawahnya">' + esc(programSumberDana(p)) + '</td>' +
+    '<td class="text-center">' + esc(p.prioritasDaerah) + '</td>' +
+    '<td class="text-center">' + esc(p.prioritasNasional) + '</td>' +
+    '<td>' + esc(p.kelompokSasaran) + '</td>' +
+    '<td class="text-center">-</td>' +
+    '<td class="text-right cell-anggaran-auto" title="Total otomatis dari seluruh Kegiatan di bawahnya (Anggaran N+1)">' + esc(fmtRpMaju(totalMaju)) + '</td>' +
+    '<td class="cell-pengampu">' + pengampuLabel + pengampuNama + '</td>' +
+    '<td class="text-center">&ndash;</td>' +
+    '</tr>';
+}
+
+function kegiatanRow(k){
+  const total = sumKegiatanRp(k);
+  const totalMaju = sumKegiatanMajuRp(k);
+  const pengampuNama = k.namaPengampu ? ('<br><span class="pengampu-name">@ ' + esc(k.namaPengampu) + '</span>') : '';
+  const pengampuLabel = k.pengampu && k.pengampu !== '-' ? ('<strong>' + esc(k.pengampu) + '</strong>') : '-';
+
+  return '<tr class="row-kegiatan" data-row-key="keg:' + esc(k.id) + '">' +
+    '<td>' + esc(k.kode) + '</td>' +
+    '<td class="cell-uraian"><span class="label-tag">Kegiatan:</span>' + esc(k.nama) + '</td>' +
+    '<td>' + esc(k.indikator) + '</td>' +
+    '<td class="text-center">' + esc(k.satuan) + '</td>' +
+    '<td class="text-center">' + esc(k.target) + '</td>' +
+    '<td class="text-right cell-anggaran-auto" title="Total otomatis dari seluruh Sub Kegiatan di bawahnya">' + esc(fmtRp(total)) + '</td>' +
+    '<td class="cell-anggaran-auto" title="Digabung otomatis dari Lokasi seluruh Sub Kegiatan di bawahnya">' + esc(kegiatanLokasi(k)) + '</td>' +
+    '<td class="text-center cell-anggaran-auto" title="Digabung otomatis dari Sumber Pendanaan seluruh Sub Kegiatan di bawahnya">' + esc(kegiatanSumberDana(k)) + '</td>' +
+    '<td class="text-center">' + esc(k.prioritasDaerah) + '</td>' +
+    '<td class="text-center">' + esc(k.prioritasNasional) + '</td>' +
+    '<td>' + esc(k.kelompokSasaran) + '</td>' +
+    '<td class="text-center">-</td>' +
+    '<td class="text-right cell-anggaran-auto" title="Total otomatis dari seluruh Sub Kegiatan di bawahnya (Anggaran N+1)">' + esc(fmtRpMaju(totalMaju)) + '</td>' +
+    '<td class="cell-pengampu">' + pengampuLabel + pengampuNama + '</td>' +
+    '    <td class="text-center"><button class="btn btn-sm btn-warning btn-aksi" data-action="edit-kegiatan" data-id="' + k.id + '" title="Edit Kegiatan"><i class="fa fa-edit"></i></button></td>' +
+    '</tr>';
+}
+
+function subKegiatanRow(sk, k){
+  const lokasiText = subKegiatanLokasiText(sk) || '-';
+  const prioritasDaerahText = [sk.prioritasProvinsi, sk.prioritasKabKota].filter(Boolean).join(' / ') || '-';
+  const pengampuNama = sk.namaPengampu ? ('<br><span class="pengampu-name">@ ' + esc(sk.namaPengampu) + '</span>') : '';
+  const pengampuLabel = sk.pengampu && sk.pengampu !== '-' ? ('<strong>' + esc(sk.pengampu) + '</strong>') : '-';
+
+  return '<tr class="row-subkegiatan" data-row-key="sub:' + esc(sk.id) + '">' +
+    '<td>' + esc(sk.kode) + '</td>' +
+    '<td class="cell-uraian sub"><span class="label-tag">Sub Kegiatan:</span>' + esc(sk.nama) + '</td>' +
+    '<td>' + esc(sk.indikator) + '</td>' +
+    '<td class="text-center">' + esc(sk.satuan) + '</td>' +
+    '<td class="text-center">' + esc(sk.target) + '</td>' +
+    '<td class="text-right cell-anggaran-input" title="Anggaran diinput lewat form Sub Kegiatan (Opsi Aksi)">' + esc(fmtRp(sk.rp)) + '</td>' +
+    '<td class="cell-anggaran-input" title="Lokasi diinput lewat form Sub Kegiatan (Opsi Aksi)">' + esc(lokasiText) + '</td>' +
+    '<td class="text-center cell-anggaran-input" title="Sumber Pendanaan diinput lewat form Sub Kegiatan (Opsi Aksi)">' + esc(sk.sumberDana || '-') + '</td>' +
+    '<td>' + esc(prioritasDaerahText) + '</td>' +
+    '<td class="text-center">' + esc(k.prioritasNasional || '-') + '</td>' +
+    '<td>' + esc(k.kelompokSasaran || '-') + '</td>' +
+    '<td class="text-center">-</td>' +
+    '<td class="text-right cell-anggaran-input" title="Anggaran N+1 diinput lewat form Sub Kegiatan (Opsi Aksi)">' + esc(fmtRpMaju(sk.anggaranN1)) + '</td>' +
+    '<td class="cell-pengampu">' + pengampuLabel + pengampuNama + '</td>' +
+    '<td class="text-center"><button class="btn btn-sm btn-warning btn-aksi" data-action="edit-subkegiatan" data-id="' + sk.id + '" data-parent="' + k.id + '" title="Edit Sub Kegiatan"><i class="fa fa-edit"></i></button></td>' +
+    '</tr>';
+}
+
+/* =========================================================================
+   MODAL: KEGIATAN
+   ========================================================================= */
+let currentKegiatanId = null;
+
+function openKegiatanModal(kegiatanId){
+  const found = findKegiatan(kegiatanId);
+  if(!found) return;
+  const k = found.kegiatan;
+  currentKegiatanId = k.id;
+
+  document.getElementById('kegKodeNama').value = k.kode + ' - ' + k.nama;
+  document.getElementById('kegIndikator').value = k.indikator || '';
+  document.getElementById('kegTarget').value = k.target || '';
+  document.getElementById('kegSatuan').value = k.satuan || '';
+  document.getElementById('kegKelompokSasaran').value = k.kelompokSasaran && k.kelompokSasaran !== '-' ? k.kelompokSasaran : '';
+  document.getElementById('kegPengampu').value = k.namaPengampu ? (k.pengampu + ' (@ ' + k.namaPengampu + ')') : (k.pengampu || '-');
+
+  const pnSelect = document.getElementById('kegPrioritasNasional');
+  const activePNList = (renjaData.prioritasNasionalList && renjaData.prioritasNasionalList.length > 0) ? renjaData.prioritasNasionalList : PRIORITAS_NASIONAL;
+  populateSelect(pnSelect, activePNList, k.prioritasNasional);
+
+  showModal('modalKegiatan');
+}
+
+function saveKegiatan(){
+  if(!currentKegiatanId) return;
+  const found = findKegiatan(currentKegiatanId);
+  if(!found) return;
+
+  const k = found.kegiatan;
+  const newInd = document.getElementById('kegIndikator').value.trim();
+  const newTarget = document.getElementById('kegTarget').value.trim();
+  const newSatuan = document.getElementById('kegSatuan').value.trim();
+  const newPN = document.getElementById('kegPrioritasNasional').value;
+  const newKelompok = document.getElementById('kegKelompokSasaran').value.trim();
+
+  k.indikator = newInd;
+  k.target = newTarget;
+  k.satuan = newSatuan;
+  k.prioritasNasional = newPN || '-';
+  k.kelompokSasaran = newKelompok || '-';
+
+  // Kirim AJAX ke Server
+  showLoading(true);
+  const fd = new FormData();
+  fd.append('kegiatan_id', k.db_id || k.id.replace('keg-',''));
+  fd.append('tahun', renjaData.tahunAktif || 2026);
+  fd.append('instansi_id', activeInstansiId);
+  fd.append('indikator', newInd);
+  fd.append('target', newTarget);
+  fd.append('satuan', newSatuan);
+  fd.append('prioritas_nasional', newPN);
+  fd.append('kelompok_sasaran', newKelompok);
+  fd.append(CSRF_NAME, CSRF_TOKEN);
+
+  fetch(BASE_URL + 'Daerah/simpanRanwalRKPDKegiatan', {
+    method: 'POST',
+    body: fd,
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  })
+  .then(function(res){ return res.json(); })
+  .then(function(data){
+    showLoading(false);
+    hideModal('modalKegiatan');
+    if(data.status === 'success'){
+      showToast(data.message || 'Kegiatan Ranwal RKPD berhasil disimpan.');
+      refreshKegiatanRow(currentKegiatanId);
+    } else {
+      showToast(data.message || 'Gagal menyimpan Kegiatan.', 'error');
+    }
+  })
+  .catch(function(err){
+    showLoading(false);
+    console.error(err);
+    showToast('Terjadi kesalahan koneksi server.', 'error');
+  });
+}
+
+/* =========================================================================
+   MODAL: SUB KEGIATAN
+   ========================================================================= */
+let currentSubKegiatanId = null;
+let currentParentKegiatanId = null;
+
+function openSubKegiatanModal(subId, parentKegiatanId){
+  const found = findSubKegiatan(subId, parentKegiatanId);
+  if(!found) return;
+
+  const sk = found.subKegiatan;
+  currentSubKegiatanId = sk.id;
+  currentParentKegiatanId = parentKegiatanId;
+
+  document.getElementById('subKodeNama').value = sk.kode + ' - ' + sk.nama;
+  document.getElementById('subIndikator').value = sk.indikator || '';
+  document.getElementById('subTarget').value = sk.target || '';
+  document.getElementById('subSatuan').value = sk.satuan || '';
+  document.getElementById('subAnggaran').value = formatRibuan(sk.rp);
+  document.getElementById('subAnggaranN1').value = formatRibuan(sk.anggaranN1);
+  document.getElementById('subPengampu').value = sk.namaPengampu ? (sk.pengampu + ' (@ ' + sk.namaPengampu + ')') : (sk.pengampu || '-');
+
+  const ppSelect = document.getElementById('subPrioritasProvinsi');
+  const activePPList = (renjaData.prioritasProvinsiList && renjaData.prioritasProvinsiList.length > 0) ? renjaData.prioritasProvinsiList : PRIORITAS_PROVINSI;
+  populateSelect(ppSelect, activePPList, sk.prioritasProvinsi);
+
+  const pkSelect = document.getElementById('subPrioritasKabKota');
+  const activePKList = (renjaData.prioritasKabKotaList && renjaData.prioritasKabKotaList.length > 0) ? renjaData.prioritasKabKotaList : PRIORITAS_KABKOTA;
+  populateSelect(pkSelect, activePKList, sk.prioritasKabKota);
+
+  populateSelect(document.getElementById('subSumberDana'), SUMBER_DANA, sk.sumberDana);
+  populateSelect(document.getElementById('subLokasiPelaksanaan'), LOKASI_PELAKSANAAN, sk.lokasiPelaksanaan);
+  populateSelect(document.getElementById('subBulanMulai'), BULAN, sk.bulanMulai || 'Januari');
+  populateSelect(document.getElementById('subBulanSelesai'), BULAN, sk.bulanSelesai || 'Desember');
+
+  populateKabKota();
+  populateKecamatan(CURRENT_KODE_WILAYAH, sk.kecamatan || '', function(){
+    const selKec = document.getElementById('subKecamatan');
+    const valKec = selKec ? selKec.value : '';
+    if(valKec){
+      populateDesa(valKec, sk.desa || '');
+    }
+  });
+
+  showModal('modalSubKegiatan');
+}
+
+function saveSubKegiatan(){
+  if(!currentSubKegiatanId || !currentParentKegiatanId) return;
+  const found = findSubKegiatan(currentSubKegiatanId, currentParentKegiatanId);
+  if(!found) return;
+
+  const sk = found.subKegiatan;
+  const newInd = document.getElementById('subIndikator').value.trim();
+  const newTarget = document.getElementById('subTarget').value.trim();
+  const newSatuan = document.getElementById('subSatuan').value.trim();
+  const newAnggaran = parseRibuan(document.getElementById('subAnggaran').value);
+  const newAnggaranN1 = parseRibuan(document.getElementById('subAnggaranN1').value);
+
+  const newPP = document.getElementById('subPrioritasProvinsi').value;
+  const newPK = document.getElementById('subPrioritasKabKota').value;
+  const newSD = document.getElementById('subSumberDana').value;
+  const newLP = document.getElementById('subLokasiPelaksanaan').value;
+  const newKab = document.getElementById('subKabKota').value;
+  const newKec = document.getElementById('subKecamatan').value;
+  const newDes = document.getElementById('subDesa').value;
+  const newBM = document.getElementById('subBulanMulai').value;
+  const newBS = document.getElementById('subBulanSelesai').value;
+
+  sk.indikator = newInd;
+  sk.target = newTarget;
+  sk.satuan = newSatuan;
+  sk.rp = newAnggaran;
+  sk.anggaranN1 = newAnggaranN1;
+  sk.prioritasProvinsi = newPP;
+  sk.prioritasKabKota = newPK;
+  sk.sumberDana = newSD;
+  sk.lokasiPelaksanaan = newLP;
+  sk.kabKota = newKab;
+  sk.kecamatan = newKec;
+  sk.desa = newDes;
+  sk.bulanMulai = newBM;
+  sk.bulanSelesai = newBS;
+
+  // Kirim AJAX ke Server
+  showLoading(true);
+  const fd = new FormData();
+  fd.append('sub_kegiatan_id', sk.db_id || sk.id.replace('sub-',''));
+  fd.append('tahun', renjaData.tahunAktif || 2026);
+  fd.append('instansi_id', activeInstansiId);
+  fd.append('anggaran', newAnggaran);
+  fd.append('anggaran_n1', newAnggaranN1);
+  fd.append('indikator', newInd);
+  fd.append('target', newTarget);
+  fd.append('satuan', newSatuan);
+  fd.append('prioritas_provinsi', newPP);
+  fd.append('prioritas_kabkota', newPK);
+  fd.append('sumber_dana', newSD);
+  fd.append('lokasi_pelaksanaan', newLP);
+  fd.append('kab_kota', newKab);
+  fd.append('kecamatan', newKec);
+  fd.append('desa', newDes);
+  fd.append('bulan_mulai', newBM);
+  fd.append('bulan_selesai', newBS);
+  fd.append(CSRF_NAME, CSRF_TOKEN);
+
+  fetch(BASE_URL + 'Daerah/simpanRanwalRKPDSubKegiatan', {
+    method: 'POST',
+    body: fd,
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  })
+  .then(function(res){ return res.json(); })
+  .then(function(data){
+    showLoading(false);
+    hideModal('modalSubKegiatan');
+    if(data.status === 'success'){
+      showToast(data.message || 'Sub Kegiatan Ranwal RKPD berhasil disimpan.');
+      refreshSubKegiatanChain(currentSubKegiatanId, currentParentKegiatanId);
+    } else {
+      showToast(data.message || 'Gagal menyimpan Sub Kegiatan.', 'error');
+    }
+  })
+  .catch(function(err){
+    showLoading(false);
+    console.error(err);
+    showToast('Terjadi kesalahan koneksi server.', 'error');
+  });
+}
+
+/* =========================================================================
+   DROPDOWN WILAYAH BERJENJANG
+   ========================================================================= */
+function populateSelect(el, list, selected){
+  el.innerHTML = '<option value="">-- Pilih --</option>' + list.map(function(item){
+    const sel = item === selected ? ' selected' : '';
+    return '<option value="' + esc(item) + '"' + sel + '>' + esc(item) + '</option>';
+  }).join('');
+}
+
+function populateKabKota(){
+  const el = document.getElementById('subKabKota');
+  if(el){
+    el.value = CURRENT_NAMA_WILAYAH ? CURRENT_NAMA_WILAYAH : stripKodeWilayah(CURRENT_KODE_WILAYAH || '');
+  }
+}
+
+function populateKecamatan(kabKode, selectedKec, callback){
+  const sel = document.getElementById('subKecamatan');
+  if(!sel) return;
+  sel.innerHTML = '<option value="">Pilih Kecamatan</option>';
+  const targetKode = kabKode || CURRENT_KODE_WILAYAH;
+  if(!targetKode) return;
+  
+  const fd = new FormData();
+  fd.append('kode', targetKode);
+  
+  fetch(BASE_URL + 'Daerah/getKecamatanWilayah', {
+    method: 'POST',
+    body: fd,
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  })
+  .then(function(res){ return res.json(); })
+  .then(function(data){
+    let opts = '<option value="">Pilih Kecamatan</option>';
+    if(data && data.length > 0){
+      data.forEach(function(item){
+        const cleanName = stripKodeWilayah(item.Nama);
+        const cleanSel = stripKodeWilayah(selectedKec || '');
+        const isSel = (cleanSel && (cleanSel.toLowerCase() === cleanName.toLowerCase() || selectedKec === item.Kode || selectedKec === item.Nama)) ? 'selected' : '';
+        opts += '<option value="' + esc(cleanName) + '" data-kode="' + esc(item.Kode) + '" ' + isSel + '>' + esc(cleanName) + '</option>';
+      });
+    }
+    sel.innerHTML = opts;
+    if(callback) callback();
+  })
+  .catch(function(err){
+    console.error('Gagal memuat kecamatan:', err);
+  });
+}
+
+function populateDesa(kecVal, selectedDesa){
+  const sel = document.getElementById('subDesa');
+  if(!sel) return;
+  sel.innerHTML = '<option value="">Pilih Desa/Kelurahan</option>';
+  if(!kecVal) return;
+  
+  let kecKode = kecVal;
+  const selKec = document.getElementById('subKecamatan');
+  const selOpt = selKec ? selKec.options[selKec.selectedIndex] : null;
+  if(selOpt && selOpt.getAttribute('data-kode')){
+    kecKode = selOpt.getAttribute('data-kode');
+  } else if(kecVal.indexOf(' - ') !== -1){
+    kecKode = kecVal.split(' - ')[0].trim();
+  }
+  
+  const fd = new FormData();
+  fd.append('kode', kecKode);
+  
+  fetch(BASE_URL + 'Daerah/getDesaWilayah', {
+    method: 'POST',
+    body: fd,
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  })
+  .then(function(res){ return res.json(); })
+  .then(function(data){
+    let opts = '<option value="">Pilih Desa/Kelurahan</option>';
+    if(data && data.length > 0){
+      data.forEach(function(item){
+        const cleanName = stripKodeWilayah(item.Nama);
+        const cleanSel = stripKodeWilayah(selectedDesa || '');
+        const isSel = (cleanSel && (cleanSel.toLowerCase() === cleanName.toLowerCase() || selectedDesa === item.Kode || selectedDesa === item.Nama)) ? 'selected' : '';
+        opts += '<option value="' + esc(cleanName) + '" data-kode="' + esc(item.Kode) + '" ' + isSel + '>' + esc(cleanName) + '</option>';
+      });
+    }
+    sel.innerHTML = opts;
+  })
+  .catch(function(err){
+    console.error('Gagal memuat desa:', err);
+  });
+}
+
+function populateStaticOptions(){
+  populateKabKota();
+}
+
+/* =========================================================================
+   COLLAPSE / ACCORDION ENGINE
+   ========================================================================= */
+function isRowVisible(u, p){
+  if(u && collapsedKeys.has('u:' + u.kode)) return false;
+  if(p && collapsedKeys.has('p:' + p.kode)) return false;
+  return true;
+}
+
+function toggleCollapse(key){
+  if(collapsedKeys.has(key)){
+    collapsedKeys.delete(key);
+  } else {
+    collapsedKeys.add(key);
+  }
+  renderTable();
+}
+
+function expandAll(){
+  collapsedKeys.clear();
+  renderTable();
+}
+
+function collapseAll(){
+  (renjaData.urusan || []).forEach(function(u){
+    collapsedKeys.add('u:' + u.kode);
+  });
+  renderTable();
+}
+
+/* =========================================================================
+   MODAL DISPLAY HELPERS
+   ========================================================================= */
+function showModal(id){
+  document.getElementById(id).classList.add('open');
+}
+function hideModal(id){
+  document.getElementById(id).classList.remove('open');
+}
+function showLoading(show){
+  document.getElementById('loadingShade').classList.toggle('active', !!show);
+}
+function showToast(msg, type){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = type === 'error' ? '#dc2626' : 'var(--slate-900)';
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3000);
+}
+
+function sectionRow(label){
+  return '<tr class="row-section"><td colspan="15">' + esc(label) + '</td></tr>';
+}
+
+function uraianRow(kind, uraian, rowspan, ind){
+  const uraianCell = uraian !== null
+    ? '<td rowspan="' + rowspan + '" class="cell-uraian">' + esc(uraian) + '</td>'
+    : '';
+  return '<tr class="row-' + kind + '">' +
+    '<td></td>' +
+    uraianCell +
+    '<td>' + esc(ind.uraian) + '</td>' +
+    '<td class="text-center">' + esc(ind.satuan) + '</td>' +
+    '<td class="text-center">' + esc(ind.kinerja) + '</td>' +
+    '<td class="text-right">' + esc(ind.rp) + '</td>' +
+    '<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>' +
+    '</tr>';
+}
+
+/* =========================================================================
+   TABLE MAIN RENDER
+   ========================================================================= */
+function renderTable(){
+  const tbody = document.getElementById('renjaBody');
+  const urusanList = renjaData.urusan || [];
+
+  if(!urusanList || urusanList.length === 0){
+    tbody.innerHTML = '<tr><td colspan="15" class="text-center" style="padding:40px; color:var(--slate-400);">Belum ada data Urusan / Program / Kegiatan pada Renstra Perangkat Daerah ini.</td></tr>';
+    renderPaguSummary();
+    return;
+  }
+
+  let html = '';
+
+  // 1. Urusan -> Bidang -> Program -> Kegiatan -> Sub Kegiatan
+  urusanList.forEach(function(u){
+    html += urusanRow(u);
+
+    const isUrusanCollapsed = collapsedKeys.has('u:' + u.kode);
+    if(isUrusanCollapsed) return;
+
+    (u.bidang || []).forEach(function(b){
+      html += bidangRow(b);
+
+      (b.program || []).forEach(function(p){
+        html += programRow(p);
+
+        const isProgCollapsed = collapsedKeys.has('p:' + p.kode);
+        if(isProgCollapsed) return;
+
+        (p.kegiatan || []).forEach(function(k){
+          html += kegiatanRow(k);
+
+          (k.subKegiatan || []).forEach(function(sk){
+            html += subKegiatanRow(sk, k);
+          });
         });
+      });
     });
+  });
 
-<?php } ?>
-
-<?php if (isset($_SESSION['KodeWilayah']) && !$is_role_4 && !empty($ListInstansi)) { ?>
-    $("#FilterInstansiBtn").click(function() {
-        var instansiId = $("#FilterInstansi").val();
-        var url = BaseURL + "Daerah/RanwalRKPD";
-        if (instansiId && instansiId != '') { url += "?instansi_id=" + instansiId; }
-        window.location.href = url;
-    });
-    $("#ResetFilterBtn").click(function() { 
-        window.location.href = BaseURL + "Daerah/RanwalRKPD"; 
-    });
-<?php } ?>
-
-// ================================================================
-// DROPDOWN BIDANG PENGAMPU & PENGAMPU (EDIT) - DENGAN JABATAN
-// ================================================================
-
-function initEditSelect2(selector, placeholder = 'Pilih...') {
-    if ($(selector).hasClass('select2-hidden-accessible')) {
-        $(selector).select2('destroy');
-    }
-    $(selector).select2({
-        placeholder: placeholder,
-        dropdownParent: $('#ModalEditRanwal'),
-        width: '100%',
-        allowClear: true
-    });
+  tbody.innerHTML = html;
+  renderPaguSummary();
 }
 
-function loadEditBidangPengampuOptions(selectedId = '') {
-    $('#EditPengampuGroup').hide();
-    $('#EditPengampu').val('').trigger('change');
-    $('#EditPengampuInfo').hide();
-    
-    $.ajax({
-        url: BaseURL + 'Instansi/getDaftarDinasRenja',
-        type: 'GET',
-        dataType: 'json',
-        beforeSend: function() {
-            $('#EditBidangPengampu').html('<option value="">Loading...</option>');
-        },
-        success: function(data) {
-            let options = '<option value="">-- Pilih Bidang Pengampu --</option>';
-            if (data && data.length > 0) {
-                $.each(data, function(index, item) {
-                    let selected = (String(item.id) === String(selectedId)) ? 'selected' : '';
-                    options += `<option value="${item.id}" ${selected}>${escapeHtml(item.nama)}</option>`;
-                });
-            } else {
-                options += '<option value="" disabled>Tidak ada data Dinas</option>';
-            }
-            $('#EditBidangPengampu').html(options);
-            initEditSelect2('#EditBidangPengampu', 'Pilih Bidang Pengampu...');
-            
-            if (selectedId) {
-                $('#EditBidangPengampu').val(selectedId).trigger('change');
-            }
-        },
-        error: function() {
-            $('#EditBidangPengampu').html('<option value="">Gagal memuat data</option>');
-            initEditSelect2('#EditBidangPengampu', 'Pilih Bidang Pengampu...');
-        }
+function syncHeadRowHeight(){
+  const thead = document.querySelector('.renja-table thead');
+  if(!thead) return;
+  const firstRow = thead.querySelector('tr:first-child');
+  if(firstRow){
+    const h = firstRow.offsetHeight;
+    const secondRowHeaders = thead.querySelectorAll('tr:nth-child(2) th');
+    secondRowHeaders.forEach(function(th){
+      th.style.top = h + 'px';
     });
+  }
 }
 
-function loadEditPengampuByBidang(dinasId, selectedPelaksanaId = '') {
-    if (!dinasId || dinasId === '') {
-        $('#EditPengampuGroup').hide();
-        $('#EditPengampu').html('<option value="">-- Pilih Pengampu --</option>');
-        $('#EditPengampuInfo').hide();
-        initEditSelect2('#EditPengampu', 'Pilih Pengampu...');
-        return;
-    }
-    
-    $('#EditPengampuGroup').show();
-    
-    $.ajax({
-        url: BaseURL + 'Instansi/getPelaksanaByDinasRenja',
-        type: 'POST',
-        data: { 
-            dinas_id: dinasId,
-            [CSRF_NAME]: CSRF_TOKEN 
-        },
-        dataType: 'json',
-        beforeSend: function() {
-            $('#EditPengampu').html('<option value="">Loading...</option>');
-        },
-        success: function(data) {
-            let options = '<option value="">-- Pilih Pengampu --</option>';
-            
-            if (data && data.length > 0) {
-                $.each(data, function(index, item) {
-                    let selected = (String(item.id) === String(selectedPelaksanaId)) ? 'selected' : '';
-                    let displayText = item.nama;
-                    if (item.jabatan) {
-                        displayText += ' - ' + item.jabatan;
-                    }
-                    if (item.nip) {
-                        displayText += ' (' + item.nip + ')';
-                    }
-                    if (item.nama_dinas) {
-                        displayText += ' - ' + item.nama_dinas;
-                    }
-                    options += `<option value="${item.id}" ${selected} 
-                                data-nama="${escapeHtml(item.nama)}" 
-                                data-jabatan="${escapeHtml(item.jabatan || '')}" 
-                                data-nip="${escapeHtml(item.nip || '')}">${escapeHtml(displayText)}</option>`;
-                });
-            } else {
-                options += '<option value="" disabled>Tidak ada pelaksana</option>';
-            }
-            
-            $('#EditPengampu').html(options);
-            initEditSelect2('#EditPengampu', 'Pilih Pengampu...');
-            
-            if (selectedPelaksanaId) {
-                $('#EditPengampu').val(selectedPelaksanaId).trigger('change');
-            }
-            
-            // Tampilkan info jika ada pengampu terpilih
-            if (selectedPelaksanaId) {
-                var $selected = $('#EditPengampu option:selected');
-                var nama = $selected.data('nama') || '';
-                var jabatan = $selected.data('jabatan') || '';
-                var nip = $selected.data('nip') || '';
-                
-                if (nama) {
-                    $('#EditPengampuInfo').show();
-                    $('#EditPengampuNama').text(nama);
-                    $('#EditPengampuJabatan').text(jabatan ? ' - ' + jabatan : '');
-                    $('#EditPengampuNip').text(nip ? ' (NIP: ' + nip + ')' : '');
-                }
-            }
-        },
-        error: function() {
-            $('#EditPengampu').html('<option value="">Gagal memuat data</option>');
-            $('#EditPengampuInfo').hide();
-            initEditSelect2('#EditPengampu', 'Pilih Pengampu...');
-        }
-    });
-}
+/* =========================================================================
+   AJAX DATA LOADER FROM SERVER
+   ========================================================================= */
+function loadRenjaDataServer(tahun, instansiId){
+  showLoading(true);
+  const y = tahun || renjaData.tahunAktif || 2026;
+  const insId = instansiId || activeInstansiId || '';
 
-// EVENT CHANGE BIDANG PENGAMPU
-$(document).off('change', '#EditBidangPengampu').on('change', '#EditBidangPengampu', function() {
-    let dinasId = $(this).val();
-    loadEditPengampuByBidang(dinasId, '');
-});
+  let url = BASE_URL + 'Daerah/getRanwalRKPDJson?tahun=' + encodeURIComponent(y);
+  if(insId) url += '&instansi_id=' + encodeURIComponent(insId);
 
-// EVENT CHANGE PENGAMPU - TAMPILKAN JABATAN DI MODAL
-$(document).off('change', '#EditPengampu').on('change', '#EditPengampu', function() {
-    var selected = $(this).find('option:selected');
-    var nama = selected.data('nama') || '';
-    var jabatan = selected.data('jabatan') || '';
-    var nip = selected.data('nip') || '';
-    
-    if (nama) {
-        $('#EditPengampuInfo').show();
-        $('#EditPengampuNama').text(nama);
-        $('#EditPengampuJabatan').text(jabatan ? ' - ' + jabatan : '');
-        $('#EditPengampuNip').text(nip ? ' (NIP: ' + nip + ')' : '');
+  fetch(url, {
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  })
+  .then(function(res){ return res.json(); })
+  .then(function(data){
+    showLoading(false);
+    if(data.status === 'success' && data.data){
+      renjaData = data.data;
+      if(renjaData.perangkatDaerah){
+        document.getElementById('pdNameLabel').textContent = renjaData.perangkatDaerah;
+      }
+      autoCollapsedApplied = false;
+      applyAutoCollapseIfNeeded();
+      renderTable();
+      syncHeadRowHeight();
     } else {
-        $('#EditPengampuInfo').hide();
+      showToast('Gagal memuat data Ranwal RKPD.', 'error');
     }
-});
+  })
+  .catch(function(err){
+    showLoading(false);
+    console.error(err);
+    showToast('Terjadi kesalahan koneksi.', 'error');
+  });
+}
 
-// ================================================================
-// TOMBOL EDIT RANWAL
-// ================================================================
-$(document).off('click', '.BtnEditRanwal').on('click', '.BtnEditRanwal', function(e) {
-    e.preventDefault();
-    var id = $(this).data('id');
-    var headerId = $(this).data('header-id') || 0;
-    
-    if (!id) {
-        alert('ID tidak valid!');
-        return;
+function buildYearTabs(){
+  const wrap = document.getElementById('yearTabs');
+  const years = (renjaData.tahunList && renjaData.tahunList.length > 0) ? renjaData.tahunList : [2026, 2027, 2028, 2029, 2030];
+  const activeYear = renjaData.tahunAktif || 2026;
+  
+  wrap.innerHTML = years.map(function(y){
+    const active = y === activeYear ? ' active' : '';
+    return '<button class="year-tab' + active + '" data-year="' + y + '">Tahun ' + y + '</button>';
+  }).join('');
+}
+
+/* =========================================================================
+   EVENT BINDING
+   ========================================================================= */
+document.addEventListener('DOMContentLoaded', function(){
+  populateStaticOptions();
+  buildYearTabs();
+  applyAutoCollapseIfNeeded();
+  loadRenjaDataServer(renjaData.tahunAktif, activeInstansiId);
+
+  // Edit buttons & accordion toggle
+  document.getElementById('renjaBody').addEventListener('click', function(e){
+    const btn = e.target.closest('button[data-action]');
+    if(btn){
+      const action = btn.getAttribute('data-action');
+      if(action === 'edit-kegiatan'){
+        openKegiatanModal(btn.getAttribute('data-id'));
+      } else if(action === 'edit-subkegiatan'){
+        openSubKegiatanModal(btn.getAttribute('data-id'), btn.getAttribute('data-parent'));
+      }
+      return;
     }
-    
-    showLoading();
-    $('#EditHeaderId').val(headerId);
-    
-    $.ajax({
-        url: BaseURL + "Daerah/GetRanwalRKPDDetail",
-        type: "POST",
-        data: {
-            id: id,
-            [CSRF_NAME]: CSRF_TOKEN
-        },
-        dataType: "json",
-        success: function(res) {
-            hideLoading();
-            if (res.status === "success" && res.data) {
-                var d = res.data;
-                $('#EditDetailId').val(d.id);
-                $('#EditHeaderInfo').text('Kode Rekening: ' + (d.kode_rekening || '-'));
-                $('#EditIndikatorKinerja').val(d.indikator_kinerja || '');
-                $('#EditSatuan').val(d.satuan || '');
-                
-                // Set lokasi
-                if (d.lokasi) {
-                    if (d.lokasi.indexOf('manual_') === 0) {
-                        setEditSelectedLokasi(d.lokasi, d.lokasi_nama || d.lokasi);
-                    } else {
-                        $.ajax({
-                            url: BaseURL + "Daerah/getLokasiDetailRanwal",
-                            type: "POST",
-                            data: { kode: d.lokasi, [CSRF_NAME]: CSRF_TOKEN },
-                            dataType: "json",
-                            async: false,
-                            success: function(lokasiData) {
-                                if (lokasiData && lokasiData.Nama) {
-                                    setEditSelectedLokasi(d.lokasi, lokasiData.Nama);
-                                } else {
-                                    setEditSelectedLokasi(d.lokasi, d.lokasi);
-                                }
-                            },
-                            error: function() {
-                                setEditSelectedLokasi(d.lokasi, d.lokasi);
-                            }
-                        });
-                    }
-                } else {
-                    removeEditLokasi();
-                }
-                
-                $('#EditPrioritasDaerah').val(d.prioritas_daerah || '');
-                $('#EditPrioritasNasional').val(d.prioritas_nasional || '');
-                $('#EditRanwalKinerja').val(d.ranwal_kinerja || '');
-                $('#EditRanwalRp').val(d.ranwal_rp ? new Intl.NumberFormat('id-ID').format(d.ranwal_rp) : '');
-                $('#EditRancanganKinerja').val(d.rancangan_kinerja || '');
-                $('#EditRancanganRp').val(d.rancangan_rp ? new Intl.NumberFormat('id-ID').format(d.rancangan_rp) : '');
-                $('#EditRanhirKinerja').val(d.ranhir_kinerja || '');
-                $('#EditRanhirRp').val(d.ranhir_rp ? new Intl.NumberFormat('id-ID').format(d.ranhir_rp) : '');
-                $('#EditRenjaKinerja').val(d.renja_kinerja || '');
-                $('#EditRenjaRp').val(d.renja_rp ? new Intl.NumberFormat('id-ID').format(d.renja_rp) : '');
-                $('#EditDpaMurniKinerja').val(d.dpa_murni_kinerja || '');
-                $('#EditDpaMurniRp').val(d.dpa_murni_rp ? new Intl.NumberFormat('id-ID').format(d.dpa_murni_rp) : '');
-                $('#EditSumberDana').val(d.sumber_dana || '');
-                $('#EditDpaPerubahanKinerja').val(d.dpa_perubahan_kinerja || '');
-                $('#EditDpaPerubahanRp').val(d.dpa_perubahan_rp ? new Intl.NumberFormat('id-ID').format(d.dpa_perubahan_rp) : '');
-                
-                // LOAD DROPDOWN BIDANG PENGAMPU & PENGAMPU
-                var bidangPengampu = d.bidang_pengampu || '';
-                var pengampu = d.pengampu || '';
-                
-                $('#EditPengampuGroup').hide();
-                $('#EditPengampu').val('').trigger('change');
-                $('#EditPengampuInfo').hide();
-                
-                if (bidangPengampu) {
-                    loadEditBidangPengampuOptions(bidangPengampu);
-                    setTimeout(function() {
-                        if (pengampu) {
-                            loadEditPengampuByBidang(bidangPengampu, pengampu);
-                        }
-                    }, 500);
-                } else {
-                    loadEditBidangPengampuOptions('');
-                }
-                
-                $('#ModalEditRanwal').modal('show');
-            } else {
-                alert(res.message || 'Gagal memuat data');
-            }
-        },
-        error: function() {
-            hideLoading();
-            alert("Terjadi kesalahan saat memuat data");
+    const toggleRow = e.target.closest('tr[data-toggle-key]');
+    if(toggleRow){
+      toggleCollapse(toggleRow.getAttribute('data-toggle-key'));
+    }
+  });
+
+  // Modal close
+  document.querySelectorAll('[data-close]').forEach(function(el){
+    el.addEventListener('click', function(){ hideModal(el.getAttribute('data-close')); });
+  });
+  document.querySelectorAll('.modal-backdrop-custom').forEach(function(bd){
+    bd.addEventListener('click', function(e){
+      if(e.target === bd) hideModal(bd.id);
+    });
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){
+      document.querySelectorAll('.modal-backdrop-custom.open').forEach(function(bd){ hideModal(bd.id); });
+    }
+  });
+
+  // Save buttons
+  document.getElementById('btnSaveKegiatan').addEventListener('click', saveKegiatan);
+  document.getElementById('btnSaveSubKegiatan').addEventListener('click', saveSubKegiatan);
+
+  // Cascading dropdown wilayah
+  const selKecEl = document.getElementById('subKecamatan');
+  if(selKecEl){
+    selKecEl.addEventListener('change', function(e){
+      const opt = this.options[this.selectedIndex];
+      const kecKode = (opt && opt.getAttribute('data-kode')) ? opt.getAttribute('data-kode') : (this.value ? this.value.split(' - ')[0].trim() : '');
+      populateDesa(kecKode, '');
+    });
+  }
+
+  // Format ribuan
+  ['subAnggaran','subAnggaranN1'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', function(e){
+      e.target.value = formatRibuan(e.target.value);
+    });
+  });
+
+  // Toolbar buttons
+  document.getElementById('btnExpandAll').addEventListener('click', expandAll);
+  document.getElementById('btnCollapseAll').addEventListener('click', collapseAll);
+
+  // Year tabs
+  document.getElementById('yearTabs').addEventListener('click', function(e){
+    const btn = e.target.closest('.year-tab');
+    if(!btn) return;
+    document.querySelectorAll('.year-tab').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    const selectedYear = Number(btn.getAttribute('data-year'));
+    renjaData.tahunAktif = selectedYear;
+    document.getElementById('activeYearLabel').textContent = selectedYear;
+    document.getElementById('paguTahunLabel').textContent = selectedYear;
+    loadRenjaDataServer(selectedYear, activeInstansiId);
+  });
+
+  // Sinkronisasi Ulang Data RKPD dengan Renja
+  const btnSync = document.getElementById('btnSyncData');
+  if(btnSync){
+    btnSync.addEventListener('click', function(){
+      const y = renjaData.tahunAktif || 2026;
+      if(!confirm('Apakah Anda yakin ingin menyinkronkan ulang data Ranwal RKPD Tahun ' + y + ' dengan data Ranwal Renja?\n\nPerubahan kustom pada Ranwal RKPD tahun ' + y + ' akan direset dan dicocokkan kembali ke data Ranwal Renja.')){
+        return;
+      }
+      showLoading(true);
+      const fd = new FormData();
+      fd.append('tahun', y);
+      fd.append('instansi_id', activeInstansiId);
+      fd.append(CSRF_NAME, CSRF_TOKEN);
+      
+      fetch(BASE_URL + 'Daerah/resetRanwalRKPDDataFromRenja', {
+        method: 'POST',
+        body: fd,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+      .then(function(res){ return res.json(); })
+      .then(function(data){
+        showLoading(false);
+        if(data.status === 'success'){
+          showToast(data.message || 'Sinkronisasi berhasil.');
+          loadRenjaDataServer(y, activeInstansiId);
+        } else {
+          showToast(data.message || 'Gagal menyinkronkan data.', 'error');
         }
+      })
+      .catch(function(err){
+        showLoading(false);
+        console.error(err);
+        showToast('Terjadi kesalahan saat menyinkronkan data.', 'error');
+      });
     });
-});
+  }
 
-// ================================================================
-// TOMBOL SIMPAN EDIT RANWAL
-// ================================================================
-$(document).off('click', '#BtnSimpanEditRanwal').on('click', '#BtnSimpanEditRanwal', function(e) {
-    e.preventDefault();
-    
-    var indikator = $('#EditIndikatorKinerja').val().trim();
-    if (!indikator) {
-        alert('Indikator Kinerja wajib diisi!');
-        $('#EditIndikatorKinerja').focus();
-        return;
-    }
-    
-    var bidangPengampu = $('#EditBidangPengampu').val();
-    if (!bidangPengampu) {
-        alert('Bidang Pengampu wajib dipilih!');
-        $('#EditBidangPengampu').focus();
-        return;
-    }
-    
-    var pengampu = $('#EditPengampu').val();
-    if (!pengampu) {
-        alert('Pengampu wajib dipilih!');
-        $('#EditPengampu').focus();
-        return;
-    }
-    
-    // Konfirmasi sebelum menyimpan
-    if (!confirm("Anda akan mengubah data Ranwal RKPD.\n\nPerubahan akan ditandai dan muncul sebagai notifikasi di menu Ranwal Renja Perangkat Daerah.\n\nLanjutkan?")) {
-        return;
-    }
-    
-    showLoading();
-    
-    var formatAngka = function(val) {
-        if (!val) return '';
-        return val.replace(/[^0-9]/g, '');
-    };
-    
-    var data = {
-        id: $('#EditDetailId').val(),
-        header_id: $('#EditHeaderId').val(),
-        indikator_kinerja: indikator,
-        satuan: $('#EditSatuan').val(),
-        lokasi: $('#EditLokasiKode').val(),
-        lokasi_nama: $('#EditLokasiNama').val(),
-        prioritas_daerah: $('#EditPrioritasDaerah').val(),
-        prioritas_nasional: $('#EditPrioritasNasional').val(),
-        ranwal_kinerja: $('#EditRanwalKinerja').val(),
-        ranwal_rp: formatAngka($('#EditRanwalRp').val()),
-        rancangan_kinerja: $('#EditRancanganKinerja').val(),
-        rancangan_rp: formatAngka($('#EditRancanganRp').val()),
-        ranhir_kinerja: $('#EditRanhirKinerja').val(),
-        ranhir_rp: formatAngka($('#EditRanhirRp').val()),
-        renja_kinerja: $('#EditRenjaKinerja').val(),
-        renja_rp: formatAngka($('#EditRenjaRp').val()),
-        dpa_murni_kinerja: $('#EditDpaMurniKinerja').val(),
-        dpa_murni_rp: formatAngka($('#EditDpaMurniRp').val()),
-        sumber_dana: $('#EditSumberDana').val(),
-        dpa_perubahan_kinerja: $('#EditDpaPerubahanKinerja').val(),
-        dpa_perubahan_rp: formatAngka($('#EditDpaPerubahanRp').val()),
-        bidang_pengampu: bidangPengampu,
-        pengampu: pengampu,
-        [CSRF_NAME]: CSRF_TOKEN
-    };
-    
-    $.ajax({
-        url: BaseURL + "Daerah/UpdateRanwalRKPD",
-        type: "POST",
-        data: data,
-        dataType: "json",
-        success: function(res) {
-            hideLoading();
-            if (res.status === "success") {
-                alert('✓ Data Ranwal RKPD berhasil diperbarui!\n\nNotifikasi akan muncul di menu Ranwal Renja Perangkat Daerah.');
-                $('#ModalEditRanwal').modal('hide');
-                location.reload();
-            } else {
-                alert(res.message || "Gagal menyimpan perubahan");
-            }
-        },
-        error: function() {
-            hideLoading();
-            alert("Terjadi kesalahan saat menyimpan");
+  // =========================================================================
+  // FILTER WILAYAH SEBELUM LOGIN
+  // =========================================================================
+  <?php if (!$IsLoggedIn || !isset($_SESSION['KodeWilayah'])) { ?>
+    const selProv = document.getElementById('Provinsi');
+    const selKab = document.getElementById('KabKota');
+    const grpInstansi = document.getElementById('FilterInstansiGroup');
+    const selInstansiBefore = document.getElementById('FilterInstansiBeforeLogin');
+    const btnFilter = document.getElementById('Filter');
+
+    if (selProv) {
+      selProv.addEventListener('change', function(){
+        const provKode = this.value;
+        if (!provKode) {
+          selKab.innerHTML = '<option value="">Pilih Kab/Kota</option>';
+          if (grpInstansi) grpInstansi.style.display = 'none';
+          return;
         }
-    });
-});
 
-// ================================================================
-// TOMBOL HAPUS RANWAL
-// ================================================================
-$(document).off('click', '.BtnHapusRanwal').on('click', '.BtnHapusRanwal', function(e) {
-    e.preventDefault();
-    
-    var id = $(this).data('id');
-    var indikator = $(this).data('indikator') || 'Data ini';
-    
-    if (!id) {
-        alert('ID tidak valid!');
-        return;
-    }
-    
-    if (!confirm("Anda yakin ingin menghapus data berikut?\n\n" + 
-                 "Indikator: " + indikator + "\n\n" +
-                 "⚠️ Data yang dihapus tidak dapat dikembalikan!")) {
-        return;
-    }
-    
-    showLoading();
-    
-    $.ajax({
-        url: BaseURL + "Daerah/HapusRanwalRKPD",
-        type: "POST",
-        data: {
-            id: id,
-            [CSRF_NAME]: CSRF_TOKEN
-        },
-        dataType: "json",
-        success: function(res) {
-            hideLoading();
-            if (res.status === "success") {
-                alert('✓ Data berhasil dihapus!');
-                location.reload();
-            } else {
-                alert(res.message || "Gagal menghapus data");
-            }
-        },
-        error: function() {
-            hideLoading();
-            alert("Terjadi kesalahan saat menghapus data");
-        }
-    });
-});
+        const fd = new FormData();
+        fd.append('Kode', provKode);
+        fd.append(CSRF_NAME, CSRF_TOKEN);
 
-// ================================================================
-// FORMAT RUPIAH
-// ================================================================
-$(document).on('input', '.format-rupiah', function() {
-    var value = $(this).val().replace(/[^0-9]/g, '');
-    if (value) {
-        var formatted = new Intl.NumberFormat('id-ID').format(value);
-        $(this).val(formatted);
-    }
-});
-
-// ================================================================
-// MODAL SHOWN EVENTS
-// ================================================================
-$('#ModalEditRanwal').on('shown.bs.modal', function() {
-    // Re-inisialisasi Select2 Bidang Pengampu
-    if ($('#EditBidangPengampu').hasClass('select2-hidden-accessible')) {
-        $('#EditBidangPengampu').select2('destroy');
-    }
-    $('#EditBidangPengampu').select2({
-        placeholder: 'Pilih Bidang Pengampu...',
-        dropdownParent: $('#ModalEditRanwal'),
-        width: '100%',
-        allowClear: true
-    });
-    
-    // Re-inisialisasi Select2 Pengampu
-    if ($('#EditPengampu').hasClass('select2-hidden-accessible')) {
-        $('#EditPengampu').select2('destroy');
-    }
-    $('#EditPengampu').select2({
-        placeholder: 'Pilih Pengampu...',
-        dropdownParent: $('#ModalEditRanwal'),
-        width: '100%',
-        allowClear: true
-    });
-    
-    // Jika ada nilai Bidang Pengampu, load Pengampu
-    let bidangValue = $('#EditBidangPengampu').val();
-    if (bidangValue && bidangValue !== '') {
-        loadEditPengampuByBidang(bidangValue, $('#EditPengampu').val());
-    } else {
-        $('#EditPengampuGroup').hide();
-        $('#EditPengampuInfo').hide();
-    }
-});
-
-// Saat modal akan ditutup, destroy Select2 untuk mencegah memory leak
-$('#ModalEditRanwal').on('hidden.bs.modal', function() {
-    if ($('#EditBidangPengampu').hasClass('select2-hidden-accessible')) {
-        $('#EditBidangPengampu').select2('destroy');
-    }
-    if ($('#EditPengampu').hasClass('select2-hidden-accessible')) {
-        $('#EditPengampu').select2('destroy');
-    }
-});
-
-// Mencegah dropdown Select2 tertutup saat scroll
-$(document).on('select2:open', function(e) {
-    var $select = $(e.target);
-    var $modal = $select.closest('.modal');
-    if ($modal.length) {
-        $modal.css('overflow-y', 'auto');
-        setTimeout(function() {
-            $('body').css('overflow', 'auto');
-            $('html').css('overflow', 'auto');
-        }, 10);
-    }
-});
-
-// Mencegah dropdown tertutup saat klik di dalam dropdown
-$(document).on('mousedown', '.select2-dropdown', function(e) {
-    e.stopPropagation();
-});
-
-// ================================================================
-// INIT DATATABLE
-// ================================================================
-$(document).ready(function() {
-    if ($('#data-table-basic').length > 0) {
-        try {
-            if ($.fn.DataTable.isDataTable('#data-table-basic')) {
-                $('#data-table-basic').DataTable().destroy();
-            }
-            $('#data-table-basic').DataTable({
-                "pageLength": 10,
-                "ordering": false,
-                "stateSave": false,
-                "scrollX": true,
-                "scrollY": "400px",
-                "scrollCollapse": true,
-                "language": {
-                    "emptyTable": "Tidak ada data",
-                    "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                    "infoEmpty": "Tidak ada",
-                    "paginate": {
-                        "first": "Pertama",
-                        "last": "Terakhir",
-                        "next": "Berikutnya",
-                        "previous": "Sebelumnya"
-                    }
-                }
+        fetch(BASE_URL + 'Instansi/GetListKabKota', {
+          method: 'POST',
+          body: fd,
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function(res){ return res.json(); })
+        .then(function(data){
+          let opts = '<option value="">Pilih Kab/Kota</option>';
+          if (data && data.length > 0) {
+            data.forEach(function(item){
+              opts += '<option value="' + esc(item.Kode) + '">' + esc(item.Nama) + '</option>';
             });
-        } catch(e) {
-            console.log("DataTable error:", e);
-        }
+          }
+          selKab.innerHTML = opts;
+        })
+        .catch(function(err){ console.error(err); });
+      });
     }
+
+    if (selKab) {
+      selKab.addEventListener('change', function(){
+        const kabKode = this.value;
+        if (!kabKode) {
+          if (grpInstansi) grpInstansi.style.display = 'none';
+          return;
+        }
+
+        const fd = new FormData();
+        fd.append('kode_wilayah', kabKode);
+        fd.append(CSRF_NAME, CSRF_TOKEN);
+
+        fetch(BASE_URL + 'Instansi/GetListInstansiLevel4', {
+          method: 'POST',
+          body: fd,
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function(res){ return res.json(); })
+        .then(function(data){
+          let opts = '<option value="">-- Pilih Instansi --</option>';
+          if (data && data.length > 0) {
+            data.forEach(function(item){
+              const selected = (activeInstansiId == item.id) ? 'selected' : '';
+              opts += '<option value="' + item.id + '" ' + selected + '>' + esc(item.nama) + '</option>';
+            });
+          }
+          if (selInstansiBefore) selInstansiBefore.innerHTML = opts;
+          if (grpInstansi) grpInstansi.style.display = 'block';
+        })
+        .catch(function(err){ console.error(err); });
+      });
+    }
+
+    if (btnFilter) {
+      btnFilter.addEventListener('click', function(){
+        const provVal = selProv ? selProv.value : '';
+        const kabVal = selKab ? selKab.value : '';
+        if (!provVal) { alert('Mohon Pilih Provinsi'); return; }
+        if (!kabVal) { alert('Mohon Pilih Kab/Kota'); return; }
+
+        const instansiVal = selInstansiBefore ? selInstansiBefore.value : '';
+        const fd = new FormData();
+        fd.append('KodeWilayah', kabVal);
+        if (instansiVal) fd.append('InstansiId', instansiVal);
+        fd.append(CSRF_NAME, CSRF_TOKEN);
+
+        btnFilter.disabled = true;
+        btnFilter.textContent = 'Memuat...';
+
+        fetch(BASE_URL + 'Instansi/SetTempKodeWilayah', {
+          method: 'POST',
+          body: fd,
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function(res){ return res.text(); })
+        .then(function(res){
+          if (res.trim() === '1') {
+            let redirectUrl = BASE_URL + 'Daerah/RanwalRKPD';
+            if (instansiVal) {
+              redirectUrl += '?instansi_id=' + encodeURIComponent(instansiVal);
+            }
+            window.location.href = redirectUrl;
+          } else {
+            alert(res || 'Gagal menyimpan filter wilayah!');
+            btnFilter.disabled = false;
+            btnFilter.innerHTML = '<i class="fa fa-search"></i> Filter';
+          }
+        })
+        .catch(function(err){
+          console.error(err);
+          alert('Gagal menghubungi server!');
+          btnFilter.disabled = false;
+          btnFilter.innerHTML = '<i class="fa fa-search"></i> Filter';
+        });
+      });
+    }
+
+    <?php if (!empty($KodeWilayah)) { ?>
+      const currentKodeWilayah = "<?= $KodeWilayah ?>";
+      const currentProv = currentKodeWilayah.substring(0, 2);
+      if (selProv) {
+        selProv.value = currentProv;
+        const fd = new FormData();
+        fd.append('Kode', currentProv);
+        fd.append(CSRF_NAME, CSRF_TOKEN);
+        fetch(BASE_URL + 'Instansi/GetListKabKota', {
+          method: 'POST',
+          body: fd,
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function(res){ return res.json(); })
+        .then(data => {
+          let opts = '<option value="">Pilih Kab/Kota</option>';
+          if (data && data.length > 0) {
+            data.forEach(function(item){
+              const sel = (item.Kode === currentKodeWilayah) ? 'selected' : '';
+              opts += '<option value="' + esc(item.Kode) + '" ' + sel + '>' + esc(item.Nama) + '</option>';
+            });
+          }
+          if (selKab) {
+            selKab.innerHTML = opts;
+            if (grpInstansi) grpInstansi.style.display = 'block';
+          }
+        });
+      }
+    <?php } ?>
+  <?php } ?>
+
+  // =========================================================================
+  // FILTER INSTANSI SETELAH LOGIN SEBAGAI DAERAH
+  // =========================================================================
+  <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
+    const selFilterInstansi = document.getElementById('FilterInstansi');
+    const btnFilterInstansi = document.getElementById('FilterInstansiBtn');
+
+    if (btnFilterInstansi) {
+      btnFilterInstansi.addEventListener('click', function(){
+        const val = selFilterInstansi ? selFilterInstansi.value : '';
+        const tahun = renjaData.tahunAktif || 2026;
+        let redirectUrl = BASE_URL + 'Daerah/RanwalRKPD?tahun=' + encodeURIComponent(tahun);
+        if (val) redirectUrl += '&instansi_id=' + encodeURIComponent(val);
+        window.location.href = redirectUrl;
+      });
+    }
+  <?php } ?>
 });
 </script>
-
 </body>
 </html>
