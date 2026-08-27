@@ -66,10 +66,16 @@
                                 <?php } ?>
                             <?php } ?>
 
-                            <div class="button-icon-btn sm-res-mg-t-30">
+                            <div class="button-icon-btn sm-res-mg-t-30" style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                    <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalTambahIku">
-                                        <i class="notika-icon bi-plus-lg"></i> <b>Tambah IKU</b>
+                                    <button type="button" class="btn btn-primary notika-btn-primary BtnBukaSinkron" data-tipe="tujuan" data-label="Sinkron Tujuan">
+                                        <i class="fa fa-refresh"></i> <b>Sinkron Tujuan</b>
+                                    </button>
+                                    <button type="button" class="btn btn-info notika-btn-info BtnBukaSinkron" data-tipe="sasaran" data-label="Sinkron Sasaran">
+                                        <i class="fa fa-refresh"></i> <b>Sinkron Sasaran</b>
+                                    </button>
+                                    <button type="button" class="btn btn-success notika-btn-success BtnBukaSinkron" data-tipe="tujuan_sasaran" data-label="Sinkron Tujuan &amp; Sasaran">
+                                        <i class="fa fa-refresh"></i> <b>Sinkron Tujuan &amp; Sasaran</b>
                                     </button>
                                 <?php } ?>
                             </div>
@@ -78,71 +84,38 @@
                             <table id="data-table-basic" class="table table-striped">
                                 <thead>
                                     <tr>
-                                        <th class="text-center">No</th>
-                                        <th>Tujuan</th>
-                                        <th>Indikator Tujuan (IKU)</th>
-                                        <th class="text-center">Periode</th>
-                                        <th class="text-center">Target <br><small>Tahun 1</small></th>
-                                        <th class="text-center">Target <br><small>Tahun 2</small></th>
-                                        <th class="text-center">Target <br><small>Tahun 3</small></th>
-                                        <th class="text-center">Target <br><small>Tahun 4</small></th>
-                                        <th class="text-center">Target <br><small>Tahun 5</small></th>
-                                     
-                                        <th <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>style="width: 10%;" class="text-center">Aksi</th>
-                                        <?php } ?>
+                                        <th class="text-center" style="width: 5%;">No</th>
+                                        <th style="width: 35%;">Indikator Kinerja Utama</th>
+                                        <th class="text-center" style="width: 15%;">Periode</th>
+                                        <th class="text-center" style="width: 9%;">Target <br><small>Tahun 1</small></th>
+                                        <th class="text-center" style="width: 9%;">Target <br><small>Tahun 2</small></th>
+                                        <th class="text-center" style="width: 9%;">Target <br><small>Tahun 3</small></th>
+                                        <th class="text-center" style="width: 9%;">Target <br><small>Tahun 4</small></th>
+                                        <th class="text-center" style="width: 9%;">Target <br><small>Tahun 5</small></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php $No = 1; foreach ($Iku as $key) { ?>
                                         <tr>
                                             <td style="vertical-align: middle;" class="text-center"><?= $No++ ?></td>
-                                            <td style="vertical-align: middle;">
-                                                <?php
-                                                $tujuan = $this->db->where('Id', $key['IdTujuan'])->get('tujuanrpjmd')->row_array();
-                                                echo $tujuan ? html_escape($tujuan['Tujuan']) : '-';
-                                                ?>
-                                            </td>
                                             <td style="vertical-align: middle;"><?= html_escape($key['indikator_tujuan']) ?></td>
                                             <td style="vertical-align: middle;" class="text-center">
-                                                <?= html_escape($key['tahun_mulai']) ?> - <?= html_escape($key['tahun_akhir']) ?>
+                                                <?= (!empty($key['tahun_mulai']) && !empty($key['tahun_akhir'])) ? html_escape($key['tahun_mulai']) . ' - ' . html_escape($key['tahun_akhir']) : '-' ?>
                                             </td>
-                                            <td style="vertical-align: middle;" class="text-center" align="center">
-                                                <?= is_numeric($key['target_1']) ? number_format($key['target_1'], 2, ',', '.') : '-' ?>
+                                            <td style="vertical-align: middle;" class="text-center">
+                                                <?= (isset($key['target_1']) && is_numeric($key['target_1'])) ? number_format((float)$key['target_1'], 2, '.', '') : (isset($key['target_1']) && $key['target_1'] !== '' ? html_escape(str_replace(',', '.', $key['target_1'])) : '-') ?>
                                             </td>
-                                            <td style="vertical-align: middle;" class="text-center" align="center">
-                                                <?= is_numeric($key['target_2']) ? number_format($key['target_2'], 2, ',', '.') : '-' ?>
+                                            <td style="vertical-align: middle;" class="text-center">
+                                                <?= (isset($key['target_2']) && is_numeric($key['target_2'])) ? number_format((float)$key['target_2'], 2, '.', '') : (isset($key['target_2']) && $key['target_2'] !== '' ? html_escape(str_replace(',', '.', $key['target_2'])) : '-') ?>
                                             </td>
-                                            <td style="vertical-align: middle;" class="text-center" align="center">
-                                                <?= is_numeric($key['target_3']) ? number_format($key['target_3'], 2, ',', '.') : '-' ?>
+                                            <td style="vertical-align: middle;" class="text-center">
+                                                <?= (isset($key['target_3']) && is_numeric($key['target_3'])) ? number_format((float)$key['target_3'], 2, '.', '') : (isset($key['target_3']) && $key['target_3'] !== '' ? html_escape(str_replace(',', '.', $key['target_3'])) : '-') ?>
                                             </td>
-                                            <td style="vertical-align: middle;" class="text-center" align="center">
-                                                <?= is_numeric($key['target_4']) ? number_format($key['target_4'], 2, ',', '.') : '-' ?>
+                                            <td style="vertical-align: middle;" class="text-center">
+                                                <?= (isset($key['target_4']) && is_numeric($key['target_4'])) ? number_format((float)$key['target_4'], 2, '.', '') : (isset($key['target_4']) && $key['target_4'] !== '' ? html_escape(str_replace(',', '.', $key['target_4'])) : '-') ?>
                                             </td>
-                                            <td style="vertical-align: middle;" class="text-center" align="center">
-                                                <?= is_numeric($key['target_5']) ? number_format($key['target_5'], 2, ',', '.') : '-' ?>
-                                            </td>
-                                            <td class="text-center">
-                                                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                                    <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                                                        <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit"
-                                                                data-id="<?= $key['id'] ?>"
-                                                                data-tujuan="<?= $key['IdTujuan'] ?>"
-                                                                data-indikator-tujuan="<?= html_escape($key['indikator_tujuan']) ?>"
-                                                                data-target1="<?= $key['target_1'] ?? '' ?>"
-                                                                data-target2="<?= $key['target_2'] ?? '' ?>"
-                                                                data-target3="<?= $key['target_3'] ?? '' ?>"
-                                                                data-target4="<?= $key['target_4'] ?? '' ?>"
-                                                                data-target5="<?= $key['target_5'] ?? '' ?>"
-                                                                data-tahunmulai="<?= $key['tahun_mulai'] ?>"
-                                                                data-tahunakhir="<?= $key['tahun_akhir'] ?>">
-                                                            <i class="notika-icon notika-edit"></i>
-                                                        </button>
-                                                        <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus"
-                                                                data-id="<?= $key['id'] ?>">
-                                                            <i class="notika-icon notika-trash"></i>
-                                                        </button>
-                                                    </div>
-                                                <?php } ?>
+                                            <td style="vertical-align: middle;" class="text-center">
+                                                <?= (isset($key['target_5']) && is_numeric($key['target_5'])) ? number_format((float)$key['target_5'], 2, '.', '') : (isset($key['target_5']) && $key['target_5'] !== '' ? html_escape(str_replace(',', '.', $key['target_5'])) : '-') ?>
                                             </td>
                                         </tr>
                                     <?php } ?>
@@ -155,144 +128,44 @@
         </div>
     </div>
 
-    <!-- Modal Tambah IKU -->
-    <div class="modal fade" id="ModalTambahIku" role="dialog">
+    <!-- Modal Pilih Periode Sinkronisasi -->
+    <div class="modal fade" id="ModalSinkronIku" role="dialog">
         <div class="modal-dialog modals-default" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title" id="ModalSinkronTitle"><i class="fa fa-refresh"></i> Sinkronisasi Data IKU</h4>
                 </div>
                 <div class="modal-body">
-                    <form id="FormTambahIku">
-                        <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
-                        <!-- Tahun Filter Dropdown dengan opsi default -->
+                    <form id="FormSinkronIku">
+                        <input type="hidden" id="SinkronTipe" name="tipe" value="">
+                        
+                        <div class="alert alert-info" style="margin-bottom: 15px;">
+                            <span id="SinkronKeterangan">Pilih periode tahun untuk melakukan sinkronisasi data dari VMTS.</span>
+                        </div>
+
                         <div class="form-group">
-                            <label for="TahunFilter">Periode Tahun</label>
-                            <select class="form-control" id="TahunFilter" name="TahunFilter" required>
-                                <option value="" selected disabled>-- Pilih Tahun --</option>
-                                <?php foreach ($Periods as $period) { ?>
-                                    <option value="<?= html_escape($period['TahunMulai'] . '-' . $period['TahunAkhir']) ?>">
-                                        <?= html_escape($period['TahunMulai'] . ' - ' . $period['TahunAkhir']) ?>
-                                    </option>
+                            <label for="SinkronPeriode"><b>Pilih Periode Tahun</b> <span class="text-danger">*</span></label>
+                            <select class="form-control" id="SinkronPeriode" name="periode" required>
+                                <option value="" selected disabled>-- Pilih Periode Tahun --</option>
+                                <?php if (!empty($Periods)) { ?>
+                                    <?php foreach ($Periods as $period) { ?>
+                                        <option value="<?= html_escape($period['TahunMulai'] . '-' . $period['TahunAkhir']) ?>">
+                                            <?= html_escape($period['TahunMulai'] . ' - ' . $period['TahunAkhir']) ?>
+                                        </option>
+                                    <?php } ?>
+                                <?php } else { ?>
+                                    <option value="" disabled>Belum ada data periode VMTS untuk wilayah ini</option>
                                 <?php } ?>
                             </select>
                         </div>
 
-                        <!-- Dropdown Tujuan (akan diisi via AJAX) -->
-                        <div class="form-group">
-                            <label for="Tujuan">Tujuan</label>
-                            <select class="form-control" id="Tujuan" name="Tujuan" required disabled>
-                                <option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>
-                            </select>
+                        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-success" id="BtnProsesSinkron">
+                                <i class="fa fa-cloud-download"></i> <b>Sinkronkan Sekarang</b>
+                            </button>
                         </div>
-
-                        <!-- Indikator Tujuan (IKU) -->
-                        <div class="form-group">
-                            <label for="IndikatorTujuan">Indikator Tujuan (IKU)</label>
-                            <textarea class="form-control" id="IndikatorTujuan" name="indikator_tujuan" rows="3" required></textarea>
-                        </div>
-
-                        <!-- Target Inputs -->
-                        <div class="form-group">
-                            <label>Target Tahunan</label>
-                            <div class="row">
-                                <div class="col-md-2">
-                                    <label>Tahun 1</label>
-                                    <input type="number" step="any" class="form-control" name="target_1" placeholder="Angka">
-                                </div>
-                                <div class="col-md-2">
-                                    <label>Tahun 2</label>
-                                    <input type="number" step="any" class="form-control" name="target_2" placeholder="Angka">
-                                </div>
-                                <div class="col-md-2">
-                                    <label>Tahun 3</label>
-                                    <input type="number" step="any" class="form-control" name="target_3" placeholder="Angka">
-                                </div>
-                                <div class="col-md-2">
-                                    <label>Tahun 4</label>
-                                    <input type="number" step="any" class="form-control" name="target_4" placeholder="Angka">
-                                </div>
-                                <div class="col-md-2">
-                                    <label>Tahun 5</label>
-                                    <input type="number" step="any" class="form-control" name="target_5" placeholder="Angka">
-                                </div>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-success">Simpan</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Edit IKU -->
-    <div class="modal fade" id="ModalEditIku" role="dialog">
-        <div class="modal-dialog modals-default" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <form id="FormEditIku">
-                        <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
-                        <input type="hidden" id="EditId" name="id">
-
-                        <!-- Periode Dropdown -->
-                        <div class="form-group">
-                            <label for="EditPeriode">Periode Tahun</label>
-                            <select class="form-control" id="EditPeriode" name="periode" required>
-                                <option value="" selected disabled>-- Pilih Tahun --</option>
-                                <?php foreach ($Periods as $period) { ?>
-                                    <option value="<?= html_escape($period['TahunMulai'] . '-' . $period['TahunAkhir']) ?>">
-                                        <?= html_escape($period['TahunMulai'] . ' - ' . $period['TahunAkhir']) ?>
-                                    </option>
-                                <?php } ?>
-                            </select>
-                        </div>
-
-                        <!-- Dropdown Tujuan -->
-                        <div class="form-group">
-                            <label for="EditTujuan">Tujuan</label>
-                            <select class="form-control" id="EditTujuan" name="EditTujuan" required disabled>
-                                <option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>
-                            </select>
-                        </div>
-
-                        <!-- Indikator Tujuan -->
-                        <div class="form-group">
-                            <label for="EditIndikatorTujuan">Indikator Tujuan (IKU)</label>
-                            <textarea class="form-control" id="EditIndikatorTujuan" name="indikator_tujuan" rows="3" required></textarea>
-                        </div>
-
-                        <!-- Target Inputs -->
-                        <div class="form-group">
-                            <label>Target Tahunan</label>
-                            <div class="row">
-                                <div class="col-md-2">
-                                    <label>Tahun 1</label>
-                                    <input type="number" step="any" class="form-control" id="EditTarget1" name="target_1">
-                                </div>
-                                <div class="col-md-2">
-                                    <label>Tahun 2</label>
-                                    <input type="number" step="any" class="form-control" id="EditTarget2" name="target_2">
-                                </div>
-                                <div class="col-md-2">
-                                    <label>Tahun 3</label>
-                                    <input type="number" step="any" class="form-control" id="EditTarget3" name="target_3">
-                                </div>
-                                <div class="col-md-2">
-                                    <label>Tahun 4</label>
-                                    <input type="number" step="any" class="form-control" id="EditTarget4" name="target_4">
-                                </div>
-                                <div class="col-md-2">
-                                    <label>Tahun 5</label>
-                                    <input type="number" step="any" class="form-control" id="EditTarget5" name="target_5">
-                                </div>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-success">Simpan</button>
                     </form>
                 </div>
             </div>
@@ -453,225 +326,69 @@
                 <?php } ?>
             <?php } ?>
 
-            // Ketika periode tahun dipilih (Tambah)
-            $('#TahunFilter').change(function() {
-                if ($(this).val()) {
-                    $('#Tujuan').prop('disabled', false);
-                    $('#Tujuan').html('<option value="" selected disabled>-- Pilih Tujuan --</option>');
-                    var tahunRange = $(this).val().split('-');
-                    var tahunMulai = tahunRange[0];
-                    var tahunAkhir = tahunRange[1];
-                    $.ajax({
-                        url: BaseURL + 'Daerah/GetTujuanByPeriod',
-                        type: 'POST',
-                        data: {
-                            tahun_mulai: tahunMulai,
-                            tahun_akhir: tahunAkhir,
-                            [CSRF_NAME]: CSRF_TOKEN
-                        },
-                        success: function(response) {
-                            try {
-                                var data = JSON.parse(response);
-                                if (data.message) {
-                                    alert(data.message);
-                                    $('#Tujuan').html('<option value="" selected disabled>-- Tidak ada tujuan untuk periode ini --</option>');
-                                    $('#Tujuan').prop('disabled', true);
-                                } else if (data.length > 0) {
-                                    $.each(data, function(key, value) {
-                                        $('#Tujuan').append('<option value="' + value.Id + '">' + value.Tujuan + '</option>');
-                                    });
-                                } else {
-                                    $('#Tujuan').html('<option value="" selected disabled>-- Tidak ada tujuan untuk periode ini --</option>');
-                                    $('#Tujuan').prop('disabled', true);
-                                }
-                            } catch (e) {
-                                alert("Gagal memproses respons server!");
-                            }
-                        },
-                        error: function() {
-                            alert("Gagal memuat data tujuan!");
-                            $('#Tujuan').html('<option value="" selected disabled>-- Tidak ada tujuan untuk periode ini --</option>');
-                            $('#Tujuan').prop('disabled', true);
-                        }
-                    });
-                } else {
-                    $('#Tujuan').prop('disabled', true);
-                    $('#Tujuan').html('<option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>');
-                }
-            });
-
-            // Ketika periode tahun dipilih (Edit)
-            $('#EditPeriode').change(function() {
-                if ($(this).val()) {
-                    $('#EditTujuan').prop('disabled', false);
-                    $('#EditTujuan').html('<option value="" selected disabled>-- Pilih Tujuan --</option>');
-                    var tahunRange = $(this).val().split('-');
-                    var tahunMulai = tahunRange[0];
-                    var tahunAkhir = tahunRange[1];
-                    $.ajax({
-                        url: BaseURL + 'Daerah/GetTujuanByPeriod',
-                        type: 'POST',
-                        data: {
-                            tahun_mulai: tahunMulai,
-                            tahun_akhir: tahunAkhir,
-                            [CSRF_NAME]: CSRF_TOKEN
-                        },
-                        success: function(response) {
-                            try {
-                                var data = JSON.parse(response);
-                                if (data.message) {
-                                    alert(data.message);
-                                    $('#EditTujuan').html('<option value="" selected disabled>-- Tidak ada tujuan untuk periode ini --</option>');
-                                    $('#EditTujuan').prop('disabled', true);
-                                } else if (data.length > 0) {
-                                    $.each(data, function(key, value) {
-                                        $('#EditTujuan').append('<option value="' + value.Id + '">' + value.Tujuan + '</option>');
-                                    });
-                                } else {
-                                    $('#EditTujuan').html('<option value="" selected disabled>-- Tidak ada tujuan untuk periode ini --</option>');
-                                    $('#EditTujuan').prop('disabled', true);
-                                }
-                            } catch (e) {
-                                alert("Gagal memproses respons server!");
-                            }
-                        },
-                        error: function() {
-                            alert("Gagal memuat data tujuan!");
-                            $('#EditTujuan').html('<option value="" selected disabled>-- Tidak ada tujuan untuk periode ini --</option>');
-                            $('#EditTujuan').prop('disabled', true);
-                        }
-                    });
-                } else {
-                    $('#EditTujuan').prop('disabled', true);
-                    $('#EditTujuan').html('<option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>');
-                }
-            });
-
-            // Validasi sebelum submit (Tambah)
-            $("#FormTambahIku").submit(function(e) {
-                e.preventDefault();
-                if ($('#TahunFilter').val() === "" || $('#TahunFilter').val() === null) {
-                    alert('Silakan pilih periode tahun terlebih dahulu!');
-                    return false;
-                }
-                if ($('#Tujuan').val() === "" || $('#Tujuan').val() === null) {
-                    alert('Silakan pilih tujuan terlebih dahulu!');
-                    return false;
-                }
-                if ($('#IndikatorTujuan').val() === "") {
-                    alert('Silakan isi indikator tujuan!');
-                    return false;
-                }
-                $.ajax({
-                    url: BaseURL + "Daerah/TambahIku",
-                    type: "POST",
-                    data: $(this).serialize(),
-                    beforeSend: function() {
-                        $("#FormTambahIku button[type=submit]").prop('disabled', true).text('Menyimpan...');
-                    },
-                    success: function(res) {
-                        if ($.trim(res) == '1') {
-                            location.reload();
-                        } else {
-                            location.reload();
-                        }
-                    },
-                    error: function() {
-                        location.reload();
-                    }
-                });
-            });
-
-            // Validasi sebelum submit (Edit)
-            $("#FormEditIku").submit(function(e) {
-                e.preventDefault();
-                if ($('#EditPeriode').val() === "" || $('#EditPeriode').val() === null) {
-                    alert('Silakan pilih periode tahun terlebih dahulu!');
-                    return false;
-                }
-                if ($('#EditTujuan').val() === "" || $('#EditTujuan').val() === null) {
-                    alert('Silakan pilih tujuan terlebih dahulu!');
-                    return false;
-                }
-                if ($('#EditIndikatorTujuan').val() === "") {
-                    alert('Silakan isi indikator tujuan!');
-                    return false;
-                }
-                $.ajax({
-                    url: BaseURL + "Daerah/EditIku",
-                    type: "POST",
-                    data: $(this).serialize(),
-                    beforeSend: function() {
-                        $("#FormEditIku button[type=submit]").prop('disabled', true).text('Menyimpan...');
-                    },
-                    success: function(res) {
-                        if ($.trim(res) == '1') {
-                            location.reload();
-                        } else {
-                            location.reload();
-                        }
-                    },
-                    error: function() {
-                        location.reload();
-                    }
-                });
-            });
-
-            // Edit button click handler
-            $(".Edit").click(function() {
-                var id = $(this).data('id');
-                var IdTujuan = $(this).data('tujuan');
-                var indikatorTujuan = $(this).data('indikator-tujuan');
-                var target1 = $(this).data('target1');
-                var target2 = $(this).data('target2');
-                var target3 = $(this).data('target3');
-                var target4 = $(this).data('target4');
-                var target5 = $(this).data('target5');
-                var tahunMulai = $(this).data('tahunmulai');
-                var tahunAkhir = $(this).data('tahunakhir');
-
-                $("#EditId").val(id);
-                $("#EditPeriode").val('');
-                $("#EditTujuan").html('<option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>');
-                $("#EditTujuan").prop('disabled', true);
-                $("#EditIndikatorTujuan").val(indikatorTujuan);
-                $("#EditTarget1").val(target1 || '');
-                $("#EditTarget2").val(target2 || '');
-                $("#EditTarget3").val(target3 || '');
-                $("#EditTarget4").val(target4 || '');
-                $("#EditTarget5").val(target5 || '');
-
-                $("#EditPeriode").val(tahunMulai + '-' + tahunAkhir).trigger('change');
+            // Ketika salah satu dari 3 tombol sinkronisasi diklik
+            $(".BtnBukaSinkron").click(function() {
+                var tipe = $(this).data('tipe');
+                var label = $(this).data('label');
                 
-                var checkTujuanExist = setInterval(function() {
-                    if ($('#EditTujuan option[value="' + IdTujuan + '"]').length > 0) {
-                        $('#EditTujuan').val(IdTujuan);
-                        clearInterval(checkTujuanExist);
-                    }
-                }, 100);
+                $("#SinkronTipe").val(tipe);
+                $("#ModalSinkronTitle").html('<i class="fa fa-refresh"></i> ' + label + ' dari VMTS');
                 
-                $("#ModalEditIku").modal('show');
+                var keterangan = "Sinkronisasi akan menarik data ";
+                if (tipe === 'tujuan') {
+                    keterangan += "<b>Indikator Tujuan</b>";
+                } else if (tipe === 'sasaran') {
+                    keterangan += "<b>Indikator Sasaran</b>";
+                } else {
+                    keterangan += "<b>Indikator Tujuan (di atas) dan Indikator Sasaran (di bawah)</b>";
+                }
+                keterangan += " untuk periode yang dipilih.";
+                
+                $("#SinkronKeterangan").html(keterangan);
+                $("#SinkronPeriode").val('');
+                $("#ModalSinkronIku").modal('show');
             });
 
-            // Hapus IKU
-            $(".Hapus").click(function() {
-                var id = $(this).data('id');
+            // Submit Form Sinkronisasi
+            $("#FormSinkronIku").submit(function(e) {
+                e.preventDefault();
+
+                var tipe = $("#SinkronTipe").val();
+                var periode = $("#SinkronPeriode").val();
+
+                if (!periode) {
+                    alert("Silakan pilih periode tahun terlebih dahulu!");
+                    return false;
+                }
+
+                var btn = $("#BtnProsesSinkron");
+                var originalHtml = btn.html();
+                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Memproses...');
+
                 $.ajax({
-                    url: BaseURL + "Daerah/HapusIku",
+                    url: BaseURL + "Daerah/SinkronIku",
                     type: "POST",
-                    data: { id: id, [CSRF_NAME]: CSRF_TOKEN },
-                    beforeSend: function() {
-                        $(this).prop('disabled', true);
+                    data: {
+                        tipe: tipe,
+                        periode: periode,
+                        [CSRF_NAME]: CSRF_TOKEN
                     },
-                    success: function(res) {
-                        if ($.trim(res) == '1') {
+                    dataType: "json",
+                    success: function(response) {
+                        btn.prop('disabled', false).html(originalHtml);
+                        if (response.status === 'success') {
+                            $("#ModalSinkronIku").modal('hide');
+                            alert(response.message);
                             location.reload();
+                        } else if (response.status === 'warning') {
+                            alert(response.message);
                         } else {
-                            location.reload();
+                            alert(response.message || "Gagal melakukan sinkronisasi data!");
                         }
                     },
-                    error: function() {
-                        location.reload();
+                    error: function(xhr, status, error) {
+                        btn.prop('disabled', false).html(originalHtml);
+                        alert("Terjadi kesalahan saat menghubungi server: " + error);
                     }
                 });
             });

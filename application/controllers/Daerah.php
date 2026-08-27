@@ -5552,13 +5552,10 @@
                             [$KodeWilayah]
                         )->result_array();
                         $Data['Iku'] = $this->db->query(
-                            "SELECT i.*, v.TahunMulai, v.TahunAkhir
-                            FROM iku i
-                            JOIN tujuanrpjmd t ON i.IdTujuan = t.Id
-                            JOIN misirpjmd m ON t._Id = m.Id
-                            JOIN visirpjmd v ON m._Id = v.Id
-                            WHERE i.deleted_at IS NULL 
-                            AND i.kodewilayah = ?",
+                            "SELECT * FROM iku 
+                            WHERE deleted_at IS NULL 
+                            AND kodewilayah = ? 
+                            ORDER BY id ASC",
                             [$KodeWilayah]
                         )->result_array();
                         $Data['Tujuan'] = $this->db->where('deleted_at IS NULL')
@@ -5586,71 +5583,166 @@
                 $this->load->view('Daerah/Iku', $Data);
             }
 
-        public function GetTujuanByPeriod() {
-            $tahunMulai = $this->input->post('tahun_mulai');
-            $tahunAkhir = $this->input->post('tahun_akhir');
-            
-            $query = $this->db->query("
-                SELECT t.Id, t.Tujuan 
-                FROM tujuanrpjmd t
-                JOIN misirpjmd m ON t._Id = m.Id
-                JOIN visirpjmd v ON m._Id = v.Id
-                WHERE v.TahunMulai = ? 
-                AND v.TahunAkhir = ?
-                AND t.KodeWilayah = ?
-                AND t.deleted_at IS NULL
-            ", array($tahunMulai, $tahunAkhir, $_SESSION['KodeWilayah']));
-            
-            echo json_encode($query->result_array());
-        }
+        public function SinkronIku() {
+            if (!$this->input->is_ajax_request()) {
+                show_404();
+                return;
+            }
 
-        public function TambahIku() {
-        $period = explode('-', $this->input->post('TahunFilter'));
-        
-        $data = [
-            'kodewilayah' => $_SESSION['KodeWilayah'],
-            'IdTujuan' => $this->input->post('Tujuan'),
-            'tahun_mulai' => $period[0],
-            'tahun_akhir' => $period[1],
-            'indikator_tujuan' => $this->input->post('indikator_tujuan'),
-            'target_1' => $this->input->post('target_1') ?: null,
-            'target_2' => $this->input->post('target_2') ?: null,
-            'target_3' => $this->input->post('target_3') ?: null,
-            'target_4' => $this->input->post('target_4') ?: null,
-            'target_5' => $this->input->post('target_5') ?: null
-        ];
-        
-        $this->db->insert('iku', $data);
-        echo $this->db->affected_rows() ? '1' : 'Gagal Menyimpan Data!';
-        }
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
 
-        public function EditIku() {
-        $period = explode('-', $this->input->post('periode'));
-        
-        $data = [
-            'IdTujuan' => $this->input->post('EditTujuan'),
-            'tahun_mulai' => $period[0],
-            'tahun_akhir' => $period[1],
-            'indikator_tujuan' => $this->input->post('indikator_tujuan'),
-            'target_1' => $this->input->post('target_1') ?: null,
-            'target_2' => $this->input->post('target_2') ?: null,
-            'target_3' => $this->input->post('target_3') ?: null,
-            'target_4' => $this->input->post('target_4') ?: null,
-            'target_5' => $this->input->post('target_5') ?: null,
-            'updated_at' => date('Y-m-d H:i:s')
-        ];
-        
-        $this->db->where('id', $this->input->post('id'));
-        $this->db->update('iku', $data);
-        echo $this->db->affected_rows() ? '1' : 'Gagal Update Data!';
-        }
+            if (empty($KodeWilayah)) {
+                echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+                return;
+            }
 
-        public function HapusIku() {
-            $id = $this->input->post('id');
-            $this->db->where('id', $id)->update('iku', [
-                'deleted_at' => date('Y-m-d H:i:s')
+            $tipe = $this->input->post('tipe', TRUE); // 'tujuan', 'sasaran', 'tujuan_sasaran'
+            if (!in_array($tipe, ['tujuan', 'sasaran', 'tujuan_sasaran'])) {
+                echo json_encode(['status' => 'error', 'message' => 'Tipe sinkronisasi tidak valid!']);
+                return;
+            }
+
+            $periode = $this->input->post('periode', TRUE);
+            $tahunMulai = $this->input->post('tahun_mulai', TRUE);
+            $tahunAkhir = $this->input->post('tahun_akhir', TRUE);
+
+            if (!empty($periode) && strpos($periode, '-') !== false) {
+                $parts = explode('-', $periode);
+                $tahunMulai = trim($parts[0]);
+                $tahunAkhir = trim($parts[1]);
+            }
+
+            if (empty($tahunMulai) || empty($tahunAkhir)) {
+                echo json_encode(['status' => 'error', 'message' => 'Periode tahun harus dipilih!']);
+                return;
+            }
+
+            // Ambil data Indikator Tujuan jika tipe == 'tujuan' atau 'tujuan_sasaran'
+            $dataTujuan = [];
+            if ($tipe === 'tujuan' || $tipe === 'tujuan_sasaran') {
+                $dataTujuan = $this->db->query("
+                    SELECT 
+                        it.id,
+                        it.indikator as nama_indikator,
+                        it.target_2025,
+                        it.target_2026,
+                        it.target_2027,
+                        it.target_2028,
+                        it.target_2029,
+                        it.tujuan_id,
+                        COALESCE(v.TahunMulai, t.TahunMulai) as TahunMulai,
+                        COALESCE(v.TahunAkhir, t.TahunAkhir) as TahunAkhir
+                    FROM indikator_tujuan it
+                    JOIN tujuanrpjmd t ON it.tujuan_id = t.Id
+                    LEFT JOIN misirpjmd m ON t._Id = m.Id AND m.deleted_at IS NULL
+                    LEFT JOIN visirpjmd v ON m._Id = v.Id AND v.deleted_at IS NULL
+                    WHERE it.deleted_at IS NULL
+                    AND (it.kodewilayah = ? OR t.KodeWilayah = ?)
+                    AND (
+                        (v.TahunMulai = ? AND v.TahunAkhir = ?)
+                        OR (t.TahunMulai = ? AND t.TahunAkhir = ?)
+                        OR (v.TahunMulai IS NULL AND t.TahunMulai IS NULL)
+                    )
+                    ORDER BY t.Id ASC, it.id ASC
+                ", [$KodeWilayah, $KodeWilayah, $tahunMulai, $tahunAkhir, $tahunMulai, $tahunAkhir])->result_array();
+            }
+
+            // Ambil data Indikator Sasaran jika tipe == 'sasaran' atau 'tujuan_sasaran'
+            $dataSasaran = [];
+            if ($tipe === 'sasaran' || $tipe === 'tujuan_sasaran') {
+                $dataSasaran = $this->db->query("
+                    SELECT 
+                        isas.id,
+                        isas.indikator as nama_indikator,
+                        isas.target_2025,
+                        isas.target_2026,
+                        isas.target_2027,
+                        isas.target_2028,
+                        isas.target_2029,
+                        isas.sasaran_id,
+                        s._Id as tujuan_id,
+                        COALESCE(v.TahunMulai, s.TahunMulai, t.TahunMulai) as TahunMulai,
+                        COALESCE(v.TahunAkhir, s.TahunAkhir, t.TahunAkhir) as TahunAkhir
+                    FROM indikator_sasaran isas
+                    JOIN sasaranrpjmd s ON isas.sasaran_id = s.Id
+                    LEFT JOIN tujuanrpjmd t ON s._Id = t.Id AND t.deleted_at IS NULL
+                    LEFT JOIN misirpjmd m ON t._Id = m.Id AND m.deleted_at IS NULL
+                    LEFT JOIN visirpjmd v ON m._Id = v.Id AND v.deleted_at IS NULL
+                    WHERE isas.deleted_at IS NULL
+                    AND (isas.kodewilayah = ? OR s.KodeWilayah = ?)
+                    AND (
+                        (v.TahunMulai = ? AND v.TahunAkhir = ?)
+                        OR (s.TahunMulai = ? AND s.TahunAkhir = ?)
+                        OR (t.TahunMulai = ? AND t.TahunAkhir = ?)
+                        OR (v.TahunMulai IS NULL AND s.TahunMulai IS NULL)
+                    )
+                    ORDER BY s.Id ASC, isas.id ASC
+                ", [$KodeWilayah, $KodeWilayah, $tahunMulai, $tahunAkhir, $tahunMulai, $tahunAkhir, $tahunMulai, $tahunAkhir])->result_array();
+            }
+
+            $totalData = count($dataTujuan) + count($dataSasaran);
+            if ($totalData === 0) {
+                echo json_encode([
+                    'status' => 'warning',
+                    'message' => "Tidak ada data Indikator Tujuan/Sasaran yang ditemukan di VMTS untuk periode {$tahunMulai} - {$tahunAkhir}!"
+                ]);
+                return;
+            }
+
+            // RESET TOTAL: Hapus seluruh data IKU sebelumnya untuk wilayah ini
+            $this->db->where('kodewilayah', $KodeWilayah)->delete('iku');
+
+            $insertData = [];
+
+            // Masukkan Indikator Tujuan terlebih dahulu
+            foreach ($dataTujuan as $row) {
+                $namaIndikator = !empty($row['nama_indikator']) ? $row['nama_indikator'] : 'Indikator Tujuan';
+                $insertData[] = [
+                    'kodewilayah' => $KodeWilayah,
+                    'IdTujuan' => $row['tujuan_id'] ?: null,
+                    'tahun_mulai' => $tahunMulai,
+                    'tahun_akhir' => $tahunAkhir,
+                    'indikator_tujuan' => $namaIndikator,
+                    'target_1' => ($row['target_2025'] !== null && $row['target_2025'] !== '') ? $row['target_2025'] : null,
+                    'target_2' => ($row['target_2026'] !== null && $row['target_2026'] !== '') ? $row['target_2026'] : null,
+                    'target_3' => ($row['target_2027'] !== null && $row['target_2027'] !== '') ? $row['target_2027'] : null,
+                    'target_4' => ($row['target_2028'] !== null && $row['target_2028'] !== '') ? $row['target_2028'] : null,
+                    'target_5' => ($row['target_2029'] !== null && $row['target_2029'] !== '') ? $row['target_2029'] : null,
+                    'created_at' => date('Y-m-d H:i:s')
+                ];
+            }
+
+            // Kemudian masukkan Indikator Sasaran
+            foreach ($dataSasaran as $row) {
+                $namaIndikator = !empty($row['nama_indikator']) ? $row['nama_indikator'] : 'Indikator Sasaran';
+                $insertData[] = [
+                    'kodewilayah' => $KodeWilayah,
+                    'IdTujuan' => $row['tujuan_id'] ?: null,
+                    'tahun_mulai' => $tahunMulai,
+                    'tahun_akhir' => $tahunAkhir,
+                    'indikator_tujuan' => $namaIndikator,
+                    'target_1' => ($row['target_2025'] !== null && $row['target_2025'] !== '') ? $row['target_2025'] : null,
+                    'target_2' => ($row['target_2026'] !== null && $row['target_2026'] !== '') ? $row['target_2026'] : null,
+                    'target_3' => ($row['target_2027'] !== null && $row['target_2027'] !== '') ? $row['target_2027'] : null,
+                    'target_4' => ($row['target_2028'] !== null && $row['target_2028'] !== '') ? $row['target_2028'] : null,
+                    'target_5' => ($row['target_2029'] !== null && $row['target_2029'] !== '') ? $row['target_2029'] : null,
+                    'created_at' => date('Y-m-d H:i:s')
+                ];
+            }
+
+            if (!empty($insertData)) {
+                $this->db->insert_batch('iku', $insertData);
+            }
+
+            $namaTipe = 'Tujuan & Sasaran';
+            if ($tipe === 'tujuan') $namaTipe = 'Tujuan';
+            if ($tipe === 'sasaran') $namaTipe = 'Sasaran';
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => "Berhasil melakukan sinkronisasi {$namaTipe} untuk periode {$tahunMulai} - {$tahunAkhir}! Total {$totalData} indikator telah disinkronkan dari VMTS."
             ]);
-            echo $this->db->affected_rows() ? '1' : '0';
         }
 
         public function IKD() {
@@ -5676,17 +5768,11 @@
                             ORDER BY TahunMulai",
                             [$KodeWilayah]
                         )->result_array();
-                        $Data['Ikd'] = $this->db->query(
-                            "SELECT i.*, v.TahunMulai, v.TahunAkhir
-                            FROM ikd i
-                            JOIN sasaranrpjmd s ON i.IdSasaran = s.Id
-                            JOIN tujuanrpjmd t ON s._Id = t.Id
-                            JOIN misirpjmd m ON t._Id = m.Id
-                            JOIN visirpjmd v ON m._Id = v.Id
-                            WHERE i.deleted_at IS NULL 
-                            AND i.kodewilayah = ?",
-                            [$KodeWilayah]
-                        )->result_array();
+                        $Data['Ikd'] = $this->db->where('kodewilayah', $KodeWilayah)
+                                                ->where('deleted_at IS NULL')
+                                                ->order_by('id', 'ASC')
+                                                ->get('ikd')
+                                                ->result_array();
                         $Data['Sasaran'] = $this->db->where('deleted_at IS NULL')
                                                     ->where('kodewilayah', $KodeWilayah)
                                                     ->get('sasaranrpjmd')
@@ -5795,49 +5881,98 @@
         }
 
         public function TambahIkd() {
-        $period = explode('-', $this->input->post('TahunFilter'));
-        
-        $data = [
-            'kodewilayah' => $_SESSION['KodeWilayah'],
-            'IdSasaran' => $this->input->post('Sasaran'),
-            'tahun_mulai' => $period[0],
-            'tahun_akhir' => $period[1],
-            'indikator_sasaran' => $this->input->post('indikator_sasaran'),
-            'target_1' => $this->input->post('target_1') ? (int)$this->input->post('target_1') : null,
-            'target_2' => $this->input->post('target_2') ? (int)$this->input->post('target_2') : null,
-            'target_3' => $this->input->post('target_3') ? (int)$this->input->post('target_3') : null,
-            'target_4' => $this->input->post('target_4') ? (int)$this->input->post('target_4') : null,
-            'target_5' => $this->input->post('target_5') ? (int)$this->input->post('target_5') : null
-        ];
-        
-        $this->db->insert('ikd', $data);
-        echo $this->db->affected_rows() ? '1' : '0';
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+            
+            if (empty($KodeWilayah)) {
+                echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+                return;
+            }
+
+            $aspek = $this->input->post('aspek', TRUE) ?: 'geografi';
+            $nama = trim($this->input->post('nama', TRUE) ?: $this->input->post('indikator_sasaran', TRUE));
+            $satuan = trim($this->input->post('satuan', TRUE));
+            $opd = trim($this->input->post('opd', TRUE) ?: $this->input->post('pd_penanggung_jawab', TRUE));
+
+            if (empty($nama)) {
+                echo json_encode(['status' => 'error', 'message' => 'Nama indikator wajib diisi!']);
+                return;
+            }
+
+            $data = [
+                'kodewilayah' => $KodeWilayah,
+                'aspek' => $aspek,
+                'indikator_sasaran' => $nama,
+                'satuan' => $satuan,
+                'pd_penanggung_jawab' => $opd,
+                'target_1' => $this->input->post('target_1') !== null && $this->input->post('target_1') !== '' ? $this->input->post('target_1') : ($this->input->post('target_2025') !== null && $this->input->post('target_2025') !== '' ? $this->input->post('target_2025') : null),
+                'target_2' => $this->input->post('target_2') !== null && $this->input->post('target_2') !== '' ? $this->input->post('target_2') : ($this->input->post('target_2026') !== null && $this->input->post('target_2026') !== '' ? $this->input->post('target_2026') : null),
+                'target_3' => $this->input->post('target_3') !== null && $this->input->post('target_3') !== '' ? $this->input->post('target_3') : ($this->input->post('target_2027') !== null && $this->input->post('target_2027') !== '' ? $this->input->post('target_2027') : null),
+                'target_4' => $this->input->post('target_4') !== null && $this->input->post('target_4') !== '' ? $this->input->post('target_4') : ($this->input->post('target_2028') !== null && $this->input->post('target_2028') !== '' ? $this->input->post('target_2028') : null),
+                'target_5' => $this->input->post('target_5') !== null && $this->input->post('target_5') !== '' ? $this->input->post('target_5') : ($this->input->post('target_2029') !== null && $this->input->post('target_2029') !== '' ? $this->input->post('target_2029') : null),
+                'target_6' => $this->input->post('target_6') !== null && $this->input->post('target_6') !== '' ? $this->input->post('target_6') : ($this->input->post('target_2030') !== null && $this->input->post('target_2030') !== '' ? $this->input->post('target_2030') : null),
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+
+            $this->db->insert('ikd', $data);
+            if ($this->db->affected_rows() > 0) {
+                echo json_encode(['status' => 'success', 'message' => 'Indikator berhasil ditambahkan!']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data!']);
+            }
         }
 
         public function EditIkd() {
-        $period = explode('-', $this->input->post('periode'));
-        
-        $data = [
-            'IdSasaran' => $this->input->post('EditSasaran'),
-            'tahun_mulai' => $period[0],
-            'tahun_akhir' => $period[1],
-            'indikator_sasaran' => $this->input->post('indikator_sasaran'),
-            'target_1' => $this->input->post('target_1') ? (int)$this->input->post('target_1') : null,
-            'target_2' => $this->input->post('target_2') ? (int)$this->input->post('target_2') : null,
-            'target_3' => $this->input->post('target_3') ? (int)$this->input->post('target_3') : null,
-            'target_4' => $this->input->post('target_4') ? (int)$this->input->post('target_4') : null,
-            'target_5' => $this->input->post('target_5') ? (int)$this->input->post('target_5') : null,
-            'updated_at' => date('Y-m-d H:i:s')
-        ];
-        
-        $this->db->where('id', $this->input->post('id'))->update('ikd', $data);
-        echo $this->db->affected_rows() ? '1' : '0';
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) {
+                echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+                return;
+            }
+
+            $aspek = $this->input->post('aspek', TRUE);
+            $nama = trim($this->input->post('nama', TRUE) ?: $this->input->post('indikator_sasaran', TRUE));
+            $satuan = trim($this->input->post('satuan', TRUE));
+            $opd = trim($this->input->post('opd', TRUE) ?: $this->input->post('pd_penanggung_jawab', TRUE));
+
+            if (empty($nama)) {
+                echo json_encode(['status' => 'error', 'message' => 'Nama indikator wajib diisi!']);
+                return;
+            }
+
+            $data = [
+                'indikator_sasaran' => $nama,
+                'satuan' => $satuan,
+                'pd_penanggung_jawab' => $opd,
+                'target_1' => $this->input->post('target_1') !== null && $this->input->post('target_1') !== '' ? $this->input->post('target_1') : ($this->input->post('target_2025') !== null && $this->input->post('target_2025') !== '' ? $this->input->post('target_2025') : null),
+                'target_2' => $this->input->post('target_2') !== null && $this->input->post('target_2') !== '' ? $this->input->post('target_2') : ($this->input->post('target_2026') !== null && $this->input->post('target_2026') !== '' ? $this->input->post('target_2026') : null),
+                'target_3' => $this->input->post('target_3') !== null && $this->input->post('target_3') !== '' ? $this->input->post('target_3') : ($this->input->post('target_2027') !== null && $this->input->post('target_2027') !== '' ? $this->input->post('target_2027') : null),
+                'target_4' => $this->input->post('target_4') !== null && $this->input->post('target_4') !== '' ? $this->input->post('target_4') : ($this->input->post('target_2028') !== null && $this->input->post('target_2028') !== '' ? $this->input->post('target_2028') : null),
+                'target_5' => $this->input->post('target_5') !== null && $this->input->post('target_5') !== '' ? $this->input->post('target_5') : ($this->input->post('target_2029') !== null && $this->input->post('target_2029') !== '' ? $this->input->post('target_2029') : null),
+                'target_6' => $this->input->post('target_6') !== null && $this->input->post('target_6') !== '' ? $this->input->post('target_6') : ($this->input->post('target_2030') !== null && $this->input->post('target_2030') !== '' ? $this->input->post('target_2030') : null),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if (!empty($aspek)) {
+                $data['aspek'] = $aspek;
+            }
+
+            $this->db->where('id', $id)->update('ikd', $data);
+            echo json_encode(['status' => 'success', 'message' => 'Indikator berhasil diperbarui!']);
         }
 
         public function HapusIkd() {
-        $id = $this->input->post('id');
-        $this->db->where('id', $id)->update('ikd', ['deleted_at' => date('Y-m-d H:i:s')]);
-        echo $this->db->affected_rows() ? '1' : '0';
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) {
+                echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+                return;
+            }
+
+            $this->db->where('id', $id)->update('ikd', ['deleted_at' => date('Y-m-d H:i:s')]);
+            if ($this->db->affected_rows() > 0) {
+                echo json_encode(['status' => 'success', 'message' => 'Indikator berhasil dihapus!']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus indikator!']);
+            }
         }
 
         // In SuperDaerah.php controller
