@@ -19,10 +19,9 @@
             if ($kodeWilayah && $this->db->where('Kode', $kodeWilayah)->get('kodewilayah')->num_rows() > 0) {
                 // Simpan ke session
                 $this->session->set_userdata('TempKodeWilayah', $kodeWilayah);
-                // Kembalikan response sukses
-                echo 'success';
+                echo '1';
             } else {
-                echo 'error';
+                echo '0';
             }
         }
 
@@ -5779,6 +5778,7 @@
                                                     ->result_array();
                         $Data['Instansi'] = $this->db->where('deleted_at IS NULL')
                                                     ->where('kodewilayah', $KodeWilayah)
+                                                    ->order_by('nama', 'ASC')
                                                     ->get('akun_instansi')
                                                     ->result_array();
                     } else {
