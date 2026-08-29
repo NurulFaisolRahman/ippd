@@ -4693,29 +4693,151 @@ public function Ultimate_outcome_pd()
             ->result_array();
     }
     
-    // ========== AMBIL DATA ULTIMATE OUTCOME PD ==========
-    $data['items'] = [];
-    
+    // ========== AMBIL DATA PELAKSANA (KARYAWAN LEVEL 4) ==========
+    $pelaksanaMap = [];
     if ($KodeWilayah) {
-        $query = $this->db->from('ultimate_outcome_pd')
+        $pelaksanaData = $this->db->select('
+                akun_karyawan.id,
+                akun_karyawan.nama,
+                akun_karyawan.nip,
+                akun_karyawan.jabatan,
+                akun_karyawan.dinas_id,
+                GROUP_CONCAT(akun_instansi.nama SEPARATOR ", ") as nama_dinas
+            ')
+            ->from('akun_karyawan')
+            ->join('akun_instansi', 'FIND_IN_SET(akun_instansi.id, akun_karyawan.dinas_id)', 'left')
+            ->where('akun_karyawan.Level', 4)
+            ->where('akun_karyawan.kodewilayah', $KodeWilayah)
+            ->where('akun_karyawan.deleted_at IS NULL')
+            ->group_by('akun_karyawan.id')
+            ->get()
+            ->result_array();
+
+        foreach ($pelaksanaData as $p) {
+            $pelaksanaMap[$p['id']] = [
+                'nama' => $p['nama'],
+                'nip' => $p['nip'],
+                'jabatan' => $p['jabatan'],
+                'dinas' => $p['nama_dinas'] ?? '-'
+            ];
+        }
+    }
+    $data['PelaksanaData'] = $pelaksanaMap;
+
+    // ========== AMBIL SELURUH DATA 4 LEVEL POHON KINERJA PD ==========
+    $ultimate = [];
+    $intermediate = [];
+    $immediate = [];
+    $output = [];
+    $hierarchy = [];
+
+    if ($KodeWilayah) {
+        // 1. Ultimate Outcome PD (Level 1)
+        $q1 = $this->db->from('ultimate_outcome_pd')
             ->where('kode_wilayah', $KodeWilayah)
             ->where('deleted_at IS NULL');
-        
-        // Filter berdasarkan role
         if ($is_role_4 && $instansi_id) {
-            // Role 4: Hanya melihat data instansi sendiri
-            $query->where('id_instansi', $instansi_id);
+            $q1->where('id_instansi', $instansi_id);
         } elseif (!empty($filter_instansi_id)) {
-            // Filter manual untuk admin/superadmin
-            $query->where('id_instansi', (int)$filter_instansi_id);
+            $q1->where('id_instansi', (int)$filter_instansi_id);
         }
-        
-        $data['items'] = $query->order_by('urutan', 'ASC')
-                              ->order_by('id', 'ASC')
-                              ->get()
-                              ->result_array();
+        $ultimate = $q1->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get()->result_array();
+
+        // 2. Intermediate Outcome PD (Level 2)
+        $q2 = $this->db->from('intermediate_outcome_pd')
+            ->where('kode_wilayah', $KodeWilayah)
+            ->where('deleted_at IS NULL');
+        if ($is_role_4 && $instansi_id) {
+            $q2->where('id_instansi', $instansi_id);
+        } elseif (!empty($filter_instansi_id)) {
+            $q2->where('id_instansi', (int)$filter_instansi_id);
+        }
+        $intermediate = $q2->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get()->result_array();
+
+        // 3. Immediate Outcome PD (Level 3)
+        $q3 = $this->db->from('immediate_outcome_pd')
+            ->where('kode_wilayah', $KodeWilayah)
+            ->where('deleted_at IS NULL');
+        if ($is_role_4 && $instansi_id) {
+            $q3->where('id_instansi', $instansi_id);
+        } elseif (!empty($filter_instansi_id)) {
+            $q3->where('id_instansi', (int)$filter_instansi_id);
+        }
+        $immediate = $q3->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get()->result_array();
+
+        // 4. Output PD (Level 4)
+        $q4 = $this->db->from('output_pd')
+            ->where('kode_wilayah', $KodeWilayah)
+            ->where('deleted_at IS NULL');
+        if ($is_role_4 && $instansi_id) {
+            $q4->where('id_instansi', $instansi_id);
+        } elseif (!empty($filter_instansi_id)) {
+            $q4->where('id_instansi', (int)$filter_instansi_id);
+        }
+        $output = $q4->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get()->result_array();
+
+        // Group Output by parent (immediate_outcome_id)
+        $outByParent = [];
+        foreach ($output as $o) {
+            $pId = $o['immediate_outcome_id'] ?? 0;
+            $o['pelaksana_detail'] = !empty($o['pelaksana']) && isset($pelaksanaMap[$o['pelaksana']]) ? $pelaksanaMap[$o['pelaksana']] : null;
+            $outByParent[$pId][] = $o;
+        }
+
+        // Group Immediate by parent (intermediate_outcome_id)
+        $immByParent = [];
+        foreach ($immediate as $imm) {
+            $pId = $imm['intermediate_outcome_id'] ?? 0;
+            $imm['pelaksana_detail'] = !empty($imm['pelaksana']) && isset($pelaksanaMap[$imm['pelaksana']]) ? $pelaksanaMap[$imm['pelaksana']] : null;
+            $imm['output'] = $outByParent[$imm['id']] ?? [];
+            $immByParent[$pId][] = $imm;
+        }
+
+        // Group Intermediate by parent (ultimate_outcome_id)
+        $intByParent = [];
+        foreach ($intermediate as $inter) {
+            $pId = $inter['ultimate_outcome_id'] ?? 0;
+            $inter['pelaksana_detail'] = !empty($inter['pelaksana']) && isset($pelaksanaMap[$inter['pelaksana']]) ? $pelaksanaMap[$inter['pelaksana']] : null;
+            $inter['immediate'] = $immByParent[$inter['id']] ?? [];
+            $intByParent[$pId][] = $inter;
+        }
+
+        // Build Nested Hierarchy
+        foreach ($ultimate as $u) {
+            $u['intermediate'] = $intByParent[$u['id']] ?? [];
+            $hierarchy[] = $u;
+        }
     }
-    
+
+    $data['items'] = $ultimate;
+    $data['hierarchy'] = $hierarchy;
+    $data['ultimate_options'] = array_map(function($u) {
+        return [
+            'id' => $u['id'],
+            'ultimate_kinerja' => $u['kinerja'],
+            'kinerja' => $u['kinerja']
+        ];
+    }, $ultimate);
+    $data['intermediate_options'] = array_map(function($i) {
+        return [
+            'id' => $i['id'],
+            'kinerja' => $i['kinerja']
+        ];
+    }, $intermediate);
+    $data['immediate_options'] = array_map(function($m) {
+        return [
+            'id' => $m['id'],
+            'kinerja' => $m['kinerja']
+        ];
+    }, $immediate);
+
+    $data['TotalData'] = [
+        'level1' => count($ultimate),
+        'level2' => count($intermediate),
+        'level3' => count($immediate),
+        'level4' => count($output)
+    ];
+
     $this->load->view('Daerah/header', $Header);
     $this->load->view('Daerah/Ultimate_outcome_pd', $data);
 }
