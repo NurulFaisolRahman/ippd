@@ -14,7 +14,35 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <!-- Custom CSS -->
-        <style>
+    <style>
+        /* Navbar Header Fixed & Seamless Connection with Sidebar */
+        .navbar {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 64px !important;
+            padding: 0 1.25rem !important;
+            border-radius: 0 !important;
+            border: none !important;
+            margin: 0 !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08) !important;
+            z-index: 99999 !important;
+        }
+
+        .page-top-space {
+            height: 64px !important;
+            display: block !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .sidebar-wrapper {
+            top: 64px !important;
+            height: calc(100vh - 64px) !important;
+            border-top: none !important;
+            margin-top: 0 !important;
+        }
 
         .dataTables_wrapper .dataTables_length,
         .dataTables_wrapper .dataTables_filter {

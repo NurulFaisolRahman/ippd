@@ -29,13 +29,17 @@
   <style>
     .navbar{
       background-color:#20c997;
-      padding: 1rem 1.25rem;
-      border-radius: 0 0 12px 12px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%;
-      z-index: 1200;
+      padding: 0 1.25rem !important;
+      height: 64px !important;
+      border-radius: 0 !important;
+      border: none !important;
+      margin: 0 !important;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08) !important;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      z-index: 99999 !important;
     }
 
     .navbar-container{
@@ -43,6 +47,8 @@
       align-items:center;
       justify-content:space-between;
       width:100%;
+      height:100%;
+      position:relative;
     }
 
     .navbar-left{
@@ -51,6 +57,7 @@
       gap: 12px;
       flex-shrink: 0;
       min-width: 0;
+      height: 100%;
     }
 
     .sidebar-header-btn{
@@ -60,7 +67,7 @@
       height: 42px;
       border-radius: 12px;
       cursor: pointer;
-      display:flex;
+      display:inline-flex;
       align-items:center;
       justify-content:center;
       transition: .2s ease;
@@ -80,6 +87,7 @@
       display:flex;
       align-items:center;
       justify-content:center;
+      height: 100%;
       pointer-events: none; /* biar klik tidak mengganggu menu */
     }
     .navbar-center a{
@@ -91,14 +99,16 @@
       color:#fff;
       font-weight:900;
       font-size:1.3rem;
-      display:flex;
+      display:inline-flex;
       align-items:center;
       text-decoration:none;
       letter-spacing:.5px;
       user-select:none;
       flex-shrink: 0;
+      margin: 0;
+      line-height: 1;
     }
-    .navbar-brand i{ margin-right:.5rem; }
+    .navbar-brand i{ margin-right:.5rem; line-height: 1; }
 
     .login-badge{
       display:inline-flex;
@@ -110,7 +120,6 @@
       border: 1px solid rgba(255,255,255,0.28);
       color:#fff;
       font-weight:700;
-      font-size:.100 rem;
       line-height:1;
       white-space:nowrap;
       max-width: 45vw;
@@ -125,12 +134,17 @@
       margin-left:auto;          /* dorong ke kanan */
       justify-content:flex-end;
       flex-shrink: 0;
+      height: 100%;
     }
 
     .navbar-item{
       color: rgba(255,255,255,0.92);
       font-weight: 600;
       padding: .5rem 0;
+      display: inline-flex;
+      align-items: center;
+      margin: 0;
+      line-height: 1;
       position: relative;
       transition: all .25s ease;
       text-decoration:none;
@@ -138,7 +152,7 @@
     }
     .navbar-item:hover{ color:#fff; text-decoration:none; }
 
-    .dropdown{ position:relative; display:inline-block; }
+    .dropdown{ position:relative; display:inline-flex; align-items:center; height:100%; }
     .dropdown-content{
       display:none;
       position:absolute;
@@ -194,17 +208,18 @@
       border:none;
       padding:.55rem .9rem;
       border-radius:10px;
-      display:flex;
+      display:inline-flex;
       align-items:center;
       gap:.5rem;
       font-weight:700;
+      line-height:1;
       transition: all .25s ease;
       cursor:pointer;
       white-space:nowrap;
     }
     .logout-btn:hover{ background-color: rgba(255,255,255,0.22); }
 
-    .page-top-space{ height:10px; }
+    .page-top-space{ height: 64px !important; display: block !important; margin: 0 !important; padding: 0 !important; }
 
     /* Mobile: tetap satu baris, menu scroll horizontal */
     @media (max-width: 768px){

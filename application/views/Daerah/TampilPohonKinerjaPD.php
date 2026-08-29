@@ -1621,67 +1621,30 @@ $(document).ready(function() {
     const NODE_WIDTH = 280;
     const NODE_HEIGHT = 120;
     const NODE_RADIUS = 16;
-    const LEVEL_HEIGHT = 180;
-    const HORIZONTAL_SPACING = 320;
+    const LEVEL_HEIGHT = 190;
+    const HORIZONTAL_GAP = 40;
+    const HORIZONTAL_SPACING = NODE_WIDTH + HORIZONTAL_GAP;
 
     // Build hierarchy
     const root = d3.hierarchy(chartData, d => d.children);
 
-    // Calculate tree layout manually
-    function calculateTreeLayout(node, level = 0, x = 0, positions = new Map()) {
-        if (!node) return;
-        
-        positions.set(node, {
-            x: x,
-            y: level * LEVEL_HEIGHT + 60,
-            level: level
-        });
-        
-        if (!node.children || node.children.length === 0) return;
-        
-        const totalChildrenWidth = (node.children.length - 1) * HORIZONTAL_SPACING;
-        let startX = x - totalChildrenWidth / 2;
-        
-        node.children.forEach((child, index) => {
-            const childX = startX + (index * HORIZONTAL_SPACING);
-            calculateTreeLayout(child, level + 1, childX, positions);
-        });
-        
-        return positions;
-    }
+    // Use d3.tree layout to calculate non-overlapping node positions
+    const treeLayout = d3.tree()
+        .nodeSize([HORIZONTAL_SPACING, LEVEL_HEIGHT])
+        .separation((a, b) => (a.parent === b.parent ? 1.08 : 1.18));
 
-    // Calculate positions
-    const positions = calculateTreeLayout(root, 0, 0);
+    treeLayout(root);
 
-    // Convert to arrays for D3
     const nodes = [];
-    const links = [];
-
-    positions.forEach((pos, node) => {
+    root.descendants().forEach(node => {
         if (node.data.nama !== 'ROOT') {
-            nodes.push({
-                ...node,
-                x: pos.x,
-                y: pos.y,
-                level: pos.level
-            });
+            node.displayX = node.x;
+            node.displayY = (node.depth - 1) * LEVEL_HEIGHT + 60;
+            nodes.push(node);
         }
     });
 
-    // Create links
-    positions.forEach((pos, node) => {
-        if (node.parent && node.parent.data.nama !== 'ROOT') {
-            const sourcePos = positions.get(node.parent);
-            const targetPos = pos;
-            
-            links.push({
-                source: sourcePos,
-                target: targetPos,
-                sourceNode: node.parent,
-                targetNode: node
-            });
-        }
-    });
+    const validLinks = root.links().filter(link => link.source.data.nama !== 'ROOT');
 
     // Store original transform for reset
     let originalTransform = null;
@@ -1689,7 +1652,7 @@ $(document).ready(function() {
     // Setup zoom
     let currentScale = 1;
     const zoom = d3.zoom()
-        .scaleExtent([0.2, 3])
+        .scaleExtent([0.05, 3])
         .on('zoom', e => {
             g.attr('transform', e.transform);
             currentScale = e.transform.k;
@@ -1735,60 +1698,73 @@ $(document).ready(function() {
             .attr('stop-color', d3.color(cfg.fill).brighter(0.5));
     });
 
-    // Draw links
-    links.forEach(link => {
-        const sourceX = link.source.x;
-        const sourceY = link.source.y + NODE_HEIGHT;
-        const targetX = link.target.x;
-        const targetY = link.target.y;
-        const level = link.targetNode.data.level;
-        const strokeColor = LEVELS[level]?.fill || '#94a3b8';
-        
-        const siblings = links.filter(l => 
-            l.sourceNode === link.sourceNode && 
-            l.targetNode !== link.targetNode
-        );
-        
-        if (siblings.length > 0) {
-            g.append('line')
-                .attr('x1', sourceX)
-                .attr('y1', sourceY)
-                .attr('x2', sourceX)
-                .attr('y2', sourceY + 20)
-                .attr('stroke', strokeColor)
-                .attr('stroke-width', 2)
-                .attr('stroke-opacity', 0.3);
-            
-            const siblingNodes = [link, ...siblings].map(l => l.target);
-            const minX = Math.min(...siblingNodes.map(n => n.x));
-            const maxX = Math.max(...siblingNodes.map(n => n.x));
-            
-            g.append('line')
-                .attr('x1', minX)
-                .attr('y1', sourceY + 20)
-                .attr('x2', maxX)
-                .attr('y2', sourceY + 20)
-                .attr('stroke', strokeColor)
-                .attr('stroke-width', 2)
-                .attr('stroke-opacity', 0.3);
-            
-            g.append('line')
-                .attr('x1', targetX)
-                .attr('y1', sourceY + 20)
-                .attr('x2', targetX)
-                .attr('y2', targetY)
-                .attr('stroke', strokeColor)
-                .attr('stroke-width', 2)
-                .attr('stroke-opacity', 0.3);
+    // Draw links grouped by parent for clean tree branch rendering
+    const parentGroups = new Map();
+    validLinks.forEach(link => {
+        if (!parentGroups.has(link.source)) {
+            parentGroups.set(link.source, []);
+        }
+        parentGroups.get(link.source).push(link.target);
+    });
+
+    parentGroups.forEach((children, parent) => {
+        const pX = parent.displayX;
+        const pY = parent.displayY + NODE_HEIGHT;
+        const firstChildLevel = children[0]?.data?.level;
+        const strokeColor = LEVELS[firstChildLevel]?.fill || '#94a3b8';
+        const midY = pY + (LEVEL_HEIGHT - NODE_HEIGHT) / 2;
+
+        if (children.length === 1) {
+            const cX = children[0].displayX;
+            const cY = children[0].displayY;
+            if (Math.abs(pX - cX) < 1) {
+                g.append('line')
+                    .attr('x1', pX).attr('y1', pY)
+                    .attr('x2', cX).attr('y2', cY)
+                    .attr('stroke', strokeColor)
+                    .attr('stroke-width', 2)
+                    .attr('stroke-opacity', 0.4);
+            } else {
+                g.append('path')
+                    .attr('d', `M ${pX},${pY} V ${midY} H ${cX} V ${cY}`)
+                    .attr('fill', 'none')
+                    .attr('stroke', strokeColor)
+                    .attr('stroke-width', 2)
+                    .attr('stroke-opacity', 0.4);
+            }
         } else {
+            const childXs = children.map(c => c.displayX);
+            const minX = Math.min(pX, ...childXs);
+            const maxX = Math.max(pX, ...childXs);
+
+            // Vertical stem from parent to midY
             g.append('line')
-                .attr('x1', sourceX)
-                .attr('y1', sourceY)
-                .attr('x2', targetX)
-                .attr('y2', targetY)
+                .attr('x1', pX).attr('y1', pY)
+                .attr('x2', pX).attr('y2', midY)
                 .attr('stroke', strokeColor)
                 .attr('stroke-width', 2)
-                .attr('stroke-opacity', 0.3);
+                .attr('stroke-opacity', 0.4);
+
+            // Horizontal branch bar
+            g.append('line')
+                .attr('x1', minX).attr('y1', midY)
+                .attr('x2', maxX).attr('y2', midY)
+                .attr('stroke', strokeColor)
+                .attr('stroke-width', 2)
+                .attr('stroke-opacity', 0.4);
+
+            // Vertical drop to each child
+            children.forEach(child => {
+                const cX = child.displayX;
+                const cY = child.displayY;
+                const childColor = LEVELS[child.data.level]?.fill || strokeColor;
+                g.append('line')
+                    .attr('x1', cX).attr('y1', midY)
+                    .attr('x2', cX).attr('y2', cY)
+                    .attr('stroke', childColor)
+                    .attr('stroke-width', 2)
+                    .attr('stroke-opacity', 0.4);
+            });
         }
     });
 
@@ -1797,7 +1773,7 @@ $(document).ready(function() {
         .data(nodes)
         .join('g')
         .attr('class', 'node')
-        .attr('transform', d => `translate(${d.x - NODE_WIDTH/2}, ${d.y})`)
+        .attr('transform', d => `translate(${d.displayX - NODE_WIDTH/2}, ${d.displayY})`)
         .style('cursor', 'pointer');
 
     node.append('rect')
@@ -1911,36 +1887,40 @@ $(document).ready(function() {
     });
 
     function fitView() {
+        if (nodes.length === 0) return;
+
         let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
         
         nodes.forEach(node => {
-            minX = Math.min(minX, node.x - NODE_WIDTH/2);
-            minY = Math.min(minY, node.y);
-            maxX = Math.max(maxX, node.x + NODE_WIDTH/2);
-            maxY = Math.max(maxY, node.y + NODE_HEIGHT);
+            minX = Math.min(minX, node.displayX - NODE_WIDTH/2);
+            minY = Math.min(minY, node.displayY);
+            maxX = Math.max(maxX, node.displayX + NODE_WIDTH/2);
+            maxY = Math.max(maxY, node.displayY + NODE_HEIGHT);
         });
         
         const bounds = {
             x: minX,
             y: minY,
-            width: maxX - minX,
-            height: maxY - minY
+            width: Math.max(maxX - minX, 1),
+            height: Math.max(maxY - minY, 1)
         };
         
-        const W2 = container.clientWidth;
-        const H2 = container.clientHeight;
+        const W2 = container.clientWidth || 1200;
+        const H2 = container.clientHeight || 700;
         const pad = 60;
         
         const scale = Math.min(
             (W2 - pad * 2) / bounds.width, 
             (H2 - pad * 2) / bounds.height, 
-            1
+            1.2
         );
         
-        const tx = W2 / 2 - (bounds.x + bounds.width / 2) * scale;
-        const ty = pad - bounds.y * scale;
+        const clampedScale = Math.max(0.08, Math.min(scale, 1.2));
         
-        const transform = d3.zoomIdentity.translate(tx, ty).scale(scale);
+        const tx = W2 / 2 - (bounds.x + bounds.width / 2) * clampedScale;
+        const ty = Math.max(20, (H2 - bounds.height * clampedScale) / 2) - bounds.y * clampedScale;
+        
+        const transform = d3.zoomIdentity.translate(tx, ty).scale(clampedScale);
         originalTransform = transform;
         
         svg.call(zoom.transform, transform);

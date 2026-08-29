@@ -1,792 +1,1112 @@
 <?php $this->load->view('Daerah/sidebar'); ?>
 <?php $this->load->view('Daerah/Cssumum'); ?>
 
+<style>
+/* Styling Card Modern Curve untuk Tabel dan Data IKD */
+.data-table-list {
+    border-radius: 14px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid #f1f5f9;
+    overflow: hidden;
+    background: #ffffff;
+    padding: 24px !important;
+}
+
+/* Card Counter IKD Curve & Ukuran Seragam (Equal Height & Width) */
+.ikd-counter-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: -10px;
+    margin-right: -10px;
+}
+.ikd-counter-col {
+    display: flex;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 22px;
+}
+.ikd-counter-box {
+    background: #fff;
+    border-radius: 14px !important;
+    padding: 18px 20px;
+    margin-bottom: 0;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+    border-left: 5px solid #00c292;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 100px;
+    transition: all 0.25s ease;
+}
+.ikd-counter-box:hover {
+    box-shadow: 0 8px 22px rgba(0,0,0,0.09);
+    transform: translateY(-2px);
+}
+.ikd-counter-box.card-geografi { border-left-color: #00c292; }
+.ikd-counter-box.card-kesejahteraan { border-left-color: #fb9678; }
+.ikd-counter-box.card-dayasaing { border-left-color: #03a9f3; }
+.ikd-counter-box.card-pelayanan { border-left-color: #ab8ce4; }
+
+.ikd-counter-box .counter-info {
+    flex: 1;
+    min-width: 0;
+    padding-right: 10px;
+}
+.ikd-counter-box .counter-info h4 {
+    margin: 0 0 4px 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.2;
+}
+.ikd-counter-box .counter-info p {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    line-height: 1.35;
+    word-break: break-word;
+}
+.ikd-counter-box .counter-icon {
+    font-size: 28px;
+    opacity: 0.35;
+    flex-shrink: 0;
+}
+.ikd-counter-box.card-geografi .counter-icon { color: #00c292; }
+.ikd-counter-box.card-kesejahteraan .counter-icon { color: #fb9678; }
+.ikd-counter-box.card-dayasaing .counter-icon { color: #03a9f3; }
+.ikd-counter-box.card-pelayanan .counter-icon { color: #ab8ce4; }
+
+.aspek-header-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-bottom: 14px;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #f1f5f9;
+}
+.aspek-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.aspek-title .badge-aspek {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    line-height: 1.2;
+    color: #fff;
+    display: inline-block;
+}
+.badge-geografi { background-color: #00c292; }
+.badge-kesejahteraan { background-color: #fb9678; }
+.badge-dayasaing { background-color: #03a9f3; }
+.badge-pelayanan { background-color: #ab8ce4; }
+
+/* Posisi Teks Header Tabel Berada Presisi di Tengah (Vertikal) */
+table.dataTable thead th,
+table.dataTable thead td,
+.table-ikd-aspek thead th,
+.table thead th {
+    background-color: #f8fafc;
+    color: #334155;
+    font-weight: 600;
+    text-align: center;
+    vertical-align: middle !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    padding: 12px 8px !important;
+    line-height: 1.4 !important;
+    background-image: none !important;
+    cursor: default !important;
+}
+.table-ikd-aspek tbody td {
+    vertical-align: middle;
+    padding: 10px 8px;
+}
+
+/* Ukuran Compact Button Aksi pada Tabel IKD */
+.btn-action-ikd {
+    width: 24px !important;
+    height: 24px !important;
+    padding: 0 !important;
+    font-size: 10px !important;
+    line-height: 24px !important;
+    border-radius: 5px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 1px !important;
+    transition: all 0.2s ease;
+    border: none !important;
+}
+.btn-action-ikd i {
+    font-size: 11px !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+}
+.btn-action-ikd:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+
+/* Hilangkan Icon Panah Sort pada Header Tabel */
+table.dataTable thead th,
+table.dataTable thead td,
+.table-ikd-aspek thead th,
+table.dataTable thead .sorting,
+table.dataTable thead .sorting_asc,
+table.dataTable thead .sorting_desc,
+table.dataTable thead .sorting_asc_disabled,
+table.dataTable thead .sorting_desc_disabled {
+    background-image: none !important;
+    cursor: default !important;
+}
+
+/* Hilangkan Icon Panah Pseudo Bawaan Notika pada Pagination */
+.dataTables_wrapper .dataTables_paginate .paginate_button.previous:before,
+.dataTables_wrapper .dataTables_paginate .paginate_button.next:before {
+    display: none !important;
+    content: "" !important;
+}
+
+/* Styling Bersih & Rapi untuk Tombol Penomoran Halaman */
+.dataTables_wrapper .dataTables_paginate {
+    margin-top: 25px !important;
+    padding-top: 8px !important;
+    float: right;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    min-width: 28px !important;
+    height: 28px !important;
+    line-height: 26px !important;
+    padding: 0 6px !important;
+    text-align: center !important;
+    font-size: 12px !important;
+    border-radius: 6px !important;
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    border: 1px solid #e2e8f0 !important;
+    margin: 0 2px !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: #00c292 !important;
+    border-color: #00c292 !important;
+    color: #ffffff !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:focus {
+    background: #00c292 !important;
+    border-color: #00c292 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover,
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled:active {
+    opacity: 0.4 !important;
+    cursor: not-allowed !important;
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+    color: #94a3b8 !important;
+}
+.dataTables_wrapper .dataTables_info {
+    font-size: 12px !important;
+    margin-top: 25px !important;
+    padding-top: 12px !important;
+    float: left;
+    color: #64748b;
+}
+
+/* Hilangkan Icon Search Bawaan Notika di Sebelah Kanan */
+.dataTables_filter label:after,
+.dataTables_filter label::after,
+.dataTables_wrapper .dataTables_filter label:after,
+.dataTables_wrapper .dataTables_filter label::after {
+    display: none !important;
+    content: none !important;
+}
+
+/* Styling Bersih Kolom Pencarian (Search) di Setiap Aspek */
+.dataTables_wrapper .dataTables_filter {
+    float: right;
+    text-align: right;
+    margin-bottom: 15px;
+    width: auto !important;
+}
+.dataTables_wrapper .dataTables_filter label {
+    font-weight: normal;
+    margin-bottom: 0;
+    position: relative;
+    display: inline-block;
+    width: auto !important;
+    font-size: 13px !important;
+}
+.dataTables_wrapper .dataTables_filter input {
+    height: 38px;
+    padding: 6px 16px !important;
+    font-size: 13px;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+    border-radius: 20px;
+    outline: none;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    transition: all 0.25s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    min-width: 220px;
+    margin-left: 0 !important;
+}
+.dataTables_wrapper .dataTables_filter input:focus {
+    min-width: 260px;
+    border-color: #00c292;
+    box-shadow: 0 0 0 3px rgba(0, 194, 146, 0.18);
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* Styling Dropdown Tampilkan Entri (Length Menu) */
+.dataTables_wrapper .dataTables_length {
+    float: left;
+    margin-bottom: 15px;
+}
+.dataTables_wrapper .dataTables_length label {
+    font-weight: 500;
+    font-size: 13px;
+    color: #475569;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 0;
+}
+.dataTables_wrapper .dataTables_length select {
+    height: 38px;
+    padding: 4px 12px;
+    font-size: 13px;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background-color: #ffffff;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    margin: 0 4px;
+}
+.dataTables_wrapper .dataTables_length select:focus {
+    border-color: #00c292;
+    box-shadow: 0 0 0 3px rgba(0, 194, 146, 0.18);
+}
+
+/* Styling Modal Menarik */
+.modal-ikd-dialog {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) !important;
+    width: 92%;
+    max-width: 760px;
+    margin: 0;
+}
+.modal-ikd-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    overflow: hidden;
+}
+.modal-ikd-header {
+    background: #ffffff;
+    color: #1e293b;
+    padding: 18px 24px;
+    position: relative;
+    width: 100%;
+    border-bottom: 1px solid #eef2f6;
+}
+.modal-ikd-header::before,
+.modal-ikd-header::after {
+    display: none !important;
+}
+.modal-ikd-header .modal-title {
+    color: #1e293b;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+    float: left !important;
+    text-align: left;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    line-height: 32px;
+}
+.modal-ikd-header .modal-title-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(0, 194, 146, 0.12);
+    color: #00c292;
+    font-size: 15px;
+}
+.modal-ikd-header .close {
+    color: #64748b !important;
+    opacity: 0.7 !important;
+    font-size: 26px !important;
+    font-weight: 300 !important;
+    text-shadow: none !important;
+    float: right !important;
+    margin-top: 1px !important;
+    margin-right: 0 !important;
+    line-height: 28px !important;
+    outline: none !important;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.modal-ikd-header .close:hover {
+    color: #0f172a !important;
+    opacity: 1 !important;
+}
+.modal-ikd-body {
+    padding: 22px 24px;
+    background-color: #ffffff;
+}
+.aspek-banner-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f8fafc;
+    border-left: 4px solid #00c292;
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-bottom: 18px;
+}
+.aspek-banner-chip .chip-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+}
+.aspek-banner-chip .chip-value {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+}
+.form-label-ikd {
+    font-size: 12px;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 6px;
+    display: block;
+}
+.form-control-ikd {
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 9px 12px;
+    font-size: 13px;
+    color: #1e293b;
+    background-color: #fff;
+    width: 100%;
+    transition: all 0.2s;
+    box-shadow: none;
+}
+.form-control-ikd:focus {
+    border-color: #00c292;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 194, 146, 0.15);
+}
+.target-grid-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 14px;
+}
+.target-grid-card .grid-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.target-year-box {
+    text-align: center;
+}
+.target-year-box label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    margin-bottom: 4px;
+    display: block;
+}
+.target-year-box .form-control-target {
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #fff;
+    padding: 7px 4px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    color: #0f172a;
+    width: 100%;
+    transition: all 0.2s;
+}
+.target-year-box .form-control-target:focus {
+    border-color: #00c292;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 194, 146, 0.2);
+}
+.modal-ikd-footer {
+    background-color: #f8fafc;
+    padding: 14px 24px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+.btn-ikd-modal {
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+.btn-ikd-cancel {
+    background: #e2e8f0;
+    color: #475569;
+}
+.btn-ikd-cancel:hover {
+    background: #cbd5e1;
+    color: #1e293b;
+}
+.btn-ikd-submit {
+    background: #00c292;
+    color: #fff;
+}
+.btn-ikd-submit:hover {
+    background: #00a87e;
+    color: #fff;
+}
+</style>
+
 <!-- Main Content -->
 <div class="main-content">
     <div class="data-table-area">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <div class="data-table-list">
-                        <div class="basic-tb-hd">
-                            <!-- Filter untuk pengguna yang belum login -->
-                            <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-                                <div class="form-example-wrap" style="margin-bottom: 20px;">
-                                    <div class="form-example-int form-horizental">
-                                        <div class="form-group">
-                                            <div class="row filter-row">
-                                                <div class="col-lg-3 col-md-6">
-                                                    <div class="filter-group">
-                                                        <!-- <label for="Provinsi"><b>Provinsi</b></label>
-                                                        <select class="form-control filter-select" id="Provinsi">
-                                                            <option value="">Pilih Provinsi</option>
-                                                            <?php foreach ($Provinsi as $prov) { ?>
-                                                                <option value="<?= html_escape($prov['Kode']) ?>" <?= (substr($KodeWilayah, 0, 2) == $prov['Kode']) ? 'selected' : '' ?>>
-                                                                    <?= html_escape($prov['Nama']) ?>
-                                                                </option>
-                                                            <?php } ?>
-                                                        </select>
-                                                    </div>
+                    
+                    <!-- Filter untuk pengguna yang belum login -->
+                    <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
+                        <div class="data-table-list" style="margin-bottom: 20px; padding: 20px;">
+                            <div class="form-example-wrap">
+                                <div class="form-example-int form-horizental">
+                                    <div class="form-group">
+                                        <div class="row filter-row">
+                                            <div class="col-lg-3 col-md-6">
+                                                <div class="filter-group">
+                                                    <label for="Provinsi"><b>Provinsi</b></label>
+                                                    <select class="form-control filter-select" id="Provinsi">
+                                                        <option value="">Pilih Provinsi</option>
+                                                        <?php foreach ($Provinsi as $prov) { ?>
+                                                            <option value="<?= html_escape($prov['Kode']) ?>" <?= (substr($KodeWilayah, 0, 2) == $prov['Kode']) ? 'selected' : '' ?>>
+                                                                <?= html_escape($prov['Nama']) ?>
+                                                            </option>
+                                                        <?php } ?>
+                                                    </select>
                                                 </div>
-                                                <div class="col-lg-3 col-md-6">
-                                                    <div class="filter-group">
-                                                        <label for="KabKota"><b>Kab/Kota</b></label>
-                                                        <select class="form-control filter-select" id="KabKota">
-                                                            <option value="">Pilih Kab/Kota</option>
-                                                        </select>
-                                                    </div>
+                                            </div>
+                                            <div class="col-lg-3 col-md-6">
+                                                <div class="filter-group">
+                                                    <label for="KabKota"><b>Kab/Kota</b></label>
+                                                    <select class="form-control filter-select" id="KabKota">
+                                                        <option value="">Pilih Kab/Kota</option>
+                                                    </select>
                                                 </div>
-                                                <div class="col-lg-2 col-md-6">
-                                                    <div class="filter-group" style="margin-top: 28px;">
-                                                        <button class="btn btn-primary notika-btn-primary btn-block" id="Filter">
-                                                            <b>Filter</b>
-                                                        </button>
-                                                    </div> -->
+                                            </div>
+                                            <div class="col-lg-2 col-md-6">
+                                                <div class="filter-group" style="margin-top: 28px;">
+                                                    <button class="btn btn-primary notika-btn-primary btn-block" id="Filter">
+                                                        <b>Filter</b>
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- Menampilkan Wilayah dan Pesan Error setelah filter -->
-                                <?php if (!empty($KodeWilayah)) { ?>
-                                    <?php 
-                                        $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-                                        $nama_wilayah = $wilayah ? html_escape($wilayah['Nama']) : 'Wilayah Tidak Ditemukan';
-                                        if (empty($Ikd)) {
-                                            $pesan_error = "Tidak ada data IKD untuk wilayah: $nama_wilayah";
-                                        }
-                                    ?>
-                                    <div class="alert <?= empty($Ikd) ? 'alert-warning' : 'alert-info' ?>" style="margin-bottom: 20px;">
-                                        <strong>Wilayah:</strong> <?= $nama_wilayah ?><br>
-                                        <?php if (!empty($pesan_error)) { ?>
-                                            <strong>Peringatan:</strong> <?= html_escape($pesan_error) ?>
-                                        <?php } ?>
-                                    </div>
-                                <?php } ?>
+                            <!-- Menampilkan Wilayah dan Pesan setelah filter -->
+                            <?php if (!empty($KodeWilayah)) { ?>
+                                <?php 
+                                    $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+                                    $nama_wilayah = $wilayah ? html_escape($wilayah['Nama']) : 'Wilayah Tidak Ditemukan';
+                                ?>
+                                <div class="alert <?= empty($Ikd) ? 'alert-warning' : 'alert-info' ?>" style="margin-bottom: 0; margin-top: 15px; border-radius: 6px;">
+                                    <strong>Wilayah:</strong> <?= $nama_wilayah ?><br>
+                                    <?php if (empty($Ikd)) { ?>
+                                        <strong>Peringatan:</strong> Tidak ada data IKD untuk wilayah ini.
+                                    <?php } ?>
+                                </div>
                             <?php } ?>
+                        </div>
+                    <?php } ?>
 
-                            <div class="button-icon-btn sm-res-mg-t-30">
+                    <?php
+                    // Pengelompokan Data & Hitungan per Aspek
+                    $aspekDef = [
+                        'geografi' => [
+                            'code' => 'I',
+                            'name' => 'ASPEK GEOGRAFI DAN DEMOGRAFI',
+                            'cardClass' => 'card-geografi',
+                            'badgeClass' => 'badge-geografi',
+                            'icon' => 'fa-globe',
+                            'items' => []
+                        ],
+                        'kesejahteraan' => [
+                            'code' => 'II',
+                            'name' => 'ASPEK KESEJAHTERAAN MASYARAKAT',
+                            'cardClass' => 'card-kesejahteraan',
+                            'badgeClass' => 'badge-kesejahteraan',
+                            'icon' => 'fa-heartbeat',
+                            'items' => []
+                        ],
+                        'dayasaing' => [
+                            'code' => 'III',
+                            'name' => 'ASPEK DAYA SAING',
+                            'cardClass' => 'card-dayasaing',
+                            'badgeClass' => 'badge-dayasaing',
+                            'icon' => 'fa-line-chart',
+                            'items' => []
+                        ],
+                        'pelayanan' => [
+                            'code' => 'IV',
+                            'name' => 'ASPEK PELAYANAN UMUM',
+                            'cardClass' => 'card-pelayanan',
+                            'badgeClass' => 'badge-pelayanan',
+                            'icon' => 'fa-building',
+                            'items' => []
+                        ]
+                    ];
+
+                    foreach ($Ikd as $item) {
+                        $asp = !empty($item['aspek']) ? strtolower($item['aspek']) : 'geografi';
+                        if (isset($aspekDef[$asp])) {
+                            $aspekDef[$asp]['items'][] = $item;
+                        } else {
+                            $aspekDef['geografi']['items'][] = $item;
+                        }
+                    }
+
+                    function fmtIkdVal($v) {
+                        if ($v === null || $v === '') return '-';
+                        if (is_numeric($v)) return number_format((float)$v, 2, '.', '');
+                        return html_escape(str_replace(',', '.', $v));
+                    }
+                    ?>
+
+                    <!-- ============================================================
+                    SUMMARY / COUNTER CARDS (HITUNGAN PER ASPEK)
+                    ============================================================ -->
+                    <div class="row ikd-counter-row">
+                        <?php foreach ($aspekDef as $key => $asp) { ?>
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12 ikd-counter-col">
+                                <div class="ikd-counter-box <?= $asp['cardClass'] ?>">
+                                    <div class="counter-info">
+                                        <h4><?= count($asp['items']) ?></h4>
+                                        <p><?= $asp['code'] ?>. <?= html_escape($asp['name']) ?></p>
+                                    </div>
+                                    <div class="counter-icon">
+                                        <i class="fa <?= $asp['icon'] ?>"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php } ?>
+                    </div>
+
+                    <!-- ============================================================
+                    TABEL DATA DIPISAHKAN PER ASPEK
+                    ============================================================ -->
+                    <?php foreach ($aspekDef as $key => $asp) { ?>
+                        <div class="data-table-list" style="margin-bottom: 25px;">
+                            <div class="aspek-header-wrap">
+                                <h3 class="aspek-title">
+                                    <span class="badge-aspek <?= $asp['badgeClass'] ?>"><?= $asp['code'] ?></span>
+                                    <?= html_escape($asp['name']) ?>
+                                    <span class="label label-default" style="font-size: 11px; margin-left: 5px; border-radius: 4px;"><?= count($asp['items']) ?> Indikator</span>
+                                </h3>
+
                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                    <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalTambahIkd">
-                                        <i class="notika-icon bi-plus-lg"></i> <b>Tambah IKD</b>
+                                    <button type="button" class="btn btn-success notika-btn-success btn-sm BtnTambahPerAspek" data-aspek="<?= $key ?>" data-aspek-name="<?= html_escape($asp['name']) ?>">
+                                        <i class="notika-icon bi-plus-lg"></i> <b>Tambah Indikator</b>
                                     </button>
                                 <?php } ?>
                             </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered table-ikd-aspek table-data-aspek" id="table-aspek-<?= $key ?>">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center" style="width: 4%; vertical-align: middle !important;">No</th>
+                                            <th style="width: 25%; text-align: left; vertical-align: middle !important;">Indikator Sasaran (IKD)</th>
+                                            <th class="text-center" style="width: 7%; vertical-align: middle !important;">Satuan</th>
+                                            <th class="text-center" style="width: 7%; vertical-align: middle !important;">Target <br><small>2025</small></th>
+                                            <th class="text-center" style="width: 7%; vertical-align: middle !important;">Target <br><small>2026</small></th>
+                                            <th class="text-center" style="width: 7%; vertical-align: middle !important;">Target <br><small>2027</small></th>
+                                            <th class="text-center" style="width: 7%; vertical-align: middle !important;">Target <br><small>2028</small></th>
+                                            <th class="text-center" style="width: 7%; vertical-align: middle !important;">Target <br><small>2029</small></th>
+                                            <th class="text-center" style="width: 7%; vertical-align: middle !important;">Target <br><small>2030</small></th>
+                                            <th style="width: 14%; text-align: left; vertical-align: middle !important;">Perangkat Daerah Pengampu</th>
+                                            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                                                <th class="text-center" style="width: 8%; vertical-align: middle !important;">Aksi</th>
+                                            <?php } ?>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (!empty($asp['items'])) { ?>
+                                            <?php $noAspek = 1; foreach ($asp['items'] as $row) { ?>
+                                                <tr>
+                                                    <td class="text-center"><?= $noAspek++ ?></td>
+                                                    <td style="font-weight: 600;">
+                                                        <?= html_escape($row['indikator_sasaran']) ?>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge" style="background-color: #f1f5f9; color: #475569; font-weight: normal;">
+                                                            <?= !empty($row['satuan']) ? html_escape($row['satuan']) : '-' ?>
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-center"><?= fmtIkdVal($row['target_1'] ?? $row['target_2025'] ?? null) ?></td>
+                                                    <td class="text-center"><?= fmtIkdVal($row['target_2'] ?? $row['target_2026'] ?? null) ?></td>
+                                                    <td class="text-center"><?= fmtIkdVal($row['target_3'] ?? $row['target_2027'] ?? null) ?></td>
+                                                    <td class="text-center"><?= fmtIkdVal($row['target_4'] ?? $row['target_2028'] ?? null) ?></td>
+                                                    <td class="text-center"><?= fmtIkdVal($row['target_5'] ?? $row['target_2029'] ?? null) ?></td>
+                                                    <td class="text-center"><?= fmtIkdVal($row['target_6'] ?? $row['target_2030'] ?? null) ?></td>
+                                                    <td style="font-size: 12px; color: #4b5563;">
+                                                        <?= !empty($row['pd_penanggung_jawab']) ? html_escape($row['pd_penanggung_jawab']) : '<em class="text-muted">Belum ditentukan</em>' ?>
+                                                    </td>
+                                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                                                        <td class="text-center" style="white-space: nowrap;">
+                                                            <div style="display: inline-flex; gap: 4px; justify-content: center; align-items: center;">
+                                                                <button type="button" class="btn btn-warning btn-action-ikd BtnEditIKD" 
+                                                                        style="background-color: #f59e0b !important; color: #ffffff !important;"
+                                                                        data-id="<?= $row['id'] ?>"
+                                                                        data-aspek="<?= html_escape($row['aspek'] ?? $key) ?>"
+                                                                        data-nama="<?= html_escape($row['indikator_sasaran']) ?>"
+                                                                        data-satuan="<?= html_escape($row['satuan'] ?? '') ?>"
+                                                                        data-opd="<?= html_escape($row['pd_penanggung_jawab'] ?? '') ?>"
+                                                                        data-t1="<?= html_escape($row['target_1'] ?? $row['target_2025'] ?? '') ?>"
+                                                                        data-t2="<?= html_escape($row['target_2'] ?? $row['target_2026'] ?? '') ?>"
+                                                                        data-t3="<?= html_escape($row['target_3'] ?? $row['target_2027'] ?? '') ?>"
+                                                                        data-t4="<?= html_escape($row['target_4'] ?? $row['target_2028'] ?? '') ?>"
+                                                                        data-t5="<?= html_escape($row['target_5'] ?? $row['target_2029'] ?? '') ?>"
+                                                                        data-t6="<?= html_escape($row['target_6'] ?? $row['target_2030'] ?? '') ?>"
+                                                                        title="Edit Indikator">
+                                                                    <i class="notika-icon notika-edit"></i>
+                                                                </button>
+                                                                <button type="button" class="btn btn-danger btn-action-ikd BtnHapusIKD" 
+                                                                        style="background-color: #ef4444 !important; color: #ffffff !important;"
+                                                                        data-id="<?= $row['id'] ?>"
+                                                                        data-nama="<?= html_escape($row['indikator_sasaran']) ?>"
+                                                                        title="Hapus Indikator">
+                                                                    <i class="notika-icon notika-trash"></i>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    <?php } ?>
+                                                </tr>
+                                            <?php } ?>
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                        <div class="table-responsive">
-                            <table id="data-table-basic" class="table table-striped" style="table-layout: fixed;">
-                                <thead>
-                                    <tr>
-                                        <th width="5%" class="text-center">No</th>
-                                        <th width="15%">Sasaran</th>
-                                        <th width="15%">Indikator Sasaran</th>
-                                        <th width="10%" class="text-center">Periode</th>
-                                        <th width="12%" class="text-center">PD Penanggung Jawab</th>
-                                        <th width="12%" class="text-center">PD Penunjang</th>
-                                        <th width="12%" class="text-center">Isu Strategis Daerah</th>
-                                        <th width="6%" class="text-center">Target <br><small>Tahun 1</small></th>
-                                        <th width="6%" class="text-center">Target <br><small>Tahun 2</small></th>
-                                        <th width="6%" class="text-center">Target <br><small>Tahun 3</small></th>
-                                        <th width="6%" class="text-center">Target <br><small>Tahun 4</small></th>
-                                        <th width="6%" class="text-center">Target <br><small>Tahun 5</small></th>
-                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                            <th width="10%" class="text-center">Aksi</th>
-                                        <?php } ?>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php $No = 1; foreach ($Ikd as $key) { ?>
-                                    <tr>
-                                        <td class="text-center" style="vertical-align: top;"><?= $No++ ?></td>
-                                        <td style="vertical-align: top;">
-                                            <?php
-                                            $sasaran = $this->db->where('Id', $key['IdSasaran'])->get('sasaranrpjmd')->row_array();
-                                            echo $sasaran ? html_escape($sasaran['Sasaran']) : '-';
-                                            ?>
-                                        </td>
-                                        <td style="vertical-align: top;"><?= html_escape($key['indikator_sasaran']) ?></td>
-                                        <td style="vertical-align: top;" class="text-center">
-                                            <?= html_escape($key['tahun_mulai']) ?> - <?= html_escape($key['tahun_akhir']) ?>
-                                        </td>
-                                        <!-- Kolom PD Penanggung Jawab -->
-                                        <td style="vertical-align: top;">
-                                            <div style="display: flex; flex-direction: column; height: 100%;">
-                                                <div style="display: flex; justify-content: center; gap: 5px; margin-bottom: 5px;">
-                                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                                        <button class="btn btn-sm btn-success TambahPj" 
-                                                                title="Tambah PD Penanggung Jawab"
-                                                                data-id="<?= $key['id'] ?>"
-                                                                style="width: 30px; height: 30px; padding: 0;">
-                                                            <i class="fa fa-plus"></i>
-                                                        </button>
-                                                        <?php if (!empty($key['pd_penanggung_jawab'])): ?>
-                                                            <button class="btn btn-sm btn-primary Pic" 
-                                                                    title="Edit PD Penanggung Jawab"
-                                                                    Pic="<?= $key['id'].'|'.html_escape($key['pd_penanggung_jawab']) ?>"
-                                                                    style="width: 30px; height: 30px; padding: 0;">
-                                                                <i class="fa fa-edit"></i>
-                                                            </button>
-                                                        <?php endif; ?>
-                                                    <?php } ?>
-                                                </div>
-                                                <div style="flex-grow: 1; overflow: auto; text-align: start;">
-                                                    <?php if (!empty($key['pd_penanggung_jawab'])): ?>
-                                                        <?php 
-                                                        $penanggungJawab = explode(',', $key['pd_penanggung_jawab']);
-                                                        foreach ($penanggungJawab as $pj): 
-                                                        ?>
-                                                            <div style="padding: 2px 0; white-space: nowrap;"><?= html_escape($pj) ?></div>
-                                                        <?php endforeach; ?>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <!-- Kolom PD Penunjang -->
-                                        <td style="vertical-align: top;">
-                                            <div style="display: flex; flex-direction: column; height: 100%;">
-                                                <div style="display: flex; justify-content: center; gap: 5px; margin-bottom: 5px;">
-                                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                                        <button class="btn btn-sm btn-success TambahPn" 
-                                                                title="Tambah PD Penunjang"
-                                                                data-id="<?= $key['id'] ?>"
-                                                                style="width: 30px; height: 30px; padding: 0;">
-                                                            <i class="fa fa-plus"></i>
-                                                        </button>
-                                                        <?php if (!empty($key['pd_penunjang'])): ?>
-                                                            <button class="btn btn-sm btn-primary Pis" 
-                                                                    title="Edit PD Penunjang"
-                                                                    Pis="<?= $key['id'].'|'.html_escape($key['pd_penunjang']) ?>"
-                                                                    style="width: 30px; height: 30px; padding: 0;">
-                                                                <i class="fa fa-edit"></i>
-                                                            </button>
-                                                        <?php endif; ?>
-                                                    <?php } ?>
-                                                </div>
-                                                <div style="flex-grow: 1; overflow: auto; text-align: start;">
-                                                    <?php if (!empty($key['pd_penunjang'])): ?>
-                                                        <?php 
-                                                        $penunjang = explode(',', $key['pd_penunjang']);
-                                                        foreach ($penunjang as $pn): 
-                                                        ?>
-                                                            <div style="padding: 2px 0; white-space: nowrap;"><?= html_escape($pn) ?></div>
-                                                        <?php endforeach; ?>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <!-- Kolom Isu Strategis -->
-                                        <td style="vertical-align: top;">
-                                            <div style="display: flex; flex-direction: column; height: 100%;">
-                                                <div style="display: flex; justify-content: center; gap: 5px; margin-bottom: 5px;">
-                                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                                        <button class="btn btn-sm btn-success TambahIsu" 
-                                                                title="Tambah Isu Strategis"
-                                                                data-id="<?= $key['id'] ?>"
-                                                                style="width: 30px; height: 30px; padding: 0;">
-                                                            <i class="fa fa-plus"></i>
-                                                        </button>
-                                                        <?php if (!empty($key['isu_strategis'])): ?>
-                                                            <button class="btn btn-sm btn-primary EditIsu" 
-                                                                    title="Edit Isu Strategis"
-                                                                    data-isi="<?= $key['id'].'|'.html_escape($key['isu_strategis']) ?>"
-                                                                    style="width: 30px; height: 30px; padding: 0;">
-                                                                <i class="fa fa-edit"></i>
-                                                            </button>
-                                                        <?php endif; ?>
-                                                    <?php } ?>
-                                                </div>
-                                                <div style="flex-grow: 1; overflow: auto; text-align: start;">
-                                                    <?php if (!empty($key['isu_strategis'])): ?>
-                                                        <?php 
-                                                        $isuStrategis = explode(',', $key['isu_strategis']);
-                                                        foreach ($isuStrategis as $isu): 
-                                                            $isuData = $this->db->where('Id', $isu)->get('isustrategisdaerah')->row_array();
-                                                            if ($isuData):
-                                                        ?>
-                                                            <div style="padding: 2px 0; white-space: nowrap;"><?= html_escape($isuData['NamaIsuStrategis']) ?></div>
-                                                        <?php 
-                                                            endif;
-                                                        endforeach; 
-                                                        ?>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <!-- Kolom Target -->
-                                        <td class="text-center" style="vertical-align: middle;">
-                                            <?= is_numeric($key['target_1']) && floor($key['target_1']) == $key['target_1'] ? (int)$key['target_1'] : '-' ?>
-                                        </td>
-                                        <td class="text-center" style="vertical-align: middle;">
-                                            <?= is_numeric($key['target_2']) && floor($key['target_2']) == $key['target_2'] ? (int)$key['target_2'] : '-' ?>
-                                        </td>
-                                        <td class="text-center" style="vertical-align: middle;">
-                                            <?= is_numeric($key['target_3']) && floor($key['target_3']) == $key['target_3'] ? (int)$key['target_3'] : '-' ?>
-                                        </td>
-                                        <td class="text-center" style="vertical-align: middle;">
-                                            <?= is_numeric($key['target_4']) && floor($key['target_4']) == $key['target_4'] ? (int)$key['target_4'] : '-' ?>
-                                        </td>
-                                        <td class="text-center" style="vertical-align: middle;">
-                                            <?= is_numeric($key['target_5']) && floor($key['target_5']) == $key['target_5'] ? (int)$key['target_5'] : '-' ?>
-                                        </td>
-                                        <!-- Kolom Aksi -->
-                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                            <td class="text-center" style="vertical-align: middle;">
-                                                <div style="display: flex; justify-content: center; gap: 5px;">
-                                                    <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" 
-                                                            data-id="<?= $key['id'] ?>" 
-                                                            data-sasaran="<?= $key['IdSasaran'] ?>" 
-                                                            data-indikator-sasaran="<?= html_escape($key['indikator_sasaran']) ?>"
-                                                            data-tahunmulai="<?= $key['tahun_mulai'] ?>"
-                                                            data-tahunakhir="<?= $key['tahun_akhir'] ?>"
-                                                            data-target1="<?= $key['target_1'] ?>"
-                                                            data-target2="<?= $key['target_2'] ?>"
-                                                            data-target3="<?= $key['target_3'] ?>"
-                                                            data-target4="<?= $key['target_4'] ?>"
-                                                            data-target5="<?= $key['target_5'] ?>"
-                                                            style="width: 36px; height: 36px; padding: 0; border-radius: 50%;">
-                                                        <i class="fa fa-edit" style="font-size: 15px;"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg Hapus" 
-                                                            data-id="<?= $key['id'] ?>"
-                                                            style="width: 36px; height: 36px; padding: 0; border-radius: 50%;">
-                                                        <i class="notika-icon notika-trash" style="font-size: 15px;"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        <?php } ?>
-                                    </tr>
-                                    <?php } ?>
-                                </tbody>
-                            </table>
-                        </div>  
+                    <?php } ?>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+MODAL TAMBAH IKD (DESAIN MENARIK & MODERN)
+============================================================ -->
+<div class="modal fade" id="ModalInputIKD" role="dialog">
+    <div class="modal-dialog modal-ikd-dialog">
+        <div class="modal-content modal-ikd-content">
+            <div class="modal-header modal-ikd-header">
+                <button type="button" class="close" data-dismiss="modal" title="Tutup">&times;</button>
+                <h4 class="modal-title">
+                    <span class="modal-title-icon"><i class="fa fa-plus"></i></span>
+                    Tambah Indikator Kinerja Daerah (IKD)
+                </h4>
+                <div style="clear: both;"></div>
+            </div>
+            <div class="modal-body modal-ikd-body">
+                <form id="FormTambahIKD">
+                    <input type="hidden" name="aspek" id="TambahAspek" value="geografi">
+                    
+                    <div class="aspek-banner-chip" id="TambahAspekChip">
+                        <span class="chip-label"><i class="fa fa-folder-open"></i> Aspek Terpilih:</span>
+                        <span class="chip-value" id="TambahAspekLabel">I. ASPEK GEOGRAFI DAN DEMOGRAFI</span>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Modal Tambah IKD -->
-    <div class="modal fade" id="ModalTambahIkd" role="dialog">
-        <div class="modal-dialog modals-default" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <form id="FormTambahIkd">
-                        <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
-                        <!-- Tahun Filter Dropdown -->
-                        <div class="form-group">
-                            <label for="TahunFilter">Periode Tahun</label>
-                            <select class="form-control" id="TahunFilter" name="TahunFilter" required>
-                                <option value="" selected disabled>-- Pilih Tahun --</option>
-                                <?php foreach ($Periods as $period) { ?>
-                                    <option value="<?= html_escape($period['TahunMulai'].'-'.$period['TahunAkhir']) ?>">
-                                        <?= html_escape($period['TahunMulai'].' - '.$period['TahunAkhir']) ?>
-                                    </option>
-                                <?php } ?>
-                            </select>
-                        </div>
-                        <!-- Dropdown Sasaran -->
-                        <div class="form-group">
-                            <label for="Sasaran">Sasaran</label>
-                            <select class="form-control" id="Sasaran" name="Sasaran" required disabled>
-                                <option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="IndikatorSasaran">Indikator Sasaran (IKD)</label>
-                            <textarea class="form-control" id="IndikatorSasaran" name="indikator_sasaran" rows="3" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>Target Tahunan</label>
-                            <div class="row">
-                                <div class="col-md-2">
-                                    <label>Tahun 1</label>
-                                    <input type="number" class="form-control" name="target_1" placeholder="Angka">
-                                </div>
-                                <div class="col-md-2">
-                                    <label>Tahun 2</label>
-                                    <input type="number" class="form-control" name="target_2" placeholder="Angka">
-                                </div>
-                                <div class="col-md-2">
-                                    <label>Tahun 3</label>
-                                    <input type="number" class="form-control" name="target_3" placeholder="Angka">
-                                </div>
-                                <div class="col-md-2">
-                                    <label>Tahun 4</label>
-                                    <input type="number" class="form-control" name="target_4" placeholder="Angka">
-                                </div>
-                                <div class="col-md-2">
-                                    <label>Tahun 5</label>
-                                    <input type="number" class="form-control" name="target_5" placeholder="Angka">
-                                </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <label class="form-label-ikd">Nama Indikator Kinerja Daerah <span class="text-danger">*</span></label>
+                                <textarea class="form-control-ikd" name="nama" id="TambahNama" rows="3" placeholder="Tuliskan nama indikator secara jelas dan lengkap..." required></textarea>
                             </div>
-                        </div>
-                        <button type="submit" class="btn btn-success">Simpan</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Modal Edit IKD -->
-    <div class="modal fade" id="ModalEditIkd" role="dialog">
-        <div class="modal-dialog modals-default" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <form id="FormEditIkd">
-                        <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
-                        <input type="hidden" id="EditId" name="id">
-                        <!-- Periode Dropdown -->
-                        <div class="form-group">
-                            <label for="EditPeriode">Periode Tahun</label>
-                            <select class="form-control" id="EditPeriode" name="periode" required>
-                                <option value="" selected disabled>-- Pilih Tahun --</option>
-                                <?php foreach ($Periods as $period) { ?>
-                                    <option value="<?= html_escape($period['TahunMulai'].'-'.$period['TahunAkhir']) ?>">
-                                        <?= html_escape($period['TahunMulai'].' - '.$period['TahunAkhir']) ?>
-                                    </option>
-                                <?php } ?>
-                            </select>
-                        </div>
-                        <!-- Dropdown Sasaran -->
-                        <div class="form-group">
-                            <label for="EditSasaran">Sasaran</label>
-                            <select class="form-control" id="EditSasaran" name="EditSasaran" required disabled>
-                                <option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="EditIndikatorSasaran">Indikator Sasaran (IKD)</label>
-                            <textarea class="form-control" id="EditIndikatorSasaran" name="indikator_sasaran" rows="3" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>Target Tahunan</label>
                             <div class="row">
-                                <div class="col-md-2">
-                                    <label>Tahun 1</label>
-                                    <input type="number" class="form-control" id="EditTarget1" name="target_1">
-                                </div>
-                                <div class="col-md-2">
-                                    <label>Tahun 2</label>
-                                    <input type="number" class="form-control" id="EditTarget2" name="target_2">
-                                </div>
-                                <div class="col-md-2">
-                                    <label>Tahun 3</label>
-                                    <input type="number" class="form-control" id="EditTarget3" name="target_3">
-                                </div>
-                                <div class="col-md-2">
-                                    <label>Tahun 4</label>
-                                    <input type="number" class="form-control" id="EditTarget4" name="target_4">
-                                </div>
-                                <div class="col-md-2">
-                                    <label>Tahun 5</label>
-                                    <input type="number" class="form-control" id="EditTarget5" name="target_5">
-                                </div>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-success">Simpan</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Tambah Isu Strategis -->
-    <div class="modal fade" id="ModalTambahIsu" role="dialog">
-        <div class="modal-dialog modals-default" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Tambah Isu Strategis Daerah</h4>
-                </div>
-                <div class="modal-body">
-                    <form id="FormTambahIsu">
-                        <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
-                        <input type="hidden" id="IsuId" name="id">
-                        <div id="isu-container">
-                            <div class="form-group isu-row">
-                                <div class="row">
-                                    <div class="col-md-10">
-                                        <label>Isu Strategis Daerah</label>
-                                        <select class="form-control isu-select" name="isu_strategis[]" required>
-                                            <option value="">Pilih Isu Strategis</option>
-                                            <?php 
-                                            $allIsu = $this->db->where('KodeWilayah', $_SESSION['KodeWilayah'])
-                                                              ->where('deleted_at IS NULL')
-                                                              ->get('isustrategisdaerah')
-                                                              ->result_array();
-                                            foreach ($allIsu as $isu): ?>
-                                                <option value="<?= html_escape($isu['Id']) ?>"><?= html_escape($isu['NamaIsuStrategis']) ?></option>
-                                            <?php endforeach; ?>
+                                <div class="col-lg-5 col-md-5">
+                                    <div class="form-group">
+                                        <label class="form-label-ikd">Satuan Pengukuran</label>
+                                        <select class="form-control-ikd" name="satuan" id="TambahSatuan">
+                                            <option value="">-- Pilih Satuan --</option>
+                                            <option value="Persen">Persen</option>
+                                            <option value="Poin">Poin</option>
+                                            <option value="Indeks">Indeks</option>
+                                            <option value="Rasio">Rasio</option>
+                                            <option value="Jiwa">Jiwa</option>
+                                            <option value="Orang">Orang</option>
+                                            <option value="Km">Km</option>
+                                            <option value="Unit">Unit</option>
+                                            <option value="Dokumen">Dokumen</option>
+                                            <option value="Paket">Paket</option>
+                                            <option value="Ha">Ha (Hektar)</option>
+                                            <option value="Rp">Rp (Rupiah)</option>
+                                            <option value="Nilai">Nilai</option>
+                                            <option value="Skor">Skor</option>
                                         </select>
                                     </div>
-                                    <div class="col-md-2" style="padding-top: 25px;">
-                                        <button type="button" class="btn btn-success btn-add-isu">
-                                            <i class="notika-icon notika-plus-symbol"></i>
-                                        </button>
-                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-success">Simpan</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Edit Isu Strategis -->
-    <div class="modal fade" id="ModalEditIsu" role="dialog">
-        <div class="modal-dialog modal-sm" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Edit Isu Strategis Daerah</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="form-example-wrap">
-                        <div class="form-example-int form-horizental">
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-lg-12">
-                                        <div class="nk-int-st text-justify">
-                                            <input type="hidden" class="form-control input-sm" id="IdIKDIsu">
-                                            <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
-                                            <div id="ListIsu"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-example-int">
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <button class="btn btn-success" id="EditIsu">Simpan</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Tambah PD Penanggung Jawab -->
-    <div class="modal fade" id="ModalTambahPj" role="dialog">
-        <div class="modal-dialog modals-default" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <form id="FormTambahPj">
-                        <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
-                        <input type="hidden" id="PjId" name="id">
-                        <div id="pj-container">
-                            <div class="form-group pj-row">
-                                <div class="row">
-                                    <div class="col-md-10">
-                                        <label>PD Penanggung Jawab</label>
-                                        <select class="form-control pj-select" name="pd_penanggung_jawab[]" required>
-                                            <option value="">Pilih PD Penanggung Jawab</option>
-                                            <option value="Semua Instansi Terkait">Semua Instansi Terkait</option>
-                                            <?php foreach ($Instansi as $instansi) { ?>
-                                                <option value="<?= html_escape($instansi['nama']) ?>"><?= html_escape($instansi['nama']) ?></option>
+                                <div class="col-lg-7 col-md-7">
+                                    <div class="form-group">
+                                        <label class="form-label-ikd">Perangkat Daerah Pengampu (OPD)</label>
+                                        <select class="form-control-ikd" name="opd" id="TambahOpd">
+                                            <option value="">-- Pilih Perangkat Daerah --</option>
+                                            <?php if (!empty($Instansi)) { ?>
+                                                <?php foreach ($Instansi as $inst) { ?>
+                                                    <option value="<?= html_escape($inst['nama']) ?>"><?= html_escape($inst['nama']) ?></option>
+                                                <?php } ?>
                                             <?php } ?>
                                         </select>
                                     </div>
-                                    <div class="col-md-2" style="padding-top: 25px;">
-                                        <button type="button" class="btn btn-success btn-add-pj">
-                                            <i class="notika-icon notika-plus-symbol"></i>
-                                        </button>
+                                </div>
+                            </div>
+
+                            <div class="target-grid-card">
+                                <div class="grid-title"><i class="fa fa-calendar-check-o text-success"></i> Target Kinerja Tahunan (2025 - 2030)</div>
+                                <div class="row">
+                                    <div class="col-xs-4 col-sm-2">
+                                        <div class="target-year-box">
+                                            <label>2025</label>
+                                            <input type="text" class="form-control-target input-target" name="target_1" id="TambahT1" placeholder="0.00">
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-4 col-sm-2">
+                                        <div class="target-year-box">
+                                            <label>2026</label>
+                                            <input type="text" class="form-control-target input-target" name="target_2" id="TambahT2" placeholder="0.00">
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-4 col-sm-2">
+                                        <div class="target-year-box">
+                                            <label>2027</label>
+                                            <input type="text" class="form-control-target input-target" name="target_3" id="TambahT3" placeholder="0.00">
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-4 col-sm-2">
+                                        <div class="target-year-box">
+                                            <label>2028</label>
+                                            <input type="text" class="form-control-target input-target" name="target_4" id="TambahT4" placeholder="0.00">
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-4 col-sm-2">
+                                        <div class="target-year-box">
+                                            <label>2029</label>
+                                            <input type="text" class="form-control-target input-target" name="target_5" id="TambahT5" placeholder="0.00">
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-4 col-sm-2">
+                                        <div class="target-year-box">
+                                            <label>2030</label>
+                                            <input type="text" class="form-control-target input-target" name="target_6" id="TambahT6" placeholder="0.00">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-success">Simpan</button>
-                    </form>
-                </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer modal-ikd-footer">
+                <button type="button" class="btn-ikd-modal btn-ikd-cancel" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn-ikd-modal btn-ikd-submit" id="BtnSimpanTambah">
+                    <i class="fa fa-check"></i> Simpan Indikator
+                </button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Modal Tambah PD Penunjang -->
-    <div class="modal fade" id="ModalTambahPn" role="dialog">
-        <div class="modal-dialog modals-default" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <form id="FormTambahPn">
-                        <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
-                        <input type="hidden" id="PnId" name="id">
-                        <div id="pn-container">
-                            <div class="form-group pn-row">
-                                <div class="row">
-                                    <div class="col-md-10">
-                                        <label>PD Penunjang</label>
-                                        <select class="form-control pn-select" name="pd_penunjang[]" required>
-                                            <option value="">Pilih PD Penunjang</option>
-                                            <option value="Semua Instansi Terkait">Semua Instansi Terkait</option>
-                                            <?php foreach ($Instansi as $instansi) { ?>
-                                                <option value="<?= html_escape($instansi['nama']) ?>"><?= html_escape($instansi['nama']) ?></option>
+<!-- ============================================================
+MODAL EDIT IKD (DESAIN MENARIK & MODERN)
+============================================================ -->
+<div class="modal fade" id="ModalEditIKD" role="dialog">
+    <div class="modal-dialog modal-ikd-dialog">
+        <div class="modal-content modal-ikd-content">
+            <div class="modal-header modal-ikd-header">
+                <button type="button" class="close" data-dismiss="modal" title="Tutup">&times;</button>
+                <h4 class="modal-title">
+                    <span class="modal-title-icon" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b;"><i class="fa fa-pencil"></i></span>
+                    Edit Indikator Kinerja Daerah (IKD)
+                </h4>
+                <div style="clear: both;"></div>
+            </div>
+            <div class="modal-body modal-ikd-body">
+                <form id="FormEditIKD">
+                    <input type="hidden" name="id" id="EditId">
+                    <input type="hidden" name="aspek" id="EditAspek">
+
+                    <div class="aspek-banner-chip" id="EditAspekChip">
+                        <span class="chip-label"><i class="fa fa-folder-open"></i> Aspek:</span>
+                        <span class="chip-value" id="EditAspekLabel"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <label class="form-label-ikd">Nama Indikator Kinerja Daerah <span class="text-danger">*</span></label>
+                                <textarea class="form-control-ikd" name="nama" id="EditNama" rows="3" placeholder="Tuliskan nama indikator secara jelas dan lengkap..." required></textarea>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-lg-5 col-md-5">
+                                    <div class="form-group">
+                                        <label class="form-label-ikd">Satuan Pengukuran</label>
+                                        <select class="form-control-ikd" name="satuan" id="EditSatuan">
+                                            <option value="">-- Pilih Satuan --</option>
+                                            <option value="Persen">Persen</option>
+                                            <option value="Poin">Poin</option>
+                                            <option value="Indeks">Indeks</option>
+                                            <option value="Rasio">Rasio</option>
+                                            <option value="Jiwa">Jiwa</option>
+                                            <option value="Orang">Orang</option>
+                                            <option value="Km">Km</option>
+                                            <option value="Unit">Unit</option>
+                                            <option value="Dokumen">Dokumen</option>
+                                            <option value="Paket">Paket</option>
+                                            <option value="Ha">Ha (Hektar)</option>
+                                            <option value="Rp">Rp (Rupiah)</option>
+                                            <option value="Nilai">Nilai</option>
+                                            <option value="Skor">Skor</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-lg-7 col-md-7">
+                                    <div class="form-group">
+                                        <label class="form-label-ikd">Perangkat Daerah Pengampu (OPD)</label>
+                                        <select class="form-control-ikd" name="opd" id="EditOpd">
+                                            <option value="">-- Pilih Perangkat Daerah --</option>
+                                            <?php if (!empty($Instansi)) { ?>
+                                                <?php foreach ($Instansi as $inst) { ?>
+                                                    <option value="<?= html_escape($inst['nama']) ?>"><?= html_escape($inst['nama']) ?></option>
+                                                <?php } ?>
                                             <?php } ?>
                                         </select>
                                     </div>
-                                    <div class="col-md-2" style="padding-top: 25px;">
-                                        <button type="button" class="btn btn-success btn-add-pn">
-                                            <i class="notika-icon notika-plus-symbol"></i>
-                                        </button>
-                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <button type="submit" class="btn btn-success">Simpan</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Modal Edit PD Penanggung Jawab -->
-    <div class="modal fade" id="ModalPic" role="dialog">
-        <div class="modal-dialog modal-sm" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Edit PD Penanggung Jawab</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="form-example-wrap">
-                        <div class="form-example-int form-horizental">
-                            <div class="form-group">
+                            <div class="target-grid-card">
+                                <div class="grid-title"><i class="fa fa-calendar-check-o text-warning"></i> Target Kinerja Tahunan (2025 - 2030)</div>
                                 <div class="row">
-                                    <div class="col-lg-12">
-                                        <div class="nk-int-st text-justify">
-                                            <input type="hidden" class="form-control input-sm" id="IdIKDPic">
-                                            <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
-                                            <div id="ListPic"></div>
+                                    <div class="col-xs-4 col-sm-2">
+                                        <div class="target-year-box">
+                                            <label>2025</label>
+                                            <input type="text" class="form-control-target input-target" name="target_1" id="EditT1" placeholder="0.00">
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-4 col-sm-2">
+                                        <div class="target-year-box">
+                                            <label>2026</label>
+                                            <input type="text" class="form-control-target input-target" name="target_2" id="EditT2" placeholder="0.00">
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-4 col-sm-2">
+                                        <div class="target-year-box">
+                                            <label>2027</label>
+                                            <input type="text" class="form-control-target input-target" name="target_3" id="EditT3" placeholder="0.00">
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-4 col-sm-2">
+                                        <div class="target-year-box">
+                                            <label>2028</label>
+                                            <input type="text" class="form-control-target input-target" name="target_4" id="EditT4" placeholder="0.00">
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-4 col-sm-2">
+                                        <div class="target-year-box">
+                                            <label>2029</label>
+                                            <input type="text" class="form-control-target input-target" name="target_5" id="EditT5" placeholder="0.00">
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-4 col-sm-2">
+                                        <div class="target-year-box">
+                                            <label>2030</label>
+                                            <input type="text" class="form-control-target input-target" name="target_6" id="EditT6" placeholder="0.00">
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="form-example-int">
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <button class="btn btn-success" id="EditPic">Simpan</button>
-                                </div>
-                            </div>
-                        </div>
                     </div>
-                </div>
+                </form>
+            </div>
+            <div class="modal-footer modal-ikd-footer">
+                <button type="button" class="btn-ikd-modal btn-ikd-cancel" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn-ikd-modal btn-ikd-submit" id="BtnSimpanEdit" style="background: #f59e0b;">
+                    <i class="fa fa-save"></i> Simpan Perubahan
+                </button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Modal Edit PD Penunjang -->
-    <div class="modal fade" id="ModalPis" role="dialog">
-        <div class="modal-dialog modal-sm" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Edit PD Penunjang</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="form-example-wrap">
-                        <div class="form-example-int form-horizental">
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-lg-12">
-                                        <div class="nk-int-st text-justify">
-                                            <input type="hidden" class="form-control input-sm" id="IdIKDPis">
-                                            <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
-                                            <div id="ListPis"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-example-int">
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <button class="btn btn-success" id="EditPis">Simpan</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<!-- Datalist Rekomendasi OPD -->
+<datalist id="OpdList">
+    <option value="Sekretariat Daerah">
+    <option value="Sekretariat DPRD">
+    <option value="Inspektorat Daerah">
+    <option value="Badan Perencanaan Pembangunan Daerah (Bappeda)">
+    <option value="Badan Pendapatan Daerah (Bapenda)">
+    <option value="Badan Pengelolaan Keuangan dan Aset Daerah (BPKAD)">
+    <option value="Badan Kepegawaian dan Pengembangan Sumber Daya Manusia (BKPSDM)">
+    <option value="Badan Kesatuan Bangsa dan Politik (Kesbangpol)">
+    <option value="Badan Penanggulangan Bencana Daerah (BPBD)">
+    <option value="Dinas Pendidikan dan Kebudayaan">
+    <option value="Dinas Kesehatan">
+    <option value="Rumah Sakit Umum Daerah (RSUD)">
+    <option value="Dinas Pekerjaan Umum dan Penataan Ruang (PUPR)">
+    <option value="Dinas Perumahan Rakyat dan Kawasan Permukiman">
+    <option value="Dinas Sosial">
+    <option value="Dinas Tenaga Kerja">
+    <option value="Dinas Pemberdayaan Perempuan, Perlindungan Anak, dan Keluarga Berencana">
+    <option value="Dinas Ketahanan Pangan">
+    <option value="Dinas Lingkungan Hidup">
+    <option value="Dinas Kependudukan dan Pencatatan Sipil">
+    <option value="Dinas Pemberdayaan Masyarakat dan Desa">
+    <option value="Dinas Perhubungan">
+    <option value="Dinas Komunikasi dan Informatika">
+    <option value="Dinas Koperasi, Usaha Kecil, dan Menengah">
+    <option value="Dinas Penanaman Modal dan Pelayanan Terpadu Satu Pintu (DPMPTSP)">
+    <option value="Dinas Pemuda dan Olahraga">
+    <option value="Dinas Perpustakaan dan Kearsipan">
+    <option value="Dinas Pertanian">
+    <option value="Dinas Perikanan">
+    <option value="Dinas Pariwisata dan Kebudayaan">
+    <option value="Dinas Perindustrian dan Perdagangan">
+    <option value="Satuan Polisi Pamong Praja (Satpol PP)">
+</datalist>
 
-    <style>
-        .filter-row {
-            display: flex;
-            align-items: flex-end;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        .filter-group label {
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-        .filter-select {
-            width: 260px;
-            font-size: 14px;
-            padding: 5px 8px;
-        }
-        @media (max-width: 768px) {
-            .filter-row {
-                flex-direction: column;
-                gap: 15px;
-            }
-            .filter-select {
-                width: 100%;
-            }
-        }
-    </style>
+<script src="<?= base_url('js/vendor/jquery-1.12.4.min.js'); ?>"></script>
+<script src="<?= base_url('js/bootstrap.min.js'); ?>"></script>
+<script src="<?= base_url('js/wow.min.js'); ?>"></script>
+<script src="<?= base_url('js/jquery-price-slider.js'); ?>"></script>
+<script src="<?= base_url('js/owl.carousel.min.js'); ?>"></script>
+<script src="<?= base_url('js/jquery.scrollUp.min.js'); ?>"></script>
+<script src="<?= base_url('js/meanmenu/jquery.meanmenu.js'); ?>"></script>
+<script src="<?= base_url('js/counterup/jquery.counterup.min.js'); ?>"></script>
+<script src="<?= base_url('js/counterup/waypoints.min.js'); ?>"></script>
+<script src="<?= base_url('js/counterup/counterup-active.js'); ?>"></script>
+<script src="<?= base_url('js/scrollbar/jquery.mCustomScrollbar.concat.min.js'); ?>"></script>
+<script src="<?= base_url('js/sparkline/jquery.sparkline.min.js'); ?>"></script>
+<script src="<?= base_url('js/sparkline/sparkline-active.js'); ?>"></script>
+<script src="<?= base_url('js/flot/jquery.flot.js'); ?>"></script>
+<script src="<?= base_url('js/flot/jquery.flot.resize.js'); ?>"></script>
+<script src="<?= base_url('js/flot/flot-active.js'); ?>"></script>
+<script src="<?= base_url('js/knob/jquery.knob.js'); ?>"></script>
+<script src="<?= base_url('js/knob/jquery.appear.js'); ?>"></script>
+<script src="<?= base_url('js/knob/knob-active.js'); ?>"></script>
+<script src="<?= base_url('js/chat/jquery.chat.js'); ?>"></script>
+<script src="<?= base_url('js/todo/jquery.todo.js'); ?>"></script>
+<script src="<?= base_url('js/data-table/jquery.dataTables.min.js'); ?>"></script>
+<script src="<?= base_url('js/main.js'); ?>"></script>
 
-    <script src="<?= base_url('js/vendor/jquery-1.12.4.min.js'); ?>"></script>
-    <script src="<?= base_url('js/bootstrap.min.js'); ?>"></script>
-    <script src="<?= base_url('js/data-table/jquery.dataTables.min.js'); ?>"></script>
-    <script src="<?= base_url('js/data-table/data-table-act.js'); ?>"></script>
-    <script src="<?= base_url('js/main.js'); ?>"></script>
+<script>
+$(document).ready(function () {
+    var BaseURL = '<?= base_url() ?>';
+    var CSRF_TOKEN = '<?= $this->security->get_csrf_hash() ?>';
+    var CSRF_NAME = '<?= $this->security->get_csrf_token_name() ?>';
 
-    <script>
-        var BaseURL = '<?= base_url() ?>';
-var CSRF_TOKEN = '<?= $this->security->get_csrf_token_name() ?>';
-var CSRF_NAME = '<?= $this->security->get_csrf_hash() ?>';
-var instansiOptions = <?php echo json_encode($Instansi); ?>;
+    // Auto replace comma with dot on target inputs
+    $(document).on('input', '.input-target', function() {
+        $(this).val($(this).val().replace(/,/g, '.'));
+    });
 
-$(document).ready(function() {
-
-    // ============================================================
-    // FUNGSI BANTUAN
-    // ============================================================
-
-    function getInstansiOptions() {
-        var options = '';
-        instansiOptions.forEach(function(instansi) {
-            options += '<option value="' + instansi.nama + '">' + instansi.nama + '</option>';
-        });
-        return options;
-    }
-
-    function getIsuStrategisOptions() {
-        var options = '';
-        <?php 
-        $allIsu = $this->db->where('KodeWilayah', $_SESSION['KodeWilayah'])
-                          ->where('deleted_at IS NULL')
-                          ->get('isustrategisdaerah')
-                          ->result_array();
-        foreach ($allIsu as $isu): ?>
-            options += '<option value="<?= html_escape($isu['Id']) ?>"><?= html_escape($isu['NamaIsuStrategis']) ?></option>';
-        <?php endforeach; ?>
-        return options;
-    }
-
-    function loadSasaranByPeriod(tahunRange, targetSelect, disableMessage) {
-        if (tahunRange && tahunRange !== '') {
-            targetSelect.prop('disabled', false).html('<option value="" selected disabled>-- Pilih Sasaran --</option>');
-            var tahunRangeSplit = tahunRange.split('-');
-            $.ajax({
-                url: BaseURL + 'Daerah/GetSasaranByPeriod',
-                type: 'POST',
-                data: {
-                    tahun_mulai: tahunRangeSplit[0],
-                    tahun_akhir: tahunRangeSplit[1],
-                    [CSRF_NAME]: CSRF_TOKEN
-                },
-                success: function(response) {
-                    try {
-                        var data = JSON.parse(response);
-                        if (data.message) {
-                            alert(data.message);
-                            targetSelect.html('<option value="" selected disabled>' + disableMessage + '</option>').prop('disabled', true);
-                        } else if (data.length > 0) {
-                            $.each(data, function(key, value) {
-                                targetSelect.append('<option value="' + value.Id + '">' + value.Sasaran + '</option>');
-                            });
-                        } else {
-                            targetSelect.html('<option value="" selected disabled>' + disableMessage + '</option>').prop('disabled', true);
-                        }
-                    } catch (e) {
-                        alert("Gagal memproses respons server!");
-                        targetSelect.html('<option value="" selected disabled>' + disableMessage + '</option>').prop('disabled', true);
-                    }
-                },
-                error: function() {
-                    alert("Gagal memuat data sasaran!");
-                    targetSelect.html('<option value="" selected disabled>' + disableMessage + '</option>').prop('disabled', true);
+    // Inisialisasi DataTables untuk masing-masing tabel aspek
+    $('.table-data-aspek').each(function() {
+        var table = $(this);
+        table.DataTable({
+            "ordering": false,
+            "pageLength": 5,
+            "lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Semua"]],
+            "language": {
+                "search": "",
+                "searchPlaceholder": "Cari indikator...",
+                "lengthMenu": "Tampilkan _MENU_ entri",
+                "info": "Menampilkan _START_ - _END_ dari _TOTAL_ entri",
+                "infoEmpty": "Menampilkan 0 dari 0 entri",
+                "infoFiltered": "(disaring dari _MAX_ total entri)",
+                "zeroRecords": "Tidak ada data yang cocok",
+                "paginate": {
+                    "first": '<i class="fa fa-angle-double-left"></i>',
+                    "last": '<i class="fa fa-angle-double-right"></i>',
+                    "next": '<i class="fa fa-angle-right"></i>',
+                    "previous": '<i class="fa fa-angle-left"></i>'
                 }
-            });
-        } else {
-            targetSelect.prop('disabled', true).html('<option value="" selected disabled>' + disableMessage + '</option>');
-        }
-    }
-
-    function validateIntegerInputs(formId) {
-        var isValid = true;
-        $('#' + formId + ' input[type="number"]').each(function() {
-            if (this.value && !Number.isInteger(parseFloat(this.value))) {
-                alert('Harap masukkan angka bulat untuk semua target!');
-                isValid = false;
-                return false;
             }
         });
-        return isValid;
-    }
+    });
 
-    function handleResponse(res, modalId, formId) {
-        try {
-            if (res === '1' || res.trim() === '1') {
-                if (formId) {
-                    $('#' + formId)[0].reset();
-                }
-                if (modalId) {
-                    $('#' + modalId).modal('hide');
-                }
-                window.location.reload();
-            } else {
-                try {
-                    var error = JSON.parse(res);
-                    alert(error.message || "Gagal memproses data!");
-                } catch (e) {
-                    alert(res || "Gagal memproses data!");
-                }
-            }
-        } catch (e) {
-            alert("Terjadi kesalahan: " + e.message);
-        }
-    }
-
-    // ============================================================
-    // FILTER WILAYAH
-    // ============================================================
+    // Filter Provinsi & Kab/Kota
     <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-        $("#Provinsi").change(function() {
-            if ($(this).val() === "") {
-                $("#KabKota").html('<option value="">Pilih Kab/Kota</option>');
+        $('#Provinsi').change(function () {
+            var kodeProv = $(this).val();
+            if (kodeProv === "") {
+                $('#KabKota').html('<option value="">Pilih Kab/Kota</option>');
                 return;
             }
             $.ajax({
                 url: BaseURL + "Daerah/GetListKabKota",
                 type: "POST",
-                data: { Kode: $(this).val(), [CSRF_NAME]: CSRF_TOKEN },
-                beforeSend: function() { $("#KabKota").prop('disabled', true); },
+                data: { Kode: kodeProv, [CSRF_NAME]: CSRF_TOKEN },
+                beforeSend: function() { $('#KabKota').prop('disabled', true); },
                 success: function(Respon) {
                     try {
                         var Data = JSON.parse(Respon);
@@ -798,20 +1118,20 @@ $(document).ready(function() {
                         } else {
                             alert("Belum Ada Data Kab/Kota");
                         }
-                        $("#KabKota").html(KabKota).prop('disabled', false);
+                        $('#KabKota').html(KabKota).prop('disabled', false);
                     } catch (e) {
                         alert("Gagal memuat data Kab/Kota");
-                        $("#KabKota").prop('disabled', false);
+                        $('#KabKota').prop('disabled', false);
                     }
                 },
                 error: function() {
                     alert("Gagal memuat data Kab/Kota");
-                    $("#KabKota").prop('disabled', false);
+                    $('#KabKota').prop('disabled', false);
                 }
             });
         });
 
-        $("#Filter").click(function() {
+        $('#Filter').click(function () {
             if ($("#Provinsi").val() === "") {
                 alert("Mohon Pilih Provinsi");
                 return;
@@ -827,16 +1147,11 @@ $(document).ready(function() {
                 data: { KodeWilayah: kodeWilayah, [CSRF_NAME]: CSRF_TOKEN },
                 beforeSend: function() { $("#Filter").prop('disabled', true).text('Memuat...'); },
                 success: function(Respon) {
-                    try {
-                        if (Respon === '1' || Respon.trim() === '1') {
-                            window.location.href = BaseURL + "Daerah/IKD";
-                        } else {
-                            var error = JSON.parse(Respon);
-                            alert(error.message || "Gagal menyimpan filter wilayah!");
-                            $("#Filter").prop('disabled', false).text('Filter');
-                        }
-                    } catch (e) {
-                        alert("Gagal memproses respons server!");
+                    var r = typeof Respon === 'string' ? Respon.trim() : Respon;
+                    if (r === '1' || r === 'success' || r == 1) {
+                        window.location.href = BaseURL + "Daerah/IKD";
+                    } else {
+                        alert("Gagal menyimpan filter wilayah!");
                         $("#Filter").prop('disabled', false).text('Filter');
                     }
                 },
@@ -847,6 +1162,7 @@ $(document).ready(function() {
             });
         });
 
+        // Populate Kab/Kota dropdown on page load if KodeWilayah is set
         <?php if (!empty($KodeWilayah)) { ?>
             var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
             var kodeKab = "<?= $KodeWilayah ?>";
@@ -867,557 +1183,148 @@ $(document).ready(function() {
                         }
                         $("#KabKota").html(KabKota);
                     } catch (e) {
-                        alert("Gagal memuat data Kab/Kota");
+                        console.error("Gagal memuat data Kab/Kota");
                     }
-                },
-                error: function() {
-                    alert("Gagal memuat data Kab/Kota");
                 }
             });
         <?php } ?>
     <?php } ?>
 
-    // ============================================================
-    // PERIODE & SASARAN DROPDOWN
-    // ============================================================
+    var aspekMapLabels = {
+        'geografi': 'I. ASPEK GEOGRAFI DAN DEMOGRAFI',
+        'kesejahteraan': 'II. ASPEK KESEJAHTERAAN MASYARAKAT',
+        'dayasaing': 'III. ASPEK DAYA SAING',
+        'pelayanan': 'IV. ASPEK PELAYANAN UMUM'
+    };
 
-    $('#TahunFilter').change(function() {
-        loadSasaranByPeriod($(this).val(), $('#Sasaran'), '-- Tidak ada sasaran untuk periode ini --');
+    // Buka Modal Tambah dengan Aspek yang Dipilih Otomatis
+    $(document).on('click', '.BtnTambahPerAspek', function() {
+        var aspek = $(this).data('aspek') || 'geografi';
+        var label = $(this).data('aspek-name') || aspekMapLabels[aspek] || aspek.toUpperCase();
+        $('#FormTambahIKD')[0].reset();
+        $('#TambahAspek').val(aspek);
+        $('#TambahAspekLabel').text(label);
+        $('#TambahSatuan').val('');
+        $('#TambahOpd').val('');
+        $('#ModalInputIKD').modal('show');
     });
 
-    $('#EditPeriode').change(function() {
-        loadSasaranByPeriod($(this).val(), $('#EditSasaran'), '-- Tidak ada sasaran untuk periode ini --');
-    });
+    // Simpan Tambah IKD
+    $('#BtnSimpanTambah').click(function() {
+        var nama = $('#TambahNama').val().trim();
+        if (!nama) {
+            alert('Nama Indikator wajib diisi!');
+            $('#TambahNama').focus();
+            return;
+        }
 
-    // ============================================================
-    // TAMBAH IKD
-    // ============================================================
+        var btn = $(this);
+        btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
 
-    $("#FormTambahIkd").submit(function(e) {
-        e.preventDefault();
-        if ($('#TahunFilter').val() === "" || $('#TahunFilter').val() === null) {
-            alert('Silakan pilih periode tahun terlebih dahulu!');
-            return false;
-        }
-        if ($('#Sasaran').val() === "" || $('#Sasaran').val() === null) {
-            alert('Silakan pilih sasaran terlebih dahulu!');
-            return false;
-        }
-        if ($('#IndikatorSasaran').val() === "") {
-            alert('Silakan isi indikator sasaran!');
-            return false;
-        }
-        if (!validateIntegerInputs('FormTambahIkd')) {
-            return false;
-        }
         $.ajax({
-            url: BaseURL + "Daerah/TambahIkd",
-            type: "POST",
-            data: $(this).serialize(),
-            beforeSend: function() {
-                $("#FormTambahIkd button[type=submit]").prop('disabled', true).text('Menyimpan...');
+            url: BaseURL + 'Daerah/TambahIkd',
+            type: 'POST',
+            data: $('#FormTambahIKD').serialize(),
+            dataType: 'json',
+            success: function(resp) {
+                btn.prop('disabled', false).html('<i class="fa fa-save"></i> <b>Simpan</b>');
+                if (resp.status === 'success') {
+                    $('#ModalInputIKD').modal('hide');
+                    alert(resp.message || 'Indikator berhasil ditambahkan!');
+                    location.reload();
+                } else {
+                    alert(resp.message || 'Gagal menambahkan indikator!');
+                }
             },
-            success: function(res) {
-                handleResponse(res, 'ModalTambahIkd', 'FormTambahIkd');
-                $("#FormTambahIkd button[type=submit]").prop('disabled', false).text('Simpan');
-            },
-            error: function(xhr) {
-                alert("Terjadi kesalahan: " + xhr.statusText);
-                $("#FormTambahIkd button[type=submit]").prop('disabled', false).text('Simpan');
+            error: function() {
+                btn.prop('disabled', false).html('<i class="fa fa-save"></i> <b>Simpan</b>');
+                alert('Terjadi kesalahan koneksi server!');
             }
         });
     });
 
-    // ============================================================
-    // EDIT IKD
-    // ============================================================
+    // Buka Modal Edit IKD
+    $(document).on('click', '.BtnEditIKD', function() {
+        var d = $(this).data();
+        var aspek = d.aspek || 'geografi';
+        var label = aspekMapLabels[aspek] || aspek.toUpperCase();
+        $('#EditId').val(d.id);
+        $('#EditAspek').val(aspek);
+        $('#EditAspekLabel').text(label);
+        $('#EditNama').val(d.nama);
+        $('#EditSatuan').val(d.satuan || '');
+        if (d.opd && $('#EditOpd option[value="' + d.opd + '"]').length === 0) {
+            $('#EditOpd').append(new Option(d.opd, d.opd, true, true));
+        }
+        $('#EditOpd').val(d.opd || '');
+        $('#EditT1').val(d.t1 ? String(d.t1).replace(',', '.') : '');
+        $('#EditT2').val(d.t2 ? String(d.t2).replace(',', '.') : '');
+        $('#EditT3').val(d.t3 ? String(d.t3).replace(',', '.') : '');
+        $('#EditT4').val(d.t4 ? String(d.t4).replace(',', '.') : '');
+        $('#EditT5').val(d.t5 ? String(d.t5).replace(',', '.') : '');
+        $('#EditT6').val(d.t6 ? String(d.t6).replace(',', '.') : '');
+        $('#ModalEditIKD').modal('show');
+    });
 
-    $(".Edit").click(function() {
+    // Simpan Perubahan Edit IKD
+    $('#BtnSimpanEdit').click(function() {
+        var nama = $('#EditNama').val().trim();
+        if (!nama) {
+            alert('Nama Indikator wajib diisi!');
+            $('#EditNama').focus();
+            return;
+        }
+
+        var btn = $(this);
+        btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
+
+        $.ajax({
+            url: BaseURL + 'Daerah/EditIkd',
+            type: 'POST',
+            data: $('#FormEditIKD').serialize(),
+            dataType: 'json',
+            success: function(resp) {
+                btn.prop('disabled', false).html('<i class="fa fa-save"></i> <b>Simpan Perubahan</b>');
+                if (resp.status === 'success') {
+                    $('#ModalEditIKD').modal('hide');
+                    alert(resp.message || 'Indikator berhasil diperbarui!');
+                    location.reload();
+                } else {
+                    alert(resp.message || 'Gagal memperbarui indikator!');
+                }
+            },
+            error: function() {
+                btn.prop('disabled', false).html('<i class="fa fa-save"></i> <b>Simpan Perubahan</b>');
+                alert('Terjadi kesalahan koneksi server!');
+            }
+        });
+    });
+
+    // Hapus IKD
+    $(document).on('click', '.BtnHapusIKD', function() {
         var id = $(this).data('id');
-        var IdSasaran = $(this).data('sasaran');
-        var indikatorSasaran = $(this).data('indikator-sasaran');
-        var target1 = $(this).data('target1');
-        var target2 = $(this).data('target2');
-        var target3 = $(this).data('target3');
-        var target4 = $(this).data('target4');
-        var target5 = $(this).data('target5');
-        var tahunMulai = $(this).data('tahunmulai');
-        var tahunAkhir = $(this).data('tahunakhir');
-
-        $("#EditId").val(id);
-        $("#EditPeriode").val('');
-        $("#EditSasaran").html('<option value="" selected disabled>-- Pilih Periode Tahun terlebih dahulu --</option>');
-        $("#EditSasaran").prop('disabled', true);
-        $("#EditIndikatorSasaran").val(indikatorSasaran);
-        $("#EditTarget1").val(target1 || '');
-        $("#EditTarget2").val(target2 || '');
-        $("#EditTarget3").val(target3 || '');
-        $("#EditTarget4").val(target4 || '');
-        $("#EditTarget5").val(target5 || '');
-
-        $("#EditPeriode").val(tahunMulai + '-' + tahunAkhir).trigger('change');
-
-        var checkSasaranExist = setInterval(function() {
-            if ($('#EditSasaran option[value="' + IdSasaran + '"]').length > 0) {
-                $('#EditSasaran').val(IdSasaran);
-                clearInterval(checkSasaranExist);
-            }
-        }, 100);
-
-        $("#ModalEditIkd").modal('show');
-    });
-
-    $("#FormEditIkd").submit(function(e) {
-        e.preventDefault();
-        if ($('#EditPeriode').val() === "" || $('#EditPeriode').val() === null) {
-            alert('Silakan pilih periode tahun terlebih dahulu!');
-            return false;
-        }
-        if ($('#EditSasaran').val() === "" || $('#EditSasaran').val() === null) {
-            alert('Silakan pilih sasaran terlebih dahulu!');
-            return false;
-        }
-        if ($('#EditIndikatorSasaran').val() === "") {
-            alert('Silakan isi indikator sasaran!');
-            return false;
-        }
-        if (!validateIntegerInputs('FormEditIkd')) {
-            return false;
-        }
-        $.ajax({
-            url: BaseURL + "Daerah/EditIkd",
-            type: "POST",
-            data: $(this).serialize(),
-            beforeSend: function() {
-                $("#FormEditIkd button[type=submit]").prop('disabled', true).text('Menyimpan...');
-            },
-            success: function(res) {
-                handleResponse(res, 'ModalEditIkd', 'FormEditIkd');
-                $("#FormEditIkd button[type=submit]").prop('disabled', false).text('Simpan');
-            },
-            error: function(xhr) {
-                alert("Terjadi kesalahan: " + xhr.statusText);
-                $("#FormEditIkd button[type=submit]").prop('disabled', false).text('Simpan');
-            }
-        });
-    });
-
-    // ============================================================
-    // HAPUS IKD
-    // ============================================================
-
-    $(".Hapus").click(function() {
-        if (confirm("Apakah Anda yakin ingin menghapus data ini?")) {
-            var id = $(this).data('id');
+        var nama = $(this).data('nama');
+        if (confirm('Apakah Anda yakin ingin menghapus indikator "' + nama + '"?')) {
             $.ajax({
-                url: BaseURL + "Daerah/HapusIkd",
-                type: "POST",
-                data: { id: id, [CSRF_NAME]: CSRF_TOKEN },
-                beforeSend: function() {
-                    $(this).prop('disabled', true);
+                url: BaseURL + 'Daerah/HapusIkd',
+                type: 'POST',
+                data: { id: id },
+                dataType: 'json',
+                success: function(resp) {
+                    if (resp.status === 'success') {
+                        alert(resp.message || 'Indikator berhasil dihapus!');
+                        location.reload();
+                    } else {
+                        alert(resp.message || 'Gagal menghapus indikator!');
+                    }
                 },
-                success: function(res) {
-                    handleResponse(res, null, null);
-                    $(this).prop('disabled', false);
-                },
-                error: function(xhr) {
-                    alert("Terjadi kesalahan: " + xhr.statusText);
-                    $(this).prop('disabled', false);
+                error: function() {
+                    alert('Terjadi kesalahan koneksi server!');
                 }
             });
         }
     });
-
-    // ============================================================
-    // TAMBAH PD PENANGGUNG JAWAB
-    // ============================================================
-
-    $(document).on('click', '.btn-add-pj', function() {
-        var newRow = $('<div class="form-group pj-row">' +
-            '<div class="row">' +
-            '<div class="col-md-10">' +
-            '<select class="form-control pj-select" name="pd_penanggung_jawab[]" required>' +
-            '<option value="">Pilih PD Penanggung Jawab</option>' +
-            '<option value="Semua Instansi Terkait">Semua Instansi Terkait</option>' +
-            getInstansiOptions() +
-            '</select>' +
-            '</div>' +
-            '<div class="col-md-2" style="padding-top: 7px;">' +
-            '<button type="button" class="btn btn-danger btn-remove-pj">' +
-            '<i class="notika-icon notika-trash"></i>' +
-            '</button>' +
-            '</div>' +
-            '</div>' +
-            '</div>');
-        $('#pj-container').append(newRow);
-    });
-
-    $(document).on('click', '.btn-remove-pj', function() {
-        if ($('.pj-row').length > 1) {
-            $(this).closest('.pj-row').remove();
-        } else {
-            alert('Minimal harus ada satu PD Penanggung Jawab');
-        }
-    });
-
-    $(".TambahPj").click(function() {
-        var id = $(this).data('id');
-        $("#PjId").val(id);
-        $("#pj-container").html('<div class="form-group pj-row">' +
-            '<div class="row">' +
-            '<div class="col-md-10">' +
-            '<label>PD Penanggung Jawab</label>' +
-            '<select class="form-control pj-select" name="pd_penanggung_jawab[]" required>' +
-            '<option value="">Pilih PD Penanggung Jawab</option>' +
-            '<option value="Semua Instansi Terkait">Semua Instansi Terkait</option>' +
-            getInstansiOptions() +
-            '</select>' +
-            '</div>' +
-            '<div class="col-md-2" style="padding-top: 25px;">' +
-            '<button type="button" class="btn btn-success btn-add-pj">' +
-            '<i class="notika-icon notika-plus-symbol"></i>' +
-            '</button>' +
-            '</div>' +
-            '</div>' +
-            '</div>');
-        $("#ModalTambahPj").modal('show');
-    });
-
-    $("#FormTambahPj").submit(function(e) {
-        e.preventDefault();
-        var formData = $(this).serializeArray();
-        var pdValues = [];
-        $('select[name="pd_penanggung_jawab[]"]').each(function() {
-            if ($(this).val()) {
-                pdValues.push($(this).val());
-            }
-        });
-        formData = formData.filter(item => item.name !== 'pd_penanggung_jawab[]');
-        formData.push({ name: 'pd_penanggung_jawab', value: pdValues.join(',') });
-        $.ajax({
-            url: BaseURL + "Daerah/TambahPd",
-            type: "POST",
-            data: $.param(formData),
-            beforeSend: function() {
-                $("#FormTambahPj button[type=submit]").prop('disabled', true).text('Menyimpan...');
-            },
-            success: function(res) {
-                handleResponse(res, 'ModalTambahPj', 'FormTambahPj');
-                $("#FormTambahPj button[type=submit]").prop('disabled', false).text('Simpan');
-            },
-            error: function(xhr) {
-                alert("Terjadi kesalahan: " + xhr.statusText);
-                $("#FormTambahPj button[type=submit]").prop('disabled', false).text('Simpan');
-            }
-        });
-    });
-
-    // ============================================================
-    // TAMBAH PD PENUNJANG
-    // ============================================================
-
-    $(document).on('click', '.btn-add-pn', function() {
-        var newRow = $('<div class="form-group pn-row">' +
-            '<div class="row">' +
-            '<div class="col-md-10">' +
-            '<select class="form-control pn-select" name="pd_penunjang[]" required>' +
-            '<option value="">Pilih PD Penunjang</option>' +
-            '<option value="Semua Instansi Terkait">Semua Instansi Terkait</option>' +
-            getInstansiOptions() +
-            '</select>' +
-            '</div>' +
-            '<div class="col-md-2" style="padding-top: 7px;">' +
-            '<button type="button" class="btn btn-danger btn-remove-pn">' +
-            '<i class="notika-icon notika-trash"></i>' +
-            '</button>' +
-            '</div>' +
-            '</div>' +
-            '</div>');
-        $('#pn-container').append(newRow);
-    });
-
-    $(document).on('click', '.btn-remove-pn', function() {
-        if ($('.pn-row').length > 1) {
-            $(this).closest('.pn-row').remove();
-        } else {
-            alert('Minimal harus ada satu PD Penunjang');
-        }
-    });
-
-    $(".TambahPn").click(function() {
-        var id = $(this).data('id');
-        $("#PnId").val(id);
-        $("#pn-container").html('<div class="form-group pn-row">' +
-            '<div class="row">' +
-            '<div class="col-md-10">' +
-            '<label>PD Penunjang</label>' +
-            '<select class="form-control pn-select" name="pd_penunjang[]" required>' +
-            '<option value="">Pilih PD Penunjang</option>' +
-            '<option value="Semua Instansi Terkait">Semua Instansi Terkait</option>' +
-            getInstansiOptions() +
-            '</select>' +
-            '</div>' +
-            '<div class="col-md-2" style="padding-top: 25px;">' +
-            '<button type="button" class="btn btn-success btn-add-pn">' +
-            '<i class="notika-icon notika-plus-symbol"></i>' +
-            '</button>' +
-            '</div>' +
-            '</div>' +
-            '</div>');
-        $("#ModalTambahPn").modal('show');
-    });
-
-    $("#FormTambahPn").submit(function(e) {
-        e.preventDefault();
-        var formData = $(this).serializeArray();
-        var pdValues = [];
-        $('select[name="pd_penunjang[]"]').each(function() {
-            if ($(this).val()) {
-                pdValues.push($(this).val());
-            }
-        });
-        formData = formData.filter(item => item.name !== 'pd_penunjang[]');
-        formData.push({ name: 'pd_penunjang', value: pdValues.join(',') });
-        $.ajax({
-            url: BaseURL + "Daerah/TambahPd",
-            type: "POST",
-            data: $.param(formData),
-            beforeSend: function() {
-                $("#FormTambahPn button[type=submit]").prop('disabled', true).text('Menyimpan...');
-            },
-            success: function(res) {
-                handleResponse(res, 'ModalTambahPn', 'FormTambahPn');
-                $("#FormTambahPn button[type=submit]").prop('disabled', false).text('Simpan');
-            },
-            error: function(xhr) {
-                alert("Terjadi kesalahan: " + xhr.statusText);
-                $("#FormTambahPn button[type=submit]").prop('disabled', false).text('Simpan');
-            }
-        });
-    });
-
-    // ============================================================
-    // EDIT PD PENANGGUNG JAWAB
-    // ============================================================
-
-    $(".Pic").click(function() {
-        var Data = $(this).attr('Pic').split("|");
-        $("#IdIKDPic").val(Data[0]);
-        var Pisah = Data[1].split(",");
-        var List = '';
-        for (let i = 0; i < Pisah.length; i++) {
-            List += '<label><input style="margin-top: 10px;" type="checkbox" checked name="Pic" value="'+Pisah[i]+'"> '+Pisah[i]+'</label><br>';
-        }
-        $("#ListPic").html(List);
-        $("#ModalPic").modal('show');
-    });
-
-    $("#EditPic").click(function() {
-        var Tampung = [];
-        $.each($("input[name='Pic']:checked"), function() {
-            Tampung.push($(this).val());
-        });
-        var Pic = {
-            id: $("#IdIKDPic").val(),
-            pd_penanggung_jawab: Tampung.join(","),
-            [CSRF_NAME]: CSRF_TOKEN
-        };
-        $.ajax({
-            url: BaseURL + "Daerah/EditPDIKD",
-            type: "POST",
-            data: Pic,
-            beforeSend: function() {
-                $("#EditPic").prop('disabled', true).text('Menyimpan...');
-            },
-            success: function(Respon) {
-                handleResponse(Respon, 'ModalPic', null);
-                $("#EditPic").prop('disabled', false).text('Simpan');
-            },
-            error: function(xhr) {
-                alert("Terjadi kesalahan: " + xhr.statusText);
-                $("#EditPic").prop('disabled', false).text('Simpan');
-            }
-        });
-    });
-
-    // ============================================================
-    // EDIT PD PENUNJANG
-    // ============================================================
-
-    $(".Pis").click(function() {
-        var Data = $(this).attr('Pis').split("|");
-        $("#IdIKDPis").val(Data[0]);
-        var Pisah = Data[1].split(",");
-        var List = '';
-        for (let i = 0; i < Pisah.length; i++) {
-            List += '<label><input style="margin-top: 10px;" type="checkbox" checked name="Pis" value="'+Pisah[i]+'"> '+Pisah[i]+'</label><br>';
-        }
-        $("#ListPis").html(List);
-        $("#ModalPis").modal('show');
-    });
-
-    $("#EditPis").click(function() {
-        var Tampung = [];
-        $.each($("input[name='Pis']:checked"), function() {
-            Tampung.push($(this).val());
-        });
-        var Pis = {
-            id: $("#IdIKDPis").val(),
-            pd_penunjang: Tampung.join(","),
-            [CSRF_NAME]: CSRF_TOKEN
-        };
-        $.ajax({
-            url: BaseURL + "Daerah/EditPDIKD",
-            type: "POST",
-            data: Pis,
-            beforeSend: function() {
-                $("#EditPis").prop('disabled', true).text('Menyimpan...');
-            },
-            success: function(Respon) {
-                handleResponse(Respon, 'ModalPis', null);
-                $("#EditPis").prop('disabled', false).text('Simpan');
-            },
-            error: function(xhr) {
-                alert("Terjadi kesalahan: " + xhr.statusText);
-                $("#EditPis").prop('disabled', false).text('Simpan');
-            }
-        });
-    });
-
-    // ============================================================
-    // TAMBAH ISU STRATEGIS
-    // ============================================================
-
-    $(document).on('click', '.btn-add-isu', function() {
-        var newRow = $('<div class="form-group isu-row">' +
-            '<div class="row">' +
-            '<div class="col-md-10">' +
-            '<select class="form-control isu-select" name="isu_strategis[]" required>' +
-            '<option value="">Pilih Isu Strategis</option>' +
-            getIsuStrategisOptions() +
-            '</select>' +
-            '</div>' +
-            '<div class="col-md-2" style="padding-top: 7px;">' +
-            '<button type="button" class="btn btn-danger btn-remove-isu">' +
-            '<i class="notika-icon notika-trash"></i>' +
-            '</button>' +
-            '</div>' +
-            '</div>' +
-            '</div>');
-        $('#isu-container').append(newRow);
-    });
-
-    $(document).on('click', '.btn-remove-isu', function() {
-        if ($('.isu-row').length > 1) {
-            $(this).closest('.isu-row').remove();
-        } else {
-            alert('Minimal harus ada satu Isu Strategis');
-        }
-    });
-
-    $(".TambahIsu").click(function() {
-        var id = $(this).data('id');
-        $("#IsuId").val(id);
-        $("#isu-container").html('<div class="form-group isu-row">' +
-            '<div class="row">' +
-            '<div class="col-md-10">' +
-            '<label>Isu Strategis Daerah</label>' +
-            '<select class="form-control isu-select" name="isu_strategis[]" required>' +
-            '<option value="">Pilih Isu Strategis</option>' +
-            getIsuStrategisOptions() +
-            '</select>' +
-            '</div>' +
-            '<div class="col-md-2" style="padding-top: 25px;">' +
-            '<button type="button" class="btn btn-success btn-add-isu">' +
-            '<i class="notika-icon notika-plus-symbol"></i>' +
-            '</button>' +
-            '</div>' +
-            '</div>' +
-            '</div>');
-        $("#ModalTambahIsu").modal('show');
-    });
-
-    $("#FormTambahIsu").submit(function(e) {
-        e.preventDefault();
-        var formData = $(this).serializeArray();
-        var isuValues = [];
-        $('select[name="isu_strategis[]"]').each(function() {
-            if ($(this).val()) {
-                isuValues.push($(this).val());
-            }
-        });
-        formData = formData.filter(item => item.name !== 'isu_strategis[]');
-        formData.push({ name: 'isu_strategis', value: isuValues.join(',') });
-        $.ajax({
-            url: BaseURL + "Daerah/TambahIsuStrategis",
-            type: "POST",
-            data: $.param(formData),
-            beforeSend: function() {
-                $("#FormTambahIsu button[type=submit]").prop('disabled', true).text('Menyimpan...');
-            },
-            success: function(res) {
-                handleResponse(res, 'ModalTambahIsu', 'FormTambahIsu');
-                $("#FormTambahIsu button[type=submit]").prop('disabled', false).text('Simpan');
-            },
-            error: function(xhr) {
-                alert("Terjadi kesalahan: " + xhr.statusText);
-                $("#FormTambahIsu button[type=submit]").prop('disabled', false).text('Simpan');
-            }
-        });
-    });
-
-    // ============================================================
-    // EDIT ISU STRATEGIS
-    // ============================================================
-
-    $(".EditIsu").click(function() {
-        var Data = $(this).attr('data-isi').split("|");
-        $("#IdIKDIsu").val(Data[0]);
-        var Pisah = Data[1].split(",");
-        var List = '';
-        <?php 
-        $allIsu = $this->db->where('KodeWilayah', $_SESSION['KodeWilayah'])
-                          ->where('deleted_at IS NULL')
-                          ->get('isustrategisdaerah')
-                          ->result_array();
-        foreach ($allIsu as $isu): ?>
-            var isChecked = Pisah.includes("<?= html_escape($isu['Id']) ?>") ? 'checked' : '';
-            List += '<label><input style="margin-top: 10px;" type="checkbox" '+isChecked+' name="Isu" value="<?= html_escape($isu['Id']) ?>"> <?= html_escape($isu['NamaIsuStrategis']) ?></label><br>';
-        <?php endforeach; ?>
-        $("#ListIsu").html(List);
-        $("#ModalEditIsu").modal('show');
-    });
-
-    $("#EditIsu").click(function() {
-        var Tampung = [];
-        $.each($("input[name='Isu']:checked"), function() {
-            Tampung.push($(this).val());
-        });
-        var Isu = {
-            id: $("#IdIKDIsu").val(),
-            isu_strategis: Tampung.join(","),
-            [CSRF_NAME]: CSRF_TOKEN
-        };
-        $.ajax({
-            url: BaseURL + "Daerah/EditIsuStrategis",
-            type: "POST",
-            data: Isu,
-            beforeSend: function() {
-                $("#EditIsu").prop('disabled', true).text('Menyimpan...');
-            },
-            success: function(Respon) {
-                handleResponse(Respon, 'ModalEditIsu', null);
-                $("#EditIsu").prop('disabled', false).text('Simpan');
-            },
-            error: function(xhr) {
-                alert("Terjadi kesalahan: " + xhr.statusText);
-                $("#EditIsu").prop('disabled', false).text('Simpan');
-            }
-        });
-    });
-
 });
-    </script>
-</div>
+</script>
 </body>
 </html>
