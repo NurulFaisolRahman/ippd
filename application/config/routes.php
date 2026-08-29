@@ -52,3 +52,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['default_controller'] = 'Beranda';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
+
+// E-LKPJ Routes
+$route['Instansi/PengisianTinjutRekomendasiDPRDn-1'] = 'Instansi/PengisianTinjutRekomendasiDPRDn1';
+$route['Instansi/PengisianTinjutRekomendasiDPRDn-1/(.+)'] = 'Instansi/PengisianTinjutRekomendasiDPRDn1/$1';
+$route['Instansi/PengisianTinjutRekomendasiDPRD'] = 'Instansi/PengisianTinjutRekomendasiDPRDn1';
+
+// IPPD Routes
+$route['Instansi/TabelIPPD'] = 'Instansi/TabelIPPD';
+$route['Instansi/TabelIPPD/(.+)'] = 'Instansi/TabelIPPD/$1';
+$route['Instansi/IPPD'] = 'Instansi/TabelIPPD';
+
+

@@ -1234,6 +1234,8 @@
   "use strict";
 
   var BaseURL = '<?= base_url() ?>';
+  var controllerName = '<?= isset($ControllerName) ? $ControllerName : $this->router->fetch_class() ?>';
+  var ControllerURL = BaseURL + controllerName + '/';
   var rawBelanjaHeaders = <?= json_encode(!empty($BelanjaData) ? $BelanjaData : []) ?>;
 
   /* ---------------- Master data ---------------- */
@@ -1636,7 +1638,7 @@
 
   function loadMasterRekening() {
     $.ajax({
-      url: BaseURL + "Daerah/GetMasterRekening",
+      url: ControllerURL + "GetMasterRekening",
       type: "POST",
       dataType: "json",
       success: function(res) {
@@ -1777,7 +1779,7 @@
 
     // AJAX Save to Database
     $.ajax({
-      url: BaseURL + "Daerah/SaveRincianSingleItem",
+      url: ControllerURL + "SaveRincianSingleItem",
       type: "POST",
       data: payload,
       dataType: "json",
@@ -1895,7 +1897,7 @@
 
   function loadBelanjaByTahun(thn) {
     $.ajax({
-      url: BaseURL + "Daerah/GetBelanjaData",
+      url: ControllerURL + "GetBelanjaData",
       type: "POST",
       data: { tahun: thn },
       dataType: "json",
@@ -2011,7 +2013,7 @@
     $tbody.html('<tr><td colspan="6" class="center" style="padding:24px; color:var(--ui-text-muted);"><i class="fa fa-spinner fa-spin"></i> Memuat data...</td></tr>');
 
     $.ajax({
-      url: BaseURL + "Daerah/GetStandarHarga",
+      url: ControllerURL + "GetStandarHarga",
       type: "POST",
       data: { type: type, q: query, limit: 50 },
       dataType: "json",
@@ -2134,7 +2136,7 @@
     if(pendingDeleteId!=null){
       var did = pendingDeleteId;
       $.ajax({
-        url: BaseURL + "Daerah/DeleteRincianSingleItem",
+        url: ControllerURL + "DeleteRincianSingleItem",
         type: "POST",
         data: { rincian_id: did },
         dataType: "json",

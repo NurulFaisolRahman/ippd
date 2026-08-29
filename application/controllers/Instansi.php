@@ -13683,5 +13683,4650 @@ public function updateStatusPerjanjianKinerja() {
     ]);
 }
 
+    // ================================================================
+    // BELANJA SUB KEGIATAN (PINDAHAN DARI DAERAH)
+    // ================================================================
+
+    private function _getKodeWilayah() {
+        return $this->get_kode_wilayah();
+    }
+
+    public function BelanjaSubKegiatan() {
+        $Header['Halaman'] = 'Belanja Sub Kegiatan';
+        
+        $KodeWilayah = $this->get_kode_wilayah();
+        $instansi_id = $this->get_instansi_id();
+        $is_role_4 = $this->is_role_4();
+        $tahun = $this->input->get('tahun', TRUE);
+        $filter_instansi = $this->input->get('instansi_id', TRUE);
+        
+        if ($is_role_4 && $instansi_id) {
+            $filter_instansi = $instansi_id;
+        }
+        
+        // Data Provinsi untuk filter
+        $Data['Provinsi'] = $this->db
+            ->where("Kode LIKE '__'")
+            ->order_by('Nama')
+            ->get('kodewilayah')
+            ->result_array();
+        
+        $Data['KodeWilayah'] = $KodeWilayah;
+        $Data['NamaWilayah'] = '';
+        $Data['IsRole4'] = $is_role_4;
+        $Data['InstansiId'] = $instansi_id;
+        $Data['ControllerName'] = 'Instansi';
+        
+        // Ambil Nama Wilayah jika ada
+        if (!empty($KodeWilayah)) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            $Data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
+        }
+        
+        // List Instansi
+        $Data['ListInstansi'] = [];
+        if (!empty($KodeWilayah)) {
+            $provKode = substr($KodeWilayah, 0, 2);
+            $Data['ListInstansi'] = $this->db
+                ->select('id, nama')
+                ->from('akun_instansi')
+                ->where("(kodewilayah = " . $this->db->escape($KodeWilayah) . " OR kodewilayah = " . $this->db->escape($provKode) . ")")
+                ->where('deleted_at IS NULL')
+                ->order_by('nama', 'ASC')
+                ->get()
+                ->result_array();
+        } else {
+            $Data['ListInstansi'] = $this->db
+                ->select('id, nama')
+                ->from('akun_instansi')
+                ->where('deleted_at IS NULL')
+                ->order_by('nama', 'ASC')
+                ->get()
+                ->result_array();
+        }
+        
+        // Ambil daftar tahun dari database
+        $dbYears = $this->db->select('DISTINCT(tahun) as thn')
+            ->where('deleted_at IS NULL')
+            ->order_by('tahun', 'DESC')
+            ->get('belanja_sub_kegiatan_header')
+            ->result_array();
+        
+        $listTahun = [];
+        if (!empty($dbYears)) {
+            foreach ($dbYears as $dy) {
+                if (!empty($dy['thn'])) {
+                    $listTahun[] = (int)$dy['thn'];
+                }
+            }
+        }
+        // Tambahkan rentang tahun standar
+        $currentY = (int)date('Y');
+        for ($y = $currentY + 1; $y >= $currentY - 5; $y--) {
+            if (!in_array($y, $listTahun)) {
+                $listTahun[] = $y;
+            }
+        }
+        rsort($listTahun);
+        $Data['ListTahun'] = $listTahun;
+        
+        // Tentukan tahun aktif
+        if (empty($tahun)) {
+            if (!empty($dbYears) && !empty($dbYears[0]['thn'])) {
+                $tahun = $dbYears[0]['thn'];
+            } else {
+                $tahun = date('Y');
+            }
+        }
+        $Data['TahunAktif'] = $tahun;
+        
+        // Ambil Data Belanja
+        $this->db->select('h.*, COALESCE(a.nama, h.nama_perangkat_daerah) as instansi_nama')
+            ->from('belanja_sub_kegiatan_header h')
+            ->join('akun_instansi a', 'a.id = h.id_instansi', 'left')
+            ->where('h.deleted_at IS NULL');
+        
+        if (!empty($KodeWilayah)) {
+            $this->db->where('h.kode_wilayah', $KodeWilayah);
+        }
+        
+        if (!empty($tahun) && $tahun !== 'all') {
+            $this->db->where('h.tahun', $tahun);
+        }
+        
+        if (!empty($filter_instansi)) {
+            $this->db->where('h.id_instansi', (int)$filter_instansi);
+        }
+        
+        $belanjaData = $this->db
+            ->order_by('h.kode_program', 'ASC')
+            ->order_by('h.kode_kegiatan', 'ASC')
+            ->order_by('h.kode_sub_kegiatan', 'ASC')
+            ->order_by('h.id', 'DESC')
+            ->get()
+            ->result_array();
+        
+        // Ambil rekening & rincian untuk setiap header
+        if (!empty($belanjaData)) {
+            $headerIds = array_column($belanjaData, 'id');
+            $rekenings = $this->db
+                ->where_in('header_id', $headerIds)
+                ->where('deleted_at IS NULL')
+                ->order_by('kode_rekening', 'ASC')
+                ->get('belanja_rekening')
+                ->result_array();
+            
+            $rincianList = [];
+            if (!empty($rekenings)) {
+                $rekIds = array_column($rekenings, 'id');
+                $rincianRows = $this->db
+                    ->where_in('rekening_id', $rekIds)
+                    ->where('deleted_at IS NULL')
+                    ->order_by('id', 'ASC')
+                    ->get('belanja_rincian')
+                    ->result_array();
+                
+                foreach ($rincianRows as $rinc) {
+                    $rincianList[$rinc['rekening_id']][] = $rinc;
+                }
+            }
+            
+            $rekeningByHeader = [];
+            foreach ($rekenings as $rek) {
+                $rek['rincian'] = isset($rincianList[$rek['id']]) ? $rincianList[$rek['id']] : [];
+                $rekeningByHeader[$rek['header_id']][] = $rek;
+            }
+            
+            foreach ($belanjaData as &$item) {
+                $item['rekening'] = isset($rekeningByHeader[$item['id']]) ? $rekeningByHeader[$item['id']] : [];
+            }
+        }
+        
+        $Data['BelanjaData'] = $belanjaData;
+        
+        $this->load->view('Daerah/header', $Header);
+        $this->load->view('Daerah/BelanjaSubKegiatan', $Data);
+    }
+
+    // ================================================================
+    // GET BELANJA DATA (AJAX) - UNTUK FILTER TANPA RELOAD
+    // ================================================================
+
+    public function GetBelanjaData() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        header('Content-Type: application/json');
+        
+        $KodeWilayah = $this->get_kode_wilayah();
+        $is_role_4 = $this->is_role_4();
+        $instansi_id = $this->get_instansi_id();
+        $tahun = $this->input->post('tahun', TRUE);
+        $filter_instansi = $this->input->post('instansi', TRUE);
+        
+        if ($is_role_4 && $instansi_id) {
+            $filter_instansi = $instansi_id;
+        }
+        
+        $this->db->select('h.*, COALESCE(a.nama, h.nama_perangkat_daerah) as instansi_nama')
+            ->from('belanja_sub_kegiatan_header h')
+            ->join('akun_instansi a', 'a.id = h.id_instansi', 'left')
+            ->where('h.deleted_at IS NULL');
+        
+        if (!empty($KodeWilayah)) {
+            $this->db->where('h.kode_wilayah', $KodeWilayah);
+        }
+        
+        if (!empty($tahun) && $tahun !== 'all') {
+            $this->db->where('h.tahun', $tahun);
+        }
+        
+        if (!empty($filter_instansi)) {
+            $this->db->where('h.id_instansi', (int)$filter_instansi);
+        }
+        
+        $data = $this->db
+            ->order_by('h.kode_program', 'ASC')
+            ->order_by('h.kode_kegiatan', 'ASC')
+            ->order_by('h.kode_sub_kegiatan', 'ASC')
+            ->order_by('h.id', 'DESC')
+            ->get()
+            ->result_array();
+        
+        // Ambil rekening & rincian untuk setiap header
+        if (!empty($data)) {
+            $headerIds = array_column($data, 'id');
+            $rekenings = $this->db
+                ->where_in('header_id', $headerIds)
+                ->where('deleted_at IS NULL')
+                ->order_by('kode_rekening', 'ASC')
+                ->get('belanja_rekening')
+                ->result_array();
+            
+            $rincianList = [];
+            if (!empty($rekenings)) {
+                $rekIds = array_column($rekenings, 'id');
+                $rincianRows = $this->db
+                    ->where_in('rekening_id', $rekIds)
+                    ->where('deleted_at IS NULL')
+                    ->order_by('id', 'ASC')
+                    ->get('belanja_rincian')
+                    ->result_array();
+                
+                foreach ($rincianRows as $rinc) {
+                    $rincianList[$rinc['rekening_id']][] = $rinc;
+                }
+            }
+            
+            $rekeningByHeader = [];
+            foreach ($rekenings as $rek) {
+                $rek['rincian'] = isset($rincianList[$rek['id']]) ? $rincianList[$rek['id']] : [];
+                $rekeningByHeader[$rek['header_id']][] = $rek;
+            }
+            
+            foreach ($data as &$item) {
+                $item['rekening'] = isset($rekeningByHeader[$item['id']]) ? $rekeningByHeader[$item['id']] : [];
+            }
+        }
+        
+        echo json_encode(['status' => 'success', 'data' => $data]);
+    }
+
+    // ================================================================
+    // GET BELANJA BY ID (UNTUK EDIT & DETAIL)
+    // ================================================================
+
+    public function GetBelanjaById() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        header('Content-Type: application/json');
+        
+        $id = (int)$this->input->post('id', TRUE);
+        $KodeWilayah = $this->get_kode_wilayah();
+        
+        if ($id <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak valid']);
+            return;
+        }
+        
+        $this->db
+            ->select('h.*, COALESCE(a.nama, h.nama_perangkat_daerah) as instansi_nama')
+            ->from('belanja_sub_kegiatan_header h')
+            ->join('akun_instansi a', 'a.id = h.id_instansi', 'left')
+            ->where('h.id', $id)
+            ->where('h.deleted_at IS NULL');
+            
+        if (!empty($KodeWilayah)) {
+            $this->db->where('h.kode_wilayah', $KodeWilayah);
+        }
+        
+        $header = $this->db->get()->row_array();
+        
+        if (!$header) {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+            return;
+        }
+        
+        // Ambil rekening
+        $header['rekening'] = $this->db
+            ->where('header_id', $id)
+            ->where('deleted_at IS NULL')
+            ->order_by('kode_rekening', 'ASC')
+            ->get('belanja_rekening')
+            ->result_array();
+        
+        // Ambil rincian untuk setiap rekening
+        foreach ($header['rekening'] as &$rek) {
+            $rek['rincian'] = $this->db
+                ->where('rekening_id', $rek['id'])
+                ->where('deleted_at IS NULL')
+                ->order_by('id', 'ASC')
+                ->get('belanja_rincian')
+                ->result_array();
+        }
+        
+        echo json_encode(['status' => 'success', 'data' => $header]);
+    }
+
+    // ================================================================
+    // SAVE BELANJA (CREATE & UPDATE)
+    // ================================================================
+
+    public function SaveBelanja() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        header('Content-Type: application/json');
+        
+        try {
+            $KodeWilayah = $this->get_kode_wilayah();
+            if (empty($KodeWilayah)) {
+                $KodeWilayah = $this->input->post('kode_wilayah', TRUE);
+            }
+            if (empty($KodeWilayah)) {
+                $KodeWilayah = '35.73';
+            }
+            
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = $this->input->post('tahun', TRUE) ?: date('Y');
+            $id_instansi = $this->input->post('id_instansi', TRUE);
+            
+            // Data Header
+            $data_header = [
+                'kode_wilayah' => $KodeWilayah,
+                'tahun' => $tahun,
+                'id_instansi' => !empty($id_instansi) ? (int)$id_instansi : null,
+                'kode_perangkat_daerah' => $this->input->post('kode_perangkat_daerah', TRUE),
+                'nama_perangkat_daerah' => $this->input->post('nama_perangkat_daerah', TRUE),
+                'kode_sub_unit' => $this->input->post('kode_sub_unit', TRUE),
+                'nama_sub_unit' => $this->input->post('nama_sub_unit', TRUE),
+                'kode_bidang_urusan' => $this->input->post('kode_bidang_urusan', TRUE),
+                'nama_bidang_urusan' => $this->input->post('nama_bidang_urusan', TRUE),
+                'kode_program' => $this->input->post('kode_program', TRUE),
+                'nama_program' => $this->input->post('nama_program', TRUE),
+                'kode_kegiatan' => $this->input->post('kode_kegiatan', TRUE),
+                'nama_kegiatan' => $this->input->post('nama_kegiatan', TRUE),
+                'kode_sub_kegiatan' => $this->input->post('kode_sub_kegiatan', TRUE),
+                'nama_sub_kegiatan' => $this->input->post('nama_sub_kegiatan', TRUE),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            
+            $this->db->trans_start();
+            
+            if ($id > 0) {
+                // UPDATE
+                $this->db->where('id', $id)->update('belanja_sub_kegiatan_header', $data_header);
+                $header_id = $id;
+                
+                // Soft delete rincian & rekening lama
+                $old_rek_ids = $this->db->select('id')->where('header_id', $id)->where('deleted_at IS NULL')->get('belanja_rekening')->result_array();
+                if (!empty($old_rek_ids)) {
+                    $ids = array_column($old_rek_ids, 'id');
+                    $this->db->where_in('rekening_id', $ids)->update('belanja_rincian', ['deleted_at' => date('Y-m-d H:i:s')]);
+                }
+                $this->db->where('header_id', $id)->update('belanja_rekening', ['deleted_at' => date('Y-m-d H:i:s')]);
+            } else {
+                // INSERT
+                $data_header['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('belanja_sub_kegiatan_header', $data_header);
+                $header_id = $this->db->insert_id();
+            }
+            
+            if (!$header_id) {
+                throw new Exception('Gagal menyimpan header!');
+            }
+            
+            // ============================================================
+            // PROSES REKENING DAN RINCIAN
+            // ============================================================
+            $rekening_kode = $this->input->post('rekening_kode', TRUE);
+            $rekening_uraian = $this->input->post('rekening_uraian', TRUE);
+            $rekening_level = $this->input->post('rekening_level', TRUE);
+            
+            // Ambil semua rincian
+            $rincian_uraian = $this->input->post('rincian_uraian', TRUE);
+            $rincian_koefisien = $this->input->post('rincian_koefisien', TRUE);
+            $rincian_harga = $this->input->post('rincian_harga', TRUE);
+            $rincian_ppn = $this->input->post('rincian_ppn', TRUE);
+            $rincian_jumlah = $this->input->post('rincian_jumlah', TRUE);
+            $rincian_sumber = $this->input->post('rincian_sumber_dana', TRUE);
+            $rincian_keterangan = $this->input->post('rincian_keterangan', TRUE);
+            $rincian_rekening_index = $this->input->post('rincian_rekening_index', TRUE);
+            
+            $total_belanja = 0;
+            
+            if (!empty($rekening_kode) && is_array($rekening_kode)) {
+                foreach ($rekening_kode as $key => $kode) {
+                    if (empty(trim($kode))) continue;
+                    
+                    $rek_total = 0;
+                    
+                    // Insert rekening
+                    $rek_data = [
+                        'header_id' => $header_id,
+                        'kode_rekening' => trim($kode),
+                        'uraian_rekening' => isset($rekening_uraian[$key]) ? trim($rekening_uraian[$key]) : '',
+                        'level_rekening' => isset($rekening_level[$key]) ? (int)$rekening_level[$key] : 1,
+                        'created_at' => date('Y-m-d H:i:s')
+                    ];
+                    
+                    $this->db->insert('belanja_rekening', $rek_data);
+                    $rekening_id = $this->db->insert_id();
+                    
+                    // Insert rincian untuk rekening ini
+                    if (!empty($rincian_uraian) && is_array($rincian_uraian)) {
+                        foreach ($rincian_uraian as $rkey => $uraian) {
+                            if (!isset($rincian_rekening_index[$rkey]) || (int)$rincian_rekening_index[$rkey] != $key) {
+                                continue;
+                            }
+                            
+                            if (empty(trim($uraian))) continue;
+                            
+                            $koef = isset($rincian_koefisien[$rkey]) ? (float)str_replace(',', '.', $rincian_koefisien[$rkey]) : 0;
+                            $harga = isset($rincian_harga[$rkey]) ? (float)str_replace(['Rp', ' ', '.', ','], '', $rincian_harga[$rkey]) : 0;
+                            $ppn = isset($rincian_ppn[$rkey]) ? (float)str_replace(',', '.', $rincian_ppn[$rkey]) : 0;
+                            
+                            $jumlah = isset($rincian_jumlah[$rkey]) ? (float)str_replace(['Rp', ' ', '.', ','], '', $rincian_jumlah[$rkey]) : 0;
+                            if ($jumlah <= 0 && ($koef > 0 || $harga > 0)) {
+                                $jumlah = round($koef * $harga * (1 + $ppn / 100));
+                            }
+                            
+                            $rek_total += $jumlah;
+                            
+                            $rincian_data = [
+                                'rekening_id' => $rekening_id,
+                                'uraian' => trim($uraian),
+                                'koefisien' => $koef,
+                                'harga_satuan' => $harga,
+                                'ppn' => $ppn,
+                                'jumlah' => $jumlah,
+                                'sumber_dana' => isset($rincian_sumber[$rkey]) ? trim($rincian_sumber[$rkey]) : null,
+                                'keterangan' => isset($rincian_keterangan[$rkey]) ? trim($rincian_keterangan[$rkey]) : null,
+                                'created_at' => date('Y-m-d H:i:s')
+                            ];
+                            
+                            $this->db->insert('belanja_rincian', $rincian_data);
+                        }
+                    }
+                    
+                    // Update total rekening
+                    $this->db->where('id', $rekening_id)->update('belanja_rekening', ['total' => $rek_total]);
+                    $total_belanja += $rek_total;
+                }
+            }
+            
+            // Update total belanja di header
+            $this->db->where('id', $header_id)->update('belanja_sub_kegiatan_header', ['total_belanja' => $total_belanja]);
+            
+            $this->db->trans_complete();
+            
+            if ($this->db->trans_status() === FALSE) {
+                throw new Exception('Gagal menyimpan data!');
+            }
+            
+            echo json_encode([
+                'status' => 'success',
+                'message' => $id > 0 ? 'Data berhasil diupdate!' : 'Data berhasil disimpan!',
+                'id' => $header_id
+            ]);
+            
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            log_message('error', 'SaveBelanja: ' . $e->getMessage());
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    // ================================================================
+    // DELETE BELANJA (SOFT DELETE)
+    // ================================================================
+
+    public function DeleteBelanja() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        header('Content-Type: application/json');
+        
+        $id = (int)$this->input->post('id', TRUE);
+        
+        if ($id <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak valid']);
+            return;
+        }
+        
+        $this->db->trans_start();
+        
+        // Soft delete header
+        $this->db->where('id', $id)->update('belanja_sub_kegiatan_header', ['deleted_at' => date('Y-m-d H:i:s')]);
+        
+        // Soft delete rincian
+        $rek_ids = $this->db->select('id')->where('header_id', $id)->get('belanja_rekening')->result_array();
+        if (!empty($rek_ids)) {
+            $ids = array_column($rek_ids, 'id');
+            $this->db->where_in('rekening_id', $ids)->update('belanja_rincian', ['deleted_at' => date('Y-m-d H:i:s')]);
+        }
+        
+        // Soft delete rekening
+        $this->db->where('header_id', $id)->update('belanja_rekening', ['deleted_at' => date('Y-m-d H:i:s')]);
+        
+        $this->db->trans_complete();
+        
+        if ($this->db->trans_status() === FALSE) {
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus data']);
+        } else {
+            echo json_encode(['status' => 'success', 'message' => 'Data berhasil dihapus']);
+        }
+    }
+
+    // ================================================================
+    // GET INSTANSI DETAIL
+    // ================================================================
+
+    public function GetInstansiDetail() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        header('Content-Type: application/json');
+        
+        $id = (int)$this->input->post('id', TRUE);
+        
+        if ($id <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'ID tidak valid']);
+            return;
+        }
+        
+        $data = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('akun_instansi')->row_array();
+        
+        if ($data) {
+            echo json_encode(['status' => 'success', 'data' => $data]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+        }
+    }
+
+    // ================================================================
+    // GET REFERENSI JENIS STANDAR HARGA
+    // ================================================================
+
+    public function GetRefJenisStandarHarga() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $data = $this->db
+            ->order_by('nama', 'ASC')
+            ->get('ref_jenis_standar_harga')
+            ->result_array();
+        
+        echo json_encode($data);
+    }
+
+    // ================================================================
+    // GET STANDAR HARGA (HSPK & ASB)
+    // ================================================================
+
+    public function GetStandarHarga() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $type = strtolower($this->input->post('type', TRUE) ?: 'hspk');
+        $q = trim($this->input->post('q', TRUE) ?: '');
+        $kode_rekening = trim($this->input->post('kode_rekening', TRUE) ?: '');
+        $limit = (int)($this->input->post('limit', TRUE) ?: 50);
+
+        $table = ($type === 'asb') ? 'asb_kab_banyuwangi' : 'hspk_kab_banyuwangi';
+
+        $this->db->select('id_standar_harga, kode_barang, uraian_barang, spesifikasi, satuan, harga_satuan, kode_rekening, uraian_kelompok_barang')
+            ->from($table)
+            ->where('kode_barang !=', 'KODE BARANG');
+
+        if (!empty($q)) {
+            $this->db->group_start()
+                ->like('uraian_barang', $q)
+                ->or_like('kode_barang', $q)
+                ->or_like('spesifikasi', $q)
+                ->or_like('uraian_kelompok_barang', $q)
+                ->group_end();
+        }
+
+        if (!empty($kode_rekening)) {
+            $this->db->like('kode_rekening', $kode_rekening);
+        }
+
+        $items = $this->db->limit($limit)->get()->result_array();
+        echo json_encode(['status' => 'success', 'type' => $type, 'data' => $items]);
+    }
+
+    // ================================================================
+    // GET MASTER REKENING
+    // ================================================================
+
+    public function GetMasterRekening() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $q = trim($this->input->post('q', TRUE) ?: '');
+        $this->db->from('master_rekening');
+        if (!empty($q)) {
+            $this->db->group_start()
+                ->like('kode_rekening', $q)
+                ->or_like('nama_rekening', $q)
+                ->group_end();
+        }
+        $items = $this->db->order_by('kode_rekening', 'ASC')->get()->result_array();
+        echo json_encode(['status' => 'success', 'data' => $items]);
+    }
+
+    // ================================================================
+    // SAVE SINGLE RINCIAN ITEM (FOR MODAL TAMBAH/EDIT)
+    // ================================================================
+    public function SaveRincianSingleItem() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $KodeWilayah = $this->get_kode_wilayah();
+            if (empty($KodeWilayah)) {
+                $KodeWilayah = $this->input->post('kode_wilayah', TRUE) ?: '35.73';
+            }
+
+            $rincian_id = (int)$this->input->post('rincian_id', TRUE);
+            $sub_kegiatan_kode = trim($this->input->post('sub_kegiatan_kode', TRUE));
+            $tahun = trim($this->input->post('tahun', TRUE)) ?: date('Y');
+            $id_instansi = (int)$this->input->post('id_instansi', TRUE);
+
+            // Cari atau buat Header Sub Kegiatan
+            $header = $this->db
+                ->where('kode_sub_kegiatan', $sub_kegiatan_kode)
+                ->where('tahun', $tahun)
+                ->where('deleted_at IS NULL')
+                ->get('belanja_sub_kegiatan_header')
+                ->row_array();
+
+            if (!$header) {
+                // Buat Header baru
+                $header_data = [
+                    'kode_wilayah' => $KodeWilayah,
+                    'tahun' => $tahun,
+                    'id_instansi' => $id_instansi > 0 ? $id_instansi : null,
+                    'kode_perangkat_daerah' => $this->input->post('kode_perangkat_daerah', TRUE),
+                    'nama_perangkat_daerah' => $this->input->post('nama_perangkat_daerah', TRUE),
+                    'kode_sub_unit' => $this->input->post('kode_sub_unit', TRUE),
+                    'nama_sub_unit' => $this->input->post('nama_sub_unit', TRUE),
+                    'kode_bidang_urusan' => $this->input->post('kode_bidang_urusan', TRUE),
+                    'nama_bidang_urusan' => $this->input->post('nama_bidang_urusan', TRUE),
+                    'kode_program' => $this->input->post('kode_program', TRUE),
+                    'nama_program' => $this->input->post('nama_program', TRUE),
+                    'kode_kegiatan' => $this->input->post('kode_kegiatan', TRUE),
+                    'nama_kegiatan' => $this->input->post('nama_kegiatan', TRUE),
+                    'kode_sub_kegiatan' => $sub_kegiatan_kode,
+                    'nama_sub_kegiatan' => $this->input->post('nama_sub_kegiatan', TRUE),
+                    'total_belanja' => 0,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+                $this->db->insert('belanja_sub_kegiatan_header', $header_data);
+                $header_id = $this->db->insert_id();
+            } else {
+                $header_id = $header['id'];
+            }
+
+            // Cari atau buat Rekening
+            $rekening_kode = trim($this->input->post('rekening_kode', TRUE));
+            $rekening_nama = trim($this->input->post('rekening_nama', TRUE));
+            $rekening_level = (int)$this->input->post('rekening_level', TRUE) ?: 6;
+
+            $rek = $this->db
+                ->where('header_id', $header_id)
+                ->where('kode_rekening', $rekening_kode)
+                ->where('deleted_at IS NULL')
+                ->get('belanja_rekening')
+                ->row_array();
+
+            if (!$rek) {
+                $rek_data = [
+                    'header_id' => $header_id,
+                    'kode_rekening' => $rekening_kode,
+                    'uraian_rekening' => $rekening_nama,
+                    'level_rekening' => $rekening_level,
+                    'total' => 0,
+                    'created_at' => date('Y-m-d H:i:s')
+                ];
+                $this->db->insert('belanja_rekening', $rek_data);
+                $rekening_id = $this->db->insert_id();
+            } else {
+                $rekening_id = $rek['id'];
+            }
+
+            // Hitung subtotal
+            $koef = (float)str_replace(',', '.', $this->input->post('koefisien', TRUE));
+            $vol = (float)str_replace(',', '.', $this->input->post('volume', TRUE) ?: '1');
+            $harga = (float)str_replace(['Rp', ' ', '.', ','], '', $this->input->post('harga_satuan', TRUE));
+            $ppn = (float)str_replace(',', '.', $this->input->post('ppn', TRUE) ?: '0');
+            $subtotal = $koef * $vol * $harga;
+            $jumlah = round($subtotal + ($subtotal * ($ppn / 100)));
+
+            $rincian_data = [
+                'rekening_id' => $rekening_id,
+                'uraian' => trim($this->input->post('uraian_pengelompokan', TRUE)),
+                'komponen' => trim($this->input->post('komponen', TRUE)),
+                'spesifikasi_komponen' => trim($this->input->post('spesifikasi', TRUE)),
+                'satuan' => trim($this->input->post('satuan', TRUE)),
+                'koefisien' => $koef,
+                'koefisien_volume' => $vol,
+                'harga_satuan' => $harga,
+                'ppn' => $ppn,
+                'jumlah' => $jumlah,
+                'sumber_dana' => trim($this->input->post('sumber_dana', TRUE)),
+                'jenis_standar_harga' => trim($this->input->post('jenis_standar_harga', TRUE)),
+                'keterangan' => trim($this->input->post('keterangan', TRUE)),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($rincian_id > 0) {
+                $this->db->where('id', $rincian_id)->update('belanja_rincian', $rincian_data);
+            } else {
+                $rincian_data['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('belanja_rincian', $rincian_data);
+                $rincian_id = $this->db->insert_id();
+            }
+
+            // Update Total Rekening
+            $rek_total = (float)$this->db->select_sum('jumlah')->where('rekening_id', $rekening_id)->where('deleted_at IS NULL')->get('belanja_rincian')->row()->jumlah;
+            $this->db->where('id', $rekening_id)->update('belanja_rekening', ['total' => $rek_total]);
+
+            // Update Total Header
+            $hdr_total = (float)$this->db->select_sum('total')->where('header_id', $header_id)->where('deleted_at IS NULL')->get('belanja_rekening')->row()->total;
+            $this->db->where('id', $header_id)->update('belanja_sub_kegiatan_header', ['total_belanja' => $hdr_total]);
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Rincian belanja berhasil disimpan!',
+                'rincian_id' => $rincian_id,
+                'rekening_id' => $rekening_id,
+                'header_id' => $header_id
+            ]);
+
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    // ================================================================
+    // DELETE SINGLE RINCIAN ITEM
+    // ================================================================
+    public function DeleteRincianSingleItem() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $rincian_id = (int)$this->input->post('rincian_id', TRUE);
+        if ($rincian_id <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'ID rincian tidak valid']);
+            return;
+        }
+
+        $rinc = $this->db->where('id', $rincian_id)->get('belanja_rincian')->row_array();
+        if (!$rinc) {
+            echo json_encode(['status' => 'error', 'message' => 'Data rincian tidak ditemukan']);
+            return;
+        }
+
+        $rekening_id = $rinc['rekening_id'];
+        $rek = $this->db->where('id', $rekening_id)->get('belanja_rekening')->row_array();
+        $header_id = $rek ? $rek['header_id'] : 0;
+
+        $this->db->where('id', $rincian_id)->update('belanja_rincian', ['deleted_at' => date('Y-m-d H:i:s')]);
+
+        // Update Total Rekening
+        $rek_total = (float)$this->db->select_sum('jumlah')->where('rekening_id', $rekening_id)->where('deleted_at IS NULL')->get('belanja_rincian')->row()->jumlah;
+        $this->db->where('id', $rekening_id)->update('belanja_rekening', ['total' => $rek_total]);
+
+        // Update Total Header
+        if ($header_id > 0) {
+            $hdr_total = (float)$this->db->select_sum('total')->where('header_id', $header_id)->where('deleted_at IS NULL')->get('belanja_rekening')->row()->total;
+            $this->db->where('id', $header_id)->update('belanja_sub_kegiatan_header', ['total_belanja' => $hdr_total]);
+        }
+
+        echo json_encode(['status' => 'success', 'message' => 'Rincian belanja berhasil dihapus']);
+    }
+
+    // ================================================================
+    // (OPSIONAL) EXPORT EXCEL
+    // ================================================================
+
+    public function ExportBelanjaExcel() {
+        $id = (int)$this->input->get('id', TRUE);
+        $KodeWilayah = $this->get_kode_wilayah();
+        
+        if ($id <= 0 || empty($KodeWilayah)) {
+            show_404();
+            return;
+        }
+        
+        // Ambil data header
+        $header = $this->db
+            ->where('id', $id)
+            ->where('kode_wilayah', $KodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->get('belanja_sub_kegiatan_header')
+            ->row_array();
+        
+        if (!$header) {
+            show_404();
+            return;
+        }
+        
+        // Ambil rekening dan rincian
+        $header['rekening'] = $this->db
+            ->where('header_id', $id)
+            ->where('deleted_at IS NULL')
+            ->order_by('kode_rekening', 'ASC')
+            ->get('belanja_rekening')
+            ->result_array();
+        
+        foreach ($header['rekening'] as &$rek) {
+            $rek['rincian'] = $this->db
+                ->where('rekening_id', $rek['id'])
+                ->where('deleted_at IS NULL')
+                ->order_by('id', 'ASC')
+                ->get('belanja_rincian')
+                ->result_array();
+        }
+        
+        // Untuk sementara redirect ke detail
+        redirect('Instansi/BelanjaSubKegiatan');
+    }
+
+    // ================================================================
+    // (OPSIONAL) PRINT
+    // ================================================================
+
+    public function PrintBelanja() {
+        $id = (int)$this->input->get('id', TRUE);
+        $KodeWilayah = $this->get_kode_wilayah();
+        
+        if ($id <= 0 || empty($KodeWilayah)) {
+            show_404();
+            return;
+        }
+        
+        $Data['header'] = $this->db
+            ->where('id', $id)
+            ->where('kode_wilayah', $KodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->get('belanja_sub_kegiatan_header')
+            ->row_array();
+        
+        if (!$Data['header']) {
+            show_404();
+            return;
+        }
+        
+        $Data['rekening'] = $this->db
+            ->where('header_id', $id)
+            ->where('deleted_at IS NULL')
+            ->order_by('kode_rekening', 'ASC')
+            ->get('belanja_rekening')
+            ->result_array();
+        
+        foreach ($Data['rekening'] as &$rek) {
+            $rek['rincian'] = $this->db
+                ->where('rekening_id', $rek['id'])
+                ->where('deleted_at IS NULL')
+                ->order_by('id', 'ASC')
+                ->get('belanja_rincian')
+                ->result_array();
+        }
+        
+        $this->load->view('Daerah/PrintBelanja', $Data);
+    }
+
+    // ================================================================
+    // DPA (DOKUMEN PELAKSANAAN ANGGARAN)
+    // ================================================================
+
+    public function DPA() {
+        $Header['Halaman'] = 'DPA';
+        
+        $KodeWilayah = $this->get_kode_wilayah();
+        $instansi_id = $this->get_instansi_id();
+        $is_role_4 = $this->is_role_4();
+        $tahun = $this->input->get('tahun', TRUE);
+        $filter_instansi = $this->input->get('instansi_id', TRUE);
+        
+        if ($is_role_4 && $instansi_id) {
+            $filter_instansi = $instansi_id;
+        }
+        
+        // Data Provinsi untuk filter
+        $Data['Provinsi'] = $this->db
+            ->where("Kode LIKE '__'")
+            ->order_by('Nama')
+            ->get('kodewilayah')
+            ->result_array();
+        
+        $Data['KodeWilayah'] = $KodeWilayah;
+        $Data['NamaWilayah'] = '';
+        $Data['IsRole4'] = $is_role_4;
+        $Data['InstansiId'] = $instansi_id;
+        $Data['ControllerName'] = 'Instansi';
+        
+        // Ambil Nama Wilayah jika ada
+        if (!empty($KodeWilayah)) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            $Data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
+        }
+        
+        // List Instansi
+        $Data['ListInstansi'] = [];
+        if (!empty($KodeWilayah)) {
+            $provKode = substr($KodeWilayah, 0, 2);
+            $Data['ListInstansi'] = $this->db
+                ->select('id, nama')
+                ->from('akun_instansi')
+                ->where("(kodewilayah = " . $this->db->escape($KodeWilayah) . " OR kodewilayah = " . $this->db->escape($provKode) . ")")
+                ->where('deleted_at IS NULL')
+                ->order_by('nama', 'ASC')
+                ->get()
+                ->result_array();
+        } else {
+            $Data['ListInstansi'] = $this->db
+                ->select('id, nama')
+                ->from('akun_instansi')
+                ->where('deleted_at IS NULL')
+                ->order_by('nama', 'ASC')
+                ->get()
+                ->result_array();
+        }
+        
+        // List Tahun
+        $dbYears = $this->db->select('DISTINCT(tahun) as thn')
+            ->where('deleted_at IS NULL')
+            ->order_by('tahun', 'DESC')
+            ->get('belanja_sub_kegiatan_header')
+            ->result_array();
+        
+        $listTahun = [];
+        if (!empty($dbYears)) {
+            foreach ($dbYears as $dy) {
+                if (!empty($dy['thn'])) {
+                    $listTahun[] = (int)$dy['thn'];
+                }
+            }
+        }
+        $currentY = (int)date('Y');
+        for ($y = $currentY + 1; $y >= $currentY - 5; $y--) {
+            if (!in_array($y, $listTahun)) {
+                $listTahun[] = $y;
+            }
+        }
+        rsort($listTahun);
+        $Data['ListTahun'] = $listTahun;
+        
+        if (empty($tahun)) {
+            if (!empty($dbYears) && !empty($dbYears[0]['thn'])) {
+                $tahun = $dbYears[0]['thn'];
+            } else {
+                $tahun = date('Y');
+            }
+        }
+        $Data['TahunAktif'] = $tahun;
+        $Data['FilterInstansi'] = $filter_instansi;
+
+        // Ambil Data Hierarki DPA
+        $Data['DPAData'] = $this->_buildDPAHierarchy($KodeWilayah, $tahun, $filter_instansi);
+        
+        $this->load->view('Daerah/header', $Header);
+        $this->load->view('Daerah/DPA', $Data);
+    }
+
+    public function GetDPAData() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $KodeWilayah = $this->get_kode_wilayah();
+        $is_role_4 = $this->is_role_4();
+        $instansi_id = $this->get_instansi_id();
+        $tahun = $this->input->post('tahun', TRUE) ?: date('Y');
+        $filter_instansi = $this->input->post('instansi', TRUE);
+
+        if ($is_role_4 && $instansi_id) {
+            $filter_instansi = $instansi_id;
+        }
+
+        $tree = $this->_buildDPAHierarchy($KodeWilayah, $tahun, $filter_instansi);
+        echo json_encode(['status' => 'success', 'data' => $tree]);
+    }
+
+    public function SaveDPARak() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $KodeWilayah = $this->get_kode_wilayah() ?: $this->input->post('kode_wilayah', TRUE) ?: '35.73';
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: date('Y'));
+            $kode_sub_kegiatan = trim($this->input->post('kode_sub_kegiatan', TRUE));
+            $header_id = (int)($this->input->post('header_id', TRUE));
+            $rincian_list = $this->input->post('rincian');
+
+            if (empty($kode_sub_kegiatan)) {
+                throw new Exception('Kode sub kegiatan wajib diisi!');
+            }
+
+            // Ambil data header dari belanja_sub_kegiatan_header untuk relasi FK
+            $headerRow = null;
+            if ($header_id > 0) {
+                $headerRow = $this->db->where('id', $header_id)
+                                      ->where('deleted_at IS NULL')
+                                      ->get('belanja_sub_kegiatan_header')
+                                      ->row_array();
+            }
+            if (!$headerRow) {
+                // Fallback: cari header berdasarkan kode_sub_kegiatan + tahun
+                $headerRow = $this->db->where('kode_sub_kegiatan', $kode_sub_kegiatan)
+                                      ->where('tahun', $tahun)
+                                      ->where('deleted_at IS NULL')
+                                      ->get('belanja_sub_kegiatan_header')
+                                      ->row_array();
+            }
+            // Gunakan data header untuk kode_wilayah dan id_instansi
+            if ($headerRow) {
+                $KodeWilayah = $headerRow['kode_wilayah'] ?: $KodeWilayah;
+                $header_id = (int)$headerRow['id'];
+            }
+            $id_instansi = $headerRow ? (int)$headerRow['id_instansi'] : (int)$this->get_instansi_id();
+
+            if (!empty($rincian_list) && is_array($rincian_list)) {
+                foreach ($rincian_list as $item) {
+                    $kode_rek = isset($item['kode']) ? trim($item['kode']) : '';
+                    $uraian = isset($item['uraian']) ? trim($item['uraian']) : '';
+                    $alokasi = isset($item['alokasi']) ? (float)$item['alokasi'] : 0;
+                    $rincian_id = isset($item['id']) && is_numeric($item['id']) ? (int)$item['id'] : null;
+                    $jenis = isset($item['jenis']) ? trim($item['jenis']) : 'operasi';
+                    $sumber_dana = isset($item['sumberDana']) ? trim($item['sumberDana']) : '';
+                    $lokasi = isset($item['lokasi']) ? trim($item['lokasi']) : '';
+
+                    $monthly = isset($item['monthly']) && is_array($item['monthly']) ? $item['monthly'] : array_fill(0, 12, 0);
+                    $mVal = [];
+                    for ($m = 0; $m < 12; $m++) {
+                        $mVal[$m] = isset($monthly[$m]) ? (float)$monthly[$m] : 0;
+                    }
+                    $total_rak = array_sum($mVal);
+                    $selisih = $alokasi - $total_rak;
+
+                    // Cek apakah sudah ada record di dpa_rak_rincian
+                    $this->db->where('kode_sub_kegiatan', $kode_sub_kegiatan)
+                             ->where('tahun', $tahun);
+                    if ($rincian_id > 0) {
+                        $this->db->where('rincian_id', $rincian_id);
+                    } else if (!empty($kode_rek)) {
+                        $this->db->where('kode_rekening', $kode_rek);
+                    }
+                    $existing = $this->db->where('deleted_at IS NULL')->get('dpa_rak_rincian')->row_array();
+
+                    $data_rak = [
+                        'header_id' => $header_id > 0 ? $header_id : null,
+                        'id_instansi' => $id_instansi > 0 ? $id_instansi : null,
+                        'kode_wilayah' => $KodeWilayah,
+                        'tahun' => $tahun,
+                        'kode_sub_kegiatan' => $kode_sub_kegiatan,
+                        'kode_rekening' => $kode_rek,
+                        'uraian' => $uraian,
+                        'jenis_belanja' => $jenis,
+                        'sumber_dana' => $sumber_dana,
+                        'lokasi' => $lokasi,
+                        'alokasi' => $alokasi,
+                        'jan' => $mVal[0],
+                        'feb' => $mVal[1],
+                        'mar' => $mVal[2],
+                        'apr' => $mVal[3],
+                        'mei' => $mVal[4],
+                        'jun' => $mVal[5],
+                        'jul' => $mVal[6],
+                        'ags' => $mVal[7],
+                        'sep' => $mVal[8],
+                        'okt' => $mVal[9],
+                        'nov' => $mVal[10],
+                        'des' => $mVal[11],
+                        'total_rak' => $total_rak,
+                        'selisih' => $selisih,
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ];
+
+                    if ($existing) {
+                        $this->db->where('id', $existing['id'])->update('dpa_rak_rincian', $data_rak);
+                    } else {
+                        $data_rak['rincian_id'] = $rincian_id;
+                        $data_rak['created_at'] = date('Y-m-d H:i:s');
+                        $this->db->insert('dpa_rak_rincian', $data_rak);
+                    }
+                }
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Anggaran Kas (RAK) Sub Kegiatan berhasil disimpan!'
+            ]);
+
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    private function _getUrusanName($kode) {
+        $map = [
+            "1" => "URUSAN PEMERINTAHAN WAJIB YANG BERKAITAN DENGAN PELAYANAN DASAR",
+            "2" => "URUSAN PEMERINTAHAN WAJIB YANG TIDAK BERKAITAN DENGAN PELAYANAN DASAR",
+            "3" => "URUSAN PEMERINTAHAN PILIHAN",
+            "4" => "UNSUR PENDUKUNG URUSAN PEMERINTAHAN",
+            "5" => "UNSUR PENUNJANG URUSAN PEMERINTAHAN",
+            "6" => "UNSUR PENGAWASAN URUSAN PEMERINTAHAN",
+            "7" => "UNSUR KEWILAYAHAN",
+            "8" => "UNSUR PEMERINTAHAN UMUM"
+        ];
+        return isset($map[$kode]) ? $map[$kode] : "URUSAN PEMERINTAHAN KODE " . $kode;
+    }
+
+    private function _getBidangName($kode, $fallback = '') {
+        $map = [
+            "1.01" => "PENDIDIKAN",
+            "1.02" => "KESEHATAN",
+            "1.03" => "PEKERJAAN UMUM DAN PENATAAN RUANG",
+            "1.04" => "PERUMAHAN RAKYAT DAN KAWASAN PERMUKIMAN",
+            "1.05" => "KETENTRAMAN DAN KETERTIBAN UMUM SERTA PERLINDUNGAN MASYARAKAT",
+            "1.06" => "SOSIAL",
+            "2.09" => "TENAGA KERJA",
+            "2.11" => "LINGKUNGAN HIDUP",
+            "2.15" => "PERHUBUNGAN",
+            "2.16" => "KOMUNIKASI DAN INFORMATIKA",
+            "2.17" => "KOPERASI, USAHA KECIL DAN MENENGAH",
+            "5.01" => "PERENCANAAN",
+            "5.02" => "KEUANGAN",
+            "5.03" => "KEPEGAWAIAN, PENDIDIKAN DAN PELATIHAN"
+        ];
+        if (isset($map[$kode])) return $map[$kode];
+        return !empty($fallback) ? strtoupper($fallback) : "BIDANG URUSAN " . $kode;
+    }
+
+    private function _buildDPAHierarchy($KodeWilayah, $tahun, $filter_instansi = null) {
+        $this->db->select('*')
+            ->from('belanja_sub_kegiatan_header')
+            ->where('deleted_at IS NULL');
+
+        if (!empty($KodeWilayah)) {
+            $this->db->where('kode_wilayah', $KodeWilayah);
+        }
+        if (!empty($tahun) && $tahun !== 'all') {
+            $this->db->where('tahun', $tahun);
+        }
+        if (!empty($filter_instansi)) {
+            $this->db->where('id_instansi', (int)$filter_instansi);
+        }
+
+        $headers = $this->db
+            ->order_by('kode_program', 'ASC')
+            ->order_by('kode_kegiatan', 'ASC')
+            ->order_by('kode_sub_kegiatan', 'ASC')
+            ->get()
+            ->result_array();
+
+        $urusanMap = [];
+
+        if (!empty($headers)) {
+            $headerIds = array_column($headers, 'id');
+            $rekenings = $this->db
+                ->where_in('header_id', $headerIds)
+                ->where('deleted_at IS NULL')
+                ->order_by('kode_rekening', 'ASC')
+                ->get('belanja_rekening')
+                ->result_array();
+
+            $rincianList = [];
+            if (!empty($rekenings)) {
+                $rekIds = array_column($rekenings, 'id');
+                $rincianRows = $this->db
+                    ->where_in('rekening_id', $rekIds)
+                    ->where('deleted_at IS NULL')
+                    ->order_by('id', 'ASC')
+                    ->get('belanja_rincian')
+                    ->result_array();
+
+                foreach ($rincianRows as $rinc) {
+                    $rincianList[$rinc['rekening_id']][] = $rinc;
+                }
+            }
+
+            $rekeningByHeader = [];
+            foreach ($rekenings as $rek) {
+                $rek['rincian'] = isset($rincianList[$rek['id']]) ? $rincianList[$rek['id']] : [];
+                $rekeningByHeader[$rek['header_id']][] = $rek;
+            }
+
+            // Ambil semua data RAK tersimpan untuk tahun ini
+            $rakSaved = $this->db
+                ->where('tahun', $tahun)
+                ->where('deleted_at IS NULL')
+                ->get('dpa_rak_rincian')
+                ->result_array();
+            
+            $rakMapByRincianId = [];
+            $rakMapBySubKegKode = [];
+            foreach ($rakSaved as $rs) {
+                if (!empty($rs['rincian_id'])) {
+                    $rakMapByRincianId[$rs['rincian_id']] = $rs;
+                }
+                $key = $rs['kode_sub_kegiatan'] . '_' . $rs['kode_rekening'];
+                $rakMapBySubKegKode[$key] = $rs;
+            }
+
+            foreach ($headers as $h) {
+                $subKegKode = $h['kode_sub_kegiatan'] ?: '5.01.01.1.01.01';
+                $kegKode = $h['kode_kegiatan'] ?: substr($subKegKode, 0, 13);
+                $progKode = $h['kode_program'] ?: substr($kegKode, 0, 7);
+                $bidangKode = $h['kode_bidang_urusan'] ?: substr($progKode, 0, 4);
+                $urusanKode = substr($bidangKode, 0, 1);
+
+                if (!isset($urusanMap[$urusanKode])) {
+                    $urusanMap[$urusanKode] = [
+                        'kode' => $urusanKode,
+                        'uraian' => $this->_getUrusanName($urusanKode),
+                        'bidang' => []
+                    ];
+                }
+
+                if (!isset($urusanMap[$urusanKode]['bidang'][$bidangKode])) {
+                    $urusanMap[$urusanKode]['bidang'][$bidangKode] = [
+                        'kode' => $bidangKode,
+                        'uraian' => $this->_getBidangName($bidangKode, $h['nama_bidang_urusan']),
+                        'program' => []
+                    ];
+                }
+
+                if (!isset($urusanMap[$urusanKode]['bidang'][$bidangKode]['program'][$progKode])) {
+                    $urusanMap[$urusanKode]['bidang'][$bidangKode]['program'][$progKode] = [
+                        'kode' => $progKode,
+                        'uraian' => $h['nama_program'] ?: 'PROGRAM ' . $progKode,
+                        'kegiatan' => []
+                    ];
+                }
+
+                if (!isset($urusanMap[$urusanKode]['bidang'][$bidangKode]['program'][$progKode]['kegiatan'][$kegKode])) {
+                    $urusanMap[$urusanKode]['bidang'][$bidangKode]['program'][$progKode]['kegiatan'][$kegKode] = [
+                        'kode' => $kegKode,
+                        'uraian' => $h['nama_kegiatan'] ?: 'KEGIATAN ' . $kegKode,
+                        'subKegiatan' => []
+                    ];
+                }
+
+                // Format rincian items
+                $rList = [];
+                $hReks = isset($rekeningByHeader[$h['id']]) ? $rekeningByHeader[$h['id']] : [];
+                foreach ($hReks as $rek) {
+                    $rekRincs = isset($rek['rincian']) ? $rek['rincian'] : [];
+                    foreach ($rekRincs as $rinc) {
+                        $rId = (int)$rinc['id'];
+                        $m = array_fill(0, 12, 0);
+
+                        $kKey = $subKegKode . '_' . $rek['kode_rekening'];
+                        $rakRow = isset($rakMapByRincianId[$rId]) ? $rakMapByRincianId[$rId] : (isset($rakMapBySubKegKode[$kKey]) ? $rakMapBySubKegKode[$kKey] : null);
+                        
+                        if ($rakRow) {
+                            $m = [
+                                (float)$rakRow['jan'], (float)$rakRow['feb'], (float)$rakRow['mar'],
+                                (float)$rakRow['apr'], (float)$rakRow['mei'], (float)$rakRow['jun'],
+                                (float)$rakRow['jul'], (float)$rakRow['ags'], (float)$rakRow['sep'],
+                                (float)$rakRow['okt'], (float)$rakRow['nov'], (float)$rakRow['des']
+                            ];
+                        }
+
+                        $rList[] = [
+                            'id' => $rId,
+                            'kode' => $rek['kode_rekening'],
+                            'uraian' => $rinc['uraian'] ?: ($rinc['komponen'] ?: $rek['uraian_rekening']),
+                            'jenis' => (strpos($rek['kode_rekening'], '5.2') === 0) ? 'modal' : ((strpos($rek['kode_rekening'], '5.3') === 0) ? 'tidakTerduga' : ((strpos($rek['kode_rekening'], '5.4') === 0) ? 'transfer' : 'operasi')),
+                            'sumberDana' => $rinc['sumber_dana'] ?: 'Pendapatan Bagi Hasil',
+                            'lokasi' => 'Kab. Bojonegoro, Semua Kecamatan, Semua Kelurahan/Desa',
+                            'alokasi' => (float)$rinc['jumlah'],
+                            'monthly' => $m
+                        ];
+                    }
+                }
+
+                $subKegData = [
+                    'id' => $h['id'],
+                    'headerId' => (int)$h['id'],
+                    'idInstansi' => (int)$h['id_instansi'],
+                    'kode' => $subKegKode,
+                    'uraian' => $h['nama_sub_kegiatan'] ?: 'Sub Kegiatan ' . $subKegKode,
+                    'perangkatDaerah' => $h['nama_perangkat_daerah'] ?: '',
+                    'sumberDana' => count($rList) > 0 && !empty($rList[0]['sumberDana']) ? $rList[0]['sumberDana'] : 'Pendapatan Bagi Hasil',
+                    'lokasi' => 'Kab. Bojonegoro, Semua Kecamatan, Semua Kelurahan/Desa',
+                    'totalBelanja' => (float)$h['total_belanja'],
+                    'flagged' => false,
+                    'rincian' => $rList
+                ];
+
+                $urusanMap[$urusanKode]['bidang'][$bidangKode]['program'][$progKode]['kegiatan'][$kegKode]['subKegiatan'][] = $subKegData;
+            }
+        }
+
+        // Convert associative maps to clean arrays
+        $result = [];
+        foreach ($urusanMap as $u) {
+            $uItem = ['kode' => $u['kode'], 'uraian' => $u['uraian'], 'bidang' => []];
+            foreach ($u['bidang'] as $b) {
+                $bItem = ['kode' => $b['kode'], 'uraian' => $b['uraian'], 'program' => []];
+                foreach ($b['program'] as $p) {
+                    $pItem = ['kode' => $p['kode'], 'uraian' => $p['uraian'], 'kegiatan' => []];
+                    foreach ($p['kegiatan'] as $k) {
+                        $kItem = ['kode' => $k['kode'], 'uraian' => $k['uraian'], 'subKegiatan' => $k['subKegiatan']];
+                        $pItem['kegiatan'][] = $kItem;
+                    }
+                    $bItem['program'][] = $pItem;
+                }
+                $uItem['bidang'][] = $bItem;
+            }
+            $result[] = $uItem;
+        }
+
+        return $result;
+    }
+
+    // ================================================================
+    // TARGET RENAKSI (RENCANA AKSI & TARGET KINERJA)
+    // ================================================================
+
+    public function TargetRenaksi() {
+        $Header['Halaman'] = 'Target Renaksi';
+        
+        $KodeWilayah = $this->get_kode_wilayah();
+        $instansi_id = $this->get_instansi_id();
+        $is_role_4 = $this->is_role_4();
+        $tahun = $this->input->get('tahun', TRUE);
+        $filter_instansi = $this->input->get('instansi_id', TRUE);
+        
+        if ($is_role_4 && $instansi_id) {
+            $filter_instansi = $instansi_id;
+        }
+        
+        // Data Provinsi untuk filter
+        $Data['Provinsi'] = $this->db
+            ->where("Kode LIKE '__'")
+            ->order_by('Nama')
+            ->get('kodewilayah')
+            ->result_array();
+        
+        $Data['KodeWilayah'] = $KodeWilayah;
+        $Data['NamaWilayah'] = '';
+        $Data['IsRole4'] = $is_role_4;
+        $Data['InstansiId'] = $instansi_id;
+        $Data['ControllerName'] = 'Instansi';
+        
+        // Ambil Nama Wilayah jika ada
+        if (!empty($KodeWilayah)) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            $Data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
+        }
+        
+        // List Instansi
+        $Data['ListInstansi'] = [];
+        if (!empty($KodeWilayah)) {
+            $provKode = substr($KodeWilayah, 0, 2);
+            $Data['ListInstansi'] = $this->db
+                ->select('id, nama')
+                ->from('akun_instansi')
+                ->where("(kodewilayah = " . $this->db->escape($KodeWilayah) . " OR kodewilayah = " . $this->db->escape($provKode) . ")")
+                ->where('deleted_at IS NULL')
+                ->order_by('nama', 'ASC')
+                ->get()
+                ->result_array();
+        } else {
+            $Data['ListInstansi'] = $this->db
+                ->select('id, nama')
+                ->from('akun_instansi')
+                ->where('deleted_at IS NULL')
+                ->order_by('nama', 'ASC')
+                ->get()
+                ->result_array();
+        }
+        
+        // List Tahun
+        $dbYears = $this->db->select('DISTINCT(tahun) as thn')
+            ->where('deleted_at IS NULL')
+            ->order_by('tahun', 'DESC')
+            ->get('belanja_sub_kegiatan_header')
+            ->result_array();
+        
+        $listTahun = [];
+        if (!empty($dbYears)) {
+            foreach ($dbYears as $dy) {
+                if (!empty($dy['thn'])) {
+                    $listTahun[] = (int)$dy['thn'];
+                }
+            }
+        }
+        $currentY = (int)date('Y');
+        for ($y = $currentY + 1; $y >= $currentY - 5; $y--) {
+            if (!in_array($y, $listTahun)) {
+                $listTahun[] = $y;
+            }
+        }
+        rsort($listTahun);
+        $Data['ListTahun'] = $listTahun;
+        
+        if (empty($tahun)) {
+            if (!empty($dbYears) && !empty($dbYears[0]['thn'])) {
+                $tahun = $dbYears[0]['thn'];
+            } else {
+                $tahun = date('Y');
+            }
+        }
+        $Data['TahunAktif'] = $tahun;
+        $Data['FilterInstansi'] = $filter_instansi;
+
+        // Ambil Data Hierarki Target Renaksi
+        $Data['RenaksiTree'] = $this->_buildTargetRenaksiHierarchy($KodeWilayah, $tahun, $filter_instansi);
+        
+        $this->load->view('Daerah/header', $Header);
+        $this->load->view('Daerah/TargetRenaksi', $Data);
+    }
+
+    public function GetTargetRenaksiData() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $KodeWilayah = $this->get_kode_wilayah();
+        $is_role_4 = $this->is_role_4();
+        $instansi_id = $this->get_instansi_id();
+        $tahun = $this->input->post('tahun', TRUE) ?: date('Y');
+        $filter_instansi = $this->input->post('instansi', TRUE);
+
+        if ($is_role_4 && $instansi_id) {
+            $filter_instansi = $instansi_id;
+        }
+
+        $tree = $this->_buildTargetRenaksiHierarchy($KodeWilayah, $tahun, $filter_instansi);
+        echo json_encode(['status' => 'success', 'data' => $tree]);
+    }
+
+    public function GetSubKegiatanTargetDetail() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $header_id = (int)$this->input->post('header_id', TRUE);
+        $kode_sub_kegiatan = trim($this->input->post('kode_sub_kegiatan', TRUE));
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: date('Y'));
+
+        $this->db->where('deleted_at IS NULL');
+        if ($header_id > 0) {
+            $this->db->where('id', $header_id);
+        } else if (!empty($kode_sub_kegiatan)) {
+            $this->db->where('kode_sub_kegiatan', $kode_sub_kegiatan)->where('tahun', $tahun);
+        }
+        $header = $this->db->get('belanja_sub_kegiatan_header')->row_array();
+
+        if (!$header) {
+            echo json_encode(['status' => 'error', 'message' => 'Data Sub Kegiatan tidak ditemukan.']);
+            return;
+        }
+
+        $hId = (int)$header['id'];
+        $subKode = $header['kode_sub_kegiatan'];
+        $thn = (int)$header['tahun'];
+
+        // Indikator Sub Kegiatan
+        $indikators = $this->db
+            ->where('deleted_at IS NULL')
+            ->group_start()
+                ->where('header_id', $hId)
+                ->or_group_start()
+                    ->where('entity_code', $subKode)
+                    ->where('tahun', $thn)
+                ->group_end()
+            ->group_end()
+            ->order_by('urutan', 'ASC')
+            ->order_by('id', 'ASC')
+            ->get('target_renaksi_indikator')
+            ->result_array();
+
+        // Target Anggaran Bulanan
+        $anggaran = $this->db
+            ->where('deleted_at IS NULL')
+            ->group_start()
+                ->where('header_id', $hId)
+                ->or_group_start()
+                    ->where('kode_sub_kegiatan', $subKode)
+                    ->where('tahun', $thn)
+                ->group_end()
+            ->group_end()
+            ->get('target_renaksi_anggaran_bulanan')
+            ->row_array();
+
+        // Fallback RAK DPA jika anggaran renaksi belum tersimpan
+        if (!$anggaran) {
+            $rakRows = $this->db
+                ->where('tahun', $thn)
+                ->where('kode_sub_kegiatan', $subKode)
+                ->where('deleted_at IS NULL')
+                ->get('dpa_rak_rincian')
+                ->result_array();
+
+            $m = array_fill(0, 12, 0);
+            $totalRak = 0;
+            if (!empty($rakRows)) {
+                foreach ($rakRows as $r) {
+                    $m[0] += (float)$r['jan'];
+                    $m[1] += (float)$r['feb'];
+                    $m[2] += (float)$r['mar'];
+                    $m[3] += (float)$r['apr'];
+                    $m[4] += (float)$r['mei'];
+                    $m[5] += (float)$r['jun'];
+                    $m[6] += (float)$r['jul'];
+                    $m[7] += (float)$r['ags'];
+                    $m[8] += (float)$r['sep'];
+                    $m[9] += (float)$r['okt'];
+                    $m[10] += (float)$r['nov'];
+                    $m[11] += (float)$r['des'];
+                    $totalRak += (float)$r['total_rak'];
+                }
+            } else {
+                $totalRak = (float)$header['total_belanja'];
+            }
+
+            $anggaran = [
+                'jan' => $m[0], 'feb' => $m[1], 'mar' => $m[2], 'apr' => $m[3],
+                'mei' => $m[4], 'jun' => $m[5], 'jul' => $m[6], 'ags' => $m[7],
+                'sep' => $m[8], 'okt' => $m[9], 'nov' => $m[10], 'des' => $m[11],
+                'total_anggaran' => $totalRak
+            ];
+        }
+
+        // Tahapan Proses
+        $tahapan = $this->db
+            ->where('deleted_at IS NULL')
+            ->group_start()
+                ->where('header_id', $hId)
+                ->or_group_start()
+                    ->where('kode_sub_kegiatan', $subKode)
+                    ->where('tahun', $thn)
+                ->group_end()
+            ->group_end()
+            ->order_by('urutan', 'ASC')
+            ->order_by('id', 'ASC')
+            ->get('target_renaksi_tahapan_proses')
+            ->result_array();
+
+        echo json_encode([
+            'status' => 'success',
+            'data' => [
+                'header' => $header,
+                'indikators' => $indikators,
+                'anggaranBulanan' => $anggaran,
+                'tahapanProses' => $tahapan
+            ]
+        ]);
+    }
+
+    public function SaveTargetRenaksiSubKegiatan() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $header_id = (int)$this->input->post('header_id', TRUE);
+            $kode_sub_kegiatan = trim($this->input->post('kode_sub_kegiatan', TRUE));
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: date('Y'));
+            $kode_wilayah = $this->input->post('kode_wilayah', TRUE) ?: $this->get_kode_wilayah() ?: '35.73';
+            $id_instansi = (int)($this->input->post('id_instansi', TRUE) ?: $this->get_instansi_id() ?: 1);
+
+            $header = null;
+            if ($header_id > 0) {
+                $header = $this->db->where('id', $header_id)->where('deleted_at IS NULL')->get('belanja_sub_kegiatan_header')->row_array();
+            }
+            if (!$header && !empty($kode_sub_kegiatan)) {
+                $header = $this->db->where('kode_sub_kegiatan', $kode_sub_kegiatan)->where('tahun', $tahun)->where('deleted_at IS NULL')->get('belanja_sub_kegiatan_header')->row_array();
+            }
+
+            if ($header) {
+                $header_id = (int)$header['id'];
+                $kode_sub_kegiatan = $header['kode_sub_kegiatan'];
+                $kode_wilayah = $header['kode_wilayah'] ?: $kode_wilayah;
+                $id_instansi = $header['id_instansi'] ? (int)$header['id_instansi'] : $id_instansi;
+            }
+
+            $indikators = $this->input->post('indikators');
+            $anggaran = $this->input->post('anggaran_bulanan');
+            $tahapan = $this->input->post('tahapan_proses');
+
+            $this->db->trans_begin();
+            $now = date('Y-m-d H:i:s');
+
+            // 1. Simpan Anggaran Bulanan
+            if (!empty($anggaran) && is_array($anggaran)) {
+                $mJan = isset($anggaran['jan']) ? (float)$anggaran['jan'] : 0;
+                $mFeb = isset($anggaran['feb']) ? (float)$anggaran['feb'] : 0;
+                $mMar = isset($anggaran['mar']) ? (float)$anggaran['mar'] : 0;
+                $mApr = isset($anggaran['apr']) ? (float)$anggaran['apr'] : 0;
+                $mMei = isset($anggaran['mei']) ? (float)$anggaran['mei'] : 0;
+                $mJun = isset($anggaran['jun']) ? (float)$anggaran['jun'] : 0;
+                $mJul = isset($anggaran['jul']) ? (float)$anggaran['jul'] : 0;
+                $mAgs = isset($anggaran['ags']) ? (float)$anggaran['ags'] : (isset($anggaran['agu']) ? (float)$anggaran['agu'] : 0);
+                $mSep = isset($anggaran['sep']) ? (float)$anggaran['sep'] : 0;
+                $mOkt = isset($anggaran['okt']) ? (float)$anggaran['okt'] : 0;
+                $mNov = isset($anggaran['nov']) ? (float)$anggaran['nov'] : 0;
+                $mDes = isset($anggaran['des']) ? (float)$anggaran['des'] : 0;
+                $totAng = $mJan + $mFeb + $mMar + $mApr + $mMei + $mJun + $mJul + $mAgs + $mSep + $mOkt + $mNov + $mDes;
+
+                $existAng = $this->db
+                    ->where('deleted_at IS NULL')
+                    ->group_start()
+                        ->where('header_id', $header_id)
+                        ->or_group_start()
+                            ->where('kode_sub_kegiatan', $kode_sub_kegiatan)
+                            ->where('tahun', $tahun)
+                        ->group_end()
+                    ->group_end()
+                    ->get('target_renaksi_anggaran_bulanan')
+                    ->row_array();
+
+                $angData = [
+                    'header_id' => $header_id,
+                    'kode_wilayah' => $kode_wilayah,
+                    'tahun' => $tahun,
+                    'id_instansi' => $id_instansi,
+                    'kode_sub_kegiatan' => $kode_sub_kegiatan,
+                    'jan' => $mJan, 'feb' => $mFeb, 'mar' => $mMar, 'apr' => $mApr,
+                    'mei' => $mMei, 'jun' => $mJun, 'jul' => $mJul, 'ags' => $mAgs,
+                    'sep' => $mSep, 'okt' => $mOkt, 'nov' => $mNov, 'des' => $mDes,
+                    'total_anggaran' => $totAng,
+                    'updated_at' => $now
+                ];
+
+                if ($existAng) {
+                    $this->db->where('id', $existAng['id'])->update('target_renaksi_anggaran_bulanan', $angData);
+                } else {
+                    $angData['created_at'] = $now;
+                    $this->db->insert('target_renaksi_anggaran_bulanan', $angData);
+                }
+            }
+
+            // 2. Simpan Indikators
+            $savedIndikatorIds = [];
+            $indCount = 0;
+            if (!empty($indikators) && is_array($indikators)) {
+                $indCount = count($indikators);
+                foreach ($indikators as $idx => $ind) {
+                    $indId = isset($ind['id']) && is_numeric($ind['id']) ? (int)$ind['id'] : 0;
+                    $uraian = isset($ind['uraian']) ? trim($ind['uraian']) : (isset($ind['nama']) ? trim($ind['nama']) : '');
+                    $satuan = isset($ind['satuan']) ? trim($ind['satuan']) : '';
+                    $targetTahunan = isset($ind['targetTahunan']) ? (float)$ind['targetTahunan'] : (isset($ind['target_tahunan']) ? (float)$ind['target_tahunan'] : 0);
+                    $tw1 = (isset($ind['tw1']) && $ind['tw1'] !== '' && $ind['tw1'] !== null) ? (float)$ind['tw1'] : null;
+                    $tw2 = (isset($ind['tw2']) && $ind['tw2'] !== '' && $ind['tw2'] !== null) ? (float)$ind['tw2'] : null;
+                    $tw3 = (isset($ind['tw3']) && $ind['tw3'] !== '' && $ind['tw3'] !== null) ? (float)$ind['tw3'] : null;
+                    $tw4 = (isset($ind['tw4']) && $ind['tw4'] !== '' && $ind['tw4'] !== null) ? (float)$ind['tw4'] : null;
+
+                    if (empty($uraian)) continue;
+
+                    // Hitung Validitas: TW sum vs Target Tahunan
+                    $sumTw = ($tw1 ?: 0) + ($tw2 ?: 0) + ($tw3 ?: 0) + ($tw4 ?: 0);
+                    $validitas = (abs($sumTw - $targetTahunan) < 0.0001) ? 'Valid' : 'Invalid';
+
+                    $indRow = [
+                        'header_id' => $header_id,
+                        'kode_wilayah' => $kode_wilayah,
+                        'tahun' => $tahun,
+                        'id_instansi' => $id_instansi,
+                        'level_type' => 'sub_kegiatan',
+                        'entity_code' => $kode_sub_kegiatan,
+                        'entity_name' => $header ? $header['nama_sub_kegiatan'] : '',
+                        'uraian_indikator' => $uraian,
+                        'satuan' => $satuan,
+                        'target_tahunan' => $targetTahunan,
+                        'tw1' => $tw1,
+                        'tw2' => $tw2,
+                        'tw3' => $tw3,
+                        'tw4' => $tw4,
+                        'validitas' => $validitas,
+                        'urutan' => $idx + 1,
+                        'updated_at' => $now
+                    ];
+
+                    if ($indId > 0) {
+                        $this->db->where('id', $indId)->update('target_renaksi_indikator', $indRow);
+                        $savedIndikatorIds[] = $indId;
+                    } else {
+                        $indRow['created_at'] = $now;
+                        $this->db->insert('target_renaksi_indikator', $indRow);
+                        $savedIndikatorIds[] = $this->db->insert_id();
+                    }
+                }
+
+                // Hapus indikator lama yang tidak ada lagi di submit
+                if (!empty($savedIndikatorIds)) {
+                    $this->db->where('level_type', 'sub_kegiatan')
+                        ->group_start()
+                            ->where('header_id', $header_id)
+                            ->or_group_start()
+                                ->where('entity_code', $kode_sub_kegiatan)
+                                ->where('tahun', $tahun)
+                            ->group_end()
+                        ->group_end()
+                        ->where_not_in('id', $savedIndikatorIds)
+                        ->update('target_renaksi_indikator', ['deleted_at' => $now]);
+                }
+            }
+
+            // 3. Simpan Tahapan Proses
+            $this->db->where('header_id', $header_id)
+                ->or_group_start()
+                    ->where('kode_sub_kegiatan', $kode_sub_kegiatan)
+                    ->where('tahun', $tahun)
+                ->group_end()
+                ->delete('target_renaksi_tahapan_proses');
+
+            $jumlahIndikator = max($indCount, 1);
+            if (!empty($tahapan) && is_array($tahapan)) {
+                foreach ($tahapan as $tIdx => $tRow) {
+                    $uraian = isset($tRow['uraian']) ? trim($tRow['uraian']) : '';
+                    $nilai = isset($tRow['nilai']) && $tRow['nilai'] !== '' ? (float)$tRow['nilai'] : 0;
+                    $satuan = isset($tRow['satuan']) ? trim($tRow['satuan']) : '';
+                    $bobotOutput = isset($tRow['bobot']) ? (float)$tRow['bobot'] : (isset($tRow['bobot_output']) ? (float)$tRow['bobot_output'] : 0);
+                    $bulan = isset($tRow['bulan']) ? trim($tRow['bulan']) : '';
+                    $ket = isset($tRow['keterangan']) ? trim($tRow['keterangan']) : (isset($tRow['ket']) ? trim($tRow['ket']) : '');
+                    
+                    // Rumus: Bobot Sub Kegiatan = Bobot Output / Jumlah Indikator
+                    $bobotSubKeg = $bobotOutput / $jumlahIndikator;
+
+                    if (!empty($uraian) || $nilai > 0 || !empty($satuan) || $bobotOutput > 0 || !empty($bulan)) {
+                        $this->db->insert('target_renaksi_tahapan_proses', [
+                            'header_id' => $header_id,
+                            'indikator_id' => isset($savedIndikatorIds[0]) ? $savedIndikatorIds[0] : null,
+                            'kode_wilayah' => $kode_wilayah,
+                            'tahun' => $tahun,
+                            'id_instansi' => $id_instansi,
+                            'kode_sub_kegiatan' => $kode_sub_kegiatan,
+                            'uraian' => $uraian,
+                            'target_output_nilai' => $nilai,
+                            'target_output_satuan' => $satuan,
+                            'bobot_kinerja_output' => $bobotOutput,
+                            'rencana_bulan' => $bulan,
+                            'bobot_kinerja_sub_kegiatan' => round($bobotSubKeg, 2),
+                            'keterangan' => $ket,
+                            'urutan' => $tIdx + 1,
+                            'created_at' => $now
+                        ]);
+                    }
+                }
+            }
+
+            if ($this->db->trans_status() === FALSE) {
+                $this->db->trans_rollback();
+                throw new Exception('Gagal menyimpan ke database.');
+            } else {
+                $this->db->trans_commit();
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Target Renaksi Sasaran Sub Kegiatan berhasil disimpan!'
+                ]);
+            }
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function SaveTargetRenaksiHierarchy() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $level_type = $this->input->post('level_type', TRUE);
+            $entity_code = trim($this->input->post('entity_code', TRUE));
+            $entity_name = trim($this->input->post('entity_name', TRUE));
+            $nomenklatur = trim($this->input->post('nomenklatur', TRUE));
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: date('Y'));
+            $kode_wilayah = $this->input->post('kode_wilayah', TRUE) ?: $this->get_kode_wilayah() ?: '35.73';
+            $id_instansi = (int)($this->input->post('id_instansi', TRUE) ?: $this->get_instansi_id() ?: 1);
+            $indikators = $this->input->post('indikators');
+
+            if (empty($level_type) || empty($entity_code)) {
+                throw new Exception('Data level atau kode entitas tidak valid.');
+            }
+
+            $this->db->trans_begin();
+            $now = date('Y-m-d H:i:s');
+
+            if (!empty($indikators) && is_array($indikators)) {
+                foreach ($indikators as $idx => $ind) {
+                    $indId = isset($ind['id']) && is_numeric($ind['id']) ? (int)$ind['id'] : 0;
+                    $nama = isset($ind['nama']) ? trim($ind['nama']) : '';
+                    $satuan = isset($ind['satuan']) ? trim($ind['satuan']) : '';
+                    $targetTahunan = isset($ind['targetTahunan']) ? (float)$ind['targetTahunan'] : 0;
+                    $tw1 = (isset($ind['tw1']) && $ind['tw1'] !== '' && $ind['tw1'] !== null) ? (float)$ind['tw1'] : null;
+                    $tw2 = (isset($ind['tw2']) && $ind['tw2'] !== '' && $ind['tw2'] !== null) ? (float)$ind['tw2'] : null;
+                    $tw3 = (isset($ind['tw3']) && $ind['tw3'] !== '' && $ind['tw3'] !== null) ? (float)$ind['tw3'] : null;
+                    $tw4 = (isset($ind['tw4']) && $ind['tw4'] !== '' && $ind['tw4'] !== null) ? (float)$ind['tw4'] : null;
+
+                    if (empty($nama) && $indId <= 0) continue;
+
+                    $hierRow = [
+                        'kode_wilayah' => $kode_wilayah,
+                        'tahun' => $tahun,
+                        'id_instansi' => $id_instansi,
+                        'level_type' => $level_type,
+                        'entity_code' => $entity_code,
+                        'entity_name' => $entity_name,
+                        'nomenklatur' => $nomenklatur,
+                        'indikator_nama' => $nama,
+                        'satuan' => $satuan,
+                        'target_tahunan' => $targetTahunan,
+                        'tw1' => $tw1,
+                        'tw2' => $tw2,
+                        'tw3' => $tw3,
+                        'tw4' => $tw4,
+                        'urutan' => $idx + 1,
+                        'updated_at' => $now
+                    ];
+
+                    if ($indId > 0) {
+                        $this->db->where('id', $indId)->update('target_renaksi_hierarchy', $hierRow);
+                    } else {
+                        $exist = $this->db->where('level_type', $level_type)
+                            ->where('entity_code', $entity_code)
+                            ->where('indikator_nama', $nama)
+                            ->where('tahun', $tahun)
+                            ->where('deleted_at IS NULL')
+                            ->get('target_renaksi_hierarchy')
+                            ->row_array();
+
+                        if ($exist) {
+                            $this->db->where('id', $exist['id'])->update('target_renaksi_hierarchy', $hierRow);
+                        } else {
+                            $hierRow['created_at'] = $now;
+                            $this->db->insert('target_renaksi_hierarchy', $hierRow);
+                        }
+                    }
+                }
+            }
+
+            if ($this->db->trans_status() === FALSE) {
+                $this->db->trans_rollback();
+                throw new Exception('Gagal menyimpan target hierarki.');
+            } else {
+                $this->db->trans_commit();
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Target Kinerja Triwulan berhasil disimpan!'
+                ]);
+            }
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function SyncDPAAnggaran() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: date('Y'));
+            $instansi_id = $this->input->post('instansi_id', TRUE);
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.73';
+
+            $this->db->where('tahun', $tahun)->where('deleted_at IS NULL');
+            if (!empty($instansi_id)) {
+                $this->db->where('id_instansi', (int)$instansi_id);
+            }
+            $headers = $this->db->get('belanja_sub_kegiatan_header')->result_array();
+
+            $syncedCount = 0;
+            $now = date('Y-m-d H:i:s');
+
+            foreach ($headers as $h) {
+                $hId = (int)$h['id'];
+                $subKode = $h['kode_sub_kegiatan'];
+
+                // Ambil RAK DPA
+                $rakRows = $this->db->where('tahun', $tahun)
+                    ->where('kode_sub_kegiatan', $subKode)
+                    ->where('deleted_at IS NULL')
+                    ->get('dpa_rak_rincian')
+                    ->result_array();
+
+                $m = array_fill(0, 12, 0);
+                $totalRak = 0;
+                if (!empty($rakRows)) {
+                    foreach ($rakRows as $r) {
+                        $m[0] += (float)$r['jan'];
+                        $m[1] += (float)$r['feb'];
+                        $m[2] += (float)$r['mar'];
+                        $m[3] += (float)$r['apr'];
+                        $m[4] += (float)$r['mei'];
+                        $m[5] += (float)$r['jun'];
+                        $m[6] += (float)$r['jul'];
+                        $m[7] += (float)$r['ags'];
+                        $m[8] += (float)$r['sep'];
+                        $m[9] += (float)$r['okt'];
+                        $m[10] += (float)$r['nov'];
+                        $m[11] += (float)$r['des'];
+                        $totalRak += (float)$r['total_rak'];
+                    }
+                } else {
+                    $totalRak = (float)$h['total_belanja'];
+                }
+
+                $exist = $this->db->where('deleted_at IS NULL')
+                    ->group_start()
+                        ->where('header_id', $hId)
+                        ->or_group_start()
+                            ->where('kode_sub_kegiatan', $subKode)
+                            ->where('tahun', $tahun)
+                        ->group_end()
+                    ->group_end()
+                    ->get('target_renaksi_anggaran_bulanan')
+                    ->row_array();
+
+                $angData = [
+                    'header_id' => $hId,
+                    'kode_wilayah' => $h['kode_wilayah'] ?: $kode_wilayah,
+                    'tahun' => $tahun,
+                    'id_instansi' => $h['id_instansi'],
+                    'kode_sub_kegiatan' => $subKode,
+                    'jan' => $m[0], 'feb' => $m[1], 'mar' => $m[2], 'apr' => $m[3],
+                    'mei' => $m[4], 'jun' => $m[5], 'jul' => $m[6], 'ags' => $m[7],
+                    'sep' => $m[8], 'okt' => $m[9], 'nov' => $m[10], 'des' => $m[11],
+                    'total_anggaran' => $totalRak,
+                    'updated_at' => $now
+                ];
+
+                if ($exist) {
+                    $this->db->where('id', $exist['id'])->update('target_renaksi_anggaran_bulanan', $angData);
+                } else {
+                    $angData['created_at'] = $now;
+                    $this->db->insert('target_renaksi_anggaran_bulanan', $angData);
+                }
+                $syncedCount++;
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => "Berhasil menyinkronkan $syncedCount data anggaran kas DPA ke Target Renaksi!"
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    private function _buildTargetRenaksiHierarchy($KodeWilayah, $tahun, $filter_instansi = null) {
+        // 1. Ambil data headers belanja sub kegiatan
+        $this->db->select('*')
+            ->from('belanja_sub_kegiatan_header')
+            ->where('deleted_at IS NULL');
+
+        if (!empty($KodeWilayah)) {
+            $this->db->where('kode_wilayah', $KodeWilayah);
+        }
+        if (!empty($tahun) && $tahun !== 'all') {
+            $this->db->where('tahun', $tahun);
+        }
+        if (!empty($filter_instansi)) {
+            $this->db->where('id_instansi', (int)$filter_instansi);
+        }
+
+        $headers = $this->db
+            ->order_by('kode_program', 'ASC')
+            ->order_by('kode_kegiatan', 'ASC')
+            ->order_by('kode_sub_kegiatan', 'ASC')
+            ->get()
+            ->result_array();
+
+        // 2. Ambil data indikator sub kegiatan
+        $this->db->where('deleted_at IS NULL');
+        if (!empty($tahun) && $tahun !== 'all') {
+            $this->db->where('tahun', $tahun);
+        }
+        $indikatorsSaved = $this->db
+            ->order_by('urutan', 'ASC')
+            ->order_by('id', 'ASC')
+            ->get('target_renaksi_indikator')
+            ->result_array();
+
+        $indikatorMap = [];
+        foreach ($indikatorsSaved as $ind) {
+            $item = [
+                'id' => (string)$ind['id'],
+                'nama' => $ind['uraian_indikator'],
+                'satuan' => $ind['satuan'] ?: 'Dokumen',
+                'targetTahunan' => $ind['target_tahunan'] !== null ? (float)$ind['target_tahunan'] : 1,
+                'tw1' => $ind['tw1'] !== null ? (float)$ind['tw1'] : null,
+                'tw2' => $ind['tw2'] !== null ? (float)$ind['tw2'] : null,
+                'tw3' => $ind['tw3'] !== null ? (float)$ind['tw3'] : null,
+                'tw4' => $ind['tw4'] !== null ? (float)$ind['tw4'] : null,
+                'validitas' => $ind['validitas'] ?: 'Valid'
+            ];
+            if (!empty($ind['header_id'])) {
+                $indikatorMap['h_' . $ind['header_id']][] = $item;
+            }
+            if (!empty($ind['entity_code'])) {
+                $indikatorMap['c_' . $ind['entity_code']][] = $item;
+            }
+        }
+
+        // 3. Ambil data tahapan proses
+        $this->db->where('deleted_at IS NULL');
+        if (!empty($tahun) && $tahun !== 'all') {
+            $this->db->where('tahun', $tahun);
+        }
+        $tahapanSaved = $this->db
+            ->order_by('urutan', 'ASC')
+            ->order_by('id', 'ASC')
+            ->get('target_renaksi_tahapan_proses')
+            ->result_array();
+
+        $tahapanMap = [];
+        foreach ($tahapanSaved as $tp) {
+            $item = [
+                'id' => (string)$tp['id'],
+                'uraian' => $tp['uraian'],
+                'nilai' => $tp['target_output_nilai'] !== null ? (float)$tp['target_output_nilai'] : 1,
+                'satuan' => $tp['target_output_satuan'] ?: 'berkas',
+                'bobot' => $tp['bobot_kinerja_output'] !== null ? (float)$tp['bobot_kinerja_output'] : 0,
+                'bulan' => $tp['rencana_bulan'] ?: 'Januari',
+                'bobotSubKeg' => $tp['bobot_kinerja_sub_kegiatan'] !== null ? (float)$tp['bobot_kinerja_sub_kegiatan'] : 0,
+                'keterangan' => $tp['keterangan'] ?: ''
+            ];
+            if (!empty($tp['header_id'])) {
+                $tahapanMap['h_' . $tp['header_id']][] = $item;
+            }
+            if (!empty($tp['kode_sub_kegiatan'])) {
+                $tahapanMap['c_' . $tp['kode_sub_kegiatan']][] = $item;
+            }
+        }
+
+        // 4. Ambil data anggaran bulanan
+        $this->db->where('deleted_at IS NULL');
+        if (!empty($tahun) && $tahun !== 'all') {
+            $this->db->where('tahun', $tahun);
+        }
+        $anggaranSaved = $this->db
+            ->get('target_renaksi_anggaran_bulanan')
+            ->result_array();
+
+        $anggaranMap = [];
+        foreach ($anggaranSaved as $ang) {
+            $pagu = [
+                'jan' => (float)$ang['jan'], 'feb' => (float)$ang['feb'], 'mar' => (float)$ang['mar'],
+                'apr' => (float)$ang['apr'], 'mei' => (float)$ang['mei'], 'jun' => (float)$ang['jun'],
+                'jul' => (float)$ang['jul'], 'agu' => (float)$ang['ags'], 'sep' => (float)$ang['sep'],
+                'okt' => (float)$ang['okt'], 'nov' => (float)$ang['nov'], 'des' => (float)$ang['des']
+            ];
+            $val = [
+                'pagu' => $pagu,
+                'total' => (float)$ang['total_anggaran']
+            ];
+            if (!empty($ang['header_id'])) {
+                $anggaranMap['h_' . $ang['header_id']] = $val;
+            }
+            if (!empty($ang['kode_sub_kegiatan'])) {
+                $anggaranMap['c_' . $ang['kode_sub_kegiatan']] = $val;
+            }
+        }
+
+        // Fallback RAK DPA jika belum ada di target_renaksi_anggaran_bulanan
+        $this->db->where('deleted_at IS NULL');
+        if (!empty($tahun) && $tahun !== 'all') {
+            $this->db->where('tahun', $tahun);
+        }
+        $dpaRak = $this->db->get('dpa_rak_rincian')->result_array();
+
+        $dpaMap = [];
+        foreach ($dpaRak as $dr) {
+            $sk = $dr['kode_sub_kegiatan'];
+            if (!isset($dpaMap[$sk])) {
+                $dpaMap[$sk] = [
+                    'jan' => 0, 'feb' => 0, 'mar' => 0, 'apr' => 0,
+                    'mei' => 0, 'jun' => 0, 'jul' => 0, 'agu' => 0,
+                    'sep' => 0, 'okt' => 0, 'nov' => 0, 'des' => 0,
+                    'total' => 0
+                ];
+            }
+            $dpaMap[$sk]['jan'] += (float)$dr['jan'];
+            $dpaMap[$sk]['feb'] += (float)$dr['feb'];
+            $dpaMap[$sk]['mar'] += (float)$dr['mar'];
+            $dpaMap[$sk]['apr'] += (float)$dr['apr'];
+            $dpaMap[$sk]['mei'] += (float)$dr['mei'];
+            $dpaMap[$sk]['jun'] += (float)$dr['jun'];
+            $dpaMap[$sk]['jul'] += (float)$dr['jul'];
+            $dpaMap[$sk]['agu'] += (float)$dr['ags'];
+            $dpaMap[$sk]['sep'] += (float)$dr['sep'];
+            $dpaMap[$sk]['okt'] += (float)$dr['okt'];
+            $dpaMap[$sk]['nov'] += (float)$dr['nov'];
+            $dpaMap[$sk]['des'] += (float)$dr['des'];
+            $dpaMap[$sk]['total'] += (float)$dr['total_rak'];
+        }
+
+        // 5. Ambil data target hierarchy (Tujuan, Sasaran Strategis, Program, Kegiatan)
+        $this->db->where('deleted_at IS NULL');
+        if (!empty($tahun) && $tahun !== 'all') {
+            $this->db->where('tahun', $tahun);
+        }
+        $hierSaved = $this->db
+            ->order_by('urutan', 'ASC')
+            ->get('target_renaksi_hierarchy')
+            ->result_array();
+
+        $hierMap = [];
+        foreach ($hierSaved as $hRow) {
+            $k = $hRow['level_type'] . '_' . $hRow['entity_code'];
+            $hierMap[$k][] = [
+                'id' => (string)$hRow['id'],
+                'nama' => $hRow['indikator_nama'],
+                'satuan' => $hRow['satuan'] ?: '%',
+                'targetTahunan' => $hRow['target_tahunan'] !== null ? (float)$hRow['target_tahunan'] : 100,
+                'tw1' => $hRow['tw1'] !== null ? (float)$hRow['tw1'] : null,
+                'tw2' => $hRow['tw2'] !== null ? (float)$hRow['tw2'] : null,
+                'tw3' => $hRow['tw3'] !== null ? (float)$hRow['tw3'] : null,
+                'tw4' => $hRow['tw4'] !== null ? (float)$hRow['tw4'] : null
+            ];
+        }
+
+        // 6. Susun pohon Tujuan -> Sasaran Strategis -> Sasaran Program -> Sasaran Kegiatan -> Sasaran Sub Kegiatan
+        $progGroups = [];
+        foreach ($headers as $h) {
+            $hId = (int)$h['id'];
+            $subKode = $h['kode_sub_kegiatan'];
+            $kegKode = $h['kode_kegiatan'] ?: substr($subKode, 0, 13);
+            $progKode = $h['kode_program'] ?: substr($kegKode, 0, 7);
+
+            // Indikators
+            $inds = isset($indikatorMap['h_' . $hId]) ? $indikatorMap['h_' . $hId] : (isset($indikatorMap['c_' . $subKode]) ? $indikatorMap['c_' . $subKode] : []);
+            if (empty($inds)) {
+                $inds = [
+                    [
+                        'id' => 'ind_def_' . $hId,
+                        'nama' => 'Jumlah output sub kegiatan ' . ($h['nama_sub_kegiatan'] ?: $subKode),
+                        'satuan' => 'Dokumen',
+                        'targetTahunan' => 1,
+                        'tw1' => 1, 'tw2' => null, 'tw3' => null, 'tw4' => null,
+                        'validitas' => 'Valid'
+                    ]
+                ];
+            }
+
+            // Tahapan Proses
+            $tps = isset($tahapanMap['h_' . $hId]) ? $tahapanMap['h_' . $hId] : (isset($tahapanMap['c_' . $subKode]) ? $tahapanMap['c_' . $subKode] : []);
+
+            // Anggaran
+            $pagu = [
+                'jan' => 0, 'feb' => 0, 'mar' => 0, 'apr' => 0,
+                'mei' => 0, 'jun' => 0, 'jul' => 0, 'agu' => 0,
+                'sep' => 0, 'okt' => 0, 'nov' => 0, 'des' => 0
+            ];
+            $totalAnggaran = 0;
+
+            if (isset($anggaranMap['h_' . $hId])) {
+                $pagu = $anggaranMap['h_' . $hId]['pagu'];
+                $totalAnggaran = $anggaranMap['h_' . $hId]['total'];
+            } else if (isset($anggaranMap['c_' . $subKode])) {
+                $pagu = $anggaranMap['c_' . $subKode]['pagu'];
+                $totalAnggaran = $anggaranMap['c_' . $subKode]['total'];
+            } else if (isset($dpaMap[$subKode])) {
+                $pagu = $dpaMap[$subKode];
+                $totalAnggaran = $dpaMap[$subKode]['total'] ?: (float)$h['total_belanja'];
+            } else {
+                $totalAnggaran = (float)$h['total_belanja'];
+            }
+
+            $subItem = [
+                'id' => (string)$hId,
+                'headerId' => $hId,
+                'kode' => $subKode,
+                'nama' => $h['nama_sub_kegiatan'] ?: 'Sub Kegiatan ' . $subKode,
+                'nomenklatur' => $h['nama_sub_kegiatan'] ?: 'Sub Kegiatan ' . $subKode,
+                'perangkatDaerah' => $h['nama_perangkat_daerah'] ?: '',
+                'subUnit' => $h['nama_sub_unit'] ?: '',
+                'bidangUrusan' => $h['nama_bidang_urusan'] ?: '',
+                'programNama' => $h['nama_program'] ?: '',
+                'kegiatanNama' => $h['nama_kegiatan'] ?: '',
+                'indikators' => $inds,
+                'paguBulanan' => $pagu,
+                'anggaran' => $totalAnggaran,
+                'tahapanProses' => $tps
+            ];
+
+            $progGroups[$progKode][$kegKode][] = $subItem;
+        }
+
+        // Bangun Sasaran Program & Sasaran Kegiatan
+        $spList = [];
+        foreach ($progGroups as $pKode => $kegGroup) {
+            $pName = 'PROGRAM ' . $pKode;
+            $skList = [];
+            $progTotalAnggaran = 0;
+
+            foreach ($kegGroup as $kKode => $subList) {
+                $kName = 'KEGIATAN ' . $kKode;
+                $kegTotalAnggaran = 0;
+                foreach ($subList as $s) {
+                    $kegTotalAnggaran += (float)$s['anggaran'];
+                    $pName = $s['programNama'] ?: $pName;
+                    $kName = $s['kegiatanNama'] ?: $kName;
+                }
+                $progTotalAnggaran += $kegTotalAnggaran;
+
+                $kInds = isset($hierMap['kegiatan_' . $kKode]) ? $hierMap['kegiatan_' . $kKode] : [
+                    [
+                        'id' => 'ind_sk_' . str_replace('.', '_', $kKode),
+                        'nama' => 'Persentase ketercapaian target output ' . $kName,
+                        'satuan' => '%',
+                        'targetTahunan' => 100,
+                        'tw1' => 25, 'tw2' => 25, 'tw3' => 25, 'tw4' => 25
+                    ]
+                ];
+
+                $skList[] = [
+                    'id' => 'sk_' . str_replace('.', '_', $kKode),
+                    'kode' => $kKode,
+                    'nama' => 'Tersedianya Layanan dan Data ' . $kName,
+                    'nomenklatur' => $kName,
+                    'indikators' => $kInds,
+                    'anggaran' => $kegTotalAnggaran,
+                    'sasaranSubKegiatanList' => $subList
+                ];
+            }
+
+            $pInds = isset($hierMap['program_' . $pKode]) ? $hierMap['program_' . $pKode] : [
+                [
+                    'id' => 'ind_sp_' . str_replace('.', '_', $pKode),
+                    'nama' => 'Persentase pemenuhan standar kualitas proses ' . $pName,
+                    'satuan' => '%',
+                    'targetTahunan' => 100,
+                    'tw1' => 100, 'tw2' => null, 'tw3' => null, 'tw4' => null
+                ]
+            ];
+
+            $spList[] = [
+                'id' => 'sp_' . str_replace('.', '_', $pKode),
+                'kode' => $pKode,
+                'nama' => 'Meningkatnya Kualitas Proses ' . $pName,
+                'nomenklatur' => $pName,
+                'indikators' => $pInds,
+                'anggaran' => $progTotalAnggaran,
+                'sasaranKegiatanList' => $skList
+            ];
+        }
+
+        // Bangun Tujuan & Sasaran Strategis
+        $ss1Inds = isset($hierMap['sasaran_strategis_SS_1']) ? $hierMap['sasaran_strategis_SS_1'] : [
+            ['id' => 'ind_ss1_1', 'nama' => 'Indeks Perencanaan Pembangunan Daerah', 'satuan' => 'Nilai', 'targetTahunan' => 90, 'tw1' => null, 'tw2' => null, 'tw3' => 90, 'tw4' => null],
+            ['id' => 'ind_ss1_2', 'nama' => 'Nilai Komponen Perencanaan SAKIP', 'satuan' => 'Nilai', 'targetTahunan' => 27.88, 'tw1' => null, 'tw2' => null, 'tw3' => 27.88, 'tw4' => null]
+        ];
+        $ss2Inds = isset($hierMap['sasaran_strategis_SS_2']) ? $hierMap['sasaran_strategis_SS_2'] : [
+            ['id' => 'ind_ss2_1', 'nama' => 'Persentase rekomendasi kebijakan pembangunan daerah yang dijadikan sebagai landasan dalam implementasi pembangunan daerah', 'satuan' => '%', 'targetTahunan' => 85, 'tw1' => null, 'tw2' => null, 'tw3' => null, 'tw4' => 85]
+        ];
+
+        $tujuanInds = isset($hierMap['tujuan_T_1']) ? $hierMap['tujuan_T_1'] : [
+            ['id' => 'ind_t1_1', 'nama' => 'Persentase ketercapaian indikator tujuan pembangunan daerah', 'satuan' => '%', 'targetTahunan' => 100, 'tw1' => null, 'tw2' => null, 'tw3' => null, 'tw4' => 100],
+            ['id' => 'ind_t1_2', 'nama' => 'Persentase ketercapaian indikator sasaran pembangunan daerah', 'satuan' => '%', 'targetTahunan' => 200, 'tw1' => null, 'tw2' => null, 'tw3' => null, 'tw4' => 200]
+        ];
+
+        $tujuanList = [
+            [
+                'id' => 't_1',
+                'kode' => 'T_1',
+                'nama' => 'Meningkatnya Kinerja Pembangunan Daerah',
+                'indikators' => $tujuanInds,
+                'sasaranStrategisList' => [
+                    [
+                        'id' => 'ss_1',
+                        'kode' => 'SS_1',
+                        'nama' => 'Meningkatnya Kualitas Perencanaan',
+                        'indikators' => $ss1Inds,
+                        'sasaranProgramList' => $spList
+                    ],
+                    [
+                        'id' => 'ss_2',
+                        'kode' => 'SS_2',
+                        'nama' => 'Meningkatnya Pemanfaatan Hasil Kelitbangan',
+                        'indikators' => $ss2Inds,
+                        'sasaranProgramList' => []
+                    ]
+                ]
+            ]
+        ];
+
+        return [
+            'tujuanList' => $tujuanList
+        ];
+    }
+
+    // ================================================================
+    // REALISASI RENAKSI (REALISASI KINERJA & ANGGARAN)
+    // ================================================================
+
+    public function RealisasiRenaksi() {
+        $Header['Halaman'] = 'Realisasi Renaksi';
+        
+        $KodeWilayah = $this->get_kode_wilayah();
+        $instansi_id = $this->get_instansi_id();
+        $is_role_4 = $this->is_role_4();
+        $tahun = $this->input->get('tahun', TRUE);
+        $filter_instansi = $this->input->get('instansi_id', TRUE);
+        $bulanIdx = $this->input->get('bulan', TRUE) !== null ? (int)$this->input->get('bulan', TRUE) : 0;
+        
+        if ($is_role_4 && $instansi_id) {
+            $filter_instansi = $instansi_id;
+        }
+
+        // Batasi rentang bulan 0-11
+        if ($bulanIdx < 0) $bulanIdx = 0;
+        if ($bulanIdx > 11) $bulanIdx = 11;
+
+        // Data Provinsi untuk filter
+        $Data['Provinsi'] = $this->db
+            ->where("Kode LIKE '__'")
+            ->order_by('Nama')
+            ->get('kodewilayah')
+            ->result_array();
+        
+        $Data['KodeWilayah'] = $KodeWilayah;
+        $Data['NamaWilayah'] = '';
+        $Data['IsRole4'] = $is_role_4;
+        $Data['InstansiId'] = $instansi_id;
+        $Data['ControllerName'] = 'Instansi';
+        
+        if (!empty($KodeWilayah)) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            $Data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
+        }
+        
+        // List Instansi
+        $Data['ListInstansi'] = [];
+        if (!empty($KodeWilayah)) {
+            $provKode = substr($KodeWilayah, 0, 2);
+            $Data['ListInstansi'] = $this->db
+                ->select('id, nama')
+                ->from('akun_instansi')
+                ->where("(kodewilayah = " . $this->db->escape($KodeWilayah) . " OR kodewilayah = " . $this->db->escape($provKode) . ")")
+                ->where('deleted_at IS NULL')
+                ->order_by('nama', 'ASC')
+                ->get()
+                ->result_array();
+        } else {
+            $Data['ListInstansi'] = $this->db
+                ->select('id, nama')
+                ->from('akun_instansi')
+                ->where('deleted_at IS NULL')
+                ->order_by('nama', 'ASC')
+                ->get()
+                ->result_array();
+        }
+        
+        // List Tahun
+        $dbYears = $this->db->select('DISTINCT(tahun) as thn')
+            ->where('deleted_at IS NULL')
+            ->order_by('tahun', 'DESC')
+            ->get('belanja_sub_kegiatan_header')
+            ->result_array();
+        
+        $listTahun = [];
+        if (!empty($dbYears)) {
+            foreach ($dbYears as $dy) {
+                if (!empty($dy['thn'])) {
+                    $listTahun[] = (int)$dy['thn'];
+                }
+            }
+        }
+        $currentY = (int)date('Y');
+        for ($y = $currentY + 1; $y >= $currentY - 5; $y--) {
+            if (!in_array($y, $listTahun)) {
+                $listTahun[] = $y;
+            }
+        }
+        rsort($listTahun);
+        $Data['ListTahun'] = $listTahun;
+        
+        if (empty($tahun)) {
+            if (!empty($dbYears) && !empty($dbYears[0]['thn'])) {
+                $tahun = $dbYears[0]['thn'];
+            } else {
+                $tahun = date('Y');
+            }
+        }
+        $Data['TahunAktif'] = $tahun;
+        $Data['FilterInstansi'] = $filter_instansi;
+        $Data['BulanAktif'] = $bulanIdx;
+
+        // Ambil Data Hierarki Realisasi Renaksi
+        $Data['RealisasiTree'] = $this->_buildRealisasiRenaksiHierarchy($KodeWilayah, $tahun, $filter_instansi, $bulanIdx);
+        
+        $this->load->view('Daerah/header', $Header);
+        $this->load->view('Daerah/RealisasiRenaksi', $Data);
+    }
+
+    public function GetRealisasiRenaksiData() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $KodeWilayah = $this->get_kode_wilayah();
+        $is_role_4 = $this->is_role_4();
+        $instansi_id = $this->get_instansi_id();
+        $tahun = $this->input->post('tahun', TRUE) ?: date('Y');
+        $filter_instansi = $this->input->post('instansi', TRUE);
+        $bulanIdx = $this->input->post('bulan', TRUE) !== null ? (int)$this->input->post('bulan', TRUE) : 0;
+
+        if ($is_role_4 && $instansi_id) {
+            $filter_instansi = $instansi_id;
+        }
+
+        $tree = $this->_buildRealisasiRenaksiHierarchy($KodeWilayah, $tahun, $filter_instansi, $bulanIdx);
+        echo json_encode(['status' => 'success', 'data' => $tree]);
+    }
+
+    public function GetSubKegiatanRealisasiDetail() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $header_id = (int)$this->input->post('header_id', TRUE);
+        $kode_sub_kegiatan = trim($this->input->post('kode_sub_kegiatan', TRUE));
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: date('Y'));
+        $bulanIdx = $this->input->post('bulan', TRUE) !== null ? (int)$this->input->post('bulan', TRUE) : 0;
+
+        $this->db->where('deleted_at IS NULL');
+        if ($header_id > 0) {
+            $this->db->where('id', $header_id);
+        } else if (!empty($kode_sub_kegiatan)) {
+            $this->db->where('kode_sub_kegiatan', $kode_sub_kegiatan)->where('tahun', $tahun);
+        }
+        $header = $this->db->get('belanja_sub_kegiatan_header')->row_array();
+
+        if (!$header) {
+            echo json_encode(['status' => 'error', 'message' => 'Data Sub Kegiatan tidak ditemukan.']);
+            return;
+        }
+
+        $hId = (int)$header['id'];
+        $subKode = $header['kode_sub_kegiatan'];
+        $thn = (int)$header['tahun'];
+
+        // 1. Target Anggaran Bulanan
+        $targetAng = $this->db->where('deleted_at IS NULL')
+            ->group_start()
+                ->where('header_id', $hId)
+                ->or_group_start()
+                    ->where('kode_sub_kegiatan', $subKode)
+                    ->where('tahun', $thn)
+                ->group_end()
+            ->group_end()
+            ->get('target_renaksi_anggaran_bulanan')
+            ->row_array();
+
+        // 2. Realisasi Anggaran Bulanan
+        $realAng = $this->db->where('deleted_at IS NULL')
+            ->group_start()
+                ->where('header_id', $hId)
+                ->or_group_start()
+                    ->where('kode_sub_kegiatan', $subKode)
+                    ->where('tahun', $thn)
+                ->group_end()
+            ->group_end()
+            ->get('realisasi_renaksi_anggaran_bulanan')
+            ->row_array();
+
+        $monthKeys = ['jan','feb','mar','apr','mei','jun','jul','ags','sep','okt','nov','des'];
+        $monthNames = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+        $bulananList = [];
+        $runningReal = 0;
+        for ($m = 0; $m < 12; $m++) {
+            $k = $monthKeys[$m];
+            $tVal = $targetAng ? (float)$targetAng[$k] : 0;
+            $rVal = $realAng && $realAng[$k] !== null ? (float)$realAng[$k] : null;
+            if ($rVal !== null) {
+                $runningReal += $rVal;
+            }
+            $bulananList[] = [
+                'bulanIdx' => $m,
+                'bulanNama' => $monthNames[$m],
+                'target' => $tVal,
+                'realisasi' => $rVal,
+                'saldoAkumulasi' => $runningReal
+            ];
+        }
+
+        // 3. Target & Realisasi Indikator
+        $targetInds = $this->db->where('deleted_at IS NULL')
+            ->group_start()
+                ->where('header_id', $hId)
+                ->or_group_start()
+                    ->where('entity_code', $subKode)
+                    ->where('tahun', $thn)
+                ->group_end()
+            ->group_end()
+            ->order_by('urutan', 'ASC')
+            ->order_by('id', 'ASC')
+            ->get('target_renaksi_indikator')
+            ->result_array();
+
+        $realInds = $this->db->where('deleted_at IS NULL')
+            ->group_start()
+                ->where('header_id', $hId)
+                ->or_group_start()
+                    ->where('entity_code', $subKode)
+                    ->where('tahun', $thn)
+                ->group_end()
+            ->group_end()
+            ->get('realisasi_renaksi_indikator')
+            ->result_array();
+
+        $realIndMap = [];
+        foreach ($realInds as $ri) {
+            if ($ri['indikator_id']) {
+                $realIndMap[$ri['indikator_id']] = $ri;
+            }
+        }
+
+        $indikatorDetailList = [];
+        foreach ($targetInds as $ti) {
+            $indId = (int)$ti['id'];
+            $ri = isset($realIndMap[$indId]) ? $realIndMap[$indId] : null;
+            $indikatorDetailList[] = [
+                'id' => $indId,
+                'uraian' => $ti['uraian_indikator'],
+                'satuan' => $ti['satuan'],
+                'targetTahunan' => (float)$ti['target_tahunan'],
+                'tw' => [
+                    ['target' => $ti['tw1'] !== null ? (float)$ti['tw1'] : null, 'realisasi' => $ri && $ri['tw1'] !== null ? (float)$ri['tw1'] : null],
+                    ['target' => $ti['tw2'] !== null ? (float)$ti['tw2'] : null, 'realisasi' => $ri && $ri['tw2'] !== null ? (float)$ri['tw2'] : null],
+                    ['target' => $ti['tw3'] !== null ? (float)$ti['tw3'] : null, 'realisasi' => $ri && $ri['tw3'] !== null ? (float)$ri['tw3'] : null],
+                    ['target' => $ti['tw4'] !== null ? (float)$ti['tw4'] : null, 'realisasi' => $ri && $ri['tw4'] !== null ? (float)$ri['tw4'] : null]
+                ]
+            ];
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'data' => [
+                'header' => $header,
+                'bulanan' => $bulananList,
+                'indikators' => $indikatorDetailList,
+                'bulanAktif' => $bulanIdx
+            ]
+        ]);
+    }
+
+    public function SaveRealisasiSubKegiatan() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $header_id = (int)$this->input->post('header_id', TRUE);
+            $kode_sub_kegiatan = trim($this->input->post('kode_sub_kegiatan', TRUE));
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: date('Y'));
+            $kode_wilayah = $this->input->post('kode_wilayah', TRUE) ?: $this->get_kode_wilayah() ?: '35.73';
+            $id_instansi = (int)($this->input->post('id_instansi', TRUE) ?: $this->get_instansi_id() ?: 1);
+
+            $header = null;
+            if ($header_id > 0) {
+                $header = $this->db->where('id', $header_id)->where('deleted_at IS NULL')->get('belanja_sub_kegiatan_header')->row_array();
+            }
+            if (!$header && !empty($kode_sub_kegiatan)) {
+                $header = $this->db->where('kode_sub_kegiatan', $kode_sub_kegiatan)->where('tahun', $tahun)->where('deleted_at IS NULL')->get('belanja_sub_kegiatan_header')->row_array();
+            }
+            if ($header) {
+                $header_id = (int)$header['id'];
+                $kode_sub_kegiatan = $header['kode_sub_kegiatan'];
+                $kode_wilayah = $header['kode_wilayah'] ?: $kode_wilayah;
+                $id_instansi = $header['id_instansi'] ? (int)$header['id_instansi'] : $id_instansi;
+            }
+
+            $bulananReal = $this->input->post('bulanan_realisasi');
+            $indikatorsReal = $this->input->post('indikators_realisasi');
+
+            $this->db->trans_begin();
+            $now = date('Y-m-d H:i:s');
+
+            // 1. Simpan Realisasi Anggaran Bulanan
+            if (!empty($bulananReal) && is_array($bulananReal)) {
+                $monthKeys = ['jan','feb','mar','apr','mei','jun','jul','ags','sep','okt','nov','des'];
+                $mVal = [];
+                $totReal = 0;
+                foreach ($monthKeys as $mk) {
+                    $val = isset($bulananReal[$mk]) && $bulananReal[$mk] !== '' && $bulananReal[$mk] !== null ? (float)$bulananReal[$mk] : 0;
+                    $mVal[$mk] = $val;
+                    $totReal += $val;
+                }
+
+                $existAng = $this->db->where('deleted_at IS NULL')
+                    ->group_start()
+                        ->where('header_id', $header_id)
+                        ->or_group_start()
+                            ->where('kode_sub_kegiatan', $kode_sub_kegiatan)
+                            ->where('tahun', $tahun)
+                        ->group_end()
+                    ->group_end()
+                    ->get('realisasi_renaksi_anggaran_bulanan')
+                    ->row_array();
+
+                $angData = [
+                    'header_id' => $header_id,
+                    'kode_wilayah' => $kode_wilayah,
+                    'tahun' => $tahun,
+                    'id_instansi' => $id_instansi,
+                    'kode_sub_kegiatan' => $kode_sub_kegiatan,
+                    'jan' => $mVal['jan'], 'feb' => $mVal['feb'], 'mar' => $mVal['mar'],
+                    'apr' => $mVal['apr'], 'mei' => $mVal['mei'], 'jun' => $mVal['jun'],
+                    'jul' => $mVal['jul'], 'ags' => $mVal['ags'], 'sep' => $mVal['sep'],
+                    'okt' => $mVal['okt'], 'nov' => $mVal['nov'], 'des' => $mVal['des'],
+                    'total_realisasi' => $totReal,
+                    'updated_at' => $now
+                ];
+
+                if ($existAng) {
+                    $this->db->where('id', $existAng['id'])->update('realisasi_renaksi_anggaran_bulanan', $angData);
+                } else {
+                    $angData['created_at'] = $now;
+                    $this->db->insert('realisasi_renaksi_anggaran_bulanan', $angData);
+                }
+            }
+
+            // 2. Simpan Realisasi Indikators (Triwulan)
+            if (!empty($indikatorsReal) && is_array($indikatorsReal)) {
+                foreach ($indikatorsReal as $ir) {
+                    $indId = isset($ir['indikator_id']) ? (int)$ir['indikator_id'] : (isset($ir['id']) ? (int)$ir['id'] : 0);
+                    $tw1 = (isset($ir['tw1']) && $ir['tw1'] !== '' && $ir['tw1'] !== null) ? (float)$ir['tw1'] : null;
+                    $tw2 = (isset($ir['tw2']) && $ir['tw2'] !== '' && $ir['tw2'] !== null) ? (float)$ir['tw2'] : null;
+                    $tw3 = (isset($ir['tw3']) && $ir['tw3'] !== '' && $ir['tw3'] !== null) ? (float)$ir['tw3'] : null;
+                    $tw4 = (isset($ir['tw4']) && $ir['tw4'] !== '' && $ir['tw4'] !== null) ? (float)$ir['tw4'] : null;
+
+                    if ($indId <= 0) continue;
+
+                    $existInd = $this->db->where('deleted_at IS NULL')
+                        ->where('indikator_id', $indId)
+                        ->where('tahun', $tahun)
+                        ->get('realisasi_renaksi_indikator')
+                        ->row_array();
+
+                    $realIndRow = [
+                        'indikator_id' => $indId,
+                        'header_id' => $header_id,
+                        'kode_wilayah' => $kode_wilayah,
+                        'tahun' => $tahun,
+                        'id_instansi' => $id_instansi,
+                        'level_type' => 'sub_kegiatan',
+                        'entity_code' => $kode_sub_kegiatan,
+                        'tw1' => $tw1,
+                        'tw2' => $tw2,
+                        'tw3' => $tw3,
+                        'tw4' => $tw4,
+                        'updated_at' => $now
+                    ];
+
+                    if ($existInd) {
+                        $this->db->where('id', $existInd['id'])->update('realisasi_renaksi_indikator', $realIndRow);
+                    } else {
+                        $realIndRow['created_at'] = $now;
+                        $this->db->insert('realisasi_renaksi_indikator', $realIndRow);
+                    }
+                }
+            }
+
+            if ($this->db->trans_status() === FALSE) {
+                $this->db->trans_rollback();
+                throw new Exception('Gagal menyimpan realisasi ke database.');
+            } else {
+                $this->db->trans_commit();
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Realisasi Renaksi Sasaran Sub Kegiatan berhasil disimpan!'
+                ]);
+            }
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function SaveRealisasiHierarchy() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $level_type = $this->input->post('level_type', TRUE);
+            $entity_code = trim($this->input->post('entity_code', TRUE));
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: date('Y'));
+            $kode_wilayah = $this->input->post('kode_wilayah', TRUE) ?: $this->get_kode_wilayah() ?: '35.73';
+            $id_instansi = (int)($this->input->post('id_instansi', TRUE) ?: $this->get_instansi_id() ?: 1);
+            $tw1 = ($this->input->post('tw1', TRUE) !== '' && $this->input->post('tw1', TRUE) !== null) ? (float)$this->input->post('tw1', TRUE) : null;
+            $tw2 = ($this->input->post('tw2', TRUE) !== '' && $this->input->post('tw2', TRUE) !== null) ? (float)$this->input->post('tw2', TRUE) : null;
+            $tw3 = ($this->input->post('tw3', TRUE) !== '' && $this->input->post('tw3', TRUE) !== null) ? (float)$this->input->post('tw3', TRUE) : null;
+            $tw4 = ($this->input->post('tw4', TRUE) !== '' && $this->input->post('tw4', TRUE) !== null) ? (float)$this->input->post('tw4', TRUE) : null;
+
+            if (empty($level_type) || empty($entity_code)) {
+                throw new Exception('Data level atau kode entitas tidak valid.');
+            }
+
+            $this->db->trans_begin();
+            $now = date('Y-m-d H:i:s');
+
+            $exist = $this->db->where('deleted_at IS NULL')
+                ->where('level_type', $level_type)
+                ->where('entity_code', $entity_code)
+                ->where('tahun', $tahun)
+                ->get('realisasi_renaksi_indikator')
+                ->row_array();
+
+            $row = [
+                'header_id' => null,
+                'indikator_id' => null,
+                'kode_wilayah' => $kode_wilayah,
+                'tahun' => $tahun,
+                'id_instansi' => $id_instansi,
+                'level_type' => $level_type,
+                'entity_code' => $entity_code,
+                'tw1' => $tw1,
+                'tw2' => $tw2,
+                'tw3' => $tw3,
+                'tw4' => $tw4,
+                'updated_at' => $now
+            ];
+
+            if ($exist) {
+                $this->db->where('id', $exist['id'])->update('realisasi_renaksi_indikator', $row);
+            } else {
+                $row['created_at'] = $now;
+                $this->db->insert('realisasi_renaksi_indikator', $row);
+            }
+
+            if ($this->db->trans_status() === FALSE) {
+                $this->db->trans_rollback();
+                throw new Exception('Gagal menyimpan realisasi kinerja.');
+            } else {
+                $this->db->trans_commit();
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Realisasi Kinerja Triwulan berhasil disimpan!'
+                ]);
+            }
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    private function _buildRealisasiRenaksiHierarchy($KodeWilayah, $tahun, $filter_instansi, $bulanIdx) {
+        $monthKeys = ['jan','feb','mar','apr','mei','jun','jul','ags','sep','okt','nov','des'];
+
+        // 1. Headers Sub Kegiatan
+        $this->db->select('*')->from('belanja_sub_kegiatan_header')->where('deleted_at IS NULL');
+        if (!empty($KodeWilayah)) $this->db->where('kode_wilayah', $KodeWilayah);
+        if (!empty($tahun) && $tahun !== 'all') $this->db->where('tahun', $tahun);
+        if (!empty($filter_instansi)) $this->db->where('id_instansi', (int)$filter_instansi);
+
+        $headers = $this->db
+            ->order_by('kode_program', 'ASC')
+            ->order_by('kode_kegiatan', 'ASC')
+            ->order_by('kode_sub_kegiatan', 'ASC')
+            ->get()
+            ->result_array();
+
+        // 2. Target Anggaran Bulanan
+        $this->db->where('deleted_at IS NULL');
+        if (!empty($tahun) && $tahun !== 'all') $this->db->where('tahun', $tahun);
+        $targetAngList = $this->db->get('target_renaksi_anggaran_bulanan')->result_array();
+        $targetAngMap = [];
+        foreach ($targetAngList as $ta) {
+            if (!empty($ta['header_id'])) $targetAngMap['h_' . $ta['header_id']] = $ta;
+            if (!empty($ta['kode_sub_kegiatan'])) $targetAngMap['c_' . $ta['kode_sub_kegiatan']] = $ta;
+        }
+
+        // 3. Realisasi Anggaran Bulanan
+        $this->db->where('deleted_at IS NULL');
+        if (!empty($tahun) && $tahun !== 'all') $this->db->where('tahun', $tahun);
+        $realAngList = $this->db->get('realisasi_renaksi_anggaran_bulanan')->result_array();
+        $realAngMap = [];
+        foreach ($realAngList as $ra) {
+            if (!empty($ra['header_id'])) $realAngMap['h_' . $ra['header_id']] = $ra;
+            if (!empty($ra['kode_sub_kegiatan'])) $realAngMap['c_' . $ra['kode_sub_kegiatan']] = $ra;
+        }
+
+        // 4. Target Indikator
+        $this->db->where('deleted_at IS NULL');
+        if (!empty($tahun) && $tahun !== 'all') $this->db->where('tahun', $tahun);
+        $targetInds = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('target_renaksi_indikator')->result_array();
+        $targetIndMap = [];
+        foreach ($targetInds as $ti) {
+            $item = [
+                'id' => (int)$ti['id'],
+                'uraian' => $ti['uraian_indikator'],
+                'satuan' => $ti['satuan'],
+                'targetTahunan' => (float)$ti['target_tahunan'],
+                'tw' => [
+                    $ti['tw1'] !== null ? (float)$ti['tw1'] : null,
+                    $ti['tw2'] !== null ? (float)$ti['tw2'] : null,
+                    $ti['tw3'] !== null ? (float)$ti['tw3'] : null,
+                    $ti['tw4'] !== null ? (float)$ti['tw4'] : null
+                ]
+            ];
+            if (!empty($ti['header_id'])) $targetIndMap['h_' . $ti['header_id']][] = $item;
+            if (!empty($ti['entity_code'])) $targetIndMap['c_' . $ti['entity_code']][] = $item;
+        }
+
+        // 5. Realisasi Indikator
+        $this->db->where('deleted_at IS NULL');
+        if (!empty($tahun) && $tahun !== 'all') $this->db->where('tahun', $tahun);
+        $realInds = $this->db->get('realisasi_renaksi_indikator')->result_array();
+        $realIndMap = [];
+        $realHierMap = [];
+        foreach ($realInds as $ri) {
+            if ($ri['indikator_id']) {
+                $realIndMap[$ri['indikator_id']] = [
+                    $ri['tw1'] !== null ? (float)$ri['tw1'] : null,
+                    $ri['tw2'] !== null ? (float)$ri['tw2'] : null,
+                    $ri['tw3'] !== null ? (float)$ri['tw3'] : null,
+                    $ri['tw4'] !== null ? (float)$ri['tw4'] : null
+                ];
+            }
+            $k = $ri['level_type'] . '_' . $ri['entity_code'];
+            $realHierMap[$k] = [
+                $ri['tw1'] !== null ? (float)$ri['tw1'] : null,
+                $ri['tw2'] !== null ? (float)$ri['tw2'] : null,
+                $ri['tw3'] !== null ? (float)$ri['tw3'] : null,
+                $ri['tw4'] !== null ? (float)$ri['tw4'] : null
+            ];
+        }
+
+        // 6. Target Hierarki (Program & Kegiatan)
+        $this->db->where('deleted_at IS NULL');
+        if (!empty($tahun) && $tahun !== 'all') $this->db->where('tahun', $tahun);
+        $hierSaved = $this->db->get('target_renaksi_hierarchy')->result_array();
+        $targetHierMap = [];
+        foreach ($hierSaved as $hRow) {
+            $k = $hRow['level_type'] . '_' . $hRow['entity_code'];
+            $targetHierMap[$k] = [
+                'nama' => $hRow['indikator_nama'],
+                'satuan' => $hRow['satuan'] ?: '%',
+                'targetTahunan' => $hRow['target_tahunan'] !== null ? (float)$hRow['target_tahunan'] : 100,
+                'tw' => [
+                    $hRow['tw1'] !== null ? (float)$hRow['tw1'] : null,
+                    $hRow['tw2'] !== null ? (float)$hRow['tw2'] : null,
+                    $hRow['tw3'] !== null ? (float)$hRow['tw3'] : null,
+                    $hRow['tw4'] !== null ? (float)$hRow['tw4'] : null
+                ]
+            ];
+        }
+
+        // Susun struktur pohon Program -> Kegiatan -> Sub Kegiatan
+        $progGroups = [];
+        $currentTW = (int)floor($bulanIdx / 3) + 1; // 1 s.d. 4
+
+        foreach ($headers as $h) {
+            $hId = (int)$h['id'];
+            $subKode = $h['kode_sub_kegiatan'];
+            $kegKode = $h['kode_kegiatan'] ?: substr($subKode, 0, 13);
+            $progKode = $h['kode_program'] ?: substr($kegKode, 0, 7);
+
+            // Target & Realisasi Anggaran Sub Kegiatan
+            $tAngRow = isset($targetAngMap['h_' . $hId]) ? $targetAngMap['h_' . $hId] : (isset($targetAngMap['c_' . $subKode]) ? $targetAngMap['c_' . $subKode] : null);
+            $rAngRow = isset($realAngMap['h_' . $hId]) ? $realAngMap['h_' . $hId] : (isset($realAngMap['c_' . $subKode]) ? $realAngMap['c_' . $subKode] : null);
+
+            $subTargetTotal = $tAngRow ? (float)$tAngRow['total_anggaran'] : (float)$h['total_belanja'];
+            $subBulanan = [];
+            $subRealBulan = null;
+            $anyReal = false;
+            $runningReal = 0;
+
+            for ($m = 0; $m < 12; $m++) {
+                $mk = $monthKeys[$m];
+                $tM = $tAngRow ? (float)$tAngRow[$mk] : ($subTargetTotal / 12);
+                $rM = ($rAngRow && $rAngRow[$mk] !== null) ? (float)$rAngRow[$mk] : null;
+                if ($rM !== null) {
+                    $anyReal = true;
+                    $runningReal += $rM;
+                }
+                if ($m <= $bulanIdx && $rM !== null) {
+                    $subRealBulan = $runningReal;
+                }
+                $subBulanan[] = [
+                    'target' => $tM,
+                    'realisasi' => $rM
+                ];
+            }
+
+            // Indikators Target & Realisasi
+            $inds = isset($targetIndMap['h_' . $hId]) ? $targetIndMap['h_' . $hId] : (isset($targetIndMap['c_' . $subKode]) ? $targetIndMap['c_' . $subKode] : []);
+            if (empty($inds)) {
+                $inds = [
+                    [
+                        'id' => 0,
+                        'uraian' => 'Jumlah output sub kegiatan ' . ($h['nama_sub_kegiatan'] ?: $subKode),
+                        'satuan' => 'Dokumen',
+                        'targetTahunan' => 1,
+                        'tw' => [1, null, null, null]
+                    ]
+                ];
+            }
+
+            $subIndikatorData = [];
+            foreach ($inds as $iObj) {
+                $iId = $iObj['id'];
+                $rTw = isset($realIndMap[$iId]) ? $realIndMap[$iId] : [null, null, null, null];
+                $twObjList = [];
+                for ($t = 0; $t < 4; $t++) {
+                    $twObjList[] = [
+                        'target' => $iObj['tw'][$t],
+                        'realisasi' => $rTw[$t]
+                    ];
+                }
+                $subIndikatorData[] = [
+                    'id' => $iId,
+                    'uraian' => $iObj['uraian'],
+                    'satuan' => $iObj['satuan'],
+                    'tw' => $twObjList
+                ];
+            }
+
+            $progGroups[$progKode][$kegKode][] = [
+                'id' => $hId,
+                'headerId' => $hId,
+                'kode' => $subKode,
+                'nama' => $h['nama_sub_kegiatan'] ?: 'Sub Kegiatan ' . $subKode,
+                'perangkatDaerah' => $h['nama_perangkat_daerah'] ?: '',
+                'subUnit' => $h['nama_sub_unit'] ?: '',
+                'bidangUrusan' => $h['nama_bidang_urusan'] ?: '',
+                'programNama' => $h['nama_program'] ?: '',
+                'kegiatanNama' => $h['nama_kegiatan'] ?: '',
+                'bulanan' => $subBulanan,
+                'targetAnggaran' => $subTargetTotal,
+                'realisasiAnggaran' => $subRealBulan,
+                'indikator' => $subIndikatorData
+            ];
+        }
+
+        // Susun Program & Kegiatan
+        $programs = [];
+        foreach ($progGroups as $pKode => $kegGroup) {
+            $pName = 'PROGRAM ' . $pKode;
+            $kegList = [];
+
+            foreach ($kegGroup as $kKode => $subList) {
+                $kName = 'KEGIATAN ' . $kKode;
+                foreach ($subList as $s) {
+                    $pName = $s['programNama'] ?: $pName;
+                    $kName = $s['kegiatanNama'] ?: $kName;
+                }
+
+                $kKey = 'kegiatan_' . $kKode;
+                $tKegKin = isset($targetHierMap[$kKey]) ? $targetHierMap[$kKey] : [
+                    'nama' => 'Persentase ketercapaian target output ' . $kName,
+                    'satuan' => '%',
+                    'targetTahunan' => 100,
+                    'tw' => [25, 25, 25, 25]
+                ];
+                $rKegKin = isset($realHierMap[$kKey]) ? $realHierMap[$kKey] : [null, null, null, null];
+                $kegKinTW = [];
+                for ($t = 0; $t < 4; $t++) {
+                    $kegKinTW[] = [
+                        'target' => $tKegKin['tw'][$t],
+                        'realisasi' => $rKegKin[$t]
+                    ];
+                }
+
+                $kegList[] = [
+                    'kode' => $kKode,
+                    'nama' => $kName,
+                    'kinerja' => [
+                        'uraian' => $tKegKin['nama'],
+                        'satuan' => $tKegKin['satuan'],
+                        'tw' => $kegKinTW
+                    ],
+                    'subKegiatan' => $subList
+                ];
+            }
+
+            $pKey = 'program_' . $pKode;
+            $tProgKin = isset($targetHierMap[$pKey]) ? $targetHierMap[$pKey] : [
+                'nama' => 'Persentase pemenuhan kualitas pelaksanaan ' . $pName,
+                'satuan' => '%',
+                'targetTahunan' => 100,
+                'tw' => [null, null, null, 95]
+            ];
+            $rProgKin = isset($realHierMap[$pKey]) ? $realHierMap[$pKey] : [null, null, null, null];
+            $progKinTW = [];
+            for ($t = 0; $t < 4; $t++) {
+                $progKinTW[] = [
+                    'target' => $tProgKin['tw'][$t],
+                    'realisasi' => $rProgKin[$t]
+                ];
+            }
+
+            $programs[] = [
+                'kode' => $pKode,
+                'nama' => $pName,
+                'kinerja' => [
+                    'uraian' => $tProgKin['nama'],
+                    'satuan' => $tProgKin['satuan'],
+                    'tw' => $progKinTW
+                ],
+                'kegiatan' => $kegList
+            ];
+        }
+
+        return $programs;
+    }
+
+    // ================================================================
+    // LAPORAN ANGGARAN (REKAPITULASI REALISASI ANGGARAN)
+    // ================================================================
+
+    public function LaporanAnggaran() {
+        $Header['Halaman'] = 'Laporan Anggaran';
+        
+        $KodeWilayah = $this->get_kode_wilayah();
+        $instansi_id = $this->get_instansi_id();
+        $is_role_4 = $this->is_role_4();
+        $tahun = $this->input->get('tahun', TRUE);
+        $filter_instansi = $this->input->get('instansi_id', TRUE);
+        $bulan_sampai = $this->input->get('bulan_sampai', TRUE) !== null ? (int)$this->input->get('bulan_sampai', TRUE) : 7; // Default: Agustus (idx 7)
+
+        if ($is_role_4 && $instansi_id) {
+            $filter_instansi = $instansi_id;
+        }
+
+        if ($bulan_sampai < 0) $bulan_sampai = 0;
+        if ($bulan_sampai > 11) $bulan_sampai = 11;
+
+        // Data Provinsi untuk filter
+        $Data['Provinsi'] = $this->db
+            ->where("Kode LIKE '__'")
+            ->order_by('Nama')
+            ->get('kodewilayah')
+            ->result_array();
+        
+        $Data['KodeWilayah'] = $KodeWilayah;
+        $Data['NamaWilayah'] = '';
+        $Data['IsRole4'] = $is_role_4;
+        $Data['InstansiId'] = $instansi_id;
+        $Data['ControllerName'] = 'Instansi';
+        
+        if (!empty($KodeWilayah)) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            $Data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
+        }
+        
+        // List Instansi
+        $Data['ListInstansi'] = [];
+        if (!empty($KodeWilayah)) {
+            $provKode = substr($KodeWilayah, 0, 2);
+            $Data['ListInstansi'] = $this->db
+                ->select('id, nama')
+                ->from('akun_instansi')
+                ->where("(kodewilayah = " . $this->db->escape($KodeWilayah) . " OR kodewilayah = " . $this->db->escape($provKode) . ")")
+                ->where('deleted_at IS NULL')
+                ->order_by('nama', 'ASC')
+                ->get()
+                ->result_array();
+        } else {
+            $Data['ListInstansi'] = $this->db
+                ->select('id, nama')
+                ->from('akun_instansi')
+                ->where('deleted_at IS NULL')
+                ->order_by('nama', 'ASC')
+                ->get()
+                ->result_array();
+        }
+        
+        // List Tahun
+        $dbYears = $this->db->select('DISTINCT(tahun) as thn')
+            ->where('deleted_at IS NULL')
+            ->order_by('tahun', 'DESC')
+            ->get('belanja_sub_kegiatan_header')
+            ->result_array();
+        
+        $listTahun = [];
+        if (!empty($dbYears)) {
+            foreach ($dbYears as $dy) {
+                if (!empty($dy['thn'])) {
+                    $listTahun[] = (int)$dy['thn'];
+                }
+            }
+        }
+        $currentY = (int)date('Y');
+        for ($y = $currentY + 1; $y >= $currentY - 5; $y--) {
+            if (!in_array($y, $listTahun)) {
+                $listTahun[] = $y;
+            }
+        }
+        rsort($listTahun);
+        $Data['ListTahun'] = $listTahun;
+        
+        if (empty($tahun)) {
+            $tahun = 2025;
+        }
+        $Data['TahunAktif'] = $tahun;
+        $Data['FilterInstansi'] = $filter_instansi ?: 1;
+        $Data['BulanSampai'] = $bulan_sampai;
+
+        // Ambil Data Rekapitulasi Realisasi Anggaran
+        $this->db->where('deleted_at IS NULL');
+        if (!empty($tahun) && $tahun !== 'all') {
+            $this->db->where('tahun', (int)$tahun);
+        }
+        if (!empty($filter_instansi)) {
+            $this->db->where('id_instansi', (int)$filter_instansi);
+        }
+
+        $items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('laporan_anggaran_rekap')->result_array();
+
+        // Hitung Grand Totals
+        $totMurni = 0;
+        $totPerubahan = 0;
+        $totRealisasi = 0;
+        $totSisa = 0;
+
+        foreach ($items as &$it) {
+            $murni = (float)$it['anggaran_murni'];
+            $perubahan = (float)$it['anggaran_perubahan'];
+            $realisasi = (float)$it['realisasi_anggaran'];
+            $sisa = $perubahan - $realisasi;
+            $persen = ($perubahan > 0) ? round(($realisasi / $perubahan) * 100, 2) : 0;
+            $status = ($perubahan >= $murni) ? '+' : '-';
+
+            $it['sisa_anggaran'] = $sisa;
+            $it['persen_capaian'] = $persen;
+            $it['perubahan_status'] = $status;
+
+            $totMurni += $murni;
+            $totPerubahan += $perubahan;
+            $totRealisasi += $realisasi;
+            $totSisa += $sisa;
+        }
+        unset($it);
+
+        $persenCapaian = ($totPerubahan > 0) ? round(($totSisa / $totPerubahan) * 100, 2) : 0;
+        $persenSerapan = ($totPerubahan > 0) ? round(($totRealisasi / $totPerubahan) * 100, 2) : 0;
+
+        $Data['Items'] = $items;
+        $Data['Summary'] = [
+            'total_murni' => $totMurni,
+            'total_perubahan' => $totPerubahan,
+            'total_realisasi' => $totRealisasi,
+            'total_sisa' => $totSisa,
+            'persen_capaian' => $persenCapaian,
+            'persen_serapan' => $persenSerapan
+        ];
+        
+        $this->load->view('Daerah/header', $Header);
+        $this->load->view('Daerah/LaporanAnggaran', $Data);
+    }
+
+    public function GetLaporanAnggaranData() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2025);
+        $filter_instansi = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+        $bulan_sampai = $this->input->post('bulan_sampai', TRUE) !== null ? (int)$this->input->post('bulan_sampai', TRUE) : 7;
+
+        $this->db->where('deleted_at IS NULL');
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+        if ($filter_instansi > 0) $this->db->where('id_instansi', $filter_instansi);
+
+        $items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('laporan_anggaran_rekap')->result_array();
+
+        $totMurni = 0;
+        $totPerubahan = 0;
+        $totRealisasi = 0;
+        $totSisa = 0;
+
+        foreach ($items as &$it) {
+            $murni = (float)$it['anggaran_murni'];
+            $perubahan = (float)$it['anggaran_perubahan'];
+            $realisasi = (float)$it['realisasi_anggaran'];
+            $sisa = $perubahan - $realisasi;
+            $persen = ($perubahan > 0) ? round(($realisasi / $perubahan) * 100, 2) : 0;
+            $status = ($perubahan >= $murni) ? '+' : '-';
+
+            $it['sisa_anggaran'] = $sisa;
+            $it['persen_capaian'] = $persen;
+            $it['perubahan_status'] = $status;
+
+            $totMurni += $murni;
+            $totPerubahan += $perubahan;
+            $totRealisasi += $realisasi;
+            $totSisa += $sisa;
+        }
+        unset($it);
+
+        $persenCapaian = ($totPerubahan > 0) ? round(($totSisa / $totPerubahan) * 100, 2) : 0;
+        $persenSerapan = ($totPerubahan > 0) ? round(($totRealisasi / $totPerubahan) * 100, 2) : 0;
+
+        echo json_encode([
+            'status' => 'success',
+            'data' => [
+                'items' => $items,
+                'summary' => [
+                    'total_murni' => $totMurni,
+                    'total_perubahan' => $totPerubahan,
+                    'total_realisasi' => $totRealisasi,
+                    'total_sisa' => $totSisa,
+                    'persen_capaian' => $persenCapaian,
+                    'persen_serapan' => $persenSerapan
+                ]
+            ]
+        ]);
+    }
+
+    public function SaveLaporanAnggaranItem() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $anggaran_murni = (float)str_replace(',', '', $this->input->post('anggaran_murni', TRUE));
+            $anggaran_perubahan = (float)str_replace(',', '', $this->input->post('anggaran_perubahan', TRUE));
+            $realisasi_anggaran = (float)str_replace(',', '', $this->input->post('realisasi_anggaran', TRUE));
+
+            if ($id <= 0) {
+                throw new Exception('ID item laporan anggaran tidak valid.');
+            }
+
+            $sisa_anggaran = $anggaran_perubahan - $realisasi_anggaran;
+            $persen_capaian = ($anggaran_perubahan > 0) ? round(($realisasi_anggaran / $anggaran_perubahan) * 100, 2) : 0;
+            $perubahan_status = ($anggaran_perubahan >= $anggaran_murni) ? '+' : '-';
+
+            $updateData = [
+                'anggaran_murni' => $anggaran_murni,
+                'anggaran_perubahan' => $anggaran_perubahan,
+                'realisasi_anggaran' => $realisasi_anggaran,
+                'sisa_anggaran' => $sisa_anggaran,
+                'persen_capaian' => $persen_capaian,
+                'perubahan_status' => $perubahan_status,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            $this->db->where('id', $id)->update('laporan_anggaran_rekap', $updateData);
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Data baris Laporan Anggaran berhasil diperbarui!',
+                'data' => array_merge(['id' => $id], $updateData)
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function SyncLaporanAnggaran() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2025);
+            $filter_instansi = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+            $bulan_sampai = $this->input->post('bulan_sampai', TRUE) !== null ? (int)$this->input->post('bulan_sampai', TRUE) : 7;
+
+            $monthCols = ['jan','feb','mar','apr','mei','jun','jul','ags','sep','okt','nov','des'];
+            $selectedMonths = array_slice($monthCols, 0, $bulan_sampai + 1);
+
+            // Ambil realisasi bulanan dari realisasi_renaksi_anggaran_bulanan
+            $realRows = $this->db->where('deleted_at IS NULL')->where('tahun', $tahun)->get('realisasi_renaksi_anggaran_bulanan')->result_array();
+            $realMap = [];
+            foreach ($realRows as $rr) {
+                $sum = 0;
+                foreach ($selectedMonths as $mc) {
+                    $sum += (float)$rr[$mc];
+                }
+                $realMap[$rr['kode_sub_kegiatan']] = $sum;
+            }
+
+            // Update ke laporan_anggaran_rekap
+            $updated = 0;
+            $items = $this->db->where('deleted_at IS NULL')->where('tahun', $tahun)->get('laporan_anggaran_rekap')->result_array();
+            foreach ($items as $it) {
+                $code = $it['kode_rekening'];
+                if (isset($realMap[$code])) {
+                    $newReal = $realMap[$code];
+                    $perubahan = (float)$it['anggaran_perubahan'];
+                    $sisa = $perubahan - $newReal;
+                    $persen = ($perubahan > 0) ? round(($newReal / $perubahan) * 100, 2) : 0;
+
+                    $this->db->where('id', $it['id'])->update('laporan_anggaran_rekap', [
+                        'realisasi_anggaran' => $newReal,
+                        'sisa_anggaran' => $sisa,
+                        'persen_capaian' => $persen,
+                        'bulan_sampai' => $bulan_sampai,
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+                    $updated++;
+                }
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => "Berhasil menyinkronkan $updated data Realisasi Renaksi ke Laporan Anggaran!"
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    // ================================================================
+    // 1. E-LKPJ: PENGISIAN KEBIJAKAN STRATEGIS
+    // ================================================================
+
+    public function PengisianKebijakanStrategis() {
+        $Header['Halaman'] = 'Pengisian Kebijakan Strategis';
+        
+        $KodeWilayah = $this->get_kode_wilayah();
+        $instansi_id = $this->get_instansi_id();
+        $is_role_4 = $this->is_role_4();
+        $tahun = $this->input->get('tahun', TRUE) ?: 2026;
+        $filter_instansi = $this->input->get('instansi_id', TRUE);
+
+        if ($is_role_4 && $instansi_id) {
+            $filter_instansi = $instansi_id;
+        }
+
+        $Data['KodeWilayah'] = $KodeWilayah;
+        $Data['NamaWilayah'] = '';
+        $Data['IsRole4'] = $is_role_4;
+        $Data['InstansiId'] = $instansi_id;
+        $Data['ControllerName'] = 'Instansi';
+
+        if (!empty($KodeWilayah)) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            $Data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
+        }
+
+        $Data['ListInstansi'] = $this->db->select('id, nama')->from('akun_instansi')->where('deleted_at IS NULL')->order_by('nama', 'ASC')->get()->result_array();
+        $Data['ListTahun'] = [2027, 2026, 2025, 2024, 2023];
+        $Data['TahunAktif'] = (int)$tahun;
+        $Data['FilterInstansi'] = $filter_instansi ? (int)$filter_instansi : 1;
+
+        $this->db->where('deleted_at IS NULL');
+        if ($tahun) $this->db->where('tahun', (int)$tahun);
+        if ($filter_instansi) $this->db->where('instansi_id', (int)$filter_instansi);
+        $Data['Items'] = $this->db->order_by('id', 'ASC')->get('lkpj_kebijakan_strategis')->result_array();
+
+        $this->load->view('Daerah/header', $Header);
+        $this->load->view('Daerah/PengisianKebijakanStrategis', $Data);
+    }
+
+    public function GetKebijakanStrategis() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+
+        $this->db->where('deleted_at IS NULL');
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+        if ($instansi_id > 0) $this->db->where('instansi_id', $instansi_id);
+
+        $items = $this->db->order_by('id', 'ASC')->get('lkpj_kebijakan_strategis')->result_array();
+        echo json_encode(['status' => 'success', 'data' => $items]);
+    }
+
+    public function SaveKebijakanStrategis() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kebijakan = trim($this->input->post('kebijakan_strategis', TRUE));
+            $hukum = trim($this->input->post('dasar_hukum', TRUE));
+            $tujuan = trim($this->input->post('tujuan_masalah', TRUE));
+
+            if (empty($kebijakan) || empty($hukum) || empty($tujuan)) {
+                throw new Exception('Semua kolom bertanda bintang (*) wajib diisi.');
+            }
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah,
+                'instansi_id' => $instansi_id,
+                'tahun' => $tahun,
+                'kebijakan_strategis' => $kebijakan,
+                'dasar_hukum' => $hukum,
+                'tujuan_masalah' => $tujuan,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $this->db->where('id', $id)->update('lkpj_kebijakan_strategis', $saveData);
+                $msg = 'Data Kebijakan Strategis berhasil diperbarui.';
+            } else {
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_kebijakan_strategis', $saveData);
+                $id = $this->db->insert_id();
+                $msg = 'Data Kebijakan Strategis berhasil ditambahkan.';
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => $msg,
+                'data' => array_merge(['id' => $id], $saveData)
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function DeleteKebijakanStrategis() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+
+            $this->db->where('id', $id)->update('lkpj_kebijakan_strategis', [
+                'deleted_at' => date('Y-m-d H:i:s')
+            ]);
+
+            echo json_encode(['status' => 'success', 'message' => 'Data Kebijakan Strategis berhasil dihapus.']);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    // ================================================================
+    // 2. E-LKPJ: PENGISIAN CAPAIAN PROGRAM KEGIATAN
+    // ================================================================
+
+    public function PengisianCapaianProgramKegiatan() {
+        $Header['Halaman'] = 'Pengisian Capaian Program Kegiatan';
+        
+        $KodeWilayah = $this->get_kode_wilayah();
+        $instansi_id = $this->get_instansi_id();
+        $is_role_4 = $this->is_role_4();
+        $tahun = $this->input->get('tahun', TRUE) ?: 2026;
+        $filter_urusan = $this->input->get('urusan', TRUE) ?: 'Perencanaan';
+        $filter_instansi = $this->input->get('instansi_id', TRUE);
+
+        if ($is_role_4 && $instansi_id) {
+            $filter_instansi = $instansi_id;
+        }
+
+        $Data['KodeWilayah'] = $KodeWilayah;
+        $Data['NamaWilayah'] = '';
+        $Data['IsRole4'] = $is_role_4;
+        $Data['InstansiId'] = $instansi_id;
+        $Data['ControllerName'] = 'Instansi';
+
+        if (!empty($KodeWilayah)) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            $Data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
+        }
+
+        $Data['ListInstansi'] = $this->db->select('id, nama')->from('akun_instansi')->where('deleted_at IS NULL')->order_by('nama', 'ASC')->get()->result_array();
+        $Data['ListTahun'] = [2027, 2026, 2025, 2024, 2023];
+        $Data['TahunAktif'] = (int)$tahun;
+        $Data['FilterInstansi'] = $filter_instansi ? (int)$filter_instansi : 1;
+        $Data['FilterUrusan'] = $filter_urusan;
+
+        // Ambil daftar Urusan yang tersedia di DB
+        $dbUrusan = $this->db->select('DISTINCT(urusan) as ur')->where('deleted_at IS NULL')->get('lkpj_capaian_program_kegiatan')->result_array();
+        $listUrusan = [];
+        foreach ($dbUrusan as $du) {
+            if (!empty($du['ur'])) $listUrusan[] = $du['ur'];
+        }
+        if (!in_array('Perencanaan', $listUrusan)) $listUrusan[] = 'Perencanaan';
+        if (!in_array('Keuangan', $listUrusan)) $listUrusan[] = 'Keuangan';
+        if (!in_array('Kepegawaian', $listUrusan)) $listUrusan[] = 'Kepegawaian';
+        $Data['ListUrusan'] = $listUrusan;
+
+        // Ambil Grouped Data
+        $Data['Groups'] = $this->_get_capaian_program_kegiatan_groups((int)$tahun, $filter_urusan, $filter_instansi ? (int)$filter_instansi : 1);
+
+        $this->load->view('Daerah/header', $Header);
+        $this->load->view('Daerah/PengisianCapaianProgramKegiatan', $Data);
+    }
+
+    private function _get_capaian_program_kegiatan_groups($tahun, $urusan, $instansi_id) {
+        $this->db->where('deleted_at IS NULL');
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+        if (!empty($urusan)) $this->db->where('urusan', $urusan);
+        if ($instansi_id > 0) $this->db->where('instansi_id', $instansi_id);
+
+        $rows = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_capaian_program_kegiatan')->result_array();
+
+        $groups = [];
+        $programMap = [];
+
+        foreach ($rows as $row) {
+            if ($row['tipe'] === 'program') {
+                $pId = (int)$row['id'];
+                $group = [
+                    'id' => $pId,
+                    'kebijakan' => $row['kebijakan'],
+                    'program' => $row,
+                    'kegiatan' => []
+                ];
+                $groups[$pId] = $group;
+                $programMap[$pId] = &$groups[$pId];
+            }
+        }
+
+        foreach ($rows as $row) {
+            if ($row['tipe'] === 'kegiatan') {
+                $parentId = (int)$row['parent_id'];
+                if (isset($groups[$parentId])) {
+                    $groups[$parentId]['kegiatan'][] = $row;
+                } else {
+                    // Fallback: assign to first program or create standalone group
+                    if (!empty($groups)) {
+                        $firstKey = array_key_first($groups);
+                        $groups[$firstKey]['kegiatan'][] = $row;
+                    } else {
+                        $groups[0] = [
+                            'id' => 0,
+                            'kebijakan' => $row['kebijakan'],
+                            'program' => null,
+                            'kegiatan' => [$row]
+                        ];
+                    }
+                }
+            }
+        }
+
+        return array_values($groups);
+    }
+
+    public function GetCapaianProgramKegiatan() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $urusan = $this->input->post('urusan', TRUE) ?: 'Perencanaan';
+        $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+
+        $groups = $this->_get_capaian_program_kegiatan_groups($tahun, $urusan, $instansi_id);
+        echo json_encode(['status' => 'success', 'data' => $groups]);
+    }
+
+    public function SaveCapaianProgramKegiatan() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $urusan = trim($this->input->post('urusan', TRUE) ?: 'Perencanaan');
+            $kebijakan = trim($this->input->post('kebijakan', TRUE));
+            $tipe = trim($this->input->post('tipe', TRUE) ?: 'kegiatan');
+            $parent_id = $this->input->post('parent_id', TRUE) ? (int)$this->input->post('parent_id', TRUE) : null;
+            $uraian = trim($this->input->post('uraian', TRUE));
+            $indikator = trim($this->input->post('indikator', TRUE));
+            $satuan = trim($this->input->post('satuan', TRUE));
+
+            $target = (float)str_replace(',', '.', str_replace(' ', '', $this->input->post('target', TRUE)));
+            $realisasi = (float)str_replace(',', '.', str_replace(' ', '', $this->input->post('realisasi', TRUE)));
+            $anggaran = (float)str_replace(',', '', str_replace('.', '', $this->input->post('anggaran', TRUE)));
+            $realisasi_anggaran = (float)str_replace(',', '', str_replace('.', '', $this->input->post('realisasi_anggaran', TRUE)));
+
+            $capaian = ($target > 0) ? round(($realisasi / $target) * 100, 2) : 0;
+            $capaian_anggaran = ($anggaran > 0) ? round(($realisasi_anggaran / $anggaran) * 100, 2) : 0;
+
+            $permasalahan = trim($this->input->post('permasalahan', TRUE));
+            $upaya = trim($this->input->post('upaya', TRUE));
+            $tinjut = trim($this->input->post('tinjut', TRUE));
+
+            if (empty($uraian)) {
+                throw new Exception('Uraian Program/Kegiatan wajib diisi.');
+            }
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah,
+                'instansi_id' => $instansi_id,
+                'tahun' => $tahun,
+                'urusan' => $urusan,
+                'kebijakan' => $kebijakan,
+                'tipe' => $tipe,
+                'parent_id' => $parent_id,
+                'uraian' => $uraian,
+                'indikator' => $indikator,
+                'satuan' => $satuan,
+                'target' => $target,
+                'realisasi' => $realisasi,
+                'capaian' => $capaian,
+                'anggaran' => $anggaran,
+                'realisasi_anggaran' => $realisasi_anggaran,
+                'capaian_anggaran' => $capaian_anggaran,
+                'permasalahan' => $permasalahan,
+                'upaya' => $upaya,
+                'tinjut' => $tinjut,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $this->db->where('id', $id)->update('lkpj_capaian_program_kegiatan', $saveData);
+                $msg = 'Data Capaian Program/Kegiatan berhasil diperbarui.';
+            } else {
+                $maxUrutan = $this->db->select_max('urutan')->where('tahun', $tahun)->where('instansi_id', $instansi_id)->get('lkpj_capaian_program_kegiatan')->row_array();
+                $saveData['urutan'] = isset($maxUrutan['urutan']) ? ((int)$maxUrutan['urutan'] + 1) : 1;
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_capaian_program_kegiatan', $saveData);
+                $id = $this->db->insert_id();
+                $msg = 'Data Capaian Program/Kegiatan berhasil ditambahkan.';
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => $msg,
+                'data' => array_merge(['id' => $id], $saveData)
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function SaveEvaluasiProgramKegiatan() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID program/kegiatan tidak valid.');
+
+            $permasalahan = trim($this->input->post('permasalahan', TRUE));
+            $upaya = trim($this->input->post('upaya', TRUE));
+            $tinjut = trim($this->input->post('tinjut', TRUE));
+
+            $updateData = [
+                'permasalahan' => $permasalahan,
+                'upaya' => $upaya,
+                'tinjut' => $tinjut,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            $this->db->where('id', $id)->update('lkpj_capaian_program_kegiatan', $updateData);
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Evaluasi (Permasalahan, Upaya & Tinjut) berhasil disimpan!',
+                'data' => array_merge(['id' => $id], $updateData)
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function DeleteCapaianProgramKegiatan() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+
+            // Soft delete parent and its sub-kegiatans
+            $this->db->where('id', $id)->or_where('parent_id', $id)->update('lkpj_capaian_program_kegiatan', [
+                'deleted_at' => date('Y-m-d H:i:s')
+            ]);
+
+            echo json_encode(['status' => 'success', 'message' => 'Data Capaian Program/Kegiatan berhasil dihapus.']);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    // ================================================================
+    // 3. E-LKPJ: PENGISIAN TINJUT REKOMENDASI DPRD N-1
+    // ================================================================
+
+    public function PengisianTinjutRekomendasiDPRDn1() {
+        $Header['Halaman'] = 'Pengisian Tindak Lanjut Rekomendasi DPRD n-1';
+        
+        $KodeWilayah = $this->get_kode_wilayah();
+        $instansi_id = $this->get_instansi_id();
+        $is_role_4 = $this->is_role_4();
+        $tahun = $this->input->get('tahun', TRUE) ?: 2026;
+        $filter_instansi = $this->input->get('instansi_id', TRUE);
+
+        if ($is_role_4 && $instansi_id) {
+            $filter_instansi = $instansi_id;
+        }
+
+        $Data['KodeWilayah'] = $KodeWilayah;
+        $Data['NamaWilayah'] = '';
+        $Data['IsRole4'] = $is_role_4;
+        $Data['InstansiId'] = $instansi_id;
+        $Data['ControllerName'] = 'Instansi';
+
+        if (!empty($KodeWilayah)) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            $Data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
+        }
+
+        $Data['ListInstansi'] = $this->db->select('id, nama')->from('akun_instansi')->where('deleted_at IS NULL')->order_by('nama', 'ASC')->get()->result_array();
+        $Data['ListTahun'] = [2027, 2026, 2025, 2024, 2023];
+        $Data['TahunAktif'] = (int)$tahun;
+        $Data['FilterInstansi'] = $filter_instansi ? (int)$filter_instansi : 1;
+
+        $this->db->where('deleted_at IS NULL');
+        if ($tahun) $this->db->where('tahun', (int)$tahun);
+        if ($filter_instansi) $this->db->where('instansi_id', (int)$filter_instansi);
+        $items = $this->db->order_by('id', 'ASC')->get('lkpj_tinjut_rekomendasi_dprd')->result_array();
+
+        $filled = 0;
+        foreach ($items as $it) {
+            if (!empty(trim($it['tindak_lanjut'])) && !empty(trim($it['tujuan_masalah']))) {
+                $filled++;
+            }
+        }
+        $total = count($items);
+        $pending = $total - $filled;
+
+        $Data['Items'] = $items;
+        $Data['Stats'] = [
+            'total' => $total,
+            'filled' => $filled,
+            'pending' => $pending
+        ];
+
+        $this->load->view('Daerah/header', $Header);
+        $this->load->view('Daerah/PengisianTinjutRekomendasiDPRDn1', $Data);
+    }
+
+    // Alias method
+    public function PengisianTinjutRekomendasiDPRD() {
+        $this->PengisianTinjutRekomendasiDPRDn1();
+    }
+
+    public function GetTinjutRekomendasiDPRD() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+
+        $this->db->where('deleted_at IS NULL');
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+        if ($instansi_id > 0) $this->db->where('instansi_id', $instansi_id);
+
+        $items = $this->db->order_by('id', 'ASC')->get('lkpj_tinjut_rekomendasi_dprd')->result_array();
+
+        $filled = 0;
+        foreach ($items as $it) {
+            if (!empty(trim($it['tindak_lanjut'])) && !empty(trim($it['tujuan_masalah']))) {
+                $filled++;
+            }
+        }
+        $total = count($items);
+        $pending = $total - $filled;
+
+        echo json_encode([
+            'status' => 'success',
+            'data' => $items,
+            'stats' => [
+                'total' => $total,
+                'filled' => $filled,
+                'pending' => $pending
+            ]
+        ]);
+    }
+
+    public function SaveTinjutRekomendasiDPRD() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $tindak_lanjut = trim($this->input->post('tindak_lanjut', TRUE));
+            $tujuan_masalah = trim($this->input->post('tujuan_masalah', TRUE));
+
+            if ($id > 0) {
+                // Rekomendasi DPRD bersifat mutlak / immutable dari relasi data lain
+                $saveData = [
+                    'kodewilayah' => $kode_wilayah,
+                    'instansi_id' => $instansi_id,
+                    'tahun' => $tahun,
+                    'tindak_lanjut' => $tindak_lanjut,
+                    'tujuan_masalah' => $tujuan_masalah,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+                $this->db->where('id', $id)->update('lkpj_tinjut_rekomendasi_dprd', $saveData);
+                $msg = 'Tindak Lanjut Rekomendasi DPRD berhasil diperbarui.';
+            } else {
+                $rekomendasi = trim($this->input->post('rekomendasi', TRUE));
+                if (empty($rekomendasi)) {
+                    throw new Exception('Rekomendasi DPRD wajib diisi.');
+                }
+                $saveData = [
+                    'kodewilayah' => $kode_wilayah,
+                    'instansi_id' => $instansi_id,
+                    'tahun' => $tahun,
+                    'rekomendasi' => $rekomendasi,
+                    'tindak_lanjut' => $tindak_lanjut,
+                    'tujuan_masalah' => $tujuan_masalah,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+                $this->db->insert('lkpj_tinjut_rekomendasi_dprd', $saveData);
+                $id = $this->db->insert_id();
+                $msg = 'Tindak Lanjut Rekomendasi DPRD berhasil ditambahkan.';
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => $msg,
+                'data' => array_merge(['id' => $id], $saveData)
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function DeleteTinjutRekomendasiDPRD() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+
+            $this->db->where('id', $id)->update('lkpj_tinjut_rekomendasi_dprd', [
+                'deleted_at' => date('Y-m-d H:i:s')
+            ]);
+
+            echo json_encode(['status' => 'success', 'message' => 'Data Rekomendasi DPRD berhasil dihapus.']);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    // ================================================================
+    // 4. E-LKPJ: CAPAIAN KINERJA PELAKSANAAN TUGAS PEMBANTUAN
+    // ================================================================
+
+    public function CapaianKinerjaPelaksanaanTugasPembantuan() {
+        $Header['Halaman'] = 'Capaian Kinerja Pelaksanaan Tugas Pembantuan';
+        
+        $KodeWilayah = $this->get_kode_wilayah();
+        $instansi_id = $this->get_instansi_id();
+        $is_role_4 = $this->is_role_4();
+        $tahun = $this->input->get('tahun', TRUE) ?: 2026;
+        $filter_instansi = $this->input->get('instansi_id', TRUE);
+
+        if ($is_role_4 && $instansi_id) {
+            $filter_instansi = $instansi_id;
+        }
+
+        $Data['KodeWilayah'] = $KodeWilayah;
+        $Data['NamaWilayah'] = '';
+        $Data['IsRole4'] = $is_role_4;
+        $Data['InstansiId'] = $instansi_id;
+        $Data['ControllerName'] = 'Instansi';
+
+        if (!empty($KodeWilayah)) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            $Data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
+        }
+
+        $Data['ListInstansi'] = $this->db->select('id, nama')->from('akun_instansi')->where('deleted_at IS NULL')->order_by('nama', 'ASC')->get()->result_array();
+        $Data['ListTahun'] = [2027, 2026, 2025, 2024, 2023];
+        $Data['TahunAktif'] = (int)$tahun;
+        $Data['FilterInstansi'] = $filter_instansi ? (int)$filter_instansi : 1;
+
+        $this->db->where('deleted_at IS NULL');
+        if ($tahun) $this->db->where('tahun', (int)$tahun);
+        if ($filter_instansi) $this->db->where('instansi_id', (int)$filter_instansi);
+        $Data['Items'] = $this->db->order_by('id', 'ASC')->get('lkpj_tugas_pembantuan')->result_array();
+
+        $this->load->view('Daerah/header', $Header);
+        $this->load->view('Daerah/CapaianKinerjaPelaksanaanTugasPembantuan', $Data);
+    }
+
+    public function GetTugasPembantuan() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+
+        $this->db->where('deleted_at IS NULL');
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+        if ($instansi_id > 0) $this->db->where('instansi_id', $instansi_id);
+
+        $items = $this->db->order_by('id', 'ASC')->get('lkpj_tugas_pembantuan')->result_array();
+        echo json_encode(['status' => 'success', 'data' => $items]);
+    }
+
+    public function SaveTugasPembantuan() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+
+            $dasar_penugasan = trim($this->input->post('dasar_penugasan', TRUE));
+            $instansi_pemberi = trim($this->input->post('instansi_pemberi', TRUE));
+            $program = trim($this->input->post('program', TRUE));
+            $kegiatan_output = trim($this->input->post('kegiatan_output', TRUE));
+            $lokasi = trim($this->input->post('lokasi', TRUE));
+            $satuan_unit = trim($this->input->post('satuan_unit', TRUE));
+            $sumber_dana = trim($this->input->post('sumber_dana', TRUE));
+
+            $pagu = (float)str_replace(',', '', str_replace('.', '', $this->input->post('pagu', TRUE)));
+            $realisasi = (float)str_replace(',', '', str_replace('.', '', $this->input->post('realisasi', TRUE)));
+
+            $manual_capaian = $this->input->post('capaian', TRUE);
+            if ($manual_capaian !== null && $manual_capaian !== '') {
+                $capaian = (float)str_replace(',', '.', $manual_capaian);
+            } else {
+                $capaian = ($pagu > 0) ? round(($realisasi / $pagu) * 100, 2) : 0;
+            }
+
+            $permasalahan = trim($this->input->post('permasalahan', TRUE));
+            $solusi = trim($this->input->post('solusi', TRUE));
+
+            if (empty($dasar_penugasan) || empty($instansi_pemberi) || empty($program) || empty($kegiatan_output)) {
+                throw new Exception('Field bertanda bintang (*) wajib dilengkapi.');
+            }
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah,
+                'instansi_id' => $instansi_id,
+                'tahun' => $tahun,
+                'dasar_penugasan' => $dasar_penugasan,
+                'instansi_pemberi' => $instansi_pemberi,
+                'program' => $program,
+                'kegiatan_output' => $kegiatan_output,
+                'lokasi' => $lokasi,
+                'satuan_unit' => $satuan_unit,
+                'pagu' => $pagu,
+                'realisasi' => $realisasi,
+                'sumber_dana' => $sumber_dana,
+                'capaian' => $capaian,
+                'permasalahan' => $permasalahan,
+                'solusi' => $solusi,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $this->db->where('id', $id)->update('lkpj_tugas_pembantuan', $saveData);
+                $msg = 'Data Tugas Pembantuan berhasil diperbarui.';
+            } else {
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_tugas_pembantuan', $saveData);
+                $id = $this->db->insert_id();
+                $msg = 'Data Tugas Pembantuan berhasil ditambahkan.';
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => $msg,
+                'data' => array_merge(['id' => $id], $saveData)
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function DeleteTugasPembantuan() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+
+            $this->db->where('id', $id)->update('lkpj_tugas_pembantuan', [
+                'deleted_at' => date('Y-m-d H:i:s')
+            ]);
+
+            echo json_encode(['status' => 'success', 'message' => 'Data Tugas Pembantuan berhasil dihapus.']);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    // ================================================================
+    // 5. IPPD: TABEL INDEKS PERENCANAAN PEMBANGUNAN DAERAH
+    // ================================================================
+
+    private function get_ippd_master_data() {
+        return [
+            [
+                'code' => '1',
+                'title' => 'SINERGI',
+                'bobot' => 32,
+                'aspek' => [
+                    [
+                        'code' => '1.a',
+                        'letter' => 'a',
+                        'title' => 'Keselarasan Dokumen RPJMD dengan Dokumen RPJMN',
+                        'bobot' => 9,
+                        'indikator' => [
+                            [
+                                'code' => '1.a.1',
+                                'no' => '1',
+                                'title' => 'Keselarasan Sasaran dan antara Prioritas Pembangunan Daerah dalam RPJMD dengan Sasaran Prioritas Nasional (PN) RPJMN',
+                                'bobot' => 2,
+                                'sub' => [
+                                    ['code' => '1.a.1.a', 'letter' => 'a', 'title' => 'Tingkat Keterkaitan indikator sasaran pembangunan daerah RPJMD RPJMN dengan PN', 'bobot' => 0.5],
+                                    ['code' => '1.a.1.b', 'letter' => 'b', 'title' => 'Tersedianya tabel antara persandingan Sasaran Pembangunan daerah RPJMD dengan PN RPJMN', 'bobot' => 0.5],
+                                    ['code' => '1.a.1.c', 'letter' => 'c', 'title' => 'Tingkat Keselarasan Prioritas Pembangunan Daerah dalam RPJMD dengan PN RPJMN', 'bobot' => 0.5],
+                                    ['code' => '1.a.1.d', 'letter' => 'd', 'title' => 'Tersedianya tabel persandingan antara PN RPJMN dengan Prioritas Pembangunan Daerah', 'bobot' => 0.5]
+                                ]
+                            ],
+                            [
+                                'code' => '1.a.2',
+                                'no' => '2',
+                                'title' => 'Tersedianya dukungan program daerah dalam RPJMD untuk mendukung Kegiatan Prioritas dalam RPJMN',
+                                'bobot' => 3,
+                                'sub' => [
+                                    ['code' => '1.a.2.a', 'letter' => 'a', 'title' => 'Ketersediaan dukungan program daerah dalam RPJMD untuk mendukung kegiatan prioritas dalam PN 1 RPJMN sesuai kewenangan daerah', 'bobot' => 0.375],
+                                    ['code' => '1.a.2.b', 'letter' => 'b', 'title' => 'Ketersediaan dukungan program daerah dalam RPJMD untuk mendukung kegiatan prioritas dalam PN 2 RPJMN sesuai kewenangan daerah', 'bobot' => 0.375],
+                                    ['code' => '1.a.2.c', 'letter' => 'c', 'title' => 'Ketersediaan dukungan program daerah dalam RPJMD untuk mendukung kegiatan prioritas dalam PN 3 RPJMN sesuai kewenangan daerah', 'bobot' => 0.375],
+                                    ['code' => '1.a.2.d', 'letter' => 'd', 'title' => 'Ketersediaan dukungan program daerah dalam RPJMD untuk mendukung kegiatan prioritas dalam PN 4 RPJMN sesuai kewenangan daerah', 'bobot' => 0.375],
+                                    ['code' => '1.a.2.e', 'letter' => 'e', 'title' => 'Ketersediaan dukungan program daerah dalam RPJMD untuk mendukung kegiatan prioritas dalam PN 5 RPJMN sesuai kewenangan daerah', 'bobot' => 0.375],
+                                    ['code' => '1.a.2.f', 'letter' => 'f', 'title' => 'Ketersediaan dukungan program daerah dalam RPJMD untuk mendukung kegiatan prioritas dalam PN 6 RPJMN sesuai kewenangan daerah', 'bobot' => 0.375],
+                                    ['code' => '1.a.2.g', 'letter' => 'g', 'title' => 'Ketersediaan dukungan program daerah dalam RPJMD untuk mendukung kegiatan prioritas dalam PN 7 RPJMN sesuai kewenangan daerah', 'bobot' => 0.375],
+                                    ['code' => '1.a.2.h', 'letter' => 'h', 'title' => 'Ketersediaan dukungan program daerah dalam RPJMD untuk mendukung kegiatan prioritas dalam PN 8 RPJMN sesuai kewenangan daerah', 'bobot' => 0.375]
+                                ]
+                            ],
+                            [
+                                'code' => '1.a.3',
+                                'no' => '3',
+                                'title' => 'Indikator makro pada RPJMD selaras dengan indikator makro pada RPJMN:',
+                                'bobot' => 1,
+                                'sub' => [
+                                    ['code' => '1.a.3.a', 'letter' => 'a', 'title' => 'Tingkat Pengangguran Terbuka (TPT) (%)', 'bobot' => 0.5],
+                                    ['code' => '1.a.3.b', 'letter' => 'b', 'title' => 'Tingkat Kemiskinan (%)', 'bobot' => 0.5]
+                                ]
+                            ],
+                            [
+                                'code' => '1.a.4',
+                                'no' => '4',
+                                'title' => 'Dokumen RPJMD selaras dengan Proyek Prioritas Strategis',
+                                'bobot' => 1,
+                                'sub' => []
+                            ],
+                            [
+                                'code' => '1.a.5',
+                                'no' => '5',
+                                'title' => 'Komponen SPM di RPJMD disclaraskan dengan komponen SPM Nasional',
+                                'bobot' => 1,
+                                'sub' => []
+                            ],
+                            [
+                                'code' => '1.a.6',
+                                'no' => '6',
+                                'title' => 'Target SPM diselaraskan dengan target daerah SPM nasional',
+                                'bobot' => 1,
+                                'sub' => []
+                            ]
+                        ]
+                    ],
+                    [
+                        'code' => '1.b',
+                        'letter' => 'b',
+                        'title' => 'Keselarasan Dokumen RKPD dengan RKP',
+                        'bobot' => 13,
+                        'indikator' => [
+                            [
+                                'code' => '1.b.1',
+                                'no' => '1',
+                                'title' => 'Keselarasan antara Sasaran dan Prioritas Pembangunan Daerah dalam RKPD dengan Sasaran Prioritas Nasional (PN) RKP',
+                                'bobot' => 2.5,
+                                'sub' => [
+                                    ['code' => '1.b.1.a', 'letter' => 'a', 'title' => 'Tingkat indikator Keterkaitan pembangunan sasaran daerah RKPD dengan PN RKP', 'bobot' => 0.625],
+                                    ['code' => '1.b.1.b', 'letter' => 'b', 'title' => 'Tersedianya persandingan tabel antara Sasaran Pembangunan daerah RKPD dengan PN RKP', 'bobot' => 0.625],
+                                    ['code' => '1.b.1.c', 'letter' => 'c', 'title' => 'Tingkat Keselarasan Prioritas Pembangunan Dacrah dalam RKPD dengan PN RKP', 'bobot' => 0.625],
+                                    ['code' => '1.b.1.d', 'letter' => 'd', 'title' => 'Tersedianya tabel persandingan antara PN RKP dengan Prioritas Pembangunan Daerah', 'bobot' => 0.625]
+                                ]
+                            ],
+                            [
+                                'code' => '1.b.2',
+                                'no' => '2',
+                                'title' => 'Tersedianya Dukungan Program Daerah RKPD terhadap Kegiatan Prioritas pada PN 1',
+                                'bobot' => 1.25,
+                                'sub' => [
+                                    ['code' => '1.b.2.a', 'letter' => 'a', 'title' => 'Tingkat dukungan program daerah terhadap kegiatan prioritas pada PN 1 RKP sesuai dengan kewenangan daerah', 'bobot' => 0.625],
+                                    ['code' => '1.b.2.b', 'letter' => 'b', 'title' => 'Tersedianya informasi eksplisit persandingan keterkaitan program prioritas/kegiatan Prioritas RKP dengan program daerah', 'bobot' => 0.625]
+                                ]
+                            ],
+                            [
+                                'code' => '1.b.3',
+                                'no' => '3',
+                                'title' => 'Tersedianya Dukungan Program Daerah RKPD terhadap Kegiatan Prioritas pada PN 2 RKP',
+                                'bobot' => 1.25,
+                                'sub' => [
+                                    ['code' => '1.b.3.a', 'letter' => 'a', 'title' => 'Tingkat program dukungan daerah terhadap kegiatan prioritas pada PN 2 RKP sesuai dengan kewenangan daerah', 'bobot' => 0.625],
+                                    ['code' => '1.b.3.b', 'letter' => 'b', 'title' => 'Tersedianya informasi eksplisit persandingan keterkaitan program prioritas/kegiatan Prioritas RKP dengan program daerah', 'bobot' => 0.625]
+                                ]
+                            ],
+                            [
+                                'code' => '1.b.4',
+                                'no' => '4',
+                                'title' => 'Tersedianya Dukungan Program Daerah RKPD terhadap Kegiatan Prioritas pada PN 3 RKP',
+                                'bobot' => 1.25,
+                                'sub' => [
+                                    ['code' => '1.b.4.a', 'letter' => 'a', 'title' => 'Tingkat program dukungan daerah terhadap kegiatan prioritas pada PN 3 RKP sesuai dengan kewenangan daerah', 'bobot' => 0.625],
+                                    ['code' => '1.b.4.b', 'letter' => 'b', 'title' => 'Tersedianya informasi eksplisit persandingan keterkaitan program prioritas/kegiatan Prioritas RKP dengan program daerah', 'bobot' => 0.625]
+                                ]
+                            ],
+                            [
+                                'code' => '1.b.5',
+                                'no' => '5',
+                                'title' => 'Tersedianya Dukungan Program Daerah RKPD terhadap Kegiatan Prioritas pada PN 4 RKP',
+                                'bobot' => 1.25,
+                                'sub' => [
+                                    ['code' => '1.b.5.a', 'letter' => 'a', 'title' => 'Tingkat program dukungan daerah terhadap kegiatan prioritas pada PN 4 RKP sesuai dengan kewenangan daerah', 'bobot' => 0.625],
+                                    ['code' => '1.b.5.b', 'letter' => 'b', 'title' => 'Tersedianya informasi eksplisit persandingan keterkaitan program prioritas/kegiatan Prioritas RKP dengan program daerah', 'bobot' => 0.625]
+                                ]
+                            ],
+                            [
+                                'code' => '1.b.6',
+                                'no' => '6',
+                                'title' => 'Tersedianya Dukungan Program Daerah RKPD terhadap Kegiatan Prioritas pada PN 5 RKP',
+                                'bobot' => 1.25,
+                                'sub' => [
+                                    ['code' => '1.b.6.a', 'letter' => 'a', 'title' => 'Tingkat program dukungan daerah terhadap kegiatan prioritas pada PN 5 RKP sesuai dengan kewenangan daerah', 'bobot' => 0.625],
+                                    ['code' => '1.b.6.b', 'letter' => 'b', 'title' => 'Tersedianya informasi eksplisit persandingan keterkaitan program prioritas/kegiatan Prioritas RKP dengan program daerah', 'bobot' => 0.625]
+                                ]
+                            ],
+                            [
+                                'code' => '1.b.7',
+                                'no' => '7',
+                                'title' => 'Tersedianya Dukungan Program Daerah RKPD terhadap Kegiatan Prioritas pada PN 6 RKP',
+                                'bobot' => 1.25,
+                                'sub' => [
+                                    ['code' => '1.b.7.a', 'letter' => 'a', 'title' => 'Tingkat program dukungan daerah terhadap kegiatan prioritas pada PN 6 RKP sesuai dengan kewenangan daerah', 'bobot' => 0.625],
+                                    ['code' => '1.b.7.b', 'letter' => 'b', 'title' => 'Tersedianya informasi eksplisit persandingan keterkaitan program prioritas/kegiatan Prioritas RKP dengan program daerah', 'bobot' => 0.625]
+                                ]
+                            ],
+                            [
+                                'code' => '1.b.8',
+                                'no' => '8',
+                                'title' => 'Tersedianya Dukungan Program Daerah RKPD terhadap Kegiatan Prioritas pada PN 7 RKP',
+                                'bobot' => 1.25,
+                                'sub' => [
+                                    ['code' => '1.b.8.a', 'letter' => 'a', 'title' => 'Tingkat program dukungan daerah terhadap kegiatan prioritas pada PN 7 RKP sesuai dengan kewenangan daerah', 'bobot' => 0.625],
+                                    ['code' => '1.b.8.b', 'letter' => 'b', 'title' => 'Tersedianya informasi eksplisit persandingan keterkaitan program prioritas/kegiatan Prioritas RKP dengan program daerah', 'bobot' => 0.625]
+                                ]
+                            ],
+                            [
+                                'code' => '1.b.9',
+                                'no' => '9',
+                                'title' => 'Tersedianya Dukungan Program Daerah RKPD terhadap Kegiatan Prioritas pada PN 8 RKP',
+                                'bobot' => 1.25,
+                                'sub' => [
+                                    ['code' => '1.b.9.a', 'letter' => 'a', 'title' => 'Tingkat program dukungan daerah terhadap kegiatan prioritas pada PN 8 RKP sesuai dengan kewenangan daerah', 'bobot' => 0.625],
+                                    ['code' => '1.b.9.b', 'letter' => 'b', 'title' => 'Tersedianya informasi eksplisit persandingan keterkaitan program prioritas/kegiatan Prioritas RKP dengan program daerah', 'bobot' => 0.625]
+                                ]
+                            ],
+                            [
+                                'code' => '1.b.10',
+                                'no' => '10',
+                                'title' => 'Indikator pada makro RKPD selaras dengan indikator makro pada RKP',
+                                'bobot' => 1.25,
+                                'sub' => [
+                                    ['code' => '1.b.10.a', 'letter' => 'a', 'title' => 'Tingkat Pengangguran Terbuka (TPT) (%)', 'bobot' => 0.625],
+                                    ['code' => '1.b.10.b', 'letter' => 'b', 'title' => 'Tingkat Kemiskinan (%)', 'bobot' => 0.625]
+                                ]
+                            ]
+                        ]
+                    ],
+                    [
+                        'code' => '1.c',
+                        'letter' => 'c',
+                        'title' => 'Kesesuaian Anggaran Daerah (APBD) untuk Membiayai Program Prioritas Nasional/Kegiatan Prioritas Utama (KPU) dalam dokumen RKPD',
+                        'bobot' => 10,
+                        'indikator' => [
+                            [
+                                'code' => '1.c.1',
+                                'no' => '1',
+                                'title' => 'Tersedianya APBD untuk Prioritas dukungan Program Nasional/Kegiatan Prioritas Utama (KPU) dalam Dokumen RKPD',
+                                'bobot' => 10,
+                                'sub' => []
+                            ]
+                        ]
+                    ]
+                ]
+            ],
+            [
+                'code' => '2',
+                'title' => 'KUALITAS PERENCANAAN',
+                'bobot' => 58,
+                'aspek' => [
+                    [
+                        'code' => '2.a',
+                        'letter' => 'a',
+                        'title' => 'Kesesuaian antara Isu Strategis TargetProgram/Kegiatan/Proyek di RPJMD atau RKPD',
+                        'bobot' => 49,
+                        'indikator' => [
+                            [
+                                'code' => '2.a.1',
+                                'no' => '1',
+                                'title' => 'Kesesuaian Isu Strategis dengan Kebutuhan Daerah',
+                                'bobot' => 18,
+                                'sub' => [
+                                    ['code' => '2.a.1.a', 'letter' => 'a', 'title' => 'Keterkaitan permasalahan daerah (kebutuhan daerah) dengan hasil evaluasi', 'bobot' => 6],
+                                    ['code' => '2.a.1.b', 'letter' => 'b', 'title' => 'Keterkaitan Prioritas daerah pembangunan dengan permasalahan pembangunan', 'bobot' => 6],
+                                    ['code' => '2.a.1.c', 'letter' => 'c', 'title' => 'Penyusunan Prioritas pembangunan daerah berdasarkan isu strategis', 'bobot' => 6]
+                                ]
+                            ],
+                            [
+                                'code' => '2.a.2',
+                                'no' => '2',
+                                'title' => 'Kesesuaian Target Sasaran dan Pembangunan dalam menyelesaikan Isu dan Prioritas Daerah',
+                                'bobot' => 14,
+                                'sub' => [
+                                    ['code' => '2.a.2.a', 'letter' => 'a', 'title' => 'Tersedianya indikator sasaran untuk isu strategis/prioritas pembangunan daerah', 'bobot' => 6],
+                                    ['code' => '2.a.2.b', 'letter' => 'b', 'title' => 'Tingkat kesesuaian sasaran indikator prioritas pembangunan daerah menyelesaikan isu strategis dalam daerah/prioritas pembangunan daerah', 'bobot' => 8]
+                                ]
+                            ],
+                            [
+                                'code' => '2.a.3',
+                                'no' => '3',
+                                'title' => 'Kesesuaian Program/Kegiatan/Proyek dalam mencapai target dan sasaran program',
+                                'bobot' => 17,
+                                'sub' => [
+                                    ['code' => '2.a.3.a', 'letter' => 'a', 'title' => 'Prioritas Pembangunan Daerah dijabarkan menjadi program prioritas', 'bobot' => 8.5],
+                                    ['code' => '2.a.3.b', 'letter' => 'b', 'title' => 'Tingkat indikator Keterkaitan sasaran Prioritas pembangunan daerah dengan indikator kinerja Program Prioritas', 'bobot' => 8.5]
+                                ]
+                            ]
+                        ]
+                    ],
+                    [
+                        'code' => '2.b',
+                        'letter' => 'b',
+                        'title' => 'Program Unggulan Perencanaan Pembangunan',
+                        'bobot' => 9,
+                        'indikator' => [
+                            [
+                                'code' => '2.b.1',
+                                'no' => '1',
+                                'title' => 'Keterkaitan Permasalahan dengan Program Unggulan yang dilaksanakan',
+                                'bobot' => 4.5,
+                                'sub' => []
+                            ],
+                            [
+                                'code' => '2.b.2',
+                                'no' => '2',
+                                'title' => 'Keterkaitan Output dengan outcome unggulan program',
+                                'bobot' => 4.5,
+                                'sub' => []
+                            ]
+                        ]
+                    ]
+                ]
+            ],
+            [
+                'code' => '3',
+                'title' => 'KETERHUBUNGAN PERENCANAAN PEMBANGUNAN DENGAN PERENCANAAN KINERJA',
+                'bobot' => 10,
+                'aspek' => [
+                    [
+                        'code' => '3.a',
+                        'letter' => 'a',
+                        'title' => 'Target dan Sasaran Pembangunan daerah menjadi Target dan Sasaran Kinerja Lembaga terkait',
+                        'bobot' => 10,
+                        'indikator' => [
+                            [
+                                'code' => '3.a.1',
+                                'no' => '1',
+                                'title' => 'Cascading Target Pembangunan Daerah menjadi Target Kinerja Lembaga Terkait di dalam Pemerintah Daerah',
+                                'bobot' => 10,
+                                'sub' => [
+                                    ['code' => '3.a.1.a', 'letter' => 'a', 'title' => 'Tersedianya penanggungjawab OPD untuk masing-masing program prioritas', 'bobot' => 5],
+                                    ['code' => '3.a.1.b', 'letter' => 'b', 'title' => 'Target dan sasaran prioritas daerah menjadi IKU OPD yang bertanggungjawab', 'bobot' => 5]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ];
+    }
+
+    public function TabelIPPD() {
+        $Header['Halaman'] = 'Tabel Indeks Perencanaan Pembangunan Daerah (IPPD)';
+
+        $KodeWilayah = $this->get_kode_wilayah();
+        $instansi_id = $this->get_instansi_id();
+        $is_role_4 = $this->is_role_4();
+        $tahun = $this->input->get('tahun', TRUE) ?: 2026;
+        $filter_instansi = $this->input->get('instansi_id', TRUE);
+
+        if ($is_role_4 && $instansi_id) {
+            $filter_instansi = $instansi_id;
+        }
+
+        $Data['KodeWilayah'] = $KodeWilayah;
+        $Data['NamaWilayah'] = '';
+        $Data['IsRole4'] = $is_role_4;
+        $Data['InstansiId'] = $instansi_id;
+        $Data['ControllerName'] = 'Instansi';
+
+        if (!empty($KodeWilayah)) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            $Data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
+        }
+
+        $Data['ListInstansi'] = $this->db->select('id, nama')->from('akun_instansi')->where('deleted_at IS NULL')->order_by('nama', 'ASC')->get()->result_array();
+        $Data['ListTahun'] = [2027, 2026, 2025, 2024, 2023];
+        $Data['TahunAktif'] = (int)$tahun;
+        $Data['FilterInstansi'] = $filter_instansi ? (int)$filter_instansi : 1;
+        $Data['MasterData'] = $this->get_ippd_master_data();
+
+        // Get saved scores
+        $this->db->where('deleted_at IS NULL');
+        if ($tahun) $this->db->where('tahun', (int)$tahun);
+        if ($filter_instansi) $this->db->where('instansi_id', (int)$filter_instansi);
+        if ($KodeWilayah) $this->db->where('kodewilayah', $KodeWilayah);
+        $savedScores = $this->db->get('ippd_penilaian')->result_array();
+
+        $scoresMap = [];
+        foreach ($savedScores as $sc) {
+            $scoresMap[$sc['item_code']] = [
+                'id' => $sc['id'],
+                'bobot_capaian' => ($sc['bobot_capaian'] !== null) ? (float)$sc['bobot_capaian'] : null,
+                'opsi_aksi' => $sc['opsi_aksi'],
+                'catatan' => $sc['catatan'],
+                'bukti_dukung' => $sc['bukti_dukung'],
+                'status_verifikasi' => $sc['status_verifikasi']
+            ];
+        }
+        $Data['SavedScores'] = $scoresMap;
+
+        $this->load->view('Daerah/header', $Header);
+        $this->load->view('Daerah/TabelIPPD', $Data);
+    }
+
+    // Alias
+    public function IPPD() {
+        $this->TabelIPPD();
+    }
+
+    public function GetIPPDData() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+        $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+
+        $this->db->where('deleted_at IS NULL');
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+        if ($instansi_id > 0) $this->db->where('instansi_id', $instansi_id);
+        if ($kode_wilayah) $this->db->where('kodewilayah', $kode_wilayah);
+
+        $savedScores = $this->db->get('ippd_penilaian')->result_array();
+        $scoresMap = [];
+        foreach ($savedScores as $sc) {
+            $scoresMap[$sc['item_code']] = [
+                'id' => $sc['id'],
+                'bobot_capaian' => ($sc['bobot_capaian'] !== null) ? (float)$sc['bobot_capaian'] : null,
+                'opsi_aksi' => $sc['opsi_aksi'],
+                'catatan' => $sc['catatan'],
+                'bukti_dukung' => $sc['bukti_dukung'],
+                'status_verifikasi' => $sc['status_verifikasi']
+            ];
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'master' => $this->get_ippd_master_data(),
+            'scores' => $scoresMap
+        ]);
+    }
+
+    public function SaveIPPDScore() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $item_code = trim($this->input->post('item_code', TRUE));
+            $bobot_capaian = $this->input->post('bobot_capaian', TRUE);
+            $opsi_aksi = trim($this->input->post('opsi_aksi', TRUE));
+            $catatan = trim($this->input->post('catatan', TRUE));
+            $bukti_dukung = trim($this->input->post('bukti_dukung', TRUE));
+
+            if (empty($item_code)) {
+                throw new Exception('Item indikator / sub-indikator tidak valid.');
+            }
+
+            $bobot_val = ($bobot_capaian !== '' && $bobot_capaian !== null) ? (float)$bobot_capaian : null;
+
+            // Check if existing record
+            $existing = $this->db->where([
+                'kodewilayah' => $kode_wilayah,
+                'instansi_id' => $instansi_id,
+                'tahun' => $tahun,
+                'item_code' => $item_code,
+                'deleted_at IS NULL' => null
+            ])->get('ippd_penilaian')->row_array();
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah,
+                'instansi_id' => $instansi_id,
+                'tahun' => $tahun,
+                'item_code' => $item_code,
+                'bobot_capaian' => $bobot_val,
+                'opsi_aksi' => $opsi_aksi,
+                'catatan' => $catatan,
+                'bukti_dukung' => $bukti_dukung,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($existing) {
+                $this->db->where('id', $existing['id'])->update('ippd_penilaian', $saveData);
+                $id = $existing['id'];
+            } else {
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('ippd_penilaian', $saveData);
+                $id = $this->db->insert_id();
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Penilaian IPPD berhasil disimpan.',
+                'data' => array_merge(['id' => $id], $saveData)
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function SaveAllIPPDScore() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $itemsJson = $this->input->post('items', FALSE);
+            $items = json_decode($itemsJson, TRUE);
+
+            if (!is_array($items)) {
+                throw new Exception('Format data penilaian tidak valid.');
+            }
+
+            $count = 0;
+            foreach ($items as $item) {
+                if (empty($item['item_code'])) continue;
+
+                $item_code = trim($item['item_code']);
+                $bobot_val = (isset($item['bobot_capaian']) && $item['bobot_capaian'] !== '' && $item['bobot_capaian'] !== null) ? (float)$item['bobot_capaian'] : null;
+                $opsi_aksi = isset($item['opsi_aksi']) ? trim($item['opsi_aksi']) : null;
+                $catatan = isset($item['catatan']) ? trim($item['catatan']) : null;
+                $bukti_dukung = isset($item['bukti_dukung']) ? trim($item['bukti_dukung']) : null;
+
+                $existing = $this->db->where([
+                    'kodewilayah' => $kode_wilayah,
+                    'instansi_id' => $instansi_id,
+                    'tahun' => $tahun,
+                    'item_code' => $item_code,
+                    'deleted_at IS NULL' => null
+                ])->get('ippd_penilaian')->row_array();
+
+                $saveData = [
+                    'kodewilayah' => $kode_wilayah,
+                    'instansi_id' => $instansi_id,
+                    'tahun' => $tahun,
+                    'item_code' => $item_code,
+                    'bobot_capaian' => $bobot_val,
+                    'opsi_aksi' => $opsi_aksi,
+                    'catatan' => $catatan,
+                    'bukti_dukung' => $bukti_dukung,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+
+                if ($existing) {
+                    $this->db->where('id', $existing['id'])->update('ippd_penilaian', $saveData);
+                } else {
+                    $saveData['created_at'] = date('Y-m-d H:i:s');
+                    $this->db->insert('ippd_penilaian', $saveData);
+                }
+                $count++;
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => "Berhasil menyimpan {$count} data penilaian IPPD."
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function ResetIPPDData() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+
+            $this->db->where([
+                'kodewilayah' => $kode_wilayah,
+                'instansi_id' => $instansi_id,
+                'tahun' => $tahun
+            ])->update('ippd_penilaian', [
+                'deleted_at' => date('Y-m-d H:i:s')
+            ]);
+
+            echo json_encode(['status' => 'success', 'message' => 'Data penilaian IPPD berhasil direset.']);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
 }
 ?>

@@ -521,8 +521,67 @@
                     <i class="fa fa-chevron-down"></i>
                 </a>
                 <div class="sidebar-submenu">
-                    <a href="<?=base_url('Daerah/BelanjaSubKegiatan')?>">Belanja Sub Kegiatan</a>
+                    <a href="<?=base_url('Instansi/BelanjaSubKegiatan')?>">Belanja Sub Kegiatan</a>
             
+                </div>
+            </li>
+
+            <li class="sidebar-dropdown">
+                <a href="#">
+                    <i class="menu-icon fa fa-sitemap"></i>
+                    <span>DPA</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Instansi/DPA')?>">DPA</a>
+                </div>
+            </li>
+
+            <li class="sidebar-dropdown">
+                <a href="#">
+                    <i class="menu-icon fa fa-sitemap"></i>
+                    <span>Rencana Aksi</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Instansi/TargetRenaksi')?>">Target</a>
+                    <a href="<?=base_url('Instansi/RealisasiRenaksi')?>">Realisasi</a>
+                </div>
+            </li>
+
+            <li class="sidebar-dropdown">
+                <a href="#">
+                    <i class="menu-icon fa fa-file-text"></i>
+                    <span>Laporan</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Instansi/LaporanAnggaran')?>">Laporan Anggaran</a>
+                </div>
+            </li>
+
+            <li class="sidebar-dropdown">
+                <a href="#">
+                    <i class="menu-icon fa fa-file-text"></i>
+                    <span>E - LKPJ</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Instansi/PengisianKebijakanStrategis')?>">Pengisian Kebijakan Strategis</a>
+                    <a href="<?=base_url('Instansi/PengisianCapaianProgramKegiatan')?>">Pengisian Capaian Program Kegiatan</a>
+                    <a href="<?=base_url('Instansi/PengisianTinjutRekomendasiDPRDn-1')?>">Pengisian Tinjut Rekomendasi DPRD n-1</a>
+                    <a href="<?=base_url('Instansi/CapaianKinerjaPelaksanaanTugasPembantuan')?>">Capaian Kinerja Pelaksanaan Tugas Pembantuan</a>
+                </div>
+            </li>
+
+            <li class="sidebar-dropdown">
+                <a href="#">
+                    <i class="menu-icon fa fa-bar-chart"></i>
+                    <span>IPPD</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Instansi/TabelIPPD')?>">Tabel IPPD</a>
                 </div>
             </li>
 
