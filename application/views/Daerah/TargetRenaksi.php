@@ -157,6 +157,43 @@
     box-shadow: 0 0 0 3px rgba(0, 194, 146, 0.15);
   }
 
+  .search-box {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  .search-box i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 13px;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .search-box input {
+    width: 100%;
+    height: 38px;
+    padding: 0 12px 0 34px !important;
+    font-size: 13px;
+    border: 1px solid var(--ui-border);
+    border-radius: var(--radius-md);
+    background: #ffffff;
+    color: var(--ui-text-black);
+    font-weight: 500;
+    outline: none;
+    transition: all 0.2s;
+  }
+
+  .search-box input:focus {
+    border-color: var(--ui-primary);
+    box-shadow: 0 0 0 3px rgba(0, 194, 146, 0.15);
+  }
+
   /* ===== Page Header & Summary Card ===== */
   .page-header-card {
     background: var(--ui-card-bg);
@@ -879,7 +916,9 @@ function formatRupiah(n){
 }
 function fmtNum(n){
   if(n===null || n===undefined || n==='') return '';
-  return Number(n).toLocaleString('id-ID');
+  var num = typeof n === 'string' ? Number(n.replace(',', '.')) : Number(n);
+  if(isNaN(num)) return String(n);
+  return num.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 }
 
 /* =========================================================
@@ -895,18 +934,27 @@ function findSUB(tId,ssId,spId,skId,subId){ var sk=findSK(tId,ssId,spId,skId); r
    AGREGASI ANGGARAN
    ========================================================= */
 function computeSubAnggaran(sub){
-  if(sub.anggaran !== undefined && sub.anggaran > 0) return Number(sub.anggaran);
+  if(sub.anggaran !== undefined && sub.anggaran !== null && Number(sub.anggaran) > 0) {
+    return Number(sub.anggaran);
+  }
   var total = 0;
   if(sub.paguBulanan){
     MONTHS.forEach(function(m){ total += Number(sub.paguBulanan[m[0]]) || 0; });
   }
-  return total;
+  if(total > 0) return total;
+  return Number(sub.anggaran) || 0;
 }
 function computeSKAnggaran(sk){
   return (sk.sasaranSubKegiatanList||[]).reduce(function(s,sub){ return s + computeSubAnggaran(sub); }, 0);
 }
 function computeSPAnggaran(sp){
   return (sp.sasaranKegiatanList||[]).reduce(function(s,sk){ return s + computeSKAnggaran(sk); }, 0);
+}
+function computeSSAnggaran(ss){
+  return (ss.sasaranProgramList||[]).reduce(function(s,sp){ return s + computeSPAnggaran(sp); }, 0);
+}
+function computeTujuanAnggaran(t){
+  return (t.sasaranStrategisList||[]).reduce(function(s,ss){ return s + computeSSAnggaran(ss); }, 0);
 }
 function sumBobot(list){
   return (list||[]).reduce(function(s,tp){ return s + (Number(tp.bobot)||0); }, 0);
@@ -1006,24 +1054,34 @@ function renderLevelBlock(entity, level, chain){
 function renderNameCell(entity, level, rowspan){
   var inner = '';
   if(level==='tujuan'){
-    inner = '<span class="lvl-prefix"><i class="fa fa-flag text-slate"></i> Tujuan:</span> '+escapeHtml(entity.nama);
+    inner = '<div style="font-weight:700; color:#334155; margin-bottom:2px;"><i class="fa fa-flag text-slate"></i> Tujuan:</div>' +
+            '<div style="font-size:13px; font-weight:600; color:#0f172a;">'+escapeHtml(entity.nama)+'</div>';
   } else if(level==='ss'){
-    inner = '<span class="lvl-prefix" style="color:#1d4ed8;"><i class="fa fa-compass"></i> Sasaran Strategis:</span> '+escapeHtml(entity.nama);
+    inner = '<div style="font-weight:700; color:#1d4ed8; margin-bottom:2px;"><i class="fa fa-compass"></i> Sasaran:</div>' +
+            '<div style="font-size:13px; font-weight:600; color:#1e293b;">'+escapeHtml(entity.nama)+'</div>';
   } else if(level==='sp'){
-    inner = '<span class="lvl-name-blue"><i class="fa fa-tasks"></i> '+escapeHtml(entity.nama)+'</span>';
-    if(entity.nomenklatur){
-      inner += '<div class="lvl-note">Nomenklatur Program: <strong>'+escapeHtml(entity.nomenklatur)+'</strong></div>';
+    var pNomen = entity.nomenklatur || entity.nama || '';
+    inner = '<div style="margin-bottom:3px;">' +
+              (entity.kode ? '<span class="font-mono font-bold" style="background:#eff6ff; color:#1d4ed8; padding:2px 6px; border-radius:4px; border:1px solid #bfdbfe; margin-right:6px; font-size:12px;">'+escapeHtml(entity.kode)+'</span>' : '') +
+              '<strong style="color:#1e3a8a; font-size:13px;">'+escapeHtml(pNomen)+'</strong>' +
+            '</div>';
+    if(entity.perihal && entity.perihal !== pNomen){
+      inner += '<div style="font-size:11.5px; color:#475569; margin-top:2px;"><strong>Perihal Program:</strong> '+escapeHtml(entity.perihal)+'</div>';
     }
   } else if(level==='sk'){
-    inner = '<span class="lvl-name-blue"><i class="fa fa-folder-open"></i> '+escapeHtml(entity.nama)+'</span>';
-    if(entity.nomenklatur){
-      inner += '<div class="lvl-note">Nomenklatur Kegiatan: <strong>'+escapeHtml(entity.nomenklatur)+'</strong></div>';
-    }
+    var kNomen = entity.nomenklatur || entity.nama || '';
+    var kPerihal = entity.perihal || entity.nama || '';
+    inner = '<div style="margin-bottom:3px;">' +
+              (entity.kode ? '<span class="font-mono font-bold" style="background:#ecfeff; color:#0e7490; padding:2px 6px; border-radius:4px; border:1px solid #a5f3fc; margin-right:6px; font-size:12px;">'+escapeHtml(entity.kode)+'</span>' : '') +
+              '<strong style="color:#155e75; font-size:13px;">'+escapeHtml(kNomen)+'</strong>' +
+            '</div>' ;
   } else if(level==='sub'){
-    inner = '<span class="lvl-name-blue" style="color:#007a5a;"><i class="fa fa-file-text-o"></i> '+escapeHtml(entity.nama)+'</span>';
-    if(entity.kode){
-      inner += '<div class="lvl-note">Kode Sub Kegiatan: <span class="font-mono" style="font-weight:700; color:#0f766e;">'+escapeHtml(entity.kode)+'</span></div>';
-    }
+    var subNomen = entity.nomenklatur || entity.nama || '';
+    var subPerihal = entity.perihal || entity.nama || '';
+    inner = '<div style="margin-bottom:3px;">' +
+              (entity.kode ? '<span class="font-mono font-bold" style="background:#ecfdf5; color:#047857; padding:2px 6px; border-radius:4px; border:1px solid #a7f3d0; margin-right:6px; font-size:12px;">'+escapeHtml(entity.kode)+'</span>' : '') +
+              '<strong style="color:#065f46; font-size:13px;">'+escapeHtml(subNomen)+'</strong>' +
+            '</div>' ;
   }
   return '<td class="cell-name cell-name-'+level+'" rowspan="'+rowspan+'">'+inner+'</td>';
 }
@@ -1671,20 +1729,27 @@ function saveSubKegiatanTarget(tId, ssId, spId, skId, subId){
    SINKRONISASI RAK DPA KE TARGET RENAKSI
    ========================================================= */
 function syncDpaAnggaran(){
-  if(!confirm('Apakah Anda yakin ingin menarik data RAK dari DPA ke Anggaran Bulanan Target Renaksi?')) return;
+  if(!confirm('Apakah Anda yakin ingin menarik data RAK dari DPA dan mereset Target Renaksi kembali ke data awal Rankhir Renja?')) return;
   
+  showToast('Sedang memproses sinkronisasi data dari DPA...', 'info');
   $.ajax({
     url: baseUrl + 'Instansi/SyncDPAAnggaran',
     type: 'POST',
     data: {
       tahun: currentTahun,
-      instansi_id: currentInstansiId
+      instansi_id: currentInstansiId,
+      kode_wilayah: currentKodeWilayah
     },
     dataType: 'json',
     success: function(res){
       if(res.status === 'success'){
         showToast(res.message, 'success');
-        reloadHierarchyData();
+        if(res.data){
+          state = res.data;
+          renderTable();
+        } else {
+          reloadHierarchyData();
+        }
       } else {
         showToast(res.message || 'Gagal menarik RAK DPA.', 'error');
       }
@@ -1701,7 +1766,8 @@ function reloadHierarchyData(){
     type: 'POST',
     data: {
       tahun: currentTahun,
-      instansi: currentInstansiId
+      instansi: currentInstansiId,
+      kode_wilayah: currentKodeWilayah
     },
     dataType: 'json',
     success: function(res){
