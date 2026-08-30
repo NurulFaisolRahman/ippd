@@ -332,6 +332,67 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
     border: 1px solid rgba(255,255,255,0.2);
 }
 
+/* === ULTIMATE DROPDOWN SELECTOR === */
+.pk-ultimate-select-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 6px 14px;
+    border-radius: 12px;
+    color: #ffffff;
+}
+
+.pk-ultimate-select-box label {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #ffffff;
+}
+
+.pk-select-ultimate {
+    background: #ffffff;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    min-width: 300px;
+    max-width: 500px;
+    outline: none;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+
+.pk-select-ultimate:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.25);
+}
+
+@media (max-width: 768px) {
+    .pk-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .pk-ultimate-select-box {
+        width: 100%;
+    }
+    .pk-select-ultimate {
+        width: 100%;
+        min-width: unset;
+        max-width: unset;
+    }
+}
+
 /* === LEGEND === */
 .pk-legend {
     background: #f8fafc;
@@ -945,9 +1006,17 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; }
             <div class="pk-header-title">
                 <div class="icon-wrap"><i class="fa fa-sitemap"></i></div>
                 <div>
-                    <h4>Pohon Kinerja Perangkat Daerah 
+                    <h4>Pohon Kinerja Perangkat Daerah <?= !empty($NamaInstansi) ? '- ' . html_escape($NamaInstansi) : '' ?></h4>
                     <p>Visualisasi hierarki kinerja 4 level - Klik node untuk melihat detail</p>
                 </div>
+            </div>
+
+            <!-- Ultimate Outcome Selector Dropdown -->
+            <div class="pk-ultimate-select-box">
+                <label for="select-ultimate-outcome-pd"><i class="fa fa-crown"></i> Pilih Ultimate:</label>
+                <select id="select-ultimate-outcome-pd" class="pk-select-ultimate">
+                    <option value="">-- Pilih Ultimate Outcome --</option>
+                </select>
             </div>
         </div>
 
@@ -1564,9 +1633,50 @@ $(document).ready(function() {
         modalOverlay.style.display = 'flex';
     }
 
+    // Helper function to calculate level counts for any data subtree
+    function calculateSubtreeCounts(dataRoot) {
+        const counts = { level1: 0, level2: 0, level3: 0, level4: 0 };
+        function traverse(node) {
+            if (!node) return;
+            if (node.level && counts['level' + node.level] !== undefined) {
+                counts['level' + node.level]++;
+            }
+            if (node.children && Array.isArray(node.children)) {
+                node.children.forEach(traverse);
+            }
+        }
+        if (dataRoot && dataRoot.children) {
+            dataRoot.children.forEach(traverse);
+        }
+        return counts;
+    }
+
+    // Helper function to update the legend count badges
+    function updateLegendCounts(counts) {
+        document.querySelectorAll('.pk-legend .legend-item').forEach(item => {
+            const text = item.textContent.toLowerCase();
+            let key = '';
+            if (text.includes('ultimate')) key = 'level1';
+            else if (text.includes('intermediate')) key = 'level2';
+            else if (text.includes('immediate')) key = 'level3';
+            else if (text.includes('output')) key = 'level4';
+            
+            if (key && counts[key] !== undefined) {
+                const countEl = item.querySelector('.legend-count');
+                if (countEl) countEl.textContent = counts[key];
+            }
+        });
+    }
+
+    const selectUltimatePdEl = document.getElementById('select-ultimate-outcome-pd');
+
     // Cek data kosong
     if (!chartData || !chartData.children || chartData.children.length === 0) {
         document.getElementById('chart-svg').style.display = 'none';
+        if (selectUltimatePdEl) {
+            selectUltimatePdEl.innerHTML = '<option value="">-- Tidak Ada Data --</option>';
+            selectUltimatePdEl.disabled = true;
+        }
         
         let emptyHtml = `
             <div class="pk-empty">
@@ -1608,14 +1718,17 @@ $(document).ready(function() {
         return;
     }
 
-    // D3 Setup
-    const svg = d3.select('#chart-svg');
-    svg.selectAll('*').remove();
-
-    const W = container.clientWidth || 1200;
-    const H = container.clientHeight || 700;
-
-    svg.attr('width', W).attr('height', H);
+    // Populate dropdown Ultimate Outcome PD
+    if (selectUltimatePdEl) {
+        selectUltimatePdEl.innerHTML = '<option value="">-- Pilih Ultimate Outcome --</option>' +
+                                      '<option value="all">-- Tampilkan Semua Ultimate Outcome --</option>';
+        chartData.children.forEach((child, index) => {
+            const opt = document.createElement('option');
+            opt.value = child.id;
+            opt.textContent = `[${index + 1}] ` + truncate(child.nama, 85);
+            selectUltimatePdEl.appendChild(opt);
+        });
+    }
 
     // Node dimensions
     const NODE_WIDTH = 280;
@@ -1625,331 +1738,395 @@ $(document).ready(function() {
     const HORIZONTAL_GAP = 40;
     const HORIZONTAL_SPACING = NODE_WIDTH + HORIZONTAL_GAP;
 
-    // Build hierarchy
-    const root = d3.hierarchy(chartData, d => d.children);
-
-    // Use d3.tree layout to calculate non-overlapping node positions
-    const treeLayout = d3.tree()
-        .nodeSize([HORIZONTAL_SPACING, LEVEL_HEIGHT])
-        .separation((a, b) => (a.parent === b.parent ? 1.08 : 1.18));
-
-    treeLayout(root);
-
-    const nodes = [];
-    root.descendants().forEach(node => {
-        if (node.data.nama !== 'ROOT') {
-            node.displayX = node.x;
-            node.displayY = (node.depth - 1) * LEVEL_HEIGHT + 60;
-            nodes.push(node);
-        }
-    });
-
-    const validLinks = root.links().filter(link => link.source.data.nama !== 'ROOT');
-
-    // Store original transform for reset
     let originalTransform = null;
-
-    // Setup zoom
     let currentScale = 1;
-    const zoom = d3.zoom()
-        .scaleExtent([0.05, 3])
-        .on('zoom', e => {
-            g.attr('transform', e.transform);
-            currentScale = e.transform.k;
-            zoomBadge.textContent = Math.round(currentScale * 100) + '%';
+    let currentFitView = null;
+
+    // Main render function for a given data tree
+    function renderTreeForData(activeData) {
+        const svg = d3.select('#chart-svg');
+        svg.selectAll('*').remove();
+
+        // Remove any existing empty prompts
+        const existingPrompt = document.getElementById('empty-select-prompt-pd');
+        if (existingPrompt) existingPrompt.remove();
+
+        // If no children to render (prompt state)
+        if (!activeData || !activeData.children || activeData.children.length === 0) {
+            document.getElementById('chart-svg').style.display = 'none';
+            if (zoomBadge) zoomBadge.style.display = 'none';
+            
+            const promptHtml = `
+                <div class="pk-empty" id="empty-select-prompt-pd">
+                    <div style="width:70px; height:70px; border-radius:50%; background:#eff6ff; display:flex; align-items:center; justify-content:center; margin-bottom:12px; border:2px dashed #3b82f6;">
+                        <i class="fa fa-sitemap" style="font-size: 32px; color: #2563eb;"></i>
+                    </div>
+                    <h4 style="font-weight: 700; color: #1e293b; margin: 0 0 6px 0; font-size: 18px;">Pilih Ultimate Outcome</h4>
+                    <p style="color: #64748b; font-size: 14px; max-width: 460px; text-align: center; line-height: 1.5; margin: 0;">
+                        Silakan pilih <strong>Ultimate Outcome (Level 1)</strong> pada dropdown di bagian atas untuk menampilkan bagan pohon kinerja PD beserta seluruh rantai turunannya.
+                    </p>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', promptHtml);
+            updateLegendCounts({ level1: 0, level2: 0, level3: 0, level4: 0 });
+            return;
+        }
+
+        // Show SVG and zoom badge
+        document.getElementById('chart-svg').style.display = 'block';
+        if (zoomBadge) zoomBadge.style.display = 'block';
+
+        // Update counts
+        const activeCounts = calculateSubtreeCounts(activeData);
+        updateLegendCounts(activeCounts);
+
+        const W = container.clientWidth || 1200;
+        const H = container.clientHeight || 700;
+        svg.attr('width', W).attr('height', H);
+
+        const root = d3.hierarchy(activeData, d => d.children);
+
+        // Calculate layout
+        const treeLayout = d3.tree()
+            .nodeSize([HORIZONTAL_SPACING, LEVEL_HEIGHT])
+            .separation((a, b) => (a.parent === b.parent ? 1.08 : 1.18));
+
+        treeLayout(root);
+
+        const nodes = [];
+        root.descendants().forEach(node => {
+            if (node.data.nama !== 'ROOT') {
+                node.displayX = node.x;
+                node.displayY = (node.depth - 1) * LEVEL_HEIGHT + 60;
+                nodes.push(node);
+            }
         });
 
-    svg.call(zoom);
+        const validLinks = root.links().filter(link => link.source.data.nama !== 'ROOT');
 
-    const g = svg.append('g');
+        const zoom = d3.zoom()
+            .scaleExtent([0.05, 3])
+            .on('zoom', e => {
+                g.attr('transform', e.transform);
+                currentScale = e.transform.k;
+                if (zoomBadge) zoomBadge.textContent = Math.round(currentScale * 100) + '%';
+            });
 
-    // Defs for gradients and shadow
-    const defs = svg.append('defs');
+        svg.call(zoom);
+        const g = svg.append('g');
 
-    // Shadow filter
-    const filter = defs.append('filter')
-        .attr('id', 'shadow')
-        .attr('x', '-20%')
-        .attr('y', '-20%')
-        .attr('width', '140%')
-        .attr('height', '140%');
+        const defs = svg.append('defs');
 
-    filter.append('feDropShadow')
-        .attr('dx', 0)
-        .attr('dy', 4)
-        .attr('stdDeviation', 6)
-        .attr('flood-color', 'rgba(0,0,0,0.15)');
+        const filter = defs.append('filter')
+            .attr('id', 'shadow')
+            .attr('x', '-20%')
+            .attr('y', '-20%')
+            .attr('width', '140%')
+            .attr('height', '140%');
 
-    // Gradients per level
-    Object.entries(LEVELS).forEach(([lv, cfg]) => {
-        const grad = defs.append('linearGradient')
-            .attr('id', `grad-${lv}`)
-            .attr('x1', '0%')
-            .attr('y1', '0%')
-            .attr('x2', '100%')
-            .attr('y2', '100%');
-        
-        grad.append('stop')
-            .attr('offset', '0%')
-            .attr('stop-color', cfg.fill);
-        
-        grad.append('stop')
-            .attr('offset', '100%')
-            .attr('stop-color', d3.color(cfg.fill).brighter(0.5));
-    });
+        filter.append('feDropShadow')
+            .attr('dx', 0)
+            .attr('dy', 4)
+            .attr('stdDeviation', 6)
+            .attr('flood-color', 'rgba(0,0,0,0.15)');
 
-    // Draw links grouped by parent for clean tree branch rendering
-    const parentGroups = new Map();
-    validLinks.forEach(link => {
-        if (!parentGroups.has(link.source)) {
-            parentGroups.set(link.source, []);
-        }
-        parentGroups.get(link.source).push(link.target);
-    });
+        Object.entries(LEVELS).forEach(([lv, cfg]) => {
+            const grad = defs.append('linearGradient')
+                .attr('id', `grad-${lv}`)
+                .attr('x1', '0%')
+                .attr('y1', '0%')
+                .attr('x2', '100%')
+                .attr('y2', '100%');
+            
+            grad.append('stop')
+                .attr('offset', '0%')
+                .attr('stop-color', cfg.fill);
+            
+            grad.append('stop')
+                .attr('offset', '100%')
+                .attr('stop-color', d3.color(cfg.fill).brighter(0.5));
+        });
 
-    parentGroups.forEach((children, parent) => {
-        const pX = parent.displayX;
-        const pY = parent.displayY + NODE_HEIGHT;
-        const firstChildLevel = children[0]?.data?.level;
-        const strokeColor = LEVELS[firstChildLevel]?.fill || '#94a3b8';
-        const midY = pY + (LEVEL_HEIGHT - NODE_HEIGHT) / 2;
+        // Draw links grouped by parent
+        const parentGroups = new Map();
+        validLinks.forEach(link => {
+            if (!parentGroups.has(link.source)) {
+                parentGroups.set(link.source, []);
+            }
+            parentGroups.get(link.source).push(link.target);
+        });
 
-        if (children.length === 1) {
-            const cX = children[0].displayX;
-            const cY = children[0].displayY;
-            if (Math.abs(pX - cX) < 1) {
+        parentGroups.forEach((children, parent) => {
+            const pX = parent.displayX;
+            const pY = parent.displayY + NODE_HEIGHT;
+            const firstChildLevel = children[0]?.data?.level;
+            const strokeColor = LEVELS[firstChildLevel]?.fill || '#94a3b8';
+            const midY = pY + (LEVEL_HEIGHT - NODE_HEIGHT) / 2;
+
+            if (children.length === 1) {
+                const cX = children[0].displayX;
+                const cY = children[0].displayY;
+                if (Math.abs(pX - cX) < 1) {
+                    g.append('line')
+                        .attr('x1', pX).attr('y1', pY)
+                        .attr('x2', cX).attr('y2', cY)
+                        .attr('stroke', strokeColor)
+                        .attr('stroke-width', 2)
+                        .attr('stroke-opacity', 0.4);
+                } else {
+                    g.append('path')
+                        .attr('d', `M ${pX},${pY} V ${midY} H ${cX} V ${cY}`)
+                        .attr('fill', 'none')
+                        .attr('stroke', strokeColor)
+                        .attr('stroke-width', 2)
+                        .attr('stroke-opacity', 0.4);
+                }
+            } else {
+                const childXs = children.map(c => c.displayX);
+                const minX = Math.min(pX, ...childXs);
+                const maxX = Math.max(pX, ...childXs);
+
+                // Vertical stem from parent to midY
                 g.append('line')
                     .attr('x1', pX).attr('y1', pY)
-                    .attr('x2', cX).attr('y2', cY)
+                    .attr('x2', pX).attr('y2', midY)
                     .attr('stroke', strokeColor)
                     .attr('stroke-width', 2)
                     .attr('stroke-opacity', 0.4);
-            } else {
-                g.append('path')
-                    .attr('d', `M ${pX},${pY} V ${midY} H ${cX} V ${cY}`)
-                    .attr('fill', 'none')
-                    .attr('stroke', strokeColor)
-                    .attr('stroke-width', 2)
-                    .attr('stroke-opacity', 0.4);
-            }
-        } else {
-            const childXs = children.map(c => c.displayX);
-            const minX = Math.min(pX, ...childXs);
-            const maxX = Math.max(pX, ...childXs);
 
-            // Vertical stem from parent to midY
-            g.append('line')
-                .attr('x1', pX).attr('y1', pY)
-                .attr('x2', pX).attr('y2', midY)
-                .attr('stroke', strokeColor)
-                .attr('stroke-width', 2)
-                .attr('stroke-opacity', 0.4);
-
-            // Horizontal branch bar
-            g.append('line')
-                .attr('x1', minX).attr('y1', midY)
-                .attr('x2', maxX).attr('y2', midY)
-                .attr('stroke', strokeColor)
-                .attr('stroke-width', 2)
-                .attr('stroke-opacity', 0.4);
-
-            // Vertical drop to each child
-            children.forEach(child => {
-                const cX = child.displayX;
-                const cY = child.displayY;
-                const childColor = LEVELS[child.data.level]?.fill || strokeColor;
+                // Horizontal branch bar
                 g.append('line')
-                    .attr('x1', cX).attr('y1', midY)
-                    .attr('x2', cX).attr('y2', cY)
-                    .attr('stroke', childColor)
+                    .attr('x1', minX).attr('y1', midY)
+                    .attr('x2', maxX).attr('y2', midY)
+                    .attr('stroke', strokeColor)
                     .attr('stroke-width', 2)
                     .attr('stroke-opacity', 0.4);
-            });
-        }
-    });
 
-    // Draw nodes
-    const node = g.selectAll('.node')
-        .data(nodes)
-        .join('g')
-        .attr('class', 'node')
-        .attr('transform', d => `translate(${d.displayX - NODE_WIDTH/2}, ${d.displayY})`)
-        .style('cursor', 'pointer');
-
-    node.append('rect')
-        .attr('width', NODE_WIDTH)
-        .attr('height', NODE_HEIGHT)
-        .attr('rx', NODE_RADIUS)
-        .attr('ry', NODE_RADIUS)
-        .attr('fill', '#ffffff')
-        .attr('stroke', d => LEVELS[d.data.level]?.fill || '#94a3b8')
-        .attr('stroke-width', 2)
-        .attr('filter', 'url(#shadow)');
-
-    node.append('rect')
-        .attr('width', NODE_WIDTH)
-        .attr('height', 32)
-        .attr('rx', NODE_RADIUS)
-        .attr('ry', NODE_RADIUS)
-        .attr('fill', d => `url(#grad-${d.data.level})`);
-
-    node.append('text')
-        .attr('x', NODE_WIDTH / 2)
-        .attr('y', 20)
-        .attr('text-anchor', 'middle')
-        .attr('fill', '#ffffff')
-        .attr('font-size', '10px')
-        .attr('font-weight', '700')
-        .attr('letter-spacing', '1px')
-        .attr('text-transform', 'uppercase')
-        .text(d => LEVELS[d.data.level]?.label || '');
-
-    node.append('circle')
-        .attr('cx', 25)
-        .attr('cy', 16)
-        .attr('r', 10)
-        .attr('fill', d => LEVELS[d.data.level]?.badge || '#94a3b8')
-        .attr('stroke', '#ffffff')
-        .attr('stroke-width', 2);
-
-    node.append('text')
-        .attr('x', 25)
-        .attr('y', 20)
-        .attr('text-anchor', 'middle')
-        .attr('fill', '#ffffff')
-        .attr('font-size', '10px')
-        .attr('font-weight', '800')
-        .text(d => d.data.level);
-
-    node.each(function(d) {
-        const el = d3.select(this);
-        const words = d.data.nama.split(' ');
-        const maxWidth = NODE_WIDTH - 40;
-        const lineHeight = 18;
-        const startY = 45;
-        const maxLines = 4;
-
-        let lines = [];
-        let currentLine = '';
-        
-        const temp = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        temp.setAttribute('font-size', '12');
-        temp.setAttribute('font-family', 'Segoe UI, system-ui, sans-serif');
-        svg.node().appendChild(temp);
-
-        words.forEach(word => {
-            const testLine = currentLine ? currentLine + ' ' + word : word;
-            temp.textContent = testLine;
-            
-            if (temp.getComputedTextLength() > maxWidth && currentLine) {
-                lines.push(currentLine);
-                currentLine = word;
-            } else {
-                currentLine = testLine;
+                // Vertical drop to each child
+                children.forEach(child => {
+                    const cX = child.displayX;
+                    const cY = child.displayY;
+                    const childColor = LEVELS[child.data.level]?.fill || strokeColor;
+                    g.append('line')
+                        .attr('x1', cX).attr('y1', midY)
+                        .attr('x2', cX).attr('y2', cY)
+                        .attr('stroke', childColor)
+                        .attr('stroke-width', 2)
+                        .attr('stroke-opacity', 0.4);
+                });
             }
         });
-        
-        if (currentLine) lines.push(currentLine);
-        svg.node().removeChild(temp);
 
-        if (lines.length > maxLines) {
-            lines = lines.slice(0, maxLines);
-            lines[lines.length-1] = lines[lines.length-1].substring(0, 25) + '...';
+        // Draw nodes
+        const node = g.selectAll('.node')
+            .data(nodes)
+            .join('g')
+            .attr('class', 'node')
+            .attr('transform', d => `translate(${d.displayX - NODE_WIDTH/2}, ${d.displayY})`)
+            .style('cursor', 'pointer');
+
+        node.append('rect')
+            .attr('width', NODE_WIDTH)
+            .attr('height', NODE_HEIGHT)
+            .attr('rx', NODE_RADIUS)
+            .attr('ry', NODE_RADIUS)
+            .attr('fill', '#ffffff')
+            .attr('stroke', d => LEVELS[d.data.level]?.fill || '#94a3b8')
+            .attr('stroke-width', 2)
+            .attr('filter', 'url(#shadow)');
+
+        node.append('rect')
+            .attr('width', NODE_WIDTH)
+            .attr('height', 32)
+            .attr('rx', NODE_RADIUS)
+            .attr('ry', NODE_RADIUS)
+            .attr('fill', d => `url(#grad-${d.data.level})`);
+
+        node.append('text')
+            .attr('x', NODE_WIDTH / 2)
+            .attr('y', 20)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#ffffff')
+            .attr('font-size', '10px')
+            .attr('font-weight', '700')
+            .attr('letter-spacing', '1px')
+            .attr('text-transform', 'uppercase')
+            .text(d => LEVELS[d.data.level]?.label || '');
+
+        node.append('circle')
+            .attr('cx', 25)
+            .attr('cy', 16)
+            .attr('r', 10)
+            .attr('fill', d => LEVELS[d.data.level]?.badge || '#94a3b8')
+            .attr('stroke', '#ffffff')
+            .attr('stroke-width', 2);
+
+        node.append('text')
+            .attr('x', 25)
+            .attr('y', 20)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#ffffff')
+            .attr('font-size', '10px')
+            .attr('font-weight', '800')
+            .text(d => d.data.level);
+
+        node.each(function(d) {
+            const el = d3.select(this);
+            const words = d.data.nama.split(' ');
+            const maxWidth = NODE_WIDTH - 40;
+            const lineHeight = 18;
+            const startY = 45;
+            const maxLines = 4;
+
+            let lines = [];
+            let currentLine = '';
+            
+            const temp = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            temp.setAttribute('font-size', '12');
+            temp.setAttribute('font-family', 'Segoe UI, system-ui, sans-serif');
+            svg.node().appendChild(temp);
+
+            words.forEach(word => {
+                const testLine = currentLine ? currentLine + ' ' + word : word;
+                temp.textContent = testLine;
+                
+                if (temp.getComputedTextLength() > maxWidth && currentLine) {
+                    lines.push(currentLine);
+                    currentLine = word;
+                } else {
+                    currentLine = testLine;
+                }
+            });
+            
+            if (currentLine) lines.push(currentLine);
+            svg.node().removeChild(temp);
+
+            if (lines.length > maxLines) {
+                lines = lines.slice(0, maxLines);
+                lines[lines.length-1] = lines[lines.length-1].substring(0, 25) + '...';
+            }
+
+            const totalHeight = lines.length * lineHeight;
+            const yStart = startY + (NODE_HEIGHT - 32 - totalHeight) / 2;
+
+            lines.forEach((line, i) => {
+                el.append('text')
+                    .attr('x', NODE_WIDTH / 2)
+                    .attr('y', yStart + i * lineHeight)
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', '#1e293b')
+                    .attr('font-size', i === 0 ? '13px' : '12px')
+                    .attr('font-weight', i === 0 ? '600' : '400')
+                    .text(line);
+            });
+
+            el.append('text')
+                .attr('x', NODE_WIDTH - 15)
+                .attr('y', NODE_HEIGHT - 10)
+                .attr('text-anchor', 'end')
+                .attr('fill', '#94a3b8')
+                .attr('font-size', '8px')
+                .attr('font-weight', '500')
+                .text(d.data.id.split('_')[1] || '');
+        });
+
+        node.on('click', function(event, d) {
+            event.stopPropagation();
+            showNodeDetails(d.data, d.data.level, d);
+        });
+
+        function fitView() {
+            if (nodes.length === 0) return;
+
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            
+            nodes.forEach(node => {
+                minX = Math.min(minX, node.displayX - NODE_WIDTH/2);
+                minY = Math.min(minY, node.displayY);
+                maxX = Math.max(maxX, node.displayX + NODE_WIDTH/2);
+                maxY = Math.max(maxY, node.displayY + NODE_HEIGHT);
+            });
+            
+            const bounds = {
+                x: minX,
+                y: minY,
+                width: Math.max(maxX - minX, 1),
+                height: Math.max(maxY - minY, 1)
+            };
+            
+            const W2 = container.clientWidth || 1200;
+            const H2 = container.clientHeight || 700;
+            const pad = 60;
+            
+            const scale = Math.min(
+                (W2 - pad * 2) / bounds.width, 
+                (H2 - pad * 2) / bounds.height, 
+                1.2
+            );
+            
+            const clampedScale = Math.max(0.08, Math.min(scale, 1.2));
+            
+            const tx = W2 / 2 - (bounds.x + bounds.width / 2) * clampedScale;
+            const ty = Math.max(20, (H2 - bounds.height * clampedScale) / 2) - bounds.y * clampedScale;
+            
+            const transform = d3.zoomIdentity.translate(tx, ty).scale(clampedScale);
+            originalTransform = transform;
+            
+            svg.transition().duration(400).call(zoom.transform, transform);
         }
 
-        const totalHeight = lines.length * lineHeight;
-        const yStart = startY + (NODE_HEIGHT - 32 - totalHeight) / 2;
-
-        lines.forEach((line, i) => {
-            el.append('text')
-                .attr('x', NODE_WIDTH / 2)
-                .attr('y', yStart + i * lineHeight)
-                .attr('text-anchor', 'middle')
-                .attr('fill', '#1e293b')
-                .attr('font-size', i === 0 ? '13px' : '12px')
-                .attr('font-weight', i === 0 ? '600' : '400')
-                .text(line);
-        });
-
-        el.append('text')
-            .attr('x', NODE_WIDTH - 15)
-            .attr('y', NODE_HEIGHT - 10)
-            .attr('text-anchor', 'end')
-            .attr('fill', '#94a3b8')
-            .attr('font-size', '8px')
-            .attr('font-weight', '500')
-            .text(d.data.id.split('_')[1] || '');
-    });
-
-    node.on('click', function(event, d) {
-        event.stopPropagation();
-        showNodeDetails(d.data, d.data.level, d);
-    });
-
-    function fitView() {
-        if (nodes.length === 0) return;
-
-        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-        
-        nodes.forEach(node => {
-            minX = Math.min(minX, node.displayX - NODE_WIDTH/2);
-            minY = Math.min(minY, node.displayY);
-            maxX = Math.max(maxX, node.displayX + NODE_WIDTH/2);
-            maxY = Math.max(maxY, node.displayY + NODE_HEIGHT);
-        });
-        
-        const bounds = {
-            x: minX,
-            y: minY,
-            width: Math.max(maxX - minX, 1),
-            height: Math.max(maxY - minY, 1)
-        };
-        
-        const W2 = container.clientWidth || 1200;
-        const H2 = container.clientHeight || 700;
-        const pad = 60;
-        
-        const scale = Math.min(
-            (W2 - pad * 2) / bounds.width, 
-            (H2 - pad * 2) / bounds.height, 
-            1.2
-        );
-        
-        const clampedScale = Math.max(0.08, Math.min(scale, 1.2));
-        
-        const tx = W2 / 2 - (bounds.x + bounds.width / 2) * clampedScale;
-        const ty = Math.max(20, (H2 - bounds.height * clampedScale) / 2) - bounds.y * clampedScale;
-        
-        const transform = d3.zoomIdentity.translate(tx, ty).scale(clampedScale);
-        originalTransform = transform;
-        
-        svg.call(zoom.transform, transform);
+        currentFitView = fitView;
+        setTimeout(fitView, 120);
     }
 
-    setTimeout(fitView, 100);
+    // Event listener for dropdown selection
+    if (selectUltimatePdEl) {
+        selectUltimatePdEl.addEventListener('change', function() {
+            const selectedId = this.value;
+            if (!selectedId) {
+                renderTreeForData({ nama: 'ROOT', children: [] });
+            } else if (selectedId === 'all') {
+                renderTreeForData(chartData);
+            } else {
+                const foundChild = chartData.children.find(c => String(c.id) === String(selectedId));
+                if (foundChild) {
+                    renderTreeForData({ nama: 'ROOT', children: [foundChild] });
+                } else {
+                    renderTreeForData({ nama: 'ROOT', children: [] });
+                }
+            }
+        });
+    }
 
+    // Zoom and pan button handlers
     document.getElementById('zoomIn').addEventListener('click', () => {
-        svg.transition().duration(300).call(zoom.scaleBy, 1.3);
+        const svg = d3.select('#chart-svg');
+        svg.transition().duration(300).call(d3.zoom().scaleBy, 1.3);
     });
 
     document.getElementById('zoomOut').addEventListener('click', () => {
-        svg.transition().duration(300).call(zoom.scaleBy, 1 / 1.3);
+        const svg = d3.select('#chart-svg');
+        svg.transition().duration(300).call(d3.zoom().scaleBy, 1 / 1.3);
     });
 
     document.getElementById('btnReset').addEventListener('click', () => {
         if (originalTransform) {
-            svg.transition().duration(400).call(zoom.transform, originalTransform);
-        } else {
-            fitView();
+            d3.select('#chart-svg').transition().duration(400).call(d3.zoom().transform, originalTransform);
+        } else if (currentFitView) {
+            currentFitView();
         }
     });
 
     window.addEventListener('resize', () => {
+        const svg = d3.select('#chart-svg');
         const newW = container.clientWidth;
         const newH = container.clientHeight;
         svg.attr('width', newW).attr('height', newH);
-        fitView();
+        if (currentFitView) currentFitView();
     });
+
+    // Initial render: empty prompt by default so nodes are not immediately dumped
+    renderTreeForData({ nama: 'ROOT', children: [] });
 
 })();
 </script>

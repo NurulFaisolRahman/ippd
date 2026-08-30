@@ -42,6 +42,38 @@
       z-index: 99999 !important;
     }
 
+    /* Modal Positioning & Centering */
+    .modal {
+      text-align: center !important;
+      padding: 0 !important;
+      z-index: 105000 !important;
+      overflow-y: auto !important;
+    }
+
+    .modal:before {
+      content: '';
+      display: inline-block;
+      height: 100%;
+      vertical-align: middle;
+      margin-right: -4px;
+    }
+
+    .modal-dialog {
+      display: inline-block !important;
+      text-align: left !important;
+      vertical-align: middle !important;
+      margin: 30px auto !important;
+    }
+
+    .modal-backdrop {
+      z-index: 104990 !important;
+    }
+
+    .select2-container--open,
+    .select2-dropdown {
+      z-index: 105050 !important;
+    }
+
     .navbar-container{
       display:flex;
       align-items:center;

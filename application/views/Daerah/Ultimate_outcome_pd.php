@@ -228,9 +228,40 @@
   color: #475569;
 }
 
+/* Modal Positioning & Centering */
 .modal {
-  padding-top: 50px;
+  text-align: center !important;
+  padding: 0 !important;
+  z-index: 105000 !important;
+  overflow-y: auto !important;
 }
+
+.modal:before {
+  content: '';
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+  margin-right: -4px;
+}
+
+.modal-dialog {
+  display: inline-block !important;
+  text-align: left !important;
+  vertical-align: middle !important;
+  margin: 30px auto !important;
+}
+
+.modal-backdrop {
+  z-index: 104990 !important;
+}
+
+.modal-content {
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  border: none;
+  overflow: hidden;
+}
+
 .modal-header {
   border-bottom: 1px solid #e2e8f0;
   padding: 16px 24px;
@@ -242,7 +273,7 @@
 }
 .modal-body {
   padding: 20px 24px;
-  max-height: calc(85vh - 120px);
+  max-height: calc(85vh - 140px);
   overflow-y: auto;
 }
 .modal-footer {
@@ -261,6 +292,10 @@
 
 .select2-container {
   width: 100% !important;
+}
+.select2-container--open,
+.select2-dropdown {
+  z-index: 105050 !important;
 }
 </style>
 
@@ -480,7 +515,10 @@
                       <?php if ($IsRole4): ?>
                         <td class="text-center">
                           <div class="action-btn-group">
-                            <button type="button" class="btn btn-xs btn-success btn-add-child-l2" data-ultimate="<?= $u['id'] ?>" title="Tambah Intermediate">
+                            <button type="button" class="btn btn-xs btn-success btn-add-child-l2" 
+                              data-ultimate="<?= $u['id'] ?>" 
+                              data-parent-kinerja="<?= html_escape($u['kinerja']) ?>" 
+                              title="Tambah Intermediate">
                               + Intermediate
                             </button>
                             <button type="button" class="btn btn-xs btn-warning btn-edit-level1" 
@@ -548,12 +586,16 @@
                         <?php if ($IsRole4): ?>
                           <td class="text-center">
                             <div class="action-btn-group">
-                              <button type="button" class="btn btn-xs btn-info btn-add-child-l3" data-intermediate="<?= $inter['id'] ?>" title="Tambah Immediate">
+                              <button type="button" class="btn btn-xs btn-info btn-add-child-l3" 
+                                data-intermediate="<?= $inter['id'] ?>" 
+                                data-parent-kinerja="<?= html_escape($inter['kinerja']) ?>" 
+                                title="Tambah Immediate">
                                 + Immediate
                               </button>
                               <button type="button" class="btn btn-xs btn-warning btn-edit-level2" 
                                 data-id="<?= $inter['id'] ?>" 
                                 data-ultimate="<?= $inter['ultimate_outcome_id'] ?>" 
+                                data-parent-kinerja="<?= html_escape($u['kinerja']) ?>" 
                                 data-kinerja="<?= html_escape($inter['kinerja']) ?>" 
                                 data-indikator="<?= html_escape($inter['indikator']) ?>" 
                                 data-pelaksana="<?= html_escape($inter['pelaksana']) ?>" 
@@ -623,12 +665,16 @@
                           <?php if ($IsRole4): ?>
                             <td class="text-center">
                               <div class="action-btn-group">
-                                <button type="button" class="btn btn-xs btn-success btn-add-child-l4" data-immediate="<?= $imm['id'] ?>" title="Tambah Output">
+                                <button type="button" class="btn btn-xs btn-success btn-add-child-l4" 
+                                  data-immediate="<?= $imm['id'] ?>" 
+                                  data-parent-kinerja="<?= html_escape($imm['kinerja']) ?>" 
+                                  title="Tambah Output">
                                   + Output
                                 </button>
                                 <button type="button" class="btn btn-xs btn-warning btn-edit-level3" 
                                   data-id="<?= $imm['id'] ?>" 
                                   data-intermediate="<?= $imm['intermediate_outcome_id'] ?>" 
+                                  data-parent-kinerja="<?= html_escape($inter['kinerja']) ?>" 
                                   data-kinerja="<?= html_escape($imm['kinerja']) ?>" 
                                   data-indikator="<?= html_escape($imm['indikator']) ?>" 
                                   data-pelaksana="<?= html_escape($imm['pelaksana']) ?>" 
@@ -694,6 +740,7 @@
                                   <button type="button" class="btn btn-xs btn-warning btn-edit-level4" 
                                     data-id="<?= $out['id'] ?>" 
                                     data-immediate="<?= $out['immediate_outcome_id'] ?>" 
+                                    data-parent-kinerja="<?= html_escape($imm['kinerja']) ?>" 
                                     data-kinerja="<?= html_escape($out['kinerja']) ?>" 
                                     data-indikator="<?= html_escape($out['indikator']) ?>" 
                                     data-pelaksana="<?= html_escape($out['pelaksana']) ?>" 
@@ -805,12 +852,11 @@
           <!-- Tautan ke Ultimate Outcome -->
           <div class="form-group">
             <label><b>Tautan ke Ultimate Outcome (Level 1)</b></label>
-            <select id="UltimateId_l2" class="form-control select2-ultimate" style="width: 100%;">
-              <option value="">— Pilih Ultimate Outcome —</option>
-              <?php foreach ($ultimate_options as $opt): ?>
-                <option value="<?= $opt['id'] ?>"><?= html_escape(substr($opt['ultimate_kinerja'], 0, 150)) ?></option>
-              <?php endforeach; ?>
-            </select>
+            <div class="mb-2 text-muted small">
+              <em>Ultimate Outcome PD (Level 1) &rarr; Otomatis terisi</em>
+            </div>
+            <div id="parent_display_l2_pd" class="p-2 border rounded" style="background:#fff; font-weight:600; color:#1e40af; border-left:4px solid #3b82f6;">—</div>
+            <input type="hidden" id="UltimateId_l2" name="ultimate_id">
           </div>
 
           <!-- Kinerja -->
@@ -909,12 +955,11 @@
           <!-- Tautan ke Intermediate Outcome -->
           <div class="form-group">
             <label><b>Tautan ke Intermediate Outcome (Level 2)</b></label>
-            <select id="IntermediateId_l3" class="form-control select2-intermediate" style="width: 100%;">
-              <option value="">— Pilih Intermediate Outcome —</option>
-              <?php foreach ($intermediate_options as $opt): ?>
-                <option value="<?= $opt['id'] ?>"><?= html_escape(substr($opt['kinerja'], 0, 150)) ?></option>
-              <?php endforeach; ?>
-            </select>
+            <div class="mb-2 text-muted small">
+              <em>Intermediate Outcome PD (Level 2) &rarr; Otomatis terisi</em>
+            </div>
+            <div id="parent_display_l3_pd" class="p-2 border rounded" style="background:#fff; font-weight:600; color:#0369a1; border-left:4px solid #0ea5e9;">—</div>
+            <input type="hidden" id="IntermediateId_l3" name="intermediate_id">
           </div>
 
           <!-- Kinerja -->
@@ -1013,12 +1058,11 @@
           <!-- Tautan ke Immediate Outcome -->
           <div class="form-group">
             <label><b>Tautan ke Immediate Outcome (Level 3)</b></label>
-            <select id="ImmediateId_l4" class="form-control select2-immediate" style="width: 100%;">
-              <option value="">— Pilih Immediate Outcome —</option>
-              <?php foreach ($immediate_options as $opt): ?>
-                <option value="<?= $opt['id'] ?>"><?= html_escape(substr($opt['kinerja'], 0, 150)) ?></option>
-              <?php endforeach; ?>
-            </select>
+            <div class="mb-2 text-muted small">
+              <em>Immediate Outcome PD (Level 3) &rarr; Otomatis terisi</em>
+            </div>
+            <div id="parent_display_l4_pd" class="p-2 border rounded" style="background:#fff; font-weight:600; color:#0f766e; border-left:4px solid #14b8a6;">—</div>
+            <input type="hidden" id="ImmediateId_l4" name="immediate_id">
           </div>
 
           <!-- Kinerja -->
@@ -1477,9 +1521,11 @@ $(document).ready(function() {
   // ================= MODAL LEVEL 2 EVENTS =================
   $(document).on('click', '.btn-add-child-l2', function() {
     let ultimateId = $(this).attr('data-ultimate') || '';
+    let parentKinerja = $(this).attr('data-parent-kinerja') || '';
     $('#id_level2').val('');
     $('#edit_mode_l2').val('0');
-    $('#UltimateId_l2').val(ultimateId).trigger('change');
+    $('#UltimateId_l2').val(ultimateId);
+    $('#parent_display_l2_pd').text(parentKinerja || 'Ultimate Outcome PD (Level 1)');
     $('#kinerja_l2').val('');
     $('#indikator-container-l2').empty();
     addFieldRow('#indikator-container-l2');
@@ -1495,6 +1541,7 @@ $(document).ready(function() {
   $(document).on('click', '.btn-edit-level2', function() {
     let id = $(this).attr('data-id');
     let ultimate = $(this).attr('data-ultimate') || '';
+    let parentKinerja = $(this).attr('data-parent-kinerja') || '';
     let kinerja = $(this).attr('data-kinerja') || '';
     let indikator = $(this).attr('data-indikator') || '';
     let pelaksanaId = $(this).attr('data-pelaksana') || '';
@@ -1506,7 +1553,8 @@ $(document).ready(function() {
 
     $('#id_level2').val(id);
     $('#edit_mode_l2').val('1');
-    $('#UltimateId_l2').val(ultimate).trigger('change');
+    $('#UltimateId_l2').val(ultimate);
+    $('#parent_display_l2_pd').text(parentKinerja || 'Ultimate Outcome PD (Level 1)');
     $('#kinerja_l2').val(kinerja);
     $('#indikator-container-l2').empty();
     $('#inovasi-container-l2').empty();
@@ -1591,9 +1639,11 @@ $(document).ready(function() {
   // ================= MODAL LEVEL 3 EVENTS =================
   $(document).on('click', '.btn-add-child-l3', function() {
     let intermediateId = $(this).attr('data-intermediate') || '';
+    let parentKinerja = $(this).attr('data-parent-kinerja') || '';
     $('#id_level3').val('');
     $('#edit_mode_l3').val('0');
-    $('#IntermediateId_l3').val(intermediateId).trigger('change');
+    $('#IntermediateId_l3').val(intermediateId);
+    $('#parent_display_l3_pd').text(parentKinerja || 'Intermediate Outcome PD (Level 2)');
     $('#kinerja_l3').val('');
     $('#indikator-container-l3').empty();
     addFieldRow('#indikator-container-l3');
@@ -1609,6 +1659,7 @@ $(document).ready(function() {
   $(document).on('click', '.btn-edit-level3', function() {
     let id = $(this).attr('data-id');
     let intermediate = $(this).attr('data-intermediate') || '';
+    let parentKinerja = $(this).attr('data-parent-kinerja') || '';
     let kinerja = $(this).attr('data-kinerja') || '';
     let indikator = $(this).attr('data-indikator') || '';
     let pelaksanaId = $(this).attr('data-pelaksana') || '';
@@ -1620,7 +1671,8 @@ $(document).ready(function() {
 
     $('#id_level3').val(id);
     $('#edit_mode_l3').val('1');
-    $('#IntermediateId_l3').val(intermediate).trigger('change');
+    $('#IntermediateId_l3').val(intermediate);
+    $('#parent_display_l3_pd').text(parentKinerja || 'Intermediate Outcome PD (Level 2)');
     $('#kinerja_l3').val(kinerja);
     $('#indikator-container-l3').empty();
     $('#inovasi-container-l3').empty();
@@ -1705,9 +1757,11 @@ $(document).ready(function() {
   // ================= MODAL LEVEL 4 EVENTS =================
   $(document).on('click', '.btn-add-child-l4', function() {
     let immediateId = $(this).attr('data-immediate') || '';
+    let parentKinerja = $(this).attr('data-parent-kinerja') || '';
     $('#id_level4').val('');
     $('#edit_mode_l4').val('0');
-    $('#ImmediateId_l4').val(immediateId).trigger('change');
+    $('#ImmediateId_l4').val(immediateId);
+    $('#parent_display_l4_pd').text(parentKinerja || 'Immediate Outcome PD (Level 3)');
     $('#kinerja_l4').val('');
     $('#indikator-container-l4').empty();
     addFieldRow('#indikator-container-l4');
@@ -1723,6 +1777,7 @@ $(document).ready(function() {
   $(document).on('click', '.btn-edit-level4', function() {
     let id = $(this).attr('data-id');
     let immediate = $(this).attr('data-immediate') || '';
+    let parentKinerja = $(this).attr('data-parent-kinerja') || '';
     let kinerja = $(this).attr('data-kinerja') || '';
     let indikator = $(this).attr('data-indikator') || '';
     let pelaksanaId = $(this).attr('data-pelaksana') || '';
@@ -1734,7 +1789,8 @@ $(document).ready(function() {
 
     $('#id_level4').val(id);
     $('#edit_mode_l4').val('1');
-    $('#ImmediateId_l4').val(immediate).trigger('change');
+    $('#ImmediateId_l4').val(immediate);
+    $('#parent_display_l4_pd').text(parentKinerja || 'Immediate Outcome PD (Level 3)');
     $('#kinerja_l4').val(kinerja);
     $('#indikator-container-l4').empty();
     $('#inovasi-container-l4').empty();

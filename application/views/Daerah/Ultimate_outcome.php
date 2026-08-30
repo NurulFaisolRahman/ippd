@@ -248,6 +248,40 @@
   flex: 1;
 }
 
+/* Modal Positioning & Centering */
+.modal {
+  text-align: center !important;
+  padding: 0 !important;
+  z-index: 105000 !important;
+  overflow-y: auto !important;
+}
+
+.modal:before {
+  content: '';
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+  margin-right: -4px;
+}
+
+.modal-dialog {
+  display: inline-block !important;
+  text-align: left !important;
+  vertical-align: middle !important;
+  margin: 30px auto !important;
+}
+
+.modal-backdrop {
+  z-index: 104990 !important;
+}
+
+.modal-content {
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  border: none;
+  overflow: hidden;
+}
+
 .modal-header {
   border-bottom: 1px solid #e2e8f0;
   padding: 16px 24px;
@@ -259,7 +293,7 @@
 }
 .modal-body {
   padding: 20px 24px;
-  max-height: calc(85vh - 120px);
+  max-height: calc(85vh - 140px);
   overflow-y: auto;
 }
 .modal-footer {
@@ -269,6 +303,10 @@
 
 .select2-container {
   width: 100% !important;
+}
+.select2-container--open,
+.select2-dropdown {
+  z-index: 105050 !important;
 }
 </style>
 
@@ -432,7 +470,10 @@
                       <?php if ($isRole3): ?>
                         <td class="text-center">
                           <div class="action-btn-group">
-                            <button type="button" class="btn btn-xs btn-success btn-add-child-l2" data-ultimate="<?= $u['id'] ?>" title="Tambah Sektor">
+                            <button type="button" class="btn btn-xs btn-success btn-add-child-l2" 
+                              data-ultimate="<?= $u['id'] ?>" 
+                              data-parent-kinerja="<?= html_escape($u['kinerja']) ?>" 
+                              title="Tambah Sektor">
                               + Sektor
                             </button>
                             <button type="button" class="btn btn-xs btn-warning btn-edit-level1" 
@@ -500,12 +541,16 @@
                         <?php if ($isRole3): ?>
                           <td class="text-center">
                             <div class="action-btn-group">
-                              <button type="button" class="btn btn-xs btn-info btn-add-child-l3" data-sektor="<?= $s['id'] ?>" title="Tambah Taktikal">
+                              <button type="button" class="btn btn-xs btn-info btn-add-child-l3" 
+                                data-sektor="<?= $s['id'] ?>" 
+                                data-parent-kinerja="<?= html_escape($s['kinerja']) ?>" 
+                                title="Tambah Taktikal">
                                 + Taktikal
                               </button>
                               <button type="button" class="btn btn-xs btn-warning btn-edit-level2" 
                                 data-id="<?= $s['id'] ?>" 
                                 data-ultimate="<?= $s['ultimate_outcome_id'] ?>" 
+                                data-parent-kinerja="<?= html_escape($u['kinerja']) ?>" 
                                 data-kinerja="<?= html_escape($s['kinerja']) ?>" 
                                 data-indikator="<?= html_escape($s['indikator']) ?>" 
                                 data-pelaksana="<?= html_escape($s['pelaksana']) ?>" 
@@ -574,12 +619,16 @@
                           <?php if ($isRole3): ?>
                             <td class="text-center">
                               <div class="action-btn-group">
-                                <button type="button" class="btn btn-xs btn-success btn-add-child-l4" data-taktikal="<?= $t['id'] ?>" title="Tambah Immediate">
+                                <button type="button" class="btn btn-xs btn-success btn-add-child-l4" 
+                                  data-taktikal="<?= $t['id'] ?>" 
+                                  data-parent-kinerja="<?= html_escape($t['kinerja']) ?>" 
+                                  title="Tambah Immediate">
                                   + Immediate
                                 </button>
                                 <button type="button" class="btn btn-xs btn-warning btn-edit-level3" 
                                   data-id="<?= $t['id'] ?>" 
                                   data-sektor="<?= $t['intermediate_sektor_id'] ?>" 
+                                  data-parent-kinerja="<?= html_escape($s['kinerja']) ?>" 
                                   data-kinerja="<?= html_escape($t['kinerja']) ?>" 
                                   data-indikator="<?= html_escape($t['indikator']) ?>" 
                                   data-pelaksana="<?= html_escape($t['pelaksana']) ?>" 
@@ -648,12 +697,16 @@
                             <?php if ($isRole3): ?>
                               <td class="text-center">
                                 <div class="action-btn-group">
-                                  <button type="button" class="btn btn-xs btn-primary btn-add-child-l5" data-immediate="<?= $imm['id'] ?>" title="Tambah Output">
+                                  <button type="button" class="btn btn-xs btn-primary btn-add-child-l5" 
+                                    data-immediate="<?= $imm['id'] ?>" 
+                                    data-parent-kinerja="<?= html_escape($imm['kinerja']) ?>" 
+                                    title="Tambah Output">
                                     + Output
                                   </button>
                                   <button type="button" class="btn btn-xs btn-warning btn-edit-level4" 
                                     data-id="<?= $imm['id'] ?>" 
                                     data-taktikal="<?= $imm['intermediate_taktikal_id'] ?>" 
+                                    data-parent-kinerja="<?= html_escape($t['kinerja']) ?>" 
                                     data-kinerja="<?= html_escape($imm['kinerja']) ?>" 
                                     data-indikator="<?= html_escape($imm['indikator']) ?>" 
                                     data-pelaksana="<?= html_escape($imm['pelaksana']) ?>" 
@@ -718,6 +771,7 @@
                                     <button type="button" class="btn btn-xs btn-warning btn-edit-level5" 
                                       data-id="<?= $out['id'] ?>" 
                                       data-immediate="<?= $out['immediate_outcome_id'] ?>" 
+                                      data-parent-kinerja="<?= html_escape($imm['kinerja']) ?>" 
                                       data-kinerja="<?= html_escape($out['kinerja']) ?>" 
                                       data-indikator="<?= html_escape($out['indikator']) ?>" 
                                       data-pelaksana="<?= html_escape($out['pelaksana']) ?>" 
@@ -828,14 +882,10 @@
           <div class="form-group">
             <label><b>Tautan kinerja yang lebih tinggi</b></label>
             <div class="mb-2 text-muted small">
-              <em>Ultimate Outcome (Level 1) → Ultimate Outcome / Level 1</em>
+              <em>Ultimate Outcome (Level 1) &rarr; Otomatis terisi</em>
             </div>
-            <select id="ultimate_id" class="form-control">
-              <option value="">— Pilih Ultimate Outcome —</option>
-              <?php foreach ($ultimate_options as $opt): ?>
-                <option value="<?= $opt['id'] ?>"><?= html_escape(substr($opt['kinerja'],0,100)) . (strlen($opt['kinerja'])>100?'...':'') ?></option>
-              <?php endforeach; ?>
-            </select>
+            <div id="parent_display_l2" class="p-2 border rounded" style="background:#fff; font-weight:600; color:#1e40af; border-left:4px solid #3b82f6;">—</div>
+            <input type="hidden" id="ultimate_id" name="ultimate_id">
           </div>
 
           <!-- Kinerja -->
@@ -980,14 +1030,10 @@
           <div class="form-group">
             <label><b>Tautan kinerja yang lebih tinggi</b></label>
             <div class="mb-2 text-muted small">
-              <em>Intermediate Outcome Sektor (Level 2) → Intermediate Outcome / Level 2</em>
+              <em>Intermediate Outcome Sektor (Level 2) &rarr; Otomatis terisi</em>
             </div>
-            <select id="sektor_id" class="form-control">
-              <option value="">— Pilih Intermediate Sektor —</option>
-              <?php foreach ($sektor_options as $opt): ?>
-                <option value="<?= $opt['id'] ?>"><?= html_escape(substr($opt['kinerja'],0,100)) . (strlen($opt['kinerja'])>100?'...':'') ?></option>
-              <?php endforeach; ?>
-            </select>
+            <div id="parent_display_l3" class="p-2 border rounded" style="background:#fff; font-weight:600; color:#0369a1; border-left:4px solid #0ea5e9;">—</div>
+            <input type="hidden" id="sektor_id" name="sektor_id">
           </div>
 
           <!-- Kinerja -->
@@ -1132,14 +1178,10 @@
           <div class="form-group">
             <label><b>Tautan kinerja yang lebih tinggi</b></label>
             <div class="mb-2 text-muted small">
-              <em>Intermediate Outcome Taktikal (Level 3) → Intermediate Outcome / Level 3</em>
+              <em>Intermediate Outcome Taktikal (Level 3) &rarr; Otomatis terisi</em>
             </div>
-            <select id="taktikal_id" class="form-control">
-              <option value="">— Pilih Intermediate Taktikal —</option>
-              <?php foreach ($taktikal_options as $opt): ?>
-                <option value="<?= $opt['id'] ?>"><?= html_escape(substr($opt['kinerja'],0,100)) . (strlen($opt['kinerja'])>100?'...':'') ?></option>
-              <?php endforeach; ?>
-            </select>
+            <div id="parent_display_l4" class="p-2 border rounded" style="background:#fff; font-weight:600; color:#0f766e; border-left:4px solid #14b8a6;">—</div>
+            <input type="hidden" id="taktikal_id" name="taktikal_id">
           </div>
 
           <!-- Kinerja -->
@@ -1284,14 +1326,10 @@
           <div class="form-group">
             <label><b>Tautan kinerja yang lebih tinggi</b></label>
             <div class="mb-2 text-muted small">
-              <em>Immediate Outcome (Level 4) → Immediate Outcome / Level 4</em>
+              <em>Immediate Outcome (Level 4) &rarr; Otomatis terisi</em>
             </div>
-            <select id="immediate_id" class="form-control">
-              <option value="">— Pilih Immediate Outcome —</option>
-              <?php foreach ($immediate_options as $opt): ?>
-                <option value="<?= $opt['id'] ?>"><?= html_escape(substr($opt['kinerja'],0,100)) . (strlen($opt['kinerja'])>100?'...':'') ?></option>
-              <?php endforeach; ?>
-            </select>
+            <div id="parent_display_l5" class="p-2 border rounded" style="background:#fff; font-weight:600; color:#c2410c; border-left:4px solid #f97316;">—</div>
+            <input type="hidden" id="immediate_id" name="immediate_id">
           </div>
 
           <!-- Kinerja -->
@@ -1628,8 +1666,10 @@ $(document).ready(function() {
   // ================= MODAL LEVEL 2 EVENTS =================
   $(document).on('click', '.btn-add-child-l2', function() {
     let ultimateId = $(this).attr('data-ultimate') || '';
+    let parentKinerja = $(this).attr('data-parent-kinerja') || '';
     $('#id_level2').val('');
     $('#ultimate_id').val(ultimateId);
+    $('#parent_display_l2').text(parentKinerja || 'Ultimate Outcome Level 1');
     $('#kinerja_level2').val('');
     $('#dinas_filter_l2').val('').trigger('change');
     $('#indikator-container-level2').empty();
@@ -1646,6 +1686,7 @@ $(document).ready(function() {
   $(document).on('click', '.btn-edit-level2', function() {
     let id = $(this).attr('data-id');
     let ultimate = $(this).attr('data-ultimate') || '';
+    let parentKinerja = $(this).attr('data-parent-kinerja') || '';
     let kinerja = $(this).attr('data-kinerja') || '';
     let indikator = $(this).attr('data-indikator') || '';
     let pelaksanaId = $(this).attr('data-pelaksana') || '';
@@ -1656,6 +1697,7 @@ $(document).ready(function() {
 
     $('#id_level2').val(id);
     $('#ultimate_id').val(ultimate);
+    $('#parent_display_l2').text(parentKinerja || 'Ultimate Outcome Level 1');
     $('#kinerja_level2').val(kinerja);
     $('#indikator-container-level2').empty();
     $('#inovasi-container-level2').empty();
@@ -1743,8 +1785,10 @@ $(document).ready(function() {
   // ================= MODAL LEVEL 3 EVENTS =================
   $(document).on('click', '.btn-add-child-l3', function() {
     let sektorId = $(this).attr('data-sektor') || '';
+    let parentKinerja = $(this).attr('data-parent-kinerja') || '';
     $('#id_level3').val('');
     $('#sektor_id').val(sektorId);
+    $('#parent_display_l3').text(parentKinerja || 'Intermediate Sektor Level 2');
     $('#kinerja_level3').val('');
     $('#dinas_filter_l3').val('').trigger('change');
     $('#indikator-container-level3').empty();
@@ -1761,6 +1805,7 @@ $(document).ready(function() {
   $(document).on('click', '.btn-edit-level3', function() {
     let id = $(this).attr('data-id');
     let sektor = $(this).attr('data-sektor') || '';
+    let parentKinerja = $(this).attr('data-parent-kinerja') || '';
     let kinerja = $(this).attr('data-kinerja') || '';
     let indikator = $(this).attr('data-indikator') || '';
     let pelaksanaId = $(this).attr('data-pelaksana') || '';
@@ -1771,6 +1816,7 @@ $(document).ready(function() {
 
     $('#id_level3').val(id);
     $('#sektor_id').val(sektor);
+    $('#parent_display_l3').text(parentKinerja || 'Intermediate Sektor Level 2');
     $('#kinerja_level3').val(kinerja);
     $('#indikator-container-level3').empty();
     $('#inovasi-container-level3').empty();
@@ -1858,8 +1904,10 @@ $(document).ready(function() {
   // ================= MODAL LEVEL 4 EVENTS =================
   $(document).on('click', '.btn-add-child-l4', function() {
     let taktikalId = $(this).attr('data-taktikal') || '';
+    let parentKinerja = $(this).attr('data-parent-kinerja') || '';
     $('#id_level4').val('');
     $('#taktikal_id').val(taktikalId);
+    $('#parent_display_l4').text(parentKinerja || 'Intermediate Taktikal Level 3');
     $('#kinerja_level4').val('');
     $('#dinas_filter_l4').val('').trigger('change');
     $('#indikator-container-level4').empty();
@@ -1876,6 +1924,7 @@ $(document).ready(function() {
   $(document).on('click', '.btn-edit-level4', function() {
     let id = $(this).attr('data-id');
     let taktikal = $(this).attr('data-taktikal') || '';
+    let parentKinerja = $(this).attr('data-parent-kinerja') || '';
     let kinerja = $(this).attr('data-kinerja') || '';
     let indikator = $(this).attr('data-indikator') || '';
     let pelaksanaId = $(this).attr('data-pelaksana') || '';
@@ -1886,6 +1935,7 @@ $(document).ready(function() {
 
     $('#id_level4').val(id);
     $('#taktikal_id').val(taktikal);
+    $('#parent_display_l4').text(parentKinerja || 'Intermediate Taktikal Level 3');
     $('#kinerja_level4').val(kinerja);
     $('#indikator-container-level4').empty();
     $('#inovasi-container-level4').empty();
@@ -1973,8 +2023,10 @@ $(document).ready(function() {
   // ================= MODAL LEVEL 5 EVENTS =================
   $(document).on('click', '.btn-add-child-l5', function() {
     let immediateId = $(this).attr('data-immediate') || '';
+    let parentKinerja = $(this).attr('data-parent-kinerja') || '';
     $('#id_level5').val('');
     $('#immediate_id').val(immediateId);
+    $('#parent_display_l5').text(parentKinerja || 'Immediate Outcome Level 4');
     $('#kinerja_level5').val('');
     $('#dinas_filter_l5').val('').trigger('change');
     $('#indikator-container-level5').empty();
@@ -1991,6 +2043,7 @@ $(document).ready(function() {
   $(document).on('click', '.btn-edit-level5', function() {
     let id = $(this).attr('data-id');
     let immediate = $(this).attr('data-immediate') || '';
+    let parentKinerja = $(this).attr('data-parent-kinerja') || '';
     let kinerja = $(this).attr('data-kinerja') || '';
     let indikator = $(this).attr('data-indikator') || '';
     let pelaksanaId = $(this).attr('data-pelaksana') || '';
@@ -2001,6 +2054,7 @@ $(document).ready(function() {
 
     $('#id_level5').val(id);
     $('#immediate_id').val(immediate);
+    $('#parent_display_l5').text(parentKinerja || 'Immediate Outcome Level 4');
     $('#kinerja_level5').val(kinerja);
     $('#indikator-container-level5').empty();
     $('#inovasi-container-level5').empty();
