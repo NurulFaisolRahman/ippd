@@ -933,7 +933,19 @@
           <div class="label">Perangkat Daerah</div>
           <div class="colon">:</div>
           <div class="control-wrap">
-            <input id="ctxPerangkatDaerah" class="context-readonly" readonly value="" placeholder="Otomatis mengikuti pilihan Sub Unit">
+            <?php if (empty($IsRole4) && !empty($ListInstansi)): ?>
+              <select id="ctxInstansiSelect">
+                <?php foreach ($ListInstansi as $inst): ?>
+                  <option value="<?= $inst['id'] ?>" <?= ($inst['id'] == $ActiveInstansiId) ? 'selected' : '' ?>>
+                    <?= html_escape($inst['nama']) ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+              <input type="hidden" id="ctxPerangkatDaerah" value="<?= html_escape($CurrentInstansi ? $CurrentInstansi['nama'] : '') ?>">
+            <?php else: ?>
+              <input id="ctxPerangkatDaerah" class="context-readonly" readonly value="<?= html_escape($CurrentInstansi ? $CurrentInstansi['nama'] : 'PERANGKAT DAERAH') ?>" placeholder="Perangkat Daerah">
+              <input type="hidden" id="ctxInstansiSelect" value="<?= $ActiveInstansiId ?: '' ?>">
+            <?php endif; ?>
           </div>
         </div>
         <div class="context-row">
@@ -1237,6 +1249,10 @@
   var controllerName = '<?= isset($ControllerName) ? $ControllerName : $this->router->fetch_class() ?>';
   var ControllerURL = BaseURL + controllerName + '/';
   var rawBelanjaHeaders = <?= json_encode(!empty($BelanjaData) ? $BelanjaData : []) ?>;
+  var initialSubUnits = <?= json_encode(!empty($SubUnits) ? $SubUnits : []) ?>;
+  var currentInstansi = <?= json_encode(!empty($CurrentInstansi) ? $CurrentInstansi : null) ?>;
+  var isRole4 = <?= !empty($IsRole4) ? 'true' : 'false' ?>;
+  var activeInstansiId = <?= json_encode($ActiveInstansiId) ?>;
 
   /* ---------------- Master data ---------------- */
   var NODE_NAMES = {
@@ -1275,53 +1291,10 @@
 
   /* ---------------- Init Master Data from Database ---------------- */
   function buildMasterFromDatabase() {
-    var subUnitMap = {};
-    var bidangMap = {};
-    var progMap = {};
-    var kegMap = {};
-    var subKegMap = {};
     var allItems = [];
 
     $.each(rawBelanjaHeaders, function(idx, h) {
-      var suKode = h.kode_sub_unit || (h.kode_perangkat_daerah ? h.kode_perangkat_daerah + '.0000' : '5.01.05.0.00.02.0001');
-      var suNama = h.nama_sub_unit || h.nama_perangkat_daerah || 'SEKRETARIAT';
-      var pdNama = (h.kode_perangkat_daerah ? h.kode_perangkat_daerah + ' - ' : '') + (h.nama_perangkat_daerah || h.instansi_nama || 'PERANGKAT DAERAH');
-
-      if (!subUnitMap[suKode]) {
-        subUnitMap[suKode] = { kode: suKode, nama: suNama, perangkatDaerah: pdNama, id_instansi: h.id_instansi };
-      }
-
-      var bKode = h.kode_bidang_urusan || (h.kode_program ? h.kode_program.substring(0, 4) : '5.01');
-      var bNama = h.nama_bidang_urusan || 'Perencanaan';
-      if (!bidangMap[bKode]) {
-        bidangMap[bKode] = { kode: bKode, nama: bNama, subUnitKode: [suKode] };
-      } else if (bidangMap[bKode].subUnitKode.indexOf(suKode) === -1) {
-        bidangMap[bKode].subUnitKode.push(suKode);
-      }
-
-      var pKode = h.kode_program || '5.01.02';
-      var pNama = h.nama_program || 'PROGRAM PERENCANAAN';
-      if (!progMap[pKode]) {
-        progMap[pKode] = { kode: pKode, nama: pNama, bidangKode: bKode };
-      }
-
-      var kKode = h.kode_kegiatan || '5.01.02.2.03';
-      var kNama = h.nama_kegiatan || 'Pengendalian dan Evaluasi';
-      if (!kegMap[kKode]) {
-        kegMap[kKode] = { kode: kKode, nama: kNama, programKode: pKode };
-      }
-
       var skKode = h.kode_sub_kegiatan || ('5.01.02.2.03.' + String(idx + 1).padStart(2, '0'));
-      var skNama = h.nama_sub_kegiatan || 'Sub Kegiatan';
-      if (!subKegMap[skKode]) {
-        subKegMap[skKode] = {
-          kode: skKode,
-          nama: skNama,
-          kegiatanKode: kKode,
-          headerId: h.id,
-          header: h
-        };
-      }
 
       // Convert nested rekening and rincian into items list
       if (h.rekening && h.rekening.length > 0) {
@@ -1356,11 +1329,6 @@
       }
     });
 
-    MASTER.subUnit = Object.values(subUnitMap);
-    MASTER.bidangUrusan = Object.values(bidangMap);
-    MASTER.program = Object.values(progMap);
-    MASTER.kegiatan = Object.values(kegMap);
-    MASTER.subKegiatan = Object.values(subKegMap);
     items = allItems;
   }
 
@@ -1453,7 +1421,7 @@
     return '<span class="toggle'+(collapsed?" collapsed":"")+'" data-toggle="'+esc(key)+'">'+ICON_CHEVRON+'</span>';
   }
 
-  /* ---------------- Row renderers (Rp & Nominal Sejajar) ---------------- */
+  /* ---------------- Row renderers ---------------- */
   function levelRow(code, name, level, total, hasChildren){
     var collapsed = collapsedSet.has(code);
     var pad = 10 + (level-1)*18;
@@ -1594,7 +1562,7 @@
 
     if(out.length===0){
       tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state">'+ICON_EMPTY+
-        '<p>Belum ada rincian belanja untuk Sub Kegiatan ini. Klik <strong>+ Tambah</strong> untuk menambahkan.</p></div></td></tr>';
+        '<p>Belum ada rincian belanja untuk Sub Kegiatan ini. Klik <strong>+ Tambah Rincian</strong> untuk menambahkan.</p></div></td></tr>';
     } else {
       tbody.innerHTML = out.join("");
     }
@@ -1743,14 +1711,18 @@
     var keg = MASTER.kegiatan.find(function(k){ return k.kode===el("ctxKegiatan").value; });
     var bu = MASTER.bidangUrusan.find(function(b){ return b.kode===el("ctxBidangUrusan").value; });
 
+    var pdNama = el("ctxPerangkatDaerah").value || (currentInstansi ? currentInstansi.nama : "");
+    var pdKode = currentInstansi && currentInstansi.kode_instansi ? currentInstansi.kode_instansi : (su && su.kode ? su.kode.substring(0, 10) : "");
+    var instId = activeInstansiId || (currentInstansi ? currentInstansi.id : (su ? su.id_instansi : 0));
+
     var payload = {
       rincian_id: editingItem ? editingItem.id : 0,
       sub_kegiatan_kode: currentSubKegiatanKode,
       nama_sub_kegiatan: sk ? sk.nama : "",
       tahun: el("ctxTahun").value,
-      id_instansi: su ? su.id_instansi : 0,
-      kode_perangkat_daerah: su ? su.kode.substring(0, 10) : "",
-      nama_perangkat_daerah: el("ctxPerangkatDaerah").value,
+      id_instansi: instId,
+      kode_perangkat_daerah: pdKode,
+      nama_perangkat_daerah: pdNama,
       kode_sub_unit: su ? su.kode : "",
       nama_sub_unit: su ? su.nama : "",
       kode_bidang_urusan: bu ? bu.kode : "",
@@ -1849,30 +1821,14 @@
   function populateSubUnitOptions(){
     el("ctxSubUnit").innerHTML = optionsHTML(MASTER.subUnit, labelFor, "Pilih sub unit");
   }
-  function populateBidang(subUnitKode, presetValue){
-    var list = MASTER.bidangUrusan.filter(function(b){ return subUnitKode && b.subUnitKode.indexOf(subUnitKode)>-1; });
-    el("ctxBidangUrusan").innerHTML = optionsHTML(list, labelFor, "Pilih bidang urusan");
-    if(presetValue) el("ctxBidangUrusan").value = presetValue;
-  }
-  function populateProgram(bidangKode, presetValue){
-    var list = MASTER.program.filter(function(p){ return bidangKode && p.bidangKode===bidangKode; });
-    el("ctxProgram").innerHTML = optionsHTML(list, labelFor, "Pilih program");
-    if(presetValue) el("ctxProgram").value = presetValue;
-  }
-  function populateKegiatan(programKode, presetValue){
-    var list = MASTER.kegiatan.filter(function(k){ return programKode && k.programKode===programKode; });
-    el("ctxKegiatan").innerHTML = optionsHTML(list, labelFor, "Pilih kegiatan");
-    if(presetValue) el("ctxKegiatan").value = presetValue;
-  }
-  function populateSubKegiatan(kegiatanKode, presetValue){
-    var list = MASTER.subKegiatan.filter(function(s){ return kegiatanKode && s.kegiatanKode===kegiatanKode; });
-    el("ctxSubKegiatan").innerHTML = optionsHTML(list, labelFor, "Pilih sub kegiatan");
-    if(presetValue) el("ctxSubKegiatan").value = presetValue;
-  }
+
   function updatePerangkatDaerah(subUnitKode){
-    var su = MASTER.subUnit.find(function(x){ return x.kode===subUnitKode; });
-    el("ctxPerangkatDaerah").value = su ? su.perangkatDaerah : "";
+    var pdNama = currentInstansi ? currentInstansi.nama : 'PERANGKAT DAERAH';
+    if (el("ctxPerangkatDaerah")) {
+      el("ctxPerangkatDaerah").value = pdNama;
+    }
   }
+
   function updateTambahState(){
     var btn = el("btnTambah");
     var hint = el("contextHint");
@@ -1891,91 +1847,314 @@
     }
   }
 
-  el("ctxTahun").addEventListener("change", function() {
-    loadBelanjaByTahun(this.value);
-  });
+  /* ---------------- Dynamic Cascading Loaders via AJAX ---------------- */
+  function loadCascadeBidangUrusan(suObj, presetVal) {
+    el("ctxBidangUrusan").innerHTML = '<option value="">Memuat bidang urusan...</option>';
+    el("ctxProgram").innerHTML = '<option value="">Pilih program</option>';
+    el("ctxKegiatan").innerHTML = '<option value="">Pilih kegiatan</option>';
+    el("ctxSubKegiatan").innerHTML = '<option value="">Pilih sub kegiatan</option>';
+    currentSubKegiatanKode = null;
+    updateTambahState();
+
+    var instId = activeInstansiId || (currentInstansi ? currentInstansi.id : 0);
+    var thnVal = el("ctxTahun").value;
+
+    $.ajax({
+      url: ControllerURL + "GetCascadeBidangUrusan",
+      type: "POST",
+      data: {
+        sub_unit_id: suObj ? suObj.id : 0,
+        bidang_urusan_id: suObj ? suObj.bidang_urusan_id : '',
+        instansi_id: instId,
+        tahun: thnVal
+      },
+      dataType: "json",
+      success: function(res) {
+        var list = (res.status === 'success' && res.data) ? res.data : [];
+
+        MASTER.bidangUrusan = list;
+        el("ctxBidangUrusan").innerHTML = optionsHTML(list, labelFor, "Pilih bidang urusan");
+
+        if (list.length > 0) {
+          var targetVal = presetVal && list.some(function(x){ return x.kode === presetVal; }) ? presetVal : list[0].kode;
+          el("ctxBidangUrusan").value = targetVal;
+          loadCascadeProgram(targetVal);
+        } else {
+          render();
+        }
+      },
+      error: function() {
+        el("ctxBidangUrusan").innerHTML = '<option value="">Gagal memuat</option>';
+      }
+    });
+  }
+
+  function loadCascadeProgram(bidangKode, presetVal) {
+    el("ctxProgram").innerHTML = '<option value="">Memuat program...</option>';
+    el("ctxKegiatan").innerHTML = '<option value="">Pilih kegiatan</option>';
+    el("ctxSubKegiatan").innerHTML = '<option value="">Pilih sub kegiatan</option>';
+    currentSubKegiatanKode = null;
+    updateTambahState();
+
+    if (!bidangKode) {
+      el("ctxProgram").innerHTML = '<option value="">Pilih program</option>';
+      return;
+    }
+
+    var instId = activeInstansiId || (currentInstansi ? currentInstansi.id : 0);
+    var thnVal = el("ctxTahun").value;
+
+    $.ajax({
+      url: ControllerURL + "GetCascadeProgram",
+      type: "POST",
+      data: {
+        kode_bidang_urusan: bidangKode,
+        instansi_id: instId,
+        tahun: thnVal
+      },
+      dataType: "json",
+      success: function(res) {
+        var list = (res.status === 'success' && res.data) ? res.data : [];
+
+        MASTER.program = list;
+        el("ctxProgram").innerHTML = optionsHTML(list, labelFor, "Pilih program");
+
+        if (list.length > 0) {
+          var targetVal = presetVal && list.some(function(x){ return x.kode === presetVal; }) ? presetVal : list[0].kode;
+          el("ctxProgram").value = targetVal;
+          loadCascadeKegiatan(targetVal);
+        } else {
+          render();
+        }
+      },
+      error: function() {
+        el("ctxProgram").innerHTML = '<option value="">Gagal memuat</option>';
+      }
+    });
+  }
+
+  function loadCascadeKegiatan(progKode, presetVal) {
+    el("ctxKegiatan").innerHTML = '<option value="">Memuat kegiatan...</option>';
+    el("ctxSubKegiatan").innerHTML = '<option value="">Pilih sub kegiatan</option>';
+    currentSubKegiatanKode = null;
+    updateTambahState();
+
+    if (!progKode) {
+      el("ctxKegiatan").innerHTML = '<option value="">Pilih kegiatan</option>';
+      return;
+    }
+
+    var instId = activeInstansiId || (currentInstansi ? currentInstansi.id : 0);
+    var thnVal = el("ctxTahun").value;
+
+    $.ajax({
+      url: ControllerURL + "GetCascadeKegiatan",
+      type: "POST",
+      data: {
+        kode_program: progKode,
+        instansi_id: instId,
+        tahun: thnVal
+      },
+      dataType: "json",
+      success: function(res) {
+        var list = (res.status === 'success' && res.data) ? res.data : [];
+
+        MASTER.kegiatan = list;
+        el("ctxKegiatan").innerHTML = optionsHTML(list, labelFor, "Pilih kegiatan");
+
+        if (list.length > 0) {
+          var targetVal = presetVal && list.some(function(x){ return x.kode === presetVal; }) ? presetVal : list[0].kode;
+          el("ctxKegiatan").value = targetVal;
+          loadCascadeSubKegiatan(targetVal);
+        } else {
+          render();
+        }
+      },
+      error: function() {
+        el("ctxKegiatan").innerHTML = '<option value="">Gagal memuat</option>';
+      }
+    });
+  }
+
+  function loadCascadeSubKegiatan(kegKode, presetVal) {
+    el("ctxSubKegiatan").innerHTML = '<option value="">Memuat sub kegiatan...</option>';
+    currentSubKegiatanKode = null;
+    updateTambahState();
+
+    if (!kegKode) {
+      el("ctxSubKegiatan").innerHTML = '<option value="">Pilih sub kegiatan</option>';
+      return;
+    }
+
+    var instId = activeInstansiId || (currentInstansi ? currentInstansi.id : 0);
+    var thnVal = el("ctxTahun").value;
+
+    $.ajax({
+      url: ControllerURL + "GetCascadeSubKegiatan",
+      type: "POST",
+      data: {
+        kode_kegiatan: kegKode,
+        instansi_id: instId,
+        tahun: thnVal
+      },
+      dataType: "json",
+      success: function(res) {
+        var list = (res.status === 'success' && res.data) ? res.data : [];
+
+        MASTER.subKegiatan = list;
+        
+        var html = '<option value="">Pilih sub kegiatan</option>';
+        list.forEach(function(it){
+          var hasRincian = items.some(function(x){ return x.subKegiatanKode === it.kode; });
+          var suffix = hasRincian ? ' (Ada Rincian)' : '';
+          html += '<option value="' + esc(it.kode) + '">' + esc(it.kode) + ' - ' + esc(it.nama) + esc(suffix) + '</option>';
+        });
+        el("ctxSubKegiatan").innerHTML = html;
+
+        if (list.length > 0) {
+          var targetVal = presetVal && list.some(function(x){ return x.kode === presetVal; }) ? presetVal : list[0].kode;
+          el("ctxSubKegiatan").value = targetVal;
+          currentSubKegiatanKode = targetVal;
+        } else {
+          currentSubKegiatanKode = null;
+        }
+        updateTambahState();
+        render();
+      },
+      error: function() {
+        el("ctxSubKegiatan").innerHTML = '<option value="">Gagal memuat</option>';
+        updateTambahState();
+        render();
+      }
+    });
+  }
+
+  function initSubUnits(subUnitsList){
+    var pdNama = currentInstansi ? currentInstansi.nama : 'PERANGKAT DAERAH';
+    var instId = activeInstansiId || (currentInstansi ? currentInstansi.id : 0);
+
+    var list = [];
+    if (subUnitsList && subUnitsList.length > 0) {
+      list = subUnitsList.map(function(s) {
+        return {
+          id: s.id,
+          kode: s.kode_sub_unit || (currentInstansi && currentInstansi.kode_instansi ? currentInstansi.kode_instansi + '.0001' : '01.0001'),
+          nama: s.nama_sub_unit || 'SEKRETARIAT',
+          perangkatDaerah: pdNama,
+          id_instansi: s.instansi_id || instId,
+          bidang_urusan_id: s.bidang_urusan_id || ''
+        };
+      });
+    } else {
+      list = [{
+        id: 0,
+        kode: currentInstansi && currentInstansi.kode_instansi ? currentInstansi.kode_instansi + '.0001' : '01.0001',
+        nama: pdNama,
+        perangkatDaerah: pdNama,
+        id_instansi: instId,
+        bidang_urusan_id: ''
+      }];
+    }
+
+    MASTER.subUnit = list;
+    populateSubUnitOptions();
+
+    if (MASTER.subUnit.length > 0) {
+      var firstSU = MASTER.subUnit[0].kode;
+      el("ctxSubUnit").value = firstSU;
+      updatePerangkatDaerah(firstSU);
+      loadCascadeBidangUrusan(MASTER.subUnit[0]);
+    } else {
+      updateTambahState();
+      render();
+    }
+  }
 
   function loadBelanjaByTahun(thn) {
+    var instId = activeInstansiId || (currentInstansi ? currentInstansi.id : null);
     $.ajax({
       url: ControllerURL + "GetBelanjaData",
       type: "POST",
-      data: { tahun: thn },
+      data: { tahun: thn, instansi: instId },
       dataType: "json",
       success: function(res) {
         if (res.status === 'success') {
           rawBelanjaHeaders = res.data || [];
           buildMasterFromDatabase();
-          initContext();
-          render();
+          var curSU = MASTER.subUnit.find(function(s){ return s.kode === el("ctxSubUnit").value; });
+          loadCascadeBidangUrusan(curSU || MASTER.subUnit[0], el("ctxBidangUrusan").value);
         }
       }
     });
   }
 
+  /* ---------------- Event Listeners for Parameter Controls ---------------- */
+  if (el("ctxInstansiSelect") && el("ctxInstansiSelect").tagName === "SELECT") {
+    el("ctxInstansiSelect").addEventListener("change", function() {
+      var newInstId = this.value;
+      activeInstansiId = newInstId;
+      var selectedText = this.options[this.selectedIndex].text;
+      if (el("ctxPerangkatDaerah")) {
+        el("ctxPerangkatDaerah").value = selectedText;
+      }
+
+      $.ajax({
+        url: ControllerURL + "GetSubUnitsByInstansi",
+        type: "POST",
+        data: { instansi_id: newInstId },
+        dataType: "json",
+        success: function(res) {
+          if (res.status === 'success') {
+            currentInstansi = res.instansi || { id: newInstId, nama: selectedText };
+            initialSubUnits = res.data || [];
+
+            $.ajax({
+              url: ControllerURL + "GetBelanjaData",
+              type: "POST",
+              data: { tahun: el("ctxTahun").value, instansi: newInstId },
+              dataType: "json",
+              success: function(bRes) {
+                if (bRes.status === 'success') {
+                  rawBelanjaHeaders = bRes.data || [];
+                  buildMasterFromDatabase();
+                  initSubUnits(initialSubUnits);
+                }
+              }
+            });
+          }
+        }
+      });
+    });
+  }
+
+  el("ctxTahun").addEventListener("change", function() {
+    loadBelanjaByTahun(this.value);
+  });
+
   el("ctxSubUnit").addEventListener("change", function(){
-    updatePerangkatDaerah(this.value);
-    populateBidang(this.value);
-    populateProgram("");
-    populateKegiatan("");
-    populateSubKegiatan("");
-    currentSubKegiatanKode = null;
-    updateTambahState();
-    render();
+    var suVal = this.value;
+    var suObj = MASTER.subUnit.find(function(x){ return x.kode === suVal; });
+    updatePerangkatDaerah(suVal);
+    loadCascadeBidangUrusan(suObj);
   });
+
   el("ctxBidangUrusan").addEventListener("change", function(){
-    populateProgram(this.value);
-    populateKegiatan("");
-    populateSubKegiatan("");
-    currentSubKegiatanKode = null;
-    updateTambahState();
-    render();
+    loadCascadeProgram(this.value);
   });
+
   el("ctxProgram").addEventListener("change", function(){
-    populateKegiatan(this.value);
-    populateSubKegiatan("");
-    currentSubKegiatanKode = null;
-    updateTambahState();
-    render();
+    loadCascadeKegiatan(this.value);
   });
+
   el("ctxKegiatan").addEventListener("change", function(){
-    populateSubKegiatan(this.value);
-    currentSubKegiatanKode = null;
-    updateTambahState();
-    render();
+    loadCascadeSubKegiatan(this.value);
   });
+
   el("ctxSubKegiatan").addEventListener("change", function(){
     currentSubKegiatanKode = this.value || null;
     updateTambahState();
     render();
   });
-
-  function initContext(){
-    populateSubUnitOptions();
-    if (MASTER.subUnit.length > 0) {
-      var firstSU = MASTER.subUnit[0].kode;
-      el("ctxSubUnit").value = firstSU;
-      updatePerangkatDaerah(firstSU);
-      
-      var bList = MASTER.bidangUrusan.filter(function(b){ return b.subUnitKode.indexOf(firstSU) > -1; });
-      var firstB = bList.length ? bList[0].kode : (MASTER.bidangUrusan[0] ? MASTER.bidangUrusan[0].kode : '');
-      populateBidang(firstSU, firstB);
-
-      var pList = MASTER.program.filter(function(p){ return p.bidangKode === firstB; });
-      var firstP = pList.length ? pList[0].kode : (MASTER.program[0] ? MASTER.program[0].kode : '');
-      populateProgram(firstB, firstP);
-
-      var kList = MASTER.kegiatan.filter(function(k){ return k.programKode === firstP; });
-      var firstK = kList.length ? kList[0].kode : (MASTER.kegiatan[0] ? MASTER.kegiatan[0].kode : '');
-      populateKegiatan(firstP, firstK);
-
-      var skList = MASTER.subKegiatan.filter(function(s){ return s.kegiatanKode === firstK; });
-      var firstSK = skList.length ? skList[0].kode : (MASTER.subKegiatan[0] ? MASTER.subKegiatan[0].kode : '');
-      populateSubKegiatan(firstK, firstSK);
-
-      currentSubKegiatanKode = firstSK;
-    }
-    updateTambahState();
-  }
 
   /* ---------------- Standar Harga Picker ---------------- */
   var pickerOverlay = document.getElementById("pickerOverlay");
@@ -2171,8 +2350,7 @@
   /* ---------------- Initialization ---------------- */
   buildMasterFromDatabase();
   loadMasterRekening();
-  initContext();
-  render();
+  initSubUnits(initialSubUnits);
 })();
 </script>
 </body>

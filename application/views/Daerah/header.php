@@ -349,14 +349,14 @@
     <div class="navbar-center">
       <a href="<?= base_url('Daerah/UrusanPD'); ?>" class="navbar-brand">
         <i class="fas fa-chart-line"></i>
-        IPPD
+        Sistem Perencanaan Daerah
     </a>
     </div>
 
     <div class="navbar-menu">
 
       <div class="dropdown">
-        <a href="#" class="navbar-item">Laporan Sakip <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
+        <a href="#" class="navbar-item">Laporan<i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
         <div class="dropdown-content">
 
           <div class="dropdown-submenu">
@@ -411,9 +411,6 @@
 
         </div>
       </div>
-
-      <a href="mailto:cvideconsultan@gmail.com" class="navbar-item">Kontak</a>
-      <a href="#" class="navbar-item">Tentang Kami</a>
 
       <?php if (isset($_SESSION['Level']) && ((int)$_SESSION['Level'] === 3 || (int)$_SESSION['Level'] === 4)) { ?>
         <button class="logout-btn" onclick="logout()" type="button">

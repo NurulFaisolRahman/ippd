@@ -786,16 +786,19 @@
 
       <div class="filter-group">
         <label for="ctxInstansi">Perangkat Daerah / Instansi</label>
-        <select id="ctxInstansi" class="form-control-custom" <?= ($IsRole4) ? 'disabled' : '' ?>>
-          <?php if (!$IsRole4): ?>
+        <?php if ($IsRole4): ?>
+          <input type="text" class="form-control-custom" readonly value="<?= htmlspecialchars(!empty($ListInstansi[0]['nama']) ? $ListInstansi[0]['nama'] : 'Perangkat Daerah') ?>" style="background: #f1f5f9; cursor: not-allowed;">
+          <input type="hidden" id="ctxInstansi" value="<?= $InstansiId ?>">
+        <?php else: ?>
+          <select id="ctxInstansi" class="form-control-custom">
             <option value="">-- Semua Perangkat Daerah --</option>
-          <?php endif; ?>
-          <?php foreach ($ListInstansi as $inst): ?>
-            <option value="<?= $inst['id'] ?>" <?= ($FilterInstansi == $inst['id'] || ($IsRole4 && $InstansiId == $inst['id'])) ? 'selected' : '' ?>>
-              <?= htmlspecialchars($inst['nama']) ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
+            <?php foreach ($ListInstansi as $inst): ?>
+              <option value="<?= $inst['id'] ?>" <?= ($FilterInstansi == $inst['id']) ? 'selected' : '' ?>>
+                <?= htmlspecialchars($inst['nama']) ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+        <?php endif; ?>
       </div>
 
       <div class="filter-group">
@@ -1336,7 +1339,12 @@
     // Link ke halaman Belanja Sub Kegiatan
     var linkEl = document.getElementById("linkBelanjaSubKegiatan");
     var thn = document.getElementById("ctxTahun").value;
-    linkEl.href = BaseURL + controllerName + "/BelanjaSubKegiatan?tahun=" + thn;
+    var instVal = document.getElementById("ctxInstansi") ? document.getElementById("ctxInstansi").value : "";
+    var url = BaseURL + controllerName + "/BelanjaSubKegiatan?tahun=" + thn;
+    if (instVal) {
+      url += "&instansi_id=" + encodeURIComponent(instVal);
+    }
+    linkEl.href = url;
 
     renderRincianModalTable();
     recalcModal();
