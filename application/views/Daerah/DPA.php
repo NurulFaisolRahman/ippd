@@ -512,8 +512,8 @@
       display: none;
       align-items: flex-start;
       justify-content: center;
-      padding: 24px 16px;
-      z-index: 99999;
+      padding: 85px 16px 40px;
+      z-index: 999999 !important;
       overflow-y: auto;
     }
 
@@ -992,6 +992,7 @@
   var BaseURL = '<?= base_url() ?>';
   var controllerName = '<?= isset($ControllerName) ? $ControllerName : $this->router->fetch_class() ?>';
   var ControllerURL = BaseURL + controllerName + '/';
+  var isRole4 = <?= !empty($IsRole4) ? 'true' : 'false' ?>;
 
   // Initial data from Controller
   var rawData = <?= json_encode(!empty($DPAData) ? $DPAData : []) ?>;
@@ -1140,7 +1141,7 @@
       out += '<td>' + formatMoney(node.agg.transfer) + '</td>';
       out += '<td>' + formatMoney(node.agg.jumlah) + '</td>';
       out += '<td class="center">' +
-               '<button type="button" class="btn-edit-rak" data-id="' + node.id + '" title="Edit Rencana Anggaran Kas (RAK)"><i class="fa fa-pencil"></i></button>' +
+               (isRole4 ? '<button type="button" class="btn-edit-rak" data-id="' + node.id + '" title="Edit Rencana Anggaran Kas (RAK)"><i class="fa fa-pencil"></i></button>' : '<span style="color:#94a3b8; font-size:12px;">-</span>') +
              '</td>';
       out += '</tr>';
     } else {

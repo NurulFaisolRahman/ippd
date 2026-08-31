@@ -299,9 +299,9 @@ body {
   display: none;
   align-items: flex-start;
   justify-content: center;
-  padding: 40px 16px;
+  padding: 85px 16px 40px;
   overflow-y: auto;
-  z-index: 1050;
+  z-index: 999999 !important;
 }
 .modal-overlay.open { display: flex; }
 
@@ -567,20 +567,27 @@ body {
         </select>
       </div>
 
-      <div class="filter-group">
-        <label for="selectInstansi">Perangkat Daerah / Instansi</label>
-        <select id="selectInstansi" class="filter-select" style="min-width: 260px;">
-          <?php foreach ($ListInstansi as $inst): ?>
-            <option value="<?= $inst['id'] ?>" <?= ((int)$inst['id'] === $filterInstansi) ? 'selected' : '' ?>><?= htmlspecialchars($inst['nama']) ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
+      <?php if (!empty($IsDaerah)): ?>
+        <div class="filter-group">
+          <label for="selectInstansi">Perangkat Daerah / Instansi</label>
+          <select id="selectInstansi" class="filter-select" style="min-width: 240px;">
+            <option value="0">-- Semua Perangkat Daerah --</option>
+            <?php foreach ($ListInstansi as $inst): ?>
+              <option value="<?= $inst['id'] ?>" <?= ((int)$inst['id'] === (int)$filterInstansi) ? 'selected' : '' ?>><?= htmlspecialchars($inst['nama']) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+      <?php else: ?>
+        <input type="hidden" id="selectInstansi" value="<?= $filterInstansi ?>">
+      <?php endif; ?>
     </div>
 
     <div>
-      <button type="button" class="btn-add-primary" id="btnBukaTambah">
-        <i class="fa fa-plus"></i> Tambah Kebijakan Strategis
-      </button>
+      <?php if (!empty($IsRole4)): ?>
+        <button type="button" class="btn-add-primary" id="btnBukaTambah">
+          <i class="fa fa-plus"></i> Tambah Kebijakan Strategis
+        </button>
+      <?php endif; ?>
     </div>
   </div>
 
@@ -690,6 +697,7 @@ body {
   "use strict";
 
   var BASE_URL = "<?= base_url() ?>";
+  var IS_ROLE_4 = <?= !empty($IsRole4) ? 'true' : 'false' ?>;
   var dataItems = <?= json_encode($items) ?>;
   var deleteTargetId = null;
 
@@ -747,14 +755,14 @@ body {
         '<td>' + escapeHtml(item.dasar_hukum) + '</td>' +
         '<td>' + escapeHtml(item.tujuan_masalah) + '</td>' +
         '<td class="col-aksi">' +
-          '<div class="action-btns">' +
+          (IS_ROLE_4 ? ('<div class="action-btns">' +
             '<button type="button" class="btn-icon edit" data-id="' + item.id + '" title="Edit">' +
               '<i class="fa fa-pencil"></i>' +
             '</button>' +
             '<button type="button" class="btn-icon delete" data-id="' + item.id + '" title="Hapus">' +
               '<i class="fa fa-trash-o"></i>' +
             '</button>' +
-          '</div>' +
+          '</div>') : '<span style="color:#94a3b8; font-size:12px;">-</span>') +
         '</td>';
       tbody.appendChild(tr);
     });
@@ -934,7 +942,10 @@ body {
   }
 
   // Event Listeners
-  document.getElementById("btnBukaTambah").addEventListener("click", openAddModal);
+  var btnBukaTambah = document.getElementById("btnBukaTambah");
+  if (btnBukaTambah) {
+    btnBukaTambah.addEventListener("click", openAddModal);
+  }
   document.getElementById("btnModalClose").addEventListener("click", closeModal);
   modalOverlay.addEventListener("click", function(e){
     if (e.target === modalOverlay) closeModal();
@@ -961,7 +972,9 @@ body {
   document.getElementById("btnKonfirmHapus").addEventListener("click", konfirmHapus);
 
   selectTahun.addEventListener("change", reloadTableData);
-  selectInstansi.addEventListener("change", reloadTableData);
+  if (selectInstansi && selectInstansi.tagName === "SELECT") {
+    selectInstansi.addEventListener("change", reloadTableData);
+  }
 
   document.addEventListener("keydown", function(e){
     if (e.key === "Escape"){

@@ -564,9 +564,9 @@
                     <i class="fa fa-chevron-down"></i>
                 </a>
                 <div class="sidebar-submenu">
-                    <a href="<?=base_url('Instansi/PengisianKebijakanStrategis')?>">Pengisian Kebijakan Strategis</a>
                     <a href="<?=base_url('Instansi/PengisianCapaianProgramKegiatan')?>">Pengisian Capaian Program Kegiatan</a>
-                    <a href="<?=base_url('Instansi/PengisianTinjutRekomendasiDPRDn-1')?>">Pengisian Tinjut Rekomendasi DPRD n-1</a>
+                    <a href="<?=base_url('Instansi/PengisianKebijakanStrategis')?>">Pengisian Kebijakan Strategis</a>
+                    <a href="<?=base_url('Instansi/PengisianTinjutRekomendasiDPRDn1')?>">Pengisian Tinjut Rekomendasi DPRD n-1</a>
                     <a href="<?=base_url('Instansi/CapaianKinerjaPelaksanaanTugasPembantuan')?>">Capaian Kinerja Pelaksanaan Tugas Pembantuan</a>
                 </div>
             </li>

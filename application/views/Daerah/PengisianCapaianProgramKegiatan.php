@@ -378,9 +378,9 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
   display: none;
   align-items: flex-start;
   justify-content: center;
-  padding: 30px 16px;
+  padding: 85px 16px 40px;
   overflow-y: auto;
-  z-index: 1050;
+  z-index: 999999 !important;
 }
 .modal-overlay.open { display: flex; }
 
@@ -635,21 +635,26 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
 
       <div class="t-field">
         <label for="selUrusan">Urusan Pemerintahan</label>
-        <select id="selUrusan" class="t-select" style="min-width: 200px;">
+        <select id="selUrusan" class="t-select" style="min-width: 220px;">
           <?php foreach ($ListUrusan as $ur): ?>
             <option value="<?= $ur ?>" <?= ($ur === $filterUrusan) ? 'selected' : '' ?>><?= htmlspecialchars($ur) ?></option>
           <?php endforeach; ?>
         </select>
       </div>
 
-      <div class="t-field">
-        <label for="selInstansi">Perangkat Daerah / Instansi</label>
-        <select id="selInstansi" class="t-select" style="min-width: 240px;">
-          <?php foreach ($ListInstansi as $inst): ?>
-            <option value="<?= $inst['id'] ?>" <?= ((int)$inst['id'] === $filterInstansi) ? 'selected' : '' ?>><?= htmlspecialchars($inst['nama']) ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
+      <?php if (!empty($IsDaerah)): ?>
+        <div class="t-field">
+          <label for="selInstansi">Perangkat Daerah / Instansi</label>
+          <select id="selInstansi" class="t-select" style="min-width: 240px;">
+            <option value="0">-- Semua Perangkat Daerah --</option>
+            <?php foreach ($ListInstansi as $inst): ?>
+              <option value="<?= $inst['id'] ?>" <?= ((int)$inst['id'] === (int)$filterInstansi) ? 'selected' : '' ?>><?= htmlspecialchars($inst['nama']) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+      <?php else: ?>
+        <input type="hidden" id="selInstansi" value="<?= $filterInstansi ?>">
+      <?php endif; ?>
 
       <div class="toggle-budget-box">
         <label class="switch-control">
@@ -658,12 +663,6 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
         </label>
         <label for="toggleAnggaran" style="font-size:13px; font-weight:700; color:var(--ui-dark); cursor:pointer; user-select:none;">Tampilkan Anggaran</label>
       </div>
-    </div>
-
-    <div>
-      <button type="button" class="btn-add-primary" id="btnTambahData">
-        <i class="fa fa-plus"></i> Tambah Program / Kegiatan
-      </button>
     </div>
   </div>
 
@@ -686,7 +685,7 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
             <th style="min-width: 240px;">Permasalahan</th>
             <th style="min-width: 240px;">Upaya Mengatasi Permasalahan</th>
             <th style="min-width: 240px;">Tinjut Rekomendasi DPRD</th>
-            <th class="center" style="width: 100px;">Aksi</th>
+            <th class="center" style="width: 80px;">Aksi</th>
           </tr>
         </thead>
         <tbody id="tbodyCPK">
@@ -698,14 +697,14 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
 </div>
 
 <!-- ============================================================== -->
-<!-- MODAL 1: INPUT EVALUASI (Permasalahan, Upaya & Tinjut)         -->
+<!-- MODAL: INPUT EVALUASI (Permasalahan, Upaya & Tinjut)          -->
 <!-- ============================================================== -->
 <div class="modal-overlay" id="modalEvaluasiOverlay">
   <div class="modal-box-lg">
     <div class="modal-header-flex">
       <div class="modal-header-left">
         <div class="modal-icon-square">
-          <i class="fa fa-edit"></i>
+          <i class="fa fa-commenting-o"></i>
         </div>
         <div>
           <h3 class="modal-title-text" id="evalModalTitle">Input Permasalahan, Upaya &amp; Tinjut Rekomendasi DPRD</h3>
@@ -789,116 +788,6 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
   </div>
 </div>
 
-<!-- ============================================================== -->
-<!-- MODAL 2: TAMBAH / EDIT MASTER PROGRAM & KEGIATAN               -->
-<!-- ============================================================== -->
-<div class="modal-overlay" id="modalFormOverlay">
-  <div class="modal-box-lg">
-    <div class="modal-header-flex">
-      <div class="modal-header-left">
-        <div class="modal-icon-square">
-          <i class="fa fa-plus-circle"></i>
-        </div>
-        <div>
-          <h3 class="modal-title-text" id="formModalTitle">Tambah Data Program / Kegiatan</h3>
-          <p class="modal-sub-text">Lengkapi detail kebijakan, program/kegiatan, indikator, target, dan anggaran.</p>
-        </div>
-      </div>
-      <button type="button" class="btn-act" id="btnCloseFormModal" style="width:34px; height:34px; font-size:16px;">&times;</button>
-    </div>
-
-    <form id="masterFormCPK" autocomplete="off">
-      <input type="hidden" id="formId" value="">
-
-      <div class="form-grid-2">
-        <div class="form-group-custom">
-          <label>Tipe Data <span style="color:var(--ui-red);">*</span></label>
-          <select id="formTipe" class="form-control-input">
-            <option value="program">Program Utama</option>
-            <option value="kegiatan" selected>Sub Kegiatan</option>
-          </select>
-        </div>
-
-        <div class="form-group-custom" id="groupParentProgram">
-          <label>Induk Program <span style="color:var(--ui-red);">*</span></label>
-          <select id="formParentId" class="form-control-input">
-            <!-- options dynamically populated -->
-          </select>
-        </div>
-      </div>
-
-      <div class="form-group-custom">
-        <label>Kebijakan Strategis <span style="color:var(--ui-red);">*</span></label>
-        <input type="text" id="formKebijakan" class="form-control-input" placeholder="Contoh: Meningkatnya Kualitas Perencanaan Pembangunan Daerah">
-      </div>
-
-      <div class="form-group-custom">
-        <label>Uraian Program / Kegiatan <span style="color:var(--ui-red);">*</span></label>
-        <textarea id="formUraian" rows="2" placeholder="Nama program atau kegiatan..."></textarea>
-      </div>
-
-      <div class="form-grid-2">
-        <div class="form-group-custom">
-          <label>Indikator Kinerja <span style="color:var(--ui-red);">*</span></label>
-          <input type="text" id="formIndikator" class="form-control-input" placeholder="Nama indikator tolok ukur...">
-        </div>
-        <div class="form-group-custom">
-          <label>Satuan <span style="color:var(--ui-red);">*</span></label>
-          <input type="text" id="formSatuan" class="form-control-input" placeholder="Contoh: %, Dokumen, Nilai, Orang, Paket">
-        </div>
-      </div>
-
-      <div class="form-grid-2">
-        <div class="form-group-custom">
-          <label>Target Kinerja</label>
-          <input type="text" id="formTarget" class="form-control-input" placeholder="0.00">
-        </div>
-        <div class="form-group-custom">
-          <label>Realisasi Kinerja</label>
-          <input type="text" id="formRealisasi" class="form-control-input" placeholder="0.00">
-        </div>
-      </div>
-
-      <div class="form-grid-2">
-        <div class="form-group-custom">
-          <label>Pagu Anggaran (Rp)</label>
-          <input type="text" id="formAnggaran" class="form-control-input" placeholder="Rp 0">
-        </div>
-        <div class="form-group-custom">
-          <label>Realisasi Anggaran (Rp)</label>
-          <input type="text" id="formRealisasiAnggaran" class="form-control-input" placeholder="Rp 0">
-        </div>
-      </div>
-
-      <div class="modal-footer-btn">
-        <button type="button" class="btn-pill btn-pill-reset" id="btnResetMasterForm">Batal</button>
-        <button type="button" class="btn-pill btn-pill-save" id="btnSaveMasterForm">
-          <i class="fa fa-save"></i> Simpan Data
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- ============================================================== -->
-<!-- MODAL 3: KONFIRMASI HAPUS                                      -->
-<!-- ============================================================== -->
-<div class="modal-overlay" id="modalDeleteOverlay">
-  <div class="modal-box-lg" style="max-width:440px; text-align:center; padding:30px 24px;">
-    <div style="width:56px; height:56px; border-radius:50%; background:var(--ui-red-light); color:var(--ui-red); display:flex; align-items:center; justify-content:center; font-size:26px; margin:0 auto 16px;">
-      <i class="fa fa-trash-o"></i>
-    </div>
-    <h3 style="margin:0 0 8px; font-size:18px; font-weight:800; color:var(--ui-dark);">Hapus Data Ini?</h3>
-    <p style="margin:0 0 20px; font-size:13px; color:var(--ui-text-muted); line-height:1.5;">Jika program dihapus, seluruh sub-kegiatan di bawahnya juga akan ikut terhapus.</p>
-    <div style="display:flex; justify-content:center; gap:10px;">
-      <button type="button" class="btn-pill btn-pill-reset" id="btnCancelDelete">Batal</button>
-      <button type="button" class="btn-pill btn-pill-danger" id="btnConfirmDelete">
-        <i class="fa fa-trash"></i> Ya, Hapus Data
-      </button>
-    </div>
-  </div>
-</div>
-
 <!-- Toast Container -->
 <div class="toast-container" id="toastContainer"></div>
 
@@ -907,8 +796,8 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
   "use strict";
 
   var BASE_URL = "<?= base_url() ?>";
+  var IS_ROLE_4 = <?= !empty($IsRole4) ? 'true' : 'false' ?>;
   var groupData = <?= json_encode($groups) ?>;
-  var deleteTargetId = null;
 
   // DOM Elements
   var tbody = document.getElementById("tbodyCPK");
@@ -920,8 +809,6 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
 
   // Modals
   var modalEvaluasi = document.getElementById("modalEvaluasiOverlay");
-  var modalForm = document.getElementById("modalFormOverlay");
-  var modalDelete = document.getElementById("modalDeleteOverlay");
 
   // Format Helpers
   function fmtNum(n){
@@ -965,20 +852,6 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
     }, 3000);
   }
 
-  // Rupiah formatting
-  function formatDigitsRupiah(str){
-    var digits = (str || "").replace(/\D/g, "");
-    if (!digits) return "";
-    return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  }
-
-  document.getElementById("formAnggaran").addEventListener("input", function(){
-    this.value = formatDigitsRupiah(this.value);
-  });
-  document.getElementById("formRealisasiAnggaran").addEventListener("input", function(){
-    this.value = formatDigitsRupiah(this.value);
-  });
-
   // Render Table
   function renderTable(){
     tbody.innerHTML = "";
@@ -988,7 +861,7 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
         '<tr><td colspan="14" style="text-align:center; padding:60px 20px; color:#94a3b8;">' +
         '<i class="fa fa-folder-open-o" style="font-size:38px; display:block; margin-bottom:10px;"></i>' +
         '<strong style="color:var(--ui-dark); font-size:15px;">Belum Ada Data Program / Kegiatan</strong><br>' +
-        'Silakan klik tombol <strong>+ Tambah Program / Kegiatan</strong> untuk menambahkan data baru.' +
+        'Data capaian otomatis dimuat dari Realisasi Renaksi dan Sasaran Renstra Perangkat Daerah.' +
         '</td></tr>';
       return;
     }
@@ -998,26 +871,28 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
     groupData.forEach(function(grp, gIdx){
       var p = grp.program || {};
       var kegs = grp.kegiatan || [];
-      var totalRows = (p.id ? 1 : 0) + kegs.length;
+      var totalRows = (p.uraian || p.id ? 1 : 0) + kegs.length;
       if (totalRows === 0) return;
 
       var kebijakanCellRendered = false;
+      var kebijakanText = grp.kebijakan || (p.kebijakan || '-');
 
       // Program Row
-      if (p.id){
+      if (p.uraian || p.id){
         var badgeK = getBadgeClass(p.capaian);
         var badgeA = getBadgeClass(p.capaian_anggaran);
+        var pCodeLabel = p.kode ? '<span style="color:var(--ui-blue); font-weight:700; margin-right:4px;">[' + escapeHtml(p.kode) + ']</span> ' : '';
 
         var trHtml = '<tr class="program-row">';
         if (!kebijakanCellRendered){
-          trHtml += '<td class="kebijakan-col" rowspan="' + totalRows + '">' + escapeHtml(grp.kebijakan) + '</td>';
+          trHtml += '<td class="kebijakan-col" rowspan="' + totalRows + '">' + escapeHtml(kebijakanText) + '</td>';
           kebijakanCellRendered = true;
         }
 
         trHtml += 
-          '<td><span class="program-name">' + escapeHtml(p.uraian) + '</span></td>' +
-          '<td>' + escapeHtml(p.indikator) + '</td>' +
-          '<td class="center">' + escapeHtml(p.satuan) + '</td>' +
+          '<td><span class="program-name">' + pCodeLabel + escapeHtml(p.uraian) + '</span></td>' +
+          '<td>' + escapeHtml(p.indikator || '-') + '</td>' +
+          '<td class="center">' + escapeHtml(p.satuan || '%') + '</td>' +
           '<td class="num">' + fmtNum(p.target) + '</td>' +
           '<td class="num">' + fmtNum(p.realisasi) + '</td>' +
           '<td class="num"><span class="badge-capaian ' + badgeK + '">' + fmtPersen(p.capaian) + '</span></td>' +
@@ -1028,11 +903,9 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
           '<td class="cell-text-desc">' + (p.upaya ? escapeHtml(p.upaya) : '<span class="empty-cell-text">Belum diisi</span>') + '</td>' +
           '<td class="cell-text-desc">' + (p.tinjut ? escapeHtml(p.tinjut) : '<span class="empty-cell-text">Belum diisi</span>') + '</td>' +
           '<td class="center">' +
-            '<div class="action-btns">' +
-              '<button type="button" class="btn-act eval" onclick="window.CPK.openEval(' + p.id + ')" title="Input Permasalahan, Upaya & Tinjut"><i class="fa fa-commenting-o"></i></button>' +
-              '<button type="button" class="btn-act edit" onclick="window.CPK.openEdit(' + p.id + ')" title="Edit Data"><i class="fa fa-pencil"></i></button>' +
-              '<button type="button" class="btn-act delete" onclick="window.CPK.openDelete(' + p.id + ')" title="Hapus Data"><i class="fa fa-trash-o"></i></button>' +
-            '</div>' +
+            (IS_ROLE_4 ? ('<div class="action-btns">' +
+              '<button type="button" class="btn-act eval" onclick="window.CPK.openEval(\'' + (p.id || p.kode) + '\')" title="Input Permasalahan, Upaya & Tinjut"><i class="fa fa-pencil"></i></button>' +
+            '</div>') : '<span style="color:#94a3b8; font-size:12px;">-</span>') +
           '</td>' +
         '</tr>';
 
@@ -1043,17 +916,18 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
       kegs.forEach(function(k){
         var badgeKK = getBadgeClass(k.capaian);
         var badgeKA = getBadgeClass(k.capaian_anggaran);
+        var kCodeLabel = k.kode ? '<span style="color:#0284c7; font-weight:700; margin-right:4px;">[' + escapeHtml(k.kode) + ']</span> ' : '';
 
         var trHtml = '<tr class="kegiatan-row">';
         if (!kebijakanCellRendered){
-          trHtml += '<td class="kebijakan-col" rowspan="' + totalRows + '">' + escapeHtml(grp.kebijakan) + '</td>';
+          trHtml += '<td class="kebijakan-col" rowspan="' + totalRows + '">' + escapeHtml(kebijakanText) + '</td>';
           kebijakanCellRendered = true;
         }
 
         trHtml += 
-          '<td><span class="kegiatan-name">' + escapeHtml(k.uraian) + '</span></td>' +
-          '<td>' + escapeHtml(k.indikator) + '</td>' +
-          '<td class="center">' + escapeHtml(k.satuan) + '</td>' +
+          '<td><span class="kegiatan-name">' + kCodeLabel + escapeHtml(k.uraian) + '</span></td>' +
+          '<td>' + escapeHtml(k.indikator || '-') + '</td>' +
+          '<td class="center">' + escapeHtml(k.satuan || '%') + '</td>' +
           '<td class="num">' + fmtNum(k.target) + '</td>' +
           '<td class="num">' + fmtNum(k.realisasi) + '</td>' +
           '<td class="num"><span class="badge-capaian ' + badgeKK + '">' + fmtPersen(k.capaian) + '</span></td>' +
@@ -1064,11 +938,9 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
           '<td class="cell-text-desc">' + (k.upaya ? escapeHtml(k.upaya) : '<span class="empty-cell-text">Belum diisi</span>') + '</td>' +
           '<td class="cell-text-desc">' + (k.tinjut ? escapeHtml(k.tinjut) : '<span class="empty-cell-text">Belum diisi</span>') + '</td>' +
           '<td class="center">' +
-            '<div class="action-btns">' +
-              '<button type="button" class="btn-act eval" onclick="window.CPK.openEval(' + k.id + ')" title="Input Permasalahan, Upaya & Tinjut"><i class="fa fa-commenting-o"></i></button>' +
-              '<button type="button" class="btn-act edit" onclick="window.CPK.openEdit(' + k.id + ')" title="Edit Data"><i class="fa fa-pencil"></i></button>' +
-              '<button type="button" class="btn-act delete" onclick="window.CPK.openDelete(' + k.id + ')" title="Hapus Data"><i class="fa fa-trash-o"></i></button>' +
-            '</div>' +
+            (IS_ROLE_4 ? ('<div class="action-btns">' +
+              '<button type="button" class="btn-act eval" onclick="window.CPK.openEval(\'' + (k.id || k.kode) + '\')" title="Input Permasalahan, Upaya & Tinjut"><i class="fa fa-pencil"></i></button>' +
+            '</div>') : '<span style="color:#94a3b8; font-size:12px;">-</span>') +
           '</td>' +
         '</tr>';
 
@@ -1082,10 +954,11 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
   function findItemById(id){
     for (var i = 0; i < groupData.length; i++){
       var g = groupData[i];
-      if (g.program && Number(g.program.id) === Number(id)) return g.program;
+      if (g.program && (String(g.program.id) === String(id) || (g.program.kode && String(g.program.kode) === String(id)))) return g.program;
       if (g.kegiatan){
         for (var j = 0; j < g.kegiatan.length; j++){
-          if (Number(g.kegiatan[j].id) === Number(id)) return g.kegiatan[j];
+          var item = g.kegiatan[j];
+          if (String(item.id) === String(id) || (item.kode && String(item.kode) === String(id))) return item;
         }
       }
     }
@@ -1107,13 +980,13 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
     if (el) el.addEventListener("input", updateCharCounters);
   });
 
-  // Modal 1: Open Evaluasi Modal
+  // Modal: Open Evaluasi Modal
   function openEvalModal(id){
     var item = findItemById(id);
     if (!item) return;
 
-    document.getElementById("evalItemId").value = item.id;
-    document.getElementById("evalUraianText").textContent = item.uraian || "-";
+    document.getElementById("evalItemId").value = item.id || item.kode || "";
+    document.getElementById("evalUraianText").textContent = (item.kode ? '[' + item.kode + '] ' : '') + (item.uraian || "-");
     document.getElementById("evalIndikatorText").textContent = item.indikator || "-";
     document.getElementById("evalSatuanText").textContent = item.satuan || "-";
 
@@ -1149,6 +1022,7 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
 
   document.getElementById("btnSaveEval").addEventListener("click", function(){
     var id = document.getElementById("evalItemId").value;
+    var item = findItemById(id) || {};
     var btn = this;
     btn.disabled = true;
     btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menyimpan...';
@@ -1157,7 +1031,23 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
       url: BASE_URL + "Instansi/SaveEvaluasiProgramKegiatan",
       type: "POST",
       data: {
-        id: id,
+        id: item.id || 0,
+        kode: item.kode || "",
+        tipe: item.tipe || "kegiatan",
+        parent_id: item.parent_id || null,
+        kebijakan: item.kebijakan || "",
+        uraian: item.uraian || "",
+        indikator: item.indikator || "",
+        satuan: item.satuan || "",
+        target: item.target || 0,
+        realisasi: item.realisasi || 0,
+        capaian: item.capaian || 0,
+        anggaran: item.anggaran || 0,
+        realisasi_anggaran: item.realisasi_anggaran || 0,
+        capaian_anggaran: item.capaian_anggaran || 0,
+        tahun: selTahun.value,
+        urusan: selUrusan.value,
+        instansi_id: selInstansi.value,
         permasalahan: document.getElementById("evalPermasalahan").value,
         upaya: document.getElementById("evalUpaya").value,
         tinjut: document.getElementById("evalTinjut").value
@@ -1178,177 +1068,6 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
         btn.disabled = false;
         btn.innerHTML = '<i class="fa fa-save"></i> Simpan Evaluasi';
         showToast("Terjadi kesalahan koneksi.", true);
-      }
-    });
-  });
-
-  // Modal 2: Master Form Add / Edit
-  function populateParentProgramSelect(selectedParentId){
-    var sel = document.getElementById("formParentId");
-    sel.innerHTML = '<option value="">-- Pilih Induk Program --</option>';
-    groupData.forEach(function(g){
-      if (g.program && g.program.id){
-        var opt = document.createElement("option");
-        opt.value = g.program.id;
-        opt.textContent = g.program.uraian;
-        if (Number(g.program.id) === Number(selectedParentId)) opt.selected = true;
-        sel.appendChild(opt);
-      }
-    });
-  }
-
-  document.getElementById("formTipe").addEventListener("change", function(){
-    var isKeg = this.value === "kegiatan";
-    document.getElementById("groupParentProgram").style.display = isKeg ? "block" : "none";
-  });
-
-  function openAddMasterModal(){
-    document.getElementById("formModalTitle").textContent = "Tambah Data Program / Kegiatan";
-    document.getElementById("formId").value = "";
-    document.getElementById("formTipe").value = "kegiatan";
-    document.getElementById("formKebijakan").value = groupData[0] ? groupData[0].kebijakan : "";
-    document.getElementById("formUraian").value = "";
-    document.getElementById("formIndikator").value = "";
-    document.getElementById("formSatuan").value = "";
-    document.getElementById("formTarget").value = "";
-    document.getElementById("formRealisasi").value = "";
-    document.getElementById("formAnggaran").value = "";
-    document.getElementById("formRealisasiAnggaran").value = "";
-    document.getElementById("groupParentProgram").style.display = "block";
-    populateParentProgramSelect(groupData[0] && groupData[0].program ? groupData[0].program.id : null);
-
-    modalForm.classList.add("open");
-    document.body.style.overflow = "hidden";
-  }
-
-  function openEditMasterModal(id){
-    var item = findItemById(id);
-    if (!item) return;
-
-    document.getElementById("formModalTitle").textContent = "Ubah Data Program / Kegiatan";
-    document.getElementById("formId").value = item.id;
-    document.getElementById("formTipe").value = item.tipe || "kegiatan";
-    document.getElementById("formKebijakan").value = item.kebijakan || "";
-    document.getElementById("formUraian").value = item.uraian || "";
-    document.getElementById("formIndikator").value = item.indikator || "";
-    document.getElementById("formSatuan").value = item.satuan || "";
-    document.getElementById("formTarget").value = item.target || "";
-    document.getElementById("formRealisasi").value = item.realisasi || "";
-    document.getElementById("formAnggaran").value = formatDigitsRupiah(String(item.anggaran || ""));
-    document.getElementById("formRealisasiAnggaran").value = formatDigitsRupiah(String(item.realisasi_anggaran || ""));
-
-    var isKeg = (item.tipe === "kegiatan");
-    document.getElementById("groupParentProgram").style.display = isKeg ? "block" : "none";
-    populateParentProgramSelect(item.parent_id);
-
-    modalForm.classList.add("open");
-    document.body.style.overflow = "hidden";
-  }
-
-  function closeFormModal(){
-    modalForm.classList.remove("open");
-    document.body.style.overflow = "";
-  }
-
-  document.getElementById("btnCloseFormModal").addEventListener("click", closeFormModal);
-  document.getElementById("btnResetMasterForm").addEventListener("click", closeFormModal);
-  document.getElementById("btnTambahData").addEventListener("click", openAddMasterModal);
-
-  document.getElementById("btnSaveMasterForm").addEventListener("click", function(){
-    var uraian = document.getElementById("formUraian").value.trim();
-    if (!uraian){
-      showToast("Uraian Program/Kegiatan wajib diisi.", true);
-      document.getElementById("formUraian").focus();
-      return;
-    }
-
-    var btn = this;
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menyimpan...';
-
-    var payload = {
-      id: document.getElementById("formId").value,
-      tahun: selTahun.value,
-      urusan: selUrusan.value,
-      instansi_id: selInstansi.value,
-      tipe: document.getElementById("formTipe").value,
-      parent_id: document.getElementById("formParentId").value,
-      kebijakan: document.getElementById("formKebijakan").value.trim(),
-      uraian: uraian,
-      indikator: document.getElementById("formIndikator").value.trim(),
-      satuan: document.getElementById("formSatuan").value.trim(),
-      target: document.getElementById("formTarget").value,
-      realisasi: document.getElementById("formRealisasi").value,
-      anggaran: document.getElementById("formAnggaran").value,
-      realisasi_anggaran: document.getElementById("formRealisasiAnggaran").value
-    };
-
-    $.ajax({
-      url: BASE_URL + "Instansi/SaveCapaianProgramKegiatan",
-      type: "POST",
-      data: payload,
-      dataType: "json",
-      success: function(resp){
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa fa-save"></i> Simpan Data';
-        if (resp.status === "success"){
-          showToast(resp.message || "Data berhasil disimpan.");
-          closeFormModal();
-          reloadTable();
-        } else {
-          showToast(resp.message || "Gagal menyimpan data.", true);
-        }
-      },
-      error: function(){
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa fa-save"></i> Simpan Data';
-        showToast("Terjadi kesalahan pada server.", true);
-      }
-    });
-  });
-
-  // Modal 3: Delete Flow
-  function openDeleteModal(id){
-    deleteTargetId = id;
-    modalDelete.classList.add("open");
-    document.body.style.overflow = "hidden";
-  }
-
-  function closeDeleteModal(){
-    deleteTargetId = null;
-    modalDelete.classList.remove("open");
-    document.body.style.overflow = "";
-  }
-
-  document.getElementById("btnCancelDelete").addEventListener("click", closeDeleteModal);
-  document.getElementById("btnConfirmDelete").addEventListener("click", function(){
-    if (!deleteTargetId) return;
-
-    var btn = this;
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menghapus...';
-
-    $.ajax({
-      url: BASE_URL + "Instansi/DeleteCapaianProgramKegiatan",
-      type: "POST",
-      data: { id: deleteTargetId },
-      dataType: "json",
-      success: function(resp){
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa fa-trash"></i> Ya, Hapus Data';
-        closeDeleteModal();
-        if (resp.status === "success"){
-          showToast("Data berhasil dihapus.");
-          reloadTable();
-        } else {
-          showToast(resp.message || "Gagal menghapus data.", true);
-        }
-      },
-      error: function(){
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa fa-trash"></i> Ya, Hapus Data';
-        closeDeleteModal();
-        showToast("Terjadi kesalahan jaringan.", true);
       }
     });
   });
@@ -1375,7 +1094,9 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
 
   selTahun.addEventListener("change", reloadTable);
   selUrusan.addEventListener("change", reloadTable);
-  selInstansi.addEventListener("change", reloadTable);
+  if (selInstansi && selInstansi.tagName === "SELECT") {
+    selInstansi.addEventListener("change", reloadTable);
+  }
 
   toggleAnggaran.addEventListener("change", function(){
     tableScrollWrap.classList.toggle("hide-budget", !this.checked);
@@ -1383,9 +1104,7 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
 
   // Window CPK methods for inline onclick
   window.CPK = {
-    openEval: openEvalModal,
-    openEdit: openEditMasterModal,
-    openDelete: openDeleteModal
+    openEval: openEvalModal
   };
 
   // Init

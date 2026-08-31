@@ -286,9 +286,9 @@ body {
   display: none;
   align-items: flex-start;
   justify-content: center;
-  padding: 30px 16px;
+  padding: 85px 16px 40px;
   overflow-y: auto;
-  z-index: 1050;
+  z-index: 999999 !important;
 }
 .modal-overlay.open { display: flex; }
 
@@ -569,20 +569,27 @@ body {
         </select>
       </div>
 
-      <div class="t-field">
-        <label for="selectInstansi">Perangkat Daerah / Instansi</label>
-        <select id="selectInstansi" class="t-select" style="min-width: 260px;">
-          <?php foreach ($ListInstansi as $inst): ?>
-            <option value="<?= $inst['id'] ?>" <?= ((int)$inst['id'] === $filterInstansi) ? 'selected' : '' ?>><?= htmlspecialchars($inst['nama']) ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
+      <?php if (!empty($IsDaerah)): ?>
+        <div class="t-field">
+          <label for="selectInstansi">Perangkat Daerah / Instansi</label>
+          <select id="selectInstansi" class="t-select" style="min-width: 260px;">
+            <option value="0">-- Semua Perangkat Daerah --</option>
+            <?php foreach ($ListInstansi as $inst): ?>
+              <option value="<?= $inst['id'] ?>" <?= ((int)$inst['id'] === (int)$filterInstansi) ? 'selected' : '' ?>><?= htmlspecialchars($inst['nama']) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+      <?php else: ?>
+        <input type="hidden" id="selectInstansi" value="<?= $filterInstansi ?>">
+      <?php endif; ?>
     </div>
 
     <div>
-      <button type="button" class="btn-add-primary" id="btnTambahTP">
-        <i class="fa fa-plus"></i> Tambah Tugas Pembantuan
-      </button>
+      <?php if (!empty($IsRole4)): ?>
+        <button type="button" class="btn-add-primary" id="btnTambahTP">
+          <i class="fa fa-plus"></i> Tambah Tugas Pembantuan
+        </button>
+      <?php endif; ?>
     </div>
   </div>
 
@@ -781,6 +788,7 @@ body {
   "use strict";
 
   var BASE_URL = "<?= base_url() ?>";
+  var IS_ROLE_4 = <?= !empty($IsRole4) ? 'true' : 'false' ?>;
   var itemsData = <?= json_encode($items) ?>;
   var deleteTargetId = null;
 
@@ -920,10 +928,10 @@ body {
         '<td class="cell-multiline">' + (r.permasalahan ? escapeHtml(r.permasalahan) : '-') + '</td>' +
         '<td class="cell-multiline">' + (r.solusi ? escapeHtml(r.solusi) : '-') + '</td>' +
         '<td class="center">' +
-          '<div class="action-btns">' +
+          (IS_ROLE_4 ? ('<div class="action-btns">' +
             '<button type="button" class="btn-icon edit" data-id="' + r.id + '" title="Edit"><i class="fa fa-pencil"></i></button>' +
             '<button type="button" class="btn-icon delete" data-id="' + r.id + '" title="Hapus"><i class="fa fa-trash-o"></i></button>' +
-          '</div>' +
+          '</div>') : '<span style="color:#94a3b8; font-size:12px;">-</span>') +
         '</td>';
       tbody.appendChild(tr);
     });
@@ -1130,7 +1138,10 @@ body {
     });
   }
 
-  document.getElementById("btnTambahTP").addEventListener("click", openAddModal);
+  var btnTambahTP = document.getElementById("btnTambahTP");
+  if (btnTambahTP) {
+    btnTambahTP.addEventListener("click", openAddModal);
+  }
   document.getElementById("btnTPClose").addEventListener("click", closeModal);
   document.getElementById("btnCancelTP").addEventListener("click", closeModal);
   document.getElementById("btnSaveTP").addEventListener("click", saveTP);
@@ -1157,7 +1168,9 @@ body {
   });
 
   selectTahun.addEventListener("change", reloadTable);
-  selectInstansi.addEventListener("change", reloadTable);
+  if (selectInstansi && selectInstansi.tagName === "SELECT") {
+    selectInstansi.addEventListener("change", reloadTable);
+  }
 
   document.addEventListener("keydown", function(e){
     if (e.key === "Escape"){

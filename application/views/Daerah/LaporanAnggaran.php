@@ -11,11 +11,21 @@ $bulanNames = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus
 $currentBulanSampai = isset($BulanSampai) ? (int)$BulanSampai : 7; // Default: Agustus
 $periodeText = "Januari - " . $bulanNames[$currentBulanSampai] . " " . $TahunAktif;
 
+$namaInstansiAktif = 'SEMUA PERANGKAT DAERAH';
+if (!empty($FilterInstansi)) {
+    foreach ($ListInstansi as $inst) {
+        if ($inst['id'] == $FilterInstansi) {
+            $namaInstansiAktif = strtoupper($inst['nama']);
+            break;
+        }
+    }
+}
+
 $totMurni = isset($Summary['total_murni']) ? $Summary['total_murni'] : 0;
 $totPerubahan = isset($Summary['total_perubahan']) ? $Summary['total_perubahan'] : 0;
 $totRealisasi = isset($Summary['total_realisasi']) ? $Summary['total_realisasi'] : 0;
 $totSisa = isset($Summary['total_sisa']) ? $Summary['total_sisa'] : 0;
-$persenCapaian = isset($Summary['persen_capaian']) ? $Summary['persen_capaian'] : 60.36;
+$persenCapaian = isset($Summary['persen_capaian']) ? $Summary['persen_capaian'] : 0;
 ?>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -194,18 +204,18 @@ body {
 /* Filter Controls */
 .filter-row {
   display: grid;
-  grid-template-columns: 140px 1.8fr 200px 1.2fr auto;
+  grid-template-columns: 150px 250px 1.5fr auto;
   gap: 12px;
   align-items: flex-end;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 991px) {
   .filter-row {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   .filter-row {
     grid-template-columns: 1fr;
   }
@@ -477,29 +487,40 @@ table.laporan-table tfoot td {
 /* Modals */
 .modal-overlay {
   position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.55);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.65);
   display: none;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  padding: 30px 16px;
-  z-index: 1300;
+  padding: 24px 16px;
+  z-index: 200000 !important;
   overflow-y: auto;
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(4px);
 }
 
 .modal-overlay.open {
-  display: flex;
+  display: flex !important;
 }
 
 .modal-container {
   background: #ffffff;
   border-radius: 12px;
   max-width: 650px;
+  max-height: calc(100vh - 48px);
   width: 100%;
-  box-shadow: var(--ui-shadow-lg);
+  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.4);
   animation: modalPop 0.18s ease-out;
-  margin-bottom: 40px;
+  margin: auto;
+  position: relative;
+  z-index: 200001;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 @keyframes modalPop {
@@ -605,6 +626,30 @@ table.laporan-table tfoot td {
   box-shadow: 0 0 0 3px rgba(0, 194, 146, 0.15);
 }
 
+.input-group-rp {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+.input-rp-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  background-color: var(--ui-gray-100);
+  border: 1px solid var(--ui-gray-300);
+  border-right: none;
+  border-radius: 6px 0 0 6px;
+  color: var(--ui-gray-600);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.input-group-rp .form-control-modal {
+  border-radius: 0 6px 6px 0 !important;
+}
+
 /* Toast Notifications */
 .notika-toast-box {
   position: fixed;
@@ -675,7 +720,7 @@ table.laporan-table tfoot td {
         Rekapitulasi Realisasi Anggaran
       </div>
       <div class="laporan-header-sub">
-        BADAN PERENCANAAN DAN PEMBANGUNAN DAERAH
+        <?=htmlspecialchars($namaInstansiAktif)?>
       </div>
       <div class="laporan-header-desc">
         <i class="fa fa-calendar-alt"></i> <strong>PERIODE: <?=$periodeText?></strong>
@@ -692,9 +737,11 @@ table.laporan-table tfoot td {
           <button class="btn-notika btn-notika-outline" onclick="window.print()" title="Cetak Laporan">
             <i class="fa fa-print"></i> Cetak / PDF
           </button>
-          <button class="btn-notika btn-notika-outline" onclick="syncWithRenaksi()" title="Sinkronkan dengan Realisasi Renaksi">
-            <i class="fa fa-sync-alt"></i> Sinkron Renaksi
-          </button>
+          <?php if (!empty($IsRole4)): ?>
+            <button class="btn-notika btn-notika-outline" onclick="syncWithRenaksi()" title="Sinkronkan dengan Realisasi Renaksi">
+              <i class="fa fa-sync-alt"></i> Sinkron Renaksi
+            </button>
+          <?php endif; ?>
         </div>
       </div>
       <div class="notika-card-body">
@@ -711,18 +758,20 @@ table.laporan-table tfoot td {
               </select>
             </div>
 
-            <!-- Perangkat Daerah -->
-            <div class="filter-group">
-              <label class="filter-label">Perangkat Daerah</label>
-              <select name="instansi_id" id="filterInstansi" class="filter-select" onchange="this.form.submit()" <?=$IsRole4 ? 'disabled' : ''?>>
-                <?php if (!$IsRole4): ?>
+            <!-- Perangkat Daerah (Khusus Daerah) -->
+            <?php if (!$IsRole4): ?>
+              <div class="filter-group">
+                <label class="filter-label">Perangkat Daerah</label>
+                <select name="instansi_id" id="filterInstansi" class="filter-select" onchange="this.form.submit()">
                   <option value="">-- Semua Perangkat Daerah --</option>
-                <?php endif; ?>
-                <?php foreach ($ListInstansi as $inst): ?>
-                  <option value="<?=$inst['id']?>" <?=$inst['id'] == $FilterInstansi ? 'selected' : ''?>><?=htmlspecialchars($inst['nama'])?></option>
-                <?php endforeach; ?>
-              </select>
-            </div>
+                  <?php foreach ($ListInstansi as $inst): ?>
+                    <option value="<?=$inst['id']?>" <?=$inst['id'] == $FilterInstansi ? 'selected' : ''?>><?=htmlspecialchars($inst['nama'])?></option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
+            <?php else: ?>
+              <input type="hidden" name="instansi_id" value="<?=$FilterInstansi?>">
+            <?php endif; ?>
 
             <!-- Periode Bulan Sampai -->
             <div class="filter-group">
@@ -807,7 +856,6 @@ table.laporan-table tfoot td {
                 <th colspan="3" style="background-color: #f0fdf9; color: #007a5c; border-bottom: 1px solid var(--ui-gray-300);">Anggaran (Rp)</th>
                 <th colspan="1" style="background-color: #eff6ff; color: #1d4ed8; border-bottom: 1px solid var(--ui-gray-300);">Realisasi Anggaran</th>
                 <th colspan="2" style="background-color: #fffbeb; color: #b45309; border-bottom: 1px solid var(--ui-gray-300);">Capaian Akhir</th>
-                <th rowspan="2" style="width: 50px;" class="no-print">Aksi</th>
               </tr>
               <tr>
                 <th style="min-width: 125px;">Murni</th>
@@ -829,8 +877,8 @@ table.laporan-table tfoot td {
                     <td style="font-weight: 500; color: var(--ui-gray-900); padding-left: 10px;">
                       <?=htmlspecialchars($row['nama_sub_kegiatan'])?>
                     </td>
-                    <td class="num-cell"><?=number_format($row['anggaran_murni'], 0, ',', '.')?></td>
-                    <td class="num-cell" style="font-weight: 600;"><?=number_format($row['anggaran_perubahan'], 0, ',', '.')?></td>
+                    <td class="num-cell"><?='Rp ' . number_format($row['anggaran_murni'], 0, ',', '.')?></td>
+                    <td class="num-cell" style="font-weight: 600;"><?='Rp ' . number_format($row['anggaran_perubahan'], 0, ',', '.')?></td>
                     <td class="center-cell">
                       <?php if ($row['perubahan_status'] === '+'): ?>
                         <span class="badge-status badge-plus">+</span>
@@ -839,24 +887,19 @@ table.laporan-table tfoot td {
                       <?php endif; ?>
                     </td>
                     <td class="num-cell" style="color: #1d4ed8; font-weight: 600;">
-                      <?=number_format($row['realisasi_anggaran'], 0, ',', '.')?>
+                      <?='Rp ' . number_format($row['realisasi_anggaran'], 0, ',', '.')?>
                     </td>
                     <td class="num-cell" style="color: #b91c1c; font-weight: 600;">
-                      <?=number_format($row['sisa_anggaran'], 0, ',', '.')?>
+                      <?='Rp ' . number_format($row['sisa_anggaran'], 0, ',', '.')?>
                     </td>
                     <td class="num-cell" style="font-weight: 700;">
-                      <?=number_format($row['persen_capaian'], 2)?>
-                    </td>
-                    <td class="center-cell no-print">
-                      <button class="btn-action-edit" onclick="openEditModal(<?=htmlspecialchars(json_encode($row))?>)" title="Edit Nilai">
-                        <i class="fa fa-pen"></i>
-                      </button>
+                      <?=number_format($row['persen_capaian'], 2)?>%
                     </td>
                   </tr>
                 <?php endforeach; ?>
               <?php else: ?>
                 <tr>
-                  <td colspan="10" class="center-cell" style="padding: 40px; color: var(--ui-gray-400);">
+                  <td colspan="9" class="center-cell" style="padding: 40px; color: var(--ui-gray-400);">
                     <i class="fa fa-folder-open fa-3x" style="margin-bottom: 10px;"></i><br>
                     Belum ada data Rekapitulasi Realisasi Anggaran.
                   </td>
@@ -866,21 +909,20 @@ table.laporan-table tfoot td {
             <tfoot>
               <tr>
                 <td colspan="3" style="text-align: right; padding-right: 14px; font-size: 13px;">JUMLAH TOTAL</td>
-                <td class="num-cell" style="font-size: 12.5px;"><?=number_format($totMurni, 0, ',', '.')?></td>
-                <td class="num-cell" style="font-size: 12.5px;"><?=number_format($totPerubahan, 0, ',', '.')?></td>
+                <td class="num-cell" style="font-size: 12.5px;"><?='Rp ' . number_format($totMurni, 0, ',', '.')?></td>
+                <td class="num-cell" style="font-size: 12.5px;"><?='Rp ' . number_format($totPerubahan, 0, ',', '.')?></td>
                 <td class="center-cell">
                   <span class="badge-status badge-plus">+</span>
                 </td>
                 <td class="num-cell" style="font-size: 12.5px; color: #1d4ed8;">
-                  <?=number_format($totRealisasi, 0, ',', '.')?>
+                  <?='Rp ' . number_format($totRealisasi, 0, ',', '.')?>
                 </td>
                 <td class="num-cell" style="font-size: 12.5px; color: #b91c1c;">
-                  <?=number_format($totSisa, 0, ',', '.')?>
+                  <?='Rp ' . number_format($totSisa, 0, ',', '.')?>
                 </td>
                 <td class="num-cell" style="font-size: 12.5px;">
                   <?=number_format($persenCapaian, 2)?>%
                 </td>
-                <td class="no-print"></td>
               </tr>
             </tfoot>
           </table>
@@ -888,73 +930,6 @@ table.laporan-table tfoot td {
       </div>
     </div>
 
-  </div>
-</div>
-
-<!-- Modal Edit Item Row -->
-<div class="modal-overlay" id="editModalOverlay">
-  <div class="modal-container">
-    <div class="modal-header-notika">
-      <div class="modal-header-icon"><i class="fa fa-edit"></i></div>
-      <div class="modal-header-text">
-        <h3>Edit Data Sub Kegiatan</h3>
-        <p id="modalSubTitle">Sesuaikan nominal Anggaran Murni, Perubahan, atau Realisasi.</p>
-      </div>
-      <button class="modal-close-btn" onclick="closeEditModal()"><i class="fa fa-times"></i></button>
-    </div>
-    <form id="editItemForm" onsubmit="saveItemChanges(event)">
-      <input type="hidden" id="editItemId" name="id">
-      <div class="modal-body-notika">
-        
-        <div class="form-group-modal">
-          <label>Kode Rekening</label>
-          <input type="text" id="editKodeRek" class="form-control-modal num-font" readonly style="background: #f8fafc;">
-        </div>
-
-        <div class="form-group-modal">
-          <label>Nama Sub Kegiatan</label>
-          <input type="text" id="editNamaSub" class="form-control-modal" readonly style="background: #f8fafc;">
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-          <div class="form-group-modal">
-            <label>Anggaran Murni (Rp)</label>
-            <input type="number" step="any" id="editMurni" name="anggaran_murni" class="form-control-modal num-font" required oninput="calcModalLive()">
-          </div>
-
-          <div class="form-group-modal">
-            <label>Anggaran Perubahan (Rp)</label>
-            <input type="number" step="any" id="editPerubahan" name="anggaran_perubahan" class="form-control-modal num-font" required oninput="calcModalLive()">
-          </div>
-        </div>
-
-        <div class="form-group-modal">
-          <label>Realisasi Anggaran (Rp)</label>
-          <input type="number" step="any" id="editRealisasi" name="realisasi_anggaran" class="form-control-modal num-font" required oninput="calcModalLive()">
-        </div>
-
-        <!-- Live Calculation Preview -->
-        <div style="background: #f0fdf9; border: 1px solid #b2dfdb; border-radius: 8px; padding: 12px; font-size: 12.5px;">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-            <span style="color: var(--ui-gray-600);">Status Perubahan (+/-):</span>
-            <strong id="previewStatus" style="font-weight: 800; color: #007a5c;">+</strong>
-          </div>
-          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-            <span style="color: var(--ui-gray-600);">Sisa Anggaran:</span>
-            <strong id="previewSisa" class="num-font" style="color: #b91c1c;">Rp 0</strong>
-          </div>
-          <div style="display: flex; justify-content: space-between;">
-            <span style="color: var(--ui-gray-600);">Persentase Capaian (%):</span>
-            <strong id="previewPersen" class="num-font" style="color: var(--ui-gray-900);">0.00%</strong>
-          </div>
-        </div>
-
-      </div>
-      <div class="modal-footer-notika">
-        <button type="button" class="btn-notika btn-notika-ghost" onclick="closeEditModal()">Batal</button>
-        <button type="submit" class="btn-notika btn-notika-primary"><i class="fa fa-save"></i> Simpan Perubahan</button>
-      </div>
-    </form>
   </div>
 </div>
 
@@ -980,70 +955,6 @@ function showToast(message, isError = false) {
     toast.style.transition = 'opacity 0.3s';
     setTimeout(() => toast.remove(), 300);
   }, 3500);
-}
-
-/* Modal Functions */
-function openEditModal(row) {
-  document.getElementById('editItemId').value = row.id;
-  document.getElementById('editKodeRek').value = row.kode_rekening;
-  document.getElementById('editNamaSub').value = row.nama_sub_kegiatan;
-  document.getElementById('editMurni').value = row.anggaran_murni;
-  document.getElementById('editPerubahan').value = row.anggaran_perubahan;
-  document.getElementById('editRealisasi').value = row.realisasi_anggaran;
-  
-  calcModalLive();
-  document.getElementById('editModalOverlay').classList.add('open');
-}
-
-function closeEditModal() {
-  document.getElementById('editModalOverlay').classList.remove('open');
-}
-
-function calcModalLive() {
-  const murni = parseFloat(document.getElementById('editMurni').value) || 0;
-  const perubahan = parseFloat(document.getElementById('editPerubahan').value) || 0;
-  const realisasi = parseFloat(document.getElementById('editRealisasi').value) || 0;
-
-  const sisa = perubahan - realisasi;
-  const persen = perubahan > 0 ? (realisasi / perubahan) * 100 : 0;
-  const status = (perubahan >= murni) ? '+' : '-';
-
-  document.getElementById('previewStatus').textContent = status;
-  document.getElementById('previewStatus').style.color = (status === '+') ? '#15803d' : '#b91c1c';
-  document.getElementById('previewSisa').textContent = 'Rp ' + Math.round(sisa).toLocaleString('id-ID');
-  document.getElementById('previewPersen').textContent = persen.toFixed(2) + '%';
-}
-
-function saveItemChanges(e) {
-  e.preventDefault();
-  const id = document.getElementById('editItemId').value;
-  const murni = document.getElementById('editMurni').value;
-  const perubahan = document.getElementById('editPerubahan').value;
-  const realisasi = document.getElementById('editRealisasi').value;
-
-  $.ajax({
-    url: BASE_URL + 'Instansi/SaveLaporanAnggaranItem',
-    type: 'POST',
-    data: {
-      id: id,
-      anggaran_murni: murni,
-      anggaran_perubahan: perubahan,
-      realisasi_anggaran: realisasi
-    },
-    dataType: 'json',
-    success: function(resp) {
-      if (resp.status === 'success') {
-        showToast(resp.message);
-        closeEditModal();
-        setTimeout(() => location.reload(), 600);
-      } else {
-        showToast(resp.message || 'Gagal menyimpan perubahan', true);
-      }
-    },
-    error: function() {
-      showToast('Terjadi kesalahan koneksi server.', true);
-    }
-  });
 }
 
 function syncWithRenaksi() {
@@ -1082,13 +993,5 @@ document.getElementById('laporanSearch').addEventListener('input', function(e) {
     const text = tr.textContent.toLowerCase();
     tr.style.display = (query === '' || text.includes(query)) ? '' : 'none';
   });
-});
-
-/* Close on click outside modal */
-document.getElementById('editModalOverlay').addEventListener('click', function(e) {
-  if (e.target.id === 'editModalOverlay') closeEditModal();
-});
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeEditModal();
 });
 </script>

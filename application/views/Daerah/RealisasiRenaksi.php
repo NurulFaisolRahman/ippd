@@ -483,29 +483,40 @@ tr.row-sub:hover td {
 /* Modals */
 .modal-overlay {
   position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.55);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.7);
   display: none;
   align-items: flex-start;
   justify-content: center;
-  padding: 30px 16px;
-  z-index: 1300;
+  padding: 85px 16px 40px;
+  z-index: 999999 !important;
   overflow-y: auto;
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(4px);
 }
 
 .modal-overlay.open {
-  display: flex;
+  display: flex !important;
 }
 
 .modal-container {
   background: #ffffff;
   border-radius: 12px;
   max-width: 1080px;
+  max-height: calc(100vh - 48px);
   width: 100%;
-  box-shadow: var(--ui-shadow-lg);
-  animation: modalPop 0.18s ease-out;
-  margin-bottom: 40px;
+  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.4);
+  animation: modalPop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  z-index: 200001;
 }
 
 @keyframes modalPop {
@@ -514,6 +525,7 @@ tr.row-sub:hover td {
 }
 
 .modal-header-notika {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -567,12 +579,14 @@ tr.row-sub:hover td {
 }
 
 .modal-body-notika {
+  flex: 1 1 auto;
   padding: 20px 24px;
-  max-height: 70vh;
+  max-height: calc(100vh - 180px);
   overflow-y: auto;
 }
 
 .modal-footer-notika {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -776,17 +790,19 @@ table.modal-edit-table input.input-real:focus {
             </div>
 
             <!-- Perangkat Daerah -->
-            <div class="filter-group">
-              <label class="filter-label">Perangkat Daerah</label>
-              <select name="instansi_id" id="filterInstansi" class="filter-select" onchange="this.form.submit()" <?=$IsRole4 ? 'disabled' : ''?>>
-                <?php if (!$IsRole4): ?>
+            <?php if (!$IsRole4): ?>
+              <div class="filter-group">
+                <label class="filter-label">Perangkat Daerah</label>
+                <select name="instansi_id" id="filterInstansi" class="filter-select" onchange="this.form.submit()">
                   <option value="">-- Semua Perangkat Daerah --</option>
-                <?php endif; ?>
-                <?php foreach ($ListInstansi as $inst): ?>
-                  <option value="<?=$inst['id']?>" <?=$inst['id'] == $FilterInstansi ? 'selected' : ''?>><?=htmlspecialchars($inst['nama'])?></option>
-                <?php endforeach; ?>
-              </select>
-            </div>
+                  <?php foreach ($ListInstansi as $inst): ?>
+                    <option value="<?=$inst['id']?>" <?=$inst['id'] == $FilterInstansi ? 'selected' : ''?>><?=htmlspecialchars($inst['nama'])?></option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
+            <?php else: ?>
+              <input type="hidden" name="instansi_id" value="<?=$FilterInstansi?>">
+            <?php endif; ?>
 
             <!-- Bulan Pelaporan -->
             <div class="filter-group">
@@ -949,6 +965,7 @@ table.modal-edit-table input.input-real:focus {
 <script>
 "use strict";
 
+const IS_ROLE_4 = <?=!empty($IsRole4) ? 'true' : 'false'?>;
 const BULAN_NAMES = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 const CURRENT_BULAN_IDX = <?=json_encode($currentBulanIdx)?>;
 const CURRENT_TAHUN = <?=json_encode($TahunAktif)?>;
@@ -966,13 +983,17 @@ function esc(str) {
 }
 
 function fmtRp(num) {
-  if (num === null || num === undefined || isNaN(num)) return '-';
-  return 'Rp ' + Math.round(num).toLocaleString('id-ID');
+  if (num === null || num === undefined || num === '') return '-';
+  const n = typeof num === 'string' ? parseNum(num) : Number(num);
+  if (n === null || isNaN(n)) return '-';
+  return 'Rp ' + Math.round(n).toLocaleString('id-ID');
 }
 
 function fmtNum(num) {
-  if (num === null || num === undefined || isNaN(num)) return '-';
-  return Number(num).toLocaleString('id-ID', { maximumFractionDigits: 2 });
+  if (num === null || num === undefined || num === '') return '-';
+  const n = typeof num === 'string' ? parseNum(num) : Number(num);
+  if (n === null || isNaN(n)) return '-';
+  return Number(n).toLocaleString('id-ID', { maximumFractionDigits: 2 });
 }
 
 function fmtPct(num) {
@@ -982,10 +1003,26 @@ function fmtPct(num) {
 
 function parseNum(val) {
   if (val === undefined || val === null) return null;
-  const s = String(val).replace(/[^0-9.-]+/g, '').trim();
+  let s = String(val).trim();
   if (s === '') return null;
-  const n = parseFloat(s);
-  return isNaN(n) ? null : n;
+  if (s.indexOf('.') !== -1 && s.indexOf(',') !== -1) {
+    s = s.replace(/\./g, '').replace(',', '.');
+  } else if (s.indexOf('.') !== -1 && s.indexOf(',') === -1) {
+    const dotCount = (s.match(/\./g) || []).length;
+    if (dotCount > 1) {
+      s = s.replace(/\./g, '');
+    } else {
+      const parts = s.split('.');
+      if (parts[1] && parts[1].length === 3 && Number(parts[0]) > 0) {
+        s = s.replace(/\./g, '');
+      }
+    }
+  } else if (s.indexOf(',') !== -1) {
+    s = s.replace(',', '.');
+  }
+  s = s.replace(/[^0-9.-]+/g, '').trim();
+  if (s === '' || isNaN(Number(s))) return null;
+  return parseFloat(s);
 }
 
 function getPredikatObj(pct) {
@@ -1011,15 +1048,37 @@ function showToast(message, isError = false) {
 }
 
 /* Aggregation Functions */
-function getSubTargetTotal(sub) {
-  return sub.targetAnggaran || (sub.bulanan || []).reduce((a, b) => a + (b.target || 0), 0);
+// Target alokasi bulan murni untuk baris Sub Kegiatan (tidak ditambah antar bulan)
+function getSubTargetBulan(sub, bulanIdx) {
+  if (sub.bulanan && sub.bulanan[bulanIdx] && sub.bulanan[bulanIdx].target !== null && sub.bulanan[bulanIdx].target !== undefined) {
+    return Number(sub.bulanan[bulanIdx].target);
+  }
+  return sub.targetAnggaran ? Number(sub.targetAnggaran) : 0;
+}
+
+// Target kumulatif s.d. bulan aktif untuk agregasi Kegiatan & Program (bertambah/terakumulasi)
+function getSubTargetKumulatif(sub, bulanIdx) {
+  let sum = 0;
+  if (sub.bulanan && sub.bulanan.length) {
+    for (let i = 0; i <= bulanIdx; i++) {
+      if (sub.bulanan[i] && sub.bulanan[i].target !== null && sub.bulanan[i].target !== undefined) {
+        sum += Number(sub.bulanan[i].target);
+      }
+    }
+    return sum;
+  }
+  return sub.targetAnggaran ? (Number(sub.targetAnggaran) * (bulanIdx + 1) / 12) : 0;
+}
+
+function getSubTargetSampai(sub, bulanIdx) {
+  return getSubTargetBulan(sub, bulanIdx);
 }
 
 function getSubRealisasiSampai(sub, bulanIdx) {
   let any = false, sum = 0;
   if (!sub.bulanan) return null;
   for (let i = 0; i <= bulanIdx; i++) {
-    if (sub.bulanan[i] && sub.bulanan[i].realisasi !== null && sub.bulanan[i].realisasi !== undefined) {
+    if (sub.bulanan[i] && sub.bulanan[i].realisasi !== null && sub.bulanan[i].realisasi !== undefined && sub.bulanan[i].realisasi !== '') {
       any = true;
       sum += Number(sub.bulanan[i].realisasi);
     }
@@ -1028,7 +1087,7 @@ function getSubRealisasiSampai(sub, bulanIdx) {
 }
 
 function getKegiatanTargetTotal(keg) {
-  return (keg.subKegiatan || []).reduce((a, s) => a + getSubTargetTotal(s), 0);
+  return (keg.subKegiatan || []).reduce((a, s) => a + getSubTargetKumulatif(s, CURRENT_BULAN_IDX), 0);
 }
 
 function getKegiatanRealisasiSampai(keg, bulanIdx) {
@@ -1134,13 +1193,13 @@ function renderMainTable() {
 
     // Row Program
     html += `<tr class="row-program">`;
-    html += `<td class="cell-name"><i class="fa fa-folder" style="margin-right: 6px;"></i> [${esc(prog.kode)}] ${esc(prog.nama)}</td>`;
+    html += `<td class="cell-name"><i class="fa fa-folder" style="margin-right: 6px; color:#3b82f6;"></i> <span style="font-weight:700;">[${esc(prog.kode)}] ${esc(prog.nomenklatur || prog.nama)}</span></td>`;
     html += renderMetricCols(pTarget, pReal, true, 1);
     html += renderMetricCols(pKinTarget, pKinReal, false, 1);
     html += `<td class="center-cell">
-      <button class="btn-action-edit" onclick="openProgramModal(${pIdx})" title="Edit Realisasi Program">
+      ${IS_ROLE_4 ? `<button class="btn-action-edit" onclick="openProgramModal(${pIdx})" title="Edit Realisasi Program">
         <i class="fa fa-pen"></i>
-      </button>
+      </button>` : `<span style="color:#94a3b8; font-size:12px;">-</span>`}
     </td>`;
     html += `</tr>`;
 
@@ -1154,18 +1213,18 @@ function renderMainTable() {
 
       // Row Kegiatan
       html += `<tr class="row-kegiatan">`;
-      html += `<td class="cell-name"><i class="fa fa-layer-group" style="margin-right: 6px; color: var(--ui-gray-400);"></i> [${esc(keg.kode)}] ${esc(keg.nama)}</td>`;
+      html += `<td class="cell-name" style="padding-left: 22px;"><i class="fa fa-layer-group" style="margin-right: 6px; color: #06b6d4;"></i> <span style="font-weight:700;">[${esc(keg.kode)}] ${esc(keg.nomenklatur || keg.nama)}</span></td>`;
       html += renderMetricCols(kTarget, kReal, true, 1);
       html += renderMetricCols(kKinTarget, kKinReal, false, 1);
       html += `<td class="center-cell">
-        <button class="btn-action-edit" onclick="openKegiatanModal(${pIdx}, ${kIdx})" title="Edit Realisasi Kegiatan">
+        ${IS_ROLE_4 ? `<button class="btn-action-edit" onclick="openKegiatanModal(${pIdx}, ${kIdx})" title="Edit Realisasi Kegiatan">
           <i class="fa fa-pen"></i>
-        </button>
+        </button>` : `<span style="color:#94a3b8; font-size:12px;">-</span>`}
       </td>`;
       html += `</tr>`;
 
       (keg.subKegiatan || []).forEach((sub, sIdx) => {
-        const subTarget = getSubTargetTotal(sub);
+        const subTarget = getSubTargetSampai(sub, CURRENT_BULAN_IDX);
         const subReal = getSubRealisasiSampai(sub, CURRENT_BULAN_IDX);
         const indikatorList = (sub.indikator && sub.indikator.length) ? sub.indikator : [null];
         const rowspan = indikatorList.length;
@@ -1173,9 +1232,9 @@ function renderMainTable() {
         indikatorList.forEach((indik, iIdx) => {
           html += `<tr class="row-sub">`;
           if (iIdx === 0) {
-            html += `<td class="cell-name"${rowspan > 1 ? ` rowspan="${rowspan}"` : ''}>
+            html += `<td class="cell-name" style="padding-left: 36px;"${rowspan > 1 ? ` rowspan="${rowspan}"` : ''}>
               <i class="fa fa-check-circle" style="margin-right: 6px; color: var(--ui-primary);"></i>
-              [${esc(sub.kode)}] ${esc(sub.nama)}
+              <span style="font-weight:600;">[${esc(sub.kode)}] ${esc(sub.nomenklatur || sub.nama)}</span>
             </td>`;
             html += renderMetricCols(subTarget, subReal, true, rowspan);
           }
@@ -1190,9 +1249,9 @@ function renderMainTable() {
 
           if (iIdx === 0) {
             html += `<td class="center-cell"${rowspan > 1 ? ` rowspan="${rowspan}"` : ''}>
-              <button class="btn-action-edit" onclick="openSubKegiatanModal(${pIdx}, ${kIdx}, ${sIdx})" title="Edit Realisasi Sub Kegiatan">
+              ${IS_ROLE_4 ? `<button class="btn-action-edit" onclick="openSubKegiatanModal(${pIdx}, ${kIdx}, ${sIdx})" title="Edit Realisasi Sub Kegiatan">
                 <i class="fa fa-pen"></i>
-              </button>
+              </button>` : `<span style="color:#94a3b8; font-size:12px;">-</span>`}
             </td>`;
           }
           html += `</tr>`;
@@ -1541,23 +1600,24 @@ function renderSubKegiatanModalContent(data) {
   const sub = keg.subKegiatan[ce.sIdx];
   const h = data.header || sub;
 
-  // Realisasi Anggaran Bulanan (tampilkan s.d. bulan pelaporan aktif)
-  let bulananHtml = '';
-  for (let m = 0; m <= CURRENT_BULAN_IDX; m++) {
-    const b = data.bulanan[m];
-    const tVal = b.target || 0;
-    const rVal = (b.realisasi !== null && b.realisasi !== undefined) ? b.realisasi : '';
-    bulananHtml += `
-      <tr>
-        <td style="text-align: left; font-weight: 600; padding-left: 14px;">${b.bulanNama}</td>
-        <td class="readonly-val">${fmtRp(tVal)}</td>
-        <td style="padding: 4px;">
-          <input type="number" step="any" class="input-real input-bln-real" data-m="${m}" value="${rVal}">
-        </td>
-        <td class="readonly-val num-font" id="sub-saldo-akumulasi-${m}" style="color: var(--ui-primary-dark);">-</td>
-      </tr>
-    `;
-  }
+  // Realisasi Anggaran Bulan Terpilih (dari Target Renaksi)
+  const m = CURRENT_BULAN_IDX;
+  const b = data.bulanan && data.bulanan[m] ? data.bulanan[m] : { bulanNama: BULAN_NAMES[m], target: 0, realisasi: null };
+  const tVal = b.target || 0;
+  const rVal = (b.realisasi !== null && b.realisasi !== undefined) ? b.realisasi : '';
+  
+  let bulananHtml = `
+    <tr>
+      <td style="text-align: left; font-weight: 600; padding-left: 14px;">
+        ${b.bulanNama} <span style="font-size:10px; background:#10b981; color:#fff; padding:1px 5px; border-radius:3px; margin-left:4px;">Bulan Dipilih</span>
+      </td>
+      <td class="readonly-val font-mono" style="font-weight:700; color:#0f766e; text-align:right; padding-right:12px;">${fmtRp(tVal)}</td>
+      <td style="padding: 4px;">
+        <input type="number" step="any" class="input-real input-bln-real font-mono" data-m="${m}" value="${rVal}" placeholder="0" style="text-align:right; font-weight:600;">
+      </td>
+      <td class="readonly-val font-mono" id="sub-persen-bln" style="color: var(--ui-primary-dark); font-weight: 700; text-align:right; padding-right:12px;">-</td>
+    </tr>
+  `;
 
   // Realisasi Kinerja Output Sub Kegiatan
   let indikatorHtml = '';
@@ -1578,7 +1638,7 @@ function renderSubKegiatanModalContent(data) {
       <div class="modal-header-icon"><i class="fa fa-file-invoice-dollar"></i></div>
       <div class="modal-header-text">
         <h3>REALISASI KINERJA &amp; ANGGARAN SUB KEGIATAN</h3>
-        <p>Input realisasi anggaran bulanan serta capaian output sub kegiatan per triwulan.</p>
+        <p>Input realisasi anggaran bulan ${esc(BULAN_NAMES[m])} serta capaian output sub kegiatan per triwulan.</p>
       </div>
       <button class="modal-close-btn" onclick="closeModal()"><i class="fa fa-times"></i></button>
     </div>
@@ -1598,24 +1658,24 @@ function renderSubKegiatanModalContent(data) {
         </div>
       </div>
 
-      <!-- Realisasi Anggaran Bulanan -->
+      <!-- Realisasi Anggaran Bulan Terpilih -->
       <div class="info-section-card">
-        <div class="info-section-title"><i class="fa fa-calendar-alt"></i> Realisasi Anggaran Bulanan (s.d. ${BULAN_NAMES[CURRENT_BULAN_IDX]})</div>
+        <div class="info-section-title"><i class="fa fa-calendar-alt"></i> Target &amp; Realisasi Anggaran Bulan ${esc(BULAN_NAMES[m])}</div>
         <table class="modal-edit-table">
           <thead>
             <tr>
-              <th style="text-align: left; padding-left: 14px; width: 140px;">Bulan</th>
-              <th>Target Anggaran (Rp)</th>
-              <th>Realisasi (Rp)</th>
-              <th>Saldo Akumulasi (Rp)</th>
+              <th style="text-align: left; padding-left: 14px; width: 150px;">Bulan</th>
+              <th style="text-align: right; padding-right: 12px; width: 170px;">Target Anggaran (Rp)</th>
+              <th style="width: 180px;">Realisasi Anggaran (Rp)</th>
+              <th style="text-align: right; padding-right: 12px; width: 130px;">% Capaian</th>
             </tr>
           </thead>
           <tbody>
             ${bulananHtml}
           </tbody>
         </table>
-        <div style="font-size: 11px; color: var(--ui-gray-500); margin-top: 6px;">
-          *Menampilkan alokasi s.d. bulan pelaporan aktif. Target Anggaran bersumber dari Target Renaksi / RAK DPA.
+        <div style="font-size: 11.5px; color: var(--ui-gray-500); margin-top: 6px;">
+          *Target Anggaran Bulan ${esc(BULAN_NAMES[m])} bersumber langsung dari penetapan Target Realisasi Anggaran Bulanan Sub Kegiatan pada menu Target Renaksi.
         </div>
       </div>
 
@@ -1663,18 +1723,21 @@ function renderSubKegiatanModalContent(data) {
   `;
 
   showModal(html);
-  attachMonthlySaldoListeners();
+  attachMonthlySaldoListeners(tVal);
 }
 
-function attachMonthlySaldoListeners() {
+function attachMonthlySaldoListeners(targetBulan) {
   function recalcSaldo() {
-    let running = 0;
-    for (let i = 0; i <= CURRENT_BULAN_IDX; i++) {
-      const inp = document.querySelector(`.input-bln-real[data-m="${i}"]`);
-      const val = inp ? parseNum(inp.value) : null;
-      if (val !== null) running += val;
-      const cell = document.getElementById(`sub-saldo-akumulasi-${i}`);
-      if (cell) cell.textContent = fmtRp(running);
+    const m = CURRENT_BULAN_IDX;
+    const inp = document.querySelector(`.input-bln-real[data-m="${m}"]`);
+    const rVal = inp ? parseNum(inp.value) : null;
+    const pctCell = document.getElementById('sub-persen-bln');
+    if (pctCell) {
+      if (targetBulan > 0 && rVal !== null) {
+        pctCell.textContent = ((rVal / targetBulan) * 100).toFixed(2) + '%';
+      } else {
+        pctCell.textContent = '-';
+      }
     }
   }
 

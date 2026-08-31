@@ -73,11 +73,13 @@ class Instansi extends CI_Controller {
      * Mendapatkan kode wilayah dari session
      */
     private function get_kode_wilayah() {
-        if (isset($_SESSION['KodeWilayah']) && !empty($_SESSION['KodeWilayah'])) {
-            return $_SESSION['KodeWilayah'];
+        $kw = $this->session->userdata('KodeWilayah') ?: (isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : null);
+        if (!empty($kw)) {
+            return $kw;
         }
-        if (isset($_SESSION['TempKodeWilayah']) && !empty($_SESSION['TempKodeWilayah'])) {
-            return $_SESSION['TempKodeWilayah'];
+        $tempKw = $this->session->userdata('TempKodeWilayah') ?: (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : null);
+        if (!empty($tempKw)) {
+            return $tempKw;
         }
         return null;
     }
@@ -16822,6 +16824,7 @@ public function updateStatusPerjanjianKinerja() {
         $Data['KodeWilayah'] = $KodeWilayah;
         $Data['NamaWilayah'] = '';
         $Data['IsRole4'] = $is_role_4;
+        $Data['IsDaerah'] = !$is_role_4;
         $Data['InstansiId'] = $instansi_id;
         $Data['ControllerName'] = 'Instansi';
         
@@ -18308,6 +18311,7 @@ public function updateStatusPerjanjianKinerja() {
         $Data['KodeWilayah'] = $KodeWilayah;
         $Data['NamaWilayah'] = '';
         $Data['IsRole4'] = $is_role_4;
+        $Data['IsDaerah'] = !$is_role_4;
         $Data['InstansiId'] = $instansi_id;
         $Data['ControllerName'] = 'Instansi';
         
@@ -18450,6 +18454,32 @@ public function updateStatusPerjanjianKinerja() {
             }
             $id_instansi = $headerRow ? (int)$headerRow['id_instansi'] : (int)$this->get_instansi_id();
 
+            $normalizeCode = function($code) {
+                if (empty($code)) return '';
+                $parts = explode('.', trim((string)$code));
+                $clean = [];
+                foreach ($parts as $p) {
+                    $pTrim = trim($p);
+                    if (is_numeric($pTrim)) {
+                        $clean[] = (string)(int)$pTrim;
+                    } else {
+                        $clean[] = strtolower($pTrim);
+                    }
+                }
+                return implode('.', $clean);
+            };
+
+            // Ambil semua data RAK yang ada untuk sub kegiatan dan tahun ini
+            $this->db->select('*')
+                ->from('dpa_rak_rincian')
+                ->where('tahun', $tahun)
+                ->where('deleted_at IS NULL');
+            if (!empty($KodeWilayah)) {
+                $this->db->where('kode_wilayah', $KodeWilayah);
+            }
+            $existingRows = $this->db->get()->result_array();
+            $normSubKode = $normalizeCode($kode_sub_kegiatan);
+
             if (!empty($rincian_list) && is_array($rincian_list)) {
                 foreach ($rincian_list as $item) {
                     $kode_rek = isset($item['kode']) ? trim($item['kode']) : '';
@@ -18468,15 +18498,21 @@ public function updateStatusPerjanjianKinerja() {
                     $total_rak = array_sum($mVal);
                     $selisih = $alokasi - $total_rak;
 
-                    // Cek apakah sudah ada record di dpa_rak_rincian
-                    $this->db->where('kode_sub_kegiatan', $kode_sub_kegiatan)
-                             ->where('tahun', $tahun);
-                    if ($rincian_id > 0) {
-                        $this->db->where('rincian_id', $rincian_id);
-                    } else if (!empty($kode_rek)) {
-                        $this->db->where('kode_rekening', $kode_rek);
+                    // Cari record yang cocok di database
+                    $matchedIds = [];
+                    foreach ($existingRows as $er) {
+                        $match = false;
+                        if ($rincian_id > 0 && !empty($er['rincian_id']) && (int)$er['rincian_id'] === $rincian_id) {
+                            $match = true;
+                        } else if ($normalizeCode($er['kode_sub_kegiatan']) === $normSubKode && trim($er['kode_rekening']) === $kode_rek) {
+                            if (empty($uraian) || empty($er['uraian']) || trim($er['uraian']) === $uraian) {
+                                $match = true;
+                            }
+                        }
+                        if ($match) {
+                            $matchedIds[] = (int)$er['id'];
+                        }
                     }
-                    $existing = $this->db->where('deleted_at IS NULL')->get('dpa_rak_rincian')->row_array();
 
                     $data_rak = [
                         'header_id' => $header_id > 0 ? $header_id : null,
@@ -18507,8 +18543,15 @@ public function updateStatusPerjanjianKinerja() {
                         'updated_at' => date('Y-m-d H:i:s')
                     ];
 
-                    if ($existing) {
-                        $this->db->where('id', $existing['id'])->update('dpa_rak_rincian', $data_rak);
+                    if (!empty($matchedIds)) {
+                        $primaryId = $matchedIds[0];
+                        $this->db->where('id', $primaryId)->update('dpa_rak_rincian', $data_rak);
+
+                        // Hapus duplikasi jika ada lebih dari 1 baris
+                        if (count($matchedIds) > 1) {
+                            $dupIds = array_slice($matchedIds, 1);
+                            $this->db->where_in('id', $dupIds)->update('dpa_rak_rincian', ['deleted_at' => date('Y-m-d H:i:s')]);
+                        }
                     } else {
                         $data_rak['rincian_id'] = $rincian_id;
                         $data_rak['created_at'] = date('Y-m-d H:i:s');
@@ -18888,6 +18931,7 @@ public function updateStatusPerjanjianKinerja() {
         $Data['KodeWilayah'] = $KodeWilayah;
         $Data['NamaWilayah'] = '';
         $Data['IsRole4'] = $is_role_4;
+        $Data['IsDaerah'] = !$is_role_4;
         $Data['InstansiId'] = $instansi_id;
         $Data['ControllerName'] = 'Instansi';
         
@@ -18900,10 +18944,19 @@ public function updateStatusPerjanjianKinerja() {
         // List Instansi
         $Data['ListInstansi'] = [];
         if (!empty($KodeWilayah)) {
+            $provKode = substr($KodeWilayah, 0, 2);
             $Data['ListInstansi'] = $this->db
                 ->select('id, nama')
                 ->from('akun_instansi')
-                ->where('kodewilayah', $KodeWilayah)
+                ->where("(kodewilayah = " . $this->db->escape($KodeWilayah) . " OR kodewilayah = " . $this->db->escape($provKode) . ")")
+                ->where('deleted_at IS NULL')
+                ->order_by('nama', 'ASC')
+                ->get()
+                ->result_array();
+        } else {
+            $Data['ListInstansi'] = $this->db
+                ->select('id, nama')
+                ->from('akun_instansi')
                 ->where('deleted_at IS NULL')
                 ->order_by('nama', 'ASC')
                 ->get()
@@ -19451,7 +19504,79 @@ public function updateStatusPerjanjianKinerja() {
             }
             $this->db->update('target_renaksi_anggaran_bulanan', ['deleted_at' => $now]);
 
+            $normalizeCode = function($code) {
+                if (empty($code)) return '';
+                $parts = explode('.', trim((string)$code));
+                $clean = [];
+                foreach ($parts as $p) {
+                    $pTrim = trim($p);
+                    if (is_numeric($pTrim)) {
+                        $clean[] = (string)(int)$pTrim;
+                    } else {
+                        $clean[] = strtolower($pTrim);
+                    }
+                }
+                return implode('.', $clean);
+            };
+
             // 2. Tarik data RAK dari DPA
+            $this->db->select('*')->from('dpa_rak_rincian')->where('deleted_at IS NULL')->where('tahun', $tahun);
+            if (!empty($instansi_id)) {
+                $this->db->group_start()
+                    ->where('id_instansi', (int)$instansi_id)
+                    ->or_where('id_instansi IS NULL')
+                    ->or_where('id_instansi', 0)
+                ->group_end();
+            }
+            if (!empty($kode_wilayah)) {
+                $this->db->where('kode_wilayah', $kode_wilayah);
+            }
+            $allRakRows = $this->db->order_by('id', 'ASC')->get()->result_array();
+
+            $uniqueRakRows = [];
+            foreach ($allRakRows as $r) {
+                $rKey = '';
+                if (!empty($r['rincian_id'])) {
+                    $rKey = 'r_' . $r['rincian_id'];
+                } else {
+                    $rKey = 'k_' . $normalizeCode($r['kode_sub_kegiatan']) . '_' . trim($r['kode_rekening'] ?? '') . '_' . trim($r['uraian'] ?? '');
+                }
+                $uniqueRakRows[$rKey] = $r;
+            }
+
+            $rakByNormCode = [];
+            foreach ($uniqueRakRows as $r) {
+                $rSk = trim($r['kode_sub_kegiatan'] ?? '');
+                $rNorm = $normalizeCode($rSk);
+                if (empty($rNorm)) continue;
+
+                if (!isset($rakByNormCode[$rNorm])) {
+                    $rakByNormCode[$rNorm] = [
+                        'jan' => 0, 'feb' => 0, 'mar' => 0, 'apr' => 0,
+                        'mei' => 0, 'jun' => 0, 'jul' => 0, 'ags' => 0,
+                        'sep' => 0, 'okt' => 0, 'nov' => 0, 'des' => 0,
+                        'total' => 0
+                    ];
+                }
+                $rakByNormCode[$rNorm]['jan'] += (float)($r['jan'] ?? 0);
+                $rakByNormCode[$rNorm]['feb'] += (float)($r['feb'] ?? 0);
+                $rakByNormCode[$rNorm]['mar'] += (float)($r['mar'] ?? 0);
+                $rakByNormCode[$rNorm]['apr'] += (float)($r['apr'] ?? 0);
+                $rakByNormCode[$rNorm]['mei'] += (float)($r['mei'] ?? 0);
+                $rakByNormCode[$rNorm]['jun'] += (float)($r['jun'] ?? 0);
+                $rakByNormCode[$rNorm]['jul'] += (float)($r['jul'] ?? 0);
+                $rakByNormCode[$rNorm]['ags'] += (float)($r['ags'] ?? ($r['agu'] ?? 0));
+                $rakByNormCode[$rNorm]['sep'] += (float)($r['sep'] ?? 0);
+                $rakByNormCode[$rNorm]['okt'] += (float)($r['okt'] ?? 0);
+                $rakByNormCode[$rNorm]['nov'] += (float)($r['nov'] ?? 0);
+                $rakByNormCode[$rNorm]['des'] += (float)($r['des'] ?? 0);
+
+                $mTot = (float)($r['jan'] ?? 0) + (float)($r['feb'] ?? 0) + (float)($r['mar'] ?? 0) + (float)($r['apr'] ?? 0) + 
+                        (float)($r['mei'] ?? 0) + (float)($r['jun'] ?? 0) + (float)($r['jul'] ?? 0) + (float)($r['ags'] ?? ($r['agu'] ?? 0)) + 
+                        (float)($r['sep'] ?? 0) + (float)($r['okt'] ?? 0) + (float)($r['nov'] ?? 0) + (float)($r['des'] ?? 0);
+                $rakByNormCode[$rNorm]['total'] += (float)($r['total_rak'] ?? 0) > 0 ? (float)$r['total_rak'] : $mTot;
+            }
+
             $this->db->where('tahun', $tahun)->where('deleted_at IS NULL');
             if (!empty($instansi_id)) {
                 $this->db->where('id_instansi', (int)$instansi_id);
@@ -19466,34 +19591,18 @@ public function updateStatusPerjanjianKinerja() {
             foreach ($headers as $h) {
                 $hId = (int)$h['id'];
                 $subKode = $h['kode_sub_kegiatan'];
+                $subNorm = $normalizeCode($subKode);
 
-                // Ambil RAK DPA
-                $rakRows = $this->db->where('tahun', $tahun)
-                    ->where('kode_sub_kegiatan', $subKode)
-                    ->where('deleted_at IS NULL')
-                    ->get('dpa_rak_rincian')
-                    ->result_array();
+                $rak = isset($rakByNormCode[$subNorm]) ? $rakByNormCode[$subNorm] : null;
 
-                $m = array_fill(0, 12, 0);
-                $totalRak = 0;
-                if (!empty($rakRows)) {
-                    foreach ($rakRows as $r) {
-                        $m[0] += (float)$r['jan'];
-                        $m[1] += (float)$r['feb'];
-                        $m[2] += (float)$r['mar'];
-                        $m[3] += (float)$r['apr'];
-                        $m[4] += (float)$r['mei'];
-                        $m[5] += (float)$r['jun'];
-                        $m[6] += (float)$r['jul'];
-                        $m[7] += (float)$r['ags'];
-                        $m[8] += (float)$r['sep'];
-                        $m[9] += (float)$r['okt'];
-                        $m[10] += (float)$r['nov'];
-                        $m[11] += (float)$r['des'];
-                        $totalRak += (float)$r['total_rak'];
-                    }
+                if ($rak && $rak['total'] > 0) {
+                    $m0 = $rak['jan']; $m1 = $rak['feb']; $m2 = $rak['mar']; $m3 = $rak['apr'];
+                    $m4 = $rak['mei']; $m5 = $rak['jun']; $m6 = $rak['jul']; $m7 = $rak['ags'];
+                    $m8 = $rak['sep']; $m9 = $rak['okt']; $m10 = $rak['nov']; $m11 = $rak['des'];
+                    $totalRak = $rak['total'];
                 } else {
                     $totalRak = (float)$h['total_belanja'];
+                    $m0 = $m1 = $m2 = $m3 = $m4 = $m5 = $m6 = $m7 = $m8 = $m9 = $m10 = $m11 = 0;
                 }
 
                 $angData = [
@@ -19502,9 +19611,9 @@ public function updateStatusPerjanjianKinerja() {
                     'tahun' => $tahun,
                     'id_instansi' => $h['id_instansi'],
                     'kode_sub_kegiatan' => $subKode,
-                    'jan' => $m[0], 'feb' => $m[1], 'mar' => $m[2], 'apr' => $m[3],
-                    'mei' => $m[4], 'jun' => $m[5], 'jul' => $m[6], 'ags' => $m[7],
-                    'sep' => $m[8], 'okt' => $m[9], 'nov' => $m[10], 'des' => $m[11],
+                    'jan' => $m0, 'feb' => $m1, 'mar' => $m2, 'apr' => $m3,
+                    'mei' => $m4, 'jun' => $m5, 'jul' => $m6, 'ags' => $m7,
+                    'sep' => $m8, 'okt' => $m9, 'nov' => $m10, 'des' => $m11,
                     'total_anggaran' => $totalRak,
                     'created_at' => $now,
                     'updated_at' => $now
@@ -19544,6 +19653,20 @@ public function updateStatusPerjanjianKinerja() {
         foreach ($nomen_rows as $n) {
             $nomen_map[trim($n['Kode'])] = $n['Nomenklatur'];
         }
+        $normalizeCode = function($code) {
+            if (empty($code)) return '';
+            $parts = explode('.', trim((string)$code));
+            $clean = [];
+            foreach ($parts as $p) {
+                $pTrim = trim($p);
+                if (is_numeric($pTrim)) {
+                    $clean[] = (string)(int)$pTrim;
+                } else {
+                    $clean[] = strtolower($pTrim);
+                }
+            }
+            return implode('.', $clean);
+        };
 
         // 2. Ambil data Belanja Sub Kegiatan Header & Rekening
         $this->db->select('*')->from('belanja_sub_kegiatan_header')->where('deleted_at IS NULL');
@@ -19567,8 +19690,10 @@ public function updateStatusPerjanjianKinerja() {
         $dpaHeaderBySubkeg = [];
         $headerIds = [];
         foreach ($dpaHeaders as $dh) {
+            $dhSk = trim($dh['kode_sub_kegiatan']);
             $dpaHeaderMap[(int)$dh['id']] = $dh;
-            $dpaHeaderBySubkeg[trim($dh['kode_sub_kegiatan'])] = $dh;
+            $dpaHeaderBySubkeg[$dhSk] = $dh;
+            $dpaHeaderBySubkeg['norm_' . $normalizeCode($dhSk)] = $dh;
             $headerIds[] = (int)$dh['id'];
         }
 
@@ -19595,13 +19720,33 @@ public function updateStatusPerjanjianKinerja() {
             $this->db->where('tahun', $tahun);
         }
         if (!empty($filter_instansi)) {
-            $this->db->where('id_instansi', (int)$filter_instansi);
+            $this->db->group_start()
+                ->where('id_instansi', (int)$filter_instansi)
+                ->or_where('id_instansi IS NULL')
+                ->or_where('id_instansi', 0)
+            ->group_end();
         }
-        $dpaRak = $this->db->get()->result_array();
+        $dpaRakRaw = $this->db->order_by('id', 'ASC')->get()->result_array();
+
+        // Deduplikasi entri rincian RAK agar rincian yang sama tidak dijumlahkan berulang kali
+        $uniqueRak = [];
+        foreach ($dpaRakRaw as $dr) {
+            $rKey = '';
+            if (!empty($dr['rincian_id'])) {
+                $rKey = 'r_' . $dr['rincian_id'];
+            } else {
+                $rKey = 'k_' . $normalizeCode($dr['kode_sub_kegiatan']) . '_' . trim($dr['kode_rekening'] ?? '') . '_' . trim($dr['uraian'] ?? '');
+            }
+            $uniqueRak[$rKey] = $dr;
+        }
 
         $dpaRakMap = [];
-        foreach ($dpaRak as $dr) {
-            $sk = trim($dr['kode_sub_kegiatan']);
+        foreach ($uniqueRak as $dr) {
+            $sk = trim($dr['kode_sub_kegiatan'] ?? '');
+            if (empty($sk)) continue;
+
+            $skNorm = 'norm_' . $normalizeCode($sk);
+
             if (!isset($dpaRakMap[$sk])) {
                 $dpaRakMap[$sk] = [
                     'jan' => 0, 'feb' => 0, 'mar' => 0, 'apr' => 0,
@@ -19610,19 +19755,63 @@ public function updateStatusPerjanjianKinerja() {
                     'total' => 0
                 ];
             }
-            $dpaRakMap[$sk]['jan'] += (float)$dr['jan'];
-            $dpaRakMap[$sk]['feb'] += (float)$dr['feb'];
-            $dpaRakMap[$sk]['mar'] += (float)$dr['mar'];
-            $dpaRakMap[$sk]['apr'] += (float)$dr['apr'];
-            $dpaRakMap[$sk]['mei'] += (float)$dr['mei'];
-            $dpaRakMap[$sk]['jun'] += (float)$dr['jun'];
-            $dpaRakMap[$sk]['jul'] += (float)$dr['jul'];
-            $dpaRakMap[$sk]['agu'] += (float)$dr['ags'];
-            $dpaRakMap[$sk]['sep'] += (float)$dr['sep'];
-            $dpaRakMap[$sk]['okt'] += (float)$dr['okt'];
-            $dpaRakMap[$sk]['nov'] += (float)$dr['nov'];
-            $dpaRakMap[$sk]['des'] += (float)$dr['des'];
-            $dpaRakMap[$sk]['total'] += (float)$dr['total_rak'];
+            if (!isset($dpaRakMap[$skNorm])) {
+                $dpaRakMap[$skNorm] = [
+                    'jan' => 0, 'feb' => 0, 'mar' => 0, 'apr' => 0,
+                    'mei' => 0, 'jun' => 0, 'jul' => 0, 'agu' => 0,
+                    'sep' => 0, 'okt' => 0, 'nov' => 0, 'des' => 0,
+                    'total' => 0
+                ];
+            }
+
+            $mJan = (float)($dr['jan'] ?? 0);
+            $mFeb = (float)($dr['feb'] ?? 0);
+            $mMar = (float)($dr['mar'] ?? 0);
+            $mApr = (float)($dr['apr'] ?? 0);
+            $mMei = (float)($dr['mei'] ?? 0);
+            $mJun = (float)($dr['jun'] ?? 0);
+            $mJul = (float)($dr['jul'] ?? 0);
+            $mAgu = (float)($dr['ags'] ?? ($dr['agu'] ?? 0));
+            $mSep = (float)($dr['sep'] ?? 0);
+            $mOkt = (float)($dr['okt'] ?? 0);
+            $mNov = (float)($dr['nov'] ?? 0);
+            $mDes = (float)($dr['des'] ?? 0);
+            $mTot = $mJan + $mFeb + $mMar + $mApr + $mMei + $mJun + $mJul + $mAgu + $mSep + $mOkt + $mNov + $mDes;
+            $rowTot = (float)($dr['total_rak'] ?? 0) > 0 ? (float)$dr['total_rak'] : $mTot;
+
+            $dpaRakMap[$sk]['jan'] += $mJan;
+            $dpaRakMap[$sk]['feb'] += $mFeb;
+            $dpaRakMap[$sk]['mar'] += $mMar;
+            $dpaRakMap[$sk]['apr'] += $mApr;
+            $dpaRakMap[$sk]['mei'] += $mMei;
+            $dpaRakMap[$sk]['jun'] += $mJun;
+            $dpaRakMap[$sk]['jul'] += $mJul;
+            $dpaRakMap[$sk]['agu'] += $mAgu;
+            $dpaRakMap[$sk]['sep'] += $mSep;
+            $dpaRakMap[$sk]['okt'] += $mOkt;
+            $dpaRakMap[$sk]['nov'] += $mNov;
+            $dpaRakMap[$sk]['des'] += $mDes;
+            $dpaRakMap[$sk]['total'] += $rowTot;
+
+            $dpaRakMap[$skNorm]['jan'] += $mJan;
+            $dpaRakMap[$skNorm]['feb'] += $mFeb;
+            $dpaRakMap[$skNorm]['mar'] += $mMar;
+            $dpaRakMap[$skNorm]['apr'] += $mApr;
+            $dpaRakMap[$skNorm]['mei'] += $mMei;
+            $dpaRakMap[$skNorm]['jun'] += $mJun;
+            $dpaRakMap[$skNorm]['jul'] += $mJul;
+            $dpaRakMap[$skNorm]['agu'] += $mAgu;
+            $dpaRakMap[$skNorm]['sep'] += $mSep;
+            $dpaRakMap[$skNorm]['okt'] += $mOkt;
+            $dpaRakMap[$skNorm]['nov'] += $mNov;
+            $dpaRakMap[$skNorm]['des'] += $mDes;
+            $dpaRakMap[$skNorm]['total'] += $rowTot;
+
+            // Alias keys
+            $dpaRakMap['c_' . $sk] = $dpaRakMap[$sk];
+            if (!empty($dr['header_id'])) {
+                $dpaRakMap['h_' . $dr['header_id']] = $dpaRakMap[$sk];
+            }
         }
 
         // 4. Ambil Anggaran Bulanan Tersimpan di Target Renaksi
@@ -19648,7 +19837,9 @@ public function updateStatusPerjanjianKinerja() {
                 $anggaranMap['h_' . $ang['header_id']] = $val;
             }
             if (!empty($ang['kode_sub_kegiatan'])) {
-                $anggaranMap['c_' . trim($ang['kode_sub_kegiatan'])] = $val;
+                $angSk = trim($ang['kode_sub_kegiatan']);
+                $anggaranMap['c_' . $angSk] = $val;
+                $anggaranMap['norm_' . $normalizeCode($angSk)] = $val;
             }
         }
 
@@ -19972,7 +20163,8 @@ public function updateStatusPerjanjianKinerja() {
                             $skindRow = $this->db->where('sub_kegiatan_id', $skId)->where('deleted_at IS NULL')->order_by('urutan', 'ASC')->get('renstra_sub_kegiatan_indikator')->row_array();
 
                             // Cari Data DPA Header
-                            $dpaH = isset($dpaHeaderBySubkeg[$subKode]) ? $dpaHeaderBySubkeg[$subKode] : null;
+                            $subNorm = 'norm_' . $normalizeCode($subKode);
+                            $dpaH = isset($dpaHeaderBySubkeg[$subKode]) ? $dpaHeaderBySubkeg[$subKode] : (isset($dpaHeaderBySubkeg[$subNorm]) ? $dpaHeaderBySubkeg[$subNorm] : null);
                             $hId = $dpaH ? (int)$dpaH['id'] : $skId;
 
                             // Indikator Sub Kegiatan
@@ -20004,16 +20196,28 @@ public function updateStatusPerjanjianKinerja() {
                             // Tahapan Proses
                             $tps = isset($tahapanMap['h_' . $hId]) ? $tahapanMap['h_' . $hId] : (isset($tahapanMap['c_' . $subKode]) ? $tahapanMap['c_' . $subKode] : []);
 
-                            // Anggaran Menarik dari DPA Belanja Sub Kegiatan
+                            // Anggaran Menarik dari DPA Belanja Sub Kegiatan / RAK
+                            $dpaRakItem = isset($dpaRakMap['h_' . $hId]) ? $dpaRakMap['h_' . $hId] : 
+                                          (isset($dpaRakMap[$subKode]) ? $dpaRakMap[$subKode] : 
+                                          (isset($dpaRakMap['c_' . $subKode]) ? $dpaRakMap['c_' . $subKode] : 
+                                          (isset($dpaRakMap[$subNorm]) ? $dpaRakMap[$subNorm] : null)));
+
+                            $angItem = isset($anggaranMap['h_' . $hId]) ? $anggaranMap['h_' . $hId] : 
+                                       (isset($anggaranMap['c_' . $subKode]) ? $anggaranMap['c_' . $subKode] : 
+                                       (isset($anggaranMap[$subNorm]) ? $anggaranMap[$subNorm] : null));
+
                             $totalBelanjaSub = 0;
-                            if ($dpaH) {
-                                $totalBelanjaSub = (float)$dpaH['total_belanja'];
-                                if ($totalBelanjaSub <= 0 && isset($rekTotalMap[(int)$dpaH['id']]) && $rekTotalMap[(int)$dpaH['id']] > 0) {
-                                    $totalBelanjaSub = $rekTotalMap[(int)$dpaH['id']];
-                                }
+                            if ($dpaRakItem && $dpaRakItem['total'] > 0) {
+                                $totalBelanjaSub = (float)$dpaRakItem['total'];
                             }
-                            if ($totalBelanjaSub <= 0 && isset($dpaRakMap[$subKode]) && $dpaRakMap[$subKode]['total'] > 0) {
-                                $totalBelanjaSub = (float)$dpaRakMap[$subKode]['total'];
+                            if ($dpaH) {
+                                $dpaTot = (float)$dpaH['total_belanja'];
+                                if ($dpaTot <= 0 && isset($rekTotalMap[(int)$dpaH['id']]) && $rekTotalMap[(int)$dpaH['id']] > 0) {
+                                    $dpaTot = $rekTotalMap[(int)$dpaH['id']];
+                                }
+                                if ($dpaTot > 0) {
+                                    $totalBelanjaSub = $dpaTot;
+                                }
                             }
 
                             $pagu = [
@@ -20023,15 +20227,17 @@ public function updateStatusPerjanjianKinerja() {
                             ];
                             $totalAnggaran = $totalBelanjaSub;
 
-                            if (isset($anggaranMap['h_' . $hId])) {
-                                $pagu = $anggaranMap['h_' . $hId]['pagu'];
-                                if ($totalAnggaran <= 0) $totalAnggaran = $anggaranMap['h_' . $hId]['total'];
-                            } else if (isset($anggaranMap['c_' . $subKode])) {
-                                $pagu = $anggaranMap['c_' . $subKode]['pagu'];
-                                if ($totalAnggaran <= 0) $totalAnggaran = $anggaranMap['c_' . $subKode]['total'];
-                            } else if (isset($dpaRakMap[$subKode])) {
-                                $pagu = $dpaRakMap[$subKode];
-                                if ($totalAnggaran <= 0) $totalAnggaran = $dpaRakMap[$subKode]['total'];
+                            if ($angItem) {
+                                $pagu = $angItem['pagu'];
+                                if ($totalAnggaran <= 0) $totalAnggaran = $angItem['total'];
+                            } else if ($dpaRakItem) {
+                                $pagu = [
+                                    'jan' => (float)$dpaRakItem['jan'], 'feb' => (float)$dpaRakItem['feb'], 'mar' => (float)$dpaRakItem['mar'],
+                                    'apr' => (float)$dpaRakItem['apr'], 'mei' => (float)$dpaRakItem['mei'], 'jun' => (float)$dpaRakItem['jun'],
+                                    'jul' => (float)$dpaRakItem['jul'], 'agu' => (float)$dpaRakItem['agu'], 'sep' => (float)$dpaRakItem['sep'],
+                                    'okt' => (float)$dpaRakItem['okt'], 'nov' => (float)$dpaRakItem['nov'], 'des' => (float)$dpaRakItem['des']
+                                ];
+                                if ($totalAnggaran <= 0) $totalAnggaran = $dpaRakItem['total'];
                             } else if ($totalAnggaran <= 0 && $subSnap && (float)$subSnap['anggaran'] > 0) {
                                 $totalAnggaran = (float)$subSnap['anggaran'];
                             }
@@ -20284,6 +20490,7 @@ public function updateStatusPerjanjianKinerja() {
         $Data['KodeWilayah'] = $KodeWilayah;
         $Data['NamaWilayah'] = '';
         $Data['IsRole4'] = $is_role_4;
+        $Data['IsDaerah'] = !$is_role_4;
         $Data['InstansiId'] = $instansi_id;
         $Data['ControllerName'] = 'Instansi';
         
@@ -20407,7 +20614,7 @@ public function updateStatusPerjanjianKinerja() {
         $subKode = $header['kode_sub_kegiatan'];
         $thn = (int)$header['tahun'];
 
-        // 1. Target Anggaran Bulanan
+        // 1. Target Anggaran Bulanan dari Target Renaksi
         $targetAng = $this->db->where('deleted_at IS NULL')
             ->group_start()
                 ->where('header_id', $hId)
@@ -20418,6 +20625,47 @@ public function updateStatusPerjanjianKinerja() {
             ->group_end()
             ->get('target_renaksi_anggaran_bulanan')
             ->row_array();
+
+        if (!$targetAng) {
+            // Ambil dari DPA RAK rincian jika belum tersimpan di target_renaksi_anggaran_bulanan
+            $rakRows = $this->db->where('tahun', $thn)
+                ->where('kode_sub_kegiatan', $subKode)
+                ->where('deleted_at IS NULL')
+                ->get('dpa_rak_rincian')
+                ->result_array();
+
+            if (!empty($rakRows)) {
+                $targetAng = [
+                    'jan' => 0, 'feb' => 0, 'mar' => 0, 'apr' => 0,
+                    'mei' => 0, 'jun' => 0, 'jul' => 0, 'ags' => 0,
+                    'sep' => 0, 'okt' => 0, 'nov' => 0, 'des' => 0,
+                    'total_anggaran' => 0
+                ];
+                foreach ($rakRows as $r) {
+                    $targetAng['jan'] += (float)$r['jan'];
+                    $targetAng['feb'] += (float)$r['feb'];
+                    $targetAng['mar'] += (float)$r['mar'];
+                    $targetAng['apr'] += (float)$r['apr'];
+                    $targetAng['mei'] += (float)$r['mei'];
+                    $targetAng['jun'] += (float)$r['jun'];
+                    $targetAng['jul'] += (float)$r['jul'];
+                    $targetAng['ags'] += (float)($r['ags'] ?? ($r['agu'] ?? 0));
+                    $targetAng['sep'] += (float)$r['sep'];
+                    $targetAng['okt'] += (float)$r['okt'];
+                    $targetAng['nov'] += (float)$r['nov'];
+                    $targetAng['des'] += (float)$r['des'];
+                    $targetAng['total_anggaran'] += (float)$r['total_rak'];
+                }
+            } else if (!empty($header['total_belanja'])) {
+                $mShare = (float)$header['total_belanja'] / 12;
+                $targetAng = [
+                    'jan' => $mShare, 'feb' => $mShare, 'mar' => $mShare, 'apr' => $mShare,
+                    'mei' => $mShare, 'jun' => $mShare, 'jul' => $mShare, 'ags' => $mShare,
+                    'sep' => $mShare, 'okt' => $mShare, 'nov' => $mShare, 'des' => $mShare,
+                    'total_anggaran' => (float)$header['total_belanja']
+                ];
+            }
+        }
 
         // 2. Realisasi Anggaran Bulanan
         $realAng = $this->db->where('deleted_at IS NULL')
@@ -20437,8 +20685,8 @@ public function updateStatusPerjanjianKinerja() {
         $runningReal = 0;
         for ($m = 0; $m < 12; $m++) {
             $k = $monthKeys[$m];
-            $tVal = $targetAng ? (float)$targetAng[$k] : 0;
-            $rVal = $realAng && $realAng[$k] !== null ? (float)$realAng[$k] : null;
+            $tVal = $targetAng ? (float)(isset($targetAng[$k]) ? $targetAng[$k] : ($k === 'ags' && isset($targetAng['agu']) ? $targetAng['agu'] : 0)) : 0;
+            $rVal = ($realAng && isset($realAng[$k]) && $realAng[$k] !== null && $realAng[$k] !== '') ? (float)$realAng[$k] : null;
             if ($rVal !== null) {
                 $runningReal += $rVal;
             }
@@ -20720,32 +20968,13 @@ public function updateStatusPerjanjianKinerja() {
     private function _buildRealisasiRenaksiHierarchy($KodeWilayah, $tahun, $filter_instansi, $bulanIdx) {
         $monthKeys = ['jan','feb','mar','apr','mei','jun','jul','ags','sep','okt','nov','des'];
 
-        // 1. Headers Sub Kegiatan
-        $this->db->select('*')->from('belanja_sub_kegiatan_header')->where('deleted_at IS NULL');
-        if (!empty($KodeWilayah)) $this->db->where('kode_wilayah', $KodeWilayah);
+        // 1. Ambil seluruh pohon Target Renaksi (Tujuan -> SS -> Program -> Kegiatan -> Sub Kegiatan)
+        $targetTree = $this->_buildTargetRenaksiHierarchy($KodeWilayah, $tahun, $filter_instansi);
+
+        // 2. Realisasi Anggaran Bulanan
+        $this->db->where('deleted_at IS NULL');
         if (!empty($tahun) && $tahun !== 'all') $this->db->where('tahun', $tahun);
         if (!empty($filter_instansi)) $this->db->where('id_instansi', (int)$filter_instansi);
-
-        $headers = $this->db
-            ->order_by('kode_program', 'ASC')
-            ->order_by('kode_kegiatan', 'ASC')
-            ->order_by('kode_sub_kegiatan', 'ASC')
-            ->get()
-            ->result_array();
-
-        // 2. Target Anggaran Bulanan
-        $this->db->where('deleted_at IS NULL');
-        if (!empty($tahun) && $tahun !== 'all') $this->db->where('tahun', $tahun);
-        $targetAngList = $this->db->get('target_renaksi_anggaran_bulanan')->result_array();
-        $targetAngMap = [];
-        foreach ($targetAngList as $ta) {
-            if (!empty($ta['header_id'])) $targetAngMap['h_' . $ta['header_id']] = $ta;
-            if (!empty($ta['kode_sub_kegiatan'])) $targetAngMap['c_' . $ta['kode_sub_kegiatan']] = $ta;
-        }
-
-        // 3. Realisasi Anggaran Bulanan
-        $this->db->where('deleted_at IS NULL');
-        if (!empty($tahun) && $tahun !== 'all') $this->db->where('tahun', $tahun);
         $realAngList = $this->db->get('realisasi_renaksi_anggaran_bulanan')->result_array();
         $realAngMap = [];
         foreach ($realAngList as $ra) {
@@ -20753,31 +20982,10 @@ public function updateStatusPerjanjianKinerja() {
             if (!empty($ra['kode_sub_kegiatan'])) $realAngMap['c_' . $ra['kode_sub_kegiatan']] = $ra;
         }
 
-        // 4. Target Indikator
+        // 3. Realisasi Indikator
         $this->db->where('deleted_at IS NULL');
         if (!empty($tahun) && $tahun !== 'all') $this->db->where('tahun', $tahun);
-        $targetInds = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('target_renaksi_indikator')->result_array();
-        $targetIndMap = [];
-        foreach ($targetInds as $ti) {
-            $item = [
-                'id' => (int)$ti['id'],
-                'uraian' => $ti['uraian_indikator'],
-                'satuan' => $ti['satuan'],
-                'targetTahunan' => (float)$ti['target_tahunan'],
-                'tw' => [
-                    $ti['tw1'] !== null ? (float)$ti['tw1'] : null,
-                    $ti['tw2'] !== null ? (float)$ti['tw2'] : null,
-                    $ti['tw3'] !== null ? (float)$ti['tw3'] : null,
-                    $ti['tw4'] !== null ? (float)$ti['tw4'] : null
-                ]
-            ];
-            if (!empty($ti['header_id'])) $targetIndMap['h_' . $ti['header_id']][] = $item;
-            if (!empty($ti['entity_code'])) $targetIndMap['c_' . $ti['entity_code']][] = $item;
-        }
-
-        // 5. Realisasi Indikator
-        $this->db->where('deleted_at IS NULL');
-        if (!empty($tahun) && $tahun !== 'all') $this->db->where('tahun', $tahun);
+        if (!empty($filter_instansi)) $this->db->where('id_instansi', (int)$filter_instansi);
         $realInds = $this->db->get('realisasi_renaksi_indikator')->result_array();
         $realIndMap = [];
         $realHierMap = [];
@@ -20799,180 +21007,152 @@ public function updateStatusPerjanjianKinerja() {
             ];
         }
 
-        // 6. Target Hierarki (Program & Kegiatan)
-        $this->db->where('deleted_at IS NULL');
-        if (!empty($tahun) && $tahun !== 'all') $this->db->where('tahun', $tahun);
-        $hierSaved = $this->db->get('target_renaksi_hierarchy')->result_array();
-        $targetHierMap = [];
-        foreach ($hierSaved as $hRow) {
-            $k = $hRow['level_type'] . '_' . $hRow['entity_code'];
-            $targetHierMap[$k] = [
-                'nama' => $hRow['indikator_nama'],
-                'satuan' => $hRow['satuan'] ?: '%',
-                'targetTahunan' => $hRow['target_tahunan'] !== null ? (float)$hRow['target_tahunan'] : 100,
-                'tw' => [
-                    $hRow['tw1'] !== null ? (float)$hRow['tw1'] : null,
-                    $hRow['tw2'] !== null ? (float)$hRow['tw2'] : null,
-                    $hRow['tw3'] !== null ? (float)$hRow['tw3'] : null,
-                    $hRow['tw4'] !== null ? (float)$hRow['tw4'] : null
-                ]
-            ];
-        }
-
-        // Susun struktur pohon Program -> Kegiatan -> Sub Kegiatan
-        $progGroups = [];
-        $currentTW = (int)floor($bulanIdx / 3) + 1; // 1 s.d. 4
-
-        foreach ($headers as $h) {
-            $hId = (int)$h['id'];
-            $subKode = $h['kode_sub_kegiatan'];
-            $kegKode = $h['kode_kegiatan'] ?: substr($subKode, 0, 13);
-            $progKode = $h['kode_program'] ?: substr($kegKode, 0, 7);
-
-            // Target & Realisasi Anggaran Sub Kegiatan
-            $tAngRow = isset($targetAngMap['h_' . $hId]) ? $targetAngMap['h_' . $hId] : (isset($targetAngMap['c_' . $subKode]) ? $targetAngMap['c_' . $subKode] : null);
-            $rAngRow = isset($realAngMap['h_' . $hId]) ? $realAngMap['h_' . $hId] : (isset($realAngMap['c_' . $subKode]) ? $realAngMap['c_' . $subKode] : null);
-
-            $subTargetTotal = $tAngRow ? (float)$tAngRow['total_anggaran'] : (float)$h['total_belanja'];
-            $subBulanan = [];
-            $subRealBulan = null;
-            $anyReal = false;
-            $runningReal = 0;
-
-            for ($m = 0; $m < 12; $m++) {
-                $mk = $monthKeys[$m];
-                $tM = $tAngRow ? (float)$tAngRow[$mk] : ($subTargetTotal / 12);
-                $rM = ($rAngRow && $rAngRow[$mk] !== null) ? (float)$rAngRow[$mk] : null;
-                if ($rM !== null) {
-                    $anyReal = true;
-                    $runningReal += $rM;
-                }
-                if ($m <= $bulanIdx && $rM !== null) {
-                    $subRealBulan = $runningReal;
-                }
-                $subBulanan[] = [
-                    'target' => $tM,
-                    'realisasi' => $rM
-                ];
-            }
-
-            // Indikators Target & Realisasi
-            $inds = isset($targetIndMap['h_' . $hId]) ? $targetIndMap['h_' . $hId] : (isset($targetIndMap['c_' . $subKode]) ? $targetIndMap['c_' . $subKode] : []);
-            if (empty($inds)) {
-                $inds = [
-                    [
-                        'id' => 0,
-                        'uraian' => 'Jumlah output sub kegiatan ' . ($h['nama_sub_kegiatan'] ?: $subKode),
-                        'satuan' => 'Dokumen',
-                        'targetTahunan' => 1,
-                        'tw' => [1, null, null, null]
-                    ]
-                ];
-            }
-
-            $subIndikatorData = [];
-            foreach ($inds as $iObj) {
-                $iId = $iObj['id'];
-                $rTw = isset($realIndMap[$iId]) ? $realIndMap[$iId] : [null, null, null, null];
-                $twObjList = [];
-                for ($t = 0; $t < 4; $t++) {
-                    $twObjList[] = [
-                        'target' => $iObj['tw'][$t],
-                        'realisasi' => $rTw[$t]
-                    ];
-                }
-                $subIndikatorData[] = [
-                    'id' => $iId,
-                    'uraian' => $iObj['uraian'],
-                    'satuan' => $iObj['satuan'],
-                    'tw' => $twObjList
-                ];
-            }
-
-            $progGroups[$progKode][$kegKode][] = [
-                'id' => $hId,
-                'headerId' => $hId,
-                'kode' => $subKode,
-                'nama' => $h['nama_sub_kegiatan'] ?: 'Sub Kegiatan ' . $subKode,
-                'perangkatDaerah' => $h['nama_perangkat_daerah'] ?: '',
-                'subUnit' => $h['nama_sub_unit'] ?: '',
-                'bidangUrusan' => $h['nama_bidang_urusan'] ?: '',
-                'programNama' => $h['nama_program'] ?: '',
-                'kegiatanNama' => $h['nama_kegiatan'] ?: '',
-                'bulanan' => $subBulanan,
-                'targetAnggaran' => $subTargetTotal,
-                'realisasiAnggaran' => $subRealBulan,
-                'indikator' => $subIndikatorData
-            ];
-        }
-
-        // Susun Program & Kegiatan
+        // 4. Ekstrak Program -> Kegiatan -> Sub Kegiatan dari pohon Target Renaksi
         $programs = [];
-        foreach ($progGroups as $pKode => $kegGroup) {
-            $pName = 'PROGRAM ' . $pKode;
-            $kegList = [];
 
-            foreach ($kegGroup as $kKode => $subList) {
-                $kName = 'KEGIATAN ' . $kKode;
-                foreach ($subList as $s) {
-                    $pName = $s['programNama'] ?: $pName;
-                    $kName = $s['kegiatanNama'] ?: $kName;
-                }
+        foreach (($targetTree['tujuanList'] ?? []) as $t) {
+            foreach (($t['sasaranStrategisList'] ?? []) as $ss) {
+                foreach (($ss['sasaranProgramList'] ?? []) as $sp) {
+                    $pKode = $sp['kode'];
+                    $pName = $sp['nomenklatur'] ?: $sp['nama'];
+                    $pPerihal = $sp['nama'];
 
-                $kKey = 'kegiatan_' . $kKode;
-                $tKegKin = isset($targetHierMap[$kKey]) ? $targetHierMap[$kKey] : [
-                    'nama' => 'Persentase ketercapaian target output ' . $kName,
-                    'satuan' => '%',
-                    'targetTahunan' => 100,
-                    'tw' => [25, 25, 25, 25]
-                ];
-                $rKegKin = isset($realHierMap[$kKey]) ? $realHierMap[$kKey] : [null, null, null, null];
-                $kegKinTW = [];
-                for ($t = 0; $t < 4; $t++) {
-                    $kegKinTW[] = [
-                        'target' => $tKegKin['tw'][$t],
-                        'realisasi' => $rKegKin[$t]
+                    // Indikator Program Kinerja
+                    $pInd = !empty($sp['indikators'][0]) ? $sp['indikators'][0] : [
+                        'id' => 0, 'nama' => 'Indikator ' . $pName, 'satuan' => '%', 'targetTahunan' => 100,
+                        'tw1' => null, 'tw2' => null, 'tw3' => null, 'tw4' => null
+                    ];
+                    $rProgKin = isset($realHierMap['program_' . $pKode]) ? $realHierMap['program_' . $pKode] : [null, null, null, null];
+                    $progKinTW = [];
+                    for ($tIdx = 0; $tIdx < 4; $tIdx++) {
+                        $twNum = $tIdx + 1;
+                        $progKinTW[] = [
+                            'target' => isset($pInd['tw' . $twNum]) && $pInd['tw' . $twNum] !== null ? (float)$pInd['tw' . $twNum] : null,
+                            'realisasi' => $rProgKin[$tIdx]
+                        ];
+                    }
+
+                    $kegList = [];
+                    foreach (($sp['sasaranKegiatanList'] ?? []) as $sk) {
+                        $kKode = $sk['kode'];
+                        $kName = $sk['nomenklatur'] ?: $sk['nama'];
+                        $kPerihal = $sk['perihal'] ?: $sk['nama'];
+
+                        // Indikator Kegiatan Kinerja
+                        $kInd = !empty($sk['indikators'][0]) ? $sk['indikators'][0] : [
+                            'id' => 0, 'nama' => 'Indikator ' . $kName, 'satuan' => '%', 'targetTahunan' => 100,
+                            'tw1' => null, 'tw2' => null, 'tw3' => null, 'tw4' => null
+                        ];
+                        $rKegKin = isset($realHierMap['kegiatan_' . $kKode]) ? $realHierMap['kegiatan_' . $kKode] : [null, null, null, null];
+                        $kegKinTW = [];
+                        for ($tIdx = 0; $tIdx < 4; $tIdx++) {
+                            $twNum = $tIdx + 1;
+                            $kegKinTW[] = [
+                                'target' => isset($kInd['tw' . $twNum]) && $kInd['tw' . $twNum] !== null ? (float)$kInd['tw' . $twNum] : null,
+                                'realisasi' => $rKegKin[$tIdx]
+                            ];
+                        }
+
+                        $subList = [];
+                        foreach (($sk['sasaranSubKegiatanList'] ?? []) as $sub) {
+                            $hId = isset($sub['headerId']) ? (int)$sub['headerId'] : (int)$sub['id'];
+                            $subKode = $sub['kode'];
+                            $subName = $sub['nomenklatur'] ?: $sub['nama'];
+                            $subPerihal = $sub['perihal'] ?: $sub['nama'];
+
+                            // Target Anggaran Bulanan dari Target Renaksi
+                            $pagu = $sub['paguBulanan'] ?? [];
+                            $rAngRow = isset($realAngMap['h_' . $hId]) ? $realAngMap['h_' . $hId] : (isset($realAngMap['c_' . $subKode]) ? $realAngMap['c_' . $subKode] : null);
+
+                            $subBulanan = [];
+                            $subRealBulan = null;
+                            $runningReal = 0;
+
+                            for ($m = 0; $m < 12; $m++) {
+                                $mk = $monthKeys[$m];
+                                $tM = isset($pagu[$mk]) ? (float)$pagu[$mk] : (isset($pagu['agu']) && $mk === 'ags' ? (float)$pagu['agu'] : 0);
+                                $rM = ($rAngRow && isset($rAngRow[$mk]) && $rAngRow[$mk] !== null && $rAngRow[$mk] !== '') ? (float)$rAngRow[$mk] : null;
+                                if ($rM !== null) {
+                                    $runningReal += $rM;
+                                }
+                                if ($m <= $bulanIdx && $rM !== null) {
+                                    $subRealBulan = $runningReal;
+                                }
+                                $subBulanan[] = [
+                                    'target' => $tM,
+                                    'realisasi' => $rM
+                                ];
+                            }
+
+                            // Indikator Sub Kegiatan
+                            $subIndikatorData = [];
+                            foreach (($sub['indikators'] ?? []) as $sInd) {
+                                $sIndId = $sInd['id'];
+                                $rTw = isset($realIndMap[$sIndId]) ? $realIndMap[$sIndId] : [null, null, null, null];
+                                $twObjList = [];
+                                for ($tIdx = 0; $tIdx < 4; $tIdx++) {
+                                    $twNum = $tIdx + 1;
+                                    $twObjList[] = [
+                                        'target' => isset($sInd['tw' . $twNum]) && $sInd['tw' . $twNum] !== null ? (float)$sInd['tw' . $twNum] : null,
+                                        'realisasi' => $rTw[$tIdx]
+                                    ];
+                                }
+                                $subIndikatorData[] = [
+                                    'id' => $sIndId,
+                                    'uraian' => $sInd['nama'],
+                                    'satuan' => $sInd['satuan'],
+                                    'targetTahunan' => $sInd['targetTahunan'],
+                                    'tw' => $twObjList
+                                ];
+                            }
+
+                            $subList[] = [
+                                'id' => $hId,
+                                'headerId' => $hId,
+                                'kode' => $subKode,
+                                'nama' => $subName,
+                                'nomenklatur' => $subName,
+                                'perihal' => $subPerihal,
+                                'perangkatDaerah' => $sub['perangkatDaerah'] ?? '',
+                                'subUnit' => $sub['subUnit'] ?? '',
+                                'bidangUrusan' => $sub['bidangUrusan'] ?? '',
+                                'programNama' => $sub['programNama'] ?? $pName,
+                                'kegiatanNama' => $sub['kegiatanNama'] ?? $kName,
+                                'bulanan' => $subBulanan,
+                                'targetAnggaran' => (float)$sub['anggaran'],
+                                'realisasiAnggaran' => $subRealBulan,
+                                'indikator' => $subIndikatorData
+                            ];
+                        }
+
+                        $kegList[] = [
+                            'kode' => $kKode,
+                            'nama' => $kName,
+                            'nomenklatur' => $kName,
+                            'perihal' => $kPerihal,
+                            'kinerja' => [
+                                'uraian' => $kInd['nama'],
+                                'satuan' => $kInd['satuan'],
+                                'tw' => $kegKinTW
+                            ],
+                            'subKegiatan' => $subList
+                        ];
+                    }
+
+                    $programs[] = [
+                        'kode' => $pKode,
+                        'nama' => $pName,
+                        'nomenklatur' => $pName,
+                        'perihal' => $pPerihal,
+                        'kinerja' => [
+                            'uraian' => $pInd['nama'],
+                            'satuan' => $pInd['satuan'],
+                            'tw' => $progKinTW
+                        ],
+                        'kegiatan' => $kegList
                     ];
                 }
-
-                $kegList[] = [
-                    'kode' => $kKode,
-                    'nama' => $kName,
-                    'kinerja' => [
-                        'uraian' => $tKegKin['nama'],
-                        'satuan' => $tKegKin['satuan'],
-                        'tw' => $kegKinTW
-                    ],
-                    'subKegiatan' => $subList
-                ];
             }
-
-            $pKey = 'program_' . $pKode;
-            $tProgKin = isset($targetHierMap[$pKey]) ? $targetHierMap[$pKey] : [
-                'nama' => 'Persentase pemenuhan kualitas pelaksanaan ' . $pName,
-                'satuan' => '%',
-                'targetTahunan' => 100,
-                'tw' => [null, null, null, 95]
-            ];
-            $rProgKin = isset($realHierMap[$pKey]) ? $realHierMap[$pKey] : [null, null, null, null];
-            $progKinTW = [];
-            for ($t = 0; $t < 4; $t++) {
-                $progKinTW[] = [
-                    'target' => $tProgKin['tw'][$t],
-                    'realisasi' => $rProgKin[$t]
-                ];
-            }
-
-            $programs[] = [
-                'kode' => $pKode,
-                'nama' => $pName,
-                'kinerja' => [
-                    'uraian' => $tProgKin['nama'],
-                    'satuan' => $tProgKin['satuan'],
-                    'tw' => $progKinTW
-                ],
-                'kegiatan' => $kegList
-            ];
         }
 
         return $programs;
@@ -21009,6 +21189,7 @@ public function updateStatusPerjanjianKinerja() {
         $Data['KodeWilayah'] = $KodeWilayah;
         $Data['NamaWilayah'] = '';
         $Data['IsRole4'] = $is_role_4;
+        $Data['IsDaerah'] = !$is_role_4;
         $Data['InstansiId'] = $instansi_id;
         $Data['ControllerName'] = 'Instansi';
         
@@ -21064,60 +21245,21 @@ public function updateStatusPerjanjianKinerja() {
         $Data['ListTahun'] = $listTahun;
         
         if (empty($tahun)) {
-            $tahun = 2025;
+            if (!empty($listTahun)) {
+                $tahun = $listTahun[0];
+            } else {
+                $tahun = 2025;
+            }
         }
         $Data['TahunAktif'] = $tahun;
-        $Data['FilterInstansi'] = $filter_instansi ?: 1;
+        $Data['FilterInstansi'] = $filter_instansi;
         $Data['BulanSampai'] = $bulan_sampai;
 
-        // Ambil Data Rekapitulasi Realisasi Anggaran
-        $this->db->where('deleted_at IS NULL');
-        if (!empty($tahun) && $tahun !== 'all') {
-            $this->db->where('tahun', (int)$tahun);
-        }
-        if (!empty($filter_instansi)) {
-            $this->db->where('id_instansi', (int)$filter_instansi);
-        }
+        // Ambil Data Laporan Anggaran bersumber dari Sub Kegiatan Realisasi Renaksi
+        $laporanData = $this->_buildLaporanAnggaranData($KodeWilayah, $tahun, $filter_instansi, $bulan_sampai);
 
-        $items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('laporan_anggaran_rekap')->result_array();
-
-        // Hitung Grand Totals
-        $totMurni = 0;
-        $totPerubahan = 0;
-        $totRealisasi = 0;
-        $totSisa = 0;
-
-        foreach ($items as &$it) {
-            $murni = (float)$it['anggaran_murni'];
-            $perubahan = (float)$it['anggaran_perubahan'];
-            $realisasi = (float)$it['realisasi_anggaran'];
-            $sisa = $perubahan - $realisasi;
-            $persen = ($perubahan > 0) ? round(($realisasi / $perubahan) * 100, 2) : 0;
-            $status = ($perubahan >= $murni) ? '+' : '-';
-
-            $it['sisa_anggaran'] = $sisa;
-            $it['persen_capaian'] = $persen;
-            $it['perubahan_status'] = $status;
-
-            $totMurni += $murni;
-            $totPerubahan += $perubahan;
-            $totRealisasi += $realisasi;
-            $totSisa += $sisa;
-        }
-        unset($it);
-
-        $persenCapaian = ($totPerubahan > 0) ? round(($totSisa / $totPerubahan) * 100, 2) : 0;
-        $persenSerapan = ($totPerubahan > 0) ? round(($totRealisasi / $totPerubahan) * 100, 2) : 0;
-
-        $Data['Items'] = $items;
-        $Data['Summary'] = [
-            'total_murni' => $totMurni,
-            'total_perubahan' => $totPerubahan,
-            'total_realisasi' => $totRealisasi,
-            'total_sisa' => $totSisa,
-            'persen_capaian' => $persenCapaian,
-            'persen_serapan' => $persenSerapan
-        ];
+        $Data['Items'] = $laporanData['items'];
+        $Data['Summary'] = $laporanData['summary'];
         
         $this->load->view('Daerah/header', $Header);
         $this->load->view('Daerah/LaporanAnggaran', $Data);
@@ -21130,57 +21272,214 @@ public function updateStatusPerjanjianKinerja() {
         }
         header('Content-Type: application/json');
 
+        $KodeWilayah = $this->get_kode_wilayah();
+        $is_role_4 = $this->is_role_4();
+        $instansi_id = $this->get_instansi_id();
         $tahun = (int)($this->input->post('tahun', TRUE) ?: 2025);
-        $filter_instansi = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+        $filter_instansi = $this->input->post('instansi_id', TRUE);
         $bulan_sampai = $this->input->post('bulan_sampai', TRUE) !== null ? (int)$this->input->post('bulan_sampai', TRUE) : 7;
 
+        if ($is_role_4 && $instansi_id) {
+            $filter_instansi = $instansi_id;
+        }
+
+        $laporanData = $this->_buildLaporanAnggaranData($KodeWilayah, $tahun, $filter_instansi, $bulan_sampai);
+
+        echo json_encode([
+            'status' => 'success',
+            'data' => [
+                'items' => $laporanData['items'],
+                'summary' => $laporanData['summary']
+            ]
+        ]);
+    }
+
+    private function _buildLaporanAnggaranData($KodeWilayah, $tahun, $filter_instansi, $bulan_sampai) {
+        if ($bulan_sampai < 0) $bulan_sampai = 0;
+        if ($bulan_sampai > 11) $bulan_sampai = 11;
+
+        // 1. Ambil hierarki Realisasi Renaksi (Program -> Kegiatan -> Sub Kegiatan)
+        $tree = $this->_buildRealisasiRenaksiHierarchy($KodeWilayah, $tahun, $filter_instansi, $bulan_sampai);
+
+        // 2. Ambil data overrides dari laporan_anggaran_rekap jika ada
         $this->db->where('deleted_at IS NULL');
-        if ($tahun > 0) $this->db->where('tahun', $tahun);
-        if ($filter_instansi > 0) $this->db->where('id_instansi', $filter_instansi);
+        if (!empty($tahun) && $tahun !== 'all') {
+            $this->db->where('tahun', (int)$tahun);
+        }
+        if (!empty($filter_instansi)) {
+            $this->db->where('id_instansi', (int)$filter_instansi);
+        }
+        $savedRekap = $this->db->get('laporan_anggaran_rekap')->result_array();
+        $savedByHeaderId = [];
+        $savedByCode = [];
+        foreach ($savedRekap as $sr) {
+            if (!empty($sr['header_id'])) {
+                $savedByHeaderId[(int)$sr['header_id']] = $sr;
+            }
+            if (!empty($sr['kode_rekening'])) {
+                $savedByCode[trim($sr['kode_rekening'])] = $sr;
+            }
+        }
 
-        $items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('laporan_anggaran_rekap')->result_array();
+        // 3. Ekstrak seluruh sub kegiatan dari tree Realisasi Renaksi
+        $items = [];
+        $seenSubCodes = [];
+        $urutan = 1;
 
+        foreach ($tree as $prog) {
+            $pName = $prog['nomenklatur'] ?: $prog['nama'];
+            foreach ($prog['kegiatan'] as $keg) {
+                $kName = $keg['nomenklatur'] ?: $keg['nama'];
+                foreach ($keg['subKegiatan'] as $sub) {
+                    $hId = (int)($sub['headerId'] ?? ($sub['id'] ?? 0));
+                    $subKode = trim($sub['kode'] ?? '');
+                    if (empty($subKode) && $hId <= 0) continue;
+
+                    $subKey = $hId > 0 ? ('h_' . $hId) : ('c_' . $subKode);
+                    if (isset($seenSubCodes[$subKey])) continue;
+                    $seenSubCodes[$subKey] = true;
+
+                    $subName = $sub['nomenklatur'] ?: $sub['nama'];
+                    $targetAnggaran = (float)($sub['targetAnggaran'] ?? 0);
+                    $realisasiAnggaran = (float)($sub['realisasiAnggaran'] ?? 0);
+
+                    // Cek jika ada data tersimpan di laporan_anggaran_rekap
+                    $savedRow = null;
+                    if ($hId > 0 && isset($savedByHeaderId[$hId])) {
+                        $savedRow = $savedByHeaderId[$hId];
+                    } else if (!empty($subKode) && isset($savedByCode[$subKode])) {
+                        $savedRow = $savedByCode[$subKode];
+                    }
+
+                    if ($savedRow) {
+                        $rowId = (int)$savedRow['id'];
+                        $anggaranMurni = ((float)$savedRow['anggaran_murni'] > 0) ? (float)$savedRow['anggaran_murni'] : $targetAnggaran;
+                        $anggaranPerubahan = ((float)$savedRow['anggaran_perubahan'] > 0) ? (float)$savedRow['anggaran_perubahan'] : $targetAnggaran;
+                        // Prioritaskan realisasi dari renaksi jika ada atau gunakan dari savedRow
+                        $realisasi = ($realisasiAnggaran > 0 || (isset($sub['realisasiAnggaran']) && $sub['realisasiAnggaran'] !== null)) ? $realisasiAnggaran : (float)$savedRow['realisasi_anggaran'];
+                    } else {
+                        $rowId = $hId; // Default row identifier
+                        $anggaranMurni = $targetAnggaran;
+                        $anggaranPerubahan = $targetAnggaran;
+                        $realisasi = $realisasiAnggaran;
+                    }
+
+                    $sisa = $anggaranPerubahan - $realisasi;
+                    $persen = ($anggaranPerubahan > 0) ? round(($realisasi / $anggaranPerubahan) * 100, 2) : 0;
+                    $status = ($anggaranPerubahan >= $anggaranMurni) ? '+' : '-';
+
+                    $items[] = [
+                        'id' => $rowId,
+                        'header_id' => $hId,
+                        'kode_rekening' => $subKode,
+                        'nama_sub_kegiatan' => $subName,
+                        'anggaran_murni' => $anggaranMurni,
+                        'anggaran_perubahan' => $anggaranPerubahan,
+                        'perubahan_status' => $status,
+                        'realisasi_anggaran' => $realisasi,
+                        'sisa_anggaran' => $sisa,
+                        'persen_capaian' => $persen,
+                        'bulan_sampai' => $bulan_sampai,
+                        'urutan' => $urutan++,
+                        'program_nama' => $sub['programNama'] ?? $pName,
+                        'kegiatan_nama' => $sub['kegiatanNama'] ?? $kName,
+                        'perangkat_daerah' => $sub['perangkatDaerah'] ?? ''
+                    ];
+                }
+            }
+        }
+
+        // Fallback: Jika tree kosong, coba ambil langsung dari belanja_sub_kegiatan_header
+        if (empty($items)) {
+            $this->db->select('*')->from('belanja_sub_kegiatan_header')->where('deleted_at IS NULL');
+            if (!empty($KodeWilayah)) $this->db->where('kode_wilayah', $KodeWilayah);
+            if (!empty($tahun)) $this->db->where('tahun', $tahun);
+            if (!empty($filter_instansi)) $this->db->where('id_instansi', (int)$filter_instansi);
+            $rawHeaders = $this->db->order_by('kode_sub_kegiatan', 'ASC')->get()->result_array();
+
+            $monthCols = ['jan','feb','mar','apr','mei','jun','jul','ags','sep','okt','nov','des'];
+            $selectedMonths = array_slice($monthCols, 0, $bulan_sampai + 1);
+
+            foreach ($rawHeaders as $rh) {
+                $hId = (int)$rh['id'];
+                $subKode = trim($rh['kode_sub_kegiatan']);
+                $subName = $rh['nama_sub_kegiatan'];
+                $totalBelanja = (float)$rh['total_belanja'];
+
+                // Realisasi dari bulanan
+                $realRow = $this->db->where('deleted_at IS NULL')
+                    ->group_start()
+                        ->where('header_id', $hId)
+                        ->or_where('kode_sub_kegiatan', $subKode)
+                    ->group_end()
+                    ->where('tahun', $tahun)
+                    ->get('realisasi_renaksi_anggaran_bulanan')
+                    ->row_array();
+
+                $realisasi = 0;
+                if ($realRow) {
+                    foreach ($selectedMonths as $mc) {
+                        $realisasi += (float)($realRow[$mc] ?? 0);
+                    }
+                }
+
+                $savedRow = isset($savedByHeaderId[$hId]) ? $savedByHeaderId[$hId] : (isset($savedByCode[$subKode]) ? $savedByCode[$subKode] : null);
+                $anggaranMurni = $savedRow ? (float)$savedRow['anggaran_murni'] : $totalBelanja;
+                $anggaranPerubahan = $savedRow ? (float)$savedRow['anggaran_perubahan'] : $totalBelanja;
+                if ($anggaranPerubahan <= 0) $anggaranPerubahan = $totalBelanja;
+                if ($anggaranMurni <= 0) $anggaranMurni = $totalBelanja;
+
+                $sisa = $anggaranPerubahan - $realisasi;
+                $persen = ($anggaranPerubahan > 0) ? round(($realisasi / $anggaranPerubahan) * 100, 2) : 0;
+                $status = ($anggaranPerubahan >= $anggaranMurni) ? '+' : '-';
+
+                $items[] = [
+                    'id' => $savedRow ? (int)$savedRow['id'] : $hId,
+                    'header_id' => $hId,
+                    'kode_rekening' => $subKode,
+                    'nama_sub_kegiatan' => $subName,
+                    'anggaran_murni' => $anggaranMurni,
+                    'anggaran_perubahan' => $anggaranPerubahan,
+                    'perubahan_status' => $status,
+                    'realisasi_anggaran' => $realisasi,
+                    'sisa_anggaran' => $sisa,
+                    'persen_capaian' => $persen,
+                    'bulan_sampai' => $bulan_sampai,
+                    'urutan' => $urutan++,
+                    'program_nama' => $rh['nama_program'] ?? '',
+                    'kegiatan_nama' => $rh['nama_kegiatan'] ?? '',
+                    'perangkat_daerah' => $rh['nama_perangkat_daerah'] ?? ''
+                ];
+            }
+        }
+
+        // Hitung Grand Totals
         $totMurni = 0;
         $totPerubahan = 0;
         $totRealisasi = 0;
         $totSisa = 0;
 
-        foreach ($items as &$it) {
-            $murni = (float)$it['anggaran_murni'];
-            $perubahan = (float)$it['anggaran_perubahan'];
-            $realisasi = (float)$it['realisasi_anggaran'];
-            $sisa = $perubahan - $realisasi;
-            $persen = ($perubahan > 0) ? round(($realisasi / $perubahan) * 100, 2) : 0;
-            $status = ($perubahan >= $murni) ? '+' : '-';
-
-            $it['sisa_anggaran'] = $sisa;
-            $it['persen_capaian'] = $persen;
-            $it['perubahan_status'] = $status;
-
-            $totMurni += $murni;
-            $totPerubahan += $perubahan;
-            $totRealisasi += $realisasi;
-            $totSisa += $sisa;
+        foreach ($items as $it) {
+            $totMurni += (float)$it['anggaran_murni'];
+            $totPerubahan += (float)$it['anggaran_perubahan'];
+            $totRealisasi += (float)$it['realisasi_anggaran'];
+            $totSisa += (float)$it['sisa_anggaran'];
         }
-        unset($it);
 
         $persenCapaian = ($totPerubahan > 0) ? round(($totSisa / $totPerubahan) * 100, 2) : 0;
         $persenSerapan = ($totPerubahan > 0) ? round(($totRealisasi / $totPerubahan) * 100, 2) : 0;
 
-        echo json_encode([
-            'status' => 'success',
-            'data' => [
-                'items' => $items,
-                'summary' => [
-                    'total_murni' => $totMurni,
-                    'total_perubahan' => $totPerubahan,
-                    'total_realisasi' => $totRealisasi,
-                    'total_sisa' => $totSisa,
-                    'persen_capaian' => $persenCapaian,
-                    'persen_serapan' => $persenSerapan
-                ]
+        return [
+            'items' => $items,
+            'summary' => [
+                'total_murni' => $totMurni,
+                'total_perubahan' => $totPerubahan,
+                'total_realisasi' => $totRealisasi,
+                'total_sisa' => $totSisa,
+                'persen_capaian' => $persenCapaian,
+                'persen_serapan' => $persenSerapan
             ]
-        ]);
+        ];
     }
 
     public function SaveLaporanAnggaranItem() {
@@ -21192,34 +21491,82 @@ public function updateStatusPerjanjianKinerja() {
 
         try {
             $id = (int)$this->input->post('id', TRUE);
+            $header_id = (int)$this->input->post('header_id', TRUE);
+            $kode_rekening = trim($this->input->post('kode_rekening', TRUE));
+            $nama_sub_kegiatan = trim($this->input->post('nama_sub_kegiatan', TRUE));
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: date('Y'));
+            $id_instansi = (int)$this->input->post('instansi_id', TRUE);
+            $bulan_sampai = (int)($this->input->post('bulan_sampai', TRUE) ?: 7);
+
             $anggaran_murni = (float)str_replace(',', '', $this->input->post('anggaran_murni', TRUE));
             $anggaran_perubahan = (float)str_replace(',', '', $this->input->post('anggaran_perubahan', TRUE));
             $realisasi_anggaran = (float)str_replace(',', '', $this->input->post('realisasi_anggaran', TRUE));
-
-            if ($id <= 0) {
-                throw new Exception('ID item laporan anggaran tidak valid.');
-            }
 
             $sisa_anggaran = $anggaran_perubahan - $realisasi_anggaran;
             $persen_capaian = ($anggaran_perubahan > 0) ? round(($realisasi_anggaran / $anggaran_perubahan) * 100, 2) : 0;
             $perubahan_status = ($anggaran_perubahan >= $anggaran_murni) ? '+' : '-';
 
-            $updateData = [
-                'anggaran_murni' => $anggaran_murni,
-                'anggaran_perubahan' => $anggaran_perubahan,
-                'realisasi_anggaran' => $realisasi_anggaran,
-                'sisa_anggaran' => $sisa_anggaran,
-                'persen_capaian' => $persen_capaian,
-                'perubahan_status' => $perubahan_status,
-                'updated_at' => date('Y-m-d H:i:s')
-            ];
+            // Cek apakah data sudah ada di laporan_anggaran_rekap
+            $existing = null;
+            if ($id > 0) {
+                $existing = $this->db->where('id', $id)->get('laporan_anggaran_rekap')->row_array();
+            }
+            if (!$existing && $header_id > 0) {
+                $existing = $this->db->where('header_id', $header_id)->where('deleted_at IS NULL')->get('laporan_anggaran_rekap')->row_array();
+            }
+            if (!$existing && !empty($kode_rekening) && $tahun > 0) {
+                $this->db->where('kode_rekening', $kode_rekening)->where('tahun', $tahun)->where('deleted_at IS NULL');
+                if ($id_instansi > 0) $this->db->where('id_instansi', $id_instansi);
+                $existing = $this->db->get('laporan_anggaran_rekap')->row_array();
+            }
 
-            $this->db->where('id', $id)->update('laporan_anggaran_rekap', $updateData);
+            if ($existing) {
+                $updateData = [
+                    'anggaran_murni' => $anggaran_murni,
+                    'anggaran_perubahan' => $anggaran_perubahan,
+                    'realisasi_anggaran' => $realisasi_anggaran,
+                    'sisa_anggaran' => $sisa_anggaran,
+                    'persen_capaian' => $persen_capaian,
+                    'perubahan_status' => $perubahan_status,
+                    'bulan_sampai' => $bulan_sampai,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+                $this->db->where('id', $existing['id'])->update('laporan_anggaran_rekap', $updateData);
+                $savedId = (int)$existing['id'];
+            } else {
+                $KodeWilayah = $this->get_kode_wilayah();
+                $insertData = [
+                    'header_id' => $header_id ?: ($id > 0 ? $id : null),
+                    'kode_wilayah' => $KodeWilayah ?: '35.73',
+                    'tahun' => $tahun,
+                    'id_instansi' => $id_instansi ?: 1,
+                    'kode_rekening' => $kode_rekening,
+                    'nama_sub_kegiatan' => $nama_sub_kegiatan,
+                    'anggaran_murni' => $anggaran_murni,
+                    'anggaran_perubahan' => $anggaran_perubahan,
+                    'realisasi_anggaran' => $realisasi_anggaran,
+                    'sisa_anggaran' => $sisa_anggaran,
+                    'persen_capaian' => $persen_capaian,
+                    'perubahan_status' => $perubahan_status,
+                    'bulan_sampai' => $bulan_sampai,
+                    'created_at' => date('Y-m-d H:i:s')
+                ];
+                $this->db->insert('laporan_anggaran_rekap', $insertData);
+                $savedId = $this->db->insert_id();
+            }
 
             echo json_encode([
                 'status' => 'success',
                 'message' => 'Data baris Laporan Anggaran berhasil diperbarui!',
-                'data' => array_merge(['id' => $id], $updateData)
+                'data' => [
+                    'id' => $savedId,
+                    'anggaran_murni' => $anggaran_murni,
+                    'anggaran_perubahan' => $anggaran_perubahan,
+                    'realisasi_anggaran' => $realisasi_anggaran,
+                    'sisa_anggaran' => $sisa_anggaran,
+                    'persen_capaian' => $persen_capaian,
+                    'perubahan_status' => $perubahan_status
+                ]
             ]);
         } catch (Exception $e) {
             echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
@@ -21234,49 +21581,77 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
 
         try {
+            $KodeWilayah = $this->get_kode_wilayah();
+            $is_role_4 = $this->is_role_4();
+            $instansi_id = $this->get_instansi_id();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2025);
-            $filter_instansi = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+            $filter_instansi = $this->input->post('instansi_id', TRUE);
             $bulan_sampai = $this->input->post('bulan_sampai', TRUE) !== null ? (int)$this->input->post('bulan_sampai', TRUE) : 7;
 
-            $monthCols = ['jan','feb','mar','apr','mei','jun','jul','ags','sep','okt','nov','des'];
-            $selectedMonths = array_slice($monthCols, 0, $bulan_sampai + 1);
-
-            // Ambil realisasi bulanan dari realisasi_renaksi_anggaran_bulanan
-            $realRows = $this->db->where('deleted_at IS NULL')->where('tahun', $tahun)->get('realisasi_renaksi_anggaran_bulanan')->result_array();
-            $realMap = [];
-            foreach ($realRows as $rr) {
-                $sum = 0;
-                foreach ($selectedMonths as $mc) {
-                    $sum += (float)$rr[$mc];
-                }
-                $realMap[$rr['kode_sub_kegiatan']] = $sum;
+            if ($is_role_4 && $instansi_id) {
+                $filter_instansi = $instansi_id;
             }
 
-            // Update ke laporan_anggaran_rekap
-            $updated = 0;
-            $items = $this->db->where('deleted_at IS NULL')->where('tahun', $tahun)->get('laporan_anggaran_rekap')->result_array();
-            foreach ($items as $it) {
-                $code = $it['kode_rekening'];
-                if (isset($realMap[$code])) {
-                    $newReal = $realMap[$code];
-                    $perubahan = (float)$it['anggaran_perubahan'];
-                    $sisa = $perubahan - $newReal;
-                    $persen = ($perubahan > 0) ? round(($newReal / $perubahan) * 100, 2) : 0;
+            $res = $this->_buildLaporanAnggaranData($KodeWilayah, $tahun, $filter_instansi, $bulan_sampai);
+            $items = $res['items'];
+            $syncedCount = 0;
 
-                    $this->db->where('id', $it['id'])->update('laporan_anggaran_rekap', [
-                        'realisasi_anggaran' => $newReal,
+            foreach ($items as $it) {
+                $hId = (int)$it['header_id'];
+                $code = $it['kode_rekening'];
+                $nama = $it['nama_sub_kegiatan'];
+                $murni = (float)$it['anggaran_murni'];
+                $perubahan = (float)$it['anggaran_perubahan'];
+                $realisasi = (float)$it['realisasi_anggaran'];
+                $sisa = (float)$it['sisa_anggaran'];
+                $persen = (float)$it['persen_capaian'];
+                $status = $it['perubahan_status'];
+
+                // Check existing in laporan_anggaran_rekap
+                $existing = null;
+                if ($hId > 0) {
+                    $existing = $this->db->where('header_id', $hId)->where('deleted_at IS NULL')->get('laporan_anggaran_rekap')->row_array();
+                }
+                if (!$existing && !empty($code)) {
+                    $this->db->where('kode_rekening', $code)->where('tahun', $tahun)->where('deleted_at IS NULL');
+                    if (!empty($filter_instansi)) $this->db->where('id_instansi', (int)$filter_instansi);
+                    $existing = $this->db->get('laporan_anggaran_rekap')->row_array();
+                }
+
+                if ($existing) {
+                    $this->db->where('id', $existing['id'])->update('laporan_anggaran_rekap', [
+                        'realisasi_anggaran' => $realisasi,
                         'sisa_anggaran' => $sisa,
                         'persen_capaian' => $persen,
+                        'anggaran_perubahan' => $perubahan,
                         'bulan_sampai' => $bulan_sampai,
                         'updated_at' => date('Y-m-d H:i:s')
                     ]);
-                    $updated++;
+                } else {
+                    $this->db->insert('laporan_anggaran_rekap', [
+                        'header_id' => $hId ?: null,
+                        'kode_wilayah' => $KodeWilayah ?: '35.73',
+                        'tahun' => $tahun,
+                        'id_instansi' => (int)($filter_instansi ?: 1),
+                        'kode_rekening' => $code,
+                        'nama_sub_kegiatan' => $nama,
+                        'anggaran_murni' => $murni,
+                        'anggaran_perubahan' => $perubahan,
+                        'perubahan_status' => $status,
+                        'realisasi_anggaran' => $realisasi,
+                        'sisa_anggaran' => $sisa,
+                        'persen_capaian' => $persen,
+                        'bulan_sampai' => $bulan_sampai,
+                        'urutan' => $it['urutan'],
+                        'created_at' => date('Y-m-d H:i:s')
+                    ]);
                 }
+                $syncedCount++;
             }
 
             echo json_encode([
                 'status' => 'success',
-                'message' => "Berhasil menyinkronkan $updated data Realisasi Renaksi ke Laporan Anggaran!"
+                'message' => "Berhasil menyinkronkan $syncedCount data Sub Kegiatan dari Realisasi Renaksi ke Laporan Anggaran!"
             ]);
         } catch (Exception $e) {
             echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
@@ -21303,15 +21678,26 @@ public function updateStatusPerjanjianKinerja() {
         $Data['KodeWilayah'] = $KodeWilayah;
         $Data['NamaWilayah'] = '';
         $Data['IsRole4'] = $is_role_4;
+        $Data['IsDaerah'] = !$is_role_4;
         $Data['InstansiId'] = $instansi_id;
         $Data['ControllerName'] = 'Instansi';
 
         if (!empty($KodeWilayah)) {
             $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
             $Data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
+            $provKode = substr($KodeWilayah, 0, 2);
+            $Data['ListInstansi'] = $this->db
+                ->select('id, nama')
+                ->from('akun_instansi')
+                ->where("(kodewilayah = " . $this->db->escape($KodeWilayah) . " OR kodewilayah = " . $this->db->escape($provKode) . ")")
+                ->where('deleted_at IS NULL')
+                ->order_by('nama', 'ASC')
+                ->get()
+                ->result_array();
+        } else {
+            $Data['ListInstansi'] = $this->db->select('id, nama')->from('akun_instansi')->where('deleted_at IS NULL')->order_by('nama', 'ASC')->get()->result_array();
         }
 
-        $Data['ListInstansi'] = $this->db->select('id, nama')->from('akun_instansi')->where('deleted_at IS NULL')->order_by('nama', 'ASC')->get()->result_array();
         $Data['ListTahun'] = [2027, 2026, 2025, 2024, 2023];
         $Data['TahunAktif'] = (int)$tahun;
         $Data['FilterInstansi'] = $filter_instansi ? (int)$filter_instansi : 1;
@@ -21418,14 +21804,55 @@ public function updateStatusPerjanjianKinerja() {
     // 2. E-LKPJ: PENGISIAN CAPAIAN PROGRAM KEGIATAN
     // ================================================================
 
+    private function _ensure_cpk_table() {
+        if (!$this->db->table_exists('lkpj_capaian_program_kegiatan')) {
+            $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_capaian_program_kegiatan` (
+              `id` INT(11) NOT NULL AUTO_INCREMENT,
+              `kodewilayah` VARCHAR(20) DEFAULT '35.12',
+              `instansi_id` INT(11) DEFAULT 1,
+              `tahun` INT(4) NOT NULL DEFAULT 2026,
+              `urusan` VARCHAR(255) DEFAULT 'Semua Urusan',
+              `kebijakan` TEXT NOT NULL,
+              `tipe` ENUM('program','kegiatan') NOT NULL DEFAULT 'kegiatan',
+              `kode` VARCHAR(100) DEFAULT NULL,
+              `parent_id` INT(11) DEFAULT NULL,
+              `uraian` TEXT NOT NULL,
+              `indikator` TEXT DEFAULT NULL,
+              `satuan` VARCHAR(50) DEFAULT NULL,
+              `target` DECIMAL(14,2) DEFAULT 0.00,
+              `realisasi` DECIMAL(14,2) DEFAULT 0.00,
+              `capaian` DECIMAL(8,2) DEFAULT 0.00,
+              `anggaran` DECIMAL(20,2) DEFAULT 0.00,
+              `realisasi_anggaran` DECIMAL(20,2) DEFAULT 0.00,
+              `capaian_anggaran` DECIMAL(8,2) DEFAULT 0.00,
+              `permasalahan` TEXT DEFAULT NULL,
+              `upaya` TEXT DEFAULT NULL,
+              `tinjut` TEXT DEFAULT NULL,
+              `urutan` INT(11) DEFAULT 1,
+              `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+              `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              `deleted_at` DATETIME DEFAULT NULL,
+              PRIMARY KEY (`id`),
+              INDEX `idx_cpk_filter` (`tahun`, `urusan`, `instansi_id`, `deleted_at`),
+              INDEX `idx_cpk_parent` (`parent_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+        } else {
+            if (!$this->db->field_exists('kode', 'lkpj_capaian_program_kegiatan')) {
+                $this->db->query("ALTER TABLE `lkpj_capaian_program_kegiatan` ADD COLUMN `kode` VARCHAR(100) DEFAULT NULL AFTER `tipe`");
+            }
+        }
+    }
+
     public function PengisianCapaianProgramKegiatan() {
         $Header['Halaman'] = 'Pengisian Capaian Program Kegiatan';
         
+        $this->_ensure_cpk_table();
+
         $KodeWilayah = $this->get_kode_wilayah();
         $instansi_id = $this->get_instansi_id();
         $is_role_4 = $this->is_role_4();
         $tahun = $this->input->get('tahun', TRUE) ?: 2026;
-        $filter_urusan = $this->input->get('urusan', TRUE) ?: 'Perencanaan';
+        $filter_urusan = $this->input->get('urusan', TRUE) ?: 'Semua Urusan';
         $filter_instansi = $this->input->get('instansi_id', TRUE);
 
         if ($is_role_4 && $instansi_id) {
@@ -21435,86 +21862,367 @@ public function updateStatusPerjanjianKinerja() {
         $Data['KodeWilayah'] = $KodeWilayah;
         $Data['NamaWilayah'] = '';
         $Data['IsRole4'] = $is_role_4;
+        $Data['IsDaerah'] = !$is_role_4;
         $Data['InstansiId'] = $instansi_id;
         $Data['ControllerName'] = 'Instansi';
 
         if (!empty($KodeWilayah)) {
             $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
             $Data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
+            $provKode = substr($KodeWilayah, 0, 2);
+            $Data['ListInstansi'] = $this->db
+                ->select('id, nama')
+                ->from('akun_instansi')
+                ->where("(kodewilayah = " . $this->db->escape($KodeWilayah) . " OR kodewilayah = " . $this->db->escape($provKode) . ")")
+                ->where('deleted_at IS NULL')
+                ->order_by('nama', 'ASC')
+                ->get()
+                ->result_array();
+        } else {
+            $Data['ListInstansi'] = $this->db->select('id, nama')->from('akun_instansi')->where('deleted_at IS NULL')->order_by('nama', 'ASC')->get()->result_array();
         }
 
-        $Data['ListInstansi'] = $this->db->select('id, nama')->from('akun_instansi')->where('deleted_at IS NULL')->order_by('nama', 'ASC')->get()->result_array();
         $Data['ListTahun'] = [2027, 2026, 2025, 2024, 2023];
         $Data['TahunAktif'] = (int)$tahun;
-        $Data['FilterInstansi'] = $filter_instansi ? (int)$filter_instansi : 1;
+        $activeInstansi = $filter_instansi ? (int)$filter_instansi : ($Data['ListInstansi'][0]['id'] ?? 1);
+        $Data['FilterInstansi'] = $activeInstansi;
         $Data['FilterUrusan'] = $filter_urusan;
 
-        // Ambil daftar Urusan yang tersedia di DB
-        $dbUrusan = $this->db->select('DISTINCT(urusan) as ur')->where('deleted_at IS NULL')->get('lkpj_capaian_program_kegiatan')->result_array();
-        $listUrusan = [];
-        foreach ($dbUrusan as $du) {
-            if (!empty($du['ur'])) $listUrusan[] = $du['ur'];
+        // Ambil daftar Urusan yang tersedia
+        $listUrusan = ['Semua Urusan'];
+        $dbBidangUrusan = $this->db->select('DISTINCT(nama_bidang_urusan) as ur')
+            ->where('deleted_at IS NULL')
+            ->where('tahun', (int)$tahun);
+        if (!empty($activeInstansi)) {
+            $dbBidangUrusan->where('id_instansi', (int)$activeInstansi);
         }
+        $bUrRows = $dbBidangUrusan->get('belanja_sub_kegiatan_header')->result_array();
+        foreach ($bUrRows as $bu) {
+            $urText = trim($bu['ur'] ?? '');
+            if (!empty($urText) && !in_array($urText, $listUrusan)) {
+                $listUrusan[] = $urText;
+            }
+        }
+
+        if (!empty($KodeWilayah)) {
+            $uPdRows = $this->db->select('nama_urusan')->where('kodewilayah', $KodeWilayah)->where('deleted_at IS NULL')->get('urusan_pd')->result_array();
+            foreach ($uPdRows as $upd) {
+                $urText = trim($upd['nama_urusan'] ?? '');
+                if (!empty($urText) && !in_array($urText, $listUrusan)) {
+                    $listUrusan[] = $urText;
+                }
+            }
+        }
+
+        $dbUrusan = $this->db->select('DISTINCT(urusan) as ur')->where('deleted_at IS NULL')->get('lkpj_capaian_program_kegiatan')->result_array();
+        foreach ($dbUrusan as $du) {
+            $urText = trim($du['ur'] ?? '');
+            if (!empty($urText) && !in_array($urText, $listUrusan)) {
+                $listUrusan[] = $urText;
+            }
+        }
+
         if (!in_array('Perencanaan', $listUrusan)) $listUrusan[] = 'Perencanaan';
         if (!in_array('Keuangan', $listUrusan)) $listUrusan[] = 'Keuangan';
         if (!in_array('Kepegawaian', $listUrusan)) $listUrusan[] = 'Kepegawaian';
         $Data['ListUrusan'] = $listUrusan;
 
-        // Ambil Grouped Data
-        $Data['Groups'] = $this->_get_capaian_program_kegiatan_groups((int)$tahun, $filter_urusan, $filter_instansi ? (int)$filter_instansi : 1);
+        // Ambil Grouped Data otomatis dari Realisasi Renaksi & Kebijakan Sasaran Renstra
+        $Data['Groups'] = $this->_get_capaian_program_kegiatan_groups((int)$tahun, $filter_urusan, $activeInstansi);
 
         $this->load->view('Daerah/header', $Header);
         $this->load->view('Daerah/PengisianCapaianProgramKegiatan', $Data);
     }
 
     private function _get_capaian_program_kegiatan_groups($tahun, $urusan, $instansi_id) {
+        $this->_ensure_cpk_table();
+
+        $tahun = (int)($tahun ?: 2026);
+        $instansi_id = (int)($instansi_id ?: ($this->get_instansi_id() ?: 1));
+        $KodeWilayah = $this->get_kode_wilayah();
+        if (empty($KodeWilayah)) {
+            $instRow = $this->db->where('id', $instansi_id)->get('akun_instansi')->row_array();
+            $KodeWilayah = ($instRow && !empty($instRow['kodewilayah'])) ? $instRow['kodewilayah'] : '35.12';
+        }
+
+        // 1. Ambil target tree dari Realisasi / Target Renaksi (Tujuan -> Sasaran Strategis -> Program -> Kegiatan -> Sub Kegiatan)
+        $targetTree = $this->_buildTargetRenaksiHierarchy($KodeWilayah, $tahun, $instansi_id);
+
+        // 2. Ambil realisasi anggaran bulanan dari realisasi_renaksi_anggaran_bulanan
         $this->db->where('deleted_at IS NULL');
-        if ($tahun > 0) $this->db->where('tahun', $tahun);
-        if (!empty($urusan)) $this->db->where('urusan', $urusan);
-        if ($instansi_id > 0) $this->db->where('instansi_id', $instansi_id);
+        if (!empty($tahun) && $tahun !== 'all') $this->db->where('tahun', $tahun);
+        if (!empty($instansi_id)) $this->db->where('id_instansi', $instansi_id);
+        $realAngList = $this->db->get('realisasi_renaksi_anggaran_bulanan')->result_array();
+        $realAngMap = [];
+        $monthKeys = ['jan','feb','mar','apr','mei','jun','jul','ags','sep','okt','nov','des'];
+        foreach ($realAngList as $ra) {
+            $sumM = 0;
+            foreach ($monthKeys as $mk) {
+                if (isset($ra[$mk]) && $ra[$mk] !== null && $ra[$mk] !== '') {
+                    $sumM += (float)$ra[$mk];
+                }
+            }
+            if (!empty($ra['header_id'])) $realAngMap['h_' . $ra['header_id']] = $sumM;
+            if (!empty($ra['kode_sub_kegiatan'])) $realAngMap['c_' . trim($ra['kode_sub_kegiatan'])] = $sumM;
+        }
 
-        $rows = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_capaian_program_kegiatan')->result_array();
-
-        $groups = [];
-        $programMap = [];
-
-        foreach ($rows as $row) {
-            if ($row['tipe'] === 'program') {
-                $pId = (int)$row['id'];
-                $group = [
-                    'id' => $pId,
-                    'kebijakan' => $row['kebijakan'],
-                    'program' => $row,
-                    'kegiatan' => []
-                ];
-                $groups[$pId] = $group;
-                $programMap[$pId] = &$groups[$pId];
+        // 3. Ambil realisasi indikator dari realisasi_renaksi_indikator
+        $this->db->where('deleted_at IS NULL');
+        if (!empty($tahun) && $tahun !== 'all') $this->db->where('tahun', $tahun);
+        if (!empty($instansi_id)) $this->db->where('id_instansi', $instansi_id);
+        $realInds = $this->db->get('realisasi_renaksi_indikator')->result_array();
+        $realHierMap = [];
+        foreach ($realInds as $ri) {
+            $twArr = [
+                $ri['tw1'] !== null ? (float)$ri['tw1'] : null,
+                $ri['tw2'] !== null ? (float)$ri['tw2'] : null,
+                $ri['tw3'] !== null ? (float)$ri['tw3'] : null,
+                $ri['tw4'] !== null ? (float)$ri['tw4'] : null
+            ];
+            $k = $ri['level_type'] . '_' . trim($ri['entity_code']);
+            $realHierMap[$k] = $twArr;
+            if ($ri['indikator_id']) {
+                $realHierMap['ind_' . $ri['indikator_id']] = $twArr;
             }
         }
 
-        foreach ($rows as $row) {
-            if ($row['tipe'] === 'kegiatan') {
-                $parentId = (int)$row['parent_id'];
-                if (isset($groups[$parentId])) {
-                    $groups[$parentId]['kegiatan'][] = $row;
-                } else {
-                    // Fallback: assign to first program or create standalone group
-                    if (!empty($groups)) {
-                        $firstKey = array_key_first($groups);
-                        $groups[$firstKey]['kegiatan'][] = $row;
+        // 4. Ambil catatan evaluasi & override dari lkpj_capaian_program_kegiatan
+        $this->db->where('deleted_at IS NULL');
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+        if ($instansi_id > 0) $this->db->where('instansi_id', $instansi_id);
+        $savedRows = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_capaian_program_kegiatan')->result_array();
+        
+        $savedByTipeKode = [];
+        $savedByUraian = [];
+        $savedById = [];
+        foreach ($savedRows as $sr) {
+            $savedById[(int)$sr['id']] = $sr;
+            $kodeKey = !empty($sr['kode']) ? trim($sr['kode']) : '';
+            if ($kodeKey) {
+                $savedByTipeKode[$sr['tipe'] . '_' . $kodeKey] = $sr;
+            }
+            $uraianKey = strtolower(trim($sr['uraian']));
+            $savedByUraian[$sr['tipe'] . '_' . $uraianKey] = $sr;
+        }
+
+        // 5. Bangun Groups dari Pohon Renstra & Realisasi Renaksi
+        $groups = [];
+        $virtualIdCounter = 10000;
+        $matchedSavedIds = [];
+
+        foreach (($targetTree['tujuanList'] ?? []) as $t) {
+            foreach (($t['sasaranStrategisList'] ?? []) as $ss) {
+                $sasaranRenstra = $ss['nama'] ?: ('Sasaran ' . $ss['id']);
+
+                foreach (($ss['sasaranProgramList'] ?? []) as $sp) {
+                    $pKode = trim($sp['kode']);
+                    $pName = $sp['nomenklatur'] ?: $sp['nama'];
+
+                    // Bidang urusan / Urusan check
+                    $pUrusan = 'Perencanaan';
+                    if (!empty($sp['sasaranKegiatanList'][0]['sasaranSubKegiatanList'][0]['bidangUrusan'])) {
+                        $pUrusan = $sp['sasaranKegiatanList'][0]['sasaranSubKegiatanList'][0]['bidangUrusan'];
+                    }
+
+                    // Filter Urusan jika dipilih
+                    if (!empty($urusan) && $urusan !== 'Semua' && $urusan !== 'Semua Urusan') {
+                        $matchedUrusan = false;
+                        if (stripos($pUrusan, $urusan) !== false || stripos($urusan, $pUrusan) !== false) {
+                            $matchedUrusan = true;
+                        } else {
+                            foreach (($sp['sasaranKegiatanList'] ?? []) as $skCheck) {
+                                foreach (($skCheck['sasaranSubKegiatanList'] ?? []) as $subCheck) {
+                                    if (!empty($subCheck['bidangUrusan']) && (stripos($subCheck['bidangUrusan'], $urusan) !== false || stripos($urusan, $subCheck['bidangUrusan']) !== false)) {
+                                        $matchedUrusan = true;
+                                        $pUrusan = $subCheck['bidangUrusan'];
+                                        break 2;
+                                    }
+                                }
+                            }
+                        }
+                        if (!$matchedUrusan) {
+                            continue;
+                        }
+                    }
+
+                    // Indikator Program
+                    $pInd = !empty($sp['indikators'][0]) ? $sp['indikators'][0] : [
+                        'id' => 0, 'nama' => 'Indikator ' . $pName, 'satuan' => '%', 'targetTahunan' => 100
+                    ];
+                    $pTargetKin = isset($pInd['targetTahunan']) && (float)$pInd['targetTahunan'] > 0 ? (float)$pInd['targetTahunan'] : 100;
+                    
+                    // Realisasi Kinerja Program (TW4 atau nilai realisasi TW terakhir yang terisi)
+                    $pRealKin = null;
+                    $rProgKin = isset($realHierMap['program_' . $pKode]) ? $realHierMap['program_' . $pKode] : null;
+                    if ($rProgKin) {
+                        for ($tIdx = 3; $tIdx >= 0; $tIdx--) {
+                            if ($rProgKin[$tIdx] !== null) {
+                                $pRealKin = (float)$rProgKin[$tIdx];
+                                break;
+                            }
+                        }
+                    }
+                    $pCapaianKin = ($pTargetKin > 0 && $pRealKin !== null) ? round(($pRealKin / $pTargetKin) * 100, 2) : 0;
+
+                    // Saved evaluasi Program
+                    $savedProg = isset($savedByTipeKode['program_' . $pKode]) ? $savedByTipeKode['program_' . $pKode] : 
+                                (isset($savedByUraian['program_' . strtolower(trim($pName))]) ? $savedByUraian['program_' . strtolower(trim($pName))] : null);
+                    
+                    $progDbId = null;
+                    $progPermasalahan = '';
+                    $progUpaya = '';
+                    $progTinjut = '';
+                    if ($savedProg) {
+                        $progDbId = (int)$savedProg['id'];
+                        $matchedSavedIds[$progDbId] = true;
+                        $progPermasalahan = $savedProg['permasalahan'] ?? '';
+                        $progUpaya = $savedProg['upaya'] ?? '';
+                        $progTinjut = $savedProg['tinjut'] ?? '';
                     } else {
-                        $groups[0] = [
-                            'id' => 0,
-                            'kebijakan' => $row['kebijakan'],
-                            'program' => null,
-                            'kegiatan' => [$row]
+                        $virtualIdCounter++;
+                        $progDbId = $virtualIdCounter;
+                    }
+
+                    // Kegiatan List
+                    $kegiatanItems = [];
+                    $progTotalAnggaran = 0;
+                    $progTotalRealAnggaran = 0;
+
+                    foreach (($sp['sasaranKegiatanList'] ?? []) as $sk) {
+                        $kKode = trim($sk['kode']);
+                        $kName = $sk['nomenklatur'] ?: $sk['nama'];
+
+                        // Indikator Kegiatan
+                        $kInd = !empty($sk['indikators'][0]) ? $sk['indikators'][0] : [
+                            'id' => 0, 'nama' => 'Indikator ' . $kName, 'satuan' => '%', 'targetTahunan' => 100
+                        ];
+                        $kTargetKin = isset($kInd['targetTahunan']) && (float)$kInd['targetTahunan'] > 0 ? (float)$kInd['targetTahunan'] : 100;
+
+                        // Realisasi Kinerja Kegiatan
+                        $kRealKin = null;
+                        $rKegKin = isset($realHierMap['kegiatan_' . $kKode]) ? $realHierMap['kegiatan_' . $kKode] : null;
+                        if ($rKegKin) {
+                            for ($tIdx = 3; $tIdx >= 0; $tIdx--) {
+                                if ($rKegKin[$tIdx] !== null) {
+                                    $kRealKin = (float)$rKegKin[$tIdx];
+                                    break;
+                                }
+                            }
+                        }
+                        $kCapaianKin = ($kTargetKin > 0 && $kRealKin !== null) ? round(($kRealKin / $kTargetKin) * 100, 2) : 0;
+
+                        // Anggaran & Realisasi Anggaran Kegiatan (dari Sub Kegiatan)
+                        $kegAnggaran = 0;
+                        $kegRealAnggaran = 0;
+                        foreach (($sk['sasaranSubKegiatanList'] ?? []) as $sub) {
+                            $subAng = (float)($sub['anggaran'] ?? ($sub['targetAnggaran'] ?? 0));
+                            $kegAnggaran += $subAng;
+
+                            $hId = isset($sub['headerId']) ? (int)$sub['headerId'] : (int)$sub['id'];
+                            $subKode = trim($sub['kode']);
+                            $rSum = isset($realAngMap['h_' . $hId]) ? $realAngMap['h_' . $hId] : (isset($realAngMap['c_' . $subKode]) ? $realAngMap['c_' . $subKode] : 0);
+                            $kegRealAnggaran += $rSum;
+                        }
+
+                        $kCapaianAng = ($kegAnggaran > 0 && $kegRealAnggaran > 0) ? round(($kegRealAnggaran / $kegAnggaran) * 100, 2) : 0;
+
+                        $progTotalAnggaran += $kegAnggaran;
+                        $progTotalRealAnggaran += $kegRealAnggaran;
+
+                        // Saved evaluasi Kegiatan
+                        $savedKeg = isset($savedByTipeKode['kegiatan_' . $kKode]) ? $savedByTipeKode['kegiatan_' . $kKode] : 
+                                    (isset($savedByUraian['kegiatan_' . strtolower(trim($kName))]) ? $savedByUraian['kegiatan_' . strtolower(trim($kName))] : null);
+                        
+                        $kegDbId = null;
+                        $kegPermasalahan = '';
+                        $kegUpaya = '';
+                        $kegTinjut = '';
+                        if ($savedKeg) {
+                            $kegDbId = (int)$savedKeg['id'];
+                            $matchedSavedIds[$kegDbId] = true;
+                            $kegPermasalahan = $savedKeg['permasalahan'] ?? '';
+                            $kegUpaya = $savedKeg['upaya'] ?? '';
+                            $kegTinjut = $savedKeg['tinjut'] ?? '';
+                        } else {
+                            $virtualIdCounter++;
+                            $kegDbId = $virtualIdCounter;
+                        }
+
+                        $kegiatanItems[] = [
+                            'id' => $kegDbId,
+                            'parent_id' => $progDbId,
+                            'tipe' => 'kegiatan',
+                            'kode' => $kKode,
+                            'kebijakan' => $sasaranRenstra,
+                            'uraian' => $kName,
+                            'indikator' => $kInd['nama'],
+                            'satuan' => $kInd['satuan'] ?: '%',
+                            'target' => $kTargetKin,
+                            'realisasi' => $kRealKin,
+                            'capaian' => $kCapaianKin,
+                            'anggaran' => $kegAnggaran,
+                            'realisasi_anggaran' => $kegRealAnggaran,
+                            'capaian_anggaran' => $kCapaianAng,
+                            'permasalahan' => $kegPermasalahan,
+                            'upaya' => $kegUpaya,
+                            'tinjut' => $kegTinjut
                         ];
                     }
+
+                    $pCapaianAng = ($progTotalAnggaran > 0 && $progTotalRealAnggaran > 0) ? round(($progTotalRealAnggaran / $progTotalAnggaran) * 100, 2) : 0;
+
+                    $programRow = [
+                        'id' => $progDbId,
+                        'tipe' => 'program',
+                        'kode' => $pKode,
+                        'kebijakan' => $sasaranRenstra,
+                        'uraian' => $pName,
+                        'indikator' => $pInd['nama'],
+                        'satuan' => $pInd['satuan'] ?: '%',
+                        'target' => $pTargetKin,
+                        'realisasi' => $pRealKin,
+                        'capaian' => $pCapaianKin,
+                        'anggaran' => $progTotalAnggaran,
+                        'realisasi_anggaran' => $progTotalRealAnggaran,
+                        'capaian_anggaran' => $pCapaianAng,
+                        'permasalahan' => $progPermasalahan,
+                        'upaya' => $progUpaya,
+                        'tinjut' => $progTinjut
+                    ];
+
+                    $groups[] = [
+                        'id' => $progDbId,
+                        'kebijakan' => $sasaranRenstra,
+                        'program' => $programRow,
+                        'kegiatan' => $kegiatanItems
+                    ];
                 }
             }
         }
 
-        return array_values($groups);
+        // 6. Jika ada data lkpj_capaian_program_kegiatan yang belum masuk (manual data), tambahkan ke groups
+        foreach ($savedRows as $sr) {
+            if (isset($matchedSavedIds[(int)$sr['id']])) continue;
+            if ($sr['tipe'] === 'program') {
+                $pId = (int)$sr['id'];
+                $kegs = [];
+                foreach ($savedRows as $subSr) {
+                    if ($subSr['tipe'] === 'kegiatan' && (int)$subSr['parent_id'] === $pId) {
+                        $matchedSavedIds[(int)$subSr['id']] = true;
+                        $kegs[] = $subSr;
+                    }
+                }
+                $groups[] = [
+                    'id' => $pId,
+                    'kebijakan' => $sr['kebijakan'],
+                    'program' => $sr,
+                    'kegiatan' => $kegs
+                ];
+                $matchedSavedIds[$pId] = true;
+            }
+        }
+
+        return $groups;
     }
 
     public function GetCapaianProgramKegiatan() {
@@ -21525,7 +22233,7 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
 
         $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
-        $urusan = $this->input->post('urusan', TRUE) ?: 'Perencanaan';
+        $urusan = $this->input->post('urusan', TRUE) ?: 'Semua Urusan';
         $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: 1);
 
         $groups = $this->_get_capaian_program_kegiatan_groups($tahun, $urusan, $instansi_id);
@@ -21540,13 +22248,16 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
 
         try {
+            $this->_ensure_cpk_table();
+
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
             $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
-            $urusan = trim($this->input->post('urusan', TRUE) ?: 'Perencanaan');
+            $urusan = trim($this->input->post('urusan', TRUE) ?: 'Semua Urusan');
             $kebijakan = trim($this->input->post('kebijakan', TRUE));
             $tipe = trim($this->input->post('tipe', TRUE) ?: 'kegiatan');
+            $kode = trim($this->input->post('kode', TRUE));
             $parent_id = $this->input->post('parent_id', TRUE) ? (int)$this->input->post('parent_id', TRUE) : null;
             $uraian = trim($this->input->post('uraian', TRUE));
             $indikator = trim($this->input->post('indikator', TRUE));
@@ -21575,6 +22286,7 @@ public function updateStatusPerjanjianKinerja() {
                 'urusan' => $urusan,
                 'kebijakan' => $kebijakan,
                 'tipe' => $tipe,
+                'kode' => $kode,
                 'parent_id' => $parent_id,
                 'uraian' => $uraian,
                 'indikator' => $indikator,
@@ -21591,16 +22303,33 @@ public function updateStatusPerjanjianKinerja() {
                 'updated_at' => date('Y-m-d H:i:s')
             ];
 
-            if ($id > 0) {
+            if ($id > 0 && $this->db->where('id', $id)->count_all_results('lkpj_capaian_program_kegiatan') > 0) {
                 $this->db->where('id', $id)->update('lkpj_capaian_program_kegiatan', $saveData);
                 $msg = 'Data Capaian Program/Kegiatan berhasil diperbarui.';
             } else {
-                $maxUrutan = $this->db->select_max('urutan')->where('tahun', $tahun)->where('instansi_id', $instansi_id)->get('lkpj_capaian_program_kegiatan')->row_array();
-                $saveData['urutan'] = isset($maxUrutan['urutan']) ? ((int)$maxUrutan['urutan'] + 1) : 1;
-                $saveData['created_at'] = date('Y-m-d H:i:s');
-                $this->db->insert('lkpj_capaian_program_kegiatan', $saveData);
-                $id = $this->db->insert_id();
-                $msg = 'Data Capaian Program/Kegiatan berhasil ditambahkan.';
+                // Cari apakah sudah ada data untuk instansi, tahun, tipe, kode/uraian
+                $checkQuery = $this->db->where('instansi_id', $instansi_id)
+                    ->where('tahun', $tahun)
+                    ->where('tipe', $tipe)
+                    ->where('deleted_at IS NULL');
+                if (!empty($kode)) {
+                    $checkQuery->where('kode', $kode);
+                } else {
+                    $checkQuery->where('uraian', $uraian);
+                }
+                $existing = $checkQuery->get('lkpj_capaian_program_kegiatan')->row_array();
+                if ($existing) {
+                    $id = (int)$existing['id'];
+                    $this->db->where('id', $id)->update('lkpj_capaian_program_kegiatan', $saveData);
+                    $msg = 'Data Capaian Program/Kegiatan berhasil diperbarui.';
+                } else {
+                    $maxUrutan = $this->db->select_max('urutan')->where('tahun', $tahun)->where('instansi_id', $instansi_id)->get('lkpj_capaian_program_kegiatan')->row_array();
+                    $saveData['urutan'] = isset($maxUrutan['urutan']) ? ((int)$maxUrutan['urutan'] + 1) : 1;
+                    $saveData['created_at'] = date('Y-m-d H:i:s');
+                    $this->db->insert('lkpj_capaian_program_kegiatan', $saveData);
+                    $id = $this->db->insert_id();
+                    $msg = 'Data Capaian Program/Kegiatan berhasil ditambahkan.';
+                }
             }
 
             echo json_encode([
@@ -21621,8 +22350,25 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
 
         try {
+            $this->_ensure_cpk_table();
+
             $id = (int)$this->input->post('id', TRUE);
-            if ($id <= 0) throw new Exception('ID program/kegiatan tidak valid.');
+            $kode = trim($this->input->post('kode', TRUE));
+            $tipe = trim($this->input->post('tipe', TRUE) ?: 'kegiatan');
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $urusan = trim($this->input->post('urusan', TRUE) ?: 'Semua Urusan');
+            $kebijakan = trim($this->input->post('kebijakan', TRUE));
+            $uraian = trim($this->input->post('uraian', TRUE));
+            $indikator = trim($this->input->post('indikator', TRUE));
+            $satuan = trim($this->input->post('satuan', TRUE));
+            $target = (float)$this->input->post('target', TRUE);
+            $realisasi = (float)$this->input->post('realisasi', TRUE);
+            $capaian = (float)$this->input->post('capaian', TRUE);
+            $anggaran = (float)$this->input->post('anggaran', TRUE);
+            $realisasi_anggaran = (float)$this->input->post('realisasi_anggaran', TRUE);
+            $capaian_anggaran = (float)$this->input->post('capaian_anggaran', TRUE);
 
             $permasalahan = trim($this->input->post('permasalahan', TRUE));
             $upaya = trim($this->input->post('upaya', TRUE));
@@ -21635,7 +22381,54 @@ public function updateStatusPerjanjianKinerja() {
                 'updated_at' => date('Y-m-d H:i:s')
             ];
 
-            $this->db->where('id', $id)->update('lkpj_capaian_program_kegiatan', $updateData);
+            if ($id > 0 && $this->db->where('id', $id)->count_all_results('lkpj_capaian_program_kegiatan') > 0) {
+                $this->db->where('id', $id)->update('lkpj_capaian_program_kegiatan', $updateData);
+            } else {
+                // Cek apakah ada record di lkpj_capaian_program_kegiatan berdasarkan kode / uraian
+                $checkQuery = $this->db->where('instansi_id', $instansi_id)
+                    ->where('tahun', $tahun)
+                    ->where('tipe', $tipe)
+                    ->where('deleted_at IS NULL');
+                if (!empty($kode)) {
+                    $checkQuery->where('kode', $kode);
+                } else if (!empty($uraian)) {
+                    $checkQuery->where('uraian', $uraian);
+                }
+                $existing = $checkQuery->get('lkpj_capaian_program_kegiatan')->row_array();
+
+                if ($existing) {
+                    $id = (int)$existing['id'];
+                    $this->db->where('id', $id)->update('lkpj_capaian_program_kegiatan', $updateData);
+                } else {
+                    $insertData = [
+                        'kodewilayah' => $kode_wilayah,
+                        'instansi_id' => $instansi_id,
+                        'tahun' => $tahun,
+                        'urusan' => $urusan,
+                        'kebijakan' => $kebijakan,
+                        'tipe' => $tipe,
+                        'kode' => $kode,
+                        'uraian' => $uraian,
+                        'indikator' => $indikator,
+                        'satuan' => $satuan,
+                        'target' => $target,
+                        'realisasi' => $realisasi,
+                        'capaian' => $capaian,
+                        'anggaran' => $anggaran,
+                        'realisasi_anggaran' => $realisasi_anggaran,
+                        'capaian_anggaran' => $capaian_anggaran,
+                        'permasalahan' => $permasalahan,
+                        'upaya' => $upaya,
+                        'tinjut' => $tinjut,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ];
+                    $maxUrutan = $this->db->select_max('urutan')->where('tahun', $tahun)->where('instansi_id', $instansi_id)->get('lkpj_capaian_program_kegiatan')->row_array();
+                    $insertData['urutan'] = isset($maxUrutan['urutan']) ? ((int)$maxUrutan['urutan'] + 1) : 1;
+                    $this->db->insert('lkpj_capaian_program_kegiatan', $insertData);
+                    $id = $this->db->insert_id();
+                }
+            }
 
             echo json_encode([
                 'status' => 'success',
@@ -21673,6 +22466,198 @@ public function updateStatusPerjanjianKinerja() {
     // 3. E-LKPJ: PENGISIAN TINJUT REKOMENDASI DPRD N-1
     // ================================================================
 
+    private function _ensure_tinjut_dprd_table() {
+        if (!$this->db->table_exists('lkpj_rekomendasi_dprd_master')) {
+            $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_rekomendasi_dprd_master` (
+              `id` INT(11) NOT NULL AUTO_INCREMENT,
+              `kodewilayah` VARCHAR(20) DEFAULT '35.12',
+              `instansi_id` INT(11) DEFAULT 0,
+              `tahun` INT(4) NOT NULL DEFAULT 2026,
+              `rekomendasi` TEXT NOT NULL,
+              `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+              `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              `deleted_at` DATETIME DEFAULT NULL,
+              PRIMARY KEY (`id`),
+              INDEX `idx_rekom_daerah` (`kodewilayah`, `tahun`, `instansi_id`, `deleted_at`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+        } else {
+            if (!$this->db->field_exists('instansi_id', 'lkpj_rekomendasi_dprd_master')) {
+                $this->db->query("ALTER TABLE `lkpj_rekomendasi_dprd_master` ADD COLUMN `instansi_id` INT(11) DEFAULT 0 AFTER `kodewilayah`, ADD INDEX (`instansi_id`)");
+            }
+        }
+
+        if (!$this->db->table_exists('lkpj_tinjut_rekomendasi_dprd')) {
+            $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_tinjut_rekomendasi_dprd` (
+              `id` INT(11) NOT NULL AUTO_INCREMENT,
+              `rekomendasi_id` INT(11) DEFAULT NULL,
+              `kodewilayah` VARCHAR(20) DEFAULT '35.12',
+              `instansi_id` INT(11) DEFAULT 1,
+              `tahun` INT(4) NOT NULL DEFAULT 2026,
+              `rekomendasi` TEXT DEFAULT NULL,
+              `tindak_lanjut` TEXT DEFAULT NULL,
+              `tujuan_masalah` TEXT DEFAULT NULL,
+              `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+              `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              `deleted_at` DATETIME DEFAULT NULL,
+              PRIMARY KEY (`id`),
+              INDEX `idx_tr_filter` (`tahun`, `instansi_id`, `deleted_at`),
+              INDEX `idx_tr_rekom` (`rekomendasi_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+        } else {
+            if (!$this->db->field_exists('rekomendasi_id', 'lkpj_tinjut_rekomendasi_dprd')) {
+                $this->db->query("ALTER TABLE `lkpj_tinjut_rekomendasi_dprd` ADD COLUMN `rekomendasi_id` INT(11) DEFAULT NULL AFTER `id`, ADD INDEX (`rekomendasi_id`)");
+            }
+        }
+
+        // Seed master if master table is empty
+        $countMaster = $this->db->where('deleted_at IS NULL')->count_all_results('lkpj_rekomendasi_dprd_master');
+        if ($countMaster == 0) {
+            $old_items = $this->db->where('deleted_at IS NULL')->group_by(['tahun', 'rekomendasi'])->get('lkpj_tinjut_rekomendasi_dprd')->result_array();
+            if (!empty($old_items)) {
+                foreach ($old_items as $old) {
+                    if (!empty(trim($old['rekomendasi']))) {
+                        $this->db->insert('lkpj_rekomendasi_dprd_master', [
+                            'kodewilayah' => !empty($old['kodewilayah']) ? $old['kodewilayah'] : '35.12',
+                            'instansi_id' => !empty($old['instansi_id']) ? (int)$old['instansi_id'] : 0,
+                            'tahun' => !empty($old['tahun']) ? (int)$old['tahun'] : 2026,
+                            'rekomendasi' => trim($old['rekomendasi']),
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s')
+                        ]);
+                        $m_id = $this->db->insert_id();
+                        $this->db->where('rekomendasi', $old['rekomendasi'])->update('lkpj_tinjut_rekomendasi_dprd', ['rekomendasi_id' => $m_id]);
+                    }
+                }
+            } else {
+                $seeds = [
+                    'Terhadap kegiatan intervensi untuk menekan tingkat ketimpangan ekonomi, tentunya patut direkomendasikan dilakukan evaluasi pada setiap sector/cluster kebijakan strategis, agar dicapai kegiatan maupun kebijakan inovatif yang berfokus pada penurunan ketimpangan ekonomi, dengan memperhatikan Kebijakan inovatif yang mengintegrasikan program prioritas Kabupaten, Provinsi dan Nasional.',
+                    'Bahwa dalam rangka mewujudkan pertumbuhan ekonomi Situbondo yang inklusif, penting untuk direkomendasikan adanya pertumbuhan pada sektor- sektor kerakyatan yang dominan menyerap tenaga kerja, seperti pertanian dan kehutanan dan perikanan dengan strategi kebijakan yang progresif (intensifikasi dan ekstensifikasi produksi, pemasaran, teknologi, pemberdayaan penyuluh, sarana irigasi, aplikasi pertanian organic).'
+                ];
+                foreach ($seeds as $s) {
+                    $this->db->insert('lkpj_rekomendasi_dprd_master', [
+                        'kodewilayah' => '35.12',
+                        'instansi_id' => 0,
+                        'tahun' => 2026,
+                        'rekomendasi' => $s,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+                }
+            }
+        }
+    }
+
+    private function _get_tinjut_rekomendasi_dprd_items($tahun, $instansi_id, $KodeWilayah = null, $is_role_4 = false) {
+        $this->_ensure_tinjut_dprd_table();
+
+        // Get map of instansi filtered by region if set
+        $this->db->select('id, nama')->where('deleted_at IS NULL');
+        if (!empty($KodeWilayah)) {
+            $this->db->where('kodewilayah', $KodeWilayah);
+        }
+        $instList = $this->db->get('akun_instansi')->result_array();
+        $instMap = [];
+        foreach ($instList as $ins) {
+            $instMap[(int)$ins['id']] = $ins['nama'];
+        }
+
+        $this->db->where('deleted_at IS NULL');
+        if ($tahun > 0) $this->db->where('tahun', (int)$tahun);
+        if (!empty($KodeWilayah)) {
+            $this->db->where('kodewilayah', $KodeWilayah);
+        }
+
+        // If filtering for a specific instansi
+        if ($instansi_id > 0) {
+            $this->db->group_start()
+                ->where('instansi_id', (int)$instansi_id)
+                ->or_where('instansi_id', 0)
+                ->or_where('instansi_id IS NULL')
+                ->group_end();
+        }
+
+        $masters = $this->db->order_by('id', 'ASC')->get('lkpj_rekomendasi_dprd_master')->result_array();
+
+        $this->db->where('deleted_at IS NULL');
+        if ($tahun > 0) $this->db->where('tahun', (int)$tahun);
+        if (!empty($KodeWilayah)) {
+            $this->db->where('kodewilayah', $KodeWilayah);
+        }
+        if ($instansi_id > 0) $this->db->where('instansi_id', (int)$instansi_id);
+        $tinjuts = $this->db->get('lkpj_tinjut_rekomendasi_dprd')->result_array();
+
+        $tinjut_by_rekom = [];
+        $tinjut_by_text = [];
+        foreach ($tinjuts as $t) {
+            if (!empty($t['rekomendasi_id'])) {
+                $tinjut_by_rekom[$t['rekomendasi_id']] = $t;
+            }
+            if (!empty($t['rekomendasi'])) {
+                $tinjut_by_text[trim($t['rekomendasi'])] = $t;
+            }
+        }
+
+        $items = [];
+        $usedTinjutIds = [];
+
+        foreach ($masters as $m) {
+            $matched = null;
+            if (!empty($m['id']) && isset($tinjut_by_rekom[$m['id']])) {
+                $matched = $tinjut_by_rekom[$m['id']];
+            } elseif (!empty($m['rekomendasi']) && isset($tinjut_by_text[trim($m['rekomendasi'])])) {
+                $matched = $tinjut_by_text[trim($m['rekomendasi'])];
+            }
+
+            if ($matched) {
+                $usedTinjutIds[] = $matched['id'];
+            }
+
+            $tagId = !empty($m['instansi_id']) ? (int)$m['instansi_id'] : 0;
+            $tagNama = ($tagId > 0 && isset($instMap[$tagId])) ? $instMap[$tagId] : 'Semua Perangkat Daerah';
+
+            $items[] = [
+                'id' => $matched ? (int)$matched['id'] : 0,
+                'rekomendasi_id' => (int)$m['id'],
+                'target_instansi_id' => $tagId,
+                'target_instansi_nama' => $tagNama,
+                'kodewilayah' => $m['kodewilayah'],
+                'instansi_id' => (int)$instansi_id,
+                'tahun' => (int)$m['tahun'],
+                'rekomendasi' => $m['rekomendasi'],
+                'tindak_lanjut' => $matched ? ($matched['tindak_lanjut'] ?: '') : '',
+                'tujuan_masalah' => $matched ? ($matched['tujuan_masalah'] ?: '') : '',
+                'is_master' => 1
+            ];
+        }
+
+        // Standalone tinjut records
+        foreach ($tinjuts as $t) {
+            if (!in_array($t['id'], $usedTinjutIds)) {
+                if (!empty($KodeWilayah) && !empty($t['kodewilayah']) && $t['kodewilayah'] !== $KodeWilayah) {
+                    continue;
+                }
+                $tagId = !empty($t['instansi_id']) ? (int)$t['instansi_id'] : 0;
+                $tagNama = ($tagId > 0 && isset($instMap[$tagId])) ? $instMap[$tagId] : 'Semua Perangkat Daerah';
+
+                $items[] = [
+                    'id' => (int)$t['id'],
+                    'rekomendasi_id' => !empty($t['rekomendasi_id']) ? (int)$t['rekomendasi_id'] : 0,
+                    'target_instansi_id' => $tagId,
+                    'target_instansi_nama' => $tagNama,
+                    'kodewilayah' => $t['kodewilayah'],
+                    'instansi_id' => (int)$t['instansi_id'],
+                    'tahun' => (int)$t['tahun'],
+                    'rekomendasi' => $t['rekomendasi'] ?: '',
+                    'tindak_lanjut' => $t['tindak_lanjut'] ?: '',
+                    'tujuan_masalah' => $t['tujuan_masalah'] ?: '',
+                    'is_master' => 0
+                ];
+            }
+        }
+
+        return $items;
+    }
+
     public function PengisianTinjutRekomendasiDPRDn1() {
         $Header['Halaman'] = 'Pengisian Tindak Lanjut Rekomendasi DPRD n-1';
         
@@ -21689,6 +22674,7 @@ public function updateStatusPerjanjianKinerja() {
         $Data['KodeWilayah'] = $KodeWilayah;
         $Data['NamaWilayah'] = '';
         $Data['IsRole4'] = $is_role_4;
+        $Data['IsDaerah'] = !$is_role_4;
         $Data['InstansiId'] = $instansi_id;
         $Data['ControllerName'] = 'Instansi';
 
@@ -21697,15 +22683,16 @@ public function updateStatusPerjanjianKinerja() {
             $Data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
         }
 
-        $Data['ListInstansi'] = $this->db->select('id, nama')->from('akun_instansi')->where('deleted_at IS NULL')->order_by('nama', 'ASC')->get()->result_array();
+        $this->db->select('id, nama')->from('akun_instansi')->where('deleted_at IS NULL');
+        if (!empty($KodeWilayah)) {
+            $this->db->where('kodewilayah', $KodeWilayah);
+        }
+        $Data['ListInstansi'] = $this->db->order_by('nama', 'ASC')->get()->result_array();
         $Data['ListTahun'] = [2027, 2026, 2025, 2024, 2023];
         $Data['TahunAktif'] = (int)$tahun;
-        $Data['FilterInstansi'] = $filter_instansi ? (int)$filter_instansi : 1;
+        $Data['FilterInstansi'] = $filter_instansi !== null && $filter_instansi !== '' ? (int)$filter_instansi : ($is_role_4 ? (int)$instansi_id : 0);
 
-        $this->db->where('deleted_at IS NULL');
-        if ($tahun) $this->db->where('tahun', (int)$tahun);
-        if ($filter_instansi) $this->db->where('instansi_id', (int)$filter_instansi);
-        $items = $this->db->order_by('id', 'ASC')->get('lkpj_tinjut_rekomendasi_dprd')->result_array();
+        $items = $this->_get_tinjut_rekomendasi_dprd_items($tahun, $Data['FilterInstansi'], $KodeWilayah, $is_role_4);
 
         $filled = 0;
         foreach ($items as $it) {
@@ -21740,13 +22727,17 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
 
         $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
-        $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+        $is_role_4 = $this->is_role_4();
+        $KodeWilayah = $this->get_kode_wilayah();
 
-        $this->db->where('deleted_at IS NULL');
-        if ($tahun > 0) $this->db->where('tahun', $tahun);
-        if ($instansi_id > 0) $this->db->where('instansi_id', $instansi_id);
+        $post_instansi = $this->input->post('instansi_id', TRUE);
+        if ($post_instansi !== null && $post_instansi !== '') {
+            $instansi_id = (int)$post_instansi;
+        } else {
+            $instansi_id = $is_role_4 ? (int)($this->get_instansi_id() ?: 0) : 0;
+        }
 
-        $items = $this->db->order_by('id', 'ASC')->get('lkpj_tinjut_rekomendasi_dprd')->result_array();
+        $items = $this->_get_tinjut_rekomendasi_dprd_items($tahun, $instansi_id, $KodeWilayah, $is_role_4);
 
         $filled = 0;
         foreach ($items as $it) {
@@ -21776,49 +22767,110 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
 
         try {
+            $this->_ensure_tinjut_dprd_table();
+
             $id = (int)$this->input->post('id', TRUE);
+            $rekomendasi_id = (int)$this->input->post('rekomendasi_id', TRUE);
+            $target_instansi_id = (int)$this->input->post('target_instansi_id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
             $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $rekomendasi = trim($this->input->post('rekomendasi', TRUE));
             $tindak_lanjut = trim($this->input->post('tindak_lanjut', TRUE));
             $tujuan_masalah = trim($this->input->post('tujuan_masalah', TRUE));
+            $action_type = $this->input->post('action_type', TRUE);
 
-            if ($id > 0) {
-                // Rekomendasi DPRD bersifat mutlak / immutable dari relasi data lain
-                $saveData = [
-                    'kodewilayah' => $kode_wilayah,
-                    'instansi_id' => $instansi_id,
-                    'tahun' => $tahun,
-                    'tindak_lanjut' => $tindak_lanjut,
-                    'tujuan_masalah' => $tujuan_masalah,
-                    'updated_at' => date('Y-m-d H:i:s')
-                ];
-                $this->db->where('id', $id)->update('lkpj_tinjut_rekomendasi_dprd', $saveData);
-                $msg = 'Tindak Lanjut Rekomendasi DPRD berhasil diperbarui.';
-            } else {
-                $rekomendasi = trim($this->input->post('rekomendasi', TRUE));
+            if ($action_type === 'daerah_master') {
                 if (empty($rekomendasi)) {
-                    throw new Exception('Rekomendasi DPRD wajib diisi.');
+                    throw new Exception('Uraian Rekomendasi DPRD wajib diisi.');
                 }
-                $saveData = [
-                    'kodewilayah' => $kode_wilayah,
-                    'instansi_id' => $instansi_id,
-                    'tahun' => $tahun,
-                    'rekomendasi' => $rekomendasi,
-                    'tindak_lanjut' => $tindak_lanjut,
-                    'tujuan_masalah' => $tujuan_masalah,
-                    'created_at' => date('Y-m-d H:i:s'),
-                    'updated_at' => date('Y-m-d H:i:s')
-                ];
-                $this->db->insert('lkpj_tinjut_rekomendasi_dprd', $saveData);
-                $id = $this->db->insert_id();
-                $msg = 'Tindak Lanjut Rekomendasi DPRD berhasil ditambahkan.';
+                if ($rekomendasi_id > 0) {
+                    $this->db->where('id', $rekomendasi_id)->update('lkpj_rekomendasi_dprd_master', [
+                        'rekomendasi' => $rekomendasi,
+                        'instansi_id' => $target_instansi_id,
+                        'tahun' => $tahun,
+                        'kodewilayah' => $kode_wilayah,
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+                    $msg = 'Rekomendasi DPRD Daerah berhasil diperbarui.';
+                } else {
+                    $this->db->insert('lkpj_rekomendasi_dprd_master', [
+                        'kodewilayah' => $kode_wilayah,
+                        'instansi_id' => $target_instansi_id,
+                        'tahun' => $tahun,
+                        'rekomendasi' => $rekomendasi,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+                    $rekomendasi_id = $this->db->insert_id();
+                    $msg = 'Rekomendasi DPRD Daerah berhasil ditambahkan.';
+                }
+            } else {
+                // Instansi input Tindak Lanjut & Tujuan / Masalah
+                if (empty($tindak_lanjut)) {
+                    throw new Exception('Tindak Lanjut yang dilakukan wajib diisi.');
+                }
+                if (empty($tujuan_masalah)) {
+                    throw new Exception('Tujuan / Masalah yang diselesaikan wajib diisi.');
+                }
+
+                $existing = null;
+                if ($id > 0) {
+                    $existing = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('lkpj_tinjut_rekomendasi_dprd')->row_array();
+                }
+                if (!$existing && $rekomendasi_id > 0) {
+                    $existing = $this->db->where('rekomendasi_id', $rekomendasi_id)
+                        ->where('instansi_id', $instansi_id)
+                        ->where('tahun', $tahun)
+                        ->where('deleted_at IS NULL')
+                        ->get('lkpj_tinjut_rekomendasi_dprd')->row_array();
+                }
+
+                if (empty($rekomendasi) && $rekomendasi_id > 0) {
+                    $masterRow = $this->db->where('id', $rekomendasi_id)->get('lkpj_rekomendasi_dprd_master')->row_array();
+                    if ($masterRow) {
+                        $rekomendasi = $masterRow['rekomendasi'];
+                    }
+                }
+
+                if ($existing) {
+                    $saveData = [
+                        'rekomendasi_id' => $rekomendasi_id ?: $existing['rekomendasi_id'],
+                        'tindak_lanjut' => $tindak_lanjut,
+                        'tujuan_masalah' => $tujuan_masalah,
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ];
+                    if (!empty($rekomendasi)) {
+                        $saveData['rekomendasi'] = $rekomendasi;
+                    }
+                    $this->db->where('id', $existing['id'])->update('lkpj_tinjut_rekomendasi_dprd', $saveData);
+                    $id = $existing['id'];
+                    $msg = 'Tindak Lanjut Rekomendasi DPRD berhasil disimpan.';
+                } else {
+                    $saveData = [
+                        'rekomendasi_id' => $rekomendasi_id,
+                        'kodewilayah' => $kode_wilayah,
+                        'instansi_id' => $instansi_id,
+                        'tahun' => $tahun,
+                        'rekomendasi' => $rekomendasi,
+                        'tindak_lanjut' => $tindak_lanjut,
+                        'tujuan_masalah' => $tujuan_masalah,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ];
+                    $this->db->insert('lkpj_tinjut_rekomendasi_dprd', $saveData);
+                    $id = $this->db->insert_id();
+                    $msg = 'Tindak Lanjut Rekomendasi DPRD berhasil disimpan.';
+                }
             }
 
             echo json_encode([
                 'status' => 'success',
                 'message' => $msg,
-                'data' => array_merge(['id' => $id], $saveData)
+                'data' => [
+                    'id' => $id,
+                    'rekomendasi_id' => $rekomendasi_id
+                ]
             ]);
         } catch (Exception $e) {
             echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
@@ -21834,13 +22886,29 @@ public function updateStatusPerjanjianKinerja() {
 
         try {
             $id = (int)$this->input->post('id', TRUE);
-            if ($id <= 0) throw new Exception('ID data tidak valid.');
+            $rekomendasi_id = (int)$this->input->post('rekomendasi_id', TRUE);
+            $is_master = (int)$this->input->post('is_master', TRUE);
 
-            $this->db->where('id', $id)->update('lkpj_tinjut_rekomendasi_dprd', [
-                'deleted_at' => date('Y-m-d H:i:s')
-            ]);
+            if ($is_master && $rekomendasi_id > 0) {
+                $this->db->where('id', $rekomendasi_id)->update('lkpj_rekomendasi_dprd_master', [
+                    'deleted_at' => date('Y-m-d H:i:s')
+                ]);
+                $this->db->where('rekomendasi_id', $rekomendasi_id)->update('lkpj_tinjut_rekomendasi_dprd', [
+                    'deleted_at' => date('Y-m-d H:i:s')
+                ]);
+                $msg = 'Rekomendasi DPRD Daerah berhasil dihapus.';
+            } elseif ($id > 0) {
+                $this->db->where('id', $id)->update('lkpj_tinjut_rekomendasi_dprd', [
+                    'tindak_lanjut' => null,
+                    'tujuan_masalah' => null,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ]);
+                $msg = 'Tindak Lanjut instansi berhasil direset.';
+            } else {
+                throw new Exception('ID data tidak valid.');
+            }
 
-            echo json_encode(['status' => 'success', 'message' => 'Data Rekomendasi DPRD berhasil dihapus.']);
+            echo json_encode(['status' => 'success', 'message' => $msg]);
         } catch (Exception $e) {
             echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }
@@ -21866,15 +22934,26 @@ public function updateStatusPerjanjianKinerja() {
         $Data['KodeWilayah'] = $KodeWilayah;
         $Data['NamaWilayah'] = '';
         $Data['IsRole4'] = $is_role_4;
+        $Data['IsDaerah'] = !$is_role_4;
         $Data['InstansiId'] = $instansi_id;
         $Data['ControllerName'] = 'Instansi';
 
         if (!empty($KodeWilayah)) {
             $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
             $Data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
+            $provKode = substr($KodeWilayah, 0, 2);
+            $Data['ListInstansi'] = $this->db
+                ->select('id, nama')
+                ->from('akun_instansi')
+                ->where("(kodewilayah = " . $this->db->escape($KodeWilayah) . " OR kodewilayah = " . $this->db->escape($provKode) . ")")
+                ->where('deleted_at IS NULL')
+                ->order_by('nama', 'ASC')
+                ->get()
+                ->result_array();
+        } else {
+            $Data['ListInstansi'] = $this->db->select('id, nama')->from('akun_instansi')->where('deleted_at IS NULL')->order_by('nama', 'ASC')->get()->result_array();
         }
 
-        $Data['ListInstansi'] = $this->db->select('id, nama')->from('akun_instansi')->where('deleted_at IS NULL')->order_by('nama', 'ASC')->get()->result_array();
         $Data['ListTahun'] = [2027, 2026, 2025, 2024, 2023];
         $Data['TahunAktif'] = (int)$tahun;
         $Data['FilterInstansi'] = $filter_instansi ? (int)$filter_instansi : 1;

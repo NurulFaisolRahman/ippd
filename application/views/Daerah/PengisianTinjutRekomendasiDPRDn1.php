@@ -307,16 +307,16 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
   display: none;
   align-items: flex-start;
   justify-content: center;
-  padding: 36px 16px;
+  padding: 85px 16px 40px;
   overflow-y: auto;
-  z-index: 1050;
+  z-index: 999999 !important;
 }
 .modal-overlay.open { display: flex; }
 
 .modal-box {
   background: #fff;
   width: 100%;
-  max-width: 680px;
+  max-width: 720px;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-modal);
   padding: 28px 30px;
@@ -453,6 +453,34 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
+.badge-instansi-table {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #0284c7;
+  background: #e0f2fe;
+  padding: 2px 7px;
+  border-radius: 4px;
+  margin-left: 4px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.badge-tag-instansi {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
 .field-readonly-hint {
   display: flex;
   align-items: center;
@@ -538,11 +566,11 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
   <div class="page-header-box">
     <div class="page-badge"><i class="fa fa-institution"></i> E-LKPJ Perangkat Daerah</div>
     <h1 class="page-title">Tindak Lanjut Rekomendasi DPRD Tahun N-1</h1>
-    <p class="page-subtitle">Pencatatan dan pemantauan tindak lanjut atas catatan serta rekomendasi DPRD tahun anggaran sebelumnya beserta tujuan penyelesaiannya.</p>
+    <p class="page-subtitle">Pencatatan rekomendasi DPRD oleh Pemerintah Daerah dengan penandaan (tagging) Perangkat Daerah / Dinas terkait, serta pelaporan tindak lanjut dan tujuan penyelesaian oleh masing-masing instansi.</p>
     
     <div class="stat-chips-row">
       <span class="stat-chip"><span class="stat-dot dot-green"></span> <span id="statFilledText"><?= $stats['filled'] ?> dari <?= $stats['total'] ?></span> telah ditindaklanjuti</span>
-      <span class="stat-chip"><span class="stat-dot dot-amber"></span> <span id="statPendingText"><?= $stats['pending'] ?></span> belum diisi</span>
+      <span class="stat-chip"><span class="stat-dot dot-amber"></span> <span id="statPendingText"><?= $stats['pending'] ?></span> belum diisi tindak lanjut</span>
     </div>
   </div>
 
@@ -558,20 +586,27 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
         </select>
       </div>
 
-      <div class="t-field">
-        <label for="selectInstansi">Perangkat Daerah / Instansi</label>
-        <select id="selectInstansi" class="t-select" style="min-width: 260px;">
-          <?php foreach ($ListInstansi as $inst): ?>
-            <option value="<?= $inst['id'] ?>" <?= ((int)$inst['id'] === $filterInstansi) ? 'selected' : '' ?>><?= htmlspecialchars($inst['nama']) ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
+      <?php if (!empty($IsDaerah)): ?>
+        <div class="t-field">
+          <label for="selectInstansi">Perangkat Daerah / Instansi</label>
+          <select id="selectInstansi" class="t-select" style="min-width: 260px;">
+            <option value="0">-- Semua Perangkat Daerah --</option>
+            <?php foreach ($ListInstansi as $inst): ?>
+              <option value="<?= $inst['id'] ?>" <?= ((int)$inst['id'] === (int)$filterInstansi) ? 'selected' : '' ?>><?= htmlspecialchars($inst['nama']) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+      <?php else: ?>
+        <input type="hidden" id="selectInstansi" value="<?= $filterInstansi ?>">
+      <?php endif; ?>
     </div>
 
     <div>
-      <button type="button" class="btn-add-primary" id="btnTambahRekom">
-        <i class="fa fa-plus"></i> Tambah Rekomendasi DPRD
-      </button>
+      <?php if (!empty($IsDaerah)): ?>
+        <button type="button" class="btn-add-primary" id="btnTambahRekom">
+          <i class="fa fa-plus"></i> Tambah Rekomendasi DPRD (Daerah)
+        </button>
+      <?php endif; ?>
     </div>
   </div>
 
@@ -582,9 +617,9 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
         <thead>
           <tr>
             <th class="col-no">No</th>
-            <th>Rekomendasi DPRD Tahun N-1 <span class="badge-locked-table"><i class="fa fa-lock"></i> Mutlak</span></th>
-            <th>Tindak Lanjut</th>
-            <th>Tujuan / Masalah yang Diselesaikan</th>
+            <th>Rekomendasi DPRD Tahun N-1 <span class="badge-locked-table"><i class="fa fa-university"></i> Daerah</span></th>
+            <th>Tindak Lanjut <span class="badge-instansi-table">Instansi / Dinas</span></th>
+            <th>Tujuan / Masalah yang Diselesaikan <span class="badge-instansi-table">Instansi / Dinas</span></th>
             <th class="col-aksi">Aksi</th>
           </tr>
         </thead>
@@ -595,13 +630,13 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
       <div id="emptyBox" style="display:none; text-align:center; padding:50px 20px; color:#94a3b8;">
         <i class="fa fa-folder-open-o" style="font-size:36px; display:block; margin-bottom:10px;"></i>
         <strong style="color:var(--ui-dark);">Belum ada data rekomendasi DPRD</strong><br>
-        Klik tombol <strong>+ Tambah Rekomendasi DPRD</strong> untuk menambahkan data baru.
+        Rekomendasi DPRD ditetapkan di tingkat Daerah dan ditag ke Perangkat Daerah / Dinas terkait untuk ditindaklanjuti.
       </div>
     </div>
   </div>
 </div>
 
-<!-- Modal Tambah / Ubah -->
+<!-- Modal Input / Edit -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal-box">
     <button type="button" class="modal-close-btn" id="btnModalClose">&times;</button>
@@ -611,36 +646,55 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
         <i class="fa fa-gavel"></i>
       </div>
       <div>
-        <h3 class="modal-title" id="modalTitle">Tinjut Rekomendasi DPRD Tahun N-1</h3>
+        <h3 class="modal-title" id="modalTitle">Tindak Lanjut Rekomendasi DPRD Tahun N-1</h3>
         <p class="modal-subtitle" id="modalSubtitle">Lengkapi tindak lanjut dan tujuan penyelesaian rekomendasi.</p>
       </div>
     </div>
 
     <form id="formTinjut" autocomplete="off">
       <input type="hidden" id="formId" value="">
+      <input type="hidden" id="formRekomId" value="">
+      <input type="hidden" id="formActionType" value="instansi_tinjut">
 
-      <div class="form-field">
+      <!-- Tag Instansi (Hanya ditampilkan untuk input/edit Daerah) -->
+      <div class="form-field" id="groupTargetInstansi" style="display: none;">
+        <label for="inputTargetInstansi">Target Perangkat Daerah / Instansi yang Ditag <span class="req">*</span></label>
+        <select id="inputTargetInstansi" class="t-select" style="width: 100%; min-width: 100%;">
+          <option value="0">-- Semua Perangkat Daerah (Umum) --</option>
+          <?php foreach ($ListInstansi as $inst): ?>
+            <option value="<?= $inst['id'] ?>"><?= htmlspecialchars($inst['nama']) ?></option>
+          <?php endforeach; ?>
+        </select>
+        <div style="font-size: 12px; color: #64748b; margin-top: 5px;">
+          Rekomendasi ini akan otomatis muncul pada menu Pengisian Tinjut Rekomendasi DPRD untuk perangkat daerah yang dipilih.
+        </div>
+      </div>
+
+      <div class="form-field" id="groupFieldRekom">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-          <label for="inputRekom" style="margin-bottom: 0;">Rekomendasi DPRD N-1</label>
-          <span class="badge-locked"><i class="fa fa-lock"></i> Data Mutlak (Relasi)</span>
+          <label for="inputRekom" style="margin-bottom: 0;">Rekomendasi DPRD N-1 <span class="req" id="reqRekom" style="display:none;">*</span></label>
+          <span class="badge-locked" id="badgeLockedRekom"><i class="fa fa-university"></i> Diisi oleh Pemerintah Daerah</span>
         </div>
-        <textarea id="inputRekom" rows="4" readonly placeholder="Uraian rekomendasi dari DPRD tahun sebelumnya..."></textarea>
-        <div class="field-readonly-hint">
+        <textarea id="inputRekom" rows="4" placeholder="Uraian rekomendasi dari DPRD tahun sebelumnya..."></textarea>
+        <div class="field-readonly-hint" id="hintRekom">
           <i class="fa fa-info-circle"></i>
-          <span>Rekomendasi bersifat <strong>mutlak dari isian relasi data</strong> dan tidak dapat diedit di halaman ini.</span>
+          <span>Rekomendasi DPRD diisi di tingkat <strong>Pemerintah Daerah</strong> dan ditindaklanjuti oleh masing-masing Perangkat Daerah.</span>
         </div>
+        <div class="field-error-msg" id="errRekom">Rekomendasi DPRD wajib diisi.</div>
       </div>
 
-      <div class="form-field">
-        <label for="inputTindak">Tindak Lanjut yang Dilakukan <span class="req">*</span></label>
-        <textarea id="inputTindak" rows="3" placeholder="Jelaskan tindak lanjut kebijakan/program yang telah dilakukan..."></textarea>
-        <div class="field-error-msg" id="errTindak">Tindak lanjut wajib diisi.</div>
-      </div>
+      <div id="groupFieldTinjut">
+        <div class="form-field">
+          <label for="inputTindak">Tindak Lanjut yang Dilakukan (Instansi / Dinas) <span class="req">*</span></label>
+          <textarea id="inputTindak" rows="3" placeholder="Jelaskan tindak lanjut kebijakan/program yang telah dilakukan oleh instansi/dinas..."></textarea>
+          <div class="field-error-msg" id="errTindak">Tindak lanjut wajib diisi.</div>
+        </div>
 
-      <div class="form-field">
-        <label for="inputTujuan">Tujuan / Masalah yang Diselesaikan <span class="req">*</span></label>
-        <textarea id="inputTujuan" rows="3" placeholder="Jelaskan tujuan atau masalah spesifik yang berhasil diselesaikan..."></textarea>
-        <div class="field-error-msg" id="errTujuan">Tujuan / masalah yang diselesaikan wajib diisi.</div>
+        <div class="form-field">
+          <label for="inputTujuan">Tujuan / Masalah yang Diselesaikan (Instansi / Dinas) <span class="req">*</span></label>
+          <textarea id="inputTujuan" rows="3" placeholder="Jelaskan tujuan atau masalah spesifik yang berhasil diselesaikan oleh instansi/dinas..."></textarea>
+          <div class="field-error-msg" id="errTujuan">Tujuan / masalah yang diselesaikan wajib diisi.</div>
+        </div>
       </div>
 
       <div class="modal-footer-section">
@@ -661,8 +715,8 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
     <div style="width:56px; height:56px; border-radius:50%; background:var(--ui-red-light); color:var(--ui-red); display:flex; align-items:center; justify-content:center; font-size:26px; margin:0 auto 16px;">
       <i class="fa fa-trash-o"></i>
     </div>
-    <h3 style="margin:0 0 8px; font-size:18px; font-weight:800; color:var(--ui-dark);">Hapus Rekomendasi DPRD?</h3>
-    <p style="margin:0 0 20px; font-size:13px; color:var(--ui-text-muted); line-height:1.5;">Data rekomendasi dan catatan tindak lanjut yang dihapus tidak dapat dipulihkan.</p>
+    <h3 style="margin:0 0 8px; font-size:18px; font-weight:800; color:var(--ui-dark);">Hapus / Reset Data?</h3>
+    <p style="margin:0 0 20px; font-size:13px; color:var(--ui-text-muted); line-height:1.5;" id="deletePromptText">Data rekomendasi atau catatan tindak lanjut yang dihapus tidak dapat dipulihkan.</p>
     <div style="display:flex; justify-content:center; gap:10px;">
       <button type="button" class="btn-action btn-reset-style" id="btnCancelDelete">Batal</button>
       <button type="button" class="btn-action btn-danger-style" id="btnConfirmDelete">
@@ -680,8 +734,9 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
   "use strict";
 
   var BASE_URL = "<?= base_url() ?>";
+  var IS_DAERAH = <?= !empty($IsDaerah) ? 'true' : 'false' ?>;
   var itemsData = <?= json_encode($items) ?>;
-  var deleteTargetId = null;
+  var deleteTarget = null;
 
   var tbody = document.getElementById("tbodyTinjut");
   var emptyBox = document.getElementById("emptyBox");
@@ -695,9 +750,17 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
   var modalTitle = document.getElementById("modalTitle");
   var modalSubtitle = document.getElementById("modalSubtitle");
   var formId = document.getElementById("formId");
+  var formRekomId = document.getElementById("formRekomId");
+  var formActionType = document.getElementById("formActionType");
+  var inputTargetInstansi = document.getElementById("inputTargetInstansi");
+  var groupTargetInstansi = document.getElementById("groupTargetInstansi");
   var inputRekom = document.getElementById("inputRekom");
   var inputTindak = document.getElementById("inputTindak");
   var inputTujuan = document.getElementById("inputTujuan");
+  var groupFieldTinjut = document.getElementById("groupFieldTinjut");
+  var reqRekom = document.getElementById("reqRekom");
+  var hintRekom = document.getElementById("hintRekom");
+  var badgeLockedRekom = document.getElementById("badgeLockedRekom");
 
   var modalDelete = document.getElementById("modalDeleteOverlay");
 
@@ -742,15 +805,24 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
       if (isFilled) filled++;
 
       var tr = document.createElement("tr");
+      var deleteBtn = "";
+      if (IS_DAERAH && item.is_master) {
+        deleteBtn = '<button type="button" class="btn-icon delete" data-rekom-id="' + item.rekomendasi_id + '" data-id="' + item.id + '" data-master="1" title="Hapus Rekomendasi Daerah"><i class="fa fa-trash-o"></i></button>';
+      }
+
+      var tagBadge = '<div style="margin-top:6px;"><span class="badge-tag-instansi"><i class="fa fa-tag"></i> Target: ' + escapeHtml(item.target_instansi_nama || 'Semua Perangkat Daerah') + '</span></div>';
+
+      var editTitle = IS_DAERAH ? "Ubah Rekomendasi / Tag Instansi (Daerah)" : "Isi / Perbarui Tindak Lanjut (Instansi)";
+
       tr.innerHTML = 
         '<td class="col-no">' + (idx + 1) + '</td>' +
-        '<td class="col-rekom">' + escapeHtml(item.rekomendasi) + '</td>' +
-        '<td class="col-tindak">' + (item.tindak_lanjut && item.tindak_lanjut.trim() ? escapeHtml(item.tindak_lanjut) : '<span class="empty-placeholder">Belum diisi</span>') + '</td>' +
-        '<td class="col-tujuan">' + (item.tujuan_masalah && item.tujuan_masalah.trim() ? escapeHtml(item.tujuan_masalah) : '<span class="empty-placeholder">Belum diisi</span>') + '</td>' +
+        '<td class="col-rekom">' + escapeHtml(item.rekomendasi) + tagBadge + '</td>' +
+        '<td class="col-tindak">' + (item.tindak_lanjut && item.tindak_lanjut.trim() ? escapeHtml(item.tindak_lanjut) : '<span class="empty-placeholder">Belum diisi oleh instansi</span>') + '</td>' +
+        '<td class="col-tujuan">' + (item.tujuan_masalah && item.tujuan_masalah.trim() ? escapeHtml(item.tujuan_masalah) : '<span class="empty-placeholder">Belum diisi oleh instansi</span>') + '</td>' +
         '<td class="col-aksi">' +
           '<div class="action-btns">' +
-            '<button type="button" class="btn-icon edit" data-id="' + item.id + '" title="Isi / Perbarui Tindak Lanjut"><i class="fa fa-pencil"></i></button>' +
-            '<button type="button" class="btn-icon delete" data-id="' + item.id + '" title="Hapus"><i class="fa fa-trash-o"></i></button>' +
+            '<button type="button" class="btn-icon edit" data-rekom-id="' + item.rekomendasi_id + '" data-id="' + item.id + '" data-master="' + (item.is_master ? '1' : '0') + '" title="' + editTitle + '"><i class="fa fa-pencil"></i></button>' +
+            deleteBtn +
           '</div>' +
         '</td>';
       tbody.appendChild(tr);
@@ -762,43 +834,91 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
   }
 
   function clearValidation(){
-    [inputTindak, inputTujuan].forEach(function(el){ if (el) el.classList.remove("is-invalid"); });
+    [inputRekom, inputTindak, inputTujuan].forEach(function(el){ if (el) el.classList.remove("is-invalid"); });
     document.querySelectorAll(".field-error-msg").forEach(function(el){ el.classList.remove("visible"); });
   }
 
   function resetForm(){
     formId.value = "";
+    formRekomId.value = "";
+    formActionType.value = "instansi_tinjut";
     inputRekom.value = "";
     inputTindak.value = "";
     inputTujuan.value = "";
+    if (inputTargetInstansi) inputTargetInstansi.value = "0";
     clearValidation();
   }
 
-  function openAddModal(){
+  // Open modal for Daerah adding new recommendation
+  function openAddMasterModal(){
     resetForm();
-    modalTitle.textContent = "Tambah Rekomendasi DPRD";
-    modalSubtitle.textContent = "Tambahkan catatan/rekomendasi DPRD beserta rencana tindak lanjut.";
+    formActionType.value = "daerah_master";
+    modalTitle.textContent = "Tambah Rekomendasi DPRD (Tingkat Daerah)";
+    modalSubtitle.textContent = "Tambahkan catatan/rekomendasi DPRD dan pilih perangkat daerah yang ditag.";
+    
+    inputRekom.readOnly = false;
+    reqRekom.style.display = "inline";
+    hintRekom.style.display = "none";
+    badgeLockedRekom.style.display = "none";
+    groupFieldTinjut.style.display = "none";
+    if (groupTargetInstansi) groupTargetInstansi.style.display = "block";
+
     modalOverlay.classList.add("open");
     document.body.style.overflow = "hidden";
-    setTimeout(function(){ inputTindak.focus(); }, 100);
+    setTimeout(function(){ inputRekom.focus(); }, 100);
   }
 
-  function openEditModal(id){
-    var item = itemsData.find(function(d){ return Number(d.id) === Number(id); });
+  // Open modal for Instansi filling Tindak Lanjut or Daerah editing master
+  function openEditModal(rekomId, id, isMaster){
+    var item = itemsData.find(function(d){ 
+      return (rekomId && Number(d.rekomendasi_id) === Number(rekomId)) || (id && Number(d.id) === Number(id)); 
+    });
     if (!item) return;
 
     resetForm();
-    formId.value = item.id;
-    inputRekom.value = item.rekomendasi || "";
-    inputRekom.readOnly = true;
-    inputTindak.value = item.tindak_lanjut || "";
-    inputTujuan.value = item.tujuan_masalah || "";
+    formId.value = item.id || 0;
+    formRekomId.value = item.rekomendasi_id || 0;
 
-    modalTitle.textContent = "Tindak Lanjut Rekomendasi DPRD";
-    modalSubtitle.textContent = "Lengkapi rencana tindak lanjut dan tujuan penyelesaian untuk rekomendasi DPRD.";
+    if (IS_DAERAH && item.is_master) {
+      // Daerah editing recommendation and tagged instansi
+      formActionType.value = "daerah_master";
+      modalTitle.textContent = "Ubah Rekomendasi DPRD (Tingkat Daerah)";
+      modalSubtitle.textContent = "Perbarui uraian rekomendasi DPRD dan target perangkat daerah yang ditag.";
+
+      inputRekom.value = item.rekomendasi || "";
+      inputRekom.readOnly = false;
+      reqRekom.style.display = "inline";
+      hintRekom.style.display = "none";
+      badgeLockedRekom.style.display = "none";
+      groupFieldTinjut.style.display = "none";
+      if (groupTargetInstansi) {
+        groupTargetInstansi.style.display = "block";
+        inputTargetInstansi.value = String(item.target_instansi_id || 0);
+      }
+    } else {
+      // Instansi filling Tindak Lanjut & Tujuan
+      formActionType.value = "instansi_tinjut";
+      modalTitle.textContent = "Pengisian Tindak Lanjut Rekomendasi DPRD";
+      modalSubtitle.textContent = "Lengkapi rencana tindak lanjut dan tujuan penyelesaian yang dilaksanakan oleh instansi/dinas.";
+
+      inputRekom.value = item.rekomendasi || "";
+      inputRekom.readOnly = true;
+      reqRekom.style.display = "none";
+      hintRekom.style.display = "flex";
+      badgeLockedRekom.style.display = "inline-flex";
+      groupFieldTinjut.style.display = "block";
+      if (groupTargetInstansi) groupTargetInstansi.style.display = "none";
+
+      inputTindak.value = item.tindak_lanjut || "";
+      inputTujuan.value = item.tujuan_masalah || "";
+    }
+
     modalOverlay.classList.add("open");
     document.body.style.overflow = "hidden";
-    setTimeout(function(){ inputTindak.focus(); }, 100);
+    setTimeout(function(){ 
+      if (IS_DAERAH && item.is_master) inputRekom.focus();
+      else inputTindak.focus(); 
+    }, 100);
   }
 
   function closeModal(){
@@ -811,15 +931,23 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
     var valid = true;
     clearValidation();
 
-    if (!inputTindak.value.trim()){
-      inputTindak.classList.add("is-invalid");
-      document.getElementById("errTindak").classList.add("visible");
-      valid = false;
-    }
-    if (!inputTujuan.value.trim()){
-      inputTujuan.classList.add("is-invalid");
-      document.getElementById("errTujuan").classList.add("visible");
-      valid = false;
+    if (formActionType.value === "daerah_master"){
+      if (!inputRekom.value.trim()){
+        inputRekom.classList.add("is-invalid");
+        document.getElementById("errRekom").classList.add("visible");
+        valid = false;
+      }
+    } else {
+      if (!inputTindak.value.trim()){
+        inputTindak.classList.add("is-invalid");
+        document.getElementById("errTindak").classList.add("visible");
+        valid = false;
+      }
+      if (!inputTujuan.value.trim()){
+        inputTujuan.classList.add("is-invalid");
+        document.getElementById("errTujuan").classList.add("visible");
+        valid = false;
+      }
     }
     return valid;
   }
@@ -833,6 +961,9 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
 
     var payload = {
       id: formId.value,
+      rekomendasi_id: formRekomId.value,
+      target_instansi_id: inputTargetInstansi ? inputTargetInstansi.value : 0,
+      action_type: formActionType.value,
       tahun: selectTahun.value,
       instansi_id: selectInstansi.value,
       rekomendasi: inputRekom.value.trim(),
@@ -864,20 +995,24 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
     });
   }
 
-  function openDelete(id){
-    deleteTargetId = id;
+  function openDelete(rekomId, id, isMaster){
+    deleteTarget = {
+      rekomendasi_id: rekomId,
+      id: id,
+      is_master: isMaster ? 1 : 0
+    };
     modalDelete.classList.add("open");
     document.body.style.overflow = "hidden";
   }
 
   function closeDelete(){
-    deleteTargetId = null;
+    deleteTarget = null;
     modalDelete.classList.remove("open");
     document.body.style.overflow = "";
   }
 
   function confirmDelete(){
-    if (!deleteTargetId) return;
+    if (!deleteTarget) return;
 
     var btn = document.getElementById("btnConfirmDelete");
     btn.disabled = true;
@@ -886,7 +1021,7 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
     $.ajax({
       url: BASE_URL + "Instansi/DeleteTinjutRekomendasiDPRD",
       type: "POST",
-      data: { id: deleteTargetId },
+      data: deleteTarget,
       dataType: "json",
       success: function(resp){
         btn.disabled = false;
@@ -926,13 +1061,23 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
     });
   }
 
-  document.getElementById("btnTambahRekom").addEventListener("click", openAddModal);
+  var btnTambahRekom = document.getElementById("btnTambahRekom");
+  if (btnTambahRekom) {
+    btnTambahRekom.addEventListener("click", openAddMasterModal);
+  }
+
   document.getElementById("btnModalClose").addEventListener("click", closeModal);
   document.getElementById("btnResetForm").addEventListener("click", function(){
-    inputTindak.value = "";
-    inputTujuan.value = "";
+    if (formActionType.value === "daerah_master") {
+      inputRekom.value = "";
+      if (inputTargetInstansi) inputTargetInstansi.value = "0";
+      inputRekom.focus();
+    } else {
+      inputTindak.value = "";
+      inputTujuan.value = "";
+      inputTindak.focus();
+    }
     clearValidation();
-    inputTindak.focus();
   });
   document.getElementById("btnSaveForm").addEventListener("click", saveForm);
 
@@ -940,10 +1085,13 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
     var btn = e.target.closest(".btn-icon");
     if (!btn) return;
     var id = btn.getAttribute("data-id");
+    var rekomId = btn.getAttribute("data-rekom-id");
+    var isMaster = btn.getAttribute("data-master") === "1" || IS_DAERAH;
+
     if (btn.classList.contains("edit")){
-      openEditModal(id);
+      openEditModal(rekomId, id, isMaster);
     } else if (btn.classList.contains("delete")){
-      openDelete(id);
+      openDelete(rekomId, id, isMaster);
     }
   });
 
@@ -958,7 +1106,9 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
   });
 
   selectTahun.addEventListener("change", reloadTable);
-  selectInstansi.addEventListener("change", reloadTable);
+  if (selectInstansi && selectInstansi.tagName === "SELECT") {
+    selectInstansi.addEventListener("change", reloadTable);
+  }
 
   document.addEventListener("keydown", function(e){
     if (e.key === "Escape"){

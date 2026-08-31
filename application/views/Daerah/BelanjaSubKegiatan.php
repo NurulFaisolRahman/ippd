@@ -553,10 +553,11 @@
     background: rgba(15, 23, 42, 0.65);
     backdrop-filter: blur(2px);
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    padding: 20px;
-    z-index: 1050;
+    padding: 85px 16px 40px;
+    z-index: 999999 !important;
+    overflow-y: auto;
   }
   .modal-overlay.hidden {
     display: none;
@@ -833,10 +834,11 @@
     background: rgba(15, 23, 42, 0.65);
     backdrop-filter: blur(2px);
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    padding: 20px;
-    z-index: 1150;
+    padding: 85px 16px 40px;
+    z-index: 999999 !important;
+    overflow-y: auto;
   }
   .picker-overlay.hidden {
     display: none;
@@ -995,10 +997,12 @@
         <h2>Tabel Rincian Belanja</h2>
         <p id="toolbarContext">Lengkapi pilihan Sub Unit sampai Sub Kegiatan terlebih dahulu.</p>
       </div>
-      <button class="btn-add" id="btnTambah" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-        Tambah Rincian
-      </button>
+      <?php if (!empty($IsRole4)): ?>
+        <button class="btn-add" id="btnTambah" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Tambah Rincian
+        </button>
+      <?php endif; ?>
     </div>
     <div class="table-wrap">
       <table>
@@ -1483,10 +1487,10 @@
       '<td class="num">'+formatMoney(it.hargaSatuan)+'</td>'+
       '<td class="center font-mono">'+(parseFloat(it.ppn)||0)+'%</td>'+
       '<td class="num" style="font-weight:700;">'+formatMoney(calcJumlah(it))+'</td>'+
-      '<td class="center"><div class="actions">'+
+      '<td class="center">' + (isRole4 ? ('<div class="actions">'+
         '<button class="icon-btn edit" data-edit="'+it.id+'" title="Ubah">'+ICON_EDIT+'</button>'+
         '<button class="icon-btn del" data-del="'+it.id+'" title="Hapus">'+ICON_DEL+'</button>'+
-      '</div></td>'+
+      '</div>') : '<span style="color:#94a3b8; font-size:12px;">-</span>') + '</td>'+
     '</tr>';
   }
 

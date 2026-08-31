@@ -524,42 +524,66 @@
     font-size: 14px;
   }
 
-  /* ===== Modal Styling (Notika Style) ===== */
+  /* ===== Modal Styling (Centering & No-Header-Overlay) ===== */
   .modal-overlay {
     position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.65);
-    backdrop-filter: blur(2px);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(4px);
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding: 30px 16px;
+    padding: 85px 16px 40px;
     overflow-y: auto;
-    z-index: 1300;
+    z-index: 999999 !important;
   }
-  .modal-overlay.hidden { display: none; }
+  .modal-overlay.hidden { display: none !important; }
+
+  #modalContent {
+    width: 100%;
+    max-width: 980px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+    position: relative;
+    z-index: 200001;
+  }
 
   .modal-card {
     background: #ffffff;
     border-radius: var(--radius-lg);
     width: 100%;
     max-width: 980px;
-    box-shadow: 0 25px 60px rgba(15, 23, 42, 0.3);
+    max-height: calc(100vh - 48px);
+    box-shadow: 0 25px 60px rgba(15, 23, 42, 0.4);
     overflow: hidden;
-    animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    position: relative;
+    z-index: 200001;
+    animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .modal-card.wide { max-width: 1200px; }
+  #modalContent:has(.modal-card.wide) { max-width: 1200px; }
 
   @keyframes modalPop {
-    from { opacity: 0; transform: scale(0.96) translateY(-10px); }
+    from { opacity: 0; transform: scale(0.96) translateY(-12px); }
     to { opacity: 1; transform: scale(1) translateY(0); }
   }
 
   .modal-header {
+    flex: 0 0 auto;
     display: flex;
     gap: 14px;
-    align-items: flex-start;
-    padding: 20px 24px 16px;
+    align-items: center;
+    padding: 18px 24px;
     border-bottom: 1px solid var(--ui-border);
     background: #ffffff;
   }
@@ -591,13 +615,15 @@
   }
 
   .modal-body {
+    flex: 1 1 auto;
     padding: 20px 24px;
-    max-height: 72vh;
+    max-height: calc(100vh - 190px);
     overflow-y: auto;
     background: #f8fafc;
   }
 
   .modal-footer {
+    flex: 0 0 auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -690,6 +716,43 @@
 
   .pagu-input { text-align: right; font-family: 'Roboto Mono', monospace; font-size: 12px; }
 
+  .input-rupiah-box {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--ui-border);
+    border-radius: 6px;
+    background: #ffffff;
+    padding: 0 4px 0 6px;
+    height: 30px;
+    width: 100%;
+    min-width: 105px;
+    transition: all 0.2s;
+  }
+  .input-rupiah-box:focus-within {
+    border-color: var(--ui-primary);
+    box-shadow: 0 0 0 2px rgba(0, 194, 146, 0.2);
+  }
+  .input-rupiah-box .prefix {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ui-text-muted);
+    user-select: none;
+    margin-right: 3px;
+  }
+  .input-rupiah-box input {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    width: 100% !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-align: right !important;
+    outline: none !important;
+    font-family: 'Roboto Mono', monospace !important;
+    color: var(--ui-text-black) !important;
+    padding: 0 !important;
+  }
+
   .btn-add-row {
     background: #ecfdf5;
     color: var(--ui-primary-text);
@@ -769,6 +832,8 @@
               <?php endforeach; ?>
             </select>
           </div>
+          <?php else: ?>
+            <input type="hidden" name="instansi_id" value="<?=$FilterInstansi?>">
           <?php endif; ?>
 
           <div class="filter-group">
@@ -780,9 +845,11 @@
           </div>
 
           <div style="display:flex; gap:8px;">
-            <button type="button" class="btn btn-sync" onclick="syncDpaAnggaran()" title="Salin RAK dari DPA ke Anggaran Bulanan">
-              <i class="fa fa-refresh"></i> Tarik RAK DPA
-            </button>
+            <?php if (!empty($IsRole4)): ?>
+              <button type="button" class="btn btn-sync" onclick="syncDpaAnggaran()" title="Salin RAK dari DPA ke Anggaran Bulanan">
+                <i class="fa fa-refresh"></i> Tarik RAK DPA
+              </button>
+            <?php endif; ?>
             <button type="submit" class="btn btn-primary">
               <i class="fa fa-filter"></i> Terapkan
             </button>
@@ -790,6 +857,18 @@
         </div>
       </form>
     </div>
+
+    <?php
+    $currentInstansiName = '';
+    if (!empty($FilterInstansi) && !empty($ListInstansi)) {
+        foreach ($ListInstansi as $ins) {
+            if ((int)$ins['id'] === (int)$FilterInstansi) {
+                $currentInstansiName = $ins['nama'];
+                break;
+            }
+        }
+    }
+    ?>
 
     <!-- Page Header & Summary -->
     <div class="page-header-card">
@@ -802,6 +881,12 @@
           <div class="lbl">Tahun Aktif</div>
           <div class="val" id="statTahun"><?=$TahunAktif?></div>
         </div>
+        <?php if (!empty($currentInstansiName)): ?>
+          <div class="stat-badge-box">
+            <div class="lbl">Perangkat Daerah</div>
+            <div class="val" style="font-size: 13px; font-weight:700; color: var(--ui-primary-dark);"><?=htmlspecialchars($currentInstansiName)?></div>
+          </div>
+        <?php endif; ?>
         <div class="stat-badge-box">
           <div class="lbl">Total Anggaran Sub Kegiatan</div>
           <div class="val" id="statTotalAnggaran">Rp 0</div>
@@ -874,6 +959,7 @@
    INITIAL DATA FROM CONTROLLER
    ========================================================= */
 var initialRenaksiTree = <?=json_encode(isset($RenaksiTree) ? $RenaksiTree : ['tujuanList' => []])?>;
+var isRole4 = <?= !empty($IsRole4) ? 'true' : 'false' ?>;
 var currentTahun = "<?=isset($TahunAktif) ? $TahunAktif : date('Y')?>";
 var currentInstansiId = "<?=isset($FilterInstansi) ? $FilterInstansi : (isset($InstansiId) ? $InstansiId : '')?>";
 var currentKodeWilayah = "<?=isset($KodeWilayah) ? $KodeWilayah : '35.73'?>";
@@ -1118,6 +1204,9 @@ function emptyTahapCells(){
 }
 
 function renderOpsiAksiCell(level, chain, rowspan){
+  if(!isRole4){
+    return '<td class="cell-opsi" rowspan="'+rowspan+'" style="text-align:center;"><span style="color:#94a3b8; font-size:12px;">-</span></td>';
+  }
   var tId=chain[0], ssId=chain[1], spId=chain[2], skId=chain[3], subId=chain[4];
   var editCall = '', editTitle = '';
 
@@ -1463,19 +1552,65 @@ function recalcValiditasBadges(){
 
 // 2. Table Target Realisasi Anggaran Bulanan
 function buildPaguTableHTML(sub){
-  var headerCells = MONTHS.map(function(m){ return '<th style="width:85px;">'+m[1]+'</th>'; }).join('') + '<th style="width:130px;">Total (Rp)</th>';
   var inputCells = MONTHS.map(function(m){
-    var val = (sub.paguBulanan && sub.paguBulanan[m[0]] !== undefined) ? sub.paguBulanan[m[0]] : 0;
-    return '<td><input type="number" min="0" step="any" class="pagu-input" data-month="'+m[0]+'" value="'+val+'" oninput="recalcPaguTotal()"></td>';
+    var val = (sub.paguBulanan && sub.paguBulanan[m[0]] !== undefined) ? Number(sub.paguBulanan[m[0]]) : 0;
+    var formattedVal = val ? val.toLocaleString('id-ID') : '';
+    return '<td style="padding:4px 3px;"><div class="input-rupiah-box"><span class="prefix">Rp</span><input type="text" inputmode="numeric" class="pagu-input" data-month="'+m[0]+'" value="'+formattedVal+'" placeholder="0" oninput="formatPaguInput(this)"></div></td>';
   }).join('');
+
   return '<div class="table-scroll"><table class="pagu-table">'+
-    '<thead><tr><th style="min-width:130px;">Bulan</th>'+headerCells+'</tr></thead>'+
-    '<tbody><tr><td><strong>Pagu Anggaran (Rp)</strong></td>'+inputCells+'<td id="paguTotalCell" class="pagu-total">'+formatRupiah(computeSubAnggaran(sub))+'</td></tr></tbody>'+
+    '<thead>'+
+      '<tr>'+
+        '<th rowspan="3" style="min-width:130px; vertical-align:middle; text-align:left; padding-left:12px;">Uraian</th>'+
+        '<th colspan="6" style="text-align:center; background-color:#00a87e; border-bottom:1px solid rgba(255,255,255,0.25);">Semester 1</th>'+
+        '<th colspan="6" style="text-align:center; background-color:#00a87e; border-bottom:1px solid rgba(255,255,255,0.25);">Semester 2</th>'+
+        '<th rowspan="3" style="min-width:130px; vertical-align:middle; text-align:right; padding-right:12px;">Total Pagu (Rp)</th>'+
+      '</tr>'+
+      '<tr>'+
+        '<th colspan="3" style="text-align:center; background-color:#00966f; border-bottom:1px solid rgba(255,255,255,0.25);">Triwulan 1</th>'+
+        '<th colspan="3" style="text-align:center; background-color:#00966f; border-bottom:1px solid rgba(255,255,255,0.25);">Triwulan 2</th>'+
+        '<th colspan="3" style="text-align:center; background-color:#00966f; border-bottom:1px solid rgba(255,255,255,0.25);">Triwulan 3</th>'+
+        '<th colspan="3" style="text-align:center; background-color:#00966f; border-bottom:1px solid rgba(255,255,255,0.25);">Triwulan 4</th>'+
+      '</tr>'+
+      '<tr>'+
+        '<th style="min-width:110px; text-align:center;">Januari</th>'+
+        '<th style="min-width:110px; text-align:center;">Februari</th>'+
+        '<th style="min-width:110px; text-align:center;">Maret</th>'+
+        '<th style="min-width:110px; text-align:center;">April</th>'+
+        '<th style="min-width:110px; text-align:center;">Mei</th>'+
+        '<th style="min-width:110px; text-align:center;">Juni</th>'+
+        '<th style="min-width:110px; text-align:center;">Juli</th>'+
+        '<th style="min-width:110px; text-align:center;">Agustus</th>'+
+        '<th style="min-width:110px; text-align:center;">September</th>'+
+        '<th style="min-width:110px; text-align:center;">Oktober</th>'+
+        '<th style="min-width:110px; text-align:center;">November</th>'+
+        '<th style="min-width:110px; text-align:center;">Desember</th>'+
+      '</tr>'+
+    '</thead>'+
+    '<tbody>'+
+      '<tr>'+
+        '<td style="text-align:left; font-weight:700; padding-left:12px;">Pagu Anggaran (Rp)</td>'+
+        inputCells+
+        '<td id="paguTotalCell" class="pagu-total font-mono" style="font-weight:800; color:#007a5a; text-align:right; padding-right:12px;">'+formatRupiah(computeSubAnggaran(sub))+'</td>'+
+      '</tr>'+
+    '</tbody>'+
   '</table></div>';
 }
+
+function formatPaguInput(inp){
+  var digits = inp.value.replace(/[^0-9]/g, "");
+  digits = digits.replace(/^0+(?=\d)/, "");
+  var val = digits ? parseInt(digits, 10) : 0;
+  inp.value = digits ? val.toLocaleString('id-ID') : "";
+  recalcPaguTotal();
+}
+
 function recalcPaguTotal(){
   var total = 0;
-  document.querySelectorAll('.pagu-input').forEach(function(inp){ total += Number(inp.value) || 0; });
+  document.querySelectorAll('.pagu-input').forEach(function(inp){
+    var digits = inp.value.replace(/[^0-9]/g, "");
+    total += digits ? parseInt(digits, 10) : 0;
+  });
   var cell = document.getElementById('paguTotalCell');
   if(cell) cell.textContent = formatRupiah(total);
 }
@@ -1659,7 +1794,8 @@ function saveSubKegiatanTarget(tId, ssId, spId, skId, subId){
   var totalAnggaran = 0;
   document.querySelectorAll('.pagu-input').forEach(function(inp){
     var m = inp.dataset.month;
-    var val = Number(inp.value) || 0;
+    var digits = inp.value.replace(/[^0-9]/g, "");
+    var val = digits ? parseInt(digits, 10) : 0;
     newPagu[m] = val;
     totalAnggaran += val;
   });
