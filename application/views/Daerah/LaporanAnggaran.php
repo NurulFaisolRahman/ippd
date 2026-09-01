@@ -727,6 +727,81 @@ table.laporan-table tfoot td {
       </div>
     </div>
 
+    <!-- Filter Wilayah Top (Sebelum Login & Saat Login Sebagai Daerah) -->
+    <?php if (!$IsLoggedIn || !empty($IsDaerah)) { 
+      $provKodeCurrent = !empty($KodeWilayah) ? substr($KodeWilayah, 0, 2) : '';
+      $ListKabKotaTop = [];
+      if (!empty($provKodeCurrent)) {
+          $ListKabKotaTop = $this->db
+              ->select('Kode, Nama')
+              ->from('kodewilayah')
+              ->where('Kode LIKE', $provKodeCurrent . '.%')
+              ->where('LENGTH(REPLACE(Kode, ".", "")) = 4', null, false)
+              ->order_by('Nama', 'ASC')
+              ->get()
+              ->result_array();
+      }
+    ?>
+      <div class="notika-card" style="margin-bottom: 20px;">
+        <div class="notika-card-header">
+          <div class="notika-card-title">
+            <i class="fa fa-filter"></i> <?= empty($IsLoggedIn) ? 'Filter Wilayah &amp; Perangkat Daerah' : 'Filter Perangkat Daerah' ?>
+          </div>
+        </div>
+        <div class="notika-card-body">
+          <div style="display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px;">
+            <?php if (empty($IsLoggedIn)): ?>
+              <div style="flex:1; min-width:180px;">
+                <label class="filter-label">Provinsi</label>
+                <select id="selProvinsiTop" class="filter-select">
+                  <option value="">Pilih Provinsi</option>
+                  <?php if (!empty($Provinsi)) { foreach ($Provinsi as $prov) { ?>
+                    <option value="<?= html_escape($prov['Kode']) ?>"
+                      <?= (!empty($provKodeCurrent) && $provKodeCurrent==$prov['Kode']) ? 'selected' : '' ?>>
+                      <?= html_escape($prov['Nama']) ?>
+                    </option>
+                  <?php } } ?>
+                </select>
+              </div>
+
+              <div style="flex:1; min-width:180px;">
+                <label class="filter-label">Kabupaten / Kota</label>
+                <select id="selKabKotaTop" class="filter-select">
+                  <option value="">Pilih Kab/Kota</option>
+                  <?php if (!empty($ListKabKotaTop)) { foreach ($ListKabKotaTop as $kab) { ?>
+                    <option value="<?= html_escape($kab['Kode']) ?>" <?= (!empty($KodeWilayah) && $KodeWilayah == $kab['Kode']) ? 'selected' : '' ?>>
+                      <?= html_escape($kab['Nama']) ?>
+                    </option>
+                  <?php }} ?>
+                </select>
+              </div>
+            <?php else: ?>
+              <input type="hidden" id="selProvinsiTop" value="<?= !empty($provKodeCurrent) ? $provKodeCurrent : substr($KodeWilayah, 0, 2) ?>">
+              <input type="hidden" id="selKabKotaTop" value="<?= !empty($KodeWilayah) ? $KodeWilayah : '' ?>">
+            <?php endif; ?>
+
+            <div id="grpInstansiTop" style="flex:1.2; min-width:220px; <?= (!empty($IsLoggedIn) || !empty($KodeWilayah)) ? '' : 'display:none;' ?>">
+              <label class="filter-label">Perangkat Daerah / Instansi</label>
+              <select id="selInstansiTop" class="filter-select">
+                <option value="">-- Semua Perangkat Daerah --</option>
+                <?php if (!empty($ListInstansi)) { foreach ($ListInstansi as $ins) { ?>
+                  <option value="<?= $ins['id'] ?>" <?= (!empty($FilterInstansi) && $FilterInstansi == $ins['id']) ? 'selected' : '' ?>>
+                    <?= html_escape($ins['nama']) ?>
+                  </option>
+                <?php }} ?>
+              </select>
+            </div>
+
+            <div style="margin-top:auto;">
+              <button type="button" class="btn-notika btn-notika-primary" id="btnFilterWilayahTop" style="height:38px;">
+                <i class="fa fa-search"></i> <?= empty($IsLoggedIn) ? 'Terapkan Wilayah' : 'Terapkan Filter' ?>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    <?php } ?>
+
     <!-- Parameter & Filter Card -->
     <div class="notika-card">
       <div class="notika-card-header">
@@ -758,20 +833,7 @@ table.laporan-table tfoot td {
               </select>
             </div>
 
-            <!-- Perangkat Daerah (Khusus Daerah) -->
-            <?php if (!$IsRole4): ?>
-              <div class="filter-group">
-                <label class="filter-label">Perangkat Daerah</label>
-                <select name="instansi_id" id="filterInstansi" class="filter-select" onchange="this.form.submit()">
-                  <option value="">-- Semua Perangkat Daerah --</option>
-                  <?php foreach ($ListInstansi as $inst): ?>
-                    <option value="<?=$inst['id']?>" <?=$inst['id'] == $FilterInstansi ? 'selected' : ''?>><?=htmlspecialchars($inst['nama'])?></option>
-                  <?php endforeach; ?>
-                </select>
-              </div>
-            <?php else: ?>
-              <input type="hidden" name="instansi_id" value="<?=$FilterInstansi?>">
-            <?php endif; ?>
+            <input type="hidden" name="instansi_id" id="filterInstansi" value="<?=$FilterInstansi?>">
 
             <!-- Periode Bulan Sampai -->
             <div class="filter-group">
@@ -901,7 +963,7 @@ table.laporan-table tfoot td {
                 <tr>
                   <td colspan="9" class="center-cell" style="padding: 40px; color: var(--ui-gray-400);">
                     <i class="fa fa-folder-open fa-3x" style="margin-bottom: 10px;"></i><br>
-                    Belum ada data Rekapitulasi Realisasi Anggaran.
+                    <?= (empty($IsLoggedIn) && empty($KodeWilayah)) ? 'Silakan pilih Filter Wilayah & Perangkat Daerah di atas terlebih dahulu untuk menampilkan data.' : 'Belum ada data Rekapitulasi Realisasi Anggaran.' ?>
                   </td>
                 </tr>
               <?php endif; ?>
@@ -985,13 +1047,140 @@ function syncWithRenaksi() {
   });
 }
 
-/* Quick Search in Table */
-document.getElementById('laporanSearch').addEventListener('input', function(e) {
-  const query = e.target.value.toLowerCase().trim();
-  const rows = document.querySelectorAll('#laporanTbody tr');
-  rows.forEach(tr => {
-    const text = tr.textContent.toLowerCase();
-    tr.style.display = (query === '' || text.includes(query)) ? '' : 'none';
+/* ---------------- Top Wilayah Filter (Before Login) ---------------- */
+$(function() {
+  var CSRF_NAME = '<?= $this->security->get_csrf_token_name() ?>';
+  var CSRF_TOKEN = '<?= $this->security->get_csrf_hash() ?>';
+  var BaseURL = '<?= base_url() ?>';
+  var cKodeWilayah = '<?= !empty($KodeWilayah) ? $KodeWilayah : "" ?>';
+  var cInstansiId = '<?= !empty($FilterInstansi) ? $FilterInstansi : (!empty($InstansiId) ? $InstansiId : "") ?>';
+
+  function loadKabKotaTop(provKode, selectedKabKode, callback) {
+    if (!provKode) {
+      $('#selKabKotaTop').html('<option value="">Pilih Kab/Kota</option>');
+      $('#grpInstansiTop').hide();
+      return;
+    }
+    $.ajax({
+      url: BaseURL + 'Instansi/GetListKabKota',
+      type: 'POST',
+      data: { Kode: provKode, [CSRF_NAME]: CSRF_TOKEN },
+      dataType: 'json',
+      beforeSend: function() {
+        $('#selKabKotaTop').prop('disabled', true).html('<option value="">Memuat Kab/Kota...</option>');
+      },
+      success: function(data) {
+        var html = '<option value="">Pilih Kab/Kota</option>';
+        if (data && data.length > 0) {
+          for (var i = 0; i < data.length; i++) {
+            var sel = (selectedKabKode && selectedKabKode == data[i].Kode) ? 'selected' : '';
+            html += '<option value="' + data[i].Kode + '" ' + sel + '>' + data[i].Nama + '</option>';
+          }
+        }
+        $('#selKabKotaTop').html(html).prop('disabled', false);
+        if (callback) callback();
+      },
+      error: function() {
+        $('#selKabKotaTop').html('<option value="">Gagal memuat data</option>').prop('disabled', false);
+      }
+    });
+  }
+
+  function loadInstansiTop(kabKode, selectedInstansiId) {
+    if (!kabKode) {
+      $('#grpInstansiTop').hide();
+      $('#selInstansiTop').html('<option value="">-- Semua Perangkat Daerah --</option>');
+      return;
+    }
+    $.ajax({
+      url: BaseURL + 'Instansi/GetListInstansiLevel4',
+      type: 'POST',
+      data: { kode_wilayah: kabKode, [CSRF_NAME]: CSRF_TOKEN },
+      dataType: 'json',
+      beforeSend: function() {
+        $('#selInstansiTop').html('<option value="">Memuat Instansi...</option>');
+        $('#grpInstansiTop').show();
+      },
+      success: function(data) {
+        var html = '<option value="">-- Semua Perangkat Daerah --</option>';
+        if (data && data.length > 0) {
+          for (var i = 0; i < data.length; i++) {
+            var sel = (selectedInstansiId && selectedInstansiId == data[i].id) ? 'selected' : '';
+            html += '<option value="' + data[i].id + '" ' + sel + '>' + data[i].nama + '</option>';
+          }
+        }
+        $('#selInstansiTop').html(html);
+        $('#grpInstansiTop').show();
+      },
+      error: function() {
+        $('#selInstansiTop').html('<option value="">-- Gagal memuat instansi --</option>');
+      }
+    });
+  }
+
+  $('#selProvinsiTop').change(function() {
+    var prov = $(this).val();
+    loadKabKotaTop(prov, '');
+  });
+
+  $('#selKabKotaTop').change(function() {
+    var kab = $(this).val();
+    loadInstansiTop(kab, '');
+  });
+
+  if (cKodeWilayah) {
+    var provKode = cKodeWilayah.substring(0, 2);
+    loadKabKotaTop(provKode, cKodeWilayah, function() {
+      loadInstansiTop(cKodeWilayah, cInstansiId);
+    });
+  }
+
+  $('#btnFilterWilayahTop').click(function() {
+    var prov = $('#selProvinsiTop').val();
+    var kab = $('#selKabKotaTop').val();
+    var inst = $('#selInstansiTop').val();
+
+    if (!prov) {
+      alert('Mohon pilih Provinsi');
+      return;
+    }
+    if (!kab) {
+      alert('Mohon pilih Kabupaten/Kota');
+      return;
+    }
+
+    var btn = $(this);
+    btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
+
+    $.ajax({
+      url: BaseURL + 'Instansi/SetTempKodeWilayah',
+      type: 'POST',
+      data: {
+        KodeWilayah: kab,
+        InstansiId: inst,
+        [CSRF_NAME]: CSRF_TOKEN
+      },
+      success: function(res) {
+        if (res.trim() === '1') {
+          var url = window.location.pathname;
+          var queryParams = [];
+          if (inst) {
+            queryParams.push('instansi_id=' + encodeURIComponent(inst));
+          }
+          if (queryParams.length > 0) {
+            url += '?' + queryParams.join('&');
+          }
+          window.location.href = url;
+        } else {
+          alert(res || 'Gagal mengatur filter wilayah');
+          btn.prop('disabled', false).html('<i class="fa fa-search"></i> Terapkan Wilayah');
+        }
+      },
+      error: function() {
+        alert('Terjadi kesalahan koneksi ke server');
+        btn.prop('disabled', false).html('<i class="fa fa-search"></i> Terapkan Wilayah');
+      }
+    });
   });
 });
 </script>

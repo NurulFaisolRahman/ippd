@@ -694,6 +694,39 @@ table.modal-edit-table input.input-real:focus {
   background-color: #ffffff;
 }
 
+.input-rupiah-box {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--ui-gray-300);
+  border-radius: 5px;
+  background: #ffffff;
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.input-rupiah-box:focus-within {
+  border-color: var(--ui-primary);
+  box-shadow: 0 0 0 2px rgba(0, 194, 146, 0.15);
+}
+
+.input-rupiah-box .prefix {
+  background-color: var(--ui-gray-100);
+  color: var(--ui-gray-600);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 7px;
+  border-right: 1px solid var(--ui-gray-300);
+  user-select: none;
+}
+
+.input-rupiah-box input.input-real {
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 5px 8px;
+  width: 100%;
+}
+
 .notice-box {
   background-color: #fffbeb;
   border: 1px solid #fde68a;
@@ -765,6 +798,81 @@ table.modal-edit-table input.input-real:focus {
       </div>
     </div>
 
+    <!-- Filter Wilayah Top (Sebelum Login & Saat Login Sebagai Daerah) -->
+    <?php if (!$IsLoggedIn || !empty($IsDaerah)) { 
+      $provKodeCurrent = !empty($KodeWilayah) ? substr($KodeWilayah, 0, 2) : '';
+      $ListKabKotaTop = [];
+      if (!empty($provKodeCurrent)) {
+          $ListKabKotaTop = $this->db
+              ->select('Kode, Nama')
+              ->from('kodewilayah')
+              ->where('Kode LIKE', $provKodeCurrent . '.%')
+              ->where('LENGTH(REPLACE(Kode, ".", "")) = 4', null, false)
+              ->order_by('Nama', 'ASC')
+              ->get()
+              ->result_array();
+      }
+    ?>
+      <div class="notika-card" style="margin-bottom: 20px;">
+        <div class="notika-card-header">
+          <div class="notika-card-title">
+            <i class="fa fa-filter"></i> <?= empty($IsLoggedIn) ? 'Filter Wilayah &amp; Perangkat Daerah' : 'Filter Perangkat Daerah' ?>
+          </div>
+        </div>
+        <div class="notika-card-body">
+          <div style="display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px;">
+            <?php if (empty($IsLoggedIn)): ?>
+              <div style="flex:1; min-width:180px;">
+                <label class="filter-label">Provinsi</label>
+                <select id="selProvinsiTop" class="filter-select">
+                  <option value="">Pilih Provinsi</option>
+                  <?php if (!empty($Provinsi)) { foreach ($Provinsi as $prov) { ?>
+                    <option value="<?= html_escape($prov['Kode']) ?>"
+                      <?= (!empty($provKodeCurrent) && $provKodeCurrent==$prov['Kode']) ? 'selected' : '' ?>>
+                      <?= html_escape($prov['Nama']) ?>
+                    </option>
+                  <?php } } ?>
+                </select>
+              </div>
+
+              <div style="flex:1; min-width:180px;">
+                <label class="filter-label">Kabupaten / Kota</label>
+                <select id="selKabKotaTop" class="filter-select">
+                  <option value="">Pilih Kab/Kota</option>
+                  <?php if (!empty($ListKabKotaTop)) { foreach ($ListKabKotaTop as $kab) { ?>
+                    <option value="<?= html_escape($kab['Kode']) ?>" <?= (!empty($KodeWilayah) && $KodeWilayah == $kab['Kode']) ? 'selected' : '' ?>>
+                      <?= html_escape($kab['Nama']) ?>
+                    </option>
+                  <?php }} ?>
+                </select>
+              </div>
+            <?php else: ?>
+              <input type="hidden" id="selProvinsiTop" value="<?= !empty($provKodeCurrent) ? $provKodeCurrent : substr($KodeWilayah, 0, 2) ?>">
+              <input type="hidden" id="selKabKotaTop" value="<?= !empty($KodeWilayah) ? $KodeWilayah : '' ?>">
+            <?php endif; ?>
+
+            <div id="grpInstansiTop" style="flex:1.2; min-width:220px; <?= (!empty($IsLoggedIn) || !empty($KodeWilayah)) ? '' : 'display:none;' ?>">
+              <label class="filter-label">Perangkat Daerah / Instansi</label>
+              <select id="selInstansiTop" class="filter-select">
+                <option value="">-- Semua Perangkat Daerah --</option>
+                <?php if (!empty($ListInstansi)) { foreach ($ListInstansi as $ins) { ?>
+                  <option value="<?= $ins['id'] ?>" <?= (!empty($FilterInstansi) && $FilterInstansi == $ins['id']) ? 'selected' : '' ?>>
+                    <?= html_escape($ins['nama']) ?>
+                  </option>
+                <?php }} ?>
+              </select>
+            </div>
+
+            <div style="margin-top:auto;">
+              <button type="button" class="btn-notika btn-notika-primary" id="btnFilterWilayahTop" style="height:38px;">
+                <i class="fa fa-search"></i> <?= empty($IsLoggedIn) ? 'Terapkan Wilayah' : 'Terapkan Filter' ?>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    <?php } ?>
+
     <!-- Filter Card -->
     <div class="notika-card">
       <div class="notika-card-header">
@@ -789,20 +897,7 @@ table.modal-edit-table input.input-real:focus {
               </select>
             </div>
 
-            <!-- Perangkat Daerah -->
-            <?php if (!$IsRole4): ?>
-              <div class="filter-group">
-                <label class="filter-label">Perangkat Daerah</label>
-                <select name="instansi_id" id="filterInstansi" class="filter-select" onchange="this.form.submit()">
-                  <option value="">-- Semua Perangkat Daerah --</option>
-                  <?php foreach ($ListInstansi as $inst): ?>
-                    <option value="<?=$inst['id']?>" <?=$inst['id'] == $FilterInstansi ? 'selected' : ''?>><?=htmlspecialchars($inst['nama'])?></option>
-                  <?php endforeach; ?>
-                </select>
-              </div>
-            <?php else: ?>
-              <input type="hidden" name="instansi_id" value="<?=$FilterInstansi?>">
-            <?php endif; ?>
+            <input type="hidden" name="instansi_id" id="filterInstansi" value="<?=$FilterInstansi?>">
 
             <!-- Bulan Pelaporan -->
             <div class="filter-group">
@@ -875,7 +970,9 @@ table.modal-edit-table input.input-real:focus {
                 <th rowspan="2" style="text-align: left; min-width: 380px; padding-left: 16px;">Program / Kegiatan / Sub Kegiatan</th>
                 <th colspan="4" style="background-color: #f0fdf9; color: #007a5c; border-bottom: 1px solid var(--ui-gray-300);">Realisasi Anggaran (Rp) s.d. <?=$bulanNames[$currentBulanIdx]?></th>
                 <th colspan="4" style="background-color: #f8fafc; color: #1e293b; border-bottom: 1px solid var(--ui-gray-300);">Realisasi Kinerja (%) Triwulan <?=floor($currentBulanIdx/3)+1?></th>
-                <th rowspan="2" style="width: 60px;">Opsi<br>Aksi</th>
+                <?php if (!empty($IsRole4)): ?>
+                  <th rowspan="2" style="width: 60px;">Opsi<br>Aksi</th>
+                <?php endif; ?>
               </tr>
               <tr>
                 <th style="min-width: 120px;">Target</th>
@@ -966,6 +1063,8 @@ table.modal-edit-table input.input-real:focus {
 "use strict";
 
 const IS_ROLE_4 = <?=!empty($IsRole4) ? 'true' : 'false'?>;
+const IS_LOGGED_IN = <?=!empty($IsLoggedIn) ? 'true' : 'false'?>;
+const HAS_KODE_WILAYAH = <?=!empty($KodeWilayah) ? 'true' : 'false'?>;
 const BULAN_NAMES = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 const CURRENT_BULAN_IDX = <?=json_encode($currentBulanIdx)?>;
 const CURRENT_TAHUN = <?=json_encode($TahunAktif)?>;
@@ -1025,6 +1124,12 @@ function parseNum(val) {
   return parseFloat(s);
 }
 
+function formatRupiahInput(inp) {
+  let digits = inp.value.replace(/[^0-9]/g, "");
+  digits = digits.replace(/^0+(?=\d)/, "");
+  inp.value = digits ? Number(digits).toLocaleString('id-ID') : "";
+}
+
 function getPredikatObj(pct) {
   if (pct === null || pct === undefined || isNaN(pct)) return { label: '-', cls: 'pred-none' };
   if (pct >= 91) return { label: 'Sangat Tinggi', cls: 'pred-1' };
@@ -1048,15 +1153,31 @@ function showToast(message, isError = false) {
 }
 
 /* Aggregation Functions */
-// Target alokasi bulan murni untuk baris Sub Kegiatan (tidak ditambah antar bulan)
+// Total Target Anggaran Tahunan untuk Sub Kegiatan (tampilan tabel utama)
+function getSubTargetTotal(sub) {
+  if (sub.targetAnggaran && Number(sub.targetAnggaran) > 0) {
+    return Number(sub.targetAnggaran);
+  }
+  let sum = 0;
+  if (sub.bulanan && sub.bulanan.length) {
+    for (let i = 0; i < sub.bulanan.length; i++) {
+      if (sub.bulanan[i] && sub.bulanan[i].target !== null && sub.bulanan[i].target !== undefined) {
+        sum += Number(sub.bulanan[i].target);
+      }
+    }
+  }
+  return sum;
+}
+
+// Target alokasi per bulan murni (untuk modal edit bulanan)
 function getSubTargetBulan(sub, bulanIdx) {
   if (sub.bulanan && sub.bulanan[bulanIdx] && sub.bulanan[bulanIdx].target !== null && sub.bulanan[bulanIdx].target !== undefined) {
     return Number(sub.bulanan[bulanIdx].target);
   }
-  return sub.targetAnggaran ? Number(sub.targetAnggaran) : 0;
+  return sub.targetAnggaran ? (Number(sub.targetAnggaran) / 12) : 0;
 }
 
-// Target kumulatif s.d. bulan aktif untuk agregasi Kegiatan & Program (bertambah/terakumulasi)
+// Target kumulatif s.d. bulan aktif
 function getSubTargetKumulatif(sub, bulanIdx) {
   let sum = 0;
   if (sub.bulanan && sub.bulanan.length) {
@@ -1071,7 +1192,7 @@ function getSubTargetKumulatif(sub, bulanIdx) {
 }
 
 function getSubTargetSampai(sub, bulanIdx) {
-  return getSubTargetBulan(sub, bulanIdx);
+  return getSubTargetTotal(sub);
 }
 
 function getSubRealisasiSampai(sub, bulanIdx) {
@@ -1087,7 +1208,7 @@ function getSubRealisasiSampai(sub, bulanIdx) {
 }
 
 function getKegiatanTargetTotal(keg) {
-  return (keg.subKegiatan || []).reduce((a, s) => a + getSubTargetKumulatif(s, CURRENT_BULAN_IDX), 0);
+  return (keg.subKegiatan || []).reduce((a, s) => a + getSubTargetTotal(s), 0);
 }
 
 function getKegiatanRealisasiSampai(keg, bulanIdx) {
@@ -1164,11 +1285,14 @@ function renderMainTable() {
   const currentTW = Math.floor(CURRENT_BULAN_IDX / 3) + 1; // 1 s.d. 4
   
   if (!REALISASI_TREE || !REALISASI_TREE.length) {
+    const emptyMsg = (!IS_LOGGED_IN && !HAS_KODE_WILAYAH) ? 
+      'Silakan pilih Filter Wilayah & Perangkat Daerah di atas terlebih dahulu untuk menampilkan data.' : 
+      'Tidak ada data Program, Kegiatan, atau Sub Kegiatan untuk parameter yang dipilih.';
     tbody.innerHTML = `
       <tr>
         <td colspan="10" style="text-align: center; padding: 40px 10px; color: var(--ui-gray-500);">
           <i class="fa fa-folder-open fa-3x" style="color: var(--ui-gray-300); margin-bottom: 10px;"></i><br>
-          Tidak ada data Program, Kegiatan, atau Sub Kegiatan untuk parameter yang dipilih.
+          ${emptyMsg}
         </td>
       </tr>
     `;
@@ -1196,11 +1320,13 @@ function renderMainTable() {
     html += `<td class="cell-name"><i class="fa fa-folder" style="margin-right: 6px; color:#3b82f6;"></i> <span style="font-weight:700;">[${esc(prog.kode)}] ${esc(prog.nomenklatur || prog.nama)}</span></td>`;
     html += renderMetricCols(pTarget, pReal, true, 1);
     html += renderMetricCols(pKinTarget, pKinReal, false, 1);
-    html += `<td class="center-cell">
-      ${IS_ROLE_4 ? `<button class="btn-action-edit" onclick="openProgramModal(${pIdx})" title="Edit Realisasi Program">
-        <i class="fa fa-pen"></i>
-      </button>` : `<span style="color:#94a3b8; font-size:12px;">-</span>`}
-    </td>`;
+    if (IS_ROLE_4) {
+      html += `<td class="center-cell">
+        <button class="btn-action-edit" onclick="openProgramModal(${pIdx})" title="Edit Realisasi Program">
+          <i class="fa fa-pen"></i>
+        </button>
+      </td>`;
+    }
     html += `</tr>`;
 
     (prog.kegiatan || []).forEach((keg, kIdx) => {
@@ -1216,11 +1342,13 @@ function renderMainTable() {
       html += `<td class="cell-name" style="padding-left: 22px;"><i class="fa fa-layer-group" style="margin-right: 6px; color: #06b6d4;"></i> <span style="font-weight:700;">[${esc(keg.kode)}] ${esc(keg.nomenklatur || keg.nama)}</span></td>`;
       html += renderMetricCols(kTarget, kReal, true, 1);
       html += renderMetricCols(kKinTarget, kKinReal, false, 1);
-      html += `<td class="center-cell">
-        ${IS_ROLE_4 ? `<button class="btn-action-edit" onclick="openKegiatanModal(${pIdx}, ${kIdx})" title="Edit Realisasi Kegiatan">
-          <i class="fa fa-pen"></i>
-        </button>` : `<span style="color:#94a3b8; font-size:12px;">-</span>`}
-      </td>`;
+      if (IS_ROLE_4) {
+        html += `<td class="center-cell">
+          <button class="btn-action-edit" onclick="openKegiatanModal(${pIdx}, ${kIdx})" title="Edit Realisasi Kegiatan">
+            <i class="fa fa-pen"></i>
+          </button>
+        </td>`;
+      }
       html += `</tr>`;
 
       (keg.subKegiatan || []).forEach((sub, sIdx) => {
@@ -1247,11 +1375,11 @@ function renderMainTable() {
           }
           html += renderMetricCols(iKinTarget, iKinReal, false, 1);
 
-          if (iIdx === 0) {
+          if (iIdx === 0 && IS_ROLE_4) {
             html += `<td class="center-cell"${rowspan > 1 ? ` rowspan="${rowspan}"` : ''}>
-              ${IS_ROLE_4 ? `<button class="btn-action-edit" onclick="openSubKegiatanModal(${pIdx}, ${kIdx}, ${sIdx})" title="Edit Realisasi Sub Kegiatan">
+              <button class="btn-action-edit" onclick="openSubKegiatanModal(${pIdx}, ${kIdx}, ${sIdx})" title="Edit Realisasi Sub Kegiatan">
                 <i class="fa fa-pen"></i>
-              </button>` : `<span style="color:#94a3b8; font-size:12px;">-</span>`}
+              </button>
             </td>`;
           }
           html += `</tr>`;
@@ -1600,24 +1728,30 @@ function renderSubKegiatanModalContent(data) {
   const sub = keg.subKegiatan[ce.sIdx];
   const h = data.header || sub;
 
-  // Realisasi Anggaran Bulan Terpilih (dari Target Renaksi)
+  // Realisasi Anggaran Bulanan (Januari s.d. Bulan Aktif Terpilih)
   const m = CURRENT_BULAN_IDX;
-  const b = data.bulanan && data.bulanan[m] ? data.bulanan[m] : { bulanNama: BULAN_NAMES[m], target: 0, realisasi: null };
-  const tVal = b.target || 0;
-  const rVal = (b.realisasi !== null && b.realisasi !== undefined) ? b.realisasi : '';
-  
-  let bulananHtml = `
-    <tr>
-      <td style="text-align: left; font-weight: 600; padding-left: 14px;">
-        ${b.bulanNama} <span style="font-size:10px; background:#10b981; color:#fff; padding:1px 5px; border-radius:3px; margin-left:4px;">Bulan Dipilih</span>
-      </td>
-      <td class="readonly-val font-mono" style="font-weight:700; color:#0f766e; text-align:right; padding-right:12px;">${fmtRp(tVal)}</td>
-      <td style="padding: 4px;">
-        <input type="number" step="any" class="input-real input-bln-real font-mono" data-m="${m}" value="${rVal}" placeholder="0" style="text-align:right; font-weight:600;">
-      </td>
-      <td class="readonly-val font-mono" id="sub-persen-bln" style="color: var(--ui-primary-dark); font-weight: 700; text-align:right; padding-right:12px;">-</td>
-    </tr>
-  `;
+  let bulananHtml = '';
+
+  for (let bIdx = 0; bIdx <= m; bIdx++) {
+    const b = (data.bulanan && data.bulanan[bIdx]) ? data.bulanan[bIdx] : { bulanNama: BULAN_NAMES[bIdx], target: 0, realisasi: null };
+    const tVal = Number(b.target) || 0;
+    const rVal = (b.realisasi !== null && b.realisasi !== undefined && b.realisasi !== '') ? Number(b.realisasi) : null;
+    const formattedVal = (rVal !== null) ? rVal.toLocaleString('id-ID') : '';
+
+    bulananHtml += `
+      <tr>
+        <td style="text-align: left; font-weight: 600; padding-left: 14px;">${esc(BULAN_NAMES[bIdx])}</td>
+        <td class="readonly-val font-mono" style="font-weight: 700; color: #0f766e; text-align: right; padding-right: 12px;">${fmtRp(tVal)}</td>
+        <td style="padding: 4px;">
+          <div class="input-rupiah-box">
+            <span class="prefix">Rp</span>
+            <input type="text" inputmode="numeric" class="input-real input-bln-real font-mono bln-real" data-m="${bIdx}" value="${formattedVal}" placeholder="0" oninput="formatRupiahInput(this)" style="text-align: right; font-weight: 600;">
+          </div>
+        </td>
+        <td class="readonly-val font-mono" id="saldo-${bIdx}" style="font-weight: 700; text-align: right; padding-right: 12px; color: var(--ui-gray-900);">-</td>
+      </tr>
+    `;
+  }
 
   // Realisasi Kinerja Output Sub Kegiatan
   let indikatorHtml = '';
@@ -1638,7 +1772,7 @@ function renderSubKegiatanModalContent(data) {
       <div class="modal-header-icon"><i class="fa fa-file-invoice-dollar"></i></div>
       <div class="modal-header-text">
         <h3>REALISASI KINERJA &amp; ANGGARAN SUB KEGIATAN</h3>
-        <p>Input realisasi anggaran bulan ${esc(BULAN_NAMES[m])} serta capaian output sub kegiatan per triwulan.</p>
+        <p>Input realisasi anggaran bulanan serta realisasi kinerja sub kegiatan per triwulan (Target bersifat tetap/read-only).</p>
       </div>
       <button class="modal-close-btn" onclick="closeModal()"><i class="fa fa-times"></i></button>
     </div>
@@ -1658,25 +1792,23 @@ function renderSubKegiatanModalContent(data) {
         </div>
       </div>
 
-      <!-- Realisasi Anggaran Bulan Terpilih -->
+      <!-- Realisasi Anggaran Bulanan -->
       <div class="info-section-card">
-        <div class="info-section-title"><i class="fa fa-calendar-alt"></i> Target &amp; Realisasi Anggaran Bulan ${esc(BULAN_NAMES[m])}</div>
+        <div class="info-section-title"><i class="fa fa-file-invoice-dollar"></i> Realisasi Anggaran Bulanan</div>
         <table class="modal-edit-table">
           <thead>
             <tr>
-              <th style="text-align: left; padding-left: 14px; width: 150px;">Bulan</th>
-              <th style="text-align: right; padding-right: 12px; width: 170px;">Target Anggaran (Rp)</th>
-              <th style="width: 180px;">Realisasi Anggaran (Rp)</th>
-              <th style="text-align: right; padding-right: 12px; width: 130px;">% Capaian</th>
+              <th style="text-align: left; padding-left: 14px;">Bulan</th>
+              <th style="text-align: right; padding-right: 12px; width: 180px;">Target Anggaran (Rp)</th>
+              <th style="width: 190px;">Realisasi (Rp)</th>
+              <th style="text-align: right; padding-right: 12px; width: 190px;">Saldo Akumulasi (Rp)</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="bulanan-tbody">
             ${bulananHtml}
           </tbody>
         </table>
-        <div style="font-size: 11.5px; color: var(--ui-gray-500); margin-top: 6px;">
-          *Target Anggaran Bulan ${esc(BULAN_NAMES[m])} bersumber langsung dari penetapan Target Realisasi Anggaran Bulanan Sub Kegiatan pada menu Target Renaksi.
-        </div>
+        <p class="hint" style="font-size: 11.5px; color: var(--ui-gray-500); margin: 8px 0 0;">Menampilkan bulan Januari s.d. ${esc(BULAN_NAMES[m])} sesuai bulan pelaporan terpilih pada filter di atas.</p>
       </div>
 
       <!-- Realisasi Kinerja Output -->
@@ -1723,20 +1855,19 @@ function renderSubKegiatanModalContent(data) {
   `;
 
   showModal(html);
-  attachMonthlySaldoListeners(tVal);
+  attachMonthlySaldoListeners(m);
 }
 
-function attachMonthlySaldoListeners(targetBulan) {
+function attachMonthlySaldoListeners(maxBulanIdx) {
   function recalcSaldo() {
-    const m = CURRENT_BULAN_IDX;
-    const inp = document.querySelector(`.input-bln-real[data-m="${m}"]`);
-    const rVal = inp ? parseNum(inp.value) : null;
-    const pctCell = document.getElementById('sub-persen-bln');
-    if (pctCell) {
-      if (targetBulan > 0 && rVal !== null) {
-        pctCell.textContent = ((rVal / targetBulan) * 100).toFixed(2) + '%';
-      } else {
-        pctCell.textContent = '-';
+    let running = 0;
+    for (let i = 0; i <= maxBulanIdx; i++) {
+      const inp = document.querySelector(`.input-bln-real[data-m="${i}"]`);
+      const v = (inp && inp.value !== '') ? parseNum(inp.value) : null;
+      running += (v || 0);
+      const cell = document.getElementById(`saldo-${i}`);
+      if (cell) {
+        cell.textContent = fmtRp(running);
       }
     }
   }
@@ -1843,6 +1974,143 @@ document.addEventListener('keydown', function(e) {
 });
 document.getElementById('modalOverlay').addEventListener('click', function(e) {
   if (e.target.id === 'modalOverlay') closeModal();
+});
+
+/* ---------------- Top Wilayah Filter (Before Login) ---------------- */
+$(function() {
+  var CSRF_NAME = '<?= $this->security->get_csrf_token_name() ?>';
+  var CSRF_TOKEN = '<?= $this->security->get_csrf_hash() ?>';
+  var BaseURL = '<?= base_url() ?>';
+  var cKodeWilayah = '<?= !empty($KodeWilayah) ? $KodeWilayah : "" ?>';
+  var cInstansiId = '<?= !empty($FilterInstansi) ? $FilterInstansi : (!empty($InstansiId) ? $InstansiId : "") ?>';
+
+  function loadKabKotaTop(provKode, selectedKabKode, callback) {
+    if (!provKode) {
+      $('#selKabKotaTop').html('<option value="">Pilih Kab/Kota</option>');
+      $('#grpInstansiTop').hide();
+      return;
+    }
+    $.ajax({
+      url: BaseURL + 'Instansi/GetListKabKota',
+      type: 'POST',
+      data: { Kode: provKode, [CSRF_NAME]: CSRF_TOKEN },
+      dataType: 'json',
+      beforeSend: function() {
+        $('#selKabKotaTop').prop('disabled', true).html('<option value="">Memuat Kab/Kota...</option>');
+      },
+      success: function(data) {
+        var html = '<option value="">Pilih Kab/Kota</option>';
+        if (data && data.length > 0) {
+          for (var i = 0; i < data.length; i++) {
+            var sel = (selectedKabKode && selectedKabKode == data[i].Kode) ? 'selected' : '';
+            html += '<option value="' + data[i].Kode + '" ' + sel + '>' + data[i].Nama + '</option>';
+          }
+        }
+        $('#selKabKotaTop').html(html).prop('disabled', false);
+        if (callback) callback();
+      },
+      error: function() {
+        $('#selKabKotaTop').html('<option value="">Gagal memuat data</option>').prop('disabled', false);
+      }
+    });
+  }
+
+  function loadInstansiTop(kabKode, selectedInstansiId) {
+    if (!kabKode) {
+      $('#grpInstansiTop').hide();
+      $('#selInstansiTop').html('<option value="">-- Semua Perangkat Daerah --</option>');
+      return;
+    }
+    $.ajax({
+      url: BaseURL + 'Instansi/GetListInstansiLevel4',
+      type: 'POST',
+      data: { kode_wilayah: kabKode, [CSRF_NAME]: CSRF_TOKEN },
+      dataType: 'json',
+      beforeSend: function() {
+        $('#selInstansiTop').html('<option value="">Memuat Instansi...</option>');
+        $('#grpInstansiTop').show();
+      },
+      success: function(data) {
+        var html = '<option value="">-- Semua Perangkat Daerah --</option>';
+        if (data && data.length > 0) {
+          for (var i = 0; i < data.length; i++) {
+            var sel = (selectedInstansiId && selectedInstansiId == data[i].id) ? 'selected' : '';
+            html += '<option value="' + data[i].id + '" ' + sel + '>' + data[i].nama + '</option>';
+          }
+        }
+        $('#selInstansiTop').html(html);
+        $('#grpInstansiTop').show();
+      },
+      error: function() {
+        $('#selInstansiTop').html('<option value="">-- Gagal memuat instansi --</option>');
+      }
+    });
+  }
+
+  $('#selProvinsiTop').change(function() {
+    var prov = $(this).val();
+    loadKabKotaTop(prov, '');
+  });
+
+  $('#selKabKotaTop').change(function() {
+    var kab = $(this).val();
+    loadInstansiTop(kab, '');
+  });
+
+  if (cKodeWilayah) {
+    var provKode = cKodeWilayah.substring(0, 2);
+    loadKabKotaTop(provKode, cKodeWilayah, function() {
+      loadInstansiTop(cKodeWilayah, cInstansiId);
+    });
+  }
+
+  $('#btnFilterWilayahTop').click(function() {
+    var prov = $('#selProvinsiTop').val();
+    var kab = $('#selKabKotaTop').val();
+    var inst = $('#selInstansiTop').val();
+
+    if (!prov) {
+      alert('Mohon pilih Provinsi');
+      return;
+    }
+    if (!kab) {
+      alert('Mohon pilih Kabupaten/Kota');
+      return;
+    }
+
+    var btn = $(this);
+    btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
+
+    $.ajax({
+      url: BaseURL + 'Instansi/SetTempKodeWilayah',
+      type: 'POST',
+      data: {
+        KodeWilayah: kab,
+        InstansiId: inst,
+        [CSRF_NAME]: CSRF_TOKEN
+      },
+      success: function(res) {
+        if (res.trim() === '1') {
+          var url = window.location.pathname;
+          var queryParams = [];
+          if (inst) {
+            queryParams.push('instansi_id=' + encodeURIComponent(inst));
+          }
+          if (queryParams.length > 0) {
+            url += '?' + queryParams.join('&');
+          }
+          window.location.href = url;
+        } else {
+          alert(res || 'Gagal mengatur filter wilayah');
+          btn.prop('disabled', false).html('<i class="fa fa-search"></i> Terapkan Wilayah');
+        }
+      },
+      error: function() {
+        alert('Terjadi kesalahan koneksi ke server');
+        btn.prop('disabled', false).html('<i class="fa fa-search"></i> Terapkan Wilayah');
+      }
+    });
+  });
 });
 
 /* Init */

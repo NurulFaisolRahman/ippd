@@ -891,6 +891,240 @@
 <div class="main-content">
 <div class="app">
 
+  <!-- Filter Wilayah (Provinsi, Kab/Kota, dan Instansi) - SEBELUM LOGIN & LOGIN DAERAH -->
+  <?php if (!$IsLoggedIn || !empty($IsDaerah)) { 
+    $provKodeCurrent = !empty($KodeWilayah) ? substr($KodeWilayah, 0, 2) : '';
+    $ListKabKotaTop = [];
+    if (!empty($provKodeCurrent)) {
+        $ListKabKotaTop = $this->db
+            ->select('Kode, Nama')
+            ->from('kodewilayah')
+            ->where('Kode LIKE', $provKodeCurrent . '.%')
+            ->where('LENGTH(REPLACE(Kode, ".", "")) = 4', null, false)
+            ->order_by('Nama', 'ASC')
+            ->get()
+            ->result_array();
+    }
+  ?>
+    <div class="card" style="padding: 16px 20px; margin-bottom: 20px;">
+      <div style="font-size: 14px; font-weight: 700; color: var(--ui-text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+        <i class="fa fa-filter" style="color: var(--notika-green);"></i> <?= empty($IsLoggedIn) ? 'Filter Wilayah &amp; Perangkat Daerah' : 'Filter Perangkat Daerah' ?>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;">
+        <?php if (empty($IsLoggedIn)): ?>
+          <div style="flex: 1; min-width: 180px;">
+            <label style="font-size: 12px; font-weight: 600; color: var(--ui-text-muted); margin-bottom: 4px; display: block;">Provinsi</label>
+            <select id="selProvinsiTop" style="width: 100%; height: 38px; border-radius: 6px; border: 1px solid var(--ui-border); padding: 6px 10px; font-size: 13px;">
+              <option value="">Pilih Provinsi</option>
+              <?php if (!empty($Provinsi)) { foreach ($Provinsi as $prov) { ?>
+                <option value="<?= html_escape($prov['Kode']) ?>" <?= (!empty($provKodeCurrent) && $provKodeCurrent == $prov['Kode']) ? 'selected' : '' ?>>
+                  <?= html_escape($prov['Nama']) ?>
+                </option>
+              <?php }} ?>
+            </select>
+          </div>
+
+          <div style="flex: 1; min-width: 180px;">
+            <label style="font-size: 12px; font-weight: 600; color: var(--ui-text-muted); margin-bottom: 4px; display: block;">Kabupaten / Kota</label>
+            <select id="selKabKotaTop" style="width: 100%; height: 38px; border-radius: 6px; border: 1px solid var(--ui-border); padding: 6px 10px; font-size: 13px;">
+              <option value="">Pilih Kab/Kota</option>
+              <?php if (!empty($ListKabKotaTop)) { foreach ($ListKabKotaTop as $kab) { ?>
+                <option value="<?= html_escape($kab['Kode']) ?>" <?= (!empty($KodeWilayah) && $KodeWilayah == $kab['Kode']) ? 'selected' : '' ?>>
+                  <?= html_escape($kab['Nama']) ?>
+                </option>
+              <?php }} ?>
+            </select>
+          </div>
+        <?php else: ?>
+          <input type="hidden" id="selProvinsiTop" value="<?= !empty($provKodeCurrent) ? $provKodeCurrent : substr($KodeWilayah, 0, 2) ?>">
+          <input type="hidden" id="selKabKotaTop" value="<?= !empty($KodeWilayah) ? $KodeWilayah : '' ?>">
+        <?php endif; ?>
+
+        <div id="grpInstansiTop" style="flex: 1.2; min-width: 220px; <?= (!empty($IsLoggedIn) || !empty($KodeWilayah)) ? '' : 'display:none;' ?>">
+          <label style="font-size: 12px; font-weight: 600; color: var(--ui-text-muted); margin-bottom: 4px; display: block;">Perangkat Daerah / Instansi</label>
+          <select id="selInstansiTop" style="width: 100%; height: 38px; border-radius: 6px; border: 1px solid var(--ui-border); padding: 6px 10px; font-size: 13px;">
+            <option value="">-- Semua Perangkat Daerah --</option>
+            <?php if (!empty($ListInstansi)) { foreach ($ListInstansi as $ins) { ?>
+              <option value="<?= $ins['id'] ?>" <?= ($ActiveInstansiId == $ins['id']) ? 'selected' : '' ?>>
+                <?= html_escape($ins['nama']) ?>
+              </option>
+            <?php }} ?>
+          </select>
+        </div>
+
+        <div style="width: auto;">
+          <button type="button" id="btnFilterWilayahTop" class="btn btn-primary" style="height: 38px; padding: 0 18px; font-size: 13px; font-weight: 600; border-radius: 6px; background: var(--notika-green); color: #fff; border: none; cursor: pointer;">
+            <i class="fa fa-search"></i> <?= empty($IsLoggedIn) ? 'Terapkan Wilayah' : 'Terapkan Filter' ?>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    (function() {
+      var BaseURL = '<?= base_url() ?>';
+      var cKodeWilayah = '<?= !empty($KodeWilayah) ? $KodeWilayah : "" ?>';
+      var cInstansiId = '<?= !empty($ActiveInstansiId) ? $ActiveInstansiId : "" ?>';
+
+      function loadKabKota(provKode, selectedKabKode, callback) {
+        var selKab = document.getElementById('selKabKotaTop');
+        var grpInst = document.getElementById('grpInstansiTop');
+        if (!selKab) return;
+        if (!provKode) {
+          selKab.innerHTML = '<option value="">Pilih Kab/Kota</option>';
+          if (grpInst) grpInst.style.display = 'none';
+          return;
+        }
+        selKab.disabled = true;
+        selKab.innerHTML = '<option value="">Memuat Kab/Kota...</option>';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', BaseURL + 'Instansi/GetListKabKota', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.onload = function() {
+          selKab.disabled = false;
+          if (xhr.status === 200) {
+            try {
+              var data = JSON.parse(xhr.responseText);
+              var html = '<option value="">Pilih Kab/Kota</option>';
+              if (data && data.length > 0) {
+                for (var i = 0; i < data.length; i++) {
+                  var sel = (selectedKabKode && selectedKabKode == data[i].Kode) ? ' selected' : '';
+                  html += '<option value="' + data[i].Kode + '"' + sel + '>' + data[i].Nama + '</option>';
+                }
+              }
+              selKab.innerHTML = html;
+              if (callback) callback();
+            } catch (e) {
+              selKab.innerHTML = '<option value="">Gagal memuat data</option>';
+            }
+          } else {
+            selKab.innerHTML = '<option value="">Gagal memuat data</option>';
+          }
+        };
+        xhr.onerror = function() {
+          selKab.disabled = false;
+          selKab.innerHTML = '<option value="">Gagal memuat data</option>';
+        };
+        xhr.send('Kode=' + encodeURIComponent(provKode));
+      }
+
+      function loadInstansi(kabKode, selectedInstansiId) {
+        var selInst = document.getElementById('selInstansiTop');
+        var grpInst = document.getElementById('grpInstansiTop');
+        if (!selInst) return;
+        if (!kabKode) {
+          if (grpInst) grpInst.style.display = 'none';
+          selInst.innerHTML = '<option value="">-- Semua Perangkat Daerah --</option>';
+          return;
+        }
+        if (grpInst) grpInst.style.display = '';
+        selInst.innerHTML = '<option value="">Memuat Instansi...</option>';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', BaseURL + 'Instansi/GetListInstansiLevel4', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.onload = function() {
+          if (xhr.status === 200) {
+            try {
+              var data = JSON.parse(xhr.responseText);
+              var html = '<option value="">-- Semua Perangkat Daerah --</option>';
+              if (data && data.length > 0) {
+                for (var i = 0; i < data.length; i++) {
+                  var sel = (selectedInstansiId && selectedInstansiId == data[i].id) ? ' selected' : '';
+                  html += '<option value="' + data[i].id + '"' + sel + '>' + data[i].nama + '</option>';
+                }
+              }
+              selInst.innerHTML = html;
+              if (grpInst) grpInst.style.display = '';
+            } catch (e) {
+              selInst.innerHTML = '<option value="">-- Gagal memuat instansi --</option>';
+            }
+          }
+        };
+        xhr.send('kode_wilayah=' + encodeURIComponent(kabKode));
+      }
+
+      function initFilter() {
+        var selProv = document.getElementById('selProvinsiTop');
+        var selKab = document.getElementById('selKabKotaTop');
+        var btnApply = document.getElementById('btnFilterWilayahTop');
+
+        if (selProv) {
+          selProv.onchange = function() {
+            loadKabKota(this.value, '', function() {
+              loadInstansi('', '');
+            });
+          };
+        }
+
+        if (selKab) {
+          selKab.onchange = function() {
+            loadInstansi(this.value, '');
+          };
+        }
+
+        if (btnApply) {
+          btnApply.onclick = function() {
+            var prov = selProv ? selProv.value : '';
+            var kab = selKab ? selKab.value : '';
+            var selInst = document.getElementById('selInstansiTop');
+            var inst = selInst ? selInst.value : '';
+
+            if (!prov) {
+              alert('Mohon pilih Provinsi');
+              return;
+            }
+            if (!kab) {
+              alert('Mohon pilih Kabupaten/Kota');
+              return;
+            }
+
+            btnApply.disabled = true;
+            btnApply.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menyimpan...';
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', BaseURL + 'Instansi/SetTempKodeWilayah', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xhr.onload = function() {
+              if (xhr.responseText.trim() === '1') {
+                var url = window.location.pathname;
+                var queryParams = [];
+                if (inst) {
+                  queryParams.push('instansi_id=' + encodeURIComponent(inst));
+                }
+                if (queryParams.length > 0) {
+                  url += '?' + queryParams.join('&');
+                }
+                window.location.href = url;
+              } else {
+                alert(xhr.responseText || 'Gagal mengatur filter wilayah');
+                btnApply.disabled = false;
+                btnApply.innerHTML = '<i class="fa fa-search"></i> Terapkan Wilayah';
+              }
+            };
+            xhr.onerror = function() {
+              alert('Terjadi kesalahan koneksi ke server');
+              btnApply.disabled = false;
+              btnApply.innerHTML = '<i class="fa fa-search"></i> Terapkan Wilayah';
+            };
+            xhr.send('KodeWilayah=' + encodeURIComponent(kab) + '&InstansiId=' + encodeURIComponent(inst));
+          };
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initFilter);
+      } else {
+        initFilter();
+      }
+    })();
+    </script>
+  <?php } ?>
+
   <!-- Professional Page Header -->
   <div class="page-header">
     <div class="page-header-left">
@@ -901,101 +1135,92 @@
     </div>
   </div>
 
-  <!-- Context Card (Parameter & Konteks Belanja) -->
-  <div class="card context-card">
-    <div class="card-header-simple">
-      <div class="card-header-title">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-        </svg>
-        <span>Parameter & Konteks Belanja</span>
-      </div>
-      <span class="card-header-desc">Pilih tingkatan struktur belanja untuk menampilkan data rincian</span>
-    </div>
-    <div class="card-body">
-      <div class="context-grid">
-        <div class="context-row">
-          <div class="label">Tahun</div>
-          <div class="colon">:</div>
-          <div class="control-wrap">
-            <select id="ctxTahun" class="font-mono">
-              <?php if (!empty($ListTahun)): ?>
-                <?php foreach ($ListTahun as $y): ?>
-                  <option value="<?= $y ?>" <?= ($y == $TahunAktif) ? 'selected' : '' ?>><?= $y ?></option>
-                <?php endforeach; ?>
-              <?php else: ?>
-                <option value="2025">2025</option>
-                <option value="2026">2026</option>
-                <option value="2027">2027</option>
-              <?php endif; ?>
-            </select>
-          </div>
+  <!-- Context Card (Parameter & Konteks Belanja) - HANYA DITAMPILKAN UNTUK ROLE 4 -->
+  <?php if (!empty($IsRole4)): ?>
+    <div class="card context-card">
+      <div class="card-header-simple">
+        <div class="card-header-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+          </svg>
+          <span>Parameter & Konteks Belanja</span>
         </div>
-        <div class="context-row">
-          <div class="label">Perangkat Daerah</div>
-          <div class="colon">:</div>
-          <div class="control-wrap">
-            <?php if (empty($IsRole4) && !empty($ListInstansi)): ?>
-              <select id="ctxInstansiSelect">
-                <?php foreach ($ListInstansi as $inst): ?>
-                  <option value="<?= $inst['id'] ?>" <?= ($inst['id'] == $ActiveInstansiId) ? 'selected' : '' ?>>
-                    <?= html_escape($inst['nama']) ?>
-                  </option>
-                <?php endforeach; ?>
+        <span class="card-header-desc">Pilih tingkatan struktur belanja untuk menampilkan data rincian</span>
+      </div>
+      <div class="card-body">
+        <div class="context-grid">
+          <div class="context-row">
+            <div class="label">Tahun</div>
+            <div class="colon">:</div>
+            <div class="control-wrap">
+              <select id="ctxTahun" class="font-mono">
+                <?php if (!empty($ListTahun)): ?>
+                  <?php foreach ($ListTahun as $y): ?>
+                    <option value="<?= $y ?>" <?= ($y == $TahunAktif) ? 'selected' : '' ?>><?= $y ?></option>
+                  <?php endforeach; ?>
+                <?php else: ?>
+                  <option value="2025">2025</option>
+                  <option value="2026">2026</option>
+                  <option value="2027">2027</option>
+                <?php endif; ?>
               </select>
-              <input type="hidden" id="ctxPerangkatDaerah" value="<?= html_escape($CurrentInstansi ? $CurrentInstansi['nama'] : '') ?>">
-            <?php else: ?>
+            </div>
+          </div>
+          <div class="context-row">
+            <div class="label">Perangkat Daerah</div>
+            <div class="colon">:</div>
+            <div class="control-wrap">
               <input id="ctxPerangkatDaerah" class="context-readonly" readonly value="<?= html_escape($CurrentInstansi ? $CurrentInstansi['nama'] : 'PERANGKAT DAERAH') ?>" placeholder="Perangkat Daerah">
               <input type="hidden" id="ctxInstansiSelect" value="<?= $ActiveInstansiId ?: '' ?>">
-            <?php endif; ?>
+            </div>
           </div>
-        </div>
-        <div class="context-row">
-          <div class="label">Sub Unit</div>
-          <div class="colon">:</div>
-          <div class="control-wrap">
-            <select id="ctxSubUnit"></select>
+          <div class="context-row">
+            <div class="label">Sub Unit</div>
+            <div class="colon">:</div>
+            <div class="control-wrap">
+              <select id="ctxSubUnit"></select>
+            </div>
           </div>
-        </div>
-        <div class="context-row">
-          <div class="label">Bidang Urusan</div>
-          <div class="colon">:</div>
-          <div class="control-wrap">
-            <select id="ctxBidangUrusan"></select>
+          <div class="context-row">
+            <div class="label">Bidang Urusan</div>
+            <div class="colon">:</div>
+            <div class="control-wrap">
+              <select id="ctxBidangUrusan"></select>
+            </div>
           </div>
-        </div>
-        <div class="context-row">
-          <div class="label">Program</div>
-          <div class="colon">:</div>
-          <div class="control-wrap">
-            <select id="ctxProgram"></select>
+          <div class="context-row">
+            <div class="label">Program</div>
+            <div class="colon">:</div>
+            <div class="control-wrap">
+              <select id="ctxProgram"></select>
+            </div>
           </div>
-        </div>
-        <div class="context-row">
-          <div class="label">Kegiatan</div>
-          <div class="colon">:</div>
-          <div class="control-wrap">
-            <select id="ctxKegiatan"></select>
+          <div class="context-row">
+            <div class="label">Kegiatan</div>
+            <div class="colon">:</div>
+            <div class="control-wrap">
+              <select id="ctxKegiatan"></select>
+            </div>
           </div>
-        </div>
-        <div class="context-row">
-          <div class="label">Sub Kegiatan</div>
-          <div class="colon">:</div>
-          <div class="control-wrap">
-            <select id="ctxSubKegiatan"></select>
+          <div class="context-row">
+            <div class="label">Sub Kegiatan</div>
+            <div class="colon">:</div>
+            <div class="control-wrap">
+              <select id="ctxSubKegiatan"></select>
+            </div>
           </div>
         </div>
       </div>
+      <div class="context-hint" id="contextHint"></div>
     </div>
-    <div class="context-hint" id="contextHint"></div>
-  </div>
+  <?php endif; ?>
 
   <!-- Table card -->
   <div class="card">
     <div class="table-toolbar">
       <div>
         <h2>Tabel Rincian Belanja</h2>
-        <p id="toolbarContext">Lengkapi pilihan Sub Unit sampai Sub Kegiatan terlebih dahulu.</p>
+        <p id="toolbarContext"><?= !empty($IsRole4) ? 'Lengkapi pilihan Sub Unit sampai Sub Kegiatan terlebih dahulu.' : 'Rincian Belanja: ' . html_escape($CurrentInstansi ? $CurrentInstansi['nama'] : 'Perangkat Daerah') . ' (Tahun ' . $TahunAktif . ')' ?></p>
       </div>
       <?php if (!empty($IsRole4)): ?>
         <button class="btn-add" id="btnTambah" type="button">
@@ -1011,7 +1236,9 @@
             <th rowspan="2" style="width:160px;">Kode Rekening</th>
             <th rowspan="2">Uraian</th>
             <th colspan="4" class="center">Rincian Perhitungan</th>
-            <th rowspan="2" style="width:90px;" class="center">Aksi</th>
+            <?php if (!empty($IsRole4)): ?>
+              <th rowspan="2" style="width:90px;" class="center">Aksi</th>
+            <?php endif; ?>
           </tr>
           <tr class="sub-head">
             <th class="num" style="width:120px;">Koefisien</th>
@@ -1023,9 +1250,11 @@
         <tbody id="tableBody"></tbody>
         <tfoot>
           <tr>
-            <td colspan="10" class="label">Jumlah Total</td>
+            <td colspan="5" class="label">Jumlah Total</td>
             <td class="num" id="grandTotal"><span class="money-cell"><span class="cur">Rp</span><span class="val">0,00</span></span></td>
-            <td></td>
+            <?php if (!empty($IsRole4)): ?>
+              <td></td>
+            <?php endif; ?>
           </tr>
         </tfoot>
       </table>
@@ -1256,6 +1485,8 @@
   var initialSubUnits = <?= json_encode(!empty($SubUnits) ? $SubUnits : []) ?>;
   var currentInstansi = <?= json_encode(!empty($CurrentInstansi) ? $CurrentInstansi : null) ?>;
   var isRole4 = <?= !empty($IsRole4) ? 'true' : 'false' ?>;
+  var isLoggedIn = <?= !empty($IsLoggedIn) ? 'true' : 'false' ?>;
+  var hasKodeWilayah = <?= !empty($KodeWilayah) ? 'true' : 'false' ?>;
   var activeInstansiId = <?= json_encode($ActiveInstansiId) ?>;
 
   /* ---------------- Master data ---------------- */
@@ -1434,7 +1665,7 @@
       '<td><div class="cell-label" style="padding-left:'+pad+'px;">'+toggleBtn(code,collapsed,hasChildren)+'<span class="txt">'+esc(name)+'</span></div></td>'+
       '<td></td><td></td><td></td>'+
       '<td class="num">'+formatMoney(total)+'</td>'+
-      '<td></td>'+
+      (isRole4 ? '<td></td>' : '')+
     '</tr>';
   }
   function accountRow(code, name, level, total, hasChildren){
@@ -1445,7 +1676,7 @@
       '<td><div class="cell-label" style="padding-left:'+pad+'px;">'+toggleBtn(code,collapsed,hasChildren)+'<span class="txt">'+esc(name)+'</span></div></td>'+
       '<td></td><td></td><td></td>'+
       '<td class="num">'+formatMoney(total)+'</td>'+
-      '<td></td>'+
+      (isRole4 ? '<td></td>' : '')+
     '</tr>';
   }
   function groupRow(key, label, sumberDana, level, total, hasChildren){
@@ -1459,7 +1690,7 @@
         '</span></div></td>'+
       '<td></td><td></td><td></td>'+
       '<td class="num">'+formatMoney(total)+'</td>'+
-      '<td></td>'+
+      (isRole4 ? '<td></td>' : '')+
     '</tr>';
   }
   function subgroupRow(key, label, level, total, hasChildren){
@@ -1470,7 +1701,7 @@
       '<td><div class="cell-label" style="padding-left:'+pad+'px;">'+toggleBtn(key,collapsed,hasChildren)+'<span class="txt">[ - ] '+esc(label)+'</span></div></td>'+
       '<td></td><td></td><td></td>'+
       '<td class="num">'+formatMoney(total)+'</td>'+
-      '<td></td>'+
+      (isRole4 ? '<td></td>' : '')+
     '</tr>';
   }
   function itemRow(it, level){
@@ -1487,10 +1718,10 @@
       '<td class="num">'+formatMoney(it.hargaSatuan)+'</td>'+
       '<td class="center font-mono">'+(parseFloat(it.ppn)||0)+'%</td>'+
       '<td class="num" style="font-weight:700;">'+formatMoney(calcJumlah(it))+'</td>'+
-      '<td class="center">' + (isRole4 ? ('<div class="actions">'+
+      (isRole4 ? ('<td class="center"><div class="actions">'+
         '<button class="icon-btn edit" data-edit="'+it.id+'" title="Ubah">'+ICON_EDIT+'</button>'+
         '<button class="icon-btn del" data-del="'+it.id+'" title="Hapus">'+ICON_DEL+'</button>'+
-      '</div>') : '<span style="color:#94a3b8; font-size:12px;">-</span>') + '</td>'+
+      '</div></td>') : '') +
     '</tr>';
   }
 
@@ -1547,10 +1778,13 @@
 
   function render(){
     var tbody = document.getElementById("tableBody");
-    var visibleItems = items.filter(function(it){ return it.subKegiatanKode===currentSubKegiatanKode; });
+    var visibleItems = isRole4 ? 
+      (currentSubKegiatanKode ? items.filter(function(it){ return it.subKegiatanKode===currentSubKegiatanKode; }) : []) : 
+      items;
 
-    if(!currentSubKegiatanKode){
-      tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state">'+ICON_EMPTY+
+    var emptyColspan = isRole4 ? 7 : 6;
+    if(isRole4 && !currentSubKegiatanKode){
+      tbody.innerHTML = '<tr><td colspan="'+emptyColspan+'"><div class="empty-state">'+ICON_EMPTY+
         '<p>Pilih Sub Unit, Bidang Urusan, Program, Kegiatan dan Sub Kegiatan di atas terlebih dahulu untuk menampilkan rincian belanja.</p></div></td></tr>';
       document.getElementById("grandTotal").innerHTML = formatMoney(0);
       refreshDatalists(visibleItems);
@@ -1565,8 +1799,11 @@
     });
 
     if(out.length===0){
-      tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state">'+ICON_EMPTY+
-        '<p>Belum ada rincian belanja untuk Sub Kegiatan ini. Klik <strong>+ Tambah Rincian</strong> untuk menambahkan.</p></div></td></tr>';
+      var emptyMsg = (!isLoggedIn && !hasKodeWilayah) ? 
+        'Silakan pilih Filter Wilayah & Perangkat Daerah di atas terlebih dahulu untuk menampilkan data.' : 
+        ('Belum ada rincian belanja untuk Perangkat Daerah ini.' + (isRole4 ? ' Klik <strong>+ Tambah Rincian</strong> untuk menambahkan.' : ''));
+      tbody.innerHTML = '<tr><td colspan="'+emptyColspan+'"><div class="empty-state">'+ICON_EMPTY+
+        '<p>' + emptyMsg + '</p></div></td></tr>';
     } else {
       tbody.innerHTML = out.join("");
     }
@@ -1823,7 +2060,9 @@
   function labelFor(it){ return it.kode+' - '+it.nama; }
 
   function populateSubUnitOptions(){
-    el("ctxSubUnit").innerHTML = optionsHTML(MASTER.subUnit, labelFor, "Pilih sub unit");
+    if (el("ctxSubUnit")) {
+      el("ctxSubUnit").innerHTML = optionsHTML(MASTER.subUnit, labelFor, "Pilih sub unit");
+    }
   }
 
   function updatePerangkatDaerah(subUnitKode){
@@ -1839,29 +2078,34 @@
     var toolbar = el("toolbarContext");
     if(currentSubKegiatanKode){
       var sk = MASTER.subKegiatan.find(function(s){ return s.kode===currentSubKegiatanKode; });
-      btn.disabled = false;
-      hint.className = "context-hint ok";
-      hint.textContent = "Konteks siap. Sub Kegiatan aktif: " + currentSubKegiatanKode + " - " + (sk?sk.nama:"");
-      toolbar.textContent = "Sub Kegiatan aktif: " + currentSubKegiatanKode + " - " + (sk?sk.nama:"");
+      if (btn) btn.disabled = false;
+      if (hint) {
+        hint.className = "context-hint ok";
+        hint.textContent = "Konteks siap. Sub Kegiatan aktif: " + currentSubKegiatanKode + " - " + (sk?sk.nama:"");
+      }
+      if (toolbar && isRole4) toolbar.textContent = "Sub Kegiatan aktif: " + currentSubKegiatanKode + " - " + (sk?sk.nama:"");
     } else {
-      btn.disabled = true;
-      hint.className = "context-hint";
-      hint.textContent = "Lengkapi pilihan Sub Unit \u2192 Bidang Urusan \u2192 Program \u2192 Kegiatan \u2192 Sub Kegiatan di atas sebelum mengisi rincian belanja.";
-      toolbar.textContent = "Lengkapi pilihan Sub Unit sampai Sub Kegiatan terlebih dahulu.";
+      if (btn) btn.disabled = true;
+      if (hint) {
+        hint.className = "context-hint";
+        hint.textContent = "Lengkapi pilihan Sub Unit \u2192 Bidang Urusan \u2192 Program \u2192 Kegiatan \u2192 Sub Kegiatan di atas sebelum mengisi rincian belanja.";
+      }
+      if (toolbar && isRole4) toolbar.textContent = "Lengkapi pilihan Sub Unit sampai Sub Kegiatan terlebih dahulu.";
     }
   }
 
   /* ---------------- Dynamic Cascading Loaders via AJAX ---------------- */
-  function loadCascadeBidangUrusan(suObj, presetVal) {
+  function loadCascadeBidangUrusan(suObj, presetBidang, presetProg, presetKeg, presetSubKeg) {
+    if (!el("ctxBidangUrusan")) return;
     el("ctxBidangUrusan").innerHTML = '<option value="">Memuat bidang urusan...</option>';
-    el("ctxProgram").innerHTML = '<option value="">Pilih program</option>';
-    el("ctxKegiatan").innerHTML = '<option value="">Pilih kegiatan</option>';
-    el("ctxSubKegiatan").innerHTML = '<option value="">Pilih sub kegiatan</option>';
+    if (el("ctxProgram")) el("ctxProgram").innerHTML = '<option value="">Pilih program</option>';
+    if (el("ctxKegiatan")) el("ctxKegiatan").innerHTML = '<option value="">Pilih kegiatan</option>';
+    if (el("ctxSubKegiatan")) el("ctxSubKegiatan").innerHTML = '<option value="">Pilih sub kegiatan</option>';
     currentSubKegiatanKode = null;
     updateTambahState();
 
     var instId = activeInstansiId || (currentInstansi ? currentInstansi.id : 0);
-    var thnVal = el("ctxTahun").value;
+    var thnVal = el("ctxTahun") ? el("ctxTahun").value : '<?= $TahunAktif ?>';
 
     $.ajax({
       url: ControllerURL + "GetCascadeBidangUrusan",
@@ -1877,26 +2121,27 @@
         var list = (res.status === 'success' && res.data) ? res.data : [];
 
         MASTER.bidangUrusan = list;
-        el("ctxBidangUrusan").innerHTML = optionsHTML(list, labelFor, "Pilih bidang urusan");
+        if (el("ctxBidangUrusan")) el("ctxBidangUrusan").innerHTML = optionsHTML(list, labelFor, "Pilih bidang urusan");
 
         if (list.length > 0) {
-          var targetVal = presetVal && list.some(function(x){ return x.kode === presetVal; }) ? presetVal : list[0].kode;
-          el("ctxBidangUrusan").value = targetVal;
-          loadCascadeProgram(targetVal);
+          var targetVal = presetBidang && list.some(function(x){ return x.kode === presetBidang; }) ? presetBidang : list[0].kode;
+          if (el("ctxBidangUrusan")) el("ctxBidangUrusan").value = targetVal;
+          loadCascadeProgram(targetVal, presetProg, presetKeg, presetSubKeg);
         } else {
           render();
         }
       },
       error: function() {
-        el("ctxBidangUrusan").innerHTML = '<option value="">Gagal memuat</option>';
+        if (el("ctxBidangUrusan")) el("ctxBidangUrusan").innerHTML = '<option value="">Gagal memuat</option>';
       }
     });
   }
 
-  function loadCascadeProgram(bidangKode, presetVal) {
+  function loadCascadeProgram(bidangKode, presetProg, presetKeg, presetSubKeg) {
+    if (!el("ctxProgram")) return;
     el("ctxProgram").innerHTML = '<option value="">Memuat program...</option>';
-    el("ctxKegiatan").innerHTML = '<option value="">Pilih kegiatan</option>';
-    el("ctxSubKegiatan").innerHTML = '<option value="">Pilih sub kegiatan</option>';
+    if (el("ctxKegiatan")) el("ctxKegiatan").innerHTML = '<option value="">Pilih kegiatan</option>';
+    if (el("ctxSubKegiatan")) el("ctxSubKegiatan").innerHTML = '<option value="">Pilih sub kegiatan</option>';
     currentSubKegiatanKode = null;
     updateTambahState();
 
@@ -1906,7 +2151,7 @@
     }
 
     var instId = activeInstansiId || (currentInstansi ? currentInstansi.id : 0);
-    var thnVal = el("ctxTahun").value;
+    var thnVal = el("ctxTahun") ? el("ctxTahun").value : '<?= $TahunAktif ?>';
 
     $.ajax({
       url: ControllerURL + "GetCascadeProgram",
@@ -1921,25 +2166,26 @@
         var list = (res.status === 'success' && res.data) ? res.data : [];
 
         MASTER.program = list;
-        el("ctxProgram").innerHTML = optionsHTML(list, labelFor, "Pilih program");
+        if (el("ctxProgram")) el("ctxProgram").innerHTML = optionsHTML(list, labelFor, "Pilih program");
 
         if (list.length > 0) {
-          var targetVal = presetVal && list.some(function(x){ return x.kode === presetVal; }) ? presetVal : list[0].kode;
-          el("ctxProgram").value = targetVal;
-          loadCascadeKegiatan(targetVal);
+          var targetVal = presetProg && list.some(function(x){ return x.kode === presetProg; }) ? presetProg : list[0].kode;
+          if (el("ctxProgram")) el("ctxProgram").value = targetVal;
+          loadCascadeKegiatan(targetVal, presetKeg, presetSubKeg);
         } else {
           render();
         }
       },
       error: function() {
-        el("ctxProgram").innerHTML = '<option value="">Gagal memuat</option>';
+        if (el("ctxProgram")) el("ctxProgram").innerHTML = '<option value="">Gagal memuat</option>';
       }
     });
   }
 
-  function loadCascadeKegiatan(progKode, presetVal) {
+  function loadCascadeKegiatan(progKode, presetKeg, presetSubKeg) {
+    if (!el("ctxKegiatan")) return;
     el("ctxKegiatan").innerHTML = '<option value="">Memuat kegiatan...</option>';
-    el("ctxSubKegiatan").innerHTML = '<option value="">Pilih sub kegiatan</option>';
+    if (el("ctxSubKegiatan")) el("ctxSubKegiatan").innerHTML = '<option value="">Pilih sub kegiatan</option>';
     currentSubKegiatanKode = null;
     updateTambahState();
 
@@ -1949,7 +2195,7 @@
     }
 
     var instId = activeInstansiId || (currentInstansi ? currentInstansi.id : 0);
-    var thnVal = el("ctxTahun").value;
+    var thnVal = el("ctxTahun") ? el("ctxTahun").value : '<?= $TahunAktif ?>';
 
     $.ajax({
       url: ControllerURL + "GetCascadeKegiatan",
@@ -1964,23 +2210,24 @@
         var list = (res.status === 'success' && res.data) ? res.data : [];
 
         MASTER.kegiatan = list;
-        el("ctxKegiatan").innerHTML = optionsHTML(list, labelFor, "Pilih kegiatan");
+        if (el("ctxKegiatan")) el("ctxKegiatan").innerHTML = optionsHTML(list, labelFor, "Pilih kegiatan");
 
         if (list.length > 0) {
-          var targetVal = presetVal && list.some(function(x){ return x.kode === presetVal; }) ? presetVal : list[0].kode;
-          el("ctxKegiatan").value = targetVal;
-          loadCascadeSubKegiatan(targetVal);
+          var targetVal = presetKeg && list.some(function(x){ return x.kode === presetKeg; }) ? presetKeg : list[0].kode;
+          if (el("ctxKegiatan")) el("ctxKegiatan").value = targetVal;
+          loadCascadeSubKegiatan(targetVal, presetSubKeg);
         } else {
           render();
         }
       },
       error: function() {
-        el("ctxKegiatan").innerHTML = '<option value="">Gagal memuat</option>';
+        if (el("ctxKegiatan")) el("ctxKegiatan").innerHTML = '<option value="">Gagal memuat</option>';
       }
     });
   }
 
   function loadCascadeSubKegiatan(kegKode, presetVal) {
+    if (!el("ctxSubKegiatan")) return;
     el("ctxSubKegiatan").innerHTML = '<option value="">Memuat sub kegiatan...</option>';
     currentSubKegiatanKode = null;
     updateTambahState();
@@ -1991,7 +2238,7 @@
     }
 
     var instId = activeInstansiId || (currentInstansi ? currentInstansi.id : 0);
-    var thnVal = el("ctxTahun").value;
+    var thnVal = el("ctxTahun") ? el("ctxTahun").value : '<?= $TahunAktif ?>';
 
     $.ajax({
       url: ControllerURL + "GetCascadeSubKegiatan",
@@ -2016,7 +2263,13 @@
         el("ctxSubKegiatan").innerHTML = html;
 
         if (list.length > 0) {
-          var targetVal = presetVal && list.some(function(x){ return x.kode === presetVal; }) ? presetVal : list[0].kode;
+          var targetVal = null;
+          if (presetVal && list.some(function(x){ return x.kode === presetVal; })) {
+            targetVal = presetVal;
+          } else {
+            var itemWithRincian = list.find(function(x){ return items.some(function(it){ return it.subKegiatanKode === x.kode; }); });
+            targetVal = itemWithRincian ? itemWithRincian.kode : list[0].kode;
+          }
           el("ctxSubKegiatan").value = targetVal;
           currentSubKegiatanKode = targetVal;
         } else {
@@ -2026,7 +2279,7 @@
         render();
       },
       error: function() {
-        el("ctxSubKegiatan").innerHTML = '<option value="">Gagal memuat</option>';
+        if (el("ctxSubKegiatan")) el("ctxSubKegiatan").innerHTML = '<option value="">Gagal memuat</option>';
         updateTambahState();
         render();
       }
@@ -2065,9 +2318,21 @@
 
     if (MASTER.subUnit.length > 0) {
       var firstSU = MASTER.subUnit[0].kode;
-      el("ctxSubUnit").value = firstSU;
+      if (el("ctxSubUnit")) el("ctxSubUnit").value = firstSU;
       updatePerangkatDaerah(firstSU);
-      loadCascadeBidangUrusan(MASTER.subUnit[0]);
+
+      if (isRole4) {
+        var firstHeader = (rawBelanjaHeaders && rawBelanjaHeaders.length > 0) ? rawBelanjaHeaders[0] : null;
+        var presetBidang = firstHeader ? (firstHeader.kode_bidang_urusan || '') : '';
+        var presetProg = firstHeader ? (firstHeader.kode_program || '') : '';
+        var presetKeg = firstHeader ? (firstHeader.kode_kegiatan || '') : '';
+        var presetSubKeg = firstHeader ? (firstHeader.kode_sub_kegiatan || '') : '';
+
+        loadCascadeBidangUrusan(MASTER.subUnit[0], presetBidang, presetProg, presetKeg, presetSubKeg);
+      } else {
+        updateTambahState();
+        render();
+      }
     } else {
       updateTambahState();
       render();
@@ -2085,8 +2350,18 @@
         if (res.status === 'success') {
           rawBelanjaHeaders = res.data || [];
           buildMasterFromDatabase();
-          var curSU = MASTER.subUnit.find(function(s){ return s.kode === el("ctxSubUnit").value; });
-          loadCascadeBidangUrusan(curSU || MASTER.subUnit[0], el("ctxBidangUrusan").value);
+          if (isRole4) {
+            var firstHeader = (rawBelanjaHeaders && rawBelanjaHeaders.length > 0) ? rawBelanjaHeaders[0] : null;
+            var presetBidang = firstHeader ? (firstHeader.kode_bidang_urusan || '') : '';
+            var presetProg = firstHeader ? (firstHeader.kode_program || '') : '';
+            var presetKeg = firstHeader ? (firstHeader.kode_kegiatan || '') : '';
+            var presetSubKeg = firstHeader ? (firstHeader.kode_sub_kegiatan || '') : '';
+
+            var curSU = MASTER.subUnit.find(function(s){ return s.kode === (el("ctxSubUnit") ? el("ctxSubUnit").value : ''); });
+            loadCascadeBidangUrusan(curSU || MASTER.subUnit[0], presetBidang, presetProg, presetKeg, presetSubKeg);
+          } else {
+            render();
+          }
         }
       }
     });
@@ -2112,10 +2387,11 @@
             currentInstansi = res.instansi || { id: newInstId, nama: selectedText };
             initialSubUnits = res.data || [];
 
+            var thnVal = el("ctxTahun") ? el("ctxTahun").value : '<?= $TahunAktif ?>';
             $.ajax({
               url: ControllerURL + "GetBelanjaData",
               type: "POST",
-              data: { tahun: el("ctxTahun").value, instansi: newInstId },
+              data: { tahun: thnVal, instansi: newInstId },
               dataType: "json",
               success: function(bRes) {
                 if (bRes.status === 'success') {
@@ -2131,34 +2407,46 @@
     });
   }
 
-  el("ctxTahun").addEventListener("change", function() {
-    loadBelanjaByTahun(this.value);
-  });
+  if (el("ctxTahun")) {
+    el("ctxTahun").addEventListener("change", function() {
+      loadBelanjaByTahun(this.value);
+    });
+  }
 
-  el("ctxSubUnit").addEventListener("change", function(){
-    var suVal = this.value;
-    var suObj = MASTER.subUnit.find(function(x){ return x.kode === suVal; });
-    updatePerangkatDaerah(suVal);
-    loadCascadeBidangUrusan(suObj);
-  });
+  if (el("ctxSubUnit")) {
+    el("ctxSubUnit").addEventListener("change", function(){
+      var suVal = this.value;
+      var suObj = MASTER.subUnit.find(function(x){ return x.kode === suVal; });
+      updatePerangkatDaerah(suVal);
+      loadCascadeBidangUrusan(suObj);
+    });
+  }
 
-  el("ctxBidangUrusan").addEventListener("change", function(){
-    loadCascadeProgram(this.value);
-  });
+  if (el("ctxBidangUrusan")) {
+    el("ctxBidangUrusan").addEventListener("change", function(){
+      loadCascadeProgram(this.value);
+    });
+  }
 
-  el("ctxProgram").addEventListener("change", function(){
-    loadCascadeKegiatan(this.value);
-  });
+  if (el("ctxProgram")) {
+    el("ctxProgram").addEventListener("change", function(){
+      loadCascadeKegiatan(this.value);
+    });
+  }
 
-  el("ctxKegiatan").addEventListener("change", function(){
-    loadCascadeSubKegiatan(this.value);
-  });
+  if (el("ctxKegiatan")) {
+    el("ctxKegiatan").addEventListener("change", function(){
+      loadCascadeSubKegiatan(this.value);
+    });
+  }
 
-  el("ctxSubKegiatan").addEventListener("change", function(){
-    currentSubKegiatanKode = this.value || null;
-    updateTambahState();
-    render();
-  });
+  if (el("ctxSubKegiatan")) {
+    el("ctxSubKegiatan").addEventListener("change", function(){
+      currentSubKegiatanKode = this.value || null;
+      updateTambahState();
+      render();
+    });
+  }
 
   /* ---------------- Standar Harga Picker ---------------- */
   var pickerOverlay = document.getElementById("pickerOverlay");
@@ -2261,13 +2549,16 @@
   });
 
   /* ---------------- Event wiring ---------------- */
-  document.getElementById("btnTambah").addEventListener("click", function(){
-    if(!currentSubKegiatanKode){
-      alert("Pilih Sub Unit, Bidang Urusan, Program, Kegiatan, dan Sub Kegiatan terlebih dahulu.");
-      return;
-    }
-    openModal(null);
-  });
+  var btnTambahEl = document.getElementById("btnTambah");
+  if (btnTambahEl) {
+    btnTambahEl.addEventListener("click", function(){
+      if(!currentSubKegiatanKode){
+        alert("Pilih Sub Unit, Bidang Urusan, Program, Kegiatan, dan Sub Kegiatan terlebih dahulu.");
+        return;
+      }
+      openModal(null);
+    });
+  }
   document.getElementById("btnBack").addEventListener("click", closeModal);
   document.getElementById("btnReset").addEventListener("click", resetForm);
   document.getElementById("btnSimpan").addEventListener("click", saveForm);

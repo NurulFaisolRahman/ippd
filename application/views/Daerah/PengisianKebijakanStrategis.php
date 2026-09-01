@@ -106,16 +106,43 @@ body {
 /* Filter Card */
 .filter-card {
   background: var(--ui-card-bg);
+  border-radius: var(--radius-lg, 12px);
   border: 1px solid var(--ui-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
   padding: 16px 20px;
   margin-bottom: 20px;
+}
+
+.filter-header {
   display: flex;
-  align-items: flex-end;
   justify-content: space-between;
-  gap: 16px;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--ui-border-light, #f1f5f9);
+}
+
+.filter-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ui-dark, #0f172a);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.filter-title i {
+  color: var(--ui-primary, #00c292);
+  font-size: 15px;
+}
+
+.filter-grid {
+  display: flex;
   flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
 }
 
 .filter-left {
@@ -131,27 +158,26 @@ body {
   gap: 6px;
 }
 .filter-group label {
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--ui-text-muted);
+  color: var(--ui-dark, #1e293b);
+  letter-spacing: 0.1px;
 }
-.filter-select {
-  background: #fff;
-  border: 1px solid #cbd5e1;
-  border-radius: var(--radius-sm);
-  padding: 8px 12px;
+.form-control-custom, .filter-select {
+  height: 38px;
+  padding: 0 12px;
   font-size: 13.5px;
-  font-weight: 600;
-  color: var(--ui-dark);
-  min-width: 170px;
+  border: 1px solid var(--ui-border, #cbd5e1);
+  border-radius: var(--radius-md, 6px);
+  background: #ffffff;
+  color: var(--ui-dark, #0f172a);
+  font-weight: 500;
   outline: none;
-  cursor: pointer;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: all 0.2s;
+  width: 100%;
 }
-.filter-select:focus {
-  border-color: var(--ui-primary);
+.form-control-custom:focus, .filter-select:focus {
+  border-color: var(--ui-primary, #00c292);
   box-shadow: 0 0 0 3px rgba(0, 194, 146, 0.15);
 }
 
@@ -548,6 +574,78 @@ body {
 </style>
 
 <div class="main-content">
+  <!-- Filter Wilayah Top (Sebelum Login & Saat Login Sebagai Daerah) -->
+  <?php if (!$IsLoggedIn || !empty($IsDaerah)) { 
+    $provKodeCurrent = !empty($KodeWilayah) ? substr($KodeWilayah, 0, 2) : '';
+    $ListKabKotaTop = [];
+    if (!empty($provKodeCurrent)) {
+        $ListKabKotaTop = $this->db
+            ->select('Kode, Nama')
+            ->from('kodewilayah')
+            ->where('Kode LIKE', $provKodeCurrent . '.%')
+            ->where('LENGTH(REPLACE(Kode, ".", "")) = 4', null, false)
+            ->order_by('Nama', 'ASC')
+            ->get()
+            ->result_array();
+    }
+  ?>
+    <div class="filter-card" style="margin-bottom: 20px;">
+      <div class="filter-header">
+        <div class="filter-title">
+          <i class="fa fa-filter"></i> <?= empty($IsLoggedIn) ? 'Filter Wilayah &amp; Perangkat Daerah' : 'Filter Perangkat Daerah' ?>
+        </div>
+      </div>
+      <div class="filter-grid" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;">
+        <?php if (empty($IsLoggedIn)): ?>
+          <div class="filter-group" style="flex: 1; min-width: 180px;">
+            <label>Provinsi</label>
+            <select id="selProvinsiTop" class="form-control-custom">
+              <option value="">Pilih Provinsi</option>
+              <?php if (!empty($Provinsi)) { foreach ($Provinsi as $prov) { ?>
+                <option value="<?= html_escape($prov['Kode']) ?>" <?= (!empty($provKodeCurrent) && $provKodeCurrent==$prov['Kode']) ? 'selected' : '' ?>>
+                  <?= html_escape($prov['Nama']) ?>
+                </option>
+              <?php }} ?>
+            </select>
+          </div>
+
+          <div class="filter-group" style="flex: 1; min-width: 180px;">
+            <label>Kabupaten / Kota</label>
+            <select id="selKabKotaTop" class="form-control-custom">
+              <option value="">Pilih Kab/Kota</option>
+              <?php if (!empty($ListKabKotaTop)) { foreach ($ListKabKotaTop as $kab) { ?>
+                <option value="<?= html_escape($kab['Kode']) ?>" <?= (!empty($KodeWilayah) && $KodeWilayah == $kab['Kode']) ? 'selected' : '' ?>>
+                  <?= html_escape($kab['Nama']) ?>
+                </option>
+              <?php }} ?>
+            </select>
+          </div>
+        <?php else: ?>
+          <input type="hidden" id="selProvinsiTop" value="<?= !empty($provKodeCurrent) ? $provKodeCurrent : substr($KodeWilayah, 0, 2) ?>">
+          <input type="hidden" id="selKabKotaTop" value="<?= !empty($KodeWilayah) ? $KodeWilayah : '' ?>">
+        <?php endif; ?>
+
+        <div class="filter-group" id="grpInstansiTop" style="flex: 1.2; min-width: 220px; <?= (!empty($IsLoggedIn) || !empty($KodeWilayah)) ? '' : 'display:none;' ?>">
+          <label>Perangkat Daerah / Instansi</label>
+          <select id="selInstansiTop" class="form-control-custom">
+            <option value="">-- Semua Perangkat Daerah --</option>
+            <?php if (!empty($ListInstansi)) { foreach ($ListInstansi as $ins) { ?>
+              <option value="<?= $ins['id'] ?>" <?= (!empty($FilterInstansi) && $FilterInstansi == $ins['id']) || (!empty($filterInstansi) && $filterInstansi == $ins['id']) ? 'selected' : '' ?>>
+                <?= html_escape($ins['nama']) ?>
+              </option>
+            <?php }} ?>
+          </select>
+        </div>
+
+        <div style="width: auto;">
+          <button type="button" id="btnFilterWilayahTop" class="btn btn-primary" style="height: 38px; padding: 0 18px; font-size: 13px; font-weight: 600; border-radius: 6px; background: var(--ui-primary, #00c292); color: #fff; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa fa-search"></i> <?= empty($IsLoggedIn) ? 'Terapkan Wilayah' : 'Terapkan Filter' ?>
+          </button>
+        </div>
+      </div>
+    </div>
+  <?php } ?>
+
   <!-- Header Title -->
   <div class="page-header-box">
     <div class="page-badge"><i class="fa fa-book"></i> E-LKPJ Perangkat Daerah</div>
@@ -567,19 +665,7 @@ body {
         </select>
       </div>
 
-      <?php if (!empty($IsDaerah)): ?>
-        <div class="filter-group">
-          <label for="selectInstansi">Perangkat Daerah / Instansi</label>
-          <select id="selectInstansi" class="filter-select" style="min-width: 240px;">
-            <option value="0">-- Semua Perangkat Daerah --</option>
-            <?php foreach ($ListInstansi as $inst): ?>
-              <option value="<?= $inst['id'] ?>" <?= ((int)$inst['id'] === (int)$filterInstansi) ? 'selected' : '' ?>><?= htmlspecialchars($inst['nama']) ?></option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-      <?php else: ?>
-        <input type="hidden" id="selectInstansi" value="<?= $filterInstansi ?>">
-      <?php endif; ?>
+      <input type="hidden" id="selectInstansi" value="<?= $filterInstansi ?>">
     </div>
 
     <div>
@@ -600,7 +686,9 @@ body {
             <th class="col-kebijakan">Kebijakan Strategis</th>
             <th class="col-hukum">Dasar Hukum</th>
             <th class="col-tujuan">Tujuan / Masalah yang Diselesaikan</th>
-            <th class="col-aksi">Aksi</th>
+            <?php if (!empty($IsRole4)): ?>
+              <th class="col-aksi">Aksi</th>
+            <?php endif; ?>
           </tr>
         </thead>
         <tbody id="tbodyKebijakan">
@@ -610,7 +698,7 @@ body {
       <div class="empty-state" id="emptyStateBox" style="display: none;">
         <i class="fa fa-folder-open-o"></i>
         <h4>Belum ada data kebijakan strategis</h4>
-        <p>Silakan klik tombol <strong>+ Tambah Kebijakan Strategis</strong> di atas untuk menambahkan data baru.</p>
+        <p><?= (empty($IsLoggedIn) && empty($KodeWilayah)) ? 'Silakan pilih Filter Wilayah & Perangkat Daerah di atas terlebih dahulu untuk menampilkan data.' : (empty($IsRole4) ? 'Belum ada data kebijakan strategis untuk perangkat daerah ini.' : 'Silakan klik tombol <strong>+ Tambah Kebijakan Strategis</strong> di atas untuk menambahkan data baru.') ?></p>
       </div>
     </div>
   </div>
@@ -750,20 +838,26 @@ body {
 
     dataItems.forEach(function(item){
       var tr = document.createElement("tr");
-      tr.innerHTML = 
+      var trHtml = 
         '<td>' + escapeHtml(item.kebijakan_strategis) + '</td>' +
         '<td>' + escapeHtml(item.dasar_hukum) + '</td>' +
-        '<td>' + escapeHtml(item.tujuan_masalah) + '</td>' +
-        '<td class="col-aksi">' +
-          (IS_ROLE_4 ? ('<div class="action-btns">' +
-            '<button type="button" class="btn-icon edit" data-id="' + item.id + '" title="Edit">' +
-              '<i class="fa fa-pencil"></i>' +
-            '</button>' +
-            '<button type="button" class="btn-icon delete" data-id="' + item.id + '" title="Hapus">' +
-              '<i class="fa fa-trash-o"></i>' +
-            '</button>' +
-          '</div>') : '<span style="color:#94a3b8; font-size:12px;">-</span>') +
-        '</td>';
+        '<td>' + escapeHtml(item.tujuan_masalah) + '</td>';
+
+      if (IS_ROLE_4) {
+        trHtml += 
+          '<td class="col-aksi">' +
+            '<div class="action-btns">' +
+              '<button type="button" class="btn-icon edit" data-id="' + item.id + '" title="Edit">' +
+                '<i class="fa fa-pencil"></i>' +
+              '</button>' +
+              '<button type="button" class="btn-icon delete" data-id="' + item.id + '" title="Hapus">' +
+                '<i class="fa fa-trash-o"></i>' +
+              '</button>' +
+            '</div>' +
+          '</td>';
+      }
+
+      tr.innerHTML = trHtml;
       tbody.appendChild(tr);
     });
   }
@@ -981,6 +1075,150 @@ body {
       if (modalHapus.classList.contains("open")) closeHapusModal();
       else if (modalOverlay.classList.contains("open")) closeModal();
     }
+  });
+
+  /* ---------------- Top Wilayah Filter (Before Login) ---------------- */
+  $(function() {
+    var CSRF_NAME = '<?= $this->security->get_csrf_token_name() ?>';
+    var CSRF_TOKEN = '<?= $this->security->get_csrf_hash() ?>';
+    var BaseURL = '<?= base_url() ?>';
+    var cKodeWilayah = '<?= !empty($KodeWilayah) ? $KodeWilayah : "" ?>';
+    var cInstansiId = '<?= !empty($FilterInstansi) ? $FilterInstansi : (!empty($filterInstansi) ? $filterInstansi : (!empty($InstansiId) ? $InstansiId : "")) ?>';
+
+    function loadKabKotaTop(provKode, selectedKabKode, callback) {
+      if (!provKode) {
+        $('#selKabKotaTop').html('<option value="">Pilih Kab/Kota</option>');
+        $('#grpInstansiTop').hide();
+        return;
+      }
+      $.ajax({
+        url: BaseURL + 'Instansi/GetListKabKota',
+        type: 'POST',
+        data: { Kode: provKode, [CSRF_NAME]: CSRF_TOKEN },
+        dataType: 'json',
+        beforeSend: function() {
+          $('#selKabKotaTop').prop('disabled', true).html('<option value="">Memuat Kab/Kota...</option>');
+        },
+        success: function(data) {
+          var html = '<option value="">Pilih Kab/Kota</option>';
+          if (data && data.length > 0) {
+            for (var i = 0; i < data.length; i++) {
+              var sel = (selectedKabKode && selectedKabKode == data[i].Kode) ? 'selected' : '';
+              html += '<option value="' + data[i].Kode + '" ' + sel + '>' + data[i].Nama + '</option>';
+            }
+          }
+          $('#selKabKotaTop').html(html).prop('disabled', false);
+          if (callback) callback();
+        },
+        error: function() {
+          $('#selKabKotaTop').html('<option value="">Gagal memuat data</option>').prop('disabled', false);
+        }
+      });
+    }
+
+    function loadInstansiTop(kabKode, selectedInstansiId) {
+      if (!kabKode) {
+        $('#grpInstansiTop').hide();
+        $('#selInstansiTop').html('<option value="">-- Semua Perangkat Daerah --</option>');
+        return;
+      }
+      $.ajax({
+        url: BaseURL + 'Instansi/GetListInstansiLevel4',
+        type: 'POST',
+        data: { kode_wilayah: kabKode, [CSRF_NAME]: CSRF_TOKEN },
+        dataType: 'json',
+        beforeSend: function() {
+          $('#selInstansiTop').html('<option value="">Memuat Instansi...</option>');
+          $('#grpInstansiTop').show();
+        },
+        success: function(data) {
+          var html = '<option value="">-- Semua Perangkat Daerah --</option>';
+          if (data && data.length > 0) {
+            for (var i = 0; i < data.length; i++) {
+              var sel = (selectedInstansiId && selectedInstansiId == data[i].id) ? 'selected' : '';
+              html += '<option value="' + data[i].id + '" ' + sel + '>' + data[i].nama + '</option>';
+            }
+          }
+          $('#selInstansiTop').html(html);
+          $('#grpInstansiTop').show();
+        },
+        error: function() {
+          $('#selInstansiTop').html('<option value="">-- Gagal memuat instansi --</option>');
+        }
+      });
+    }
+
+    $(document).on('change', '#selProvinsiTop', function() {
+      var prov = $(this).val();
+      loadKabKotaTop(prov, '');
+    });
+
+    $(document).on('change', '#selKabKotaTop', function() {
+      var kab = $(this).val();
+      loadInstansiTop(kab, '');
+    });
+
+    var initialProv = $('#selProvinsiTop').val();
+    if (initialProv) {
+      loadKabKotaTop(initialProv, cKodeWilayah, function() {
+        if (cKodeWilayah) {
+          loadInstansiTop(cKodeWilayah, cInstansiId);
+        }
+      });
+    } else if (cKodeWilayah) {
+      var provKode = cKodeWilayah.substring(0, 2);
+      loadKabKotaTop(provKode, cKodeWilayah, function() {
+        loadInstansiTop(cKodeWilayah, cInstansiId);
+      });
+    }
+
+    $(document).on('click', '#btnFilterWilayahTop', function() {
+      var prov = $('#selProvinsiTop').val();
+      var kab = $('#selKabKotaTop').val();
+      var inst = $('#selInstansiTop').val();
+
+      if (!prov) {
+        alert('Mohon pilih Provinsi');
+        return;
+      }
+      if (!kab) {
+        alert('Mohon pilih Kabupaten/Kota');
+        return;
+      }
+
+      var btn = $(this);
+      btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
+
+      $.ajax({
+        url: BaseURL + 'Instansi/SetTempKodeWilayah',
+        type: 'POST',
+        data: {
+          KodeWilayah: kab,
+          InstansiId: inst,
+          [CSRF_NAME]: CSRF_TOKEN
+        },
+        success: function(res) {
+          if (res.trim() === '1') {
+            var url = window.location.pathname;
+            var queryParams = [];
+            if (inst) {
+              queryParams.push('instansi_id=' + encodeURIComponent(inst));
+            }
+            if (queryParams.length > 0) {
+              url += '?' + queryParams.join('&');
+            }
+            window.location.href = url;
+          } else {
+            alert(res || 'Gagal mengatur filter wilayah');
+            btn.prop('disabled', false).html('<i class="fa fa-save"></i> Terapkan Wilayah');
+          }
+        },
+        error: function() {
+          alert('Terjadi kesalahan koneksi ke server');
+          btn.prop('disabled', false).html('<i class="fa fa-save"></i> Terapkan Wilayah');
+        }
+      });
+    });
   });
 
   // Init Table
