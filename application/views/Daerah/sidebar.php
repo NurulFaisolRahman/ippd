@@ -440,6 +440,18 @@
                         </div>
                     </div>
 
+                    <!-- Perubahan RKPD -->
+                    <div class="sidebar-dropdown">
+                        <a href="#">
+                            <span>Perubahan RKPD</span>
+                            <i class="fa fa-chevron-down"></i>
+                        </a>
+
+                        <div class="sidebar-submenu">
+                            <a href="<?=base_url('Daerah/PerubahanRKPD')?>">Perubahan RKPD</a>
+                        </div>
+                    </div>
+
                 </div>
             </li>
 
@@ -453,6 +465,7 @@
                     <a href="<?=base_url('Instansi/RenjaPD')?>">Ranwal Renja</a>
                     <a href="<?=base_url('Instansi/RancanganRenjaPD')?>">Rancangan Renja</a>
                     <a href="<?=base_url('Instansi/RancanganAkhirRenjaPD')?>">Rankhir Renja</a>
+                    <a href="<?=base_url('Instansi/PerubahanRenjaPD')?>">Perubahan Renja</a>
                 </div>
             </li>
 
