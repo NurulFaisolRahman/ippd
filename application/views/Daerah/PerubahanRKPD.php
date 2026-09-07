@@ -757,9 +757,11 @@ $ActiveInstansiId = isset($ActiveInstansiId) ? $ActiveInstansiId : (isset($Filte
             <option>RPJMD 2025-2029</option>
           </select>
           <div class="year-tabs" id="yearTabs"></div>
+          <?php if (!empty($IsLoggedIn) && empty($IsRole4)): ?>
           <button type="button" id="btnSyncData" class="btn-sync" title="Cocokkan / Sinkronkan Ulang Data RKPD dengan Renja">
             <i class="fa fa-refresh"></i> Sinkronkan Renja
           </button>
+          <?php endif; ?>
         </div>
       </div>
     </div>

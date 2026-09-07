@@ -559,18 +559,8 @@
 
         <div class="topbar-controls">
           <select class="rpjmd-select" id="rpjmdSelect" aria-label="Periode RPJMD">
-            <option value="2026-2030" selected>RPJMD 2026-2030 (Teknoktratik)</option>
+            <option value="2026-2030" selected>RPJMD 2026-2030</option>
           </select>
-
-          <?php if (!$IsRole4): ?>
-            <select class="instansi-select" id="instansiSelect" aria-label="Pilih Perangkat Daerah">
-              <?php foreach ($ListInstansi as $inst): ?>
-                <option value="<?= $inst['id'] ?>" <?= ($ActiveInstansiId == $inst['id']) ? 'selected' : '' ?>>
-                  <?= html_escape($inst['nama']) ?>
-                </option>
-              <?php endforeach; ?>
-            </select>
-          <?php endif; ?>
 
           <div class="year-tabs" role="tablist" aria-label="Pilihan Tahun">
             <?php 
@@ -583,9 +573,11 @@
             <?php endforeach; ?>
           </div>
 
+          <?php if (!empty($IsLoggedIn) && !empty($IsRole4)): ?>
           <button type="button" class="btn-sync" id="btnSyncRenja" title="Sinkronkan / Cocokkan Ulang data Perubahan Renja dengan Rankhir Renja">
             <i class="fa fa-refresh"></i> Sinkronkan dengan Rankhir Renja
           </button>
+          <?php endif; ?>
         </div>
       </div>
     </div>
@@ -1708,44 +1700,46 @@ function bindEvents(){
   });
 
   // Sinkronkan / Reset Data dari Rankhir Renja
-  document.getElementById('btnSyncRenja').addEventListener('click', () => {
-    const y = CURRENT_TAHUN;
-    if(!confirm('Apakah Anda yakin ingin menyinkronkan ulang data Perubahan Renja Tahun ' + y + ' dengan data Rankhir Renja?\n\nPerubahan kustom pada Perubahan Renja tahun ' + y + ' akan direset dan dicocokkan kembali mengambil data terbaru dari Rankhir Renja.')){
-      return;
-    }
-
-    const btn = document.getElementById('btnSyncRenja');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menyinkronkan...';
-
-    fetch(BASE_URL + 'Instansi/resetPerubahanRenjaDataFromRankhir', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'X-Requested-With': 'XMLHttpRequest'
-      },
-      body: new URLSearchParams({
-        tahun: y,
-        instansi_id: ACTIVE_INSTANSI_ID
-      })
-    })
-    .then(r => r.json())
-    .then(res => {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fa fa-refresh"></i> Sinkronkan dengan Rankhir Renja';
-      if (res.status === 'success'){
-        showToast(res.message || 'Berhasil menyinkronkan data.');
-        loadDataAjax(y, ACTIVE_INSTANSI_ID);
-      } else {
-        alert(res.message || 'Gagal menyinkronkan data.');
+  const btnSyncRenja = document.getElementById('btnSyncRenja');
+  if (btnSyncRenja) {
+    btnSyncRenja.addEventListener('click', () => {
+      const y = CURRENT_TAHUN;
+      if(!confirm('Apakah Anda yakin ingin menyinkronkan ulang data Perubahan Renja Tahun ' + y + ' dengan data Rankhir Renja?\n\nPerubahan kustom pada Perubahan Renja tahun ' + y + ' akan direset dan dicocokkan kembali mengambil data terbaru dari Rankhir Renja.')){
+        return;
       }
-    })
-    .catch(err => {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fa fa-refresh"></i> Sinkronkan dengan Rankhir Renja';
-      alert('Terjadi kesalahan jaringan.');
+
+      btnSyncRenja.disabled = true;
+      btnSyncRenja.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menyinkronkan...';
+
+      fetch(BASE_URL + 'Instansi/resetPerubahanRenjaDataFromRankhir', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: new URLSearchParams({
+          tahun: y,
+          instansi_id: ACTIVE_INSTANSI_ID
+        })
+      })
+      .then(r => r.json())
+      .then(res => {
+        btnSyncRenja.disabled = false;
+        btnSyncRenja.innerHTML = '<i class="fa fa-refresh"></i> Sinkronkan dengan Rankhir Renja';
+        if (res.status === 'success'){
+          showToast(res.message || 'Berhasil menyinkronkan data.');
+          loadDataAjax(y, ACTIVE_INSTANSI_ID);
+        } else {
+          alert(res.message || 'Gagal menyinkronkan data.');
+        }
+      })
+      .catch(err => {
+        btnSyncRenja.disabled = false;
+        btnSyncRenja.innerHTML = '<i class="fa fa-refresh"></i> Sinkronkan dengan Rankhir Renja';
+        alert('Terjadi kesalahan jaringan.');
+      });
     });
-  });
+  }
 
   // Export Excel & PDF
   document.getElementById('btnExportExcel').addEventListener('click', exportExcel);
@@ -1797,6 +1791,7 @@ function initFilterWilayah(){
     const grpInstansi = document.getElementById('FilterInstansiGroup');
     const selInstansi = document.getElementById('FilterInstansiBeforeLogin');
     const btnFilter = document.getElementById('Filter');
+    const activeInstansiId = "<?= !empty($ActiveInstansiId) ? $ActiveInstansiId : '' ?>";
 
     if (selProv) {
       selProv.addEventListener('change', function(){
@@ -1841,20 +1836,21 @@ function initFilterWilayah(){
         }
         if (selInstansi) {
           selInstansi.innerHTML = '<option value="">Memuat Instansi...</option>';
-          fetch(BASE_URL + 'Instansi/GetListInstansiByWilayah', {
+          fetch(BASE_URL + 'Instansi/GetListInstansiLevel4', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
               'X-Requested-With': 'XMLHttpRequest'
             },
-            body: 'KodeWilayah=' + encodeURIComponent(kabVal)
+            body: 'kode_wilayah=' + encodeURIComponent(kabVal)
           })
           .then(r => r.json())
           .then(data => {
             let opts = '<option value="">-- Pilih Instansi --</option>';
             if (data && data.length > 0) {
               data.forEach(item => {
-                opts += '<option value="' + esc(item.id) + '">' + esc(item.nama) + '</option>';
+                const selected = (activeInstansiId == item.id) ? 'selected' : '';
+                opts += '<option value="' + esc(item.id) + '" ' + selected + '>' + esc(item.nama) + '</option>';
               });
             }
             selInstansi.innerHTML = opts;
@@ -1882,22 +1878,66 @@ function initFilterWilayah(){
           return;
         }
 
-        fetch(BASE_URL + 'Instansi/SetWilayahSession', {
+        btnFilter.disabled = true;
+        btnFilter.textContent = 'Memuat...';
+
+        fetch(BASE_URL + 'Instansi/SetTempKodeWilayah', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             'X-Requested-With': 'XMLHttpRequest'
           },
-          body: 'KodeWilayah=' + encodeURIComponent(kabVal) + '&InstansiId=' + encodeURIComponent(instansiVal || '')
+          body: 'KodeWilayah=' + encodeURIComponent(kabVal) + (instansiVal ? '&InstansiId=' + encodeURIComponent(instansiVal) : '')
         })
         .then(r => r.text())
         .then(res => {
-          let redirectUrl = BASE_URL + 'Instansi/PerubahanRenjaPD';
-          if (instansiVal) redirectUrl += '?instansi_id=' + encodeURIComponent(instansiVal);
-          window.location.href = redirectUrl;
+          if (res.trim() === '1') {
+            let redirectUrl = BASE_URL + 'Instansi/PerubahanRenjaPD';
+            if (instansiVal) redirectUrl += '?instansi_id=' + encodeURIComponent(instansiVal);
+            window.location.href = redirectUrl;
+          } else {
+            alert(res || 'Gagal menyimpan filter wilayah!');
+            btnFilter.disabled = false;
+            btnFilter.innerHTML = '<i class="fa fa-search"></i> Filter';
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Gagal menghubungi server!');
+          btnFilter.disabled = false;
+          btnFilter.innerHTML = '<i class="fa fa-search"></i> Filter';
         });
       });
     }
+
+    <?php if (!empty($KodeWilayah)) { ?>
+      const currentKodeWilayah = "<?= $KodeWilayah ?>";
+      const currentProv = currentKodeWilayah.substring(0, 2);
+      if (selProv) {
+        selProv.value = currentProv;
+        fetch(BASE_URL + 'Instansi/GetListKabKota', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: 'Kode=' + encodeURIComponent(currentProv)
+        })
+        .then(res => res.json())
+        .then(data => {
+          let opts = '<option value="">Pilih Kab/Kota</option>';
+          if (data && data.length > 0) {
+            data.forEach(item => {
+              const selected = (currentKodeWilayah == item.Kode) ? 'selected' : '';
+              opts += '<option value="' + esc(item.Kode) + '" ' + selected + '>' + esc(item.Nama) + '</option>';
+            });
+          }
+          selKab.innerHTML = opts;
+          if (grpInstansi) grpInstansi.style.display = 'block';
+        })
+        .catch(err => console.error(err));
+      }
+    <?php } ?>
   <?php } ?>
 
   <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
