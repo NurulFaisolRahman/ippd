@@ -73,15 +73,66 @@ class Instansi extends CI_Controller {
      * Mendapatkan kode wilayah dari session
      */
     private function get_kode_wilayah() {
-        $kw = $this->session->userdata('KodeWilayah') ?: (isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : null);
-        if (!empty($kw)) {
-            return $kw;
+        // 1. Jika user login sebagai Role 4 (Instansi), kodewilayah HARUS diambil dari akun_instansi miliknya (tidak bisa dibypass)
+        if ($this->is_role_4()) {
+            $instansi_id = $this->get_instansi_id();
+            if ($instansi_id) {
+                $inst = $this->db->select('kodewilayah')->where('id', $instansi_id)->get('akun_instansi')->row_array();
+                if (!empty($inst['kodewilayah'])) {
+                    $this->session->set_userdata('KodeWilayah', $inst['kodewilayah']);
+                    $_SESSION['KodeWilayah'] = $inst['kodewilayah'];
+                    return $inst['kodewilayah'];
+                }
+            }
         }
+
+        // 2. Jika user login sebagai Role 3 (Daerah), kodewilayah HARUS dikunci ke wilayah akun daerahnya
+        if ($this->is_role_3()) {
+            $kw = $this->session->userdata('KodeWilayah') ?: (isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : null);
+            if (!empty($kw)) {
+                return $kw;
+            }
+            if (isset($_SESSION['Username']) && !empty($_SESSION['Username'])) {
+                $user = $this->db->select('KodeWilayah')->where('Username', $_SESSION['Username'])->get('akun')->row_array();
+                if (!empty($user['KodeWilayah'])) {
+                    $this->session->set_userdata('KodeWilayah', $user['KodeWilayah']);
+                    $_SESSION['KodeWilayah'] = $user['KodeWilayah'];
+                    return $user['KodeWilayah'];
+                }
+            }
+        }
+
+        // 3. Cek query parameter get 'kode_wilayah' atau 'KodeWilayah' jika belum login
+        $getKw = $this->input->get('kode_wilayah', TRUE) ?: $this->input->get('KodeWilayah', TRUE);
+        if (!$this->is_logged_in() && !empty($getKw)) {
+            $this->session->set_userdata('TempKodeWilayah', $getKw);
+            return $getKw;
+        }
+
+        // 4. Cek TempKodeWilayah (misal untuk Admin yang memilih wilayah, atau user belum login yang memilih dropdown)
         $tempKw = $this->session->userdata('TempKodeWilayah') ?: (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : null);
         if (!empty($tempKw)) {
             return $tempKw;
         }
-        return null;
+
+        // 5. Cek session KodeWilayah
+        $kw = $this->session->userdata('KodeWilayah') ?: (isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : null);
+        if (!empty($kw)) {
+            return $kw;
+        }
+
+        // 6. Jika session kosong, ambil langsung dari tabel akun berdasarkan user login
+        if (isset($_SESSION['Username']) && !empty($_SESSION['Username'])) {
+            $user = $this->db->select('KodeWilayah')->where('Username', $_SESSION['Username'])->get('akun')->row_array();
+            if (!empty($user['KodeWilayah'])) {
+                $this->session->set_userdata('KodeWilayah', $user['KodeWilayah']);
+                $_SESSION['KodeWilayah'] = $user['KodeWilayah'];
+                return $user['KodeWilayah'];
+            }
+        }
+
+        // 7. Default fallback Situbondo
+        return '35.12';
     }
 
     /**
@@ -25027,6 +25078,6510 @@ public function updateStatusPerjanjianKinerja() {
             echo json_encode(['status' => 'success', 'message' => 'Data penilaian IPPD berhasil direset.']);
         } catch (Exception $e) {
             echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    // =========================================================================
+    // 5. E-LKPJ: BAB 1 (PENDAHULUAN & KONDISI UMUM DAERAH)
+    // =========================================================================
+
+    /**
+     * Master daftar tabel BAB 1 (Tabel 1.1 s/d Tabel 1.20)
+     */
+    private function get_bab1_tabel_list() {
+        return [
+            '1.1' => [
+                'kode' => '1.1',
+                'nomor_tabel' => 'Tabel 1.1',
+                'judul' => 'Tabel 1.1 Pembagian Wilayah Administrasi dan Luas Wilayah Kabupaten Situbondo',
+                'judul_singkat' => 'Pembagian Wilayah & Luas Wilayah',
+                'subjudul' => 'Kondisi Geografis & Administratif Kecamatan, Luas Wilayah, Jumlah Desa dan Kelurahan',
+                'kategori' => 'Geografis & Administratif',
+                'kolom' => ['No', 'Kecamatan', 'Luas (Ha)', 'Jumlah Desa', 'Jumlah Kelurahan']
+            ],
+            '1.2' => [
+                'kode' => '1.2',
+                'nomor_tabel' => 'Tabel 1.2',
+                'judul' => 'Tabel 1.2 Tutupan Lahan Kabupaten Situbondo',
+                'judul_singkat' => 'Tutupan Lahan',
+                'subjudul' => 'Rincian Luas Tutupan Lahan (Ha) dan Prosentase (%) Kabupaten Situbondo',
+                'kategori' => 'Geografis & Penggunaan Lahan',
+                'kolom' => ['No', 'Tutupan Lahan', 'Luas (Ha)', 'Prosentase (%)']
+            ],
+            '1.3' => [
+                'kode' => '1.3',
+                'nomor_tabel' => 'Tabel 1.3',
+                'judul' => 'Tabel 1.3 Ketinggian Wilayah Per Kecamatan Kabupaten Situbondo',
+                'judul_singkat' => 'Ketinggian Wilayah',
+                'subjudul' => 'Tinggi Wilayah Menurut Kecamatan di Kabupaten Situbondo',
+                'sumber' => 'Dinas Pekerjaan Umum Perumahan dan Permukiman Kabupaten Situbondo',
+                'kategori' => 'Topografi & Geografis',
+                'kolom' => ['No', 'Kecamatan', 'Tinggi Wilayah']
+            ],
+            '1.4' => [
+                'kode' => '1.4',
+                'nomor_tabel' => 'Tabel 1.4',
+                'judul' => 'Tabel 1.4 Kondisi Iklim Kabupaten Situbondo Menurut Bulan Tahun 2025',
+                'judul_singkat' => 'Kondisi Iklim',
+                'subjudul' => 'Jumlah Curah Hujan (mm/tahun) dan Jumlah Hari Hujan (Hari) Menurut Bulan',
+                'sumber' => 'Badan Pusat Statistik Kabupaten Situbondo Dalam Angka, 2026',
+                'kategori' => 'Iklim & Lingkungan',
+                'kolom' => ['No', 'Bulan', 'Jumlah Curah Hujan (mm/tahun)', 'Jumlah Hari Hujan (Hari)']
+            ],
+            '1.5' => [
+                'kode' => '1.5',
+                'nomor_tabel' => 'Tabel 1.5',
+                'judul' => 'Tabel 1.5 Jumlah Penduduk Menurut Kecamatan di Kabupaten Situbondo Tahun 2025',
+                'judul_singkat' => 'Jumlah Penduduk Menurut Kecamatan',
+                'subjudul' => 'Jumlah Penduduk Menurut Kecamatan dan Jenis Kelamin Serta Rasio Jenis Kelamin (%)',
+                'sumber' => 'Badan Pusat Statistik Kabupaten Situbondo Tahun 2026',
+                'kategori' => 'Demografi & Kependudukan',
+                'kolom' => ['No', 'Kecamatan', 'Laki-Laki', 'Perempuan', 'Rasio Jenis Kelamin (%)']
+            ],
+            '1.6' => [
+                'kode' => '1.6',
+                'nomor_tabel' => 'Tabel 1.6',
+                'judul' => 'Tabel 1.6 Persentase Pertumbuhan Penduduk Kabupaten Situbondo',
+                'judul_singkat' => 'Pertumbuhan Penduduk',
+                'subjudul' => 'Jumlah Penduduk Tahun 2024 dan 2025 Serta Persentase Pertumbuhan Penduduk (%)',
+                'sumber' => 'Badan Pusat Statistik Kabupaten Situbondo Tahun 2026',
+                'kategori' => 'Demografi & Kependudukan',
+                'kolom' => ['No', 'Kecamatan', '2024', '2025', 'Pertumbuhan Penduduk (%)']
+            ],
+            '1.7' => [
+                'kode' => '1.7',
+                'nomor_tabel' => 'Tabel 1.7',
+                'judul' => 'Tabel 1.7 Jumlah Migrasi Masuk dan Migrasi Keluar Menurut Kecamatan',
+                'judul_singkat' => 'Migrasi Masuk & Keluar',
+                'subjudul' => 'Jumlah Migrasi Masuk dan Migrasi Keluar Menurut Kecamatan di Kabupaten Situbondo',
+                'sumber' => 'Badan Pusat Statistik Kabupaten Situbondo Tahun 2026',
+                'kategori' => 'Demografi & Kependudukan',
+                'kolom' => ['No', 'Kecamatan', 'Masuk', 'Keluar']
+            ],
+            '1.8' => [
+                'kode' => '1.8',
+                'nomor_tabel' => 'Tabel 1.8',
+                'judul' => 'Tabel 1.8 Jumlah ASN berdasarkan Jenis Kelamin',
+                'judul_singkat' => 'Jumlah ASN Menurut Gender',
+                'subjudul' => 'Jumlah Pegawai ASN (PNS, PPPK Penuh Waktu, PPPK Paruh Waktu) Berdasarkan Jenis Kelamin',
+                'sumber' => 'Badan Kepegawaian dan Pengembangan Sumber Daya Manusia Tahun 2026',
+                'kategori' => 'Kepegawaian & Aparatur',
+                'kolom' => ['No', 'Jumlah Pegawai', 'Laki-Laki', 'Perempuan', 'Jumlah']
+            ],
+            '1.9' => [
+                'kode' => '1.9',
+                'nomor_tabel' => 'Tabel 1.9',
+                'judul' => 'Tabel 1.9 Jumlah ASN Menurut Tingkat Pendidikan',
+                'judul_singkat' => 'Jumlah ASN Menurut Pendidikan',
+                'subjudul' => 'Jumlah Pegawai ASN (PNS, PPPK Penuh Waktu, PPPK Paruh Waktu) Menurut Tingkat Pendidikan',
+                'sumber' => 'Badan Kepegawaian dan Pengembangan Sumber Daya Manusia Tahun 2026',
+                'kategori' => 'Kepegawaian & Aparatur',
+                'kolom' => ['No', 'Tingkat Pendidikan', 'PNS Laki-Laki', 'PNS Perempuan', 'PPPK Penuh Laki-Laki', 'PPPK Penuh Perempuan', 'PPPK Paruh Laki-Laki', 'PPPK Paruh Perempuan', 'Jumlah']
+            ],
+            '1.10' => [
+                'kode' => '1.10',
+                'nomor_tabel' => 'Tabel 1.10',
+                'judul' => 'Tabel 1.10 Rincian Target, Realisasi dan Capaian Pendapatan Daerah Tahun 2025',
+                'judul_singkat' => 'Capaian Pendapatan Daerah',
+                'subjudul' => 'Rincian Target, Realisasi dan Capaian Pendapatan Daerah Kabupaten Situbondo Tahun 2025',
+                'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited',
+                'kategori' => 'Keuangan & Pendapatan Daerah',
+                'kolom' => ['No', 'Uraian', 'Anggaran 2025 (Rp.)', 'Realisasi 2025 (Rp.)', 'Lebih/(Kurang) (Rp.)', '%', 'Realisasi 2024 (Rp.)', 'Realisasi 2023 (Rp.)', 'Realisasi 2022 (Rp.)']
+            ],
+            '1.11' => [
+                'kode' => '1.11',
+                'nomor_tabel' => 'Tabel 1.11',
+                'judul' => 'Tabel 1.11 Rincian Pajak Daerah Tahun 2025',
+                'judul_singkat' => 'Rincian Pajak Daerah',
+                'subjudul' => 'Target, Realisasi, Capaian dan Persentase Pertumbuhan Pajak Daerah Kabupaten Situbondo Tahun 2025',
+                'sumber' => 'BAPENDA Kabupaten Situbondo Tahun 2026, unaudited',
+                'kategori' => 'Keuangan & Pajak Daerah',
+                'kolom' => ['No', 'Uraian', 'Target 2025 (Rp.)', 'Realisasi 2025 (Rp.)', '%', 'Persentase Naik/Turun Realisasi 2024-2025 (%)']
+            ],
+            '1.12' => [
+                'kode' => '1.12',
+                'nomor_tabel' => 'Tabel 1.12',
+                'judul' => 'Tabel 1.12 Rincian Retribusi Daerah Tahun 2025',
+                'judul_singkat' => 'Rincian Retribusi Daerah',
+                'subjudul' => 'Target, Realisasi dan Capaian Retribusi Daerah Kabupaten Situbondo Tahun 2025',
+                'sumber' => 'Bapenda Kabupaten Situbondo Tahun 2026, unaudited',
+                'kategori' => 'Keuangan & Retribusi Daerah',
+                'kolom' => ['No', 'Uraian', 'Target 2025 (Rp.)', 'Realisasi 2025 (Rp.)', '%']
+            ],
+            '1.13' => [
+                'kode' => '1.13',
+                'nomor_tabel' => 'Tabel 1.13',
+                'judul' => 'Tabel 1.13 Rincian Hasil pengelolaan keuangan daerah yang dipisahkan Tahun 2025',
+                'judul_singkat' => 'Hasil Pengelolaan Keuangan Dipisahkan',
+                'subjudul' => 'Target, Realisasi, Capaian dan Persentase Pertumbuhan Hasil Pengelolaan Keuangan Daerah yang Dipisahkan Kabupaten Situbondo Tahun 2025',
+                'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited',
+                'kategori' => 'Keuangan Daerah',
+                'kolom' => ['No', 'Uraian', 'Target 2025 (Rp.)', 'Realisasi 2025 (Rp.)', '%', 'Persentase Naik/Turun Realisasi 2024-2025']
+            ],
+            '1.14' => [
+                'kode' => '1.14',
+                'nomor_tabel' => 'Tabel 1.14',
+                'judul' => 'Tabel 1.14 Rincian Hasil Lain-Lain PAD yang Sah Tahun 2025',
+                'judul_singkat' => 'Hasil Lain-Lain PAD yang Sah',
+                'subjudul' => 'Target, Realisasi, Capaian dan Persentase Pertumbuhan Hasil Lain-Lain PAD yang Sah Kabupaten Situbondo Tahun 2025',
+                'sumber' => 'Bapenda Kabupaten Situbondo Tahun 2026, unaudited',
+                'kategori' => 'Keuangan Daerah',
+                'kolom' => ['No', 'Uraian', 'Target 2025 (Rp.)', 'Realisasi 2025 (Rp.)', '%', 'Persentase Naik/Turun Realisasi 2024-2025']
+            ],
+            '1.15' => [
+                'kode' => '1.15',
+                'nomor_tabel' => 'Tabel 1.15',
+                'judul' => 'Tabel 1.15 Rincian Pendapatan Transfer Tahun 2025',
+                'judul_singkat' => 'Rincian Pendapatan Transfer',
+                'subjudul' => 'Target, Realisasi, Capaian dan Persentase Pertumbuhan Pendapatan Transfer Kabupaten Situbondo Tahun 2025',
+                'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited',
+                'kategori' => 'Keuangan Daerah',
+                'kolom' => ['No', 'Uraian', 'Target 2025 (Rp.)', 'Realisasi 2025 (Rp.)', '%', 'Persentase Naik/Turun Realisasi 2024-2025']
+            ],
+            '1.16' => [
+                'kode' => '1.16',
+                'nomor_tabel' => 'Tabel 1.16',
+                'judul' => 'Tabel 1.16 Rincian Target, Realisasi dan Capaian Realisasi Belanja dan Transfer Daerah Tahun 2025',
+                'judul_singkat' => 'Target & Realisasi Belanja dan Transfer',
+                'subjudul' => 'Target, Realisasi dan Capaian Realisasi Belanja dan Transfer Daerah Kabupaten Situbondo Tahun 2025',
+                'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited',
+                'kategori' => 'Keuangan Daerah',
+                'kolom' => ['No', 'Uraian', 'Anggaran 2025 (Rp.)', 'Realisasi 2025 (Rp.)', 'Lebih/(Kurang) (Rp.)', '%', 'Realisasi 2024 (Rp.)', 'Realisasi 2023 (Rp.)', 'Realisasi 2022 (Rp.)']
+            ],
+            '1.17' => [
+                'kode' => '1.17',
+                'nomor_tabel' => 'Tabel 1.17',
+                'judul' => 'Tabel 1.17 Rincian Belanja Hibah Tahun 2025',
+                'judul_singkat' => 'Rincian Belanja Hibah',
+                'subjudul' => 'Rincian Anggaran dan Realisasi Belanja Hibah Berdasarkan SKPD dan Kategori Penerima Tahun 2025',
+                'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited',
+                'kategori' => 'Keuangan Daerah',
+                'kolom' => ['Uraian', 'Belanja Hibah kepada Pemerintah Pusat', 'Belanja Hibah kepada Badan, Lembaga, Ormas', 'Belanja Hibah Bantuan Keuangan Parpol', 'Belanja Hibah Dana BOSP', 'Total Belanja Hibah']
+            ],
+            '1.18' => [
+                'kode' => '1.18',
+                'nomor_tabel' => 'Tabel 1.18',
+                'judul' => 'Tabel 1.18 Rincian Belanja Bantuan Sosial Tahun 2025',
+                'judul_singkat' => 'Rincian Belanja Bantuan Sosial',
+                'subjudul' => 'Rincian Anggaran dan Realisasi Belanja Bantuan Sosial Kabupaten Situbondo Tahun 2025',
+                'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited',
+                'kategori' => 'Keuangan Daerah',
+                'kolom' => ['Uraian', 'Bansos Individu', 'Bansos Kelompok Masyarakat', 'Bansos Lembaga Non Pemerintahan', 'Total Belanja Bantuan Sosial']
+            ],
+            '1.19' => [
+                'kode' => '1.19',
+                'nomor_tabel' => 'Tabel 1.19',
+                'judul' => 'Tabel 1.19 Rincian Target, Realisasi dan Capaian Realisasi Pembiayaan Daerah Tahun 2025',
+                'judul_singkat' => 'Pembiayaan Daerah',
+                'subjudul' => 'Target, Realisasi dan Capaian Realisasi Pembiayaan Daerah Kabupaten Situbondo Tahun 2025',
+                'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited',
+                'kategori' => 'Keuangan Daerah',
+                'kolom' => ['No', 'Uraian', 'Anggaran 2025 (Rp.)', 'Realisasi 2025 (Rp.)', 'Lebih/(Kurang) (Rp.)', '%', 'Realisasi 2024 (Rp.)', 'Realisasi 2023 (Rp.)', 'Realisasi 2022 (Rp.)']
+            ],
+            '1.20' => [
+                'kode' => '1.20',
+                'nomor_tabel' => 'Tabel 1.20',
+                'judul' => 'Tabel 1.20 Komponen SILPA Kabupaten Situbondo Tahun 2025',
+                'judul_singkat' => 'Komponen SILPA',
+                'subjudul' => 'Rincian Komponen dan Posisi Kas Sisa Lebih Perhitungan Anggaran (SILPA) Tahun 2025',
+                'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited',
+                'kategori' => 'Keuangan Daerah',
+                'kolom' => ['Komponen SILPA', 'Jumlah (Rp.)']
+            ]
+        ];
+    }
+
+    /**
+     * Pastikan tabel database BAB 1 dibuat dan diisi jika kosong
+     */
+    private function ensure_bab1_tables_exist() {
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab1_tabel1_1` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` VARCHAR(20) NOT NULL DEFAULT '35.12',
+            `instansi_id` INT(11) NOT NULL DEFAULT 1,
+            `tahun` INT(4) NOT NULL DEFAULT 2026,
+            `nomor` INT(11) NOT NULL DEFAULT 1,
+            `kecamatan` VARCHAR(150) NOT NULL,
+            `luas_ha` DECIMAL(14,3) NOT NULL DEFAULT 0.000,
+            `jumlah_desa` INT(11) NOT NULL DEFAULT 0,
+            `jumlah_kelurahan` INT(11) NOT NULL DEFAULT 0,
+            `keterangan` TEXT NULL,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            `deleted_at` DATETIME NULL,
+            PRIMARY KEY (`id`),
+            INDEX `idx_wilayah_tahun` (`kodewilayah`, `tahun`, `instansi_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab1_generic` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `tabel_kode` VARCHAR(10) NOT NULL,
+            `kodewilayah` VARCHAR(20) NOT NULL DEFAULT '35.12',
+            `instansi_id` INT(11) NOT NULL DEFAULT 1,
+            `tahun` INT(4) NOT NULL DEFAULT 2026,
+            `nomor` INT(11) NOT NULL DEFAULT 1,
+            `kolom_1` VARCHAR(255) NULL,
+            `kolom_2` VARCHAR(255) NULL,
+            `kolom_3` VARCHAR(255) NULL,
+            `kolom_4` VARCHAR(255) NULL,
+            `kolom_5` VARCHAR(255) NULL,
+            `kolom_6` VARCHAR(255) NULL,
+            `data_json` LONGTEXT NULL,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            `deleted_at` DATETIME NULL,
+            PRIMARY KEY (`id`),
+            INDEX `idx_generic_lookup` (`tabel_kode`, `kodewilayah`, `tahun`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+        // Periksa apakah tabel 1.1 sudah memiliki data untuk tahun aktif
+        $count = $this->db->where('deleted_at IS NULL')->count_all_results('lkpj_bab1_tabel1_1');
+        if ($count == 0) {
+            $this->seed_default_tabel1_1('35.12', 1, 2026);
+        }
+
+        // Pastikan tabel 1.2 ada dan terisi
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab1_tabel1_2` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` VARCHAR(20) NOT NULL DEFAULT '35.12',
+            `instansi_id` INT(11) NOT NULL DEFAULT 1,
+            `tahun` INT(4) NOT NULL DEFAULT 2026,
+            `nomor` INT(11) NOT NULL DEFAULT 1,
+            `tutupan_lahan` VARCHAR(150) NOT NULL,
+            `luas_ha` DECIMAL(14,3) NOT NULL DEFAULT 0.000,
+            `prosentase` DECIMAL(8,3) NOT NULL DEFAULT 0.000,
+            `keterangan` TEXT NULL,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            `deleted_at` DATETIME NULL,
+            PRIMARY KEY (`id`),
+            INDEX `idx_wilayah_tahun_1_2` (`kodewilayah`, `tahun`, `instansi_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+        $count1_2 = $this->db->where('deleted_at IS NULL')->count_all_results('lkpj_bab1_tabel1_2');
+        if ($count1_2 == 0) {
+            $this->seed_default_tabel1_2('35.12', 1, 2026);
+        }
+
+        // Pastikan tabel 1.3 ada dan terisi
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab1_tabel1_3` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` VARCHAR(20) NOT NULL DEFAULT '35.12',
+            `instansi_id` INT(11) NOT NULL DEFAULT 1,
+            `tahun` INT(4) NOT NULL DEFAULT 2026,
+            `nomor` INT(11) NOT NULL DEFAULT 1,
+            `kecamatan` VARCHAR(100) NOT NULL,
+            `tinggi_wilayah` VARCHAR(50) NOT NULL,
+            `satuan` VARCHAR(20) NOT NULL DEFAULT 'm dpl',
+            `keterangan` TEXT NULL,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            `deleted_at` DATETIME NULL,
+            PRIMARY KEY (`id`),
+            INDEX `idx_wilayah_tahun_1_3` (`kodewilayah`, `tahun`, `instansi_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+        $count1_3 = $this->db->where('deleted_at IS NULL')->count_all_results('lkpj_bab1_tabel1_3');
+        if ($count1_3 == 0) {
+            $this->seed_default_tabel1_3('35.12', 1, 2026);
+        }
+
+        // Pastikan tabel 1.4 ada dan terisi
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab1_tabel1_4` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` VARCHAR(20) NOT NULL DEFAULT '35.12',
+            `instansi_id` INT(11) NOT NULL DEFAULT 1,
+            `tahun` INT(4) NOT NULL DEFAULT 2026,
+            `nomor` INT(11) NOT NULL DEFAULT 1,
+            `bulan` VARCHAR(50) NOT NULL,
+            `curah_hujan` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+            `hari_hujan` INT(11) NOT NULL DEFAULT 0,
+            `keterangan` TEXT NULL,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            `deleted_at` DATETIME NULL,
+            PRIMARY KEY (`id`),
+            INDEX `idx_wilayah_tahun_1_4` (`kodewilayah`, `tahun`, `instansi_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+        $count1_4 = $this->db->where('deleted_at IS NULL')->count_all_results('lkpj_bab1_tabel1_4');
+        if ($count1_4 == 0) {
+            $this->seed_default_tabel1_4('35.12', 1, 2026);
+        }
+
+        // Pastikan tabel 1.5 ada dan terisi
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab1_tabel1_5` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` VARCHAR(20) NOT NULL DEFAULT '35.12',
+            `instansi_id` INT(11) NOT NULL DEFAULT 1,
+            `tahun` INT(4) NOT NULL DEFAULT 2026,
+            `nomor` INT(11) NOT NULL DEFAULT 1,
+            `kecamatan` VARCHAR(100) NOT NULL,
+            `laki_laki` INT(11) NOT NULL DEFAULT 0,
+            `perempuan` INT(11) NOT NULL DEFAULT 0,
+            `rasio` DECIMAL(6,2) NOT NULL DEFAULT 0.00,
+            `keterangan` TEXT NULL,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            `deleted_at` DATETIME NULL,
+            PRIMARY KEY (`id`),
+            INDEX `idx_wilayah_tahun_1_5` (`kodewilayah`, `tahun`, `instansi_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+        $count1_5 = $this->db->where('deleted_at IS NULL')->count_all_results('lkpj_bab1_tabel1_5');
+        if ($count1_5 == 0) {
+            $this->seed_default_tabel1_5('35.12', 1, 2026);
+        }
+
+        // Pastikan tabel 1.6 ada dan terisi
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab1_tabel1_6` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` VARCHAR(20) NOT NULL DEFAULT '35.12',
+            `instansi_id` INT(11) NOT NULL DEFAULT 1,
+            `tahun` INT(4) NOT NULL DEFAULT 2026,
+            `nomor` INT(11) NOT NULL DEFAULT 1,
+            `kecamatan` VARCHAR(100) NOT NULL,
+            `penduduk_2024` INT(11) NOT NULL DEFAULT 0,
+            `penduduk_2025` INT(11) NOT NULL DEFAULT 0,
+            `pertumbuhan` DECIMAL(6,2) NOT NULL DEFAULT 0.00,
+            `keterangan` TEXT NULL,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            `deleted_at` DATETIME NULL,
+            PRIMARY KEY (`id`),
+            INDEX `idx_wilayah_tahun_1_6` (`kodewilayah`, `tahun`, `instansi_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        if ($this->db->where('deleted_at IS NULL')->count_all_results('lkpj_bab1_tabel1_6') == 0) {
+            $this->seed_default_tabel1_6('35.12', 1, 2026);
+        }
+
+        // Pastikan tabel 1.7 ada dan terisi
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab1_tabel1_7` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` VARCHAR(20) NOT NULL DEFAULT '35.12',
+            `instansi_id` INT(11) NOT NULL DEFAULT 1,
+            `tahun` INT(4) NOT NULL DEFAULT 2026,
+            `nomor` INT(11) NOT NULL DEFAULT 1,
+            `kecamatan` VARCHAR(100) NOT NULL,
+            `migrasi_masuk` INT(11) NOT NULL DEFAULT 0,
+            `migrasi_keluar` INT(11) NOT NULL DEFAULT 0,
+            `keterangan` TEXT NULL,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            `deleted_at` DATETIME NULL,
+            PRIMARY KEY (`id`),
+            INDEX `idx_wilayah_tahun_1_7` (`kodewilayah`, `tahun`, `instansi_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        if ($this->db->where('deleted_at IS NULL')->count_all_results('lkpj_bab1_tabel1_7') == 0) {
+            $this->seed_default_tabel1_7('35.12', 1, 2026);
+        }
+
+        // Pastikan tabel 1.8 ada dan terisi
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab1_tabel1_8` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` VARCHAR(20) NOT NULL DEFAULT '35.12',
+            `instansi_id` INT(11) NOT NULL DEFAULT 1,
+            `tahun` INT(4) NOT NULL DEFAULT 2026,
+            `nomor` INT(11) NOT NULL DEFAULT 1,
+            `jenis_pegawai` VARCHAR(100) NOT NULL,
+            `laki_laki` INT(11) NOT NULL DEFAULT 0,
+            `perempuan` INT(11) NOT NULL DEFAULT 0,
+            `jumlah` INT(11) NOT NULL DEFAULT 0,
+            `keterangan` TEXT NULL,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            `deleted_at` DATETIME NULL,
+            PRIMARY KEY (`id`),
+            INDEX `idx_wilayah_tahun_1_8` (`kodewilayah`, `tahun`, `instansi_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        if ($this->db->where('deleted_at IS NULL')->count_all_results('lkpj_bab1_tabel1_8') == 0) {
+            $this->seed_default_tabel1_8('35.12', 1, 2026);
+        }
+
+        // Pastikan tabel 1.9 ada dan terisi
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab1_tabel1_9` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` VARCHAR(20) NOT NULL DEFAULT '35.12',
+            `instansi_id` INT(11) NOT NULL DEFAULT 1,
+            `tahun` INT(4) NOT NULL DEFAULT 2026,
+            `nomor` INT(11) NOT NULL DEFAULT 1,
+            `tingkat_pendidikan` VARCHAR(100) NOT NULL,
+            `pns_l` INT(11) NOT NULL DEFAULT 0,
+            `pns_p` INT(11) NOT NULL DEFAULT 0,
+            `pppk_penuh_l` INT(11) NOT NULL DEFAULT 0,
+            `pppk_penuh_p` INT(11) NOT NULL DEFAULT 0,
+            `pppk_paruh_l` INT(11) NOT NULL DEFAULT 0,
+            `pppk_paruh_p` INT(11) NOT NULL DEFAULT 0,
+            `jumlah` INT(11) NOT NULL DEFAULT 0,
+            `keterangan` TEXT NULL,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            `deleted_at` DATETIME NULL,
+            PRIMARY KEY (`id`),
+            INDEX `idx_wilayah_tahun_1_9` (`kodewilayah`, `tahun`, `instansi_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        if ($this->db->where('deleted_at IS NULL')->count_all_results('lkpj_bab1_tabel1_9') == 0) {
+            $this->seed_default_tabel1_9('35.12', 1, 2026);
+        }
+
+        // Pastikan tabel 1.10 ada dan terisi
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab1_tabel1_10` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` VARCHAR(20) NOT NULL DEFAULT '35.12',
+            `instansi_id` INT(11) NOT NULL DEFAULT 1,
+            `tahun` INT(4) NOT NULL DEFAULT 2026,
+            `nomor` VARCHAR(20) NULL,
+            `is_header` TINYINT(1) NOT NULL DEFAULT 0,
+            `parent_id` INT(11) NOT NULL DEFAULT 0,
+            `uraian` VARCHAR(255) NOT NULL,
+            `anggaran_2025` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `realisasi_2025` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `selisih` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `persen` DECIMAL(6,2) NOT NULL DEFAULT 0.00,
+            `realisasi_2024` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `realisasi_2023` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `realisasi_2022` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `keterangan` TEXT NULL,
+            `urutan` INT(11) NOT NULL DEFAULT 1,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            `deleted_at` DATETIME NULL,
+            PRIMARY KEY (`id`),
+            INDEX `idx_wilayah_tahun_1_10` (`kodewilayah`, `tahun`, `instansi_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        if ($this->db->where('deleted_at IS NULL')->count_all_results('lkpj_bab1_tabel1_10') == 0) {
+            $this->seed_default_tabel1_10('35.12', 1, 2026);
+        }
+
+        // Pastikan tabel 1.11 ada dan terisi
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab1_tabel1_11` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` VARCHAR(20) NOT NULL DEFAULT '35.12',
+            `instansi_id` INT(11) NOT NULL DEFAULT 1,
+            `tahun` INT(4) NOT NULL DEFAULT 2026,
+            `nomor` VARCHAR(30) NULL,
+            `is_header` TINYINT(1) NOT NULL DEFAULT 0,
+            `parent_id` INT(11) NOT NULL DEFAULT 0,
+            `level` INT(2) NOT NULL DEFAULT 1,
+            `uraian` VARCHAR(255) NOT NULL,
+            `target_2025` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `realisasi_2025` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `persen` DECIMAL(6,2) NOT NULL DEFAULT 0.00,
+            `pertumbuhan` DECIMAL(6,2) NULL,
+            `keterangan` TEXT NULL,
+            `urutan` INT(11) NOT NULL DEFAULT 1,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            `deleted_at` DATETIME NULL,
+            PRIMARY KEY (`id`),
+            INDEX `idx_wilayah_tahun_1_11` (`kodewilayah`, `tahun`, `instansi_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        if ($this->db->where('deleted_at IS NULL')->count_all_results('lkpj_bab1_tabel1_11') == 0) {
+            $this->seed_default_tabel1_11('35.12', 1, 2026);
+        }
+
+        // Pastikan tabel 1.12 ada dan terisi
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab1_tabel1_12` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` VARCHAR(20) NOT NULL DEFAULT '35.12',
+            `instansi_id` INT(11) NOT NULL DEFAULT 1,
+            `tahun` INT(4) NOT NULL DEFAULT 2026,
+            `nomor` VARCHAR(30) NULL,
+            `is_header` TINYINT(1) NOT NULL DEFAULT 0,
+            `parent_id` INT(11) NOT NULL DEFAULT 0,
+            `level` INT(2) NOT NULL DEFAULT 1,
+            `uraian` VARCHAR(255) NOT NULL,
+            `target_2025` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `realisasi_2025` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `persen` DECIMAL(6,2) NOT NULL DEFAULT 0.00,
+            `keterangan` TEXT NULL,
+            `urutan` INT(11) NOT NULL DEFAULT 1,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            `deleted_at` DATETIME NULL,
+            PRIMARY KEY (`id`),
+            INDEX `idx_wilayah_tahun_1_12` (`kodewilayah`, `tahun`, `instansi_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        if ($this->db->where('deleted_at IS NULL')->count_all_results('lkpj_bab1_tabel1_12') == 0) {
+            $this->seed_default_tabel1_12('35.12', 1, 2026);
+        }
+
+        // Pastikan tabel 1.13 ada dan terisi
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab1_tabel1_13` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` VARCHAR(20) NOT NULL DEFAULT '35.12',
+            `instansi_id` INT(11) NOT NULL DEFAULT 1,
+            `tahun` INT(4) NOT NULL DEFAULT 2026,
+            `nomor` VARCHAR(30) NULL,
+            `is_header` TINYINT(1) NOT NULL DEFAULT 0,
+            `parent_id` INT(11) NOT NULL DEFAULT 0,
+            `level` INT(2) NOT NULL DEFAULT 1,
+            `uraian` VARCHAR(255) NOT NULL,
+            `target_2025` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `realisasi_2025` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `persen` DECIMAL(6,2) NOT NULL DEFAULT 0.00,
+            `pertumbuhan` DECIMAL(6,2) NULL,
+            `keterangan` TEXT NULL,
+            `urutan` INT(11) NOT NULL DEFAULT 1,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            `deleted_at` DATETIME NULL,
+            PRIMARY KEY (`id`),
+            INDEX `idx_wilayah_tahun_1_13` (`kodewilayah`, `tahun`, `instansi_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        if ($this->db->where('deleted_at IS NULL')->count_all_results('lkpj_bab1_tabel1_13') == 0) {
+            $this->seed_default_tabel1_13('35.12', 1, 2026);
+        }
+
+        // Pastikan tabel 1.14 ada dan terisi
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab1_tabel1_14` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` VARCHAR(20) NOT NULL DEFAULT '35.12',
+            `instansi_id` INT(11) NOT NULL DEFAULT 1,
+            `tahun` INT(4) NOT NULL DEFAULT 2026,
+            `nomor` VARCHAR(30) NULL,
+            `is_header` TINYINT(1) NOT NULL DEFAULT 0,
+            `parent_id` INT(11) NOT NULL DEFAULT 0,
+            `level` INT(2) NOT NULL DEFAULT 1,
+            `uraian` VARCHAR(255) NOT NULL,
+            `target_2025` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `realisasi_2025` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `persen` DECIMAL(6,2) NOT NULL DEFAULT 0.00,
+            `pertumbuhan` DECIMAL(6,2) NULL,
+            `keterangan` TEXT NULL,
+            `urutan` INT(11) NOT NULL DEFAULT 1,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            `deleted_at` DATETIME NULL,
+            PRIMARY KEY (`id`),
+            INDEX `idx_wilayah_tahun_1_14` (`kodewilayah`, `tahun`, `instansi_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        if ($this->db->where('deleted_at IS NULL')->count_all_results('lkpj_bab1_tabel1_14') == 0) {
+            $this->seed_default_tabel1_14('35.12', 1, 2026);
+        }
+
+        // Pastikan tabel 1.15 ada dan terisi
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab1_tabel1_15` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` VARCHAR(20) NOT NULL DEFAULT '35.12',
+            `instansi_id` INT(11) NOT NULL DEFAULT 1,
+            `tahun` INT(4) NOT NULL DEFAULT 2026,
+            `nomor` VARCHAR(30) NULL,
+            `is_header` TINYINT(1) NOT NULL DEFAULT 0,
+            `parent_id` INT(11) NOT NULL DEFAULT 0,
+            `level` INT(2) NOT NULL DEFAULT 1,
+            `uraian` VARCHAR(255) NOT NULL,
+            `target_2025` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `realisasi_2025` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `persen` DECIMAL(6,2) NOT NULL DEFAULT 0.00,
+            `pertumbuhan` DECIMAL(6,2) NULL,
+            `keterangan` TEXT NULL,
+            `urutan` INT(11) NOT NULL DEFAULT 1,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            `deleted_at` DATETIME NULL,
+            PRIMARY KEY (`id`),
+            INDEX `idx_wilayah_tahun_1_15` (`kodewilayah`, `tahun`, `instansi_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        if ($this->db->where('deleted_at IS NULL')->count_all_results('lkpj_bab1_tabel1_15') == 0) {
+            $this->seed_default_tabel1_15('35.12', 1, 2026);
+        }
+
+        // Pastikan tabel 1.16 ada dan terisi
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab1_tabel1_16` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` VARCHAR(20) NOT NULL DEFAULT '35.12',
+            `instansi_id` INT(11) NOT NULL DEFAULT 1,
+            `tahun` INT(4) NOT NULL DEFAULT 2026,
+            `nomor` VARCHAR(30) NULL,
+            `is_header` TINYINT(1) NOT NULL DEFAULT 0,
+            `parent_id` INT(11) NOT NULL DEFAULT 0,
+            `level` INT(2) NOT NULL DEFAULT 1,
+            `uraian` VARCHAR(255) NOT NULL,
+            `anggaran_2025` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `realisasi_2025` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `selisih` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `persen` DECIMAL(6,2) NOT NULL DEFAULT 0.00,
+            `realisasi_2024` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `realisasi_2023` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `realisasi_2022` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `keterangan` TEXT NULL,
+            `urutan` INT(11) NOT NULL DEFAULT 1,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            `deleted_at` DATETIME NULL,
+            PRIMARY KEY (`id`),
+            INDEX `idx_wilayah_tahun_1_16` (`kodewilayah`, `tahun`, `instansi_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        if ($this->db->where('deleted_at IS NULL')->count_all_results('lkpj_bab1_tabel1_16') == 0) {
+            $this->seed_default_tabel1_16('35.12', 1, 2026);
+        }
+
+        // Pastikan tabel 1.17 ada dan terisi
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab1_tabel1_17` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` VARCHAR(20) NOT NULL DEFAULT '35.12',
+            `instansi_id` INT(11) NOT NULL DEFAULT 1,
+            `tahun` INT(4) NOT NULL DEFAULT 2026,
+            `uraian` VARCHAR(255) NOT NULL,
+            `hibah_pusat_anggaran` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `hibah_pusat_realisasi` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `hibah_badan_anggaran` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `hibah_badan_realisasi` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `hibah_parpol_anggaran` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `hibah_parpol_realisasi` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `hibah_bosp_anggaran` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `hibah_bosp_realisasi` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `total_anggaran` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `total_realisasi` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `keterangan` TEXT NULL,
+            `urutan` INT(11) NOT NULL DEFAULT 1,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            `deleted_at` DATETIME NULL,
+            PRIMARY KEY (`id`),
+            INDEX `idx_wilayah_tahun_1_17` (`kodewilayah`, `tahun`, `instansi_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        if ($this->db->where('deleted_at IS NULL')->count_all_results('lkpj_bab1_tabel1_17') == 0) {
+            $this->seed_default_tabel1_17('35.12', 1, 2026);
+        }
+
+        // Pastikan tabel 1.18 ada dan terisi
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab1_tabel1_18` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` VARCHAR(20) NOT NULL DEFAULT '35.12',
+            `instansi_id` INT(11) NOT NULL DEFAULT 1,
+            `tahun` INT(4) NOT NULL DEFAULT 2026,
+            `uraian` VARCHAR(255) NOT NULL,
+            `bansos_individu_anggaran` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `bansos_individu_realisasi` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `bansos_pokmas_anggaran` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `bansos_pokmas_realisasi` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `bansos_lembaga_anggaran` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `bansos_lembaga_realisasi` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `total_anggaran` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `total_realisasi` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `keterangan` TEXT NULL,
+            `urutan` INT(11) NOT NULL DEFAULT 1,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            `deleted_at` DATETIME NULL,
+            PRIMARY KEY (`id`),
+            INDEX `idx_wilayah_tahun_1_18` (`kodewilayah`, `tahun`, `instansi_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        if ($this->db->where('deleted_at IS NULL')->count_all_results('lkpj_bab1_tabel1_18') == 0) {
+            $this->seed_default_tabel1_18('35.12', 1, 2026);
+        }
+
+        // Pastikan tabel 1.19 ada dan terisi
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab1_tabel1_19` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` VARCHAR(20) NOT NULL DEFAULT '35.12',
+            `instansi_id` INT(11) NOT NULL DEFAULT 1,
+            `tahun` INT(4) NOT NULL DEFAULT 2026,
+            `nomor` VARCHAR(30) NULL,
+            `is_header` TINYINT(1) NOT NULL DEFAULT 0,
+            `parent_id` INT(11) NOT NULL DEFAULT 0,
+            `level` INT(2) NOT NULL DEFAULT 1,
+            `uraian` VARCHAR(255) NOT NULL,
+            `anggaran_2025` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `realisasi_2025` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `selisih` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `persen` VARCHAR(20) NULL DEFAULT '0.00',
+            `realisasi_2024` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `realisasi_2023` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `realisasi_2022` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `keterangan` TEXT NULL,
+            `urutan` INT(11) NOT NULL DEFAULT 1,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            `deleted_at` DATETIME NULL,
+            PRIMARY KEY (`id`),
+            INDEX `idx_wilayah_tahun_1_19` (`kodewilayah`, `tahun`, `instansi_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        if ($this->db->where('deleted_at IS NULL')->count_all_results('lkpj_bab1_tabel1_19') == 0) {
+            $this->seed_default_tabel1_19('35.12', 1, 2026);
+        }
+
+        // Pastikan tabel 1.20 ada dan terisi
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab1_tabel1_20` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` VARCHAR(20) NOT NULL DEFAULT '35.12',
+            `instansi_id` INT(11) NOT NULL DEFAULT 1,
+            `tahun` INT(4) NOT NULL DEFAULT 2026,
+            `komponen` VARCHAR(255) NOT NULL,
+            `jumlah` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+            `keterangan` TEXT NULL,
+            `urutan` INT(11) NOT NULL DEFAULT 1,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            `deleted_at` DATETIME NULL,
+            PRIMARY KEY (`id`),
+            INDEX `idx_wilayah_tahun_1_20` (`kodewilayah`, `tahun`, `instansi_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        if ($this->db->where('deleted_at IS NULL')->count_all_results('lkpj_bab1_tabel1_20') == 0) {
+            $this->seed_default_tabel1_20('35.12', 1, 2026);
+        }
+    }
+
+    /**
+     * Seeding data default Tabel 1.17 Rincian Belanja Hibah Tahun 2025
+     */
+    private function seed_default_tabel1_17($kodeWilayah = '35.12', $instansiId = 1, $tahun = 2026) {
+        $now = date('Y-m-d H:i:s');
+        $rows = [
+            ['Dinas Pendidikan dan Kebudayaan', 0.00, 0.00, 15002776300.00, 14348345517.15, 0.00, 0.00, 26968918403.00, 27046941702.00, 41971694703.00, 41395287219.15, 1],
+            ['Dinas Pekerjaan Umum Dan Perumahan Permukiman', 2300000000.00, 2213926373.36, 8398120000.00, 8078120000.00, 0.00, 0.00, 0.00, 0.00, 10698120000.00, 10292046373.36, 2],
+            ['Dinas Lingkungan Hidup', 0.00, 0.00, 285000000.00, 0.00, 0.00, 0.00, 0.00, 0.00, 285000000.00, 0.00, 3],
+            ['Dinas Koperasi, Perindustrian, dan Perdagangan', 0.00, 0.00, 2234824826.00, 630130621.00, 0.00, 0.00, 0.00, 0.00, 2234824826.00, 630130621.00, 4],
+            ['Dinas Pariwisata, Pemuda Dan Olahraga', 0.00, 0.00, 1900000000.00, 1800000000.00, 0.00, 0.00, 0.00, 0.00, 1900000000.00, 1800000000.00, 5],
+            ['Dinas Pertanian Dan Ketahanan Pangan', 0.00, 0.00, 12485654880.00, 12022770338.24, 0.00, 0.00, 0.00, 0.00, 12485654880.00, 12022770338.24, 6],
+            ['Sekretariat Daerah', 0.00, 0.00, 4128000000.00, 3998000000.00, 0.00, 0.00, 0.00, 0.00, 4128000000.00, 3998000000.00, 7],
+            ['Badan Kesatuan Bangsa dan Politik', 0.00, 0.00, 200000000.00, 200000000.00, 949679000.00, 949679000.00, 0.00, 0.00, 1149679000.00, 1149679000.00, 8],
+        ];
+        foreach ($rows as $r) {
+            $this->db->insert('lkpj_bab1_tabel1_17', [
+                'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+                'uraian' => $r[0],
+                'hibah_pusat_anggaran' => $r[1], 'hibah_pusat_realisasi' => $r[2],
+                'hibah_badan_anggaran' => $r[3], 'hibah_badan_realisasi' => $r[4],
+                'hibah_parpol_anggaran' => $r[5], 'hibah_parpol_realisasi' => $r[6],
+                'hibah_bosp_anggaran' => $r[7], 'hibah_bosp_realisasi' => $r[8],
+                'total_anggaran' => $r[9], 'total_realisasi' => $r[10],
+                'urutan' => $r[11], 'created_at' => $now, 'updated_at' => $now
+            ]);
+        }
+    }
+
+    /**
+     * Seeding data default Tabel 1.18 Rincian Belanja Bantuan Sosial Tahun 2025
+     */
+    private function seed_default_tabel1_18($kodeWilayah = '35.12', $instansiId = 1, $tahun = 2026) {
+        $now = date('Y-m-d H:i:s');
+        $this->db->insert('lkpj_bab1_tabel1_18', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'uraian' => 'Dinas Pekerjaan Umum Dan Perumahan Permukiman',
+            'bansos_individu_anggaran' => 0.00, 'bansos_individu_realisasi' => 0.00,
+            'bansos_pokmas_anggaran' => 9405000000.00, 'bansos_pokmas_realisasi' => 9405000000.00,
+            'bansos_lembaga_anggaran' => 0.00, 'bansos_lembaga_realisasi' => 0.00,
+            'total_anggaran' => 9405000000.00, 'total_realisasi' => 9405000000.00,
+            'urutan' => 1, 'created_at' => $now, 'updated_at' => $now
+        ]);
+    }
+
+    /**
+     * Seeding data default Tabel 1.19 Rincian Target, Realisasi dan Capaian Realisasi Pembiayaan Daerah Tahun 2025
+     */
+    private function seed_default_tabel1_19($kodeWilayah = '35.12', $instansiId = 1, $tahun = 2026) {
+        $now = date('Y-m-d H:i:s');
+
+        // 1. PENERIMAAN PEMBIAYAAN DAERAH
+        $this->db->insert('lkpj_bab1_tabel1_19', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'nomor' => '1', 'is_header' => 1, 'parent_id' => 0, 'level' => 1,
+            'uraian' => 'PENERIMAAN PEMBIAYAAN DAERAH',
+            'anggaran_2025' => 104238675364.00, 'realisasi_2025' => 104238675365.12,
+            'selisih' => 1.12, 'persen' => '100,00',
+            'realisasi_2024' => 172927746766.38, 'realisasi_2023' => 258176554734.07, 'realisasi_2022' => 374251043253.47,
+            'urutan' => 1, 'created_at' => $now, 'updated_at' => $now
+        ]);
+        $prmId = $this->db->insert_id();
+
+        $itemsPrm = [
+            ['', 'Sisa Lebih Perhitungan Anggaran Tahun Sebelumnya', 104238675364.00, 104238675365.12, 1.12, '100,00', 132927746766.38, 256876810369.07, 374246952343.97, 2],
+            ['', 'Hasil Penjualan Kekayaan Daerah yang Dipisahkan', 0.00, 0.00, 0.00, '0,00', 0.00, 1299744365.00, 0.00, 3],
+            ['', 'Pencairan Dana Cadangan', 0.00, 0.00, 0.00, '0,00', 40000000000.00, 0.00, 4090909.50, 4],
+        ];
+        foreach ($itemsPrm as $r) {
+            $this->db->insert('lkpj_bab1_tabel1_19', [
+                'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+                'nomor' => $r[0], 'is_header' => 0, 'parent_id' => $prmId, 'level' => 2,
+                'uraian' => $r[1], 'anggaran_2025' => $r[2], 'realisasi_2025' => $r[3],
+                'selisih' => $r[4], 'persen' => $r[5], 'realisasi_2024' => $r[6], 'realisasi_2023' => $r[7], 'realisasi_2022' => $r[8],
+                'urutan' => $r[9], 'created_at' => $now, 'updated_at' => $now
+            ]);
+        }
+
+        // 2. PENGELUARAN PEMBIAYAAN DAERAH
+        $this->db->insert('lkpj_bab1_tabel1_19', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'nomor' => '2', 'is_header' => 1, 'parent_id' => 0, 'level' => 1,
+            'uraian' => 'PENGELUARAN PEMBIAYAAN DAERAH',
+            'anggaran_2025' => 0.00, 'realisasi_2025' => 0.00,
+            'selisih' => 0.00, 'persen' => '0,00',
+            'realisasi_2024' => 0.00, 'realisasi_2023' => 40000000000.00, 'realisasi_2022' => 62323000000.00,
+            'urutan' => 5, 'created_at' => $now, 'updated_at' => $now
+        ]);
+        $pngId = $this->db->insert_id();
+
+        $itemsPng = [
+            ['', 'Pembayaran Pokok Pinjaman Dalam Negeri', 0.00, 0.00, 0.00, '0,00', 0.00, 0.00, 62323000000.00, 6],
+            ['', 'Pembentukan Dana Cadangan', 0.00, 0.00, 0.00, '0,00', 0.00, 40000000000.00, 0.00, 7],
+            ['', 'Pembayaran Cicilan Pokok Utang yang Jatuh Tempo', 0.00, 0.00, 0.00, '0,00', 0.00, 0.00, 0.00, 8],
+        ];
+        foreach ($itemsPng as $r) {
+            $this->db->insert('lkpj_bab1_tabel1_19', [
+                'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+                'nomor' => $r[0], 'is_header' => 0, 'parent_id' => $pngId, 'level' => 2,
+                'uraian' => $r[1], 'anggaran_2025' => $r[2], 'realisasi_2025' => $r[3],
+                'selisih' => $r[4], 'persen' => $r[5], 'realisasi_2024' => $r[6], 'realisasi_2023' => $r[7], 'realisasi_2022' => $r[8],
+                'urutan' => $r[9], 'created_at' => $now, 'updated_at' => $now
+            ]);
+        }
+
+        // PEMBIAYAAN NETTO
+        $this->db->insert('lkpj_bab1_tabel1_19', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'nomor' => '', 'is_header' => 1, 'parent_id' => 0, 'level' => 1,
+            'uraian' => 'PEMBIAYAAN NETTO',
+            'anggaran_2025' => 104238675364.00, 'realisasi_2025' => 104238675365.12,
+            'selisih' => 1.12, 'persen' => '100,00',
+            'realisasi_2024' => 172927746766.38, 'realisasi_2023' => 218176554734.07, 'realisasi_2022' => 311923952343.97,
+            'urutan' => 9, 'created_at' => $now, 'updated_at' => $now
+        ]);
+
+        // 3. SISA LEBIH PEMBIAYAAN ANGGARAN (SILPA)
+        $this->db->insert('lkpj_bab1_tabel1_19', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'nomor' => '3', 'is_header' => 1, 'parent_id' => 0, 'level' => 1,
+            'uraian' => 'SISA LEBIH PEMBIAYAAN ANGGARAN (SILPA)',
+            'anggaran_2025' => 0.00, 'realisasi_2025' => 159085204887.54,
+            'selisih' => 159085204887.54, 'persen' => '-',
+            'realisasi_2024' => 104238595364.44, 'realisasi_2023' => 132927746766.38, 'realisasi_2022' => 256878710587.78,
+            'urutan' => 10, 'created_at' => $now, 'updated_at' => $now
+        ]);
+    }
+
+    /**
+     * Seeding data default Tabel 1.20 Komponen SILPA Kabupaten Situbondo Tahun 2025
+     */
+    private function seed_default_tabel1_20($kodeWilayah = '35.12', $instansiId = 1, $tahun = 2026) {
+        $now = date('Y-m-d H:i:s');
+        $rows = [
+            ['Kas di Kas Daerah', 142802611211.01, 1],
+            ['Kas Di Badan Layanan Umum Daerah (BLUD)', 14502585796.04, 2],
+            ['Kas di Bendahara Penerimaan SKPD', 46053.74, 3],
+            ['Kas di Bendahara BOSP', 1412936433.07, 4],
+            ['Kas di Bendahara BOK', 367025393.00, 5],
+        ];
+        foreach ($rows as $r) {
+            $this->db->insert('lkpj_bab1_tabel1_20', [
+                'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+                'komponen' => $r[0], 'jumlah' => $r[1],
+                'urutan' => $r[2], 'created_at' => $now, 'updated_at' => $now
+            ]);
+        }
+    }
+
+    /**
+     * Seeding data default Tabel 1.16 Rincian Target, Realisasi dan Capaian Realisasi Belanja dan Transfer Daerah Tahun 2025
+     */
+    private function seed_default_tabel1_16($kodeWilayah = '35.12', $instansiId = 1, $tahun = 2026) {
+        $now = date('Y-m-d H:i:s');
+
+        // 1. BELANJA OPERASIONAL
+        $this->db->insert('lkpj_bab1_tabel1_16', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'nomor' => '1', 'is_header' => 1, 'parent_id' => 0, 'level' => 1,
+            'uraian' => 'BELANJA OPERASIONAL',
+            'anggaran_2025' => 1419631683269.00, 'realisasi_2025' => 1349063175594.69,
+            'selisih' => -70568507674.31, 'persen' => 95.03,
+            'realisasi_2024' => 1380458807383.55, 'realisasi_2023' => 1357235240158.24, 'realisasi_2022' => 1283267877578.39,
+            'urutan' => 1, 'created_at' => $now, 'updated_at' => $now
+        ]);
+        $opId = $this->db->insert_id();
+
+        $itemsOp = [
+            ['', 'Belanja Pegawai', 718115470587.00, 689653487516.20, -28461983070.80, 96.04, 687132798462.00, 651626798729.00, 662110412534.00, 2],
+            ['', 'Belanja Barang dan Jasa', 614258239273.00, 578715919526.74, -35542319746.26, 94.21, 570194166718.21, 578394060734.41, 528946798022.75, 3],
+            ['', 'Belanja Bunga', 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 3037553775.00, 4],
+            ['', 'Belanja Subsidi', 3000000000.00, 855000.00, -2999145000.00, 0.03, 0.00, 0.00, 0.00, 5],
+            ['', 'Belanja Hibah', 74852973409.00, 71287913551.75, -3565059857.25, 95.24, 111036212203.34, 110590420694.83, 69390452286.64, 6],
+            ['', 'Belanja Bantuan Sosial', 9405000000.00, 9405000000.00, 0.00, 100.00, 12095630000.00, 16623960000.00, 19782660960.00, 7],
+        ];
+        foreach ($itemsOp as $r) {
+            $this->db->insert('lkpj_bab1_tabel1_16', [
+                'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+                'nomor' => $r[0], 'is_header' => 0, 'parent_id' => $opId, 'level' => 2,
+                'uraian' => $r[1], 'anggaran_2025' => $r[2], 'realisasi_2025' => $r[3],
+                'selisih' => $r[4], 'persen' => $r[5], 'realisasi_2024' => $r[6], 'realisasi_2023' => $r[7], 'realisasi_2022' => $r[8],
+                'urutan' => $r[9], 'created_at' => $now, 'updated_at' => $now
+            ]);
+        }
+
+        // 2. BELANJA MODAL
+        $this->db->insert('lkpj_bab1_tabel1_16', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'nomor' => '2', 'is_header' => 1, 'parent_id' => 0, 'level' => 1,
+            'uraian' => 'BELANJA MODAL',
+            'anggaran_2025' => 183756593702.00, 'realisasi_2025' => 168422650295.39,
+            'selisih' => -15333943406.61, 'persen' => 91.66,
+            'realisasi_2024' => 276451811670.48, 'realisasi_2023' => 292907025489.01, 'realisasi_2022' => 266000572493.34,
+            'urutan' => 8, 'created_at' => $now, 'updated_at' => $now
+        ]);
+        $modalId = $this->db->insert_id();
+
+        $itemsModal = [
+            ['', 'Belanja Modal Tanah', 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 9],
+            ['', 'Belanja Modal Peralatan dan Mesin', 62899388389.00, 57936219968.42, -4963168420.58, 92.11, 42490583437.00, 67352828603.00, 90675917983.73, 10],
+            ['', 'Belanja Modal Gedung dan Bangunan', 35757220357.00, 32143604058.26, -3613616298.74, 89.89, 72239872692.95, 71600379280.40, 55610002196.06, 11],
+            ['', 'Belanja Modal Jalan, Irigasi dan Jaringan', 76841842104.00, 73504325539.71, -3337516564.29, 95.66, 160053849162.53, 149978030894.61, 116824175457.61, 12],
+            ['', 'Belanja Modal Aset Tetap Lainnya', 8258142852.00, 4838500729.00, -3419642123.00, 58.59, 1667506378.00, 3975786711.00, 2890476855.94, 13],
+            ['', 'Belanja Modal Aset Lainnya', 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 14],
+        ];
+        foreach ($itemsModal as $r) {
+            $this->db->insert('lkpj_bab1_tabel1_16', [
+                'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+                'nomor' => $r[0], 'is_header' => 0, 'parent_id' => $modalId, 'level' => 2,
+                'uraian' => $r[1], 'anggaran_2025' => $r[2], 'realisasi_2025' => $r[3],
+                'selisih' => $r[4], 'persen' => $r[5], 'realisasi_2024' => $r[6], 'realisasi_2023' => $r[7], 'realisasi_2022' => $r[8],
+                'urutan' => $r[9], 'created_at' => $now, 'updated_at' => $now
+            ]);
+        }
+
+        // 3. BELANJA TAK TERDUGA
+        $this->db->insert('lkpj_bab1_tabel1_16', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'nomor' => '3', 'is_header' => 1, 'parent_id' => 0, 'level' => 1,
+            'uraian' => 'BELANJA TAK TERDUGA',
+            'anggaran_2025' => 5550181481.00, 'realisasi_2025' => 1094875401.00,
+            'selisih' => -4455306080.00, 'persen' => 19.73,
+            'realisasi_2024' => 644952636.00, 'realisasi_2023' => 815196718.14, 'realisasi_2022' => 182818835.00,
+            'urutan' => 15, 'created_at' => $now, 'updated_at' => $now
+        ]);
+        $bttId = $this->db->insert_id();
+
+        $this->db->insert('lkpj_bab1_tabel1_16', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'nomor' => '', 'is_header' => 0, 'parent_id' => $bttId, 'level' => 2,
+            'uraian' => 'Belanja Tidak Terduga',
+            'anggaran_2025' => 5550181481.00, 'realisasi_2025' => 1094875401.00,
+            'selisih' => -4455306080.00, 'persen' => 19.73,
+            'realisasi_2024' => 644952636.00, 'realisasi_2023' => 815196718.14, 'realisasi_2022' => 182818835.00,
+            'urutan' => 16, 'created_at' => $now, 'updated_at' => $now
+        ]);
+
+        // 4. BELANJA TRANSFER
+        $this->db->insert('lkpj_bab1_tabel1_16', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'nomor' => '4', 'is_header' => 1, 'parent_id' => 0, 'level' => 1,
+            'uraian' => 'BELANJA TRANSFER',
+            'anggaran_2025' => 245819114314.00, 'realisasi_2025' => 227484069338.00,
+            'selisih' => -18335044976.00, 'persen' => 92.54,
+            'realisasi_2024' => 249532240500.00, 'realisasi_2023' => 249328606540.00, 'realisasi_2022' => 229534191400.00,
+            'urutan' => 17, 'created_at' => $now, 'updated_at' => $now
+        ]);
+        $tfId = $this->db->insert_id();
+
+        $itemsTf = [
+            ['', 'Belanja Bagi Hasil', 11838520914.00, 7764187000.00, -4074333914.00, 65.58, 7346452000.00, 6921836000.00, 5445462000.00, 18],
+            ['', 'Belanja Bantuan Keuangan', 233980593400.00, 219719882338.00, -14260711062.00, 93.91, 242185788500.00, 242406770540.00, 224088729400.00, 19],
+        ];
+        foreach ($itemsTf as $r) {
+            $this->db->insert('lkpj_bab1_tabel1_16', [
+                'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+                'nomor' => $r[0], 'is_header' => 0, 'parent_id' => $tfId, 'level' => 2,
+                'uraian' => $r[1], 'anggaran_2025' => $r[2], 'realisasi_2025' => $r[3],
+                'selisih' => $r[4], 'persen' => $r[5], 'realisasi_2024' => $r[6], 'realisasi_2023' => $r[7], 'realisasi_2022' => $r[8],
+                'urutan' => $r[9], 'created_at' => $now, 'updated_at' => $now
+            ]);
+        }
+    }
+
+    /**
+     * Seeding data default Tabel 1.15 Rincian Pendapatan Transfer Tahun 2025
+     */
+    private function seed_default_tabel1_15($kodeWilayah = '35.12', $instansiId = 1, $tahun = 2026) {
+        $now = date('Y-m-d H:i:s');
+
+        // 1. Header Utama Level 1: PENDAPATAN TRANSFER
+        $this->db->insert('lkpj_bab1_tabel1_15', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'nomor' => '4.2', 'is_header' => 1, 'parent_id' => 0, 'level' => 1,
+            'uraian' => 'PENDAPATAN TRANSFER',
+            'target_2025' => 1447778871981.00, 'realisasi_2025' => 1479934567563.00,
+            'persen' => 102.22, 'pertumbuhan' => -5.54, 'urutan' => 1,
+            'created_at' => $now, 'updated_at' => $now
+        ]);
+        $rootId = $this->db->insert_id();
+
+        // 2. Sub-kelompok Level 2: Pendapatan Transfer Pemerintah Pusat
+        $this->db->insert('lkpj_bab1_tabel1_15', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'nomor' => '4.2.01', 'is_header' => 1, 'parent_id' => $rootId, 'level' => 2,
+            'uraian' => 'Pendapatan Transfer Pemerintah Pusat',
+            'target_2025' => 1356062271097.00, 'realisasi_2025' => 1377780513913.00,
+            'persen' => 101.60, 'pertumbuhan' => -3.41, 'urutan' => 2,
+            'created_at' => $now, 'updated_at' => $now
+        ]);
+        $pusatId = $this->db->insert_id();
+
+        // 3-7. Rincian Objek Level 3 (Pusat)
+        $rPusat = [
+            ['4.2.01.05', 'Dana Desa', 144895257000.00, 130743954938.00, 90.23, -15.20, 3],
+            ['4.2.01.06', 'Insentif Fiskal', 15308361000.00, 15308361000.00, 100.00, 102.89, 4],
+            ['4.2.01.07', 'Dana Bagi Hasil (DBH)', 143264235000.00, 149598391900.00, 104.42, 8.95, 5],
+            ['4.2.01.08', 'Dana Alokasi Umum (DAU)', 789092752000.00, 815341125680.00, 103.33, 29.05, 6],
+            ['4.2.01.09', 'Dana Alokasi Khusus (DAK)', 263501666097.00, 266788680395.00, 101.25, -14.00, 7],
+        ];
+        foreach ($rPusat as $r) {
+            $this->db->insert('lkpj_bab1_tabel1_15', [
+                'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+                'nomor' => $r[0], 'is_header' => 0, 'parent_id' => $pusatId, 'level' => 3,
+                'uraian' => $r[1], 'target_2025' => $r[2], 'realisasi_2025' => $r[3],
+                'persen' => $r[4], 'pertumbuhan' => $r[5], 'urutan' => $r[6],
+                'created_at' => $now, 'updated_at' => $now
+            ]);
+        }
+
+        // 8. Sub-kelompok Level 2: Pendapatan Transfer Antar Daerah
+        $this->db->insert('lkpj_bab1_tabel1_15', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'nomor' => '4.2.02', 'is_header' => 1, 'parent_id' => $rootId, 'level' => 2,
+            'uraian' => 'Pendapatan Transfer Antar Daerah',
+            'target_2025' => 91716600884.00, 'realisasi_2025' => 102154053650.00,
+            'persen' => 111.38, 'pertumbuhan' => -27.21, 'urutan' => 8,
+            'created_at' => $now, 'updated_at' => $now
+        ]);
+        $daerahId = $this->db->insert_id();
+
+        // 9-10. Rincian Objek Level 3 (Antar Daerah)
+        $rDaerah = [
+            ['4.2.02.01', 'Pendapatan Bagi Hasil', 77817253884.00, 88303156650.00, 113.48, -32.90, 9],
+            ['4.2.02.02', 'Bantuan Keuangan', 13899347000.00, 13850897000.00, 99.65, 58.55, 10],
+        ];
+        foreach ($rDaerah as $r) {
+            $this->db->insert('lkpj_bab1_tabel1_15', [
+                'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+                'nomor' => $r[0], 'is_header' => 0, 'parent_id' => $daerahId, 'level' => 3,
+                'uraian' => $r[1], 'target_2025' => $r[2], 'realisasi_2025' => $r[3],
+                'persen' => $r[4], 'pertumbuhan' => $r[5], 'urutan' => $r[6],
+                'created_at' => $now, 'updated_at' => $now
+            ]);
+        }
+    }
+
+    /**
+     * Seeding data default Tabel 1.14 Rincian Hasil Lain-Lain PAD yang Sah Tahun 2025
+     */
+    private function seed_default_tabel1_14($kodeWilayah = '35.12', $instansiId = 1, $tahun = 2026) {
+        $now = date('Y-m-d H:i:s');
+
+        // 1. Header Utama Level 1: Lain-lain PAD yang Sah
+        $this->db->insert('lkpj_bab1_tabel1_14', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'nomor' => '4.1.04', 'is_header' => 1, 'parent_id' => 0, 'level' => 1,
+            'uraian' => 'Lain-lain PAD yang Sah',
+            'target_2025' => 47663144592.00, 'realisasi_2025' => 50938653895.25,
+            'persen' => 106.87, 'pertumbuhan' => -72.85, 'urutan' => 1,
+            'created_at' => $now, 'updated_at' => $now
+        ]);
+        $rootId = $this->db->insert_id();
+
+        // 2-9. Objek Lain-lain PAD yang Sah
+        $rincian = [
+            ['4.1.04.01', 'Hasil Penjualan BMD yang Tidak Dipisahkan', 48129333.00, 756443100.00, 1571.69, -64.72, 2],
+            ['4.1.04.03', 'Hasil Pemanfaatan BMD yang Tidak Dipisahkan', 139800000.00, 275686838.00, 197.20, -93.86, 3],
+            ['4.1.04.05', 'Jasa Giro', 792785355.00, 1359082727.48, 171.43, 48.79, 4],
+            ['4.1.04.07', 'Pendapatan Bunga', 1042988141.00, 1167448241.61, 111.93, -63.34, 5],
+            ['4.1.04.12', 'Pendapatan Denda Pajak Daerah', 676700361.00, 383899868.00, 56.73, -44.50, 6],
+            ['4.1.04.15', 'Pendapatan dari Pengembalian', 7679409672.00, 9697211011.79, 126.28, 624.84, 7],
+            ['4.1.04.16', 'Pendapatan BLUD', 37272881730.00, 37147946082.29, 99.66, 18.52, 8],
+            ['4.1.04.19', 'Pendapatan Hasil Pengelolaan Dana Bergulir', 10450000.00, 1017044.50, 9.73, null, 9],
+        ];
+
+        foreach ($rincian as $r) {
+            $this->db->insert('lkpj_bab1_tabel1_14', [
+                'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+                'nomor' => $r[0], 'is_header' => 0, 'parent_id' => $rootId, 'level' => 2,
+                'uraian' => $r[1], 'target_2025' => $r[2], 'realisasi_2025' => $r[3],
+                'persen' => $r[4], 'pertumbuhan' => $r[5], 'urutan' => $r[6],
+                'created_at' => $now, 'updated_at' => $now
+            ]);
+        }
+    }
+
+    /**
+     * Seeding data default Tabel 1.13 Rincian Hasil pengelolaan keuangan daerah yang dipisahkan Tahun 2025
+     */
+    private function seed_default_tabel1_13($kodeWilayah = '35.12', $instansiId = 1, $tahun = 2026) {
+        $now = date('Y-m-d H:i:s');
+
+        // 1. Header Utama Level 1: Hasil Pengelolaan Kekayaan Daerah yang Dipisahkan
+        $this->db->insert('lkpj_bab1_tabel1_13', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'nomor' => '4.1.03', 'is_header' => 1, 'parent_id' => 0, 'level' => 1,
+            'uraian' => 'Hasil Pengelolaan Kekayaan Daerah yang Dipisahkan',
+            'target_2025' => 4965202287.00, 'realisasi_2025' => 4989642157.03,
+            'persen' => 100.49, 'pertumbuhan' => -2.51, 'urutan' => 1,
+            'created_at' => $now, 'updated_at' => $now
+        ]);
+        $rootId = $this->db->insert_id();
+
+        // 2. Sub Kelompok Level 2: Bagian Laba yang Dibagikan kepada Pemerintah Daerah (Dividen) atas Penyertaan Modal pada BUMD
+        $this->db->insert('lkpj_bab1_tabel1_13', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'nomor' => '4.1.03.02', 'is_header' => 1, 'parent_id' => $rootId, 'level' => 2,
+            'uraian' => 'Bagian Laba yang Dibagikan kepada Pemerintah Daerah (Dividen) atas Penyertaan Modal pada BUMD',
+            'target_2025' => 4965202287.00, 'realisasi_2025' => 4989642157.03,
+            'persen' => 100.49, 'pertumbuhan' => -2.51, 'urutan' => 2,
+            'created_at' => $now, 'updated_at' => $now
+        ]);
+        $subId = $this->db->insert_id();
+
+        // 3. Rincian Objek Level 3: Lembaga Keuangan
+        $this->db->insert('lkpj_bab1_tabel1_13', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'nomor' => '4.1.03.02.01', 'is_header' => 0, 'parent_id' => $subId, 'level' => 3,
+            'uraian' => 'Bagian Laba yang Dibagikan kepada Pemerintah Daerah (Dividen) atas Penyertaan Modal pada BUMD (Lembaga Keuangan)',
+            'target_2025' => 4154014113.00, 'realisasi_2025' => 4178453983.03,
+            'persen' => 100.59, 'pertumbuhan' => -3.42, 'urutan' => 3,
+            'created_at' => $now, 'updated_at' => $now
+        ]);
+
+        // 4. Rincian Objek Level 3: Bidang Air Minum
+        $this->db->insert('lkpj_bab1_tabel1_13', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'nomor' => '4.1.03.02.03', 'is_header' => 0, 'parent_id' => $subId, 'level' => 3,
+            'uraian' => 'Bagian Laba yang Dibagikan kepada Pemerintah Daerah (Dividen) atas Penyertaan Modal pada BUMD (Bidang Air Minum)',
+            'target_2025' => 811188174.00, 'realisasi_2025' => 811188174.00,
+            'persen' => 100.00, 'pertumbuhan' => 2.43, 'urutan' => 4,
+            'created_at' => $now, 'updated_at' => $now
+        ]);
+    }
+
+    /**
+     * Seeding data default Tabel 1.12 Rincian Retribusi Daerah Tahun 2025
+     */
+    private function seed_default_tabel1_12($kodeWilayah = '35.12', $instansiId = 1, $tahun = 2026) {
+        $now = date('Y-m-d H:i:s');
+
+        // 1. Header Utama Retribusi Daerah
+        $this->db->insert('lkpj_bab1_tabel1_12', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'nomor' => '4.1.02', 'is_header' => 1, 'parent_id' => 0, 'level' => 1,
+            'uraian' => 'Retribusi Daerah', 'target_2025' => 154503239288.00, 'realisasi_2025' => 163468830248.82,
+            'persen' => 105.80, 'urutan' => 1, 'created_at' => $now, 'updated_at' => $now
+        ]);
+        $retribusiDaerahId = $this->db->insert_id();
+
+        // 2. Kelompok 1: Retribusi Jasa Umum
+        $this->db->insert('lkpj_bab1_tabel1_12', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'nomor' => '4.1.02.01', 'is_header' => 1, 'parent_id' => $retribusiDaerahId, 'level' => 2,
+            'uraian' => 'Retribusi Jasa Umum', 'target_2025' => 139798925417.00, 'realisasi_2025' => 147296667185.00,
+            'persen' => 105.36, 'urutan' => 2, 'created_at' => $now, 'updated_at' => $now
+        ]);
+        $jasaUmumId = $this->db->insert_id();
+
+        // 3-6. Objek Retribusi Jasa Umum
+        $rJasaUmum = [
+            ['4.1.02.01.01', 0, 3, 'Retribusi Pelayanan Kesehatan', 132407126517.00, 139685603235.00, 105.50, 3],
+            ['4.1.02.01.04', 0, 3, 'Retribusi Pelayanan Parkir di Tepi Jalan Umum', 4179279000.00, 4318560000.00, 103.33, 4],
+            ['4.1.02.01.05', 0, 3, 'Retribusi Pelayanan Pasar', 2686055900.00, 2601820450.00, 96.86, 5],
+            ['4.1.02.01.14', 0, 3, 'Retribusi Pelayanan Kebersihan', 526464000.00, 690683500.00, 131.19, 6],
+        ];
+        foreach ($rJasaUmum as $r) {
+            $this->db->insert('lkpj_bab1_tabel1_12', [
+                'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+                'nomor' => $r[0], 'is_header' => $r[1], 'parent_id' => $jasaUmumId, 'level' => $r[2],
+                'uraian' => $r[3], 'target_2025' => $r[4], 'realisasi_2025' => $r[5],
+                'persen' => $r[6], 'urutan' => $r[7], 'created_at' => $now, 'updated_at' => $now
+            ]);
+        }
+
+        // 7. Kelompok 2: Retribusi Jasa Usaha
+        $this->db->insert('lkpj_bab1_tabel1_12', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'nomor' => '4.1.02.02', 'is_header' => 1, 'parent_id' => $retribusiDaerahId, 'level' => 2,
+            'uraian' => 'Retribusi Jasa Usaha', 'target_2025' => 13904313871.00, 'realisasi_2025' => 14541447485.82,
+            'persen' => 104.58, 'urutan' => 7, 'created_at' => $now, 'updated_at' => $now
+        ]);
+        $jasaUsahaId = $this->db->insert_id();
+
+        // 8-17. Objek Retribusi Jasa Usaha
+        $rJasaUsaha = [
+            ['4.1.02.02.06', 0, 3, 'Retribusi Tempat Penginapan/Pesanggrahan/Vila', 1800000000.00, 1735193600.00, 96.40, 8],
+            ['4.1.02.02.11', 0, 3, 'Retribusi Penjualan Produksi Usaha Daerah', 1261860000.00, 1276431000.00, 101.15, 9],
+            ['4.1.02.02.12', 0, 3, 'Retribusi Penyediaan Tempat Kegiatan Usaha berupa Pasar, Grosir, Pertokoan, dan Tempat Kegiatan Usaha Lainnya', 920329527.00, 1048083728.75, 113.88, 10],
+            ['4.1.02.02.13', 0, 3, 'Retribusi Penyediaan Tempat Pelelangan Ikan, Ternak, Hasil Bumi, dan Hasil Hutan Termasuk Fasilitas Lainnya dalam Lingkungan Tempat Pelelangan', 62000000.00, 72997500.00, 117.74, 11],
+            ['4.1.02.02.14', 0, 3, 'Retribusi Penyediaan Tempat Khusus Parkir Diluar Badan Jalan', 484412000.00, 443648000.00, 91.58, 12],
+            ['4.1.02.02.15', 0, 3, 'Retribusi Pelayanan Rumah Pemotongan Hewan Ternak', 226080000.00, 240016000.00, 106.16, 13],
+            ['4.1.02.02.16', 0, 3, 'Retribusi Pelayanan Jasa Kepelabuhanan', 20923000.00, 23007000.00, 109.96, 14],
+            ['4.1.02.02.17', 0, 3, 'Retribusi Pelayanan Tempat Rekreasi, Pariwisata, dan Olahraga', 89420000.00, 71116433.00, 79.53, 15],
+            ['4.1.02.02.19', 0, 3, 'Retribusi Penjualan Hasil Produksi Usaha Pemerintah Daerah', 388980000.00, 316771354.00, 81.44, 16],
+            ['4.1.02.02.20', 0, 3, 'Retribusi Pemanfaatan Aset Daerah', 8650309344.00, 9314182870.07, 107.67, 17],
+        ];
+        foreach ($rJasaUsaha as $r) {
+            $this->db->insert('lkpj_bab1_tabel1_12', [
+                'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+                'nomor' => $r[0], 'is_header' => $r[1], 'parent_id' => $jasaUsahaId, 'level' => $r[2],
+                'uraian' => $r[3], 'target_2025' => $r[4], 'realisasi_2025' => $r[5],
+                'persen' => $r[6], 'urutan' => $r[7], 'created_at' => $now, 'updated_at' => $now
+            ]);
+        }
+
+        // 18. Kelompok 3: Retribusi Perizinan Tertentu
+        $this->db->insert('lkpj_bab1_tabel1_12', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'nomor' => '4.1.02.03', 'is_header' => 1, 'parent_id' => $retribusiDaerahId, 'level' => 2,
+            'uraian' => 'Retribusi Perizinan Tertentu', 'target_2025' => 800000000.00, 'realisasi_2025' => 1630715578.00,
+            'persen' => 203.84, 'urutan' => 18, 'created_at' => $now, 'updated_at' => $now
+        ]);
+        $perizinanId = $this->db->insert_id();
+
+        // 19. Objek Retribusi Perizinan Tertentu: Retribusi Persetujuan Bangunan Gedung
+        $this->db->insert('lkpj_bab1_tabel1_12', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'nomor' => '4.1.02.03.07', 'is_header' => 0, 'parent_id' => $perizinanId, 'level' => 3,
+            'uraian' => 'Retribusi Persetujuan Bangunan Gedung', 'target_2025' => 800000000.00, 'realisasi_2025' => 1630715578.00,
+            'persen' => 203.84, 'urutan' => 19, 'created_at' => $now, 'updated_at' => $now
+        ]);
+    }
+
+    /**
+     * Seeding data default Tabel 1.11 Rincian Pajak Daerah Tahun 2025
+     */
+    private function seed_default_tabel1_11($kodeWilayah = '35.12', $instansiId = 1, $tahun = 2026) {
+        $now = date('Y-m-d H:i:s');
+
+        // 1. Header Pajak Daerah
+        $this->db->insert('lkpj_bab1_tabel1_11', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'nomor' => '4.1.01', 'is_header' => 1, 'parent_id' => 0, 'level' => 1,
+            'uraian' => 'Pajak Daerah', 'target_2025' => 95608439254.00, 'realisasi_2025' => 101579639887.40,
+            'persen' => 106.25, 'pertumbuhan' => 56.50, 'urutan' => 1,
+            'created_at' => $now, 'updated_at' => $now
+        ]);
+        $pajakDaerahId = $this->db->insert_id();
+
+        // 2-6. Reklame, Air Tanah, Mineral, PBBP2, BPHTB
+        $lvl2 = [
+            ['4.1.01.09', 0, 2, 'Pajak Reklame', 1918982503.00, 2204341619.00, 114.87, 14.87, 2],
+            ['4.1.01.12', 0, 2, 'Pajak Air Tanah', 2159720125.00, 1920064137.00, 88.90, -11.10, 3],
+            ['4.1.01.14', 0, 2, 'Pajak Mineral Bukan Logam dan Batuan', 1000000000.00, 570294273.40, 57.03, -68.92, 4],
+            ['4.1.01.15', 0, 2, 'Pajak Bumi dan Bangunan Perdesaan dan Perkotaan (PBBP2)', 12280105950.00, 9875290991.00, 80.42, -2.87, 5],
+            ['4.1.01.16', 0, 2, 'Bea Perolehan Hak Atas Tanah dan Bangunan (BPHTB)', 12000000000.00, 19025662481.00, 158.55, 14.95, 6],
+        ];
+        foreach ($lvl2 as $r) {
+            $this->db->insert('lkpj_bab1_tabel1_11', [
+                'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+                'nomor' => $r[0], 'is_header' => $r[1], 'parent_id' => $pajakDaerahId, 'level' => $r[2],
+                'uraian' => $r[3], 'target_2025' => $r[4], 'realisasi_2025' => $r[5],
+                'persen' => $r[6], 'pertumbuhan' => $r[7], 'urutan' => $r[8],
+                'created_at' => $now, 'updated_at' => $now
+            ]);
+        }
+
+        // 7. Sub-Header PBJT
+        $this->db->insert('lkpj_bab1_tabel1_11', [
+            'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+            'nomor' => '4.1.01.19', 'is_header' => 1, 'parent_id' => $pajakDaerahId, 'level' => 2,
+            'uraian' => 'Pajak Barang dan Jasa Tertentu (PBJT)', 'target_2025' => 32274754320.00, 'realisasi_2025' => 31374647386.00,
+            'persen' => 97.21, 'pertumbuhan' => -2.79, 'urutan' => 7,
+            'created_at' => $now, 'updated_at' => $now
+        ]);
+        $pbjtId = $this->db->insert_id();
+
+        // 8-12. Rincian Sub-Akun PBJT
+        $lvl3 = [
+            ['4.1.01.19.01', 0, 3, 'PBJT-Makanan dan/atau Minuman', 4170154878.00, 4714731306.00, 113.06, 13.06, 8],
+            ['4.1.01.19.02', 0, 3, 'PBJT-Tenaga Listrik', 26988085987.00, 25569282109.00, 94.74, -5.26, 9],
+            ['4.1.01.19.03', 0, 3, 'PBJT-Jasa Perhotelan', 686679135.00, 676715571.00, 98.55, -1.45, 10],
+            ['4.1.01.19.04', 0, 3, 'PBJT-Jasa Parkir', 247824700.00, 253953800.00, 102.47, 2.47, 11],
+            ['4.1.01.19.05', 0, 3, 'PBJT-Jasa Kesenian dan Hiburan', 182009620.00, 159964600.00, 87.89, -12.11, 12],
+        ];
+        foreach ($lvl3 as $r) {
+            $this->db->insert('lkpj_bab1_tabel1_11', [
+                'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+                'nomor' => $r[0], 'is_header' => $r[1], 'parent_id' => $pbjtId, 'level' => $r[2],
+                'uraian' => $r[3], 'target_2025' => $r[4], 'realisasi_2025' => $r[5],
+                'persen' => $r[6], 'pertumbuhan' => $r[7], 'urutan' => $r[8],
+                'created_at' => $now, 'updated_at' => $now
+            ]);
+        }
+
+        // 13-14. Opsen PKB & Opsen BBNKB
+        $opsen = [
+            ['4.1.01.20', 0, 2, 'Opsen Pajak Kendaraan Bermotor (PKB)', 24045335273.00, 25378679000.00, 105.55, null, 13],
+            ['4.1.01.21', 0, 2, 'Opsen Bea Balik Nama Kendaraan Bermotor (BBNKB)', 9929541083.00, 11230660000.00, 113.10, null, 14],
+        ];
+        foreach ($opsen as $r) {
+            $this->db->insert('lkpj_bab1_tabel1_11', [
+                'kodewilayah' => $kodeWilayah, 'instansi_id' => $instansiId, 'tahun' => $tahun,
+                'nomor' => $r[0], 'is_header' => $r[1], 'parent_id' => $pajakDaerahId, 'level' => $r[2],
+                'uraian' => $r[3], 'target_2025' => $r[4], 'realisasi_2025' => $r[5],
+                'persen' => $r[6], 'pertumbuhan' => $r[7], 'urutan' => $r[8],
+                'created_at' => $now, 'updated_at' => $now
+            ]);
+        }
+    }
+
+    /**
+     * Seeding data default Tabel 1.10 Target, Realisasi dan Capaian Pendapatan Daerah
+     */
+    private function seed_default_tabel1_10($kodeWilayah = '35.12', $instansiId = 1, $tahun = 2026) {
+        $rows1_10 = [
+            ['1', 1, 0, 'Pendapatan Asli Daerah', 302740025421.00, 320976732588.50, 18236707167.50, 106.02, 271677383608.09, 266045812072.23, 253352994071.60, 1],
+            ['', 0, 1, 'Pajak daerah', 95608439254.00, 101579606287.40, 5971167033.40, 106.25, 64907480484.00, 59963461725.00, 57647054732.00, 2],
+            ['', 0, 1, 'Retribusi daerah', 154503239288.00, 163468830248.82, 8965590960.82, 105.80, 14066771148.92, 14219579076.50, 13162603368.00, 3],
+            ['', 0, 1, 'Hasil pengelolaan keuangan daerah yang dipisahkan', 4965202287.00, 4989642157.03, 24439870.03, 100.49, 5118248282.27, 4963034363.05, 4858708444.11, 4],
+            ['', 0, 1, 'Lain-lain PAD yang sah', 47663144592.00, 50938653895.25, 3275509303.25, 106.87, 187584883692.90, 186899736907.68, 177684627527.49, 5],
+            ['2', 1, 0, 'Pendapatan Transfer', 1447778871981.00, 1479934567563.00, 32155695582.00, 102.22, 1566721277180.00, 1548989548646.76, 1462966654423.44, 6],
+            ['', 0, 2, 'Transfer Pemerintah Pusat', 1356062271097.00, 1377780513913.00, 21718242816.00, 101.60, 1426376601980.00, 1384773325021.76, 1335857711917.44, 7],
+            ['', 0, 2, 'Transfer Pemerintah Antar Daerah', 91716600884.00, 102154053650.00, 10437452766.00, 111.38, 140344675200.00, 164216223625.00, 127108942506.00, 8],
+            ['3', 1, 0, 'LAIN-LAIN PENDAPATAN YANG SAH', 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 876358146.00, 9],
+            ['', 0, 3, 'Lain-lain Pendapatan Sesuai dengan Ketentuan Peraturan Perundang-Undangan', 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 876358146.00, 10],
+        ];
+        $now = date('Y-m-d H:i:s');
+        foreach ($rows1_10 as $row) {
+            $this->db->insert('lkpj_bab1_tabel1_10', [
+                'kodewilayah' => $kodeWilayah,
+                'instansi_id' => $instansiId,
+                'tahun' => $tahun,
+                'nomor' => $row[0],
+                'is_header' => $row[1],
+                'parent_id' => $row[2],
+                'uraian' => $row[3],
+                'anggaran_2025' => $row[4],
+                'realisasi_2025' => $row[5],
+                'selisih' => $row[6],
+                'persen' => $row[7],
+                'realisasi_2024' => $row[8],
+                'realisasi_2023' => $row[9],
+                'realisasi_2022' => $row[10],
+                'urutan' => $row[11],
+                'created_at' => $now,
+                'updated_at' => $now
+            ]);
+        }
+    }
+
+    /**
+     * Seeding data default Tabel 1.6 Persentase Pertumbuhan Penduduk
+     */
+    private function seed_default_tabel1_6($kodeWilayah = '35.12', $instansiId = 1, $tahun = 2026) {
+        $rows1_6 = [
+            [1, 'Sumbermalang', 28906, 28993, 0.30],
+            [2, 'Jatibanteng', 23208, 23319, 0.48],
+            [3, 'Banyuglugur', 24181, 24301, 0.50],
+            [4, 'Besuki', 66295, 66567, 0.41],
+            [5, 'Suboh', 28893, 29072, 0.62],
+            [6, 'Mlandingan', 24693, 24830, 0.55],
+            [7, 'Bungatan', 26183, 26315, 0.50],
+            [8, 'Kendit', 30240, 30360, 0.40],
+            [9, 'Panarukan', 59588, 59787, 0.33],
+            [10, 'Situbondo', 49259, 49537, 0.56],
+            [11, 'Mangaran', 35497, 35679, 0.51],
+            [12, 'Panji', 67723, 67923, 0.30],
+            [13, 'Kapongan', 40301, 40466, 0.41],
+            [14, 'Arjasa', 43769, 44018, 0.57],
+            [15, 'Jangkar', 40671, 40967, 0.73],
+            [16, 'Asembagus', 50014, 50149, 0.27],
+            [17, 'Banyuputih', 52214, 52476, 0.50],
+        ];
+        $now = date('Y-m-d H:i:s');
+        foreach ($rows1_6 as $row) {
+            $this->db->insert('lkpj_bab1_tabel1_6', [
+                'kodewilayah' => $kodeWilayah,
+                'instansi_id' => $instansiId,
+                'tahun' => $tahun,
+                'nomor' => $row[0],
+                'kecamatan' => $row[1],
+                'penduduk_2024' => $row[2],
+                'penduduk_2025' => $row[3],
+                'pertumbuhan' => $row[4],
+                'created_at' => $now,
+                'updated_at' => $now
+            ]);
+        }
+    }
+
+    /**
+     * Seeding data default Tabel 1.7 Migrasi Masuk dan Keluar
+     */
+    private function seed_default_tabel1_7($kodeWilayah = '35.12', $instansiId = 1, $tahun = 2026) {
+        $rows1_7 = [
+            [1, 'Sumbermalang', 26, 70],
+            [2, 'Jatibanteng', 24, 45],
+            [3, 'Banyuglugur', 66, 72],
+            [4, 'Besuki', 130, 175],
+            [5, 'Suboh', 84, 79],
+            [6, 'Mlandingan', 22, 54],
+            [7, 'Bungatan', 31, 40],
+            [8, 'Kendit', 59, 57],
+            [9, 'Panarukan', 204, 172],
+            [10, 'Situbondo', 179, 206],
+            [11, 'Mangaran', 63, 50],
+            [12, 'Panji', 228, 242],
+            [13, 'Kapongan', 77, 67],
+            [14, 'Arjasa', 73, 85],
+            [15, 'Jangkar', 60, 58],
+            [16, 'Asembagus', 98, 109],
+            [17, 'Banyuputih', 179, 262],
+        ];
+        $now = date('Y-m-d H:i:s');
+        foreach ($rows1_7 as $row) {
+            $this->db->insert('lkpj_bab1_tabel1_7', [
+                'kodewilayah' => $kodeWilayah,
+                'instansi_id' => $instansiId,
+                'tahun' => $tahun,
+                'nomor' => $row[0],
+                'kecamatan' => $row[1],
+                'migrasi_masuk' => $row[2],
+                'migrasi_keluar' => $row[3],
+                'created_at' => $now,
+                'updated_at' => $now
+            ]);
+        }
+    }
+
+    /**
+     * Seeding data default Tabel 1.8 Jumlah ASN berdasarkan Jenis Kelamin
+     */
+    private function seed_default_tabel1_8($kodeWilayah = '35.12', $instansiId = 1, $tahun = 2026) {
+        $rows1_8 = [
+            [1, 'PNS', 2417, 2372, 4789],
+            [2, 'PPPK Penuh Waktu', 734, 1099, 1833],
+            [3, 'PPPK Paruh Waktu', 3402, 2412, 5814],
+        ];
+        $now = date('Y-m-d H:i:s');
+        foreach ($rows1_8 as $row) {
+            $this->db->insert('lkpj_bab1_tabel1_8', [
+                'kodewilayah' => $kodeWilayah,
+                'instansi_id' => $instansiId,
+                'tahun' => $tahun,
+                'nomor' => $row[0],
+                'jenis_pegawai' => $row[1],
+                'laki_laki' => $row[2],
+                'perempuan' => $row[3],
+                'jumlah' => $row[4],
+                'created_at' => $now,
+                'updated_at' => $now
+            ]);
+        }
+    }
+
+    /**
+     * Seeding data default Tabel 1.9 Jumlah ASN Menurut Tingkat Pendidikan
+     */
+    private function seed_default_tabel1_9($kodeWilayah = '35.12', $instansiId = 1, $tahun = 2026) {
+        $rows1_9 = [
+            [1, 'Sekolah Dasar (SD)', 29, 2, 2, 0, 194, 5, 232],
+            [2, 'Sekolah Menengah Pertama (SMP)', 50, 3, 0, 0, 24, 1, 78],
+            [3, 'Sekolah Menengah Atas (SMA)', 612, 189, 20, 6, 1598, 333, 2758],
+            [4, 'Diploma I/Akta I', 0, 1, 0, 0, 0, 0, 1],
+            [5, 'Diploma II/Akta II', 29, 18, 0, 0, 0, 2, 49],
+            [6, 'Diploma III/Akta III', 88, 277, 34, 66, 187, 563, 1215],
+            [7, 'Diploma IV/Akta IV', 25, 45, 2, 20, 22, 85, 199],
+            [8, 'S1/Sarjana', 1364, 1671, 667, 989, 1266, 1272, 7229],
+            [9, 'S2/Pasca Sarjana', 219, 165, 9, 18, 111, 151, 673],
+            [10, 'S3/Doktor/Ph.D', 1, 1, 0, 0, 0, 0, 2],
+        ];
+        $now = date('Y-m-d H:i:s');
+        foreach ($rows1_9 as $row) {
+            $this->db->insert('lkpj_bab1_tabel1_9', [
+                'kodewilayah' => $kodeWilayah,
+                'instansi_id' => $instansiId,
+                'tahun' => $tahun,
+                'nomor' => $row[0],
+                'tingkat_pendidikan' => $row[1],
+                'pns_l' => $row[2],
+                'pns_p' => $row[3],
+                'pppk_penuh_l' => $row[4],
+                'pppk_penuh_p' => $row[5],
+                'pppk_paruh_l' => $row[6],
+                'pppk_paruh_p' => $row[7],
+                'jumlah' => $row[8],
+                'created_at' => $now,
+                'updated_at' => $now
+            ]);
+        }
+    }
+
+    /**
+     * Seeding data default Tabel 1.5 Jumlah Penduduk Menurut Kecamatan
+     */
+    private function seed_default_tabel1_5($kodeWilayah = '35.12', $instansiId = 1, $tahun = 2026) {
+        $rows1_5 = [
+            [1, 'Sumbermalang', 14283, 14710, 97.10],
+            [2, 'Jatibanteng', 11555, 11764, 98.22],
+            [3, 'Banyuglugur', 11993, 12308, 97.44],
+            [4, 'Besuki', 32696, 33871, 96.53],
+            [5, 'Suboh', 14228, 14844, 95.85],
+            [6, 'Mlandingan', 12043, 12787, 94.18],
+            [7, 'Bungatan', 12783, 13532, 94.46],
+            [8, 'Kendit', 14853, 15507, 95.78],
+            [9, 'Panarukan', 29368, 30419, 96.54],
+            [10, 'Situbondo', 24116, 25421, 94.87],
+            [11, 'Mangaran', 17284, 18395, 93.96],
+            [12, 'Panji', 33207, 34716, 95.65],
+            [13, 'Kapongan', 19673, 20793, 94.61],
+            [14, 'Arjasa', 21648, 22370, 96.77],
+            [15, 'Jangkar', 19910, 21057, 94.55],
+            [16, 'Asembagus', 24300, 25849, 94.01],
+            [17, 'Banyuputih', 25917, 26559, 97.58],
+        ];
+
+        $now = date('Y-m-d H:i:s');
+        foreach ($rows1_5 as $row) {
+            $this->db->insert('lkpj_bab1_tabel1_5', [
+                'kodewilayah' => $kodeWilayah,
+                'instansi_id' => $instansiId,
+                'tahun' => $tahun,
+                'nomor' => $row[0],
+                'kecamatan' => $row[1],
+                'laki_laki' => $row[2],
+                'perempuan' => $row[3],
+                'rasio' => $row[4],
+                'created_at' => $now,
+                'updated_at' => $now
+            ]);
+        }
+    }
+
+    /**
+     * Seeding data default Tabel 1.4 Kondisi Iklim Kabupaten Situbondo Menurut Bulan
+     */
+    private function seed_default_tabel1_4($kodeWilayah = '35.12', $instansiId = 1, $tahun = 2026) {
+        $rows1_4 = [
+            [1, 'Januari', 6205.00, 27],
+            [2, 'Februari', 6549.00, 17],
+            [3, 'Maret', 3032.00, 21],
+            [4, 'April', 1059.00, 9],
+            [5, 'Mei', 1351.00, 13],
+            [6, 'Juni', 482.00, 7],
+            [7, 'Juli', 150.00, 3],
+            [8, 'Agustus', 302.00, 4],
+            [9, 'September', 116.00, 3],
+            [10, 'Oktober', 1040.00, 10],
+            [11, 'November', 2516.00, 22],
+            [12, 'Desember', 2928.00, 21],
+        ];
+
+        $now = date('Y-m-d H:i:s');
+        foreach ($rows1_4 as $row) {
+            $this->db->insert('lkpj_bab1_tabel1_4', [
+                'kodewilayah' => $kodeWilayah,
+                'instansi_id' => $instansiId,
+                'tahun' => $tahun,
+                'nomor' => $row[0],
+                'bulan' => $row[1],
+                'curah_hujan' => $row[2],
+                'hari_hujan' => $row[3],
+                'created_at' => $now,
+                'updated_at' => $now
+            ]);
+        }
+    }
+
+    /**
+     * Seeding data default Tabel 1.3 Ketinggian Wilayah Per Kecamatan Kabupaten Situbondo
+     */
+    private function seed_default_tabel1_3($kodeWilayah = '35.12', $instansiId = 1, $tahun = 2026) {
+        $rows1_3 = [
+            [1, 'Sumbermalang', '100-1223'],
+            [2, 'Jatibanteng', '100-1000'],
+            [3, 'Banyuglugur', '0-500'],
+            [4, 'Besuki', '0-500'],
+            [5, 'Suboh', '0-500'],
+            [6, 'Malandingan', '0-1000'],
+            [7, 'Bungatan', '0-1250'],
+            [8, 'Kendit', '0-1000'],
+            [9, 'Panarukan', '0-500'],
+            [10, 'Situbondo', '0-500'],
+            [11, 'Panji', '0-500'],
+            [12, 'Mangaran', '0-50'],
+            [13, 'Kapongan', '0-100'],
+            [14, 'Ajasa', '0-1000'],
+            [15, 'Jangkar', '0-500'],
+            [16, 'Asembagus', '0-1000'],
+            [17, 'Banyuputih', '0-1227'],
+        ];
+
+        $now = date('Y-m-d H:i:s');
+        foreach ($rows1_3 as $row) {
+            $this->db->insert('lkpj_bab1_tabel1_3', [
+                'kodewilayah' => $kodeWilayah,
+                'instansi_id' => $instansiId,
+                'tahun' => $tahun,
+                'nomor' => $row[0],
+                'kecamatan' => $row[1],
+                'tinggi_wilayah' => $row[2],
+                'satuan' => 'm dpl',
+                'created_at' => $now,
+                'updated_at' => $now
+            ]);
+        }
+    }
+
+    /**
+     * Seeding data default Tabel 1.2 Tutupan Lahan Kabupaten Situbondo
+     */
+    private function seed_default_tabel1_2($kodeWilayah = '35.12', $instansiId = 1, $tahun = 2026) {
+        $rows1_2 = [
+            [1, 'Sungai', 477.000, 0.290],
+            [2, 'Kolam', 11.000, 0.010],
+            [3, 'Hutan', 57095.000, 34.530],
+            [4, 'Mangrove', 98.000, 0.060],
+            [5, 'Hamparan Pasir', 17.000, 0.010],
+            [6, 'Rawa', 89.000, 0.050],
+            [7, 'Sawah', 34071.000, 20.610],
+            [8, 'Kebun Campuran', 58.000, 0.030],
+            [9, 'Tegalan/Ladang', 35785.000, 21.640],
+            [10, 'Semak Belukar', 19296.000, 11.670],
+            [11, 'Sabana', 2342.000, 1.420],
+            [12, 'Perkebunan', 3075.000, 1.860],
+            [13, 'Tambak', 1518.000, 0.920],
+            [14, 'Bangunan Permukiman', 11160.000, 6.750],
+            [15, 'Lapangan', 2.000, 0.001],
+            [16, 'Taman Kota', 3.000, 0.002],
+            [17, 'TPA', 9.000, 0.010],
+            [18, 'Bangunan Bukan Permukiman', 20.000, 0.010],
+            [19, 'Pertambangan', 48.000, 0.030],
+        ];
+
+        $now = date('Y-m-d H:i:s');
+        foreach ($rows1_2 as $row) {
+            $this->db->insert('lkpj_bab1_tabel1_2', [
+                'kodewilayah' => $kodeWilayah,
+                'instansi_id' => $instansiId,
+                'tahun' => $tahun,
+                'nomor' => $row[0],
+                'tutupan_lahan' => $row[1],
+                'luas_ha' => $row[2],
+                'prosentase' => $row[3],
+                'created_at' => $now,
+                'updated_at' => $now
+            ]);
+        }
+    }
+
+    /**
+     * Seeding data default Tabel 1.1 sesuai referensi dokumen Kabupaten Situbondo
+     */
+    private function seed_default_tabel1_1($kodeWilayah = '35.12', $instansiId = 1, $tahun = 2026) {
+        $initRows = [
+            [1, 'Sumbermalang', 8.965, 9, 0],
+            [2, 'Jatibanteng', 10.393, 8, 0],
+            [3, 'Banyuglugur', 6.704, 7, 0],
+            [4, 'Besuki', 2.773, 10, 0],
+            [5, 'Suboh', 3.085, 8, 0],
+            [6, 'Mlandingan', 5.485, 7, 0],
+            [7, 'Bungatan', 6.810, 7, 0],
+            [8, 'Kendit', 11.181, 7, 0],
+            [9, 'Panarukan', 6.005, 8, 0],
+            [10, 'Situbondo', 2.884, 4, 2],
+            [11, 'Panji', 4.646, 10, 2],
+            [12, 'Mangaran', 3.701, 6, 0],
+            [13, 'Kapongan', 5.161, 10, 0],
+            [14, 'Arjasa', 18.482, 8, 0],
+            [15, 'Jangkar', 7.553, 8, 0],
+            [16, 'Asembagus', 22.576, 10, 0],
+            [17, 'Banyuputih', 39.101, 5, 0],
+        ];
+
+        $now = date('Y-m-d H:i:s');
+        foreach ($initRows as $row) {
+            $this->db->insert('lkpj_bab1_tabel1_1', [
+                'kodewilayah' => $kodeWilayah,
+                'instansi_id' => $instansiId,
+                'tahun' => $tahun,
+                'nomor' => $row[0],
+                'kecamatan' => $row[1],
+                'luas_ha' => $row[2],
+                'jumlah_desa' => $row[3],
+                'jumlah_kelurahan' => $row[4],
+                'created_at' => $now,
+                'updated_at' => $now
+            ]);
+        }
+    }
+
+    /**
+     * Halaman Utama Menu BAB 1 E-LKPJ
+     */
+    public function BAB1() {
+        $this->ensure_bab1_tables_exist();
+
+        $Header['Halaman'] = 'E-LKPJ: BAB 1 (Kondisi Umum Daerah)';
+        $KodeWilayah = $this->get_kode_wilayah();
+        $instansi_id = $this->get_instansi_id();
+        $is_role_4 = $this->is_role_4();
+        $is_logged_in = $this->is_logged_in();
+        $tahun = (int)($this->input->get('tahun', TRUE) ?: (isset($_SESSION['Tahun']) ? $_SESSION['Tahun'] : 2026));
+        $filter_instansi = $this->input->get('instansi_id', TRUE);
+
+        if (empty($filter_instansi) && isset($_SESSION['TempInstansiId']) && !empty($_SESSION['TempInstansiId'])) {
+            $filter_instansi = $_SESSION['TempInstansiId'];
+        }
+        if ($is_role_4 && $instansi_id) {
+            $filter_instansi = $instansi_id;
+        }
+
+        // Ambil data nama wilayah dinamis dari database terlebih dahulu
+        $Data['NamaWilayah'] = '';
+        $namaWilayahFormat = 'Kabupaten Situbondo';
+        if (!empty($KodeWilayah)) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            if ($wilayah) {
+                $Data['NamaWilayah'] = $wilayah['Nama'];
+                $namaWilayahFormat = ucwords(strtolower($wilayah['Nama']));
+            } else {
+                $Data['NamaWilayah'] = 'KAB. SITUBONDO';
+            }
+        } else {
+            $Data['NamaWilayah'] = 'KAB. SITUBONDO';
+        }
+
+        $active_tabel = $this->input->get('tabel', TRUE) ?: '1.1';
+        $daftar_tabel = $this->bab1_tabel_list = $this->get_bab1_tabel_list($namaWilayahFormat);
+
+        if (!array_key_exists($active_tabel, $daftar_tabel)) {
+            $active_tabel = '1.1';
+        }
+
+        $is_logged_in = $this->is_logged_in();
+        $Data['IsLoggedIn'] = $is_logged_in;
+        $Data['CanCrud'] = $is_logged_in;
+        $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama', 'ASC')->get('kodewilayah')->result_array();
+        $Data['KodeWilayah'] = $KodeWilayah;
+        $Data['IsRole4'] = $is_role_4;
+        $Data['IsDaerah'] = $is_logged_in && !$is_role_4;
+        $Data['InstansiId'] = $instansi_id;
+        $Data['ControllerName'] = 'Instansi';
+
+        // Filter List Instansi sesuai Role dan Kode Wilayah
+        if ($is_role_4 && $instansi_id) {
+            $Data['ListInstansi'] = $this->db->select('id, nama')->from('akun_instansi')->where('id', $instansi_id)->where('deleted_at IS NULL')->get()->result_array();
+            $activeInstansi = $instansi_id;
+        } else {
+            $provKode = substr($KodeWilayah, 0, 2);
+            $Data['ListInstansi'] = $this->db->select('id, nama')->from('akun_instansi')
+                ->where("(kodewilayah = " . $this->db->escape($KodeWilayah) . " OR kodewilayah = " . $this->db->escape($provKode) . ")")
+                ->where('deleted_at IS NULL')
+                ->order_by('nama', 'ASC')
+                ->get()
+                ->result_array();
+            if (empty($Data['ListInstansi'])) {
+                $Data['ListInstansi'] = $this->db->select('id, nama')->from('akun_instansi')->where('deleted_at IS NULL')->order_by('nama', 'ASC')->get()->result_array();
+            }
+            $activeInstansi = $filter_instansi ? (int)$filter_instansi : ($Data['ListInstansi'][0]['id'] ?? 1);
+        }
+        $Data['ListTahun'] = [2027, 2026, 2025, 2024, 2023];
+        $Data['TahunAktif'] = (int)$tahun;
+        $activeInstansi = $filter_instansi ? (int)$filter_instansi : ($Data['ListInstansi'][0]['id'] ?? 1);
+        $Data['FilterInstansi'] = $activeInstansi;
+
+        $Data['DaftarTabel'] = $daftar_tabel;
+        $Data['ActiveTabel'] = $active_tabel;
+        $Data['MetaTabel'] = $daftar_tabel[$active_tabel];
+
+        // Ambil data untuk Tabel 1.1
+        $this->db->where('deleted_at IS NULL');
+        $this->db->where('kodewilayah', $KodeWilayah);
+        if ($tahun) $this->db->where('tahun', $tahun);
+        $tabel1_1_items = $this->db->order_by('nomor', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_1')->result_array();
+
+
+
+        $Data['ItemsTabel1_1'] = $tabel1_1_items;
+
+        // Hitung agregat total
+        $totalLuas = 0;
+        $totalDesa = 0;
+        $totalKelurahan = 0;
+        foreach ($tabel1_1_items as $item) {
+            $totalLuas += (float)$item['luas_ha'];
+            $totalDesa += (int)$item['jumlah_desa'];
+            $totalKelurahan += (int)$item['jumlah_kelurahan'];
+        }
+
+        $Data['SummaryTabel1_1'] = [
+            'total_kecamatan' => count($tabel1_1_items),
+            'total_luas' => $totalLuas,
+            'total_desa' => $totalDesa,
+            'total_kelurahan' => $totalKelurahan
+        ];
+
+        // Ambil data untuk Tabel 1.2 jika aktif
+        if ($active_tabel === '1.2') {
+            $this->db->where('deleted_at IS NULL');
+            $this->db->where('kodewilayah', $KodeWilayah);
+            if ($tahun) $this->db->where('tahun', $tahun);
+            $tabel1_2_items = $this->db->order_by('nomor', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_2')->result_array();
+
+
+
+            $Data['ItemsTabel1_2'] = $tabel1_2_items;
+
+            $totalLuas1_2 = 0;
+            $totalPersen1_2 = 0;
+            $maxTutupan = '';
+            $maxLuas = 0;
+            foreach ($tabel1_2_items as $item) {
+                $totalLuas1_2 += (float)$item['luas_ha'];
+                $totalPersen1_2 += (float)$item['prosentase'];
+                if ((float)$item['luas_ha'] > $maxLuas) {
+                    $maxLuas = (float)$item['luas_ha'];
+                    $maxTutupan = $item['tutupan_lahan'];
+                }
+            }
+
+            $Data['SummaryTabel1_2'] = [
+                'total_item' => count($tabel1_2_items),
+                'total_luas' => 165505.000,
+                'total_persen' => 100.00,
+                'max_tutupan' => $maxTutupan,
+                'max_luas' => $maxLuas
+            ];
+        } else {
+            $Data['ItemsTabel1_2'] = [];
+            $Data['SummaryTabel1_2'] = [
+                'total_item' => 0,
+                'total_luas' => 0,
+                'total_persen' => 0,
+                'max_tutupan' => '-',
+                'max_luas' => 0
+            ];
+        }
+
+        // Ambil data untuk Tabel 1.3 jika aktif
+        if ($active_tabel === '1.3') {
+            $this->db->where('deleted_at IS NULL');
+            $this->db->where('kodewilayah', $KodeWilayah);
+            if ($tahun) $this->db->where('tahun', $tahun);
+            $tabel1_3_items = $this->db->order_by('nomor', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_3')->result_array();
+
+
+
+            $Data['ItemsTabel1_3'] = $tabel1_3_items;
+
+            $maxElev = 0;
+            $kecMax = '-';
+            $minElev = 99999;
+            $kecMin = '-';
+            foreach ($tabel1_3_items as $item) {
+                if (preg_match('/(\d+)\s*-\s*(\d+)/', $item['tinggi_wilayah'], $m)) {
+                    $upper = (int)$m[2];
+                    if ($upper > $maxElev) {
+                        $maxElev = $upper;
+                        $kecMax = $item['kecamatan'] . ' (' . $item['tinggi_wilayah'] . ' m dpl)';
+                    }
+                    if ($upper < $minElev) {
+                        $minElev = $upper;
+                        $kecMin = $item['kecamatan'] . ' (' . $item['tinggi_wilayah'] . ' m dpl)';
+                    }
+                }
+            }
+
+            $Data['SummaryTabel1_3'] = [
+                'total_kecamatan' => count($tabel1_3_items),
+                'kec_tertinggi' => $kecMax,
+                'kec_terendah' => $kecMin,
+                'sumber' => 'Dinas Pekerjaan Umum Perumahan dan Permukiman Kabupaten Situbondo'
+            ];
+        } else {
+            $Data['ItemsTabel1_3'] = [];
+            $Data['SummaryTabel1_3'] = [
+                'total_kecamatan' => 0,
+                'kec_tertinggi' => '-',
+                'kec_terendah' => '-',
+                'sumber' => ''
+            ];
+        }
+
+        // Ambil data untuk Tabel 1.4 jika aktif
+        if ($active_tabel === '1.4') {
+            $this->db->where('deleted_at IS NULL');
+            $this->db->where('kodewilayah', $KodeWilayah);
+            if ($tahun) $this->db->where('tahun', $tahun);
+            $tabel1_4_items = $this->db->order_by('nomor', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_4')->result_array();
+
+
+
+            $Data['ItemsTabel1_4'] = $tabel1_4_items;
+
+            $totalCurah = 0;
+            $totalHari = 0;
+            $maxCurah = 0;
+            $bulanMaxCurah = '-';
+            $minCurah = 999999;
+            $bulanMinCurah = '-';
+            $maxHari = 0;
+            $bulanMaxHari = '-';
+
+            foreach ($tabel1_4_items as $item) {
+                $ch = (float)$item['curah_hujan'];
+                $hh = (int)$item['hari_hujan'];
+                $totalCurah += $ch;
+                $totalHari += $hh;
+
+                if ($ch > $maxCurah) {
+                    $maxCurah = $ch;
+                    $bulanMaxCurah = $item['bulan'] . ' (' . number_format($ch, 0, ',', '.') . ' mm)';
+                }
+                if ($ch < $minCurah) {
+                    $minCurah = $ch;
+                    $bulanMinCurah = $item['bulan'] . ' (' . number_format($ch, 0, ',', '.') . ' mm)';
+                }
+                if ($hh > $maxHari) {
+                    $maxHari = $hh;
+                    $bulanMaxHari = $item['bulan'] . ' (' . $hh . ' Hari)';
+                }
+            }
+
+            $Data['SummaryTabel1_4'] = [
+                'total_bulan' => count($tabel1_4_items),
+                'total_curah' => $totalCurah,
+                'total_hari' => $totalHari,
+                'bulan_terbasah' => $bulanMaxCurah,
+                'bulan_terkering' => $bulanMinCurah,
+                'hari_terbanyak' => $bulanMaxHari,
+                'sumber' => 'Badan Pusat Statistik Kabupaten Situbondo Dalam Angka, 2026'
+            ];
+        } else {
+            $Data['ItemsTabel1_4'] = [];
+            $Data['SummaryTabel1_4'] = [
+                'total_bulan' => 0,
+                'total_curah' => 0,
+                'total_hari' => 0,
+                'bulan_terbasah' => '-',
+                'bulan_terkering' => '-',
+                'hari_terbanyak' => '-',
+                'sumber' => ''
+            ];
+        }
+
+        // Ambil data untuk Tabel 1.5 jika aktif
+        if ($active_tabel === '1.5') {
+            $this->db->where('deleted_at IS NULL');
+            $this->db->where('kodewilayah', $KodeWilayah);
+            if ($tahun) $this->db->where('tahun', $tahun);
+            $tabel1_5_items = $this->db->order_by('nomor', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_5')->result_array();
+
+
+
+            $Data['ItemsTabel1_5'] = $tabel1_5_items;
+
+            $totalLaki = 0;
+            $totalPerempuan = 0;
+            $maxPop = 0;
+            $kecMaxPop = '-';
+            $minPop = 99999999;
+            $kecMinPop = '-';
+
+            foreach ($tabel1_5_items as $item) {
+                $lk = (int)$item['laki_laki'];
+                $pr = (int)$item['perempuan'];
+                $totalLaki += $lk;
+                $totalPerempuan += $pr;
+                $pop = $lk + $pr;
+
+                if ($pop > $maxPop) {
+                    $maxPop = $pop;
+                    $kecMaxPop = $item['kecamatan'] . ' (' . number_format($pop, 0, ',', '.') . ' Jiwa)';
+                }
+                if ($pop < $minPop) {
+                    $minPop = $pop;
+                    $kecMinPop = $item['kecamatan'] . ' (' . number_format($pop, 0, ',', '.') . ' Jiwa)';
+                }
+            }
+
+            $rasioTotal = ($totalPerempuan > 0) ? round(($totalLaki / $totalPerempuan) * 100, 2) : 0;
+
+            $Data['SummaryTabel1_5'] = [
+                'total_kecamatan' => count($tabel1_5_items),
+                'total_laki' => $totalLaki,
+                'total_perempuan' => $totalPerempuan,
+                'total_penduduk' => $totalLaki + $totalPerempuan,
+                'rasio_total' => $rasioTotal,
+                'kec_terbanyak' => $kecMaxPop,
+                'kec_tersedikit' => $kecMinPop,
+                'sumber' => 'Badan Pusat Statistik Kabupaten Situbondo Tahun 2026'
+            ];
+        } else {
+            $Data['ItemsTabel1_5'] = [];
+            $Data['SummaryTabel1_5'] = [
+                'total_kecamatan' => 0,
+                'total_laki' => 0,
+                'total_perempuan' => 0,
+                'total_penduduk' => 0,
+                'rasio_total' => 0,
+                'kec_terbanyak' => '-',
+                'kec_tersedikit' => '-',
+                'sumber' => ''
+            ];
+        }
+
+        // Ambil data untuk Tabel 1.6 jika aktif
+        if ($active_tabel === '1.6') {
+            $this->db->where('deleted_at IS NULL');
+            $this->db->where('kodewilayah', $KodeWilayah);
+            if ($tahun) $this->db->where('tahun', $tahun);
+            $tabel1_6_items = $this->db->order_by('nomor', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_6')->result_array();
+
+
+
+            $Data['ItemsTabel1_6'] = $tabel1_6_items;
+            $tot2024 = 0; $tot2025 = 0;
+            $maxTumbuh = -999; $kecMaxTumbuh = '-';
+            $minTumbuh = 999; $kecMinTumbuh = '-';
+
+            foreach ($tabel1_6_items as $item) {
+                $p24 = (int)$item['penduduk_2024'];
+                $p25 = (int)$item['penduduk_2025'];
+                $growth = (float)$item['pertumbuhan'];
+                $tot2024 += $p24;
+                $tot2025 += $p25;
+                if ($growth > $maxTumbuh) {
+                    $maxTumbuh = $growth;
+                    $kecMaxTumbuh = $item['kecamatan'] . ' (' . number_format($growth, 2, ',', '.') . '%)';
+                }
+                if ($growth < $minTumbuh) {
+                    $minTumbuh = $growth;
+                    $kecMinTumbuh = $item['kecamatan'] . ' (' . number_format($growth, 2, ',', '.') . '%)';
+                }
+            }
+            $pertumbuhanTotal = ($tot2024 > 0) ? round((($tot2025 - $tot2024) / $tot2024) * 100, 2) : 0;
+
+            $Data['SummaryTabel1_6'] = [
+                'total_kecamatan' => count($tabel1_6_items),
+                'total_2024' => $tot2024,
+                'total_2025' => $tot2025,
+                'pertumbuhan_total' => $pertumbuhanTotal,
+                'tumbuh_tertinggi' => $kecMaxTumbuh,
+                'tumbuh_terendah' => $kecMinTumbuh,
+                'sumber' => 'Badan Pusat Statistik Kabupaten Situbondo Tahun 2026'
+            ];
+        } else {
+            $Data['ItemsTabel1_6'] = [];
+            $Data['SummaryTabel1_6'] = [
+                'total_kecamatan' => 0, 'total_2024' => 0, 'total_2025' => 0, 'pertumbuhan_total' => 0,
+                'tumbuh_tertinggi' => '-', 'tumbuh_terendah' => '-', 'sumber' => ''
+            ];
+        }
+
+        // Ambil data untuk Tabel 1.7 jika aktif
+        if ($active_tabel === '1.7') {
+            $this->db->where('deleted_at IS NULL');
+            $this->db->where('kodewilayah', $KodeWilayah);
+            if ($tahun) $this->db->where('tahun', $tahun);
+            $tabel1_7_items = $this->db->order_by('nomor', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_7')->result_array();
+
+
+
+            $Data['ItemsTabel1_7'] = $tabel1_7_items;
+            $totMasuk = 0; $totKeluar = 0;
+            $maxMasuk = -1; $kecMaxMasuk = '-';
+            $maxKeluar = -1; $kecMaxKeluar = '-';
+
+            foreach ($tabel1_7_items as $item) {
+                $in = (int)$item['migrasi_masuk'];
+                $out = (int)$item['migrasi_keluar'];
+                $totMasuk += $in;
+                $totKeluar += $out;
+                if ($in > $maxMasuk) {
+                    $maxMasuk = $in;
+                    $kecMaxMasuk = $item['kecamatan'] . ' (' . number_format($in, 0, ',', '.') . ' Jiwa)';
+                }
+                if ($out > $maxKeluar) {
+                    $maxKeluar = $out;
+                    $kecMaxKeluar = $item['kecamatan'] . ' (' . number_format($out, 0, ',', '.') . ' Jiwa)';
+                }
+            }
+
+            $Data['SummaryTabel1_7'] = [
+                'total_kecamatan' => count($tabel1_7_items),
+                'total_masuk' => $totMasuk,
+                'total_keluar' => $totKeluar,
+                'netto' => $totMasuk - $totKeluar,
+                'max_masuk' => $kecMaxMasuk,
+                'max_keluar' => $kecMaxKeluar,
+                'sumber' => 'Badan Pusat Statistik Kabupaten Situbondo Tahun 2026'
+            ];
+        } else {
+            $Data['ItemsTabel1_7'] = [];
+            $Data['SummaryTabel1_7'] = [
+                'total_kecamatan' => 0, 'total_masuk' => 0, 'total_keluar' => 0, 'netto' => 0,
+                'max_masuk' => '-', 'max_keluar' => '-', 'sumber' => ''
+            ];
+        }
+
+        // Ambil data untuk Tabel 1.8 jika aktif
+        if ($active_tabel === '1.8') {
+            $this->db->where('deleted_at IS NULL');
+            $this->db->where('kodewilayah', $KodeWilayah);
+            if ($tahun) $this->db->where('tahun', $tahun);
+            $tabel1_8_items = $this->db->order_by('nomor', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_8')->result_array();
+
+
+
+            $Data['ItemsTabel1_8'] = $tabel1_8_items;
+            $totLaki = 0; $totPerempuan = 0; $totAsn = 0;
+            $maxPeg = 0; $jenisMaxPeg = '-';
+
+            foreach ($tabel1_8_items as $item) {
+                $lk = (int)$item['laki_laki'];
+                $pr = (int)$item['perempuan'];
+                $jm = (int)$item['jumlah'];
+                $totLaki += $lk;
+                $totPerempuan += $pr;
+                $totAsn += $jm;
+                if ($jm > $maxPeg) {
+                    $maxPeg = $jm;
+                    $jenisMaxPeg = $item['jenis_pegawai'] . ' (' . number_format($jm, 0, ',', '.') . ' Orang)';
+                }
+            }
+
+            $Data['SummaryTabel1_8'] = [
+                'total_kategori' => count($tabel1_8_items),
+                'total_laki' => $totLaki,
+                'total_perempuan' => $totPerempuan,
+                'total_asn' => $totAsn,
+                'kategori_terbanyak' => $jenisMaxPeg,
+                'sumber' => 'Badan Kepegawaian dan Pengembangan Sumber Daya Manusia Tahun 2026'
+            ];
+        } else {
+            $Data['ItemsTabel1_8'] = [];
+            $Data['SummaryTabel1_8'] = [
+                'total_kategori' => 0, 'total_laki' => 0, 'total_perempuan' => 0, 'total_asn' => 0,
+                'kategori_terbanyak' => '-', 'sumber' => ''
+            ];
+        }
+
+        // Ambil data untuk Tabel 1.9 jika aktif
+        if ($active_tabel === '1.9') {
+            $this->db->where('deleted_at IS NULL');
+            $this->db->where('kodewilayah', $KodeWilayah);
+            if ($tahun) $this->db->where('tahun', $tahun);
+            $tabel1_9_items = $this->db->order_by('nomor', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_9')->result_array();
+
+
+
+            $Data['ItemsTabel1_9'] = $tabel1_9_items;
+            $sumPnsL = 0; $sumPnsP = 0;
+            $sumPenuhL = 0; $sumPenuhP = 0;
+            $sumParuhL = 0; $sumParuhP = 0;
+            $sumTotal = 0;
+            $maxJml = 0; $tingkatMax = '-';
+
+            foreach ($tabel1_9_items as $item) {
+                $sumPnsL += (int)$item['pns_l'];
+                $sumPnsP += (int)$item['pns_p'];
+                $sumPenuhL += (int)$item['pppk_penuh_l'];
+                $sumPenuhP += (int)$item['pppk_penuh_p'];
+                $sumParuhL += (int)$item['pppk_paruh_l'];
+                $sumParuhP += (int)$item['pppk_paruh_p'];
+                $jm = (int)$item['jumlah'];
+                $sumTotal += $jm;
+                if ($jm > $maxJml) {
+                    $maxJml = $jm;
+                    $tingkatMax = $item['tingkat_pendidikan'] . ' (' . number_format($jm, 0, ',', '.') . ' Orang)';
+                }
+            }
+
+            $Data['SummaryTabel1_9'] = [
+                'total_tingkat' => count($tabel1_9_items),
+                'pns_l' => $sumPnsL, 'pns_p' => $sumPnsP,
+                'pppk_penuh_l' => $sumPenuhL, 'pppk_penuh_p' => $sumPenuhP,
+                'pppk_paruh_l' => $sumParuhL, 'pppk_paruh_p' => $sumParuhP,
+                'total_asn' => $sumTotal,
+                'pendidikan_terbanyak' => $tingkatMax,
+                'sumber' => 'Badan Kepegawaian dan Pengembangan Sumber Daya Manusia Tahun 2026'
+            ];
+        } else {
+            $Data['ItemsTabel1_9'] = [];
+            $Data['SummaryTabel1_9'] = [
+                'total_tingkat' => 0, 'pns_l' => 0, 'pns_p' => 0,
+                'pppk_penuh_l' => 0, 'pppk_penuh_p' => 0,
+                'pppk_paruh_l' => 0, 'pppk_paruh_p' => 0,
+                'total_asn' => 0, 'pendidikan_terbanyak' => '-', 'sumber' => ''
+            ];
+        }
+
+        // Ambil data untuk Tabel 1.10 jika aktif
+        if ($active_tabel === '1.10') {
+            $this->db->where('deleted_at IS NULL');
+            $this->db->where('kodewilayah', $KodeWilayah);
+            if ($tahun) $this->db->where('tahun', $tahun);
+            $tabel1_10_items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_10')->result_array();
+
+
+
+            $Data['ItemsTabel1_10'] = $tabel1_10_items;
+            
+            // Hitung total dari baris header (is_header = 1)
+            $totAnggaran25 = 0; $totRealisasi25 = 0; $totSelisih = 0;
+            $totRealisasi24 = 0; $totRealisasi23 = 0; $totRealisasi22 = 0;
+
+            foreach ($tabel1_10_items as $item) {
+                if ((int)$item['is_header'] === 1) {
+                    $totAnggaran25 += (float)$item['anggaran_2025'];
+                    $totRealisasi25 += (float)$item['realisasi_2025'];
+                    $totSelisih += (float)$item['selisih'];
+                    $totRealisasi24 += (float)$item['realisasi_2024'];
+                    $totRealisasi23 += (float)$item['realisasi_2023'];
+                    $totRealisasi22 += (float)$item['realisasi_2022'];
+                }
+            }
+
+            $totPersen = ($totAnggaran25 > 0) ? round(($totRealisasi25 / $totAnggaran25) * 100, 2) : 0;
+
+            $Data['SummaryTabel1_10'] = [
+                'total_anggaran_2025' => $totAnggaran25,
+                'total_realisasi_2025' => $totRealisasi25,
+                'total_selisih' => $totSelisih,
+                'total_persen' => $totPersen,
+                'total_realisasi_2024' => $totRealisasi24,
+                'total_realisasi_2023' => $totRealisasi23,
+                'total_realisasi_2022' => $totRealisasi22,
+                'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited'
+            ];
+        } else {
+            $Data['ItemsTabel1_10'] = [];
+            $Data['SummaryTabel1_10'] = [
+                'total_anggaran_2025' => 0, 'total_realisasi_2025' => 0, 'total_selisih' => 0, 'total_persen' => 0,
+                'total_realisasi_2024' => 0, 'total_realisasi_2023' => 0, 'total_realisasi_2022' => 0, 'sumber' => ''
+            ];
+        }
+
+        // Ambil data untuk Tabel 1.11 jika aktif
+        if ($active_tabel === '1.11') {
+            $this->db->where('deleted_at IS NULL');
+            $this->db->where('kodewilayah', $KodeWilayah);
+            if ($tahun) $this->db->where('tahun', $tahun);
+            $tabel1_11_items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_11')->result_array();
+
+
+
+            $Data['ItemsTabel1_11'] = $tabel1_11_items;
+
+            // Hitung ringkasan total
+            $totTarget25 = 0; $totRealisasi25 = 0; $totPersen = 0; $pertumbuhanTotal = 0;
+            $headerRow = null;
+            foreach ($tabel1_11_items as $item) {
+                if ((int)$item['level'] === 1 && (int)$item['is_header'] === 1) {
+                    $headerRow = $item;
+                    break;
+                }
+            }
+            if ($headerRow) {
+                $totTarget25 = (float)$headerRow['target_2025'];
+                $totRealisasi25 = (float)$headerRow['realisasi_2025'];
+                $totPersen = (float)$headerRow['persen'];
+                $pertumbuhanTotal = ($headerRow['pertumbuhan'] !== null) ? (float)$headerRow['pertumbuhan'] : 0.00;
+            } else {
+                foreach ($tabel1_11_items as $item) {
+                    if ((int)$item['level'] === 2) {
+                        $totTarget25 += (float)$item['target_2025'];
+                        $totRealisasi25 += (float)$item['realisasi_2025'];
+                    }
+                }
+                $totPersen = ($totTarget25 > 0) ? round(($totRealisasi25 / $totTarget25) * 100, 2) : 0;
+            }
+
+            $Data['SummaryTabel1_11'] = [
+                'total_target_2025' => $totTarget25,
+                'total_realisasi_2025' => $totRealisasi25,
+                'total_persen' => $totPersen,
+                'total_pertumbuhan' => $pertumbuhanTotal,
+                'sumber' => 'BAPENDA Kabupaten Situbondo Tahun 2026, unaudited'
+            ];
+        } else {
+            $Data['ItemsTabel1_11'] = [];
+            $Data['SummaryTabel1_11'] = [
+                'total_target_2025' => 0, 'total_realisasi_2025' => 0, 'total_persen' => 0, 'total_pertumbuhan' => 0, 'sumber' => ''
+            ];
+        }
+
+        // Ambil data untuk Tabel 1.12 jika aktif
+        if ($active_tabel === '1.12') {
+            $this->db->where('deleted_at IS NULL');
+            $this->db->where('kodewilayah', $KodeWilayah);
+            if ($tahun) $this->db->where('tahun', $tahun);
+            $tabel1_12_items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_12')->result_array();
+
+
+
+            $Data['ItemsTabel1_12'] = $tabel1_12_items;
+
+            // Hitung ringkasan total
+            $totTarget25 = 0; $totRealisasi25 = 0; $totPersen = 0; $totSelisih = 0;
+            $headerRow = null;
+            foreach ($tabel1_12_items as $item) {
+                if ((int)$item['level'] === 1 && (int)$item['is_header'] === 1) {
+                    $headerRow = $item;
+                    break;
+                }
+            }
+            if ($headerRow) {
+                $totTarget25 = (float)$headerRow['target_2025'];
+                $totRealisasi25 = (float)$headerRow['realisasi_2025'];
+                $totPersen = (float)$headerRow['persen'];
+                $totSelisih = $totRealisasi25 - $totTarget25;
+            } else {
+                foreach ($tabel1_12_items as $item) {
+                    if ((int)$item['level'] === 2) {
+                        $totTarget25 += (float)$item['target_2025'];
+                        $totRealisasi25 += (float)$item['realisasi_2025'];
+                    }
+                }
+                $totPersen = ($totTarget25 > 0) ? round(($totRealisasi25 / $totTarget25) * 100, 2) : 0;
+                $totSelisih = $totRealisasi25 - $totTarget25;
+            }
+
+            $Data['SummaryTabel1_12'] = [
+                'total_target_2025' => $totTarget25,
+                'total_realisasi_2025' => $totRealisasi25,
+                'total_persen' => $totPersen,
+                'total_selisih' => $totSelisih,
+                'sumber' => 'Bapenda Kabupaten Situbondo Tahun 2026, unaudited'
+            ];
+        } else {
+            $Data['ItemsTabel1_12'] = [];
+            $Data['SummaryTabel1_12'] = [
+                'total_target_2025' => 0, 'total_realisasi_2025' => 0, 'total_persen' => 0, 'total_selisih' => 0, 'sumber' => ''
+            ];
+        }
+
+        // Ambil data untuk Tabel 1.13 jika aktif
+        if ($active_tabel === '1.13') {
+            $this->db->where('deleted_at IS NULL');
+            $this->db->where('kodewilayah', $KodeWilayah);
+            if ($tahun) $this->db->where('tahun', $tahun);
+            $tabel1_13_items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_13')->result_array();
+
+
+
+            $Data['ItemsTabel1_13'] = $tabel1_13_items;
+
+            // Hitung ringkasan total
+            $totTarget25 = 0; $totRealisasi25 = 0; $totPersen = 0; $totPertumbuhan = 0;
+            $headerRow = null;
+            foreach ($tabel1_13_items as $item) {
+                if ((int)$item['level'] === 1 && (int)$item['is_header'] === 1) {
+                    $headerRow = $item;
+                    break;
+                }
+            }
+            if ($headerRow) {
+                $totTarget25 = (float)$headerRow['target_2025'];
+                $totRealisasi25 = (float)$headerRow['realisasi_2025'];
+                $totPersen = (float)$headerRow['persen'];
+                $totPertumbuhan = ($headerRow['pertumbuhan'] !== null) ? (float)$headerRow['pertumbuhan'] : 0.00;
+            } else {
+                foreach ($tabel1_13_items as $item) {
+                    if ((int)$item['level'] === 3 || ((int)$item['is_header'] === 0)) {
+                        $totTarget25 += (float)$item['target_2025'];
+                        $totRealisasi25 += (float)$item['realisasi_2025'];
+                    }
+                }
+                $totPersen = ($totTarget25 > 0) ? round(($totRealisasi25 / $totTarget25) * 100, 2) : 0;
+            }
+
+            $Data['SummaryTabel1_13'] = [
+                'total_target_2025' => $totTarget25,
+                'total_realisasi_2025' => $totRealisasi25,
+                'total_persen' => $totPersen,
+                'total_pertumbuhan' => $totPertumbuhan,
+                'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited'
+            ];
+        } else {
+            $Data['ItemsTabel1_13'] = [];
+            $Data['SummaryTabel1_13'] = [
+                'total_target_2025' => 0, 'total_realisasi_2025' => 0, 'total_persen' => 0, 'total_pertumbuhan' => 0, 'sumber' => ''
+            ];
+        }
+
+        // Ambil data untuk Tabel 1.14 jika aktif
+        if ($active_tabel === '1.14') {
+            $this->db->where('deleted_at IS NULL');
+            $this->db->where('kodewilayah', $KodeWilayah);
+            if ($tahun) $this->db->where('tahun', $tahun);
+            $tabel1_14_items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_14')->result_array();
+
+
+
+            $Data['ItemsTabel1_14'] = $tabel1_14_items;
+
+            // Hitung ringkasan total
+            $totTarget25 = 0; $totRealisasi25 = 0; $totPersen = 0; $totPertumbuhan = 0;
+            $headerRow = null;
+            foreach ($tabel1_14_items as $item) {
+                if ((int)$item['level'] === 1 && (int)$item['is_header'] === 1) {
+                    $headerRow = $item;
+                    break;
+                }
+            }
+            if ($headerRow) {
+                $totTarget25 = (float)$headerRow['target_2025'];
+                $totRealisasi25 = (float)$headerRow['realisasi_2025'];
+                $totPersen = (float)$headerRow['persen'];
+                $totPertumbuhan = ($headerRow['pertumbuhan'] !== null) ? (float)$headerRow['pertumbuhan'] : 0.00;
+            } else {
+                foreach ($tabel1_14_items as $item) {
+                    if ((int)$item['is_header'] === 0) {
+                        $totTarget25 += (float)$item['target_2025'];
+                        $totRealisasi25 += (float)$item['realisasi_2025'];
+                    }
+                }
+                $totPersen = ($totTarget25 > 0) ? round(($totRealisasi25 / $totTarget25) * 100, 2) : 0;
+            }
+
+            $Data['SummaryTabel1_14'] = [
+                'total_target_2025' => $totTarget25,
+                'total_realisasi_2025' => $totRealisasi25,
+                'total_persen' => $totPersen,
+                'total_pertumbuhan' => $totPertumbuhan,
+                'sumber' => 'Bapenda Kabupaten Situbondo Tahun 2026, unaudited'
+            ];
+        } else {
+            $Data['ItemsTabel1_14'] = [];
+            $Data['SummaryTabel1_14'] = [
+                'total_target_2025' => 0, 'total_realisasi_2025' => 0, 'total_persen' => 0, 'total_pertumbuhan' => 0, 'sumber' => ''
+            ];
+        }
+
+        // Ambil data untuk Tabel 1.15 jika aktif
+        if ($active_tabel === '1.15') {
+            $this->db->where('deleted_at IS NULL');
+            $this->db->where('kodewilayah', $KodeWilayah);
+            if ($tahun) $this->db->where('tahun', $tahun);
+            $tabel1_15_items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_15')->result_array();
+
+
+
+            $Data['ItemsTabel1_15'] = $tabel1_15_items;
+
+            // Hitung ringkasan total
+            $totTarget25 = 0; $totRealisasi25 = 0; $totPersen = 0; $totPertumbuhan = 0;
+            $headerRow = null;
+            foreach ($tabel1_15_items as $item) {
+                if ((int)$item['level'] === 1 && (int)$item['is_header'] === 1) {
+                    $headerRow = $item;
+                    break;
+                }
+            }
+            if ($headerRow) {
+                $totTarget25 = (float)$headerRow['target_2025'];
+                $totRealisasi25 = (float)$headerRow['realisasi_2025'];
+                $totPersen = (float)$headerRow['persen'];
+                $totPertumbuhan = ($headerRow['pertumbuhan'] !== null) ? (float)$headerRow['pertumbuhan'] : 0.00;
+            } else {
+                foreach ($tabel1_15_items as $item) {
+                    if ((int)$item['level'] === 2 && (int)$item['is_header'] === 1) {
+                        $totTarget25 += (float)$item['target_2025'];
+                        $totRealisasi25 += (float)$item['realisasi_2025'];
+                    }
+                }
+                $totPersen = ($totTarget25 > 0) ? round(($totRealisasi25 / $totTarget25) * 100, 2) : 0;
+            }
+
+            $Data['SummaryTabel1_15'] = [
+                'total_target_2025' => $totTarget25,
+                'total_realisasi_2025' => $totRealisasi25,
+                'total_persen' => $totPersen,
+                'total_pertumbuhan' => $totPertumbuhan,
+                'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited'
+            ];
+        } else {
+            $Data['ItemsTabel1_15'] = [];
+            $Data['SummaryTabel1_15'] = [
+                'total_target_2025' => 0, 'total_realisasi_2025' => 0, 'total_persen' => 0, 'total_pertumbuhan' => 0, 'sumber' => ''
+            ];
+        }
+
+        // Ambil data untuk Tabel 1.16 jika aktif
+        if ($active_tabel === '1.16') {
+            $this->db->where('deleted_at IS NULL');
+            $this->db->where('kodewilayah', $KodeWilayah);
+            if ($tahun) $this->db->where('tahun', $tahun);
+            $tabel1_16_items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_16')->result_array();
+
+
+
+            $Data['ItemsTabel1_16'] = $tabel1_16_items;
+
+            // Hitung ringkasan total (Jumlah Belanja dan Transfer = sum of Level 1)
+            $totAnggaran25 = 0; $totRealisasi25 = 0; $totSelisih = 0; $totPersen = 0;
+            $totRealisasi24 = 0; $totRealisasi23 = 0; $totRealisasi22 = 0;
+            foreach ($tabel1_16_items as $item) {
+                if ((int)$item['level'] === 1 && (int)$item['is_header'] === 1) {
+                    $totAnggaran25 += (float)$item['anggaran_2025'];
+                    $totRealisasi25 += (float)$item['realisasi_2025'];
+                    $totRealisasi24 += (float)$item['realisasi_2024'];
+                    $totRealisasi23 += (float)$item['realisasi_2023'];
+                    $totRealisasi22 += (float)$item['realisasi_2022'];
+                }
+            }
+            $totSelisih = $totRealisasi25 - $totAnggaran25;
+            $totPersen = ($totAnggaran25 > 0) ? round(($totRealisasi25 / $totAnggaran25) * 100, 2) : 0;
+
+            $Data['SummaryTabel1_16'] = [
+                'total_anggaran_2025' => $totAnggaran25,
+                'total_realisasi_2025' => $totRealisasi25,
+                'total_selisih' => $totSelisih,
+                'total_persen' => $totPersen,
+                'total_realisasi_2024' => $totRealisasi24,
+                'total_realisasi_2023' => $totRealisasi23,
+                'total_realisasi_2022' => $totRealisasi22,
+                'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited'
+            ];
+        } else {
+            $Data['ItemsTabel1_16'] = [];
+            $Data['SummaryTabel1_16'] = [
+                'total_anggaran_2025' => 0, 'total_realisasi_2025' => 0, 'total_selisih' => 0, 'total_persen' => 0,
+                'total_realisasi_2024' => 0, 'total_realisasi_2023' => 0, 'total_realisasi_2022' => 0,
+                'sumber' => ''
+            ];
+        }
+
+        // Ambil data untuk Tabel 1.17 jika aktif
+        if ($active_tabel === '1.17') {
+            $this->db->where('deleted_at IS NULL');
+            $this->db->where('kodewilayah', $KodeWilayah);
+            if ($is_role_4 && $instansi_id) { $this->db->where('instansi_id', $instansi_id); }
+            if ($tahun) $this->db->where('tahun', $tahun);
+            $tabel1_17_items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_17')->result_array();
+
+
+
+            $Data['ItemsTabel1_17'] = $tabel1_17_items;
+
+            $totPusatAngg = 0; $totPusatReal = 0;
+            $totBadanAngg = 0; $totBadanReal = 0;
+            $totParpolAngg = 0; $totParpolReal = 0;
+            $totBospAngg = 0; $totBospReal = 0;
+            $totAllAngg = 0; $totAllReal = 0;
+            foreach ($tabel1_17_items as $item) {
+                $totPusatAngg += (float)$item['hibah_pusat_anggaran'];
+                $totPusatReal += (float)$item['hibah_pusat_realisasi'];
+                $totBadanAngg += (float)$item['hibah_badan_anggaran'];
+                $totBadanReal += (float)$item['hibah_badan_realisasi'];
+                $totParpolAngg += (float)$item['hibah_parpol_anggaran'];
+                $totParpolReal += (float)$item['hibah_parpol_realisasi'];
+                $totBospAngg += (float)$item['hibah_bosp_anggaran'];
+                $totBospReal += (float)$item['hibah_bosp_realisasi'];
+                $totAllAngg += (float)$item['total_anggaran'];
+                $totAllReal += (float)$item['total_realisasi'];
+            }
+            $pctTotal = ($totAllAngg > 0) ? round(($totAllReal / $totAllAngg) * 100, 2) : 0;
+
+            $Data['SummaryTabel1_17'] = [
+                'tot_pusat_anggaran' => $totPusatAngg, 'tot_pusat_realisasi' => $totPusatReal,
+                'tot_badan_anggaran' => $totBadanAngg, 'tot_badan_realisasi' => $totBadanReal,
+                'tot_parpol_anggaran' => $totParpolAngg, 'tot_parpol_realisasi' => $totParpolReal,
+                'tot_bosp_anggaran' => $totBospAngg, 'tot_bosp_realisasi' => $totBospReal,
+                'tot_total_anggaran' => $totAllAngg, 'tot_total_realisasi' => $totAllReal,
+                'tot_persen' => $pctTotal,
+                'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited'
+            ];
+        } else {
+            $Data['ItemsTabel1_17'] = [];
+            $Data['SummaryTabel1_17'] = [
+                'tot_pusat_anggaran' => 0, 'tot_pusat_realisasi' => 0,
+                'tot_badan_anggaran' => 0, 'tot_badan_realisasi' => 0,
+                'tot_parpol_anggaran' => 0, 'tot_parpol_realisasi' => 0,
+                'tot_bosp_anggaran' => 0, 'tot_bosp_realisasi' => 0,
+                'tot_total_anggaran' => 0, 'tot_total_realisasi' => 0,
+                'tot_persen' => 0, 'sumber' => ''
+            ];
+        }
+
+        // Ambil data untuk Tabel 1.18 jika aktif
+        if ($active_tabel === '1.18') {
+            $this->db->where('deleted_at IS NULL');
+            $this->db->where('kodewilayah', $KodeWilayah);
+            if ($is_role_4 && $instansi_id) { $this->db->where('instansi_id', $instansi_id); }
+            if ($tahun) $this->db->where('tahun', $tahun);
+            $tabel1_18_items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_18')->result_array();
+
+
+
+            $Data['ItemsTabel1_18'] = $tabel1_18_items;
+
+            $totIndivAngg = 0; $totIndivReal = 0;
+            $totPokmasAngg = 0; $totPokmasReal = 0;
+            $totLembagaAngg = 0; $totLembagaReal = 0;
+            $totAllAngg18 = 0; $totAllReal18 = 0;
+            foreach ($tabel1_18_items as $item) {
+                $totIndivAngg += (float)$item['bansos_individu_anggaran'];
+                $totIndivReal += (float)$item['bansos_individu_realisasi'];
+                $totPokmasAngg += (float)$item['bansos_pokmas_anggaran'];
+                $totPokmasReal += (float)$item['bansos_pokmas_realisasi'];
+                $totLembagaAngg += (float)$item['bansos_lembaga_anggaran'];
+                $totLembagaReal += (float)$item['bansos_lembaga_realisasi'];
+                $totAllAngg18 += (float)$item['total_anggaran'];
+                $totAllReal18 += (float)$item['total_realisasi'];
+            }
+            $pctTotal18 = ($totAllAngg18 > 0) ? round(($totAllReal18 / $totAllAngg18) * 100, 2) : 0;
+
+            $Data['SummaryTabel1_18'] = [
+                'tot_individu_anggaran' => $totIndivAngg, 'tot_individu_realisasi' => $totIndivReal,
+                'tot_pokmas_anggaran' => $totPokmasAngg, 'tot_pokmas_realisasi' => $totPokmasReal,
+                'tot_lembaga_anggaran' => $totLembagaAngg, 'tot_lembaga_realisasi' => $totLembagaReal,
+                'tot_total_anggaran' => $totAllAngg18, 'tot_total_realisasi' => $totAllReal18,
+                'tot_persen' => $pctTotal18,
+                'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited'
+            ];
+        } else {
+            $Data['ItemsTabel1_18'] = [];
+            $Data['SummaryTabel1_18'] = [
+                'tot_individu_anggaran' => 0, 'tot_individu_realisasi' => 0,
+                'tot_pokmas_anggaran' => 0, 'tot_pokmas_realisasi' => 0,
+                'tot_lembaga_anggaran' => 0, 'tot_lembaga_realisasi' => 0,
+                'tot_total_anggaran' => 0, 'tot_total_realisasi' => 0,
+                'tot_persen' => 0, 'sumber' => ''
+            ];
+        }
+
+        // Ambil data untuk Tabel 1.19 jika aktif
+        if ($active_tabel === '1.19') {
+            $this->db->where('deleted_at IS NULL');
+            $this->db->where('kodewilayah', $KodeWilayah);
+            if ($tahun) $this->db->where('tahun', $tahun);
+            $tabel1_19_items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_19')->result_array();
+
+
+
+            $Data['ItemsTabel1_19'] = $tabel1_19_items;
+
+            $penerimaanRow = null; $pengeluaranRow = null; $nettoRow = null; $silpaRow = null;
+            foreach ($tabel1_19_items as $item) {
+                if ($item['nomor'] === '1' && (int)$item['is_header'] === 1) $penerimaanRow = $item;
+                if ($item['nomor'] === '2' && (int)$item['is_header'] === 1) $pengeluaranRow = $item;
+                if ($item['uraian'] === 'PEMBIAYAAN NETTO') $nettoRow = $item;
+                if ($item['nomor'] === '3' && (int)$item['is_header'] === 1) $silpaRow = $item;
+            }
+
+            $Data['SummaryTabel1_19'] = [
+                'penerimaan_realisasi' => $penerimaanRow ? (float)$penerimaanRow['realisasi_2025'] : 0,
+                'pengeluaran_realisasi' => $pengeluaranRow ? (float)$pengeluaranRow['realisasi_2025'] : 0,
+                'netto_realisasi' => $nettoRow ? (float)$nettoRow['realisasi_2025'] : 0,
+                'silpa_realisasi' => $silpaRow ? (float)$silpaRow['realisasi_2025'] : 0,
+                'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited'
+            ];
+        } else {
+            $Data['ItemsTabel1_19'] = [];
+            $Data['SummaryTabel1_19'] = [
+                'penerimaan_realisasi' => 0, 'pengeluaran_realisasi' => 0, 'netto_realisasi' => 0, 'silpa_realisasi' => 0, 'sumber' => ''
+            ];
+        }
+
+        // Ambil data untuk Tabel 1.20 jika aktif
+        if ($active_tabel === '1.20') {
+            $this->db->where('deleted_at IS NULL');
+            $this->db->where('kodewilayah', $KodeWilayah);
+            if ($tahun) $this->db->where('tahun', $tahun);
+            $tabel1_20_items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_20')->result_array();
+
+
+
+            $Data['ItemsTabel1_20'] = $tabel1_20_items;
+
+            $totalSilpa = 0;
+            foreach ($tabel1_20_items as $item) {
+                $totalSilpa += (float)$item['jumlah'];
+            }
+
+            $Data['SummaryTabel1_20'] = [
+                'total_silpa' => $totalSilpa,
+                'total_komponen' => count($tabel1_20_items),
+                'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited'
+            ];
+        } else {
+            $Data['ItemsTabel1_20'] = [];
+            $Data['SummaryTabel1_20'] = [
+                'total_silpa' => 0, 'total_komponen' => 0, 'sumber' => ''
+            ];
+        }
+
+        // Ambil data generic jika tabel aktif bukan 1.1 s/d 1.20
+        if (!in_array($active_tabel, ['1.1', '1.2', '1.3', '1.4', '1.5', '1.6', '1.7', '1.8', '1.9', '1.10', '1.11', '1.12', '1.13', '1.14', '1.15', '1.16', '1.17', '1.18', '1.19', '1.20'])) {
+            $this->db->where('deleted_at IS NULL');
+            $this->db->where('kodewilayah', $KodeWilayah);
+            $this->db->where('tabel_kode', $active_tabel);
+            if ($tahun) $this->db->where('tahun', $tahun);
+            $Data['ItemsGeneric'] = $this->db->order_by('nomor', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_generic')->result_array();
+        } else {
+            $Data['ItemsGeneric'] = [];
+        }
+
+        $this->load->view('Daerah/header', $Header);
+        $this->load->view('Daerah/BAB1', $Data);
+    }
+
+    /**
+     * AJAX: Dapatkan Data Tabel 1.1
+     */
+    public function GetBab1Tabel1_1() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->where('kodewilayah', $this->get_kode_wilayah());
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+
+        $items = $this->db->order_by('nomor', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_1')->result_array();
+        echo json_encode(['status' => 'success', 'data' => $items]);
+    }
+
+    /**
+     * AJAX: Simpan Data Tabel 1.1 (Tambah / Edit)
+     */
+    public function SaveBab1Tabel1_1() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+
+            $nomor = (int)$this->input->post('nomor', TRUE);
+            $kecamatan = trim($this->input->post('kecamatan', TRUE));
+            $luas_raw = str_replace(',', '.', trim($this->input->post('luas_ha', TRUE)));
+            $luas_ha = (float)$luas_raw;
+            $jumlah_desa = (int)$this->input->post('jumlah_desa', TRUE);
+            $jumlah_kelurahan = (int)$this->input->post('jumlah_kelurahan', TRUE);
+            $keterangan = trim($this->input->post('keterangan', TRUE));
+
+            if (empty($kecamatan)) {
+                throw new Exception('Nama Kecamatan wajib diisi.');
+            }
+
+            if ($nomor <= 0) {
+                // Auto nomor jika tidak diisi
+                $maxNomor = $this->db->select_max('nomor')
+                    ->where('tahun', $tahun)
+                    ->where('deleted_at IS NULL')
+                    ->get('lkpj_bab1_tabel1_1')
+                    ->row()->nomor;
+                $nomor = ($maxNomor ? (int)$maxNomor : 0) + 1;
+            }
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah,
+                'instansi_id' => $instansi_id,
+                'tahun' => $tahun,
+                'nomor' => $nomor,
+                'kecamatan' => $kecamatan,
+                'luas_ha' => $luas_ha,
+                'jumlah_desa' => $jumlah_desa,
+                'jumlah_kelurahan' => $jumlah_kelurahan,
+                'keterangan' => $keterangan,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $this->db->where('id', $id)->update('lkpj_bab1_tabel1_1', $saveData);
+                $msg = "Data Kecamatan {$kecamatan} berhasil diperbarui.";
+            } else {
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab1_tabel1_1', $saveData);
+                $id = $this->db->insert_id();
+                $msg = "Data Kecamatan {$kecamatan} berhasil ditambahkan.";
+            }
+
+            // Hitung ulang total ringkasan
+            $summary = $this->db->select('COUNT(*) as total_kecamatan, SUM(luas_ha) as total_luas, SUM(jumlah_desa) as total_desa, SUM(jumlah_kelurahan) as total_kelurahan')
+                ->where('deleted_at IS NULL')
+                ->where('tahun', $tahun)
+                ->get('lkpj_bab1_tabel1_1')
+                ->row_array();
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => $msg,
+                'data' => array_merge(['id' => $id], $saveData),
+                'summary' => $summary
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * AJAX: Hapus Data Tabel 1.1
+     */
+    public function DeleteBab1Tabel1_1() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+
+            $row = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->get('lkpj_bab1_tabel1_1')->row_array();
+            if (!$row) throw new Exception('Data tidak ditemukan.');
+
+            $this->db->where('id', $id)->update('lkpj_bab1_tabel1_1', [
+                'deleted_at' => date('Y-m-d H:i:s')
+            ]);
+
+            // Hitung ulang total ringkasan
+            $summary = $this->db->select('COUNT(*) as total_kecamatan, SUM(luas_ha) as total_luas, SUM(jumlah_desa) as total_desa, SUM(jumlah_kelurahan) as total_kelurahan')
+                ->where('deleted_at IS NULL')
+                ->where('tahun', $row['tahun'])
+                ->get('lkpj_bab1_tabel1_1')
+                ->row_array();
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Data kecamatan berhasil dihapus.',
+                'summary' => $summary
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * AJAX: Reset Data Tabel 1.1 ke Data Standar
+     */
+    public function ResetBab1Tabel1_1() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+            $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+
+            // Soft-delete data lama pada tahun ini
+            $this->db->where('tahun', $tahun)
+                ->where('kodewilayah', $kodeWilayah)
+                ->update('lkpj_bab1_tabel1_1', ['deleted_at' => date('Y-m-d H:i:s')]);
+
+            // Seed ulang
+            $this->seed_default_tabel1_1($kodeWilayah, $instansiId, $tahun);
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Data Tabel 1.1 berhasil direset kembali ke 17 kecamatan standar.'
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * AJAX: Dapatkan Data Tabel 1.2
+     */
+    public function GetBab1Tabel1_2() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->where('kodewilayah', $this->get_kode_wilayah());
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+
+        $items = $this->db->order_by('nomor', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_2')->result_array();
+        echo json_encode(['status' => 'success', 'data' => $items]);
+    }
+
+    /**
+     * AJAX: Simpan Data Tabel 1.2 (Tambah / Edit)
+     */
+    public function SaveBab1Tabel1_2() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+
+            $nomor = (int)$this->input->post('nomor', TRUE);
+            $tutupan_lahan = trim($this->input->post('tutupan_lahan', TRUE));
+            
+            $luas_input = trim($this->input->post('luas_ha', TRUE));
+            $luas_clean = str_replace(' ', '', $luas_input);
+            if (strpos($luas_clean, ',') !== false) {
+                $luas_clean = str_replace('.', '', $luas_clean);
+                $luas_clean = str_replace(',', '.', $luas_clean);
+            } else if (preg_match('/^\d{1,3}\.\d{3}$/', $luas_clean)) {
+                $luas_clean = str_replace('.', '', $luas_clean);
+            }
+            $luas_ha = (float)$luas_clean;
+
+            $persen_input = trim($this->input->post('prosentase', TRUE));
+            $persen_clean = str_replace(',', '.', $persen_input);
+            $prosentase = (float)$persen_clean;
+
+            if ($prosentase <= 0 && $luas_ha > 0) {
+                $totalLuasKab = 165505.0;
+                $prosentase = round(($luas_ha / $totalLuasKab) * 100, 3);
+            }
+
+            $keterangan = trim($this->input->post('keterangan', TRUE));
+
+            if (empty($tutupan_lahan)) {
+                throw new Exception('Nama Tutupan Lahan wajib diisi.');
+            }
+
+            if ($nomor <= 0) {
+                $maxNomor = $this->db->select_max('nomor')
+                    ->where('tahun', $tahun)
+                    ->where('deleted_at IS NULL')
+                    ->get('lkpj_bab1_tabel1_2')
+                    ->row()->nomor;
+                $nomor = ($maxNomor ? (int)$maxNomor : 0) + 1;
+            }
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah,
+                'instansi_id' => $instansi_id,
+                'tahun' => $tahun,
+                'nomor' => $nomor,
+                'tutupan_lahan' => $tutupan_lahan,
+                'luas_ha' => $luas_ha,
+                'prosentase' => $prosentase,
+                'keterangan' => $keterangan,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $this->db->where('id', $id)->update('lkpj_bab1_tabel1_2', $saveData);
+                $msg = "Data Tutupan Lahan {$tutupan_lahan} berhasil diperbarui.";
+            } else {
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab1_tabel1_2', $saveData);
+                $id = $this->db->insert_id();
+                $msg = "Data Tutupan Lahan {$tutupan_lahan} berhasil ditambahkan.";
+            }
+
+            $summary = $this->db->select('COUNT(*) as total_item, SUM(luas_ha) as total_luas, SUM(prosentase) as total_persen')
+                ->where('deleted_at IS NULL')
+                ->where('tahun', $tahun)
+                ->get('lkpj_bab1_tabel1_2')
+                ->row_array();
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => $msg,
+                'data' => array_merge(['id' => $id], $saveData),
+                'summary' => $summary
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * AJAX: Hapus Data Tabel 1.2
+     */
+    public function DeleteBab1Tabel1_2() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+
+            $row = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->get('lkpj_bab1_tabel1_2')->row_array();
+            if (!$row) throw new Exception('Data tidak ditemukan.');
+
+            $this->db->where('id', $id)->update('lkpj_bab1_tabel1_2', [
+                'deleted_at' => date('Y-m-d H:i:s')
+            ]);
+
+            $summary = $this->db->select('COUNT(*) as total_item, SUM(luas_ha) as total_luas, SUM(prosentase) as total_persen')
+                ->where('deleted_at IS NULL')
+                ->where('tahun', $row['tahun'])
+                ->get('lkpj_bab1_tabel1_2')
+                ->row_array();
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Data tutupan lahan berhasil dihapus.',
+                'summary' => $summary
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * AJAX: Reset Data Tabel 1.2 ke Data Standar
+     */
+    public function ResetBab1Tabel1_2() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+            $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+
+            $this->db->where('tahun', $tahun)
+                ->where('kodewilayah', $kodeWilayah)
+                ->update('lkpj_bab1_tabel1_2', ['deleted_at' => date('Y-m-d H:i:s')]);
+
+            $this->seed_default_tabel1_2($kodeWilayah, $instansiId, $tahun);
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Data Tabel 1.2 berhasil direset kembali ke 19 tutupan lahan standar Kabupaten Situbondo.'
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * AJAX: Dapatkan Data Tabel 1.3
+     */
+    public function GetBab1Tabel1_3() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->where('kodewilayah', $this->get_kode_wilayah());
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+
+        $items = $this->db->order_by('nomor', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_3')->result_array();
+        echo json_encode(['status' => 'success', 'data' => $items]);
+    }
+
+    /**
+     * AJAX: Simpan Data Tabel 1.3 (Tambah / Edit)
+     */
+    public function SaveBab1Tabel1_3() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+
+            $nomor = (int)$this->input->post('nomor', TRUE);
+            $kecamatan = trim($this->input->post('kecamatan', TRUE));
+            $tinggi_wilayah = trim($this->input->post('tinggi_wilayah', TRUE));
+            $satuan = trim($this->input->post('satuan', TRUE) ?: 'm dpl');
+            $keterangan = trim($this->input->post('keterangan', TRUE));
+
+            if (empty($kecamatan)) {
+                throw new Exception('Nama Kecamatan wajib diisi.');
+            }
+            if (empty($tinggi_wilayah)) {
+                throw new Exception('Tinggi Wilayah wajib diisi.');
+            }
+
+            if ($nomor <= 0) {
+                $maxNomor = $this->db->select_max('nomor')
+                    ->where('tahun', $tahun)
+                    ->where('deleted_at IS NULL')
+                    ->get('lkpj_bab1_tabel1_3')
+                    ->row()->nomor;
+                $nomor = ($maxNomor ? (int)$maxNomor : 0) + 1;
+            }
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah,
+                'instansi_id' => $instansi_id,
+                'tahun' => $tahun,
+                'nomor' => $nomor,
+                'kecamatan' => $kecamatan,
+                'tinggi_wilayah' => $tinggi_wilayah,
+                'satuan' => $satuan,
+                'keterangan' => $keterangan,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $this->db->where('id', $id)->update('lkpj_bab1_tabel1_3', $saveData);
+                $msg = "Data Ketinggian Kecamatan {$kecamatan} berhasil diperbarui.";
+            } else {
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab1_tabel1_3', $saveData);
+                $id = $this->db->insert_id();
+                $msg = "Data Ketinggian Kecamatan {$kecamatan} berhasil ditambahkan.";
+            }
+
+            $count = $this->db->where('deleted_at IS NULL')->where('tahun', $tahun)->count_all_results('lkpj_bab1_tabel1_3');
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => $msg,
+                'data' => array_merge(['id' => $id], $saveData),
+                'total_kecamatan' => $count
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * AJAX: Hapus Data Tabel 1.3
+     */
+    public function DeleteBab1Tabel1_3() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+
+            $row = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->get('lkpj_bab1_tabel1_3')->row_array();
+            if (!$row) throw new Exception('Data tidak ditemukan.');
+
+            $this->db->where('id', $id)->update('lkpj_bab1_tabel1_3', [
+                'deleted_at' => date('Y-m-d H:i:s')
+            ]);
+
+            $count = $this->db->where('deleted_at IS NULL')->where('tahun', $row['tahun'])->count_all_results('lkpj_bab1_tabel1_3');
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => "Data ketinggian kecamatan {$row['kecamatan']} berhasil dihapus.",
+                'total_kecamatan' => $count
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * AJAX: Reset Data Tabel 1.3 ke Data Standar
+     */
+    public function ResetBab1Tabel1_3() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+            $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+
+            $this->db->where('tahun', $tahun)
+                ->where('kodewilayah', $kodeWilayah)
+                ->update('lkpj_bab1_tabel1_3', ['deleted_at' => date('Y-m-d H:i:s')]);
+
+            $this->seed_default_tabel1_3($kodeWilayah, $instansiId, $tahun);
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Data Tabel 1.3 berhasil direset kembali ke 17 kecamatan standar Kabupaten Situbondo.'
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * AJAX: Dapatkan Data Tabel 1.4
+     */
+    public function GetBab1Tabel1_4() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->where('kodewilayah', $this->get_kode_wilayah());
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+
+        $items = $this->db->order_by('nomor', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_4')->result_array();
+        echo json_encode(['status' => 'success', 'data' => $items]);
+    }
+
+    /**
+     * AJAX: Simpan Data Tabel 1.4 (Tambah / Edit)
+     */
+    public function SaveBab1Tabel1_4() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+
+            $nomor = (int)$this->input->post('nomor', TRUE);
+            $bulan = trim($this->input->post('bulan', TRUE));
+            
+            $ch_raw = trim($this->input->post('curah_hujan', TRUE));
+            $ch_clean = str_replace(' ', '', $ch_raw);
+            if (strpos($ch_clean, ',') !== false) {
+                $ch_clean = str_replace('.', '', $ch_clean);
+                $ch_clean = str_replace(',', '.', $ch_clean);
+            } else if (preg_match('/^\d{1,3}\.\d{3}$/', $ch_clean)) {
+                $ch_clean = str_replace('.', '', $ch_clean);
+            }
+            $curah_hujan = (float)$ch_clean;
+
+            $hari_hujan = (int)$this->input->post('hari_hujan', TRUE);
+            $keterangan = trim($this->input->post('keterangan', TRUE));
+
+            if (empty($bulan)) {
+                throw new Exception('Nama Bulan wajib diisi.');
+            }
+
+            if ($nomor <= 0) {
+                $maxNomor = $this->db->select_max('nomor')
+                    ->where('tahun', $tahun)
+                    ->where('deleted_at IS NULL')
+                    ->get('lkpj_bab1_tabel1_4')
+                    ->row()->nomor;
+                $nomor = ($maxNomor ? (int)$maxNomor : 0) + 1;
+            }
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah,
+                'instansi_id' => $instansi_id,
+                'tahun' => $tahun,
+                'nomor' => $nomor,
+                'bulan' => $bulan,
+                'curah_hujan' => $curah_hujan,
+                'hari_hujan' => $hari_hujan,
+                'keterangan' => $keterangan,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $this->db->where('id', $id)->update('lkpj_bab1_tabel1_4', $saveData);
+                $msg = "Data Iklim Bulan {$bulan} berhasil diperbarui.";
+            } else {
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab1_tabel1_4', $saveData);
+                $id = $this->db->insert_id();
+                $msg = "Data Iklim Bulan {$bulan} berhasil ditambahkan.";
+            }
+
+            $summary = $this->db->select('COUNT(*) as total_bulan, SUM(curah_hujan) as total_curah, SUM(hari_hujan) as total_hari')
+                ->where('deleted_at IS NULL')
+                ->where('tahun', $tahun)
+                ->get('lkpj_bab1_tabel1_4')
+                ->row_array();
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => $msg,
+                'data' => array_merge(['id' => $id], $saveData),
+                'summary' => $summary
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * AJAX: Hapus Data Tabel 1.4
+     */
+    public function DeleteBab1Tabel1_4() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+
+            $row = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->get('lkpj_bab1_tabel1_4')->row_array();
+            if (!$row) throw new Exception('Data tidak ditemukan.');
+
+            $this->db->where('id', $id)->update('lkpj_bab1_tabel1_4', [
+                'deleted_at' => date('Y-m-d H:i:s')
+            ]);
+
+            $summary = $this->db->select('COUNT(*) as total_bulan, SUM(curah_hujan) as total_curah, SUM(hari_hujan) as total_hari')
+                ->where('deleted_at IS NULL')
+                ->where('tahun', $row['tahun'])
+                ->get('lkpj_bab1_tabel1_4')
+                ->row_array();
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => "Data iklim bulan {$row['bulan']} berhasil dihapus.",
+                'summary' => $summary
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * AJAX: Reset Data Tabel 1.4 ke Data Standar
+     */
+    public function ResetBab1Tabel1_4() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+            $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+
+            $this->db->where('tahun', $tahun)
+                ->where('kodewilayah', $kodeWilayah)
+                ->update('lkpj_bab1_tabel1_4', ['deleted_at' => date('Y-m-d H:i:s')]);
+
+            $this->seed_default_tabel1_4($kodeWilayah, $instansiId, $tahun);
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Data Tabel 1.4 berhasil direset kembali ke 12 bulan standar Kabupaten Situbondo.'
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * AJAX: Dapatkan Data Tabel 1.5
+     */
+    public function GetBab1Tabel1_5() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->where('kodewilayah', $this->get_kode_wilayah());
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+
+        $items = $this->db->order_by('nomor', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_5')->result_array();
+        echo json_encode(['status' => 'success', 'data' => $items]);
+    }
+
+    /**
+     * AJAX: Simpan Data Tabel 1.5 (Tambah / Edit)
+     */
+    public function SaveBab1Tabel1_5() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+
+            $nomor = (int)$this->input->post('nomor', TRUE);
+            $kecamatan = trim($this->input->post('kecamatan', TRUE));
+
+            $lk_raw = trim($this->input->post('laki_laki', TRUE));
+            $lk_clean = str_replace([' ', '.'], '', $lk_raw);
+            $laki_laki = (int)$lk_clean;
+
+            $pr_raw = trim($this->input->post('perempuan', TRUE));
+            $pr_clean = str_replace([' ', '.'], '', $pr_raw);
+            $perempuan = (int)$pr_clean;
+
+            $rasio_raw = trim($this->input->post('rasio', TRUE));
+            $rasio_clean = str_replace(' ', '', $rasio_raw);
+            if (strpos($rasio_clean, ',') !== false) {
+                $rasio_clean = str_replace('.', '', $rasio_clean);
+                $rasio_clean = str_replace(',', '.', $rasio_clean);
+            }
+            $rasio = (float)$rasio_clean;
+
+            if ($rasio <= 0 && $perempuan > 0) {
+                $rasio = round(($laki_laki / $perempuan) * 100, 2);
+            }
+
+            $keterangan = trim($this->input->post('keterangan', TRUE));
+
+            if (empty($kecamatan)) {
+                throw new Exception('Nama Kecamatan wajib diisi.');
+            }
+
+            if ($nomor <= 0) {
+                $maxNomor = $this->db->select_max('nomor')
+                    ->where('tahun', $tahun)
+                    ->where('deleted_at IS NULL')
+                    ->get('lkpj_bab1_tabel1_5')
+                    ->row()->nomor;
+                $nomor = ($maxNomor ? (int)$maxNomor : 0) + 1;
+            }
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah,
+                'instansi_id' => $instansi_id,
+                'tahun' => $tahun,
+                'nomor' => $nomor,
+                'kecamatan' => $kecamatan,
+                'laki_laki' => $laki_laki,
+                'perempuan' => $perempuan,
+                'rasio' => $rasio,
+                'keterangan' => $keterangan,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $this->db->where('id', $id)->update('lkpj_bab1_tabel1_5', $saveData);
+                $msg = "Data Penduduk Kecamatan {$kecamatan} berhasil diperbarui.";
+            } else {
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab1_tabel1_5', $saveData);
+                $id = $this->db->insert_id();
+                $msg = "Data Penduduk Kecamatan {$kecamatan} berhasil ditambahkan.";
+            }
+
+            $summary = $this->db->select('COUNT(*) as total_kecamatan, SUM(laki_laki) as total_laki, SUM(perempuan) as total_perempuan')
+                ->where('deleted_at IS NULL')
+                ->where('tahun', $tahun)
+                ->get('lkpj_bab1_tabel1_5')
+                ->row_array();
+
+            $totLk = (int)($summary['total_laki'] ?? 0);
+            $totPr = (int)($summary['total_perempuan'] ?? 0);
+            $summary['total_penduduk'] = $totLk + $totPr;
+            $summary['rasio_total'] = ($totPr > 0) ? round(($totLk / $totPr) * 100, 2) : 0;
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => $msg,
+                'data' => array_merge(['id' => $id], $saveData),
+                'summary' => $summary
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * AJAX: Hapus Data Tabel 1.5
+     */
+    public function DeleteBab1Tabel1_5() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+
+            $row = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->get('lkpj_bab1_tabel1_5')->row_array();
+            if (!$row) throw new Exception('Data tidak ditemukan.');
+
+            $this->db->where('id', $id)->update('lkpj_bab1_tabel1_5', [
+                'deleted_at' => date('Y-m-d H:i:s')
+            ]);
+
+            $summary = $this->db->select('COUNT(*) as total_kecamatan, SUM(laki_laki) as total_laki, SUM(perempuan) as total_perempuan')
+                ->where('deleted_at IS NULL')
+                ->where('tahun', $row['tahun'])
+                ->get('lkpj_bab1_tabel1_5')
+                ->row_array();
+
+            $totLk = (int)($summary['total_laki'] ?? 0);
+            $totPr = (int)($summary['total_perempuan'] ?? 0);
+            $summary['total_penduduk'] = $totLk + $totPr;
+            $summary['rasio_total'] = ($totPr > 0) ? round(($totLk / $totPr) * 100, 2) : 0;
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => "Data penduduk kecamatan {$row['kecamatan']} berhasil dihapus.",
+                'summary' => $summary
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * AJAX: Reset Data Tabel 1.5 ke Data Standar
+     */
+    public function ResetBab1Tabel1_5() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+            $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+
+            $this->db->where('tahun', $tahun)
+                ->where('kodewilayah', $kodeWilayah)
+                ->update('lkpj_bab1_tabel1_5', ['deleted_at' => date('Y-m-d H:i:s')]);
+
+            $this->seed_default_tabel1_5($kodeWilayah, $instansiId, $tahun);
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Data Tabel 1.5 berhasil direset kembali ke 17 kecamatan data kependudukan standar Kabupaten Situbondo.'
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    // ===================================================================
+    // CRUD TABEL 1.6 (Pertumbuhan Penduduk)
+    // ===================================================================
+    public function GetBab1Tabel1_6() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->where('kodewilayah', $this->get_kode_wilayah());
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+        $items = $this->db->order_by('nomor', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_6')->result_array();
+        echo json_encode(['status' => 'success', 'data' => $items]);
+    }
+
+    public function SaveBab1Tabel1_6() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $nomor = (int)$this->input->post('nomor', TRUE);
+            $kecamatan = trim($this->input->post('kecamatan', TRUE));
+            $p24 = (int)str_replace([' ', '.'], '', trim($this->input->post('penduduk_2024', TRUE)));
+            $p25 = (int)str_replace([' ', '.'], '', trim($this->input->post('penduduk_2025', TRUE)));
+            
+            $gr_raw = trim($this->input->post('pertumbuhan', TRUE));
+            $gr_clean = str_replace(' ', '', $gr_raw);
+            if (strpos($gr_clean, ',') !== false) {
+                $gr_clean = str_replace('.', '', $gr_clean);
+                $gr_clean = str_replace(',', '.', $gr_clean);
+            }
+            $pertumbuhan = (float)$gr_clean;
+            if ($pertumbuhan == 0 && $p24 > 0 && $p25 > 0) {
+                $pertumbuhan = round((($p25 - $p24) / $p24) * 100, 2);
+            }
+            $keterangan = trim($this->input->post('keterangan', TRUE));
+            if (empty($kecamatan)) throw new Exception('Nama Kecamatan wajib diisi.');
+
+            if ($nomor <= 0) {
+                $maxNomor = $this->db->select_max('nomor')->where('tahun', $tahun)->where('deleted_at IS NULL')->get('lkpj_bab1_tabel1_6')->row()->nomor;
+                $nomor = ($maxNomor ? (int)$maxNomor : 0) + 1;
+            }
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah, 'instansi_id' => $instansi_id, 'tahun' => $tahun,
+                'nomor' => $nomor, 'kecamatan' => $kecamatan, 'penduduk_2024' => $p24,
+                'penduduk_2025' => $p25, 'pertumbuhan' => $pertumbuhan, 'keterangan' => $keterangan,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $this->db->where('id', $id)->update('lkpj_bab1_tabel1_6', $saveData);
+                $msg = "Data Pertumbuhan Penduduk Kecamatan {$kecamatan} berhasil diperbarui.";
+            } else {
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab1_tabel1_6', $saveData);
+                $id = $this->db->insert_id();
+                $msg = "Data Pertumbuhan Penduduk Kecamatan {$kecamatan} berhasil ditambahkan.";
+            }
+
+            $summary = $this->db->select('COUNT(*) as total_kecamatan, SUM(penduduk_2024) as total_2024, SUM(penduduk_2025) as total_2025')
+                ->where('deleted_at IS NULL')->where('tahun', $tahun)->get('lkpj_bab1_tabel1_6')->row_array();
+            $t24 = (int)($summary['total_2024'] ?? 0);
+            $t25 = (int)($summary['total_2025'] ?? 0);
+            $summary['pertumbuhan_total'] = ($t24 > 0) ? round((($t25 - $t24) / $t24) * 100, 2) : 0;
+
+            echo json_encode(['status' => 'success', 'message' => $msg, 'data' => array_merge(['id' => $id], $saveData), 'summary' => $summary]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function DeleteBab1Tabel1_6() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+            $row = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->get('lkpj_bab1_tabel1_6')->row_array();
+            if (!$row) throw new Exception('Data tidak ditemukan.');
+            $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->update('lkpj_bab1_tabel1_6', ['deleted_at' => date('Y-m-d H:i:s')]);
+            echo json_encode(['status' => 'success', 'message' => "Data pertumbuhan penduduk kecamatan {$row['kecamatan']} berhasil dihapus."]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function ResetBab1Tabel1_6() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+            $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+            $this->db->where('tahun', $tahun)->where('kodewilayah', $kodeWilayah)->update('lkpj_bab1_tabel1_6', ['deleted_at' => date('Y-m-d H:i:s')]);
+            $this->seed_default_tabel1_6($kodeWilayah, $instansiId, $tahun);
+            echo json_encode(['status' => 'success', 'message' => 'Data Tabel 1.6 berhasil direset kembali ke 17 kecamatan standar BPS.']);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    // ===================================================================
+    // CRUD TABEL 1.7 (Migrasi Masuk dan Keluar)
+    // ===================================================================
+    public function GetBab1Tabel1_7() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->where('kodewilayah', $this->get_kode_wilayah());
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+        $items = $this->db->order_by('nomor', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_7')->result_array();
+        echo json_encode(['status' => 'success', 'data' => $items]);
+    }
+
+    public function SaveBab1Tabel1_7() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $nomor = (int)$this->input->post('nomor', TRUE);
+            $kecamatan = trim($this->input->post('kecamatan', TRUE));
+            $masuk = (int)str_replace([' ', '.'], '', trim($this->input->post('migrasi_masuk', TRUE)));
+            $keluar = (int)str_replace([' ', '.'], '', trim($this->input->post('migrasi_keluar', TRUE)));
+            $keterangan = trim($this->input->post('keterangan', TRUE));
+            if (empty($kecamatan)) throw new Exception('Nama Kecamatan wajib diisi.');
+
+            if ($nomor <= 0) {
+                $maxNomor = $this->db->select_max('nomor')->where('tahun', $tahun)->where('deleted_at IS NULL')->get('lkpj_bab1_tabel1_7')->row()->nomor;
+                $nomor = ($maxNomor ? (int)$maxNomor : 0) + 1;
+            }
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah, 'instansi_id' => $instansi_id, 'tahun' => $tahun,
+                'nomor' => $nomor, 'kecamatan' => $kecamatan, 'migrasi_masuk' => $masuk,
+                'migrasi_keluar' => $keluar, 'keterangan' => $keterangan, 'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $this->db->where('id', $id)->update('lkpj_bab1_tabel1_7', $saveData);
+                $msg = "Data Migrasi Kecamatan {$kecamatan} berhasil diperbarui.";
+            } else {
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab1_tabel1_7', $saveData);
+                $id = $this->db->insert_id();
+                $msg = "Data Migrasi Kecamatan {$kecamatan} berhasil ditambahkan.";
+            }
+
+            $summary = $this->db->select('COUNT(*) as total_kecamatan, SUM(migrasi_masuk) as total_masuk, SUM(migrasi_keluar) as total_keluar')
+                ->where('deleted_at IS NULL')->where('tahun', $tahun)->get('lkpj_bab1_tabel1_7')->row_array();
+            echo json_encode(['status' => 'success', 'message' => $msg, 'data' => array_merge(['id' => $id], $saveData), 'summary' => $summary]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function DeleteBab1Tabel1_7() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+            $row = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->get('lkpj_bab1_tabel1_7')->row_array();
+            if (!$row) throw new Exception('Data tidak ditemukan.');
+            $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->update('lkpj_bab1_tabel1_7', ['deleted_at' => date('Y-m-d H:i:s')]);
+            echo json_encode(['status' => 'success', 'message' => "Data migrasi kecamatan {$row['kecamatan']} berhasil dihapus."]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function ResetBab1Tabel1_7() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+            $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+            $this->db->where('tahun', $tahun)->where('kodewilayah', $kodeWilayah)->update('lkpj_bab1_tabel1_7', ['deleted_at' => date('Y-m-d H:i:s')]);
+            $this->seed_default_tabel1_7($kodeWilayah, $instansiId, $tahun);
+            echo json_encode(['status' => 'success', 'message' => 'Data Tabel 1.7 berhasil direset kembali ke 17 kecamatan standar BPS.']);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    // ===================================================================
+    // CRUD TABEL 1.8 (Jumlah ASN berdasarkan Jenis Kelamin)
+    // ===================================================================
+    public function GetBab1Tabel1_8() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->where('kodewilayah', $this->get_kode_wilayah());
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+        $items = $this->db->order_by('nomor', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_8')->result_array();
+        echo json_encode(['status' => 'success', 'data' => $items]);
+    }
+
+    public function SaveBab1Tabel1_8() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $nomor = (int)$this->input->post('nomor', TRUE);
+            $jenis_pegawai = trim($this->input->post('jenis_pegawai', TRUE));
+            $laki = (int)str_replace([' ', '.'], '', trim($this->input->post('laki_laki', TRUE)));
+            $perempuan = (int)str_replace([' ', '.'], '', trim($this->input->post('perempuan', TRUE)));
+            $jumlah = (int)str_replace([' ', '.'], '', trim($this->input->post('jumlah', TRUE)));
+            if ($jumlah <= 0) $jumlah = $laki + $perempuan;
+            $keterangan = trim($this->input->post('keterangan', TRUE));
+            if (empty($jenis_pegawai)) throw new Exception('Jenis Pegawai wajib diisi.');
+
+            if ($nomor <= 0) {
+                $maxNomor = $this->db->select_max('nomor')->where('tahun', $tahun)->where('deleted_at IS NULL')->get('lkpj_bab1_tabel1_8')->row()->nomor;
+                $nomor = ($maxNomor ? (int)$maxNomor : 0) + 1;
+            }
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah, 'instansi_id' => $instansi_id, 'tahun' => $tahun,
+                'nomor' => $nomor, 'jenis_pegawai' => $jenis_pegawai, 'laki_laki' => $laki,
+                'perempuan' => $perempuan, 'jumlah' => $jumlah, 'keterangan' => $keterangan,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $this->db->where('id', $id)->update('lkpj_bab1_tabel1_8', $saveData);
+                $msg = "Data ASN {$jenis_pegawai} berhasil diperbarui.";
+            } else {
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab1_tabel1_8', $saveData);
+                $id = $this->db->insert_id();
+                $msg = "Data ASN {$jenis_pegawai} berhasil ditambahkan.";
+            }
+
+            $summary = $this->db->select('COUNT(*) as total_kategori, SUM(laki_laki) as total_laki, SUM(perempuan) as total_perempuan, SUM(jumlah) as total_asn')
+                ->where('deleted_at IS NULL')->where('tahun', $tahun)->get('lkpj_bab1_tabel1_8')->row_array();
+            echo json_encode(['status' => 'success', 'message' => $msg, 'data' => array_merge(['id' => $id], $saveData), 'summary' => $summary]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function DeleteBab1Tabel1_8() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+            $row = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->get('lkpj_bab1_tabel1_8')->row_array();
+            if (!$row) throw new Exception('Data tidak ditemukan.');
+            $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->update('lkpj_bab1_tabel1_8', ['deleted_at' => date('Y-m-d H:i:s')]);
+            echo json_encode(['status' => 'success', 'message' => "Data ASN {$row['jenis_pegawai']} berhasil dihapus."]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function ResetBab1Tabel1_8() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+            $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+            $this->db->where('tahun', $tahun)->where('kodewilayah', $kodeWilayah)->update('lkpj_bab1_tabel1_8', ['deleted_at' => date('Y-m-d H:i:s')]);
+            $this->seed_default_tabel1_8($kodeWilayah, $instansiId, $tahun);
+            echo json_encode(['status' => 'success', 'message' => 'Data Tabel 1.8 berhasil direset kembali ke standar BKPSDM.']);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    // ===================================================================
+    // CRUD TABEL 1.9 (Jumlah ASN Menurut Tingkat Pendidikan)
+    // ===================================================================
+    public function GetBab1Tabel1_9() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->where('kodewilayah', $this->get_kode_wilayah());
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+        $items = $this->db->order_by('nomor', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_9')->result_array();
+        echo json_encode(['status' => 'success', 'data' => $items]);
+    }
+
+    public function SaveBab1Tabel1_9() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $nomor = (int)$this->input->post('nomor', TRUE);
+            $tingkat = trim($this->input->post('tingkat_pendidikan', TRUE));
+            
+            $pns_l = (int)str_replace([' ', '.', '-'], '', trim($this->input->post('pns_l', TRUE) ?: '0'));
+            $pns_p = (int)str_replace([' ', '.', '-'], '', trim($this->input->post('pns_p', TRUE) ?: '0'));
+            $pppk_penuh_l = (int)str_replace([' ', '.', '-'], '', trim($this->input->post('pppk_penuh_l', TRUE) ?: '0'));
+            $pppk_penuh_p = (int)str_replace([' ', '.', '-'], '', trim($this->input->post('pppk_penuh_p', TRUE) ?: '0'));
+            $pppk_paruh_l = (int)str_replace([' ', '.', '-'], '', trim($this->input->post('pppk_paruh_l', TRUE) ?: '0'));
+            $pppk_paruh_p = (int)str_replace([' ', '.', '-'], '', trim($this->input->post('pppk_paruh_p', TRUE) ?: '0'));
+            
+            $jumlah = (int)str_replace([' ', '.', '-'], '', trim($this->input->post('jumlah', TRUE) ?: '0'));
+            if ($jumlah <= 0) {
+                $jumlah = $pns_l + $pns_p + $pppk_penuh_l + $pppk_penuh_p + $pppk_paruh_l + $pppk_paruh_p;
+            }
+            $keterangan = trim($this->input->post('keterangan', TRUE));
+            if (empty($tingkat)) throw new Exception('Tingkat Pendidikan wajib diisi.');
+
+            if ($nomor <= 0) {
+                $maxNomor = $this->db->select_max('nomor')->where('tahun', $tahun)->where('deleted_at IS NULL')->get('lkpj_bab1_tabel1_9')->row()->nomor;
+                $nomor = ($maxNomor ? (int)$maxNomor : 0) + 1;
+            }
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah, 'instansi_id' => $instansi_id, 'tahun' => $tahun,
+                'nomor' => $nomor, 'tingkat_pendidikan' => $tingkat,
+                'pns_l' => $pns_l, 'pns_p' => $pns_p,
+                'pppk_penuh_l' => $pppk_penuh_l, 'pppk_penuh_p' => $pppk_penuh_p,
+                'pppk_paruh_l' => $pppk_paruh_l, 'pppk_paruh_p' => $pppk_paruh_p,
+                'jumlah' => $jumlah, 'keterangan' => $keterangan, 'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $this->db->where('id', $id)->update('lkpj_bab1_tabel1_9', $saveData);
+                $msg = "Data ASN Pendidikan {$tingkat} berhasil diperbarui.";
+            } else {
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab1_tabel1_9', $saveData);
+                $id = $this->db->insert_id();
+                $msg = "Data ASN Pendidikan {$tingkat} berhasil ditambahkan.";
+            }
+
+            $summary = $this->db->select('COUNT(*) as total_tingkat, SUM(pns_l) as pns_l, SUM(pns_p) as pns_p, SUM(pppk_penuh_l) as pppk_penuh_l, SUM(pppk_penuh_p) as pppk_penuh_p, SUM(pppk_paruh_l) as pppk_paruh_l, SUM(pppk_paruh_p) as pppk_paruh_p, SUM(jumlah) as total_asn')
+                ->where('deleted_at IS NULL')->where('tahun', $tahun)->get('lkpj_bab1_tabel1_9')->row_array();
+            echo json_encode(['status' => 'success', 'message' => $msg, 'data' => array_merge(['id' => $id], $saveData), 'summary' => $summary]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function DeleteBab1Tabel1_9() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+            $row = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->get('lkpj_bab1_tabel1_9')->row_array();
+            if (!$row) throw new Exception('Data tidak ditemukan.');
+            $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->update('lkpj_bab1_tabel1_9', ['deleted_at' => date('Y-m-d H:i:s')]);
+            echo json_encode(['status' => 'success', 'message' => "Data ASN pendidikan {$row['tingkat_pendidikan']} berhasil dihapus."]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function ResetBab1Tabel1_9() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+            $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+            $this->db->where('tahun', $tahun)->where('kodewilayah', $kodeWilayah)->update('lkpj_bab1_tabel1_9', ['deleted_at' => date('Y-m-d H:i:s')]);
+            $this->seed_default_tabel1_9($kodeWilayah, $instansiId, $tahun);
+            echo json_encode(['status' => 'success', 'message' => 'Data Tabel 1.9 berhasil direset kembali ke standar BKPSDM.']);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    // ===================================================================
+    // CRUD TABEL 1.10 (Target, Realisasi dan Capaian Pendapatan Daerah)
+    // ===================================================================
+    public function GetBab1Tabel1_10() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->where('kodewilayah', $this->get_kode_wilayah());
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+        $items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_10')->result_array();
+        echo json_encode(['status' => 'success', 'data' => $items]);
+    }
+
+    public function SaveBab1Tabel1_10() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+
+            $nomor = trim($this->input->post('nomor', TRUE));
+            $is_header = (int)($this->input->post('is_header', TRUE) ?: 0);
+            $parent_id = (int)($this->input->post('parent_id', TRUE) ?: 0);
+            $uraian = trim($this->input->post('uraian', TRUE));
+            if (empty($uraian)) throw new Exception('Uraian pendapatan daerah wajib diisi.');
+
+            $cleanCurr = function($val) {
+                if (!$val) return 0.00;
+                $v = trim((string)$val);
+                $v = str_replace(' ', '', $v);
+                if (strpos($v, ',') !== false) {
+                    $v = str_replace('.', '', $v);
+                    $v = str_replace(',', '.', $v);
+                }
+                return (float)$v;
+            };
+
+            $anggaran25 = $cleanCurr($this->input->post('anggaran_2025', TRUE));
+            $realisasi25 = $cleanCurr($this->input->post('realisasi_2025', TRUE));
+
+            $selisih_raw = $this->input->post('selisih', TRUE);
+            if ($selisih_raw !== null && $selisih_raw !== '') {
+                $selisih = $cleanCurr($selisih_raw);
+            } else {
+                $selisih = $realisasi25 - $anggaran25;
+            }
+
+            $persen_raw = $this->input->post('persen', TRUE);
+            if ($persen_raw !== null && $persen_raw !== '') {
+                $persen = $cleanCurr($persen_raw);
+            } else {
+                $persen = ($anggaran25 > 0) ? round(($realisasi25 / $anggaran25) * 100, 2) : 0.00;
+            }
+
+            $realisasi24 = $cleanCurr($this->input->post('realisasi_2024', TRUE));
+            $realisasi23 = $cleanCurr($this->input->post('realisasi_2023', TRUE));
+            $realisasi22 = $cleanCurr($this->input->post('realisasi_2022', TRUE));
+
+            $urutan = (int)$this->input->post('urutan', TRUE);
+            if ($urutan <= 0) {
+                $maxUrut = $this->db->select_max('urutan')->where('tahun', $tahun)->where('deleted_at IS NULL')->get('lkpj_bab1_tabel1_10')->row()->urutan;
+                $urutan = ($maxUrut ? (int)$maxUrut : 0) + 1;
+            }
+
+            $keterangan = trim($this->input->post('keterangan', TRUE));
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah, 'instansi_id' => $instansi_id, 'tahun' => $tahun,
+                'nomor' => $nomor, 'is_header' => $is_header, 'parent_id' => $parent_id,
+                'uraian' => $uraian, 'anggaran_2025' => $anggaran25, 'realisasi_2025' => $realisasi25,
+                'selisih' => $selisih, 'persen' => $persen, 'realisasi_2024' => $realisasi24,
+                'realisasi_2023' => $realisasi23, 'realisasi_2022' => $realisasi22,
+                'urutan' => $urutan, 'keterangan' => $keterangan, 'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $this->db->where('id', $id)->update('lkpj_bab1_tabel1_10', $saveData);
+                $msg = "Data '{$uraian}' berhasil diperbarui.";
+            } else {
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab1_tabel1_10', $saveData);
+                $id = $this->db->insert_id();
+                $msg = "Data '{$uraian}' berhasil ditambahkan.";
+            }
+
+            // Hitung ringkasan
+            $items = $this->db->where('deleted_at IS NULL')->where('tahun', $tahun)->where('is_header', 1)->get('lkpj_bab1_tabel1_10')->result_array();
+            $totAngg = 0; $totReal = 0; $totSel = 0;
+            foreach ($items as $it) {
+                $totAngg += (float)$it['anggaran_2025'];
+                $totReal += (float)$it['realisasi_2025'];
+                $totSel += (float)$it['selisih'];
+            }
+            $totPct = ($totAngg > 0) ? round(($totReal / $totAngg) * 100, 2) : 0;
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => $msg,
+                'data' => array_merge(['id' => $id], $saveData),
+                'summary' => [
+                    'total_anggaran_2025' => $totAngg,
+                    'total_realisasi_2025' => $totReal,
+                    'total_selisih' => $totSel,
+                    'total_persen' => $totPct
+                ]
+            ]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function DeleteBab1Tabel1_10() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+            $row = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->get('lkpj_bab1_tabel1_10')->row_array();
+            if (!$row) throw new Exception('Data tidak ditemukan.');
+            $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->update('lkpj_bab1_tabel1_10', ['deleted_at' => date('Y-m-d H:i:s')]);
+            echo json_encode(['status' => 'success', 'message' => "Data '{$row['uraian']}' berhasil dihapus."]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function ResetBab1Tabel1_10() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+            $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+            $this->db->where('tahun', $tahun)->where('kodewilayah', $kodeWilayah)->update('lkpj_bab1_tabel1_10', ['deleted_at' => date('Y-m-d H:i:s')]);
+            $this->seed_default_tabel1_10($kodeWilayah, $instansiId, $tahun);
+            echo json_encode(['status' => 'success', 'message' => 'Data Tabel 1.10 berhasil direset kembali ke data BKAD resmi.']);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    // ===================================================================
+    // CRUD TABEL 1.11 (Rincian Pajak Daerah Tahun 2025 - BAPENDA)
+    // ===================================================================
+    public function GetBab1Tabel1_11() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->where('kodewilayah', $this->get_kode_wilayah());
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+        $items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_11')->result_array();
+        echo json_encode(['status' => 'success', 'data' => $items]);
+    }
+
+    public function SaveBab1Tabel1_11() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+
+            $nomor = trim($this->input->post('nomor', TRUE));
+            $is_header = (int)($this->input->post('is_header', TRUE) ?: 0);
+            $level = (int)($this->input->post('level', TRUE) ?: 2);
+            $parent_id = (int)($this->input->post('parent_id', TRUE) ?: 0);
+            $uraian = trim($this->input->post('uraian', TRUE));
+            if (empty($uraian)) throw new Exception('Uraian pajak daerah wajib diisi.');
+
+            $cleanCurr = function($val) {
+                if (!$val) return 0.00;
+                $v = trim((string)$val);
+                $v = str_replace(' ', '', $v);
+                if (strpos($v, ',') !== false) {
+                    $v = str_replace('.', '', $v);
+                    $v = str_replace(',', '.', $v);
+                }
+                return (float)$v;
+            };
+
+            $target25 = $cleanCurr($this->input->post('target_2025', TRUE));
+            $realisasi25 = $cleanCurr($this->input->post('realisasi_2025', TRUE));
+
+            $persen_raw = $this->input->post('persen', TRUE);
+            if ($persen_raw !== null && $persen_raw !== '') {
+                $persen = $cleanCurr($persen_raw);
+            } else {
+                $persen = ($target25 > 0) ? round(($realisasi25 / $target25) * 100, 2) : 0.00;
+            }
+
+            $pertumbuhan_raw = $this->input->post('pertumbuhan', TRUE);
+            $pertumbuhan = null;
+            if ($pertumbuhan_raw !== null && trim($pertumbuhan_raw) !== '' && trim($pertumbuhan_raw) !== '-') {
+                $p_val = trim($pertumbuhan_raw);
+                $isNegative = false;
+                if (strpos($p_val, '(') !== false && strpos($p_val, ')') !== false) {
+                    $isNegative = true;
+                    $p_val = str_replace(['(', ')'], '', $p_val);
+                }
+                $p_val = str_replace(' ', '', $p_val);
+                if (strpos($p_val, ',') !== false) {
+                    $p_val = str_replace('.', '', $p_val);
+                    $p_val = str_replace(',', '.', $p_val);
+                }
+                $num = (float)$p_val;
+                $pertumbuhan = $isNegative ? -abs($num) : $num;
+            }
+
+            $urutan = (int)$this->input->post('urutan', TRUE);
+            if ($urutan <= 0) {
+                $maxUrut = $this->db->select_max('urutan')->where('tahun', $tahun)->where('deleted_at IS NULL')->get('lkpj_bab1_tabel1_11')->row()->urutan;
+                $urutan = ($maxUrut ? (int)$maxUrut : 0) + 1;
+            }
+
+            $keterangan = trim($this->input->post('keterangan', TRUE));
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah, 'instansi_id' => $instansi_id, 'tahun' => $tahun,
+                'nomor' => $nomor, 'is_header' => $is_header, 'level' => $level, 'parent_id' => $parent_id,
+                'uraian' => $uraian, 'target_2025' => $target25, 'realisasi_2025' => $realisasi25,
+                'persen' => $persen, 'pertumbuhan' => $pertumbuhan,
+                'urutan' => $urutan, 'keterangan' => $keterangan, 'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $this->db->where('id', $id)->update('lkpj_bab1_tabel1_11', $saveData);
+                $msg = "Data '{$uraian}' berhasil diperbarui.";
+            } else {
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab1_tabel1_11', $saveData);
+                $id = $this->db->insert_id();
+                $msg = "Data '{$uraian}' berhasil ditambahkan.";
+            }
+
+            // Hitung ringkasan
+            $headerRow = $this->db->where('deleted_at IS NULL')->where('tahun', $tahun)->where('level', 1)->get('lkpj_bab1_tabel1_11')->row_array();
+            $totTarget = $headerRow ? (float)$headerRow['target_2025'] : $target25;
+            $totReal = $headerRow ? (float)$headerRow['realisasi_2025'] : $realisasi25;
+            $totPct = $headerRow ? (float)$headerRow['persen'] : $persen;
+            $totTumbuh = ($headerRow && $headerRow['pertumbuhan'] !== null) ? (float)$headerRow['pertumbuhan'] : 0.00;
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => $msg,
+                'data' => array_merge(['id' => $id], $saveData),
+                'summary' => [
+                    'total_target_2025' => $totTarget,
+                    'total_realisasi_2025' => $totReal,
+                    'total_persen' => $totPct,
+                    'total_pertumbuhan' => $totTumbuh
+                ]
+            ]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function DeleteBab1Tabel1_11() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+            $row = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->get('lkpj_bab1_tabel1_11')->row_array();
+            if (!$row) throw new Exception('Data tidak ditemukan.');
+            $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->update('lkpj_bab1_tabel1_11', ['deleted_at' => date('Y-m-d H:i:s')]);
+            echo json_encode(['status' => 'success', 'message' => "Data '{$row['uraian']}' berhasil dihapus."]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function ResetBab1Tabel1_11() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+            $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+            $this->db->where('tahun', $tahun)->where('kodewilayah', $kodeWilayah)->update('lkpj_bab1_tabel1_11', ['deleted_at' => date('Y-m-d H:i:s')]);
+            $this->seed_default_tabel1_11($kodeWilayah, $instansiId, $tahun);
+            echo json_encode(['status' => 'success', 'message' => 'Data Tabel 1.11 berhasil direset kembali ke data resmi BAPENDA.']);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    // ===================================================================
+    // CRUD TABEL 1.12 (Rincian Retribusi Daerah Tahun 2025 - Bapenda)
+    // ===================================================================
+    public function GetBab1Tabel1_12() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->where('kodewilayah', $this->get_kode_wilayah());
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+        $items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_12')->result_array();
+        echo json_encode(['status' => 'success', 'data' => $items]);
+    }
+
+    public function SaveBab1Tabel1_12() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+
+            $nomor = trim($this->input->post('nomor', TRUE));
+            $is_header = (int)($this->input->post('is_header', TRUE) ?: 0);
+            $level = (int)($this->input->post('level', TRUE) ?: 2);
+            $parent_id = (int)($this->input->post('parent_id', TRUE) ?: 0);
+            $uraian = trim($this->input->post('uraian', TRUE));
+            if (empty($uraian)) throw new Exception('Uraian retribusi daerah wajib diisi.');
+
+            $cleanCurr = function($val) {
+                if (!$val) return 0.00;
+                $v = trim((string)$val);
+                $v = str_replace(' ', '', $v);
+                if (strpos($v, ',') !== false) {
+                    $v = str_replace('.', '', $v);
+                    $v = str_replace(',', '.', $v);
+                }
+                return (float)$v;
+            };
+
+            $target25 = $cleanCurr($this->input->post('target_2025', TRUE));
+            $realisasi25 = $cleanCurr($this->input->post('realisasi_2025', TRUE));
+
+            $persen_raw = $this->input->post('persen', TRUE);
+            if ($persen_raw !== null && $persen_raw !== '') {
+                $persen = $cleanCurr($persen_raw);
+            } else {
+                $persen = ($target25 > 0) ? round(($realisasi25 / $target25) * 100, 2) : 0.00;
+            }
+
+            $urutan = (int)$this->input->post('urutan', TRUE);
+            if ($urutan <= 0) {
+                $maxUrut = $this->db->select_max('urutan')->where('tahun', $tahun)->where('deleted_at IS NULL')->get('lkpj_bab1_tabel1_12')->row()->urutan;
+                $urutan = ($maxUrut ? (int)$maxUrut : 0) + 1;
+            }
+
+            $keterangan = trim($this->input->post('keterangan', TRUE));
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah, 'instansi_id' => $instansi_id, 'tahun' => $tahun,
+                'nomor' => $nomor, 'is_header' => $is_header, 'level' => $level, 'parent_id' => $parent_id,
+                'uraian' => $uraian, 'target_2025' => $target25, 'realisasi_2025' => $realisasi25,
+                'persen' => $persen, 'urutan' => $urutan, 'keterangan' => $keterangan, 'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $this->db->where('id', $id)->update('lkpj_bab1_tabel1_12', $saveData);
+                $msg = "Data '{$uraian}' berhasil diperbarui.";
+            } else {
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab1_tabel1_12', $saveData);
+                $id = $this->db->insert_id();
+                $msg = "Data '{$uraian}' berhasil ditambahkan.";
+            }
+
+            // Hitung ringkasan total
+            $headerRow = $this->db->where('deleted_at IS NULL')->where('tahun', $tahun)->where('level', 1)->get('lkpj_bab1_tabel1_12')->row_array();
+            $totTarget = $headerRow ? (float)$headerRow['target_2025'] : $target25;
+            $totReal = $headerRow ? (float)$headerRow['realisasi_2025'] : $realisasi25;
+            $totPct = $headerRow ? (float)$headerRow['persen'] : $persen;
+            $totSelisih = $totReal - $totTarget;
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => $msg,
+                'data' => array_merge(['id' => $id], $saveData),
+                'summary' => [
+                    'total_target_2025' => $totTarget,
+                    'total_realisasi_2025' => $totReal,
+                    'total_persen' => $totPct,
+                    'total_selisih' => $totSelisih
+                ]
+            ]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function DeleteBab1Tabel1_12() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+            $row = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->get('lkpj_bab1_tabel1_12')->row_array();
+            if (!$row) throw new Exception('Data tidak ditemukan.');
+            $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->update('lkpj_bab1_tabel1_12', ['deleted_at' => date('Y-m-d H:i:s')]);
+            echo json_encode(['status' => 'success', 'message' => "Data '{$row['uraian']}' berhasil dihapus."]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function ResetBab1Tabel1_12() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+            $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+            $this->db->where('tahun', $tahun)->where('kodewilayah', $kodeWilayah)->update('lkpj_bab1_tabel1_12', ['deleted_at' => date('Y-m-d H:i:s')]);
+            $this->seed_default_tabel1_12($kodeWilayah, $instansiId, $tahun);
+            echo json_encode(['status' => 'success', 'message' => 'Data Tabel 1.12 berhasil direset kembali ke data resmi Bapenda.']);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    // ===================================================================
+    // CRUD TABEL 1.13 (Rincian Hasil Pengelolaan Keuangan Daerah Dipisahkan)
+    // ===================================================================
+    public function GetBab1Tabel1_13() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->where('kodewilayah', $this->get_kode_wilayah());
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+        $items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_13')->result_array();
+        echo json_encode(['status' => 'success', 'data' => $items]);
+    }
+
+    public function SaveBab1Tabel1_13() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+
+            $nomor = trim($this->input->post('nomor', TRUE));
+            $is_header = (int)($this->input->post('is_header', TRUE) ?: 0);
+            $level = (int)($this->input->post('level', TRUE) ?: 2);
+            $parent_id = (int)($this->input->post('parent_id', TRUE) ?: 0);
+            $uraian = trim($this->input->post('uraian', TRUE));
+            if (empty($uraian)) throw new Exception('Uraian pengelolaan keuangan daerah wajib diisi.');
+
+            $cleanCurr = function($val) {
+                if (!$val) return 0.00;
+                $v = trim((string)$val);
+                $v = str_replace(' ', '', $v);
+                if (strpos($v, ',') !== false) {
+                    $v = str_replace('.', '', $v);
+                    $v = str_replace(',', '.', $v);
+                }
+                return (float)$v;
+            };
+
+            $target25 = $cleanCurr($this->input->post('target_2025', TRUE));
+            $realisasi25 = $cleanCurr($this->input->post('realisasi_2025', TRUE));
+
+            $persen_raw = $this->input->post('persen', TRUE);
+            if ($persen_raw !== null && $persen_raw !== '') {
+                $persen = $cleanCurr($persen_raw);
+            } else {
+                $persen = ($target25 > 0) ? round(($realisasi25 / $target25) * 100, 2) : 0.00;
+            }
+
+            $pertumbuhan_raw = $this->input->post('pertumbuhan', TRUE);
+            $pertumbuhan = null;
+            if ($pertumbuhan_raw !== null && trim($pertumbuhan_raw) !== '' && trim($pertumbuhan_raw) !== '-') {
+                $p_val = trim($pertumbuhan_raw);
+                $isNegative = false;
+                if (strpos($p_val, '(') !== false && strpos($p_val, ')') !== false) {
+                    $isNegative = true;
+                    $p_val = str_replace(['(', ')'], '', $p_val);
+                }
+                $p_val = str_replace(' ', '', $p_val);
+                if (strpos($p_val, ',') !== false) {
+                    $p_val = str_replace('.', '', $p_val);
+                    $p_val = str_replace(',', '.', $p_val);
+                }
+                $num = (float)$p_val;
+                $pertumbuhan = $isNegative ? -abs($num) : $num;
+            }
+
+            $urutan = (int)$this->input->post('urutan', TRUE);
+            if ($urutan <= 0) {
+                $maxUrut = $this->db->select_max('urutan')->where('tahun', $tahun)->where('deleted_at IS NULL')->get('lkpj_bab1_tabel1_13')->row()->urutan;
+                $urutan = ($maxUrut ? (int)$maxUrut : 0) + 1;
+            }
+
+            $keterangan = trim($this->input->post('keterangan', TRUE));
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah, 'instansi_id' => $instansi_id, 'tahun' => $tahun,
+                'nomor' => $nomor, 'is_header' => $is_header, 'level' => $level, 'parent_id' => $parent_id,
+                'uraian' => $uraian, 'target_2025' => $target25, 'realisasi_2025' => $realisasi25,
+                'persen' => $persen, 'pertumbuhan' => $pertumbuhan,
+                'urutan' => $urutan, 'keterangan' => $keterangan, 'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $this->db->where('id', $id)->update('lkpj_bab1_tabel1_13', $saveData);
+                $msg = "Data '{$uraian}' berhasil diperbarui.";
+            } else {
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab1_tabel1_13', $saveData);
+                $id = $this->db->insert_id();
+                $msg = "Data '{$uraian}' berhasil ditambahkan.";
+            }
+
+            // Hitung ringkasan total
+            $headerRow = $this->db->where('deleted_at IS NULL')->where('tahun', $tahun)->where('level', 1)->get('lkpj_bab1_tabel1_13')->row_array();
+            $totTarget = $headerRow ? (float)$headerRow['target_2025'] : $target25;
+            $totReal = $headerRow ? (float)$headerRow['realisasi_2025'] : $realisasi25;
+            $totPct = $headerRow ? (float)$headerRow['persen'] : $persen;
+            $totTumbuh = ($headerRow && $headerRow['pertumbuhan'] !== null) ? (float)$headerRow['pertumbuhan'] : ($pertumbuhan ?: 0.00);
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => $msg,
+                'data' => array_merge(['id' => $id], $saveData),
+                'summary' => [
+                    'total_target_2025' => $totTarget,
+                    'total_realisasi_2025' => $totReal,
+                    'total_persen' => $totPct,
+                    'total_pertumbuhan' => $totTumbuh
+                ]
+            ]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function DeleteBab1Tabel1_13() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+            $row = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->get('lkpj_bab1_tabel1_13')->row_array();
+            if (!$row) throw new Exception('Data tidak ditemukan.');
+            $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->update('lkpj_bab1_tabel1_13', ['deleted_at' => date('Y-m-d H:i:s')]);
+            echo json_encode(['status' => 'success', 'message' => "Data '{$row['uraian']}' berhasil dihapus."]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function ResetBab1Tabel1_13() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+            $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+            $this->db->where('tahun', $tahun)->where('kodewilayah', $kodeWilayah)->update('lkpj_bab1_tabel1_13', ['deleted_at' => date('Y-m-d H:i:s')]);
+            $this->seed_default_tabel1_13($kodeWilayah, $instansiId, $tahun);
+            echo json_encode(['status' => 'success', 'message' => 'Data Tabel 1.13 berhasil direset kembali ke data resmi BKAD.']);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    // ===================================================================
+    // CRUD TABEL 1.14 (Rincian Hasil Lain-Lain PAD yang Sah)
+    // ===================================================================
+    public function GetBab1Tabel1_14() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->where('kodewilayah', $this->get_kode_wilayah());
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+        $items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_14')->result_array();
+        echo json_encode(['status' => 'success', 'data' => $items]);
+    }
+
+    public function SaveBab1Tabel1_14() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+
+            $nomor = trim($this->input->post('nomor', TRUE));
+            $is_header = (int)($this->input->post('is_header', TRUE) ?: 0);
+            $level = (int)($this->input->post('level', TRUE) ?: 2);
+            $parent_id = (int)($this->input->post('parent_id', TRUE) ?: 0);
+            $uraian = trim($this->input->post('uraian', TRUE));
+            if (empty($uraian)) throw new Exception('Uraian lain-lain PAD yang sah wajib diisi.');
+
+            $cleanCurr = function($val) {
+                if (!$val) return 0.00;
+                $v = trim((string)$val);
+                $v = str_replace(' ', '', $v);
+                if (strpos($v, ',') !== false) {
+                    $v = str_replace('.', '', $v);
+                    $v = str_replace(',', '.', $v);
+                }
+                return (float)$v;
+            };
+
+            $target25 = $cleanCurr($this->input->post('target_2025', TRUE));
+            $realisasi25 = $cleanCurr($this->input->post('realisasi_2025', TRUE));
+
+            $persen_raw = $this->input->post('persen', TRUE);
+            if ($persen_raw !== null && $persen_raw !== '') {
+                $persen = $cleanCurr($persen_raw);
+            } else {
+                $persen = ($target25 > 0) ? round(($realisasi25 / $target25) * 100, 2) : 0.00;
+            }
+
+            $pertumbuhan_raw = $this->input->post('pertumbuhan', TRUE);
+            $pertumbuhan = null;
+            if ($pertumbuhan_raw !== null && trim($pertumbuhan_raw) !== '' && trim($pertumbuhan_raw) !== '-') {
+                $p_val = trim($pertumbuhan_raw);
+                $isNegative = false;
+                if (strpos($p_val, '(') !== false && strpos($p_val, ')') !== false) {
+                    $isNegative = true;
+                    $p_val = str_replace(['(', ')'], '', $p_val);
+                }
+                $p_val = str_replace(' ', '', $p_val);
+                if (strpos($p_val, ',') !== false) {
+                    $p_val = str_replace('.', '', $p_val);
+                    $p_val = str_replace(',', '.', $p_val);
+                }
+                $num = (float)$p_val;
+                $pertumbuhan = $isNegative ? -abs($num) : $num;
+            }
+
+            $urutan = (int)$this->input->post('urutan', TRUE);
+            if ($urutan <= 0) {
+                $maxUrut = $this->db->select_max('urutan')->where('tahun', $tahun)->where('deleted_at IS NULL')->get('lkpj_bab1_tabel1_14')->row()->urutan;
+                $urutan = ($maxUrut ? (int)$maxUrut : 0) + 1;
+            }
+
+            $keterangan = trim($this->input->post('keterangan', TRUE));
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah, 'instansi_id' => $instansi_id, 'tahun' => $tahun,
+                'nomor' => $nomor, 'is_header' => $is_header, 'level' => $level, 'parent_id' => $parent_id,
+                'uraian' => $uraian, 'target_2025' => $target25, 'realisasi_2025' => $realisasi25,
+                'persen' => $persen, 'pertumbuhan' => $pertumbuhan,
+                'urutan' => $urutan, 'keterangan' => $keterangan, 'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $this->db->where('id', $id)->update('lkpj_bab1_tabel1_14', $saveData);
+                $msg = "Data '{$uraian}' berhasil diperbarui.";
+            } else {
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab1_tabel1_14', $saveData);
+                $id = $this->db->insert_id();
+                $msg = "Data '{$uraian}' berhasil ditambahkan.";
+            }
+
+            // Hitung ringkasan total
+            $headerRow = $this->db->where('deleted_at IS NULL')->where('tahun', $tahun)->where('level', 1)->get('lkpj_bab1_tabel1_14')->row_array();
+            $totTarget = $headerRow ? (float)$headerRow['target_2025'] : $target25;
+            $totReal = $headerRow ? (float)$headerRow['realisasi_2025'] : $realisasi25;
+            $totPct = $headerRow ? (float)$headerRow['persen'] : $persen;
+            $totTumbuh = ($headerRow && $headerRow['pertumbuhan'] !== null) ? (float)$headerRow['pertumbuhan'] : ($pertumbuhan ?: 0.00);
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => $msg,
+                'data' => array_merge(['id' => $id], $saveData),
+                'summary' => [
+                    'total_target_2025' => $totTarget,
+                    'total_realisasi_2025' => $totReal,
+                    'total_persen' => $totPct,
+                    'total_pertumbuhan' => $totTumbuh
+                ]
+            ]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function DeleteBab1Tabel1_14() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+            $row = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->get('lkpj_bab1_tabel1_14')->row_array();
+            if (!$row) throw new Exception('Data tidak ditemukan.');
+            $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->update('lkpj_bab1_tabel1_14', ['deleted_at' => date('Y-m-d H:i:s')]);
+            echo json_encode(['status' => 'success', 'message' => "Data '{$row['uraian']}' berhasil dihapus."]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function ResetBab1Tabel1_14() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+            $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+            $this->db->where('tahun', $tahun)->where('kodewilayah', $kodeWilayah)->update('lkpj_bab1_tabel1_14', ['deleted_at' => date('Y-m-d H:i:s')]);
+            $this->seed_default_tabel1_14($kodeWilayah, $instansiId, $tahun);
+            echo json_encode(['status' => 'success', 'message' => 'Data Tabel 1.14 berhasil direset kembali ke data resmi Bapenda.']);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    // ===================================================================
+    // CRUD TABEL 1.15 (Rincian Pendapatan Transfer)
+    // ===================================================================
+    public function GetBab1Tabel1_15() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->where('kodewilayah', $this->get_kode_wilayah());
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+        $items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_15')->result_array();
+        echo json_encode(['status' => 'success', 'data' => $items]);
+    }
+
+    public function SaveBab1Tabel1_15() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+
+            $nomor = trim($this->input->post('nomor', TRUE));
+            $is_header = (int)($this->input->post('is_header', TRUE) ?: 0);
+            $level = (int)($this->input->post('level', TRUE) ?: 3);
+            $parent_id = (int)($this->input->post('parent_id', TRUE) ?: 0);
+            $uraian = trim($this->input->post('uraian', TRUE));
+            if (empty($uraian)) throw new Exception('Uraian pendapatan transfer wajib diisi.');
+
+            $cleanCurr = function($val) {
+                if (!$val) return 0.00;
+                $v = trim((string)$val);
+                $v = str_replace(' ', '', $v);
+                if (strpos($v, ',') !== false) {
+                    $v = str_replace('.', '', $v);
+                    $v = str_replace(',', '.', $v);
+                }
+                return (float)$v;
+            };
+
+            $target25 = $cleanCurr($this->input->post('target_2025', TRUE));
+            $realisasi25 = $cleanCurr($this->input->post('realisasi_2025', TRUE));
+
+            $persen_raw = $this->input->post('persen', TRUE);
+            if ($persen_raw !== null && $persen_raw !== '') {
+                $persen = $cleanCurr($persen_raw);
+            } else {
+                $persen = ($target25 > 0) ? round(($realisasi25 / $target25) * 100, 2) : 0.00;
+            }
+
+            $pertumbuhan_raw = $this->input->post('pertumbuhan', TRUE);
+            $pertumbuhan = null;
+            if ($pertumbuhan_raw !== null && trim($pertumbuhan_raw) !== '' && trim($pertumbuhan_raw) !== '-') {
+                $p_val = trim($pertumbuhan_raw);
+                $isNegative = false;
+                if (strpos($p_val, '(') !== false && strpos($p_val, ')') !== false) {
+                    $isNegative = true;
+                    $p_val = str_replace(['(', ')'], '', $p_val);
+                }
+                $p_val = str_replace(' ', '', $p_val);
+                if (strpos($p_val, ',') !== false) {
+                    $p_val = str_replace('.', '', $p_val);
+                    $p_val = str_replace(',', '.', $p_val);
+                }
+                $num = (float)$p_val;
+                $pertumbuhan = $isNegative ? -abs($num) : $num;
+            }
+
+            $urutan = (int)$this->input->post('urutan', TRUE);
+            if ($urutan <= 0) {
+                $maxUrut = $this->db->select_max('urutan')->where('tahun', $tahun)->where('deleted_at IS NULL')->get('lkpj_bab1_tabel1_15')->row()->urutan;
+                $urutan = ($maxUrut ? (int)$maxUrut : 0) + 1;
+            }
+
+            $keterangan = trim($this->input->post('keterangan', TRUE));
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah, 'instansi_id' => $instansi_id, 'tahun' => $tahun,
+                'nomor' => $nomor, 'is_header' => $is_header, 'level' => $level, 'parent_id' => $parent_id,
+                'uraian' => $uraian, 'target_2025' => $target25, 'realisasi_2025' => $realisasi25,
+                'persen' => $persen, 'pertumbuhan' => $pertumbuhan,
+                'urutan' => $urutan, 'keterangan' => $keterangan, 'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $this->db->where('id', $id)->update('lkpj_bab1_tabel1_15', $saveData);
+                $msg = "Data '{$uraian}' berhasil diperbarui.";
+            } else {
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab1_tabel1_15', $saveData);
+                $id = $this->db->insert_id();
+                $msg = "Data '{$uraian}' berhasil ditambahkan.";
+            }
+
+            // Hitung ringkasan total
+            $headerRow = $this->db->where('deleted_at IS NULL')->where('tahun', $tahun)->where('level', 1)->get('lkpj_bab1_tabel1_15')->row_array();
+            $totTarget = $headerRow ? (float)$headerRow['target_2025'] : $target25;
+            $totReal = $headerRow ? (float)$headerRow['realisasi_2025'] : $realisasi25;
+            $totPct = $headerRow ? (float)$headerRow['persen'] : $persen;
+            $totTumbuh = ($headerRow && $headerRow['pertumbuhan'] !== null) ? (float)$headerRow['pertumbuhan'] : ($pertumbuhan ?: 0.00);
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => $msg,
+                'data' => array_merge(['id' => $id], $saveData),
+                'summary' => [
+                    'total_target_2025' => $totTarget,
+                    'total_realisasi_2025' => $totReal,
+                    'total_persen' => $totPct,
+                    'total_pertumbuhan' => $totTumbuh
+                ]
+            ]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function DeleteBab1Tabel1_15() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+            $row = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->get('lkpj_bab1_tabel1_15')->row_array();
+            if (!$row) throw new Exception('Data tidak ditemukan.');
+            $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->update('lkpj_bab1_tabel1_15', ['deleted_at' => date('Y-m-d H:i:s')]);
+            echo json_encode(['status' => 'success', 'message' => "Data '{$row['uraian']}' berhasil dihapus."]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function ResetBab1Tabel1_15() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+            $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+            $this->db->where('tahun', $tahun)->where('kodewilayah', $kodeWilayah)->update('lkpj_bab1_tabel1_15', ['deleted_at' => date('Y-m-d H:i:s')]);
+            $this->seed_default_tabel1_15($kodeWilayah, $instansiId, $tahun);
+            echo json_encode(['status' => 'success', 'message' => 'Data Tabel 1.15 berhasil direset kembali ke data resmi BKAD.']);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    // ===================================================================
+    // CRUD TABEL 1.16 (Rincian Target, Realisasi & Capaian Belanja dan Transfer)
+    // ===================================================================
+    public function GetBab1Tabel1_16() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->where('kodewilayah', $this->get_kode_wilayah());
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+        $items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_16')->result_array();
+        echo json_encode(['status' => 'success', 'data' => $items]);
+    }
+
+    public function SaveBab1Tabel1_16() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+
+            $nomor = trim($this->input->post('nomor', TRUE));
+            $uraian = trim($this->input->post('uraian', TRUE));
+            $is_header = (int)($this->input->post('is_header', TRUE) ?: 0);
+            $level = (int)($this->input->post('level', TRUE) ?: 2);
+            $parent_id = (int)($this->input->post('parent_id', TRUE) ?: 0);
+            $urutan = (int)($this->input->post('urutan', TRUE) ?: 0);
+
+            if (empty($uraian)) throw new Exception('Uraian rekening belanja/transfer wajib diisi.');
+
+            // Helper parser rupiah
+            $parseNum = function($str) {
+                if ($str === null || $str === '') return 0.00;
+                $clean = str_replace(['Rp', ' ', '.'], '', (string)$str);
+                $clean = str_replace(',', '.', $clean);
+                return (float)$clean;
+            };
+
+            $anggaran_2025 = $parseNum($this->input->post('anggaran_2025', TRUE));
+            $realisasi_2025 = $parseNum($this->input->post('realisasi_2025', TRUE));
+            $selisih = $realisasi_2025 - $anggaran_2025;
+            $persen = ($anggaran_2025 > 0) ? round(($realisasi_2025 / $anggaran_2025) * 100, 2) : 0.00;
+
+            $realisasi_2024 = $parseNum($this->input->post('realisasi_2024', TRUE));
+            $realisasi_2023 = $parseNum($this->input->post('realisasi_2023', TRUE));
+            $realisasi_2022 = $parseNum($this->input->post('realisasi_2022', TRUE));
+            $keterangan = trim($this->input->post('keterangan', TRUE));
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah,
+                'instansi_id' => $instansi_id,
+                'tahun' => $tahun,
+                'nomor' => $nomor,
+                'is_header' => $is_header,
+                'level' => $level,
+                'parent_id' => $parent_id,
+                'uraian' => $uraian,
+                'anggaran_2025' => $anggaran_2025,
+                'realisasi_2025' => $realisasi_2025,
+                'selisih' => $selisih,
+                'persen' => $persen,
+                'realisasi_2024' => $realisasi_2024,
+                'realisasi_2023' => $realisasi_2023,
+                'realisasi_2022' => $realisasi_2022,
+                'keterangan' => $keterangan,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                if ($urutan > 0) $saveData['urutan'] = $urutan;
+                $this->db->where('id', $id)->update('lkpj_bab1_tabel1_16', $saveData);
+                $msg = "Data '{$uraian}' berhasil diperbarui.";
+            } else {
+                if ($urutan <= 0) {
+                    $maxUrut = $this->db->select_max('urutan')->where('tahun', $tahun)->where('deleted_at IS NULL')->get('lkpj_bab1_tabel1_16')->row()->urutan;
+                    $urutan = ((int)$maxUrut) + 1;
+                }
+                $saveData['urutan'] = $urutan;
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab1_tabel1_16', $saveData);
+                $id = $this->db->insert_id();
+                $msg = "Data '{$uraian}' berhasil ditambahkan.";
+            }
+
+            // Jika item ini memiliki parent, update total parent-nya
+            if ($parent_id > 0) {
+                $subRows = $this->db->where('deleted_at IS NULL')->where('tahun', $tahun)->where('parent_id', $parent_id)->get('lkpj_bab1_tabel1_16')->result_array();
+                $pAngg = 0; $pReal = 0; $p24 = 0; $p23 = 0; $p22 = 0;
+                foreach ($subRows as $sr) {
+                    $pAngg += (float)$sr['anggaran_2025'];
+                    $pReal += (float)$sr['realisasi_2025'];
+                    $p24 += (float)$sr['realisasi_2024'];
+                    $p23 += (float)$sr['realisasi_2023'];
+                    $p22 += (float)$sr['realisasi_2022'];
+                }
+                $pSelisih = $pReal - $pAngg;
+                $pPct = ($pAngg > 0) ? round(($pReal / $pAngg) * 100, 2) : 0.00;
+                $this->db->where('id', $parent_id)->update('lkpj_bab1_tabel1_16', [
+                    'anggaran_2025' => $pAngg,
+                    'realisasi_2025' => $pReal,
+                    'selisih' => $pSelisih,
+                    'persen' => $pPct,
+                    'realisasi_2024' => $p24,
+                    'realisasi_2023' => $p23,
+                    'realisasi_2022' => $p22,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ]);
+            }
+
+            $savedRow = $this->db->where('id', $id)->get('lkpj_bab1_tabel1_16')->row_array();
+            echo json_encode(['status' => 'success', 'message' => $msg, 'data' => $savedRow]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function DeleteBab1Tabel1_16() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+            $row = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->get('lkpj_bab1_tabel1_16')->row_array();
+            if (!$row) throw new Exception('Data tidak ditemukan.');
+            $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->update('lkpj_bab1_tabel1_16', ['deleted_at' => date('Y-m-d H:i:s')]);
+            echo json_encode(['status' => 'success', 'message' => "Data '{$row['uraian']}' berhasil dihapus."]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function ResetBab1Tabel1_16() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+            $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+            $this->db->where('tahun', $tahun)->where('kodewilayah', $kodeWilayah)->update('lkpj_bab1_tabel1_16', ['deleted_at' => date('Y-m-d H:i:s')]);
+            $this->seed_default_tabel1_16($kodeWilayah, $instansiId, $tahun);
+            echo json_encode(['status' => 'success', 'message' => 'Data Tabel 1.16 berhasil direset kembali ke data resmi BKAD.']);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    // ===================================================================
+    // CRUD TABEL 1.17 (Rincian Belanja Hibah)
+    // ===================================================================
+    public function GetBab1Tabel1_17() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->where('kodewilayah', $this->get_kode_wilayah());
+        if ($this->is_role_4() && $this->get_instansi_id()) { $this->db->where('instansi_id', $this->get_instansi_id()); }
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+        $items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_17')->result_array();
+        echo json_encode(['status' => 'success', 'data' => $items]);
+    }
+
+    public function SaveBab1Tabel1_17() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $uraian = trim($this->input->post('uraian', TRUE));
+            $urutan = (int)($this->input->post('urutan', TRUE) ?: 0);
+            if (empty($uraian)) throw new Exception('Nama SKPD / Uraian belanja hibah wajib diisi.');
+
+            $parseNum = function($str) {
+                if ($str === null || $str === '') return 0.00;
+                $clean = str_replace(['Rp', ' ', '.'], '', (string)$str);
+                $clean = str_replace(',', '.', $clean);
+                return (float)$clean;
+            };
+
+            $p_ang = $parseNum($this->input->post('hibah_pusat_anggaran', TRUE));
+            $p_rea = $parseNum($this->input->post('hibah_pusat_realisasi', TRUE));
+            $b_ang = $parseNum($this->input->post('hibah_badan_anggaran', TRUE));
+            $b_rea = $parseNum($this->input->post('hibah_badan_realisasi', TRUE));
+            $k_ang = $parseNum($this->input->post('hibah_parpol_anggaran', TRUE));
+            $k_rea = $parseNum($this->input->post('hibah_parpol_realisasi', TRUE));
+            $s_ang = $parseNum($this->input->post('hibah_bosp_anggaran', TRUE));
+            $s_rea = $parseNum($this->input->post('hibah_bosp_realisasi', TRUE));
+
+            $tot_ang = $p_ang + $b_ang + $k_ang + $s_ang;
+            $tot_rea = $p_rea + $b_rea + $k_rea + $s_rea;
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah, 'instansi_id' => $instansi_id, 'tahun' => $tahun,
+                'uraian' => $uraian,
+                'hibah_pusat_anggaran' => $p_ang, 'hibah_pusat_realisasi' => $p_rea,
+                'hibah_badan_anggaran' => $b_ang, 'hibah_badan_realisasi' => $b_rea,
+                'hibah_parpol_anggaran' => $k_ang, 'hibah_parpol_realisasi' => $k_rea,
+                'hibah_bosp_anggaran' => $s_ang, 'hibah_bosp_realisasi' => $s_rea,
+                'total_anggaran' => $tot_ang, 'total_realisasi' => $tot_rea,
+                'keterangan' => trim($this->input->post('keterangan', TRUE)),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                if ($urutan > 0) $saveData['urutan'] = $urutan;
+                $this->db->where('id', $id)->update('lkpj_bab1_tabel1_17', $saveData);
+                $msg = "Data '{$uraian}' berhasil diperbarui.";
+            } else {
+                if ($urutan <= 0) {
+                    $maxUrut = $this->db->select_max('urutan')->where('tahun', $tahun)->where('deleted_at IS NULL')->get('lkpj_bab1_tabel1_17')->row()->urutan;
+                    $urutan = ((int)$maxUrut) + 1;
+                }
+                $saveData['urutan'] = $urutan;
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab1_tabel1_17', $saveData);
+                $id = $this->db->insert_id();
+                $msg = "Data '{$uraian}' berhasil ditambahkan.";
+            }
+
+            $savedRow = $this->db->where('id', $id)->get('lkpj_bab1_tabel1_17')->row_array();
+            echo json_encode(['status' => 'success', 'message' => $msg, 'data' => $savedRow]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function DeleteBab1Tabel1_17() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+            $delQuery = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah());
+            if ($this->is_role_4() && $this->get_instansi_id()) { $delQuery->where('instansi_id', $this->get_instansi_id()); }
+            $row = $delQuery->get('lkpj_bab1_tabel1_17')->row_array();
+            if (!$row) throw new Exception('Data tidak ditemukan.');
+            $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->update('lkpj_bab1_tabel1_17', ['deleted_at' => date('Y-m-d H:i:s')]);
+            echo json_encode(['status' => 'success', 'message' => "Data '{$row['uraian']}' berhasil dihapus."]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function ResetBab1Tabel1_17() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+            $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+            $this->db->where('tahun', $tahun)->where('kodewilayah', $kodeWilayah)->update('lkpj_bab1_tabel1_17', ['deleted_at' => date('Y-m-d H:i:s')]);
+            $this->seed_default_tabel1_17($kodeWilayah, $instansiId, $tahun);
+            echo json_encode(['status' => 'success', 'message' => 'Data Tabel 1.17 berhasil direset kembali ke data resmi BKAD.']);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    // ===================================================================
+    // CRUD TABEL 1.18 (Rincian Belanja Bantuan Sosial)
+    // ===================================================================
+    public function GetBab1Tabel1_18() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->where('kodewilayah', $this->get_kode_wilayah());
+        if ($this->is_role_4() && $this->get_instansi_id()) { $this->db->where('instansi_id', $this->get_instansi_id()); }
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+        $items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_18')->result_array();
+        echo json_encode(['status' => 'success', 'data' => $items]);
+    }
+
+    public function SaveBab1Tabel1_18() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $uraian = trim($this->input->post('uraian', TRUE));
+            $urutan = (int)($this->input->post('urutan', TRUE) ?: 0);
+            if (empty($uraian)) throw new Exception('Nama SKPD / Uraian belanja bantuan sosial wajib diisi.');
+
+            $parseNum = function($str) {
+                if ($str === null || $str === '') return 0.00;
+                $clean = str_replace(['Rp', ' ', '.'], '', (string)$str);
+                $clean = str_replace(',', '.', $clean);
+                return (float)$clean;
+            };
+
+            $i_ang = $parseNum($this->input->post('bansos_individu_anggaran', TRUE));
+            $i_rea = $parseNum($this->input->post('bansos_individu_realisasi', TRUE));
+            $p_ang = $parseNum($this->input->post('bansos_pokmas_anggaran', TRUE));
+            $p_rea = $parseNum($this->input->post('bansos_pokmas_realisasi', TRUE));
+            $l_ang = $parseNum($this->input->post('bansos_lembaga_anggaran', TRUE));
+            $l_rea = $parseNum($this->input->post('bansos_lembaga_realisasi', TRUE));
+
+            $tot_ang = $i_ang + $p_ang + $l_ang;
+            $tot_rea = $i_rea + $p_rea + $l_rea;
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah, 'instansi_id' => $instansi_id, 'tahun' => $tahun,
+                'uraian' => $uraian,
+                'bansos_individu_anggaran' => $i_ang, 'bansos_individu_realisasi' => $i_rea,
+                'bansos_pokmas_anggaran' => $p_ang, 'bansos_pokmas_realisasi' => $p_rea,
+                'bansos_lembaga_anggaran' => $l_ang, 'bansos_lembaga_realisasi' => $l_rea,
+                'total_anggaran' => $tot_ang, 'total_realisasi' => $tot_rea,
+                'keterangan' => trim($this->input->post('keterangan', TRUE)),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                if ($urutan > 0) $saveData['urutan'] = $urutan;
+                $this->db->where('id', $id)->update('lkpj_bab1_tabel1_18', $saveData);
+                $msg = "Data '{$uraian}' berhasil diperbarui.";
+            } else {
+                if ($urutan <= 0) {
+                    $maxUrut = $this->db->select_max('urutan')->where('tahun', $tahun)->where('deleted_at IS NULL')->get('lkpj_bab1_tabel1_18')->row()->urutan;
+                    $urutan = ((int)$maxUrut) + 1;
+                }
+                $saveData['urutan'] = $urutan;
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab1_tabel1_18', $saveData);
+                $id = $this->db->insert_id();
+                $msg = "Data '{$uraian}' berhasil ditambahkan.";
+            }
+
+            $savedRow = $this->db->where('id', $id)->get('lkpj_bab1_tabel1_18')->row_array();
+            echo json_encode(['status' => 'success', 'message' => $msg, 'data' => $savedRow]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function DeleteBab1Tabel1_18() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+            $delQuery = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah());
+            if ($this->is_role_4() && $this->get_instansi_id()) { $delQuery->where('instansi_id', $this->get_instansi_id()); }
+            $row = $delQuery->get('lkpj_bab1_tabel1_18')->row_array();
+            if (!$row) throw new Exception('Data tidak ditemukan.');
+            $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->update('lkpj_bab1_tabel1_18', ['deleted_at' => date('Y-m-d H:i:s')]);
+            echo json_encode(['status' => 'success', 'message' => "Data '{$row['uraian']}' berhasil dihapus."]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function ResetBab1Tabel1_18() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+            $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+            $this->db->where('tahun', $tahun)->where('kodewilayah', $kodeWilayah)->update('lkpj_bab1_tabel1_18', ['deleted_at' => date('Y-m-d H:i:s')]);
+            $this->seed_default_tabel1_18($kodeWilayah, $instansiId, $tahun);
+            echo json_encode(['status' => 'success', 'message' => 'Data Tabel 1.18 berhasil direset kembali ke data resmi BKAD.']);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    // ===================================================================
+    // CRUD TABEL 1.19 (Pembiayaan Daerah)
+    // ===================================================================
+    public function GetBab1Tabel1_19() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->where('kodewilayah', $this->get_kode_wilayah());
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+        $items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_19')->result_array();
+        echo json_encode(['status' => 'success', 'data' => $items]);
+    }
+
+    public function SaveBab1Tabel1_19() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+
+            $nomor = trim($this->input->post('nomor', TRUE));
+            $uraian = trim($this->input->post('uraian', TRUE));
+            $is_header = (int)($this->input->post('is_header', TRUE) ?: 0);
+            $level = (int)($this->input->post('level', TRUE) ?: 2);
+            $parent_id = (int)($this->input->post('parent_id', TRUE) ?: 0);
+            $urutan = (int)($this->input->post('urutan', TRUE) ?: 0);
+
+            if (empty($uraian)) throw new Exception('Uraian rekening pembiayaan wajib diisi.');
+
+            $parseNum = function($str) {
+                if ($str === null || $str === '') return 0.00;
+                $clean = str_replace(['Rp', ' ', '.'], '', (string)$str);
+                $clean = str_replace(',', '.', $clean);
+                return (float)$clean;
+            };
+
+            $anggaran_2025 = $parseNum($this->input->post('anggaran_2025', TRUE));
+            $realisasi_2025 = $parseNum($this->input->post('realisasi_2025', TRUE));
+            $selisih = $realisasi_2025 - $anggaran_2025;
+            
+            $persenInput = trim($this->input->post('persen', TRUE));
+            if ($persenInput === '-' || ($anggaran_2025 == 0 && $realisasi_2025 > 0)) {
+                $persen = '-';
+            } elseif ($anggaran_2025 > 0) {
+                $persen = number_format(($realisasi_2025 / $anggaran_2025) * 100, 2, ',', '.');
+            } else {
+                $persen = '0,00';
+            }
+
+            $realisasi_2024 = $parseNum($this->input->post('realisasi_2024', TRUE));
+            $realisasi_2023 = $parseNum($this->input->post('realisasi_2023', TRUE));
+            $realisasi_2022 = $parseNum($this->input->post('realisasi_2022', TRUE));
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah, 'instansi_id' => $instansi_id, 'tahun' => $tahun,
+                'nomor' => $nomor, 'is_header' => $is_header, 'level' => $level, 'parent_id' => $parent_id,
+                'uraian' => $uraian,
+                'anggaran_2025' => $anggaran_2025, 'realisasi_2025' => $realisasi_2025,
+                'selisih' => $selisih, 'persen' => $persen,
+                'realisasi_2024' => $realisasi_2024, 'realisasi_2023' => $realisasi_2023, 'realisasi_2022' => $realisasi_2022,
+                'keterangan' => trim($this->input->post('keterangan', TRUE)),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                if ($urutan > 0) $saveData['urutan'] = $urutan;
+                $this->db->where('id', $id)->update('lkpj_bab1_tabel1_19', $saveData);
+                $msg = "Data '{$uraian}' berhasil diperbarui.";
+            } else {
+                if ($urutan <= 0) {
+                    $maxUrut = $this->db->select_max('urutan')->where('tahun', $tahun)->where('deleted_at IS NULL')->get('lkpj_bab1_tabel1_19')->row()->urutan;
+                    $urutan = ((int)$maxUrut) + 1;
+                }
+                $saveData['urutan'] = $urutan;
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab1_tabel1_19', $saveData);
+                $id = $this->db->insert_id();
+                $msg = "Data '{$uraian}' berhasil ditambahkan.";
+            }
+
+            if ($parent_id > 0) {
+                $subRows = $this->db->where('deleted_at IS NULL')->where('tahun', $tahun)->where('parent_id', $parent_id)->get('lkpj_bab1_tabel1_19')->result_array();
+                $pAngg = 0; $pReal = 0; $p24 = 0; $p23 = 0; $p22 = 0;
+                foreach ($subRows as $sr) {
+                    $pAngg += (float)$sr['anggaran_2025'];
+                    $pReal += (float)$sr['realisasi_2025'];
+                    $p24 += (float)$sr['realisasi_2024'];
+                    $p23 += (float)$sr['realisasi_2023'];
+                    $p22 += (float)$sr['realisasi_2022'];
+                }
+                $pSelisih = $pReal - $pAngg;
+                $pPct = ($pAngg > 0) ? number_format(($pReal / $pAngg) * 100, 2, ',', '.') : '0,00';
+                $this->db->where('id', $parent_id)->update('lkpj_bab1_tabel1_19', [
+                    'anggaran_2025' => $pAngg, 'realisasi_2025' => $pReal,
+                    'selisih' => $pSelisih, 'persen' => $pPct,
+                    'realisasi_2024' => $p24, 'realisasi_2023' => $p23, 'realisasi_2022' => $p22,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ]);
+            }
+
+            $savedRow = $this->db->where('id', $id)->get('lkpj_bab1_tabel1_19')->row_array();
+            echo json_encode(['status' => 'success', 'message' => $msg, 'data' => $savedRow]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function DeleteBab1Tabel1_19() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+            $row = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->get('lkpj_bab1_tabel1_19')->row_array();
+            if (!$row) throw new Exception('Data tidak ditemukan.');
+            $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->update('lkpj_bab1_tabel1_19', ['deleted_at' => date('Y-m-d H:i:s')]);
+            echo json_encode(['status' => 'success', 'message' => "Data '{$row['uraian']}' berhasil dihapus."]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function ResetBab1Tabel1_19() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+            $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+            $this->db->where('tahun', $tahun)->where('kodewilayah', $kodeWilayah)->update('lkpj_bab1_tabel1_19', ['deleted_at' => date('Y-m-d H:i:s')]);
+            $this->seed_default_tabel1_19($kodeWilayah, $instansiId, $tahun);
+            echo json_encode(['status' => 'success', 'message' => 'Data Tabel 1.19 berhasil direset kembali ke data resmi BKAD.']);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    // ===================================================================
+    // CRUD TABEL 1.20 (Komponen SILPA)
+    // ===================================================================
+    public function GetBab1Tabel1_20() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+        $this->db->where('deleted_at IS NULL');
+        $this->db->where('kodewilayah', $this->get_kode_wilayah());
+        if ($tahun > 0) $this->db->where('tahun', $tahun);
+        $items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab1_tabel1_20')->result_array();
+        echo json_encode(['status' => 'success', 'data' => $items]);
+    }
+
+    public function SaveBab1Tabel1_20() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $komponen = trim($this->input->post('komponen', TRUE));
+            $urutan = (int)($this->input->post('urutan', TRUE) ?: 0);
+            if (empty($komponen)) throw new Exception('Nama komponen SILPA wajib diisi.');
+
+            $parseNum = function($str) {
+                if ($str === null || $str === '') return 0.00;
+                $clean = str_replace(['Rp', ' ', '.'], '', (string)$str);
+                $clean = str_replace(',', '.', $clean);
+                return (float)$clean;
+            };
+            $jumlah = $parseNum($this->input->post('jumlah', TRUE));
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah, 'instansi_id' => $instansi_id, 'tahun' => $tahun,
+                'komponen' => $komponen, 'jumlah' => $jumlah,
+                'keterangan' => trim($this->input->post('keterangan', TRUE)),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                if ($urutan > 0) $saveData['urutan'] = $urutan;
+                $this->db->where('id', $id)->update('lkpj_bab1_tabel1_20', $saveData);
+                $msg = "Data '{$komponen}' berhasil diperbarui.";
+            } else {
+                if ($urutan <= 0) {
+                    $maxUrut = $this->db->select_max('urutan')->where('tahun', $tahun)->where('deleted_at IS NULL')->get('lkpj_bab1_tabel1_20')->row()->urutan;
+                    $urutan = ((int)$maxUrut) + 1;
+                }
+                $saveData['urutan'] = $urutan;
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab1_tabel1_20', $saveData);
+                $id = $this->db->insert_id();
+                $msg = "Data '{$komponen}' berhasil ditambahkan.";
+            }
+
+            $savedRow = $this->db->where('id', $id)->get('lkpj_bab1_tabel1_20')->row_array();
+            echo json_encode(['status' => 'success', 'message' => $msg, 'data' => $savedRow]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function DeleteBab1Tabel1_20() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+            $row = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->get('lkpj_bab1_tabel1_20')->row_array();
+            if (!$row) throw new Exception('Data tidak ditemukan.');
+            $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->update('lkpj_bab1_tabel1_20', ['deleted_at' => date('Y-m-d H:i:s')]);
+            echo json_encode(['status' => 'success', 'message' => "Data '{$row['komponen']}' berhasil dihapus."]);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    public function ResetBab1Tabel1_20() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+            $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+            $this->db->where('tahun', $tahun)->where('kodewilayah', $kodeWilayah)->update('lkpj_bab1_tabel1_20', ['deleted_at' => date('Y-m-d H:i:s')]);
+            $this->seed_default_tabel1_20($kodeWilayah, $instansiId, $tahun);
+            echo json_encode(['status' => 'success', 'message' => 'Data Tabel 1.20 berhasil direset kembali ke data resmi BKAD.']);
+        } catch (Exception $e) { echo json_encode(['status' => 'error', 'message' => $e->getMessage()]); }
+    }
+
+    /**
+     * AJAX: Simpan Data Generic Tabel 1.2 s/d 1.20
+     */
+    public function SaveBab1Generic() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tabel_kode = trim($this->input->post('tabel_kode', TRUE));
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+
+            if (empty($tabel_kode)) {
+                throw new Exception('Kode tabel tidak valid.');
+            }
+
+            $nomor = (int)$this->input->post('nomor', TRUE);
+            $kolom_1 = trim($this->input->post('kolom_1', TRUE));
+            $kolom_2 = trim($this->input->post('kolom_2', TRUE));
+            $kolom_3 = trim($this->input->post('kolom_3', TRUE));
+            $kolom_4 = trim($this->input->post('kolom_4', TRUE));
+            $kolom_5 = trim($this->input->post('kolom_5', TRUE));
+            $kolom_6 = trim($this->input->post('kolom_6', TRUE));
+
+            if (empty($kolom_1)) {
+                throw new Exception('Uraian kolom pertama wajib diisi.');
+            }
+
+            if ($nomor <= 0) {
+                $maxNomor = $this->db->select_max('nomor')
+                    ->where('tabel_kode', $tabel_kode)
+                    ->where('tahun', $tahun)
+                    ->where('deleted_at IS NULL')
+                    ->get('lkpj_bab1_generic')
+                    ->row()->nomor;
+                $nomor = ($maxNomor ? (int)$maxNomor : 0) + 1;
+            }
+
+            $saveData = [
+                'tabel_kode' => $tabel_kode,
+                'kodewilayah' => $kode_wilayah,
+                'instansi_id' => $instansi_id,
+                'tahun' => $tahun,
+                'nomor' => $nomor,
+                'kolom_1' => $kolom_1,
+                'kolom_2' => $kolom_2,
+                'kolom_3' => $kolom_3,
+                'kolom_4' => $kolom_4,
+                'kolom_5' => $kolom_5,
+                'kolom_6' => $kolom_6,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $this->db->where('id', $id)->update('lkpj_bab1_generic', $saveData);
+                $msg = "Data berhasil diperbarui.";
+            } else {
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab1_generic', $saveData);
+                $id = $this->db->insert_id();
+                $msg = "Data berhasil ditambahkan.";
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => $msg,
+                'data' => array_merge(['id' => $id], $saveData)
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * AJAX: Hapus Data Generic Tabel 1.2 s/d 1.20
+     */
+    public function DeleteBab1Generic() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+
+            $this->db->where('id', $id)->update('lkpj_bab1_generic', [
+                'deleted_at' => date('Y-m-d H:i:s')
+            ]);
+
+            echo json_encode(['status' => 'success', 'message' => 'Data baris berhasil dihapus.']);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    // =========================================================================
+    // MODUL E-LKPJ BAB 2 (Pengelolaan Keuangan Daerah: Tabel 2.1 s/d Tabel 2.3)
+    // =========================================================================
+
+    public function get_bab2_tabel_list() {
+        return [
+            '2.1' => [
+                'kode' => '2.1',
+                'nomor_tabel' => 'Tabel 2.1',
+                'judul' => 'Tabel 2.1 Perubahan Anggaran Pendapatan Daerah Kabupaten Situbondo Tahun 2025',
+                'judul_singkat' => 'Perubahan Anggaran Pendapatan Daerah',
+                'subjudul' => 'Perubahan Anggaran Pendapatan Daerah Kabupaten Situbondo Tahun Anggaran 2025 (Sebelum dan Sesudah Perubahan)',
+                'sumber' => 'BAPENDA Tahun 2026, Unaudited',
+                'kategori' => 'Pendapatan Daerah',
+                'kolom' => ['No', 'Uraian', 'Sebelum Perubahan (Rp)', 'Sesudah Perubahan (Rp)', 'Lebih/(Kurang) (Rp)', '%']
+            ],
+            '2.2' => [
+                'kode' => '2.2',
+                'nomor_tabel' => 'Tabel 2.2',
+                'judul' => 'Tabel 2.2 Perubahan Anggaran Belanja Daerah Kabupaten Situbondo Tahun 2025',
+                'judul_singkat' => 'Perubahan Anggaran Belanja Daerah',
+                'subjudul' => 'Perubahan Anggaran Belanja Daerah Kabupaten Situbondo Tahun Anggaran 2025 (Sebelum dan Sesudah Perubahan)',
+                'sumber' => 'BKAD Tahun 2026, Unaudited',
+                'kategori' => 'Belanja Daerah',
+                'kolom' => ['No', 'Uraian', 'Sebelum Perubahan (Rp)', 'Sesudah Perubahan (Rp)', 'Lebih/(Kurang) (Rp)', '%']
+            ],
+            '2.3' => [
+                'kode' => '2.3',
+                'nomor_tabel' => 'Tabel 2.3',
+                'judul' => 'Tabel 2.3 Perubahan Anggaran Pembiayaan Daerah Kabupaten Situbondo Tahun 2025',
+                'judul_singkat' => 'Perubahan Anggaran Pembiayaan Daerah',
+                'subjudul' => 'Perubahan Anggaran Pembiayaan Daerah Kabupaten Situbondo Tahun Anggaran 2025 (Sebelum dan Sesudah Perubahan)',
+                'sumber' => 'BKAD Tahun 2026, Unaudited',
+                'kategori' => 'Pembiayaan Daerah',
+                'kolom' => ['No', 'Uraian', 'Sebelum Perubahan (Rp)', 'Sesudah Perubahan (Rp)', 'Lebih/(Kurang) (Rp)', '%']
+            ]
+        ];
+    }
+
+    private function ensure_bab2_tables_exist() {
+        $tables = ['lkpj_bab2_tabel2_1', 'lkpj_bab2_tabel2_2', 'lkpj_bab2_tabel2_3'];
+        foreach ($tables as $tbl) {
+            $this->db->query("CREATE TABLE IF NOT EXISTS `{$tbl}` (
+                `id` INT(11) NOT NULL AUTO_INCREMENT,
+                `kodewilayah` VARCHAR(20) NOT NULL DEFAULT '35.12',
+                `instansi_id` INT(11) NOT NULL DEFAULT 1,
+                `tahun` INT(4) NOT NULL DEFAULT 2026,
+                `urutan` INT(11) NOT NULL DEFAULT 1,
+                `nomor` VARCHAR(10) NULL,
+                `uraian` VARCHAR(255) NOT NULL,
+                `level` INT(2) NOT NULL DEFAULT 1,
+                `is_header` TINYINT(1) NOT NULL DEFAULT 0,
+                `parent_id` INT(11) NULL DEFAULT 0,
+                `sebelum_perubahan` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+                `sesudah_perubahan` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+                `selisih` DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+                `persen` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                `keterangan` TEXT NULL,
+                `created_at` DATETIME NOT NULL,
+                `updated_at` DATETIME NOT NULL,
+                `deleted_at` DATETIME NULL,
+                PRIMARY KEY (`id`),
+                INDEX `idx_wilayah_tahun` (`kodewilayah`, `tahun`, `instansi_id`),
+                INDEX `idx_urutan` (`urutan`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        }
+    }
+
+    private function seed_default_tabel2_1($kodeWilayah = '35.12', $instansiId = 1, $tahun = 2026) {
+        $now = date('Y-m-d H:i:s');
+        $data = [
+            // 1 Pendapatan Asli Daerah (Header)
+            ['urutan' => 1, 'nomor' => '1', 'uraian' => 'Pendapatan Asli Daerah', 'level' => 1, 'is_header' => 1, 'parent_id' => 0, 'sebelum' => 316441559050.00, 'sesudah' => 302740025421.00, 'selisih' => -13701533629.00, 'persen' => -4.33],
+            ['urutan' => 2, 'nomor' => '', 'uraian' => 'Pajak daerah', 'level' => 2, 'is_header' => 0, 'parent_id' => 1, 'sebelum' => 95229076159.00, 'sesudah' => 95608439254.00, 'selisih' => 379363095.00, 'persen' => 0.40],
+            ['urutan' => 3, 'nomor' => '', 'uraian' => 'Retribusi daerah', 'level' => 2, 'is_header' => 0, 'parent_id' => 1, 'sebelum' => 210539521260.00, 'sesudah' => 154503239288.00, 'selisih' => -56036281972.00, 'persen' => -26.62],
+            ['urutan' => 4, 'nomor' => '', 'uraian' => 'Hasil pengelolaan kekayaan daerah yang dipisahkan', 'level' => 2, 'is_header' => 0, 'parent_id' => 1, 'sebelum' => 4963034363.00, 'sesudah' => 4965202287.00, 'selisih' => 2167924.00, 'persen' => 0.04],
+            ['urutan' => 5, 'nomor' => '', 'uraian' => 'Lain-lain PAD yang sah', 'level' => 2, 'is_header' => 0, 'parent_id' => 1, 'sebelum' => 5709927268.00, 'sesudah' => 47663144592.00, 'selisih' => 41953217324.00, 'persen' => 734.74],
+
+            // 2 Pendapatan Transfer (Header)
+            ['urutan' => 6, 'nomor' => '2', 'uraian' => 'Pendapatan Transfer', 'level' => 1, 'is_header' => 1, 'parent_id' => 0, 'sebelum' => 1483975464074.00, 'sesudah' => 1447778871981.00, 'selisih' => -36196592093.00, 'persen' => -2.44],
+            ['urutan' => 7, 'nomor' => '', 'uraian' => 'Transfer Pemerintah Pusat', 'level' => 2, 'is_header' => 0, 'parent_id' => 2, 'sebelum' => 1371707506294.00, 'sesudah' => 1356062271097.00, 'selisih' => -15645235197.00, 'persen' => -1.14],
+            ['urutan' => 8, 'nomor' => '', 'uraian' => 'Transfer Pemerintah Antar Daerah', 'level' => 2, 'is_header' => 0, 'parent_id' => 2, 'sebelum' => 112267957780.00, 'sesudah' => 91716600884.00, 'selisih' => -20551356896.00, 'persen' => -18.31],
+
+            // 3 LAIN-LAIN PENDAPATAN YANG SAH (Header)
+            ['urutan' => 9, 'nomor' => '3', 'uraian' => 'LAIN-LAIN PENDAPATAN YANG SAH', 'level' => 1, 'is_header' => 1, 'parent_id' => 0, 'sebelum' => 0.00, 'sesudah' => 0.00, 'selisih' => 0.00, 'persen' => 0.00],
+            ['urutan' => 10, 'nomor' => '', 'uraian' => 'Lain-lain Pendapatan Sesuai dengan Ketentuan Peraturan Perundang-Undangan', 'level' => 2, 'is_header' => 0, 'parent_id' => 3, 'sebelum' => 0.00, 'sesudah' => 0.00, 'selisih' => 0.00, 'persen' => 0.00]
+        ];
+
+        $insertedParentMap = [];
+        foreach ($data as $row) {
+            $parentId = 0;
+            if ($row['parent_id'] > 0 && isset($insertedParentMap[$row['parent_id']])) {
+                $parentId = $insertedParentMap[$row['parent_id']];
+            }
+            $ins = [
+                'kodewilayah' => $kodeWilayah,
+                'instansi_id' => $instansiId,
+                'tahun' => $tahun,
+                'urutan' => $row['urutan'],
+                'nomor' => $row['nomor'],
+                'uraian' => $row['uraian'],
+                'level' => $row['level'],
+                'is_header' => $row['is_header'],
+                'parent_id' => $parentId,
+                'sebelum_perubahan' => $row['sebelum'],
+                'sesudah_perubahan' => $row['sesudah'],
+                'selisih' => $row['selisih'],
+                'persen' => $row['persen'],
+                'created_at' => $now,
+                'updated_at' => $now
+            ];
+            $this->db->insert('lkpj_bab2_tabel2_1', $ins);
+            $newId = $this->db->insert_id();
+            if ($row['is_header'] == 1 && !empty($row['nomor'])) {
+                $insertedParentMap[(int)$row['nomor']] = $newId;
+            }
+        }
+    }
+
+    private function seed_default_tabel2_2($kodeWilayah = '35.12', $instansiId = 1, $tahun = 2026) {
+        $now = date('Y-m-d H:i:s');
+        $data = [
+            // 1 BELANJA OPERASI
+            ['urutan' => 1, 'nomor' => '1', 'uraian' => 'BELANJA OPERASI', 'level' => 1, 'is_header' => 1, 'parent_id' => 0, 'sebelum' => 1437587949728.00, 'sesudah' => 1419631683269.00, 'selisih' => -17956266459.00, 'persen' => -1.25],
+            ['urutan' => 2, 'nomor' => '', 'uraian' => 'Belanja Pegawai', 'level' => 2, 'is_header' => 0, 'parent_id' => 1, 'sebelum' => 742652645451.00, 'sesudah' => 718115470587.00, 'selisih' => -24537174864.00, 'persen' => -3.30],
+            ['urutan' => 3, 'nomor' => '', 'uraian' => 'Belanja Barang dan Jasa', 'level' => 2, 'is_header' => 0, 'parent_id' => 1, 'sebelum' => 618805937299.00, 'sesudah' => 614258239273.00, 'selisih' => -4547698026.00, 'persen' => -0.73],
+            ['urutan' => 4, 'nomor' => '', 'uraian' => 'Belanja Subsidi', 'level' => 2, 'is_header' => 0, 'parent_id' => 1, 'sebelum' => 0.00, 'sesudah' => 3000000000.00, 'selisih' => 3000000000.00, 'persen' => 0.00],
+            ['urutan' => 5, 'nomor' => '', 'uraian' => 'Belanja Hibah', 'level' => 2, 'is_header' => 0, 'parent_id' => 1, 'sebelum' => 53896921978.00, 'sesudah' => 74852973409.00, 'selisih' => 20956051431.00, 'persen' => 38.88],
+            ['urutan' => 6, 'nomor' => '', 'uraian' => 'Belanja Bantuan Sosial', 'level' => 2, 'is_header' => 0, 'parent_id' => 1, 'sebelum' => 22232445000.00, 'sesudah' => 9405000000.00, 'selisih' => -12827445000.00, 'persen' => -57.70],
+
+            // 2 BELANJA MODAL
+            ['urutan' => 7, 'nomor' => '2', 'uraian' => 'BELANJA MODAL', 'level' => 1, 'is_header' => 1, 'parent_id' => 0, 'sebelum' => 144650342195.00, 'sesudah' => 183756593702.00, 'selisih' => 39106251507.00, 'persen' => 27.04],
+            ['urutan' => 8, 'nomor' => '', 'uraian' => 'Belanja Modal Tanah', 'level' => 2, 'is_header' => 0, 'parent_id' => 2, 'sebelum' => 0.00, 'sesudah' => 0.00, 'selisih' => 0.00, 'persen' => 0.00],
+            ['urutan' => 9, 'nomor' => '', 'uraian' => 'Belanja Modal Peralatan dan Mesin', 'level' => 2, 'is_header' => 0, 'parent_id' => 2, 'sebelum' => 43656588540.00, 'sesudah' => 62899388389.00, 'selisih' => 19242799849.00, 'persen' => 44.08],
+            ['urutan' => 10, 'nomor' => '', 'uraian' => 'Belanja Modal Gedung dan Bangunan', 'level' => 2, 'is_header' => 0, 'parent_id' => 2, 'sebelum' => 28479111515.00, 'sesudah' => 35757220357.00, 'selisih' => 7278108842.00, 'persen' => 25.56],
+            ['urutan' => 11, 'nomor' => '', 'uraian' => 'Belanja Modal Jalan, Irigasi dan Jaringan', 'level' => 2, 'is_header' => 0, 'parent_id' => 2, 'sebelum' => 72356594029.00, 'sesudah' => 76841842104.00, 'selisih' => 4485248075.00, 'persen' => 6.20],
+            ['urutan' => 12, 'nomor' => '', 'uraian' => 'Belanja Modal Aset Tetap Lainnya', 'level' => 2, 'is_header' => 0, 'parent_id' => 2, 'sebelum' => 148048111.00, 'sesudah' => 8258142852.00, 'selisih' => 8110094741.00, 'persen' => 5478.01],
+            ['urutan' => 13, 'nomor' => '', 'uraian' => 'Belanja Modal Aset Lainnya', 'level' => 2, 'is_header' => 0, 'parent_id' => 2, 'sebelum' => 10000000.00, 'sesudah' => 0.00, 'selisih' => -10000000.00, 'persen' => -100.00],
+
+            // 3 BELANJA TIDAK TERDUGA
+            ['urutan' => 14, 'nomor' => '3', 'uraian' => 'BELANJA TIDAK TERDUGA', 'level' => 1, 'is_header' => 1, 'parent_id' => 0, 'sebelum' => 21515018057.00, 'sesudah' => 5550181481.00, 'selisih' => -15964836576.00, 'persen' => -74.20],
+            ['urutan' => 15, 'nomor' => '', 'uraian' => 'Belanja Tidak Terduga', 'level' => 2, 'is_header' => 0, 'parent_id' => 3, 'sebelum' => 21515018057.00, 'sesudah' => 5550181481.00, 'selisih' => -15964836576.00, 'persen' => -74.20],
+
+            // 4 BELANJA TRANSFER
+            ['urutan' => 16, 'nomor' => '4', 'uraian' => 'BELANJA TRANSFER', 'level' => 1, 'is_header' => 1, 'parent_id' => 0, 'sebelum' => 249183683797.00, 'sesudah' => 245819114314.00, 'selisih' => -3364569483.00, 'persen' => -1.35],
+            ['urutan' => 17, 'nomor' => '', 'uraian' => 'Belanja Bagi Hasil', 'level' => 2, 'is_header' => 0, 'parent_id' => 4, 'sebelum' => 11703090397.00, 'sesudah' => 11838520914.00, 'selisih' => 135430517.00, 'persen' => 1.16],
+            ['urutan' => 18, 'nomor' => '', 'uraian' => 'Belanja Bantuan Keuangan', 'level' => 2, 'is_header' => 0, 'parent_id' => 4, 'sebelum' => 237480593400.00, 'sesudah' => 233980593400.00, 'selisih' => -3500000000.00, 'persen' => -1.47]
+        ];
+
+        $insertedParentMap = [];
+        foreach ($data as $row) {
+            $parentId = 0;
+            if ($row['parent_id'] > 0 && isset($insertedParentMap[$row['parent_id']])) {
+                $parentId = $insertedParentMap[$row['parent_id']];
+            }
+            $ins = [
+                'kodewilayah' => $kodeWilayah,
+                'instansi_id' => $instansiId,
+                'tahun' => $tahun,
+                'urutan' => $row['urutan'],
+                'nomor' => $row['nomor'],
+                'uraian' => $row['uraian'],
+                'level' => $row['level'],
+                'is_header' => $row['is_header'],
+                'parent_id' => $parentId,
+                'sebelum_perubahan' => $row['sebelum'],
+                'sesudah_perubahan' => $row['sesudah'],
+                'selisih' => $row['selisih'],
+                'persen' => $row['persen'],
+                'created_at' => $now,
+                'updated_at' => $now
+            ];
+            $this->db->insert('lkpj_bab2_tabel2_2', $ins);
+            $newId = $this->db->insert_id();
+            if ($row['is_header'] == 1 && !empty($row['nomor'])) {
+                $insertedParentMap[(int)$row['nomor']] = $newId;
+            }
+        }
+    }
+
+    private function seed_default_tabel2_3($kodeWilayah = '35.12', $instansiId = 1, $tahun = 2026) {
+        $now = date('Y-m-d H:i:s');
+        $data = [
+            // 1 PENERIMAAN PEMBIAYAAN DAERAH
+            ['urutan' => 1, 'nomor' => '1', 'uraian' => 'PENERIMAAN PEMBIAYAAN DAERAH', 'level' => 1, 'is_header' => 1, 'parent_id' => 0, 'sebelum' => 52519970653.00, 'sesudah' => 104238675364.00, 'selisih' => 51718704711.00, 'persen' => 198.47],
+            ['urutan' => 2, 'nomor' => '', 'uraian' => 'Sisa Lebih Perhitungan Anggaran Tahun Sebelumnya', 'level' => 2, 'is_header' => 0, 'parent_id' => 1, 'sebelum' => 52519970653.00, 'sesudah' => 104238675364.00, 'selisih' => 51718704711.00, 'persen' => 198.47],
+            ['urutan' => 3, 'nomor' => '', 'uraian' => 'Pencairan Dana Cadangan', 'level' => 2, 'is_header' => 0, 'parent_id' => 1, 'sebelum' => 0.00, 'sesudah' => 0.00, 'selisih' => 0.00, 'persen' => 0.00],
+
+            // 2 PENGELUARAN PEMBIAYAAN DAERAH
+            ['urutan' => 4, 'nomor' => '2', 'uraian' => 'PENGELUARAN PEMBIAYAAN DAERAH', 'level' => 1, 'is_header' => 1, 'parent_id' => 0, 'sebelum' => 0.00, 'sesudah' => 0.00, 'selisih' => 0.00, 'persen' => 0.00],
+            ['urutan' => 5, 'nomor' => '', 'uraian' => 'Pembayaran Pokok Pinjaman Dalam Negeri', 'level' => 2, 'is_header' => 0, 'parent_id' => 2, 'sebelum' => 0.00, 'sesudah' => 0.00, 'selisih' => 0.00, 'persen' => 0.00],
+            ['urutan' => 6, 'nomor' => '', 'uraian' => 'Pembentukan Dana Cadangan', 'level' => 2, 'is_header' => 0, 'parent_id' => 2, 'sebelum' => 0.00, 'sesudah' => 0.00, 'selisih' => 0.00, 'persen' => 0.00],
+            ['urutan' => 7, 'nomor' => '', 'uraian' => 'Pembayaran Cicilan Pokok Utang yang Jatuh Tempo', 'level' => 2, 'is_header' => 0, 'parent_id' => 2, 'sebelum' => 0.00, 'sesudah' => 0.00, 'selisih' => 0.00, 'persen' => 0.00],
+
+            // PEMBIAYAAN NETTO
+            ['urutan' => 8, 'nomor' => '', 'uraian' => 'PEMBIAYAAN NETTO', 'level' => 1, 'is_header' => 1, 'parent_id' => 0, 'sebelum' => 0.00, 'sesudah' => 0.00, 'selisih' => 0.00, 'persen' => 0.00],
+
+            // 3 SISA LEBIH PEMBIAYAAN ANGGARAN (SILPA)
+            ['urutan' => 9, 'nomor' => '3', 'uraian' => 'SISA LEBIH PEMBIAYAAN ANGGARAN (SILPA)', 'level' => 1, 'is_header' => 1, 'parent_id' => 0, 'sebelum' => 52519970653.00, 'sesudah' => 104238675364.00, 'selisih' => 51718704711.00, 'persen' => 198.47]
+        ];
+
+        $insertedParentMap = [];
+        foreach ($data as $row) {
+            $parentId = 0;
+            if ($row['parent_id'] > 0 && isset($insertedParentMap[$row['parent_id']])) {
+                $parentId = $insertedParentMap[$row['parent_id']];
+            }
+            $ins = [
+                'kodewilayah' => $kodeWilayah,
+                'instansi_id' => $instansiId,
+                'tahun' => $tahun,
+                'urutan' => $row['urutan'],
+                'nomor' => $row['nomor'],
+                'uraian' => $row['uraian'],
+                'level' => $row['level'],
+                'is_header' => $row['is_header'],
+                'parent_id' => $parentId,
+                'sebelum_perubahan' => $row['sebelum'],
+                'sesudah_perubahan' => $row['sesudah'],
+                'selisih' => $row['selisih'],
+                'persen' => $row['persen'],
+                'created_at' => $now,
+                'updated_at' => $now
+            ];
+            $this->db->insert('lkpj_bab2_tabel2_3', $ins);
+            $newId = $this->db->insert_id();
+            if ($row['is_header'] == 1 && !empty($row['nomor'])) {
+                $insertedParentMap[(int)$row['nomor']] = $newId;
+            }
+        }
+    }
+
+    /**
+     * Halaman Utama Menu BAB 2 E-LKPJ
+     */
+    public function BAB2() {
+        $this->ensure_bab2_tables_exist();
+
+        $Header['Halaman'] = 'E-LKPJ: BAB 2 (Pengelolaan Keuangan Daerah)';
+        $KodeWilayah = $this->get_kode_wilayah();
+        $instansi_id = $this->get_instansi_id();
+        $is_role_4 = $this->is_role_4();
+        $is_logged_in = $this->is_logged_in();
+        $tahun = (int)($this->input->get('tahun', TRUE) ?: (isset($_SESSION['Tahun']) ? $_SESSION['Tahun'] : 2026));
+        $filter_instansi = $this->input->get('instansi_id', TRUE);
+
+        if (empty($filter_instansi) && isset($_SESSION['TempInstansiId']) && !empty($_SESSION['TempInstansiId'])) {
+            $filter_instansi = $_SESSION['TempInstansiId'];
+        }
+        if ($is_role_4 && $instansi_id) {
+            $filter_instansi = $instansi_id;
+        }
+
+        // Ambil data nama wilayah dinamis dari database terlebih dahulu
+        $Data['NamaWilayah'] = '';
+        $namaWilayahFormat = 'Kabupaten Situbondo';
+        if (!empty($KodeWilayah)) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            if ($wilayah) {
+                $Data['NamaWilayah'] = $wilayah['Nama'];
+                $namaWilayahFormat = ucwords(strtolower($wilayah['Nama']));
+            } else {
+                $Data['NamaWilayah'] = 'KAB. SITUBONDO';
+            }
+        } else {
+            $Data['NamaWilayah'] = 'KAB. SITUBONDO';
+        }
+
+        $active_tabel = $this->input->get('tabel', TRUE) ?: '2.1';
+        $daftar_tabel = $this->get_bab2_tabel_list($namaWilayahFormat);
+
+        if (!array_key_exists($active_tabel, $daftar_tabel)) {
+            $active_tabel = '2.1';
+        }
+
+        $Data['IsLoggedIn'] = $is_logged_in;
+        $Data['CanCrud'] = $is_logged_in;
+        $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama', 'ASC')->get('kodewilayah')->result_array();
+        $Data['KodeWilayah'] = $KodeWilayah;
+        $Data['IsRole4'] = $is_role_4;
+        $Data['IsDaerah'] = $is_logged_in && !$is_role_4;
+        $Data['InstansiId'] = $instansi_id;
+        $Data['ControllerName'] = 'Instansi';
+
+        // Filter List Instansi sesuai Role dan Kode Wilayah
+        if ($is_role_4 && $instansi_id) {
+            $Data['ListInstansi'] = $this->db->select('id, nama')->from('akun_instansi')->where('id', $instansi_id)->where('deleted_at IS NULL')->get()->result_array();
+            $activeInstansi = $instansi_id;
+        } else {
+            $provKode = substr($KodeWilayah, 0, 2);
+            $Data['ListInstansi'] = $this->db->select('id, nama')->from('akun_instansi')
+                ->where("(kodewilayah = " . $this->db->escape($KodeWilayah) . " OR kodewilayah = " . $this->db->escape($provKode) . ")")
+                ->where('deleted_at IS NULL')
+                ->order_by('nama', 'ASC')
+                ->get()
+                ->result_array();
+            if (empty($Data['ListInstansi'])) {
+                $Data['ListInstansi'] = $this->db->select('id, nama')->from('akun_instansi')->where('deleted_at IS NULL')->order_by('nama', 'ASC')->get()->result_array();
+            }
+            $activeInstansi = $filter_instansi ? (int)$filter_instansi : ($Data['ListInstansi'][0]['id'] ?? 1);
+        }
+        $Data['ListTahun'] = [2027, 2026, 2025, 2024, 2023];
+        $Data['TahunAktif'] = (int)$tahun;
+        $Data['FilterInstansi'] = $activeInstansi;
+
+        $Data['DaftarTabel'] = $daftar_tabel;
+        $Data['ActiveTabel'] = $active_tabel;
+        $Data['MetaTabel'] = $daftar_tabel[$active_tabel];
+
+        // Ambil Data Tabel 2.1
+        $this->db->where('deleted_at IS NULL');
+        $this->db->where('kodewilayah', $KodeWilayah);
+        if ($tahun) $this->db->where('tahun', $tahun);
+        $tabel2_1_items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab2_tabel2_1')->result_array();
+
+        $Data['ItemsTabel2_1'] = $tabel2_1_items;
+
+        $totSebelum21 = 0; $totSesudah21 = 0;
+        foreach ($tabel2_1_items as $it) {
+            if ((int)$it['is_header'] === 1 && !empty($it['nomor'])) {
+                $totSebelum21 += (float)$it['sebelum_perubahan'];
+                $totSesudah21 += (float)$it['sesudah_perubahan'];
+            }
+        }
+        $totSelisih21 = $totSesudah21 - $totSebelum21;
+        $totPersen21 = ($totSebelum21 != 0) ? round(($totSelisih21 / $totSebelum21) * 100, 2) : 0;
+        $Data['SummaryTabel2_1'] = [
+            'total_sebelum' => $totSebelum21,
+            'total_sesudah' => $totSesudah21,
+            'total_selisih' => $totSelisih21,
+            'total_persen' => $totPersen21,
+            'sumber' => 'BAPENDA Tahun 2026, Unaudited'
+        ];
+
+        // Ambil Data Tabel 2.2
+        if ($active_tabel === '2.2') {
+            $this->db->where('deleted_at IS NULL');
+            if ($tahun) $this->db->where('tahun', $tahun);
+            $tabel2_2_items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab2_tabel2_2')->result_array();
+
+            $Data['ItemsTabel2_2'] = $tabel2_2_items;
+
+            $totSebelum22 = 0; $totSesudah22 = 0;
+            foreach ($tabel2_2_items as $it) {
+                if ((int)$it['is_header'] === 1 && !empty($it['nomor'])) {
+                    $totSebelum22 += (float)$it['sebelum_perubahan'];
+                    $totSesudah22 += (float)$it['sesudah_perubahan'];
+                }
+            }
+            $totSelisih22 = $totSesudah22 - $totSebelum22;
+            $totPersen22 = ($totSebelum22 != 0) ? round(($totSelisih22 / $totSebelum22) * 100, 2) : 0;
+            $Data['SummaryTabel2_2'] = [
+                'total_sebelum' => $totSebelum22,
+                'total_sesudah' => $totSesudah22,
+                'total_selisih' => $totSelisih22,
+                'total_persen' => $totPersen22,
+                'sumber' => 'BKAD Tahun 2026, Unaudited'
+            ];
+        } else {
+            $Data['ItemsTabel2_2'] = [];
+            $Data['SummaryTabel2_2'] = [
+                'total_sebelum' => 0, 'total_sesudah' => 0, 'total_selisih' => 0, 'total_persen' => 0, 'sumber' => ''
+            ];
+        }
+
+        // Ambil Data Tabel 2.3
+        if ($active_tabel === '2.3') {
+            $this->db->where('deleted_at IS NULL');
+            if ($tahun) $this->db->where('tahun', $tahun);
+            $tabel2_3_items = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('lkpj_bab2_tabel2_3')->result_array();
+
+            $Data['ItemsTabel2_3'] = $tabel2_3_items;
+
+            $penerimaanRow = null; $pengeluaranRow = null; $nettoRow = null; $silpaRow = null;
+            foreach ($tabel2_3_items as $it) {
+                if ($it['nomor'] === '1' && (int)$it['is_header'] === 1) $penerimaanRow = $it;
+                if ($it['nomor'] === '2' && (int)$it['is_header'] === 1) $pengeluaranRow = $it;
+                if ($it['uraian'] === 'PEMBIAYAAN NETTO') $nettoRow = $it;
+                if ($it['nomor'] === '3' && (int)$it['is_header'] === 1) $silpaRow = $it;
+            }
+
+            $Data['SummaryTabel2_3'] = [
+                'penerimaan_sesudah' => $penerimaanRow ? (float)$penerimaanRow['sesudah_perubahan'] : 0,
+                'pengeluaran_sesudah' => $pengeluaranRow ? (float)$pengeluaranRow['sesudah_perubahan'] : 0,
+                'netto_sesudah' => $nettoRow ? (float)$nettoRow['sesudah_perubahan'] : 0,
+                'silpa_sesudah' => $silpaRow ? (float)$silpaRow['sesudah_perubahan'] : 0,
+                'sumber' => 'BKAD Tahun 2026, Unaudited'
+            ];
+        } else {
+            $Data['ItemsTabel2_3'] = [];
+            $Data['SummaryTabel2_3'] = [
+                'penerimaan_sesudah' => 0, 'pengeluaran_sesudah' => 0, 'netto_sesudah' => 0, 'silpa_sesudah' => 0, 'sumber' => ''
+            ];
+        }
+
+        $this->load->view('Daerah/header', $Header);
+        $this->load->view('Daerah/BAB2', $Data);
+    }
+
+    // =========================================================================
+    // AJAX CRUD TABEL 2.1
+    // =========================================================================
+    public function GetBab2Tabel2_1() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        $id = (int)$this->input->get('id', TRUE);
+        $data = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->where('deleted_at IS NULL')->get('lkpj_bab2_tabel2_1')->row_array();
+        if ($data) {
+            echo json_encode(['status' => 'success', 'data' => $data]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+        }
+    }
+
+    public function SaveBab2Tabel2_1() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+
+            $nomor = trim((string)$this->input->post('nomor', TRUE));
+            $uraian = trim((string)$this->input->post('uraian', TRUE));
+            $level = (int)($this->input->post('level', TRUE) ?: 2);
+            $is_header = (int)($this->input->post('is_header', TRUE) ?: 0);
+            $parent_id = (int)($this->input->post('parent_id', TRUE) ?: 0);
+            $urutan = (int)($this->input->post('urutan', TRUE) ?: 1);
+
+            $sebelum = (float)str_replace(',', '.', str_replace(['Rp', ' ', '.'], '', (string)$this->input->post('sebelum_perubahan', TRUE)));
+            $sesudah = (float)str_replace(',', '.', str_replace(['Rp', ' ', '.'], '', (string)$this->input->post('sesudah_perubahan', TRUE)));
+            $selisih = $sesudah - $sebelum;
+            $persen = ($sebelum != 0) ? round(($selisih / $sebelum) * 100, 2) : 0.00;
+
+            if (empty($uraian)) throw new Exception('Uraian pendapatan wajib diisi.');
+
+            $saveData = [
+                'kodewilayah' => $kodeWilayah,
+                'instansi_id' => $instansi_id,
+                'tahun' => $tahun,
+                'nomor' => $nomor,
+                'uraian' => $uraian,
+                'level' => $level,
+                'is_header' => $is_header,
+                'parent_id' => $parent_id,
+                'urutan' => $urutan,
+                'sebelum_perubahan' => $sebelum,
+                'sesudah_perubahan' => $sesudah,
+                'selisih' => $selisih,
+                'persen' => $persen,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $this->db->where('id', $id)->where('kodewilayah', $kodeWilayah)->update('lkpj_bab2_tabel2_1', $saveData);
+            } else {
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab2_tabel2_1', $saveData);
+                $id = $this->db->insert_id();
+            }
+
+            // Recalculate parent if exists
+            if ($parent_id > 0) {
+                $this->recalc_bab2_parent('lkpj_bab2_tabel2_1', $parent_id);
+            }
+
+            echo json_encode(['status' => 'success', 'message' => 'Data Tabel 2.1 berhasil disimpan.']);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function DeleteBab2Tabel2_1() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+
+            $row = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->get('lkpj_bab2_tabel2_1')->row_array();
+            $parentId = $row ? (int)$row['parent_id'] : 0;
+
+            $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->update('lkpj_bab2_tabel2_1', ['deleted_at' => date('Y-m-d H:i:s')]);
+
+            if ($parentId > 0) {
+                $this->recalc_bab2_parent('lkpj_bab2_tabel2_1', $parentId);
+            }
+
+            echo json_encode(['status' => 'success', 'message' => 'Data berhasil dihapus.']);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function ResetBab2Tabel2_1() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+            $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+
+            $this->db->where('tahun', $tahun)->where('kodewilayah', $kodeWilayah)->delete('lkpj_bab2_tabel2_1');
+            $this->seed_default_tabel2_1($kodeWilayah, $instansiId, $tahun);
+
+            echo json_encode(['status' => 'success', 'message' => 'Data Tabel 2.1 berhasil di-reset ke nilai default dokumen.']);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    // =========================================================================
+    // AJAX CRUD TABEL 2.2
+    // =========================================================================
+    public function GetBab2Tabel2_2() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        $id = (int)$this->input->get('id', TRUE);
+        $data = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->where('deleted_at IS NULL')->get('lkpj_bab2_tabel2_2')->row_array();
+        if ($data) {
+            echo json_encode(['status' => 'success', 'data' => $data]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+        }
+    }
+
+    public function SaveBab2Tabel2_2() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+
+            $nomor = trim((string)$this->input->post('nomor', TRUE));
+            $uraian = trim((string)$this->input->post('uraian', TRUE));
+            $level = (int)($this->input->post('level', TRUE) ?: 2);
+            $is_header = (int)($this->input->post('is_header', TRUE) ?: 0);
+            $parent_id = (int)($this->input->post('parent_id', TRUE) ?: 0);
+            $urutan = (int)($this->input->post('urutan', TRUE) ?: 1);
+
+            $sebelum = (float)str_replace(',', '.', str_replace(['Rp', ' ', '.'], '', (string)$this->input->post('sebelum_perubahan', TRUE)));
+            $sesudah = (float)str_replace(',', '.', str_replace(['Rp', ' ', '.'], '', (string)$this->input->post('sesudah_perubahan', TRUE)));
+            $selisih = $sesudah - $sebelum;
+            $persen = ($sebelum != 0) ? round(($selisih / $sebelum) * 100, 2) : 0.00;
+
+            if (empty($uraian)) throw new Exception('Uraian belanja wajib diisi.');
+
+            $saveData = [
+                'kodewilayah' => $kodeWilayah,
+                'instansi_id' => $instansi_id,
+                'tahun' => $tahun,
+                'nomor' => $nomor,
+                'uraian' => $uraian,
+                'level' => $level,
+                'is_header' => $is_header,
+                'parent_id' => $parent_id,
+                'urutan' => $urutan,
+                'sebelum_perubahan' => $sebelum,
+                'sesudah_perubahan' => $sesudah,
+                'selisih' => $selisih,
+                'persen' => $persen,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $this->db->where('id', $id)->where('kodewilayah', $kodeWilayah)->update('lkpj_bab2_tabel2_2', $saveData);
+            } else {
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab2_tabel2_2', $saveData);
+                $id = $this->db->insert_id();
+            }
+
+            if ($parent_id > 0) {
+                $this->recalc_bab2_parent('lkpj_bab2_tabel2_2', $parent_id);
+            }
+
+            echo json_encode(['status' => 'success', 'message' => 'Data Tabel 2.2 berhasil disimpan.']);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function DeleteBab2Tabel2_2() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+
+            $row = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->get('lkpj_bab2_tabel2_2')->row_array();
+            $parentId = $row ? (int)$row['parent_id'] : 0;
+
+            $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->update('lkpj_bab2_tabel2_2', ['deleted_at' => date('Y-m-d H:i:s')]);
+
+            if ($parentId > 0) {
+                $this->recalc_bab2_parent('lkpj_bab2_tabel2_2', $parentId);
+            }
+
+            echo json_encode(['status' => 'success', 'message' => 'Data berhasil dihapus.']);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function ResetBab2Tabel2_2() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+            $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+
+            $this->db->where('tahun', $tahun)->where('kodewilayah', $kodeWilayah)->delete('lkpj_bab2_tabel2_2');
+            $this->seed_default_tabel2_2($kodeWilayah, $instansiId, $tahun);
+
+            echo json_encode(['status' => 'success', 'message' => 'Data Tabel 2.2 berhasil di-reset ke nilai default dokumen.']);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    // =========================================================================
+    // AJAX CRUD TABEL 2.3
+    // =========================================================================
+    public function GetBab2Tabel2_3() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        $id = (int)$this->input->get('id', TRUE);
+        $data = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->where('deleted_at IS NULL')->get('lkpj_bab2_tabel2_3')->row_array();
+        if ($data) {
+            echo json_encode(['status' => 'success', 'data' => $data]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+        }
+    }
+
+    public function SaveBab2Tabel2_3() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+
+            $nomor = trim((string)$this->input->post('nomor', TRUE));
+            $uraian = trim((string)$this->input->post('uraian', TRUE));
+            $level = (int)($this->input->post('level', TRUE) ?: 2);
+            $is_header = (int)($this->input->post('is_header', TRUE) ?: 0);
+            $parent_id = (int)($this->input->post('parent_id', TRUE) ?: 0);
+            $urutan = (int)($this->input->post('urutan', TRUE) ?: 1);
+
+            $sebelum = (float)str_replace(',', '.', str_replace(['Rp', ' ', '.'], '', (string)$this->input->post('sebelum_perubahan', TRUE)));
+            $sesudah = (float)str_replace(',', '.', str_replace(['Rp', ' ', '.'], '', (string)$this->input->post('sesudah_perubahan', TRUE)));
+            $selisih = $sesudah - $sebelum;
+            $persen = ($sebelum != 0) ? round(($selisih / $sebelum) * 100, 2) : 0.00;
+
+            if (empty($uraian)) throw new Exception('Uraian pembiayaan wajib diisi.');
+
+            $saveData = [
+                'kodewilayah' => $kodeWilayah,
+                'instansi_id' => $instansi_id,
+                'tahun' => $tahun,
+                'nomor' => $nomor,
+                'uraian' => $uraian,
+                'level' => $level,
+                'is_header' => $is_header,
+                'parent_id' => $parent_id,
+                'urutan' => $urutan,
+                'sebelum_perubahan' => $sebelum,
+                'sesudah_perubahan' => $sesudah,
+                'selisih' => $selisih,
+                'persen' => $persen,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $this->db->where('id', $id)->where('kodewilayah', $kodeWilayah)->update('lkpj_bab2_tabel2_3', $saveData);
+            } else {
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab2_tabel2_3', $saveData);
+                $id = $this->db->insert_id();
+            }
+
+            if ($parent_id > 0) {
+                $this->recalc_bab2_parent('lkpj_bab2_tabel2_3', $parent_id);
+            }
+
+            echo json_encode(['status' => 'success', 'message' => 'Data Tabel 2.3 berhasil disimpan.']);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function DeleteBab2Tabel2_3() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) throw new Exception('ID data tidak valid.');
+
+            $row = $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->get('lkpj_bab2_tabel2_3')->row_array();
+            $parentId = $row ? (int)$row['parent_id'] : 0;
+
+            $this->db->where('id', $id)->where('kodewilayah', $this->get_kode_wilayah())->update('lkpj_bab2_tabel2_3', ['deleted_at' => date('Y-m-d H:i:s')]);
+
+            if ($parentId > 0) {
+                $this->recalc_bab2_parent('lkpj_bab2_tabel2_3', $parentId);
+            }
+
+            echo json_encode(['status' => 'success', 'message' => 'Data berhasil dihapus.']);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function ResetBab2Tabel2_3() {
+        if (!$this->input->is_ajax_request()) { show_404(); return; }
+        header('Content-Type: application/json');
+        if (!$this->is_logged_in()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+        try {
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+            $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
+
+            $this->db->where('tahun', $tahun)->where('kodewilayah', $kodeWilayah)->delete('lkpj_bab2_tabel2_3');
+            $this->seed_default_tabel2_3($kodeWilayah, $instansiId, $tahun);
+
+            echo json_encode(['status' => 'success', 'message' => 'Data Tabel 2.3 berhasil di-reset ke nilai default dokumen.']);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Helper: Recalculate Parent row for BAB 2
+     */
+    private function recalc_bab2_parent($table, $parentId) {
+        if ($parentId <= 0) return;
+        $children = $this->db->where('parent_id', $parentId)->where('deleted_at IS NULL')->get($table)->result_array();
+        if (!empty($children)) {
+            $sumSebelum = 0;
+            $sumSesudah = 0;
+            foreach ($children as $c) {
+                $sumSebelum += (float)$c['sebelum_perubahan'];
+                $sumSesudah += (float)$c['sesudah_perubahan'];
+            }
+            $sumSelisih = $sumSesudah - $sumSebelum;
+            $sumPersen = ($sumSebelum != 0) ? round(($sumSelisih / $sumSebelum) * 100, 2) : 0.00;
+
+            $this->db->where('id', $parentId)->update($table, [
+                'sebelum_perubahan' => $sumSebelum,
+                'sesudah_perubahan' => $sumSesudah,
+                'selisih' => $sumSelisih,
+                'persen' => $sumPersen,
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
         }
     }
 

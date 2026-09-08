@@ -24999,7 +24999,13 @@
         }
     }
 
+    public function BAB1() {
+        redirect('Instansi/BAB1' . (!empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : ''));
+    }
 
+    public function BAB2() {
+        redirect('Instansi/BAB2' . (!empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : ''));
+    }
 
-        }
-        
+}
+
