@@ -1,0 +1,13 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+/**
+ * Template Konfigurasi Google Gemini API Key untuk E-LKPJ
+ * 
+ * Salin file ini menjadi: application/config/gemini.php
+ * lalu isikan API Key Anda di bawah ini, atau gunakan Environment Variable GEMINI_API_KEY di server hosting.
+ */
+$config['gemini_api_key'] = getenv('GEMINI_API_KEY') 
+    ?: (isset($_SERVER['GEMINI_API_KEY']) ? $_SERVER['GEMINI_API_KEY'] : '')
+    ?: (isset($_ENV['GEMINI_API_KEY']) ? $_ENV['GEMINI_API_KEY'] : '')
+    ?: 'YOUR_GEMINI_API_KEY_HERE';
