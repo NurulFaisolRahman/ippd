@@ -31,3 +31,9 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 *.sublime-project
 /tests/tests/
 /tests/results/
+
+# Secure API Key & Temporary Cache Files
+application/config/gemini.php
+scratch/
+__pycache__/
+*.pyc

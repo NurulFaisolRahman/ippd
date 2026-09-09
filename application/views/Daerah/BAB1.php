@@ -34,6 +34,7 @@ $itemsTabel1_18 = isset($ItemsTabel1_18) ? $ItemsTabel1_18 : [];
 $itemsTabel1_19 = isset($ItemsTabel1_19) ? $ItemsTabel1_19 : [];
 $itemsTabel1_20 = isset($ItemsTabel1_20) ? $ItemsTabel1_20 : [];
 $itemsGeneric = isset($ItemsGeneric) ? $ItemsGeneric : [];
+$narasiTabel = isset($NarasiTabel) ? $NarasiTabel : '';
 $summary = isset($SummaryTabel1_1) ? $SummaryTabel1_1 : [
     'total_kecamatan' => 17,
     'total_luas' => 165.505,
@@ -1005,6 +1006,50 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
 .filter-status-notice a {
   color: #007a5a;
   text-decoration: underline;
+}
+
+/* AI Narasi Card Styles */
+.narasi-card-container {
+  margin-top: 24px;
+  margin-bottom: 30px;
+  background: #ffffff;
+  border: 1px solid #d4ece5;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px -3px rgba(0, 194, 146, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+.narasi-card-header {
+  background: linear-gradient(135deg, #f0fdf4 0%, #e6f9f3 100%);
+  border-bottom: 1px solid #b2dfdb;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.narasi-textarea {
+  width: 100%;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 14px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #1e293b;
+  background: #ffffff;
+  resize: vertical;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+.narasi-textarea:focus {
+  border-color: #00c292;
+  box-shadow: 0 0 0 3px rgba(0, 194, 146, 0.18);
+  outline: none;
+}
+@media print {
+  .print-only-narasi { display: block !important; }
 }
 
 </style>
@@ -4208,6 +4253,79 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
       </table>
     </div>
     <?php endif; ?>
+
+    <!-- Cetak Dokumen: Narasi Analisis Tabel Aktif -->
+    <?php if (!empty($narasiTabel)): ?>
+    <div class="print-only-narasi" style="display: none; margin-top: 20px; margin-bottom: 20px; font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.6;">
+      <h5 style="margin-bottom: 8px; font-weight: bold; font-size: 12pt;">Narasi &amp; Interpretasi Tabel <?= htmlspecialchars($activeTabel) ?>:</h5>
+      <p style="text-align: justify; text-indent: 30px; margin: 0;"><?= nl2br(htmlspecialchars($narasiTabel)) ?></p>
+    </div>
+    <?php endif; ?>
+
+    <!-- ============================================================= -->
+    <!-- NARASI & INTERPRETASI DATA (AI ASSISTANT GEMINI)              -->
+    <!-- ============================================================= -->
+    <div class="narasi-card-container no-print">
+      <div class="narasi-card-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #00c292 0%, #008f6b 100%); display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 18px; box-shadow: 0 2px 8px rgba(0, 194, 146, 0.3);">
+            <i class="fa fa-magic"></i>
+          </div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <h4 style="margin: 0; font-size: 16px; font-weight: 700; color: #007a5a; letter-spacing: -0.2px;">
+                Narasi &amp; Interpretasi Data Tabel <?= htmlspecialchars($activeTabel) ?><?= !empty($metaTabel['judul_singkat']) ? ' (' . htmlspecialchars($metaTabel['judul_singkat']) . ')' : '' ?> (AI Assistant)
+              </h4>
+              <span style="display: inline-flex; align-items: center; gap: 4px; background: #dcfce7; color: #15803d; border: 1px solid #86efac; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 12px;">
+                <i class="fa fa-bolt"></i> Gemini AI
+              </span>
+            </div>
+            <p style="margin: 3px 0 0; font-size: 12px; color: #4b6358;">
+              <i class="fa fa-user-circle"></i> <b>Persona:</b> Peneliti Riset Ekonomi Pembangunan &mdash; Analisis komprehensif, evaluatif, dan siap cetak untuk LKPJ.
+            </p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button type="button" id="btnGenerateAI" onclick="generateNarasiAI('1', '<?= $activeTabel ?>')" class="btn-notika-primary" style="background: linear-gradient(135deg, #00c292 0%, #009688 100%); border: none; color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 3px 10px rgba(0, 194, 146, 0.25); transition: all 0.2s ease;">
+            <i class="fa fa-magic"></i> <span>Generate Narasi AI</span>
+          </button>
+        </div>
+      </div>
+      
+      <div style="padding: 20px;">
+        <div id="aiLoadingIndicator" style="display: none; padding: 18px; background: #f8fafc; border: 1px dashed #00c292; border-radius: 8px; margin-bottom: 15px; text-align: center;">
+          <div style="display: inline-flex; align-items: center; gap: 10px; color: #007a5a; font-weight: 600; font-size: 14px;">
+            <i class="fa fa-circle-o-notch fa-spin fa-lg"></i>
+            <span>Gemini AI sedang meneliti dan menyusun narasi akademik Tabel <?= htmlspecialchars($activeTabel) ?>... Harap tunggu sejenak.</span>
+          </div>
+        </div>
+
+        <div style="position: relative;">
+          <textarea id="narasiTabelAktif" class="narasi-textarea" rows="7" placeholder="Narasi interpretasi data akan muncul di sini setelah di-generate oleh AI, atau Anda dapat mengetikkan analisis data secara manual..."><?= htmlspecialchars($narasiTabel) ?></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; flex-wrap: wrap; gap: 10px;">
+          <div style="font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 6px;">
+            <i class="fa fa-info-circle" style="color: #00c292;"></i>
+            <span>Anda dapat menyunting langsung teks di atas sebelum menyimpannya ke laporan LKPJ.</span>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button type="button" onclick="copyNarasiToClipboard()" class="btn btn-default btn-sm" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; font-weight: 600; border-radius: 6px; padding: 6px 14px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+              <i class="fa fa-copy"></i> Salin Teks
+            </button>
+            <?php if (!empty($IsLoggedIn)): ?>
+            <button type="button" id="btnSimpanNarasi" onclick="simpanNarasi('1', '<?= $activeTabel ?>')" class="btn btn-success btn-sm" style="background: #00c292; border: 1px solid #00a87e; color: #fff; font-weight: 600; border-radius: 6px; padding: 6px 18px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(0, 194, 146, 0.2); cursor: pointer;">
+              <i class="fa fa-save"></i> Simpan Narasi
+            </button>
+            <?php else: ?>
+            <button type="button" disabled title="Silakan login terlebih dahulu untuk menyimpan narasi" class="btn btn-default btn-sm" style="background: #e2e8f0; border: 1px solid #cbd5e1; color: #94a3b8; font-weight: 600; border-radius: 6px; padding: 6px 18px; display: inline-flex; align-items: center; gap: 6px; cursor: not-allowed;">
+              <i class="fa fa-lock"></i> Simpan Narasi (Login Diperlukan)
+            </button>
+            <?php endif; ?>
+          </div>
+        </div>
+      </div>
+    </div>
 
   </div>
 </div>
@@ -9685,4 +9803,166 @@ function exportTableToExcel() {
   link.click();
   document.body.removeChild(link);
 }
+
+// ==============================================================
+// FITUR AI GENERATE & SIMPAN NARASI TABEL (GEMINI)
+// ==============================================================
+function generateNarasiAI(bab, tabel) {
+  const btn = document.getElementById('btnGenerateAI');
+  const loader = document.getElementById('aiLoadingIndicator');
+  const textarea = document.getElementById('narasiTabelAktif') || document.getElementById('narasiTabel1_1');
+  
+  if (!btn || !textarea) return;
+
+  const originalBtnHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> <span>Menganalisis...</span>';
+  if (loader) loader.style.display = 'block';
+
+  const formData = new FormData();
+  formData.append('bab', bab);
+  formData.append('tabel', tabel);
+  formData.append('tahun', CURRENT_TAHUN);
+
+  fetch(`${BASE_URL}Instansi/generate_narasi_ai`, {
+    method: 'POST',
+    body: formData,
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  })
+  .then(res => res.json())
+  .then(data => {
+    btn.disabled = false;
+    btn.innerHTML = originalBtnHtml;
+    if (loader) loader.style.display = 'none';
+
+    if (data.status === 'success') {
+      textarea.value = data.narasi;
+      Swal.fire({
+        icon: 'success',
+        title: 'Narasi Berhasil Di-generate!',
+        text: 'Analisis naratif akademik Tabel ' + tabel + ' telah dibuat oleh Gemini AI. Anda dapat meninjau, menyunting, atau menyimpannya.',
+        timer: 3000,
+        showConfirmButton: true,
+        confirmButtonColor: '#00c292'
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal Generate Narasi',
+        text: data.message || 'Terjadi kesalahan saat memproses permintaan ke AI.'
+      });
+    }
+  })
+  .catch(err => {
+    btn.disabled = false;
+    btn.innerHTML = originalBtnHtml;
+    if (loader) loader.style.display = 'none';
+    Swal.fire({
+      icon: 'error',
+      title: 'Kesalahan Sistem',
+      text: 'Tidak dapat terhubung ke server. Silakan periksa koneksi jaringan Anda.'
+    });
+  });
+}
+
+function simpanNarasi(bab, tabel) {
+  const btn = document.getElementById('btnSimpanNarasi');
+  const textarea = document.getElementById('narasiTabelAktif') || document.getElementById('narasiTabel1_1');
+  
+  if (!textarea) return;
+  const narasiVal = textarea.value.trim();
+  if (!narasiVal) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Narasi Kosong',
+      text: 'Silakan ketikkan atau generate narasi terlebih dahulu sebelum menyimpan.'
+    });
+    return;
+  }
+
+  const originalBtnHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menyimpan...';
+  }
+
+  const formData = new FormData();
+  formData.append('bab', bab);
+  formData.append('tabel', tabel);
+  formData.append('tahun', CURRENT_TAHUN);
+  formData.append('narasi', narasiVal);
+
+  fetch(`${BASE_URL}Instansi/simpan_narasi`, {
+    method: 'POST',
+    body: formData,
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalBtnHtml;
+    }
+
+    if (data.status === 'success') {
+      Swal.fire({
+        icon: 'success',
+        title: 'Tersimpan!',
+        text: data.message,
+        timer: 2000,
+        showConfirmButton: false
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal Menyimpan',
+        text: data.message || 'Terjadi kesalahan saat menyimpan narasi.'
+      });
+    }
+  })
+  .catch(err => {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalBtnHtml;
+    }
+    Swal.fire({
+      icon: 'error',
+      title: 'Kesalahan Sistem',
+      text: 'Gagal mengirim data ke server.'
+    });
+  });
+}
+
+function copyNarasiToClipboard() {
+  const textarea = document.getElementById('narasiTabelAktif') || document.getElementById('narasiTabel1_1');
+  if (!textarea || !textarea.value.trim()) {
+    Swal.fire({
+      icon: 'info',
+      title: 'Teks Kosong',
+      text: 'Belum ada narasi yang dapat disalin.'
+    });
+    return;
+  }
+
+  navigator.clipboard.writeText(textarea.value).then(() => {
+    Swal.fire({
+      icon: 'success',
+      title: 'Berhasil Disalin!',
+      text: 'Teks narasi telah disalin ke papan klip.',
+      timer: 1500,
+      showConfirmButton: false
+    });
+  }).catch(() => {
+    textarea.select();
+    document.execCommand('copy');
+    Swal.fire({
+      icon: 'success',
+      title: 'Berhasil Disalin!',
+      text: 'Teks narasi telah disalin ke papan klip.',
+      timer: 1500,
+      showConfirmButton: false
+    });
+  });
+}
 </script>
+
