@@ -580,7 +580,12 @@
                     <a href="<?=base_url('Instansi/PengisianCapaianProgramKegiatan')?>">Pengisian Capaian Program Kegiatan</a>
                     <a href="<?=base_url('Instansi/PengisianKebijakanStrategis')?>">Pengisian Kebijakan Strategis</a>
                     <a href="<?=base_url('Instansi/PengisianTinjutRekomendasiDPRDn1')?>">Pengisian Tinjut Rekomendasi DPRD n-1</a>
-                    <a href="<?=base_url('Instansi/CapaianKinerjaPelaksanaanTugasPembantuan')?>">Capaian Kinerja Pelaksanaan Tugas Pembantuan</a>
+                    <a href="<?=base_url('Instansi/BAB1')?>">BAB 1</a>
+                    <a href="<?=base_url('Instansi/BAB2')?>">BAB 2</a>
+                    <a href="<?=base_url('Instansi/BAB3')?>">BAB 3</a>
+                    <a href="<?=base_url('Instansi/BAB4')?>">BAB 4</a>
+                    <a href="<?=base_url('Instansi/BAB5')?>">BAB 5</a>
+
                 </div>
             </li>
 
