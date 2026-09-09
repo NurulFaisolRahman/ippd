@@ -43,6 +43,20 @@
         $kegiatanList = $program['kegiatan_list'] ?? [];
         return hitungTotalAnggaranKegiatan($kegiatanList);
     }
+
+    if (!function_exists('formatDesimalRenstra')) {
+        function formatDesimalRenstra($val, $fallback = '-') {
+            if ($val === null || $val === '') return $fallback;
+            $str = trim((string)$val);
+            if ($str === '' || $str === '-') return $fallback;
+            $clean = str_replace(',', '.', $str);
+            if (is_numeric($clean)) {
+                $formatted = (string)(float)$clean;
+                return str_replace('.', ',', $formatted);
+            }
+            return html_escape(str_replace('.', ',', $str));
+        }
+    }
     ?>
 
     <style>
@@ -422,21 +436,21 @@
                                                     <!-- SATUAN -->
                                                     <td><?= html_escape($firstIndTujuan['satuan'] ?? ($tujuan['satuan'] ?? '-')) ?></td>
                                                     <!-- KONDISI AWAL -->
-                                                    <td><?= html_escape($firstIndTujuan['kondisi_awal'] ?? ($tujuan['kondisi_awal'] ?? '-')) ?></td>
+                                                    <td><?= formatDesimalRenstra($firstIndTujuan['kondisi_awal'] ?? ($tujuan['kondisi_awal'] ?? null)) ?></td>
                                                     <!-- 2026 -->
-                                                    <td><?= html_escape($firstIndTujuan['target_2026'] ?? ($tujuan['target_2026'] ?? '-')) ?></td>
+                                                    <td><?= formatDesimalRenstra($firstIndTujuan['target_2026'] ?? ($tujuan['target_2026'] ?? null)) ?></td>
                                                     <td class="pagu-col">-</td>
                                                     <!-- 2027 -->
-                                                    <td><?= html_escape($firstIndTujuan['target_2027'] ?? ($tujuan['target_2027'] ?? '-')) ?></td>
+                                                    <td><?= formatDesimalRenstra($firstIndTujuan['target_2027'] ?? ($tujuan['target_2027'] ?? null)) ?></td>
                                                     <td class="pagu-col">-</td>
                                                     <!-- 2028 -->
-                                                    <td><?= html_escape($firstIndTujuan['target_2028'] ?? ($tujuan['target_2028'] ?? '-')) ?></td>
+                                                    <td><?= formatDesimalRenstra($firstIndTujuan['target_2028'] ?? ($tujuan['target_2028'] ?? null)) ?></td>
                                                     <td class="pagu-col">-</td>
                                                     <!-- 2029 -->
-                                                    <td><?= html_escape($firstIndTujuan['target_2029'] ?? ($tujuan['target_2029'] ?? '-')) ?></td>
+                                                    <td><?= formatDesimalRenstra($firstIndTujuan['target_2029'] ?? ($tujuan['target_2029'] ?? null)) ?></td>
                                                     <td class="pagu-col">-</td>
                                                     <!-- 2030 -->
-                                                    <td><?= html_escape($firstIndTujuan['target_2030'] ?? ($tujuan['target_2030'] ?? '-')) ?></td>
+                                                    <td><?= formatDesimalRenstra($firstIndTujuan['target_2030'] ?? ($tujuan['target_2030'] ?? null)) ?></td>
                                                     <td class="pagu-col">-</td>
                                                     <?php if ($IsRole4) { ?>
                                                         <td class="col-aksi" rowspan="<?= $tujuanRowspan ?>">
@@ -458,16 +472,16 @@
                                                     <tr class="row-tujuan border-tujuan">
                                                         <td class="indikator-text" style="text-align:left; padding-left:5px;"><?= html_escape($indT['indikator'] ?? '-') ?></td>
                                                         <td><?= html_escape($indT['satuan'] ?? '-') ?></td>
-                                                        <td><?= html_escape($indT['kondisi_awal'] ?? '-') ?></td>
-                                                        <td><?= html_escape($indT['target_2026'] ?? '-') ?></td>
+                                                        <td><?= formatDesimalRenstra($indT['kondisi_awal'] ?? null) ?></td>
+                                                        <td><?= formatDesimalRenstra($indT['target_2026'] ?? null) ?></td>
                                                         <td class="pagu-col">-</td>
-                                                        <td><?= html_escape($indT['target_2027'] ?? '-') ?></td>
+                                                        <td><?= formatDesimalRenstra($indT['target_2027'] ?? null) ?></td>
                                                         <td class="pagu-col">-</td>
-                                                        <td><?= html_escape($indT['target_2028'] ?? '-') ?></td>
+                                                        <td><?= formatDesimalRenstra($indT['target_2028'] ?? null) ?></td>
                                                         <td class="pagu-col">-</td>
-                                                        <td><?= html_escape($indT['target_2029'] ?? '-') ?></td>
+                                                        <td><?= formatDesimalRenstra($indT['target_2029'] ?? null) ?></td>
                                                         <td class="pagu-col">-</td>
-                                                        <td><?= html_escape($indT['target_2030'] ?? '-') ?></td>
+                                                        <td><?= formatDesimalRenstra($indT['target_2030'] ?? null) ?></td>
                                                         <td class="pagu-col">-</td>
                                                     </tr>
                                                 <?php 
@@ -498,21 +512,21 @@
                                                         <!-- SATUAN -->
                                                         <td><?= html_escape($firstIndSasaran['satuan'] ?? ($sasaran['satuan'] ?? '-')) ?></td>
                                                         <!-- KONDISI AWAL -->
-                                                        <td><?= html_escape($firstIndSasaran['kondisi_awal'] ?? ($sasaran['kondisi_awal'] ?? '-')) ?></td>
+                                                        <td><?= formatDesimalRenstra($firstIndSasaran['kondisi_awal'] ?? ($sasaran['kondisi_awal'] ?? null)) ?></td>
                                                         <!-- 2026 -->
-                                                        <td><?= html_escape($firstIndSasaran['target_2026'] ?? ($sasaran['target_2026'] ?? '-')) ?></td>
+                                                        <td><?= formatDesimalRenstra($firstIndSasaran['target_2026'] ?? ($sasaran['target_2026'] ?? null)) ?></td>
                                                         <td class="pagu-col">-</td>
                                                         <!-- 2027 -->
-                                                        <td><?= html_escape($firstIndSasaran['target_2027'] ?? ($sasaran['target_2027'] ?? '-')) ?></td>
+                                                        <td><?= formatDesimalRenstra($firstIndSasaran['target_2027'] ?? ($sasaran['target_2027'] ?? null)) ?></td>
                                                         <td class="pagu-col">-</td>
                                                         <!-- 2028 -->
-                                                        <td><?= html_escape($firstIndSasaran['target_2028'] ?? ($sasaran['target_2028'] ?? '-')) ?></td>
+                                                        <td><?= formatDesimalRenstra($firstIndSasaran['target_2028'] ?? ($sasaran['target_2028'] ?? null)) ?></td>
                                                         <td class="pagu-col">-</td>
                                                         <!-- 2029 -->
-                                                        <td><?= html_escape($firstIndSasaran['target_2029'] ?? ($sasaran['target_2029'] ?? '-')) ?></td>
+                                                        <td><?= formatDesimalRenstra($firstIndSasaran['target_2029'] ?? ($sasaran['target_2029'] ?? null)) ?></td>
                                                         <td class="pagu-col">-</td>
                                                         <!-- 2030 -->
-                                                        <td><?= html_escape($firstIndSasaran['target_2030'] ?? ($sasaran['target_2030'] ?? '-')) ?></td>
+                                                        <td><?= formatDesimalRenstra($firstIndSasaran['target_2030'] ?? ($sasaran['target_2030'] ?? null)) ?></td>
                                                         <td class="pagu-col">-</td>
                                                         <?php if ($IsRole4) { ?>
                                                             <td class="col-aksi" rowspan="<?= $sasaranRowspan ?>">
@@ -534,16 +548,16 @@
                                                         <tr class="row-sasaran border-sasaran">
                                                             <td class="indikator-text" style="text-align:left; padding-left:5px;"><?= html_escape($indS['indikator'] ?? '-') ?></td>
                                                             <td><?= html_escape($indS['satuan'] ?? '-') ?></td>
-                                                            <td><?= html_escape($indS['kondisi_awal'] ?? '-') ?></td>
-                                                            <td><?= html_escape($indS['target_2026'] ?? '-') ?></td>
+                                                            <td><?= formatDesimalRenstra($indS['kondisi_awal'] ?? null) ?></td>
+                                                            <td><?= formatDesimalRenstra($indS['target_2026'] ?? null) ?></td>
                                                             <td class="pagu-col">-</td>
-                                                            <td><?= html_escape($indS['target_2027'] ?? '-') ?></td>
+                                                            <td><?= formatDesimalRenstra($indS['target_2027'] ?? null) ?></td>
                                                             <td class="pagu-col">-</td>
-                                                            <td><?= html_escape($indS['target_2028'] ?? '-') ?></td>
+                                                            <td><?= formatDesimalRenstra($indS['target_2028'] ?? null) ?></td>
                                                             <td class="pagu-col">-</td>
-                                                            <td><?= html_escape($indS['target_2029'] ?? '-') ?></td>
+                                                            <td><?= formatDesimalRenstra($indS['target_2029'] ?? null) ?></td>
                                                             <td class="pagu-col">-</td>
-                                                            <td><?= html_escape($indS['target_2030'] ?? '-') ?></td>
+                                                            <td><?= formatDesimalRenstra($indS['target_2030'] ?? null) ?></td>
                                                             <td class="pagu-col">-</td>
                                                         </tr>
                                                     <?php 
@@ -691,10 +705,10 @@
                                                                     <td><?= html_escape($firstIndikator['satuan'] ?? '-') ?></td>
                                                                     
                                                                     <!-- KONDISI AWAL -->
-                                                                    <td><?= html_escape($firstIndikator['kondisi_awal'] ?? '-') ?></td>
+                                                                    <td><?= formatDesimalRenstra($firstIndikator['kondisi_awal'] ?? null) ?></td>
                                                                     
                                                                     <!-- 2026 -->
-                                                                    <td><?= html_escape($firstIndikator['target_2026'] ?? '-') ?></td>
+                                                                    <td><?= formatDesimalRenstra($firstIndikator['target_2026'] ?? null) ?></td>
                                                                     <?php if ($isFirstRow) { ?>
                                                                         <td class="pagu-col" rowspan="<?= $totalIndikatorProgram ?>">
                                                                             <?php if (!empty($totalAnggaranProgram['2026'])): ?>
@@ -706,7 +720,7 @@
                                                                     <?php } ?>
                                                                     
                                                                     <!-- 2027 -->
-                                                                    <td><?= html_escape($firstIndikator['target_2027'] ?? '-') ?></td>
+                                                                    <td><?= formatDesimalRenstra($firstIndikator['target_2027'] ?? null) ?></td>
                                                                     <?php if ($isFirstRow) { ?>
                                                                         <td class="pagu-col" rowspan="<?= $totalIndikatorProgram ?>">
                                                                             <?php if (!empty($totalAnggaranProgram['2027'])): ?>
@@ -718,7 +732,7 @@
                                                                     <?php } ?>
                                                                     
                                                                     <!-- 2028 -->
-                                                                    <td><?= html_escape($firstIndikator['target_2028'] ?? '-') ?></td>
+                                                                    <td><?= formatDesimalRenstra($firstIndikator['target_2028'] ?? null) ?></td>
                                                                     <?php if ($isFirstRow) { ?>
                                                                         <td class="pagu-col" rowspan="<?= $totalIndikatorProgram ?>">
                                                                             <?php if (!empty($totalAnggaranProgram['2028'])): ?>
@@ -730,7 +744,7 @@
                                                                     <?php } ?>
                                                                     
                                                                     <!-- 2029 -->
-                                                                    <td><?= html_escape($firstIndikator['target_2029'] ?? '-') ?></td>
+                                                                    <td><?= formatDesimalRenstra($firstIndikator['target_2029'] ?? null) ?></td>
                                                                     <?php if ($isFirstRow) { ?>
                                                                         <td class="pagu-col" rowspan="<?= $totalIndikatorProgram ?>">
                                                                             <?php if (!empty($totalAnggaranProgram['2029'])): ?>
@@ -742,7 +756,7 @@
                                                                     <?php } ?>
                                                                     
                                                                     <!-- 2030 -->
-                                                                    <td><?= html_escape($firstIndikator['target_2030'] ?? '-') ?></td>
+                                                                    <td><?= formatDesimalRenstra($firstIndikator['target_2030'] ?? null) ?></td>
                                                                     <?php if ($isFirstRow) { ?>
                                                                         <td class="pagu-col" rowspan="<?= $totalIndikatorProgram ?>">
                                                                             <?php if (!empty($totalAnggaranProgram['2030'])): ?>
@@ -784,22 +798,22 @@
                                                                             <td><?= html_escape($indikator['satuan'] ?? '-') ?></td>
                                                                             
                                                                             <!-- KONDISI AWAL -->
-                                                                            <td><?= html_escape($indikator['kondisi_awal'] ?? '-') ?></td>
+                                                                            <td><?= formatDesimalRenstra($indikator['kondisi_awal'] ?? null) ?></td>
                                                                             
                                                                             <!-- 2026 -->
-                                                                            <td><?= html_escape($indikator['target_2026'] ?? '-') ?></td>
+                                                                            <td><?= formatDesimalRenstra($indikator['target_2026'] ?? null) ?></td>
                                                                             
                                                                             <!-- 2027 -->
-                                                                            <td><?= html_escape($indikator['target_2027'] ?? '-') ?></td>
+                                                                            <td><?= formatDesimalRenstra($indikator['target_2027'] ?? null) ?></td>
                                                                             
                                                                             <!-- 2028 -->
-                                                                            <td><?= html_escape($indikator['target_2028'] ?? '-') ?></td>
+                                                                            <td><?= formatDesimalRenstra($indikator['target_2028'] ?? null) ?></td>
                                                                             
                                                                             <!-- 2029 -->
-                                                                            <td><?= html_escape($indikator['target_2029'] ?? '-') ?></td>
+                                                                            <td><?= formatDesimalRenstra($indikator['target_2029'] ?? null) ?></td>
                                                                             
                                                                             <!-- 2030 -->
-                                                                            <td><?= html_escape($indikator['target_2030'] ?? '-') ?></td>
+                                                                            <td><?= formatDesimalRenstra($indikator['target_2030'] ?? null) ?></td>
                                                                         </tr>
                                                                         <?php
                                                                     }
@@ -985,10 +999,10 @@
                                                                         <td><?= html_escape($firstIndKeg['satuan'] ?? '-') ?></td>
 
                                                                         <!-- KONDISI AWAL -->
-                                                                        <td><?= html_escape($firstIndKeg['kondisi_awal'] ?? '-') ?></td>
+                                                                        <td><?= formatDesimalRenstra($firstIndKeg['kondisi_awal'] ?? null) ?></td>
 
                                                                         <!-- 2026 -->
-                                                                        <td><?= html_escape($firstIndKeg['target_2026'] ?? '-') ?></td>
+                                                                        <td><?= formatDesimalRenstra($firstIndKeg['target_2026'] ?? null) ?></td>
                                                                         <td class="pagu-col">
                                                                             <?php if ($isFirstKegiatanRow && !empty($totalAnggaranKegiatan['2026'])): ?>
                                                                                 <?= number_format($totalAnggaranKegiatan['2026'], 0, ',', '.') ?>
@@ -998,7 +1012,7 @@
                                                                         </td>
 
                                                                         <!-- 2027 -->
-                                                                        <td><?= html_escape($firstIndKeg['target_2027'] ?? '-') ?></td>
+                                                                        <td><?= formatDesimalRenstra($firstIndKeg['target_2027'] ?? null) ?></td>
                                                                         <td class="pagu-col">
                                                                             <?php if ($isFirstKegiatanRow && !empty($totalAnggaranKegiatan['2027'])): ?>
                                                                                 <?= number_format($totalAnggaranKegiatan['2027'], 0, ',', '.') ?>
@@ -1008,7 +1022,7 @@
                                                                         </td>
 
                                                                         <!-- 2028 -->
-                                                                        <td><?= html_escape($firstIndKeg['target_2028'] ?? '-') ?></td>
+                                                                        <td><?= formatDesimalRenstra($firstIndKeg['target_2028'] ?? null) ?></td>
                                                                         <td class="pagu-col">
                                                                             <?php if ($isFirstKegiatanRow && !empty($totalAnggaranKegiatan['2028'])): ?>
                                                                                 <?= number_format($totalAnggaranKegiatan['2028'], 0, ',', '.') ?>
@@ -1018,7 +1032,7 @@
                                                                         </td>
 
                                                                         <!-- 2029 -->
-                                                                        <td><?= html_escape($firstIndKeg['target_2029'] ?? '-') ?></td>
+                                                                        <td><?= formatDesimalRenstra($firstIndKeg['target_2029'] ?? null) ?></td>
                                                                         <td class="pagu-col">
                                                                             <?php if ($isFirstKegiatanRow && !empty($totalAnggaranKegiatan['2029'])): ?>
                                                                                 <?= number_format($totalAnggaranKegiatan['2029'], 0, ',', '.') ?>
@@ -1028,7 +1042,7 @@
                                                                         </td>
 
                                                                         <!-- 2030 -->
-                                                                        <td><?= html_escape($firstIndKeg['target_2030'] ?? '-') ?></td>
+                                                                        <td><?= formatDesimalRenstra($firstIndKeg['target_2030'] ?? null) ?></td>
                                                                         <td class="pagu-col">
                                                                             <?php if ($isFirstKegiatanRow && !empty($totalAnggaranKegiatan['2030'])): ?>
                                                                                 <?= number_format($totalAnggaranKegiatan['2030'], 0, ',', '.') ?>
@@ -1071,21 +1085,21 @@
                                                                                 <!-- SATUAN -->
                                                                                 <td><?= html_escape($ind['satuan'] ?? '-') ?></td>
                                                                                 <!-- KONDISI AWAL -->
-                                                                                <td><?= html_escape($ind['kondisi_awal'] ?? '-') ?></td>
+                                                                                <td><?= formatDesimalRenstra($ind['kondisi_awal'] ?? null) ?></td>
                                                                                 <!-- 2026 -->
-                                                                                <td><?= html_escape($ind['target_2026'] ?? '-') ?></td>
+                                                                                <td><?= formatDesimalRenstra($ind['target_2026'] ?? null) ?></td>
                                                                                 <td class="pagu-col">-</td>
                                                                                 <!-- 2027 -->
-                                                                                <td><?= html_escape($ind['target_2027'] ?? '-') ?></td>
+                                                                                <td><?= formatDesimalRenstra($ind['target_2027'] ?? null) ?></td>
                                                                                 <td class="pagu-col">-</td>
                                                                                 <!-- 2028 -->
-                                                                                <td><?= html_escape($ind['target_2028'] ?? '-') ?></td>
+                                                                                <td><?= formatDesimalRenstra($ind['target_2028'] ?? null) ?></td>
                                                                                 <td class="pagu-col">-</td>
                                                                                 <!-- 2029 -->
-                                                                                <td><?= html_escape($ind['target_2029'] ?? '-') ?></td>
+                                                                                <td><?= formatDesimalRenstra($ind['target_2029'] ?? null) ?></td>
                                                                                 <td class="pagu-col">-</td>
                                                                                 <!-- 2030 -->
-                                                                                <td><?= html_escape($ind['target_2030'] ?? '-') ?></td>
+                                                                                <td><?= formatDesimalRenstra($ind['target_2030'] ?? null) ?></td>
                                                                                 <td class="pagu-col">-</td>
                                                                             </tr>
                                                                             <?php
@@ -1289,13 +1303,13 @@
                                                                                 KONDISI AWAL
                                                                                 ================================================= -->
 
-                                                                            <td><?= html_escape($firstIndSub['kondisi_awal'] ?? '-') ?></td>
+                                                                            <td><?= formatDesimalRenstra($firstIndSub['kondisi_awal'] ?? null) ?></td>
 
                                                                             <!-- =================================================
                                                                                 2026
                                                                                 ================================================= -->
 
-                                                                            <td><?= html_escape($firstIndSub['target_2026'] ?? '-') ?></td>
+                                                                            <td><?= formatDesimalRenstra($firstIndSub['target_2026'] ?? null) ?></td>
                                                                             <td class="pagu-col">
                                                                                 <?= !empty($firstIndSub['anggaran_2026']) ? number_format($firstIndSub['anggaran_2026'], 0, ',', '.') : '-' ?>
                                                                             </td>
@@ -1304,7 +1318,7 @@
                                                                                 2027
                                                                                 ================================================= -->
 
-                                                                            <td><?= html_escape($firstIndSub['target_2027'] ?? '-') ?></td>
+                                                                            <td><?= formatDesimalRenstra($firstIndSub['target_2027'] ?? null) ?></td>
                                                                             <td class="pagu-col">
                                                                                 <?= !empty($firstIndSub['anggaran_2027']) ? number_format($firstIndSub['anggaran_2027'], 0, ',', '.') : '-' ?>
                                                                             </td>
@@ -1313,7 +1327,7 @@
                                                                                 2028
                                                                                 ================================================= -->
 
-                                                                            <td><?= html_escape($firstIndSub['target_2028'] ?? '-') ?></td>
+                                                                            <td><?= formatDesimalRenstra($firstIndSub['target_2028'] ?? null) ?></td>
                                                                             <td class="pagu-col">
                                                                                 <?= !empty($firstIndSub['anggaran_2028']) ? number_format($firstIndSub['anggaran_2028'], 0, ',', '.') : '-' ?>
                                                                             </td>
@@ -1322,7 +1336,7 @@
                                                                                 2029
                                                                                 ================================================= -->
 
-                                                                            <td><?= html_escape($firstIndSub['target_2029'] ?? '-') ?></td>
+                                                                            <td><?= formatDesimalRenstra($firstIndSub['target_2029'] ?? null) ?></td>
                                                                             <td class="pagu-col">
                                                                                 <?= !empty($firstIndSub['anggaran_2029']) ? number_format($firstIndSub['anggaran_2029'], 0, ',', '.') : '-' ?>
                                                                             </td>
@@ -1331,7 +1345,7 @@
                                                                                 2030
                                                                                 ================================================= -->
 
-                                                                            <td><?= html_escape($firstIndSub['target_2030'] ?? '-') ?></td>
+                                                                            <td><?= formatDesimalRenstra($firstIndSub['target_2030'] ?? null) ?></td>
                                                                             <td class="pagu-col">
                                                                                 <?= !empty($firstIndSub['anggaran_2030']) ? number_format($firstIndSub['anggaran_2030'], 0, ',', '.') : '-' ?>
                                                                             </td>
@@ -1372,29 +1386,29 @@
                                                                                     <!-- SATUAN -->
                                                                                     <td><?= html_escape($ind['satuan'] ?? '-') ?></td>
                                                                                     <!-- KONDISI AWAL -->
-                                                                                    <td><?= html_escape($ind['kondisi_awal'] ?? '-') ?></td>
+                                                                                    <td><?= formatDesimalRenstra($ind['kondisi_awal'] ?? null) ?></td>
                                                                                     <!-- 2026 -->
-                                                                                    <td><?= html_escape($ind['target_2026'] ?? '-') ?></td>
+                                                                                    <td><?= formatDesimalRenstra($ind['target_2026'] ?? null) ?></td>
                                                                                     <td class="pagu-col">
                                                                                         <?= !empty($ind['anggaran_2026']) ? number_format($ind['anggaran_2026'], 0, ',', '.') : '-' ?>
                                                                                     </td>
                                                                                     <!-- 2027 -->
-                                                                                    <td><?= html_escape($ind['target_2027'] ?? '-') ?></td>
+                                                                                    <td><?= formatDesimalRenstra($ind['target_2027'] ?? null) ?></td>
                                                                                     <td class="pagu-col">
                                                                                         <?= !empty($ind['anggaran_2027']) ? number_format($ind['anggaran_2027'], 0, ',', '.') : '-' ?>
                                                                                     </td>
                                                                                     <!-- 2028 -->
-                                                                                    <td><?= html_escape($ind['target_2028'] ?? '-') ?></td>
+                                                                                    <td><?= formatDesimalRenstra($ind['target_2028'] ?? null) ?></td>
                                                                                     <td class="pagu-col">
                                                                                         <?= !empty($ind['anggaran_2028']) ? number_format($ind['anggaran_2028'], 0, ',', '.') : '-' ?>
                                                                                     </td>
                                                                                     <!-- 2029 -->
-                                                                                    <td><?= html_escape($ind['target_2029'] ?? '-') ?></td>
+                                                                                    <td><?= formatDesimalRenstra($ind['target_2029'] ?? null) ?></td>
                                                                                     <td class="pagu-col">
                                                                                         <?= !empty($ind['anggaran_2029']) ? number_format($ind['anggaran_2029'], 0, ',', '.') : '-' ?>
                                                                                     </td>
                                                                                     <!-- 2030 -->
-                                                                                    <td><?= html_escape($ind['target_2030'] ?? '-') ?></td>
+                                                                                    <td><?= formatDesimalRenstra($ind['target_2030'] ?? null) ?></td>
                                                                                     <td class="pagu-col">
                                                                                         <?= !empty($ind['anggaran_2030']) ? number_format($ind['anggaran_2030'], 0, ',', '.') : '-' ?>
                                                                                     </td>
@@ -2040,6 +2054,13 @@
         });
 
         // ==============================================
+        // AUTO CONVERT TITIK KE KOMA PADA TARGET & KONDISI AWAL
+        // ==============================================
+        $(document).on('input', '.target-input, .kondisi-input', function() {
+            $(this).val($(this).val().replace(/\./g, ','));
+        });
+
+        // ==============================================
         // FORMAT RUPIAH OTOMATIS
         // ==============================================
         $(document).on('input', '.rupiah-input', function() {
@@ -2455,16 +2476,21 @@
             $('#OutcomeContainer').append(html);
         }
 
+        function formatDesimalInput(val) {
+            if (val === null || val === undefined) return '';
+            return String(val).replace(/\./g, ',');
+        }
+
         function generateIndikatorRow(groupId, data) {
             var id = data && data.id ? data.id : '';
             var indikator = data && data.indikator ? escapeHtml(data.indikator) : '';
             var satuan = data && data.satuan ? escapeHtml(data.satuan) : '';
-            var kondisiAwal = data && data.kondisi_awal ? escapeHtml(data.kondisi_awal) : '';
-            var target2026 = data && data.target_2026 ? escapeHtml(data.target_2026) : '';
-            var target2027 = data && data.target_2027 ? escapeHtml(data.target_2027) : '';
-            var target2028 = data && data.target_2028 ? escapeHtml(data.target_2028) : '';
-            var target2029 = data && data.target_2029 ? escapeHtml(data.target_2029) : '';
-            var target2030 = data && data.target_2030 ? escapeHtml(data.target_2030) : '';
+            var kondisiAwal = data && data.kondisi_awal ? escapeHtml(formatDesimalInput(data.kondisi_awal)) : '';
+            var target2026 = data && data.target_2026 ? escapeHtml(formatDesimalInput(data.target_2026)) : '';
+            var target2027 = data && data.target_2027 ? escapeHtml(formatDesimalInput(data.target_2027)) : '';
+            var target2028 = data && data.target_2028 ? escapeHtml(formatDesimalInput(data.target_2028)) : '';
+            var target2029 = data && data.target_2029 ? escapeHtml(formatDesimalInput(data.target_2029)) : '';
+            var target2030 = data && data.target_2030 ? escapeHtml(formatDesimalInput(data.target_2030)) : '';
             
             var counter = counterIndikator++;
             var html = '<div class="indikator-row" id="indikator_row_' + counter + '">';
@@ -2534,12 +2560,12 @@
             var id = data && data.id ? data.id : '';
             var indikator = data && data.indikator ? escapeHtml(data.indikator) : '';
             var satuan = data && data.satuan ? escapeHtml(data.satuan) : '';
-            var kondisiAwal = data && data.kondisi_awal ? escapeHtml(data.kondisi_awal) : '';
-            var target2026 = data && data.target_2026 ? escapeHtml(data.target_2026) : '';
-            var target2027 = data && data.target_2027 ? escapeHtml(data.target_2027) : '';
-            var target2028 = data && data.target_2028 ? escapeHtml(data.target_2028) : '';
-            var target2029 = data && data.target_2029 ? escapeHtml(data.target_2029) : '';
-            var target2030 = data && data.target_2030 ? escapeHtml(data.target_2030) : '';
+            var kondisiAwal = data && data.kondisi_awal ? escapeHtml(formatDesimalInput(data.kondisi_awal)) : '';
+            var target2026 = data && data.target_2026 ? escapeHtml(formatDesimalInput(data.target_2026)) : '';
+            var target2027 = data && data.target_2027 ? escapeHtml(formatDesimalInput(data.target_2027)) : '';
+            var target2028 = data && data.target_2028 ? escapeHtml(formatDesimalInput(data.target_2028)) : '';
+            var target2029 = data && data.target_2029 ? escapeHtml(formatDesimalInput(data.target_2029)) : '';
+            var target2030 = data && data.target_2030 ? escapeHtml(formatDesimalInput(data.target_2030)) : '';
             
             var counter = counterKegiatanIndikator++;
             var html = '<div class="indikator-row" id="kegiatan_indikator_row_' + counter + '">';
@@ -2609,20 +2635,20 @@
             var id = data && data.id ? data.id : '';
             var indikator = data && data.indikator ? escapeHtml(data.indikator) : '';
             var satuan = data && data.satuan ? escapeHtml(data.satuan) : '';
-            var kondisiAwal = data && data.kondisi_awal ? escapeHtml(data.kondisi_awal) : '';
-            var target2026 = data && data.target_2026 ? escapeHtml(data.target_2026) : '';
+            var kondisiAwal = data && data.kondisi_awal ? escapeHtml(formatDesimalInput(data.kondisi_awal)) : '';
+            var target2026 = data && data.target_2026 ? escapeHtml(formatDesimalInput(data.target_2026)) : '';
             var anggaran2026 = data && data.anggaran_2026 ? data.anggaran_2026 : '';
             var anggaran2026Formatted = anggaran2026 ? formatRupiah(anggaran2026) : '';
-            var target2027 = data && data.target_2027 ? escapeHtml(data.target_2027) : '';
+            var target2027 = data && data.target_2027 ? escapeHtml(formatDesimalInput(data.target_2027)) : '';
             var anggaran2027 = data && data.anggaran_2027 ? data.anggaran_2027 : '';
             var anggaran2027Formatted = anggaran2027 ? formatRupiah(anggaran2027) : '';
-            var target2028 = data && data.target_2028 ? escapeHtml(data.target_2028) : '';
+            var target2028 = data && data.target_2028 ? escapeHtml(formatDesimalInput(data.target_2028)) : '';
             var anggaran2028 = data && data.anggaran_2028 ? data.anggaran_2028 : '';
             var anggaran2028Formatted = anggaran2028 ? formatRupiah(anggaran2028) : '';
-            var target2029 = data && data.target_2029 ? escapeHtml(data.target_2029) : '';
+            var target2029 = data && data.target_2029 ? escapeHtml(formatDesimalInput(data.target_2029)) : '';
             var anggaran2029 = data && data.anggaran_2029 ? data.anggaran_2029 : '';
             var anggaran2029Formatted = anggaran2029 ? formatRupiah(anggaran2029) : '';
-            var target2030 = data && data.target_2030 ? escapeHtml(data.target_2030) : '';
+            var target2030 = data && data.target_2030 ? escapeHtml(formatDesimalInput(data.target_2030)) : '';
             var anggaran2030 = data && data.anggaran_2030 ? data.anggaran_2030 : '';
             var anggaran2030Formatted = anggaran2030 ? formatRupiah(anggaran2030) : '';
             
@@ -2827,12 +2853,12 @@
             var id = data && data.id ? data.id : '';
             var indikator = data && data.indikator ? escapeHtml(data.indikator) : '';
             var satuan = data && data.satuan ? escapeHtml(data.satuan) : '';
-            var kondisiAwal = data && data.kondisi_awal ? escapeHtml(data.kondisi_awal) : '';
-            var target2026 = data && data.target_2026 ? escapeHtml(data.target_2026) : '';
-            var target2027 = data && data.target_2027 ? escapeHtml(data.target_2027) : '';
-            var target2028 = data && data.target_2028 ? escapeHtml(data.target_2028) : '';
-            var target2029 = data && data.target_2029 ? escapeHtml(data.target_2029) : '';
-            var target2030 = data && data.target_2030 ? escapeHtml(data.target_2030) : '';
+            var kondisiAwal = data && data.kondisi_awal ? escapeHtml(formatDesimalInput(data.kondisi_awal)) : '';
+            var target2026 = data && data.target_2026 ? escapeHtml(formatDesimalInput(data.target_2026)) : '';
+            var target2027 = data && data.target_2027 ? escapeHtml(formatDesimalInput(data.target_2027)) : '';
+            var target2028 = data && data.target_2028 ? escapeHtml(formatDesimalInput(data.target_2028)) : '';
+            var target2029 = data && data.target_2029 ? escapeHtml(formatDesimalInput(data.target_2029)) : '';
+            var target2030 = data && data.target_2030 ? escapeHtml(formatDesimalInput(data.target_2030)) : '';
             
             var counter = counterTujuanIndikator++;
             var html = '<div class="indikator-row" id="tujuan_indikator_row_' + counter + '">';
@@ -2881,12 +2907,12 @@
             var id = data && data.id ? data.id : '';
             var indikator = data && data.indikator ? escapeHtml(data.indikator) : '';
             var satuan = data && data.satuan ? escapeHtml(data.satuan) : '';
-            var kondisiAwal = data && data.kondisi_awal ? escapeHtml(data.kondisi_awal) : '';
-            var target2026 = data && data.target_2026 ? escapeHtml(data.target_2026) : '';
-            var target2027 = data && data.target_2027 ? escapeHtml(data.target_2027) : '';
-            var target2028 = data && data.target_2028 ? escapeHtml(data.target_2028) : '';
-            var target2029 = data && data.target_2029 ? escapeHtml(data.target_2029) : '';
-            var target2030 = data && data.target_2030 ? escapeHtml(data.target_2030) : '';
+            var kondisiAwal = data && data.kondisi_awal ? escapeHtml(formatDesimalInput(data.kondisi_awal)) : '';
+            var target2026 = data && data.target_2026 ? escapeHtml(formatDesimalInput(data.target_2026)) : '';
+            var target2027 = data && data.target_2027 ? escapeHtml(formatDesimalInput(data.target_2027)) : '';
+            var target2028 = data && data.target_2028 ? escapeHtml(formatDesimalInput(data.target_2028)) : '';
+            var target2029 = data && data.target_2029 ? escapeHtml(formatDesimalInput(data.target_2029)) : '';
+            var target2030 = data && data.target_2030 ? escapeHtml(formatDesimalInput(data.target_2030)) : '';
             
             var counter = counterSasaranIndikator++;
             var html = '<div class="indikator-row" id="sasaran_indikator_row_' + counter + '">';
