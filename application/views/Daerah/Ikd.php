@@ -623,8 +623,14 @@ table.dataTable thead .sorting_desc_disabled {
 
                     function fmtIkdVal($v) {
                         if ($v === null || $v === '') return '-';
-                        if (is_numeric($v)) return number_format((float)$v, 2, '.', '');
-                        return html_escape(str_replace(',', '.', $v));
+                        $str = trim((string)$v);
+                        if ($str === '' || $str === '-') return '-';
+                        $clean = str_replace(',', '.', $str);
+                        if (is_numeric($clean)) {
+                            $formatted = (string)(float)$clean;
+                            return str_replace('.', ',', $formatted);
+                        }
+                        return html_escape($str);
                     }
                     ?>
 
@@ -717,12 +723,12 @@ table.dataTable thead .sorting_desc_disabled {
                                                                         data-nama="<?= html_escape($row['indikator_sasaran']) ?>"
                                                                         data-satuan="<?= html_escape($row['satuan'] ?? '') ?>"
                                                                         data-opd="<?= html_escape($row['pd_penanggung_jawab'] ?? '') ?>"
-                                                                        data-t1="<?= html_escape($row['target_1'] ?? $row['target_2025'] ?? '') ?>"
-                                                                        data-t2="<?= html_escape($row['target_2'] ?? $row['target_2026'] ?? '') ?>"
-                                                                        data-t3="<?= html_escape($row['target_3'] ?? $row['target_2027'] ?? '') ?>"
-                                                                        data-t4="<?= html_escape($row['target_4'] ?? $row['target_2028'] ?? '') ?>"
-                                                                        data-t5="<?= html_escape($row['target_5'] ?? $row['target_2029'] ?? '') ?>"
-                                                                        data-t6="<?= html_escape($row['target_6'] ?? $row['target_2030'] ?? '') ?>"
+                                                                        data-t1="<?= html_escape(str_replace('.', ',', $row['target_1'] ?? $row['target_2025'] ?? '')) ?>"
+                                                                        data-t2="<?= html_escape(str_replace('.', ',', $row['target_2'] ?? $row['target_2026'] ?? '')) ?>"
+                                                                        data-t3="<?= html_escape(str_replace('.', ',', $row['target_3'] ?? $row['target_2027'] ?? '')) ?>"
+                                                                        data-t4="<?= html_escape(str_replace('.', ',', $row['target_4'] ?? $row['target_2028'] ?? '')) ?>"
+                                                                        data-t5="<?= html_escape(str_replace('.', ',', $row['target_5'] ?? $row['target_2029'] ?? '')) ?>"
+                                                                        data-t6="<?= html_escape(str_replace('.', ',', $row['target_6'] ?? $row['target_2030'] ?? '')) ?>"
                                                                         title="Edit Indikator">
                                                                     <i class="notika-icon notika-edit"></i>
                                                                 </button>
@@ -809,37 +815,37 @@ MODAL TAMBAH IKD (DESAIN MENARIK & MODERN)
                                     <div class="col-xs-4 col-sm-2">
                                         <div class="target-year-box">
                                             <label>2025</label>
-                                            <input type="text" class="form-control-target input-target" name="target_1" id="TambahT1" placeholder="0.00">
+                                            <input type="text" class="form-control-target input-target" name="target_1" id="TambahT1" placeholder="0,00">
                                         </div>
                                     </div>
                                     <div class="col-xs-4 col-sm-2">
                                         <div class="target-year-box">
                                             <label>2026</label>
-                                            <input type="text" class="form-control-target input-target" name="target_2" id="TambahT2" placeholder="0.00">
+                                            <input type="text" class="form-control-target input-target" name="target_2" id="TambahT2" placeholder="0,00">
                                         </div>
                                     </div>
                                     <div class="col-xs-4 col-sm-2">
                                         <div class="target-year-box">
                                             <label>2027</label>
-                                            <input type="text" class="form-control-target input-target" name="target_3" id="TambahT3" placeholder="0.00">
+                                            <input type="text" class="form-control-target input-target" name="target_3" id="TambahT3" placeholder="0,00">
                                         </div>
                                     </div>
                                     <div class="col-xs-4 col-sm-2">
                                         <div class="target-year-box">
                                             <label>2028</label>
-                                            <input type="text" class="form-control-target input-target" name="target_4" id="TambahT4" placeholder="0.00">
+                                            <input type="text" class="form-control-target input-target" name="target_4" id="TambahT4" placeholder="0,00">
                                         </div>
                                     </div>
                                     <div class="col-xs-4 col-sm-2">
                                         <div class="target-year-box">
                                             <label>2029</label>
-                                            <input type="text" class="form-control-target input-target" name="target_5" id="TambahT5" placeholder="0.00">
+                                            <input type="text" class="form-control-target input-target" name="target_5" id="TambahT5" placeholder="0,00">
                                         </div>
                                     </div>
                                     <div class="col-xs-4 col-sm-2">
                                         <div class="target-year-box">
                                             <label>2030</label>
-                                            <input type="text" class="form-control-target input-target" name="target_6" id="TambahT6" placeholder="0.00">
+                                            <input type="text" class="form-control-target input-target" name="target_6" id="TambahT6" placeholder="0,00">
                                         </div>
                                     </div>
                                 </div>
@@ -917,37 +923,37 @@ MODAL EDIT IKD (DESAIN MENARIK & MODERN)
                                     <div class="col-xs-4 col-sm-2">
                                         <div class="target-year-box">
                                             <label>2025</label>
-                                            <input type="text" class="form-control-target input-target" name="target_1" id="EditT1" placeholder="0.00">
+                                            <input type="text" class="form-control-target input-target" name="target_1" id="EditT1" placeholder="0,00">
                                         </div>
                                     </div>
                                     <div class="col-xs-4 col-sm-2">
                                         <div class="target-year-box">
                                             <label>2026</label>
-                                            <input type="text" class="form-control-target input-target" name="target_2" id="EditT2" placeholder="0.00">
+                                            <input type="text" class="form-control-target input-target" name="target_2" id="EditT2" placeholder="0,00">
                                         </div>
                                     </div>
                                     <div class="col-xs-4 col-sm-2">
                                         <div class="target-year-box">
                                             <label>2027</label>
-                                            <input type="text" class="form-control-target input-target" name="target_3" id="EditT3" placeholder="0.00">
+                                            <input type="text" class="form-control-target input-target" name="target_3" id="EditT3" placeholder="0,00">
                                         </div>
                                     </div>
                                     <div class="col-xs-4 col-sm-2">
                                         <div class="target-year-box">
                                             <label>2028</label>
-                                            <input type="text" class="form-control-target input-target" name="target_4" id="EditT4" placeholder="0.00">
+                                            <input type="text" class="form-control-target input-target" name="target_4" id="EditT4" placeholder="0,00">
                                         </div>
                                     </div>
                                     <div class="col-xs-4 col-sm-2">
                                         <div class="target-year-box">
                                             <label>2029</label>
-                                            <input type="text" class="form-control-target input-target" name="target_5" id="EditT5" placeholder="0.00">
+                                            <input type="text" class="form-control-target input-target" name="target_5" id="EditT5" placeholder="0,00">
                                         </div>
                                     </div>
                                     <div class="col-xs-4 col-sm-2">
                                         <div class="target-year-box">
                                             <label>2030</label>
-                                            <input type="text" class="form-control-target input-target" name="target_6" id="EditT6" placeholder="0.00">
+                                            <input type="text" class="form-control-target input-target" name="target_6" id="EditT6" placeholder="0,00">
                                         </div>
                                     </div>
                                 </div>
@@ -1032,9 +1038,9 @@ $(document).ready(function () {
     var CSRF_TOKEN = '<?= $this->security->get_csrf_hash() ?>';
     var CSRF_NAME = '<?= $this->security->get_csrf_token_name() ?>';
 
-    // Auto replace comma with dot on target inputs
+    // Auto replace dot with comma on target inputs
     $(document).on('input', '.input-target', function() {
-        $(this).val($(this).val().replace(/,/g, '.'));
+        $(this).val($(this).val().replace(/\./g, ','));
     });
 
     // Inisialisasi DataTables untuk masing-masing tabel aspek
@@ -1225,12 +1231,12 @@ $(document).ready(function () {
             $('#EditOpd').append(new Option(d.opd, d.opd, true, true));
         }
         $('#EditOpd').val(d.opd || '');
-        $('#EditT1').val(d.t1 ? String(d.t1).replace(',', '.') : '');
-        $('#EditT2').val(d.t2 ? String(d.t2).replace(',', '.') : '');
-        $('#EditT3').val(d.t3 ? String(d.t3).replace(',', '.') : '');
-        $('#EditT4').val(d.t4 ? String(d.t4).replace(',', '.') : '');
-        $('#EditT5').val(d.t5 ? String(d.t5).replace(',', '.') : '');
-        $('#EditT6').val(d.t6 ? String(d.t6).replace(',', '.') : '');
+        $('#EditT1').val(d.t1 ? String(d.t1).replace(/\./g, ',') : '');
+        $('#EditT2').val(d.t2 ? String(d.t2).replace(/\./g, ',') : '');
+        $('#EditT3').val(d.t3 ? String(d.t3).replace(/\./g, ',') : '');
+        $('#EditT4').val(d.t4 ? String(d.t4).replace(/\./g, ',') : '');
+        $('#EditT5').val(d.t5 ? String(d.t5).replace(/\./g, ',') : '');
+        $('#EditT6').val(d.t6 ? String(d.t6).replace(/\./g, ',') : '');
         $('#ModalEditIKD').modal('show');
     });
 
