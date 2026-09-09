@@ -785,23 +785,7 @@ MODAL TAMBAH IKD (DESAIN MENARIK & MODERN)
                                 <div class="col-lg-5 col-md-5">
                                     <div class="form-group">
                                         <label class="form-label-ikd">Satuan Pengukuran</label>
-                                        <select class="form-control-ikd" name="satuan" id="TambahSatuan">
-                                            <option value="">-- Pilih Satuan --</option>
-                                            <option value="Persen">Persen</option>
-                                            <option value="Poin">Poin</option>
-                                            <option value="Indeks">Indeks</option>
-                                            <option value="Rasio">Rasio</option>
-                                            <option value="Jiwa">Jiwa</option>
-                                            <option value="Orang">Orang</option>
-                                            <option value="Km">Km</option>
-                                            <option value="Unit">Unit</option>
-                                            <option value="Dokumen">Dokumen</option>
-                                            <option value="Paket">Paket</option>
-                                            <option value="Ha">Ha (Hektar)</option>
-                                            <option value="Rp">Rp (Rupiah)</option>
-                                            <option value="Nilai">Nilai</option>
-                                            <option value="Skor">Skor</option>
-                                        </select>
+                                        <input type="text" class="form-control-ikd" name="satuan" id="TambahSatuan" placeholder="Contoh: %, Orang, Dokumen">
                                     </div>
                                 </div>
                                 <div class="col-lg-7 col-md-7">
@@ -909,23 +893,7 @@ MODAL EDIT IKD (DESAIN MENARIK & MODERN)
                                 <div class="col-lg-5 col-md-5">
                                     <div class="form-group">
                                         <label class="form-label-ikd">Satuan Pengukuran</label>
-                                        <select class="form-control-ikd" name="satuan" id="EditSatuan">
-                                            <option value="">-- Pilih Satuan --</option>
-                                            <option value="Persen">Persen</option>
-                                            <option value="Poin">Poin</option>
-                                            <option value="Indeks">Indeks</option>
-                                            <option value="Rasio">Rasio</option>
-                                            <option value="Jiwa">Jiwa</option>
-                                            <option value="Orang">Orang</option>
-                                            <option value="Km">Km</option>
-                                            <option value="Unit">Unit</option>
-                                            <option value="Dokumen">Dokumen</option>
-                                            <option value="Paket">Paket</option>
-                                            <option value="Ha">Ha (Hektar)</option>
-                                            <option value="Rp">Rp (Rupiah)</option>
-                                            <option value="Nilai">Nilai</option>
-                                            <option value="Skor">Skor</option>
-                                        </select>
+                                        <input type="text" class="form-control-ikd" name="satuan" id="EditSatuan" placeholder="Contoh: %, Orang, Dokumen">
                                     </div>
                                 </div>
                                 <div class="col-lg-7 col-md-7">
