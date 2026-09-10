@@ -4590,7 +4590,7 @@
                 'password'          => password_hash($pwd, PASSWORD_DEFAULT),
                 'tahun_mulai'       => $tahunMulai,
                 'tahun_akhir'       => $tahunAkhir,
-                'Level'             => 2,
+                'Level'             => 4,
                 'idkementerian'     => $idKementerian,
                 'created_at'        => date('Y-m-d H:i:s'),
                 'updated_at'        => date('Y-m-d H:i:s')
