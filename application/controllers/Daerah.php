@@ -9098,7 +9098,13 @@
         $bidangId = (int)$this->input->post('bidang_urusan_id', TRUE);
         $kode = trim($this->input->post('kode_program', TRUE));
         $nama = trim($this->input->post('nama_program', TRUE));
-        $outcomes = $this->input->post('outcomes', TRUE); // array multidimensi
+        
+        $outcomesRaw = $this->input->post('outcomes_json');
+        if (!empty($outcomesRaw)) {
+            $outcomes = json_decode($outcomesRaw, true);
+        } else {
+            $outcomes = $this->input->post('outcomes', TRUE);
+        }
         
         if ($bidangId <= 0 || empty($nama)) {
             echo json_encode(['status' => 'error', 'message' => 'Data program tidak lengkap!']);
@@ -9150,6 +9156,8 @@
                         if (empty(trim($ind['indikator'] ?? ''))) continue;
                         
                         $dataInd = [
+                            'kode_wilayah' => $kodeWilayah,
+                            'program_id' => $programId,
                             'outcome_id' => $outcomeId,
                             'indikator' => trim($ind['indikator']),
                             'satuan' => trim($ind['satuan'] ?? ''),
@@ -9164,7 +9172,7 @@
                             'pagu_2029' => $this->_program_format_pagu($ind['pagu_2029'] ?? null),
                             'target_2030' => trim($ind['target_2030'] ?? ''),
                             'pagu_2030' => $this->_program_format_pagu($ind['pagu_2030'] ?? null),
-                            'perangkat_daerah_id' => isset($ind['perangkat_daerah_id']) ? (int)$ind['perangkat_daerah_id'] : null,
+                            'perangkat_daerah_id' => !empty($ind['perangkat_daerah_id']) ? (int)$ind['perangkat_daerah_id'] : null,
                             'urutan' => $urutanInd,
                             'created_at' => date('Y-m-d H:i:s')
                         ];
@@ -9187,7 +9195,7 @@
     /**
      * EDIT PROGRAM + OUTCOME + INDIKATOR
      * POST: id, bidang_urusan_id, kode_program, nama_program,
-     *       outcomes[][id, outcome_text, deleted, indikators[][id, indikator, ...]]
+     *       outcomes_json / outcomes[][id, outcome_text, deleted, indikators[][id, indikator, ...]]
      */
     public function program_edit_program() {
         if (!$this->input->is_ajax_request()) show_404();
@@ -9199,7 +9207,13 @@
         $bidangId = (int)$this->input->post('bidang_urusan_id', TRUE);
         $kode = trim($this->input->post('kode_program', TRUE));
         $nama = trim($this->input->post('nama_program', TRUE));
-        $outcomes = $this->input->post('outcomes', TRUE);
+        
+        $outcomesRaw = $this->input->post('outcomes_json');
+        if (!empty($outcomesRaw)) {
+            $outcomes = json_decode($outcomesRaw, true);
+        } else {
+            $outcomes = $this->input->post('outcomes', TRUE);
+        }
         
         if ($id <= 0 || $bidangId <= 0 || empty($nama)) {
             echo json_encode(['status' => 'error', 'message' => 'Data tidak lengkap!']);
@@ -9287,6 +9301,8 @@
                         if ($indId > 0 && !$isDeletedInd) {
                             // Update existing
                             $this->db->where('id', $indId)->where('outcome_id', $outcomeId)->update('program_indikator', [
+                                'kode_wilayah' => $kodeWilayah,
+                                'program_id' => $id,
                                 'indikator' => $indText,
                                 'satuan' => trim($ind['satuan'] ?? ''),
                                 'kondisi_awal' => trim($ind['kondisi_awal'] ?? ''),
@@ -9300,7 +9316,7 @@
                                 'pagu_2029' => $this->_program_format_pagu($ind['pagu_2029'] ?? null),
                                 'target_2030' => trim($ind['target_2030'] ?? ''),
                                 'pagu_2030' => $this->_program_format_pagu($ind['pagu_2030'] ?? null),
-                                'perangkat_daerah_id' => isset($ind['perangkat_daerah_id']) ? (int)$ind['perangkat_daerah_id'] : null,
+                                'perangkat_daerah_id' => !empty($ind['perangkat_daerah_id']) ? (int)$ind['perangkat_daerah_id'] : null,
                                 'urutan' => $urutanInd,
                                 'updated_at' => date('Y-m-d H:i:s')
                             ]);
@@ -9312,6 +9328,8 @@
                         } else {
                             // Insert new indikator
                             $dataInd = [
+                                'kode_wilayah' => $kodeWilayah,
+                                'program_id' => $id,
                                 'outcome_id' => $outcomeId,
                                 'indikator' => $indText,
                                 'satuan' => trim($ind['satuan'] ?? ''),
@@ -9326,7 +9344,7 @@
                                 'pagu_2029' => $this->_program_format_pagu($ind['pagu_2029'] ?? null),
                                 'target_2030' => trim($ind['target_2030'] ?? ''),
                                 'pagu_2030' => $this->_program_format_pagu($ind['pagu_2030'] ?? null),
-                                'perangkat_daerah_id' => isset($ind['perangkat_daerah_id']) ? (int)$ind['perangkat_daerah_id'] : null,
+                                'perangkat_daerah_id' => !empty($ind['perangkat_daerah_id']) ? (int)$ind['perangkat_daerah_id'] : null,
                                 'urutan' => $urutanInd,
                                 'created_at' => date('Y-m-d H:i:s')
                             ];
@@ -9371,8 +9389,10 @@
     public function program_get_by_id() {
         if (!$this->input->is_ajax_request()) show_404();
         
+        $kodeWilayah = $this->_checkSessionWilayah();
+        if (!$kodeWilayah) return;
+        
         $id = (int)$this->input->post('id', TRUE);
-        $kodeWilayah = $this->_getKodeWilayah();
         
         if ($id <= 0 || empty($kodeWilayah)) {
             echo json_encode(['status' => 'error', 'message' => 'Data tidak valid']);
