@@ -12,26 +12,141 @@
     
     .program-table {
         width: 100%;
-        border-collapse: collapse;
+        min-width: 1800px;
+        table-layout: fixed;
+        border-collapse: separate;
+        border-spacing: 0;
         font-size: 12px;
     }
     .program-table th {
-        background: #f1f8e9;
+        background: #e8f5e9;
         text-align: center;
         font-weight: 600;
         padding: 6px 4px;
-        border: 1px solid #dee2e6;
+        border-right: 1px solid #dee2e6;
+        border-bottom: 1px solid #dee2e6;
         font-size: 10px;
         vertical-align: middle;
+        position: sticky;
+        box-sizing: border-box;
+    }
+    .program-table thead tr:nth-child(1) th {
+        top: 0;
+        height: 28px;
+        z-index: 12;
+        background: #e8f5e9;
+        border-top: 1px solid #dee2e6;
+    }
+    .program-table thead tr:nth-child(2) th {
+        top: 28px;
+        height: 26px;
+        z-index: 11;
+        background: #f1f8e9;
+    }
+    .program-table th:first-child,
+    .program-table td:first-child {
+        border-left: 1px solid #dee2e6;
     }
     .program-table td {
         padding: 4px 3px;
-        border: 1px solid #dee2e6;
+        border-right: 1px solid #dee2e6;
+        border-bottom: 1px solid #dee2e6;
         vertical-align: middle;
         text-align: center;
+        box-sizing: border-box;
     }
     .program-table .text-left { text-align: left; padding-left: 8px; }
     .program-table .text-right { text-align: right; padding-right: 8px; }
+    
+    .program-table tr.border-urusan td:first-child { border-left: 4px solid #007bff !important; }
+    .program-table tr.border-bidang td:first-child { border-left: 4px solid #28a745 !important; }
+    .program-table tr.border-program td:first-child { border-left: 4px solid #0d6efd !important; }
+    .program-table tr.border-outcome td:first-child { border-left: 4px solid #198754 !important; }
+    .program-table tr.border-indikator td:first-child { border-left: 4px solid #ffc107 !important; }
+
+    /* Sticky Columns (Horizontal Freeze) */
+    .program-table .col-sticky-1 {
+        position: sticky !important;
+        left: 0 !important;
+        width: 320px !important;
+        min-width: 320px !important;
+        max-width: 320px !important;
+        box-sizing: border-box;
+        word-break: break-word;
+        white-space: normal;
+    }
+    .program-table .col-sticky-2 {
+        position: sticky !important;
+        left: 320px !important;
+        width: 250px !important;
+        min-width: 250px !important;
+        max-width: 250px !important;
+        box-sizing: border-box;
+        word-break: break-word;
+        white-space: normal;
+    }
+    .program-table .col-sticky-1-2 {
+        position: sticky !important;
+        left: 0 !important;
+        width: 570px !important;
+        min-width: 570px !important;
+        max-width: 570px !important;
+        box-sizing: border-box;
+        word-break: break-word;
+        white-space: normal;
+    }
+
+    /* Sticky Headers (Top + Left Freeze) */
+    .program-table thead th.col-sticky-1 {
+        top: 0;
+        left: 0 !important;
+        z-index: 35 !important;
+        background: #e8f5e9 !important;
+    }
+    .program-table thead th.col-sticky-2 {
+        top: 0;
+        left: 320px !important;
+        z-index: 30 !important;
+        background: #e8f5e9 !important;
+        border-right: 2px solid #b0bec5 !important;
+    }
+
+    /* Sticky Body Cells Z-index & Backgrounds */
+    .program-table tbody td.col-sticky-1 {
+        z-index: 7;
+    }
+    .program-table tbody td.col-sticky-2 {
+        z-index: 6;
+    }
+    .program-table tbody td.col-sticky-1-2 {
+        z-index: 7;
+    }
+
+    .program-table .row-urusan td.col-sticky-1-2 { 
+        background: #f8f9fa !important; 
+        border-right: 2px solid #b0bec5 !important;
+    }
+    .program-table .row-bidang td.col-sticky-1-2 { 
+        background: #fafbfc !important; 
+        border-right: 2px solid #b0bec5 !important;
+    }
+    .program-table .row-program td.col-sticky-1 { 
+        background: #eef7ff !important; 
+    }
+    .program-table .row-outcome td.col-sticky-1 { 
+        background: #f0faf0 !important; 
+    }
+    .program-table .row-outcome td.col-sticky-2 { 
+        background: #f0faf0 !important; 
+        border-right: 2px solid #b0bec5 !important;
+    }
+    .program-table .row-indikator td.col-sticky-1 { 
+        background: #ffffff !important; 
+    }
+    .program-table .row-indikator td.col-sticky-2 { 
+        background: #ffffff !important; 
+        border-right: 2px solid #b0bec5 !important;
+    }
     
     /* Warna level */
     .program-table .row-urusan { background: #f8f9fa; font-weight: 600; }
@@ -268,8 +383,29 @@
     .empty-state { text-align: center; padding: 40px 20px; color: #6c757d; }
     .empty-state .icon { font-size: 48px; margin-bottom: 15px; color: #dee2e6; }
     .empty-state h5 { color: #495057; }
-    .table-scroll { overflow-x: auto; margin-top: 5px; }
-    .table-scroll .program-table { min-width: 1400px; }
+    .table-scroll { 
+        overflow: auto; 
+        max-height: 75vh; 
+        margin-top: 5px; 
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        position: relative;
+    }
+    .table-scroll::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    .table-scroll::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    .table-scroll::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 4px;
+    }
+    .table-scroll::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+    .table-scroll .program-table { min-width: 1800px; }
 
     @media (max-width: 768px) {
         .filter-row { flex-direction:column; gap:15px; }
@@ -411,33 +547,48 @@
                             <?php } else { ?>
                                 <div class="table-scroll">
                                     <table class="program-table">
+                                        <colgroup>
+                                            <col style="width: 320px;">
+                                            <col style="width: 250px;">
+                                            <col style="width: 80px;">
+                                            <col style="width: 90px;">
+                                            <col style="width: 80px;">
+                                            <col style="width: 100px;">
+                                            <col style="width: 80px;">
+                                            <col style="width: 100px;">
+                                            <col style="width: 80px;">
+                                            <col style="width: 100px;">
+                                            <col style="width: 80px;">
+                                            <col style="width: 100px;">
+                                            <col style="width: 80px;">
+                                            <col style="width: 100px;">
+                                            <col style="width: 180px;">
+                                            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                                                <col style="width: 90px;">
+                                            <?php } ?>
+                                        </colgroup>
                                         <thead>
                                             <tr>
-                                                <th style="width:15%;">URUSAN / BIDANG / PROGRAM / OUTCOME</th>
-                                                <th style="width:10%;">INDIKATOR</th>
-                                                <th style="width:5%;">SATUAN</th>
-                                                <th style="width:7%;">KONDISI AWAL</th>
+                                                <th rowspan="2" class="col-sticky-1">URUSAN / BIDANG / PROGRAM / OUTCOME</th>
+                                                <th rowspan="2" class="col-sticky-2">INDIKATOR</th>
+                                                <th rowspan="2" style="width:5%;">SATUAN</th>
+                                                <th rowspan="2" style="width:7%;">KONDISI AWAL</th>
                                                 <th colspan="2" style="width:7%;">2026</th>
                                                 <th colspan="2" style="width:7%;">2027</th>
                                                 <th colspan="2" style="width:7%;">2028</th>
                                                 <th colspan="2" style="width:7%;">2029</th>
                                                 <th colspan="2" style="width:7%;">2030</th>
-                                                <th style="width:8%;">PERANGKAT DAERAH</th>
+                                                <th rowspan="2" style="width:8%;">PERANGKAT DAERAH</th>
                                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                                    <th style="width:5%;" class="col-aksi">AKSI</th>
+                                                    <th rowspan="2" style="width:5%;" class="col-aksi">AKSI</th>
                                                 <?php } ?>
                                             </tr>
                                             <tr>
-                                                <th></th><th></th><th></th><th></th>
                                                 <th>TARGET</th><th>PAGU</th>
                                                 <th>TARGET</th><th>PAGU</th>
                                                 <th>TARGET</th><th>PAGU</th>
                                                 <th>TARGET</th><th>PAGU</th>
                                                 <th>TARGET</th><th>PAGU</th>
-                                                <th></th>
-                                                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                                    <th class="col-aksi"></th>
-                                                <?php } ?>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -471,7 +622,7 @@
                                             ?>
                                                 <!-- ROW URUSAN -->
                                                 <tr class="row-urusan border-urusan">
-                                                    <td class="text-left level-urusan" colspan="2">
+                                                    <td class="text-left level-urusan col-sticky-1-2" colspan="2">
                                                         <span class="badge-urusan"><?= html_escape($urusan['kode_urusan']) ?></span>
                                                         <strong><?= html_escape($urusan['nama_urusan']) ?></strong>
                                                     </td>
@@ -517,7 +668,7 @@
                                                     ?>
                                                         <!-- ROW BIDANG -->
                                                         <tr class="row-bidang border-bidang">
-                                                            <td class="text-left level-bidang" colspan="2">
+                                                            <td class="text-left level-bidang col-sticky-1-2" colspan="2">
                                                                 <span class="badge-bidang"><?= html_escape($bidang['kode_bidang']) ?></span>
                                                                 <span class="nama-bidang"><?= html_escape($bidang['nama_bidang']) ?></span>
                                                             </td>
@@ -556,7 +707,7 @@
                                                                 if ($totalIndikator == 0) {
                                                                     ?>
                                                                     <tr class="row-program border-program">
-                                                                        <td class="text-left level-program" style="padding-left:45px;">
+                                                                        <td class="text-left level-program col-sticky-1" style="padding-left:45px;">
                                                                             <?php if (!empty($program['kode_program'])) { ?>
                                                                                 <span class="badge-program"><?= html_escape($program['kode_program']) ?></span>
                                                                             <?php } ?>
@@ -596,7 +747,7 @@
                                                                     // Tampilkan baris OUTCOME + INDIKATOR PERTAMA
                                                                     ?>
                                                                     <tr class="row-outcome border-outcome">
-                                                                        <td class="text-left program-outcome-cell" style="padding-left:45px;">
+                                                                        <td class="text-left program-outcome-cell col-sticky-1" style="padding-left:45px;">
                                                                             <?php if ($isFirstOutcome) { ?>
                                                                                 <!-- Tampilkan Program hanya di baris outcome pertama -->
                                                                                 <?php if (!empty($program['kode_program'])) { ?>
@@ -612,7 +763,7 @@
                                                                         </td>
                                                                         
                                                                         <!-- Kolom INDIKATOR PERTAMA -->
-                                                                        <td class="indikator-text" style="text-align:left; padding-left:5px;">
+                                                                        <td class="indikator-text col-sticky-2" style="text-align:left; padding-left:5px;">
                                                                             <span class="badge-indikator-sm">Indikator 1</span>
                                                                             <?= html_escape($firstIndikator['indikator'] ?? '-') ?>
                                                                         </td>
@@ -658,12 +809,12 @@
                                                                             $indikator = $indikators[$i];
                                                                             ?>
                                                                             <tr class="row-indikator border-indikator">
-                                                                                <td class="text-left" style="padding-left:65px;">
+                                                                                <td class="text-left col-sticky-1" style="padding-left:65px;">
                                                                                     <!-- Kosongkan kolom program/outcome untuk indikator tambahan -->
                                                                                 </td>
                                                                                 
                                                                                 <!-- Kolom INDIKATOR -->
-                                                                                <td class="indikator-text" style="text-align:left; padding-left:5px;">
+                                                                                <td class="indikator-text col-sticky-2" style="text-align:left; padding-left:5px;">
                                                                                     <span class="badge-indikator-sm">Indikator <?= $i+1 ?></span>
                                                                                     <?= html_escape($indikator['indikator'] ?? '-') ?>
                                                                                 </td>
@@ -1598,7 +1749,22 @@ $(document).on('hidden.bs.modal', '.modal.fixed-modal', function() {
     nomenklaturCache = {};
 });
 
+function adjustStickyColumns() {
+    var $col1 = $('.program-table thead th.col-sticky-1');
+    if ($col1.length) {
+        var w1 = Math.round($col1.outerWidth());
+        $('.program-table .col-sticky-2').css('left', w1 + 'px');
+        var $col2 = $('.program-table thead th.col-sticky-2');
+        if ($col2.length) {
+            var w2 = Math.round($col2.outerWidth());
+            $('.program-table .col-sticky-1-2').css('width', (w1 + w2) + 'px');
+        }
+    }
+}
+
 $(document).ready(function() {
+    adjustStickyColumns();
+    $(window).on('resize', adjustStickyColumns);
     console.log('ProgramPD ready - Mendukung Multiple Outcome & Indikator');
 });
 </script>
