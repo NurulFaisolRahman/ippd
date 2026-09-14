@@ -34,6 +34,7 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 
 # Secure API Key & Temporary Cache Files
 application/config/gemini.php
+application/config/nine_router.php
 scratch/
 __pycache__/
 *.pyc

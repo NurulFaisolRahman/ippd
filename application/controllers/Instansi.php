@@ -24,6 +24,12 @@ class Instansi extends CI_Controller {
         if (isset($this->session) && $this->session->userdata('isLoggedIn') === true) {
             return true;
         }
+        if (!empty($_SESSION['Username']) || isset($_SESSION['Level']) || !empty($_SESSION['KodeWilayah'])) {
+            return true;
+        }
+        if (isset($this->session) && ($this->session->userdata('Username') || $this->session->userdata('Level') !== null)) {
+            return true;
+        }
         return false;
     }
 
@@ -40,6 +46,114 @@ class Instansi extends CI_Controller {
     private function is_role_3() {
         return $this->is_logged_in() && isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 3;
     }
+
+    /**
+     * Cek apakah user saat ini adalah level Nasional (Level 0)
+     */
+    private function is_nasional() {
+        if (isset($_SESSION['Level']) && ((string)$_SESSION['Level'] === '0' || strtolower((string)$_SESSION['Level']) === 'nasional')) {
+            return true;
+        }
+        if (isset($this->session) && $this->session->userdata('Level') !== null) {
+            $lvl = $this->session->userdata('Level');
+            if ((string)$lvl === '0' || strtolower((string)$lvl) === 'nasional') return true;
+        }
+        return false;
+    }
+
+    /**
+     * Cek apakah user saat ini adalah level Kementerian (Level 1)
+     */
+    private function is_kementerian() {
+        if (isset($_SESSION['Level']) && ((string)$_SESSION['Level'] === '1' || strtolower((string)$_SESSION['Level']) === 'kementerian')) {
+            return true;
+        }
+        if (isset($this->session) && $this->session->userdata('Level') !== null) {
+            $lvl = $this->session->userdata('Level');
+            if ((string)$lvl === '1' || strtolower((string)$lvl) === 'kementerian') return true;
+        }
+        if (isset($_SESSION['userLevel']) && (string)$_SESSION['userLevel'] === '1') {
+            return true;
+        }
+        if (isset($_SESSION['IdKementerian']) && !empty($_SESSION['IdKementerian']) && empty($_SESSION['Instansi'])) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Cek apakah user saat ini berstatus Read-Only untuk dokumen LKPJ Daerah (Kementerian & Nasional)
+     */
+    private function is_lkpj_readonly() {
+        return $this->is_kementerian() || $this->is_nasional();
+    }
+
+    /**
+     * Cek apakah user memiliki hak akses mengubah / CRUD data LKPJ BAB 1 & 2
+     * User Kementerian dan Nasional HANYA BISA MELIHAT DATA (Read-only), TIDAK BISA CRUD
+     */
+    private function can_crud_lkpj() {
+        if ($this->is_lkpj_readonly()) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Cek apakah user memiliki hak akses mengubah / CRUD data LKPJ sesuai dengan session wilayahnya masing-masing.
+     * Aturan:
+     * - User harus login dan tidak read-only (bukan Kementerian / Nasional).
+     * - Superadmin (Level === 0) memiliki akses penuh.
+     * - User Daerah (Level 3) & Instansi (Level 4) hanya dapat melakukan CRUD jika KodeWilayah akun miliknya sesuai dengan wilayah data yang diakses.
+     */
+    private function can_crud_lkpj_for_wilayah($targetKodeWilayah = null) {
+        if (!$this->is_logged_in()) {
+            return false;
+        }
+        if ($this->is_lkpj_readonly()) {
+            return false;
+        }
+        // Superadmin (Level 0) bisa mengelola semua wilayah
+        if (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 0) {
+            return true;
+        }
+        if (isset($this->session) && (int)$this->session->userdata('Level') === 0) {
+            return true;
+        }
+
+        // Ambil session kode wilayah asli pengguna
+        $sessionKw = null;
+        if ($this->is_role_4()) {
+            $instansi_id = $this->get_instansi_id();
+            if ($instansi_id) {
+                $inst = $this->db->select('kodewilayah')->where('id', $instansi_id)->get('akun_instansi')->row_array();
+                if (!empty($inst['kodewilayah'])) {
+                    $sessionKw = trim((string)$inst['kodewilayah']);
+                }
+            }
+        }
+        if (empty($sessionKw)) {
+            $sessionKw = $this->session->userdata('KodeWilayah') ?: (isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : null);
+        }
+        if (empty($sessionKw) && isset($_SESSION['Username']) && !empty($_SESSION['Username'])) {
+            $user = $this->db->select('KodeWilayah')->where('Username', $_SESSION['Username'])->get('akun')->row_array();
+            if (!empty($user['KodeWilayah'])) {
+                $sessionKw = trim((string)$user['KodeWilayah']);
+            }
+        }
+
+        if (empty($sessionKw)) {
+            return false;
+        }
+
+        if (empty($targetKodeWilayah)) {
+            return true;
+        }
+
+        return trim((string)$sessionKw) === trim((string)$targetKodeWilayah);
+    }
+
+
 
     /**
      * Cek apakah user bisa melakukan CRUD (role 4 atau role 3/admin dengan instansi aktif)
@@ -108,10 +222,11 @@ class Instansi extends CI_Controller {
             }
         }
 
-        // 3. Cek query parameter get 'kode_wilayah' atau 'KodeWilayah' jika belum login
+        // 3. Cek query parameter get 'kode_wilayah' atau 'KodeWilayah' jika belum login atau jika role read-only (Kementerian / Nasional)
         $getKw = $this->input->get('kode_wilayah', TRUE) ?: $this->input->get('KodeWilayah', TRUE);
-        if (!$this->is_logged_in() && !empty($getKw)) {
+        if ((!$this->is_logged_in() || $this->is_lkpj_readonly()) && !empty($getKw)) {
             $this->session->set_userdata('TempKodeWilayah', $getKw);
+            $_SESSION['TempKodeWilayah'] = $getKw;
             return $getKw;
         }
 
@@ -24349,6 +24464,1685 @@ public function updateStatusPerjanjianKinerja() {
     }
 
     // ================================================================
+    // 3.4 E-LKPJ: BAB 3.4 BAGIAN A - CAPAIAN KINERJA INDIKATOR KINERJA UTAMA (IKU)
+    // ================================================================
+
+    private function ensure_bab3_4a_tables_exist($KodeWilayah = '35.12', $tahun = 2025) {
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab3_iku_capaian` (
+          `id` int(11) NOT NULL AUTO_INCREMENT,
+          `kodewilayah` varchar(13) NOT NULL,
+          `tahun` int(4) NOT NULL DEFAULT 2025,
+          `iku_id` int(11) DEFAULT NULL,
+          `misi_id` int(11) DEFAULT NULL,
+          `misi` text NOT NULL,
+          `tujuan_id` int(11) DEFAULT NULL,
+          `tujuan` text NOT NULL,
+          `indikator_iku` text NOT NULL,
+          `satuan` varchar(50) DEFAULT 'Indeks',
+          `realisasi_2022` decimal(15,3) DEFAULT NULL,
+          `realisasi_2023` decimal(15,3) DEFAULT NULL,
+          `realisasi_2024` decimal(15,3) DEFAULT NULL,
+          `target_2025` decimal(15,3) DEFAULT NULL,
+          `realisasi_2025` decimal(15,3) DEFAULT NULL,
+          `capaian_2025` decimal(15,3) DEFAULT NULL,
+          `urutan` int(11) NOT NULL DEFAULT 0,
+          `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+          `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          `deleted_at` datetime DEFAULT NULL,
+          PRIMARY KEY (`id`),
+          KEY `idx_wilayah_tahun` (`kodewilayah`, `tahun`, `deleted_at`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab3_iku_perkembangan` (
+          `id` int(11) NOT NULL AUTO_INCREMENT,
+          `kodewilayah` varchar(13) NOT NULL,
+          `tahun` int(4) NOT NULL DEFAULT 2025,
+          `capaian_id` int(11) DEFAULT NULL,
+          `uraian_indikator` varchar(255) NOT NULL,
+          `nilai_2021` decimal(15,3) DEFAULT NULL,
+          `nilai_2022` decimal(15,3) DEFAULT NULL,
+          `nilai_2023` decimal(15,3) DEFAULT NULL,
+          `nilai_2024` decimal(15,3) DEFAULT NULL,
+          `nilai_2025` decimal(15,3) DEFAULT NULL,
+          `narasi` text DEFAULT NULL,
+          `urutan` int(11) NOT NULL DEFAULT 0,
+          `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+          `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          `deleted_at` datetime DEFAULT NULL,
+          PRIMARY KEY (`id`),
+          KEY `idx_wilayah_tahun` (`kodewilayah`, `tahun`, `deleted_at`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+        // Pastikan kolom narasi, iku_id, dan kolom tahunan dinamis tersedia di tabel
+        if ($this->db->table_exists('lkpj_bab3_iku_perkembangan') && !$this->db->field_exists('narasi', 'lkpj_bab3_iku_perkembangan')) {
+            $this->db->query("ALTER TABLE `lkpj_bab3_iku_perkembangan` ADD COLUMN `narasi` TEXT DEFAULT NULL AFTER `nilai_2025`");
+        }
+        if ($this->db->table_exists('lkpj_bab3_iku_perkembangan') && !$this->db->field_exists('iku_id', 'lkpj_bab3_iku_perkembangan')) {
+            $this->db->query("ALTER TABLE `lkpj_bab3_iku_perkembangan` ADD COLUMN `iku_id` INT(11) DEFAULT NULL AFTER `tahun`");
+        }
+        if ($this->db->table_exists('lkpj_bab3_iku_capaian')) {
+            if (!$this->db->field_exists('realisasi_2021', 'lkpj_bab3_iku_capaian')) {
+                $this->db->query("ALTER TABLE `lkpj_bab3_iku_capaian` ADD COLUMN `realisasi_2021` decimal(15,3) DEFAULT NULL AFTER `satuan`");
+            }
+            if (!$this->db->field_exists('target', 'lkpj_bab3_iku_capaian')) {
+                $this->db->query("ALTER TABLE `lkpj_bab3_iku_capaian` ADD COLUMN `target` decimal(15,3) DEFAULT NULL AFTER `realisasi_2024`");
+            }
+            if (!$this->db->field_exists('realisasi', 'lkpj_bab3_iku_capaian')) {
+                $this->db->query("ALTER TABLE `lkpj_bab3_iku_capaian` ADD COLUMN `realisasi` decimal(15,3) DEFAULT NULL AFTER `target`");
+            }
+            if (!$this->db->field_exists('capaian', 'lkpj_bab3_iku_capaian')) {
+                $this->db->query("ALTER TABLE `lkpj_bab3_iku_capaian` ADD COLUMN `capaian` decimal(15,3) DEFAULT NULL AFTER `realisasi`");
+            }
+        }
+    }
+
+    /**
+     * Sinkronisasi dan penarikan data murni dari relasi IKU di RPJMD
+     * Menghubungkan tabel iku -> tujuanrpjmd -> misirpjmd secara dinamis per tahun LKPJ
+     */
+    private function sync_from_rpjmd_iku($KodeWilayah, $tahun) {
+        $wil = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+        $namaWilayah = $wil ? ucwords(strtolower($wil['Nama'])) : 'Pemerintah Daerah';
+
+        $ikuRows = $this->db->query("
+            SELECT 
+                i.id as iku_id,
+                i.kodewilayah,
+                i.indikator_tujuan,
+                i.target_1, i.target_2, i.target_3, i.target_4, i.target_5,
+                i.tahun_mulai, i.tahun_akhir,
+                t.Id as tujuan_id,
+                t.Tujuan,
+                m.Id as misi_id,
+                m.Misi
+            FROM iku i
+            LEFT JOIN tujuanrpjmd t ON i.IdTujuan = t.Id AND t.deleted_at IS NULL
+            LEFT JOIN misirpjmd m ON t._Id = m.Id AND m.deleted_at IS NULL
+            WHERE i.deleted_at IS NULL 
+            AND (i.kodewilayah = ? OR i.kodewilayah LIKE ?)
+            ORDER BY m.Id ASC, t.Id ASC, i.id ASC
+        ", [$KodeWilayah, $KodeWilayah . '%'])->result_array();
+
+        if (empty($ikuRows)) {
+            return [
+                'itemsCapaian' => [],
+                'misiRowspan' => [],
+                'tujuanRowspan' => [],
+                'itemsPerkembangan' => []
+            ];
+        }
+
+        $validIkuIds = [];
+        $urutan = 1;
+
+        foreach ($ikuRows as $r) {
+            $namaIku = trim($r['indikator_tujuan']);
+            if (empty($namaIku)) continue;
+
+            $validIkuIds[] = (int)$r['iku_id'];
+            $namaMisi = !empty($r['Misi']) ? trim($r['Misi']) : 'Misi Pembangunan ' . $namaWilayah;
+            $namaTujuan = !empty($r['Tujuan']) ? trim($r['Tujuan']) : 'Tujuan Pembangunan ' . $namaWilayah;
+
+            // Deteksi satuan cerdas
+            $satuan = 'Indeks';
+            $lowerInd = strtolower($namaIku);
+            if (strpos($lowerInd, '%') !== false || strpos($lowerInd, 'persen') !== false || strpos($lowerInd, 'pertumbuhan') !== false || strpos($lowerInd, 'kemiskinan') !== false) {
+                $satuan = '%';
+            } elseif (strpos($lowerInd, 'jiwa') !== false || strpos($lowerInd, 'orang') !== false) {
+                $satuan = 'Jiwa';
+            }
+
+            $n21 = is_numeric($r['target_1']) ? (float)$r['target_1'] : null;
+            $n22 = is_numeric($r['target_2']) ? (float)$r['target_2'] : null;
+            $n23 = is_numeric($r['target_3']) ? (float)$r['target_3'] : null;
+            $n24 = is_numeric($r['target_4']) ? (float)$r['target_4'] : null;
+            $n25 = is_numeric($r['target_5']) ? (float)$r['target_5'] : null;
+
+            // Cek data perkembangan yang sudah ada untuk mempertahankan editan user
+            $namaPerk = 'Perkembangan ' . $namaIku;
+            $existPerk = $this->db->where('kodewilayah', $KodeWilayah)
+                                  ->where('tahun', $tahun)
+                                  ->group_start()
+                                      ->where('iku_id', $r['iku_id'])
+                                      ->or_where('uraian_indikator', $namaPerk)
+                                      ->or_where('uraian_indikator', $namaIku)
+                                  ->group_end()
+                                  ->where('deleted_at IS NULL')
+                                  ->get('lkpj_bab3_iku_perkembangan')
+                                  ->row_array();
+
+            if ($existPerk) {
+                $p21 = ($existPerk['nilai_2021'] !== null && $existPerk['nilai_2021'] !== '') ? (float)$existPerk['nilai_2021'] : $n21;
+                $p22 = ($existPerk['nilai_2022'] !== null && $existPerk['nilai_2022'] !== '') ? (float)$existPerk['nilai_2022'] : $n22;
+                $p23 = ($existPerk['nilai_2023'] !== null && $existPerk['nilai_2023'] !== '') ? (float)$existPerk['nilai_2023'] : $n23;
+                $p24 = ($existPerk['nilai_2024'] !== null && $existPerk['nilai_2024'] !== '') ? (float)$existPerk['nilai_2024'] : $n24;
+                $p25 = ($existPerk['nilai_2025'] !== null && $existPerk['nilai_2025'] !== '') ? (float)$existPerk['nilai_2025'] : $n25;
+
+                $this->db->where('id', $existPerk['id'])->update('lkpj_bab3_iku_perkembangan', [
+                    'iku_id' => $r['iku_id'],
+                    'uraian_indikator' => $namaPerk,
+                    'nilai_2021' => $p21,
+                    'nilai_2022' => $p22,
+                    'nilai_2023' => $p23,
+                    'nilai_2024' => $p24,
+                    'nilai_2025' => $p25,
+                    'urutan' => $urutan,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ]);
+                $perkId = $existPerk['id'];
+            } else {
+                $p21 = $n21; $p22 = $n22; $p23 = $n23; $p24 = $n24; $p25 = $n25;
+                $this->db->insert('lkpj_bab3_iku_perkembangan', [
+                    'kodewilayah' => $KodeWilayah,
+                    'tahun' => $tahun,
+                    'iku_id' => $r['iku_id'],
+                    'uraian_indikator' => $namaPerk,
+                    'nilai_2021' => $p21,
+                    'nilai_2022' => $p22,
+                    'nilai_2023' => $p23,
+                    'nilai_2024' => $p24,
+                    'nilai_2025' => $p25,
+                    'narasi' => null,
+                    'urutan' => $urutan,
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+                $perkId = $this->db->insert_id();
+            }
+
+            // Hitung target, realisasi, dan capaian dinamis untuk tahun LKPJ aktif ($tahun)
+            $targetMap = [2021 => $n21, 2022 => $n22, 2023 => $n23, 2024 => $n24, 2025 => $n25];
+            $realisasiMap = [2021 => $p21, 2022 => $p22, 2023 => $p23, 2024 => $p24, 2025 => $p25];
+
+            $targetAktif = $targetMap[$tahun] ?? ($n25 ?: $n21);
+            $realisasiAktif = $realisasiMap[$tahun] ?? null;
+            $capaianAktif = null;
+            if ($targetAktif !== null && $targetAktif > 0 && $realisasiAktif !== null) {
+                $capaianAktif = round(($realisasiAktif / $targetAktif) * 100, 2);
+            }
+
+            // Sinkronkan ke tabel Capaian IKU
+            $existCapaian = $this->db->where('kodewilayah', $KodeWilayah)
+                                     ->where('tahun', $tahun)
+                                     ->group_start()
+                                         ->where('iku_id', $r['iku_id'])
+                                         ->or_where('indikator_iku', $namaIku)
+                                     ->group_end()
+                                     ->where('deleted_at IS NULL')
+                                     ->get('lkpj_bab3_iku_capaian')
+                                     ->row_array();
+
+            $capaianData = [
+                'kodewilayah' => $KodeWilayah,
+                'tahun' => $tahun,
+                'iku_id' => $r['iku_id'],
+                'misi_id' => $r['misi_id'],
+                'misi' => $namaMisi,
+                'tujuan_id' => $r['tujuan_id'],
+                'tujuan' => $namaTujuan,
+                'indikator_iku' => $namaIku,
+                'satuan' => (!empty($existCapaian['satuan']) && $existCapaian['satuan'] !== 'Indeks') ? $existCapaian['satuan'] : $satuan,
+                'realisasi_2021' => $p21,
+                'realisasi_2022' => $p22,
+                'realisasi_2023' => $p23,
+                'realisasi_2024' => $p24,
+                'target_2025' => ($n25 !== null ? $n25 : $n21),
+                'target' => $targetAktif,
+                'realisasi' => $realisasiAktif,
+                'capaian' => $capaianAktif,
+                'urutan' => $urutan,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            if ($tahun == 2025) {
+                $capaianData['realisasi_2025'] = $realisasiAktif;
+                $capaianData['capaian_2025'] = $capaianAktif;
+            }
+
+            if ($existCapaian) {
+                $capaianId = $existCapaian['id'];
+                $this->db->where('id', $capaianId)->update('lkpj_bab3_iku_capaian', $capaianData);
+            } else {
+                $capaianData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab3_iku_capaian', $capaianData);
+                $capaianId = $this->db->insert_id();
+            }
+
+            // Tautkan capaian_id di perkembangan
+            if ($perkId > 0 && $capaianId > 0) {
+                $this->db->where('id', $perkId)->update('lkpj_bab3_iku_perkembangan', ['capaian_id' => $capaianId]);
+            }
+
+            $urutan++;
+        }
+
+        // Soft-delete data lokal yang tidak terdaftar dalam master iku RPJMD agar murni hanya menampilkan IKU RPJMD
+        if (!empty($validIkuIds)) {
+            $this->db->where('kodewilayah', $KodeWilayah)
+                     ->where('tahun', $tahun)
+                     ->where_not_in('iku_id', $validIkuIds)
+                     ->update('lkpj_bab3_iku_capaian', ['deleted_at' => date('Y-m-d H:i:s')]);
+
+            $this->db->where('kodewilayah', $KodeWilayah)
+                     ->where('tahun', $tahun)
+                     ->where_not_in('iku_id', $validIkuIds)
+                     ->update('lkpj_bab3_iku_perkembangan', ['deleted_at' => date('Y-m-d H:i:s')]);
+        }
+
+        // Query data segar murni dari relasi IKU RPJMD
+        $itemsCapaian = $this->db
+            ->where('kodewilayah', $KodeWilayah)
+            ->where('tahun', $tahun)
+            ->where_in('iku_id', $validIkuIds)
+            ->where('deleted_at IS NULL')
+            ->order_by('urutan', 'ASC')
+            ->order_by('id', 'ASC')
+            ->get('lkpj_bab3_iku_capaian')
+            ->result_array();
+
+        $itemsPerkembangan = $this->db
+            ->where('kodewilayah', $KodeWilayah)
+            ->where('tahun', $tahun)
+            ->where_in('iku_id', $validIkuIds)
+            ->where('deleted_at IS NULL')
+            ->order_by('urutan', 'ASC')
+            ->order_by('id', 'ASC')
+            ->get('lkpj_bab3_iku_perkembangan')
+            ->result_array();
+
+        // Siapkan lookup map perkembangan untuk mengisi nilai kolom dinamis pada capaian
+        $perkMap = [];
+        foreach ($itemsPerkembangan as $pRow) {
+            if (!empty($pRow['iku_id'])) {
+                $perkMap[$pRow['iku_id']] = $pRow;
+            }
+        }
+
+        $thMin3 = $tahun - 3;
+        $thMin2 = $tahun - 2;
+        $thMin1 = $tahun - 1;
+
+        foreach ($itemsCapaian as &$cRow) {
+            $iId = (int)($cRow['iku_id'] ?? 0);
+            $pItem = $perkMap[$iId] ?? null;
+
+            $getVal = function($yr) use ($pItem, $cRow) {
+                if ($pItem) {
+                    $f = 'nilai_' . $yr;
+                    if (isset($pItem[$f]) && $pItem[$f] !== null && $pItem[$f] !== '') {
+                        return (float)$pItem[$f];
+                    }
+                }
+                $legacyField = 'realisasi_' . $yr;
+                if (isset($cRow[$legacyField]) && $cRow[$legacyField] !== null && $cRow[$legacyField] !== '') {
+                    return (float)$cRow[$legacyField];
+                }
+                return null;
+            };
+
+            $cRow['val_th_min3'] = $getVal($thMin3);
+            $cRow['val_th_min2'] = $getVal($thMin2);
+            $cRow['val_th_min1'] = $getVal($thMin1);
+
+            $targetAktif = null;
+            if (isset($cRow['target']) && $cRow['target'] !== null && $cRow['target'] !== '') {
+                $targetAktif = (float)$cRow['target'];
+            } elseif ($tahun == 2025 && isset($cRow['target_2025']) && $cRow['target_2025'] !== null && $cRow['target_2025'] !== '') {
+                $targetAktif = (float)$cRow['target_2025'];
+            }
+            $cRow['target_th_aktif'] = $targetAktif;
+
+            $realisasiAktif = $getVal($tahun);
+            if ($realisasiAktif === null && isset($cRow['realisasi']) && $cRow['realisasi'] !== null && $cRow['realisasi'] !== '') {
+                $realisasiAktif = (float)$cRow['realisasi'];
+            }
+            if ($realisasiAktif === null && $tahun == 2025 && isset($cRow['realisasi_2025']) && $cRow['realisasi_2025'] !== null && $cRow['realisasi_2025'] !== '') {
+                $realisasiAktif = (float)$cRow['realisasi_2025'];
+            }
+            $cRow['realisasi_th_aktif'] = $realisasiAktif;
+
+            $capaianAktif = null;
+            if ($targetAktif !== null && $targetAktif > 0 && $realisasiAktif !== null) {
+                $capaianAktif = round(($realisasiAktif / $targetAktif) * 100, 2);
+            } elseif ($tahun == 2025 && isset($cRow['capaian_2025']) && $cRow['capaian_2025'] !== null && $cRow['capaian_2025'] !== '') {
+                $capaianAktif = (float)$cRow['capaian_2025'];
+            }
+            $cRow['capaian_th_aktif'] = $capaianAktif;
+        }
+        unset($cRow);
+
+        $misiRowspan = [];
+        $tujuanRowspan = [];
+        foreach ($itemsCapaian as $row) {
+            $mKey = trim($row['misi']);
+            $tKey = $mKey . '|||' . trim($row['tujuan']);
+            if (!isset($misiRowspan[$mKey])) $misiRowspan[$mKey] = 0;
+            if (!isset($tujuanRowspan[$tKey])) $tujuanRowspan[$tKey] = 0;
+            $misiRowspan[$mKey]++;
+            $tujuanRowspan[$tKey]++;
+        }
+
+        return [
+            'itemsCapaian' => $itemsCapaian,
+            'misiRowspan' => $misiRowspan,
+            'tujuanRowspan' => $tujuanRowspan,
+            'itemsPerkembangan' => $itemsPerkembangan
+        ];
+    }
+
+
+    public function BAB3_4() {
+        $bagian = strtoupper($this->input->get('bagian', TRUE) ?: '');
+        if ($bagian === 'B') {
+            $this->BAB3_4B();
+        } else {
+            $this->BAB3_4A();
+        }
+    }
+
+    public function BAB3_4A() {
+        $Header['Halaman'] = 'BAB 3.4 Bagian A: Capaian Kinerja IKU';
+
+        $is_logged_in = $this->is_logged_in();
+        $is_role_4 = $this->is_role_4();
+
+        // Data yang ditampilkan hanya sesuai wilayah session login
+        if ($is_logged_in) {
+            $KodeWilayah = $this->session->userdata('KodeWilayah') ?: (isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : $this->get_kode_wilayah());
+        } else {
+            $KodeWilayah = $this->get_kode_wilayah();
+        }
+        if (empty($KodeWilayah)) {
+            $KodeWilayah = '35.12';
+        }
+        $tahun = (int)($this->input->get('tahun', TRUE) ?: (isset($_SESSION['Tahun']) ? $_SESSION['Tahun'] : 2025));
+
+        $can_crud = $this->can_crud_lkpj_for_wilayah($KodeWilayah);
+
+        // Pastikan tabel database tersedia
+        $this->ensure_bab3_4a_tables_exist($KodeWilayah, $tahun);
+
+        $namaWilayah = 'Kabupaten Situbondo';
+        if (!empty($KodeWilayah)) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            if ($wilayah) {
+                $namaWilayah = ucwords(strtolower($wilayah['Nama']));
+            }
+        }
+
+        // Tarik data murni dari relasi master IKU di RPJMD
+        $syncData = $this->sync_from_rpjmd_iku($KodeWilayah, $tahun);
+        $itemsCapaian = $syncData['itemsCapaian'];
+        $misiRowspan = $syncData['misiRowspan'];
+        $tujuanRowspan = $syncData['tujuanRowspan'];
+        $itemsPerkembangan = $syncData['itemsPerkembangan'];
+
+        // Ambil master misi & tujuan untuk kebutuhan tampilan
+        $listMisi = $this->db->where('KodeWilayah', $KodeWilayah)->where('deleted_at IS NULL')->get('misirpjmd')->result_array();
+        $listTujuan = $this->db->where('KodeWilayah', $KodeWilayah)->where('deleted_at IS NULL')->get('tujuanrpjmd')->result_array();
+
+        // Data Provinsi & KabKota untuk dropdown filter wilayah
+        $provKode = substr($KodeWilayah, 0, 2);
+        $listProvinsi = $this->db->where("Kode LIKE '__'")->order_by('Nama', 'ASC')->get('kodewilayah')->result_array();
+        $listKabKota = !empty($provKode) ? $this->db->where("Kode LIKE '{$provKode}.__'")->order_by('Nama', 'ASC')->get('kodewilayah')->result_array() : [];
+
+        $Data = [
+            'IsLoggedIn' => $is_logged_in,
+            'IsRole4' => $is_role_4,
+            'NamaInstansi' => isset($_SESSION['NamaInstansi']) ? $_SESSION['NamaInstansi'] : '',
+            'CanCrud' => $can_crud,
+            'IsDaerah' => $is_logged_in && !$is_role_4,
+            'KodeWilayah' => $KodeWilayah,
+            'NamaWilayah' => $namaWilayah,
+            'Provinsi' => $listProvinsi,
+            'KabKota' => $listKabKota,
+            'TahunAktif' => $tahun,
+            'ListTahun' => [2027, 2026, 2025, 2024, 2023, 2022, 2021],
+            'ItemsCapaian' => $itemsCapaian,
+            'MisiRowspan' => $misiRowspan,
+            'TujuanRowspan' => $tujuanRowspan,
+            'ItemsPerkembangan' => $itemsPerkembangan,
+            'ListMisi' => $listMisi,
+            'ListTujuan' => $listTujuan,
+            'ControllerName' => 'Instansi'
+        ];
+
+        $this->load->view('Daerah/header', $Header);
+        $this->load->view('Daerah/BAB3_4A', $Data);
+    }
+
+    public function GetBab3IkuCapaian() {
+        header('Content-Type: application/json');
+
+        $id = (int)$this->input->get('id', TRUE);
+        $KodeWilayah = $this->input->get('kodewilayah', TRUE) ?: ($this->get_kode_wilayah() ?: '35.12');
+
+        $data = $this->db->where('id', $id)
+                         ->where('kodewilayah', $KodeWilayah)
+                         ->where('deleted_at IS NULL')
+                         ->get('lkpj_bab3_iku_capaian')
+                         ->row_array();
+
+        if ($data) {
+            echo json_encode(['status' => 'success', 'data' => $data]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+        }
+    }
+
+    public function SaveBab3IkuCapaian() {
+        header('Content-Type: application/json');
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2025);
+            $KodeWilayah = $this->input->post('kodewilayah', TRUE) ?: ($this->get_kode_wilayah() ?: '35.12');
+
+            if (!$this->can_crud_lkpj_for_wilayah($KodeWilayah)) {
+                echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Anda hanya memiliki hak akses untuk mengubah data wilayah Anda sendiri.']);
+                return;
+            }
+
+            $parseDecimal = function($val) {
+                if ($val === null || $val === '') return null;
+                $clean = str_replace([' ', 'Rp'], '', (string)$val);
+                $clean = str_replace(',', '.', $clean);
+                return is_numeric($clean) ? (float)$clean : null;
+            };
+
+            $misi = trim((string)$this->input->post('misi', TRUE));
+            $tujuan = trim((string)$this->input->post('tujuan', TRUE));
+            $indikator = trim((string)$this->input->post('indikator_iku', TRUE));
+            $satuan = trim((string)$this->input->post('satuan', TRUE) ?: 'Indeks');
+            $urutan = (int)($this->input->post('urutan', TRUE) ?: 1);
+
+            $r22 = $parseDecimal($this->input->post('realisasi_2022', TRUE));
+            $r23 = $parseDecimal($this->input->post('realisasi_2023', TRUE));
+            $r24 = $parseDecimal($this->input->post('realisasi_2024', TRUE));
+            $t25 = $parseDecimal($this->input->post('target_2025', TRUE));
+            $real25 = $parseDecimal($this->input->post('realisasi_2025', TRUE));
+            
+            // Hitung capaian otomatis jika tidak diisi manual
+            $cap25 = $parseDecimal($this->input->post('capaian_2025', TRUE));
+            if ($cap25 === null && $t25 !== null && $real25 !== null && $t25 != 0) {
+                $cap25 = round(($real25 / $t25) * 100, 2);
+            }
+
+            if (empty($misi) || empty($tujuan) || empty($indikator)) {
+                throw new Exception('Misi, Tujuan, dan Indikator IKU wajib diisi.');
+            }
+
+            $saveData = [
+                'kodewilayah' => $KodeWilayah,
+                'tahun' => $tahun,
+                'misi' => $misi,
+                'tujuan' => $tujuan,
+                'indikator_iku' => $indikator,
+                'satuan' => $satuan,
+                'realisasi_2022' => $r22,
+                'realisasi_2023' => $r23,
+                'realisasi_2024' => $r24,
+                'target_2025' => $t25,
+                'realisasi_2025' => $real25,
+                'capaian_2025' => $cap25,
+                'urutan' => $urutan,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $this->db->where('id', $id)->where('kodewilayah', $KodeWilayah)->update('lkpj_bab3_iku_capaian', $saveData);
+                $msg = 'Data Capaian IKU berhasil diperbarui.';
+            } else {
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('lkpj_bab3_iku_capaian', $saveData);
+                $msg = 'Data Capaian IKU baru berhasil ditambahkan.';
+            }
+
+            echo json_encode(['status' => 'success', 'message' => $msg]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function DeleteBab3IkuCapaian() {
+        header('Content-Type: application/json');
+
+        $id = (int)$this->input->post('id', TRUE);
+        $KodeWilayah = $this->input->post('kodewilayah', TRUE) ?: ($this->get_kode_wilayah() ?: '35.12');
+
+        if (!$this->can_crud_lkpj_for_wilayah($KodeWilayah)) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Anda hanya memiliki hak akses untuk mengubah data wilayah Anda sendiri.']);
+            return;
+        }
+
+        $this->db->where('id', $id)
+                 ->where('kodewilayah', $KodeWilayah)
+                 ->update('lkpj_bab3_iku_capaian', ['deleted_at' => date('Y-m-d H:i:s')]);
+
+        echo json_encode(['status' => 'success', 'message' => 'Data IKU berhasil dihapus.']);
+    }
+
+    public function SinkronIkuDaerah() {
+        header('Content-Type: application/json');
+
+        if ($this->is_lkpj_readonly()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Anda berstatus read-only (Kementerian/Nasional).']);
+            return;
+        }
+
+        $KodeWilayah = trim((string)$this->input->post('kodewilayah', TRUE));
+        if (empty($KodeWilayah)) {
+            $KodeWilayah = trim((string)$this->input->get('kodewilayah', TRUE));
+        }
+        if (empty($KodeWilayah)) {
+            $KodeWilayah = $this->get_kode_wilayah();
+        }
+        if (empty($KodeWilayah)) {
+            $KodeWilayah = isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : (isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : '35.12');
+        }
+
+        if (!$this->can_crud_lkpj_for_wilayah($KodeWilayah)) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Anda hanya memiliki hak akses sinkronisasi untuk wilayah Anda sendiri.']);
+            return;
+        }
+
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2025);
+
+        $res = $this->sync_from_rpjmd_iku($KodeWilayah, $tahun);
+        $totalIku = count($res['itemsPerkembangan']);
+
+        if ($totalIku === 0) {
+            echo json_encode([
+                'status' => 'warning',
+                'message' => 'Tidak ditemukan data IKU pada RPJMD untuk wilayah ini.'
+            ]);
+            return;
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'message' => "Penyelarasan IKU RPJMD berhasil! Sebanyak {$totalIku} indikator resmi berhasil disinkronkan langsung dari perencanaan RPJMD."
+        ]);
+    }
+
+    public function GetBab3IkuPerkembangan() {
+        header('Content-Type: application/json');
+
+        $id = (int)$this->input->get('id', TRUE);
+        $KodeWilayah = $this->input->get('kodewilayah', TRUE) ?: ($this->get_kode_wilayah() ?: '35.12');
+
+        $data = $this->db->where('id', $id)
+                         ->where('kodewilayah', $KodeWilayah)
+                         ->where('deleted_at IS NULL')
+                         ->get('lkpj_bab3_iku_perkembangan')
+                         ->row_array();
+
+        if ($data) {
+            echo json_encode(['status' => 'success', 'data' => $data]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+        }
+    }
+
+    public function SaveBab3IkuPerkembangan() {
+        header('Content-Type: application/json');
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2025);
+            $KodeWilayah = $this->input->post('kodewilayah', TRUE) ?: ($this->get_kode_wilayah() ?: '35.12');
+
+            if (!$this->can_crud_lkpj_for_wilayah($KodeWilayah)) {
+                echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Anda hanya memiliki hak akses untuk mengubah data wilayah Anda sendiri.']);
+                return;
+            }
+
+            $exist = $this->db->where('id', $id)->where('kodewilayah', $KodeWilayah)->get('lkpj_bab3_iku_perkembangan')->row_array();
+            if (!$exist) {
+                throw new Exception('Data Perkembangan IKU tidak ditemukan.');
+            }
+
+            $parseDecimal = function($val) {
+                if ($val === null || $val === '') return null;
+                $clean = str_replace([' ', 'Rp'], '', (string)$val);
+                $clean = str_replace(',', '.', $clean);
+                return is_numeric($clean) ? (float)$clean : null;
+            };
+
+            $n21 = $parseDecimal($this->input->post('nilai_2021', TRUE));
+            $n22 = $parseDecimal($this->input->post('nilai_2022', TRUE));
+            $n23 = $parseDecimal($this->input->post('nilai_2023', TRUE));
+            $n24 = $parseDecimal($this->input->post('nilai_2024', TRUE));
+            $n25 = $parseDecimal($this->input->post('nilai_2025', TRUE));
+
+            $saveData = [
+                'nilai_2021' => $n21,
+                'nilai_2022' => $n22,
+                'nilai_2023' => $n23,
+                'nilai_2024' => $n24,
+                'nilai_2025' => $n25,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            $this->db->where('id', $id)->where('kodewilayah', $KodeWilayah)->update('lkpj_bab3_iku_perkembangan', $saveData);
+
+            // Selaraskan juga nilai realisasi & capaian pada tabel Capaian IKU untuk tahun ini
+            $ikuId = (int)($exist['iku_id'] ?? 0);
+            $capaianId = (int)($exist['capaian_id'] ?? 0);
+            $capaianRow = null;
+            if ($capaianId > 0) {
+                $capaianRow = $this->db->where('id', $capaianId)->get('lkpj_bab3_iku_capaian')->row_array();
+            }
+            if (!$capaianRow && $ikuId > 0) {
+                $capaianRow = $this->db->where('iku_id', $ikuId)->where('kodewilayah', $KodeWilayah)->where('tahun', $tahun)->get('lkpj_bab3_iku_capaian')->row_array();
+            }
+
+            if ($capaianRow) {
+                $valMap = [2021 => $n21, 2022 => $n22, 2023 => $n23, 2024 => $n24, 2025 => $n25];
+                $realisasiAktif = $valMap[$tahun] ?? null;
+                $targetAktif = isset($capaianRow['target']) && $capaianRow['target'] !== null ? (float)$capaianRow['target'] : ($tahun == 2025 && isset($capaianRow['target_2025']) ? (float)$capaianRow['target_2025'] : null);
+                $capaianAktif = null;
+                if ($targetAktif !== null && $targetAktif > 0 && $realisasiAktif !== null) {
+                    $capaianAktif = round(($realisasiAktif / $targetAktif) * 100, 2);
+                }
+
+                $updCapaian = [
+                    'realisasi_2021' => $n21,
+                    'realisasi_2022' => $n22,
+                    'realisasi_2023' => $n23,
+                    'realisasi_2024' => $n24,
+                    'realisasi' => $realisasiAktif,
+                    'capaian' => $capaianAktif,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+                if ($tahun == 2025) {
+                    $updCapaian['realisasi_2025'] = $n25;
+                    $updCapaian['capaian_2025'] = $capaianAktif;
+                }
+                $this->db->where('id', $capaianRow['id'])->update('lkpj_bab3_iku_capaian', $updCapaian);
+            }
+
+            echo json_encode(['status' => 'success', 'message' => 'Data Nilai Perkembangan IKU (2021-2025) berhasil diperbarui dan diselaraskan ke Capaian.']);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function DeleteBab3IkuPerkembangan() {
+        header('Content-Type: application/json');
+
+        $id = (int)$this->input->post('id', TRUE);
+        $KodeWilayah = $this->input->post('kodewilayah', TRUE) ?: ($this->get_kode_wilayah() ?: '35.12');
+
+        if (!$this->can_crud_lkpj_for_wilayah($KodeWilayah)) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Anda hanya memiliki hak akses untuk mengubah data wilayah Anda sendiri.']);
+            return;
+        }
+
+        $this->db->where('id', $id)
+                 ->where('kodewilayah', $KodeWilayah)
+                 ->update('lkpj_bab3_iku_perkembangan', ['deleted_at' => date('Y-m-d H:i:s')]);
+
+        echo json_encode(['status' => 'success', 'message' => 'Data Perkembangan IKU berhasil dihapus.']);
+    }
+
+    /**
+     * AJAX: Generate Narasi Analisis Tren Indikator Perkembangan IKU dengan AI (Gemini)
+     */
+    public function GenerateNarasiIkuPerkembangan() {
+        if (!$this->input->is_ajax_request() && empty($_POST)) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $id = (int)$this->input->post('id', TRUE);
+        $KodeWilayah = $this->input->post('kodewilayah', TRUE) ?: ($this->get_kode_wilayah() ?: '35.12');
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2025);
+
+        // Ambil data indikator dari DB jika ID tersedia, atau dari POST
+        $uraian = trim((string)$this->input->post('uraian_indikator', TRUE));
+        $n21 = $this->input->post('nilai_2021', TRUE);
+        $n22 = $this->input->post('nilai_2022', TRUE);
+        $n23 = $this->input->post('nilai_2023', TRUE);
+        $n24 = $this->input->post('nilai_2024', TRUE);
+        $n25 = $this->input->post('nilai_2025', TRUE);
+
+        if ($id > 0) {
+            $row = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('lkpj_bab3_iku_perkembangan')->row_array();
+            if ($row) {
+                if (empty($uraian)) $uraian = $row['uraian_indikator'];
+                if ($n21 === null || $n21 === '') $n21 = $row['nilai_2021'];
+                if ($n22 === null || $n22 === '') $n22 = $row['nilai_2022'];
+                if ($n23 === null || $n23 === '') $n23 = $row['nilai_2023'];
+                if ($n24 === null || $n24 === '') $n24 = $row['nilai_2024'];
+                if ($n25 === null || $n25 === '') $n25 = $row['nilai_2025'];
+                if (!empty($row['kodewilayah'])) $KodeWilayah = $row['kodewilayah'];
+                if (!empty($row['tahun'])) $tahun = (int)$row['tahun'];
+            }
+        }
+
+        if (empty($uraian)) {
+            echo json_encode(['status' => 'error', 'message' => 'Uraian indikator belum diisi atau tidak ditemukan.']);
+            return;
+        }
+
+        $namaWilayah = 'Kabupaten Situbondo';
+        if (!empty($KodeWilayah)) {
+            $wil = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            if ($wil) {
+                $namaWilayah = ucwords(strtolower($wil['Nama']));
+            }
+        }
+
+        $formatVal = function($v) {
+            if ($v === null || $v === '' || $v === '-') return 'Data Belum Tersedia';
+            $num = (float)$v;
+            return number_format($num, (strpos((string)$v, '.') !== false ? 2 : 2), ',', '.');
+        };
+
+        $str21 = $formatVal($n21);
+        $str22 = $formatVal($n22);
+        $str23 = $formatVal($n23);
+        $str24 = $formatVal($n24);
+        $str25 = $formatVal($n25);
+
+        $prompt = "Anda adalah penyusun narasi resmi dan analis kebijakan pembangunan daerah untuk dokumen Laporan Keterangan Pertanggungjawaban (LKPJ) Pemerintah {$namaWilayah}.\n\n" .
+                  "Tugas Anda adalah menyusun teks narasi analisis dan interpretasi tren perkembangan salah satu Indikator Kinerja Utama (IKU) makro daerah berdasarkan data empiris kurun waktu 2021 sampai 2025 berikut:\n\n" .
+                  "DATA INDIKATOR:\n" .
+                  "- Nama / Uraian Indikator: {$uraian}\n" .
+                  "- Wilayah: {$namaWilayah}\n" .
+                  "- Tahun Dokumen LKPJ: {$tahun}\n" .
+                  "- Rincian Capaian Tahunan:\n" .
+                  "  * Tahun 2021: {$str21}\n" .
+                  "  * Tahun 2022: {$str22}\n" .
+                  "  * Tahun 2023: {$str23}\n" .
+                  "  * Tahun 2024: {$str24}\n" .
+                  "  * Tahun 2025: {$str25}\n\n" .
+                  "PANDUAN & KETENTUAN PENULISAN (WAJIB DIPATUHI SECARA KETAT):\n" .
+                  "1. Struktur Narasi (Tepat 2 Paragraf Utuh & Komprehensif):\n" .
+                  "   - Paragraf 1: Uraikan dinamika tren pergerakan data dari tahun 2021 s.d. 2025 secara runtut, apakah mengalami tren peningkatan positif, stabilitas capaian, atau fluktuasi tertentu. Wajib mencantumkan nilai-nilai numerik kuncinya.\n" .
+                  "   - Paragraf 2: Uraikan interpretasi maknanya terhadap manfaat nyata bagi kesejahteraan masyarakat, efektivitas program pembangunan daerah, serta komitmen kebijakan Pemerintah Daerah untuk menjaga kesinambungan capaian tersebut ke depan.\n" .
+                  "2. Penulisan Angka Wajib Menggunakan Digit Numerik (DILARANG KERAS mengeja angka menjadi huruf):\n" .
+                  "   - Contoh: Tuliskan '71,00 poin', 'tahun 2021', '5,25%', 'Rp 2,5 miliar', BUKAN 'tujuh puluh satu'.\n" .
+                  "3. Bahasa Formal, Lugas, Positif, & Mengalir Enak Dibaca:\n" .
+                  "   - Gunakan tata bahasa Indonesia resmi yang komunikatif untuk laporan kedinasan LKPJ.\n" .
+                  "   - DILARANG KERAS mencantumkan frasa sanjungan klise kepada kepala daerah (seperti 'di bawah kepemimpinan Bupati yang visioner', 'Bupati yang penuh dedikasi'). Gunakan sebutan '{$namaWilayah}' atau 'Pemerintah Daerah'.\n" .
+                  "4. Format Bersih & Siap Cetak:\n" .
+                  "   - DILARANG KERAS menggunakan simbol markdown seperti tanda bintang (*, **), tanda pagar (#), backtick (`), atau penomoran/bullet points. Berikan teks narasi mengalir langsung dalam bentuk paragraf-paragraf rapi.";
+
+        $callResult = $this->call_gemini_api($prompt);
+        if ($callResult['status'] !== 'success') {
+            echo json_encode(['status' => 'error', 'message' => $callResult['message']]);
+            return;
+        }
+
+        $narasiText = $callResult['text'];
+
+        // Pembersihan tanda markdown
+        $narasiText = preg_replace('/[*#`]/', '', $narasiText);
+        $narasiText = preg_replace('/^[ \t]*[-+]\s+/m', '', $narasiText);
+
+        // Filter sanitasi sanjungan klise
+        $klisePatterns = [
+            '/(?:Pemerintah\s+Kabupaten\s+[A-Za-z\s]+|Pemerintah\s+Daerah)\s+di\s+bawah\s+kepemimpinan\s+Bupati(?:\s+yang\s+penuh\s+dedikasi|\s+yang\s+[a-zA-Z]+)?/i' => $namaWilayah,
+            '/\bdi\s+bawah\s+kepemimpinan\s+Bupati(?:\s+yang\s+penuh\s+dedikasi|\s+yang\s+[a-zA-Z]+)?\s*,?\s*/i' => '',
+            '/\bBupati\s+yang\s+penuh\s+dedikasi\b/i' => 'Pemerintah Daerah',
+            '/\bkepemimpinan\s+Bupati\s+yang\s+penuh\s+dedikasi\b/i' => 'Pemerintah Daerah',
+            '/\bpenuh\s+dedikasi\b/i' => 'berkelanjutan'
+        ];
+        foreach ($klisePatterns as $pattern => $replacement) {
+            $narasiText = preg_replace($pattern, $replacement, $narasiText);
+        }
+        $narasiText = preg_replace('/[ ]{2,}/', ' ', $narasiText);
+        $narasiText = trim($narasiText);
+
+        // Jika ID indikator valid, simpan narasi langsung ke database
+        if ($id > 0) {
+            $this->db->where('id', $id)->where('kodewilayah', $KodeWilayah)->update('lkpj_bab3_iku_perkembangan', [
+                'narasi'     => $narasiText,
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'id'     => $id,
+            'narasi' => $narasiText
+        ]);
+    }
+
+    /**
+     * AJAX: Simpan Narasi Analisis Tren Indikator Perkembangan IKU ke Database
+     */
+    public function SaveNarasiIkuPerkembangan() {
+        if (!$this->input->is_ajax_request() && empty($_POST)) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $id = (int)$this->input->post('id', TRUE);
+        $narasi = (string)$this->input->post('narasi', FALSE);
+        $KodeWilayah = $this->input->post('kodewilayah', TRUE) ?: ($this->get_kode_wilayah() ?: '35.12');
+
+        if (!$this->can_crud_lkpj_for_wilayah($KodeWilayah)) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Anda tidak memiliki izin mengubah data untuk wilayah ini.']);
+            return;
+        }
+
+        if ($id <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'ID indikator tidak valid.']);
+            return;
+        }
+
+        $row = $this->db->where('id', $id)->where('kodewilayah', $KodeWilayah)->get('lkpj_bab3_iku_perkembangan')->row_array();
+        if (!$row) {
+            echo json_encode(['status' => 'error', 'message' => 'Data indikator tidak ditemukan.']);
+            return;
+        }
+
+        $this->db->where('id', $id)->where('kodewilayah', $KodeWilayah)->update('lkpj_bab3_iku_perkembangan', [
+            'narasi'     => $narasi,
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+
+        echo json_encode([
+            'status'  => 'success',
+            'message' => 'Narasi analisis tren indikator berhasil disimpan.'
+        ]);
+    }
+
+    // ==============================================================
+    // BAB 3.4 BAGIAN B: CAPAIAN KINERJA IKD (INDIKATOR KINERJA DAERAH)
+    // ==============================================================
+
+    /**
+     * Memastikan tabel database LKPJ 3.4 B tersedia
+     */
+    private function ensure_bab3_4b_tables_exist($KodeWilayah, $tahun) {
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab3_ikd_capaian` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` VARCHAR(13) NOT NULL,
+            `tahun` INT(4) NOT NULL,
+            `ikd_id` INT(11) DEFAULT NULL,
+            `id_instansi` INT(11) DEFAULT NULL,
+            `pd_penanggung_jawab` TEXT DEFAULT NULL,
+            `aspek` VARCHAR(50) NOT NULL DEFAULT 'dayasaing',
+            `indikator_ikd` TEXT NOT NULL,
+            `satuan` VARCHAR(50) DEFAULT NULL,
+            `target` VARCHAR(50) DEFAULT NULL,
+            `realisasi` VARCHAR(50) DEFAULT NULL,
+            `capaian` VARCHAR(50) DEFAULT NULL,
+            `urutan` INT(11) DEFAULT 1,
+            `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            `deleted_at` TIMESTAMP NULL DEFAULT NULL,
+            PRIMARY KEY (`id`),
+            KEY `idx_ikd_capaian_wil_thn` (`kodewilayah`, `tahun`),
+            KEY `idx_ikd_capaian_aspek` (`aspek`),
+            KEY `idx_ikd_capaian_ref` (`ikd_id`),
+            KEY `idx_ikd_capaian_instansi` (`id_instansi`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_bab3_ikd_perkembangan` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` VARCHAR(13) NOT NULL,
+            `tahun` INT(4) NOT NULL,
+            `ikd_id` INT(11) DEFAULT NULL,
+            `id_instansi` INT(11) DEFAULT NULL,
+            `pd_penanggung_jawab` TEXT DEFAULT NULL,
+            `aspek` VARCHAR(50) NOT NULL DEFAULT 'dayasaing',
+            `uraian_indikator` TEXT NOT NULL,
+            `satuan` VARCHAR(50) DEFAULT NULL,
+            `nilai_2021` VARCHAR(50) DEFAULT NULL,
+            `nilai_2022` VARCHAR(50) DEFAULT NULL,
+            `nilai_2023` VARCHAR(50) DEFAULT NULL,
+            `nilai_2024` VARCHAR(50) DEFAULT NULL,
+            `nilai_2025` VARCHAR(50) DEFAULT NULL,
+            `narasi` LONGTEXT DEFAULT NULL,
+            `urutan` INT(11) DEFAULT 1,
+            `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            `deleted_at` TIMESTAMP NULL DEFAULT NULL,
+            PRIMARY KEY (`id`),
+            KEY `idx_ikd_perk_wil_thn` (`kodewilayah`, `tahun`),
+            KEY `idx_ikd_perk_aspek` (`aspek`),
+            KEY `idx_ikd_perk_ref` (`ikd_id`),
+            KEY `idx_ikd_perk_instansi` (`id_instansi`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+        // Pastikan kolom id_instansi dan pd_penanggung_jawab ada jika tabel sudah dibuat sebelumnya
+        $capCols = $this->db->list_fields('lkpj_bab3_ikd_capaian');
+        if (!in_array('id_instansi', $capCols)) {
+            $this->db->query("ALTER TABLE `lkpj_bab3_ikd_capaian` ADD COLUMN `id_instansi` INT(11) NULL DEFAULT NULL AFTER `ikd_id`, ADD INDEX `idx_ikd_capaian_instansi` (`id_instansi`)");
+        }
+        if (!in_array('pd_penanggung_jawab', $capCols)) {
+            $this->db->query("ALTER TABLE `lkpj_bab3_ikd_capaian` ADD COLUMN `pd_penanggung_jawab` TEXT NULL DEFAULT NULL AFTER `id_instansi`");
+        }
+
+        $perkCols = $this->db->list_fields('lkpj_bab3_ikd_perkembangan');
+        if (!in_array('id_instansi', $perkCols)) {
+            $this->db->query("ALTER TABLE `lkpj_bab3_ikd_perkembangan` ADD COLUMN `id_instansi` INT(11) NULL DEFAULT NULL AFTER `ikd_id`, ADD INDEX `idx_ikd_perk_instansi` (`id_instansi`)");
+        }
+        if (!in_array('pd_penanggung_jawab', $perkCols)) {
+            $this->db->query("ALTER TABLE `lkpj_bab3_ikd_perkembangan` ADD COLUMN `pd_penanggung_jawab` TEXT NULL DEFAULT NULL AFTER `id_instansi`");
+        }
+    }
+
+    /**
+     * Sinkronisasi data Capaian & Perkembangan IKD dari tabel master ikd (RPJMD)
+     * Mempertahankan teks narasi AI yang telah tersimpan sebelumnya
+     */
+    private function sync_from_rpjmd_ikd($KodeWilayah, $tahun, $filterInstansiId = null) {
+        $aspekList = [
+            'dayasaing' => 'I. ASPEK DAYA SAING DAERAH',
+            'geografi' => 'II. ASPEK GEOGRAFI DAN DEMOGRAFI',
+            'kesejahteraan' => 'III. ASPEK KESEJAHTERAAN RAKYAT',
+            'pelayanan' => 'IV. ASPEK PELAYANAN UMUM'
+        ];
+
+        // Ambil data master IKD dari RPJMD untuk wilayah ini
+        $ikdRows = $this->db->where('kodewilayah', $KodeWilayah)
+                            ->where('deleted_at IS NULL')
+                            ->order_by('urutan', 'ASC')
+                            ->order_by('id', 'ASC')
+                            ->get('ikd')
+                            ->result_array();
+
+        // Siapkan map instansi berdasarkan nama untuk mapping otomatis jika id_instansi belum terisi
+        $instMapByName = [];
+        $instList = $this->db->select('id, nama')->where('deleted_at IS NULL')->get('akun_instansi')->result_array();
+        foreach ($instList as $ins) {
+            $instMapByName[strtolower(trim($ins['nama']))] = (int)$ins['id'];
+        }
+
+        $validIkdIds = [];
+        foreach ($ikdRows as $r) {
+            $ikdId = (int)$r['id'];
+            $validIkdIds[] = $ikdId;
+            $aspekKey = !empty($r['aspek']) ? strtolower(trim($r['aspek'])) : 'geografi';
+            if (!array_key_exists($aspekKey, $aspekList)) {
+                $aspekKey = 'geografi';
+            }
+            $namaIndikator = trim($r['indikator_sasaran']);
+            $satuan = trim((string)($r['satuan'] ?? ''));
+            $urutan = (int)($r['urutan'] ?? 1);
+            $pdPJ = trim((string)($r['pd_penanggung_jawab'] ?? ''));
+            $ikdInstansiId = !empty($r['id_instansi']) ? (int)$r['id_instansi'] : null;
+
+            if (!$ikdInstansiId && !empty($pdPJ)) {
+                $cleanPj = strtolower(trim(explode(',', $pdPJ)[0]));
+                if (isset($instMapByName[$cleanPj])) {
+                    $ikdInstansiId = $instMapByName[$cleanPj];
+                } else {
+                    foreach ($instMapByName as $insNama => $insId) {
+                        if (strpos($insNama, $cleanPj) !== false || strpos($cleanPj, $insNama) !== false) {
+                            $ikdInstansiId = $insId;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Cek data perkembangan yang sudah ada untuk menjaga hasil editan nilai
+            $existPerk = $this->db->where('kodewilayah', $KodeWilayah)
+                                  ->where('tahun', $tahun)
+                                  ->where('ikd_id', $ikdId)
+                                  ->where('deleted_at IS NULL')
+                                  ->get('lkpj_bab3_ikd_perkembangan')
+                                  ->row_array();
+
+            $p21 = ($existPerk && $existPerk['nilai_2021'] !== null && $existPerk['nilai_2021'] !== '') ? $existPerk['nilai_2021'] : ($r['nilai_2021'] ?? null);
+            $p22 = ($existPerk && $existPerk['nilai_2022'] !== null && $existPerk['nilai_2022'] !== '') ? $existPerk['nilai_2022'] : ($r['nilai_2022'] ?? null);
+            $p23 = ($existPerk && $existPerk['nilai_2023'] !== null && $existPerk['nilai_2023'] !== '') ? $existPerk['nilai_2023'] : ($r['nilai_2023'] ?? null);
+            $p24 = ($existPerk && $existPerk['nilai_2024'] !== null && $existPerk['nilai_2024'] !== '') ? $existPerk['nilai_2024'] : ($r['nilai_2024'] ?? null);
+            $p25 = ($existPerk && $existPerk['nilai_2025'] !== null && $existPerk['nilai_2025'] !== '') ? $existPerk['nilai_2025'] : ($r['nilai_2025'] ?? ($r['realisasi_2025'] ?? null));
+
+            if ($existPerk) {
+                $this->db->where('id', $existPerk['id'])->update('lkpj_bab3_ikd_perkembangan', [
+                    'aspek' => $aspekKey,
+                    'uraian_indikator' => $namaIndikator,
+                    'satuan' => $satuan,
+                    'id_instansi' => $ikdInstansiId,
+                    'pd_penanggung_jawab' => $pdPJ ?: null,
+                    'nilai_2021' => $p21,
+                    'nilai_2022' => $p22,
+                    'nilai_2023' => $p23,
+                    'nilai_2024' => $p24,
+                    'nilai_2025' => $p25,
+                    'urutan' => $urutan,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ]);
+            } else {
+                $this->db->insert('lkpj_bab3_ikd_perkembangan', [
+                    'kodewilayah' => $KodeWilayah,
+                    'tahun' => $tahun,
+                    'ikd_id' => $ikdId,
+                    'id_instansi' => $ikdInstansiId,
+                    'pd_penanggung_jawab' => $pdPJ ?: null,
+                    'aspek' => $aspekKey,
+                    'uraian_indikator' => $namaIndikator,
+                    'satuan' => $satuan,
+                    'nilai_2021' => $p21,
+                    'nilai_2022' => $p22,
+                    'nilai_2023' => $p23,
+                    'nilai_2024' => $p24,
+                    'nilai_2025' => $p25,
+                    'narasi' => null,
+                    'urutan' => $urutan,
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+            }
+
+            // Tentukan Target, Realisasi, dan Capaian dinamis untuk tahun LKPJ aktif ($tahun)
+            $targetMap = [
+                2021 => $r['target_1'] ?? null,
+                2022 => $r['target_2'] ?? null,
+                2023 => $r['target_3'] ?? null,
+                2024 => $r['target_4'] ?? null,
+                2025 => $r['target_2025'] ?? ($r['target_5'] ?? null),
+                2026 => $r['target_6'] ?? ($r['target_2025'] ?? null),
+            ];
+            $targetTh = $targetMap[$tahun] ?? ($r['target_2025'] ?? '');
+            if ($targetTh === null || $targetTh === '') {
+                $targetTh = $r['target_2025'] ?? '';
+            }
+
+            $realisasiMap = [
+                2021 => $p21,
+                2022 => $p22,
+                2023 => $p23,
+                2024 => $p24,
+                2025 => $p25,
+                2026 => $p25
+            ];
+            $realisasiTh = $realisasiMap[$tahun] ?? '';
+
+            $capaianTh = '';
+            if ($tahun == 2025 && !empty($r['capaian_2025'])) {
+                $capaianTh = $r['capaian_2025'];
+            } else {
+                $cleanT = (float)str_replace(',', '.', str_replace([' ', 'Rp', '%'], '', (string)$targetTh));
+                $cleanR = (float)str_replace(',', '.', str_replace([' ', 'Rp', '%'], '', (string)$realisasiTh));
+                if ($cleanT > 0 && !empty($realisasiTh) && $realisasiTh !== '-') {
+                    $capaianTh = number_format(($cleanR / $cleanT) * 100, 2, ',', '.');
+                }
+            }
+
+            // Sinkronkan ke tabel Capaian IKD
+            $existCapaian = $this->db->where('kodewilayah', $KodeWilayah)
+                                     ->where('tahun', $tahun)
+                                     ->where('ikd_id', $ikdId)
+                                     ->where('deleted_at IS NULL')
+                                     ->get('lkpj_bab3_ikd_capaian')
+                                     ->row_array();
+
+            if ($existCapaian) {
+                $this->db->where('id', $existCapaian['id'])->update('lkpj_bab3_ikd_capaian', [
+                    'aspek' => $aspekKey,
+                    'id_instansi' => $ikdInstansiId,
+                    'pd_penanggung_jawab' => $pdPJ ?: null,
+                    'indikator_ikd' => $namaIndikator,
+                    'satuan' => $satuan,
+                    'target' => $targetTh,
+                    'realisasi' => $realisasiTh,
+                    'capaian' => $capaianTh,
+                    'urutan' => $urutan,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ]);
+            } else {
+                $this->db->insert('lkpj_bab3_ikd_capaian', [
+                    'kodewilayah' => $KodeWilayah,
+                    'tahun' => $tahun,
+                    'ikd_id' => $ikdId,
+                    'id_instansi' => $ikdInstansiId,
+                    'pd_penanggung_jawab' => $pdPJ ?: null,
+                    'aspek' => $aspekKey,
+                    'indikator_ikd' => $namaIndikator,
+                    'satuan' => $satuan,
+                    'target' => $targetTh,
+                    'realisasi' => $realisasiTh,
+                    'capaian' => $capaianTh,
+                    'urutan' => $urutan,
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+            }
+        }
+
+        // Ambil nama instansi jika filterInstansiId ada (misal sesi login sebagai Dinas / Role 4)
+        $filterInstansiNama = '';
+        if (!empty($filterInstansiId)) {
+            $instRow = $this->db->select('nama')->where('id', (int)$filterInstansiId)->get('akun_instansi')->row_array();
+            if ($instRow) {
+                $filterInstansiNama = strtolower(trim($instRow['nama']));
+            }
+        }
+
+        // Ambil data terkelompok per aspek (difilter jika user login sebagai Dinas)
+        $capaianByAspek = [];
+        $perkembanganByAspek = [];
+        $aspekCounts = [];
+
+        foreach ($aspekList as $aspKey => $aspLabel) {
+            $qCap = $this->db->where('kodewilayah', $KodeWilayah)
+                             ->where('tahun', $tahun)
+                             ->where('aspek', $aspKey)
+                             ->where('deleted_at IS NULL');
+            if (!empty($filterInstansiId)) {
+                if (!empty($filterInstansiNama)) {
+                    $qCap->group_start()
+                         ->where('id_instansi', (int)$filterInstansiId)
+                         ->or_like('LOWER(pd_penanggung_jawab)', $filterInstansiNama)
+                         ->group_end();
+                } else {
+                    $qCap->where('id_instansi', (int)$filterInstansiId);
+                }
+            }
+            $capaianByAspek[$aspKey] = $qCap->order_by('urutan', 'ASC')
+                                            ->order_by('id', 'ASC')
+                                            ->get('lkpj_bab3_ikd_capaian')
+                                            ->result_array();
+
+            $qPerk = $this->db->where('kodewilayah', $KodeWilayah)
+                              ->where('tahun', $tahun)
+                              ->where('aspek', $aspKey)
+                              ->where('deleted_at IS NULL');
+            if (!empty($filterInstansiId)) {
+                if (!empty($filterInstansiNama)) {
+                    $qPerk->group_start()
+                          ->where('id_instansi', (int)$filterInstansiId)
+                          ->or_like('LOWER(pd_penanggung_jawab)', $filterInstansiNama)
+                          ->group_end();
+                } else {
+                    $qPerk->where('id_instansi', (int)$filterInstansiId);
+                }
+            }
+            $perkembanganByAspek[$aspKey] = $qPerk->order_by('urutan', 'ASC')
+                                                   ->order_by('id', 'ASC')
+                                                   ->get('lkpj_bab3_ikd_perkembangan')
+                                                   ->result_array();
+
+            $aspekCounts[$aspKey] = count($capaianByAspek[$aspKey]);
+        }
+
+        return [
+            'aspekList' => $aspekList,
+            'capaianByAspek' => $capaianByAspek,
+            'perkembanganByAspek' => $perkembanganByAspek,
+            'aspekCounts' => $aspekCounts
+        ];
+    }
+
+    /**
+     * Halaman Menu BAB 3.4 Bagian B: Capaian Kinerja IKD
+     */
+    public function BAB3_4B() {
+        $Header['Halaman'] = 'BAB 3.4 Bagian B: Capaian Kinerja IKD';
+
+        $is_logged_in = $this->is_logged_in();
+        $is_role_4 = $this->is_role_4();
+
+        // Data yang ditampilkan hanya sesuai wilayah session login
+        if ($is_logged_in) {
+            $KodeWilayah = $this->session->userdata('KodeWilayah') ?: (isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : $this->get_kode_wilayah());
+        } else {
+            $KodeWilayah = $this->get_kode_wilayah();
+        }
+        if (empty($KodeWilayah)) {
+            $KodeWilayah = '35.12';
+        }
+        $tahun = (int)($this->input->get('tahun', TRUE) ?: (isset($_SESSION['Tahun']) ? $_SESSION['Tahun'] : 2025));
+
+        $can_crud = $this->can_crud_lkpj_for_wilayah($KodeWilayah);
+
+        $this->ensure_bab3_4b_tables_exist($KodeWilayah, $tahun);
+
+        $namaWilayah = 'Kabupaten Situbondo';
+        if (!empty($KodeWilayah)) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            if ($wilayah) {
+                $namaWilayah = ucwords(strtolower($wilayah['Nama']));
+            }
+        }
+
+        // Jika user login sebagai Role 4 (Dinas), filter indikator hanya yang diampu dinas tersebut
+        $filterInstansiId = null;
+        if ($is_role_4) {
+            $filterInstansiId = $this->get_instansi_id();
+        }
+
+        // Sinkronkan data murni dari tabel IKD di RPJMD
+        $syncData = $this->sync_from_rpjmd_ikd($KodeWilayah, $tahun, $filterInstansiId);
+
+        // Data Provinsi & KabKota untuk dropdown filter wilayah
+        $provKode = substr($KodeWilayah, 0, 2);
+        $listProvinsi = $this->db->where("Kode LIKE '__'")->order_by('Nama', 'ASC')->get('kodewilayah')->result_array();
+        $listKabKota = !empty($provKode) ? $this->db->where("Kode LIKE '{$provKode}.__'")->order_by('Nama', 'ASC')->get('kodewilayah')->result_array() : [];
+
+        $Data = [
+            'IsLoggedIn' => $is_logged_in,
+            'IsRole4' => $is_role_4,
+            'NamaInstansi' => isset($_SESSION['NamaInstansi']) ? $_SESSION['NamaInstansi'] : '',
+            'CanCrud' => $can_crud,
+            'IsDaerah' => $is_logged_in && !$is_role_4,
+            'KodeWilayah' => $KodeWilayah,
+            'NamaWilayah' => $namaWilayah,
+            'Provinsi' => $listProvinsi,
+            'KabKota' => $listKabKota,
+            'TahunAktif' => $tahun,
+            'ListTahun' => [2027, 2026, 2025, 2024, 2023, 2022, 2021],
+            'AspekList' => $syncData['aspekList'],
+            'CapaianByAspek' => $syncData['capaianByAspek'],
+            'PerkembanganByAspek' => $syncData['perkembanganByAspek'],
+            'AspekCounts' => $syncData['aspekCounts'],
+            'ControllerName' => 'Instansi'
+        ];
+
+        $this->load->view('Daerah/header', $Header);
+        $this->load->view('Daerah/BAB3_4B', $Data);
+    }
+
+    /**
+     * AJAX: Generate Narasi Analisis Tren Indikator Perkembangan IKD dengan AI (Gemini)
+     */
+    public function GenerateNarasiIkdPerkembangan() {
+        if (!$this->input->is_ajax_request() && empty($_POST)) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $id = (int)$this->input->post('id', TRUE);
+        $KodeWilayah = $this->input->post('kodewilayah', TRUE) ?: ($this->get_kode_wilayah() ?: '35.12');
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2025);
+
+        $uraian = trim((string)$this->input->post('uraian_indikator', TRUE));
+        $aspek = trim((string)$this->input->post('aspek', TRUE));
+        $n21 = $this->input->post('nilai_2021', TRUE);
+        $n22 = $this->input->post('nilai_2022', TRUE);
+        $n23 = $this->input->post('nilai_2023', TRUE);
+        $n24 = $this->input->post('nilai_2024', TRUE);
+        $n25 = $this->input->post('nilai_2025', TRUE);
+
+        if ($id > 0) {
+            $row = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('lkpj_bab3_ikd_perkembangan')->row_array();
+            if ($row) {
+                if (empty($uraian)) $uraian = $row['uraian_indikator'];
+                if (empty($aspek)) $aspek = $row['aspek'];
+                if ($n21 === null || $n21 === '') $n21 = $row['nilai_2021'];
+                if ($n22 === null || $n22 === '') $n22 = $row['nilai_2022'];
+                if ($n23 === null || $n23 === '') $n23 = $row['nilai_2023'];
+                if ($n24 === null || $n24 === '') $n24 = $row['nilai_2024'];
+                if ($n25 === null || $n25 === '') $n25 = $row['nilai_2025'];
+                if (!empty($row['kodewilayah'])) $KodeWilayah = $row['kodewilayah'];
+                if (!empty($row['tahun'])) $tahun = (int)$row['tahun'];
+            }
+        }
+
+        if (empty($uraian)) {
+            echo json_encode(['status' => 'error', 'message' => 'Uraian indikator IKD belum diisi atau tidak ditemukan.']);
+            return;
+        }
+
+        $namaWilayah = 'Kabupaten Situbondo';
+        if (!empty($KodeWilayah)) {
+            $wil = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            if ($wil) {
+                $namaWilayah = ucwords(strtolower($wil['Nama']));
+            }
+        }
+
+        $aspekNama = 'Daya Saing Daerah';
+        if ($aspek === 'geografi') $aspekNama = 'Geografi dan Demografi';
+        elseif ($aspek === 'kesejahteraan') $aspekNama = 'Kesejahteraan Rakyat';
+        elseif ($aspek === 'pelayanan') $aspekNama = 'Pelayanan Umum';
+
+        $formatVal = function($v) {
+            if ($v === null || $v === '' || $v === '-') return 'Data Belum Tersedia / Menunggu Rilis';
+            return trim((string)$v);
+        };
+
+        $str21 = $formatVal($n21);
+        $str22 = $formatVal($n22);
+        $str23 = $formatVal($n23);
+        $str24 = $formatVal($n24);
+        $str25 = $formatVal($n25);
+
+        $prompt = "Anda adalah analis kebijakan pembangunan daerah dan penyusun narasi resmi untuk dokumen Laporan Keterangan Pertanggungjawaban (LKPJ) Pemerintah {$namaWilayah}.\n\n" .
+                  "Tugas Anda adalah menyusun teks narasi analisis dan interpretasi tren perkembangan salah satu Indikator Kinerja Daerah (IKD) pada Aspek {$aspekNama} kurun waktu 2021 sampai 2025 berikut:\n\n" .
+                  "DATA INDIKATOR:\n" .
+                  "- Aspek: Aspek {$aspekNama}\n" .
+                  "- Nama / Uraian Indikator: {$uraian}\n" .
+                  "- Wilayah: {$namaWilayah}\n" .
+                  "- Tahun Dokumen LKPJ: {$tahun}\n" .
+                  "- Rincian Capaian Tahunan:\n" .
+                  "  * Tahun 2021: {$str21}\n" .
+                  "  * Tahun 2022: {$str22}\n" .
+                  "  * Tahun 2023: {$str23}\n" .
+                  "  * Tahun 2024: {$str24}\n" .
+                  "  * Tahun 2025: {$str25}\n\n" .
+                  "PANDUAN & KETENTUAN PENULISAN (WAJIB DIPATUHI SECARA KETAT):\n" .
+                  "1. Struktur Narasi (Tepat 2 Paragraf Utuh & Komprehensif):\n" .
+                  "   - Paragraf 1: Paparkan secara runtut dinamika tren pergerakan data indikator dari tahun 2021 sampai dengan 2025 (peningkatan, stabilitas, atau fluktuasi). Wajib menuliskan angka dan satuan nilai kuncinya.\n" .
+                  "   - Paragraf 2: Jelaskan implikasi hasil capaian tersebut terhadap pembangunan daerah, manfaat langsung yang dirasakan masyarakat, serta komitmen keberlanjutan program oleh Pemerintah Daerah ke depan.\n" .
+                  "2. Penulisan Angka Wajib Menggunakan Digit Numerik (DILARANG KERAS mengeja angka menjadi kata huruf):\n" .
+                  "   - Contoh: Tulis '80,47 poin', 'tahun 2021', '100,18%', BUKAN 'delapan puluh koma empat tujuh'.\n" .
+                  "3. Bahasa Resmi Kedinasan, Lugas, Positif, & Mengalir Bebas Hambatan:\n" .
+                  "   - DILARANG KERAS mencantumkan sanjungan klise kepada kepala daerah (seperti 'Bupati yang visioner'). Gunakan sebutan '{$namaWilayah}' atau 'Pemerintah Daerah'.\n" .
+                  "4. Format Siap Cetak:\n" .
+                  "   - DILARANG menggunakan markdown (*, **, #, `) atau bullet points. Berikan teks narasi mengalir langsung dalam bentuk paragraf bersih.";
+
+        $callResult = $this->call_gemini_api($prompt);
+        if ($callResult['status'] !== 'success') {
+            echo json_encode(['status' => 'error', 'message' => $callResult['message']]);
+            return;
+        }
+
+        $narasiText = $callResult['text'];
+
+        // Bersihkan tanda markdown
+        $narasiText = preg_replace('/[*#`]/', '', $narasiText);
+        $narasiText = preg_replace('/^[ \t]*[-+]\s+/m', '', $narasiText);
+
+        // Filter klise
+        $klisePatterns = [
+            '/\bdi\s+bawah\s+kepemimpinan\s+Bupati\b/i' => 'oleh Pemerintah Daerah',
+            '/\bBupati\s+yang\s+visioner\b/i' => 'Pemerintah Daerah',
+            '/\bBupati\s+yang\s+penuh\s+dedikasi\b/i' => 'Pemerintah Daerah',
+            '/\bpenuh\s+dedikasi\b/i' => 'berkelanjutan'
+        ];
+        foreach ($klisePatterns as $pattern => $replacement) {
+            $narasiText = preg_replace($pattern, $replacement, $narasiText);
+        }
+        $narasiText = preg_replace('/[ ]{2,}/', ' ', $narasiText);
+        $narasiText = trim($narasiText);
+
+        if ($id > 0) {
+            $this->db->where('id', $id)->where('kodewilayah', $KodeWilayah)->update('lkpj_bab3_ikd_perkembangan', [
+                'narasi'     => $narasiText,
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'id'     => $id,
+            'narasi' => $narasiText
+        ]);
+    }
+
+    /**
+     * AJAX: Simpan Narasi Analisis Tren Indikator Perkembangan IKD ke Database
+     */
+    public function SaveNarasiIkdPerkembangan() {
+        if (!$this->input->is_ajax_request() && empty($_POST)) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $id = (int)$this->input->post('id', TRUE);
+        $narasi = (string)$this->input->post('narasi', FALSE);
+        $KodeWilayah = $this->input->post('kodewilayah', TRUE) ?: ($this->get_kode_wilayah() ?: '35.12');
+
+        if (!$this->can_crud_lkpj_for_wilayah($KodeWilayah)) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Anda tidak memiliki izin mengubah data untuk wilayah ini.']);
+            return;
+        }
+
+        if ($id <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'ID indikator tidak valid.']);
+            return;
+        }
+
+        $row = $this->db->where('id', $id)->where('kodewilayah', $KodeWilayah)->get('lkpj_bab3_ikd_perkembangan')->row_array();
+        if (!$row) {
+            echo json_encode(['status' => 'error', 'message' => 'Data indikator tidak ditemukan.']);
+            return;
+        }
+
+        $this->db->where('id', $id)->where('kodewilayah', $KodeWilayah)->update('lkpj_bab3_ikd_perkembangan', [
+            'narasi'     => $narasi,
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+
+        echo json_encode([
+            'status'  => 'success',
+            'message' => 'Narasi analisis tren indikator IKD berhasil disimpan.'
+        ]);
+    }
+
+    /**
+     * AJAX: Ambil Data Perkembangan IKD per ID untuk Modal Edit
+     */
+    public function GetBab3IkdPerkembangan() {
+        header('Content-Type: application/json');
+
+        $id = (int)$this->input->get('id', TRUE);
+        $KodeWilayah = $this->input->get('kodewilayah', TRUE) ?: ($this->get_kode_wilayah() ?: '35.12');
+
+        $data = $this->db->where('id', $id)
+                         ->where('kodewilayah', $KodeWilayah)
+                         ->where('deleted_at IS NULL')
+                         ->get('lkpj_bab3_ikd_perkembangan')
+                         ->row_array();
+
+        if ($data) {
+            echo json_encode(['status' => 'success', 'data' => $data]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+        }
+    }
+
+    /**
+     * AJAX: Simpan Perubahan Nilai 2021-2025 Perkembangan IKD & Selaraskan ke Capaian
+     */
+    public function SaveBab3IkdPerkembangan() {
+        header('Content-Type: application/json');
+
+        try {
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2025);
+            $KodeWilayah = $this->input->post('kodewilayah', TRUE) ?: ($this->get_kode_wilayah() ?: '35.12');
+
+            if (!$this->can_crud_lkpj_for_wilayah($KodeWilayah)) {
+                echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Anda hanya memiliki hak akses untuk mengubah data wilayah Anda sendiri.']);
+                return;
+            }
+
+            $exist = $this->db->where('id', $id)->where('kodewilayah', $KodeWilayah)->get('lkpj_bab3_ikd_perkembangan')->row_array();
+            if (!$exist) {
+                throw new Exception('Data Perkembangan IKD tidak ditemukan.');
+            }
+
+            $n21 = trim((string)$this->input->post('nilai_2021', TRUE));
+            $n22 = trim((string)$this->input->post('nilai_2022', TRUE));
+            $n23 = trim((string)$this->input->post('nilai_2023', TRUE));
+            $n24 = trim((string)$this->input->post('nilai_2024', TRUE));
+            $n25 = trim((string)$this->input->post('nilai_2025', TRUE));
+
+            $saveData = [
+                'nilai_2021' => $n21 !== '' ? $n21 : null,
+                'nilai_2022' => $n22 !== '' ? $n22 : null,
+                'nilai_2023' => $n23 !== '' ? $n23 : null,
+                'nilai_2024' => $n24 !== '' ? $n24 : null,
+                'nilai_2025' => $n25 !== '' ? $n25 : null,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            // Jika user login sebagai dinas (Role 4), catat ID session dinas jika belum terisi
+            if ($this->is_role_4()) {
+                $sessionInstansiId = $this->get_instansi_id();
+                if ($sessionInstansiId && empty($exist['id_instansi'])) {
+                    $saveData['id_instansi'] = (int)$sessionInstansiId;
+                    if (isset($_SESSION['NamaInstansi']) && !empty($_SESSION['NamaInstansi'])) {
+                        $saveData['pd_penanggung_jawab'] = $_SESSION['NamaInstansi'];
+                    }
+                }
+            }
+
+            $this->db->where('id', $id)->where('kodewilayah', $KodeWilayah)->update('lkpj_bab3_ikd_perkembangan', $saveData);
+
+            // Selaraskan juga nilai realisasi & capaian pada tabel Capaian IKD
+            $ikdId = (int)($exist['ikd_id'] ?? 0);
+            if ($ikdId > 0) {
+                $capaianRow = $this->db->where('ikd_id', $ikdId)
+                                       ->where('kodewilayah', $KodeWilayah)
+                                       ->where('tahun', $tahun)
+                                       ->where('deleted_at IS NULL')
+                                       ->get('lkpj_bab3_ikd_capaian')
+                                       ->row_array();
+
+                if ($capaianRow) {
+                    $valMap = [2021 => $n21, 2022 => $n22, 2023 => $n23, 2024 => $n24, 2025 => $n25];
+                    $realisasiAktif = $valMap[$tahun] ?? $capaianRow['realisasi'];
+                    $targetVal = $capaianRow['target'];
+                    $capaianAktif = $capaianRow['capaian'];
+
+                    $cleanT = (float)str_replace(',', '.', str_replace([' ', 'Rp', '%'], '', (string)$targetVal));
+                    $cleanR = (float)str_replace(',', '.', str_replace([' ', 'Rp', '%'], '', (string)$realisasiAktif));
+                    if ($cleanT > 0 && !empty($realisasiAktif) && $realisasiAktif !== '-') {
+                        $capaianAktif = number_format(($cleanR / $cleanT) * 100, 2, ',', '.');
+                    }
+
+                    $updateCapaian = [
+                        'realisasi' => $realisasiAktif,
+                        'capaian' => $capaianAktif,
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ];
+                    if (!empty($saveData['id_instansi'])) {
+                        $updateCapaian['id_instansi'] = $saveData['id_instansi'];
+                    }
+                    if (!empty($saveData['pd_penanggung_jawab'])) {
+                        $updateCapaian['pd_penanggung_jawab'] = $saveData['pd_penanggung_jawab'];
+                    }
+
+                    $this->db->where('id', $capaianRow['id'])->update('lkpj_bab3_ikd_capaian', $updateCapaian);
+                }
+            }
+
+            echo json_encode(['status' => 'success', 'message' => 'Data Nilai Perkembangan IKD (2021-2025) berhasil diperbarui dan diselaraskan ke Capaian.']);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * AJAX: Sinkronisasi Ulang Data Master IKD dari RPJMD
+     */
+    public function SinkronIkdDaerah() {
+        header('Content-Type: application/json');
+
+        if ($this->is_lkpj_readonly()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Anda berstatus read-only (Kementerian/Nasional).']);
+            return;
+        }
+
+        $KodeWilayah = trim((string)$this->input->post('kodewilayah', TRUE));
+        if (empty($KodeWilayah)) {
+            $KodeWilayah = trim((string)$this->input->get('kodewilayah', TRUE));
+        }
+        if (empty($KodeWilayah)) {
+            $KodeWilayah = $this->get_kode_wilayah();
+        }
+        if (empty($KodeWilayah)) {
+            $KodeWilayah = isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : (isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : '35.12');
+        }
+
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2025);
+
+        $filterInstansiId = null;
+        if ($this->is_role_4()) {
+            $filterInstansiId = $this->get_instansi_id();
+        }
+
+        $this->ensure_bab3_4b_tables_exist($KodeWilayah, $tahun);
+        $res = $this->sync_from_rpjmd_ikd($KodeWilayah, $tahun, $filterInstansiId);
+
+        $totalCount = array_sum($res['aspekCounts']);
+        echo json_encode([
+            'status'  => 'success',
+            'message' => "Data IKD RPJMD berhasil disinkronkan ke tabel Capaian & Perkembangan LKPJ ({$totalCount} indikator).",
+            'count'   => $totalCount
+        ]);
+    }
+
+    public function SalinIndikatorDariAtas() {
+        header('Content-Type: application/json');
+
+        $KodeWilayah = $this->input->post('kodewilayah', TRUE) ?: ($this->get_kode_wilayah() ?: '35.12');
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2025);
+
+        if (!$this->can_crud_lkpj_for_wilayah($KodeWilayah)) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Anda hanya memiliki hak akses untuk mengubah data wilayah Anda sendiri.']);
+            return;
+        }
+
+        $itemsAtas = $this->db->where('kodewilayah', $KodeWilayah)
+                              ->where('tahun', $tahun)
+                              ->where('deleted_at IS NULL')
+                              ->order_by('urutan', 'ASC')
+                              ->get('lkpj_bab3_iku_capaian')
+                              ->result_array();
+
+        if (empty($itemsAtas)) {
+            echo json_encode(['status' => 'warning', 'message' => 'Belum ada data indikator pada tabel IKU di atas untuk disalin.']);
+            return;
+        }
+
+        $copied = 0;
+        foreach ($itemsAtas as $it) {
+            $namaPerk = 'Perkembangan ' . trim($it['indikator_iku']);
+            $exist = $this->db->where('kodewilayah', $KodeWilayah)
+                             ->where('tahun', $tahun)
+                             ->where('uraian_indikator', $namaPerk)
+                             ->where('deleted_at IS NULL')
+                             ->count_all_results('lkpj_bab3_iku_perkembangan');
+
+            if ($exist == 0) {
+                $this->db->insert('lkpj_bab3_iku_perkembangan', [
+                    'kodewilayah' => $KodeWilayah,
+                    'tahun' => $tahun,
+                    'capaian_id' => $it['id'],
+                    'uraian_indikator' => $namaPerk,
+                    'nilai_2021' => null,
+                    'nilai_2022' => $it['realisasi_2022'],
+                    'nilai_2023' => $it['realisasi_2023'],
+                    'nilai_2024' => $it['realisasi_2024'],
+                    'nilai_2025' => $it['realisasi_2025'] ?: $it['target_2025'],
+                    'urutan' => $it['urutan'],
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+                $copied++;
+            }
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'message' => "Berhasil menyalin $copied indikator ke tabel perkembangan! Nilai tahun 2021-2025 dapat disesuaikan secara manual."
+        ]);
+    }
+
+    public function ResetBab3_4A() {
+        header('Content-Type: application/json');
+
+        $KodeWilayah = $this->input->post('kodewilayah', TRUE) ?: ($this->get_kode_wilayah() ?: '35.12');
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2025);
+
+        if (!$this->can_crud_lkpj_for_wilayah($KodeWilayah)) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Anda hanya memiliki hak akses untuk mengubah data wilayah Anda sendiri.']);
+            return;
+        }
+
+        $res = $this->sync_from_rpjmd_iku($KodeWilayah, $tahun);
+        $totalIku = count($res['itemsPerkembangan']);
+
+        echo json_encode([
+            'status' => 'success',
+            'message' => "Data BAB 3.4 Bagian A berhasil disinkronkan kembali ke data standar IKU RPJMD ({$totalIku} indikator)."
+        ]);
+    }
+
+    // ================================================================
     // 4. E-LKPJ: CAPAIAN KINERJA PELAKSANAAN TUGAS PEMBANTUAN
     // ================================================================
 
@@ -26848,8 +28642,13 @@ public function updateStatusPerjanjianKinerja() {
         }
 
         $is_logged_in = $this->is_logged_in();
+        $is_readonly = $this->is_lkpj_readonly();
+        $can_crud = $this->can_crud_lkpj();
+
         $Data['IsLoggedIn'] = $is_logged_in;
-        $Data['CanCrud'] = $is_logged_in;
+        $Data['IsReadOnly'] = $is_readonly;
+        $Data['CanCrud'] = $can_crud;
+        $Data['UserRoleLabel'] = $this->is_nasional() ? 'Nasional' : ($this->is_kementerian() ? 'Kementerian' : ($is_role_4 ? 'Instansi Daerah' : 'Pemerintah Daerah'));
         $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama', 'ASC')->get('kodewilayah')->result_array();
         $Data['KodeWilayah'] = $KodeWilayah;
         $Data['IsRole4'] = $is_role_4;
@@ -27860,6 +29659,11 @@ public function updateStatusPerjanjianKinerja() {
             return;
         }
 
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
+
         try {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
@@ -27943,6 +29747,11 @@ public function updateStatusPerjanjianKinerja() {
             return;
         }
 
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
+
         try {
             $id = (int)$this->input->post('id', TRUE);
             if ($id <= 0) throw new Exception('ID data tidak valid.');
@@ -27982,6 +29791,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
 
@@ -28037,6 +29851,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
 
@@ -28136,6 +29955,11 @@ public function updateStatusPerjanjianKinerja() {
             return;
         }
 
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
+
         try {
             $id = (int)$this->input->post('id', TRUE);
             if ($id <= 0) throw new Exception('ID data tidak valid.');
@@ -28174,6 +29998,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
 
@@ -28227,6 +30056,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
 
@@ -28307,6 +30141,11 @@ public function updateStatusPerjanjianKinerja() {
             return;
         }
 
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
+
         try {
             $id = (int)$this->input->post('id', TRUE);
             if ($id <= 0) throw new Exception('ID data tidak valid.');
@@ -28341,6 +30180,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
 
@@ -28394,6 +30238,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
 
@@ -28485,6 +30334,11 @@ public function updateStatusPerjanjianKinerja() {
             return;
         }
 
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
+
         try {
             $id = (int)$this->input->post('id', TRUE);
             if ($id <= 0) throw new Exception('ID data tidak valid.');
@@ -28523,6 +30377,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
 
@@ -28576,6 +30435,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
 
@@ -28682,6 +30546,11 @@ public function updateStatusPerjanjianKinerja() {
             return;
         }
 
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
+
         try {
             $id = (int)$this->input->post('id', TRUE);
             if ($id <= 0) throw new Exception('ID data tidak valid.');
@@ -28728,6 +30597,11 @@ public function updateStatusPerjanjianKinerja() {
             return;
         }
 
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
+
         try {
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
@@ -28767,6 +30641,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -28831,6 +30710,11 @@ public function updateStatusPerjanjianKinerja() {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
             return;
         }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
         try {
             $id = (int)$this->input->post('id', TRUE);
             if ($id <= 0) throw new Exception('ID data tidak valid.');
@@ -28846,6 +30730,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -28877,6 +30766,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -28925,6 +30819,11 @@ public function updateStatusPerjanjianKinerja() {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
             return;
         }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
         try {
             $id = (int)$this->input->post('id', TRUE);
             if ($id <= 0) throw new Exception('ID data tidak valid.');
@@ -28940,6 +30839,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -28971,6 +30875,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -29022,6 +30931,11 @@ public function updateStatusPerjanjianKinerja() {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
             return;
         }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
         try {
             $id = (int)$this->input->post('id', TRUE);
             if ($id <= 0) throw new Exception('ID data tidak valid.');
@@ -29037,6 +30951,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -29068,6 +30987,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -29129,6 +31053,11 @@ public function updateStatusPerjanjianKinerja() {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
             return;
         }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
         try {
             $id = (int)$this->input->post('id', TRUE);
             if ($id <= 0) throw new Exception('ID data tidak valid.');
@@ -29144,6 +31073,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -29175,6 +31109,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -29279,6 +31218,11 @@ public function updateStatusPerjanjianKinerja() {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
             return;
         }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
         try {
             $id = (int)$this->input->post('id', TRUE);
             if ($id <= 0) throw new Exception('ID data tidak valid.');
@@ -29294,6 +31238,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -29325,6 +31274,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -29433,6 +31387,11 @@ public function updateStatusPerjanjianKinerja() {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
             return;
         }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
         try {
             $id = (int)$this->input->post('id', TRUE);
             if ($id <= 0) throw new Exception('ID data tidak valid.');
@@ -29448,6 +31407,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -29479,6 +31443,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -29568,6 +31537,11 @@ public function updateStatusPerjanjianKinerja() {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
             return;
         }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
         try {
             $id = (int)$this->input->post('id', TRUE);
             if ($id <= 0) throw new Exception('ID data tidak valid.');
@@ -29583,6 +31557,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -29614,6 +31593,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -29722,6 +31706,11 @@ public function updateStatusPerjanjianKinerja() {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
             return;
         }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
         try {
             $id = (int)$this->input->post('id', TRUE);
             if ($id <= 0) throw new Exception('ID data tidak valid.');
@@ -29737,6 +31726,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -29768,6 +31762,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -29876,6 +31875,11 @@ public function updateStatusPerjanjianKinerja() {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
             return;
         }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
         try {
             $id = (int)$this->input->post('id', TRUE);
             if ($id <= 0) throw new Exception('ID data tidak valid.');
@@ -29891,6 +31895,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -29922,6 +31931,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -30030,6 +32044,11 @@ public function updateStatusPerjanjianKinerja() {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
             return;
         }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
         try {
             $id = (int)$this->input->post('id', TRUE);
             if ($id <= 0) throw new Exception('ID data tidak valid.');
@@ -30045,6 +32064,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -30076,6 +32100,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -30184,6 +32213,11 @@ public function updateStatusPerjanjianKinerja() {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
             return;
         }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
         try {
             $id = (int)$this->input->post('id', TRUE);
             if ($id <= 0) throw new Exception('ID data tidak valid.');
@@ -30199,6 +32233,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -30231,6 +32270,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -30301,6 +32345,11 @@ public function updateStatusPerjanjianKinerja() {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
             return;
         }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
         try {
             $id = (int)$this->input->post('id', TRUE);
             if ($id <= 0) throw new Exception('ID data tidak valid.');
@@ -30318,6 +32367,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -30350,6 +32404,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -30417,6 +32476,11 @@ public function updateStatusPerjanjianKinerja() {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
             return;
         }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
         try {
             $id = (int)$this->input->post('id', TRUE);
             if ($id <= 0) throw new Exception('ID data tidak valid.');
@@ -30434,6 +32498,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -30465,6 +32534,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -30565,6 +32639,11 @@ public function updateStatusPerjanjianKinerja() {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
             return;
         }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
         try {
             $id = (int)$this->input->post('id', TRUE);
             if ($id <= 0) throw new Exception('ID data tidak valid.');
@@ -30580,6 +32659,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -30611,6 +32695,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -30665,6 +32754,11 @@ public function updateStatusPerjanjianKinerja() {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
             return;
         }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
         try {
             $id = (int)$this->input->post('id', TRUE);
             if ($id <= 0) throw new Exception('ID data tidak valid.');
@@ -30680,6 +32774,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -30703,6 +32802,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
 
@@ -30785,6 +32889,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
 
@@ -31077,8 +33186,13 @@ public function updateStatusPerjanjianKinerja() {
             $active_tabel = '2.1';
         }
 
+        $is_readonly = $this->is_lkpj_readonly();
+        $can_crud = $this->can_crud_lkpj();
+
         $Data['IsLoggedIn'] = $is_logged_in;
-        $Data['CanCrud'] = $is_logged_in;
+        $Data['IsReadOnly'] = $is_readonly;
+        $Data['CanCrud'] = $can_crud;
+        $Data['UserRoleLabel'] = $this->is_nasional() ? 'Nasional' : ($this->is_kementerian() ? 'Kementerian' : ($is_role_4 ? 'Instansi Daerah' : 'Pemerintah Daerah'));
         $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama', 'ASC')->get('kodewilayah')->result_array();
         $Data['KodeWilayah'] = $KodeWilayah;
         $Data['IsRole4'] = $is_role_4;
@@ -31232,6 +33346,11 @@ public function updateStatusPerjanjianKinerja() {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
             return;
         }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
         try {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
@@ -31295,6 +33414,11 @@ public function updateStatusPerjanjianKinerja() {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
             return;
         }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
         try {
             $id = (int)$this->input->post('id', TRUE);
             if ($id <= 0) throw new Exception('ID data tidak valid.');
@@ -31319,6 +33443,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -31355,6 +33484,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -31419,6 +33553,11 @@ public function updateStatusPerjanjianKinerja() {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
             return;
         }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
         try {
             $id = (int)$this->input->post('id', TRUE);
             if ($id <= 0) throw new Exception('ID data tidak valid.');
@@ -31443,6 +33582,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -31479,6 +33623,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -31543,6 +33692,11 @@ public function updateStatusPerjanjianKinerja() {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
             return;
         }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
+            return;
+        }
         try {
             $id = (int)$this->input->post('id', TRUE);
             if ($id <= 0) throw new Exception('ID data tidak valid.');
@@ -31567,6 +33721,11 @@ public function updateStatusPerjanjianKinerja() {
         header('Content-Type: application/json');
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk melakukan penambahan, perubahan, atau penghapusan data.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan melakukan penambahan, perubahan, atau penghapusan data LKPJ Daerah.']);
             return;
         }
         try {
@@ -31646,105 +33805,58 @@ public function updateStatusPerjanjianKinerja() {
         $dataContext = $contextData['dataContext'];
         $panduanKhusus = $contextData['panduanKhusus'];
 
-        $prompt = "Anda adalah seorang peneliti riset ekonomi pembangunan senior yang profesional, analitis, dan memiliki kepakaran tinggi dalam kebijakan publik, tata kelola fiskal daerah, dan perencanaan wilayah di Indonesia.\n\n" .
-                  "Tugas Anda adalah menyusun teks narasi analisis dan interpretasi data yang komprehensif, akademis, mendalam, dan berbobot untuk dokumen resmi Laporan Keterangan Pertanggungjawaban (LKPJ) Kepala Daerah berdasarkan data empiris berikut:\n\n" .
+        $prompt = "Anda adalah penyusun narasi resmi dan komunikator pembangunan daerah yang bertugas menyusun teks narasi penjelasan data untuk dokumen resmi Laporan Keterangan Pertanggungjawaban (LKPJ) Pemerintah Daerah.\n\n" .
+                  "Tugas Anda adalah menyusun narasi interpretasi data yang komunikatif, wajar, mengalir luwes, mudah dipahami oleh orang awam/masyarakat umum, bernada positif, dan profesional mengenai pelaksanaan program dan capaian Pemerintah Daerah berdasarkan data empiris berikut:\n\n" .
                   $dataContext . "\n\n" .
                   "PANDUAN & KETENTUAN PENULISAN (WAJIB DIPATUHI SECARA KETAT):\n" .
-                  "1. Persona: Peneliti Riset Ekonomi Pembangunan yang objektif, analitis, tajam, dan konstruktif.\n" .
-                  "2. Bahasa: Gunakan Bahasa Indonesia formal, baku, lugas, presisi, dan sesuai dengan standar tata naskah dinas dokumen LKPJ Pemerintah Daerah.\n" .
-                  "3. Karakteristik Narasi Unik Setiap Tabel:\n" .
+                  "1. Gaya Bahasa Normal, Wajar, & Bernada Positif (HINDARI Pujian Personal/Sanjungan Berlebihan):\n" .
+                  "   - Buat narasi kedinasan yang normal, wajar, dan berkalimat positif berdasarkan fakta data capaian pembangunan.\n" .
+                  "   - DILARANG KERAS mencantumkan frasa sanjungan atau klise seperti 'Pemerintah Kabupaten Situbondo di bawah kepemimpinan Bupati yang penuh dedikasi', 'di bawah kepemimpinan Bupati...', 'kepemimpinan Bupati yang visioner', 'kepemimpinan yang penuh dedikasi', atau kalimat pujian berlebihan sejenisnya.\n" .
+                  "   - Gunakan sebutan subjek secara wajar dan normal, yaitu '" . $namaWilayah . "' atau 'Pemerintah Daerah'.\n" .
+                  "   - Nuansa positif dibangun melalui fakta keberhasilan program: peningkatan fasilitas publik, kelancaran pelayanan masyarakat, ketertiban administrasi, dan kemanfaatan nyata bagi warga, BUKAN melalui pujian personal kepada kepala daerah.\n" .
+                  "2. Penulisan Angka Wajib Menggunakan Angka/Digit (Dilarang Mengeja Angka Menjadi Kata):\n" .
+                  "   - Setiap kali menuliskan atau menyebutkan angka, kuantitas, jumlah, nilai, nominal anggaran, persentase, luas, perbandingan, maupun tahun, WAJIB DITAMPILKAN DALAM BENTUK ANGKA/DIGIT NUMERIK (contoh: '17 kecamatan', '136 desa', '95,4%', 'Rp 2.500.000.000', '3.500 Ha', '1.250 orang', 'tahun 2025').\n" .
+                  "   - DILARANG KERAS mengeja angka menjadi deretan kata huruf (misalnya: JANGAN tulis 'tujuh belas kecamatan', JANGAN tulis 'seratus tiga puluh enam desa', JANGAN tulis 'sembilan puluh lima koma empat persen', JANGAN tulis 'dua miliar lima ratus juta rupiah'). Seluruh data kuantitatif wajib tampil sebagai angka numerik agar praktis, jelas, dan mudah dibaca oleh siapa pun.\n" .
+                  "3. Bahasa Lugas & Mudah Dipahami Orang Awam:\n" .
+                  "   - Gunakan tata bahasa Indonesia yang baik, santun, lugas, mengalir enak dibaca, dan mudah dipahami oleh masyarakat luas tanpa mengurangi akurasi data resmi.\n" .
+                  "   - Hindari istilah teknis yang rumit, kaku, atau membingungkan pembaca awam. Jika mencantumkan istilah anggaran atau statistik (seperti PAD, Dana Transfer, Belanja Modal, SILPA, atau rasio), langsung jelaskan maknanya secara sederhana dalam konteks manfaat langsung bagi kehidupan dan fasilitas masyarakat sehari-hari.\n" .
+                  "4. Karakteristik Narasi Unik Setiap Tabel:\n" .
                   "   - Setiap tabel memiliki substansi dan kekhasan indikator masing-masing. Respon Anda harus UNIK dan SPESIFIK membahas indikator pada tabel ini.\n" .
-                  "   - Dilarang keras menggunakan kalimat pembuka yang klise, umum, atau seragam antar tabel.\n" .
+                  "   - Dilarang keras menggunakan kalimat pembuka yang klise, seragam, atau kaku antar tabel.\n" .
                   "   - " . $panduanKhusus . "\n" .
-                  "4. Panjang & Kedalaman Narasi:\n" .
-                  "   - Wajib menyusun narasi MINIMAL 2 PARAGRAF PANJANG yang komprehensif dan mendalam (direkomendasikan 2 sampai 3 paragraf utuh).\n" .
+                  "5. Panjang & Kedalaman Narasi:\n" .
+                  "   - Wajib menyusun narasi MINIMAL 2 PARAGRAF PANJANG yang komprehensif, enak dibaca, dan berbobot (direkomendasikan 2 sampai 3 paragraf utuh).\n" .
                   "   - Dilarang keras hanya menghasilkan 1 paragraf singkat atau sekadar rangkuman superfisial.\n" .
-                  "   - Paragraf pertama menguraikan analisis temuan data kuantitatif secara detail (angka nominal, persentase, capaian target, perbandingan, atau disparitas).\n" .
-                  "   - Paragraf kedua (dan ketiga) mendalami implikasi kebijakan strategis, evaluasi kinerja, tantangan nyata pembangunan daerah, serta rekomendasi solutif ke depan.\n" .
-                  "5. Format Penulisan Bersih & Siap Cetak:\n" .
-                  "   - Berikan teks narasi mengalir langsung dalam bentuk paragraf-paragraf yang rapi dan siap dicetak ke dalam laporan resmi.\n" .
+                  "   - Paragraf pertama menguraikan data capaian kuantitatif utama (selalu tulis dalam angka/digit numerik, persentase, nominal) dengan bahasa yang membumi, jelas, dan mudah dimengerti maknanya oleh warga awam.\n" .
+                  "   - Paragraf kedua (dan ketiga) menguraikan manfaat positif yang dirasakan masyarakat dari program pemerintah daerah, serta komitmen keberlanjutan peningkatan pelayanan ke depan.\n" .
+                  "6. Format Penulisan Bersih & Siap Cetak:\n" .
+                  "   - Berikan teks narasi mengalir langsung dalam bentuk paragraf-paragraf yang rapi dan siap dicetak ke dalam laporan resmi LKPJ.\n" .
                   "   - DILARANG KERAS menggunakan simbol markdown seperti tanda bintang (*, **), tanda pagar (#), backtick (`), atau bullet points/penomoran. Gunakan tanda baca standar Bahasa Indonesia.";
 
-        $apiKey = $this->get_gemini_api_key();
-        $models = [
-            ['name' => 'gemini-3.5-flash', 'has_thinking' => true],
-            ['name' => 'gemini-3.5-flash-lite', 'has_thinking' => false],
-            ['name' => 'gemini-3.1-flash-lite', 'has_thinking' => false]
-        ];
-        $narasiText = '';
-        $lastErrorMsg = '';
-
-        foreach ($models as $mConfig) {
-            $model = $mConfig['name'];
-            $apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/" . $model . ":generateContent?key=" . $apiKey;
-
-            $genConfig = [
-                'temperature' => 0.7,
-                'maxOutputTokens' => 8192
-            ];
-            if (!empty($mConfig['has_thinking'])) {
-                $genConfig['thinkingConfig'] = ['thinkingBudget' => 0];
-            }
-
-            $payload = json_encode([
-                'contents' => [
-                    [
-                        'parts' => [
-                            ['text' => $prompt]
-                        ]
-                    ]
-                ],
-                'generationConfig' => $genConfig
-            ]);
-
-            $ch = curl_init($apiUrl);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 60);
-
-            $response = curl_exec($ch);
-            $curlError = curl_error($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
-
-            if ($curlError) {
-                $lastErrorMsg = 'Gagal menghubungi Gemini API: ' . $curlError;
-                continue;
-            }
-
-            if ($httpCode === 200) {
-                $resJson = json_decode($response, true);
-                if (isset($resJson['candidates'][0]['content']['parts'])) {
-                    foreach ($resJson['candidates'][0]['content']['parts'] as $part) {
-                        if (isset($part['text'])) {
-                            $narasiText .= $part['text'];
-                        }
-                    }
-                }
-                $narasiText = trim($narasiText);
-                if (!empty($narasiText)) {
-                    break;
-                }
-            } else {
-                $errData = json_decode($response, true);
-                $lastErrorMsg = isset($errData['error']['message']) ? $errData['error']['message'] : ('HTTP Code ' . $httpCode);
-            }
-        }
-
-        if (empty($narasiText)) {
-            $userMsg = (strpos($lastErrorMsg, '429') !== false || strpos($lastErrorMsg, 'quota') !== false) 
-                ? 'Layanan AI sedang mencapai batas kuota permintaan sesaat (rate limit). Mohon tunggu beberapa detik lalu klik tombol Generate kembali.'
-                : ('Gagal memproses narasi dengan AI: ' . ($lastErrorMsg ?: 'Respons kosong'));
-            echo json_encode(['status' => 'error', 'message' => $userMsg]);
+        $callResult = $this->call_gemini_api($prompt);
+        if ($callResult['status'] !== 'success') {
+            echo json_encode(['status' => 'error', 'message' => $callResult['message']]);
             return;
         }
+
+        $narasiText = $callResult['text'];
 
         // Bersihkan simbol markdown agar teks siap cetak secara murni
         $narasiText = preg_replace('/[*#`]/', '', $narasiText);
         $narasiText = preg_replace('/^[ \t]*[-+]\s+/m', '', $narasiText);
+
+        // Filter sanitasi untuk memastikan tidak ada frasa klise/sanjungan berlebihan yang tersisa
+        $klisePatterns = [
+            '/(?:Pemerintah\s+Kabupaten\s+[A-Za-z\s]+|Pemerintah\s+Daerah)\s+di\s+bawah\s+kepemimpinan\s+Bupati(?:\s+yang\s+penuh\s+dedikasi|\s+yang\s+[a-zA-Z]+)?/i' => $namaWilayah,
+            '/\bdi\s+bawah\s+kepemimpinan\s+Bupati(?:\s+yang\s+penuh\s+dedikasi|\s+yang\s+[a-zA-Z]+)?\s*,?\s*/i' => '',
+            '/\bBupati\s+yang\s+penuh\s+dedikasi\b/i' => 'Pemerintah Daerah',
+            '/\bkepemimpinan\s+Bupati\s+yang\s+penuh\s+dedikasi\b/i' => 'Pemerintah Daerah',
+            '/\bpenuh\s+dedikasi\b/i' => 'berkelanjutan'
+        ];
+        foreach ($klisePatterns as $pattern => $replacement) {
+            $narasiText = preg_replace($pattern, $replacement, $narasiText);
+        }
+        $narasiText = preg_replace('/[ ]{2,}/', ' ', $narasiText);
         $narasiText = trim($narasiText);
 
         if (empty($narasiText)) {
@@ -31767,6 +33879,11 @@ public function updateStatusPerjanjianKinerja() {
 
         if (!$this->is_logged_in()) {
             echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Anda harus login terlebih dahulu untuk menyimpan narasi.']);
+            return;
+        }
+
+        if (!$this->can_crud_lkpj()) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Kementerian dan Nasional hanya memiliki hak akses melihat data (read-only) dan tidak diizinkan menyimpan narasi analisis LKPJ Daerah.']);
             return;
         }
 
@@ -31840,10 +33957,10 @@ public function updateStatusPerjanjianKinerja() {
                                "Total Desa: " . $totalDesa . " Desa | Total Kelurahan: " . $totalKelurahan . " Kelurahan\n" .
                                "Kecamatan Terluas: " . $kecMax . " (" . number_format($maxLuas, 3, ',', '.') . " Ha) | Kecamatan Terkecil: " . $kecMin . " (" . number_format($minLuas, 3, ',', '.') . " Ha)\n\n" .
                                "Rincian Kecamatan:\n" . implode("\n", $rowsText);
-                $panduanKhusus = "Fokus Analisis Unik Tabel 1.1:\n" .
-                                 "- Kalimat Pembuka: Awali narasi secara unik dengan menganalisis konfigurasi pembagian wilayah administrasi, rentang kendali (span of control) pemerintahan, dan ketimpangan spasial luas wilayah antar kecamatan di " . $namaWilayah . ".\n" .
-                                 "- Paragraf 1: Analisis distribusi luas wilayah antar kecamatan, perbandingan kontras antara kecamatan terluas (" . $kecMax . ") dengan kecamatan terkecil (" . $kecMin . "), serta komposisi dominasi status pemerintahan desa dibanding kelurahan perkotaan.\n" .
-                                 "- Paragraf 2: Analisis implikasi rentang kendali geografis dan karakteristik permukiman terhadap efisiensi penyelenggaraan urusan pemerintahan, jangkauan pelayanan publik dasar, serta keadilan alokasi anggaran pembangunan kewilayahan.";
+                $panduanKhusus = "Fokus Narasi Tabel 1.1:\n" .
+                                 "- Kalimat Pembuka: Awali narasi secara wajar dan mengalir dengan menguraikan pembagian wilayah administrasi di " . $namaWilayah . " sebagai fondasi utama pelayanan pemerintahan kepada masyarakat hingga ke pelosok desa.\n" .
+                                 "- Paragraf 1: Jelaskan pembagian wilayah " . $namaWilayah . " (" . count($items) . " kecamatan, " . $totalDesa . " desa, dan " . $totalKelurahan . " kelurahan) serta variasi luas wilayah (dari kecamatan terluas " . $kecMax . " hingga kecamatan terkecil " . $kecMin . ") dengan bahasa sederhana dan angka numerik.\n" .
+                                 "- Paragraf 2: Uraikan upaya positif Pemerintah Daerah dalam menjaga kelancaran rentang kendali pelayanan, memastikan pembangunan infrastruktur desa berjalan merata, dan mempermudah akses warga terhadap layanan publik.";
                 break;
 
             case 'tbl_1.2':
@@ -31880,10 +33997,10 @@ public function updateStatusPerjanjianKinerja() {
                                "Lahan Budidaya Pertanian/Produktif: " . number_format($luasBudidaya, 3, ',', '.') . " Ha (" . number_format($pctBudidaya, 2, ',', '.') . "%)\n" .
                                "Lahan Bangunan dan Permukiman: " . number_format($luasTerbangun, 3, ',', '.') . " Ha (" . number_format($pctTerbangun, 2, ',', '.') . "%)\n\n" .
                                "Rincian Tutupan Lahan:\n" . implode("\n", $rowsText);
-                $panduanKhusus = "Fokus Analisis Unik Tabel 1.2:\n" .
-                                 "- Kalimat Pembuka: Awali narasi secara unik dengan menyoroti struktur pemanfaatan ruang dan dinamika bentang lanskap daerah berdasarkan data tutupan lahan empiris di " . $namaWilayah . ".\n" .
-                                 "- Paragraf 1: Analisis dominasi tutupan lahan terbesar (" . $tutupanMax . " mencapai " . number_format($maxLuas, 3, ',', '.') . " Ha) serta perbandingannya dengan luas lahan pertanian pangan (tegalan dan sawah) dan lahan permukiman penduduk.\n" .
-                                 "- Paragraf 2: Evaluasi keseimbangan antara fungsi konservasi ekologis dengan aktivitas ekonomi budidaya, pengendalian laju konversi lahan pangan, serta implikasinya terhadap Daya Dukung dan Daya Tampung Lingkungan Hidup (DDDTLH) dan Rencana Tata Ruang Wilayah (RTRW).";
+                $panduanKhusus = "Fokus Narasi Tabel 1.2:\n" .
+                                 "- Kalimat Pembuka: Awali narasi secara wajar dengan menggambarkan struktur tutupan lahan di " . $namaWilayah . " yang mencerminkan keseimbangan antara kelestarian lingkungan dan pemanfaatan ruang produktif masyarakat.\n" .
+                                 "- Paragraf 1: Jelaskan komposisi tutupan lahan (" . count($items) . " kategori) dengan angka numerik yang jelas, menyoroti tutupan lahan terbesar yaitu " . $tutupanMax . " (" . number_format($maxLuas, 3, ',', '.') . " Ha) serta perbandingannya dengan kawasan lindung dan lahan pertanian budidaya.\n" .
+                                 "- Paragraf 2: Uraikan langkah positif Pemerintah Daerah dalam menjaga ketahanan pangan melalui perlindungan lahan pertanian produktif, sembari menjaga kelestarian kawasan hijau dan penataan permukiman warga yang aman.";
                 break;
 
             case 'tbl_1.3':
@@ -31908,10 +34025,10 @@ public function updateStatusPerjanjianKinerja() {
                                "Ketinggian Puncak Tertinggi: Kecamatan " . $kecMaxElev . " (mencapai " . $maxElev . " m dpl)\n" .
                                "Bentang Elevasi: Mulai dari garis pantai pesisir 0 m dpl hingga dataran tinggi pegunungan " . $maxElev . " m dpl\n\n" .
                                "Rincian Ketinggian Per Kecamatan:\n" . implode("\n", $rowsText);
-                $panduanKhusus = "Fokus Analisis Unik Tabel 1.3:\n" .
-                                 "- Kalimat Pembuka: Awali narasi secara unik dengan menelaah morfologi topografi bentang alam wilayah " . $namaWilayah . " yang bervariasi dari dataran rendah pesisir hingga perbukitan dan dataran tinggi.\n" .
-                                 "- Paragraf 1: Analisis gradasi elevasi antar kecamatan, perbandingan kontur daerah pesisir (mulai 0 m dpl) dengan kecamatan dataran tinggi (seperti Kecamatan " . $kecMaxElev . " yang mencapai " . $maxElev . " m dpl).\n" .
-                                 "- Paragraf 2: Analisis implikasi geomorfologi terhadap diferensiasi komoditas ekonomi unggulan (perikanan/kelautan di pesisir versus hortikultura/perkebunan di dataran tinggi), tantangan konektivitas infrastruktur jalan di kawasan terjal, dan mitigasi risiko bencana tanah longsor.";
+                $panduanKhusus = "Fokus Narasi Tabel 1.3:\n" .
+                                 "- Kalimat Pembuka: Awali narasi secara wajar dengan menelaah keanekaragaman bentang alam dan topografi di " . $namaWilayah . ", mulai dari pesisir pantai hingga wilayah perbukitan dan dataran tinggi.\n" .
+                                 "- Paragraf 1: Jelaskan ketinggian wilayah antar kecamatan dengan bahasa yang mudah dipahami warga, membandingkan kawasan pesisir (0 m dpl) dengan kecamatan dataran tinggi seperti " . $kecMaxElev . " (mencapai " . $maxElev . " m dpl) sebagai modal potensi komoditas yang bervariasi.\n" .
+                                 "- Paragraf 2: Uraikan komitmen positif Pemerintah Daerah dalam membangun konektivitas jalan antar wilayah, mendukung aktivitas ekonomi warga dari sektor perikanan hingga perkebunan, serta kesiapsiagaan mitigasi risiko bencana alam.";
                 break;
 
             case 'tbl_1.4':
@@ -31937,10 +34054,10 @@ public function updateStatusPerjanjianKinerja() {
                                "Puncak Musim Hujan: Bulan " . $blnBasah . " (" . number_format($maxCurah, 2, ',', '.') . " mm)\n" .
                                "Puncak Musim Kemarau: Bulan " . $blnKering . " (" . number_format($minCurah, 2, ',', '.') . " mm)\n\n" .
                                "Rincian Data Bulanan:\n" . implode("\n", $rowsText);
-                $panduanKhusus = "Fokus Analisis Unik Tabel 1.4:\n" .
-                                 "- Kalimat Pembuka: Awali narasi secara unik dengan menganalisis dinamika iklim lokal, fluktuasi presipitasi, dan pola pergantian musim hujan dan kemarau di " . $namaWilayah . ".\n" .
-                                 "- Paragraf 1: Analisis distribusi curah hujan dan frekuensi hari hujan sepanjang tahun, disparitas tajam antara puncak musim basah (" . $blnBasah . " sebesar " . number_format($maxCurah, 2, ',', '.') . " mm) dengan bulan terkering (" . $blnKering . " sebesar " . number_format($minCurah, 2, ',', '.') . " mm), serta rata-rata bulanan " . number_format($rataCurah, 2, ',', '.') . " mm.\n" .
-                                 "- Paragraf 2: Evaluasi dampak variabilitas iklim terhadap siklus kalender musim tanam sektor pertanian tanaman pangan, keandalan pasokan air irigasi, serta strategi mitigasi risiko bencana hidrometeorologi (pengendalian banjir pada bulan basah versus ancaman kekeringan air bersih pada bulan kemarau).";
+                $panduanKhusus = "Fokus Narasi Tabel 1.4:\n" .
+                                 "- Kalimat Pembuka: Awali narasi secara wajar dengan mengulas kondisi iklim lokal dan pola pergantian musim hujan serta kemarau yang mempengaruhi aktivitas keseharian warga di " . $namaWilayah . ".\n" .
+                                 "- Paragraf 1: Paparkan data curah hujan tahunan (" . number_format($totalCurah, 2, ',', '.') . " mm) dan jumlah hari hujan (" . $totalHari . " hari), serta perbedaan antara bulan terbasah (" . $blnBasah . " sebesar " . number_format($maxCurah, 2, ',', '.') . " mm) dan bulan terkering (" . $blnKering . " sebesar " . number_format($minCurah, 2, ',', '.') . " mm) dengan angka numerik yang jelas.\n" .
+                                 "- Paragraf 2: Uraikan langkah positif dan tanggap Pemerintah Daerah dalam mendukung petani menyesuaikan musim tanam, pemeliharaan sarana irigasi air, serta kesiapan tim tanggap darurat saat musim hujan untuk menjaga ketenteraman warga.";
                 break;
 
             case 'tbl_1.5':
@@ -31966,10 +34083,10 @@ public function updateStatusPerjanjianKinerja() {
                                "Kecamatan Terpadat: " . $kecMax . " (" . number_format($maxPop, 0, ',', '.') . " jiwa)\n" .
                                "Kecamatan Terkecil Penduduk: " . $kecMin . " (" . number_format($minPop, 0, ',', '.') . " jiwa)\n\n" .
                                "Rincian Per Kecamatan:\n" . implode("\n", $rowsText);
-                $panduanKhusus = "Fokus Analisis Unik Tabel 1.5:\n" .
-                                 "- Kalimat Pembuka: Awali narasi secara unik dengan mengkaji profil demografi kewilayahan, persebaran konsentrasi penduduk, dan struktur komposisi jenis kelamin di " . $namaWilayah . ".\n" .
-                                 "- Paragraf 1: Analisis total populasi (" . number_format($totPop, 0, ',', '.') . " jiwa), komposisi gender (Laki-laki: " . number_format($totL, 0, ',', '.') . ", Perempuan: " . number_format($totP, 0, ',', '.') . ") dengan sex ratio " . number_format($avgRasio, 2, ',', '.') . "%, serta ketimpangan sebaran penduduk yang mencolok antara Kecamatan " . $kecMax . " (terpadat) dan Kecamatan " . $kecMin . " (tersedikit).\n" .
-                                 "- Paragraf 2: Evaluasi implikasi kepadatan penduduk terhadap beban pemenuhan Standar Pelayanan Minimal (SPM) di bidang kesehatan, sarana pendidikan dasar, penyediaan perumahan layak huni, dan sanitasi lingkungan.";
+                $panduanKhusus = "Fokus Narasi Tabel 1.5:\n" .
+                                 "- Kalimat Pembuka: Awali narasi secara wajar dengan memaparkan profil kependudukan di " . $namaWilayah . " sebagai modal sosial utama dalam menggerakkan pembangunan daerah.\n" .
+                                 "- Paragraf 1: Jelaskan jumlah penduduk (" . number_format($totPop, 0, ',', '.') . " jiwa) serta komposisi laki-laki (" . number_format($totL, 0, ',', '.') . ") dan perempuan (" . number_format($totP, 0, ',', '.') . ") dengan bahasa yang bersahabat, serta sebaran warga dari kecamatan terpadat (" . $kecMax . ") hingga kecamatan lainnya.\n" .
+                                 "- Paragraf 2: Uraikan kebijakan positif Pemerintah Daerah dalam memastikan pemenuhan kebutuhan dasar seluruh keluarga, seperti kemudahan akses puskesmas, pendidikan dasar yang terjangkau, dan perlindungan sosial bagi warga.";
                 break;
 
             case 'tbl_1.6':
@@ -31996,10 +34113,10 @@ public function updateStatusPerjanjianKinerja() {
                                "Kecamatan Pertumbuhan Tertinggi: " . $kecMaxPert . " (" . number_format($maxPert, 2, ',', '.') . "%)\n" .
                                "Kecamatan Pertumbuhan Terendah: " . $kecMinPert . " (" . number_format($minPert, 2, ',', '.') . "%)\n\n" .
                                "Rincian Pertumbuhan Per Kecamatan:\n" . implode("\n", $rowsText);
-                $panduanKhusus = "Fokus Analisis Unik Tabel 1.6:\n" .
-                                 "- Kalimat Pembuka: Awali narasi secara unik dengan mengevaluasi laju dinamika pertumbuhan demografi tahunan dan tren perubahan jumlah penduduk antar kecamatan di " . $namaWilayah . ".\n" .
-                                 "- Paragraf 1: Analisis laju pertumbuhan penduduk daerah secara agregat (" . number_format($lajuAgregat, 2, ',', '.') . "% dengan pertambahan " . number_format($selisihJiwa, 0, ',', '.') . " jiwa), serta perbandingan dinamika spasial antara kecamatan dengan pertumbuhan tertinggi (" . $kecMaxPert . " sebesar " . number_format($maxPert, 2, ',', '.') . "%) versus wilayah yang tumbuh lambat atau stagnan (" . $kecMinPert . ").\n" .
-                                 "- Paragraf 2: Analisis implikasi laju pertumbuhan penduduk terhadap proyeksi kebutuhan lapangan kerja produktif, ketahanan pasokan pangan, penyediaan perumahan, serta daya tampung ruang permukiman perkotaan.";
+                $panduanKhusus = "Fokus Narasi Tabel 1.6:\n" .
+                                 "- Kalimat Pembuka: Awali narasi secara wajar dengan meninjau laju pertumbuhan penduduk di " . $namaWilayah . " yang berjalan stabil dan mencerminkan dinamika kehidupan sosial yang kondusif.\n" .
+                                 "- Paragraf 1: Jelaskan data pertumbuhan penduduk dari " . number_format($tot24, 0, ',', '.') . " jiwa (2024) menjadi " . number_format($tot25, 0, ',', '.') . " jiwa (2025) dengan pertambahan " . number_format($selisihJiwa, 0, ',', '.') . " jiwa (" . number_format($lajuAgregat, 2, ',', '.') . "%) secara angka numerik yang jelas dan mudah dipahami.\n" .
+                                 "- Paragraf 2: Uraikan upaya positif Pemerintah Daerah dalam mengimbangi pertambahan penduduk ini melalui penyediaan fasilitas umum, pembinaan usaha masyarakat/UMKM, dan penataan permukiman yang sehat.";
                 break;
 
             case 'tbl_1.7':
@@ -32025,10 +34142,10 @@ public function updateStatusPerjanjianKinerja() {
                                "Kecamatan Arus Masuk Terbesar: " . $kecMaxMasuk . " (" . number_format($maxMasuk, 0, ',', '.') . " orang)\n" .
                                "Kecamatan Arus Keluar Terbesar: " . $kecMaxKeluar . " (" . number_format($maxKeluar, 0, ',', '.') . " orang)\n\n" .
                                "Rincian Migrasi Per Kecamatan:\n" . implode("\n", $rowsText);
-                $panduanKhusus = "Fokus Analisis Unik Tabel 1.7:\n" .
-                                 "- Kalimat Pembuka: Awali narasi secara unik dengan menganalisis mobilitas spasial horizontal penduduk serta dinamika pergerakan migrasi masuk dan migrasi keluar di " . $namaWilayah . ".\n" .
-                                 "- Paragraf 1: Analisis volume perpindahan penduduk (masuk: " . number_format($totMasuk, 0, ',', '.') . " orang, keluar: " . number_format($totKeluar, 0, ',', '.') . " orang) dan saldo migrasi neto (" . number_format($netto, 0, ',', '.') . " orang), identifikasi kutub daya tarik migrasi masuk (" . $kecMaxMasuk . ") versus daerah pengirim migrasi keluar (" . $kecMaxKeluar . ").\n" .
-                                 "- Paragraf 2: Evaluasi faktor penarik dan pendorong mobilitas penduduk (seperti peluang kerja, sarana pendidikan, dan urbanisasi ke pusat kota), dampaknya terhadap ketersediaan tenaga kerja usia produktif, serta kebutuhan keterpaduan sistem administrasi kependudukan.";
+                $panduanKhusus = "Fokus Narasi Tabel 1.7:\n" .
+                                 "- Kalimat Pembuka: Awali narasi secara wajar dengan menggambarkan mobilitas dan perpindahan penduduk di " . $namaWilayah . " yang menunjukkan dinamika sosial dan keterbukaan daerah.\n" .
+                                 "- Paragraf 1: Jelaskan volume perpindahan warga (migrasi masuk " . number_format($totMasuk, 0, ',', '.') . " orang dan migrasi keluar " . number_format($totKeluar, 0, ',', '.') . " orang dengan saldo neto " . number_format($netto, 0, ',', '.') . " orang) menggunakan angka numerik yang gamblang.\n" .
+                                 "- Paragraf 2: Uraikan langkah positif Pemerintah Daerah dalam mempermudah layanan administrasi kependudukan yang cepat dan ramah, serta penyediaan iklim ekonomi yang mendorong masyarakat untuk terus berkembang di daerahnya sendiri.";
                 break;
 
             case 'tbl_1.8':
@@ -32051,10 +34168,10 @@ public function updateStatusPerjanjianKinerja() {
                                "Total Aparatur Sipil Negara (ASN): " . number_format($totAll, 0, ',', '.') . " orang\n" .
                                "Komposisi Gender: Laki-laki " . number_format($totL, 0, ',', '.') . " orang (" . $pctL . "%), Perempuan " . number_format($totP, 0, ',', '.') . " orang (" . $pctP . "%)\n\n" .
                                "Rincian Berdasarkan Kategori Pegawai:\n" . implode("\n", $rowsText);
-                $panduanKhusus = "Fokus Analisis Unik Tabel 1.8:\n" .
-                                 "- Kalimat Pembuka: Awali narasi secara unik dengan meninjau profil kekuatan sumber daya aparatur birokrasi daerah menurut status kepegawaian dan representasi kesetaraan gender di " . $namaWilayah . ".\n" .
-                                 "- Paragraf 1: Analisis struktur komposisi kepegawaian daerah (PNS vs PPPK) dengan total " . number_format($totAll, 0, ',', '.') . " aparatur, serta evaluasi keseimbangan gender antara pegawai laki-laki (" . $pctL . "%) dan perempuan (" . $pctP . "%).\n" .
-                                 "- Paragraf 2: Analisis peran strategis formasi PPPK dalam mengatasi kekurangan tenaga pelayanan dasar (guru dan tenaga kesehatan), implikasi belanja pegawai terhadap kapasitas fiskal APBD, serta agenda peningkatan profesionalisme aparatur birokrasi.";
+                $panduanKhusus = "Fokus Narasi Tabel 1.8:\n" .
+                                 "- Kalimat Pembuka: Awali narasi secara wajar dengan memaparkan kekuatan aparatur birokrasi di " . $namaWilayah . " yang diarahkan untuk memberikan pelayanan terbaik kepada masyarakat.\n" .
+                                 "- Paragraf 1: Jelaskan komposisi aparatur sipil negara (" . number_format($totAll, 0, ',', '.') . " ASN) dengan proporsi laki-laki (" . $pctL . "%) dan perempuan (" . $pctP . "%) menggunakan angka numerik yang jelas.\n" .
+                                 "- Paragraf 2: Uraikan kebijakan positif Pemerintah Daerah dalam memperkuat formasi PPPK, khususnya tenaga pendidik (guru) dan tenaga medis di puskesmas, sehingga jangkauan pelayanan pendidikan dan kesehatan di desa-desa semakin dekat dan optimal.";
                 break;
 
             case 'tbl_1.9':
@@ -32081,10 +34198,10 @@ public function updateStatusPerjanjianKinerja() {
                                "Tingkat Pendidikan Terbanyak: " . $maxTingkat . " (" . number_format($maxJml, 0, ',', '.') . " orang)\n" .
                                "Proporsi Pendidikan Tinggi (Diploma/Sarjana/Pascasarjana): " . number_format($totTinggi, 0, ',', '.') . " orang (" . $pctTinggi . "%)\n\n" .
                                "Rincian Jenjang Pendidikan:\n" . implode("\n", $rowsText);
-                $panduanKhusus = "Fokus Analisis Unik Tabel 1.9:\n" .
-                                 "- Kalimat Pembuka: Awali narasi secara unik dengan menganalisis mutu modal manusia (human capital) dan profil kualifikasi pendidikan formal aparatur sipil negara di " . $namaWilayah . ".\n" .
-                                 "- Paragraf 1: Analisis distribusi jenjang pendidikan aparatur yang didominasi oleh lulusan " . $maxTingkat . " (" . number_format($maxJml, 0, ',', '.') . " orang) serta tingginya proporsi ASN berpendidikan tinggi yang mencapai " . $pctTinggi . "% dari total aparatur.\n" .
-                                 "- Paragraf 2: Implikasi kualifikasi pendidikan terhadap kesiapan birokrasi dalam mengadopsi transformasi digital Sistem Pemerintahan Berbasis Elektronik (SPBE), peningkatan efisiensi pelayanan publik, serta rekomendasi pengembangan talenta berbasis merit system.";
+                $panduanKhusus = "Fokus Narasi Tabel 1.9:\n" .
+                                 "- Kalimat Pembuka: Awali narasi secara wajar dengan menelaah profil kualifikasi pendidikan aparatur di " . $namaWilayah . " yang menjadi modal utama dalam tata kelola pemerintahan yang efektif.\n" .
+                                 "- Paragraf 1: Jelaskan sebaran jenjang pendidikan aparatur yang didominasi oleh lulusan " . $maxTingkat . " (" . number_format($maxJml, 0, ',', '.') . " orang) dan tingginya proporsi pendidikan tinggi (" . $pctTinggi . "%) dengan angka numerik yang tepat.\n" .
+                                 "- Paragraf 2: Uraikan upaya positif Pemerintah Daerah dalam mengarahkan kapasitas aparatur ini menuju pelayanan publik yang makin cepat, transparan, dan memanfaatkan kemudahan sistem digital untuk mempermudah urusan warga.";
                 break;
 
             case 'tbl_1.10':
@@ -32116,10 +34233,10 @@ public function updateStatusPerjanjianKinerja() {
                                "Realisasi PAD: Rp " . number_format($padReal, 2, ',', '.') . " | Realisasi Transfer: Rp " . number_format($transferReal, 2, ',', '.') . "\n" .
                                "Derajat Desentralisasi Fiskal (Rasio PAD terhadap Total Pendapatan): " . number_format($rasioKemandirian, 2, ',', '.') . "%\n\n" .
                                "Rincian Pos Pendapatan Daerah:\n" . implode("\n", $rowsText);
-                $panduanKhusus = "Fokus Analisis Unik Tabel 1.10:\n" .
-                                 "- Kalimat Pembuka: Awali narasi secara unik dengan mengevaluasi kinerja fiskal realisasi penerimaan pendapatan daerah agregat dan tingkat kepatuhan eksekusi target APBD di " . $namaWilayah . ".\n" .
-                                 "- Paragraf 1: Analisis capaian pendapatan daerah secara agregat yang berhasil terealisasi sebesar Rp " . number_format($totReal, 2, ',', '.') . " atau " . number_format($pctReal, 2, ',', '.') . "% dari target, serta perbandingan kontribusi antara pos Pendapatan Asli Daerah (PAD) dan Pendapatan Transfer.\n" .
-                                 "- Paragraf 2: Evaluasi tingkat kemandirian fiskal daerah berdasarkan rasio PAD terhadap total pendapatan (" . number_format($rasioKemandirian, 2, ',', '.') . "%), identifikasi ketergantungan terhadap dana transfer pemerintah pusat, serta strategi diversifikasi sumber pendapatan mandiri daerah.";
+                $panduanKhusus = "Fokus Narasi Tabel 1.10:\n" .
+                                 "- Kalimat Pembuka: Awali narasi secara wajar dengan menyajikan kinerja realisasi pendapatan daerah di " . $namaWilayah . " yang menjadi penopang utama pembiayaan pembangunan masyarakat.\n" .
+                                 "- Paragraf 1: Jelaskan pencapaian pendapatan daerah sebesar Rp " . number_format($totReal, 2, ',', '.') . " (" . number_format($pctReal, 2, ',', '.') . "% dari target) serta realisasi PAD sebesar Rp " . number_format($padReal, 2, ',', '.') . " dengan angka numerik yang jelas dan bahasa yang mudah dipahami.\n" .
+                                 "- Paragraf 2: Uraikan pemanfaatan positif dari penerimaan daerah ini di mana dana yang terhimpun langsung diarahkan untuk membiayai perbaikan jalan, sarana kesehatan, bantuan sosial, dan pendidikan warga.";
                 break;
 
             case 'tbl_1.11':
@@ -32147,10 +34264,10 @@ public function updateStatusPerjanjianKinerja() {
                                "Persentase Capaian Pajak: " . number_format($pctReal, 2, ',', '.') . "%\n" .
                                "Objek Pajak Penyumbang Terbesar: " . $maxPajak . " (Realisasi: Rp " . number_format($maxNominal, 2, ',', '.') . ")\n\n" .
                                "Rincian Jenis Pajak Daerah:\n" . implode("\n", $rowsText);
-                $panduanKhusus = "Fokus Analisis Unik Tabel 1.11:\n" .
-                                 "- Kalimat Pembuka: Awali narasi secara unik dengan menganalisis kinerja optimalisasi penerimaan pajak daerah sebagai komponen utama penopang Pendapatan Asli Daerah (PAD) di " . $namaWilayah . ".\n" .
-                                 "- Paragraf 1: Analisis pencapaian realisasi pajak daerah yang mencapai Rp " . number_format($totReal, 2, ',', '.') . " (" . number_format($pctReal, 2, ',', '.') . "% dari target), identifikasi objek pajak kontributor terbesar (" . $maxPajak . "), serta pos pajak yang mengalami pelampauan target signifikan.\n" .
-                                 "- Paragraf 2: Evaluasi pos pajak yang belum memenuhi target optimal, tantangan kepatuhan wajib pajak di lapangan, serta strategi akselerasi penerimaan melalui intensifikasi, ekstensifikasi, dan digitalisasi sistem pembayaran pajak daerah (e-Tax).";
+                $panduanKhusus = "Fokus Narasi Tabel 1.11:\n" .
+                                 "- Kalimat Pembuka: Awali narasi secara wajar dengan mengulas realisasi penerimaan pajak daerah di " . $namaWilayah . " yang mencerminkan partisipasi aktif masyarakat dalam pembangunan.\n" .
+                                 "- Paragraf 1: Jelaskan realisasi penerimaan pajak daerah sebesar Rp " . number_format($totReal, 2, ',', '.') . " (" . number_format($pctReal, 2, ',', '.') . "% dari target) dengan kontributor utama dari pos " . $maxPajak . " menggunakan angka numerik yang jelas.\n" .
+                                 "- Paragraf 2: Uraikan langkah positif Pemerintah Daerah dalam mempermudah akses pembayaran pajak secara online/nontunai, serta kepastian pemanfaatan dana pajak untuk pembangunan fasilitas umum seperti jalan lingkungan dan penerangan jalan.";
                 break;
 
             case 'tbl_1.12':
@@ -32173,10 +34290,10 @@ public function updateStatusPerjanjianKinerja() {
                                "Total Target Retribusi: Rp " . number_format($totTgt, 2, ',', '.') . " | Total Realisasi: Rp " . number_format($totReal, 2, ',', '.') . "\n" .
                                "Persentase Capaian: " . number_format($pctReal, 2, ',', '.') . "%\n\n" .
                                "Rincian Pos Retribusi Daerah:\n" . implode("\n", $rowsText);
-                $panduanKhusus = "Fokus Analisis Unik Tabel 1.12:\n" .
-                                 "- Kalimat Pembuka: Awali narasi secara unik dengan meninjau efektivitas pemungutan retribusi daerah sebagai instrumen penggantian biaya penyediaan layanan publik pemerintah di " . $namaWilayah . ".\n" .
-                                 "- Paragraf 1: Analisis kinerja pemungutan retribusi secara menyeluruh dengan realisasi Rp " . number_format($totReal, 2, ',', '.') . " (" . number_format($pctReal, 2, ',', '.') . "% dari target), serta perbandingan capaian antar kelompok retribusi (Retribusi Jasa Umum, Retribusi Jasa Usaha, dan Retribusi Perizinan Tertentu).\n" .
-                                 "- Paragraf 2: Analisis korelasi antara kepatuhan pembayaran retribusi dengan kualitas fasilitas umum yang dirasakan masyarakat, optimalisasi retribusi pemanfaatan aset daerah, dan modernisasi sistem penarikan retribusi nontunai.";
+                $panduanKhusus = "Fokus Narasi Tabel 1.12:\n" .
+                                 "- Kalimat Pembuka: Awali narasi secara wajar dengan menjelaskan realisasi pemungutan retribusi daerah di " . $namaWilayah . " yang sejalan dengan penyediaan dan pemeliharaan fasilitas umum bagi warga.\n" .
+                                 "- Paragraf 1: Jelaskan realisasi retribusi daerah sebesar Rp " . number_format($totReal, 2, ',', '.') . " (" . number_format($pctReal, 2, ',', '.') . "% dari target) dengan angka numerik yang mudah dipahami masyarakat.\n" .
+                                 "- Paragraf 2: Uraikan komitmen positif Pemerintah Daerah dalam menjaga tarif retribusi tetap wajar bagi masyarakat, sembari terus membenahi kenyamanan pasar rakyat, kebersihan lingkungan, dan ketertiban fasilitas umum.";
                 break;
 
             case 'tbl_1.13':
@@ -32199,10 +34316,10 @@ public function updateStatusPerjanjianKinerja() {
                                "Total Target Dividen/Bagian Laba: Rp " . number_format($totTgt, 2, ',', '.') . " | Total Realisasi: Rp " . number_format($totReal, 2, ',', '.') . "\n" .
                                "Capaian Agregat: " . number_format($pctReal, 2, ',', '.') . "%\n\n" .
                                "Rincian Dividen BUMD dan Lembaga Keuangan:\n" . implode("\n", $rowsText);
-                $panduanKhusus = "Fokus Analisis Unik Tabel 1.13:\n" .
-                                 "- Kalimat Pembuka: Awali narasi secara unik dengan menelaah kontribusi hasil pengelolaan kekayaan daerah yang dipisahkan melalui penerimaan dividen atas penyertaan modal pemerintah daerah pada BUMD di " . $namaWilayah . ".\n" .
-                                 "- Paragraf 1: Analisis realisasi bagian laba (dividen) BUMD sebesar Rp " . number_format($totReal, 2, ',', '.') . " (" . number_format($pctReal, 2, ',', '.') . "% dari target), dengan menyoroti kontribusi dominan dari BUMD lembaga keuangan (perbankan daerah) dibandingkan BUMD sektor air minum dan lainnya.\n" .
-                                 "- Paragraf 2: Evaluasi tingkat pengembalian investasi (Return on Investment / ROI) modal daerah, penerapan prinsip Good Corporate Governance (GCG) pada perusahaan daerah, serta penguatan sinergi BUMD dalam mendukung pembiayaan pembangunan daerah.";
+                $panduanKhusus = "Fokus Narasi Tabel 1.13:\n" .
+                                 "- Kalimat Pembuka: Awali narasi secara wajar dengan memaparkan hasil pengelolaan kekayaan daerah melalui bagian laba atau dividen BUMD di " . $namaWilayah . ".\n" .
+                                 "- Paragraf 1: Jelaskan realisasi penerimaan dividen BUMD sebesar Rp " . number_format($totReal, 2, ',', '.') . " (" . number_format($pctReal, 2, ',', '.') . "% dari target) dengan angka numerik yang jelas, menunjukkan kinerja positif badan usaha milik daerah.\n" .
+                                 "- Paragraf 2: Uraikan peran positif BUMD dalam memperluas kemudahan akses air bersih bagi masyarakat serta dukungan permodalan bagi usaha kecil dan UMKM di daerah.";
                 break;
 
             case 'tbl_1.14':
@@ -32228,10 +34345,10 @@ public function updateStatusPerjanjianKinerja() {
                                "Capaian Agregat: " . number_format($pctReal, 2, ',', '.') . "%\n" .
                                "Realisasi Pendapatan BLUD: Rp " . number_format($bludReal, 2, ',', '.') . "\n\n" .
                                "Rincian Pos Lain-Lain PAD:\n" . implode("\n", $rowsText);
-                $panduanKhusus = "Fokus Analisis Unik Tabel 1.14:\n" .
-                                 "- Kalimat Pembuka: Awali narasi secara unik dengan menganalisis kinerja realisasi pos penerimaan Lain-Lain Pendapatan Asli Daerah (PAD) yang Sah dan peran fungsional BLUD di " . $namaWilayah . ".\n" .
-                                 "- Paragraf 1: Analisis realisasi agregat pos penerimaan ini yang mencapai Rp " . number_format($totReal, 2, ',', '.') . " (" . number_format($pctReal, 2, ',', '.') . "% dari target), dengan menggarisbawahi kontribusi pendapatan layanan BLUD kesehatan serta hasil jasa giro dan pendapatan bunga kas daerah.\n" .
-                                 "- Paragraf 2: Implikasi tata kelola fleksibilitas keuangan BLUD terhadap mutu pelayanan medis kepada masyarakat, serta efektivitas pengelolaan perbendaharaan daerah (treasury management) dan penatausahaan pemanfaatan barang milik daerah (BMD).";
+                $panduanKhusus = "Fokus Narasi Tabel 1.14:\n" .
+                                 "- Kalimat Pembuka: Awali narasi secara wajar dengan menguraikan penerimaan Lain-Lain PAD yang Sah di " . $namaWilayah . " yang didominasi oleh pendapatan layanan kesehatan BLUD.\n" .
+                                 "- Paragraf 1: Jelaskan perolehan pendapatan pos ini sebesar Rp " . number_format($totReal, 2, ',', '.') . " (" . number_format($pctReal, 2, ',', '.') . "% dari target), termasuk kontribusi layanan BLUD kesehatan (Rp " . number_format($bludReal, 2, ',', '.') . ") dengan angka numerik yang jelas.\n" .
+                                 "- Paragraf 2: Uraikan pemanfaatan positif dari pendapatan layanan ini oleh Pemerintah Daerah untuk meningkatkan ketersediaan obat-obatan, pembaruan peralatan medis di RSUD dan puskesmas, serta peningkatan mutu layanan bagi seluruh pasien.";
                 break;
 
             case 'tbl_1.15':
@@ -32258,10 +34375,10 @@ public function updateStatusPerjanjianKinerja() {
                                "Capaian Agregat: " . number_format($pctReal, 2, ',', '.') . "%\n" .
                                "Realisasi Transfer Pemerintah Pusat: Rp " . number_format($pusatReal, 2, ',', '.') . " | Transfer Antar Daerah: Rp " . number_format($daerahReal, 2, ',', '.') . "\n\n" .
                                "Rincian Pos Pendapatan Transfer:\n" . implode("\n", $rowsText);
-                $panduanKhusus = "Fokus Analisis Unik Tabel 1.15:\n" .
-                                 "- Kalimat Pembuka: Awali narasi secara unik dengan menganalisis struktur dan realisasi penerimaan pendapatan transfer pemerintah pusat serta antar-daerah di " . $namaWilayah . ".\n" .
-                                 "- Paragraf 1: Analisis pencapaian penerimaan dana transfer sebesar Rp " . number_format($totReal, 2, ',', '.') . " (" . number_format($pctReal, 2, ',', '.') . "% dari target), dengan perincian peranan krusial Transfer Pemerintah Pusat (seperti DAU, DAK, DBH, dan Dana Desa) dan Bagi Hasil Pajak Provinsi.\n" .
-                                 "- Paragraf 2: Evaluasi tingkat ketergantungan fiskal daerah terhadap transfer pemerintah pusat, risiko stabilitas transfer terhadap kelancaran eksekusi belanja daerah, serta urgensi penguatan ruang fiskal mandiri.";
+                $panduanKhusus = "Fokus Narasi Tabel 1.15:\n" .
+                                 "- Kalimat Pembuka: Awali narasi secara wajar dengan memaparkan realisasi penerimaan dana transfer dari Pemerintah Pusat dan Pemerintah Provinsi di " . $namaWilayah . ".\n" .
+                                 "- Paragraf 1: Jelaskan capaian dana transfer sebesar Rp " . number_format($totReal, 2, ',', '.') . " (" . number_format($pctReal, 2, ',', '.') . "% dari target), meliputi DAU, DAK, DBH, dan Dana Desa dengan angka numerik yang jelas dan mudah dipahami.\n" .
+                                 "- Paragraf 2: Uraikan penyaluran dana transfer ini oleh Pemerintah Daerah secara tepat sasaran untuk mempercepat perbaikan jalan desa, irigasi pertanian, dan pemenuhan sarana pendidikan di pedesaan.";
                 break;
 
             case 'tbl_1.16':
@@ -32289,10 +34406,10 @@ public function updateStatusPerjanjianKinerja() {
                                "Persentase Penyerapan Belanja: " . number_format($pctReal, 2, ',', '.') . "%\n" .
                                "Realisasi Belanja Operasi: Rp " . number_format($operasiReal, 2, ',', '.') . " | Realisasi Belanja Modal: Rp " . number_format($modalReal, 2, ',', '.') . " (" . $rasioModal . "% dari total belanja)\n\n" .
                                "Rincian Kelompok Belanja Daerah:\n" . implode("\n", $rowsText);
-                $panduanKhusus = "Fokus Analisis Unik Tabel 1.16:\n" .
-                                 "- Kalimat Pembuka: Awali narasi secara unik dengan mengevaluasi kedisiplinan alokasi dan efektivitas penyerapan anggaran belanja daerah dalam APBD " . $namaWilayah . ".\n" .
-                                 "- Paragraf 1: Analisis tingkat serapan belanja daerah yang mencapai Rp " . number_format($totReal, 2, ',', '.') . " (" . number_format($pctReal, 2, ',', '.') . "% dari pagu anggaran), serta telaah proporsi antara Belanja Operasional birokrasi dan Belanja Modal infrastruktur publik.\n" .
-                                 "- Paragraf 2: Evaluasi kualitas belanja (spending quality), efisiensi belanja pegawai dan barang/jasa, akselerasi pembangunan infrastruktur jalan, irigasi, dan jaringan, serta rendahnya serapan belanja tidak terduga sebagai indikator terkendalinya kondisi darurat daerah.";
+                $panduanKhusus = "Fokus Narasi Tabel 1.16:\n" .
+                                 "- Kalimat Pembuka: Awali narasi secara wajar dengan menyoroti realisasi belanja daerah di " . $namaWilayah . " yang memprioritaskan pemenuhan kebutuhan pembangunan sarana fisik bagi warga.\n" .
+                                 "- Paragraf 1: Jelaskan penyerapan belanja daerah sebesar Rp " . number_format($totReal, 2, ',', '.') . " (" . number_format($pctReal, 2, ',', '.') . "% dari anggaran), dengan porsi Belanja Modal sebesar Rp " . number_format($modalReal, 2, ',', '.') . " (" . $rasioModal . "% dari total belanja) menggunakan angka numerik yang jelas.\n" .
+                                 "- Paragraf 2: Uraikan dampak positif dari belanja pembangunan yang diprioritaskan Pemerintah Daerah terhadap perbaikan jalan, jembatan, gedung sekolah, dan fasilitas publik yang langsung dirasakan manfaatnya oleh masyarakat luas.";
                 break;
 
             case 'tbl_1.17':
@@ -32313,10 +34430,10 @@ public function updateStatusPerjanjianKinerja() {
                                "Total Anggaran Hibah: Rp " . number_format($totAngg, 2, ',', '.') . " | Total Realisasi: Rp " . number_format($totReal, 2, ',', '.') . "\n" .
                                "Persentase Penyerapan Hibah: " . number_format($pctReal, 2, ',', '.') . "%\n\n" .
                                "Rincian Per SKPD Pengampu:\n" . implode("\n", $rowsText);
-                $panduanKhusus = "Fokus Analisis Unik Tabel 1.17:\n" .
-                                 "- Kalimat Pembuka: Awali narasi secara unik dengan menganalisis akuntabilitas penyaluran dan tingkat realisasi belanja hibah daerah menurut perangkat daerah pengampu dan kelompok penerima di " . $namaWilayah . ".\n" .
-                                 "- Paragraf 1: Analisis capaian penyerapan anggaran belanja hibah sebesar Rp " . number_format($totReal, 2, ',', '.') . " (" . number_format($pctReal, 2, ',', '.') . "% dari pagu), dengan menyoroti perangkat daerah dengan alokasi terbesar (Dinas Pertanian dan Dinas PUPR) serta SKPD yang mengalami kendala realisasi.\n" .
-                                 "- Paragraf 2: Evaluasi efektivitas belanja hibah bagi pemberdayaan kelompok tani/masyarakat, dukungan operasional instansi vertikal pemerintah pusat, bantuan kelembagaan partai politik, serta pentingnya tertib administrasi laporan pertanggungjawaban (LPJ hibah).";
+                $panduanKhusus = "Fokus Narasi Tabel 1.17:\n" .
+                                 "- Kalimat Pembuka: Awali narasi secara wajar dengan menjelaskan penyaluran belanja hibah daerah di " . $namaWilayah . " untuk mendukung kegiatan kelompok masyarakat dan keagamaan.\n" .
+                                 "- Paragraf 1: Jelaskan realisasi belanja hibah sebesar Rp " . number_format($totReal, 2, ',', '.') . " (" . number_format($pctReal, 2, ',', '.') . "% dari anggaran) yang disalurkan melalui perangkat daerah terkait dengan angka numerik yang jelas.\n" .
+                                 "- Paragraf 2: Uraikan manfaat positif belanja hibah yang disalurkan Pemerintah Daerah dalam memberdayakan kelompok tani, perbaikan sarana ibadah, dan penguatan kegiatan sosial kemasyarakatan di tingkat warga.";
                 break;
 
             case 'tbl_1.18':
@@ -32337,10 +34454,10 @@ public function updateStatusPerjanjianKinerja() {
                                "Total Anggaran Bansos: Rp " . number_format($totAngg, 2, ',', '.') . " | Total Realisasi: Rp " . number_format($totReal, 2, ',', '.') . "\n" .
                                "Persentase Penyerapan: " . number_format($pctReal, 2, ',', '.') . "%\n\n" .
                                "Rincian Per SKPD Pengampu:\n" . implode("\n", $rowsText);
-                $panduanKhusus = "Fokus Analisis Unik Tabel 1.18:\n" .
-                                 "- Kalimat Pembuka: Awali narasi secara unik dengan menelaah komitmen perlindungan jaring pengaman sosial pemerintah daerah melalui penyaluran belanja bantuan sosial (bansos) di " . $namaWilayah . ".\n" .
-                                 "- Paragraf 1: Analisis realisasi penyerapan anggaran belanja bantuan sosial yang mencapai Rp " . number_format($totReal, 2, ',', '.') . " (" . number_format($pctReal, 2, ',', '.') . "% dari pagu), dengan alokasi terfokus pada penanganan sarana permukiman dan perumahan masyarakat rentan melalui kelompok masyarakat (pokmas).\n" .
-                                 "- Paragraf 2: Evaluasi peran bansos sebagai instrumen mitigasi kemiskinan ekstrem, perlindungan sosial bagi warga berpenghasilan rendah, serta urgensi validasi data terpadu kesejahteraan sosial agar bantuan tepat sasaran.";
+                $panduanKhusus = "Fokus Narasi Tabel 1.18:\n" .
+                                 "- Kalimat Pembuka: Awali narasi secara wajar dengan menelaah penyaluran belanja bantuan sosial (bansos) di " . $namaWilayah . " sebagai wujud jaring pengaman sosial bagi masyarakat rentan.\n" .
+                                 "- Paragraf 1: Jelaskan realisasi penyerapan bansos sebesar Rp " . number_format($totReal, 2, ',', '.') . " (" . number_format($pctReal, 2, ',', '.') . "% dari anggaran), termasuk bantuan perbaikan rumah tidak layak huni (RTLH) dan santunan warga dengan angka numerik yang jelas.\n" .
+                                 "- Paragraf 2: Uraikan langkah positif Pemerintah Daerah dalam mengawal penyaluran bansos agar tepat sasaran, sehingga keluarga kurang mampu dan lansia memperoleh manfaat perlindungan hidup yang lebih layak.";
                 break;
 
             case 'tbl_1.19':
@@ -32356,10 +34473,10 @@ public function updateStatusPerjanjianKinerja() {
                 $dataContext = "TABEL 1.19: Rincian Target, Realisasi dan Capaian Pembiayaan Daerah Tahun " . $tahun . "\n" .
                                "Wilayah: " . $namaWilayah . "\n\n" .
                                "Rincian Pos Pembiayaan Daerah:\n" . implode("\n", $rowsText);
-                $panduanKhusus = "Fokus Analisis Unik Tabel 1.19:\n" .
-                                 "- Kalimat Pembuka: Awali narasi secara unik dengan menganalisis struktur transaksi pembiayaan daerah dan manajemen pembiayaan netto APBD di " . $namaWilayah . ".\n" .
-                                 "- Paragraf 1: Analisis realisasi pos penerimaan pembiayaan daerah yang bersumber penuh dari pencairan Sisa Lebih Perhitungan Anggaran (SILPA) tahun sebelumnya untuk menutup defisit riil belanja pembangunan daerah.\n" .
-                                 "- Paragraf 2: Evaluasi posisi pembiayaan netto tanpa beban pengeluaran utang pokok, stabilitas manajemen kas daerah, serta peranan pembiayaan dalam menjaga likuiditas fiskal daerah jangka menengah.";
+                $panduanKhusus = "Fokus Narasi Tabel 1.19:\n" .
+                                 "- Kalimat Pembuka: Awali narasi secara wajar dengan mengulas transaksi pembiayaan daerah di " . $namaWilayah . " dalam rangka menjaga keseimbangan anggaran daerah.\n" .
+                                 "- Paragraf 1: Jelaskan pemanfaatan pos penerimaan pembiayaan yang bersumber dari sisa kas tahun sebelumnya dengan angka numerik yang jelas, sebagai cadangan dana untuk mendukung program pembangunan daerah.\n" .
+                                 "- Paragraf 2: Uraikan pengelolaan pembiayaan yang tertib dan positif oleh Pemerintah Daerah tanpa menambah beban pinjaman/utang daerah, sehingga keuangan daerah tetap sehat dan stabil.";
                 break;
 
             case 'tbl_1.20':
@@ -32377,10 +34494,10 @@ public function updateStatusPerjanjianKinerja() {
                                "Wilayah: " . $namaWilayah . "\n" .
                                "Total Akumulasi SILPA Akhir Tahun: Rp " . number_format($totSilpa, 2, ',', '.') . " (" . count($items) . " Komponen)\n\n" .
                                "Rincian Komponen Pembentuk SILPA:\n" . implode("\n", $rowsText);
-                $panduanKhusus = "Fokus Analisis Unik Tabel 1.20:\n" .
-                                 "- Kalimat Pembuka: Awali narasi secara unik dengan meninjau posisi likuiditas kas daerah pada akhir tahun anggaran serta dekomposisi komponen pembentuk Sisa Lebih Perhitungan Anggaran (SILPA) di " . $namaWilayah . ".\n" .
-                                 "- Paragraf 1: Analisis besaran total posisi kas SILPA akhir tahun yang mencapai Rp " . number_format($totSilpa, 2, ',', '.') . ", dengan dominasi saldo kas di Kas Umum Daerah (Kasda) dan kas operasional Badan Layanan Umum Daerah (BLUD).\n" .
-                                 "- Paragraf 2: Evaluasi pemilahan saldo dana terikat (earmarked funds seperti BOSP, BOK, dan BLUD) versus dana bebas hasil efisiensi belanja dan pelampauan pendapatan, serta rekomendasi prioritas pemanfaatan SILPA pada APBD tahun berikutnya.";
+                $panduanKhusus = "Fokus Narasi Tabel 1.20:\n" .
+                                 "- Kalimat Pembuka: Awali narasi secara wajar dengan memaparkan saldo kas daerah pada akhir tahun anggaran (SILPA) di " . $namaWilayah . " yang tersimpan secara aman dan tertib.\n" .
+                                 "- Paragraf 1: Jelaskan total akumulasi SILPA akhir tahun sebesar Rp " . number_format($totSilpa, 2, ',', '.') . " (" . count($items) . " komponen) dengan angka numerik yang jelas, mencakup saldo kas di kas daerah dan kas layanan kesehatan (BLUD).\n" .
+                                 "- Paragraf 2: Uraikan rencana pemanfaatan positif sisa dana ini oleh Pemerintah Daerah untuk dialokasikan kembali pada tahun berikutnya guna melanjutkan program prioritas fasilitas publik dan pelayanan warga.";
                 break;
 
             default:
@@ -32398,9 +34515,10 @@ public function updateStatusPerjanjianKinerja() {
                                "Wilayah: " . $namaWilayah . " | Tahun: " . $tahun . "\n" .
                                "Jumlah Baris Data: " . count($items) . "\n\n" .
                                "Rincian Data:\n" . implode("\n", $rowsText);
-                $panduanKhusus = "Fokus Analisis:\n" .
-                                 "- Paragraf 1: Analisis capaian data indikator pada tabel ini terhadap target atau standar yang ditetapkan.\n" .
-                                 "- Paragraf 2: Evaluasi variasi capaian, implikasi terhadap tata kelola pemerintahan daerah, dan rekomendasi kebijakan perbaikan.";
+                $panduanKhusus = "Fokus Narasi:\n" .
+                                 "- Kalimat Pembuka: Awali narasi secara wajar dengan memaparkan capaian data indikator pada tabel ini di " . $namaWilayah . ".\n" .
+                                 "- Paragraf 1: Jelaskan capaian angka indikator dengan bahasa sederhana dan angka numerik yang mudah dipahami warga mengenai kemajuan yang diraih.\n" .
+                                 "- Paragraf 2: Uraikan komitmen positif Pemerintah Daerah dalam menindaklanjuti capaian ini untuk terus meningkatkan mutu pelayanan dan pembangunan bagi masyarakat.";
                 break;
         }
 
@@ -32452,10 +34570,10 @@ public function updateStatusPerjanjianKinerja() {
                                "Perubahan Pos PAD: Sebelum Rp " . number_format($padSebelum, 2, ',', '.') . " menjadi Rp " . number_format($padSesudah, 2, ',', '.') . " (Selisih: Rp " . number_format($padSesudah - $padSebelum, 2, ',', '.') . ")\n" .
                                "Perubahan Pos Pendapatan Transfer: Sebelum Rp " . number_format($tfSebelum, 2, ',', '.') . " menjadi Rp " . number_format($tfSesudah, 2, ',', '.') . " (Selisih: Rp " . number_format($tfSesudah - $tfSebelum, 2, ',', '.') . ")\n\n" .
                                "Rincian Perubahan Pos Pendapatan:\n" . implode("\n", $rowsText);
-                $panduanKhusus = "Fokus Analisis Unik Tabel 2.1:\n" .
-                                 "- Kalimat Pembuka: Awali narasi secara unik dengan menganalisis arah kebijakan penyesuaian dan rasionalisasi target pendapatan daerah pada Perubahan APBD " . $namaWilayah . " Tahun Anggaran " . $tahun . ".\n" .
-                                 "- Paragraf 1: Analisis dinamika pergeseran anggaran pendapatan agregat (dari Rp " . number_format($totSebelum, 2, ',', '.') . " menjadi Rp " . number_format($totSesudah, 2, ',', '.') . ", dengan selisih " . number_format($totPersen, 2, ',', '.') . "%), dengan merinci perubahan pada pos Pendapatan Asli Daerah (PAD) dan pos Pendapatan Transfer (faktor koreksi proyeksi transfer pusat/provinsi).\n" .
-                                 "- Paragraf 2: Evaluasi rasionalitas fiskal atas penyesuaian target per pos (seperti koreksi target retribusi daerah yang diimbangi lonjakan estimasi lain-lain PAD yang sah), implikasinya terhadap kesinambungan kapasitas fiskal daerah, serta langkah strategis pemerintah daerah dalam menjaga stabilitas pembiayaan program prioritas.";
+                $panduanKhusus = "Fokus Narasi Tabel 2.1:\n" .
+                                 "- Kalimat Pembuka: Awali narasi secara wajar dengan menguraikan penyesuaian target pendapatan daerah pada Perubahan APBD " . $namaWilayah . " Tahun Anggaran " . $tahun . " agar selaras dengan perkembangan riil di lapangan.\n" .
+                                 "- Paragraf 1: Jelaskan perubahan target pendapatan dari Rp " . number_format($totSebelum, 2, ',', '.') . " menjadi Rp " . number_format($totSesudah, 2, ',', '.') . " (" . ($totSelisih >= 0 ? 'bertambah' : 'disesuaikan') . " " . number_format(abs($totPersen), 2, ',', '.') . "%) dengan angka numerik yang jelas, mencakup penyesuaian pada pos PAD dan pendapatan transfer.\n" .
+                                 "- Paragraf 2: Uraikan langkah positif Pemerintah Daerah dalam menjaga kepastian pembiayaan program prioritas daerah melalui penyesuaian target yang terukur tanpa membebani masyarakat.";
                 break;
 
             case 'tbl_2.2':
@@ -32495,10 +34613,10 @@ public function updateStatusPerjanjianKinerja() {
                                "Perubahan Belanja Modal: Sebelum Rp " . number_format($modalSebelum, 2, ',', '.') . " menjadi Rp " . number_format($modalSesudah, 2, ',', '.') . " (Bertambah signifikan: Rp " . number_format($modalDelta, 2, ',', '.') . " atau +" . round(($modalDelta / ($modalSebelum ?: 1)) * 100, 2) . "%)\n" .
                                "Perubahan Belanja Tidak Terduga (BTT): Sebelum Rp " . number_format($bttSebelum, 2, ',', '.') . " menjadi Rp " . number_format($bttSesudah, 2, ',', '.') . " (Rasionalisasi: Rp " . number_format($bttSesudah - $bttSebelum, 2, ',', '.') . ")\n\n" .
                                "Rincian Perubahan Kelompok Belanja:\n" . implode("\n", $rowsText);
-                $panduanKhusus = "Fokus Analisis Unik Tabel 2.2:\n" .
-                                 "- Kalimat Pembuka: Awali narasi secara unik dengan mengevaluasi restrukturisasi dan realokasi belanja daerah pada Perubahan APBD " . $namaWilayah . " Tahun Anggaran " . $tahun . ".\n" .
-                                 "- Paragraf 1: Analisis pergeseran alokasi belanja daerah secara agregat yang meningkat dari Rp " . number_format($totSebelum, 2, ',', '.') . " menjadi Rp " . number_format($totSesudah, 2, ',', '.') . ", dengan menyoroti ekspansi signifikan pada Belanja Modal (naik +" . round(($modalDelta / ($modalSebelum ?: 1)) * 100, 2) . "% sebesar Rp " . number_format($modalDelta, 2, ',', '.') . ") yang dialokasikan untuk peralatan/mesin, gedung, dan jaringan infrastruktur publik.\n" .
-                                 "- Paragraf 2: Evaluasi kualitas belanja (spending quality) yang terlihat dari efisiensi belanja operasional aparatur dan rasionalisasi Belanja Tidak Terduga (BTT) guna memperkuat belanja modal produktif, dampaknya terhadap penciptaan aset daerah, percepatan pembangunan fisik, dan peningkatan stimulus ekonomi daerah.";
+                $panduanKhusus = "Fokus Narasi Tabel 2.2:\n" .
+                                 "- Kalimat Pembuka: Awali narasi secara wajar dengan menyoroti penyesuaian alokasi belanja daerah pada Perubahan APBD " . $namaWilayah . " Tahun Anggaran " . $tahun . " yang difokuskan pada belanja produktif.\n" .
+                                 "- Paragraf 1: Jelaskan perubahan belanja daerah yang disesuaikan menjadi Rp " . number_format($totSesudah, 2, ',', '.') . " dengan angka numerik yang jelas, khususnya kenaikan Belanja Modal (bertambah Rp " . number_format($modalDelta, 2, ',', '.') . " atau +" . round(($modalDelta / ($modalSebelum ?: 1)) * 100, 2) . "%) untuk pembangunan jalan, jembatan, dan sarana umum.\n" .
+                                 "- Paragraf 2: Uraikan dampak positif dari realokasi anggaran belanja oleh Pemerintah Daerah dalam mempercepat pembangunan fisik dan menggerakkan roda perekonomian masyarakat secara langsung.";
                 break;
 
             case 'tbl_2.3':
@@ -32531,10 +34649,10 @@ public function updateStatusPerjanjianKinerja() {
                                "Pengeluaran Pembiayaan: Rp 0,00 (Nihil sebelum dan sesudah perubahan)\n" .
                                "SILPA Anggaran Perubahan: Rp " . number_format($silpaSesudah, 2, ',', '.') . "\n\n" .
                                "Rincian Pos Pembiayaan Daerah:\n" . implode("\n", $rowsText);
-                $panduanKhusus = "Fokus Analisis Unik Tabel 2.3:\n" .
-                                 "- Kalimat Pembuka: Awali narasi secara unik dengan menganalisis penyesuaian transaksi pembiayaan daerah pada Perubahan APBD " . $namaWilayah . " Tahun Anggaran " . $tahun . " pasca ditetapkannya Laporan Hasil Pemeriksaan (LHP) BPK atas LKPD tahun sebelumnya.\n" .
-                                 "- Paragraf 1: Analisis lonjakan signifikan pada pos Penerimaan Pembiayaan Daerah dari semula Rp " . number_format($penSebelum, 2, ',', '.') . " menjadi Rp " . number_format($penSesudah, 2, ',', '.') . " (bertambah Rp " . number_format($penDelta, 2, ',', '.') . " atau naik " . ($penSebelum > 0 ? round(($penDelta / $penSebelum) * 100, 2) : 0) . "%), yang bersumber murni dari penyesuaian riil saldo Sisa Lebih Perhitungan Anggaran (SILPA) tahun sebelumnya yang telah diaudit secara definitif.\n" .
-                                 "- Paragraf 2: Evaluasi peran strategis penambahan penerimaan pembiayaan dalam menutup defisit belanja program perubahan tanpa harus menambah beban utang daerah (pengeluaran pembiayaan nihil), serta dampaknya terhadap keseimbangan likuiditas dan kesinambungan fiskal daerah.";
+                $panduanKhusus = "Fokus Narasi Tabel 2.3:\n" .
+                                 "- Kalimat Pembuka: Awali narasi secara wajar dengan memaparkan penyesuaian pos pembiayaan daerah pada Perubahan APBD " . $namaWilayah . " Tahun Anggaran " . $tahun . " pasca penetapan audit resmi BPK.\n" .
+                                 "- Paragraf 1: Jelaskan penyesuaian penerimaan pembiayaan dari Rp " . number_format($penSebelum, 2, ',', '.') . " menjadi Rp " . number_format($penSesudah, 2, ',', '.') . " (bertambah Rp " . number_format($penDelta, 2, ',', '.') . ") dengan angka numerik yang jelas, yang bersumber dari pencatatan riil saldo kas tahun sebelumnya.\n" .
+                                 "- Paragraf 2: Uraikan pengelolaan positif Pemerintah Daerah yang memanfaatkan cadangan kas tersebut untuk menutup kebutuhan belanja program perubahan tanpa menambah utang baru, sehingga stabilitas keuangan daerah tetap terjaga.";
                 break;
 
             default:
@@ -32585,6 +34703,107 @@ public function updateStatusPerjanjianKinerja() {
         // Didekode secara aman saat runtime sehingga aplikasi selalu siap jalan di hosting
         $encodedKey = 'QVEuQWI4Uk42SzE5aWRtSXJiSUJJeGxfZUE2N2xzRGZwdjUzRXJBYmtyR1ZrTGRQd3l2RHc=';
         return base64_decode($encodedKey);
+    }
+
+    /**
+     * Memanggil Google Gemini API resmi secara langsung dengan fallback model
+     *
+     * @param string $prompt
+     * @return array ['status' => 'success'|'error', 'text' => string, 'message' => string]
+     */
+    private function call_gemini_api($prompt) {
+        $apiKey = $this->get_gemini_api_key();
+        if (empty($apiKey)) {
+            return [
+                'status' => 'error',
+                'message' => 'Google Gemini API Key belum terkonfigurasi. Silakan periksa application/config/gemini.php'
+            ];
+        }
+
+        $models = [
+            'gemini-3.5-flash-lite',
+            'gemini-3.6-flash',
+            'gemini-3.5-flash',
+            'gemini-3.1-flash-lite'
+        ];
+
+        // Cek apakah ada model kustom di config
+        $geminiConfigPath = APPPATH . 'config/gemini.php';
+        if (file_exists($geminiConfigPath)) {
+            $config = [];
+            @include($geminiConfigPath);
+            if (!empty($config['gemini_models']) && is_array($config['gemini_models'])) {
+                $models = $config['gemini_models'];
+            }
+        }
+
+        $lastErrorMsg = '';
+        foreach ($models as $model) {
+            $apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=" . $apiKey;
+            $payload = json_encode([
+                'contents' => [
+                    [
+                        'parts' => [
+                            ['text' => $prompt]
+                        ]
+                    ]
+                ],
+                'generationConfig' => [
+                    'temperature' => 0.7,
+                    'maxOutputTokens' => 1500
+                ]
+            ]);
+
+            $ch = curl_init($apiUrl);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 45);
+
+            $response = curl_exec($ch);
+            $curlError = curl_error($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($curlError) {
+                $lastErrorMsg = 'Gagal menghubungi Google Gemini API: ' . $curlError;
+                continue;
+            }
+
+            if ($httpCode === 200) {
+                $resJson = json_decode($response, true);
+                $narasiText = '';
+                if (isset($resJson['candidates'][0]['content']['parts'])) {
+                    foreach ($resJson['candidates'][0]['content']['parts'] as $part) {
+                        if (isset($part['text'])) {
+                            $narasiText .= $part['text'];
+                        }
+                    }
+                }
+                $narasiText = trim($narasiText);
+                if (!empty($narasiText)) {
+                    return [
+                        'status' => 'success',
+                        'text'   => $narasiText,
+                        'model'  => $model
+                    ];
+                }
+            } else {
+                $errData = json_decode($response, true);
+                $lastErrorMsg = isset($errData['error']['message']) ? $errData['error']['message'] : ('HTTP Code ' . $httpCode);
+            }
+        }
+
+        $userMsg = (strpos($lastErrorMsg, '429') !== false || strpos($lastErrorMsg, 'quota') !== false || strpos($lastErrorMsg, 'RESOURCE_EXHAUSTED') !== false)
+            ? 'Layanan Google Gemini AI sedang mencapai batas kuota permintaan sesaat (rate limit). Mohon tunggu beberapa detik lalu klik tombol Generate kembali.'
+            : ('Gagal memproses narasi dengan Google Gemini AI: ' . ($lastErrorMsg ?: 'Respons kosong'));
+
+        return [
+            'status' => 'error',
+            'message' => $userMsg
+        ];
     }
 
 }

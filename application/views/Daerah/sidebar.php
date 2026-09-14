@@ -594,6 +594,7 @@
                             <a href="<?=base_url('Instansi/PengisianCapaianProgramKegiatan')?>">3.1 Pengisian Capaian Program Kegiatan</a>
                             <a href="<?=base_url('Instansi/PengisianKebijakanStrategis')?>">3.2 Pengisian Kebijakan Strategis</a>
                             <a href="<?=base_url('Instansi/PengisianTinjutRekomendasiDPRDn1')?>">3.3 Pengisian Tinjut Rekomendasi DPRD n-1</a>
+                            <a href="<?=base_url('Instansi/BAB3_4')?>">3.4 Capaian Kinerja IKU & IKD</a>
                         </div>
                     </div>
                     <div class="sidebar-dropdown">
@@ -725,7 +726,14 @@ document.querySelectorAll('.sidebar-dropdown > a').forEach(a => {
     if (!href) return;
 
     const linkPath = new URL(href, window.location.origin).pathname.replace(/\/+$/, '');
-    if (linkPath === currentPath) {
+    const isCurrent = linkPath === currentPath;
+    const isBab3_4Active = linkPath.toLowerCase().endsWith('/instansi/bab3_4') && (
+      currentPath.toLowerCase().endsWith('/instansi/bab3_4') || 
+      currentPath.toLowerCase().endsWith('/instansi/bab3_4a') || 
+      currentPath.toLowerCase().endsWith('/instansi/bab3_4b')
+    );
+
+    if (isCurrent || isBab3_4Active) {
       link.style.color = '#20c997';
       link.style.fontWeight = 'bold';
 

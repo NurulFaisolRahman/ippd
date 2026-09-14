@@ -5893,6 +5893,24 @@
             $nama = trim($this->input->post('nama', TRUE) ?: $this->input->post('indikator_sasaran', TRUE));
             $satuan = trim($this->input->post('satuan', TRUE));
             $opd = trim($this->input->post('opd', TRUE) ?: $this->input->post('pd_penanggung_jawab', TRUE));
+            $id_instansi = $this->input->post('id_instansi', TRUE);
+
+            if (empty($id_instansi) && !empty($_SESSION['IdInstansi'])) {
+                $id_instansi = $_SESSION['IdInstansi'];
+            }
+
+            if (empty($id_instansi) && !empty($opd)) {
+                $inst = $this->db->select('id')->from('akun_instansi')
+                    ->where('kodewilayah', $KodeWilayah)
+                    ->group_start()
+                        ->where('nama', $opd)
+                        ->or_like('nama', $opd)
+                    ->group_end()
+                    ->limit(1)->get()->row();
+                if ($inst) {
+                    $id_instansi = $inst->id;
+                }
+            }
 
             if (empty($nama)) {
                 echo json_encode(['status' => 'error', 'message' => 'Nama indikator wajib diisi!']);
@@ -5905,6 +5923,7 @@
                 'indikator_sasaran' => $nama,
                 'satuan' => $satuan,
                 'pd_penanggung_jawab' => $opd,
+                'id_instansi' => !empty($id_instansi) ? (int)$id_instansi : null,
                 'target_1' => $this->input->post('target_1') !== null && $this->input->post('target_1') !== '' ? $this->input->post('target_1') : ($this->input->post('target_2025') !== null && $this->input->post('target_2025') !== '' ? $this->input->post('target_2025') : null),
                 'target_2' => $this->input->post('target_2') !== null && $this->input->post('target_2') !== '' ? $this->input->post('target_2') : ($this->input->post('target_2026') !== null && $this->input->post('target_2026') !== '' ? $this->input->post('target_2026') : null),
                 'target_3' => $this->input->post('target_3') !== null && $this->input->post('target_3') !== '' ? $this->input->post('target_3') : ($this->input->post('target_2027') !== null && $this->input->post('target_2027') !== '' ? $this->input->post('target_2027') : null),
@@ -5933,6 +5952,28 @@
             $nama = trim($this->input->post('nama', TRUE) ?: $this->input->post('indikator_sasaran', TRUE));
             $satuan = trim($this->input->post('satuan', TRUE));
             $opd = trim($this->input->post('opd', TRUE) ?: $this->input->post('pd_penanggung_jawab', TRUE));
+            $id_instansi = $this->input->post('id_instansi', TRUE);
+
+            if (empty($id_instansi) && !empty($_SESSION['IdInstansi'])) {
+                $id_instansi = $_SESSION['IdInstansi'];
+            }
+
+            if (empty($id_instansi) && !empty($opd)) {
+                $existing = $this->db->select('kodewilayah')->where('id', $id)->get('ikd')->row();
+                $kw = $existing ? $existing->kodewilayah : (isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : '');
+                $q = $this->db->select('id')->from('akun_instansi');
+                if (!empty($kw)) {
+                    $q->where('kodewilayah', $kw);
+                }
+                $inst = $q->group_start()
+                    ->where('nama', $opd)
+                    ->or_like('nama', $opd)
+                ->group_end()
+                ->limit(1)->get()->row();
+                if ($inst) {
+                    $id_instansi = $inst->id;
+                }
+            }
 
             if (empty($nama)) {
                 echo json_encode(['status' => 'error', 'message' => 'Nama indikator wajib diisi!']);
@@ -5951,6 +5992,10 @@
                 'target_6' => $this->input->post('target_6') !== null && $this->input->post('target_6') !== '' ? $this->input->post('target_6') : ($this->input->post('target_2030') !== null && $this->input->post('target_2030') !== '' ? $this->input->post('target_2030') : null),
                 'updated_at' => date('Y-m-d H:i:s')
             ];
+
+            if (!empty($id_instansi)) {
+                $data['id_instansi'] = (int)$id_instansi;
+            }
 
             if (!empty($aspek)) {
                 $data['aspek'] = $aspek;
@@ -25007,5 +25052,16 @@
         redirect('Instansi/BAB2' . (!empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : ''));
     }
 
+    public function BAB3_4() {
+        redirect('Instansi/BAB3_4' . (!empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : ''));
+    }
+
+    public function BAB3_4A() {
+        redirect('Instansi/BAB3_4A' . (!empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : ''));
+    }
+
+    public function BAB3_4B() {
+        redirect('Instansi/BAB3_4B' . (!empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : ''));
+    }
 }
 

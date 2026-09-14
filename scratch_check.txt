@@ -1,0 +1,1 @@
+id, id_program, kode_kegiatan, nama_kegiatan, sasaran_kegiatan, created_at, updated_at, deleted_at

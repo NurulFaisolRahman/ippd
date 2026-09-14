@@ -1,0 +1,24 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+/**
+ * Template Konfigurasi 9Router API untuk E-LKPJ / IPPD
+ * 
+ * Salin file ini menjadi: application/config/nine_router.php
+ * lalu isikan API Key 9Router Anda di bawah ini, atau gunakan Environment Variable NINEROUTER_API_KEY.
+ */
+$config['nine_router_api_url'] = getenv('NINEROUTER_API_URL')
+    ?: (isset($_SERVER['NINEROUTER_API_URL']) ? $_SERVER['NINEROUTER_API_URL'] : '')
+    ?: (isset($_ENV['NINEROUTER_API_URL']) ? $_ENV['NINEROUTER_API_URL'] : '')
+    ?: 'http://localhost:20128/v1/chat/completions';
+
+$config['nine_router_api_key'] = getenv('NINEROUTER_API_KEY')
+    ?: (isset($_SERVER['NINEROUTER_API_KEY']) ? $_SERVER['NINEROUTER_API_KEY'] : '')
+    ?: (isset($_ENV['NINEROUTER_API_KEY']) ? $_ENV['NINEROUTER_API_KEY'] : '')
+    ?: 'YOUR_9ROUTER_API_KEY_HERE';
+
+$config['nine_router_models'] = [
+    'gemini/gemini-3.5-flash-lite',
+    'gemini-3.5-flash-lite',
+    'gemini/gemini-3.6-flash'
+];

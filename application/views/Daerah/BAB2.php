@@ -980,8 +980,8 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
   </div>
 
   
-  <!-- FILTER PROVINSI & KAB/KOTA (MUNCUL SAAT BELUM LOGIN / MODE PUBLIK) -->
-  <?php if (empty($IsLoggedIn)): ?>
+  <!-- FILTER PROVINSI & KAB/KOTA (MUNCUL SAAT BELUM LOGIN ATAU ROLE READ-ONLY: KEMENTERIAN / NASIONAL) -->
+  <?php if (empty($IsLoggedIn) || !empty($IsReadOnly)): ?>
   <div class="filter-wilayah-card">
     <div class="filter-wilayah-header">
       <div class="filter-icon-box">
@@ -989,7 +989,11 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
       </div>
       <div>
         <h3 class="filter-wilayah-title">Pilih Wilayah (Provinsi & Daerah)</h3>
+        <?php if (!empty($IsReadOnly)): ?>
+        <p class="filter-wilayah-desc">Mode Pemantauan & Evaluasi LKPJ Daerah: <b>Akun <?= htmlspecialchars($UserRoleLabel ?? 'Kementerian/Nasional') ?> (Hanya Baca)</b>. Silakan pilih provinsi dan kabupaten/kota untuk meninjau data statistik LKPJ daerah.</p>
+        <?php else: ?>
         <p class="filter-wilayah-desc">Anda sedang dalam mode pratinjau publik (belum login). Silakan pilih provinsi dan kabupaten/kota untuk melihat data statistik dokumen LKPJ daerah terkait.</p>
+        <?php endif; ?>
       </div>
     </div>
     <div class="filter-wilayah-form">
@@ -1019,8 +1023,12 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
       </div>
     </div>
     <div class="filter-status-notice">
-      <i class="fa fa-lock" style="color:#d97706;font-size:14px;"></i>
+      <i class="fa fa-info-circle" style="color:#0284c7;font-size:14px;"></i>
+      <?php if (!empty($IsReadOnly)): ?>
+      <span>Hak Akses: <b>Mode Lihat Data (Hanya Baca)</b> untuk akun <b><?= htmlspecialchars($UserRoleLabel ?? 'Kementerian/Nasional') ?></b>. Penambahan, pengeditan, atau penghapusan data dikelola langsung oleh Pemerintah Daerah terkait.</span>
+      <?php else: ?>
       <span>Mode Pratinjau: <b>Hanya Baca (Read-Only)</b>. Untuk menambah, mengubah, atau menghapus data wilayah ini, silakan <a href="<?= base_url('Home') ?>" style="color:#007a5a;font-weight:700;text-decoration:underline;">Login ke Akun Daerah / Instansi</a>.</span>
+      <?php endif; ?>
     </div>
   </div>
   <?php endif; ?>
@@ -1225,6 +1233,10 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
         <button class="btn-ui btn-ui-outline" onclick="konfirmasiReset('<?= $activeTabel ?>')" title="Reset ke Nilai Default Dokumen">
           <i class="fa fa-refresh"></i> Reset Data
         </button>
+        <?php elseif (!empty($IsReadOnly)): ?>
+        <span class="btn-ui btn-ui-outline" style="background:#f0fdf4; border-color:#86efac; color:#166534; cursor:default; font-weight:600; font-size:12.5px; display:inline-flex; align-items:center; gap:6px;" title="Akun <?= htmlspecialchars($UserRoleLabel ?? 'Kementerian/Nasional') ?> hanya memiliki hak akses melihat data (Read-Only)">
+          <i class="fa fa-eye" style="color:#16a34a;"></i> Mode Lihat Data (<?= htmlspecialchars($UserRoleLabel ?? 'Kementerian/Nasional') ?>)
+        </span>
         <?php else: ?>
         <a href="<?= base_url('Home') ?>" class="btn-ui btn-ui-notika" style="text-decoration:none;">
           <i class="fa fa-sign-in"></i> Login untuk Kelola Data
@@ -1498,17 +1510,14 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
                 Narasi &amp; Interpretasi Data Tabel <?= htmlspecialchars($activeTabel) ?><?= !empty($metaTabel['judul_singkat']) ? ' (' . htmlspecialchars($metaTabel['judul_singkat']) . ')' : '' ?> (AI Assistant)
               </h4>
               <span style="display: inline-flex; align-items: center; gap: 4px; background: #dcfce7; color: #15803d; border: 1px solid #86efac; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 12px;">
-                <i class="fa fa-bolt"></i> Gemini AI
+                <i class="fa fa-bolt"></i> AI
               </span>
             </div>
-            <p style="margin: 3px 0 0; font-size: 12px; color: #4b6358;">
-              <i class="fa fa-user-circle"></i> <b>Persona:</b> Peneliti Riset Ekonomi Pembangunan &mdash; Analisis komprehensif, evaluatif, dan siap cetak untuk LKPJ.
-            </p>
           </div>
         </div>
         <div style="display: flex; gap: 8px; align-items: center;">
           <button type="button" id="btnGenerateAI" onclick="generateNarasiAI('2', '<?= $activeTabel ?>')" class="btn-notika-primary" style="background: linear-gradient(135deg, #00c292 0%, #009688 100%); border: none; color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 3px 10px rgba(0, 194, 146, 0.25); transition: all 0.2s ease;">
-            <i class="fa fa-magic"></i> <span>Generate Narasi AI</span>
+            <i class="fa fa-magic"></i> <span>Generate Narasi</span>
           </button>
         </div>
       </div>
@@ -1517,7 +1526,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
         <div id="aiLoadingIndicator" style="display: none; padding: 18px; background: #f8fafc; border: 1px dashed #00c292; border-radius: 8px; margin-bottom: 15px; text-align: center;">
           <div style="display: inline-flex; align-items: center; gap: 10px; color: #007a5a; font-weight: 600; font-size: 14px;">
             <i class="fa fa-circle-o-notch fa-spin fa-lg"></i>
-            <span>Gemini AI sedang meneliti dan menyusun narasi akademik Tabel <?= htmlspecialchars($activeTabel) ?>... Harap tunggu sejenak.</span>
+            <span>AI (Gemini) sedang menyusun narasi komunikatif dan apresiatif Tabel <?= htmlspecialchars($activeTabel) ?>... Harap tunggu sejenak.</span>
           </div>
         </div>
 
@@ -1534,9 +1543,13 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
             <button type="button" onclick="copyNarasiToClipboard()" class="btn btn-default btn-sm" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; font-weight: 600; border-radius: 6px; padding: 6px 14px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
               <i class="fa fa-copy"></i> Salin Teks
             </button>
-            <?php if (!empty($IsLoggedIn)): ?>
+            <?php if (!empty($CanCrud)): ?>
             <button type="button" id="btnSimpanNarasi" onclick="simpanNarasi('2', '<?= $activeTabel ?>')" class="btn btn-success btn-sm" style="background: #00c292; border: 1px solid #00a87e; color: #fff; font-weight: 600; border-radius: 6px; padding: 6px 18px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(0, 194, 146, 0.2); cursor: pointer;">
               <i class="fa fa-save"></i> Simpan Narasi
+            </button>
+            <?php elseif (!empty($IsReadOnly)): ?>
+            <button type="button" disabled title="Akun <?= htmlspecialchars($UserRoleLabel ?? 'Kementerian/Nasional') ?> hanya memiliki akses melihat data (Read-Only)" class="btn btn-default btn-sm" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #64748b; font-weight: 600; border-radius: 6px; padding: 6px 18px; display: inline-flex; align-items: center; gap: 6px; cursor: not-allowed;">
+              <i class="fa fa-eye"></i> Simpan Narasi (Read-Only)
             </button>
             <?php else: ?>
             <button type="button" disabled title="Silakan login terlebih dahulu untuk menyimpan narasi" class="btn btn-default btn-sm" style="background: #e2e8f0; border: 1px solid #cbd5e1; color: #94a3b8; font-weight: 600; border-radius: 6px; padding: 6px 18px; display: inline-flex; align-items: center; gap: 6px; cursor: not-allowed;">
@@ -1661,8 +1674,8 @@ const CURRENT_INSTANSI = '<?= $filterInstansi ?>';
 const IS_LOGGED_IN = <?= !empty($IsLoggedIn) ? 'true' : 'false' ?>;
 const CAN_CRUD = <?= !empty($CanCrud) ? 'true' : 'false' ?>;
 
-// Script Filter Dropdown Provinsi & Kab/Kota (Khusus Saat Belum Login)
-<?php if (empty($IsLoggedIn)): ?>
+// Script Filter Dropdown Provinsi & Kab/Kota (Saat Belum Login atau Akun Read-Only Kementerian/Nasional)
+<?php if (empty($IsLoggedIn) || !empty($IsReadOnly)): ?>
 document.addEventListener('DOMContentLoaded', function() {
   const provSelect = document.getElementById('filterProvinsi');
   const kabSelect = document.getElementById('filterKabKota');
@@ -2085,8 +2098,8 @@ function generateNarasiAI(bab, tabel) {
       textarea.value = data.narasi;
       Swal.fire({
         icon: 'success',
-        title: 'Narasi Berhasil Di-generate!',
-        text: 'Analisis naratif akademik Tabel ' + tabel + ' telah dibuat oleh Gemini AI. Anda dapat meninjau, menyunting, atau menyimpannya.',
+        title: 'Narasi Berhasil Disusun!',
+        text: 'Narasi ramah publik dan apresiatif Tabel ' + tabel + ' telah dibuat oleh AI (Gemini). Anda dapat meninjau, menyunting, atau menyimpannya.',
         timer: 3000,
         showConfirmButton: true,
         confirmButtonColor: '#00c292'

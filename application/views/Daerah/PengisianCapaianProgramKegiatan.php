@@ -405,40 +405,52 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
 .hide-budget .col-budget { display: none !important; }
 
 .action-btns {
-  display: flex;
+  display: inline-flex !important;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 6px;
   white-space: nowrap;
 }
 .btn-act {
-  width: 30px;
-  height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--ui-border);
-  background: #fff;
-  color: var(--ui-text-muted);
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: 0 2px 5px rgba(0,0,0,.16), 0 2px 10px rgba(0,0,0,.12) !important;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease !important;
   font-size: 13px;
 }
+.btn-act:hover {
+  transform: translateY(-2px) scale(1.06);
+  box-shadow: 0 4px 12px rgba(0,0,0,.25) !important;
+}
+.btn-act.eval {
+  background: #00BCD4 !important;
+  color: #fff !important;
+}
 .btn-act.eval:hover {
-  background: var(--ui-primary-light);
-  border-color: var(--ui-primary-border);
-  color: var(--ui-primary-text);
+  background: #00acc1 !important;
+}
+.btn-act.edit {
+  background: #2196F3 !important;
+  color: #fff !important;
 }
 .btn-act.edit:hover {
-  background: var(--ui-blue-light);
-  border-color: var(--ui-blue-border);
-  color: var(--ui-blue);
+  background: #1e88e5 !important;
+}
+.btn-act.delete {
+  background: #F44336 !important;
+  color: #fff !important;
 }
 .btn-act.delete:hover {
-  background: var(--ui-red-light);
-  border-color: #fecaca;
-  color: var(--ui-red);
+  background: #e53935 !important;
 }
 
 /* Modals */
@@ -758,11 +770,19 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
     </div>
   <?php } ?>
 
-  <!-- Page Title -->
+  <!-- Page Header (Selaras Notika & E-LKPJ) -->
   <div class="page-header-box">
-    <div class="page-badge"><i class="fa fa-line-chart"></i> E-LKPJ Perangkat Daerah</div>
-    <h1 class="page-title">Pengisian Capaian Program Kegiatan</h1>
-    <p class="page-subtitle">Pelaksanaan Urusan Pemerintahan Daerah (Urusan Wajib & Pilihan), realisasi target kinerja dan anggaran, serta evaluasi permasalahan, solusi, dan tindak lanjut rekomendasi DPRD.</p>
+    <div class="page-badge">
+      <i class="fa fa-book"></i> E-LKPJ &bull; Bab III &bull; 3.1
+      <?php if (!empty($NamaWilayah)): ?>
+        &bull; <i class="fa fa-map-marker"></i> <?= htmlspecialchars($NamaWilayah) ?>
+      <?php endif; ?>
+      <?php if (!empty($IsRole4) && !empty($NamaInstansi)): ?>
+        &bull; <i class="fa fa-building"></i> <?= htmlspecialchars($NamaInstansi) ?> (Role Instansi)
+      <?php endif; ?>
+    </div>
+    <h1 class="page-title">BAB 3.1 : Capaian Kinerja Program &amp; Kegiatan</h1>
+    <p class="page-subtitle">Pelaksanaan Urusan Pemerintahan Daerah (Urusan Wajib &amp; Pilihan), realisasi target kinerja dan anggaran, serta evaluasi permasalahan, solusi, dan tindak lanjut rekomendasi DPRD.</p>
   </div>
 
   <!-- Toolbar & Filters -->
@@ -1047,7 +1067,7 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
           trHtml += 
             '<td class="center">' +
               '<div class="action-btns">' +
-                '<button type="button" class="btn-act eval" onclick="window.CPK.openEval(\'' + (p.id || p.kode) + '\')" title="Input Permasalahan, Upaya & Tinjut"><i class="fa fa-pencil"></i></button>' +
+                '<button type="button" class="btn-act eval" onclick="window.CPK.openEval(\'' + (p.id || p.kode) + '\')" title="Input Permasalahan, Upaya & Tinjut"><i class="notika-icon notika-edit"></i></button>' +
               '</div>' +
             '</td>';
         }
@@ -1087,7 +1107,7 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
           trkHtml += 
             '<td class="center">' +
               '<div class="action-btns">' +
-                '<button type="button" class="btn-act eval" onclick="window.CPK.openEval(\'' + (k.id || k.kode) + '\')" title="Input Permasalahan, Upaya & Tinjut"><i class="fa fa-pencil"></i></button>' +
+                '<button type="button" class="btn-act eval" onclick="window.CPK.openEval(\'' + (k.id || k.kode) + '\')" title="Input Permasalahan, Upaya & Tinjut"><i class="notika-icon notika-edit"></i></button>' +
               '</div>' +
             '</td>';
         }

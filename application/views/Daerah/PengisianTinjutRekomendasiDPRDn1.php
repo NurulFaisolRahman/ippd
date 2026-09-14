@@ -259,18 +259,22 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: var(--ui-primary);
+  background: #00c292;
   color: #fff;
   border: none;
-  padding: 9px 18px;
-  font-size: 13.5px;
+  padding: 8px 16px;
+  font-size: 13px;
   font-weight: 700;
-  border-radius: var(--radius-sm);
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.15s ease;
-  box-shadow: 0 2px 6px rgba(0, 194, 146, 0.25);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0, 194, 146, 0.3);
 }
-.btn-add-primary:hover { background: var(--ui-primary-hover); }
+.btn-add-primary:hover {
+  background: #00a87e;
+  box-shadow: 0 4px 10px rgba(0, 194, 146, 0.4);
+  transform: translateY(-1px);
+}
 
 /* Table Section */
 .table-card {
@@ -347,27 +351,38 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
   gap: 6px;
 }
 .btn-icon {
-  width: 32px;
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--ui-border);
-  background: #fff;
-  color: var(--ui-text-muted);
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: 0 2px 5px rgba(0,0,0,.16), 0 2px 10px rgba(0,0,0,.12) !important;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease !important;
+  font-size: 13px;
+}
+.btn-icon:hover {
+  transform: translateY(-2px) scale(1.06);
+  box-shadow: 0 4px 12px rgba(0,0,0,.25) !important;
+}
+.btn-icon.edit {
+  background: #2196F3 !important;
+  color: #fff !important;
 }
 .btn-icon.edit:hover {
-  background: var(--ui-primary-light);
-  border-color: var(--ui-primary-border);
-  color: var(--ui-primary-text);
+  background: #1e88e5 !important;
+}
+.btn-icon.delete {
+  background: #F44336 !important;
+  color: #fff !important;
 }
 .btn-icon.delete:hover {
-  background: var(--ui-red-light);
-  border-color: #fecaca;
-  color: var(--ui-red);
+  background: #e53935 !important;
 }
 
 /* Modals */
@@ -707,9 +722,28 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
   <?php } ?>
 
   <!-- Page Header -->
+  <?php
+  $namaInstansiTampil = '';
+  if (!empty($ListInstansi) && !empty($filterInstansi)) {
+      foreach ($ListInstansi as $ins) {
+          if ($ins['id'] == $filterInstansi) {
+              $namaInstansiTampil = $ins['nama'];
+              break;
+          }
+      }
+  }
+  ?>
   <div class="page-header-box">
-    <div class="page-badge"><i class="fa fa-institution"></i> E-LKPJ Perangkat Daerah</div>
-    <h1 class="page-title">Tindak Lanjut Rekomendasi DPRD Tahun N-1</h1>
+    <div class="page-badge">
+      <i class="fa fa-book"></i> E-LKPJ &bull; Bab III &bull; 3.3
+      <?php if (!empty($NamaWilayah)): ?>
+        &bull; <i class="fa fa-map-marker"></i> <?= htmlspecialchars($NamaWilayah) ?>
+      <?php endif; ?>
+      <?php if (!empty($IsRole4) && !empty($namaInstansiTampil)): ?>
+        &bull; <i class="fa fa-building"></i> <?= htmlspecialchars($namaInstansiTampil) ?> (Role Instansi)
+      <?php endif; ?>
+    </div>
+    <h1 class="page-title">BAB 3.3 : Tindak Lanjut Rekomendasi DPRD (Tahun N-1)</h1>
     <p class="page-subtitle">Pencatatan rekomendasi DPRD oleh Pemerintah Daerah dengan penandaan (tagging) Perangkat Daerah / Dinas terkait, serta pelaporan tindak lanjut dan tujuan penyelesaian oleh masing-masing instansi.</p>
     
     <div class="stat-chips-row">
@@ -943,7 +977,7 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
       var tr = document.createElement("tr");
       var deleteBtn = "";
       if (IS_DAERAH) {
-        deleteBtn = '<button type="button" class="btn-icon delete" data-rekom-id="' + item.rekomendasi_id + '" data-id="' + item.id + '" data-master="1" title="Hapus Rekomendasi Daerah"><i class="fa fa-trash-o"></i></button>';
+        deleteBtn = '<button type="button" class="btn-icon delete" data-rekom-id="' + item.rekomendasi_id + '" data-id="' + item.id + '" data-master="1" title="Hapus Rekomendasi Daerah"><i class="notika-icon notika-trash"></i></button>';
       }
 
       var tagBadge = '<div style="margin-top:6px;"><span class="badge-tag-instansi"><i class="fa fa-tag"></i> Target: ' + escapeHtml(item.target_instansi_nama || 'Semua Perangkat Daerah') + '</span></div>';
@@ -953,7 +987,7 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
       var aksiCol = IS_LOGGED_IN ? (
         '<td class="col-aksi">' +
           '<div class="action-btns">' +
-            '<button type="button" class="btn-icon edit" data-rekom-id="' + item.rekomendasi_id + '" data-id="' + item.id + '" data-master="' + (item.is_master ? '1' : '0') + '" title="' + editTitle + '"><i class="fa fa-pencil"></i></button>' +
+            '<button type="button" class="btn-icon edit" data-rekom-id="' + item.rekomendasi_id + '" data-id="' + item.id + '" data-master="' + (item.is_master ? '1' : '0') + '" title="' + editTitle + '"><i class="notika-icon notika-edit"></i></button>' +
             deleteBtn +
           '</div>' +
         '</td>'
