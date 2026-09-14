@@ -2377,6 +2377,33 @@
                                     $tujuan['TahunAkhir'] = $misi['TahunAkhir'];
                                 }
                                 
+                                // Ambil Indikator Tujuan
+                                $tujuan['Indikator'] = $this->db
+                                    ->where('tujuan_id', $tujuan['Id'])
+                                    ->where('deleted_at IS NULL')
+                                    ->order_by('id', 'ASC')
+                                    ->get('indikator_tujuan')
+                                    ->result_array();
+                                
+                                foreach ($tujuan['Indikator'] as &$indT) {
+                                    if (!empty($indT['pd_pengampuh'])) {
+                                        $pdIds = array_filter(explode(',', $indT['pd_pengampuh']));
+                                        if (!empty($pdIds)) {
+                                            $pdNames = $this->db
+                                                ->select('nama')
+                                                ->where_in('id', $pdIds)
+                                                ->where('deleted_at IS NULL')
+                                                ->get('akun_instansi')
+                                                ->result_array();
+                                            $indT['pd_pengampuh_names'] = array_column($pdNames, 'nama');
+                                        } else {
+                                            $indT['pd_pengampuh_names'] = [];
+                                        }
+                                    } else {
+                                        $indT['pd_pengampuh_names'] = [];
+                                    }
+                                }
+                                
                                 $tujuan['Sasaran'] = $this->db
                                     ->select('s.*')
                                     ->from('sasaranrpjmd s')
@@ -2392,6 +2419,33 @@
                                     if (empty($sasaran['TahunMulai']) || empty($sasaran['TahunAkhir'])) {
                                         $sasaran['TahunMulai'] = $tujuan['TahunMulai'];
                                         $sasaran['TahunAkhir'] = $tujuan['TahunAkhir'];
+                                    }
+                                    
+                                    // Ambil Indikator Sasaran
+                                    $sasaran['Indikator'] = $this->db
+                                        ->where('sasaran_id', $sasaran['Id'])
+                                        ->where('deleted_at IS NULL')
+                                        ->order_by('id', 'ASC')
+                                        ->get('indikator_sasaran')
+                                        ->result_array();
+                                    
+                                    foreach ($sasaran['Indikator'] as &$indS) {
+                                        if (!empty($indS['pd_pengampuh'])) {
+                                            $pdIds = array_filter(explode(',', $indS['pd_pengampuh']));
+                                            if (!empty($pdIds)) {
+                                                $pdNames = $this->db
+                                                    ->select('nama')
+                                                    ->where_in('id', $pdIds)
+                                                    ->where('deleted_at IS NULL')
+                                                    ->get('akun_instansi')
+                                                    ->result_array();
+                                                $indS['pd_pengampuh_names'] = array_column($pdNames, 'nama');
+                                            } else {
+                                                $indS['pd_pengampuh_names'] = [];
+                                            }
+                                        } else {
+                                            $indS['pd_pengampuh_names'] = [];
+                                        }
                                     }
                                 }
                             }
@@ -3441,19 +3495,26 @@
                 }
             }
             
+            $parseTarget = function($val) {
+                if ($val === null) return null;
+                $val = trim((string)$val);
+                if ($val === '' || $val === '-') return null;
+                return $val;
+            };
+
             // Tentukan apakah perlu insert kodewilayah
             // Jika tabel memiliki kolom kodewilayah, tambahkan
             $data = [
                 'tujuan_id' => $tujuanId,
                 'indikator' => $indikator,
                 'satuan' => $satuan,
-                'baseline_2024' => $this->input->post('baseline_2024') ?: null,
-                'target_2025' => $this->input->post('target_2025') ?: null,
-                'target_2026' => $this->input->post('target_2026') ?: null,
-                'target_2027' => $this->input->post('target_2027') ?: null,
-                'target_2028' => $this->input->post('target_2028') ?: null,
-                'target_2029' => $this->input->post('target_2029') ?: null,
-                'target_2030' => $this->input->post('target_2030') ?: null,
+                'baseline_2024' => $parseTarget($this->input->post('baseline_2024', TRUE)),
+                'target_2025' => $parseTarget($this->input->post('target_2025', TRUE)),
+                'target_2026' => $parseTarget($this->input->post('target_2026', TRUE)),
+                'target_2027' => $parseTarget($this->input->post('target_2027', TRUE)),
+                'target_2028' => $parseTarget($this->input->post('target_2028', TRUE)),
+                'target_2029' => $parseTarget($this->input->post('target_2029', TRUE)),
+                'target_2030' => $parseTarget($this->input->post('target_2030', TRUE)),
                 'pd_pengampuh' => $pdPengampuhValue,
                 'created_at' => date('Y-m-d H:i:s')
             ];
@@ -3550,17 +3611,24 @@
                     }
                 }
                 
+                $parseTarget = function($val) {
+                    if ($val === null) return null;
+                    $val = trim((string)$val);
+                    if ($val === '' || $val === '-') return null;
+                    return $val;
+                };
+
                 // Siapkan data untuk update
                 $data = [
                     'indikator' => $indikator,
                     'satuan' => trim($this->input->post('satuan', TRUE)),
-                    'baseline_2024' => $this->input->post('baseline_2024') ?: null,
-                    'target_2025' => $this->input->post('target_2025') ?: null,
-                    'target_2026' => $this->input->post('target_2026') ?: null,
-                    'target_2027' => $this->input->post('target_2027') ?: null,
-                    'target_2028' => $this->input->post('target_2028') ?: null,
-                    'target_2029' => $this->input->post('target_2029') ?: null,
-                    'target_2030' => $this->input->post('target_2030') ?: null,
+                    'baseline_2024' => $parseTarget($this->input->post('baseline_2024', TRUE)),
+                    'target_2025' => $parseTarget($this->input->post('target_2025', TRUE)),
+                    'target_2026' => $parseTarget($this->input->post('target_2026', TRUE)),
+                    'target_2027' => $parseTarget($this->input->post('target_2027', TRUE)),
+                    'target_2028' => $parseTarget($this->input->post('target_2028', TRUE)),
+                    'target_2029' => $parseTarget($this->input->post('target_2029', TRUE)),
+                    'target_2030' => $parseTarget($this->input->post('target_2030', TRUE)),
                     'pd_pengampuh' => $pdPengampuhValue,
                     'updated_at' => date('Y-m-d H:i:s')
                 ];
@@ -3708,18 +3776,25 @@
                 }
             }
             
+            $parseTarget = function($val) {
+                if ($val === null) return null;
+                $val = trim((string)$val);
+                if ($val === '' || $val === '-') return null;
+                return $val;
+            };
+
             // Siapkan data untuk insert
             $data = [
                 'sasaran_id' => $sasaranId,
                 'indikator' => $indikator,
                 'satuan' => $satuan,
-                'baseline_2024' => $this->input->post('baseline_2024') ?: null,
-                'target_2025' => $this->input->post('target_2025') ?: null,
-                'target_2026' => $this->input->post('target_2026') ?: null,
-                'target_2027' => $this->input->post('target_2027') ?: null,
-                'target_2028' => $this->input->post('target_2028') ?: null,
-                'target_2029' => $this->input->post('target_2029') ?: null,
-                'target_2030' => $this->input->post('target_2030') ?: null,
+                'baseline_2024' => $parseTarget($this->input->post('baseline_2024', TRUE)),
+                'target_2025' => $parseTarget($this->input->post('target_2025', TRUE)),
+                'target_2026' => $parseTarget($this->input->post('target_2026', TRUE)),
+                'target_2027' => $parseTarget($this->input->post('target_2027', TRUE)),
+                'target_2028' => $parseTarget($this->input->post('target_2028', TRUE)),
+                'target_2029' => $parseTarget($this->input->post('target_2029', TRUE)),
+                'target_2030' => $parseTarget($this->input->post('target_2030', TRUE)),
                 'pd_pengampuh' => $pdPengampuhValue,
                 'created_at' => date('Y-m-d H:i:s')
             ];
@@ -3815,17 +3890,24 @@
                     }
                 }
                 
+                $parseTarget = function($val) {
+                    if ($val === null) return null;
+                    $val = trim((string)$val);
+                    if ($val === '' || $val === '-') return null;
+                    return $val;
+                };
+
                 // Siapkan data untuk update
                 $data = [
                     'indikator' => $indikator,
                     'satuan' => trim($this->input->post('satuan', TRUE)),
-                    'baseline_2024' => $this->input->post('baseline_2024') ?: null,
-                    'target_2025' => $this->input->post('target_2025') ?: null,
-                    'target_2026' => $this->input->post('target_2026') ?: null,
-                    'target_2027' => $this->input->post('target_2027') ?: null,
-                    'target_2028' => $this->input->post('target_2028') ?: null,
-                    'target_2029' => $this->input->post('target_2029') ?: null,
-                    'target_2030' => $this->input->post('target_2030') ?: null,
+                    'baseline_2024' => $parseTarget($this->input->post('baseline_2024', TRUE)),
+                    'target_2025' => $parseTarget($this->input->post('target_2025', TRUE)),
+                    'target_2026' => $parseTarget($this->input->post('target_2026', TRUE)),
+                    'target_2027' => $parseTarget($this->input->post('target_2027', TRUE)),
+                    'target_2028' => $parseTarget($this->input->post('target_2028', TRUE)),
+                    'target_2029' => $parseTarget($this->input->post('target_2029', TRUE)),
+                    'target_2030' => $parseTarget($this->input->post('target_2030', TRUE)),
                     'pd_pengampuh' => $pdPengampuhValue,
                     'updated_at' => date('Y-m-d H:i:s')
                 ];
@@ -4508,7 +4590,7 @@
                 'password'          => password_hash($pwd, PASSWORD_DEFAULT),
                 'tahun_mulai'       => $tahunMulai,
                 'tahun_akhir'       => $tahunAkhir,
-                'Level'             => 2,
+                'Level'             => 4,
                 'idkementerian'     => $idKementerian,
                 'created_at'        => date('Y-m-d H:i:s'),
                 'updated_at'        => date('Y-m-d H:i:s')
@@ -9061,7 +9143,13 @@
         $bidangId = (int)$this->input->post('bidang_urusan_id', TRUE);
         $kode = trim($this->input->post('kode_program', TRUE));
         $nama = trim($this->input->post('nama_program', TRUE));
-        $outcomes = $this->input->post('outcomes', TRUE); // array multidimensi
+        
+        $outcomesRaw = $this->input->post('outcomes_json');
+        if (!empty($outcomesRaw)) {
+            $outcomes = json_decode($outcomesRaw, true);
+        } else {
+            $outcomes = $this->input->post('outcomes', TRUE);
+        }
         
         if ($bidangId <= 0 || empty($nama)) {
             echo json_encode(['status' => 'error', 'message' => 'Data program tidak lengkap!']);
@@ -9113,6 +9201,8 @@
                         if (empty(trim($ind['indikator'] ?? ''))) continue;
                         
                         $dataInd = [
+                            'kode_wilayah' => $kodeWilayah,
+                            'program_id' => $programId,
                             'outcome_id' => $outcomeId,
                             'indikator' => trim($ind['indikator']),
                             'satuan' => trim($ind['satuan'] ?? ''),
@@ -9127,7 +9217,7 @@
                             'pagu_2029' => $this->_program_format_pagu($ind['pagu_2029'] ?? null),
                             'target_2030' => trim($ind['target_2030'] ?? ''),
                             'pagu_2030' => $this->_program_format_pagu($ind['pagu_2030'] ?? null),
-                            'perangkat_daerah_id' => isset($ind['perangkat_daerah_id']) ? (int)$ind['perangkat_daerah_id'] : null,
+                            'perangkat_daerah_id' => !empty($ind['perangkat_daerah_id']) ? (int)$ind['perangkat_daerah_id'] : null,
                             'urutan' => $urutanInd,
                             'created_at' => date('Y-m-d H:i:s')
                         ];
@@ -9150,7 +9240,7 @@
     /**
      * EDIT PROGRAM + OUTCOME + INDIKATOR
      * POST: id, bidang_urusan_id, kode_program, nama_program,
-     *       outcomes[][id, outcome_text, deleted, indikators[][id, indikator, ...]]
+     *       outcomes_json / outcomes[][id, outcome_text, deleted, indikators[][id, indikator, ...]]
      */
     public function program_edit_program() {
         if (!$this->input->is_ajax_request()) show_404();
@@ -9162,7 +9252,13 @@
         $bidangId = (int)$this->input->post('bidang_urusan_id', TRUE);
         $kode = trim($this->input->post('kode_program', TRUE));
         $nama = trim($this->input->post('nama_program', TRUE));
-        $outcomes = $this->input->post('outcomes', TRUE);
+        
+        $outcomesRaw = $this->input->post('outcomes_json');
+        if (!empty($outcomesRaw)) {
+            $outcomes = json_decode($outcomesRaw, true);
+        } else {
+            $outcomes = $this->input->post('outcomes', TRUE);
+        }
         
         if ($id <= 0 || $bidangId <= 0 || empty($nama)) {
             echo json_encode(['status' => 'error', 'message' => 'Data tidak lengkap!']);
@@ -9250,6 +9346,8 @@
                         if ($indId > 0 && !$isDeletedInd) {
                             // Update existing
                             $this->db->where('id', $indId)->where('outcome_id', $outcomeId)->update('program_indikator', [
+                                'kode_wilayah' => $kodeWilayah,
+                                'program_id' => $id,
                                 'indikator' => $indText,
                                 'satuan' => trim($ind['satuan'] ?? ''),
                                 'kondisi_awal' => trim($ind['kondisi_awal'] ?? ''),
@@ -9263,7 +9361,7 @@
                                 'pagu_2029' => $this->_program_format_pagu($ind['pagu_2029'] ?? null),
                                 'target_2030' => trim($ind['target_2030'] ?? ''),
                                 'pagu_2030' => $this->_program_format_pagu($ind['pagu_2030'] ?? null),
-                                'perangkat_daerah_id' => isset($ind['perangkat_daerah_id']) ? (int)$ind['perangkat_daerah_id'] : null,
+                                'perangkat_daerah_id' => !empty($ind['perangkat_daerah_id']) ? (int)$ind['perangkat_daerah_id'] : null,
                                 'urutan' => $urutanInd,
                                 'updated_at' => date('Y-m-d H:i:s')
                             ]);
@@ -9275,6 +9373,8 @@
                         } else {
                             // Insert new indikator
                             $dataInd = [
+                                'kode_wilayah' => $kodeWilayah,
+                                'program_id' => $id,
                                 'outcome_id' => $outcomeId,
                                 'indikator' => $indText,
                                 'satuan' => trim($ind['satuan'] ?? ''),
@@ -9289,7 +9389,7 @@
                                 'pagu_2029' => $this->_program_format_pagu($ind['pagu_2029'] ?? null),
                                 'target_2030' => trim($ind['target_2030'] ?? ''),
                                 'pagu_2030' => $this->_program_format_pagu($ind['pagu_2030'] ?? null),
-                                'perangkat_daerah_id' => isset($ind['perangkat_daerah_id']) ? (int)$ind['perangkat_daerah_id'] : null,
+                                'perangkat_daerah_id' => !empty($ind['perangkat_daerah_id']) ? (int)$ind['perangkat_daerah_id'] : null,
                                 'urutan' => $urutanInd,
                                 'created_at' => date('Y-m-d H:i:s')
                             ];
@@ -9334,8 +9434,10 @@
     public function program_get_by_id() {
         if (!$this->input->is_ajax_request()) show_404();
         
+        $kodeWilayah = $this->_checkSessionWilayah();
+        if (!$kodeWilayah) return;
+        
         $id = (int)$this->input->post('id', TRUE);
-        $kodeWilayah = $this->_getKodeWilayah();
         
         if ($id <= 0 || empty($kodeWilayah)) {
             echo json_encode(['status' => 'error', 'message' => 'Data tidak valid']);
@@ -25042,6 +25144,318 @@
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
         }
+    }
+
+    // ============================================================
+    // MENU RAPBD (Rancangan APBD)
+    // ============================================================
+    public function RAPBD() {
+        $Header['Halaman'] = 'RAPBD';
+        
+        $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
+        $KodeWilayah = $this->_getKodeWilayah();
+
+        $tahun = $this->input->get('tahun', TRUE);
+        if (empty($tahun)) {
+            $tahun = date('Y');
+        }
+        $Data['SelectedTahun'] = (int)$tahun;
+
+        // Daftar tahun untuk filter
+        $daftarTahunDb = $this->db->distinct()->select('tahun')->where('kodewilayah', $KodeWilayah)->where('deleted_at IS NULL')->order_by('tahun', 'DESC')->get('rapbd')->result_array();
+        $tahunList = array_unique(array_merge([date('Y'), date('Y')+1, 2024, 2025, 2026, 2027], array_column($daftarTahunDb, 'tahun')));
+        rsort($tahunList);
+        $Data['TahunList'] = $tahunList;
+
+        if ($KodeWilayah) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            $Data['KodeWilayah'] = $KodeWilayah;
+            $Data['NamaWilayah'] = $wilayah['Nama'] ?? '';
+            
+            $Data['RAPBDList'] = $this->db
+                ->where('kodewilayah', $KodeWilayah)
+                ->where('tahun', $Data['SelectedTahun'])
+                ->where('deleted_at IS NULL')
+                ->order_by('kode', 'ASC')
+                ->order_by('id', 'ASC')
+                ->get('rapbd')
+                ->result_array();
+
+            $total = $this->db
+                ->select_sum('jumlah')
+                ->where('kodewilayah', $KodeWilayah)
+                ->where('tahun', $Data['SelectedTahun'])
+                ->where('deleted_at IS NULL')
+                ->get('rapbd')
+                ->row_array();
+            $Data['TotalJumlah'] = $total['jumlah'] ?? 0;
+        } else {
+            $Data['KodeWilayah'] = '';
+            $Data['NamaWilayah'] = '';
+            $Data['RAPBDList'] = [];
+            $Data['TotalJumlah'] = 0;
+        }
+
+        $this->load->view('Daerah/header', $Header);
+        $this->load->view('Daerah/RAPBD', $Data);
+    }
+
+    public function InputRAPBD() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+
+        $kodeWilayah = $this->input->post('kodewilayah', TRUE);
+        if (empty($kodeWilayah)) {
+            $kodeWilayah = $this->_getKodeWilayah();
+        }
+
+        $tahun = (int)$this->input->post('tahun', TRUE);
+        $kode = trim($this->input->post('kode', TRUE));
+        $uraian = trim($this->input->post('uraian', TRUE));
+        $jumlahRaw = $this->input->post('jumlah', TRUE);
+        $jumlah = floatval(preg_replace('/[^0-9]/', '', $jumlahRaw));
+
+        if (empty($kode) || empty($uraian)) {
+            echo json_encode(['status' => 'error', 'message' => 'Kode dan Uraian wajib diisi!']);
+            return;
+        }
+
+        $dataInsert = [
+            'kodewilayah' => $kodeWilayah,
+            'tahun' => $tahun > 0 ? $tahun : date('Y'),
+            'kode' => $kode,
+            'uraian' => $uraian,
+            'jumlah' => $jumlah,
+            'keterangan' => $this->input->post('keterangan', TRUE) ?? '',
+            'created_at' => date('Y-m-d H:i:s')
+        ];
+
+        $this->db->insert('rapbd', $dataInsert);
+        if ($this->db->affected_rows() > 0) {
+            echo json_encode(['status' => 'success', 'message' => 'Data RAPBD berhasil ditambahkan!']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data RAPBD.']);
+        }
+    }
+
+    public function GetRAPBDById() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+
+        $id = (int)$this->input->post('id', TRUE);
+        $data = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('rapbd')->row_array();
+        if ($data) {
+            echo json_encode(['status' => 'success', 'data' => $data]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+        }
+    }
+
+    public function UpdateRAPBD() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+
+        $id = (int)$this->input->post('id', TRUE);
+        $kode = trim($this->input->post('kode', TRUE));
+        $uraian = trim($this->input->post('uraian', TRUE));
+        $tahun = (int)$this->input->post('tahun', TRUE);
+        $jumlahRaw = $this->input->post('jumlah', TRUE);
+        $jumlah = floatval(preg_replace('/[^0-9]/', '', $jumlahRaw));
+
+        if (empty($kode) || empty($uraian) || $id <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak valid!']);
+            return;
+        }
+
+        $dataUpdate = [
+            'kode' => $kode,
+            'uraian' => $uraian,
+            'tahun' => $tahun > 0 ? $tahun : date('Y'),
+            'jumlah' => $jumlah,
+            'keterangan' => $this->input->post('keterangan', TRUE) ?? '',
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        $this->db->where('id', $id)->update('rapbd', $dataUpdate);
+        echo json_encode(['status' => 'success', 'message' => 'Data RAPBD berhasil diperbarui!']);
+    }
+
+    public function DeleteRAPBD() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+
+        $id = (int)$this->input->post('id', TRUE);
+        if ($id <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+            return;
+        }
+
+        $this->db->where('id', $id)->update('rapbd', ['deleted_at' => date('Y-m-d H:i:s')]);
+        echo json_encode(['status' => 'success', 'message' => 'Data RAPBD berhasil dihapus!']);
+    }
+
+    // ============================================================
+    // MENU APBD (Anggaran Pendapatan dan Belanja Daerah)
+    // ============================================================
+    public function APBD() {
+        $Header['Halaman'] = 'APBD';
+        
+        $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
+        $KodeWilayah = $this->_getKodeWilayah();
+
+        $tahun = $this->input->get('tahun', TRUE);
+        if (empty($tahun)) {
+            $tahun = date('Y');
+        }
+        $Data['SelectedTahun'] = (int)$tahun;
+
+        // Daftar tahun untuk filter
+        $daftarTahunDb = $this->db->distinct()->select('tahun')->where('kodewilayah', $KodeWilayah)->where('deleted_at IS NULL')->order_by('tahun', 'DESC')->get('apbd')->result_array();
+        $tahunList = array_unique(array_merge([date('Y'), date('Y')+1, 2024, 2025, 2026, 2027], array_column($daftarTahunDb, 'tahun')));
+        rsort($tahunList);
+        $Data['TahunList'] = $tahunList;
+
+        if ($KodeWilayah) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            $Data['KodeWilayah'] = $KodeWilayah;
+            $Data['NamaWilayah'] = $wilayah['Nama'] ?? '';
+            
+            $Data['APBDList'] = $this->db
+                ->where('kodewilayah', $KodeWilayah)
+                ->where('tahun', $Data['SelectedTahun'])
+                ->where('deleted_at IS NULL')
+                ->order_by('kode', 'ASC')
+                ->order_by('id', 'ASC')
+                ->get('apbd')
+                ->result_array();
+
+            $total = $this->db
+                ->select_sum('jumlah')
+                ->where('kodewilayah', $KodeWilayah)
+                ->where('tahun', $Data['SelectedTahun'])
+                ->where('deleted_at IS NULL')
+                ->get('apbd')
+                ->row_array();
+            $Data['TotalJumlah'] = $total['jumlah'] ?? 0;
+        } else {
+            $Data['KodeWilayah'] = '';
+            $Data['NamaWilayah'] = '';
+            $Data['APBDList'] = [];
+            $Data['TotalJumlah'] = 0;
+        }
+
+        $this->load->view('Daerah/header', $Header);
+        $this->load->view('Daerah/APBD', $Data);
+    }
+
+    public function InputAPBD() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+
+        $kodeWilayah = $this->input->post('kodewilayah', TRUE);
+        if (empty($kodeWilayah)) {
+            $kodeWilayah = $this->_getKodeWilayah();
+        }
+
+        $tahun = (int)$this->input->post('tahun', TRUE);
+        $kode = trim($this->input->post('kode', TRUE));
+        $uraian = trim($this->input->post('uraian', TRUE));
+        $jumlahRaw = $this->input->post('jumlah', TRUE);
+        $jumlah = floatval(preg_replace('/[^0-9]/', '', $jumlahRaw));
+
+        if (empty($kode) || empty($uraian)) {
+            echo json_encode(['status' => 'error', 'message' => 'Kode dan Uraian wajib diisi!']);
+            return;
+        }
+
+        $dataInsert = [
+            'kodewilayah' => $kodeWilayah,
+            'tahun' => $tahun > 0 ? $tahun : date('Y'),
+            'kode' => $kode,
+            'uraian' => $uraian,
+            'jumlah' => $jumlah,
+            'keterangan' => $this->input->post('keterangan', TRUE) ?? '',
+            'created_at' => date('Y-m-d H:i:s')
+        ];
+
+        $this->db->insert('apbd', $dataInsert);
+        if ($this->db->affected_rows() > 0) {
+            echo json_encode(['status' => 'success', 'message' => 'Data APBD berhasil ditambahkan!']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data APBD.']);
+        }
+    }
+
+    public function GetAPBDById() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+
+        $id = (int)$this->input->post('id', TRUE);
+        $data = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('apbd')->row_array();
+        if ($data) {
+            echo json_encode(['status' => 'success', 'data' => $data]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+        }
+    }
+
+    public function UpdateAPBD() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+
+        $id = (int)$this->input->post('id', TRUE);
+        $kode = trim($this->input->post('kode', TRUE));
+        $uraian = trim($this->input->post('uraian', TRUE));
+        $tahun = (int)$this->input->post('tahun', TRUE);
+        $jumlahRaw = $this->input->post('jumlah', TRUE);
+        $jumlah = floatval(preg_replace('/[^0-9]/', '', $jumlahRaw));
+
+        if (empty($kode) || empty($uraian) || $id <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak valid!']);
+            return;
+        }
+
+        $dataUpdate = [
+            'kode' => $kode,
+            'uraian' => $uraian,
+            'tahun' => $tahun > 0 ? $tahun : date('Y'),
+            'jumlah' => $jumlah,
+            'keterangan' => $this->input->post('keterangan', TRUE) ?? '',
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        $this->db->where('id', $id)->update('apbd', $dataUpdate);
+        echo json_encode(['status' => 'success', 'message' => 'Data APBD berhasil diperbarui!']);
+    }
+
+    public function DeleteAPBD() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+
+        $id = (int)$this->input->post('id', TRUE);
+        if ($id <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+            return;
+        }
+
+        $this->db->where('id', $id)->update('apbd', ['deleted_at' => date('Y-m-d H:i:s')]);
+        echo json_encode(['status' => 'success', 'message' => 'Data APBD berhasil dihapus!']);
     }
 
     public function BAB1() {

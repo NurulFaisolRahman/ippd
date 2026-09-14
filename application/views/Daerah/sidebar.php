@@ -508,8 +508,8 @@
                     <i class="fa fa-chevron-down"></i>
                 </a>
                 <div class="sidebar-submenu">
-                    <a href="<?=base_url('#')?>">RAPBD</a>
-                    <a href="<?=base_url('#')?>">APBD</a>
+                    <a href="<?=base_url('Daerah/RAPBD')?>">RAPBD</a>
+                    <a href="<?=base_url('Daerah/APBD')?>">APBD</a>
                 </div>
             </li>
 

@@ -12,26 +12,141 @@
     
     .program-table {
         width: 100%;
-        border-collapse: collapse;
+        min-width: 1800px;
+        table-layout: fixed;
+        border-collapse: separate;
+        border-spacing: 0;
         font-size: 12px;
     }
     .program-table th {
-        background: #f1f8e9;
+        background: #e8f5e9;
         text-align: center;
         font-weight: 600;
         padding: 6px 4px;
-        border: 1px solid #dee2e6;
+        border-right: 1px solid #dee2e6;
+        border-bottom: 1px solid #dee2e6;
         font-size: 10px;
         vertical-align: middle;
+        position: sticky;
+        box-sizing: border-box;
+    }
+    .program-table thead tr:nth-child(1) th {
+        top: 0;
+        height: 28px;
+        z-index: 12;
+        background: #e8f5e9;
+        border-top: 1px solid #dee2e6;
+    }
+    .program-table thead tr:nth-child(2) th {
+        top: 28px;
+        height: 26px;
+        z-index: 11;
+        background: #f1f8e9;
+    }
+    .program-table th:first-child,
+    .program-table td:first-child {
+        border-left: 1px solid #dee2e6;
     }
     .program-table td {
         padding: 4px 3px;
-        border: 1px solid #dee2e6;
+        border-right: 1px solid #dee2e6;
+        border-bottom: 1px solid #dee2e6;
         vertical-align: middle;
         text-align: center;
+        box-sizing: border-box;
     }
     .program-table .text-left { text-align: left; padding-left: 8px; }
     .program-table .text-right { text-align: right; padding-right: 8px; }
+    
+    .program-table tr.border-urusan td:first-child { border-left: 4px solid #007bff !important; }
+    .program-table tr.border-bidang td:first-child { border-left: 4px solid #28a745 !important; }
+    .program-table tr.border-program td:first-child { border-left: 4px solid #0d6efd !important; }
+    .program-table tr.border-outcome td:first-child { border-left: 4px solid #198754 !important; }
+    .program-table tr.border-indikator td:first-child { border-left: 4px solid #ffc107 !important; }
+
+    /* Sticky Columns (Horizontal Freeze) */
+    .program-table .col-sticky-1 {
+        position: sticky !important;
+        left: 0 !important;
+        width: 320px !important;
+        min-width: 320px !important;
+        max-width: 320px !important;
+        box-sizing: border-box;
+        word-break: break-word;
+        white-space: normal;
+    }
+    .program-table .col-sticky-2 {
+        position: sticky !important;
+        left: 320px !important;
+        width: 250px !important;
+        min-width: 250px !important;
+        max-width: 250px !important;
+        box-sizing: border-box;
+        word-break: break-word;
+        white-space: normal;
+    }
+    .program-table .col-sticky-1-2 {
+        position: sticky !important;
+        left: 0 !important;
+        width: 570px !important;
+        min-width: 570px !important;
+        max-width: 570px !important;
+        box-sizing: border-box;
+        word-break: break-word;
+        white-space: normal;
+    }
+
+    /* Sticky Headers (Top + Left Freeze) */
+    .program-table thead th.col-sticky-1 {
+        top: 0;
+        left: 0 !important;
+        z-index: 35 !important;
+        background: #e8f5e9 !important;
+    }
+    .program-table thead th.col-sticky-2 {
+        top: 0;
+        left: 320px !important;
+        z-index: 30 !important;
+        background: #e8f5e9 !important;
+        border-right: 2px solid #b0bec5 !important;
+    }
+
+    /* Sticky Body Cells Z-index & Backgrounds */
+    .program-table tbody td.col-sticky-1 {
+        z-index: 7;
+    }
+    .program-table tbody td.col-sticky-2 {
+        z-index: 6;
+    }
+    .program-table tbody td.col-sticky-1-2 {
+        z-index: 7;
+    }
+
+    .program-table .row-urusan td.col-sticky-1-2 { 
+        background: #f8f9fa !important; 
+        border-right: 2px solid #b0bec5 !important;
+    }
+    .program-table .row-bidang td.col-sticky-1-2 { 
+        background: #fafbfc !important; 
+        border-right: 2px solid #b0bec5 !important;
+    }
+    .program-table .row-program td.col-sticky-1 { 
+        background: #eef7ff !important; 
+    }
+    .program-table .row-outcome td.col-sticky-1 { 
+        background: #f0faf0 !important; 
+    }
+    .program-table .row-outcome td.col-sticky-2 { 
+        background: #f0faf0 !important; 
+        border-right: 2px solid #b0bec5 !important;
+    }
+    .program-table .row-indikator td.col-sticky-1 { 
+        background: #ffffff !important; 
+    }
+    .program-table .row-indikator td.col-sticky-2 { 
+        background: #ffffff !important; 
+        border-right: 2px solid #b0bec5 !important;
+    }
     
     /* Warna level */
     .program-table .row-urusan { background: #f8f9fa; font-weight: 600; }
@@ -268,8 +383,29 @@
     .empty-state { text-align: center; padding: 40px 20px; color: #6c757d; }
     .empty-state .icon { font-size: 48px; margin-bottom: 15px; color: #dee2e6; }
     .empty-state h5 { color: #495057; }
-    .table-scroll { overflow-x: auto; margin-top: 5px; }
-    .table-scroll .program-table { min-width: 1400px; }
+    .table-scroll { 
+        overflow: auto; 
+        max-height: 75vh; 
+        margin-top: 5px; 
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        position: relative;
+    }
+    .table-scroll::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    .table-scroll::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    .table-scroll::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 4px;
+    }
+    .table-scroll::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+    .table-scroll .program-table { min-width: 1800px; }
 
     @media (max-width: 768px) {
         .filter-row { flex-direction:column; gap:15px; }
@@ -411,33 +547,48 @@
                             <?php } else { ?>
                                 <div class="table-scroll">
                                     <table class="program-table">
+                                        <colgroup>
+                                            <col style="width: 320px;">
+                                            <col style="width: 250px;">
+                                            <col style="width: 80px;">
+                                            <col style="width: 90px;">
+                                            <col style="width: 80px;">
+                                            <col style="width: 100px;">
+                                            <col style="width: 80px;">
+                                            <col style="width: 100px;">
+                                            <col style="width: 80px;">
+                                            <col style="width: 100px;">
+                                            <col style="width: 80px;">
+                                            <col style="width: 100px;">
+                                            <col style="width: 80px;">
+                                            <col style="width: 100px;">
+                                            <col style="width: 180px;">
+                                            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                                                <col style="width: 90px;">
+                                            <?php } ?>
+                                        </colgroup>
                                         <thead>
                                             <tr>
-                                                <th style="width:15%;">URUSAN / BIDANG / PROGRAM / OUTCOME</th>
-                                                <th style="width:10%;">INDIKATOR</th>
-                                                <th style="width:5%;">SATUAN</th>
-                                                <th style="width:7%;">KONDISI AWAL</th>
+                                                <th rowspan="2" class="col-sticky-1">URUSAN / BIDANG / PROGRAM / OUTCOME</th>
+                                                <th rowspan="2" class="col-sticky-2">INDIKATOR</th>
+                                                <th rowspan="2" style="width:5%;">SATUAN</th>
+                                                <th rowspan="2" style="width:7%;">KONDISI AWAL</th>
                                                 <th colspan="2" style="width:7%;">2026</th>
                                                 <th colspan="2" style="width:7%;">2027</th>
                                                 <th colspan="2" style="width:7%;">2028</th>
                                                 <th colspan="2" style="width:7%;">2029</th>
                                                 <th colspan="2" style="width:7%;">2030</th>
-                                                <th style="width:8%;">PERANGKAT DAERAH</th>
+                                                <th rowspan="2" style="width:8%;">PERANGKAT DAERAH</th>
                                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                                    <th style="width:5%;" class="col-aksi">AKSI</th>
+                                                    <th rowspan="2" style="width:5%;" class="col-aksi">AKSI</th>
                                                 <?php } ?>
                                             </tr>
                                             <tr>
-                                                <th></th><th></th><th></th><th></th>
                                                 <th>TARGET</th><th>PAGU</th>
                                                 <th>TARGET</th><th>PAGU</th>
                                                 <th>TARGET</th><th>PAGU</th>
                                                 <th>TARGET</th><th>PAGU</th>
                                                 <th>TARGET</th><th>PAGU</th>
-                                                <th></th>
-                                                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                                    <th class="col-aksi"></th>
-                                                <?php } ?>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -471,7 +622,7 @@
                                             ?>
                                                 <!-- ROW URUSAN -->
                                                 <tr class="row-urusan border-urusan">
-                                                    <td class="text-left level-urusan" colspan="2">
+                                                    <td class="text-left level-urusan col-sticky-1-2" colspan="2">
                                                         <span class="badge-urusan"><?= html_escape($urusan['kode_urusan']) ?></span>
                                                         <strong><?= html_escape($urusan['nama_urusan']) ?></strong>
                                                     </td>
@@ -517,7 +668,7 @@
                                                     ?>
                                                         <!-- ROW BIDANG -->
                                                         <tr class="row-bidang border-bidang">
-                                                            <td class="text-left level-bidang" colspan="2">
+                                                            <td class="text-left level-bidang col-sticky-1-2" colspan="2">
                                                                 <span class="badge-bidang"><?= html_escape($bidang['kode_bidang']) ?></span>
                                                                 <span class="nama-bidang"><?= html_escape($bidang['nama_bidang']) ?></span>
                                                             </td>
@@ -556,7 +707,7 @@
                                                                 if ($totalIndikator == 0) {
                                                                     ?>
                                                                     <tr class="row-program border-program">
-                                                                        <td class="text-left level-program" style="padding-left:45px;">
+                                                                        <td class="text-left level-program col-sticky-1" style="padding-left:45px;">
                                                                             <?php if (!empty($program['kode_program'])) { ?>
                                                                                 <span class="badge-program"><?= html_escape($program['kode_program']) ?></span>
                                                                             <?php } ?>
@@ -596,7 +747,7 @@
                                                                     // Tampilkan baris OUTCOME + INDIKATOR PERTAMA
                                                                     ?>
                                                                     <tr class="row-outcome border-outcome">
-                                                                        <td class="text-left program-outcome-cell" style="padding-left:45px;">
+                                                                        <td class="text-left program-outcome-cell col-sticky-1" style="padding-left:45px;">
                                                                             <?php if ($isFirstOutcome) { ?>
                                                                                 <!-- Tampilkan Program hanya di baris outcome pertama -->
                                                                                 <?php if (!empty($program['kode_program'])) { ?>
@@ -612,7 +763,7 @@
                                                                         </td>
                                                                         
                                                                         <!-- Kolom INDIKATOR PERTAMA -->
-                                                                        <td class="indikator-text" style="text-align:left; padding-left:5px;">
+                                                                        <td class="indikator-text col-sticky-2" style="text-align:left; padding-left:5px;">
                                                                             <span class="badge-indikator-sm">Indikator 1</span>
                                                                             <?= html_escape($firstIndikator['indikator'] ?? '-') ?>
                                                                         </td>
@@ -658,12 +809,12 @@
                                                                             $indikator = $indikators[$i];
                                                                             ?>
                                                                             <tr class="row-indikator border-indikator">
-                                                                                <td class="text-left" style="padding-left:65px;">
+                                                                                <td class="text-left col-sticky-1" style="padding-left:65px;">
                                                                                     <!-- Kosongkan kolom program/outcome untuk indikator tambahan -->
                                                                                 </td>
                                                                                 
                                                                                 <!-- Kolom INDIKATOR -->
-                                                                                <td class="indikator-text" style="text-align:left; padding-left:5px;">
+                                                                                <td class="indikator-text col-sticky-2" style="text-align:left; padding-left:5px;">
                                                                                     <span class="badge-indikator-sm">Indikator <?= $i+1 ?></span>
                                                                                     <?= html_escape($indikator['indikator'] ?? '-') ?>
                                                                                 </td>
@@ -894,26 +1045,28 @@ function getNomenklatur(level, parentKode, callback) {
     });
 }
 
-function loadLevelUrusan() {
+function loadLevelUrusan(selectedKode) {
     var cacheKey = 'level1_root';
     if (nomenklaturCache[cacheKey]) {
-        renderUrusanOptions(nomenklaturCache[cacheKey]);
+        renderUrusanOptions(nomenklaturCache[cacheKey], selectedKode);
         return;
     }
-    getNomenklatur(1, '', function(res) { renderUrusanOptions(res); });
+    getNomenklatur(1, '', function(res) { renderUrusanOptions(res, selectedKode); });
 }
 
-function renderUrusanOptions(res) {
+function renderUrusanOptions(res, selectedKode) {
     var options = '<option value="">-- Pilih Urusan --</option>';
     if (res && res.length > 0) {
         for (var i = 0; i < res.length; i++) {
-            options += '<option value="' + res[i].Kode + '">' + res[i].Kode + ' - ' + res[i].Nomenklatur + '</option>';
+            var sel = (selectedKode && selectedKode === res[i].Kode) ? ' selected' : '';
+            options += '<option value="' + res[i].Kode + '"' + sel + '>' + res[i].Kode + ' - ' + res[i].Nomenklatur + '</option>';
         }
     }
     $('#UrusanKodeSelect').html(options);
+    updatePathDisplayUrusan();
 }
 
-function loadLevelBidang(kodeUrusan) {
+function loadLevelBidang(kodeUrusan, selectedKode) {
     if (!kodeUrusan) {
         $('#BidangKodeSelect').html('<option value="">-- Pilih Bidang Urusan --</option>');
         $('#path_display_bidang').html('Belum ada yang dipilih');
@@ -922,24 +1075,25 @@ function loadLevelBidang(kodeUrusan) {
     }
     var cacheKey = 'level2_' + kodeUrusan;
     if (nomenklaturCache[cacheKey]) {
-        renderBidangOptions(nomenklaturCache[cacheKey]);
+        renderBidangOptions(nomenklaturCache[cacheKey], selectedKode);
         return;
     }
-    getNomenklatur(2, kodeUrusan, function(res) { renderBidangOptions(res); });
+    getNomenklatur(2, kodeUrusan, function(res) { renderBidangOptions(res, selectedKode); });
 }
 
-function renderBidangOptions(res) {
+function renderBidangOptions(res, selectedKode) {
     var options = '<option value="">-- Pilih Bidang Urusan --</option>';
     if (res && res.length > 0) {
         for (var i = 0; i < res.length; i++) {
-            options += '<option value="' + res[i].Kode + '">' + res[i].Kode + ' - ' + res[i].Nomenklatur + '</option>';
+            var sel = (selectedKode && selectedKode === res[i].Kode) ? ' selected' : '';
+            options += '<option value="' + res[i].Kode + '"' + sel + '>' + res[i].Kode + ' - ' + res[i].Nomenklatur + '</option>';
         }
     }
     $('#BidangKodeSelect').html(options);
     updatePathDisplayBidang();
 }
 
-function loadLevelProgram(kodeBidang) {
+function loadLevelProgram(kodeBidang, selectedKode) {
     if (!kodeBidang) {
         $('#ProgramKodeSelect').html('<option value="">-- Pilih Program --</option>');
         $('#path_display_program').html('Belum ada yang dipilih');
@@ -948,17 +1102,18 @@ function loadLevelProgram(kodeBidang) {
     }
     var cacheKey = 'level3_' + kodeBidang;
     if (nomenklaturCache[cacheKey]) {
-        renderProgramOptions(nomenklaturCache[cacheKey]);
+        renderProgramOptions(nomenklaturCache[cacheKey], selectedKode);
         return;
     }
-    getNomenklatur(3, kodeBidang, function(res) { renderProgramOptions(res); });
+    getNomenklatur(3, kodeBidang, function(res) { renderProgramOptions(res, selectedKode); });
 }
 
-function renderProgramOptions(res) {
+function renderProgramOptions(res, selectedKode) {
     var options = '<option value="">-- Pilih Program --</option>';
     if (res && res.length > 0) {
         for (var i = 0; i < res.length; i++) {
-            options += '<option value="' + res[i].Kode + '">' + res[i].Kode + ' - ' + res[i].Nomenklatur + '</option>';
+            var sel = (selectedKode && selectedKode === res[i].Kode) ? ' selected' : '';
+            options += '<option value="' + res[i].Kode + '"' + sel + '>' + res[i].Kode + ' - ' + res[i].Nomenklatur + '</option>';
         }
     }
     $('#ProgramKodeSelect').html(options);
@@ -1134,40 +1289,49 @@ $(document).on('click', '.BtnEditUrusan', function() {
     $('#ModalUrusanTitle').text('Edit Urusan');
     $('#UrusanId').val(id);
     nomenklaturCache = {};
-    loadLevelUrusan();
-    setTimeout(function() {
-        if (kode) { $('#UrusanKodeSelect').val(kode); updatePathDisplayUrusan(); }
-    }, 500);
+    loadLevelUrusan(kode);
     showFixedModal('#ModalUrusan');
 });
 
 $('#BtnSimpanUrusan').click(function() {
     var id = $('#UrusanId').val();
     var kode = $('#UrusanKodeSelect').val();
-    var nama = $('#UrusanKodeSelect option:selected').text().split(' - ').slice(1).join(' - ');
+    var rawText = $('#UrusanKodeSelect option:selected').text().trim();
+    var parts = rawText.split(' - ');
+    var nama = parts.length > 1 ? parts.slice(1).join(' - ').trim() : rawText;
     if (!kode) { alert('Urusan harus dipilih!'); return; }
     if (!nama) { alert('Nama Urusan tidak valid!'); return; }
     var url = id ? BaseURL + "Daerah/program_edit_urusan" : BaseURL + "Daerah/program_input_urusan";
     var data = { id: id, kode_urusan: kode, nama_urusan: nama, [CSRF_NAME]: CSRF_TOKEN };
     $('#BtnSimpanUrusan').prop('disabled', true).text('MENYIMPAN...');
-    $.post(url, data)
-        .done(function(res) {
-            try { var result = typeof res === 'string' ? JSON.parse(res) : res; } catch(e) { var result = res; }
-            if (result.status === 'success') { hideFixedModal('#ModalUrusan'); window.location.reload(); }
-            else { alert(result.message || 'Gagal menyimpan!'); $('#BtnSimpanUrusan').prop('disabled', false).text('SIMPAN'); }
-        })
-        .fail(function() { alert('Terjadi kesalahan!'); $('#BtnSimpanUrusan').prop('disabled', false).text('SIMPAN'); });
+    $.post(url, data, function(res) {
+        var resp = (typeof res === 'string') ? JSON.parse(res) : res;
+        if (resp && resp.status === 'success') {
+            hideFixedModal('#ModalUrusan');
+            window.location.reload();
+        } else {
+            alert((resp && resp.message) ? resp.message : 'Gagal menyimpan urusan!');
+            $('#BtnSimpanUrusan').prop('disabled', false).text('SIMPAN');
+        }
+    }, 'json').fail(function(xhr) {
+        alert('Terjadi kesalahan pada server saat menyimpan urusan.');
+        $('#BtnSimpanUrusan').prop('disabled', false).text('SIMPAN');
+    });
 });
 
 $(document).on('click', '.BtnHapusUrusan', function() {
     if (!confirm('Yakin ingin menghapus Urusan ini?')) return;
     var id = $(this).data('id');
-    $.post(BaseURL + "Daerah/program_hapus_urusan", { id: id, [CSRF_NAME]: CSRF_TOKEN })
-        .done(function(res) {
-            try { var result = typeof res === 'string' ? JSON.parse(res) : res; } catch(e) { var result = res; }
-            if (result.status === 'success') { window.location.reload(); } else { alert(result.message || 'Gagal menghapus!'); }
-        })
-        .fail(function() { alert('Terjadi kesalahan!'); });
+    $.post(BaseURL + "Daerah/program_hapus_urusan", { id: id, [CSRF_NAME]: CSRF_TOKEN }, function(res) {
+        var resp = (typeof res === 'string') ? JSON.parse(res) : res;
+        if (resp && resp.status === 'success') {
+            window.location.reload();
+        } else {
+            alert((resp && resp.message) ? resp.message : 'Gagal menghapus urusan!');
+        }
+    }, 'json').fail(function() {
+        alert('Terjadi kesalahan saat menghapus urusan.');
+    });
 });
 
 // ============================================================
@@ -1208,10 +1372,7 @@ $(document).on('click', '.BtnEditBidang', function() {
                 var urusanNama = res.data.nama_urusan || '';
                 $('#BidangUrusanNama').val(urusanKode + ' - ' + urusanNama);
                 nomenklaturCache = {};
-                loadLevelBidang(urusanKode);
-                setTimeout(function() {
-                    if (kode) { $('#BidangKodeSelect').val(kode); updatePathDisplayBidang(); }
-                }, 500);
+                loadLevelBidang(urusanKode, kode);
             }
         }
     });
@@ -1222,30 +1383,42 @@ $('#BtnSimpanBidang').click(function() {
     var id = $('#BidangId').val();
     var urusanId = $('#BidangUrusanId').val();
     var kode = $('#BidangKodeSelect').val();
-    var nama = $('#BidangKodeSelect option:selected').text().split(' - ').slice(1).join(' - ');
+    var rawText = $('#BidangKodeSelect option:selected').text().trim();
+    var parts = rawText.split(' - ');
+    var nama = parts.length > 1 ? parts.slice(1).join(' - ').trim() : rawText;
     if (!kode) { alert('Bidang Urusan harus dipilih!'); return; }
     if (!nama) { alert('Nama Bidang tidak valid!'); return; }
     var url = id ? BaseURL + "Daerah/program_edit_bidang_urusan" : BaseURL + "Daerah/program_input_bidang_urusan";
     var data = { id: id, urusan_id: urusanId, kode_bidang: kode, nama_bidang: nama, [CSRF_NAME]: CSRF_TOKEN };
     $('#BtnSimpanBidang').prop('disabled', true).text('MENYIMPAN...');
-    $.post(url, data)
-        .done(function(res) {
-            try { var result = typeof res === 'string' ? JSON.parse(res) : res; } catch(e) { var result = res; }
-            if (result.status === 'success') { hideFixedModal('#ModalBidangUrusan'); window.location.reload(); }
-            else { alert(result.message || 'Gagal menyimpan!'); $('#BtnSimpanBidang').prop('disabled', false).text('SIMPAN'); }
-        })
-        .fail(function() { alert('Terjadi kesalahan!'); $('#BtnSimpanBidang').prop('disabled', false).text('SIMPAN'); });
+    $.post(url, data, function(res) {
+        var resp = (typeof res === 'string') ? JSON.parse(res) : res;
+        if (resp && resp.status === 'success') {
+            hideFixedModal('#ModalBidangUrusan');
+            window.location.reload();
+        } else {
+            alert((resp && resp.message) ? resp.message : 'Gagal menyimpan bidang urusan!');
+            $('#BtnSimpanBidang').prop('disabled', false).text('SIMPAN');
+        }
+    }, 'json').fail(function(xhr) {
+        alert('Terjadi kesalahan pada server saat menyimpan bidang urusan.');
+        $('#BtnSimpanBidang').prop('disabled', false).text('SIMPAN');
+    });
 });
 
 $(document).on('click', '.BtnHapusBidang', function() {
     if (!confirm('Yakin ingin menghapus Bidang ini?')) return;
     var id = $(this).data('id');
-    $.post(BaseURL + "Daerah/program_hapus_bidang_urusan", { id: id, [CSRF_NAME]: CSRF_TOKEN })
-        .done(function(res) {
-            try { var result = typeof res === 'string' ? JSON.parse(res) : res; } catch(e) { var result = res; }
-            if (result.status === 'success') { window.location.reload(); } else { alert(result.message || 'Gagal menghapus!'); }
-        })
-        .fail(function() { alert('Terjadi kesalahan!'); });
+    $.post(BaseURL + "Daerah/program_hapus_bidang_urusan", { id: id, [CSRF_NAME]: CSRF_TOKEN }, function(res) {
+        var resp = (typeof res === 'string') ? JSON.parse(res) : res;
+        if (resp && resp.status === 'success') {
+            window.location.reload();
+        } else {
+            alert((resp && resp.message) ? resp.message : 'Gagal menghapus bidang urusan!');
+        }
+    }, 'json').fail(function() {
+        alert('Terjadi kesalahan saat menghapus bidang urusan.');
+    });
 });
 
 // ============================================================
@@ -1318,7 +1491,7 @@ function generateIndikatorRow(groupId, data) {
     var targetVals = [target2026, target2027, target2028, target2029, target2030];
     var paguFormatted = [pagu2026Formatted, pagu2027Formatted, pagu2028Formatted, pagu2029Formatted, pagu2030Formatted];
     for (var y = 0; y < years.length; y++) {
-        html += '<div class="col-md-2"><div class="form-group"><label style="font-size:11px; color:#007bff;">' + years[y] + '</label><div class="row"><div class="col-xs-6" style="padding-right:3px;"><input type="text" class="form-control form-control-sm target-input" id="target_' + years[y] + '_' + counter + '" placeholder="Target" value="' + targetVals[y] + '"></div><div class="col-xs-6" style="padding-left:3px;"><input type="text" class="form-control form-control-sm pagu-input" id="pagu_' + years[y] + '_' + counter + '" placeholder="Pagu" value="' + paguFormatted[y] + '"></div></div></div></div>';
+        html += '<div class="col-md-2"><div class="form-group"><label style="font-size:11px; color:#007bff;">' + years[y] + '</label><div class="row"><div class="col-xs-6" style="padding-right:3px;"><input type="text" class="form-control form-control-sm target-input target-' + years[y] + '" id="target_' + years[y] + '_' + counter + '" placeholder="Target" value="' + targetVals[y] + '"></div><div class="col-xs-6" style="padding-left:3px;"><input type="text" class="form-control form-control-sm pagu-input pagu-' + years[y] + '" id="pagu_' + years[y] + '_' + counter + '" placeholder="Pagu" value="' + paguFormatted[y] + '"></div></div></div></div>';
     }
     html += '</div>';
     html += '<div class="row">';
@@ -1385,6 +1558,7 @@ $(document).on('click', '.BtnTambahProgram', function() {
     counterIndikator = 0;
     nomenklaturCache = {};
     loadLevelProgram(kodeBidang);
+    addOutcome({ indikators: [] });
     showFixedModal('#ModalProgram');
 });
 
@@ -1412,13 +1586,7 @@ $(document).on('click', '.BtnEditProgram', function() {
                 $('#ProgramBidangInfo').text((program.kode_bidang || '') + ' - ' + (program.nama_bidang || ''));
                 // Load program select
                 nomenklaturCache = {};
-                loadLevelProgram(program.kode_bidang || '');
-                setTimeout(function() {
-                    if (program.kode_program) {
-                        $('#ProgramKodeSelect').val(program.kode_program);
-                        updatePathDisplayProgram();
-                    }
-                }, 500);
+                loadLevelProgram(program.kode_bidang || '', program.kode_program || '');
                 // Load outcomes
                 if (program.outcomes && program.outcomes.length > 0) {
                     for (var i = 0; i < program.outcomes.length; i++) {
@@ -1427,6 +1595,8 @@ $(document).on('click', '.BtnEditProgram', function() {
                 } else {
                     addOutcome({ indikators: [] });
                 }
+            } else {
+                alert((res && res.message) ? res.message : 'Gagal memuat data program!');
             }
         },
         error: function() { alert('Gagal memuat data program!'); }
@@ -1438,7 +1608,9 @@ $('#BtnSimpanProgram').click(function() {
     var id = $('#ProgramId').val();
     var bidangId = $('#ProgramBidangId').val();
     var kode = $('#ProgramKodeSelect').val();
-    var nama = $('#ProgramKodeSelect option:selected').text().split(' - ').slice(1).join(' - ');
+    var rawText = $('#ProgramKodeSelect option:selected').text().trim();
+    var parts = rawText.split(' - ');
+    var nama = parts.length > 1 ? parts.slice(1).join(' - ').trim() : rawText;
     if (!kode) { alert('Program harus dipilih!'); return; }
     if (!nama) { alert('Nama Program tidak valid!'); return; }
     
@@ -1448,7 +1620,7 @@ $('#BtnSimpanProgram').click(function() {
     $('.outcome-group').each(function() {
         var group = $(this);
         var outcomeId = group.find('.outcome-id').val();
-        var outcomeText = group.find('.outcome-textarea').val().trim();
+        var outcomeText = (group.find('.outcome-textarea').val() || '').trim();
         if (!outcomeText) {
             hasError = true;
             alert('Outcome tidak boleh kosong!');
@@ -1458,24 +1630,31 @@ $('#BtnSimpanProgram').click(function() {
         group.find('.indikator-row').each(function() {
             var row = $(this);
             var indId = row.find('.indikator-id').val();
-            var indText = row.find('.indikator-textarea').val().trim();
+            var indText = (row.find('.indikator-textarea').val() || '').trim();
             if (!indText) {
                 hasError = true;
                 alert('Indikator tidak boleh kosong!');
                 return false;
             }
-            var satuan = row.find('.satuan-input').val().trim();
-            var kondisi = row.find('.kondisi-input').val().trim();
-            var target2026 = row.find('#target_2026_' + row.attr('id').replace('indikator_row_', '')).val().trim();
-            var pagu2026 = row.find('#pagu_2026_' + row.attr('id').replace('indikator_row_', '')).val().replace(/\./g, '');
-            var target2027 = row.find('#target_2027_' + row.attr('id').replace('indikator_row_', '')).val().trim();
-            var pagu2027 = row.find('#pagu_2027_' + row.attr('id').replace('indikator_row_', '')).val().replace(/\./g, '');
-            var target2028 = row.find('#target_2028_' + row.attr('id').replace('indikator_row_', '')).val().trim();
-            var pagu2028 = row.find('#pagu_2028_' + row.attr('id').replace('indikator_row_', '')).val().replace(/\./g, '');
-            var target2029 = row.find('#target_2029_' + row.attr('id').replace('indikator_row_', '')).val().trim();
-            var pagu2029 = row.find('#pagu_2029_' + row.attr('id').replace('indikator_row_', '')).val().replace(/\./g, '');
-            var target2030 = row.find('#target_2030_' + row.attr('id').replace('indikator_row_', '')).val().trim();
-            var pagu2030 = row.find('#pagu_2030_' + row.attr('id').replace('indikator_row_', '')).val().replace(/\./g, '');
+            var satuan = (row.find('.satuan-input').val() || '').trim();
+            var kondisi = (row.find('.kondisi-input').val() || '').trim();
+            var rowNum = row.attr('id') ? row.attr('id').replace('indikator_row_', '') : '';
+            
+            var target2026 = (row.find('.target-2026').val() || (rowNum !== '' ? row.find('#target_2026_' + rowNum).val() : '') || row.find('.target-input:eq(0)').val() || '').trim();
+            var pagu2026 = (row.find('.pagu-2026').val() || (rowNum !== '' ? row.find('#pagu_2026_' + rowNum).val() : '') || row.find('.pagu-input:eq(0)').val() || '').replace(/\./g, '');
+            
+            var target2027 = (row.find('.target-2027').val() || (rowNum !== '' ? row.find('#target_2027_' + rowNum).val() : '') || row.find('.target-input:eq(1)').val() || '').trim();
+            var pagu2027 = (row.find('.pagu-2027').val() || (rowNum !== '' ? row.find('#pagu_2027_' + rowNum).val() : '') || row.find('.pagu-input:eq(1)').val() || '').replace(/\./g, '');
+            
+            var target2028 = (row.find('.target-2028').val() || (rowNum !== '' ? row.find('#target_2028_' + rowNum).val() : '') || row.find('.target-input:eq(2)').val() || '').trim();
+            var pagu2028 = (row.find('.pagu-2028').val() || (rowNum !== '' ? row.find('#pagu_2028_' + rowNum).val() : '') || row.find('.pagu-input:eq(2)').val() || '').replace(/\./g, '');
+            
+            var target2029 = (row.find('.target-2029').val() || (rowNum !== '' ? row.find('#target_2029_' + rowNum).val() : '') || row.find('.target-input:eq(3)').val() || '').trim();
+            var pagu2029 = (row.find('.pagu-2029').val() || (rowNum !== '' ? row.find('#pagu_2029_' + rowNum).val() : '') || row.find('.pagu-input:eq(3)').val() || '').replace(/\./g, '');
+            
+            var target2030 = (row.find('.target-2030').val() || (rowNum !== '' ? row.find('#target_2030_' + rowNum).val() : '') || row.find('.target-input:eq(4)').val() || '').trim();
+            var pagu2030 = (row.find('.pagu-2030').val() || (rowNum !== '' ? row.find('#pagu_2030_' + rowNum).val() : '') || row.find('.pagu-input:eq(4)').val() || '').replace(/\./g, '');
+            
             var pdId = row.find('.pd-select').val();
             
             indikators.push({
@@ -1522,26 +1701,24 @@ $('#BtnSimpanProgram').click(function() {
         bidang_urusan_id: bidangId,
         kode_program: kode,
         nama_program: nama,
-        outcomes: outcomes,
+        outcomes_json: JSON.stringify(outcomes),
         [CSRF_NAME]: CSRF_TOKEN
     };
     
     $('#BtnSimpanProgram').prop('disabled', true).text('MENYIMPAN...');
-    $.post(url, data)
-        .done(function(res) {
-            try { var result = typeof res === 'string' ? JSON.parse(res) : res; } catch(e) { var result = res; }
-            if (result.status === 'success') {
-                hideFixedModal('#ModalProgram');
-                window.location.reload();
-            } else {
-                alert(result.message || 'Gagal menyimpan!');
-                $('#BtnSimpanProgram').prop('disabled', false).text('SIMPAN PROGRAM');
-            }
-        })
-        .fail(function() {
-            alert('Terjadi kesalahan!');
+    $.post(url, data, function(res) {
+        var resp = (typeof res === 'string') ? JSON.parse(res) : res;
+        if (resp && resp.status === 'success') {
+            hideFixedModal('#ModalProgram');
+            window.location.reload();
+        } else {
+            alert((resp && resp.message) ? resp.message : 'Gagal menyimpan program!');
             $('#BtnSimpanProgram').prop('disabled', false).text('SIMPAN PROGRAM');
-        });
+        }
+    }, 'json').fail(function(xhr) {
+        alert('Terjadi kesalahan pada server saat menyimpan program.');
+        $('#BtnSimpanProgram').prop('disabled', false).text('SIMPAN PROGRAM');
+    });
 });
 
 // ============================================================
@@ -1550,12 +1727,16 @@ $('#BtnSimpanProgram').click(function() {
 $(document).on('click', '.BtnHapusProgram', function() {
     if (!confirm('Yakin ingin menghapus Program ini beserta semua Outcome dan Indikator?')) return;
     var id = $(this).data('id');
-    $.post(BaseURL + "Daerah/program_hapus_program", { id: id, [CSRF_NAME]: CSRF_TOKEN })
-        .done(function(res) {
-            try { var result = typeof res === 'string' ? JSON.parse(res) : res; } catch(e) { var result = res; }
-            if (result.status === 'success') { window.location.reload(); } else { alert(result.message || 'Gagal menghapus!'); }
-        })
-        .fail(function() { alert('Terjadi kesalahan!'); });
+    $.post(BaseURL + "Daerah/program_hapus_program", { id: id, [CSRF_NAME]: CSRF_TOKEN }, function(res) {
+        var resp = (typeof res === 'string') ? JSON.parse(res) : res;
+        if (resp && resp.status === 'success') {
+            window.location.reload();
+        } else {
+            alert((resp && resp.message) ? resp.message : 'Gagal menghapus program!');
+        }
+    }, 'json').fail(function() {
+        alert('Terjadi kesalahan saat menghapus program.');
+    });
 });
 
 // ============================================================
@@ -1568,7 +1749,22 @@ $(document).on('hidden.bs.modal', '.modal.fixed-modal', function() {
     nomenklaturCache = {};
 });
 
+function adjustStickyColumns() {
+    var $col1 = $('.program-table thead th.col-sticky-1');
+    if ($col1.length) {
+        var w1 = Math.round($col1.outerWidth());
+        $('.program-table .col-sticky-2').css('left', w1 + 'px');
+        var $col2 = $('.program-table thead th.col-sticky-2');
+        if ($col2.length) {
+            var w2 = Math.round($col2.outerWidth());
+            $('.program-table .col-sticky-1-2').css('width', (w1 + w2) + 'px');
+        }
+    }
+}
+
 $(document).ready(function() {
+    adjustStickyColumns();
+    $(window).on('resize', adjustStickyColumns);
     console.log('ProgramPD ready - Mendukung Multiple Outcome & Indikator');
 });
 </script>
