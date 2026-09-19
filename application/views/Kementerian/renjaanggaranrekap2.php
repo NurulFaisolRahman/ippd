@@ -1,4 +1,11 @@
 <?php $this->load->view('Kementerian/Sidebar'); ?>
+<?php
+$userLevel = isset($_SESSION['Level']) ? (int)$_SESSION['Level'] : (isset($_SESSION['userLevel']) ? (int)$_SESSION['userLevel'] : null);
+$isSuperAdmin = ($userLevel === 0);
+$sessionKemenId = $_SESSION['IdKementerian'] ?? null;
+$rekapKemenId = $Rekap2['id_kementerian'] ?? ($IdKementerian ?? null);
+$canCrud = $isSuperAdmin || ($userLevel === 1 && !empty($sessionKemenId) && ($rekapKemenId === null || (int)$sessionKemenId === (int)$rekapKemenId));
+?>
 
 <style>
     .card-notika {
@@ -339,9 +346,11 @@
 
                 <!-- Tombol Aksi -->
                 <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+                    <?php if ($canCrud): ?>
                     <button class="btn-notika btn-notika-success" data-toggle="modal" data-target="#ModalRekap2">
                         <span>+</span> Buat/Edit Rekap 2
                     </button>
+                    <?php endif; ?>
                     <?php if ($Rekap2): ?>
                     <button class="btn-notika btn-notika-outline" onclick="window.print()">
                         <span>⎙</span> Cetak
@@ -445,13 +454,14 @@
 
                         <!-- ============================================================
                         PRIORITAS NASIONAL
-                        ============================================================ -->
-                        <div class="card-notika">
+                        ========================================================                        <div class="card-notika">
                             <div class="card-header">
                                 <div class="card-title">Prioritas Nasional / Program Prioritas</div>
+                                <?php if ($canCrud): ?>
                                 <button class="btn-notika btn-notika-success btn-notika-sm" data-toggle="modal" data-target="#ModalPrioritas">
                                     <span>+</span> Tambah
                                 </button>
+                                <?php endif; ?>
                             </div>
                             <div class="card-body" style="overflow-x:auto;">
                                 <table class="table-notika">
@@ -461,7 +471,9 @@
                                             <th>Prioritas Nasional</th>
                                             <th>Program Prioritas</th>
                                             <th class="text-right" style="width:18%;">Alokasi (Ribu)</th>
+                                            <?php if ($canCrud): ?>
                                             <th class="text-center" style="width:8%;">Aksi</th>
+                                            <?php endif; ?>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -475,6 +487,7 @@
                                             <td><?= htmlspecialchars($p['nama_prioritas']) ?></td>
                                             <td><?= htmlspecialchars($p['program_prioritas'] ?? '-') ?></td>
                                             <td class="text-right"><?= number_format($p['alokasi'], 0, ',', '.') ?></td>
+                                            <?php if ($canCrud): ?>
                                             <td class="text-center">
                                                 <div class="dropdown-aksi">
                                                     <button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)">
@@ -495,17 +508,20 @@
                                                     </div>
                                                 </div>
                                             </td>
+                                            <?php endif; ?>
                                         </tr>
                                         <?php endforeach; ?>
                                         <?php if (empty($Prioritas)): ?>
-                                        <tr><td colspan="5" style="text-align:center;color:#aaa;padding:20px 0;">Belum ada data prioritas</td></tr>
+                                        <tr><td colspan="<?= $canCrud ? '5' : '4' ?>" style="text-align:center;color:#aaa;padding:20px 0;">Belum ada data prioritas</td></tr>
                                         <?php endif; ?>
                                     </tbody>
                                     <tfoot>
                                         <tr class="total-row">
                                             <td colspan="3" class="text-right">TOTAL</td>
                                             <td class="text-right"><?= number_format($total_prioritas, 0, ',', '.') ?></td>
+                                            <?php if ($canCrud): ?>
                                             <td></td>
+                                            <?php endif; ?>
                                         </tr>
                                     </tfoot>
                                 </table>
@@ -518,9 +534,11 @@
                         <div class="card-notika">
                             <div class="card-header">
                                 <div class="card-title">Sasaran Program (Outcome) dan Indikator Kinerja Program (IKP)</div>
+                                <?php if ($canCrud): ?>
                                 <button class="btn-notika btn-notika-success btn-notika-sm" data-toggle="modal" data-target="#ModalSasaran">
                                     <span>+</span> Tambah
                                 </button>
+                                <?php endif; ?>
                             </div>
                             <div class="card-body" style="overflow-x:auto;">
                                 <table class="table-notika">
@@ -531,7 +549,9 @@
                                             <th>Indikator Kinerja</th>
                                             <th class="text-center" style="width:10%;">Target</th>
                                             <th class="text-right" style="width:15%;">Alokasi (Ribu)</th>
+                                            <?php if ($canCrud): ?>
                                             <th class="text-center" style="width:8%;">Aksi</th>
+                                            <?php endif; ?>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -546,13 +566,14 @@
                                             <td><?= htmlspecialchars($s['indikator_kinerja'] ?? '-') ?></td>
                                             <td class="text-center"><?= htmlspecialchars($s['target'] ?? '-') ?></td>
                                             <td class="text-right"><?= number_format($s['alokasi'], 0, ',', '.') ?></td>
+                                            <?php if ($canCrud): ?>
                                             <td class="text-center">
                                                 <div class="dropdown-aksi">
                                                     <button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)">
                                                         <i class="fa fa-ellipsis-v"></i>
                                                     </button>
                                                     <div class="menu-dropdown">
-                                                        <button class="item-dropdown edit-sasaran"
+                                                        <button class="item-dropdown edit-sasaran" 
                                                             data-id="<?= $s['id'] ?>"
                                                             data-kode="<?= htmlspecialchars($s['kode']) ?>"
                                                             data-nama="<?= htmlspecialchars($s['nama_sasaran']) ?>"
@@ -567,17 +588,20 @@
                                                     </div>
                                                 </div>
                                             </td>
+                                            <?php endif; ?>
                                         </tr>
                                         <?php endforeach; ?>
                                         <?php if (empty($SasaranProgram)): ?>
-                                        <tr><td colspan="6" style="text-align:center;color:#aaa;padding:20px 0;">Belum ada data sasaran program</td></tr>
+                                        <tr><td colspan="<?= $canCrud ? '6' : '5' ?>" style="text-align:center;color:#aaa;padding:20px 0;">Belum ada data sasaran program</td></tr>
                                         <?php endif; ?>
                                     </tbody>
                                     <tfoot>
                                         <tr class="total-row">
                                             <td colspan="4" class="text-right">TOTAL</td>
                                             <td class="text-right"><?= number_format($total_sasaran, 0, ',', '.') ?></td>
+                                            <?php if ($canCrud): ?>
                                             <td></td>
+                                            <?php endif; ?>
                                         </tr>
                                     </tfoot>
                                 </table>
@@ -590,9 +614,11 @@
                         <div class="card-notika">
                             <div class="card-header">
                                 <div class="card-title">Output Program dan Indikator Output Program</div>
+                                <?php if ($canCrud): ?>
                                 <button class="btn-notika btn-notika-success btn-notika-sm" data-toggle="modal" data-target="#ModalOutput">
                                     <span>+</span> Tambah
                                 </button>
+                                <?php endif; ?>
                             </div>
                             <div class="card-body" style="overflow-x:auto;">
                                 <table class="table-notika">
@@ -602,7 +628,9 @@
                                             <th>Output Program</th>
                                             <th>Indikator Output</th>
                                             <th class="text-right" style="width:18%;">Alokasi (Ribu)</th>
+                                            <?php if ($canCrud): ?>
                                             <th class="text-center" style="width:8%;">Aksi</th>
+                                            <?php endif; ?>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -616,13 +644,14 @@
                                             <td><?= htmlspecialchars($o['nama_output']) ?></td>
                                             <td><?= htmlspecialchars($o['indikator_output'] ?? '-') ?></td>
                                             <td class="text-right"><?= number_format($o['alokasi'], 0, ',', '.') ?></td>
+                                            <?php if ($canCrud): ?>
                                             <td class="text-center">
                                                 <div class="dropdown-aksi">
                                                     <button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)">
                                                         <i class="fa fa-ellipsis-v"></i>
                                                     </button>
                                                     <div class="menu-dropdown">
-                                                        <button class="item-dropdown edit-output"
+                                                        <button class="item-dropdown edit-output" 
                                                             data-id="<?= $o['id'] ?>"
                                                             data-kode="<?= htmlspecialchars($o['kode']) ?>"
                                                             data-nama="<?= htmlspecialchars($o['nama_output']) ?>"
@@ -636,17 +665,20 @@
                                                     </div>
                                                 </div>
                                             </td>
+                                            <?php endif; ?>
                                         </tr>
                                         <?php endforeach; ?>
                                         <?php if (empty($OutputProgram)): ?>
-                                        <tr><td colspan="5" style="text-align:center;color:#aaa;padding:20px 0;">Belum ada data output program</td></tr>
+                                        <tr><td colspan="<?= $canCrud ? '5' : '4' ?>" style="text-align:center;color:#aaa;padding:20px 0;">Belum ada data output program</td></tr>
                                         <?php endif; ?>
                                     </tbody>
                                     <tfoot>
                                         <tr class="total-row">
                                             <td colspan="3" class="text-right">TOTAL</td>
                                             <td class="text-right"><?= number_format($total_output, 0, ',', '.') ?></td>
+                                            <?php if ($canCrud): ?>
                                             <td></td>
+                                            <?php endif; ?>
                                         </tr>
                                     </tfoot>
                                 </table>
@@ -659,9 +691,11 @@
                         <div class="card-notika">
                             <div class="card-header">
                                 <div class="card-title">Kegiatan dan Pendanaan</div>
+                                <?php if ($canCrud): ?>
                                 <button class="btn-notika btn-notika-success btn-notika-sm" data-toggle="modal" data-target="#ModalKegiatan">
                                     <span>+</span> Tambah Kegiatan
                                 </button>
+                                <?php endif; ?>
                             </div>
                             <div class="card-body" style="overflow-x:auto;">
                                 <table class="table-notika" style="font-size:12px;">
@@ -671,7 +705,9 @@
                                             <th rowspan="2">Program / Kegiatan</th>
                                             <th colspan="10" class="text-center">Indikasi Pendanaan Tahun <?= $CurrentTahun ?></th>
                                             <th colspan="3" class="text-center">Prakiraan Kebutuhan</th>
+                                            <?php if ($canCrud): ?>
                                             <th rowspan="2" class="text-center" style="width:8%;">Aksi</th>
+                                            <?php endif; ?>
                                         </tr>
                                         <tr>
                                             <th class="text-right">RPP</th>
@@ -705,13 +741,14 @@
                                             <td class="text-right"><?= number_format($k['tahun_2026'] ?? 0, 0, ',', '.') ?></td>
                                             <td class="text-right"><?= number_format($k['tahun_2027'] ?? 0, 0, ',', '.') ?></td>
                                             <td class="text-right"><?= number_format($k['tahun_2028'] ?? 0, 0, ',', '.') ?></td>
+                                            <?php if ($canCrud): ?>
                                             <td class="text-center">
                                                 <div class="dropdown-aksi">
                                                     <button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)">
                                                         <i class="fa fa-ellipsis-v"></i>
                                                     </button>
                                                     <div class="menu-dropdown">
-                                                        <button class="item-dropdown edit-kegiatan"
+                                                        <button class="item-dropdown edit-kegiatan" 
                                                             data-id="<?= $k['id'] ?>"
                                                             data-kode="<?= htmlspecialchars($k['kode']) ?>"
                                                             data-nama="<?= htmlspecialchars($k['nama_kegiatan']) ?>"
@@ -729,10 +766,11 @@
                                                     </div>
                                                 </div>
                                             </td>
+                                            <?php endif; ?>
                                         </tr>
                                         <?php endforeach; ?>
                                         <?php if (empty($Kegiatan)): ?>
-                                        <tr><td colspan="16" style="text-align:center;color:#aaa;padding:20px 0;">Belum ada data kegiatan</td></tr>
+                                        <tr><td colspan="<?= $canCrud ? '16' : '15' ?>" style="text-align:center;color:#aaa;padding:20px 0;">Belum ada data kegiatan</td></tr>
                                         <?php endif; ?>
                                     </tbody>
                                     <tfoot>
@@ -756,12 +794,14 @@
                                             <td class="text-right"><?= number_format($total_2026, 0, ',', '.') ?></td>
                                             <td class="text-right"><?= number_format($total_2027, 0, ',', '.') ?></td>
                                             <td class="text-right"><?= number_format($total_2028, 0, ',', '.') ?></td>
+                                            <?php if ($canCrud): ?>
                                             <td></td>
+                                            <?php endif; ?>
                                         </tr>
                                     </tfoot>
                                 </table>
                             </div>
-                        </div>
+                        </div>    </div>
 
                         <!-- ============================================================
                         REKAPITULASI AKHIR
@@ -803,6 +843,7 @@
                                     <div class="empty-icon">📋</div>
                                     <h4>Data Rekap 2 Belum Dibuat</h4>
                                     <p>Renja untuk tahun <strong><?= $CurrentTahun ?></strong> sudah ada, namun Rekap 2 belum diisi.</p>
+                                    <?php if ($canCrud): ?>
                                     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
                                         <button class="btn-notika btn-notika-success" onclick="createRekap2()">
                                             <span>+</span> Buat Rekap 2
@@ -811,6 +852,7 @@
                                             <span>✎</span> Isi Data
                                         </button>
                                     </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -822,11 +864,13 @@
                                     <div class="empty-icon">📄</div>
                                     <h4>Belum Ada Data</h4>
                                     <p>Untuk tahun <strong><?= $CurrentTahun ?></strong>, belum ada data Renja dan Rekap 2.</p>
+                                    <?php if ($canCrud): ?>
                                     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
                                         <a href="<?= base_url('Kementerian/renjaanggaranrekap1?tahun=' . $CurrentTahun) ?>" class="btn-notika btn-notika-primary">
                                             <span>+</span> Buat Renja di Rekap 1
                                         </a>
                                     </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -841,7 +885,7 @@
 <!-- ============================================================
     MODALS
     ============================================================ -->
-
+<?php if ($canCrud): ?>
 <!-- Modal Rekap 2 -->
 <div class="modal fade modal-notika" id="ModalRekap2" role="dialog">
     <div class="modal-dialog modal-lg">
@@ -890,16 +934,15 @@
                     <input type="hidden" name="id_rekap2" id="PrioritasIdRekap2" value="<?= $Rekap2['id'] ?? '' ?>">
                     <div class="form-group-notika">
                         <label>Kode</label>
-                        <input type="text" class="form-control" name="kode" id="PrioritasKode" required maxlength="20">
-                        <div class="help-text">Contoh: 02, 02.08, 02.16</div>
+                        <input type="text" class="form-control" name="kode" id="PrioritasKode" placeholder="Contoh: PN 01" required>
                     </div>
                     <div class="form-group-notika">
                         <label>Prioritas Nasional</label>
-                        <input type="text" class="form-control" name="nama_prioritas" id="PrioritasNama" required>
+                        <textarea class="form-control" name="nama_prioritas" id="PrioritasNama" rows="2" required></textarea>
                     </div>
                     <div class="form-group-notika">
                         <label>Program Prioritas</label>
-                        <input type="text" class="form-control" name="program_prioritas" id="PrioritasProgram">
+                        <textarea class="form-control" name="program_prioritas" id="PrioritasProgram" rows="2"></textarea>
                     </div>
                     <div class="form-group-notika">
                         <label>Alokasi (Ribu Rupiah)</label>
@@ -927,12 +970,6 @@
                 <form id="FormSasaran">
                     <input type="hidden" name="id" id="SasaranId">
                     <input type="hidden" name="id_rekap2" id="SasaranIdRekap2" value="<?= $Rekap2['id'] ?? '' ?>">
-                    <div class="form-group-notika">
-                        <label>Kode</label>
-                        <input type="text" class="form-control" name="kode" id="SasaranKode" required maxlength="20">
-                        <div class="help-text">Contoh: 01, 01.01</div>
-                    </div>
-                    <div class="form-group-notika">
                         <label>Sasaran Program</label>
                         <input type="text" class="form-control" name="nama_sasaran" id="SasaranNama" required>
                     </div>
@@ -1074,6 +1111,7 @@
         </div>
     </div>
 </div>
+<?php endif; ?>
 
 <!-- ============================================================
     SCRIPTS
@@ -1087,6 +1125,7 @@ var BaseURL = '<?= base_url() ?>';
 var IdRekap2 = <?= json_encode($Rekap2['id'] ?? null) ?>;
 var CurrentTahun = <?= json_encode($CurrentTahun) ?>;
 var IdRenja = <?= json_encode($IdRenja ?? null) ?>;
+var canCrud = <?= $canCrud ? 'true' : 'false' ?>;
 
 // ============================================================
 // FUNGSI TOGGLE DROPDOWN
@@ -1177,8 +1216,11 @@ function loadDataTahun(tahun) {
         html += '<div class="empty-icon">📄</div>';
         html += '<h4>Belum Ada Data</h4>';
         html += '<p>Untuk tahun <strong>' + tahun + '</strong>, belum ada data Renja dan Rekap 2.</p>';
-        html += '<a href="' + BaseURL + 'Kementerian/renjaanggaranrekap1?tahun=' + tahun + '" class="btn-notika btn-notika-primary">';
-        html += '<span>+</span> Buat Renja di Rekap 1</a>';
+        if (canCrud) {
+            html += '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">';
+            html += '<a href="' + BaseURL + 'Kementerian/renjaanggaranrekap1?tahun=' + tahun + '" class="btn-notika btn-notika-primary">';
+            html += '<span>+</span> Buat Renja di Rekap 1</a></div>';
+        }
         html += '</div></div></div>';
         $('#contentData').html(html);
         $('#contentData').show();
@@ -1204,12 +1246,15 @@ function loadDataTahun(tahun) {
                     var html = '<div class="card-notika"><div class="card-body"><div class="empty-state">';
                     html += '<div class="empty-icon">📋</div>';
                     html += '<h4>' + res.message + '</h4>';
-                    html += '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">';
-                    html += '<button class="btn-notika btn-notika-success" onclick="createRekap2()">';
-                    html += '<span>+</span> Buat Rekap 2</button>';
-                    html += '<button class="btn-notika btn-notika-primary" data-toggle="modal" data-target="#ModalRekap2">';
-                    html += '<span>✎</span> Isi Data</button>';
-                    html += '</div></div></div></div>';
+                    if (canCrud) {
+                        html += '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">';
+                        html += '<button class="btn-notika btn-notika-success" onclick="createRekap2()">';
+                        html += '<span>+</span> Buat Rekap 2</button>';
+                        html += '<button class="btn-notika btn-notika-primary" data-toggle="modal" data-target="#ModalRekap2">';
+                        html += '<span>✎</span> Isi Data</button>';
+                        html += '</div>';
+                    }
+                    html += '</div></div></div>';
                     $('#contentData').html(html);
                 } else {
                     $('#contentData').html('<div class="alert alert-danger">' + res.message + '</div>');

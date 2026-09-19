@@ -595,6 +595,7 @@
                             <a href="<?=base_url('Instansi/PengisianKebijakanStrategis')?>">3.2 Pengisian Kebijakan Strategis</a>
                             <a href="<?=base_url('Instansi/PengisianTinjutRekomendasiDPRDn1')?>">3.3 Pengisian Tinjut Rekomendasi DPRD n-1</a>
                             <a href="<?=base_url('Instansi/BAB3_4')?>">3.4 Capaian Kinerja IKU & IKD</a>
+                            <a href="<?=base_url('Instansi/BAB3_5')?>">3.5 Penghargaan</a>
                         </div>
                     </div>
                     <div class="sidebar-dropdown">
@@ -732,8 +733,12 @@ document.querySelectorAll('.sidebar-dropdown > a').forEach(a => {
       currentPath.toLowerCase().endsWith('/instansi/bab3_4a') || 
       currentPath.toLowerCase().endsWith('/instansi/bab3_4b')
     );
+    const isBab3_5Active = linkPath.toLowerCase().endsWith('/instansi/bab3_5') && (
+      currentPath.toLowerCase().endsWith('/instansi/bab3_5') ||
+      currentPath.toLowerCase().endsWith('/instansi/pengisianpenghargaan')
+    );
 
-    if (isCurrent || isBab3_4Active) {
+    if (isCurrent || isBab3_4Active || isBab3_5Active) {
       link.style.color = '#20c997';
       link.style.fontWeight = 'bold';
 

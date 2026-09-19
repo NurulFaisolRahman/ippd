@@ -25426,6 +25426,17 @@ public function updateStatusPerjanjianKinerja() {
         if (!in_array('pd_penanggung_jawab', $perkCols)) {
             $this->db->query("ALTER TABLE `lkpj_bab3_ikd_perkembangan` ADD COLUMN `pd_penanggung_jawab` TEXT NULL DEFAULT NULL AFTER `id_instansi`");
         }
+
+        // Pastikan tabel master ikd memiliki kolom urutan dan id_instansi jika belum ada di database hosting
+        if ($this->db->table_exists('ikd')) {
+            $ikdCols = $this->db->list_fields('ikd');
+            if (!in_array('urutan', $ikdCols)) {
+                $this->db->query("ALTER TABLE `ikd` ADD COLUMN `urutan` INT(11) DEFAULT 1");
+            }
+            if (!in_array('id_instansi', $ikdCols)) {
+                $this->db->query("ALTER TABLE `ikd` ADD COLUMN `id_instansi` INT(11) NULL DEFAULT NULL AFTER `pd_penanggung_jawab`, ADD INDEX `idx_ikd_instansi` (`id_instansi`)");
+            }
+        }
     }
 
     /**
@@ -25440,11 +25451,13 @@ public function updateStatusPerjanjianKinerja() {
             'pelayanan' => 'IV. ASPEK PELAYANAN UMUM'
         ];
 
-        // Ambil data master IKD dari RPJMD untuk wilayah ini
-        $ikdRows = $this->db->where('kodewilayah', $KodeWilayah)
-                            ->where('deleted_at IS NULL')
-                            ->order_by('urutan', 'ASC')
-                            ->order_by('id', 'ASC')
+        // Ambil data master IKD dari RPJMD untuk wilayah ini (aman terhadap ketiadaan kolom urutan di database lama)
+        $this->db->where('kodewilayah', $KodeWilayah)
+                 ->where('deleted_at IS NULL');
+        if ($this->db->field_exists('urutan', 'ikd')) {
+            $this->db->order_by('urutan', 'ASC');
+        }
+        $ikdRows = $this->db->order_by('id', 'ASC')
                             ->get('ikd')
                             ->result_array();
 
@@ -26140,6 +26153,530 @@ public function updateStatusPerjanjianKinerja() {
             'status' => 'success',
             'message' => "Data BAB 3.4 Bagian A berhasil disinkronkan kembali ke data standar IKU RPJMD ({$totalIku} indikator)."
         ]);
+    }
+
+    // ================================================================
+    // 3.5 E-LKPJ: BAB 3.5 PENGHARGAAN DAERAH (OPD & REKAP DAERAH)
+    // ================================================================
+
+    /**
+     * Memastikan tabel lkpj_penghargaan tersedia dan terisi data awal
+     */
+    private function ensure_bab3_5_tables_exist($KodeWilayah = '35.12', $tahun = 2025) {
+        $this->db->query("CREATE TABLE IF NOT EXISTS `lkpj_penghargaan` (
+          `id` INT(11) NOT NULL AUTO_INCREMENT,
+          `kodewilayah` VARCHAR(20) DEFAULT '35.12',
+          `instansi_id` INT(11) DEFAULT 1,
+          `tahun` INT(4) NOT NULL DEFAULT 2025,
+          `urutan` INT(11) DEFAULT 1,
+          `jenis_penghargaan` TEXT NOT NULL,
+          `tingkat` VARCHAR(100) NOT NULL,
+          `lembaga` VARCHAR(255) NOT NULL,
+          `keterangan` TEXT DEFAULT NULL,
+          `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+          `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          `deleted_at` DATETIME DEFAULT NULL,
+          PRIMARY KEY (`id`),
+          INDEX `idx_penghargaan_filter` (`tahun`, `kodewilayah`, `instansi_id`, `deleted_at`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+        $cnt = $this->db->where('kodewilayah', $KodeWilayah)
+                        ->where('tahun', $tahun)
+                        ->where('deleted_at IS NULL')
+                        ->count_all_results('lkpj_penghargaan');
+
+        // Hanya inisialisasi data awal (seed) untuk tahun 2025 jika belum ada.
+        // Tahun selain 2025 (2023, 2024, 2026, 2027) dibiarkan kosong sampai diinputkan oleh OPD.
+        if ((int)$tahun === 2025 && $cnt === 0) {
+            $seed = [
+                [1, 'Kabupaten Terinovatif - Innovative Government Award 2025', 'Pusat / Nasional', 'Kementerian Dalam Negeri', 'Kategori Kabupaten Terinovatif dalam IGA 2025', 1],
+                [4, 'Kabupaten Sehat Swasti Saba 2025 Kategori "Padapa"', 'Pusat / Nasional', 'Kementerian Kesehatan RI', 'Penghargaan Kabupaten/Kota Sehat Kategori Padapa', 2],
+                [1, 'CNN INDONESIA AWARD 2025 Kategori “Outstanding Regional Initiative For MSME Empowerment”', 'Pusat / Nasional', 'CNN', 'Inisiatif pemberdayaan UMKM daerah', 3],
+                [1, 'Opini LKPD/OPINI BPK atas LKPD', 'Pusat / Nasional', 'BPK RI', 'Opini Wajar Tanpa Pengecualian (WTP)', 4],
+                [1, 'Penghargaan Atas Capaian Perolehan Pajak Tertinggi Secara Nasional', 'Pusat / Nasional', 'Kantor Pelayanan Pajak Pratama Situbondo', 'Capaian perolehan pajak tertinggi', 5],
+                [4, 'Kabupaten/Kota Sehat (Swasti Saba) Kategori Padapa', 'Pusat / Nasional', 'Kementerian Kesehatan Republik Indonesia (Kemenkes RI)', 'Swasti Saba Kategori Padapa', 6],
+                [5, 'KABUPATEN LAYAK ANAK Kategori “Nindya”', 'Pusat / Nasional', 'Kementerian Pemberdayaan Perempuan dan Perlindungan Anak Republik Indonesia', 'KLA Kategori Nindya', 7],
+                [1, 'KOMPAS TV AWARD Kategori “Daerah Peduli Pengembangan UMKM dan Potensi Sumber Daya Lokal”', 'Pusat / Nasional', 'KOMPAS TV', 'Penghargaan daerah peduli UMKM dan potensi lokal', 8],
+                [1, 'Anugerah TIMES Indonesia 2025 kategori “The Gateway Leader Award bidang Accelerating Regional Economic Advancement”', 'Pusat / Nasional', 'Times Indonesia', 'The Gateway Leader Award', 9],
+                [6, 'TERBAIK 1 PETUGAS IB BERPRESTASI PROVINSI JAWA TIMUR KATEGORI AKSEPTOR TINGGI TAHUN 2025', 'Provinsi', 'Pemerintah Provinsi Jawa Timur', 'Kategori Akseptor Tinggi Tingkat Provinsi Jatim', 10],
+                [6, 'PERINGKAT 2 KABUPATEN DENGAN CAKUPAN VAKSINASI PMK TERBAIK TINGKAT PROVINSI', 'Provinsi', 'KETUA SATGAS PENANGANAN PMK PROVINSI JAWA TIMUR', 'Cakupan Vaksinasi PMK Terbaik Tingkat Jatim', 11],
+                [35, 'FORUM PENINGKATAN KONSUMSI IKAN KAB SITUBONDO', 'Provinsi', 'KETUA FORUM PENINGKATAN KONSUMSI IKAN PROV JATIM', 'Penghargaan Forum Peningkatan Konsumsi Ikan', 12],
+                [36, 'SATA JATIM AWARD', 'Provinsi', 'Dinas Komunikasi Dan Informatika Provinsi Jawa Timur', 'Satu Data Jawa Timur Award', 13],
+                [37, 'PIAGAM PENGHARGAAN KPD DESA SUMBER PINANG KECAMATAN MLANDINGAN DALAM LOMBA TIM PEMBINAAN POSYANDU TINGKAT PROVINSI JAWA TIMUR TAHUN 2025', 'Provinsi', 'Pemerintah Provinsi Jawa Timur', 'Lomba Tim Pembinaan Posyandu', 14],
+                [38, 'Apresiasi Penyelenggaraan Penilaian Kompetensi. Tingkat Provinsi', 'Provinsi', 'Badan Kepegawaian Daerah Provinsi Jawa Timur', 'Penilaian Kompetensi Tingkat Provinsi', 15],
+                [39, 'Mitra Strategis Terbaik Dalam Pengendalian Inflasi Daerah Kategori Non-IHK', 'Provinsi', 'Bank Indonesia', 'Pengendalian Inflasi Daerah Kategori Non-IHK', 16],
+                [40, 'Mitra Digitalisasi Daerah Terkooperatif di wilayah kerja BI', 'Provinsi', 'Bank Indonesia', 'Mitra Digitalisasi Daerah di Wilayah Kerja BI', 17],
+                [42, 'Juara II Apresiasi Penyelenggaraan Perpustakaan Umum Terbaik (Desa/Kelurahan) Desa Mojosari, Kecamatan Asembagus, Kabupaten Situbondo', 'Provinsi', 'Gubernur Jawa Timur', 'Perpustakaan Umum Terbaik Desa Mojosari', 18],
+                [43, 'Piagam Penghargaan Kelompok KB Pria "JAGO" Kabupaten Situbondo sebagai Juara Harapan 2 Lomba Kelompok KB Pria Tingkat Provinsi Jawa Timur Tahun 2025', 'Provinsi', 'Kementerian Kependudukan dan Pembangunan Keluarga/BKKBN Provinsi Jawa Timur', 'Juara Harapan 2 Kelompok KB Pria JAGO', 19],
+                [4, 'Penilaian Kinerja Pelaksanaan Aksi Konvergensi Pencegahan dan Percepatan Penurunan Stunting (PPPS)', 'Provinsi', 'Pemerintah Provinsi Jawa Timur', 'Aksi Konvergensi Pencegahan & Penurunan Stunting', 20],
+                [41, 'Wajib Pajak dengan Pembayaran Pajak atas Pembelanjaan APBD terbaik Tahun 2025 di Kabupaten Situbondo', 'Provinsi', 'Kantor Pelayanan Pajak Pratama Situbondo', 'Wajib Pajak Pembayaran Pajak Terbaik 2025', 21],
+                [44, 'Penghargaan Desa Berseri Madya untuk Desa Mojosari', 'Provinsi', 'Dinas Lingkungan Hidup Provinsi Jawa Timur', 'Desa Berseri Madya untuk Desa Mojosari', 22],
+                [44, 'Desa Berseri Pratama untuk Desa Kotakan, Paowan, Patokan dan Kilensari', 'Provinsi', 'Dinas Lingkungan Hidup Provinsi Jawa Timur', 'Desa Berseri Pratama', 23],
+                [1, 'Kabupaten Terinovatif III Kategori Inovasi Daerah Inotek Award 2025', 'Provinsi', 'BRIDA Provinsi Jatim', 'Inotek Award 2025 Kategori Inovasi Daerah', 25],
+                [45, 'Kabupaten Top 15 Kategori Inovasi Agribisnis dan Energi Baru Terbarukan Inotek Award 2025', 'Provinsi', 'BRIDA Provinsi Jatim', 'Inotek Award 2025 Top 15 Agribisnis & EBT', 26],
+                [36, 'Kabupaten Top 15 Kategori Inovasi Teknologi Berbasis Website/Mobile Apps Inotek Award 2025', 'Provinsi', 'BRIDA Provinsi Jatim', 'Inotek Award 2025 Top 15 Website/Mobile Apps', 27],
+                [1, 'Kabupaten Top 15 Kategori Inovasi Khusus Milenial Inotek Award 2025', 'Provinsi', 'BRIDA Provinsi Jatim', 'Inotek Award 2025 Top 15 Khusus Milenial', 28],
+                [38, 'DETIK JATIM AWARD Kategori “Transformasi Birokrasi Berbasis Meritokrasi”', 'Provinsi', 'Detikcom', 'Detik Jatim Award Kategori Transformasi Birokrasi', 29],
+            ];
+            foreach ($seed as $s) {
+                $this->db->insert('lkpj_penghargaan', [
+                    'kodewilayah' => $KodeWilayah,
+                    'instansi_id' => $s[0],
+                    'tahun' => 2025,
+                    'jenis_penghargaan' => $s[1],
+                    'tingkat' => $s[2],
+                    'lembaga' => $s[3],
+                    'keterangan' => $s[4],
+                    'urutan' => $s[5],
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s')
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Halaman Utama Menu BAB 3.5: Penghargaan Daerah & Rekapitulasi OPD
+     */
+    public function BAB3_5() {
+        $Header['Halaman'] = 'BAB 3.5 : Penghargaan';
+
+        $KodeWilayah = $this->get_kode_wilayah();
+        $instansi_id = $this->get_instansi_id();
+        $is_role_4 = $this->is_role_4();
+        $is_logged_in = $this->is_logged_in();
+
+        $tahun = (int)($this->input->get('tahun', TRUE) ?: 2025);
+        $filter_instansi = $this->input->get('instansi_id', TRUE);
+        $filter_tingkat = trim($this->input->get('tingkat', TRUE) ?: '');
+
+        // Mode OPD: hanya instansi miliknya sendiri
+        if ($is_role_4 && $instansi_id) {
+            $filter_instansi = (int)$instansi_id;
+        }
+
+        $Data['IsLoggedIn'] = $is_logged_in;
+        $Data['KodeWilayah'] = $KodeWilayah;
+        $Data['NamaWilayah'] = '';
+        $Data['IsRole4'] = $is_role_4;
+        $Data['IsDaerah'] = $is_logged_in && !$is_role_4;
+        $Data['InstansiId'] = $instansi_id;
+        $Data['ControllerName'] = 'Instansi';
+
+        if (!empty($KodeWilayah)) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            $Data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
+            $provKode = substr($KodeWilayah, 0, 2);
+            $Data['ListInstansi'] = $this->db
+                ->select('id, nama')
+                ->from('akun_instansi')
+                ->where("(kodewilayah = " . $this->db->escape($KodeWilayah) . " OR kodewilayah = " . $this->db->escape($provKode) . ")")
+                ->where('deleted_at IS NULL')
+                ->order_by('nama', 'ASC')
+                ->get()
+                ->result_array();
+        } else {
+            $Data['ListInstansi'] = $this->db->select('id, nama')->from('akun_instansi')->where('deleted_at IS NULL')->order_by('nama', 'ASC')->get()->result_array();
+        }
+
+        // Cari nama instansi aktif untuk user OPD
+        $Data['NamaInstansiAktif'] = '';
+        if (!empty($instansi_id)) {
+            $insRow = $this->db->select('nama')->where('id', (int)$instansi_id)->get('akun_instansi')->row_array();
+            if ($insRow) $Data['NamaInstansiAktif'] = $insRow['nama'];
+        }
+
+        $Data['ListTahun'] = [2027, 2026, 2025, 2024, 2023];
+        $Data['TahunAktif'] = $tahun;
+        $Data['FilterInstansi'] = $filter_instansi;
+        $Data['FilterTingkat'] = $filter_tingkat;
+
+        // Data Provinsi untuk filter daerah jika belum login
+        $Data['Provinsi'] = $this->db
+            ->where("Kode LIKE '__'")
+            ->order_by('Nama')
+            ->get('kodewilayah')
+            ->result_array();
+
+        // Pastikan tabel dan seed data tersedia
+        $this->ensure_bab3_5_tables_exist($KodeWilayah ?: '35.12', $tahun);
+
+        // Ambil Data Penghargaan
+        $this->db->select('p.*, COALESCE(i.nama, "Pemerintah Daerah") as nama_instansi')
+                 ->from('lkpj_penghargaan p')
+                 ->join('akun_instansi i', 'i.id = p.instansi_id', 'left')
+                 ->where('p.deleted_at IS NULL');
+
+        if ($tahun > 0) {
+            $this->db->where('p.tahun', $tahun);
+        }
+        if (!empty($KodeWilayah)) {
+            $this->db->where('p.kodewilayah', $KodeWilayah);
+        }
+
+        if ($is_role_4 && $instansi_id) {
+            $this->db->where('p.instansi_id', (int)$instansi_id);
+        } elseif (!empty($filter_instansi)) {
+            $this->db->where('p.instansi_id', (int)$filter_instansi);
+        }
+
+        if (!empty($filter_tingkat)) {
+            $this->db->where('p.tingkat', $filter_tingkat);
+        }
+
+        $items = $this->db->order_by('p.urutan', 'ASC')->order_by('p.id', 'ASC')->get()->result_array();
+
+        // Hitung Statistik
+        $totalItems = count($items);
+        $totalNasional = 0;
+        $totalProvinsi = 0;
+        $opdSet = [];
+
+        foreach ($items as $it) {
+            $t = strtolower($it['tingkat']);
+            if (strpos($t, 'pusat') !== false || strpos($t, 'nasional') !== false) {
+                $totalNasional++;
+            } elseif (strpos($t, 'provinsi') !== false) {
+                $totalProvinsi++;
+            }
+            if (!empty($it['instansi_id'])) {
+                $opdSet[$it['instansi_id']] = true;
+            }
+        }
+
+        $Data['Items'] = $items;
+        $Data['Stats'] = [
+            'total' => $totalItems,
+            'nasional' => $totalNasional,
+            'provinsi' => $totalProvinsi,
+            'total_opd' => count($opdSet)
+        ];
+
+        $this->load->view('Daerah/header', $Header);
+        $this->load->view('Daerah/BAB3_5', $Data);
+    }
+
+    public function PengisianPenghargaan() {
+        $this->BAB3_5();
+    }
+
+    /**
+     * AJAX Get Data Penghargaan
+     */
+    public function GetPenghargaan() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $KodeWilayah = $this->get_kode_wilayah();
+        $instansi_id = $this->get_instansi_id();
+        $is_role_4 = $this->is_role_4();
+
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: 2025);
+        $filter_instansi = $this->input->post('instansi_id', TRUE);
+        $filter_tingkat = trim($this->input->post('tingkat', TRUE) ?: '');
+        $keyword = trim($this->input->post('keyword', TRUE) ?: '');
+
+        if ($is_role_4 && $instansi_id) {
+            $filter_instansi = (int)$instansi_id;
+        }
+
+        $this->ensure_bab3_5_tables_exist($KodeWilayah ?: '35.12', $tahun);
+
+        $this->db->select('p.*, COALESCE(i.nama, "Pemerintah Daerah") as nama_instansi')
+                 ->from('lkpj_penghargaan p')
+                 ->join('akun_instansi i', 'i.id = p.instansi_id', 'left')
+                 ->where('p.deleted_at IS NULL');
+
+        if ($tahun > 0) {
+            $this->db->where('p.tahun', $tahun);
+        }
+        if (!empty($KodeWilayah)) {
+            $this->db->where('p.kodewilayah', $KodeWilayah);
+        }
+
+        if ($is_role_4 && $instansi_id) {
+            $this->db->where('p.instansi_id', (int)$instansi_id);
+        } elseif (!empty($filter_instansi)) {
+            $this->db->where('p.instansi_id', (int)$filter_instansi);
+        }
+
+        if (!empty($filter_tingkat)) {
+            $this->db->where('p.tingkat', $filter_tingkat);
+        }
+
+        if (!empty($keyword)) {
+            $this->db->group_start()
+                     ->like('p.jenis_penghargaan', $keyword)
+                     ->or_like('p.lembaga', $keyword)
+                     ->or_like('p.tingkat', $keyword)
+                     ->or_like('i.nama', $keyword)
+                     ->group_end();
+        }
+
+        $items = $this->db->order_by('p.urutan', 'ASC')->order_by('p.id', 'ASC')->get()->result_array();
+
+        $totalItems = count($items);
+        $totalNasional = 0;
+        $totalProvinsi = 0;
+        $opdSet = [];
+
+        foreach ($items as $it) {
+            $t = strtolower($it['tingkat']);
+            if (strpos($t, 'pusat') !== false || strpos($t, 'nasional') !== false) {
+                $totalNasional++;
+            } elseif (strpos($t, 'provinsi') !== false) {
+                $totalProvinsi++;
+            }
+            if (!empty($it['instansi_id'])) {
+                $opdSet[$it['instansi_id']] = true;
+            }
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'data' => $items,
+            'stats' => [
+                'total' => $totalItems,
+                'nasional' => $totalNasional,
+                'provinsi' => $totalProvinsi,
+                'total_opd' => count($opdSet)
+            ]
+        ]);
+    }
+
+    /**
+     * AJAX Save Data Penghargaan (Tambah / Ubah)
+     */
+    public function SavePenghargaan() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $is_role_4 = $this->is_role_4();
+            if (!$is_role_4) {
+                throw new Exception('Akses ditolak: Pengisian dan pengubahan data penghargaan hanya dapat dilakukan melalui akun masing-masing OPD / Dinas.');
+            }
+
+            $id = (int)$this->input->post('id', TRUE);
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2025);
+            $urutan = (int)($this->input->post('urutan', TRUE) ?: 1);
+            $jenis_penghargaan = trim($this->input->post('jenis_penghargaan', TRUE));
+            $tingkat = trim($this->input->post('tingkat', TRUE));
+            $lembaga = trim($this->input->post('lembaga', TRUE));
+            $keterangan = trim($this->input->post('keterangan', TRUE) ?: '');
+
+            $KodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+            $my_instansi_id = $this->get_instansi_id();
+
+            if (empty($jenis_penghargaan)) {
+                throw new Exception('Jenis Penghargaan wajib diisi.');
+            }
+            if (empty($tingkat)) {
+                throw new Exception('Tingkat Penghargaan wajib dipilih.');
+            }
+            if (empty($lembaga)) {
+                throw new Exception('Lembaga Pemberi Penghargaan wajib diisi.');
+            }
+
+            $instansi_id = (int)$my_instansi_id;
+
+            $this->ensure_bab3_5_tables_exist($KodeWilayah, $tahun);
+
+            if ($id > 0) {
+                // Mode Edit: Cek keberadaan & kepemilikan data
+                $existing = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('lkpj_penghargaan')->row_array();
+                if (!$existing) {
+                    throw new Exception('Data penghargaan tidak ditemukan.');
+                }
+
+                if ((int)$existing['instansi_id'] !== (int)$my_instansi_id) {
+                    throw new Exception('Anda tidak memiliki hak akses untuk mengubah data OPD lain.');
+                }
+
+                $updateData = [
+                    'jenis_penghargaan' => $jenis_penghargaan,
+                    'tingkat' => $tingkat,
+                    'lembaga' => $lembaga,
+                    'keterangan' => $keterangan,
+                    'urutan' => $urutan,
+                    'tahun' => $tahun,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+
+                $this->db->where('id', $id)->update('lkpj_penghargaan', $updateData);
+                $savedId = $id;
+                $msg = 'Data penghargaan berhasil diperbarui.';
+            } else {
+                // Mode Tambah Baru
+                if ($urutan <= 1) {
+                    $maxU = $this->db->select_max('urutan')
+                                     ->where('kodewilayah', $KodeWilayah)
+                                     ->where('tahun', $tahun)
+                                     ->where('deleted_at IS NULL')
+                                     ->get('lkpj_penghargaan')
+                                     ->row_array();
+                    $urutan = !empty($maxU['urutan']) ? ((int)$maxU['urutan'] + 1) : 1;
+                }
+
+                $insertData = [
+                    'kodewilayah' => $KodeWilayah,
+                    'instansi_id' => $instansi_id,
+                    'tahun' => $tahun,
+                    'urutan' => $urutan,
+                    'jenis_penghargaan' => $jenis_penghargaan,
+                    'tingkat' => $tingkat,
+                    'lembaga' => $lembaga,
+                    'keterangan' => $keterangan,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+
+                $this->db->insert('lkpj_penghargaan', $insertData);
+                $savedId = $this->db->insert_id();
+                $msg = 'Data penghargaan berhasil ditambahkan.';
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => $msg,
+                'id' => $savedId
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * AJAX Delete Data Penghargaan (Soft Delete)
+     */
+    public function DeletePenghargaan() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $is_role_4 = $this->is_role_4();
+            if (!$is_role_4) {
+                throw new Exception('Akses ditolak: Penghapusan data penghargaan hanya dapat dilakukan melalui akun masing-masing OPD / Dinas.');
+            }
+
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) {
+                throw new Exception('ID penghargaan tidak valid.');
+            }
+
+            $existing = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('lkpj_penghargaan')->row_array();
+            if (!$existing) {
+                throw new Exception('Data penghargaan tidak ditemukan.');
+            }
+
+            $my_instansi_id = $this->get_instansi_id();
+
+            if ((int)$existing['instansi_id'] !== (int)$my_instansi_id) {
+                throw new Exception('Anda tidak memiliki hak akses untuk menghapus data OPD lain.');
+            }
+
+            $this->db->where('id', $id)->update('lkpj_penghargaan', [
+                'deleted_at' => date('Y-m-d H:i:s')
+            ]);
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Data penghargaan berhasil dihapus.'
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Ekspor Data Penghargaan ke Excel / HTML Spreadsheet
+     */
+    public function ExportPenghargaanExcel() {
+        $KodeWilayah = $this->get_kode_wilayah() ?: '35.12';
+        $tahun = (int)($this->input->get('tahun', TRUE) ?: 2025);
+        $filter_instansi = $this->input->get('instansi_id', TRUE);
+        $filter_tingkat = trim($this->input->get('tingkat', TRUE) ?: '');
+
+        $is_role_4 = $this->is_role_4();
+        $instansi_id = $this->get_instansi_id();
+        if ($is_role_4 && $instansi_id) {
+            $filter_instansi = (int)$instansi_id;
+        }
+
+        $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+        $namaWilayah = $wilayah ? $wilayah['Nama'] : 'Kabupaten Situbondo';
+
+        $this->db->select('p.*, COALESCE(i.nama, "Pemerintah Daerah") as nama_instansi')
+                 ->from('lkpj_penghargaan p')
+                 ->join('akun_instansi i', 'i.id = p.instansi_id', 'left')
+                 ->where('p.deleted_at IS NULL')
+                 ->where('p.tahun', $tahun)
+                 ->where('p.kodewilayah', $KodeWilayah);
+
+        if (!empty($filter_instansi)) {
+            $this->db->where('p.instansi_id', (int)$filter_instansi);
+        }
+        if (!empty($filter_tingkat)) {
+            $this->db->where('p.tingkat', $filter_tingkat);
+        }
+
+        $items = $this->db->order_by('p.urutan', 'ASC')->order_by('p.id', 'ASC')->get()->result_array();
+
+        $filename = "LKPJ_Bab_3_5_Penghargaan_" . preg_replace('/[^a-zA-Z0-9]/', '_', $namaWilayah) . "_{$tahun}.xls";
+
+        header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        header("Pragma: no-cache");
+        header("Expires: 0");
+
+        echo "\xEF\xBB\xBF"; // UTF-8 BOM
+        echo '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; font-family:Arial, sans-serif; font-size:12px;">';
+        echo '<thead>';
+        echo '<tr><th colspan="5" style="background:#00a87e; color:#ffffff; font-size:15px; font-weight:bold; text-align:center; padding:12px;">DAFTAR PENGHARGAAN DAN PRESTASI PEMERINTAH DAERAH TAHUN ' . $tahun . '</th></tr>';
+        echo '<tr><th colspan="5" style="background:#f4f4f4; text-align:center; padding:6px;">Wilayah: ' . htmlspecialchars($namaWilayah) . '</th></tr>';
+        echo '<tr style="background:#00c292; color:#ffffff; font-weight:bold; text-align:center;">';
+        echo '<th style="width:50px;">NO</th>';
+        echo '<th style="width:380px;">JENIS PENGHARGAAN</th>';
+        echo '<th style="width:180px;">TINGKAT</th>';
+        echo '<th style="width:280px;">LEMBAGA</th>';
+        echo '<th style="width:220px;">PERANGKAT DAERAH</th>';
+        echo '</tr>';
+        echo '</thead>';
+        echo '<tbody>';
+
+        if (!empty($items)) {
+            $no = 1;
+            foreach ($items as $it) {
+                echo '<tr>';
+                echo '<td style="text-align:center;">' . $no++ . '</td>';
+                echo '<td>' . htmlspecialchars($it['jenis_penghargaan']) . '</td>';
+                echo '<td style="text-align:center;">' . htmlspecialchars($it['tingkat']) . '</td>';
+                echo '<td>' . htmlspecialchars($it['lembaga']) . '</td>';
+                echo '<td>' . htmlspecialchars($it['nama_instansi']) . '</td>';
+                echo '</tr>';
+            }
+        } else {
+            echo '<tr><td colspan="5" style="text-align:center; padding:20px;">Belum ada data penghargaan</td></tr>';
+        }
+
+        echo '</tbody>';
+        echo '</table>';
+        exit;
     }
 
     // ================================================================

@@ -1,4 +1,12 @@
-<?php $this->load->view('Kementerian/Sidebar'); ?>
+<?php 
+$this->load->view('Kementerian/Sidebar'); 
+
+$userLevel = isset($_SESSION['Level']) ? (int)$_SESSION['Level'] : (isset($_SESSION['userLevel']) ? (int)$_SESSION['userLevel'] : null);
+$isSuperAdmin = ($userLevel === 0);
+$isKemen = ($userLevel === 1 && !empty($_SESSION['IdKementerian']));
+$canCrud = $isSuperAdmin || $isKemen;
+$sessionKemenId = $_SESSION['IdKementerian'] ?? null;
+?>
 
 <style>
     /* ============ DROPDOWN TITIK TIGA ============ */
@@ -163,11 +171,13 @@
                     </div>
                     <?php endif; ?>
 
+                    <?php if ($canCrud): ?>
                     <div class="basic-tb-hd">
                         <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputNSPK">
                             <i class="notika-icon notika-edit"></i> <b>Input NSPK Baru</b>
                         </button>
                     </div>
+                    <?php endif; ?>
 
                     <div class="table-responsive">
                         <table id="data-table-basic" class="table table-striped">
@@ -180,13 +190,17 @@
                                     <th width="12%">Bidang</th>
                                     <th width="8%">Tahun</th>
                                     <th width="10%">Status</th>
-                                    <th width="12%">Keterangan</th>
+                                    <th width="<?= $canCrud ? '12%' : '20%' ?>">Keterangan</th>
+                                    <?php if ($canCrud): ?>
                                     <th width="8%">Aksi</th>
+                                    <?php endif; ?>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php $No = 1; foreach ($NSPK as $key): ?>
-                                <tr data-id="<?= $key['id'] ?>">
+                                <?php $No = 1; foreach ($NSPK as $key): 
+                                    $canEditThisRow = $isSuperAdmin || ($isKemen && (!empty($key['IdKementerian']) && $key['IdKementerian'] == $sessionKemenId));
+                                ?>
+                                <tr data-id="<?= $key['id'] ?>" data-can-edit="<?= $canEditThisRow ? '1' : '0' ?>">
                                     <td class="text-center details-control">
                                         <i class="fa fa-plus-circle text-success" style="cursor:pointer;font-size:18px;"></i>
                                     </td>
@@ -202,7 +216,9 @@
                                         <span class="badge badge-<?= $badge ?>"><?= $key['status'] ?></span>
                                     </td>
                                     <td><?= nl2br(htmlspecialchars($key['keterangan'] ?? '')) ?></td>
+                                    <?php if ($canCrud): ?>
                                     <td>
+                                        <?php if ($canEditThisRow): ?>
                                         <div class="dropdown-aksi">
                                             <button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)">
                                                 <i class="fa fa-ellipsis-v"></i>
@@ -223,7 +239,11 @@
                                                 </button>
                                             </div>
                                         </div>
+                                        <?php else: ?>
+                                        <span class="text-muted">-</span>
+                                        <?php endif; ?>
                                     </td>
+                                    <?php endif; ?>
                                 </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -235,6 +255,7 @@
     </div>
 </div>
 
+<?php if ($canCrud): ?>
 <!-- Modal Input NSPK -->
 <div class="modal fade" id="ModalInputNSPK" role="dialog">
     <div class="modal-dialog modal-lg">
@@ -394,9 +415,32 @@
         </div>
     </div>
 </div>
+<?php endif; ?>
 
 <script src="<?= base_url('js/vendor/jquery-1.12.4.min.js'); ?>"></script>
 <script src="<?= base_url('js/bootstrap.min.js'); ?>"></script>
+<script src="<?= base_url('js/wow.min.js'); ?>"></script>
+<script src="<?= base_url('js/jquery-price-slider.js'); ?>"></script>
+<script src="<?= base_url('js/owl.carousel.min.js'); ?>"></script>
+<script src="<?= base_url('js/jquery.scrollUp.min.js'); ?>"></script>
+<script src="<?= base_url('js/meanmenu/jquery.meanmenu.js'); ?>"></script>
+<script src="<?= base_url('js/counterup/jquery.counterup.min.js'); ?>"></script>
+<script src="<?= base_url('js/counterup/waypoints.min.js'); ?>"></script>
+<script src="<?= base_url('js/counterup/counterup-active.js'); ?>"></script>
+<script src="<?= base_url('js/scrollbar/jquery.mCustomScrollbar.concat.min.js'); ?>"></script>
+<script src="<?= base_url('js/sparkline/jquery.sparkline.min.js'); ?>"></script>
+<script src="<?= base_url('js/sparkline/sparkline-active.js'); ?>"></script>
+<script src="<?= base_url('js/flot/jquery.flot.js'); ?>"></script>
+<script src="<?= base_url('js/flot/jquery.flot.resize.js'); ?>"></script>
+<script src="<?= base_url('js/flot/flot-active.js'); ?>"></script>
+<script src="<?= base_url('js/knob/jquery.knob.js'); ?>"></script>
+<script src="<?= base_url('js/knob/jquery.appear.js'); ?>"></script>
+<script src="<?= base_url('js/knob/knob-active.js'); ?>"></script>
+<script src="<?= base_url('js/chat/jquery.chat.js'); ?>"></script>
+<script src="<?= base_url('js/todo/jquery.todo.js'); ?>"></script>
+<script src="<?= base_url('js/wave/waves.min.js'); ?>"></script>
+<script src="<?= base_url('js/wave/wave-active.js'); ?>"></script>
+<script src="<?= base_url('js/plugins.js'); ?>"></script>
 <script src="<?= base_url('js/data-table/jquery.dataTables.min.js'); ?>"></script>
 <script src="<?= base_url('js/data-table/data-table-act.js'); ?>"></script>
 <script src="<?= base_url('js/main.js'); ?>"></script>
@@ -438,6 +482,7 @@ $(document).ready(function() {
         var tr = $(this).closest('tr');
         var row = table.row(tr);
         var nspk_id = tr.data('id');
+        var canCrudThisRow = (tr.data('can-edit') == 1);
 
         if (row.child.isShown()) {
             row.child.hide();
@@ -452,14 +497,15 @@ $(document).ready(function() {
                     html += '<p class="text-muted mb-2">Belum ada isian detail.</p>';
                 } else {
                     html += `<table class="table table-bordered table-sm">
-                        <thead><tr><th>No</th><th>Jenis</th><th>Isi</th><th>Urutan</th><th>Aksi</th></tr></thead><tbody>`;
+                        <thead><tr><th>No</th><th>Jenis</th><th>Isi</th><th>Urutan</th>` + (canCrudThisRow ? `<th>Aksi</th>` : ``) + `</tr></thead><tbody>`;
                     details.forEach(function(d, i) {
                         html += `<tr>
                             <td>${i+1}</td>
                             <td><span class="badge badge-info">${d.jenis}</span></td>
                             <td>${d.isi.replace(/\n/g, '<br>')}</td>
-                            <td>${d.urutan}</td>
-                            <td>
+                            <td>${d.urutan}</td>`;
+                        if (canCrudThisRow) {
+                            html += `<td>
                                 <div class="dropdown-aksi">
                                     <button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)">
                                         <i class="fa fa-ellipsis-v"></i>
@@ -476,15 +522,19 @@ $(document).ready(function() {
                                         </button>
                                     </div>
                                 </div>
-                            </td>
-                        </tr>`;
+                            </td>`;
+                        }
+                        html += `</tr>`;
                     });
                     html += '</tbody></table>';
                 }
 
-                html += `<button class="btn btn-sm btn-primary AddDetailBtn" data-nspk="${nspk_id}">
-                    <i class="fa fa-plus"></i> Tambah Isian Baru
-                </button></div>`;
+                if (canCrudThisRow) {
+                    html += `<button class="btn btn-sm btn-primary AddDetailBtn" data-nspk="${nspk_id}">
+                        <i class="fa fa-plus"></i> Tambah Isian Baru
+                    </button>`;
+                }
+                html += `</div>`;
 
                 row.child(html).show();
                 tr.addClass('shown');

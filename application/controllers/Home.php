@@ -49,6 +49,14 @@ class Home extends CI_Controller {
 						'Username' => $akun['Username'],
 						'KodeWilayah' => ''
 					);
+					if (!empty($akun['IdKementerian'])) {
+						$kemen = $this->db->where('Id', $akun['IdKementerian'])->where('deleted_at IS NULL')->get('kementerian')->row_array();
+						if ($kemen) {
+							$Session['NamaKementerian'] = $kemen['NamaKementerian'];
+							$Session['TahunMulai'] = $kemen['TahunMulai'];
+							$Session['TahunAkhir'] = $kemen['TahunAkhir'];
+						}
+					}
 					$this->session->set_userdata($Session);
 					echo $level;
 					return;

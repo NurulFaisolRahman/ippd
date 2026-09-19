@@ -7,20 +7,121 @@ class Kementerian extends CI_Controller {
     public function __construct() {
         parent::__construct();
         date_default_timezone_set("Asia/Jakarta");
-    }
-      public function GetPeriodeKementerian(){
-    echo json_encode($this->db->query("SELECT * FROM `kementerian` GROUP BY TahunMulai")->result_array());
-	}
 
-  public function GetListKementerian(){
-    echo json_encode($this->db->where("TahunMulai = ".$_POST['TahunMulai']." AND deleted_at IS NULL")->get("kementerian")->result_array());
-	}
+        // Sinkronisasi session Level 1 (Kementerian)
+        $userLevel = $this->session->userdata('userLevel') ?: ($this->session->userdata('Level') ?: ($_SESSION['Level'] ?? ($_SESSION['userLevel'] ?? null)));
+        $idKemen = $this->session->userdata('IdKementerian') ?: ($_SESSION['IdKementerian'] ?? null);
+
+        if ($userLevel == 1 && !empty($idKemen)) {
+            if (!$this->session->userdata('userLevel')) {
+                $this->session->set_userdata('userLevel', 1);
+            }
+            if (!$this->session->userdata('Level')) {
+                $this->session->set_userdata('Level', 1);
+            }
+            if (!isset($_SESSION['Level'])) {
+                $_SESSION['Level'] = 1;
+            }
+            if (!isset($_SESSION['userLevel'])) {
+                $_SESSION['userLevel'] = 1;
+            }
+            if (!isset($_SESSION['IdKementerian'])) {
+                $_SESSION['IdKementerian'] = $idKemen;
+            }
+            if (empty($_SESSION['NamaKementerian']) || empty($_SESSION['TahunMulai'])) {
+                $kemen = $this->db->where('Id', $idKemen)->where('deleted_at IS NULL')->get('kementerian')->row_array();
+                if ($kemen) {
+                    $_SESSION['NamaKementerian'] = $kemen['NamaKementerian'];
+                    $_SESSION['TahunMulai'] = $kemen['TahunMulai'];
+                    $_SESSION['TahunAkhir'] = $kemen['TahunAkhir'];
+                    $this->session->set_userdata([
+                        'NamaKementerian' => $kemen['NamaKementerian'],
+                        'TahunMulai' => $kemen['TahunMulai'],
+                        'TahunAkhir' => $kemen['TahunAkhir']
+                    ]);
+                }
+            }
+        }
+    }
+
+    private function get_kementerian_session() {
+        $isLoggedIn = $this->session->userdata('isLoggedIn') ?? ($_SESSION['isLoggedIn'] ?? false);
+        $userLevel  = $this->session->userdata('userLevel') ?? ($this->session->userdata('Level') ?? ($_SESSION['userLevel'] ?? ($_SESSION['Level'] ?? null)));
+        $idKemen    = $this->session->userdata('IdKementerian') ?? ($_SESSION['IdKementerian'] ?? null);
+        $isKemen    = ($userLevel == 1 && !empty($idKemen));
+
+        return [
+            'isLoggedIn'    => (bool)$isLoggedIn,
+            'userLevel'     => $userLevel !== null ? (int)$userLevel : null,
+            'idKementerian' => $idKemen ? (int)$idKemen : null,
+            'isKementerian' => (bool)$isKemen
+        ];
+    }
+
+    private function check_renja_access($id_renja, $kemenSession = null) {
+        if (!$kemenSession) {
+            $kemenSession = $this->get_kementerian_session();
+        }
+        if (!$kemenSession['isLoggedIn']) return false;
+        if ($kemenSession['userLevel'] === 0) return true;
+        if ($kemenSession['userLevel'] === 1 && !empty($kemenSession['idKementerian'])) {
+            $row = $this->db->get_where('renja_kl', ['id' => $id_renja, 'deleted_at' => null])->row_array();
+            return ($row && (int)$row['id_kementerian'] === (int)$kemenSession['idKementerian']);
+        }
+        return false;
+    }
+
+    private function check_rekap2_access($id_rekap2, $kemenSession = null) {
+        if (!$kemenSession) {
+            $kemenSession = $this->get_kementerian_session();
+        }
+        if (!$kemenSession['isLoggedIn']) return false;
+        if ($kemenSession['userLevel'] === 0) return true;
+        if ($kemenSession['userLevel'] === 1 && !empty($kemenSession['idKementerian'])) {
+            $row = $this->db->get_where('renja_rekap2', ['id' => $id_rekap2, 'deleted_at' => null])->row_array();
+            return ($row && (int)$row['id_kementerian'] === (int)$kemenSession['idKementerian']);
+        }
+        return false;
+    }
+
+    private function check_rekap3_access($id_rekap3, $kemenSession = null) {
+        if (!$kemenSession) {
+            $kemenSession = $this->get_kementerian_session();
+        }
+        if (!$kemenSession['isLoggedIn']) return false;
+        if ($kemenSession['userLevel'] === 0) return true;
+        if ($kemenSession['userLevel'] === 1 && !empty($kemenSession['idKementerian'])) {
+            $row = $this->db->get_where('renja_rekap3', ['id' => $id_rekap3, 'deleted_at' => null])->row_array();
+            return ($row && (int)$row['id_kementerian'] === (int)$kemenSession['idKementerian']);
+        }
+        return false;
+    }
+
+    public function GetPeriodeKementerian(){
+        echo json_encode($this->db->query("SELECT * FROM `kementerian` GROUP BY TahunMulai")->result_array());
+    }
+
+    public function GetListKementerian(){
+        echo json_encode($this->db->where("TahunMulai = ".$_POST['TahunMulai']." AND deleted_at IS NULL")->get("kementerian")->result_array());
+    }
 
     public function Kementerian() {
-      $Header['Halaman'] = 'Isu';
-      $Data['Kementerian'] = $this->db->query("SELECT * FROM `kementerian` WHERE deleted_at IS NULL")->result_array();
-      $this->load->view('Kementerian/header', $Header);
-      $this->load->view('Kementerian/Kementerian', $Data);
+        $Header['Halaman'] = 'Isu';
+        $kemenSession = $this->get_kementerian_session();
+
+        if ($kemenSession['isKementerian']) {
+            $Data['Kementerian'] = $this->db->where('Id', $kemenSession['idKementerian'])
+                ->where('deleted_at IS NULL')
+                ->get('kementerian')
+                ->result_array();
+        } else {
+            $Data['Kementerian'] = $this->db->query("SELECT * FROM `kementerian` WHERE deleted_at IS NULL ORDER BY NamaKementerian ASC")->result_array();
+        }
+
+        $Data['userLevel'] = $kemenSession['userLevel'];
+        $Data['userIdKementerian'] = $kemenSession['idKementerian'];
+        $this->load->view('Kementerian/header', $Header);
+        $this->load->view('Kementerian/Kementerian', $Data);
     }
 
   public function InputKementerian() {
@@ -139,13 +240,19 @@ class Kementerian extends CI_Controller {
         $Header['Halaman'] = 'Kementerian';
 
         // SESSION
-        $isLoggedIn = $_SESSION['isLoggedIn'] ?? false;
-        $userLevel  = $_SESSION['userLevel'] ?? ($_SESSION['Level'] ?? 2);
-        $userIdKementerian = $_SESSION['IdKementerian'] ?? null;
+        $kemenSession = $this->get_kementerian_session();
+        $isLoggedIn = $kemenSession['isLoggedIn'];
+        $userLevel  = $kemenSession['userLevel'] ?? 2;
+        $userIdKementerian = $kemenSession['idKementerian'];
+        $isKementerian = $kemenSession['isKementerian'];
 
         // FILTER URL
         $periodeFilter      = $this->input->get('periode');
         $kementerianFilter  = $this->input->get('kementerian');
+
+        if ($isKementerian) {
+            $kementerianFilter = $userIdKementerian;
+        }
 
         // QUERY UTAMA
         $this->db->select('s.*, k.NamaKementerian');
@@ -154,7 +261,7 @@ class Kementerian extends CI_Controller {
         $this->db->where('s.deleted_at IS NULL');
 
         // 🔐 PEMBATASAN ROLE
-        if ($isLoggedIn && $userLevel == 1) {
+        if ($isKementerian) {
             // KEMENTERIAN → DATA SENDIRI
             $this->db->where('s.IdKementerian', $userIdKementerian);
         } elseif ($kementerianFilter) {
@@ -343,10 +450,19 @@ class Kementerian extends CI_Controller {
      public function ProyekStrategis() {
         $Header['Halaman'] = 'Kementerian';
         
+        $kemenSession = $this->get_kementerian_session();
+        $isKementerian = $kemenSession['isKementerian'];
+        $userIdKementerian = $kemenSession['idKementerian'];
+        $userLevel = $kemenSession['userLevel'];
+
         // Get filter parameters
         $periodeFilter = $this->input->get('periode');
         $kementerianFilter = $this->input->get('kementerian');
         
+        if ($isKementerian) {
+            $kementerianFilter = $userIdKementerian;
+        }
+
         // Query proyek data with filters
         $this->db->select("
             p.Id, p.IdKementerian, p.IdProgramStrategis, p.NamaProyek, 
@@ -383,38 +499,48 @@ class Kementerian extends CI_Controller {
         $this->db->join('program_strategis ps', 'p.IdProgramStrategis = ps.Id', 'left');
         $this->db->where('p.deleted_at IS NULL');
         
+        if ($isKementerian) {
+            $this->db->where('p.IdKementerian', $userIdKementerian);
+        } elseif ($kementerianFilter) {
+            $this->db->where('p.IdKementerian', $kementerianFilter);
+        }
+
         if ($periodeFilter) {
             list($tahunMulai, $tahunAkhir) = explode('|', $periodeFilter);
             $this->db->where('p.TahunMulai', $tahunMulai);
             $this->db->where('p.TahunAkhir', $tahunAkhir);
         }
         
-        if ($kementerianFilter) {
-            $this->db->where('p.IdKementerian', $kementerianFilter);
-        }
-        
         $this->db->order_by('p.TahunMulai', 'DESC');
         $this->db->order_by('p.TahunAkhir', 'DESC');
         $Data['Proyek'] = $this->db->get()->result_array();
         
-        // Debug: Log if no data is returned
-        if (empty($Data['Proyek'])) {
-            log_message('error', 'No data found in proyek_strategis. Query: ' . $this->db->last_query());
+        // Dropdown kementerian & periode
+        if ($isKementerian) {
+            $Data['Kementerian'] = $this->db->get_where('kementerian', ['Id' => $userIdKementerian, 'deleted_at' => NULL])->result_array();
+            $Data['Periode'] = $this->db->query("
+                SELECT DISTINCT TahunMulai, TahunAkhir
+                FROM (
+                    SELECT TahunMulai, TahunAkhir FROM kementerian WHERE Id = ? AND deleted_at IS NULL
+                    UNION
+                    SELECT TahunMulai, TahunAkhir FROM proyek_strategis WHERE IdKementerian = ? AND deleted_at IS NULL
+                ) AS periods
+                ORDER BY TahunMulai DESC
+            ", [$userIdKementerian, $userIdKementerian])->result_array();
+            $k = $this->db->get_where('kementerian', ['Id' => $userIdKementerian])->row_array();
+            $Data['UserKementerianName'] = $k['NamaKementerian'] ?? 'Kementerian Anda';
+        } else {
+            $Data['Kementerian'] = $this->db->get_where('kementerian', ['deleted_at' => NULL])->result_array();
+            $Data['Periode'] = $this->db->query("
+                SELECT DISTINCT TahunMulai, TahunAkhir
+                FROM (
+                    SELECT TahunMulai, TahunAkhir FROM kementerian WHERE deleted_at IS NULL
+                    UNION
+                    SELECT TahunMulai, TahunAkhir FROM proyek_strategis WHERE deleted_at IS NULL
+                ) AS periods
+                ORDER BY TahunMulai DESC
+            ")->result_array();
         }
-        
-        // Get kementerian for filter dropdown
-        $Data['Kementerian'] = $this->db->get_where('kementerian', ['deleted_at' => NULL])->result_array();
-        
-        // Get unique periods from kementerian and proyek_strategis
-        $Data['Periode'] = $this->db->query("
-            SELECT DISTINCT TahunMulai, TahunAkhir
-            FROM (
-                SELECT TahunMulai, TahunAkhir FROM kementerian WHERE deleted_at IS NULL
-                UNION
-                SELECT TahunMulai, TahunAkhir FROM proyek_strategis WHERE deleted_at IS NULL
-            ) AS periods
-            ORDER BY TahunMulai
-        ")->result_array();
         
         // Get provinces for location dropdowns
         $this->db->where("LENGTH(Kode) = 2");
@@ -424,17 +550,18 @@ class Kementerian extends CI_Controller {
         // Pass current filter values
         $Data['CurrentPeriode'] = $periodeFilter;
         $Data['CurrentKementerian'] = $kementerianFilter;
+        $Data['userLevel'] = $userLevel;
+        $Data['userIdKementerian'] = $userIdKementerian;
         
         $this->load->view('Kementerian/header', $Header);
         $this->load->view('Kementerian/ProyekStrategis', $Data);
-    }
-
-  
+     }
 
     public function GetProgramByKementerianAndPeriode() {
         $TahunMulai = $this->input->post('TahunMulai');
         $TahunAkhir = $this->input->post('TahunAkhir');
-        $IdKementerian = $this->input->post('IdKementerian');
+        $kemenSession = $this->get_kementerian_session();
+        $IdKementerian = $kemenSession['isKementerian'] ? $kemenSession['idKementerian'] : $this->input->post('IdKementerian');
         
         $this->db->select("
             ps.Id, ps.NamaProgram,
@@ -466,10 +593,12 @@ class Kementerian extends CI_Controller {
         echo json_encode($data);
     }
 
-
     public function InputProyek() {
         $this->load->library('form_validation');
-        $this->form_validation->set_rules('IdKementerian', 'Kementerian', 'required');
+        $kemenSession = $this->get_kementerian_session();
+        if (!$kemenSession['isKementerian']) {
+            $this->form_validation->set_rules('IdKementerian', 'Kementerian', 'required');
+        }
         $this->form_validation->set_rules('IdProgramStrategis', 'Program Strategis', 'required');
         $this->form_validation->set_rules('NamaProyek', 'Nama Proyek', 'required');
         $this->form_validation->set_rules('TahunMulai', 'Tahun Mulai', 'required');
@@ -479,12 +608,14 @@ class Kementerian extends CI_Controller {
             echo validation_errors();
             return;
         }
+
+        $idKementerian = $kemenSession['isKementerian'] ? $kemenSession['idKementerian'] : $this->input->post('IdKementerian');
         
         $KodeWilayah = $this->input->post('KodeWilayah') ? array_filter($this->input->post('KodeWilayah')) : [];
         $KodeKota = $this->input->post('KodeKota') ? array_filter($this->input->post('KodeKota')) : [];
         
         $data = [
-            'IdKementerian' => $this->input->post('IdKementerian'),
+            'IdKementerian' => $idKementerian,
             'IdProgramStrategis' => $this->input->post('IdProgramStrategis'),
             'KodeWilayah' => implode(',', $KodeWilayah),
             'KodeKota' => implode(',', $KodeKota),
@@ -508,7 +639,10 @@ class Kementerian extends CI_Controller {
     public function UpdateProyek() {
         $this->load->library('form_validation');
         $this->form_validation->set_rules('Id', 'ID Proyek', 'required');
-        $this->form_validation->set_rules('IdKementerian', 'Kementerian', 'required');
+        $kemenSession = $this->get_kementerian_session();
+        if (!$kemenSession['isKementerian']) {
+            $this->form_validation->set_rules('IdKementerian', 'Kementerian', 'required');
+        }
         $this->form_validation->set_rules('IdProgramStrategis', 'Program Strategis', 'required');
         $this->form_validation->set_rules('NamaProyek', 'Nama Proyek', 'required');
         $this->form_validation->set_rules('TahunMulai', 'Tahun Mulai', 'required');
@@ -518,12 +652,24 @@ class Kementerian extends CI_Controller {
             echo validation_errors();
             return;
         }
+
+        $idProyek = $this->input->post('Id');
+        if ($kemenSession['isKementerian']) {
+            $existing = $this->db->where('Id', $idProyek)->where('deleted_at IS NULL')->get('proyek_strategis')->row_array();
+            if (!$existing || $existing['IdKementerian'] != $kemenSession['idKementerian']) {
+                echo 'Anda tidak berhak mengedit data ini!';
+                return;
+            }
+            $idKementerian = $kemenSession['idKementerian'];
+        } else {
+            $idKementerian = $this->input->post('IdKementerian');
+        }
         
         $KodeWilayah = $this->input->post('KodeWilayah') ? array_filter($this->input->post('KodeWilayah')) : [];
         $KodeKota = $this->input->post('KodeKota') ? array_filter($this->input->post('KodeKota')) : [];
         
         $data = [
-            'IdKementerian' => $this->input->post('IdKementerian'),
+            'IdKementerian' => $idKementerian,
             'IdProgramStrategis' => $this->input->post('IdProgramStrategis'),
             'KodeWilayah' => implode(',', $KodeWilayah),
             'KodeKota' => implode(',', $KodeKota),
@@ -540,7 +686,7 @@ class Kementerian extends CI_Controller {
             'edited_at' => date('Y-m-d H:i:s')
         ];
         
-        $this->db->where('Id', $this->input->post('Id'));
+        $this->db->where('Id', $idProyek);
         $this->db->update('proyek_strategis', $data);
         echo $this->db->affected_rows() ? '1' : 'Gagal Update Data!';
     }
@@ -553,73 +699,106 @@ class Kementerian extends CI_Controller {
             echo validation_errors();
             return;
         }
+
+        $kemenSession = $this->get_kementerian_session();
+        $idProyek = $this->input->post('Id');
+        if ($kemenSession['isKementerian']) {
+            $existing = $this->db->where('Id', $idProyek)->where('deleted_at IS NULL')->get('proyek_strategis')->row_array();
+            if (!$existing || $existing['IdKementerian'] != $kemenSession['idKementerian']) {
+                echo 'Anda tidak berhak menghapus data ini!';
+                return;
+            }
+        }
         
         $data = ['deleted_at' => date('Y-m-d H:i:s')];
-        $this->db->where('Id', $this->input->post('Id'));
+        $this->db->where('Id', $idProyek);
         $this->db->update('proyek_strategis', $data);
         echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!';
     }
 
     public function ProgramStrategis() {
-    $Header['Halaman'] = 'Kementerian';
+        $Header['Halaman'] = 'Kementerian';
 
-    $periodeFilter     = $this->input->get('periode');
-    $kementerianFilter = $this->input->get('kementerian');
+        $kemenSession = $this->get_kementerian_session();
+        $isKementerian = $kemenSession['isKementerian'];
+        $userIdKementerian = $kemenSession['idKementerian'];
+        $userLevel = $kemenSession['userLevel'];
 
-    if ($this->session->userdata('userLevel') == 1) {
-        $kementerianFilter = $this->session->userdata('IdKementerian');
+        $periodeFilter     = $this->input->get('periode');
+        $kementerianFilter = $this->input->get('kementerian');
 
-        $k = $this->db->select('TahunMulai,TahunAkhir')
-            ->where('Id', $kementerianFilter)
-            ->where('deleted_at IS NULL')
-            ->get('kementerian')
-            ->row_array();
+        if ($isKementerian) {
+            $kementerianFilter = $userIdKementerian;
 
-        if ($k) {
-            $periodeFilter = $k['TahunMulai'].'|'.$k['TahunAkhir'];
+            $k = $this->db->select('TahunMulai,TahunAkhir,NamaKementerian')
+                ->where('Id', $kementerianFilter)
+                ->where('deleted_at IS NULL')
+                ->get('kementerian')
+                ->row_array();
+
+            if ($k && empty($periodeFilter)) {
+                $periodeFilter = $k['TahunMulai'].'|'.$k['TahunAkhir'];
+            }
+            if ($k) {
+                $Data['UserKementerianName'] = $k['NamaKementerian'];
+            }
         }
+
+        $this->db->select("
+            ps.*, k.NamaKementerian,
+            (SELECT GROUP_CONCAT(kw.Nama SEPARATOR ', ')
+             FROM kodewilayah kw
+             WHERE FIND_IN_SET(kw.Kode, ps.KodeWilayah)
+             AND LENGTH(kw.Kode)=2) AS NamaProvinsi,
+            (SELECT GROUP_CONCAT(kw.Nama SEPARATOR ', ')
+             FROM kodewilayah kw
+             WHERE FIND_IN_SET(kw.Kode, ps.KodeKota)) AS NamaKota
+        ");
+        $this->db->from('program_strategis ps');
+        $this->db->join('kementerian k','ps.IdKementerian=k.Id','left');
+        $this->db->where('ps.deleted_at IS NULL');
+
+        if ($isKementerian) {
+            $this->db->where('ps.IdKementerian', $userIdKementerian);
+        } elseif ($kementerianFilter) {
+            $this->db->where('ps.IdKementerian', $kementerianFilter);
+        }
+
+        if ($periodeFilter) {
+            list($tm,$ta)=explode('|',$periodeFilter);
+            $this->db->where('ps.TahunMulai',$tm);
+            $this->db->where('ps.TahunAkhir',$ta);
+        }
+
+        $Data['Program']=$this->db->get()->result_array();
+        $Data['Provinsi']=$this->db->where("Kode LIKE '__'")->get('kodewilayah')->result_array();
+        
+        if ($isKementerian) {
+            $Data['Periode']=$this->db->query("
+                SELECT DISTINCT TahunMulai,TahunAkhir FROM kementerian WHERE Id = ? AND deleted_at IS NULL
+                UNION
+                SELECT DISTINCT TahunMulai,TahunAkhir FROM program_strategis WHERE IdKementerian = ? AND deleted_at IS NULL
+                ORDER BY TahunMulai DESC
+            ", [$userIdKementerian, $userIdKementerian])->result_array();
+            $Data['Kementerian'] = $this->db->get_where('kementerian', ['Id' => $userIdKementerian, 'deleted_at' => NULL])->result_array();
+        } else {
+            $Data['Periode']=$this->db->query("
+                SELECT DISTINCT TahunMulai,TahunAkhir FROM kementerian WHERE deleted_at IS NULL
+                UNION
+                SELECT DISTINCT TahunMulai,TahunAkhir FROM program_strategis WHERE deleted_at IS NULL
+                ORDER BY TahunMulai DESC
+            ")->result_array();
+            $Data['Kementerian'] = $this->db->get_where('kementerian', ['deleted_at' => NULL])->result_array();
+        }
+
+        $Data['CurrentPeriode']=$periodeFilter;
+        $Data['CurrentKementerian']=$kementerianFilter;
+        $Data['userLevel']=$userLevel;
+        $Data['userIdKementerian']=$userIdKementerian;
+
+        $this->load->view('Kementerian/header',$Header);
+        $this->load->view('Kementerian/ProgramStrategis',$Data);
     }
-
-    $this->db->select("
-        ps.*, k.NamaKementerian,
-        (SELECT GROUP_CONCAT(kw.Nama SEPARATOR ', ')
-         FROM kodewilayah kw
-         WHERE FIND_IN_SET(kw.Kode, ps.KodeWilayah)
-         AND LENGTH(kw.Kode)=2) AS NamaProvinsi,
-        (SELECT GROUP_CONCAT(kw.Nama SEPARATOR ', ')
-         FROM kodewilayah kw
-         WHERE FIND_IN_SET(kw.Kode, ps.KodeKota)) AS NamaKota
-    ");
-    $this->db->from('program_strategis ps');
-    $this->db->join('kementerian k','ps.IdKementerian=k.Id','left');
-    $this->db->where('ps.deleted_at IS NULL');
-
-    if ($periodeFilter) {
-        list($tm,$ta)=explode('|',$periodeFilter);
-        $this->db->where('ps.TahunMulai',$tm);
-        $this->db->where('ps.TahunAkhir',$ta);
-    }
-
-    if ($kementerianFilter) {
-        $this->db->where('ps.IdKementerian',$kementerianFilter);
-    }
-
-    $Data['Program']=$this->db->get()->result_array();
-    $Data['Provinsi']=$this->db->where("Kode LIKE '__'")->get('kodewilayah')->result_array();
-    $Data['Periode']=$this->db->query("
-        SELECT DISTINCT TahunMulai,TahunAkhir FROM kementerian WHERE deleted_at IS NULL
-        UNION
-        SELECT DISTINCT TahunMulai,TahunAkhir FROM program_strategis WHERE deleted_at IS NULL
-        ORDER BY TahunMulai DESC
-    ")->result_array();
-
-    $Data['CurrentPeriode']=$periodeFilter;
-    $Data['CurrentKementerian']=$kementerianFilter;
-    $Data['userLevel']=$this->session->userdata('userLevel');
-
-    $this->load->view('Kementerian/header',$Header);
-    $this->load->view('Kementerian/ProgramStrategis',$Data);
-}
 
 
 
@@ -2596,15 +2775,21 @@ public function SasaranStrategis() {
     // ===============================
     // SESSION LOGIN
     // ===============================
-    $isLoggedIn = $_SESSION['isLoggedIn'] ?? false;
-    $userLevel = $_SESSION['userLevel'] ?? null;
-    $userIdKementerian = $_SESSION['IdKementerian'] ?? null;
+    $kemenSession = $this->get_kementerian_session();
+    $isLoggedIn = $kemenSession['isLoggedIn'];
+    $userLevel = $kemenSession['userLevel'];
+    $userIdKementerian = $kemenSession['idKementerian'];
+    $isKementerian = $kemenSession['isKementerian'];
 
     // ===============================
     // FILTER DARI URL
     // ===============================
     $periodeFilter = $this->input->get('periode');
     $kementerianFilter = $this->input->get('kementerian');
+
+    if ($isKementerian) {
+        $kementerianFilter = $userIdKementerian;
+    }
 
     // ===============================
     // QUERY UTAMA
@@ -2615,7 +2800,7 @@ public function SasaranStrategis() {
     $this->db->where('ss.deleted_at IS NULL');
 
     // 🔐 PEMBATASAN BERDASARKAN ROLE
-    if ($isLoggedIn && $userLevel == 1) {
+    if ($isKementerian) {
         // LOGIN KEMENTERIAN ➜ WAJIB DATA MILIKNYA
         $this->db->where('ss.IdKementerian', $userIdKementerian);
     } elseif ($kementerianFilter) {
@@ -2777,8 +2962,9 @@ public function DeleteSasaranStrategis() {
 public function NSPK() {
     $Header['Halaman'] = 'NSPK';
 
-    if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) {
-        $this->db->where('IdKementerian', $_SESSION['IdKementerian']);
+    $kemenSession = $this->get_kementerian_session();
+    if ($kemenSession['isKementerian']) {
+        $this->db->where('IdKementerian', $kemenSession['idKementerian']);
     }
     $this->db->where('deleted_at IS NULL');
     $this->db->order_by('tahun_penetapan', 'ASC');
@@ -2788,8 +2974,8 @@ public function NSPK() {
     // Info Kementerian
     $Data['UserKementerianName'] = '-';
     $Data['UserPeriode'] = '-';
-    if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1 && isset($_SESSION['IdKementerian'])) {
-        $this->db->where('Id', $_SESSION['IdKementerian']);
+    if ($kemenSession['isKementerian']) {
+        $this->db->where('Id', $kemenSession['idKementerian']);
         $this->db->where('deleted_at IS NULL');
         $kementerian = $this->db->get('kementerian')->row_array();
         if ($kementerian) {
@@ -2815,6 +3001,12 @@ public function GetNSPKDetails() {
 }
 
 public function InputNSPKDetail() {
+    $kemenSession = $this->get_kementerian_session();
+    if (!$kemenSession['isLoggedIn'] || !in_array($kemenSession['userLevel'], [0, 1], true)) {
+        echo 'Akses ditolak: Anda tidak memiliki hak akses.';
+        return;
+    }
+
     $nspk_id = (int)$this->input->post('nspk_id');
     $jenis   = $this->input->post('jenis');
     $isi     = trim($this->input->post('isi'));
@@ -2822,6 +3014,17 @@ public function InputNSPKDetail() {
 
     if (!$nspk_id || empty($jenis) || empty($isi)) {
         echo 'Data tidak lengkap';
+        return;
+    }
+
+    // Validasi kepemilikan NSPK induk jika Level 1
+    $nspk = $this->db->get_where('nspk', ['id' => $nspk_id, 'deleted_at' => null])->row_array();
+    if (!$nspk) {
+        echo 'NSPK tidak ditemukan';
+        return;
+    }
+    if ($kemenSession['userLevel'] === 1 && $nspk['IdKementerian'] != $kemenSession['idKementerian']) {
+        echo 'Akses ditolak: Anda tidak berhak menambah isian pada data kementerian lain.';
         return;
     }
 
@@ -2836,11 +3039,35 @@ public function InputNSPKDetail() {
 }
 
 public function UpdateNSPKDetail() {
+    $kemenSession = $this->get_kementerian_session();
+    if (!$kemenSession['isLoggedIn'] || !in_array($kemenSession['userLevel'], [0, 1], true)) {
+        echo 'Akses ditolak: Anda tidak memiliki hak akses.';
+        return;
+    }
+
     $id = (int)$this->input->post('id');
     if (!$id) {
         echo 'ID tidak valid';
         return;
     }
+
+    $detail = $this->db->get_where('nspk_detail', ['id' => $id])->row_array();
+    if (!$detail) {
+        echo 'Detail tidak ditemukan';
+        return;
+    }
+
+    // Validasi kepemilikan NSPK induk jika Level 1
+    $nspk = $this->db->get_where('nspk', ['id' => $detail['nspk_id'], 'deleted_at' => null])->row_array();
+    if (!$nspk) {
+        echo 'NSPK tidak ditemukan';
+        return;
+    }
+    if ($kemenSession['userLevel'] === 1 && $nspk['IdKementerian'] != $kemenSession['idKementerian']) {
+        echo 'Akses ditolak: Anda tidak berhak mengubah isian pada data kementerian lain.';
+        return;
+    }
+
     $this->db->where('id', $id);
     $this->db->update('nspk_detail', [
         'jenis'      => $this->input->post('jenis'),
@@ -2848,24 +3075,60 @@ public function UpdateNSPKDetail() {
         'urutan'     => (int)($this->input->post('urutan') ?? 1),
         'updated_at' => date('Y-m-d H:i:s')
     ]);
-    echo $this->db->affected_rows() ? '1' : 'Gagal update detail';
+    echo $this->db->affected_rows() !== false ? '1' : 'Gagal update detail';
 }
 
 public function DeleteNSPKDetail() {
+    $kemenSession = $this->get_kementerian_session();
+    if (!$kemenSession['isLoggedIn'] || !in_array($kemenSession['userLevel'], [0, 1], true)) {
+        echo 'Akses ditolak: Anda tidak memiliki hak akses.';
+        return;
+    }
+
     $id = (int)$this->input->post('id');
     if (!$id) {
         echo 'ID tidak valid';
         return;
     }
+
+    $detail = $this->db->get_where('nspk_detail', ['id' => $id])->row_array();
+    if (!$detail) {
+        echo 'Detail tidak ditemukan';
+        return;
+    }
+
+    // Validasi kepemilikan NSPK induk jika Level 1
+    $nspk = $this->db->get_where('nspk', ['id' => $detail['nspk_id'], 'deleted_at' => null])->row_array();
+    if (!$nspk) {
+        echo 'NSPK tidak ditemukan';
+        return;
+    }
+    if ($kemenSession['userLevel'] === 1 && $nspk['IdKementerian'] != $kemenSession['idKementerian']) {
+        echo 'Akses ditolak: Anda tidak berhak menghapus isian pada data kementerian lain.';
+        return;
+    }
+
     $this->db->where('id', $id);
     $this->db->delete('nspk_detail');
     echo $this->db->affected_rows() ? '1' : 'Gagal hapus detail';
 }
 
 public function InputNSPK() {
-    if (!isset($_SESSION['Level'])) {
-        echo 'Session tidak valid';
+    $kemenSession = $this->get_kementerian_session();
+    if (!$kemenSession['isLoggedIn'] || !in_array($kemenSession['userLevel'], [0, 1], true)) {
+        echo 'Akses ditolak: Anda tidak memiliki hak akses.';
         return;
+    }
+
+    $idKemen = null;
+    if ($kemenSession['userLevel'] === 1) {
+        $idKemen = $kemenSession['idKementerian'];
+        if (!$idKemen) {
+            echo 'Akses ditolak: Sesi kementerian tidak ditemukan.';
+            return;
+        }
+    } else if ($kemenSession['userLevel'] === 0) {
+        $idKemen = $this->input->post('IdKementerian') ? (int)$this->input->post('IdKementerian') : null;
     }
 
     $data = [
@@ -2875,16 +3138,13 @@ public function InputNSPK() {
         'tahun_penetapan' => (int)$this->input->post('tahun_penetapan'),
         'status'          => $this->input->post('status') ?? 'Berlaku',
         'keterangan'      => trim($this->input->post('keterangan')),
+        'IdKementerian'   => $idKemen,
         'created_at'      => date('Y-m-d H:i:s')
     ];
 
     if (empty($data['kode_nspk']) || empty($data['judul_nspk']) || empty($data['bidang'])) {
         echo 'Kode NSPK, Judul, dan Bidang wajib diisi';
         return;
-    }
-
-    if ($_SESSION['Level'] == 1 && isset($_SESSION['IdKementerian'])) {
-        $data['IdKementerian'] = (int)$_SESSION['IdKementerian'];
     }
 
     $this->db->insert('nspk', $data);
@@ -2914,9 +3174,27 @@ public function InputNSPK() {
 }
 
 public function UpdateNSPK() {
-    $id = $this->input->post('id');
+    $kemenSession = $this->get_kementerian_session();
+    if (!$kemenSession['isLoggedIn'] || !in_array($kemenSession['userLevel'], [0, 1], true)) {
+        echo 'Akses ditolak: Anda tidak memiliki hak akses.';
+        return;
+    }
+
+    $id = (int)$this->input->post('id');
     if (!$id) {
         echo 'ID tidak valid';
+        return;
+    }
+
+    $nspk = $this->db->get_where('nspk', ['id' => $id, 'deleted_at' => null])->row_array();
+    if (!$nspk) {
+        echo 'Data tidak ditemukan';
+        return;
+    }
+
+    // Validasi kepemilikan jika Level 1
+    if ($kemenSession['userLevel'] === 1 && $nspk['IdKementerian'] != $kemenSession['idKementerian']) {
+        echo 'Akses ditolak: Anda tidak berhak mengubah data milik kementerian lain.';
         return;
     }
 
@@ -2930,15 +3208,34 @@ public function UpdateNSPK() {
         'keterangan'      => $this->input->post('keterangan'),
         'updated_at'      => date('Y-m-d H:i:s')
     ]);
-    echo $this->db->affected_rows() ? '1' : 'Gagal update NSPK';
+    echo $this->db->affected_rows() !== false ? '1' : 'Gagal update NSPK';
 }
 
 public function DeleteNSPK() {
-    $id = $this->input->post('id');
+    $kemenSession = $this->get_kementerian_session();
+    if (!$kemenSession['isLoggedIn'] || !in_array($kemenSession['userLevel'], [0, 1], true)) {
+        echo 'Akses ditolak: Anda tidak memiliki hak akses.';
+        return;
+    }
+
+    $id = (int)$this->input->post('id');
     if (!$id) {
         echo 'ID tidak valid';
         return;
     }
+
+    $nspk = $this->db->get_where('nspk', ['id' => $id, 'deleted_at' => null])->row_array();
+    if (!$nspk) {
+        echo 'Data tidak ditemukan';
+        return;
+    }
+
+    // Validasi kepemilikan jika Level 1
+    if ($kemenSession['userLevel'] === 1 && $nspk['IdKementerian'] != $kemenSession['idKementerian']) {
+        echo 'Akses ditolak: Anda tidak berhak menghapus data milik kementerian lain.';
+        return;
+    }
+
     $this->db->where('id', $id);
     $this->db->update('nspk', ['deleted_at' => date('Y-m-d H:i:s')]);
     echo $this->db->affected_rows() ? '1' : 'Gagal hapus NSPK';
@@ -2949,34 +3246,30 @@ public function DeleteNSPK() {
 public function Renstra() {
     $Header['Halaman'] = 'Renstra';
 
+    $kemenSession = $this->get_kementerian_session();
     // Filter hanya data milik kementerian login (level 1)
-    if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) {
-        $this->db->where('id_kementerian', $_SESSION['IdKementerian']);
+    if ($kemenSession['isKementerian']) {
+        $this->db->where('id_kementerian', $kemenSession['idKementerian']);
     }
 
     $this->db->where('deleted_at IS NULL');
     $this->db->order_by('kode_pn', 'ASC');
     $Data['PN'] = $this->db->get('renstra_pn')->result_array();
 
-    // === INFO KEMENTERIAN & PERIODE (INI YANG ANDA KURANG) ===
+    // === INFO KEMENTERIAN & PERIODE ===
     $Data['UserKementerianName'] = '-';
     $Data['UserPeriode']         = '-';
 
-    if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) {
-        // Cek apakah IdKementerian ada di session
-        if (isset($_SESSION['IdKementerian']) && is_numeric($_SESSION['IdKementerian'])) {
-            $this->db->where('Id', $_SESSION['IdKementerian']);
-            $this->db->where('deleted_at IS NULL');
-            $kementerian = $this->db->get('kementerian')->row_array();
+    if ($kemenSession['isKementerian']) {
+        $this->db->where('Id', $kemenSession['idKementerian']);
+        $this->db->where('deleted_at IS NULL');
+        $kementerian = $this->db->get('kementerian')->row_array();
 
-            if ($kementerian) {
-                $Data['UserKementerianName'] = $kementerian['NamaKementerian'] ?? '-';
-                $Data['UserPeriode']         = ($kementerian['TahunMulai'] ?? '-') . ' - ' . ($kementerian['TahunAkhir'] ?? '-');
-            } else {
-                $Data['UserKementerianName'] = 'Data kementerian tidak ditemukan (ID: ' . $_SESSION['IdKementerian'] . ')';
-            }
+        if ($kementerian) {
+            $Data['UserKementerianName'] = $kementerian['NamaKementerian'] ?? '-';
+            $Data['UserPeriode']         = ($kementerian['TahunMulai'] ?? '-') . ' - ' . ($kementerian['TahunAkhir'] ?? '-');
         } else {
-            $Data['UserKementerianName'] = 'Session IdKementerian tidak ditemukan';
+            $Data['UserKementerianName'] = 'Data kementerian tidak ditemukan (ID: ' . $kemenSession['idKementerian'] . ')';
         }
     } else {
         $Data['UserKementerianName'] = 'Login sebagai user kementerian (level 1) untuk melihat info';
@@ -3728,24 +4021,28 @@ public function pendanaan() {
         $Data['UserTahunAkhir'] = null;
         $Data['TahunList'] = [];
         
-        $id_kementerian = $_SESSION['IdKementerian'] ?? 0;
+        $id_kementerian = $this->input->get('id_kementerian') ?: ($_SESSION['IdKementerian'] ?? 0);
+        if (!$id_kementerian) {
+            $firstRenja = $this->db->get_where('renja_kl', ['deleted_at' => null])->row_array();
+            if ($firstRenja) {
+                $id_kementerian = (int)$firstRenja['id_kementerian'];
+            }
+        }
         
-        if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) {
-            if ($id_kementerian) {
-                $this->db->where('Id', $id_kementerian);
-                $this->db->where('deleted_at IS NULL');
-                $kementerian = $this->db->get('kementerian')->row_array();
+        if ($id_kementerian) {
+            $this->db->where('Id', $id_kementerian);
+            $this->db->where('deleted_at IS NULL');
+            $kementerian = $this->db->get('kementerian')->row_array();
+            
+            if ($kementerian) {
+                $Data['UserKementerianName'] = $kementerian['NamaKementerian'] ?? '-';
+                $Data['UserPeriode'] = ($kementerian['TahunMulai'] ?? '-') . ' - ' . ($kementerian['TahunAkhir'] ?? '-');
+                $Data['UserTahunMulai'] = $kementerian['TahunMulai'];
+                $Data['UserTahunAkhir'] = $kementerian['TahunAkhir'];
                 
-                if ($kementerian) {
-                    $Data['UserKementerianName'] = $kementerian['NamaKementerian'] ?? '-';
-                    $Data['UserPeriode'] = ($kementerian['TahunMulai'] ?? '-') . ' - ' . ($kementerian['TahunAkhir'] ?? '-');
-                    $Data['UserTahunMulai'] = $kementerian['TahunMulai'];
-                    $Data['UserTahunAkhir'] = $kementerian['TahunAkhir'];
-                    
-                    // Buat daftar tahun
-                    for ($t = $kementerian['TahunMulai']; $t <= $kementerian['TahunAkhir']; $t++) {
-                        $Data['TahunList'][] = $t;
-                    }
+                // Buat daftar tahun
+                for ($t = $kementerian['TahunMulai']; $t <= $kementerian['TahunAkhir']; $t++) {
+                    $Data['TahunList'][] = $t;
                 }
             }
         }
@@ -3946,6 +4243,12 @@ public function pendanaan() {
             show_404();
         }
         
+        $kemenSession = $this->get_kementerian_session();
+        if (!$kemenSession['isLoggedIn'] || ($kemenSession['userLevel'] !== 0 && !$kemenSession['isKementerian'])) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data Renja ini.']);
+            return;
+        }
+        
         $this->form_validation->set_rules('tahun', 'Tahun', 'required|numeric|min_length[4]|max_length[4]');
         $this->form_validation->set_rules('visi', 'Visi', 'trim|required');
         $this->form_validation->set_rules('misi', 'Misi', 'trim|required');
@@ -3956,24 +4259,31 @@ public function pendanaan() {
         }
         
         $id = $this->input->post('id');
-        $id_kementerian = $_SESSION['IdKementerian'] ?? 0;
-        
-        $data = [
-            'id_kementerian' => $id_kementerian,
-            'tahun' => $this->input->post('tahun'),
-            'visi' => $this->input->post('visi'),
-            'misi' => $this->input->post('misi')
-        ];
         
         if ($id && is_numeric($id)) {
-            // Update
+            // Update: periksa kepemilikan Renja
+            if (!$this->check_renja_access($id, $kemenSession)) {
+                echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data Renja ini.']);
+                return;
+            }
+            $data = [
+                'tahun' => $this->input->post('tahun'),
+                'visi' => $this->input->post('visi'),
+                'misi' => $this->input->post('misi')
+            ];
             $this->db->where('id', $id);
-            $this->db->where('id_kementerian', $id_kementerian);
             $this->db->update('renja_kl', $data);
             $new_id = $id;
         } else {
             // Insert
-            $data['created_at'] = date('Y-m-d H:i:s');
+            $id_kemen = ($kemenSession['userLevel'] === 0) ? ($this->input->post('id_kementerian') ?: 0) : $kemenSession['idKementerian'];
+            $data = [
+                'id_kementerian' => $id_kemen,
+                'tahun' => $this->input->post('tahun'),
+                'visi' => $this->input->post('visi'),
+                'misi' => $this->input->post('misi'),
+                'created_at' => date('Y-m-d H:i:s')
+            ];
             $this->db->insert('renja_kl', $data);
             $new_id = $this->db->insert_id();
         }
@@ -3993,6 +4303,12 @@ public function pendanaan() {
             show_404();
         }
         
+        $id_renja = $this->input->post('id_renja');
+        if (!$this->check_renja_access($id_renja)) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
+            return;
+        }
+        
         $this->form_validation->set_rules('id_renja', 'ID Renja', 'required|numeric');
         $this->form_validation->set_rules('kode', 'Kode Prioritas', 'required|max_length[10]');
         $this->form_validation->set_rules('nama_prioritas', 'Nama Prioritas', 'trim|required');
@@ -4005,7 +4321,7 @@ public function pendanaan() {
         
         $id = $this->input->post('id');
         $data = [
-            'id_renja' => $this->input->post('id_renja'),
+            'id_renja' => $id_renja,
             'kode' => $this->input->post('kode'),
             'nama_prioritas' => $this->input->post('nama_prioritas'),
             'alokasi' => $this->input->post('alokasi') ?: 0
@@ -4033,6 +4349,12 @@ public function pendanaan() {
             return;
         }
         
+        $row = $this->db->get_where('renja_prioritas_nasional', ['id' => $id])->row_array();
+        if (!$row || !$this->check_renja_access($row['id_renja'])) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
+            return;
+        }
+        
         $this->db->where('id', $id);
         $this->db->update('renja_prioritas_nasional', ['deleted_at' => date('Y-m-d H:i:s')]);
         echo json_encode(['success' => true, 'message' => 'Data berhasil dihapus']);
@@ -4044,6 +4366,12 @@ public function pendanaan() {
     public function renja_sasaran_save() {
         if (!$this->input->is_ajax_request()) {
             show_404();
+        }
+        
+        $id_renja = $this->input->post('id_renja');
+        if (!$this->check_renja_access($id_renja)) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
+            return;
         }
         
         $this->form_validation->set_rules('id_renja', 'ID Renja', 'required|numeric');
@@ -4060,7 +4388,7 @@ public function pendanaan() {
         
         $id = $this->input->post('id');
         $data = [
-            'id_renja' => $this->input->post('id_renja'),
+            'id_renja' => $id_renja,
             'kode' => $this->input->post('kode'),
             'nama_sasaran' => $this->input->post('nama_sasaran'),
             'indikator_kinerja' => $this->input->post('indikator_kinerja'),
@@ -4090,6 +4418,12 @@ public function pendanaan() {
             return;
         }
         
+        $row = $this->db->get_where('renja_sasaran_strategis', ['id' => $id])->row_array();
+        if (!$row || !$this->check_renja_access($row['id_renja'])) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
+            return;
+        }
+        
         $this->db->where('id', $id);
         $this->db->update('renja_sasaran_strategis', ['deleted_at' => date('Y-m-d H:i:s')]);
         echo json_encode(['success' => true, 'message' => 'Data berhasil dihapus']);
@@ -4103,6 +4437,12 @@ public function pendanaan() {
             show_404();
         }
         
+        $id_renja = $this->input->post('id_renja');
+        if (!$this->check_renja_access($id_renja)) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
+            return;
+        }
+        
         $this->form_validation->set_rules('id_renja', 'ID Renja', 'required|numeric');
         $this->form_validation->set_rules('kode_program', 'Kode Program', 'required|max_length[20]');
         $this->form_validation->set_rules('nama_program', 'Nama Program', 'trim|required');
@@ -4114,7 +4454,7 @@ public function pendanaan() {
         
         $id = $this->input->post('id');
         $data = [
-            'id_renja' => $this->input->post('id_renja'),
+            'id_renja' => $id_renja,
             'kode_program' => $this->input->post('kode_program'),
             'nama_program' => $this->input->post('nama_program')
         ];
@@ -4143,6 +4483,12 @@ public function pendanaan() {
             return;
         }
         
+        $row = $this->db->get_where('renja_program', ['id' => $id])->row_array();
+        if (!$row || !$this->check_renja_access($row['id_renja'])) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
+            return;
+        }
+        
         $this->db->where('id', $id);
         $this->db->update('renja_program', ['deleted_at' => date('Y-m-d H:i:s')]);
         echo json_encode(['success' => true, 'message' => 'Data program berhasil dihapus']);
@@ -4156,6 +4502,13 @@ public function pendanaan() {
             show_404();
         }
         
+        $id_program = $this->input->post('id_program');
+        $prog = $this->db->get_where('renja_program', ['id' => $id_program])->row_array();
+        if (!$prog || !$this->check_renja_access($prog['id_renja'])) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
+            return;
+        }
+        
         $this->form_validation->set_rules('id_program', 'ID Program', 'required|numeric');
         $this->form_validation->set_rules('tahun', 'Tahun', 'required|numeric|min_length[4]|max_length[4]');
         
@@ -4167,7 +4520,7 @@ public function pendanaan() {
         $sources = ['rpp', 'nbp', 'blu', 'ln', 'rm', 'ppdn', 'hibah', 'phbs', 'snh', 'nt'];
         $id = $this->input->post('id');
         $data = [
-            'id_program' => $this->input->post('id_program'),
+            'id_program' => $id_program,
             'tahun' => $this->input->post('tahun')
         ];
         
@@ -4198,6 +4551,13 @@ public function pendanaan() {
         $id = $this->input->post('id');
         if (!$id || !is_numeric($id)) {
             echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+            return;
+        }
+        
+        $row = $this->db->get_where('renja_pendanaan', ['id' => $id])->row_array();
+        $prog = $row ? $this->db->get_where('renja_program', ['id' => $row['id_program']])->row_array() : null;
+        if (!$prog || !$this->check_renja_access($prog['id_renja'])) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
             return;
         }
         
@@ -4387,6 +4747,13 @@ public function pendanaan() {
     public function rekap2_save() {
         if (!$this->input->is_ajax_request()) show_404();
         
+        $kemenSession = $this->get_kementerian_session();
+        $id_renja = $this->input->post('id_renja');
+        if (!$this->check_renja_access($id_renja, $kemenSession)) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
+            return;
+        }
+        
         $this->form_validation->set_rules('id_renja', 'ID Renja', 'required|numeric');
         $this->form_validation->set_rules('sasaran_strategis', 'Sasaran Strategis', 'trim');
         $this->form_validation->set_rules('program', 'Program', 'trim');
@@ -4397,15 +4764,22 @@ public function pendanaan() {
         }
         
         $id = $this->input->post('id');
+        $renjaRow = $this->db->get_where('renja_kl', ['id' => $id_renja])->row_array();
+        $id_kemen = ($kemenSession['userLevel'] === 0) ? ($renjaRow['id_kementerian'] ?? 0) : $kemenSession['idKementerian'];
+        
         $data = [
-            'id_renja' => $this->input->post('id_renja'),
-            'id_kementerian' => $_SESSION['IdKementerian'] ?? 0,
+            'id_renja' => $id_renja,
+            'id_kementerian' => $id_kemen,
             'tahun' => $this->input->post('tahun'),
             'sasaran_strategis' => $this->input->post('sasaran_strategis'),
             'program' => $this->input->post('program')
         ];
         
         if ($id && is_numeric($id)) {
+            if (!$this->check_rekap2_access($id, $kemenSession)) {
+                echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
+                return;
+            }
             $this->db->where('id', $id);
             $this->db->update('renja_rekap2', $data);
         } else {
@@ -4439,6 +4813,12 @@ public function pendanaan() {
     public function rekap2_prioritas_save() {
         if (!$this->input->is_ajax_request()) show_404();
         
+        $id_rekap2 = $this->input->post('id_rekap2');
+        if (!$this->check_rekap2_access($id_rekap2)) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
+            return;
+        }
+        
         $this->form_validation->set_rules('id_rekap2', 'ID Rekap 2', 'required|numeric');
         $this->form_validation->set_rules('kode', 'Kode', 'required|max_length[20]');
         $this->form_validation->set_rules('nama_prioritas', 'Nama Prioritas', 'trim|required');
@@ -4451,7 +4831,7 @@ public function pendanaan() {
         
         $id = $this->input->post('id');
         $data = [
-            'id_rekap2' => $this->input->post('id_rekap2'),
+            'id_rekap2' => $id_rekap2,
             'kode' => $this->input->post('kode'),
             'nama_prioritas' => $this->input->post('nama_prioritas'),
             'program_prioritas' => $this->input->post('program_prioritas'),
@@ -4475,6 +4855,12 @@ public function pendanaan() {
         $id = $this->input->post('id');
         if (!$id || !is_numeric($id)) {
             echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+            return;
+        }
+        
+        $row = $this->db->get_where('renja_rekap2_prioritas', ['id' => $id])->row_array();
+        if (!$row || !$this->check_rekap2_access($row['id_rekap2'])) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
             return;
         }
         
@@ -4505,6 +4891,12 @@ public function pendanaan() {
     public function rekap2_sasaran_save() {
         if (!$this->input->is_ajax_request()) show_404();
         
+        $id_rekap2 = $this->input->post('id_rekap2');
+        if (!$this->check_rekap2_access($id_rekap2)) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
+            return;
+        }
+        
         $this->form_validation->set_rules('id_rekap2', 'ID Rekap 2', 'required|numeric');
         $this->form_validation->set_rules('kode', 'Kode', 'required|max_length[20]');
         $this->form_validation->set_rules('nama_sasaran', 'Nama Sasaran', 'trim|required');
@@ -4516,7 +4908,7 @@ public function pendanaan() {
         
         $id = $this->input->post('id');
         $data = [
-            'id_rekap2' => $this->input->post('id_rekap2'),
+            'id_rekap2' => $id_rekap2,
             'kode' => $this->input->post('kode'),
             'nama_sasaran' => $this->input->post('nama_sasaran'),
             'indikator_kinerja' => $this->input->post('indikator_kinerja'),
@@ -4541,6 +4933,12 @@ public function pendanaan() {
         $id = $this->input->post('id');
         if (!$id || !is_numeric($id)) {
             echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+            return;
+        }
+        
+        $row = $this->db->get_where('renja_rekap2_sasaran_program', ['id' => $id])->row_array();
+        if (!$row || !$this->check_rekap2_access($row['id_rekap2'])) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
             return;
         }
         
@@ -4571,6 +4969,12 @@ public function pendanaan() {
     public function rekap2_output_save() {
         if (!$this->input->is_ajax_request()) show_404();
         
+        $id_rekap2 = $this->input->post('id_rekap2');
+        if (!$this->check_rekap2_access($id_rekap2)) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
+            return;
+        }
+        
         $this->form_validation->set_rules('id_rekap2', 'ID Rekap 2', 'required|numeric');
         $this->form_validation->set_rules('kode', 'Kode', 'required|max_length[20]');
         $this->form_validation->set_rules('nama_output', 'Nama Output', 'trim|required');
@@ -4582,7 +4986,7 @@ public function pendanaan() {
         
         $id = $this->input->post('id');
         $data = [
-            'id_rekap2' => $this->input->post('id_rekap2'),
+            'id_rekap2' => $id_rekap2,
             'kode' => $this->input->post('kode'),
             'nama_output' => $this->input->post('nama_output'),
             'indikator_output' => $this->input->post('indikator_output'),
@@ -4606,6 +5010,12 @@ public function pendanaan() {
         $id = $this->input->post('id');
         if (!$id || !is_numeric($id)) {
             echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+            return;
+        }
+        
+        $row = $this->db->get_where('renja_rekap2_output', ['id' => $id])->row_array();
+        if (!$row || !$this->check_rekap2_access($row['id_rekap2'])) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
             return;
         }
         
@@ -4636,6 +5046,12 @@ public function pendanaan() {
     public function rekap2_kegiatan_save() {
         if (!$this->input->is_ajax_request()) show_404();
         
+        $id_rekap2 = $this->input->post('id_rekap2');
+        if (!$this->check_rekap2_access($id_rekap2)) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
+            return;
+        }
+        
         $this->form_validation->set_rules('id_rekap2', 'ID Rekap 2', 'required|numeric');
         $this->form_validation->set_rules('kode', 'Kode', 'required|max_length[20]');
         $this->form_validation->set_rules('nama_kegiatan', 'Nama Kegiatan', 'trim|required');
@@ -4649,7 +5065,7 @@ public function pendanaan() {
         $sources = ['rpp', 'nbp', 'blu', 'ln', 'rm', 'ppdn', 'hibah', 'phbs', 'snh', 'nt'];
         
         $data = [
-            'id_rekap2' => $this->input->post('id_rekap2'),
+            'id_rekap2' => $id_rekap2,
             'kode' => $this->input->post('kode'),
             'nama_kegiatan' => $this->input->post('nama_kegiatan'),
             'tahun_2026' => $this->input->post('tahun_2026') ?: 0,
@@ -4682,6 +5098,12 @@ public function pendanaan() {
         $id = $this->input->post('id');
         if (!$id || !is_numeric($id)) {
             echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+            return;
+        }
+        
+        $row = $this->db->get_where('renja_rekap2_kegiatan', ['id' => $id])->row_array();
+        if (!$row || !$this->check_rekap2_access($row['id_rekap2'])) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
             return;
         }
         
@@ -4795,11 +5217,17 @@ public function pendanaan() {
     public function rekap2_create() {
         if (!$this->input->is_ajax_request()) show_404();
         
+        $kemenSession = $this->get_kementerian_session();
         $id_renja = $this->input->post('id_renja');
         $tahun = $this->input->post('tahun');
         
         if (!$id_renja || !is_numeric($id_renja)) {
             echo json_encode(['success' => false, 'message' => 'ID Renja tidak valid']);
+            return;
+        }
+        
+        if (!$this->check_renja_access($id_renja, $kemenSession)) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
             return;
         }
         
@@ -4812,9 +5240,12 @@ public function pendanaan() {
             return;
         }
         
+        $renjaRow = $this->db->get_where('renja_kl', ['id' => $id_renja])->row_array();
+        $id_kemen = ($kemenSession['userLevel'] === 0) ? ($renjaRow['id_kementerian'] ?? 0) : $kemenSession['idKementerian'];
+        
         $data = [
             'id_renja' => $id_renja,
-            'id_kementerian' => $_SESSION['IdKementerian'] ?? 0,
+            'id_kementerian' => $id_kemen,
             'tahun' => $tahun,
             'created_at' => date('Y-m-d H:i:s')
         ];
@@ -5025,16 +5456,25 @@ public function pendanaan() {
         if (!$this->input->is_ajax_request()) show_404();
         $this->output->set_content_type('application/json');
         
+        $kemenSession = $this->get_kementerian_session();
         $id_renja = $this->input->post('id_renja');
         if (empty($id_renja) || !is_numeric($id_renja)) {
             echo json_encode(['success' => false, 'message' => 'ID Renja tidak valid']);
             return;
         }
         
+        if (!$this->check_renja_access($id_renja, $kemenSession)) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
+            return;
+        }
+        
         $id = $this->input->post('id');
+        $renjaRow = $this->db->get_where('renja_kl', ['id' => $id_renja])->row_array();
+        $id_kemen = ($kemenSession['userLevel'] === 0) ? ($renjaRow['id_kementerian'] ?? 0) : $kemenSession['idKementerian'];
+        
         $data = [
             'id_renja' => $id_renja,
-            'id_kementerian' => $_SESSION['IdKementerian'] ?? 0,
+            'id_kementerian' => $id_kemen,
             'tahun' => $this->input->post('tahun'),
             'program' => $this->input->post('program'),
             'sasaran_program' => $this->input->post('sasaran_program'),
@@ -5043,6 +5483,10 @@ public function pendanaan() {
         ];
         
         if ($id && is_numeric($id)) {
+            if (!$this->check_rekap3_access($id, $kemenSession)) {
+                echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
+                return;
+            }
             $this->db->where('id', $id);
             $this->db->update('renja_rekap3', $data);
             $message = 'Data Rekap 3 berhasil diupdate';
@@ -5060,11 +5504,17 @@ public function pendanaan() {
         if (!$this->input->is_ajax_request()) show_404();
         $this->output->set_content_type('application/json');
         
+        $kemenSession = $this->get_kementerian_session();
         $id_renja = $this->input->post('id_renja');
         $tahun = $this->input->post('tahun');
         
         if (empty($id_renja) || !is_numeric($id_renja)) {
             echo json_encode(['success' => false, 'message' => 'ID Renja tidak valid']);
+            return;
+        }
+        
+        if (!$this->check_renja_access($id_renja, $kemenSession)) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
             return;
         }
         
@@ -5077,9 +5527,12 @@ public function pendanaan() {
             return;
         }
         
+        $renjaRow = $this->db->get_where('renja_kl', ['id' => $id_renja])->row_array();
+        $id_kemen = ($kemenSession['userLevel'] === 0) ? ($renjaRow['id_kementerian'] ?? 0) : $kemenSession['idKementerian'];
+        
         $data = [
             'id_renja' => $id_renja,
-            'id_kementerian' => $_SESSION['IdKementerian'] ?? 0,
+            'id_kementerian' => $id_kemen,
             'tahun' => $tahun,
             'created_at' => date('Y-m-d H:i:s')
         ];
@@ -5191,6 +5644,11 @@ public function pendanaan() {
             return;
         }
         
+        if (!$this->check_rekap3_access($id_rekap3)) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
+            return;
+        }
+        
         $id = $this->input->post('id');
         $data = [
             'id_rekap3' => $id_rekap3,
@@ -5224,6 +5682,12 @@ public function pendanaan() {
             return;
         }
         
+        $row = $this->db->get_where('renja_rekap3_sasaran_kegiatan', ['id' => $id])->row_array();
+        if (!$row || !$this->check_rekap3_access($row['id_rekap3'])) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
+            return;
+        }
+        
         $this->db->where('id', $id);
         $this->db->update('renja_rekap3_sasaran_kegiatan', ['deleted_at' => date('Y-m-d H:i:s')]);
         echo json_encode(['success' => true, 'message' => 'Data sasaran kegiatan berhasil dihapus']);
@@ -5239,6 +5703,11 @@ public function pendanaan() {
         $id_rekap3 = $this->input->post('id_rekap3');
         if (empty($id_rekap3) || !is_numeric($id_rekap3)) {
             echo json_encode(['success' => false, 'message' => 'ID Rekap 3 tidak valid']);
+            return;
+        }
+        
+        if (!$this->check_rekap3_access($id_rekap3)) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
             return;
         }
         
@@ -5291,6 +5760,12 @@ public function pendanaan() {
             return;
         }
         
+        $row = $this->db->get_where('renja_rekap3_rincian', ['id' => $id])->row_array();
+        if (!$row || !$this->check_rekap3_access($row['id_rekap3'])) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
+            return;
+        }
+        
         $this->db->where('id', $id);
         $this->db->update('renja_rekap3_rincian', ['deleted_at' => date('Y-m-d H:i:s')]);
         echo json_encode(['success' => true, 'message' => 'Data rincian kegiatan berhasil dihapus']);
@@ -5306,6 +5781,11 @@ public function pendanaan() {
         $id_rekap3 = $this->input->post('id_rekap3');
         if (empty($id_rekap3) || !is_numeric($id_rekap3)) {
             echo json_encode(['success' => false, 'message' => 'ID Rekap 3 tidak valid']);
+            return;
+        }
+        
+        if (!$this->check_rekap3_access($id_rekap3)) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
             return;
         }
         
@@ -5349,6 +5829,12 @@ public function pendanaan() {
             return;
         }
         
+        $row = $this->db->get_where('renja_rekap3_pendanaan', ['id' => $id])->row_array();
+        if (!$row || !$this->check_rekap3_access($row['id_rekap3'])) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
+            return;
+        }
+        
         $this->db->where('id', $id);
         $this->db->update('renja_rekap3_pendanaan', ['deleted_at' => date('Y-m-d H:i:s')]);
         echo json_encode(['success' => true, 'message' => 'Data perhitungan pendanaan berhasil dihapus']);
@@ -5364,6 +5850,11 @@ public function pendanaan() {
         $id_rekap3 = $this->input->post('id_rekap3');
         if (empty($id_rekap3) || !is_numeric($id_rekap3)) {
             echo json_encode(['success' => false, 'message' => 'ID Rekap 3 tidak valid']);
+            return;
+        }
+        
+        if (!$this->check_rekap3_access($id_rekap3)) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
             return;
         }
         
@@ -5408,6 +5899,12 @@ public function pendanaan() {
         $id = $this->input->post('id');
         if (!$id || !is_numeric($id)) {
             echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+            return;
+        }
+        
+        $row = $this->db->get_where('renja_rekap3_sumber_dana', ['id' => $id])->row_array();
+        if (!$row || !$this->check_rekap3_access($row['id_rekap3'])) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Anda tidak memiliki hak akses untuk mengubah data ini.']);
             return;
         }
         

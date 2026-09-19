@@ -2,384 +2,463 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>Super Admin IPPD</title>
-    <meta name="description" content="">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,700,900" rel="stylesheet">
-    <link rel="stylesheet" href="<?= base_url('css/bootstrap.min.css'); ?>">
-    <link rel="stylesheet" href="<?= base_url('css/font-awesome.min.css'); ?>">
-    <link rel="stylesheet" href="<?= base_url('css/meanmenu/meanmenu.min.css'); ?>">
-    <link rel="stylesheet" href="<?= base_url('css/wave/button.css'); ?>">
-    <link rel="stylesheet" href="<?= base_url('css/notika-custom-icon.css'); ?>">
-    <link rel="stylesheet" href="<?= base_url('css/jquery.dataTables.min.css'); ?>">
-    <link rel="stylesheet" href="<?= base_url('css/main.css'); ?>">
-    <link rel="stylesheet" href="<?= base_url('style.css'); ?>">
-    <link rel="stylesheet" href="<?= base_url('css/responsive.css'); ?>">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* Navbar Styles */
-        .navbar {
-            background-color:#20c997;
-            padding: 1rem 2rem;
-            border-radius: 0 0 12px 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            position: relative;
-            z-index: 1000;
-        }
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>Admin IPPD</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        .navbar-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,700,900" rel="stylesheet">
 
-        .navbar-brand {
-            color: white;
-            font-weight: bold;
-            font-size: 1.25rem;
-            display: flex;
-            align-items: center;
-        }
+  <!-- CSS utama -->
+  <link rel="stylesheet" href="<?= base_url('css/bootstrap.min.css'); ?>">
+  <link rel="stylesheet" href="<?= base_url('css/font-awesome.min.css'); ?>">
+  <link rel="stylesheet" href="<?= base_url('css/meanmenu/meanmenu.min.css'); ?>">
+  <link rel="stylesheet" href="<?= base_url('css/wave/button.css'); ?>">
+  <link rel="stylesheet" href="<?= base_url('css/notika-custom-icon.css'); ?>">
+  <link rel="stylesheet" href="<?= base_url('css/jquery.dataTables.min.css'); ?>">
+  <link rel="stylesheet" href="<?= base_url('css/main.css'); ?>">
+  <link rel="stylesheet" href="<?= base_url('style.css'); ?>">
+  <link rel="stylesheet" href="<?= base_url('css/responsive.css'); ?>">
 
-        .navbar-brand i {
-            margin-right: 0.5rem;
-        }
+  <!-- Tailwind -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 
-        .navbar-menu {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        .navbar-item {
-            color: rgba(255, 255, 255, 0.9);
-            font-weight: 500;
-            padding: 0.5rem 0;
-            position: relative;
-            transition: all 0.3s ease;
-            text-decoration: none;
-        }
+  <style>
+    .navbar{
+      background-color:#20c997;
+      padding: 0 1.25rem !important;
+      height: 64px !important;
+      border-radius: 0 !important;
+      border: none !important;
+      margin: 0 !important;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08) !important;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      z-index: 99999 !important;
+    }
 
-        .navbar-item:hover {
-            color: white;
-            text-decoration: none;
-        }
+    /* Modal Positioning & Centering */
+    .modal {
+      text-align: center !important;
+      padding: 0 !important;
+      z-index: 105000 !important;
+      overflow-y: auto !important;
+    }
 
-        /* Dropdown Styles */
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
+    .modal:before {
+      content: '';
+      display: inline-block;
+      height: 100%;
+      vertical-align: middle;
+      margin-right: -4px;
+    }
 
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: white;
-            min-width: 200px;
-            box-shadow: 0px 8px 20px 0px rgba(0,0,0,0.15);
-            z-index: 1001;
-            border-radius: 8px;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 1px solid rgba(0,0,0,0.1);
-        }
+    .modal-dialog {
+      display: inline-block !important;
+      text-align: left !important;
+      vertical-align: middle !important;
+      margin: 30px auto !important;
+    }
 
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
+    .modal-backdrop {
+      z-index: 104990 !important;
+    }
 
-        .dropdown-item {
-            color: #4b5563;
-            padding: 0.75rem 1rem;
-            text-decoration: none;
-            display: block;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-            position: relative;
-        }
+    .select2-container--open,
+    .select2-dropdown {
+      z-index: 105050 !important;
+    }
 
-        .dropdown-item:hover {
-            background-color: #f3f4f6;
-            color: #20c997;
-        }
+    .navbar-container{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      width:100%;
+      height:100%;
+      position:relative;
+    }
 
-        /* Submenu Styles */
-        .dropdown-submenu {
-            position: relative;
-        }
+    .navbar-left{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      flex-shrink: 0;
+      min-width: 0;
+      height: 100%;
+    }
 
-        .dropdown-submenu > .dropdown-item:after {
-            content: "▸";
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
+    .sidebar-header-btn{
+      border: none;
+      color: white;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      cursor: pointer;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      transition: .2s ease;
+      flex-shrink: 0;
+      background: transparent;
+    }
+    .sidebar-header-btn:hover{
+      background: rgba(255,255,255,0.25);
+      transform: scale(1.05);
+    }
 
-        .dropdown-submenu .dropdown-submenu-content {
-            display: none;
-            position: absolute;
-            left: 100%;
-            top: 0;
-            background-color: white;
-            min-width: 200px;
-            box-shadow: 0px 8px 20px 0px rgba(0,0,0,0.15);
-            z-index: 1002;
-            border-radius: 0 8px 8px 0;
-            border: 1px solid rgba(0,0,0,0.1);
-            border-left: none;
-        }
+    .navbar-center{
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      height: 100%;
+      pointer-events: none; /* biar klik tidak mengganggu menu */
+    }
+    .navbar-center a{
+      pointer-events: auto; /* link tetap bisa diklik */
+    }
 
-        .dropdown-submenu:hover > .dropdown-submenu-content {
-            display: block;
-        }
+    /* Brand (IPPD) */
+    .navbar-brand{
+      color:#fff;
+      font-weight:900;
+      font-size:1.3rem;
+      display:inline-flex;
+      align-items:center;
+      text-decoration:none;
+      letter-spacing:.5px;
+      user-select:none;
+      flex-shrink: 0;
+      margin: 0;
+      line-height: 1;
+    }
+    .navbar-brand i{ margin-right:.5rem; line-height: 1; }
 
-        /* Logout Button */
-        .logout-btn {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
+    .login-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 16px;
+      border-radius:1000px;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.28);
+      color:#fff;
+      font-weight:700;
+      line-height:1;
+      white-space:nowrap;
+      max-width: 45vw;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
 
-        .logout-btn:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
+    .navbar-menu{
+      display:flex;
+      align-items:center;
+      gap:1.25rem;
+      margin-left:auto;          /* dorong ke kanan */
+      justify-content:flex-end;
+      flex-shrink: 0;
+      height: 100%;
+    }
 
-        /* Mobile Responsiveness */
-        @media (max-width: 768px) {
-            .navbar-container {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .navbar-menu {
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 1rem;
-            }
-            
-            .dropdown-content {
-                position: static;
-                transform: none;
-                width: 100%;
-                display: none;
-            }
-            
-            .dropdown-submenu .dropdown-submenu-content {
-                position: static;
-                border-radius: 0 0 8px 8px;
-                border-left: 1px solid rgba(0,0,0,0.1);
-                margin-left: 15px;
-                box-shadow: none;
-            }
-            
-            .dropdown.active .dropdown-content {
-                display: block;
-            }
-            
-            .dropdown-submenu.active > .dropdown-submenu-content {
-                display: block;
-            }
-        }
+    .navbar-item{
+      color: rgba(255,255,255,0.92);
+      font-weight: 600;
+      padding: .5rem 0;
+      display: inline-flex;
+      align-items: center;
+      margin: 0;
+      line-height: 1;
+      position: relative;
+      transition: all .25s ease;
+      text-decoration:none;
+      white-space:nowrap;
+    }
+    .navbar-item:hover{ color:#fff; text-decoration:none; }
 
-        /* Remove click effects */
-        .navbar-item:focus,
-        .navbar-item:active,
-        .dropdown-item:focus,
-        .dropdown-item:active,
-        .logout-btn:focus,
-        .logout-btn:active {
-            outline: none;
-            box-shadow: none;
-            background-color: transparent !important;
-        }
+    .dropdown{ position:relative; display:inline-flex; align-items:center; height:100%; }
+    .dropdown-content{
+      display:none;
+      position:absolute;
+      background-color:white;
+      min-width:220px;
+      box-shadow:0 8px 20px rgba(0,0,0,0.15);
+      z-index:1201;
+      border-radius:8px;
+      top:100%;
+      left:50%;
+      transform:translateX(-50%);
+      border:1px solid rgba(0,0,0,0.1);
+    }
+    .dropdown:hover .dropdown-content{ display:block; }
 
-        /* Ensure main content doesn't get overlapped */
-        .main-content-wrapper {
-            position: relative;
-            z-index: 1;
-            margin-top: 20px;
-        }
+    .dropdown-item{
+      color:#4b5563;
+      padding:.75rem 1rem;
+      text-decoration:none;
+      display:block;
+      transition: all .25s ease;
+      white-space:nowrap;
+      position:relative;
+    }
+    .dropdown-item:hover{ background-color:#f3f4f6; color:#20c997; }
 
-        /* Additional fix for dropdown arrow */
-        .dropdown .navbar-item i.fa-chevron-down {
-            transition: transform 0.3s ease;
-        }
+    .dropdown-submenu{ position:relative; }
+    .dropdown-submenu > .dropdown-item:after{
+      content:"▸";
+      position:absolute;
+      right:10px;
+      top:50%;
+      transform:translateY(-50%);
+    }
+    .dropdown-submenu .dropdown-submenu-content{
+      display:none;
+      position:absolute;
+      left:100%;
+      top:0;
+      background-color:white;
+      min-width:220px;
+      box-shadow:0 8px 20px rgba(0,0,0,0.15);
+      z-index:1202;
+      border-radius:0 8px 8px 0;
+      border:1px solid rgba(0,0,0,0.1);
+      border-left:none;
+    }
+    .dropdown-submenu:hover > .dropdown-submenu-content{ display:block; }
 
-        .dropdown:hover .navbar-item i.fa-chevron-down {
-            transform: rotate(180deg);
-        }
-    </style>
+    .logout-btn{
+      background-color: rgba(255,255,255,0.12);
+      color:white;
+      border:none;
+      padding:.55rem .9rem;
+      border-radius:10px;
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+      font-weight:700;
+      line-height:1;
+      transition: all .25s ease;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .logout-btn:hover{ background-color: rgba(255,255,255,0.22); }
+
+    .page-top-space{ height: 64px !important; display: block !important; margin: 0 !important; padding: 0 !important; }
+
+    /* Mobile: tetap satu baris, menu scroll horizontal */
+    @media (max-width: 768px){
+      .navbar-container{
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 10px;
+      }
+      .navbar-menu{
+        margin-left:auto;
+        justify-content:flex-end;
+        gap:.75rem;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .navbar-menu::-webkit-scrollbar{ height:6px; }
+      .navbar-menu::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.35); border-radius:999px; }
+
+      /* dropdown di mobile tetap bisa, tapi tidak maksa column */
+      .dropdown-content{
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+    }
+  </style>
 </head>
 
 <body class="bg-gray-50 font-sans">
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="navbar-container">
-            <a href="/ippd/Beranda" class="navbar-brand">
-                <i class="fas fa-chart-line"></i>
-                IPPD1
-            </a>
-            <div class="navbar-menu">
-                
-                <!-- Menu Daerah dengan Submenu -->
-                <div class="dropdown">
-                    <a href="#" class="navbar-item active">Laporan Sakip <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
-                    <div class="dropdown-content">
-                        <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item">Perencanaan</a>
-                            <div class="dropdown-submenu-content">
-                                <a href="<?=base_url('Nasional/VisiRPJPN')?>" class="dropdown-item">Nasional</a>
-                                <a href="<?=base_url('Kementerian/Kementerian')?>" class="dropdown-item">Kementerian</a>
-                                <a href="<?=base_url('Provinsi/VisiRPJPD')?>" class="dropdown-item">Provinsi</a>
-                                <a href="<?=base_url('Daerah/VisiRPJPD')?>" class="dropdown-item">Daerah</a>
-                            </div>
-                        </div>
-                        <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item">Pengukuran</a>
-                            <div class="dropdown-submenu-content">
-                                <a href="#" class="dropdown-item">Nasional</a>
-                                <a href="#" class="dropdown-item">Kementerian</a>
-                                <a href="#" class="dropdown-item">Provinsi</a>
-                                <a href="#" class="dropdown-item">Daerah</a>
-                            </div>
-                        </div>
-                        <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item">Pelaporan</a>
-                            <div class="dropdown-submenu-content">
-                                <a href="#" class="dropdown-item">Nasional</a>
-                                <a href="#" class="dropdown-item">Kementerian</a>
-                                <a href="#" class="dropdown-item">Provinsi</a>
-                                <a href="#" class="dropdown-item">Daerah</a>
-                            </div>
-                        </div>
-                        <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item">Evaluasi</a>
-                            <div class="dropdown-submenu-content">
-                                <a href="#" class="dropdown-item">Nasional</a>
-                                <a href="#" class="dropdown-item">Kementerian</a>
-                                <a href="#" class="dropdown-item">Provinsi</a>
-                                <a href="#" class="dropdown-item">Daerah</a>
-                            </div>
-                        </div>
-                        <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item">Prestasi</a>
-                            <div class="dropdown-submenu-content">
-                                <a href="#" class="dropdown-item">Nasional</a>
-                                <a href="#" class="dropdown-item">Kementerian</a>
-                                <a href="#" class="dropdown-item">Provinsi</a>
-                                <a href="#" class="dropdown-item">Daerah</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Kontak Menu (tanpa dropdown) -->
-                <a href="mailto:info@ippd.example.com" class="navbar-item">Kontak</a>
-                
-                <!-- Tentang Kami Menu (tanpa dropdown) -->
-                <a href="#" class="navbar-item">Tentang Kami</a>
-                
-                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1) { ?>
-                <button class="logout-btn" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i>
-                    Logout
-                </button>
-                <?php } else { ?>
-                <button class="Login-btn" onclick="Login()">
-                    <i class="fas fa-sign-out-alt"></i>
-                    Login
-                </button>
-                <?php } ?>
+
+<?php
+  $LoginInfo = '';
+
+  $userLevel         = $_SESSION['Level'] ?? ($this->session->userdata('Level') ?? ($_SESSION['userLevel'] ?? $this->session->userdata('userLevel')));
+  $userIdKementerian = $_SESSION['IdKementerian'] ?? $this->session->userdata('IdKementerian');
+  $sessionUsername   = $_SESSION['Username'] ?? $this->session->userdata('Username');
+
+  if (isset($userLevel) && (int)$userLevel === 1) {
+    if (!empty($userIdKementerian)) {
+      $rowKemen = $this->db->select('NamaKementerian')
+        ->from('kementerian')
+        ->where('Id', $userIdKementerian)
+        ->where('deleted_at IS NULL', null, false)
+        ->limit(1)
+        ->get()
+        ->row_array();
+
+      $LoginInfo = $rowKemen['NamaKementerian'] ?? ($_SESSION['NamaKementerian'] ?? ($sessionUsername ?? 'Kementerian'));
+    } elseif (!empty($sessionUsername)) {
+      $rowAkun = $this->db->select('IdKementerian')
+        ->from('akun')
+        ->where('Username', $sessionUsername)
+        ->where('Level', 1)
+        ->where('deleted_at IS NULL', null, false)
+        ->limit(1)
+        ->get()
+        ->row_array();
+
+      if (!empty($rowAkun['IdKementerian'])) {
+        $rowKemen = $this->db->select('NamaKementerian')
+          ->from('kementerian')
+          ->where('Id', $rowAkun['IdKementerian'])
+          ->where('deleted_at IS NULL', null, false)
+          ->limit(1)
+          ->get()
+          ->row_array();
+        $LoginInfo = $rowKemen['NamaKementerian'] ?? ($sessionUsername ?? 'Kementerian');
+      } else {
+        $LoginInfo = $_SESSION['NamaKementerian'] ?? $sessionUsername;
+      }
+    } else {
+      $LoginInfo = $_SESSION['NamaKementerian'] ?? 'Kementerian';
+    }
+  } elseif (isset($userLevel) && (int)$userLevel === 0) {
+    $LoginInfo = !empty($sessionUsername) ? $sessionUsername : 'Administrator';
+  } elseif (!empty($userIdKementerian)) {
+    $rowKemen = $this->db->select('NamaKementerian')
+      ->from('kementerian')
+      ->where('Id', $userIdKementerian)
+      ->where('deleted_at IS NULL', null, false)
+      ->limit(1)
+      ->get()
+      ->row_array();
+    $LoginInfo = $rowKemen['NamaKementerian'] ?? ($_SESSION['NamaKementerian'] ?? ($sessionUsername ?? ''));
+  } elseif (!empty($_SESSION['NamaKementerian'])) {
+    $LoginInfo = $_SESSION['NamaKementerian'];
+  } elseif (!empty($sessionUsername)) {
+    $LoginInfo = $sessionUsername;
+  }
+?>
+
+<nav class="navbar">
+  <div class="navbar-container">
+
+    <div class="navbar-left">
+      <button id="sidebarToggle" class="sidebar-header-btn" type="button" aria-label="Toggle sidebar">
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <?php if (!empty($LoginInfo)) { ?>
+        <span class="login-badge" title="<?= html_escape($LoginInfo) ?>">
+          <i class="fas fa-user"></i>
+          <?= html_escape($LoginInfo) ?>
+        </span>
+      <?php } ?>
+    </div>
+
+    <div class="navbar-center">
+      <a href="<?= base_url('Kementerian/Kementerian'); ?>" class="navbar-brand">
+        <i class="fas fa-chart-line"></i>
+        Sistem Perencanaan 
+      </a>
+    </div>
+
+    <div class="navbar-menu">
+      <div class="dropdown">
+        <a href="#" class="navbar-item">Laporan<i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
+        <div class="dropdown-content">
+
+          <div class="dropdown-submenu">
+            <a href="#" class="dropdown-item">Perencanaan</a>
+            <div class="dropdown-submenu-content">
+              <a href="<?=base_url('Nasional/VisiRPJPN')?>" class="dropdown-item">Nasional</a>
+              <a href="<?=base_url('Kementerian/Kementerian')?>" class="dropdown-item">Kementerian</a>
+              <a href="<?=base_url('Provinsi/VisiRPJPD')?>" class="dropdown-item">Provinsi</a>
+              <a href="<?=base_url('Daerah/VisiRPJPD')?>" class="dropdown-item">Daerah</a>
             </div>
+          </div>
+
+          <div class="dropdown-submenu">
+            <a href="#" class="dropdown-item">Pengukuran</a>
+            <div class="dropdown-submenu-content">
+              <a href="#" class="dropdown-item">Nasional</a>
+              <a href="#" class="dropdown-item">Kementerian</a>
+              <a href="#" class="dropdown-item">Provinsi</a>
+              <a href="#" class="dropdown-item">Daerah</a>
+            </div>
+          </div>
+
+          <div class="dropdown-submenu">
+            <a href="#" class="dropdown-item">Pelaporan</a>
+            <div class="dropdown-submenu-content">
+              <a href="#" class="dropdown-item">Nasional</a>
+              <a href="#" class="dropdown-item">Kementerian</a>
+              <a href="#" class="dropdown-item">Provinsi</a>
+              <a href="#" class="dropdown-item">Daerah</a>
+            </div>
+          </div>
+
+          <div class="dropdown-submenu">
+            <a href="#" class="dropdown-item">Evaluasi</a>
+            <div class="dropdown-submenu-content">
+              <a href="#" class="dropdown-item">Nasional</a>
+              <a href="#" class="dropdown-item">Kementerian</a>
+              <a href="#" class="dropdown-item">Provinsi</a>
+              <a href="#" class="dropdown-item">Daerah</a>
+            </div>
+          </div>
+
+          <div class="dropdown-submenu">
+            <a href="#" class="dropdown-item">Prestasi</a>
+            <div class="dropdown-submenu-content">
+              <a href="#" class="dropdown-item">Nasional</a>
+              <a href="#" class="dropdown-item">Kementerian</a>
+              <a href="#" class="dropdown-item">Provinsi</a>
+              <a href="#" class="dropdown-item">Daerah</a>
+            </div>
+          </div>
+
         </div>
-    </nav>
+      </div>
+
+      <?php if (!empty($_SESSION['isLoggedIn']) || (isset($userLevel) && in_array((int)$userLevel, [0, 1]))) { ?>
+        <button class="logout-btn" onclick="logout()" type="button">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      <?php } else { ?>
+        <button class="logout-btn" onclick="Login()" type="button">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+      <?php } ?>
+    </div>
+
+  </div>
+</nav>
+
+<div class="page-top-space"></div>
+
 <script>
-        // Log Out Clear Session in Controller Beranda
-        function logout() {
-            window.location.href = '/ippd';
-        }
+  function logout(){ window.location.href = '/ippd'; }
+  function Login(){ window.location.href = '/ippd/Home'; }
 
-        // Redirect to Login
-        function Login() {    
-            window.location.href = '/ippd/Home';
-        }
+  document.addEventListener('DOMContentLoaded', function () {
+    const btn = document.getElementById('sidebarToggle');
+    if (!btn) return;
 
-        // Mobile menu handling
-        document.addEventListener('DOMContentLoaded', function() {
-            // Handle mobile menu clicks
-            if (window.innerWidth <= 768) {
-                document.addEventListener('click', function(e) {
-                    // Close all dropdowns if clicking outside
-                    if (!e.target.closest('.dropdown')) {
-                        document.querySelectorAll('.dropdown-content, .dropdown-submenu-content').forEach(menu => {
-                            menu.style.display = 'none';
-                        });
-                        document.querySelectorAll('.dropdown, .dropdown-submenu').forEach(item => {
-                            item.classList.remove('active');
-                        });
-                    }
-                });
+    if (localStorage.getItem('sidebarMini') === 'true') {
+      document.body.classList.add('sidebar-mini');
+    }
 
-                // Toggle main dropdowns
-                document.querySelectorAll('.navbar-item').forEach(item => {
-                    item.addEventListener('click', function(e) {
-                        if (window.innerWidth <= 768 && this.nextElementSibling && 
-                            this.nextElementSibling.classList.contains('dropdown-content')) {
-                            e.preventDefault();
-                            const dropdown = this.closest('.dropdown');
-                            const content = dropdown.querySelector('.dropdown-content');
-                            
-                            // Close other dropdowns
-                            document.querySelectorAll('.dropdown-content, .dropdown-submenu-content').forEach(menu => {
-                                if (menu !== content) menu.style.display = 'none';
-                            });
-                            
-                            // Toggle current dropdown
-                            content.style.display = content.style.display === 'block' ? 'none' : 'block';
-                            dropdown.classList.toggle('active');
-                        }
-                    });
-                });
-
-                // Toggle submenus
-                document.querySelectorAll('.dropdown-submenu > .dropdown-item').forEach(item => {
-                    item.addEventListener('click', function(e) {
-                        if (window.innerWidth <= 768) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            const submenu = this.nextElementSibling;
-                            const isVisible = submenu.style.display === 'block';
-                            
-                            // Close all submenus first
-                            document.querySelectorAll('.dropdown-submenu-content').forEach(sm => {
-                                sm.style.display = 'none';
-                            });
-                            
-                            // Toggle current submenu if it wasn't visible
-                            if (!isVisible) {
-                                submenu.style.display = 'block';
-                                this.closest('.dropdown-submenu').classList.add('active');
-                            }
-                        }
-                    });
-                });
-            }
-        });
-    </script>
-</body>
-</html>
+    btn.dataset.hasToggleEvent = "true";
+    btn.addEventListener('click', function () {
+      document.body.classList.toggle('sidebar-mini');
+      localStorage.setItem('sidebarMini', document.body.classList.contains('sidebar-mini'));
+    });
+  });
+</script>

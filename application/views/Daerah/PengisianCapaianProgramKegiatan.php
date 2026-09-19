@@ -699,6 +699,13 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
 
 <div class="main-content">
   <!-- Filter Wilayah Top (Sebelum Login & Saat Login Sebagai Daerah) -->
+  
+
+  <!-- Page Header (Selaras Notika & E-LKPJ) -->
+  <div class="page-header-box">
+    <h1 class="page-title">BAB 3.1 CAPAIAN KINERJA PROGRAM KEGIATAN</h1>
+    <p class="page-subtitle">Pelaksanaan Urusan Pemerintahan Daerah (Urusan Wajib &amp; Pilihan), realisasi target kinerja dan anggaran, serta evaluasi permasalahan, solusi, dan tindak lanjut rekomendasi DPRD.</p>
+  </div>
   <?php if (!$IsLoggedIn || !empty($IsDaerah)) { 
     $provKodeCurrent = !empty($KodeWilayah) ? substr($KodeWilayah, 0, 2) : '';
     $ListKabKotaTop = [];
@@ -769,21 +776,6 @@ td.num { text-align: right; white-space: nowrap; font-family: 'Roboto Mono', mon
       </div>
     </div>
   <?php } ?>
-
-  <!-- Page Header (Selaras Notika & E-LKPJ) -->
-  <div class="page-header-box">
-    <div class="page-badge">
-      <i class="fa fa-book"></i> E-LKPJ &bull; Bab III &bull; 3.1
-      <?php if (!empty($NamaWilayah)): ?>
-        &bull; <i class="fa fa-map-marker"></i> <?= htmlspecialchars($NamaWilayah) ?>
-      <?php endif; ?>
-      <?php if (!empty($IsRole4) && !empty($NamaInstansi)): ?>
-        &bull; <i class="fa fa-building"></i> <?= htmlspecialchars($NamaInstansi) ?> (Role Instansi)
-      <?php endif; ?>
-    </div>
-    <h1 class="page-title">BAB 3.1 : Capaian Kinerja Program &amp; Kegiatan</h1>
-    <p class="page-subtitle">Pelaksanaan Urusan Pemerintahan Daerah (Urusan Wajib &amp; Pilihan), realisasi target kinerja dan anggaran, serta evaluasi permasalahan, solusi, dan tindak lanjut rekomendasi DPRD.</p>
-  </div>
 
   <!-- Toolbar & Filters -->
   <div class="toolbar-card">

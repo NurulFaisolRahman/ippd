@@ -33,12 +33,14 @@
         .sidebar-wrapper {
             width: var(--sidebar-width);
             background-color: #f8f9fa;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            padding-top: 70px;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            height: calc(100vh - 64px) !important;
+            position: fixed !important;
+            left: 0 !important;
+            top: 64px !important;
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+            border-top: none !important;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.08);
             z-index: 999;
             overflow-y: auto;
             transition: all var(--transition-speed) ease;
@@ -257,11 +259,7 @@
         }
     </style>
 </head>
-<body>
-    <!-- Toggle Button -->
-    <button class="sidebar-toggle" id="sidebarToggle">
-        <i class="fa fa-bars"></i>
-    </button>
+    <!-- Toggle Button sudah terintegrasi di navbar header.php -->
 
     <!-- Sidebar -->
     <div class="sidebar-wrapper">
@@ -355,12 +353,15 @@
                 body.classList.add('sidebar-mini');
             }
             
-            // Toggle sidebar
-            sidebarToggle.addEventListener('click', function() {
-                body.classList.toggle('sidebar-mini');
-                // Save state to localStorage
-                localStorage.setItem('sidebarMini', body.classList.contains('sidebar-mini'));
-            });
+            // Toggle sidebar (jika belum di-handle oleh header.php)
+            if (sidebarToggle && !sidebarToggle.dataset.hasToggleEvent) {
+                sidebarToggle.dataset.hasToggleEvent = "true";
+                sidebarToggle.addEventListener('click', function() {
+                    body.classList.toggle('sidebar-mini');
+                    // Save state to localStorage
+                    localStorage.setItem('sidebarMini', body.classList.contains('sidebar-mini'));
+                });
+            }
             
             // Close all dropdowns except the active one
             document.querySelectorAll('.sidebar-dropdown').forEach(dropdown => {

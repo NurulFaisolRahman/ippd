@@ -25477,5 +25477,10 @@
     public function BAB3_4B() {
         redirect('Instansi/BAB3_4B' . (!empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : ''));
     }
+
+    public function BAB3_5() {
+        redirect('Instansi/BAB3_5' . (!empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : ''));
+    }
 }
+
 

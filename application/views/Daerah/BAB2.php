@@ -966,16 +966,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
 
   <!-- Breadcrumb & Page Title -->
   <div class="page-header-box">
-    <div class="page-badge">
-      <i class="fa fa-book"></i> E-LKPJ &bull; Bab II
-      <?php if (!empty($NamaWilayah)): ?>
-        &bull; <i class="fa fa-map-marker"></i> <?= htmlspecialchars($NamaWilayah) ?>
-      <?php endif; ?>
-      <?php if (!empty($IsRole4) && !empty($NamaInstansi)): ?>
-        &bull; <i class="fa fa-building"></i> <?= htmlspecialchars($NamaInstansi) ?> (Role Instansi)
-      <?php endif; ?>
-    </div>
-    <h1 class="page-title">BAB 2 : Pengelolaan Keuangan Daerah</h1>
+    <h1 class="page-title">BAB 2 PENGELOLAAN KEUANGAN DAERAH</h1>
     <p class="page-subtitle">Perubahan Anggaran Pendapatan, Belanja, dan Pembiayaan Daerah <?= htmlspecialchars($NamaWilayah ?: 'Kabupaten Situbondo') ?> Tahun Anggaran <?= $tahunAktif ?> (Sebelum dan Sesudah Perubahan).</p>
   </div>
 

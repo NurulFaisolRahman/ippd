@@ -91,6 +91,19 @@ $route['Instansi/GetBab3IkdPerkembangan'] = 'Instansi/GetBab3IkdPerkembangan';
 $route['Instansi/SaveBab3IkdPerkembangan'] = 'Instansi/SaveBab3IkdPerkembangan';
 $route['Instansi/SinkronIkdDaerah'] = 'Instansi/SinkronIkdDaerah';
 
+// BAB 3.5 Penghargaan Routes
+$route['Instansi/BAB3_5'] = 'Instansi/BAB3_5';
+$route['Instansi/BAB3_5/(.+)'] = 'Instansi/BAB3_5/$1';
+$route['Instansi/Bab3_5'] = 'Instansi/BAB3_5';
+$route['Instansi/Bab3_5/(.+)'] = 'Instansi/BAB3_5/$1';
+$route['Instansi/bab3_5'] = 'Instansi/BAB3_5';
+$route['Instansi/bab3_5/(.+)'] = 'Instansi/BAB3_5/$1';
+$route['Instansi/PengisianPenghargaan'] = 'Instansi/BAB3_5';
+$route['Instansi/PengisianPenghargaan/(.+)'] = 'Instansi/BAB3_5/$1';
+$route['Instansi/GetPenghargaan'] = 'Instansi/GetPenghargaan';
+$route['Instansi/SavePenghargaan'] = 'Instansi/SavePenghargaan';
+$route['Instansi/DeletePenghargaan'] = 'Instansi/DeletePenghargaan';
+$route['Instansi/ExportPenghargaanExcel'] = 'Instansi/ExportPenghargaanExcel';
 
 // IPPD Routes
 $route['Instansi/TabelIPPD'] = 'Instansi/TabelIPPD';

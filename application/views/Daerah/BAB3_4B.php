@@ -624,13 +624,8 @@ body {
   
   <!-- Page Header (Notika Style) -->
   <div class="page-header-box">
-    <div class="page-badge">
-      <i class="fa fa-book"></i> E-LKPJ &bull; Bab III &bull; 3.4 &bull; <?= htmlspecialchars($namaWilayah) ?>
-      <?php if (!empty($isRole4) && !empty($namaInstansi)): ?>
-        &bull; <i class="fa fa-building"></i> <?= htmlspecialchars($namaInstansi) ?> (Role Instansi)
-      <?php endif; ?>
-    </div>
-    <h1 class="page-title">BAB 3.4 : Capaian Kinerja Daerah (IKU & IKD)</h1>
+    
+    <h1 class="page-title">BAB 3.4 CAPAIAN KINERJA DAERAH (IKU DAN IKD)</h1>
     <p class="page-subtitle">3.4 Bagian B : Pencatatan dan pemantauan capaian target kinerja serta analisis tren tahunan 4 Aspek Indikator Kinerja Daerah (IKD) Pemerintah <?= htmlspecialchars($namaWilayah) ?>.</p>
   </div>
 

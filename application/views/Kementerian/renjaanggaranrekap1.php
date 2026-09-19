@@ -1,4 +1,11 @@
 <?php $this->load->view('Kementerian/Sidebar'); ?>
+<?php
+$userLevel = isset($_SESSION['Level']) ? (int)$_SESSION['Level'] : (isset($_SESSION['userLevel']) ? (int)$_SESSION['userLevel'] : null);
+$isSuperAdmin = ($userLevel === 0);
+$sessionKemenId = $_SESSION['IdKementerian'] ?? null;
+$renjaKemenId = $Renja['id_kementerian'] ?? ($IdKementerian ?? null);
+$canCrud = $isSuperAdmin || ($userLevel === 1 && !empty($sessionKemenId) && ($renjaKemenId === null || (int)$sessionKemenId === (int)$renjaKemenId));
+?>
 
 <style>
     .renja-section {
@@ -297,9 +304,11 @@
 
                 <!-- Tombol Aksi -->
                 <div class="button-icon-btn sm-res-mg-t-30" style="margin-bottom:15px;">
+                    <?php if ($canCrud): ?>
                     <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalRenja">
                         <i class="notika-icon notika-edit"></i> <b>Buat/Edit Renja</b>
                     </button>
+                    <?php endif; ?>
                     <?php if (!empty($Renja)): ?>
                     <button type="button" class="btn btn-info notika-btn-info" onclick="window.print()">
                         <i class="notika-icon notika-print"></i> <b>Cetak</b>
@@ -315,7 +324,9 @@
                 <div class="alert alert-warning text-center">
                     <i class="notika-icon notika-alert"></i>
                     <h4>Belum ada data Renja</h4>
+                    <?php if ($canCrud): ?>
                     <p>Klik tombol <b>"Buat/Edit Renja"</b> untuk mulai mengisi data.</p>
+                    <?php endif; ?>
                 </div>
                 <?php else: ?>
 
@@ -382,11 +393,13 @@
                     <div class="renja-section">
                         <div class="section-title">
                             <span>PRIORITAS NASIONAL</span>
+                            <?php if ($canCrud): ?>
                             <div>
                                 <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#ModalPrioritas">
                                     <i class="notika-icon notika-plus"></i> Tambah
                                 </button>
                             </div>
+                            <?php endif; ?>
                         </div>
                         <div class="table-responsive">
                             <table class="table table-bordered table-renja">
@@ -394,8 +407,10 @@
                                     <tr>
                                         <th width="10%">KODE</th>
                                         <th>PRIORITAS</th>
-                                        <th width="20%" class="text-right">ALOKASI (RIBU)</th>
+                                        <th width="<?= $canCrud ? '20%' : '30%' ?>" class="text-right">ALOKASI (RIBU)</th>
+                                        <?php if ($canCrud): ?>
                                         <th width="10%" class="text-center">AKSI</th>
+                                        <?php endif; ?>
                                     </tr>
                                 </thead>
                                 <tbody id="prioritasBody">
@@ -408,6 +423,7 @@
                                         <td><?= htmlspecialchars($p['kode']) ?></td>
                                         <td><?= htmlspecialchars($p['nama_prioritas']) ?></td>
                                         <td class="text-right uang-besar"><?= number_format($p['alokasi'], 0, ',', '.') ?></td>
+                                        <?php if ($canCrud): ?>
                                         <td class="text-center">
                                             <div class="dropdown-aksi">
                                                 <button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)">
@@ -427,11 +443,12 @@
                                                 </div>
                                             </div>
                                         </td>
+                                        <?php endif; ?>
                                     </tr>
                                     <?php endforeach; ?>
                                     <?php if (empty($PrioritasNasional)): ?>
                                     <tr>
-                                        <td colspan="4" class="text-center text-muted">Belum ada data prioritas nasional</td>
+                                        <td colspan="<?= $canCrud ? '4' : '3' ?>" class="text-center text-muted">Belum ada data prioritas nasional</td>
                                     </tr>
                                     <?php endif; ?>
                                 </tbody>
@@ -439,7 +456,9 @@
                                     <tr class="total-row">
                                         <td colspan="2" class="text-right"><strong>TOTAL</strong></td>
                                         <td class="text-right uang-besar" id="totalPrioritas"><?= number_format($total_prioritas, 0, ',', '.') ?></td>
+                                        <?php if ($canCrud): ?>
                                         <td></td>
+                                        <?php endif; ?>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -450,11 +469,13 @@
                     <div class="renja-section">
                         <div class="section-title">
                             <span>SASARAN STRATEGIS DAN INDIKATOR KINERJA</span>
+                            <?php if ($canCrud): ?>
                             <div>
                                 <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#ModalSasaran">
                                     <i class="notika-icon notika-plus"></i> Tambah
                                 </button>
                             </div>
+                            <?php endif; ?>
                         </div>
                         <div class="table-responsive">
                             <table class="table table-bordered table-renja">
@@ -463,8 +484,10 @@
                                         <th width="8%">KODE</th>
                                         <th>SASARAN STRATEGIS / INDIKATOR KINERJA</th>
                                         <th width="12%" class="text-right">TARGET</th>
-                                        <th width="18%" class="text-right">ALOKASI (RIBU)</th>
+                                        <th width="<?= $canCrud ? '18%' : '28%' ?>" class="text-right">ALOKASI (RIBU)</th>
+                                        <?php if ($canCrud): ?>
                                         <th width="10%" class="text-center">AKSI</th>
+                                        <?php endif; ?>
                                     </tr>
                                 </thead>
                                 <tbody id="sasaranBody">
@@ -481,6 +504,7 @@
                                         </td>
                                         <td class="text-right"><?= number_format($s['target'], 2, ',', '.') ?></td>
                                         <td class="text-right uang-besar"><?= number_format($s['alokasi'], 0, ',', '.') ?></td>
+                                        <?php if ($canCrud): ?>
                                         <td class="text-center">
                                             <div class="dropdown-aksi">
                                                 <button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)">
@@ -502,11 +526,12 @@
                                                 </div>
                                             </div>
                                         </td>
+                                        <?php endif; ?>
                                     </tr>
                                     <?php endforeach; ?>
                                     <?php if (empty($SasaranStrategis)): ?>
                                     <tr>
-                                        <td colspan="5" class="text-center text-muted">Belum ada data sasaran strategis</td>
+                                        <td colspan="<?= $canCrud ? '5' : '4' ?>" class="text-center text-muted">Belum ada data sasaran strategis</td>
                                     </tr>
                                     <?php endif; ?>
                                 </tbody>
@@ -514,7 +539,9 @@
                                     <tr class="total-row">
                                         <td colspan="3" class="text-right"><strong>TOTAL</strong></td>
                                         <td class="text-right uang-besar" id="totalSasaran"><?= number_format($total_sasaran, 0, ',', '.') ?></td>
+                                        <?php if ($canCrud): ?>
                                         <td></td>
+                                        <?php endif; ?>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -525,11 +552,13 @@
                     <div class="renja-section">
                         <div class="section-title">
                             <span>PROGRAM DAN PENDANAAN</span>
+                            <?php if ($canCrud): ?>
                             <div>
                                 <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#ModalProgram">
                                     <i class="notika-icon notika-plus"></i> Tambah Program
                                 </button>
                             </div>
+                            <?php endif; ?>
                         </div>
 
                         <?php if (!empty($Program)): ?>
@@ -564,8 +593,10 @@
                                                 <tr>
                                                     <th rowspan="2" width="10%">TAHUN</th>
                                                     <th colspan="10" class="text-center">SUMBER DANA</th>
-                                                    <th rowspan="2" width="15%" class="text-right">TOTAL</th>
+                                                    <th rowspan="2" width="<?= $canCrud ? '15%' : '23%' ?>" class="text-right">TOTAL</th>
+                                                    <?php if ($canCrud): ?>
                                                     <th rowspan="2" width="8%" class="text-center">AKSI</th>
+                                                    <?php endif; ?>
                                                 </tr>
                                                 <tr>
                                                     <th class="text-right">RPP</th>
@@ -594,6 +625,7 @@
                                                     <td class="text-right uang"><?= number_format($pd[$src] ?? 0, 0, ',', '.') ?></td>
                                                     <?php endforeach; ?>
                                                     <td class="text-right uang-besar"><?= number_format($pd['total'], 0, ',', '.') ?></td>
+                                                    <?php if ($canCrud): ?>
                                                     <td class="text-center">
                                                         <div class="dropdown-aksi">
                                                             <button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)">
@@ -615,12 +647,13 @@
                                                             </div>
                                                         </div>
                                                     </td>
+                                                    <?php endif; ?>
                                                 </tr>
                                                 <?php endforeach; ?>
                                                 
                                                 <?php if (empty($program['pendanaan'])): ?>
                                                 <tr>
-                                                    <td colspan="12" class="text-center text-muted">Belum ada data pendanaan</td>
+                                                    <td colspan="<?= $canCrud ? '13' : '12' ?>" class="text-center text-muted">Belum ada data pendanaan</td>
                                                 </tr>
                                                 <?php endif; ?>
                                             </tbody>
@@ -641,12 +674,15 @@
                                                     <td class="text-right uang-besar" style="font-size:16px;">
                                                         <?= number_format($grand_total, 0, ',', '.') ?>
                                                     </td>
+                                                    <?php if ($canCrud): ?>
                                                     <td></td>
+                                                    <?php endif; ?>
                                                 </tr>
                                             </tfoot>
                                         </table>
                                     </div>
                                     <div class="text-right" style="margin-top:10px;">
+                                        <?php if ($canCrud): ?>
                                         <button class="btn btn-xs btn-primary add-pendanaan" 
                                             data-id_program="<?= $program['id'] ?>"
                                             data-kode="<?= htmlspecialchars($program['kode_program']) ?>">
@@ -655,13 +691,14 @@
                                         <button class="btn btn-xs btn-danger delete-program" data-id="<?= $program['id'] ?>">
                                             <i class="notika-icon notika-trash"></i> Hapus Program
                                         </button>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
                             <?php endforeach; ?>
                         <?php else: ?>
                         <div class="alert alert-info text-center">
-                            Belum ada program. Klik <b>"Tambah Program"</b> untuk mulai mengisi.
+                            Belum ada program. <?= $canCrud ? 'Klik <b>"Tambah Program"</b> untuk mulai mengisi.' : '' ?>
                         </div>
                         <?php endif; ?>
                     </div>
@@ -714,6 +751,7 @@
 <!-- ============================================================ -->
 <!-- MODALS -->
 <!-- ============================================================ -->
+<?php if ($canCrud): ?>
 
 <!-- Modal Renja -->
 <div class="modal fade" id="ModalRenja" role="dialog">
@@ -811,9 +849,12 @@
                                 <input type="number" class="form-control" name="target" id="SasaranTarget" step="0.01">
                             </div>
                         </div>
+                                <input type="number" step="0.01" class="form-control" name="target" id="SasaranTarget" value="0">
+                            </div>
+                        </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label><b>Alokasi (Ribu Rupiah)</b></label>
+                                <label><b>Alokasi (Ribu)</b></label>
                                 <input type="number" class="form-control" name="alokasi" id="SasaranAlokasi" value="0" step="1000">
                             </div>
                         </div>
@@ -836,15 +877,15 @@
             <div class="modal-body">
                 <form id="FormProgram">
                     <input type="hidden" name="id" id="ProgramId">
-                    <input type="hidden" name="id_renja" id="ProgramRenjaId" value="<?= $Renja['id'] ?? '' ?>">
+                    <input type="hidden" name="id_renja" id="ProgramIdRenja" value="<?= $Renja['id'] ?? '' ?>">
                     <div class="form-group">
                         <label><b>Kode Program</b></label>
-                        <input type="text" class="form-control" name="kode_program" id="ProgramKode" required maxlength="20">
-                        <small class="text-muted">Contoh: 027.DQ, 027.WA</small>
+                        <input type="text" class="form-control" name="kode_program" id="ProgramKode" 
+                            placeholder="Contoh: 023.01.WA" required>
                     </div>
                     <div class="form-group">
                         <label><b>Nama Program</b></label>
-                        <input type="text" class="form-control" name="nama_program" id="ProgramNama" required>
+                        <textarea class="form-control" name="nama_program" id="ProgramNama" rows="3" required></textarea>
                     </div>
                     <button type="submit" class="btn btn-success">SIMPAN</button>
                 </form>
@@ -859,20 +900,25 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">×</button>
-                <h4 class="modal-title">Pendanaan Program</h4>
+                <h4 class="modal-title" id="PendanaanModalTitle">Tambah Pendanaan</h4>
             </div>
             <div class="modal-body">
                 <form id="FormPendanaan">
                     <input type="hidden" name="id" id="PendanaanId">
-                    <input type="hidden" name="id_program" id="PendanaanIdProgram" required>
+                    <input type="hidden" name="id_program" id="PendanaanIdProgram">
+                    
+                    <div class="alert alert-info">
+                        Program: <b id="PendanaanKodeProgram"></b>
+                    </div>
                     
                     <div class="form-group">
                         <label><b>Tahun</b></label>
-                        <input type="number" class="form-control" name="tahun" id="PendanaanTahun" min="2020" max="2045" required>
+                        <input type="number" class="form-control" name="tahun" id="PendanaanTahun" 
+                            value="<?= $Renja['tahun'] ?? date('Y') ?>" required>
                     </div>
                     
+                    <label><b>Sumber Pendanaan (Ribu Rp)</b></label>
                     <div class="row">
-                        <div class="col-md-12"><h5>Sumber Dana</h5></div>
                         <?php 
                         $sumber_dana = [
                             'rpp' => 'RPP',
@@ -910,6 +956,7 @@
         </div>
     </div>
 </div>
+<?php endif; ?>
 
 <!-- ============================================================ -->
 <!-- SCRIPTS -->
@@ -929,6 +976,7 @@
 var BaseURL = '<?= base_url() ?>';
 var IdRenja = <?= json_encode($Renja['id'] ?? null) ?>;
 var CurrentTahun = <?= json_encode($Renja['tahun'] ?? date('Y')) ?>;
+var canCrud = <?= $canCrud ? 'true' : 'false' ?>;
 
 // ============================================================
 // FUNGSI TOGGLE DROPDOWN
@@ -1033,9 +1081,12 @@ function renderData(data) {
     // 2. PRIORITAS NASIONAL
     html += '<div class="renja-section">';
     html += '<div class="section-title"><span>PRIORITAS NASIONAL</span>';
-    html += '<div><button class="btn btn-sm btn-success" data-toggle="modal" data-target="#ModalPrioritas"><i class="notika-icon notika-plus"></i> Tambah</button></div></div>';
+    if (canCrud) {
+        html += '<div><button class="btn btn-sm btn-success" data-toggle="modal" data-target="#ModalPrioritas"><i class="notika-icon notika-plus"></i> Tambah</button></div>';
+    }
+    html += '</div>';
     html += '<div class="table-responsive"><table class="table table-bordered table-renja">';
-    html += '<thead><tr><th width="10%">KODE</th><th>PRIORITAS</th><th width="20%" class="text-right">ALOKASI (RIBU)</th><th width="10%" class="text-center">AKSI</th></tr></thead>';
+    html += '<thead><tr><th width="10%">KODE</th><th>PRIORITAS</th><th width="' + (canCrud ? '20%' : '30%') + '" class="text-right">ALOKASI (RIBU)</th>' + (canCrud ? '<th width="10%" class="text-center">AKSI</th>' : '') + '</tr></thead>';
     html += '<tbody>';
     
     if (data.prioritas && data.prioritas.length > 0) {
@@ -1044,30 +1095,36 @@ function renderData(data) {
             html += '<td>' + escapeHtml(p.kode) + '</td>';
             html += '<td>' + escapeHtml(p.nama_prioritas) + '</td>';
             html += '<td class="text-right uang-besar">' + formatNumber(p.alokasi) + '</td>';
-            html += '<td class="text-center">';
-            html += '<div class="dropdown-aksi">';
-            html += '<button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)"><i class="fa fa-ellipsis-v"></i></button>';
-            html += '<div class="menu-dropdown">';
-            html += '<button class="item-dropdown edit-prioritas" data-id="' + p.id + '" data-kode="' + escapeHtml(p.kode) + '" data-nama="' + escapeHtml(p.nama_prioritas) + '" data-alokasi="' + p.alokasi + '"><i class="fa fa-pencil"></i> Edit</button>';
-            html += '<button class="item-dropdown text-danger delete-prioritas" data-id="' + p.id + '"><i class="fa fa-trash"></i> Hapus</button>';
-            html += '</div></div>';
-            html += '</td></tr>';
+            if (canCrud) {
+                html += '<td class="text-center">';
+                html += '<div class="dropdown-aksi">';
+                html += '<button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)"><i class="fa fa-ellipsis-v"></i></button>';
+                html += '<div class="menu-dropdown">';
+                html += '<button class="item-dropdown edit-prioritas" data-id="' + p.id + '" data-kode="' + escapeHtml(p.kode) + '" data-nama="' + escapeHtml(p.nama_prioritas) + '" data-alokasi="' + p.alokasi + '"><i class="fa fa-pencil"></i> Edit</button>';
+                html += '<button class="item-dropdown text-danger delete-prioritas" data-id="' + p.id + '"><i class="fa fa-trash"></i> Hapus</button>';
+                html += '</div></div>';
+                html += '</td>';
+            }
+            html += '</tr>';
         });
     } else {
-        html += '<tr><td colspan="4" class="text-center text-muted">Belum ada data prioritas nasional</td></tr>';
+        html += '<tr><td colspan="' + (canCrud ? 4 : 3) + '" class="text-center text-muted">Belum ada data prioritas nasional</td></tr>';
     }
     
     html += '</tbody>';
     html += '<tfoot><tr class="total-row"><td colspan="2" class="text-right"><strong>TOTAL</strong></td>';
-    html += '<td class="text-right uang-besar">' + formatNumber(data.total_prioritas) + '</td><td></td></tr></tfoot>';
+    html += '<td class="text-right uang-besar">' + formatNumber(data.total_prioritas) + '</td>' + (canCrud ? '<td></td>' : '') + '</tr></tfoot>';
     html += '</table></div></div>';
     
     // 3. SASARAN STRATEGIS
     html += '<div class="renja-section">';
     html += '<div class="section-title"><span>SASARAN STRATEGIS DAN INDIKATOR KINERJA</span>';
-    html += '<div><button class="btn btn-sm btn-success" data-toggle="modal" data-target="#ModalSasaran"><i class="notika-icon notika-plus"></i> Tambah</button></div></div>';
+    if (canCrud) {
+        html += '<div><button class="btn btn-sm btn-success" data-toggle="modal" data-target="#ModalSasaran"><i class="notika-icon notika-plus"></i> Tambah</button></div>';
+    }
+    html += '</div>';
     html += '<div class="table-responsive"><table class="table table-bordered table-renja">';
-    html += '<thead><tr><th width="8%">KODE</th><th>SASARAN STRATEGIS / INDIKATOR KINERJA</th><th width="12%" class="text-right">TARGET</th><th width="18%" class="text-right">ALOKASI (RIBU)</th><th width="10%" class="text-center">AKSI</th></tr></thead>';
+    html += '<thead><tr><th width="8%">KODE</th><th>SASARAN STRATEGIS / INDIKATOR KINERJA</th><th width="12%" class="text-right">TARGET</th><th width="' + (canCrud ? '18%' : '28%') + '" class="text-right">ALOKASI (RIBU)</th>' + (canCrud ? '<th width="10%" class="text-center">AKSI</th>' : '') + '</tr></thead>';
     html += '<tbody>';
     
     if (data.sasaran && data.sasaran.length > 0) {
@@ -1077,28 +1134,34 @@ function renderData(data) {
             html += '<td><strong>' + escapeHtml(s.nama_sasaran) + '</strong><br><small class="text-muted">Indikator: ' + escapeHtml(s.indikator_kinerja) + '</small></td>';
             html += '<td class="text-right">' + formatNumber(s.target, 2) + '</td>';
             html += '<td class="text-right uang-besar">' + formatNumber(s.alokasi) + '</td>';
-            html += '<td class="text-center">';
-            html += '<div class="dropdown-aksi">';
-            html += '<button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)"><i class="fa fa-ellipsis-v"></i></button>';
-            html += '<div class="menu-dropdown">';
-            html += '<button class="item-dropdown edit-sasaran" data-id="' + s.id + '" data-kode="' + escapeHtml(s.kode) + '" data-nama="' + escapeHtml(s.nama_sasaran) + '" data-indikator="' + escapeHtml(s.indikator_kinerja) + '" data-target="' + s.target + '" data-alokasi="' + s.alokasi + '"><i class="fa fa-pencil"></i> Edit</button>';
-            html += '<button class="item-dropdown text-danger delete-sasaran" data-id="' + s.id + '"><i class="fa fa-trash"></i> Hapus</button>';
-            html += '</div></div>';
-            html += '</td></tr>';
+            if (canCrud) {
+                html += '<td class="text-center">';
+                html += '<div class="dropdown-aksi">';
+                html += '<button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)"><i class="fa fa-ellipsis-v"></i></button>';
+                html += '<div class="menu-dropdown">';
+                html += '<button class="item-dropdown edit-sasaran" data-id="' + s.id + '" data-kode="' + escapeHtml(s.kode) + '" data-nama="' + escapeHtml(s.nama_sasaran) + '" data-indikator="' + escapeHtml(s.indikator_kinerja) + '" data-target="' + s.target + '" data-alokasi="' + s.alokasi + '"><i class="fa fa-pencil"></i> Edit</button>';
+                html += '<button class="item-dropdown text-danger delete-sasaran" data-id="' + s.id + '"><i class="fa fa-trash"></i> Hapus</button>';
+                html += '</div></div>';
+                html += '</td>';
+            }
+            html += '</tr>';
         });
     } else {
-        html += '<tr><td colspan="5" class="text-center text-muted">Belum ada data sasaran strategis</td></tr>';
+        html += '<tr><td colspan="' + (canCrud ? 5 : 4) + '" class="text-center text-muted">Belum ada data sasaran strategis</td></tr>';
     }
     
     html += '</tbody>';
     html += '<tfoot><tr class="total-row"><td colspan="3" class="text-right"><strong>TOTAL</strong></td>';
-    html += '<td class="text-right uang-besar">' + formatNumber(data.total_sasaran) + '</td><td></td></tr></tfoot>';
+    html += '<td class="text-right uang-besar">' + formatNumber(data.total_sasaran) + '</td>' + (canCrud ? '<td></td>' : '') + '</tr></tfoot>';
     html += '</table></div></div>';
     
     // 4. PROGRAM DAN PENDANAAN
     html += '<div class="renja-section">';
     html += '<div class="section-title"><span>PROGRAM DAN PENDANAAN</span>';
-    html += '<div><button class="btn btn-sm btn-success" data-toggle="modal" data-target="#ModalProgram"><i class="notika-icon notika-plus"></i> Tambah Program</button></div></div>';
+    if (canCrud) {
+        html += '<div><button class="btn btn-sm btn-success" data-toggle="modal" data-target="#ModalProgram"><i class="notika-icon notika-plus"></i> Tambah Program</button></div>';
+    }
+    html += '</div>';
     
     if (data.program && data.program.length > 0) {
         data.program.forEach(function(program) {
@@ -1119,7 +1182,7 @@ function renderData(data) {
             html += '<div class="collapse" id="program_' + program.id + '">';
             html += '<div class="table-responsive" style="margin-top:10px;">';
             html += '<table class="table table-bordered table-renja program-sub-table">';
-            html += '<thead><tr><th rowspan="2" width="10%">TAHUN</th><th colspan="10" class="text-center">SUMBER DANA</th><th rowspan="2" width="15%" class="text-right">TOTAL</th><th rowspan="2" width="8%" class="text-center">AKSI</th></tr>';
+            html += '<thead><tr><th rowspan="2" width="10%">TAHUN</th><th colspan="10" class="text-center">SUMBER DANA</th><th rowspan="2" width="' + (canCrud ? '15%' : '23%') + '" class="text-right">TOTAL</th>' + (canCrud ? '<th rowspan="2" width="8%" class="text-center">AKSI</th>' : '') + '</tr>';
             html += '<tr><th class="text-right">RPP</th><th class="text-right">NBP</th><th class="text-right">BLU</th><th class="text-right">LN</th><th class="text-right">RM</th><th class="text-right">PPDN</th><th class="text-right">HIBAH</th><th class="text-right">PHBS</th><th class="text-right">SNH</th><th class="text-right">NT</th></tr></thead>';
             html += '<tbody>';
             
@@ -1135,21 +1198,24 @@ function renderData(data) {
                         html += '<td class="text-right uang">' + formatNumber(val) + '</td>';
                     });
                     html += '<td class="text-right uang-besar">' + formatNumber(pd.total) + '</td>';
-                    html += '<td class="text-center">';
-                    html += '<div class="dropdown-aksi">';
-                    html += '<button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)"><i class="fa fa-ellipsis-v"></i></button>';
-                    html += '<div class="menu-dropdown">';
-                    html += '<button class="item-dropdown edit-pendanaan" data-id="' + pd.id + '" data-id_program="' + program.id + '" data-tahun="' + pd.tahun + '"';
-                    sources.forEach(function(src) {
-                        html += ' data-' + src + '="' + (pd[src] || 0) + '"';
-                    });
-                    html += '><i class="fa fa-pencil"></i> Edit</button>';
-                    html += '<button class="item-dropdown text-danger delete-pendanaan" data-id="' + pd.id + '"><i class="fa fa-trash"></i> Hapus</button>';
-                    html += '</div></div>';
-                    html += '</td></tr>';
+                    if (canCrud) {
+                        html += '<td class="text-center">';
+                        html += '<div class="dropdown-aksi">';
+                        html += '<button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)"><i class="fa fa-ellipsis-v"></i></button>';
+                        html += '<div class="menu-dropdown">';
+                        html += '<button class="item-dropdown edit-pendanaan" data-id="' + pd.id + '" data-id_program="' + program.id + '" data-tahun="' + pd.tahun + '"';
+                        sources.forEach(function(src) {
+                            html += ' data-' + src + '="' + (pd[src] || 0) + '"';
+                        });
+                        html += '><i class="fa fa-pencil"></i> Edit</button>';
+                        html += '<button class="item-dropdown text-danger delete-pendanaan" data-id="' + pd.id + '"><i class="fa fa-trash"></i> Hapus</button>';
+                        html += '</div></div>';
+                        html += '</td>';
+                    }
+                    html += '</tr>';
                 });
             } else {
-                html += '<tr><td colspan="12" class="text-center text-muted">Belum ada data pendanaan</td></tr>';
+                html += '<tr><td colspan="' + (canCrud ? 13 : 12) + '" class="text-center text-muted">Belum ada data pendanaan</td></tr>';
             }
             
             html += '</tbody>';
@@ -1166,15 +1232,18 @@ function renderData(data) {
             sources.forEach(function(src) {
                 html += '<td class="text-right uang-besar">' + formatNumber(totals[src]) + '</td>';
             });
-            html += '<td class="text-right uang-besar" style="font-size:16px;">' + formatNumber(grand_total) + '</td><td></td></tr></tfoot>';
+            html += '<td class="text-right uang-besar" style="font-size:16px;">' + formatNumber(grand_total) + '</td>' + (canCrud ? '<td></td>' : '') + '</tr></tfoot>';
             html += '</table></div>';
-            html += '<div class="text-right" style="margin-top:10px;">';
-            html += '<button class="btn btn-xs btn-primary add-pendanaan" data-id_program="' + program.id + '" data-kode="' + escapeHtml(program.kode_program) + '"><i class="notika-icon notika-plus"></i> Tambah Pendanaan</button> ';
-            html += '<button class="btn btn-xs btn-danger delete-program" data-id="' + program.id + '"><i class="notika-icon notika-trash"></i> Hapus Program</button>';
-            html += '</div></div></div>';
+            if (canCrud) {
+                html += '<div class="text-right" style="margin-top:10px;">';
+                html += '<button class="btn btn-xs btn-primary add-pendanaan" data-id_program="' + program.id + '" data-kode="' + escapeHtml(program.kode_program) + '"><i class="notika-icon notika-plus"></i> Tambah Pendanaan</button> ';
+                html += '<button class="btn btn-xs btn-danger delete-program" data-id="' + program.id + '"><i class="notika-icon notika-trash"></i> Hapus Program</button>';
+                html += '</div>';
+            }
+            html += '</div></div>';
         });
     } else {
-        html += '<div class="alert alert-info text-center">Belum ada program. Klik <b>"Tambah Program"</b> untuk mulai mengisi.</div>';
+        html += '<div class="alert alert-info text-center">Belum ada program.' + (canCrud ? ' Klik <b>"Tambah Program"</b> untuk mulai mengisi.' : '') + '</div>';
     }
     
     html += '</div>';

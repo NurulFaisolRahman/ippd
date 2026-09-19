@@ -588,6 +588,12 @@ body {
 
 <div class="main-content">
   <!-- Filter Wilayah Top (Sebelum Login & Saat Login Sebagai Daerah) -->
+  
+  <div class="page-header-box">
+    <h1 class="page-title">BAB 3.2 KEBIJAKAN STRATEGIS KEPALA DAERAH</h1>
+    <p class="page-subtitle">Pencatatan kebijakan strategis kepala daerah, dasar hukum, serta tujuan/masalah yang diselesaikan dalam periode anggaran.</p>
+  </div>
+
   <?php if (!$IsLoggedIn || !empty($IsDaerah)) { 
     $provKodeCurrent = !empty($KodeWilayah) ? substr($KodeWilayah, 0, 2) : '';
     $ListKabKotaTop = [];
@@ -671,19 +677,6 @@ body {
       }
   }
   ?>
-  <div class="page-header-box">
-    <div class="page-badge">
-      <i class="fa fa-book"></i> E-LKPJ &bull; Bab III &bull; 3.2
-      <?php if (!empty($NamaWilayah)): ?>
-        &bull; <i class="fa fa-map-marker"></i> <?= htmlspecialchars($NamaWilayah) ?>
-      <?php endif; ?>
-      <?php if (!empty($IsRole4) && !empty($namaInstansiTampil)): ?>
-        &bull; <i class="fa fa-building"></i> <?= htmlspecialchars($namaInstansiTampil) ?> (Role Instansi)
-      <?php endif; ?>
-    </div>
-    <h1 class="page-title">BAB 3.2 : Kebijakan Strategis Kepala Daerah</h1>
-    <p class="page-subtitle">Pencatatan kebijakan strategis kepala daerah, dasar hukum, serta tujuan/masalah yang diselesaikan dalam periode anggaran.</p>
-  </div>
 
   <!-- Filter & Actions Toolbar -->
   <div class="filter-card">

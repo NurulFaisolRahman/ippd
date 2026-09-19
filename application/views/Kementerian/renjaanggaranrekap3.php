@@ -1,4 +1,11 @@
 <?php $this->load->view('Kementerian/Sidebar'); ?>
+<?php
+$userLevel = isset($_SESSION['Level']) ? (int)$_SESSION['Level'] : (isset($_SESSION['userLevel']) ? (int)$_SESSION['userLevel'] : null);
+$isSuperAdmin = ($userLevel === 0);
+$sessionKemenId = $_SESSION['IdKementerian'] ?? null;
+$rekapKemenId = $Rekap3['id_kementerian'] ?? ($IdKementerian ?? null);
+$canCrud = $isSuperAdmin || ($userLevel === 1 && !empty($sessionKemenId) && ($rekapKemenId === null || (int)$sessionKemenId === (int)$rekapKemenId));
+?>
 
 <style>
     .card-notika {
@@ -410,9 +417,11 @@
                 <?php endif; ?>
 
                 <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+                    <?php if ($canCrud): ?>
                     <button class="btn-notika btn-notika-success" data-toggle="modal" data-target="#ModalRekap3">
                         <span>+</span> Buat/Edit Rekap 3
                     </button>
+                    <?php endif; ?>
                     <?php if ($Rekap3): ?>
                     <button class="btn-notika btn-notika-outline" onclick="window.print()">
                         <span>⎙</span> Cetak
@@ -513,9 +522,11 @@
                         <div class="card-notika">
                             <div class="card-header">
                                 <div class="card-title">Sasaran Kegiatan / Indikator Kinerja Kegiatan (IKK)</div>
+                                <?php if ($canCrud): ?>
                                 <button class="btn-notika btn-notika-success btn-notika-sm" data-toggle="modal" data-target="#ModalSasaran">
                                     <span>+</span> Tambah
                                 </button>
+                                <?php endif; ?>
                             </div>
                             <div class="card-body">
                                 <table class="table-notika" id="tabelSasaran">
@@ -526,7 +537,9 @@
                                             <th>Indikator Kinerja</th>
                                             <th style="width:10%;text-align:center;">Target</th>
                                             <th style="width:15%;text-align:right;">Alokasi (Ribu)</th>
+                                            <?php if ($canCrud): ?>
                                             <th style="width:8%;text-align:center;">Aksi</th>
+                                            <?php endif; ?>
                                         </tr>
                                     </thead>
                                     <tbody id="tbodySasaran">
@@ -541,6 +554,7 @@
                                             <td><?= htmlspecialchars($s['indikator_kinerja'] ?? '-') ?></td>
                                             <td class="text-center"><?= htmlspecialchars($s['target'] ?? '-') ?></td>
                                             <td class="text-right"><?= number_format($s['alokasi'], 0, ',', '.') ?></td>
+                                            <?php if ($canCrud): ?>
                                             <td class="text-center">
                                                 <div class="dropdown-aksi">
                                                     <button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)">
@@ -562,17 +576,20 @@
                                                     </div>
                                                 </div>
                                             </td>
+                                            <?php endif; ?>
                                         </tr>
                                         <?php endforeach; ?>
                                         <?php if (empty($SasaranKegiatan)): ?>
-                                        <tr id="emptySasaran"><td colspan="6" style="text-align:center;color:#aaa;padding:20px 0;">Belum ada data sasaran kegiatan</td></tr>
+                                        <tr id="emptySasaran"><td colspan="<?= $canCrud ? 6 : 5 ?>" style="text-align:center;color:#aaa;padding:20px 0;">Belum ada data sasaran kegiatan</td></tr>
                                         <?php endif; ?>
                                     </tbody>
                                     <tfoot>
                                         <tr class="total-row">
                                             <td colspan="4" class="text-right">TOTAL</td>
                                             <td class="text-right" id="totalSasaran"><?= number_format($total_sasaran, 0, ',', '.') ?></td>
+                                            <?php if ($canCrud): ?>
                                             <td></td>
+                                            <?php endif; ?>
                                         </tr>
                                     </tfoot>
                                 </table>
@@ -583,9 +600,11 @@
 <div class="card-notika">
     <div class="card-header">
         <div class="card-title">Rincian Kegiatan - Pemetaan</div>
+        <?php if ($canCrud): ?>
         <button class="btn-notika btn-notika-success btn-notika-sm" data-toggle="modal" data-target="#ModalRincian">
             <span>+</span> Tambah
         </button>
+        <?php endif; ?>
     </div>
     <div class="card-body">
         <table class="table-notika" id="tabelRincian" style="font-size:11px;">
@@ -597,7 +616,9 @@
                     <th>Rincian Output / Komponen</th>
                     <th style="width:20%;text-align:center;">Lokasi</th>
                     <th style="width:10%;text-align:right;">Alokasi</th>
+                    <?php if ($canCrud): ?>
                     <th style="width:6%;text-align:center;">Aksi</th>
+                    <?php endif; ?>
                 </tr>
             </thead>
             <tbody id="tbodyRincian">
@@ -636,6 +657,7 @@
                         <div class="lokasi-display"><?= $lokasi_display ?></div>
                     </td>
                     <td class="text-right"><?= number_format($r['alokasi'], 0, ',', '.') ?></td>
+                    <?php if ($canCrud): ?>
                     <td class="text-center">
                         <div class="dropdown-aksi">
                             <button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)">
@@ -659,17 +681,20 @@
                             </div>
                         </div>
                     </td>
+                    <?php endif; ?>
                 </tr>
                 <?php endforeach; ?>
                 <?php if (empty($Rincian)): ?>
-                <tr id="emptyRincian"><td colspan="7" style="text-align:center;color:#aaa;padding:20px 0;">Belum ada data rincian kegiatan</td></tr>
+                <tr id="emptyRincian"><td colspan="<?= $canCrud ? 7 : 6 ?>" style="text-align:center;color:#aaa;padding:20px 0;">Belum ada data rincian kegiatan</td></tr>
                 <?php endif; ?>
             </tbody>
             <tfoot>
                 <tr class="total-row">
                     <td colspan="5" class="text-right">TOTAL</td>
                     <td class="text-right" id="totalRincian"><?= number_format($total_rincian, 0, ',', '.') ?></td>
+                    <?php if ($canCrud): ?>
                     <td></td>
+                    <?php endif; ?>
                 </tr>
             </tfoot>
         </table>
@@ -679,9 +704,11 @@
                         <div class="card-notika">
                             <div class="card-header">
                                 <div class="card-title">Perhitungan Pendanaan (Tahun <?= $CurrentTahun ?> dan Prakiraan Maju)</div>
+                                <?php if ($canCrud): ?>
                                 <button class="btn-notika btn-notika-success btn-notika-sm" data-toggle="modal" data-target="#ModalPendanaan">
                                     <span>+</span> Tambah
                                 </button>
+                                <?php endif; ?>
                             </div>
                             <div class="card-body">
                                 <table class="table-notika" id="tabelPendanaan" style="font-size:11px;">
@@ -694,14 +721,18 @@
                                             <th style="width:10%;text-align:right;">Satuan Biaya</th>
                                             <th style="width:10%;text-align:right;">Alokasi <?= $CurrentTahun ?></th>
                                             <th colspan="3" style="text-align:center;">Prakiraan Kebutuhan</th>
+                                            <?php if ($canCrud): ?>
                                             <th style="width:6%;text-align:center;">Aksi</th>
+                                            <?php endif; ?>
                                         </tr>
                                         <tr>
                                             <th colspan="6"></th>
                                             <th style="text-align:center;font-size:10px;">2025</th>
                                             <th style="text-align:center;font-size:10px;">2026</th>
                                             <th style="text-align:center;font-size:10px;">2027</th>
+                                            <?php if ($canCrud): ?>
                                             <th></th>
+                                            <?php endif; ?>
                                         </tr>
                                     </thead>
                                     <tbody id="tbodyPendanaan">
@@ -725,6 +756,7 @@
                                             <td class="text-center"><?= htmlspecialchars($p['target_2025'] ?? '-') ?></td>
                                             <td class="text-center"><?= htmlspecialchars($p['target_2026'] ?? '-') ?></td>
                                             <td class="text-center"><?= htmlspecialchars($p['target_2027'] ?? '-') ?></td>
+                                            <?php if ($canCrud): ?>
                                             <td class="text-center">
                                                 <div class="dropdown-aksi">
                                                     <button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)">
@@ -753,17 +785,18 @@
                                                     </div>
                                                 </div>
                                             </td>
+                                            <?php endif; ?>
                                         </tr>
                                         <?php endforeach; ?>
                                         <?php if (empty($Pendanaan)): ?>
-                                        <tr id="emptyPendanaan"><td colspan="10" style="text-align:center;color:#aaa;padding:20px 0;">Belum ada data perhitungan pendanaan</td></tr>
+                                        <tr id="emptyPendanaan"><td colspan="<?= $canCrud ? 10 : 9 ?>" style="text-align:center;color:#aaa;padding:20px 0;">Belum ada data perhitungan pendanaan</td></tr>
                                         <?php endif; ?>
                                     </tbody>
                                     <tfoot>
                                         <tr class="total-row">
                                             <td colspan="5" class="text-right">TOTAL</td>
                                             <td class="text-right" id="totalPendanaan"><?= number_format($total_pendanaan, 0, ',', '.') ?></td>
-                                            <td colspan="4"></td>
+                                            <td colspan="<?= $canCrud ? 4 : 3 ?>"></td>
                                         </tr>
                                     </tfoot>
                                 </table>
@@ -774,9 +807,11 @@
                         <div class="card-notika">
                             <div class="card-header">
                                 <div class="card-title">Sumber Pendanaan</div>
+                                <?php if ($canCrud): ?>
                                 <button class="btn-notika btn-notika-success btn-notika-sm" data-toggle="modal" data-target="#ModalSumberDana">
                                     <span>+</span> Tambah
                                 </button>
+                                <?php endif; ?>
                             </div>
                             <div class="card-body">
                                 <table class="table-notika" id="tabelSumberDana" style="font-size:11px;">
@@ -796,7 +831,9 @@
                                             <th style="width:8%;text-align:right;">SNH</th>
                                             <th style="width:8%;text-align:right;">NT</th>
                                             <th style="width:10%;text-align:right;">Total</th>
+                                            <?php if ($canCrud): ?>
                                             <th style="width:6%;text-align:center;">Aksi</th>
+                                            <?php endif; ?>
                                         </tr>
                                     </thead>
                                     <tbody id="tbodySumberDana">
@@ -819,6 +856,7 @@
                                             <td class="text-right"><?= number_format($sd[$src] ?? 0, 0, ',', '.') ?></td>
                                             <?php endforeach; ?>
                                             <td class="text-right" style="font-weight:600;color:#4a90d9;"><?= number_format($sd['total'], 0, ',', '.') ?></td>
+                                            <?php if ($canCrud): ?>
                                             <td class="text-center">
                                                 <div class="dropdown-aksi">
                                                     <button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)">
@@ -844,10 +882,11 @@
                                                     </div>
                                                 </div>
                                             </td>
+                                            <?php endif; ?>
                                         </tr>
                                         <?php endforeach; ?>
                                         <?php if (empty($SumberDana)): ?>
-                                        <tr id="emptySumberDana"><td colspan="15" style="text-align:center;color:#aaa;padding:20px 0;">Belum ada data sumber pendanaan</td></tr>
+                                        <tr id="emptySumberDana"><td colspan="<?= $canCrud ? 15 : 14 ?>" style="text-align:center;color:#aaa;padding:20px 0;">Belum ada data sumber pendanaan</td></tr>
                                         <?php endif; ?>
                                     </tbody>
                                     <tfoot>
@@ -867,7 +906,9 @@
                                             <td class="text-right" id="totalSumberDana" style="font-weight:700;color:#4a90d9;font-size:14px;">
                                                 <?= number_format($total_sumber_dana, 0, ',', '.') ?>
                                             </td>
+                                            <?php if ($canCrud): ?>
                                             <td></td>
+                                            <?php endif; ?>
                                         </tr>
                                     </tfoot>
                                 </table>
@@ -911,6 +952,7 @@
                                     <div class="empty-icon">📋</div>
                                     <h4>Data Rekap 3 Belum Dibuat</h4>
                                     <p>Renja untuk tahun <strong><?= $CurrentTahun ?></strong> sudah ada, namun Rekap 3 belum diisi.</p>
+                                    <?php if ($canCrud): ?>
                                     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
                                         <button class="btn-notika btn-notika-success" onclick="createRekap3()">
                                             <span>+</span> Buat Rekap 3
@@ -919,6 +961,7 @@
                                             <span>✎</span> Isi Data
                                         </button>
                                     </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -929,11 +972,13 @@
                                     <div class="empty-icon">📄</div>
                                     <h4>Belum Ada Data</h4>
                                     <p>Untuk tahun <strong><?= $CurrentTahun ?></strong>, belum ada data Renja dan Rekap 3.</p>
+                                    <?php if ($canCrud): ?>
                                     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
                                         <a href="<?= base_url('Kementerian/renjaanggaranrekap1?tahun=' . $CurrentTahun) ?>" class="btn-notika btn-notika-primary">
                                             <span>+</span> Buat Renja di Rekap 1
                                         </a>
                                     </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -945,6 +990,7 @@
     </div>
 </div>
 
+<?php if ($canCrud): ?>
 <!-- ============================================================
     MODALS
     ============================================================ -->
@@ -964,20 +1010,20 @@
                     <input type="hidden" name="tahun" id="Rekap3Tahun" value="<?= $CurrentTahun ?>">
                     
                     <div class="form-group-notika">
-                        <label>Program</label>
-                        <input type="text" class="form-control" name="program" id="Rekap3Program" value="<?= htmlspecialchars($Rekap3['program'] ?? '') ?>" placeholder="Contoh: CL - Program Koordinasi Pelaksanaan Kebijakan">
+                        <label>Program <span class="text-danger">*</span></label>
+                        <textarea class="form-control" name="program" id="Rekap3Program" rows="2" placeholder="Nama Program" required><?= htmlspecialchars($Rekap3['program'] ?? '') ?></textarea>
                     </div>
                     <div class="form-group-notika">
-                        <label>Sasaran Program</label>
-                        <input type="text" class="form-control" name="sasaran_program" id="Rekap3SasaranProgram" value="<?= htmlspecialchars($Rekap3['sasaran_program'] ?? '') ?>" placeholder="Contoh: 08 - Terwujudnya Kebijakan Bidang Kerja sama Ekonomi Internasional">
+                        <label>Sasaran Program <span class="text-danger">*</span></label>
+                        <textarea class="form-control" name="sasaran_program" id="Rekap3SasaranProgram" rows="2" placeholder="Sasaran Program" required><?= htmlspecialchars($Rekap3['sasaran_program'] ?? '') ?></textarea>
                     </div>
                     <div class="form-group-notika">
-                        <label>Kegiatan</label>
-                        <input type="text" class="form-control" name="kegiatan" id="Rekap3Kegiatan" value="<?= htmlspecialchars($Rekap3['kegiatan'] ?? '') ?>" placeholder="Contoh: 2513 - Koordinasi Kebijakan Kerja Sama Ekonomi Multilateral">
+                        <label>Kegiatan <span class="text-danger">*</span></label>
+                        <textarea class="form-control" name="kegiatan" id="Rekap3Kegiatan" rows="2" placeholder="Nama Kegiatan" required><?= htmlspecialchars($Rekap3['kegiatan'] ?? '') ?></textarea>
                     </div>
                     <div class="form-group-notika">
-                        <label>Unit Organisasi (Eselon 2)</label>
-                        <input type="text" class="form-control" name="unit_organisasi" id="Rekap3Unit" value="<?= htmlspecialchars($Rekap3['unit_organisasi'] ?? '') ?>" placeholder="Contoh: 22 - Asdep Kerjasama Ekonomi Multilateral">
+                        <label>Unit Organisasi (Eselon 2) <span class="text-danger">*</span></label>
+                        <textarea class="form-control" name="unit_organisasi" id="Rekap3Unit" rows="2" placeholder="Unit Organisasi / Eselon 2" required><?= htmlspecialchars($Rekap3['unit_organisasi'] ?? '') ?></textarea>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn-notika btn-notika-outline" data-dismiss="modal">Batal</button>
@@ -995,32 +1041,43 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">×</button>
-                <h4 class="modal-title" id="SasaranTitle">Tambah Sasaran Kegiatan</h4>
+                <h4 class="modal-title" id="ModalSasaranTitle">Tambah Sasaran Kegiatan</h4>
             </div>
             <div class="modal-body">
                 <form id="FormSasaran">
                     <input type="hidden" name="id" id="SasaranId">
-                    <input type="hidden" name="id_rekap3" id="SasaranIdRekap3" value="<?= $Rekap3['id'] ?? '' ?>">
-                    <div class="form-group-notika">
-                        <label>Kode</label>
-                        <input type="text" class="form-control" name="kode" id="SasaranKode" required maxlength="20" placeholder="Contoh: 01, 01.01">
-                    </div>
-                    <div class="form-group-notika">
-                        <label>Sasaran Kegiatan</label>
-                        <input type="text" class="form-control" name="nama_sasaran" id="SasaranNama" required placeholder="Contoh: Terwujudnya Kebijakan di Bidang...">
+                    <input type="hidden" name="id_rekap3" value="<?= $Rekap3['id'] ?? '' ?>">
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group-notika">
+                                <label>Kode <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="kode" id="SasaranKode" placeholder="contoh: 01" required>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="form-group-notika">
+                                <label>Sasaran Kegiatan <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="nama_sasaran" id="SasaranNama" placeholder="Nama Sasaran Kegiatan" required>
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group-notika">
                         <label>Indikator Kinerja Kegiatan (IKK)</label>
-                        <input type="text" class="form-control" name="indikator_kinerja" id="SasaranIndikator" placeholder="Contoh: Jumlah Kesepakatan dalam Forum...">
+                        <textarea class="form-control" name="indikator_kinerja" id="SasaranIndikator" rows="2" placeholder="Indikator Kinerja"></textarea>
                     </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-                        <div class="form-group-notika">
-                            <label>Target</label>
-                            <input type="text" class="form-control" name="target" id="SasaranTarget" placeholder="Contoh: 5, 75%">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group-notika">
+                                <label>Target</label>
+                                <input type="text" class="form-control" name="target" id="SasaranTarget" placeholder="contoh: 100%">
+                            </div>
                         </div>
-                        <div class="form-group-notika">
-                            <label>Alokasi (Ribu Rupiah)</label>
-                            <input type="number" class="form-control" name="alokasi" id="SasaranAlokasi" value="0" step="1000">
+                        <div class="col-md-8">
+                            <div class="form-group-notika">
+                                <label>Alokasi (Ribu Rupiah) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" name="alokasi" id="SasaranAlokasi" placeholder="0" required step="1000">
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -1039,53 +1096,59 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">×</button>
-                <h4 class="modal-title" id="RincianTitle">Tambah Rincian Kegiatan</h4>
+                <h4 class="modal-title" id="ModalRincianTitle">Tambah Rincian Kegiatan</h4>
             </div>
             <div class="modal-body">
                 <form id="FormRincian">
                     <input type="hidden" name="id" id="RincianId">
-                    <input type="hidden" name="id_rekap3" id="RincianIdRekap3" value="<?= $Rekap3['id'] ?? '' ?>">
+                    <input type="hidden" name="id_rekap3" value="<?= $Rekap3['id'] ?? '' ?>">
+                    <input type="hidden" name="lokasi_wilayah" id="RincianLokasiWilayah">
                     
-                    <div class="form-group-notika">
-                        <label>Kode</label>
-                        <input type="text" class="form-control" name="kode" id="RincianKode" required maxlength="50" placeholder="Contoh: 01, 01.ABA, 01.ABA.001">
-                    </div>
-                    <div class="form-group-notika">
-                        <label>Sasaran Kegiatan</label>
-                        <input type="text" class="form-control" name="sasaran_kegiatan" id="RincianSasaran" placeholder="Contoh: Terwujudnya Kebijakan...">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group-notika">
+                                <label>Kode <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="kode" id="RincianKode" placeholder="contoh: 01.01" required>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="form-group-notika">
+                                <label>Sasaran Kegiatan</label>
+                                <input type="text" class="form-control" name="sasaran_kegiatan" id="RincianSasaran" placeholder="Sasaran Kegiatan Terkait">
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group-notika">
                         <label>Klasifikasi Rincian Output</label>
-                        <input type="text" class="form-control" name="klasifikasi_rincian_output" id="RincianKlasifikasi" placeholder="Contoh: Kebijakan Bidang Ekonomi dan Keuangan">
+                        <input type="text" class="form-control" name="klasifikasi_rincian_output" id="RincianKlasifikasi" placeholder="Klasifikasi Rincian Output">
                     </div>
                     <div class="form-group-notika">
-                        <label>Rincian Output</label>
-                        <input type="text" class="form-control" name="rincian_output" id="RincianOutput" placeholder="Contoh: Rekomendasi Kebijakan Kerja Sama Ekonomi">
+                        <label>Rincian Output <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="rincian_output" id="RincianOutput" placeholder="Rincian Output" required>
                     </div>
                     <div class="form-group-notika">
                         <label>Komponen</label>
-                        <input type="text" class="form-control" name="komponen" id="RincianKomponen" placeholder="Contoh: 51 - Persiapan Kegiatan">
+                        <input type="text" class="form-control" name="komponen" id="RincianKomponen" placeholder="Komponen Kegiatan">
                     </div>
-                    
-                    <!-- LOKASI WILAYAH - DINAMIS -->
                     <div class="form-group-notika">
-                        <label>Lokasi Wilayah</label>
-                        <div id="lokasiContainer">
-                            <!-- Lokasi akan ditambahkan di sini -->
+                        <div class="lokasi-header">
+                            <label style="margin-bottom:0;font-weight:600;color:#333;font-size:13px;">
+                                Lokasi Wilayah Pelaksanaan
+                            </label>
+                            <button type="button" class="btn-tambah-lokasi" onclick="tambahLokasi('', '')">
+                                <span>+</span> Tambah Lokasi
+                            </button>
                         </div>
-                        <button type="button" class="btn-add-lokasi" onclick="tambahLokasi()">
-                            <span>+</span> Tambah Lokasi
-                        </button>
+                        <div id="lokasiContainer" class="lokasi-container">
+                        </div>
                     </div>
-                    
                     <div class="form-group-notika">
-                        <label>Alokasi (Ribu Rupiah)</label>
-                        <input type="number" class="form-control" name="alokasi" id="RincianAlokasi" value="0" step="1000">
+                        <label>Alokasi (Ribu Rupiah) <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" name="alokasi" id="RincianAlokasi" placeholder="0" required step="1000">
                     </div>
-                    
                     <div class="modal-footer">
                         <button type="button" class="btn-notika btn-notika-outline" data-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn-notika btn-notika-success" form="FormRincian" id="btnSimpanRincian">Simpan</button>
+                        <button type="submit" class="btn-notika btn-notika-success" form="FormRincian">Simpan</button>
                     </div>
                 </form>
             </div>
@@ -1099,62 +1162,78 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">×</button>
-                <h4 class="modal-title">Tambah Perhitungan Pendanaan</h4>
+                <h4 class="modal-title" id="ModalPendanaanTitle">Tambah Perhitungan Pendanaan</h4>
             </div>
             <div class="modal-body">
                 <form id="FormPendanaan">
                     <input type="hidden" name="id" id="PendanaanId">
-                    <input type="hidden" name="id_rekap3" id="PendanaanIdRekap3" value="<?= $Rekap3['id'] ?? '' ?>">
-                    <div class="form-group-notika">
-                        <label>Kode</label>
-                        <input type="text" class="form-control" name="kode" id="PendanaanKode" required maxlength="50" placeholder="Contoh: 01, 01.ABA">
-                    </div>
-                    <div class="form-group-notika">
-                        <label>Sasaran Kegiatan</label>
-                        <input type="text" class="form-control" name="sasaran_kegiatan" id="PendanaanSasaran" placeholder="Contoh: Terwujudnya Kebijakan...">
-                    </div>
-                    <div class="form-group-notika">
-                        <label>Klasifikasi Rincian Output</label>
-                        <input type="text" class="form-control" name="klasifikasi_rincian_output" id="PendanaanKlasifikasi" placeholder="Contoh: Kebijakan Bidang Ekonomi dan Keuangan">
-                    </div>
-                    <div class="form-group-notika">
-                        <label>Rincian Output / Komponen</label>
-                        <input type="text" class="form-control" name="rincian_output" id="PendanaanRincian" placeholder="Contoh: Rekomendasi Kebijakan...">
+                    <input type="hidden" name="id_rekap3" value="<?= $Rekap3['id'] ?? '' ?>">
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group-notika">
+                                <label>Kode <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="kode" id="PendanaanKode" placeholder="contoh: 01.01" required>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="form-group-notika">
+                                <label>Rincian Output <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="rincian_output" id="PendanaanOutput" placeholder="Rincian Output" required>
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group-notika">
                         <label>Komponen</label>
-                        <input type="text" class="form-control" name="komponen" id="PendanaanKomponen" placeholder="Contoh: 51 - Persiapan Kegiatan">
+                        <input type="text" class="form-control" name="komponen" id="PendanaanKomponen" placeholder="Komponen">
                     </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
-                        <div class="form-group-notika">
-                            <label>Volume / Target</label>
-                            <input type="text" class="form-control" name="volume_target" id="PendanaanVolume" placeholder="Contoh: 2, 1,0">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group-notika">
+                                <label>Volume / Target</label>
+                                <input type="text" class="form-control" name="volume_target" id="PendanaanVolume" placeholder="contoh: 1">
+                            </div>
                         </div>
-                        <div class="form-group-notika">
-                            <label>Satuan</label>
-                            <input type="text" class="form-control" name="satuan" id="PendanaanSatuan" placeholder="Contoh: Kegiatan, Rekomendasi">
+                        <div class="col-md-3">
+                            <div class="form-group-notika">
+                                <label>Satuan</label>
+                                <input type="text" class="form-control" name="satuan" id="PendanaanSatuan" placeholder="contoh: Laporan, Dokumen">
+                            </div>
                         </div>
-                        <div class="form-group-notika">
-                            <label>Satuan Biaya</label>
-                            <input type="number" class="form-control" name="satuan_biaya" id="PendanaanSatuanBiaya" value="0" step="1000">
+                        <div class="col-md-3">
+                            <div class="form-group-notika">
+                                <label>Satuan Biaya</label>
+                                <input type="number" class="form-control" name="satuan_biaya" id="PendanaanSatuanBiaya" placeholder="0" step="1000">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group-notika">
+                                <label>Alokasi <?= $CurrentTahun ?> <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" name="alokasi_2024" id="PendanaanAlokasi" placeholder="0" required step="1000">
+                            </div>
                         </div>
                     </div>
-                    <div class="form-group-notika">
-                        <label>Alokasi <?= $CurrentTahun ?> (Ribu Rupiah)</label>
-                        <input type="number" class="form-control" name="alokasi_2024" id="PendanaanAlokasi" value="0" step="1000">
-                    </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
-                        <div class="form-group-notika">
-                            <label>Target 2025</label>
-                            <input type="text" class="form-control" name="target_2025" id="PendanaanTarget2025" placeholder="Contoh: 2, 1,0">
-                        </div>
-                        <div class="form-group-notika">
-                            <label>Target 2026</label>
-                            <input type="text" class="form-control" name="target_2026" id="PendanaanTarget2026" placeholder="Contoh: 2, 1,0">
-                        </div>
-                        <div class="form-group-notika">
-                            <label>Target 2027</label>
-                            <input type="text" class="form-control" name="target_2027" id="PendanaanTarget2027" placeholder="Contoh: 2, 1,0">
+                    <div style="background:#f9f9f9;padding:12px 16px;border-radius:4px;margin-bottom:16px;">
+                        <label style="font-weight:600;color:#444;font-size:13px;display:block;margin-bottom:8px;">Prakiraan Maju Kebutuhan Pendanaan</label>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group-notika" style="margin-bottom:0;">
+                                    <label style="font-size:12px;color:#666;">Tahun 2025</label>
+                                    <input type="text" class="form-control" name="target_2025" id="PendanaanTarget2025" placeholder="0">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group-notika" style="margin-bottom:0;">
+                                    <label style="font-size:12px;color:#666;">Tahun 2026</label>
+                                    <input type="text" class="form-control" name="target_2026" id="PendanaanTarget2026" placeholder="0">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group-notika" style="margin-bottom:0;">
+                                    <label style="font-size:12px;color:#666;">Tahun 2027</label>
+                                    <input type="text" class="form-control" name="target_2027" id="PendanaanTarget2027" placeholder="0">
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -1167,47 +1246,48 @@
     </div>
 </div>
 
-<!-- Modal Sumber Dana -->
+<!-- Modal Sumber Pendanaan -->
 <div class="modal fade modal-notika" id="ModalSumberDana" role="dialog">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">×</button>
-                <h4 class="modal-title">Tambah Sumber Pendanaan</h4>
+                <h4 class="modal-title" id="ModalSumberDanaTitle">Tambah Sumber Pendanaan</h4>
             </div>
             <div class="modal-body">
                 <form id="FormSumberDana">
                     <input type="hidden" name="id" id="SumberDanaId">
-                    <input type="hidden" name="id_rekap3" id="SumberDanaIdRekap3" value="<?= $Rekap3['id'] ?? '' ?>">
-                    <div class="form-group-notika">
-                        <label>Kode</label>
-                        <input type="text" class="form-control" name="kode" id="SumberDanaKode" required maxlength="50" placeholder="Contoh: 01, 01.ABA">
-                    </div>
-                    <div class="form-group-notika">
-                        <label>Sasaran Kegiatan</label>
-                        <input type="text" class="form-control" name="sasaran_kegiatan" id="SumberDanaSasaran" placeholder="Contoh: Terwujudnya Kebijakan...">
-                    </div>
-                    <div class="form-group-notika">
-                        <label>Klasifikasi Rincian Output</label>
-                        <input type="text" class="form-control" name="klasifikasi_rincian_output" id="SumberDanaKlasifikasi" placeholder="Contoh: Kebijakan Bidang Ekonomi dan Keuangan">
-                    </div>
-                    <div class="form-group-notika">
-                        <label>Rincian Output / Komponen</label>
-                        <input type="text" class="form-control" name="rincian_output" id="SumberDanaRincian" placeholder="Contoh: Rekomendasi Kebijakan...">
+                    <input type="hidden" name="id_rekap3" value="<?= $Rekap3['id'] ?? '' ?>">
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group-notika">
+                                <label>Kode <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="kode" id="SumberDanaKode" placeholder="contoh: 01.01" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group-notika">
+                                <label>Rincian Output <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="rincian_output" id="SumberDanaOutput" placeholder="Rincian Output" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group-notika">
+                                <label>Jenis Komponen</label>
+                                <select class="form-control" name="jenis_komponen" id="SumberDanaJenis">
+                                    <option value="Utama">Utama</option>
+                                    <option value="Pendukung">Pendukung</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group-notika">
                         <label>Komponen</label>
-                        <input type="text" class="form-control" name="komponen" id="SumberDanaKomponen" placeholder="Contoh: 51 - Persiapan Kegiatan">
+                        <input type="text" class="form-control" name="komponen" id="SumberDanaKomponen" placeholder="Komponen Kegiatan">
                     </div>
-                    <div class="form-group-notika">
-                        <label>Jenis Komponen</label>
-                        <select class="form-control" name="jenis_komponen" id="SumberDanaJenis">
-                            <option value="">-- Pilih --</option>
-                            <option value="Utama">Utama</option>
-                            <option value="Pendukung">Pendukung</option>
-                        </select>
-                    </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:8px;margin-top:8px;">
+                    <label style="font-weight:600;color:#444;font-size:13px;display:block;margin-bottom:8px;">Sumber Dana (Ribu Rupiah)</label>
+                    <div style="display:grid;grid-template-columns:repeat(5, 1fr);gap:10px;">
                         <div class="form-group-notika" style="margin-bottom:0;">
                             <label style="font-size:11px;color:#888;">RPP</label>
                             <input type="number" class="form-control sumber-dana-input" name="rpp" id="SumberDanaRPP" value="0" step="1000" style="padding:4px 8px;font-size:12px;">
@@ -1262,6 +1342,7 @@
         </div>
     </div>
 </div>
+<?php endif; ?>
 
 <script src="<?= base_url('js/vendor/jquery-1.12.4.min.js'); ?>"></script>
 <script src="<?= base_url('js/bootstrap.min.js'); ?>"></script>
@@ -1271,6 +1352,7 @@ var BaseURL = '<?= base_url() ?>';
 var IdRekap3 = <?= json_encode($Rekap3['id'] ?? null) ?>;
 var CurrentTahun = <?= json_encode($CurrentTahun) ?>;
 var IdRenja = <?= json_encode($IdRenja ?? null) ?>;
+var canCrud = <?= $canCrud ? 'true' : 'false' ?>;
 
 // ============================================================
 // FUNGSI TOAST
@@ -1463,8 +1545,10 @@ function loadDataTahun(tahun) {
         html += '<div class="empty-icon">📄</div>';
         html += '<h4>Belum Ada Data</h4>';
         html += '<p>Untuk tahun <strong>' + tahun + '</strong>, belum ada data Renja dan Rekap 3.</p>';
-        html += '<a href="' + BaseURL + 'Kementerian/renjaanggaranrekap1?tahun=' + tahun + '" class="btn-notika btn-notika-primary">';
-        html += '<span>+</span> Buat Renja di Rekap 1</a>';
+        if (canCrud) {
+            html += '<a href="' + BaseURL + 'Kementerian/renjaanggaranrekap1?tahun=' + tahun + '" class="btn-notika btn-notika-primary">';
+            html += '<span>+</span> Buat Renja di Rekap 1</a>';
+        }
         html += '</div></div></div>';
         $('#contentData').html(html);
         $('#contentData').show();
@@ -1490,12 +1574,15 @@ function loadDataTahun(tahun) {
                     var html = '<div class="card-notika"><div class="card-body"><div class="empty-state">';
                     html += '<div class="empty-icon">📋</div>';
                     html += '<h4>' + (res.message || 'Data Rekap 3 Belum Dibuat') + '</h4>';
-                    html += '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">';
-                    html += '<button class="btn-notika btn-notika-success" onclick="createRekap3()">';
-                    html += '<span>+</span> Buat Rekap 3</button>';
-                    html += '<button class="btn-notika btn-notika-primary" data-toggle="modal" data-target="#ModalRekap3">';
-                    html += '<span>✎</span> Isi Data</button>';
-                    html += '</div></div></div></div>';
+                    if (canCrud) {
+                        html += '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">';
+                        html += '<button class="btn-notika btn-notika-success" onclick="createRekap3()">';
+                        html += '<span>+</span> Buat Rekap 3</button>';
+                        html += '<button class="btn-notika btn-notika-primary" data-toggle="modal" data-target="#ModalRekap3">';
+                        html += '<span>✎</span> Isi Data</button>';
+                        html += '</div>';
+                    }
+                    html += '</div></div></div>';
                     $('#contentData').html(html);
                 } else {
                     $('#contentData').html('<div class="alert alert-danger">' + (res.message || 'Error loading data') + '</div>');
@@ -1550,12 +1637,18 @@ function loadContentData(data) {
     // Sasaran Kegiatan
     html += '<div class="card-notika">';
     html += '<div class="card-header"><div class="card-title">Sasaran Kegiatan / Indikator Kinerja Kegiatan (IKK)</div>';
-    html += '<button class="btn-notika btn-notika-success btn-notika-sm" data-toggle="modal" data-target="#ModalSasaran"><span>+</span> Tambah</button></div>';
+    if (canCrud) {
+        html += '<button class="btn-notika btn-notika-success btn-notika-sm" data-toggle="modal" data-target="#ModalSasaran"><span>+</span> Tambah</button>';
+    }
+    html += '</div>';
     html += '<div class="card-body"><table class="table-notika" id="tabelSasaran"><thead><tr>';
     html += '<th style="width:8%;">Kode</th><th>Sasaran Kegiatan</th><th>Indikator Kinerja</th>';
     html += '<th style="width:10%;text-align:center;">Target</th>';
     html += '<th style="width:15%;text-align:right;">Alokasi (Ribu)</th>';
-    html += '<th style="width:8%;text-align:center;">Aksi</th></tr></thead><tbody id="tbodySasaran">';
+    if (canCrud) {
+        html += '<th style="width:8%;text-align:center;">Aksi</th>';
+    }
+    html += '</tr></thead><tbody id="tbodySasaran">';
     
     var totalSasaran = 0;
     if (data.sasaran && data.sasaran.length > 0) {
@@ -1567,30 +1660,43 @@ function loadContentData(data) {
             html += '<td>' + (s.indikator_kinerja || '-') + '</td>';
             html += '<td class="text-center">' + (s.target || '-') + '</td>';
             html += '<td class="text-right">' + formatNumber(s.alokasi) + '</td>';
-            html += '<td class="text-center"><div class="dropdown-aksi">';
-            html += '<button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)"><i class="fa fa-ellipsis-v"></i></button>';
-            html += '<div class="menu-dropdown">';
-            html += '<button class="item-dropdown edit-sasaran" data-id="' + s.id + '" data-kode="' + s.kode + '" data-nama="' + s.nama_sasaran + '" data-indikator="' + (s.indikator_kinerja || '') + '" data-target="' + (s.target || '') + '" data-alokasi="' + s.alokasi + '"><i class="fa fa-pencil"></i> Edit</button>';
-            html += '<button class="item-dropdown text-danger delete-sasaran" data-id="' + s.id + '"><i class="fa fa-trash"></i> Hapus</button>';
-            html += '</div></div></td></tr>';
+            if (canCrud) {
+                html += '<td class="text-center"><div class="dropdown-aksi">';
+                html += '<button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)"><i class="fa fa-ellipsis-v"></i></button>';
+                html += '<div class="menu-dropdown">';
+                html += '<button class="item-dropdown edit-sasaran" data-id="' + s.id + '" data-kode="' + s.kode + '" data-nama="' + s.nama_sasaran + '" data-indikator="' + (s.indikator_kinerja || '') + '" data-target="' + (s.target || '') + '" data-alokasi="' + s.alokasi + '"><i class="fa fa-pencil"></i> Edit</button>';
+                html += '<button class="item-dropdown text-danger delete-sasaran" data-id="' + s.id + '"><i class="fa fa-trash"></i> Hapus</button>';
+                html += '</div></div></td>';
+            }
+            html += '</tr>';
         });
     } else {
-        html += '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:20px 0;">Belum ada data sasaran kegiatan</td></tr>';
+        html += '<tr><td colspan="' + (canCrud ? 6 : 5) + '" style="text-align:center;color:#aaa;padding:20px 0;">Belum ada data sasaran kegiatan</td></tr>';
     }
     html += '</tbody><tfoot><tr class="total-row">';
     html += '<td colspan="4" class="text-right">TOTAL</td>';
-    html += '<td class="text-right">' + formatNumber(totalSasaran) + '</td><td></td></tr></tfoot></table></div></div>';
+    html += '<td class="text-right">' + formatNumber(totalSasaran) + '</td>';
+    if (canCrud) {
+        html += '<td></td>';
+    }
+    html += '</tr></tfoot></table></div></div>';
     
     // Rincian Kegiatan - Tampilkan NAMA Wilayah
     html += '<div class="card-notika">';
     html += '<div class="card-header"><div class="card-title">Rincian Kegiatan - Pemetaan</div>';
-    html += '<button class="btn-notika btn-notika-success btn-notika-sm" data-toggle="modal" data-target="#ModalRincian"><span>+</span> Tambah</button></div>';
+    if (canCrud) {
+        html += '<button class="btn-notika btn-notika-success btn-notika-sm" data-toggle="modal" data-target="#ModalRincian"><span>+</span> Tambah</button>';
+    }
+    html += '</div>';
     html += '<div class="card-body"><table class="table-notika" style="font-size:11px;" id="tabelRincian"><thead><tr>';
     html += '<th style="width:6%;">Kode</th><th>Sasaran Kegiatan</th><th>Klasifikasi Rincian Output</th>';
     html += '<th>Rincian Output / Komponen</th>';
     html += '<th style="width:20%;text-align:center;">Lokasi</th>';
     html += '<th style="width:10%;text-align:right;">Alokasi</th>';
-    html += '<th style="width:6%;text-align:center;">Aksi</th></tr></thead><tbody id="tbodyRincian">';
+    if (canCrud) {
+        html += '<th style="width:6%;text-align:center;">Aksi</th>';
+    }
+    html += '</tr></thead><tbody id="tbodyRincian">';
     
     var totalRincian = 0;
     if (data.rincian && data.rincian.length > 0) {
@@ -1617,32 +1723,49 @@ function loadContentData(data) {
             html += '<td><strong>' + (r.rincian_output || '-') + '</strong>' + (r.komponen ? '<br><small style="color:#888;">' + r.komponen + '</small>' : '') + '</td>';
             html += '<td class="text-center"><div class="lokasi-display">' + lokasiDisplay + '</div></td>';
             html += '<td class="text-right">' + formatNumber(r.alokasi) + '</td>';
-            html += '<td class="text-center"><div class="dropdown-aksi">';
-            html += '<button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)"><i class="fa fa-ellipsis-v"></i></button>';
-            html += '<div class="menu-dropdown">';
-            html += '<button class="item-dropdown edit-rincian" data-id="' + r.id + '" data-kode="' + r.kode + '" data-sasaran="' + (r.sasaran_kegiatan || '') + '" data-klasifikasi="' + (r.klasifikasi_rincian_output || '') + '" data-rincian="' + (r.rincian_output || '') + '" data-komponen="' + (r.komponen || '') + '" data-lokasi="' + (r.lokasi_wilayah || '') + '" data-alokasi="' + r.alokasi + '"><i class="fa fa-pencil"></i> Edit</button>';
-            html += '<button class="item-dropdown text-danger delete-rincian" data-id="' + r.id + '"><i class="fa fa-trash"></i> Hapus</button>';
-            html += '</div></div></td></tr>';
+            if (canCrud) {
+                html += '<td class="text-center"><div class="dropdown-aksi">';
+                html += '<button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)"><i class="fa fa-ellipsis-v"></i></button>';
+                html += '<div class="menu-dropdown">';
+                html += '<button class="item-dropdown edit-rincian" data-id="' + r.id + '" data-kode="' + r.kode + '" data-sasaran="' + (r.sasaran_kegiatan || '') + '" data-klasifikasi="' + (r.klasifikasi_rincian_output || '') + '" data-rincian="' + (r.rincian_output || '') + '" data-komponen="' + (r.komponen || '') + '" data-lokasi="' + (r.lokasi_wilayah || '') + '" data-alokasi="' + r.alokasi + '"><i class="fa fa-pencil"></i> Edit</button>';
+                html += '<button class="item-dropdown text-danger delete-rincian" data-id="' + r.id + '"><i class="fa fa-trash"></i> Hapus</button>';
+                html += '</div></div></td>';
+            }
+            html += '</tr>';
         });
     } else {
-        html += '<tr><td colspan="7" style="text-align:center;color:#aaa;padding:20px 0;">Belum ada data rincian kegiatan</td></tr>';
+        html += '<tr><td colspan="' + (canCrud ? 7 : 6) + '" style="text-align:center;color:#aaa;padding:20px 0;">Belum ada data rincian kegiatan</td></tr>';
     }
     html += '</tbody><tfoot><tr class="total-row">';
     html += '<td colspan="5" class="text-right">TOTAL</td>';
-    html += '<td class="text-right">' + formatNumber(totalRincian) + '</td><td></td></tr></tfoot></table></div></div>';
+    html += '<td class="text-right">' + formatNumber(totalRincian) + '</td>';
+    if (canCrud) {
+        html += '<td></td>';
+    }
+    html += '</tr></tfoot></table></div></div>';
     
     // Pendanaan
     html += '<div class="card-notika">';
     html += '<div class="card-header"><div class="card-title">Perhitungan Pendanaan (Tahun ' + data.rekap3.tahun + ' dan Prakiraan Maju)</div>';
-    html += '<button class="btn-notika btn-notika-success btn-notika-sm" data-toggle="modal" data-target="#ModalPendanaan"><span>+</span> Tambah</button></div>';
+    if (canCrud) {
+        html += '<button class="btn-notika btn-notika-success btn-notika-sm" data-toggle="modal" data-target="#ModalPendanaan"><span>+</span> Tambah</button>';
+    }
+    html += '</div>';
     html += '<div class="card-body"><table class="table-notika" style="font-size:11px;" id="tabelPendanaan"><thead><tr>';
     html += '<th style="width:6%;">Kode</th><th>Rincian Output</th>';
     html += '<th style="width:8%;text-align:center;">Volume</th><th style="width:8%;text-align:center;">Satuan</th>';
     html += '<th style="width:10%;text-align:right;">Satuan Biaya</th>';
     html += '<th style="width:10%;text-align:right;">Alokasi ' + data.rekap3.tahun + '</th>';
     html += '<th colspan="3" style="text-align:center;">Prakiraan Kebutuhan</th>';
-    html += '<th style="width:6%;text-align:center;">Aksi</th></tr>';
-    html += '<tr><th colspan="6"></th><th style="text-align:center;font-size:10px;">2025</th><th style="text-align:center;font-size:10px;">2026</th><th style="text-align:center;font-size:10px;">2027</th><th></th></tr></thead><tbody id="tbodyPendanaan">';
+    if (canCrud) {
+        html += '<th style="width:6%;text-align:center;">Aksi</th>';
+    }
+    html += '</tr>';
+    html += '<tr><th colspan="6"></th><th style="text-align:center;font-size:10px;">2025</th><th style="text-align:center;font-size:10px;">2026</th><th style="text-align:center;font-size:10px;">2027</th>';
+    if (canCrud) {
+        html += '<th></th>';
+    }
+    html += '</tr></thead><tbody id="tbodyPendanaan">';
     
     var totalPendanaan = 0;
     if (data.pendanaan && data.pendanaan.length > 0) {
@@ -1658,25 +1781,31 @@ function loadContentData(data) {
             html += '<td class="text-center">' + (p.target_2025 || '-') + '</td>';
             html += '<td class="text-center">' + (p.target_2026 || '-') + '</td>';
             html += '<td class="text-center">' + (p.target_2027 || '-') + '</td>';
-            html += '<td class="text-center"><div class="dropdown-aksi">';
-            html += '<button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)"><i class="fa fa-ellipsis-v"></i></button>';
-            html += '<div class="menu-dropdown">';
-            html += '<button class="item-dropdown edit-pendanaan" data-id="' + p.id + '" data-kode="' + p.kode + '" data-sasaran="' + (p.sasaran_kegiatan || '') + '" data-klasifikasi="' + (p.klasifikasi_rincian_output || '') + '" data-rincian="' + (p.rincian_output || '') + '" data-komponen="' + (p.komponen || '') + '" data-volume="' + (p.volume_target || '') + '" data-satuan="' + (p.satuan || '') + '" data-satuan_biaya="' + p.satuan_biaya + '" data-alokasi_2024="' + p.alokasi_2024 + '" data-target_2025="' + (p.target_2025 || '') + '" data-target_2026="' + (p.target_2026 || '') + '" data-target_2027="' + (p.target_2027 || '') + '"><i class="fa fa-pencil"></i> Edit</button>';
-            html += '<button class="item-dropdown text-danger delete-pendanaan" data-id="' + p.id + '"><i class="fa fa-trash"></i> Hapus</button>';
-            html += '</div></div></td></tr>';
+            if (canCrud) {
+                html += '<td class="text-center"><div class="dropdown-aksi">';
+                html += '<button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)"><i class="fa fa-ellipsis-v"></i></button>';
+                html += '<div class="menu-dropdown">';
+                html += '<button class="item-dropdown edit-pendanaan" data-id="' + p.id + '" data-kode="' + p.kode + '" data-sasaran="' + (p.sasaran_kegiatan || '') + '" data-klasifikasi="' + (p.klasifikasi_rincian_output || '') + '" data-rincian="' + (p.rincian_output || '') + '" data-komponen="' + (p.komponen || '') + '" data-volume="' + (p.volume_target || '') + '" data-satuan="' + (p.satuan || '') + '" data-satuan_biaya="' + p.satuan_biaya + '" data-alokasi_2024="' + p.alokasi_2024 + '" data-target_2025="' + (p.target_2025 || '') + '" data-target_2026="' + (p.target_2026 || '') + '" data-target_2027="' + (p.target_2027 || '') + '"><i class="fa fa-pencil"></i> Edit</button>';
+                html += '<button class="item-dropdown text-danger delete-pendanaan" data-id="' + p.id + '"><i class="fa fa-trash"></i> Hapus</button>';
+                html += '</div></div></td>';
+            }
+            html += '</tr>';
         });
     } else {
-        html += '<tr><td colspan="10" style="text-align:center;color:#aaa;padding:20px 0;">Belum ada data perhitungan pendanaan</td></tr>';
+        html += '<tr><td colspan="' + (canCrud ? 10 : 9) + '" style="text-align:center;color:#aaa;padding:20px 0;">Belum ada data perhitungan pendanaan</td></tr>';
     }
     html += '</tbody><tfoot><tr class="total-row">';
     html += '<td colspan="5" class="text-right">TOTAL</td>';
     html += '<td class="text-right">' + formatNumber(totalPendanaan) + '</td>';
-    html += '<td colspan="4"></td></tr></tfoot></table></div></div>';
+    html += '<td colspan="' + (canCrud ? 4 : 3) + '"></td></tr></tfoot></table></div></div>';
     
     // Sumber Dana
     html += '<div class="card-notika">';
     html += '<div class="card-header"><div class="card-title">Sumber Pendanaan</div>';
-    html += '<button class="btn-notika btn-notika-success btn-notika-sm" data-toggle="modal" data-target="#ModalSumberDana"><span>+</span> Tambah</button></div>';
+    if (canCrud) {
+        html += '<button class="btn-notika btn-notika-success btn-notika-sm" data-toggle="modal" data-target="#ModalSumberDana"><span>+</span> Tambah</button>';
+    }
+    html += '</div>';
     html += '<div class="card-body"><table class="table-notika" style="font-size:11px;" id="tabelSumberDana"><thead><tr>';
     html += '<th style="width:6%;">Kode</th><th>Rincian Output / Komponen</th>';
     html += '<th style="width:8%;text-align:center;">Jenis</th>';
@@ -1685,7 +1814,10 @@ function loadContentData(data) {
         html += '<th style="width:8%;text-align:right;">' + src + '</th>';
     });
     html += '<th style="width:10%;text-align:right;">Total</th>';
-    html += '<th style="width:6%;text-align:center;">Aksi</th></tr></thead><tbody id="tbodySumberDana">';
+    if (canCrud) {
+        html += '<th style="width:6%;text-align:center;">Aksi</th>';
+    }
+    html += '</tr></thead><tbody id="tbodySumberDana">';
     
     var totalSumberDana = 0;
     var srcKeys = ['rpp', 'nbp', 'blu', 'ln', 'rm', 'ppdn', 'hibah', 'phbs', 'snh', 'nt'];
@@ -1701,19 +1833,22 @@ function loadContentData(data) {
                 html += '<td class="text-right">' + formatNumber(val) + '</td>';
             });
             html += '<td class="text-right" style="font-weight:600;color:#4a90d9;">' + formatNumber(sd.total) + '</td>';
-            html += '<td class="text-center"><div class="dropdown-aksi">';
-            html += '<button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)"><i class="fa fa-ellipsis-v"></i></button>';
-            html += '<div class="menu-dropdown">';
-            var dataAttrs = 'data-id="' + sd.id + '" data-kode="' + sd.kode + '" data-sasaran="' + (sd.sasaran_kegiatan || '') + '" data-klasifikasi="' + (sd.klasifikasi_rincian_output || '') + '" data-rincian="' + (sd.rincian_output || '') + '" data-komponen="' + (sd.komponen || '') + '" data-jenis="' + (sd.jenis_komponen || '') + '"';
-            $.each(srcKeys, function(si, sk) {
-                dataAttrs += ' data-' + sk + '="' + (sd[sk] || 0) + '"';
-            });
-            html += '<button class="item-dropdown edit-sumber-dana" ' + dataAttrs + '><i class="fa fa-pencil"></i> Edit</button>';
-            html += '<button class="item-dropdown text-danger delete-sumber-dana" data-id="' + sd.id + '"><i class="fa fa-trash"></i> Hapus</button>';
-            html += '</div></div></td></tr>';
+            if (canCrud) {
+                html += '<td class="text-center"><div class="dropdown-aksi">';
+                html += '<button class="btn-titik-tiga" onclick="event.stopPropagation(); toggleDropdown(this)"><i class="fa fa-ellipsis-v"></i></button>';
+                html += '<div class="menu-dropdown">';
+                var dataAttrs = 'data-id="' + sd.id + '" data-kode="' + sd.kode + '" data-sasaran="' + (sd.sasaran_kegiatan || '') + '" data-klasifikasi="' + (sd.klasifikasi_rincian_output || '') + '" data-rincian="' + (sd.rincian_output || '') + '" data-komponen="' + (sd.komponen || '') + '" data-jenis="' + (sd.jenis_komponen || '') + '"';
+                $.each(srcKeys, function(si, sk) {
+                    dataAttrs += ' data-' + sk + '="' + (sd[sk] || 0) + '"';
+                });
+                html += '<button class="item-dropdown edit-sumber-dana" ' + dataAttrs + '><i class="fa fa-pencil"></i> Edit</button>';
+                html += '<button class="item-dropdown text-danger delete-sumber-dana" data-id="' + sd.id + '"><i class="fa fa-trash"></i> Hapus</button>';
+                html += '</div></div></td>';
+            }
+            html += '</tr>';
         });
     } else {
-        html += '<tr><td colspan="15" style="text-align:center;color:#aaa;padding:20px 0;">Belum ada data sumber pendanaan</td></tr>';
+        html += '<tr><td colspan="' + (canCrud ? 15 : 14) + '" style="text-align:center;color:#aaa;padding:20px 0;">Belum ada data sumber pendanaan</td></tr>';
     }
     
     var totalSources = {};
@@ -1732,7 +1867,10 @@ function loadContentData(data) {
         html += '<td class="text-right">' + formatNumber(totalSources[sk]) + '</td>';
     });
     html += '<td class="text-right" style="font-weight:700;color:#4a90d9;font-size:14px;">' + formatNumber(totalSumberDana) + '</td>';
-    html += '<td></td></tr></tfoot></table></div></div>';
+    if (canCrud) {
+        html += '<td></td>';
+    }
+    html += '</tr></tfoot></table></div></div>';
     
     // Rekapitulasi
     html += '<div class="card-notika" style="background:#f9f9f9;">';

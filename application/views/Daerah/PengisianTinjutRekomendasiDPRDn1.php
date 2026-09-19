@@ -649,6 +649,17 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
 </style>
 
 <div class="main-content">
+  
+  <div class="page-header-box">
+    <h1 class="page-title">BAB 3.3 TINDAK LANJUT REKOMENDASI DPRD (TAHUN N-1)</h1>
+    <p class="page-subtitle">Pencatatan rekomendasi DPRD oleh Pemerintah Daerah dengan penandaan (tagging) Perangkat Daerah / Dinas terkait, serta pelaporan tindak lanjut dan tujuan penyelesaian oleh masing-masing instansi.</p>
+    
+    <div class="stat-chips-row">
+      <span class="stat-chip"><span class="stat-dot dot-green"></span> <span id="statFilledText"><?= $stats['filled'] ?> dari <?= $stats['total'] ?></span> telah ditindaklanjuti</span>
+      <span class="stat-chip"><span class="stat-dot dot-amber"></span> <span id="statPendingText"><?= $stats['pending'] ?></span> belum diisi tindak lanjut</span>
+    </div>
+  </div>
+
   <!-- Filter Wilayah Top (Sebelum Login & Saat Login Sebagai Daerah) -->
   <?php if (!$IsLoggedIn || !empty($IsDaerah)) { 
     $provKodeCurrent = !empty($KodeWilayah) ? substr($KodeWilayah, 0, 2) : '';
@@ -733,24 +744,6 @@ td.col-aksi { width: 10%; text-align: center; white-space: nowrap; }
       }
   }
   ?>
-  <div class="page-header-box">
-    <div class="page-badge">
-      <i class="fa fa-book"></i> E-LKPJ &bull; Bab III &bull; 3.3
-      <?php if (!empty($NamaWilayah)): ?>
-        &bull; <i class="fa fa-map-marker"></i> <?= htmlspecialchars($NamaWilayah) ?>
-      <?php endif; ?>
-      <?php if (!empty($IsRole4) && !empty($namaInstansiTampil)): ?>
-        &bull; <i class="fa fa-building"></i> <?= htmlspecialchars($namaInstansiTampil) ?> (Role Instansi)
-      <?php endif; ?>
-    </div>
-    <h1 class="page-title">BAB 3.3 : Tindak Lanjut Rekomendasi DPRD (Tahun N-1)</h1>
-    <p class="page-subtitle">Pencatatan rekomendasi DPRD oleh Pemerintah Daerah dengan penandaan (tagging) Perangkat Daerah / Dinas terkait, serta pelaporan tindak lanjut dan tujuan penyelesaian oleh masing-masing instansi.</p>
-    
-    <div class="stat-chips-row">
-      <span class="stat-chip"><span class="stat-dot dot-green"></span> <span id="statFilledText"><?= $stats['filled'] ?> dari <?= $stats['total'] ?></span> telah ditindaklanjuti</span>
-      <span class="stat-chip"><span class="stat-dot dot-amber"></span> <span id="statPendingText"><?= $stats['pending'] ?></span> belum diisi tindak lanjut</span>
-    </div>
-  </div>
 
   <!-- Toolbar & Filters -->
   <div class="toolbar-card">

@@ -1060,16 +1060,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
 
   <!-- Breadcrumb & Page Title -->
   <div class="page-header-box">
-    <div class="page-badge">
-      <i class="fa fa-book"></i> E-LKPJ &bull; Bab I
-      <?php if (!empty($NamaWilayah)): ?>
-        &bull; <i class="fa fa-map-marker"></i> <?= htmlspecialchars($NamaWilayah) ?>
-      <?php endif; ?>
-      <?php if (!empty($IsRole4) && !empty($NamaInstansi)): ?>
-        &bull; <i class="fa fa-building"></i> <?= htmlspecialchars($NamaInstansi) ?> (Role Instansi)
-      <?php endif; ?>
-    </div>
-    <h1 class="page-title">BAB 1 : Pendahuluan & Gambaran Umum Daerah</h1>
+    <h1 class="page-title">BAB 1 PENDAHULUAN & GAMBARAN UMUM DAERAH</h1>
     <p class="page-subtitle">Pencatatan dan pelaporan data statistik kondisi geografis, administratif, demografis, dan indikator makro daerah <?= htmlspecialchars($NamaWilayah ?: 'Kabupaten Situbondo') ?>.</p>
   </div>
 
