@@ -146,17 +146,34 @@
       display:inline-flex;
       align-items:center;
       gap:10px;
-      padding:10px 16px;
+      padding:11px 20px;
       border-radius:1000px;
       background: rgba(255,255,255,0.18);
       border: 1px solid rgba(255,255,255,0.28);
       color:#fff;
-      font-weight:700;
+      font-weight:800;
+      font-size: 1.08rem;
+      letter-spacing: 0.3px;
       line-height:1;
       white-space:nowrap;
-      max-width: 45vw;
+      max-width: 300px;
       overflow:hidden;
       text-overflow:ellipsis;
+    }
+
+    .daerah-badge {
+      background: rgba(255,255,255,0.13);
+      border-color: rgba(255,255,255,0.25);
+      font-weight: 800;
+      font-size: 1.05rem;
+      letter-spacing: 0.3px;
+      color: #fff;
+      max-width: 300px;
+    }
+
+    .daerah-badge i {
+      color: rgba(255,255,255,0.90);
+      font-size: 0.98rem;
     }
 
     .navbar-menu{
@@ -284,7 +301,8 @@
 <body class="bg-gray-50 font-sans">
 
 <?php
-  $LoginInfo = '';
+  $LoginInfo   = '';
+  $NamaDaerah  = '';
 
   if (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 3) {
     $KodeWilayah = $_SESSION['KodeWilayah'] ?? '';
@@ -300,6 +318,15 @@
         ->row_array();
 
       $LoginInfo = $row['Username'] ?? ($_SESSION['Username'] ?? '');
+
+      // Ambil nama daerah dari tabel kodewilayah
+      $rowWilayah = $this->db->select('Nama')
+        ->from('kodewilayah')
+        ->where('Kode', $KodeWilayah)
+        ->limit(1)
+        ->get()
+        ->row_array();
+      $NamaDaerah = $rowWilayah['Nama'] ?? '';
     } else {
       $LoginInfo = $_SESSION['Username'] ?? '';
     }
@@ -320,6 +347,18 @@
     } else {
       $LoginInfo = 'Instansi';
     }
+
+    // Ambil nama daerah berdasarkan KodeWilayah instansi
+    $KodeWilayahInst = $_SESSION['KodeWilayah'] ?? '';
+    if (!empty($KodeWilayahInst)) {
+      $rowWilayahInst = $this->db->select('Nama')
+        ->from('kodewilayah')
+        ->where('Kode', $KodeWilayahInst)
+        ->limit(1)
+        ->get()
+        ->row_array();
+      $NamaDaerah = $rowWilayahInst['Nama'] ?? '';
+    }
   } elseif (!empty($_SESSION['NamaInstansi'])) {
     $LoginInfo = $_SESSION['NamaInstansi'];
   } elseif (!empty($_SESSION['Username'])) {
@@ -338,12 +377,19 @@
         <i class="fas fa-bars"></i>
       </button>
 
+      <?php if (!empty($NamaDaerah)) { ?>
+          <span class="login-badge daerah-badge" title="Daerah: <?= html_escape($NamaDaerah) ?>">
+            <i class="fas fa-map-marker-alt"></i>
+            <?= html_escape($NamaDaerah) ?>
+          </span>
+      <?php } ?>
+
         <?php if (!empty($LoginInfo)) { ?>
-            <span class="login-badge" title="<?= html_escape($LoginInfo) ?>">
+          <span class="login-badge" title="<?= html_escape($LoginInfo) ?>">
             <i class="fas fa-user"></i>
             <?= html_escape($LoginInfo) ?>
-            </span>
-        <?php } ?>
+          </span>
+      <?php } ?>
     </div>
 
     <div class="navbar-center">
