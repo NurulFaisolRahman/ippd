@@ -557,12 +557,11 @@ if (!function_exists('formatDesimalIndikator')) {
                             <!-- TABEL HIERARKI DENGAN INDIKATOR KELUAR LANGSUNG -->
                             <div class="table-responsive">
                                 <table id="hierarki-table" class="table table-bordered">
-                                    <thead>
+                                     <thead>
                                         <tr>
                                             <th rowspan="2" class="text-center" style="vertical-align: middle; width: 3%;">No</th>
-                                            <th rowspan="2" style="vertical-align: middle; width: 20%;">Visi, Misi, Tujuan dan Sasaran</th>
-                                            <th rowspan="2" class="text-center" style="vertical-align: middle; width: 7%;">Tahun</th>
-                                            <th rowspan="2" style="vertical-align: middle; width: 13%;">Indikator</th>
+                                            <th rowspan="2" style="vertical-align: middle; width: 25%;">Visi, Misi, Tujuan dan Sasaran</th>
+                                            <th rowspan="2" style="vertical-align: middle; width: 15%;">Indikator</th>
                                             <th rowspan="2" class="text-center" style="vertical-align: middle; width: 5%;">Satuan</th>
                                             <th rowspan="2" class="text-center" style="vertical-align: middle; width: 5%;">Base line<br>2024</th>
                                             <th colspan="6" class="text-center" style="vertical-align: middle;">Target</th>
@@ -599,9 +598,6 @@ if (!function_exists('formatDesimalIndikator')) {
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td class="text-center" style="vertical-align: middle; font-weight: 600; color: #2e7d32;">
-                                                    <?= html_escape($visi['TahunMulai']) . ' - ' . html_escape($visi['TahunAkhir']) ?>
-                                                </td>
                                                 <td class="text-center text-muted">-</td>
                                                 <td class="text-center text-muted">-</td>
                                                 <td class="text-center text-muted">-</td>
@@ -617,7 +613,7 @@ if (!function_exists('formatDesimalIndikator')) {
                                                 <td class="text-center">
                                                     <div class="btn-aksi-group">
                                                         <button class="btn btn-xs btn-success TambahMisi btn-action" data-id="<?= $visi['Id'] ?>" title="Tambah Misi"><i class="fa fa-plus"></i> Misi</button>
-                                                        <button class="btn btn-xs btn-warning EditVisi btn-action" data-id="<?= $visi['Id'] ?>" data-visi="<?= html_escape($visi['Visi']) ?>" data-awal="<?= $visi['TahunMulai'] ?>" data-akhir="<?= $visi['TahunAkhir'] ?>" title="Edit Visi"><i class="fa fa-edit"></i></button>
+                                                        <button class="btn btn-xs btn-warning EditVisi btn-action" data-id="<?= $visi['Id'] ?>" data-visi="<?= html_escape($visi['Visi']) ?>" title="Edit Visi"><i class="fa fa-edit"></i></button>
                                                         <button class="btn btn-xs btn-danger HapusVisi btn-action" data-id="<?= $visi['Id'] ?>" title="Hapus Visi"><i class="fa fa-trash"></i></button>
                                                     </div>
                                                 </td>
@@ -640,9 +636,6 @@ if (!function_exists('formatDesimalIndikator')) {
                                                                 <?= html_escape($misi['Misi']) ?>
                                                             </div>
                                                         </div>
-                                                    </td>
-                                                    <td class="text-center" style="vertical-align: middle; font-weight: 600; color: #00838f;">
-                                                        <?= html_escape($misi['TahunMulai'] ?? $visi['TahunMulai']) . ' - ' . html_escape($misi['TahunAkhir'] ?? $visi['TahunAkhir']) ?>
                                                     </td>
                                                     <td class="text-center text-muted">-</td>
                                                     <td class="text-center text-muted">-</td>
@@ -679,15 +672,12 @@ if (!function_exists('formatDesimalIndikator')) {
                                                     <tr data-id="tujuan-<?= $tujuan['Id'] ?>" data-parent="misi-<?= $misi['Id'] ?>" data-expanded="true" class="row-tujuan">
                                                         <td rowspan="<?= $tujuanRowspan ?>" class="text-center" style="font-weight: 600;"><?= $noMisi . '.' . $noTujuan ?></td>
                                                         <td rowspan="<?= $tujuanRowspan ?>" style="padding-left: 30px !important;" class="border-tujuan clickable-row" onclick="toggleLevel('tujuan-<?= $tujuan['Id'] ?>', this)">
-                                                            <div class="td-content-wrapper">
+                                                             <div class="td-content-wrapper">
                                                                 <div class="text-content">
                                                                     <span class="label-text"><b style="color: #ef6c00;">TUJUAN <?= $noMisi . '.' . $noTujuan ?>:</b> </span>
                                                                     <?= html_escape($tujuan['Tujuan']) ?>
                                                                 </div>
                                                             </div>
-                                                        </td>
-                                                        <td rowspan="<?= $tujuanRowspan ?>" class="text-center" style="vertical-align: middle; font-weight: 600; color: #ef6c00;">
-                                                            <?= html_escape($tujuan['TahunMulai'] ?? $visi['TahunMulai']) . ' - ' . html_escape($tujuan['TahunAkhir'] ?? $visi['TahunAkhir']) ?>
                                                         </td>
                                                         
                                                         <?php if ($firstIndT) { 
@@ -839,15 +829,12 @@ if (!function_exists('formatDesimalIndikator')) {
                                                         <tr data-id="sasaran-<?= $sasaran['Id'] ?>" data-parent="tujuan-<?= $tujuan['Id'] ?>" data-expanded="true" class="row-sasaran">
                                                             <td rowspan="<?= $sasaranRowspan ?>" class="text-center" style="font-weight: 500;"><?= $noMisi . '.' . $noTujuan . '.' . $noSasaran ?></td>
                                                             <td rowspan="<?= $sasaranRowspan ?>" style="padding-left: 45px !important;" class="border-sasaran">
-                                                                <div class="td-content-wrapper">
+                                                                 <div class="td-content-wrapper">
                                                                     <div class="text-content">
                                                                         <span class="label-text"><b style="color: #616161;">SASARAN <?= $noMisi . '.' . $noTujuan . '.' . $noSasaran ?>:</b> </span>
                                                                         <?= html_escape($sasaran['Sasaran']) ?>
                                                                     </div>
                                                                 </div>
-                                                            </td>
-                                                            <td rowspan="<?= $sasaranRowspan ?>" class="text-center" style="vertical-align: middle; font-weight: 600; color: #616161;">
-                                                                <?= html_escape($sasaran['TahunMulai'] ?? $visi['TahunMulai']) . ' - ' . html_escape($sasaran['TahunAkhir'] ?? $visi['TahunAkhir']) ?>
                                                             </td>
                                                             
                                                             <?php if ($firstIndS) { 
@@ -1029,7 +1016,7 @@ if (!function_exists('formatDesimalIndikator')) {
                                             } 
                                         } else { ?>
                                             <tr>
-                                                <td colspan="15" class="text-center" style="padding: 30px; color: #999;">Belum ada data Visi RPJMD.</td>
+                                                <td colspan="14" class="text-center" style="padding: 30px; color: #999;">Belum ada data Visi RPJMD.</td>
                                             </tr>
                                         <?php } ?>
                                     </tbody>
@@ -1061,28 +1048,6 @@ if (!function_exists('formatDesimalIndikator')) {
                                 </div>
                                 <div class="nk-int-st">
                                     <textarea class="form-control" id="Visi" rows="3" style="resize: vertical;" placeholder="Uraian Visi RPJMD"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row" style="margin-top: 15px;">
-                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                            <div class="form-group ic-cmp-int float-lb floating-lb">
-                                <div class="form-ic-cmp">
-                                    <i class="notika-icon notika-calendar"></i>
-                                </div>
-                                <div class="nk-int-st">
-                                    <input type="number" class="form-control" id="TahunMulai" placeholder="Tahun Mulai (YYYY)">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                            <div class="form-group ic-cmp-int float-lb floating-lb">
-                                <div class="form-ic-cmp">
-                                    <i class="notika-icon notika-calendar"></i>
-                                </div>
-                                <div class="nk-int-st">
-                                    <input type="number" class="form-control" id="TahunAkhir" placeholder="Tahun Akhir (YYYY)">
                                 </div>
                             </div>
                         </div>
@@ -1120,28 +1085,6 @@ if (!function_exists('formatDesimalIndikator')) {
                             </div>
                         </div>
                     </div>
-                    <div class="row" style="margin-top: 15px;">
-                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                            <div class="form-group ic-cmp-int float-lb floating-lb">
-                                <div class="form-ic-cmp">
-                                    <i class="notika-icon notika-calendar"></i>
-                                </div>
-                                <div class="nk-int-st">
-                                    <input type="number" class="form-control" id="_TahunMulai" placeholder="Tahun Mulai (YYYY)">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                            <div class="form-group ic-cmp-int float-lb floating-lb">
-                                <div class="form-ic-cmp">
-                                    <i class="notika-icon notika-calendar"></i>
-                                </div>
-                                <div class="nk-int-st">
-                                    <input type="number" class="form-control" id="_TahunAkhir" placeholder="Tahun Akhir (YYYY)">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
                 <div class="modal-footer" style="padding-top: 15px;">
                     <button type="button" class="btn btn-info btn-action" id="EditBtnVisi"><i class="fa fa-save"></i> Update</button>
@@ -1163,9 +1106,6 @@ if (!function_exists('formatDesimalIndikator')) {
                 </div>
                 <div class="modal-body" style="padding-top: 20px;">
                     <input type="hidden" id="IdVisi">
-                    <div class="periode-info" id="PeriodeMisiInfo">
-                        <i class="fa fa-info-circle"></i> Periode akan diambil otomatis dari Visi yang dipilih
-                    </div>
                     <div class="row">
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                             <div class="form-group ic-cmp-int float-lb floating-lb">
@@ -1200,9 +1140,6 @@ if (!function_exists('formatDesimalIndikator')) {
                 <div class="modal-body" style="padding-top: 20px;">
                     <input type="hidden" id="IdMisiForm">
                     <input type="hidden" id="_IdVisi">
-                    <div class="periode-info" id="EditPeriodeMisiInfo">
-                        <i class="fa fa-info-circle"></i> Periode akan diambil otomatis dari Visi yang dipilih
-                    </div>
                     <div class="row">
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                             <div class="form-group ic-cmp-int float-lb floating-lb">
@@ -1236,9 +1173,6 @@ if (!function_exists('formatDesimalIndikator')) {
                 </div>
                 <div class="modal-body" style="padding-top: 20px;">
                     <input type="hidden" id="IdMisi">
-                    <div class="periode-info" id="PeriodeTujuanInfo">
-                        <i class="fa fa-info-circle"></i> Periode akan diambil otomatis dari Misi yang dipilih
-                    </div>
                     <div class="row">
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                             <div class="form-group ic-cmp-int float-lb floating-lb">
@@ -1273,9 +1207,6 @@ if (!function_exists('formatDesimalIndikator')) {
                 <div class="modal-body" style="padding-top: 20px;">
                     <input type="hidden" id="IdTujuanForm">
                     <input type="hidden" id="_IdMisi">
-                    <div class="periode-info" id="EditPeriodeTujuanInfo">
-                        <i class="fa fa-info-circle"></i> Periode akan diambil otomatis dari Misi yang dipilih
-                    </div>
                     <div class="row">
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                             <div class="form-group ic-cmp-int float-lb floating-lb">
@@ -1309,9 +1240,6 @@ if (!function_exists('formatDesimalIndikator')) {
                 </div>
                 <div class="modal-body" style="padding-top: 20px;">
                     <input type="hidden" id="IdTujuan">
-                    <div class="periode-info" id="PeriodeSasaranInfo">
-                        <i class="fa fa-info-circle"></i> Periode akan diambil otomatis dari Tujuan yang dipilih
-                    </div>
                     <div class="row">
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                             <div class="form-group ic-cmp-int float-lb floating-lb">
@@ -1346,9 +1274,6 @@ if (!function_exists('formatDesimalIndikator')) {
                 <div class="modal-body" style="padding-top: 20px;">
                     <input type="hidden" id="IdSasaranForm">
                     <input type="hidden" id="_IdTujuan">
-                    <div class="periode-info" id="EditPeriodeSasaranInfo">
-                        <i class="fa fa-info-circle"></i> Periode akan diambil otomatis dari Tujuan yang dipilih
-                    </div>
                     <div class="row">
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                             <div class="form-group ic-cmp-int float-lb floating-lb">
@@ -1690,6 +1615,25 @@ if (!function_exists('formatDesimalIndikator')) {
             var div = document.createElement('div');
             div.appendChild(document.createTextNode(text));
             return div.innerHTML;
+        }
+
+        // Helper: cek apakah response server = sukses (string '1' atau JSON {status:'success'})
+        function isRespSuccess(r) {
+            if (r === '1' || r === 1) return true;
+            try {
+                var j = (typeof r === 'object') ? r : JSON.parse(r);
+                return j && (j.status === 'success' || j === 1);
+            } catch(e) {}
+            return false;
+        }
+
+        // Helper: ambil pesan error dari response (JSON atau string)
+        function parseRespError(r, fallback) {
+            try {
+                var j = (typeof r === 'object') ? r : JSON.parse(r);
+                if (j && j.message) return j.message;
+            } catch(e) {}
+            return (typeof r === 'string' && r.trim() !== '') ? r : fallback;
         }
 
         // ==============================================
@@ -2134,27 +2078,14 @@ if (!function_exists('formatDesimalIndikator')) {
             // CRUD VISI
             // ==============================================
             $("#SimpanVisi").click(function() {
-                if (isNaN($("#TahunMulai").val()) || $("#TahunMulai").val() == "" || $("#TahunMulai").val().length != 4) {
-                    showToast('Tahun Mulai harus diisi dengan format YYYY!', 'error');
-                    return;
-                }
-                if (isNaN($("#TahunAkhir").val()) || $("#TahunAkhir").val() == "" || $("#TahunAkhir").val().length != 4) {
-                    showToast('Tahun Akhir harus diisi dengan format YYYY!', 'error');
-                    return;
-                }
-                if (parseInt($("#TahunMulai").val()) >= parseInt($("#TahunAkhir").val())) {
-                    showToast('Tahun Mulai harus lebih kecil dari Tahun Akhir!', 'error');
-                    return;
-                }
-                if ($("#Visi").val() == "") {
+                var visi = $("#Visi").val().trim();
+                if (visi === "") {
                     showToast('Visi harus diisi!', 'error');
                     return;
                 }
                 
                 var data = {
-                    Visi: $("#Visi").val(),
-                    TahunMulai: $("#TahunMulai").val(),
-                    TahunAkhir: $("#TahunAkhir").val(),
+                    Visi: visi,
                     [CSRF_NAME]: CSRF_TOKEN
                 };
 
@@ -2162,14 +2093,25 @@ if (!function_exists('formatDesimalIndikator')) {
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
 
                 $.post(BaseURL + "Daerah/InputVisiRPJMD", data, function(Respon) {
-                    btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
-                    if (Respon == '1') {
-                        showToast('Berhasil Menyimpan Visi RPJMD!', 'success');
-                        setTimeout(function() { location.reload(); }, 800);
+                    var isSuccess = (Respon == '1');
+                    try {
+                        var json = (typeof Respon === 'object') ? Respon : JSON.parse(Respon);
+                        if (json && (json.status === 'success' || json == 1)) {
+                            isSuccess = true;
+                        }
+                    } catch(e) {}
+
+                    if (isSuccess) {
+                        location.reload();
                     } else if (Respon == '2') {
                         showToast('Gagal: Periode tahun sudah ada!', 'error');
                     } else {
-                        showToast(Respon || 'Gagal Menyimpan Visi RPJMD!', 'error');
+                        var msg = Respon;
+                        try {
+                            var jsonErr = (typeof Respon === 'object') ? Respon : JSON.parse(Respon);
+                            if (jsonErr && jsonErr.message) msg = jsonErr.message;
+                        } catch(e) {}
+                        showToast(msg || 'Gagal Menyimpan Visi RPJMD!', 'error');
                     }
                 }).fail(function() {
                     btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
@@ -2180,34 +2122,19 @@ if (!function_exists('formatDesimalIndikator')) {
             $('#hierarki-table tbody').on('click', '.EditVisi', function() {
                 $("#IdVisiForm").val($(this).data('id'));
                 $("#_Visi").val($(this).data('visi'));
-                $("#_TahunMulai").val($(this).data('awal'));
-                $("#_TahunAkhir").val($(this).data('akhir'));
                 $("#ModalEditVisi").modal('show');
             });
 
             $("#EditBtnVisi").click(function() {
-                if (isNaN($("#_TahunMulai").val()) || $("#_TahunMulai").val() == "" || $("#_TahunMulai").val().length != 4) {
-                    showToast('Tahun Mulai harus diisi dengan format YYYY!', 'error');
-                    return;
-                }
-                if (isNaN($("#_TahunAkhir").val()) || $("#_TahunAkhir").val() == "" || $("#_TahunAkhir").val().length != 4) {
-                    showToast('Tahun Akhir harus diisi dengan format YYYY!', 'error');
-                    return;
-                }
-                if (parseInt($("#_TahunMulai").val()) >= parseInt($("#_TahunAkhir").val())) {
-                    showToast('Tahun Mulai harus lebih kecil dari Tahun Akhir!', 'error');
-                    return;
-                }
-                if ($("#_Visi").val() == "") {
+                var visi = $("#_Visi").val().trim();
+                if (visi === "") {
                     showToast('Visi harus diisi!', 'error');
                     return;
                 }
                 
                 var data = {
                     Id: $("#IdVisiForm").val(),
-                    Visi: $("#_Visi").val(),
-                    TahunMulai: $("#_TahunMulai").val(),
-                    TahunAkhir: $("#_TahunAkhir").val(),
+                    Visi: visi,
                     [CSRF_NAME]: CSRF_TOKEN
                 };
 
@@ -2215,14 +2142,23 @@ if (!function_exists('formatDesimalIndikator')) {
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
 
                 $.post(BaseURL + "Daerah/EditVisiRPJMD", data, function(Respon) {
-                    btn.prop('disabled', false).html('<i class="fa fa-save"></i> Update');
-                    if (Respon == '1') {
-                        showToast('Berhasil Mengupdate Visi RPJMD!', 'success');
-                        setTimeout(function() { location.reload(); }, 800);
-                    } else if (Respon == '2') {
-                        showToast('Gagal: Periode tahun sudah ada!', 'error');
+                    var isSuccess = (Respon == '1');
+                    try {
+                        var json = (typeof Respon === 'object') ? Respon : JSON.parse(Respon);
+                        if (json && (json.status === 'success' || json == 1)) {
+                            isSuccess = true;
+                        }
+                    } catch(e) {}
+
+                    if (isSuccess) {
+                        location.reload();
                     } else {
-                        showToast(Respon || 'Gagal Mengupdate Visi RPJMD!', 'error');
+                        var msg = Respon;
+                        try {
+                            var jsonErr = (typeof Respon === 'object') ? Respon : JSON.parse(Respon);
+                            if (jsonErr && jsonErr.message) msg = jsonErr.message;
+                        } catch(e) {}
+                        showToast(msg || 'Gagal Mengupdate Visi RPJMD!', 'error');
                     }
                 }).fail(function() {
                     btn.prop('disabled', false).html('<i class="fa fa-save"></i> Update');
@@ -2232,17 +2168,14 @@ if (!function_exists('formatDesimalIndikator')) {
 
             $('#hierarki-table tbody').on('click', '.HapusVisi', function() {
                 var id = $(this).data('id');
-                if (confirm("Yakin ingin menghapus Visi ini? Semua Misi, Tujuan, Sasaran dan Indikator terkait akan terhapus.")) {
-                    var data = { Id: id, [CSRF_NAME]: CSRF_TOKEN };
-                    $.post(BaseURL + "Daerah/HapusVisiRPJMD", data, function(Respon) {
-                        if (Respon == '1') {
-                            showToast('Berhasil Menghapus Visi RPJMD!', 'success');
-                            setTimeout(function() { location.reload(); }, 800);
-                        } else {
-                            showToast(Respon || 'Gagal Menghapus Visi RPJMD!', 'error');
-                        }
-                    });
-                }
+                var data = { Id: id, [CSRF_NAME]: CSRF_TOKEN };
+                $.post(BaseURL + "Daerah/HapusVisiRPJMD", data, function(Respon) {
+                    if (isRespSuccess(Respon)) {
+                        location.reload();
+                    } else {
+                        showToast(parseRespError(Respon, 'Gagal Menghapus Visi RPJMD!'), 'error');
+                    }
+                });
             });
 
             // ==============================================
@@ -2269,12 +2202,11 @@ if (!function_exists('formatDesimalIndikator')) {
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
 
                 $.post(BaseURL + "Daerah/InputMisiRPJMD", data, function(Respon) {
-                    btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
-                    if (Respon == '1') {
-                        showToast('Berhasil Menyimpan Misi RPJMD!', 'success');
-                        setTimeout(function() { location.reload(); }, 800);
+                    if (isRespSuccess(Respon)) {
+                        location.reload();
                     } else {
-                        showToast(Respon || 'Gagal Menyimpan Misi RPJMD!', 'error');
+                        btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
+                        showToast(parseRespError(Respon, 'Gagal Menyimpan Misi RPJMD!'), 'error');
                     }
                 }).fail(function() {
                     btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
@@ -2304,12 +2236,11 @@ if (!function_exists('formatDesimalIndikator')) {
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
 
                 $.post(BaseURL + "Daerah/EditMisiRPJMD", data, function(Respon) {
-                    btn.prop('disabled', false).html('<i class="fa fa-save"></i> Update');
-                    if (Respon == '1') {
-                        showToast('Berhasil Mengupdate Misi RPJMD!', 'success');
-                        setTimeout(function() { location.reload(); }, 800);
+                    if (isRespSuccess(Respon)) {
+                        location.reload();
                     } else {
-                        showToast(Respon || 'Gagal Mengupdate Misi RPJMD!', 'error');
+                        btn.prop('disabled', false).html('<i class="fa fa-save"></i> Update');
+                        showToast(parseRespError(Respon, 'Gagal Mengupdate Misi RPJMD!'), 'error');
                     }
                 }).fail(function() {
                     btn.prop('disabled', false).html('<i class="fa fa-save"></i> Update');
@@ -2319,17 +2250,14 @@ if (!function_exists('formatDesimalIndikator')) {
 
             $('#hierarki-table tbody').on('click', '.HapusMisi', function() {
                 var id = $(this).data('id');
-                if (confirm("Yakin ingin menghapus Misi ini? Semua Tujuan dan Sasaran terkait akan terhapus.")) {
-                    var data = { Id: id, [CSRF_NAME]: CSRF_TOKEN };
-                    $.post(BaseURL + "Daerah/HapusMisiRPJMD", data, function(Respon) {
-                        if (Respon == '1') {
-                            showToast('Berhasil Menghapus Misi RPJMD!', 'success');
-                            setTimeout(function() { location.reload(); }, 800);
-                        } else {
-                            showToast(Respon || 'Gagal Menghapus Misi RPJMD!', 'error');
-                        }
-                    });
-                }
+                var data = { Id: id, [CSRF_NAME]: CSRF_TOKEN };
+                $.post(BaseURL + "Daerah/HapusMisiRPJMD", data, function(Respon) {
+                    if (isRespSuccess(Respon)) {
+                        location.reload();
+                    } else {
+                        showToast(parseRespError(Respon, 'Gagal Menghapus Misi RPJMD!'), 'error');
+                    }
+                });
             });
 
             // ==============================================
@@ -2356,12 +2284,11 @@ if (!function_exists('formatDesimalIndikator')) {
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
 
                 $.post(BaseURL + "Daerah/InputTujuanRPJMD", data, function(Respon) {
-                    btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
-                    if (Respon == '1') {
-                        showToast('Berhasil Menyimpan Tujuan RPJMD!', 'success');
-                        setTimeout(function() { location.reload(); }, 800);
+                    if (isRespSuccess(Respon)) {
+                        location.reload();
                     } else {
-                        showToast(Respon || 'Gagal Menyimpan Tujuan RPJMD!', 'error');
+                        btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
+                        showToast(parseRespError(Respon, 'Gagal Menyimpan Tujuan RPJMD!'), 'error');
                     }
                 }).fail(function() {
                     btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
@@ -2391,12 +2318,11 @@ if (!function_exists('formatDesimalIndikator')) {
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
 
                 $.post(BaseURL + "Daerah/EditTujuanRPJMD", data, function(Respon) {
-                    btn.prop('disabled', false).html('<i class="fa fa-save"></i> Update');
-                    if (Respon == '1') {
-                        showToast('Berhasil Mengupdate Tujuan RPJMD!', 'success');
-                        setTimeout(function() { location.reload(); }, 800);
+                    if (isRespSuccess(Respon)) {
+                        location.reload();
                     } else {
-                        showToast(Respon || 'Gagal Mengupdate Tujuan RPJMD!', 'error');
+                        btn.prop('disabled', false).html('<i class="fa fa-save"></i> Update');
+                        showToast(parseRespError(Respon, 'Gagal Mengupdate Tujuan RPJMD!'), 'error');
                     }
                 }).fail(function() {
                     btn.prop('disabled', false).html('<i class="fa fa-save"></i> Update');
@@ -2406,17 +2332,14 @@ if (!function_exists('formatDesimalIndikator')) {
 
             $('#hierarki-table tbody').on('click', '.HapusTujuan', function() {
                 var id = $(this).data('id');
-                if (confirm("Yakin ingin menghapus Tujuan ini? Semua Sasaran terkait akan terhapus.")) {
-                    var data = { Id: id, [CSRF_NAME]: CSRF_TOKEN };
-                    $.post(BaseURL + "Daerah/HapusTujuanRPJMD", data, function(Respon) {
-                        if (Respon == '1') {
-                            showToast('Berhasil Menghapus Tujuan RPJMD!', 'success');
-                            setTimeout(function() { location.reload(); }, 800);
-                        } else {
-                            showToast(Respon || 'Gagal Menghapus Tujuan RPJMD!', 'error');
-                        }
-                    });
-                }
+                var data = { Id: id, [CSRF_NAME]: CSRF_TOKEN };
+                $.post(BaseURL + "Daerah/HapusTujuanRPJMD", data, function(Respon) {
+                    if (isRespSuccess(Respon)) {
+                        location.reload();
+                    } else {
+                        showToast(parseRespError(Respon, 'Gagal Menghapus Tujuan RPJMD!'), 'error');
+                    }
+                });
             });
 
             // ==============================================
@@ -2443,12 +2366,11 @@ if (!function_exists('formatDesimalIndikator')) {
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
 
                 $.post(BaseURL + "Daerah/InputSasaranRPJMD", data, function(Respon) {
-                    btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
-                    if (Respon == '1') {
-                        showToast('Berhasil Menyimpan Sasaran RPJMD!', 'success');
-                        setTimeout(function() { location.reload(); }, 800);
+                    if (isRespSuccess(Respon)) {
+                        location.reload();
                     } else {
-                        showToast(Respon || 'Gagal Menyimpan Sasaran RPJMD!', 'error');
+                        btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
+                        showToast(parseRespError(Respon, 'Gagal Menyimpan Sasaran RPJMD!'), 'error');
                     }
                 }).fail(function() {
                     btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
@@ -2478,12 +2400,11 @@ if (!function_exists('formatDesimalIndikator')) {
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
 
                 $.post(BaseURL + "Daerah/EditSasaranRPJMD", data, function(Respon) {
-                    btn.prop('disabled', false).html('<i class="fa fa-save"></i> Update');
-                    if (Respon == '1') {
-                        showToast('Berhasil Mengupdate Sasaran RPJMD!', 'success');
-                        setTimeout(function() { location.reload(); }, 800);
+                    if (isRespSuccess(Respon)) {
+                        location.reload();
                     } else {
-                        showToast(Respon || 'Gagal Mengupdate Sasaran RPJMD!', 'error');
+                        btn.prop('disabled', false).html('<i class="fa fa-save"></i> Update');
+                        showToast(parseRespError(Respon, 'Gagal Mengupdate Sasaran RPJMD!'), 'error');
                     }
                 }).fail(function() {
                     btn.prop('disabled', false).html('<i class="fa fa-save"></i> Update');
@@ -2493,17 +2414,14 @@ if (!function_exists('formatDesimalIndikator')) {
 
             $('#hierarki-table tbody').on('click', '.HapusSasaran', function() {
                 var id = $(this).data('id');
-                if (confirm("Yakin ingin menghapus Sasaran ini?")) {
-                    var data = { Id: id, [CSRF_NAME]: CSRF_TOKEN };
-                    $.post(BaseURL + "Daerah/HapusSasaranRPJMD", data, function(Respon) {
-                        if (Respon == '1') {
-                            showToast('Berhasil Menghapus Sasaran RPJMD!', 'success');
-                            setTimeout(function() { location.reload(); }, 800);
-                        } else {
-                            showToast(Respon || 'Gagal Menghapus Sasaran RPJMD!', 'error');
-                        }
-                    });
-                }
+                var data = { Id: id, [CSRF_NAME]: CSRF_TOKEN };
+                $.post(BaseURL + "Daerah/HapusSasaranRPJMD", data, function(Respon) {
+                    if (isRespSuccess(Respon)) {
+                        location.reload();
+                    } else {
+                        showToast(parseRespError(Respon, 'Gagal Menghapus Sasaran RPJMD!'), 'error');
+                    }
+                });
             });
 
             // Helper function to clean target input (support text and numbers)
@@ -2566,12 +2484,10 @@ if (!function_exists('formatDesimalIndikator')) {
                     data: data,
                     dataType: 'json',
                     success: function(result) {
-                        btn.prop('disabled', false).html('<i class="fa fa-save"></i> <span id="btn_text_tujuan">' + (isEdit ? 'Update' : 'Simpan') + '</span>');
                         if (result.status === 'success') {
-                            showToast('✅ ' + result.message, 'success');
-                            $('#ModalIndikatorTujuan').modal('hide');
-                            setTimeout(function() { location.reload(); }, 700);
+                            location.reload();
                         } else {
+                            btn.prop('disabled', false).html('<i class="fa fa-save"></i> <span id="btn_text_tujuan">' + (isEdit ? 'Update' : 'Simpan') + '</span>');
                             showToast('❌ ' + result.message, 'error');
                         }
                     },
@@ -2636,12 +2552,10 @@ if (!function_exists('formatDesimalIndikator')) {
                     data: data,
                     dataType: 'json',
                     success: function(result) {
-                        btn.prop('disabled', false).html('<i class="fa fa-save"></i> <span id="btn_text_sasaran">' + (isEdit ? 'Update' : 'Simpan') + '</span>');
                         if (result.status === 'success') {
-                            showToast('✅ ' + result.message, 'success');
-                            $('#ModalIndikatorSasaran').modal('hide');
-                            setTimeout(function() { location.reload(); }, 700);
+                            location.reload();
                         } else {
+                            btn.prop('disabled', false).html('<i class="fa fa-save"></i> <span id="btn_text_sasaran">' + (isEdit ? 'Update' : 'Simpan') + '</span>');
                             showToast('❌ ' + result.message, 'error');
                         }
                     },
@@ -2812,17 +2726,14 @@ if (!function_exists('formatDesimalIndikator')) {
                 hideIndikatorPopover();
 
                 var url = data.type === 'tujuan' ? 'HapusIndikatorTujuan' : 'HapusIndikatorSasaran';
-                if (confirm("Yakin ingin menghapus indikator ini?")) {
-                    $.post(BaseURL + "Daerah/" + url, { id: data.id, [CSRF_NAME]: CSRF_TOKEN }, function(Respon) {
-                        var result = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
-                        if (result.status === 'success') {
-                            showToast('✅ ' + result.message, 'success');
-                            setTimeout(function() { location.reload(); }, 600);
-                        } else {
-                            showToast('❌ ' + result.message, 'error');
-                        }
-                    });
-                }
+                $.post(BaseURL + "Daerah/" + url, { id: data.id, [CSRF_NAME]: CSRF_TOKEN }, function(Respon) {
+                    var result = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
+                    if (result.status === 'success') {
+                        location.reload();
+                    } else {
+                        showToast('❌ ' + result.message, 'error');
+                    }
+                });
             });
 
         });
