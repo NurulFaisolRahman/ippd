@@ -2446,6 +2446,30 @@
                                         } else {
                                             $indS['pd_pengampuh_names'] = [];
                                         }
+
+                                        // Program PD
+                                        if (!empty($indS['program_pd'])) {
+                                            $prgIds = array_filter(explode(',', $indS['program_pd']));
+                                            if (!empty($prgIds)) {
+                                                $prgRows = $this->db
+                                                    ->select('id, kode_program, nama_program')
+                                                    ->where_in('id', $prgIds)
+                                                    ->where('deleted_at IS NULL')
+                                                    ->order_by('kode_program', 'ASC')
+                                                    ->get('program_data')
+                                                    ->result_array();
+                                                $indS['program_pd_names'] = array_map(function($p) {
+                                                    return '[' . $p['kode_program'] . '] ' . $p['nama_program'];
+                                                }, $prgRows);
+                                                $indS['program_pd_ids'] = array_column($prgRows, 'id');
+                                            } else {
+                                                $indS['program_pd_names'] = [];
+                                                $indS['program_pd_ids'] = [];
+                                            }
+                                        } else {
+                                            $indS['program_pd_names'] = [];
+                                            $indS['program_pd_ids'] = [];
+                                        }
                                     }
                                 }
                             }
@@ -3776,6 +3800,23 @@
                 }
             }
             
+            // Validasi dan proses Program PD
+            $programPd = $this->input->post('program_pd', TRUE);
+            $programPdValue = '';
+            if (!empty($programPd)) {
+                if (is_string($programPd)) {
+                    $programPd = explode(',', $programPd);
+                }
+                if (is_array($programPd)) {
+                    $programPd = array_filter($programPd, function($val) {
+                        return !empty($val) && is_numeric($val);
+                    });
+                    if (!empty($programPd)) {
+                        $programPdValue = implode(',', $programPd);
+                    }
+                }
+            }
+            
             $parseTarget = function($val) {
                 if ($val === null) return null;
                 $val = trim((string)$val);
@@ -3796,6 +3837,7 @@
                 'target_2029' => $parseTarget($this->input->post('target_2029', TRUE)),
                 'target_2030' => $parseTarget($this->input->post('target_2030', TRUE)),
                 'pd_pengampuh' => $pdPengampuhValue,
+                'program_pd' => $programPdValue,
                 'created_at' => date('Y-m-d H:i:s')
             ];
             
@@ -3890,6 +3932,23 @@
                     }
                 }
                 
+                // Validasi dan proses Program PD
+                $programPd = $this->input->post('program_pd', TRUE);
+                $programPdValue = '';
+                if (!empty($programPd)) {
+                    if (is_string($programPd)) {
+                        $programPd = explode(',', $programPd);
+                    }
+                    if (is_array($programPd)) {
+                        $programPd = array_filter($programPd, function($val) {
+                            return !empty($val) && is_numeric($val);
+                        });
+                        if (!empty($programPd)) {
+                            $programPdValue = implode(',', $programPd);
+                        }
+                    }
+                }
+                
                 $parseTarget = function($val) {
                     if ($val === null) return null;
                     $val = trim((string)$val);
@@ -3909,6 +3968,7 @@
                     'target_2029' => $parseTarget($this->input->post('target_2029', TRUE)),
                     'target_2030' => $parseTarget($this->input->post('target_2030', TRUE)),
                     'pd_pengampuh' => $pdPengampuhValue,
+                    'program_pd' => $programPdValue,
                     'updated_at' => date('Y-m-d H:i:s')
                 ];
                 
@@ -4089,6 +4149,38 @@
             } else {
                 echo json_encode([]);
             }
+        }
+
+        // ============================================================
+        // GET DAFTAR PROGRAM PD UNTUK INDIKATOR SASARAN
+        // ============================================================
+        public function GetListProgramPDForIndikator() {
+            if (!$this->input->is_ajax_request()) {
+                show_404();
+                return;
+            }
+            
+            $kodeWilayah = $this->_checkSessionWilayah();
+            if (!$kodeWilayah) {
+                echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih', 'data' => []]);
+                return;
+            }
+            
+            $data = $this->db
+                ->select('p.id, p.kode_program, p.nama_program, b.nama_bidang, u.nama_urusan')
+                ->from('program_data p')
+                ->join('program_bidang_urusan b', 'b.id = p.bidang_urusan_id AND b.deleted_at IS NULL', 'left')
+                ->join('program_urusan u', 'u.id = b.urusan_id AND u.deleted_at IS NULL', 'left')
+                ->where('p.kode_wilayah', $kodeWilayah)
+                ->where('p.deleted_at IS NULL')
+                ->order_by('p.kode_program', 'ASC')
+                ->get()
+                ->result_array();
+            
+            echo json_encode([
+                'status' => 'success',
+                'data' => $data
+            ]);
         }
 
         public function TahapanRPJMD() {
@@ -4440,6 +4532,23 @@
                 ->get('akun_instansi')
                 ->result_array();
 
+            // URUSAN PD
+            $Data['Urusan'] = [];
+            if (!empty($KodeWilayah)) {
+                $provKode = substr($KodeWilayah, 0, 2);
+                $Data['Urusan'] = $this->db
+                    ->where("(kodewilayah = " . $this->db->escape($KodeWilayah) . " OR kodewilayah = " . $this->db->escape($provKode) . ")")
+                    ->where('deleted_at IS NULL', null, false)
+                    ->order_by('nama_urusan', 'ASC')
+                    ->get('urusan_pd')
+                    ->result_array();
+            }
+
+            $mapUrusan = [];
+            foreach ($Data['Urusan'] as $u) {
+                $mapUrusan[$u['id']] = $u['nama_urusan'];
+            }
+
             // SUB UNIT
             $Data['SubUnit'] = $this->db
                 ->select('su.*')
@@ -4474,7 +4583,7 @@
                 $subUnitGrouped[$su['instansi_id']][] = $su;
             }
 
-            // tambahkan nama_kementerian + sub_unit + bidang_urusan untuk view
+            // tambahkan nama_kementerian + nama_urusan + sub_unit + bidang_urusan untuk view
             foreach ($Data['Akun'] as &$a) {
                 // nama_kementerian
                 $kemIds = [];
@@ -4488,6 +4597,19 @@
                     }
                 }
                 $a['nama_kementerian'] = !empty($kemNames) ? implode(', ', $kemNames) : '-';
+
+                // nama_urusan
+                $uIds = [];
+                if (!empty($a['urusan_id'])) {
+                    $uIds = array_filter(array_map('trim', explode(',', $a['urusan_id'])));
+                }
+                $uNames = [];
+                foreach ($uIds as $uid) {
+                    if (isset($mapUrusan[$uid])) {
+                        $uNames[] = $mapUrusan[$uid];
+                    }
+                }
+                $a['nama_urusan'] = !empty($uNames) ? implode(', ', $uNames) : '-';
 
                 // SUB UNIT
                 $a['sub_unit'] = isset($subUnitGrouped[$a['id']]) ? $subUnitGrouped[$a['id']] : [];
@@ -4583,6 +4705,13 @@
             }
             $idKementerian = !empty($idKementerianArr) ? implode(',', $idKementerianArr) : null;
 
+            // ===== URUSAN PD =====
+            $idUrusanArr = $this->input->post('urusan_id');
+            $idUrusanArr = is_array($idUrusanArr)
+                ? array_values(array_unique(array_filter(array_map('intval', $idUrusanArr))))
+                : [];
+            $idUrusan = !empty($idUrusanArr) ? implode(',', $idUrusanArr) : null;
+
             $data = [
                 'kode_instansi'     => $kodeInstansi,
                 'kodewilayah'       => $KodeWilayah,
@@ -4592,6 +4721,7 @@
                 'tahun_akhir'       => $tahunAkhir,
                 'Level'             => 4,
                 'idkementerian'     => $idKementerian,
+                'urusan_id'         => $idUrusan,
                 'created_at'        => date('Y-m-d H:i:s'),
                 'updated_at'        => date('Y-m-d H:i:s')
             ];
@@ -4699,12 +4829,20 @@
             }
             $idKementerian = !empty($idKementerianArr) ? implode(',', $idKementerianArr) : null;
 
+            // ===== URUSAN PD =====
+            $idUrusanArr = $this->input->post('urusan_id');
+            $idUrusanArr = is_array($idUrusanArr)
+                ? array_values(array_unique(array_filter(array_map('intval', $idUrusanArr))))
+                : [];
+            $idUrusan = !empty($idUrusanArr) ? implode(',', $idUrusanArr) : null;
+
             $data = [
                 'kode_instansi'     => $kodeInstansi,
                 'nama'              => $nama,
                 'tahun_mulai'       => $tahunMulai,
                 'tahun_akhir'       => $tahunAkhir,
                 'idkementerian'     => $idKementerian,
+                'urusan_id'         => $idUrusan,
                 'updated_at'        => date('Y-m-d H:i:s')
             ];
 

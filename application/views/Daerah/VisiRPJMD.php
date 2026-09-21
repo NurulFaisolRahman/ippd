@@ -282,23 +282,69 @@ if (!function_exists('formatDesimalIndikator')) {
             line-height: 1.3;
         }
 
+        .program-tag {
+            display: inline-block;
+            background: #f5f3ff;
+            color: #6b21a8;
+            border: 1px solid #ddd6fe;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin: 1px 2px;
+            line-height: 1.3;
+            word-break: break-word;
+        }
+
+        .select2-container--default .select2-selection--multiple {
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            min-height: 36px;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #f5f3ff;
+            border: 1px solid #ddd6fe;
+            color: #6b21a8;
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: #6b21a8;
+            margin-right: 5px;
+            font-weight: bold;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+            color: #ef4444;
+        }
+
         /* PD Pengampuh Table Styles */
         .pd-table {
             margin-bottom: 5px;
+            text-align: left;
         }
         .pd-table thead th {
             font-size: 12px;
             padding: 5px 8px;
             background: #f8f9fa;
+            text-align: left;
+        }
+        .pd-table thead th.text-center {
+            text-align: center !important;
         }
         .pd-table tbody td {
             padding: 5px 8px;
             vertical-align: middle;
+            text-align: left;
+        }
+        .pd-table tbody td.text-center {
+            text-align: center !important;
         }
         .pd-table .form-control-sm {
             padding: 4px 8px;
             font-size: 13px;
             height: 34px;
+            text-align: left;
         }
         .pd-table .btn-sm {
             padding: 3px 8px;
@@ -308,13 +354,24 @@ if (!function_exists('formatDesimalIndikator')) {
             height: 34px;
             border: 1px solid #ced4da;
             border-radius: 4px;
+            text-align: left !important;
         }
         .select2-container--default .select2-selection--single .select2-selection__rendered {
             line-height: 32px;
             padding-left: 10px;
+            text-align: left !important;
         }
         .select2-container--default .select2-selection--single .select2-selection__arrow {
             height: 32px;
+        }
+        .select2-container--default .select2-results__option {
+            text-align: left !important;
+        }
+        .select2-dropdown {
+            text-align: left !important;
+        }
+        .select2-search--dropdown .select2-search__field {
+            text-align: left !important;
         }
 
         .divider-aksi {
@@ -815,6 +872,7 @@ if (!function_exists('formatDesimalIndikator')) {
                                                                     data-t2029="<?= formatDesimalIndikator($firstIndS['target_2029'] ?? '', '') ?>"
                                                                     data-t2030="<?= formatDesimalIndikator($firstIndS['target_2030'] ?? '', '') ?>"
                                                                     data-pd="<?= html_escape($firstIndS['pd_pengampuh'] ?? '') ?>"
+                                                                    data-program-pd="<?= html_escape($firstIndS['program_pd'] ?? '') ?>"
                                                                     title="<?= $titleInd ?>">
                                                                     <?= html_escape($firstIndS['indikator']) ?>
                                                                 </td>
@@ -836,6 +894,17 @@ if (!function_exists('formatDesimalIndikator')) {
                                                                         <span class="pd-tag">ID: <?= html_escape($firstIndS['pd_pengampuh']) ?></span>
                                                                     <?php } else { ?>
                                                                         <span class="text-muted">-</span>
+                                                                    <?php } ?>
+
+                                                                    <?php if (!empty($firstIndS['program_pd_names'])) { ?>
+                                                                        <div style="margin-top: 5px; border-top: 1px dashed #cbd5e1; padding-top: 4px;">
+                                                                            <small style="color: #6b21a8; font-weight: 700; font-size: 10px; display: block; margin-bottom: 2px;">
+                                                                                <i class="fa fa-folder-open-o"></i> Program PD:
+                                                                            </small>
+                                                                            <?php foreach ($firstIndS['program_pd_names'] as $prgName) { ?>
+                                                                                <span class="program-tag" title="<?= html_escape($prgName) ?>"><?= html_escape($prgName) ?></span>
+                                                                            <?php } ?>
+                                                                        </div>
                                                                     <?php } ?>
                                                                 </td>
                                                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
@@ -899,6 +968,7 @@ if (!function_exists('formatDesimalIndikator')) {
                                                                     data-t2029="<?= formatDesimalIndikator($indS['target_2029'] ?? '', '') ?>"
                                                                     data-t2030="<?= formatDesimalIndikator($indS['target_2030'] ?? '', '') ?>"
                                                                     data-pd="<?= html_escape($indS['pd_pengampuh'] ?? '') ?>"
+                                                                    data-program-pd="<?= html_escape($indS['program_pd'] ?? '') ?>"
                                                                     title="<?= $titleInd ?>">
                                                                     <?= html_escape($indS['indikator']) ?>
                                                                 </td>
@@ -920,6 +990,17 @@ if (!function_exists('formatDesimalIndikator')) {
                                                                         <span class="pd-tag">ID: <?= html_escape($indS['pd_pengampuh']) ?></span>
                                                                     <?php } else { ?>
                                                                         <span class="text-muted">-</span>
+                                                                    <?php } ?>
+
+                                                                    <?php if (!empty($indS['program_pd_names'])) { ?>
+                                                                        <div style="margin-top: 5px; border-top: 1px dashed #cbd5e1; padding-top: 4px;">
+                                                                            <small style="color: #6b21a8; font-weight: 700; font-size: 10px; display: block; margin-bottom: 2px;">
+                                                                                <i class="fa fa-folder-open-o"></i> Program PD:
+                                                                            </small>
+                                                                            <?php foreach ($indS['program_pd_names'] as $prgName) { ?>
+                                                                                <span class="program-tag" title="<?= html_escape($prgName) ?>"><?= html_escape($prgName) ?></span>
+                                                                            <?php } ?>
+                                                                        </div>
                                                                     <?php } ?>
                                                                 </td>
                                                             </tr>
@@ -1502,6 +1583,31 @@ if (!function_exists('formatDesimalIndikator')) {
                             </div>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <!-- PROGRAM PD -->
+                            <div class="form-group">
+                                <label><b>Program</b></label>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-sm pd-table" style="margin-bottom: 5px;">
+                                        <thead>
+                                            <tr>
+                                                <th>Nama Program</th>
+                                                <th width="50" class="text-center">Hapus</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="program-sasaran-body"></tbody>
+                                    </table>
+                                </div>
+                                <button type="button" class="btn btn-success btn-sm" id="btn-tambah-program-sasaran">
+                                    <i class="fa fa-plus"></i> Tambah Program
+                                </button>
+                                <small class="text-muted pd-info-text" style="display: block; margin-top: 5px;">
+                                    Pilih Program dari Program PD yang terkait dengan indikator sasaran ini
+                                </small>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer" style="padding-top: 15px;">
                     <button type="button" class="btn btn-success btn-action" id="SimpanIndikatorSasaran">
@@ -1639,6 +1745,35 @@ if (!function_exists('formatDesimalIndikator')) {
         }
 
         // ==============================================
+        // DATA PROGRAM PD UNTUK INDIKATOR SASARAN
+        // ==============================================
+        var daftarProgramPD = [];
+
+        function loadDaftarProgramPD(callback) {
+            $.ajax({
+                url: BaseURL + "Daerah/GetListProgramPDForIndikator",
+                type: "GET",
+                dataType: "json",
+                success: function(res) {
+                    if (res && res.status === 'success') {
+                        daftarProgramPD = res.data;
+                        var currentSelected = typeof getSelectedProgramSasaran === 'function' ? getSelectedProgramSasaran() : [];
+                        if (currentSelected.length === 0 && $('#program-sasaran-body tr').length > 0) {
+                            $('#program-sasaran-body').empty();
+                            addProgramRowSasaran('program-sasaran-body', '');
+                        }
+                        if (typeof callback === 'function') {
+                            callback();
+                        }
+                    }
+                },
+                error: function() {
+                    console.log('Gagal memuat daftar Program PD');
+                }
+            });
+        }
+
+        // ==============================================
         // FUNGSI TAMBAH BARIS PD PENGGAMPUH TUJUAN
         // ==============================================
         function addPDRowTujuan(containerId, pdId = '') {
@@ -1659,12 +1794,12 @@ if (!function_exists('formatDesimalIndikator')) {
             
             var tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>
-                    <select class="form-control form-control-sm pd-select-tujuan" style="width: 100%;">
+                <td style="text-align: left;">
+                    <select class="form-control form-control-sm pd-select-tujuan" style="width: 100%; text-align: left;">
                         ${options}
                     </select>
                 </td>
-                <td class="text-center">
+                <td class="text-center" style="text-align: center; vertical-align: middle;">
                     <button type="button" class="btn btn-danger btn-sm remove-pd-row"><i class="fa fa-trash"></i></button>
                 </td>
             `;
@@ -1698,12 +1833,12 @@ if (!function_exists('formatDesimalIndikator')) {
             
             var tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>
-                    <select class="form-control form-control-sm pd-select-sasaran" style="width: 100%;">
+                <td style="text-align: left;">
+                    <select class="form-control form-control-sm pd-select-sasaran" style="width: 100%; text-align: left;">
                         ${options}
                     </select>
                 </td>
-                <td class="text-center">
+                <td class="text-center" style="text-align: center; vertical-align: middle;">
                     <button type="button" class="btn btn-danger btn-sm remove-pd-row"><i class="fa fa-trash"></i></button>
                 </td>
             `;
@@ -1776,6 +1911,78 @@ if (!function_exists('formatDesimalIndikator')) {
         });
 
         // ==============================================
+        // FUNGSI TAMBAH BARIS PROGRAM SASARAN
+        // ==============================================
+        function addProgramRowSasaran(containerId, programId = '') {
+            var container = document.getElementById(containerId);
+            if (!container) return;
+            
+            var options = '<option value="">-- Pilih Program --</option>';
+            if (daftarProgramPD && daftarProgramPD.length > 0) {
+                for (var i = 0; i < daftarProgramPD.length; i++) {
+                    var selected = (String(daftarProgramPD[i].id) === String(programId)) ? 'selected' : '';
+                    var label = '[' + daftarProgramPD[i].kode_program + '] ' + daftarProgramPD[i].nama_program;
+                    options += '<option value="' + daftarProgramPD[i].id + '" ' + selected + '>' + 
+                            escapeHtml(label) +
+                            '</option>';
+                }
+            } else {
+                options += '<option value="" disabled>Data program tidak tersedia</option>';
+            }
+            
+            var tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="text-align: left;">
+                    <select class="form-control form-control-sm program-select-sasaran" style="width: 100%; text-align: left;">
+                        ${options}
+                    </select>
+                </td>
+                <td class="text-center" style="text-align: center; vertical-align: middle;">
+                    <button type="button" class="btn btn-danger btn-sm remove-program-row"><i class="fa fa-trash"></i></button>
+                </td>
+            `;
+            container.appendChild(tr);
+            
+            $(tr).find('.program-select-sasaran').select2({
+                placeholder: 'Pilih Program',
+                dropdownParent: $('#ModalIndikatorSasaran'),
+                width: '100%'
+            });
+        }
+
+        $(document).on('click', '.remove-program-row', function(e) {
+            e.preventDefault();
+            $(this).closest('tr').remove();
+        });
+
+        function getSelectedProgramSasaran() {
+            var ids = [];
+            $('#program-sasaran-body .program-select-sasaran').each(function() {
+                var val = $(this).val();
+                if (val && val !== '') {
+                    ids.push(val);
+                }
+            });
+            return ids;
+        }
+
+        function setSelectedProgramSasaran(selectedIds) {
+            $('#program-sasaran-body').empty();
+            if (!selectedIds || selectedIds.length === 0) {
+                addProgramRowSasaran('program-sasaran-body', '');
+                return;
+            }
+            for (var i = 0; i < selectedIds.length; i++) {
+                addProgramRowSasaran('program-sasaran-body', selectedIds[i]);
+            }
+        }
+
+        $(document).on('click', '#btn-tambah-program-sasaran', function(e) {
+            e.preventDefault();
+            addProgramRowSasaran('program-sasaran-body', '');
+        });
+
+        // ==============================================
         // RESET FORM INDIKATOR
         // ==============================================
         function resetFormTujuan() {
@@ -1800,6 +2007,8 @@ if (!function_exists('formatDesimalIndikator')) {
             $('.input-target-sasaran').val('');
             $('#pd-pengampuh-sasaran-body').empty();
             addPDRowSasaran('pd-pengampuh-sasaran-body', '');
+            $('#program-sasaran-body').empty();
+            addProgramRowSasaran('program-sasaran-body', '');
             $('#is_edit_sasaran').val('false');
             $('#judul_modal_sasaran').text('Tambah Indikator Sasaran');
             $('#btn_text_sasaran').text('Simpan');
@@ -1811,6 +2020,7 @@ if (!function_exists('formatDesimalIndikator')) {
         // ==============================================
         $(document).ready(function() {
             loadDaftarPD();
+            loadDaftarProgramPD();
 
             // Toggle Buka / Tutup Semua
             var allExpanded = true;
@@ -2393,6 +2603,7 @@ if (!function_exists('formatDesimalIndikator')) {
                 }
                 
                 var pdValues = getSelectedPDSasaran();
+                var programValues = getSelectedProgramSasaran();
                 var sasaranId = $('#current_sasaran_id').val();
                 var isEdit = $('#is_edit_sasaran').val() === 'true';
                 var editId = $('#indikator_sasaran_id').val();
@@ -2409,6 +2620,7 @@ if (!function_exists('formatDesimalIndikator')) {
                     target_2029: cleanDecimalInput($('#input_target2029_sasaran').val()),
                     target_2030: cleanDecimalInput($('#input_target2030_sasaran').val()),
                     pd_pengampuh: pdValues,
+                    program_pd: programValues,
                     [CSRF_NAME]: CSRF_TOKEN
                 };
                 
@@ -2509,7 +2721,8 @@ if (!function_exists('formatDesimalIndikator')) {
                     t2028: mainCell.data('t2028') || '',
                     t2029: mainCell.data('t2029') || '',
                     t2030: mainCell.data('t2030') || '',
-                    pd: mainCell.data('pd') || ''
+                    pd: mainCell.data('pd') || '',
+                    program_pd: mainCell.data('program-pd') || ''
                 };
 
                 $('#popoverIndikatorTypeTitle').text(indType === 'sasaran' ? 'Opsi Indikator Sasaran' : 'Opsi Indikator Tujuan');
@@ -2581,6 +2794,14 @@ if (!function_exists('formatDesimalIndikator')) {
                     $('#input_target2030_sasaran').val(data.t2030);
                     var pdList = data.pd ? String(data.pd).split(',').map(function(s) { return s.trim(); }).filter(Boolean) : [];
                     setSelectedPDSasaran(pdList);
+                    var prgList = data.program_pd ? String(data.program_pd).split(',').map(function(s) { return s.trim(); }).filter(Boolean) : [];
+                    if (daftarProgramPD && daftarProgramPD.length > 0) {
+                        setSelectedProgramSasaran(prgList);
+                    } else {
+                        loadDaftarProgramPD(function() {
+                            setSelectedProgramSasaran(prgList);
+                        });
+                    }
                     $('#ModalIndikatorSasaran').modal('show');
                 }
             });

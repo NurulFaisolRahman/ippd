@@ -81,6 +81,7 @@
                     <th style="width:40px; min-width:40px;">NO</th>
                     <th style="min-width:100px;">KODE INSTANSI</th>
                     <th style="min-width:200px;">NAMA PERANGKAT DAERAH</th>
+                    <th style="min-width:180px;">URUSAN PD</th>
                     <th style="min-width:150px;">INDUK KEMENTERIAN</th>
                     <th style="width:80px;">JML SUB UNIT</th>
                     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
@@ -109,6 +110,9 @@
                           <?= html_escape($key['nama']) ?>
                         </td>
                         <td class="uraian header-clickable" onclick="toggleDetails('<?= $key['id'] ?>', this)">
+                          <?= html_escape($key['nama_urusan'] ?? '-') ?>
+                        </td>
+                        <td class="uraian header-clickable" onclick="toggleDetails('<?= $key['id'] ?>', this)">
                           <?= html_escape($key['nama_kementerian'] ?? '-') ?>
                         </td>
                         <td class="text-center header-clickable" onclick="toggleDetails('<?= $key['id'] ?>', this)">
@@ -132,6 +136,7 @@
                                 data-tahun-mulai="<?= $key['tahun_mulai'] ?>"
                                 data-tahun-akhir="<?= $key['tahun_akhir'] ?>"
                                 data-idkementerian="<?= $key['idkementerian'] ?>"
+                                data-urusan-ids="<?= htmlspecialchars($key['urusan_id'] ?? '', ENT_QUOTES) ?>"
                                 title="Edit Instansi"
                               >
                                 <i class="notika-icon notika-edit"></i>
@@ -148,7 +153,7 @@
                       <!-- DETAIL ROW - SUB UNIT -->
                       <?php if (!empty($key['sub_unit'])) { ?>
                         <tr class="detail-row detail-hidden" data-instansi-id="<?= $key['id'] ?>">
-                          <td colspan="<?= (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) ? '9' : '6' ?>" style="padding:0;">
+                          <td colspan="<?= (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) ? '10' : '7' ?>" style="padding:0;">
                             <div class="detail-container">
                               <table class="table table-bordered table-condensed" style="margin:0; font-size:11px; min-width:850px;">
                                 <thead>
@@ -230,7 +235,7 @@
                       <!-- BARIS TAMBAH SUB UNIT - HANYA ROLE 3 -->
                       <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                         <tr class="detail-row detail-hidden" data-instansi-id="<?= $key['id'] ?>" style="background:#fafafa;">
-                          <td colspan="<?= (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) ? '9' : '6' ?>" class="text-center" style="padding:5px;">
+                          <td colspan="<?= (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) ? '10' : '7' ?>" class="text-center" style="padding:5px;">
                             <button class="btn btn-success btn-sm btn-add-sub-unit"
                                 data-instansi-id="<?= $key['id'] ?>"
                                 data-instansi-nama="<?= html_escape($key['nama']) ?>"
@@ -247,7 +252,7 @@
                     <?php } ?>
                   <?php } else { ?>
                     <tr>
-                      <td colspan="<?= (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) ? '9' : '6' ?>" class="text-center no-data">
+                      <td colspan="<?= (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) ? '10' : '7' ?>" class="text-center no-data">
                         <i class="fa fa-inbox" style="font-size: 40px; display: block; color: #ddd;"></i>
                         <strong>Belum ada data Instansi</strong>
                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
@@ -344,6 +349,26 @@
                         </button>
                         <div style="margin-top:6px; font-size:12px; color:#888;">
                           * Boleh pilih lebih dari 1
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- URUSAN PD -->
+                <div class="form-example-int form-horizental">
+                  <div class="form-group">
+                    <div class="row">
+                      <div class="col-lg-3">
+                        <label class="hrzn-fm"><b>Urusan PD</b></label>
+                      </div>
+                      <div class="col-lg-8">
+                        <div id="urusanContainerAdd"></div>
+                        <button type="button" class="btn btn-info btn-sm" id="addUrusanRowAdd" style="margin-top:8px;">
+                          + Tambah Urusan
+                        </button>
+                        <div style="margin-top:6px; font-size:12px; color:#888;">
+                          * Boleh pilih lebih dari 1 urusan
                         </div>
                       </div>
                     </div>
@@ -480,6 +505,26 @@
                         </button>
                         <div style="margin-top:6px; font-size:12px; color:#888;">
                           * Boleh pilih lebih dari 1
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- URUSAN PD -->
+                <div class="form-example-int form-horizental">
+                  <div class="form-group">
+                    <div class="row">
+                      <div class="col-lg-3">
+                        <label class="hrzn-fm"><b>Urusan PD</b></label>
+                      </div>
+                      <div class="col-lg-8">
+                        <div id="urusanContainerEdit"></div>
+                        <button type="button" class="btn btn-info btn-sm" id="addUrusanRowEdit" style="margin-top:8px;">
+                          + Tambah Urusan
+                        </button>
+                        <div style="margin-top:6px; font-size:12px; color:#888;">
+                          * Boleh pilih lebih dari 1 urusan
                         </div>
                       </div>
                     </div>
@@ -933,6 +978,71 @@
 
   $(document).on('click', '.remove-kementerian', function(){
     $(this).closest('.kementerian-row').remove();
+  });
+
+  // =====================================================
+  // URUSAN PD - HELPER JS (UNTUK INSTANSI)
+  // =====================================================
+  var URUSAN_LIST = <?= json_encode($Urusan ?? []) ?>;
+
+  function buildUrusanSelect(nameAttr, selectedId) {
+    var html = '<div class="urusan-row" style="display:flex; gap:8px; margin-bottom:6px;">';
+    html += '<select class="form-control input-sm urusan-select" style="flex:1;">';
+    html += '<option value="">-- Pilih Urusan --</option>';
+
+    if (URUSAN_LIST && URUSAN_LIST.length > 0) {
+      URUSAN_LIST.forEach(function(u){
+        var sel = (selectedId && String(selectedId) === String(u.id)) ? 'selected' : '';
+        html += '<option value="'+u.id+'" '+sel+'>'+u.nama_urusan+'</option>';
+      });
+    }
+
+    html += '</select>';
+    html += '<button type="button" class="btn btn-danger btn-sm remove-urusan" style="white-space:nowrap;">Hapus</button>';
+    html += '</div>';
+    return html;
+  }
+
+  function initUrusanContainer(containerId, nameAttr, selectedIds) {
+    var $c = $('#'+containerId);
+    $c.html('');
+
+    if (!selectedIds || selectedIds.length === 0) {
+      $c.append(buildUrusanSelect(nameAttr, null));
+    } else {
+      selectedIds.forEach(function(id){
+        $c.append(buildUrusanSelect(nameAttr, id));
+      });
+    }
+  }
+
+  function collectUrusan(containerId) {
+    var arr = [];
+    $('#'+containerId+' select.urusan-select').each(function(){
+      var v = $(this).val();
+      if (v) arr.push(v);
+    });
+    return arr.filter(function(v, i, a){ return a.indexOf(v) === i; });
+  }
+
+  // init urusan saat load
+  initUrusanContainer('urusanContainerAdd', 'urusan_id', []);
+
+  $(document).on('click', '#addUrusanRowAdd', function(){
+    $('#urusanContainerAdd').append(buildUrusanSelect('urusan_id', null));
+  });
+
+  $(document).on('click', '#addUrusanRowEdit', function(){
+    $('#urusanContainerEdit').append(buildUrusanSelect('urusan_id', null));
+  });
+
+  $(document).on('click', '.remove-urusan', function(){
+    var container = $(this).closest('.urusan-row').parent();
+    if (container.find('.urusan-row').length > 1) {
+      $(this).closest('.urusan-row').remove();
+    } else {
+      $(this).closest('.urusan-row').find('select').val('');
+    }
   });
 
   // =====================================================
@@ -1428,6 +1538,7 @@
       tahun_mulai: tahunMulai,
       tahun_akhir: tahunAkhir,
       idkementerian: collectKementerian('kementerianContainerAdd'),
+      urusan_id: collectUrusan('urusanContainerAdd'),
       [CSRF_NAME]: CSRF_TOKEN
     };
 
@@ -1456,6 +1567,7 @@
     var tm = $(this).data('tahun-mulai');
     var ta = $(this).data('tahun-akhir');
     var idKem = $(this).data('idkementerian');
+    var urusanIds = $(this).data('urusan-ids');
 
     $("#Id").val(id);
     $("#_KodeInstansi").val(kodeInstansi);
@@ -1469,6 +1581,12 @@
       selectedKem = String(idKem).split(',').map(function(x){ return x.trim(); }).filter(Boolean);
     }
     initKementerianContainer('kementerianContainerEdit', 'idkementerian', selectedKem);
+
+    var selectedUrusan = [];
+    if (urusanIds) {
+      selectedUrusan = String(urusanIds).split(',').map(function(x){ return x.trim(); }).filter(Boolean);
+    }
+    initUrusanContainer('urusanContainerEdit', 'urusan_id', selectedUrusan);
 
     $('#ModalEditInstansi').modal("show");
   });
@@ -1494,6 +1612,7 @@
       tahun_mulai: tahunMulai,
       tahun_akhir: tahunAkhir,
       idkementerian: collectKementerian('kementerianContainerEdit'),
+      urusan_id: collectUrusan('urusanContainerEdit'),
       [CSRF_NAME]: CSRF_TOKEN
     };
 
