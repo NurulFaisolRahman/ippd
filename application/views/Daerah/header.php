@@ -377,11 +377,13 @@
         <i class="fas fa-bars"></i>
       </button>
 
+      <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 4) { ?>
       <?php if (!empty($NamaDaerah)) { ?>
           <span class="login-badge daerah-badge" title="Daerah: <?= html_escape($NamaDaerah) ?>">
             <i class="fas fa-map-marker-alt"></i>
             <?= html_escape($NamaDaerah) ?>
           </span>
+      <?php } ?>
       <?php } ?>
 
         <?php if (!empty($LoginInfo)) { ?>
