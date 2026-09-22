@@ -4490,6 +4490,26 @@
                 $mapKem[$k['username']] = $k['username'];
             }
 
+            // URUSAN DARI NOMENKLATUR PROVINSI (Hanya Urusan, tanpa Bidang Urusan)
+            $Data['Urusan'] = $this->db
+                ->select('TRIM(Kode) as Kode, TRIM(Nomenklatur) as Nomenklatur')
+                ->where('Kode NOT LIKE', '%.%')
+                ->where('LENGTH(TRIM(Kode)) =', 1)
+                ->order_by('Kode', 'ASC')
+                ->get('nomenklaturprovinsi')
+                ->result_array();
+
+            $mapUrusan = [];
+            // Ambil semua referensi urusan & bidang urusan untuk pemetaan nama tampilan tabel
+            $allNomen = $this->db
+                ->select('TRIM(Kode) as Kode, TRIM(Nomenklatur) as Nomenklatur')
+                ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) <= 1', null, false)
+                ->get('nomenklaturprovinsi')
+                ->result_array();
+            foreach ($allNomen as $u) {
+                $mapUrusan[$u['Kode']] = $u['Kode'] . ' - ' . $u['Nomenklatur'];
+            }
+
             if (empty($KodeWilayah)) {
                 $Data['Akun'] = [];
                 $Data['SubUnit'] = [];
@@ -4507,21 +4527,19 @@
                 ->get('akun_instansi')
                 ->result_array();
 
-            // URUSAN PD
-            $Data['Urusan'] = [];
+            // Fallback map untuk data lama urusan_pd
             if (!empty($KodeWilayah)) {
                 $provKode = substr($KodeWilayah, 0, 2);
-                $Data['Urusan'] = $this->db
+                $oldUrusan = $this->db
                     ->where("(kodewilayah = " . $this->db->escape($KodeWilayah) . " OR kodewilayah = " . $this->db->escape($provKode) . ")")
                     ->where('deleted_at IS NULL', null, false)
-                    ->order_by('nama_urusan', 'ASC')
                     ->get('urusan_pd')
                     ->result_array();
-            }
-
-            $mapUrusan = [];
-            foreach ($Data['Urusan'] as $u) {
-                $mapUrusan[$u['id']] = $u['nama_urusan'];
+                foreach ($oldUrusan as $ou) {
+                    if (!isset($mapUrusan[$ou['id']])) {
+                        $mapUrusan[$ou['id']] = $ou['nama_urusan'];
+                    }
+                }
             }
 
             // SUB UNIT
@@ -4680,10 +4698,10 @@
             }
             $idKementerian = !empty($idKementerianArr) ? implode(',', $idKementerianArr) : null;
 
-            // ===== URUSAN PD =====
+            // ===== URUSAN (NOMENKLATUR PROVINSI) =====
             $idUrusanArr = $this->input->post('urusan_id');
             $idUrusanArr = is_array($idUrusanArr)
-                ? array_values(array_unique(array_filter(array_map('intval', $idUrusanArr))))
+                ? array_values(array_unique(array_filter(array_map('trim', $idUrusanArr))))
                 : [];
             $idUrusan = !empty($idUrusanArr) ? implode(',', $idUrusanArr) : null;
 
@@ -4804,10 +4822,10 @@
             }
             $idKementerian = !empty($idKementerianArr) ? implode(',', $idKementerianArr) : null;
 
-            // ===== URUSAN PD =====
+            // ===== URUSAN (NOMENKLATUR PROVINSI) =====
             $idUrusanArr = $this->input->post('urusan_id');
             $idUrusanArr = is_array($idUrusanArr)
-                ? array_values(array_unique(array_filter(array_map('intval', $idUrusanArr))))
+                ? array_values(array_unique(array_filter(array_map('trim', $idUrusanArr))))
                 : [];
             $idUrusan = !empty($idUrusanArr) ? implode(',', $idUrusanArr) : null;
 

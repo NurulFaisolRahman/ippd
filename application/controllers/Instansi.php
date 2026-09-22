@@ -4487,15 +4487,30 @@ public function IkkPD() {
         if (!empty($instansiRow['urusan_id'])) {
             $uIds = array_filter(array_map('trim', explode(',', $instansiRow['urusan_id'])));
             if (!empty($uIds)) {
-                $provKode = substr($KodeWilayah, 0, 2);
-                $data['Urusan'] = $this->db->select('id, nama_urusan')
-                    ->from('urusan_pd')
-                    ->where("(kodewilayah = " . $this->db->escape($KodeWilayah) . " OR kodewilayah = " . $this->db->escape($provKode) . ")")
-                    ->where_in('id', $uIds)
-                    ->where('deleted_at IS NULL')
-                    ->order_by('nama_urusan', 'ASC')
+                // Ambil dari nomenklaturprovinsi
+                $nomenUrusan = $this->db->select('Kode as id, CONCAT(Kode, " - ", Nomenklatur) as nama_urusan')
+                    ->from('nomenklaturprovinsi')
+                    ->where_in('Kode', $uIds)
+                    ->order_by('Kode', 'ASC')
                     ->get()
                     ->result_array();
+
+                // Fallback untuk id urusan_pd lama
+                $remainingIds = array_diff($uIds, array_column($nomenUrusan, 'id'));
+                $oldUrusan = [];
+                if (!empty($remainingIds)) {
+                    $provKode = substr($KodeWilayah, 0, 2);
+                    $oldUrusan = $this->db->select('id, nama_urusan')
+                        ->from('urusan_pd')
+                        ->where("(kodewilayah = " . $this->db->escape($KodeWilayah) . " OR kodewilayah = " . $this->db->escape($provKode) . ")")
+                        ->where_in('id', $remainingIds)
+                        ->where('deleted_at IS NULL')
+                        ->order_by('nama_urusan', 'ASC')
+                        ->get()
+                        ->result_array();
+                }
+
+                $data['Urusan'] = array_merge($nomenUrusan, $oldUrusan);
             }
         }
     }
@@ -4559,18 +4574,32 @@ public function GetUrusanByInstansi() {
         return;
     }
 
-    $query = $this->db->select('id, nama_urusan')
-        ->from('urusan_pd')
-        ->where_in('id', $urusan_ids)
-        ->where('deleted_at IS NULL');
+    // Ambil dari nomenklaturprovinsi
+    $nomenUrusan = $this->db->select('Kode as id, CONCAT(Kode, " - ", Nomenklatur) as nama_urusan')
+        ->from('nomenklaturprovinsi')
+        ->where_in('Kode', $urusan_ids)
+        ->order_by('Kode', 'ASC')
+        ->get()
+        ->result_array();
 
-    $wilayahToUse = $KodeWilayah ?: $instansi['kodewilayah'];
-    if ($wilayahToUse) {
-        $provKode = substr($wilayahToUse, 0, 2);
-        $query->where("(kodewilayah = " . $this->db->escape($wilayahToUse) . " OR kodewilayah = " . $this->db->escape($provKode) . ")");
+    // Fallback untuk id urusan_pd lama
+    $remainingIds = array_diff($urusan_ids, array_column($nomenUrusan, 'id'));
+    $oldUrusan = [];
+    if (!empty($remainingIds)) {
+        $query = $this->db->select('id, nama_urusan')
+            ->from('urusan_pd')
+            ->where_in('id', $remainingIds)
+            ->where('deleted_at IS NULL');
+
+        $wilayahToUse = $KodeWilayah ?: $instansi['kodewilayah'];
+        if ($wilayahToUse) {
+            $provKode = substr($wilayahToUse, 0, 2);
+            $query->where("(kodewilayah = " . $this->db->escape($wilayahToUse) . " OR kodewilayah = " . $this->db->escape($provKode) . ")");
+        }
+        $oldUrusan = $query->order_by('nama_urusan', 'ASC')->get()->result_array();
     }
 
-    $urusan = $query->order_by('nama_urusan', 'ASC')->get()->result_array();
+    $urusan = array_merge($nomenUrusan, $oldUrusan);
 
     $this->output
         ->set_content_type('application/json')

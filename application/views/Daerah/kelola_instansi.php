@@ -81,7 +81,7 @@
                     <th style="width:40px; min-width:40px;">NO</th>
                     <th style="min-width:100px;">KODE INSTANSI</th>
                     <th style="min-width:200px;">NAMA PERANGKAT DAERAH</th>
-                    <th style="min-width:180px;">URUSAN PD</th>
+                    <th style="min-width:180px;">URUSAN</th>
                     <th style="min-width:150px;">INDUK KEMENTERIAN</th>
                     <th style="width:80px;">JML SUB UNIT</th>
                     <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
@@ -355,12 +355,12 @@
                   </div>
                 </div>
 
-                <!-- URUSAN PD -->
+                <!-- URUSAN (NOMENKLATUR PROVINSI) -->
                 <div class="form-example-int form-horizental">
                   <div class="form-group">
                     <div class="row">
                       <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Urusan PD</b></label>
+                        <label class="hrzn-fm"><b>Urusan</b></label>
                       </div>
                       <div class="col-lg-8">
                         <div id="urusanContainerAdd"></div>
@@ -511,12 +511,12 @@
                   </div>
                 </div>
 
-                <!-- URUSAN PD -->
+                <!-- URUSAN (NOMENKLATUR PROVINSI) -->
                 <div class="form-example-int form-horizental">
                   <div class="form-group">
                     <div class="row">
                       <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Urusan PD</b></label>
+                        <label class="hrzn-fm"><b>Urusan</b></label>
                       </div>
                       <div class="col-lg-8">
                         <div id="urusanContainerEdit"></div>
@@ -981,7 +981,7 @@
   });
 
   // =====================================================
-  // URUSAN PD - HELPER JS (UNTUK INSTANSI)
+  // URUSAN NOMENKLATUR - HELPER JS (UNTUK INSTANSI)
   // =====================================================
   var URUSAN_LIST = <?= json_encode($Urusan ?? []) ?>;
 
@@ -992,8 +992,10 @@
 
     if (URUSAN_LIST && URUSAN_LIST.length > 0) {
       URUSAN_LIST.forEach(function(u){
-        var sel = (selectedId && String(selectedId) === String(u.id)) ? 'selected' : '';
-        html += '<option value="'+u.id+'" '+sel+'>'+u.nama_urusan+'</option>';
+        var val = (u.Kode !== undefined && u.Kode !== null) ? u.Kode : u.id;
+        var text = u.nama_urusan ? u.nama_urusan : (u.Kode + ' - ' + u.Nomenklatur);
+        var sel = (selectedId && String(selectedId) === String(val)) ? 'selected' : '';
+        html += '<option value="'+val+'" '+sel+'>'+text+'</option>';
       });
     }
 
