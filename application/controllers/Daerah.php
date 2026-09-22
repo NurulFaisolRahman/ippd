@@ -2287,6 +2287,10 @@
                     ->where('deleted_at IS NULL')
                     ->get('visirpjmd')
                     ->row_array();
+                if ($visi) {
+                    if (empty($visi['TahunMulai'])) $visi['TahunMulai'] = '2025';
+                    if (empty($visi['TahunAkhir'])) $visi['TahunAkhir'] = '2030';
+                }
                 return $visi;
             }
 
@@ -2446,6 +2450,29 @@
                                         } else {
                                             $indS['pd_pengampuh_names'] = [];
                                         }
+
+                                        // Program (Nomenklatur Provinsi)
+                                        if (!empty($indS['program_pd'])) {
+                                            $prgCodes = array_filter(explode(',', $indS['program_pd']));
+                                            if (!empty($prgCodes)) {
+                                                $prgRows = $this->db
+                                                    ->select('Kode as kode_program, Nomenklatur as nama_program')
+                                                    ->where_in('Kode', $prgCodes)
+                                                    ->order_by('Kode', 'ASC')
+                                                    ->get('nomenklaturprovinsi')
+                                                    ->result_array();
+                                                $indS['program_pd_names'] = array_map(function($p) {
+                                                    return '[' . $p['kode_program'] . '] ' . $p['nama_program'];
+                                                }, $prgRows);
+                                                $indS['program_pd_ids'] = array_column($prgRows, 'kode_program');
+                                            } else {
+                                                $indS['program_pd_names'] = [];
+                                                $indS['program_pd_ids'] = [];
+                                            }
+                                        } else {
+                                            $indS['program_pd_names'] = [];
+                                            $indS['program_pd_ids'] = [];
+                                        }
                                     }
                                 }
                             }
@@ -2507,24 +2534,12 @@
             }
             
             $visi = trim($this->input->post('Visi', TRUE));
-            $tahunMulai = $this->input->post('TahunMulai', TRUE);
-            $tahunAkhir = $this->input->post('TahunAkhir', TRUE);
+            $tahunMulai = $this->input->post('TahunMulai', TRUE) ?: '2025';
+            $tahunAkhir = $this->input->post('TahunAkhir', TRUE) ?: '2030';
             
             // Validasi
             if (empty($visi)) {
                 echo json_encode(['status' => 'error', 'message' => 'Visi harus diisi!']);
-                return;
-            }
-            if (!is_numeric($tahunMulai) || strlen($tahunMulai) != 4) {
-                echo json_encode(['status' => 'error', 'message' => 'Tahun Mulai tidak valid!']);
-                return;
-            }
-            if (!is_numeric($tahunAkhir) || strlen($tahunAkhir) != 4) {
-                echo json_encode(['status' => 'error', 'message' => 'Tahun Akhir tidak valid!']);
-                return;
-            }
-            if ($tahunMulai >= $tahunAkhir) {
-                echo json_encode(['status' => 'error', 'message' => 'Tahun Mulai harus lebih kecil dari Tahun Akhir!']);
                 return;
             }
             
@@ -2570,25 +2585,17 @@
                 echo json_encode(['status' => 'error', 'message' => 'Visi harus diisi!']);
                 return;
             }
-            if (!is_numeric($tahunMulai) || strlen($tahunMulai) != 4) {
-                echo json_encode(['status' => 'error', 'message' => 'Tahun Mulai tidak valid!']);
-                return;
-            }
-            if (!is_numeric($tahunAkhir) || strlen($tahunAkhir) != 4) {
-                echo json_encode(['status' => 'error', 'message' => 'Tahun Akhir tidak valid!']);
-                return;
-            }
-            if ($tahunMulai >= $tahunAkhir) {
-                echo json_encode(['status' => 'error', 'message' => 'Tahun Mulai harus lebih kecil dari Tahun Akhir!']);
-                return;
-            }
             
             $data = [
                 'Visi' => $visi,
-                'TahunMulai' => $tahunMulai,
-                'TahunAkhir' => $tahunAkhir,
                 'updated_at' => date('Y-m-d H:i:s')
             ];
+            if (!empty($tahunMulai)) {
+                $data['TahunMulai'] = $tahunMulai;
+            }
+            if (!empty($tahunAkhir)) {
+                $data['TahunAkhir'] = $tahunAkhir;
+            }
             
             $this->db->where('Id', $id);
             $this->db->where('KodeWilayah', $kodeWilayah);
@@ -3776,6 +3783,23 @@
                 }
             }
             
+            // Validasi dan proses Program (Nomenklatur Provinsi)
+            $programPd = $this->input->post('program_pd', TRUE);
+            $programPdValue = '';
+            if (!empty($programPd)) {
+                if (is_string($programPd)) {
+                    $programPd = explode(',', $programPd);
+                }
+                if (is_array($programPd)) {
+                    $programPd = array_filter(array_map('trim', $programPd), function($val) {
+                        return !empty($val);
+                    });
+                    if (!empty($programPd)) {
+                        $programPdValue = implode(',', $programPd);
+                    }
+                }
+            }
+            
             $parseTarget = function($val) {
                 if ($val === null) return null;
                 $val = trim((string)$val);
@@ -3796,6 +3820,7 @@
                 'target_2029' => $parseTarget($this->input->post('target_2029', TRUE)),
                 'target_2030' => $parseTarget($this->input->post('target_2030', TRUE)),
                 'pd_pengampuh' => $pdPengampuhValue,
+                'program_pd' => $programPdValue,
                 'created_at' => date('Y-m-d H:i:s')
             ];
             
@@ -3890,6 +3915,23 @@
                     }
                 }
                 
+                // Validasi dan proses Program (Nomenklatur Provinsi)
+                $programPd = $this->input->post('program_pd', TRUE);
+                $programPdValue = '';
+                if (!empty($programPd)) {
+                    if (is_string($programPd)) {
+                        $programPd = explode(',', $programPd);
+                    }
+                    if (is_array($programPd)) {
+                        $programPd = array_filter(array_map('trim', $programPd), function($val) {
+                            return !empty($val);
+                        });
+                        if (!empty($programPd)) {
+                            $programPdValue = implode(',', $programPd);
+                        }
+                    }
+                }
+                
                 $parseTarget = function($val) {
                     if ($val === null) return null;
                     $val = trim((string)$val);
@@ -3909,6 +3951,7 @@
                     'target_2029' => $parseTarget($this->input->post('target_2029', TRUE)),
                     'target_2030' => $parseTarget($this->input->post('target_2030', TRUE)),
                     'pd_pengampuh' => $pdPengampuhValue,
+                    'program_pd' => $programPdValue,
                     'updated_at' => date('Y-m-d H:i:s')
                 ];
                 
@@ -4089,6 +4132,30 @@
             } else {
                 echo json_encode([]);
             }
+        }
+
+        // ============================================================
+        // GET DAFTAR PROGRAM UNTUK INDIKATOR SASARAN (NOMENKLATUR PROVINSI)
+        // ============================================================
+        public function GetListProgramPDForIndikator() {
+            if (!$this->input->is_ajax_request()) {
+                show_404();
+                return;
+            }
+            
+            // Mengambil program dari tabel nomenklaturprovinsi (level program memiliki 2 titik, contoh: 1.01.01)
+            $data = $this->db
+                ->select('Kode as id, Kode as kode_program, Nomenklatur as nama_program')
+                ->from('nomenklaturprovinsi')
+                ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) = 2', NULL, FALSE)
+                ->order_by('Kode', 'ASC')
+                ->get()
+                ->result_array();
+            
+            echo json_encode([
+                'status' => 'success',
+                'data' => $data
+            ]);
         }
 
         public function TahapanRPJMD() {
@@ -4440,6 +4507,23 @@
                 ->get('akun_instansi')
                 ->result_array();
 
+            // URUSAN PD
+            $Data['Urusan'] = [];
+            if (!empty($KodeWilayah)) {
+                $provKode = substr($KodeWilayah, 0, 2);
+                $Data['Urusan'] = $this->db
+                    ->where("(kodewilayah = " . $this->db->escape($KodeWilayah) . " OR kodewilayah = " . $this->db->escape($provKode) . ")")
+                    ->where('deleted_at IS NULL', null, false)
+                    ->order_by('nama_urusan', 'ASC')
+                    ->get('urusan_pd')
+                    ->result_array();
+            }
+
+            $mapUrusan = [];
+            foreach ($Data['Urusan'] as $u) {
+                $mapUrusan[$u['id']] = $u['nama_urusan'];
+            }
+
             // SUB UNIT
             $Data['SubUnit'] = $this->db
                 ->select('su.*')
@@ -4474,7 +4558,7 @@
                 $subUnitGrouped[$su['instansi_id']][] = $su;
             }
 
-            // tambahkan nama_kementerian + sub_unit + bidang_urusan untuk view
+            // tambahkan nama_kementerian + nama_urusan + sub_unit + bidang_urusan untuk view
             foreach ($Data['Akun'] as &$a) {
                 // nama_kementerian
                 $kemIds = [];
@@ -4488,6 +4572,19 @@
                     }
                 }
                 $a['nama_kementerian'] = !empty($kemNames) ? implode(', ', $kemNames) : '-';
+
+                // nama_urusan
+                $uIds = [];
+                if (!empty($a['urusan_id'])) {
+                    $uIds = array_filter(array_map('trim', explode(',', $a['urusan_id'])));
+                }
+                $uNames = [];
+                foreach ($uIds as $uid) {
+                    if (isset($mapUrusan[$uid])) {
+                        $uNames[] = $mapUrusan[$uid];
+                    }
+                }
+                $a['nama_urusan'] = !empty($uNames) ? implode(', ', $uNames) : '-';
 
                 // SUB UNIT
                 $a['sub_unit'] = isset($subUnitGrouped[$a['id']]) ? $subUnitGrouped[$a['id']] : [];
@@ -4583,6 +4680,13 @@
             }
             $idKementerian = !empty($idKementerianArr) ? implode(',', $idKementerianArr) : null;
 
+            // ===== URUSAN PD =====
+            $idUrusanArr = $this->input->post('urusan_id');
+            $idUrusanArr = is_array($idUrusanArr)
+                ? array_values(array_unique(array_filter(array_map('intval', $idUrusanArr))))
+                : [];
+            $idUrusan = !empty($idUrusanArr) ? implode(',', $idUrusanArr) : null;
+
             $data = [
                 'kode_instansi'     => $kodeInstansi,
                 'kodewilayah'       => $KodeWilayah,
@@ -4592,6 +4696,7 @@
                 'tahun_akhir'       => $tahunAkhir,
                 'Level'             => 4,
                 'idkementerian'     => $idKementerian,
+                'urusan_id'         => $idUrusan,
                 'created_at'        => date('Y-m-d H:i:s'),
                 'updated_at'        => date('Y-m-d H:i:s')
             ];
@@ -4699,12 +4804,20 @@
             }
             $idKementerian = !empty($idKementerianArr) ? implode(',', $idKementerianArr) : null;
 
+            // ===== URUSAN PD =====
+            $idUrusanArr = $this->input->post('urusan_id');
+            $idUrusanArr = is_array($idUrusanArr)
+                ? array_values(array_unique(array_filter(array_map('intval', $idUrusanArr))))
+                : [];
+            $idUrusan = !empty($idUrusanArr) ? implode(',', $idUrusanArr) : null;
+
             $data = [
                 'kode_instansi'     => $kodeInstansi,
                 'nama'              => $nama,
                 'tahun_mulai'       => $tahunMulai,
                 'tahun_akhir'       => $tahunAkhir,
                 'idkementerian'     => $idKementerian,
+                'urusan_id'         => $idUrusan,
                 'updated_at'        => date('Y-m-d H:i:s')
             ];
 

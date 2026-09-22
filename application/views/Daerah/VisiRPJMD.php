@@ -282,23 +282,69 @@ if (!function_exists('formatDesimalIndikator')) {
             line-height: 1.3;
         }
 
+        .program-tag {
+            display: inline-block;
+            background: #f5f3ff;
+            color: #6b21a8;
+            border: 1px solid #ddd6fe;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin: 1px 2px;
+            line-height: 1.3;
+            word-break: break-word;
+        }
+
+        .select2-container--default .select2-selection--multiple {
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            min-height: 36px;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #f5f3ff;
+            border: 1px solid #ddd6fe;
+            color: #6b21a8;
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: #6b21a8;
+            margin-right: 5px;
+            font-weight: bold;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+            color: #ef4444;
+        }
+
         /* PD Pengampuh Table Styles */
         .pd-table {
             margin-bottom: 5px;
+            text-align: left;
         }
         .pd-table thead th {
             font-size: 12px;
             padding: 5px 8px;
             background: #f8f9fa;
+            text-align: left;
+        }
+        .pd-table thead th.text-center {
+            text-align: center !important;
         }
         .pd-table tbody td {
             padding: 5px 8px;
             vertical-align: middle;
+            text-align: left;
+        }
+        .pd-table tbody td.text-center {
+            text-align: center !important;
         }
         .pd-table .form-control-sm {
             padding: 4px 8px;
             font-size: 13px;
             height: 34px;
+            text-align: left;
         }
         .pd-table .btn-sm {
             padding: 3px 8px;
@@ -308,13 +354,24 @@ if (!function_exists('formatDesimalIndikator')) {
             height: 34px;
             border: 1px solid #ced4da;
             border-radius: 4px;
+            text-align: left !important;
         }
         .select2-container--default .select2-selection--single .select2-selection__rendered {
             line-height: 32px;
             padding-left: 10px;
+            text-align: left !important;
         }
         .select2-container--default .select2-selection--single .select2-selection__arrow {
             height: 32px;
+        }
+        .select2-container--default .select2-results__option {
+            text-align: left !important;
+        }
+        .select2-dropdown {
+            text-align: left !important;
+        }
+        .select2-search--dropdown .select2-search__field {
+            text-align: left !important;
         }
 
         .divider-aksi {
@@ -500,12 +557,11 @@ if (!function_exists('formatDesimalIndikator')) {
                             <!-- TABEL HIERARKI DENGAN INDIKATOR KELUAR LANGSUNG -->
                             <div class="table-responsive">
                                 <table id="hierarki-table" class="table table-bordered">
-                                    <thead>
+                                     <thead>
                                         <tr>
                                             <th rowspan="2" class="text-center" style="vertical-align: middle; width: 3%;">No</th>
-                                            <th rowspan="2" style="vertical-align: middle; width: 20%;">Visi, Misi, Tujuan dan Sasaran</th>
-                                            <th rowspan="2" class="text-center" style="vertical-align: middle; width: 7%;">Tahun</th>
-                                            <th rowspan="2" style="vertical-align: middle; width: 13%;">Indikator</th>
+                                            <th rowspan="2" style="vertical-align: middle; width: 25%;">Visi, Misi, Tujuan dan Sasaran</th>
+                                            <th rowspan="2" style="vertical-align: middle; width: 15%;">Indikator</th>
                                             <th rowspan="2" class="text-center" style="vertical-align: middle; width: 5%;">Satuan</th>
                                             <th rowspan="2" class="text-center" style="vertical-align: middle; width: 5%;">Base line<br>2024</th>
                                             <th colspan="6" class="text-center" style="vertical-align: middle;">Target</th>
@@ -542,9 +598,6 @@ if (!function_exists('formatDesimalIndikator')) {
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td class="text-center" style="vertical-align: middle; font-weight: 600; color: #2e7d32;">
-                                                    <?= html_escape($visi['TahunMulai']) . ' - ' . html_escape($visi['TahunAkhir']) ?>
-                                                </td>
                                                 <td class="text-center text-muted">-</td>
                                                 <td class="text-center text-muted">-</td>
                                                 <td class="text-center text-muted">-</td>
@@ -560,7 +613,7 @@ if (!function_exists('formatDesimalIndikator')) {
                                                 <td class="text-center">
                                                     <div class="btn-aksi-group">
                                                         <button class="btn btn-xs btn-success TambahMisi btn-action" data-id="<?= $visi['Id'] ?>" title="Tambah Misi"><i class="fa fa-plus"></i> Misi</button>
-                                                        <button class="btn btn-xs btn-warning EditVisi btn-action" data-id="<?= $visi['Id'] ?>" data-visi="<?= html_escape($visi['Visi']) ?>" data-awal="<?= $visi['TahunMulai'] ?>" data-akhir="<?= $visi['TahunAkhir'] ?>" title="Edit Visi"><i class="fa fa-edit"></i></button>
+                                                        <button class="btn btn-xs btn-warning EditVisi btn-action" data-id="<?= $visi['Id'] ?>" data-visi="<?= html_escape($visi['Visi']) ?>" title="Edit Visi"><i class="fa fa-edit"></i></button>
                                                         <button class="btn btn-xs btn-danger HapusVisi btn-action" data-id="<?= $visi['Id'] ?>" title="Hapus Visi"><i class="fa fa-trash"></i></button>
                                                     </div>
                                                 </td>
@@ -583,9 +636,6 @@ if (!function_exists('formatDesimalIndikator')) {
                                                                 <?= html_escape($misi['Misi']) ?>
                                                             </div>
                                                         </div>
-                                                    </td>
-                                                    <td class="text-center" style="vertical-align: middle; font-weight: 600; color: #00838f;">
-                                                        <?= html_escape($misi['TahunMulai'] ?? $visi['TahunMulai']) . ' - ' . html_escape($misi['TahunAkhir'] ?? $visi['TahunAkhir']) ?>
                                                     </td>
                                                     <td class="text-center text-muted">-</td>
                                                     <td class="text-center text-muted">-</td>
@@ -622,15 +672,12 @@ if (!function_exists('formatDesimalIndikator')) {
                                                     <tr data-id="tujuan-<?= $tujuan['Id'] ?>" data-parent="misi-<?= $misi['Id'] ?>" data-expanded="true" class="row-tujuan">
                                                         <td rowspan="<?= $tujuanRowspan ?>" class="text-center" style="font-weight: 600;"><?= $noMisi . '.' . $noTujuan ?></td>
                                                         <td rowspan="<?= $tujuanRowspan ?>" style="padding-left: 30px !important;" class="border-tujuan clickable-row" onclick="toggleLevel('tujuan-<?= $tujuan['Id'] ?>', this)">
-                                                            <div class="td-content-wrapper">
+                                                             <div class="td-content-wrapper">
                                                                 <div class="text-content">
                                                                     <span class="label-text"><b style="color: #ef6c00;">TUJUAN <?= $noMisi . '.' . $noTujuan ?>:</b> </span>
                                                                     <?= html_escape($tujuan['Tujuan']) ?>
                                                                 </div>
                                                             </div>
-                                                        </td>
-                                                        <td rowspan="<?= $tujuanRowspan ?>" class="text-center" style="vertical-align: middle; font-weight: 600; color: #ef6c00;">
-                                                            <?= html_escape($tujuan['TahunMulai'] ?? $visi['TahunMulai']) . ' - ' . html_escape($tujuan['TahunAkhir'] ?? $visi['TahunAkhir']) ?>
                                                         </td>
                                                         
                                                         <?php if ($firstIndT) { 
@@ -782,15 +829,12 @@ if (!function_exists('formatDesimalIndikator')) {
                                                         <tr data-id="sasaran-<?= $sasaran['Id'] ?>" data-parent="tujuan-<?= $tujuan['Id'] ?>" data-expanded="true" class="row-sasaran">
                                                             <td rowspan="<?= $sasaranRowspan ?>" class="text-center" style="font-weight: 500;"><?= $noMisi . '.' . $noTujuan . '.' . $noSasaran ?></td>
                                                             <td rowspan="<?= $sasaranRowspan ?>" style="padding-left: 45px !important;" class="border-sasaran">
-                                                                <div class="td-content-wrapper">
+                                                                 <div class="td-content-wrapper">
                                                                     <div class="text-content">
                                                                         <span class="label-text"><b style="color: #616161;">SASARAN <?= $noMisi . '.' . $noTujuan . '.' . $noSasaran ?>:</b> </span>
                                                                         <?= html_escape($sasaran['Sasaran']) ?>
                                                                     </div>
                                                                 </div>
-                                                            </td>
-                                                            <td rowspan="<?= $sasaranRowspan ?>" class="text-center" style="vertical-align: middle; font-weight: 600; color: #616161;">
-                                                                <?= html_escape($sasaran['TahunMulai'] ?? $visi['TahunMulai']) . ' - ' . html_escape($sasaran['TahunAkhir'] ?? $visi['TahunAkhir']) ?>
                                                             </td>
                                                             
                                                             <?php if ($firstIndS) { 
@@ -815,6 +859,7 @@ if (!function_exists('formatDesimalIndikator')) {
                                                                     data-t2029="<?= formatDesimalIndikator($firstIndS['target_2029'] ?? '', '') ?>"
                                                                     data-t2030="<?= formatDesimalIndikator($firstIndS['target_2030'] ?? '', '') ?>"
                                                                     data-pd="<?= html_escape($firstIndS['pd_pengampuh'] ?? '') ?>"
+                                                                    data-program-pd="<?= html_escape($firstIndS['program_pd'] ?? '') ?>"
                                                                     title="<?= $titleInd ?>">
                                                                     <?= html_escape($firstIndS['indikator']) ?>
                                                                 </td>
@@ -836,6 +881,17 @@ if (!function_exists('formatDesimalIndikator')) {
                                                                         <span class="pd-tag">ID: <?= html_escape($firstIndS['pd_pengampuh']) ?></span>
                                                                     <?php } else { ?>
                                                                         <span class="text-muted">-</span>
+                                                                    <?php } ?>
+
+                                                                    <?php if (!empty($firstIndS['program_pd_names'])) { ?>
+                                                                        <div style="margin-top: 5px; border-top: 1px dashed #cbd5e1; padding-top: 4px;">
+                                                                            <small style="color: #6b21a8; font-weight: 700; font-size: 10px; display: block; margin-bottom: 2px;">
+                                                                                <i class="fa fa-folder-open-o"></i> Program PD:
+                                                                            </small>
+                                                                            <?php foreach ($firstIndS['program_pd_names'] as $prgName) { ?>
+                                                                                <span class="program-tag" title="<?= html_escape($prgName) ?>"><?= html_escape($prgName) ?></span>
+                                                                            <?php } ?>
+                                                                        </div>
                                                                     <?php } ?>
                                                                 </td>
                                                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
@@ -899,6 +955,7 @@ if (!function_exists('formatDesimalIndikator')) {
                                                                     data-t2029="<?= formatDesimalIndikator($indS['target_2029'] ?? '', '') ?>"
                                                                     data-t2030="<?= formatDesimalIndikator($indS['target_2030'] ?? '', '') ?>"
                                                                     data-pd="<?= html_escape($indS['pd_pengampuh'] ?? '') ?>"
+                                                                    data-program-pd="<?= html_escape($indS['program_pd'] ?? '') ?>"
                                                                     title="<?= $titleInd ?>">
                                                                     <?= html_escape($indS['indikator']) ?>
                                                                 </td>
@@ -920,6 +977,17 @@ if (!function_exists('formatDesimalIndikator')) {
                                                                         <span class="pd-tag">ID: <?= html_escape($indS['pd_pengampuh']) ?></span>
                                                                     <?php } else { ?>
                                                                         <span class="text-muted">-</span>
+                                                                    <?php } ?>
+
+                                                                    <?php if (!empty($indS['program_pd_names'])) { ?>
+                                                                        <div style="margin-top: 5px; border-top: 1px dashed #cbd5e1; padding-top: 4px;">
+                                                                            <small style="color: #6b21a8; font-weight: 700; font-size: 10px; display: block; margin-bottom: 2px;">
+                                                                                <i class="fa fa-folder-open-o"></i> Program PD:
+                                                                            </small>
+                                                                            <?php foreach ($indS['program_pd_names'] as $prgName) { ?>
+                                                                                <span class="program-tag" title="<?= html_escape($prgName) ?>"><?= html_escape($prgName) ?></span>
+                                                                            <?php } ?>
+                                                                        </div>
                                                                     <?php } ?>
                                                                 </td>
                                                             </tr>
@@ -948,7 +1016,7 @@ if (!function_exists('formatDesimalIndikator')) {
                                             } 
                                         } else { ?>
                                             <tr>
-                                                <td colspan="15" class="text-center" style="padding: 30px; color: #999;">Belum ada data Visi RPJMD.</td>
+                                                <td colspan="14" class="text-center" style="padding: 30px; color: #999;">Belum ada data Visi RPJMD.</td>
                                             </tr>
                                         <?php } ?>
                                     </tbody>
@@ -980,28 +1048,6 @@ if (!function_exists('formatDesimalIndikator')) {
                                 </div>
                                 <div class="nk-int-st">
                                     <textarea class="form-control" id="Visi" rows="3" style="resize: vertical;" placeholder="Uraian Visi RPJMD"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row" style="margin-top: 15px;">
-                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                            <div class="form-group ic-cmp-int float-lb floating-lb">
-                                <div class="form-ic-cmp">
-                                    <i class="notika-icon notika-calendar"></i>
-                                </div>
-                                <div class="nk-int-st">
-                                    <input type="number" class="form-control" id="TahunMulai" placeholder="Tahun Mulai (YYYY)">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                            <div class="form-group ic-cmp-int float-lb floating-lb">
-                                <div class="form-ic-cmp">
-                                    <i class="notika-icon notika-calendar"></i>
-                                </div>
-                                <div class="nk-int-st">
-                                    <input type="number" class="form-control" id="TahunAkhir" placeholder="Tahun Akhir (YYYY)">
                                 </div>
                             </div>
                         </div>
@@ -1039,28 +1085,6 @@ if (!function_exists('formatDesimalIndikator')) {
                             </div>
                         </div>
                     </div>
-                    <div class="row" style="margin-top: 15px;">
-                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                            <div class="form-group ic-cmp-int float-lb floating-lb">
-                                <div class="form-ic-cmp">
-                                    <i class="notika-icon notika-calendar"></i>
-                                </div>
-                                <div class="nk-int-st">
-                                    <input type="number" class="form-control" id="_TahunMulai" placeholder="Tahun Mulai (YYYY)">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                            <div class="form-group ic-cmp-int float-lb floating-lb">
-                                <div class="form-ic-cmp">
-                                    <i class="notika-icon notika-calendar"></i>
-                                </div>
-                                <div class="nk-int-st">
-                                    <input type="number" class="form-control" id="_TahunAkhir" placeholder="Tahun Akhir (YYYY)">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
                 <div class="modal-footer" style="padding-top: 15px;">
                     <button type="button" class="btn btn-info btn-action" id="EditBtnVisi"><i class="fa fa-save"></i> Update</button>
@@ -1082,9 +1106,6 @@ if (!function_exists('formatDesimalIndikator')) {
                 </div>
                 <div class="modal-body" style="padding-top: 20px;">
                     <input type="hidden" id="IdVisi">
-                    <div class="periode-info" id="PeriodeMisiInfo">
-                        <i class="fa fa-info-circle"></i> Periode akan diambil otomatis dari Visi yang dipilih
-                    </div>
                     <div class="row">
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                             <div class="form-group ic-cmp-int float-lb floating-lb">
@@ -1119,9 +1140,6 @@ if (!function_exists('formatDesimalIndikator')) {
                 <div class="modal-body" style="padding-top: 20px;">
                     <input type="hidden" id="IdMisiForm">
                     <input type="hidden" id="_IdVisi">
-                    <div class="periode-info" id="EditPeriodeMisiInfo">
-                        <i class="fa fa-info-circle"></i> Periode akan diambil otomatis dari Visi yang dipilih
-                    </div>
                     <div class="row">
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                             <div class="form-group ic-cmp-int float-lb floating-lb">
@@ -1155,9 +1173,6 @@ if (!function_exists('formatDesimalIndikator')) {
                 </div>
                 <div class="modal-body" style="padding-top: 20px;">
                     <input type="hidden" id="IdMisi">
-                    <div class="periode-info" id="PeriodeTujuanInfo">
-                        <i class="fa fa-info-circle"></i> Periode akan diambil otomatis dari Misi yang dipilih
-                    </div>
                     <div class="row">
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                             <div class="form-group ic-cmp-int float-lb floating-lb">
@@ -1192,9 +1207,6 @@ if (!function_exists('formatDesimalIndikator')) {
                 <div class="modal-body" style="padding-top: 20px;">
                     <input type="hidden" id="IdTujuanForm">
                     <input type="hidden" id="_IdMisi">
-                    <div class="periode-info" id="EditPeriodeTujuanInfo">
-                        <i class="fa fa-info-circle"></i> Periode akan diambil otomatis dari Misi yang dipilih
-                    </div>
                     <div class="row">
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                             <div class="form-group ic-cmp-int float-lb floating-lb">
@@ -1228,9 +1240,6 @@ if (!function_exists('formatDesimalIndikator')) {
                 </div>
                 <div class="modal-body" style="padding-top: 20px;">
                     <input type="hidden" id="IdTujuan">
-                    <div class="periode-info" id="PeriodeSasaranInfo">
-                        <i class="fa fa-info-circle"></i> Periode akan diambil otomatis dari Tujuan yang dipilih
-                    </div>
                     <div class="row">
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                             <div class="form-group ic-cmp-int float-lb floating-lb">
@@ -1265,9 +1274,6 @@ if (!function_exists('formatDesimalIndikator')) {
                 <div class="modal-body" style="padding-top: 20px;">
                     <input type="hidden" id="IdSasaranForm">
                     <input type="hidden" id="_IdTujuan">
-                    <div class="periode-info" id="EditPeriodeSasaranInfo">
-                        <i class="fa fa-info-circle"></i> Periode akan diambil otomatis dari Tujuan yang dipilih
-                    </div>
                     <div class="row">
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                             <div class="form-group ic-cmp-int float-lb floating-lb">
@@ -1502,6 +1508,31 @@ if (!function_exists('formatDesimalIndikator')) {
                             </div>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <!-- PROGRAM PD -->
+                            <div class="form-group">
+                                <label><b>Program</b></label>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-sm pd-table" style="margin-bottom: 5px;">
+                                        <thead>
+                                            <tr>
+                                                <th>Nama Program</th>
+                                                <th width="50" class="text-center">Hapus</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="program-sasaran-body"></tbody>
+                                    </table>
+                                </div>
+                                <button type="button" class="btn btn-success btn-sm" id="btn-tambah-program-sasaran">
+                                    <i class="fa fa-plus"></i> Tambah Program
+                                </button>
+                                <small class="text-muted pd-info-text" style="display: block; margin-top: 5px;">
+                                    Pilih Program dari Program PD yang terkait dengan indikator sasaran ini
+                                </small>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer" style="padding-top: 15px;">
                     <button type="button" class="btn btn-success btn-action" id="SimpanIndikatorSasaran">
@@ -1586,6 +1617,25 @@ if (!function_exists('formatDesimalIndikator')) {
             return div.innerHTML;
         }
 
+        // Helper: cek apakah response server = sukses (string '1' atau JSON {status:'success'})
+        function isRespSuccess(r) {
+            if (r === '1' || r === 1) return true;
+            try {
+                var j = (typeof r === 'object') ? r : JSON.parse(r);
+                return j && (j.status === 'success' || j === 1);
+            } catch(e) {}
+            return false;
+        }
+
+        // Helper: ambil pesan error dari response (JSON atau string)
+        function parseRespError(r, fallback) {
+            try {
+                var j = (typeof r === 'object') ? r : JSON.parse(r);
+                if (j && j.message) return j.message;
+            } catch(e) {}
+            return (typeof r === 'string' && r.trim() !== '') ? r : fallback;
+        }
+
         // ==============================================
         // FUNGSI TOGGLE HIERARKI
         // ==============================================
@@ -1639,6 +1689,35 @@ if (!function_exists('formatDesimalIndikator')) {
         }
 
         // ==============================================
+        // DATA PROGRAM PD UNTUK INDIKATOR SASARAN
+        // ==============================================
+        var daftarProgramPD = [];
+
+        function loadDaftarProgramPD(callback) {
+            $.ajax({
+                url: BaseURL + "Daerah/GetListProgramPDForIndikator",
+                type: "GET",
+                dataType: "json",
+                success: function(res) {
+                    if (res && res.status === 'success') {
+                        daftarProgramPD = res.data;
+                        var currentSelected = typeof getSelectedProgramSasaran === 'function' ? getSelectedProgramSasaran() : [];
+                        if (currentSelected.length === 0 && $('#program-sasaran-body tr').length > 0) {
+                            $('#program-sasaran-body').empty();
+                            addProgramRowSasaran('program-sasaran-body', '');
+                        }
+                        if (typeof callback === 'function') {
+                            callback();
+                        }
+                    }
+                },
+                error: function() {
+                    console.log('Gagal memuat daftar Program PD');
+                }
+            });
+        }
+
+        // ==============================================
         // FUNGSI TAMBAH BARIS PD PENGGAMPUH TUJUAN
         // ==============================================
         function addPDRowTujuan(containerId, pdId = '') {
@@ -1659,12 +1738,12 @@ if (!function_exists('formatDesimalIndikator')) {
             
             var tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>
-                    <select class="form-control form-control-sm pd-select-tujuan" style="width: 100%;">
+                <td style="text-align: left;">
+                    <select class="form-control form-control-sm pd-select-tujuan" style="width: 100%; text-align: left;">
                         ${options}
                     </select>
                 </td>
-                <td class="text-center">
+                <td class="text-center" style="text-align: center; vertical-align: middle;">
                     <button type="button" class="btn btn-danger btn-sm remove-pd-row"><i class="fa fa-trash"></i></button>
                 </td>
             `;
@@ -1698,12 +1777,12 @@ if (!function_exists('formatDesimalIndikator')) {
             
             var tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>
-                    <select class="form-control form-control-sm pd-select-sasaran" style="width: 100%;">
+                <td style="text-align: left;">
+                    <select class="form-control form-control-sm pd-select-sasaran" style="width: 100%; text-align: left;">
                         ${options}
                     </select>
                 </td>
-                <td class="text-center">
+                <td class="text-center" style="text-align: center; vertical-align: middle;">
                     <button type="button" class="btn btn-danger btn-sm remove-pd-row"><i class="fa fa-trash"></i></button>
                 </td>
             `;
@@ -1776,6 +1855,78 @@ if (!function_exists('formatDesimalIndikator')) {
         });
 
         // ==============================================
+        // FUNGSI TAMBAH BARIS PROGRAM SASARAN
+        // ==============================================
+        function addProgramRowSasaran(containerId, programId = '') {
+            var container = document.getElementById(containerId);
+            if (!container) return;
+            
+            var options = '<option value="">-- Pilih Program --</option>';
+            if (daftarProgramPD && daftarProgramPD.length > 0) {
+                for (var i = 0; i < daftarProgramPD.length; i++) {
+                    var selected = (String(daftarProgramPD[i].id) === String(programId)) ? 'selected' : '';
+                    var label = '[' + daftarProgramPD[i].kode_program + '] ' + daftarProgramPD[i].nama_program;
+                    options += '<option value="' + daftarProgramPD[i].id + '" ' + selected + '>' + 
+                            escapeHtml(label) +
+                            '</option>';
+                }
+            } else {
+                options += '<option value="" disabled>Data program tidak tersedia</option>';
+            }
+            
+            var tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="text-align: left;">
+                    <select class="form-control form-control-sm program-select-sasaran" style="width: 100%; text-align: left;">
+                        ${options}
+                    </select>
+                </td>
+                <td class="text-center" style="text-align: center; vertical-align: middle;">
+                    <button type="button" class="btn btn-danger btn-sm remove-program-row"><i class="fa fa-trash"></i></button>
+                </td>
+            `;
+            container.appendChild(tr);
+            
+            $(tr).find('.program-select-sasaran').select2({
+                placeholder: 'Pilih Program',
+                dropdownParent: $('#ModalIndikatorSasaran'),
+                width: '100%'
+            });
+        }
+
+        $(document).on('click', '.remove-program-row', function(e) {
+            e.preventDefault();
+            $(this).closest('tr').remove();
+        });
+
+        function getSelectedProgramSasaran() {
+            var ids = [];
+            $('#program-sasaran-body .program-select-sasaran').each(function() {
+                var val = $(this).val();
+                if (val && val !== '') {
+                    ids.push(val);
+                }
+            });
+            return ids;
+        }
+
+        function setSelectedProgramSasaran(selectedIds) {
+            $('#program-sasaran-body').empty();
+            if (!selectedIds || selectedIds.length === 0) {
+                addProgramRowSasaran('program-sasaran-body', '');
+                return;
+            }
+            for (var i = 0; i < selectedIds.length; i++) {
+                addProgramRowSasaran('program-sasaran-body', selectedIds[i]);
+            }
+        }
+
+        $(document).on('click', '#btn-tambah-program-sasaran', function(e) {
+            e.preventDefault();
+            addProgramRowSasaran('program-sasaran-body', '');
+        });
+
+        // ==============================================
         // RESET FORM INDIKATOR
         // ==============================================
         function resetFormTujuan() {
@@ -1800,6 +1951,8 @@ if (!function_exists('formatDesimalIndikator')) {
             $('.input-target-sasaran').val('');
             $('#pd-pengampuh-sasaran-body').empty();
             addPDRowSasaran('pd-pengampuh-sasaran-body', '');
+            $('#program-sasaran-body').empty();
+            addProgramRowSasaran('program-sasaran-body', '');
             $('#is_edit_sasaran').val('false');
             $('#judul_modal_sasaran').text('Tambah Indikator Sasaran');
             $('#btn_text_sasaran').text('Simpan');
@@ -1811,6 +1964,7 @@ if (!function_exists('formatDesimalIndikator')) {
         // ==============================================
         $(document).ready(function() {
             loadDaftarPD();
+            loadDaftarProgramPD();
 
             // Toggle Buka / Tutup Semua
             var allExpanded = true;
@@ -1924,27 +2078,14 @@ if (!function_exists('formatDesimalIndikator')) {
             // CRUD VISI
             // ==============================================
             $("#SimpanVisi").click(function() {
-                if (isNaN($("#TahunMulai").val()) || $("#TahunMulai").val() == "" || $("#TahunMulai").val().length != 4) {
-                    showToast('Tahun Mulai harus diisi dengan format YYYY!', 'error');
-                    return;
-                }
-                if (isNaN($("#TahunAkhir").val()) || $("#TahunAkhir").val() == "" || $("#TahunAkhir").val().length != 4) {
-                    showToast('Tahun Akhir harus diisi dengan format YYYY!', 'error');
-                    return;
-                }
-                if (parseInt($("#TahunMulai").val()) >= parseInt($("#TahunAkhir").val())) {
-                    showToast('Tahun Mulai harus lebih kecil dari Tahun Akhir!', 'error');
-                    return;
-                }
-                if ($("#Visi").val() == "") {
+                var visi = $("#Visi").val().trim();
+                if (visi === "") {
                     showToast('Visi harus diisi!', 'error');
                     return;
                 }
                 
                 var data = {
-                    Visi: $("#Visi").val(),
-                    TahunMulai: $("#TahunMulai").val(),
-                    TahunAkhir: $("#TahunAkhir").val(),
+                    Visi: visi,
                     [CSRF_NAME]: CSRF_TOKEN
                 };
 
@@ -1952,14 +2093,25 @@ if (!function_exists('formatDesimalIndikator')) {
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
 
                 $.post(BaseURL + "Daerah/InputVisiRPJMD", data, function(Respon) {
-                    btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
-                    if (Respon == '1') {
-                        showToast('Berhasil Menyimpan Visi RPJMD!', 'success');
-                        setTimeout(function() { location.reload(); }, 800);
+                    var isSuccess = (Respon == '1');
+                    try {
+                        var json = (typeof Respon === 'object') ? Respon : JSON.parse(Respon);
+                        if (json && (json.status === 'success' || json == 1)) {
+                            isSuccess = true;
+                        }
+                    } catch(e) {}
+
+                    if (isSuccess) {
+                        location.reload();
                     } else if (Respon == '2') {
                         showToast('Gagal: Periode tahun sudah ada!', 'error');
                     } else {
-                        showToast(Respon || 'Gagal Menyimpan Visi RPJMD!', 'error');
+                        var msg = Respon;
+                        try {
+                            var jsonErr = (typeof Respon === 'object') ? Respon : JSON.parse(Respon);
+                            if (jsonErr && jsonErr.message) msg = jsonErr.message;
+                        } catch(e) {}
+                        showToast(msg || 'Gagal Menyimpan Visi RPJMD!', 'error');
                     }
                 }).fail(function() {
                     btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
@@ -1970,34 +2122,19 @@ if (!function_exists('formatDesimalIndikator')) {
             $('#hierarki-table tbody').on('click', '.EditVisi', function() {
                 $("#IdVisiForm").val($(this).data('id'));
                 $("#_Visi").val($(this).data('visi'));
-                $("#_TahunMulai").val($(this).data('awal'));
-                $("#_TahunAkhir").val($(this).data('akhir'));
                 $("#ModalEditVisi").modal('show');
             });
 
             $("#EditBtnVisi").click(function() {
-                if (isNaN($("#_TahunMulai").val()) || $("#_TahunMulai").val() == "" || $("#_TahunMulai").val().length != 4) {
-                    showToast('Tahun Mulai harus diisi dengan format YYYY!', 'error');
-                    return;
-                }
-                if (isNaN($("#_TahunAkhir").val()) || $("#_TahunAkhir").val() == "" || $("#_TahunAkhir").val().length != 4) {
-                    showToast('Tahun Akhir harus diisi dengan format YYYY!', 'error');
-                    return;
-                }
-                if (parseInt($("#_TahunMulai").val()) >= parseInt($("#_TahunAkhir").val())) {
-                    showToast('Tahun Mulai harus lebih kecil dari Tahun Akhir!', 'error');
-                    return;
-                }
-                if ($("#_Visi").val() == "") {
+                var visi = $("#_Visi").val().trim();
+                if (visi === "") {
                     showToast('Visi harus diisi!', 'error');
                     return;
                 }
                 
                 var data = {
                     Id: $("#IdVisiForm").val(),
-                    Visi: $("#_Visi").val(),
-                    TahunMulai: $("#_TahunMulai").val(),
-                    TahunAkhir: $("#_TahunAkhir").val(),
+                    Visi: visi,
                     [CSRF_NAME]: CSRF_TOKEN
                 };
 
@@ -2005,14 +2142,23 @@ if (!function_exists('formatDesimalIndikator')) {
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
 
                 $.post(BaseURL + "Daerah/EditVisiRPJMD", data, function(Respon) {
-                    btn.prop('disabled', false).html('<i class="fa fa-save"></i> Update');
-                    if (Respon == '1') {
-                        showToast('Berhasil Mengupdate Visi RPJMD!', 'success');
-                        setTimeout(function() { location.reload(); }, 800);
-                    } else if (Respon == '2') {
-                        showToast('Gagal: Periode tahun sudah ada!', 'error');
+                    var isSuccess = (Respon == '1');
+                    try {
+                        var json = (typeof Respon === 'object') ? Respon : JSON.parse(Respon);
+                        if (json && (json.status === 'success' || json == 1)) {
+                            isSuccess = true;
+                        }
+                    } catch(e) {}
+
+                    if (isSuccess) {
+                        location.reload();
                     } else {
-                        showToast(Respon || 'Gagal Mengupdate Visi RPJMD!', 'error');
+                        var msg = Respon;
+                        try {
+                            var jsonErr = (typeof Respon === 'object') ? Respon : JSON.parse(Respon);
+                            if (jsonErr && jsonErr.message) msg = jsonErr.message;
+                        } catch(e) {}
+                        showToast(msg || 'Gagal Mengupdate Visi RPJMD!', 'error');
                     }
                 }).fail(function() {
                     btn.prop('disabled', false).html('<i class="fa fa-save"></i> Update');
@@ -2022,17 +2168,14 @@ if (!function_exists('formatDesimalIndikator')) {
 
             $('#hierarki-table tbody').on('click', '.HapusVisi', function() {
                 var id = $(this).data('id');
-                if (confirm("Yakin ingin menghapus Visi ini? Semua Misi, Tujuan, Sasaran dan Indikator terkait akan terhapus.")) {
-                    var data = { Id: id, [CSRF_NAME]: CSRF_TOKEN };
-                    $.post(BaseURL + "Daerah/HapusVisiRPJMD", data, function(Respon) {
-                        if (Respon == '1') {
-                            showToast('Berhasil Menghapus Visi RPJMD!', 'success');
-                            setTimeout(function() { location.reload(); }, 800);
-                        } else {
-                            showToast(Respon || 'Gagal Menghapus Visi RPJMD!', 'error');
-                        }
-                    });
-                }
+                var data = { Id: id, [CSRF_NAME]: CSRF_TOKEN };
+                $.post(BaseURL + "Daerah/HapusVisiRPJMD", data, function(Respon) {
+                    if (isRespSuccess(Respon)) {
+                        location.reload();
+                    } else {
+                        showToast(parseRespError(Respon, 'Gagal Menghapus Visi RPJMD!'), 'error');
+                    }
+                });
             });
 
             // ==============================================
@@ -2059,12 +2202,11 @@ if (!function_exists('formatDesimalIndikator')) {
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
 
                 $.post(BaseURL + "Daerah/InputMisiRPJMD", data, function(Respon) {
-                    btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
-                    if (Respon == '1') {
-                        showToast('Berhasil Menyimpan Misi RPJMD!', 'success');
-                        setTimeout(function() { location.reload(); }, 800);
+                    if (isRespSuccess(Respon)) {
+                        location.reload();
                     } else {
-                        showToast(Respon || 'Gagal Menyimpan Misi RPJMD!', 'error');
+                        btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
+                        showToast(parseRespError(Respon, 'Gagal Menyimpan Misi RPJMD!'), 'error');
                     }
                 }).fail(function() {
                     btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
@@ -2094,12 +2236,11 @@ if (!function_exists('formatDesimalIndikator')) {
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
 
                 $.post(BaseURL + "Daerah/EditMisiRPJMD", data, function(Respon) {
-                    btn.prop('disabled', false).html('<i class="fa fa-save"></i> Update');
-                    if (Respon == '1') {
-                        showToast('Berhasil Mengupdate Misi RPJMD!', 'success');
-                        setTimeout(function() { location.reload(); }, 800);
+                    if (isRespSuccess(Respon)) {
+                        location.reload();
                     } else {
-                        showToast(Respon || 'Gagal Mengupdate Misi RPJMD!', 'error');
+                        btn.prop('disabled', false).html('<i class="fa fa-save"></i> Update');
+                        showToast(parseRespError(Respon, 'Gagal Mengupdate Misi RPJMD!'), 'error');
                     }
                 }).fail(function() {
                     btn.prop('disabled', false).html('<i class="fa fa-save"></i> Update');
@@ -2109,17 +2250,14 @@ if (!function_exists('formatDesimalIndikator')) {
 
             $('#hierarki-table tbody').on('click', '.HapusMisi', function() {
                 var id = $(this).data('id');
-                if (confirm("Yakin ingin menghapus Misi ini? Semua Tujuan dan Sasaran terkait akan terhapus.")) {
-                    var data = { Id: id, [CSRF_NAME]: CSRF_TOKEN };
-                    $.post(BaseURL + "Daerah/HapusMisiRPJMD", data, function(Respon) {
-                        if (Respon == '1') {
-                            showToast('Berhasil Menghapus Misi RPJMD!', 'success');
-                            setTimeout(function() { location.reload(); }, 800);
-                        } else {
-                            showToast(Respon || 'Gagal Menghapus Misi RPJMD!', 'error');
-                        }
-                    });
-                }
+                var data = { Id: id, [CSRF_NAME]: CSRF_TOKEN };
+                $.post(BaseURL + "Daerah/HapusMisiRPJMD", data, function(Respon) {
+                    if (isRespSuccess(Respon)) {
+                        location.reload();
+                    } else {
+                        showToast(parseRespError(Respon, 'Gagal Menghapus Misi RPJMD!'), 'error');
+                    }
+                });
             });
 
             // ==============================================
@@ -2146,12 +2284,11 @@ if (!function_exists('formatDesimalIndikator')) {
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
 
                 $.post(BaseURL + "Daerah/InputTujuanRPJMD", data, function(Respon) {
-                    btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
-                    if (Respon == '1') {
-                        showToast('Berhasil Menyimpan Tujuan RPJMD!', 'success');
-                        setTimeout(function() { location.reload(); }, 800);
+                    if (isRespSuccess(Respon)) {
+                        location.reload();
                     } else {
-                        showToast(Respon || 'Gagal Menyimpan Tujuan RPJMD!', 'error');
+                        btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
+                        showToast(parseRespError(Respon, 'Gagal Menyimpan Tujuan RPJMD!'), 'error');
                     }
                 }).fail(function() {
                     btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
@@ -2181,12 +2318,11 @@ if (!function_exists('formatDesimalIndikator')) {
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
 
                 $.post(BaseURL + "Daerah/EditTujuanRPJMD", data, function(Respon) {
-                    btn.prop('disabled', false).html('<i class="fa fa-save"></i> Update');
-                    if (Respon == '1') {
-                        showToast('Berhasil Mengupdate Tujuan RPJMD!', 'success');
-                        setTimeout(function() { location.reload(); }, 800);
+                    if (isRespSuccess(Respon)) {
+                        location.reload();
                     } else {
-                        showToast(Respon || 'Gagal Mengupdate Tujuan RPJMD!', 'error');
+                        btn.prop('disabled', false).html('<i class="fa fa-save"></i> Update');
+                        showToast(parseRespError(Respon, 'Gagal Mengupdate Tujuan RPJMD!'), 'error');
                     }
                 }).fail(function() {
                     btn.prop('disabled', false).html('<i class="fa fa-save"></i> Update');
@@ -2196,17 +2332,14 @@ if (!function_exists('formatDesimalIndikator')) {
 
             $('#hierarki-table tbody').on('click', '.HapusTujuan', function() {
                 var id = $(this).data('id');
-                if (confirm("Yakin ingin menghapus Tujuan ini? Semua Sasaran terkait akan terhapus.")) {
-                    var data = { Id: id, [CSRF_NAME]: CSRF_TOKEN };
-                    $.post(BaseURL + "Daerah/HapusTujuanRPJMD", data, function(Respon) {
-                        if (Respon == '1') {
-                            showToast('Berhasil Menghapus Tujuan RPJMD!', 'success');
-                            setTimeout(function() { location.reload(); }, 800);
-                        } else {
-                            showToast(Respon || 'Gagal Menghapus Tujuan RPJMD!', 'error');
-                        }
-                    });
-                }
+                var data = { Id: id, [CSRF_NAME]: CSRF_TOKEN };
+                $.post(BaseURL + "Daerah/HapusTujuanRPJMD", data, function(Respon) {
+                    if (isRespSuccess(Respon)) {
+                        location.reload();
+                    } else {
+                        showToast(parseRespError(Respon, 'Gagal Menghapus Tujuan RPJMD!'), 'error');
+                    }
+                });
             });
 
             // ==============================================
@@ -2233,12 +2366,11 @@ if (!function_exists('formatDesimalIndikator')) {
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
 
                 $.post(BaseURL + "Daerah/InputSasaranRPJMD", data, function(Respon) {
-                    btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
-                    if (Respon == '1') {
-                        showToast('Berhasil Menyimpan Sasaran RPJMD!', 'success');
-                        setTimeout(function() { location.reload(); }, 800);
+                    if (isRespSuccess(Respon)) {
+                        location.reload();
                     } else {
-                        showToast(Respon || 'Gagal Menyimpan Sasaran RPJMD!', 'error');
+                        btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
+                        showToast(parseRespError(Respon, 'Gagal Menyimpan Sasaran RPJMD!'), 'error');
                     }
                 }).fail(function() {
                     btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan');
@@ -2268,12 +2400,11 @@ if (!function_exists('formatDesimalIndikator')) {
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
 
                 $.post(BaseURL + "Daerah/EditSasaranRPJMD", data, function(Respon) {
-                    btn.prop('disabled', false).html('<i class="fa fa-save"></i> Update');
-                    if (Respon == '1') {
-                        showToast('Berhasil Mengupdate Sasaran RPJMD!', 'success');
-                        setTimeout(function() { location.reload(); }, 800);
+                    if (isRespSuccess(Respon)) {
+                        location.reload();
                     } else {
-                        showToast(Respon || 'Gagal Mengupdate Sasaran RPJMD!', 'error');
+                        btn.prop('disabled', false).html('<i class="fa fa-save"></i> Update');
+                        showToast(parseRespError(Respon, 'Gagal Mengupdate Sasaran RPJMD!'), 'error');
                     }
                 }).fail(function() {
                     btn.prop('disabled', false).html('<i class="fa fa-save"></i> Update');
@@ -2283,17 +2414,14 @@ if (!function_exists('formatDesimalIndikator')) {
 
             $('#hierarki-table tbody').on('click', '.HapusSasaran', function() {
                 var id = $(this).data('id');
-                if (confirm("Yakin ingin menghapus Sasaran ini?")) {
-                    var data = { Id: id, [CSRF_NAME]: CSRF_TOKEN };
-                    $.post(BaseURL + "Daerah/HapusSasaranRPJMD", data, function(Respon) {
-                        if (Respon == '1') {
-                            showToast('Berhasil Menghapus Sasaran RPJMD!', 'success');
-                            setTimeout(function() { location.reload(); }, 800);
-                        } else {
-                            showToast(Respon || 'Gagal Menghapus Sasaran RPJMD!', 'error');
-                        }
-                    });
-                }
+                var data = { Id: id, [CSRF_NAME]: CSRF_TOKEN };
+                $.post(BaseURL + "Daerah/HapusSasaranRPJMD", data, function(Respon) {
+                    if (isRespSuccess(Respon)) {
+                        location.reload();
+                    } else {
+                        showToast(parseRespError(Respon, 'Gagal Menghapus Sasaran RPJMD!'), 'error');
+                    }
+                });
             });
 
             // Helper function to clean target input (support text and numbers)
@@ -2356,12 +2484,10 @@ if (!function_exists('formatDesimalIndikator')) {
                     data: data,
                     dataType: 'json',
                     success: function(result) {
-                        btn.prop('disabled', false).html('<i class="fa fa-save"></i> <span id="btn_text_tujuan">' + (isEdit ? 'Update' : 'Simpan') + '</span>');
                         if (result.status === 'success') {
-                            showToast('✅ ' + result.message, 'success');
-                            $('#ModalIndikatorTujuan').modal('hide');
-                            setTimeout(function() { location.reload(); }, 700);
+                            location.reload();
                         } else {
+                            btn.prop('disabled', false).html('<i class="fa fa-save"></i> <span id="btn_text_tujuan">' + (isEdit ? 'Update' : 'Simpan') + '</span>');
                             showToast('❌ ' + result.message, 'error');
                         }
                     },
@@ -2393,6 +2519,7 @@ if (!function_exists('formatDesimalIndikator')) {
                 }
                 
                 var pdValues = getSelectedPDSasaran();
+                var programValues = getSelectedProgramSasaran();
                 var sasaranId = $('#current_sasaran_id').val();
                 var isEdit = $('#is_edit_sasaran').val() === 'true';
                 var editId = $('#indikator_sasaran_id').val();
@@ -2409,6 +2536,7 @@ if (!function_exists('formatDesimalIndikator')) {
                     target_2029: cleanDecimalInput($('#input_target2029_sasaran').val()),
                     target_2030: cleanDecimalInput($('#input_target2030_sasaran').val()),
                     pd_pengampuh: pdValues,
+                    program_pd: programValues,
                     [CSRF_NAME]: CSRF_TOKEN
                 };
                 
@@ -2424,12 +2552,10 @@ if (!function_exists('formatDesimalIndikator')) {
                     data: data,
                     dataType: 'json',
                     success: function(result) {
-                        btn.prop('disabled', false).html('<i class="fa fa-save"></i> <span id="btn_text_sasaran">' + (isEdit ? 'Update' : 'Simpan') + '</span>');
                         if (result.status === 'success') {
-                            showToast('✅ ' + result.message, 'success');
-                            $('#ModalIndikatorSasaran').modal('hide');
-                            setTimeout(function() { location.reload(); }, 700);
+                            location.reload();
                         } else {
+                            btn.prop('disabled', false).html('<i class="fa fa-save"></i> <span id="btn_text_sasaran">' + (isEdit ? 'Update' : 'Simpan') + '</span>');
                             showToast('❌ ' + result.message, 'error');
                         }
                     },
@@ -2509,7 +2635,8 @@ if (!function_exists('formatDesimalIndikator')) {
                     t2028: mainCell.data('t2028') || '',
                     t2029: mainCell.data('t2029') || '',
                     t2030: mainCell.data('t2030') || '',
-                    pd: mainCell.data('pd') || ''
+                    pd: mainCell.data('pd') || '',
+                    program_pd: mainCell.data('program-pd') || ''
                 };
 
                 $('#popoverIndikatorTypeTitle').text(indType === 'sasaran' ? 'Opsi Indikator Sasaran' : 'Opsi Indikator Tujuan');
@@ -2581,6 +2708,14 @@ if (!function_exists('formatDesimalIndikator')) {
                     $('#input_target2030_sasaran').val(data.t2030);
                     var pdList = data.pd ? String(data.pd).split(',').map(function(s) { return s.trim(); }).filter(Boolean) : [];
                     setSelectedPDSasaran(pdList);
+                    var prgList = data.program_pd ? String(data.program_pd).split(',').map(function(s) { return s.trim(); }).filter(Boolean) : [];
+                    if (daftarProgramPD && daftarProgramPD.length > 0) {
+                        setSelectedProgramSasaran(prgList);
+                    } else {
+                        loadDaftarProgramPD(function() {
+                            setSelectedProgramSasaran(prgList);
+                        });
+                    }
                     $('#ModalIndikatorSasaran').modal('show');
                 }
             });
@@ -2591,17 +2726,14 @@ if (!function_exists('formatDesimalIndikator')) {
                 hideIndikatorPopover();
 
                 var url = data.type === 'tujuan' ? 'HapusIndikatorTujuan' : 'HapusIndikatorSasaran';
-                if (confirm("Yakin ingin menghapus indikator ini?")) {
-                    $.post(BaseURL + "Daerah/" + url, { id: data.id, [CSRF_NAME]: CSRF_TOKEN }, function(Respon) {
-                        var result = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
-                        if (result.status === 'success') {
-                            showToast('✅ ' + result.message, 'success');
-                            setTimeout(function() { location.reload(); }, 600);
-                        } else {
-                            showToast('❌ ' + result.message, 'error');
-                        }
-                    });
-                }
+                $.post(BaseURL + "Daerah/" + url, { id: data.id, [CSRF_NAME]: CSRF_TOKEN }, function(Respon) {
+                    var result = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
+                    if (result.status === 'success') {
+                        location.reload();
+                    } else {
+                        showToast('❌ ' + result.message, 'error');
+                    }
+                });
             });
 
         });

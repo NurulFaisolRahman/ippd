@@ -132,12 +132,20 @@
                             <div class="col-lg-4">
                                 <label><b>Urusan PD <span style="color:red">*</span></b></label>
                                 <select class="form-control" id="UrusanPD">
-                                    <option value="">-- Pilih Urusan --</option>
-                                    <?php foreach ($Urusan as $u) { ?>
-                                        <option value="<?= $u['id'] ?>"
-                                            <?= ($UrusanAktif == $u['id']) ? 'selected' : '' ?>>
-                                            <?= html_escape($u['nama_urusan']) ?>
-                                        </option>
+                                    <?php if (!$IsRole4 && empty($FilterInstansiId)) { ?>
+                                        <option value="">-- Pilih Instansi terlebih dahulu --</option>
+                                    <?php } else { ?>
+                                        <option value="">-- Pilih Urusan --</option>
+                                        <?php if (!empty($Urusan)) { ?>
+                                            <?php foreach ($Urusan as $u) { ?>
+                                                <option value="<?= $u['id'] ?>"
+                                                    <?= ($UrusanAktif == $u['id']) ? 'selected' : '' ?>>
+                                                    <?= html_escape($u['nama_urusan']) ?>
+                                                </option>
+                                            <?php } ?>
+                                        <?php } else { ?>
+                                            <option value="" disabled>-- Instansi ini belum memiliki Urusan PD --</option>
+                                        <?php } ?>
                                     <?php } ?>
                                 </select>
                             </div>
@@ -406,6 +414,35 @@ jQuery(document).ready(function($){
         });
     });
 
+    $("#FilterInstansiBeforeLogin").change(function() {
+        var instId = $(this).val();
+        if (!instId) {
+            $("#UrusanPD").html('<option value="">-- Pilih Instansi terlebih dahulu --</option>');
+            return;
+        }
+        $("#UrusanPD").html('<option value="">Memuat urusan...</option>');
+        $.ajax({
+            url: BaseURL + "Instansi/GetUrusanByInstansi",
+            type: "POST",
+            data: { instansi_id: instId, [CSRF_NAME]: CSRF_TOKEN },
+            dataType: 'json',
+            success: function(res) {
+                var html = '<option value="">-- Pilih Urusan --</option>';
+                if (res && res.length > 0) {
+                    $.each(res, function(i, item) {
+                        html += '<option value="' + item.id + '">' + item.nama_urusan + '</option>';
+                    });
+                } else {
+                    html += '<option value="" disabled>-- Instansi ini belum memiliki Urusan PD --</option>';
+                }
+                $("#UrusanPD").html(html);
+            },
+            error: function() {
+                $("#UrusanPD").html('<option value="">-- Gagal memuat data urusan --</option>');
+            }
+        });
+    });
+
     $("#Filter").click(function() {
         if ($("#Provinsi").val() === "") { alert("Mohon Pilih Provinsi"); return; }
         if ($("#KabKota").val() === "") { alert("Mohon Pilih Kab/Kota"); return; }
@@ -454,6 +491,38 @@ jQuery(document).ready(function($){
 
     /* ================= FILTER INSTANSI (UNTUK YANG SUDAH LOGIN DAN BUKAN ROLE 4) ================= */
     <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
+        $("#FilterInstansi").change(function() {
+            var instansiId = $(this).val();
+            if (!instansiId) {
+                $("#UrusanPD").html('<option value="">-- Pilih Instansi terlebih dahulu --</option>');
+                return;
+            }
+            $("#UrusanPD").html('<option value="">Memuat urusan...</option>');
+            $.ajax({
+                url: BaseURL + "Instansi/GetUrusanByInstansi",
+                type: "POST",
+                data: {
+                    instansi_id: instansiId,
+                    [CSRF_NAME]: CSRF_TOKEN
+                },
+                dataType: "json",
+                success: function(res) {
+                    var html = '<option value="">-- Pilih Urusan --</option>';
+                    if (res && res.length > 0) {
+                        $.each(res, function(i, item) {
+                            html += '<option value="' + item.id + '">' + item.nama_urusan + '</option>';
+                        });
+                    } else {
+                        html += '<option value="" disabled>-- Instansi ini belum memiliki Urusan PD --</option>';
+                    }
+                    $("#UrusanPD").html(html);
+                },
+                error: function() {
+                    $("#UrusanPD").html('<option value="">-- Gagal memuat urusan --</option>');
+                }
+            });
+        });
+
         $("#FilterInstansiBtn").click(function() {
             var instansiId = $("#FilterInstansi").val();
             var url = BaseURL + "Instansi/IkkPD";
@@ -464,7 +533,7 @@ jQuery(document).ready(function($){
     <?php } ?>
 
     /* ================= EVENT UNTUK FILTER URUSAN (UNTUK SEMUA ROLE) ================= */
-    // PERBAIKAN: Event handler untuk ganti Urusan PD
+    // Event handler untuk ganti Urusan PD
     $("#UrusanPD").change(function(){
         var urusan_id = $(this).val();
         if (!urusan_id) return;
@@ -473,8 +542,17 @@ jQuery(document).ready(function($){
         var url = BaseURL + "Instansi/IkkPD?urusan_id=" + urusan_id;
         
         // Jika ada filter instansi, tambahkan ke URL
-        if (CURRENT_FILTER_INSTANSI && CURRENT_FILTER_INSTANSI !== '') {
-            url += "&instansi_id=" + CURRENT_FILTER_INSTANSI;
+        var filterInstansi = '';
+        if ($("#FilterInstansi").length && $("#FilterInstansi").val()) {
+            filterInstansi = $("#FilterInstansi").val();
+        } else if ($("#FilterInstansiBeforeLogin").length && $("#FilterInstansiBeforeLogin").val()) {
+            filterInstansi = $("#FilterInstansiBeforeLogin").val();
+        } else if (CURRENT_FILTER_INSTANSI && CURRENT_FILTER_INSTANSI !== '') {
+            filterInstansi = CURRENT_FILTER_INSTANSI;
+        }
+
+        if (filterInstansi && filterInstansi !== '') {
+            url += "&instansi_id=" + filterInstansi;
         }
         
         window.location.href = url;

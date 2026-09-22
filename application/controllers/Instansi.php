@@ -4466,16 +4466,45 @@ public function IkkPD() {
             ->result_array();
     }
     
-    // Data Urusan PD (tidak perlu filter id_instansi)
+    // Tentukan instansi yang aktif (Role 4 = instansi login, Non-Role 4 = instansi dari filter)
+    $active_instansi_id = null;
+    if ($is_role_4 && $instansi_id) {
+        $active_instansi_id = $instansi_id;
+    } elseif (!empty($filter_instansi_id)) {
+        $active_instansi_id = (int)$filter_instansi_id;
+    }
+
+    // Data Urusan PD berdasarkan instansi yang dipilih pada Daftar Instansi
     $data['Urusan'] = [];
-    if ($KodeWilayah) {
-        $data['Urusan'] = $this->db->select('id, nama_urusan')
-            ->from('urusan_pd')
-            ->where('kodewilayah', $KodeWilayah)
+    if ($KodeWilayah && $active_instansi_id) {
+        $instansiRow = $this->db->select('urusan_id')
+            ->from('akun_instansi')
+            ->where('id', $active_instansi_id)
             ->where('deleted_at IS NULL')
-            ->order_by('nama_urusan', 'ASC')
             ->get()
-            ->result_array();
+            ->row_array();
+
+        if (!empty($instansiRow['urusan_id'])) {
+            $uIds = array_filter(array_map('trim', explode(',', $instansiRow['urusan_id'])));
+            if (!empty($uIds)) {
+                $provKode = substr($KodeWilayah, 0, 2);
+                $data['Urusan'] = $this->db->select('id, nama_urusan')
+                    ->from('urusan_pd')
+                    ->where("(kodewilayah = " . $this->db->escape($KodeWilayah) . " OR kodewilayah = " . $this->db->escape($provKode) . ")")
+                    ->where_in('id', $uIds)
+                    ->where('deleted_at IS NULL')
+                    ->order_by('nama_urusan', 'ASC')
+                    ->get()
+                    ->result_array();
+            }
+        }
+    }
+
+    // Validasi UrusanAktif agar sesuai dengan daftar urusan instansi terpilih
+    $validUrusanIds = !empty($data['Urusan']) ? array_column($data['Urusan'], 'id') : [];
+    if (!empty($urusan_id) && !in_array($urusan_id, $validUrusanIds)) {
+        $data['UrusanAktif'] = '';
+        $urusan_id = null;
     }
     
     // ========== AMBIL DATA IKK PD ==========
@@ -4501,8 +4530,53 @@ public function IkkPD() {
 }
 
 /**
- * Input IKK PD (AJAX) - HANYA UNTUK ROLE 4
+ * Get Urusan PD berdasarkan Instansi yang dipilih (AJAX)
  */
+public function GetUrusanByInstansi() {
+    $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: $this->input->get('instansi_id', TRUE));
+    $KodeWilayah = $this->get_kode_wilayah();
+
+    if (!$instansi_id) {
+        $this->output->set_content_type('application/json')->set_output(json_encode([]));
+        return;
+    }
+
+    $instansi = $this->db->select('urusan_id, kodewilayah')
+        ->from('akun_instansi')
+        ->where('id', $instansi_id)
+        ->where('deleted_at IS NULL')
+        ->get()
+        ->row_array();
+
+    if (!$instansi || empty($instansi['urusan_id'])) {
+        $this->output->set_content_type('application/json')->set_output(json_encode([]));
+        return;
+    }
+
+    $urusan_ids = array_filter(array_map('trim', explode(',', $instansi['urusan_id'])));
+    if (empty($urusan_ids)) {
+        $this->output->set_content_type('application/json')->set_output(json_encode([]));
+        return;
+    }
+
+    $query = $this->db->select('id, nama_urusan')
+        ->from('urusan_pd')
+        ->where_in('id', $urusan_ids)
+        ->where('deleted_at IS NULL');
+
+    $wilayahToUse = $KodeWilayah ?: $instansi['kodewilayah'];
+    if ($wilayahToUse) {
+        $provKode = substr($wilayahToUse, 0, 2);
+        $query->where("(kodewilayah = " . $this->db->escape($wilayahToUse) . " OR kodewilayah = " . $this->db->escape($provKode) . ")");
+    }
+
+    $urusan = $query->order_by('nama_urusan', 'ASC')->get()->result_array();
+
+    $this->output
+        ->set_content_type('application/json')
+        ->set_output(json_encode($urusan));
+}
+
 /**
  * Input IKK PD (AJAX) - HANYA UNTUK ROLE 4
  */
@@ -4543,6 +4617,22 @@ public function InputIkkPD() {
     if (!$urusan_id) {
         echo "Urusan PD harus dipilih!";
         return;
+    }
+
+    // Validasi bahwa urusan_id sesuai dengan urusan pada instansi ini
+    $instansiRow = $this->db->select('urusan_id')
+        ->from('akun_instansi')
+        ->where('id', $instansi_id)
+        ->where('deleted_at IS NULL')
+        ->get()
+        ->row_array();
+
+    if (!empty($instansiRow['urusan_id'])) {
+        $uIds = array_filter(array_map('trim', explode(',', $instansiRow['urusan_id'])));
+        if (!in_array((string)$urusan_id, $uIds)) {
+            echo "Urusan PD tidak sesuai dengan instansi Anda!";
+            return;
+        }
     }
     
     if (empty($indikator)) {
