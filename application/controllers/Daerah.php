@@ -5755,6 +5755,11 @@
 
                 log_message('debug', 'KodeWilayah diterima untuk IKU: ' . $KodeWilayah);
 
+                // Auto-migration: pastikan kolom rumus tersedia pada tabel iku
+                if ($this->db->table_exists('iku') && !$this->db->field_exists('rumus', 'iku')) {
+                    $this->db->query("ALTER TABLE `iku` ADD COLUMN `rumus` TEXT DEFAULT NULL AFTER `indikator_tujuan`");
+                }
+
                 $Data = [];
                 $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
 
@@ -5910,6 +5915,16 @@
                 return;
             }
 
+            // Simpan rumus yang sudah ada agar tidak hilang saat sinkronisasi ulang
+            $existingRumus = [];
+            $oldIku = $this->db->where('kodewilayah', $KodeWilayah)->where('deleted_at IS NULL')->get('iku')->result_array();
+            foreach ($oldIku as $oi) {
+                if (!empty($oi['rumus'])) {
+                    $cleanName = trim(mb_strtolower($oi['indikator_tujuan']));
+                    $existingRumus[$cleanName] = $oi['rumus'];
+                }
+            }
+
             // RESET TOTAL: Hapus seluruh data IKU sebelumnya untuk wilayah ini
             $this->db->where('kodewilayah', $KodeWilayah)->delete('iku');
 
@@ -5918,12 +5933,16 @@
             // Masukkan Indikator Tujuan terlebih dahulu
             foreach ($dataTujuan as $row) {
                 $namaIndikator = !empty($row['nama_indikator']) ? $row['nama_indikator'] : 'Indikator Tujuan';
+                $cleanName = trim(mb_strtolower($namaIndikator));
+                $rumusVal = isset($existingRumus[$cleanName]) ? $existingRumus[$cleanName] : null;
+
                 $insertData[] = [
                     'kodewilayah' => $KodeWilayah,
                     'IdTujuan' => $row['tujuan_id'] ?: null,
                     'tahun_mulai' => $tahunMulai,
                     'tahun_akhir' => $tahunAkhir,
                     'indikator_tujuan' => $namaIndikator,
+                    'rumus' => $rumusVal,
                     'target_1' => ($row['target_2025'] !== null && $row['target_2025'] !== '') ? $row['target_2025'] : null,
                     'target_2' => ($row['target_2026'] !== null && $row['target_2026'] !== '') ? $row['target_2026'] : null,
                     'target_3' => ($row['target_2027'] !== null && $row['target_2027'] !== '') ? $row['target_2027'] : null,
@@ -5936,12 +5955,16 @@
             // Kemudian masukkan Indikator Sasaran
             foreach ($dataSasaran as $row) {
                 $namaIndikator = !empty($row['nama_indikator']) ? $row['nama_indikator'] : 'Indikator Sasaran';
+                $cleanName = trim(mb_strtolower($namaIndikator));
+                $rumusVal = isset($existingRumus[$cleanName]) ? $existingRumus[$cleanName] : null;
+
                 $insertData[] = [
                     'kodewilayah' => $KodeWilayah,
                     'IdTujuan' => $row['tujuan_id'] ?: null,
                     'tahun_mulai' => $tahunMulai,
                     'tahun_akhir' => $tahunAkhir,
                     'indikator_tujuan' => $namaIndikator,
+                    'rumus' => $rumusVal,
                     'target_1' => ($row['target_2025'] !== null && $row['target_2025'] !== '') ? $row['target_2025'] : null,
                     'target_2' => ($row['target_2026'] !== null && $row['target_2026'] !== '') ? $row['target_2026'] : null,
                     'target_3' => ($row['target_2027'] !== null && $row['target_2027'] !== '') ? $row['target_2027'] : null,
@@ -5965,12 +5988,168 @@
             ]);
         }
 
+        public function SimpanRumusIku() {
+            if (!$this->input->is_ajax_request()) {
+                show_404();
+                return;
+            }
+
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+
+            if (empty($KodeWilayah)) {
+                echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih atau sesi telah berakhir!']);
+                return;
+            }
+
+            $id = (int)$this->input->post('id', TRUE);
+            $rawRumus = (string)$this->input->post('rumus', FALSE);
+            // Izinkan ekspresi matematika, unicode, serta tag pangkat/subscript yang aman (sup/sub)
+            $rumus = trim(strip_tags($rawRumus, '<sup><sub>'));
+
+            if ($id <= 0) {
+                echo json_encode(['status' => 'error', 'message' => 'ID IKU tidak valid!']);
+                return;
+            }
+
+            $check = $this->db->where('id', $id)
+                              ->where('kodewilayah', $KodeWilayah)
+                              ->where('deleted_at IS NULL')
+                              ->get('iku')->row_array();
+
+            if (!$check) {
+                echo json_encode(['status' => 'error', 'message' => 'Data IKU tidak ditemukan atau Anda tidak memiliki hak akses!']);
+                return;
+            }
+
+            $this->db->where('id', $id)->update('iku', [
+                'rumus' => !empty($rumus) ? $rumus : null,
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Rumus RPJMD berhasil disimpan!',
+                'rumus' => $rumus
+            ]);
+        }
+
+        public function SimpanIku() {
+            if (!$this->input->is_ajax_request()) {
+                show_404();
+                return;
+            }
+
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+
+            if (empty($KodeWilayah)) {
+                echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih atau sesi telah berakhir!']);
+                return;
+            }
+
+            $id = (int)$this->input->post('id', TRUE);
+            $indikator = trim((string)$this->input->post('indikator_tujuan', TRUE));
+            $rumus = trim((string)$this->input->post('rumus', TRUE));
+            $periode = trim((string)$this->input->post('periode', TRUE));
+            $tahunMulai = trim((string)$this->input->post('tahun_mulai', TRUE));
+            $tahunAkhir = trim((string)$this->input->post('tahun_akhir', TRUE));
+
+            if (!empty($periode) && strpos($periode, '-') !== false) {
+                $parts = explode('-', $periode);
+                $tahunMulai = trim($parts[0]);
+                $tahunAkhir = trim($parts[1]);
+            }
+
+            if (empty($indikator)) {
+                echo json_encode(['status' => 'error', 'message' => 'Nama Indikator Kinerja Utama wajib diisi!']);
+                return;
+            }
+
+            $t1 = $this->input->post('target_1', TRUE);
+            $t2 = $this->input->post('target_2', TRUE);
+            $t3 = $this->input->post('target_3', TRUE);
+            $t4 = $this->input->post('target_4', TRUE);
+            $t5 = $this->input->post('target_5', TRUE);
+
+            $cleanTarget = function($v) {
+                if ($v === null || $v === '') return null;
+                $val = str_replace(',', '.', trim($v));
+                return is_numeric($val) ? $val : null;
+            };
+
+            $data = [
+                'kodewilayah' => $KodeWilayah,
+                'indikator_tujuan' => $indikator,
+                'rumus' => !empty($rumus) ? $rumus : null,
+                'tahun_mulai' => !empty($tahunMulai) ? $tahunMulai : null,
+                'tahun_akhir' => !empty($tahunAkhir) ? $tahunAkhir : null,
+                'target_1' => $cleanTarget($t1),
+                'target_2' => $cleanTarget($t2),
+                'target_3' => $cleanTarget($t3),
+                'target_4' => $cleanTarget($t4),
+                'target_5' => $cleanTarget($t5),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $check = $this->db->where('id', $id)->where('kodewilayah', $KodeWilayah)->get('iku')->row_array();
+                if (!$check) {
+                    echo json_encode(['status' => 'error', 'message' => 'Data IKU tidak ditemukan!']);
+                    return;
+                }
+                $this->db->where('id', $id)->update('iku', $data);
+                $msg = 'Data IKU dan Rumus RPJMD berhasil diperbarui!';
+            } else {
+                $data['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('iku', $data);
+                $msg = 'Data IKU dan Rumus RPJMD berhasil ditambahkan!';
+            }
+
+            echo json_encode(['status' => 'success', 'message' => $msg]);
+        }
+
+        public function HapusIku() {
+            if (!$this->input->is_ajax_request()) {
+                show_404();
+                return;
+            }
+
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+
+            if (empty($KodeWilayah)) {
+                echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+                return;
+            }
+
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) {
+                echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+                return;
+            }
+
+            $check = $this->db->where('id', $id)->where('kodewilayah', $KodeWilayah)->get('iku')->row_array();
+            if (!$check) {
+                echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
+                return;
+            }
+
+            $this->db->where('id', $id)->delete('iku');
+            echo json_encode(['status' => 'success', 'message' => 'Data IKU berhasil dihapus!']);
+        }
+
         public function IKD() {
                 $Header['Halaman'] = 'Cascading';
                 $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
                             (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
 
                 log_message('debug', 'KodeWilayah diterima untuk IKD: ' . $KodeWilayah);
+
+                // Auto-migration: pastikan kolom rumus tersedia pada tabel ikd
+                if ($this->db->table_exists('ikd') && !$this->db->field_exists('rumus', 'ikd')) {
+                    $this->db->query("ALTER TABLE `ikd` ADD COLUMN `rumus` TEXT DEFAULT NULL AFTER `indikator_sasaran`");
+                }
 
                 $Data = [];
                 $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
@@ -6138,10 +6317,14 @@
                 return;
             }
 
+            $rumusInput = $this->input->post('rumus', FALSE);
+            $rumusClean = $rumusInput !== null && $rumusInput !== '' ? trim(strip_tags($rumusInput, '<sup><sub>')) : null;
+
             $data = [
                 'kodewilayah' => $KodeWilayah,
                 'aspek' => $aspek,
                 'indikator_sasaran' => $nama,
+                'rumus' => $rumusClean,
                 'satuan' => $satuan,
                 'pd_penanggung_jawab' => $opd,
                 'id_instansi' => !empty($id_instansi) ? (int)$id_instansi : null,
@@ -6214,6 +6397,11 @@
                 'updated_at' => date('Y-m-d H:i:s')
             ];
 
+            if ($this->input->post('rumus', FALSE) !== null) {
+                $rawRumus = $this->input->post('rumus', FALSE);
+                $data['rumus'] = $rawRumus !== '' ? trim(strip_tags($rawRumus, '<sup><sub>')) : null;
+            }
+
             if (!empty($id_instansi)) {
                 $data['id_instansi'] = (int)$id_instansi;
             }
@@ -6239,6 +6427,52 @@
             } else {
                 echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus indikator!']);
             }
+        }
+
+        public function SimpanRumusIkd() {
+            if (!$this->input->is_ajax_request()) {
+                show_404();
+                return;
+            }
+
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+
+            if (empty($KodeWilayah)) {
+                echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih atau sesi telah berakhir!']);
+                return;
+            }
+
+            $id = (int)$this->input->post('id', TRUE);
+            $rawRumus = (string)$this->input->post('rumus', FALSE);
+            // Izinkan ekspresi matematika, unicode, serta tag pangkat/subscript yang aman (sup/sub)
+            $rumus = trim(strip_tags($rawRumus, '<sup><sub>'));
+
+            if ($id <= 0) {
+                echo json_encode(['status' => 'error', 'message' => 'ID IKD tidak valid!']);
+                return;
+            }
+
+            $check = $this->db->where('id', $id)
+                              ->where('kodewilayah', $KodeWilayah)
+                              ->where('deleted_at IS NULL')
+                              ->get('ikd')->row_array();
+
+            if (!$check) {
+                echo json_encode(['status' => 'error', 'message' => 'Data IKD tidak ditemukan!']);
+                return;
+            }
+
+            $this->db->where('id', $id)->update('ikd', [
+                'rumus' => $rumus ?: null,
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Rumus perhitungan IKD berhasil disimpan!',
+                'rumus' => $rumus
+            ]);
         }
 
         // In SuperDaerah.php controller

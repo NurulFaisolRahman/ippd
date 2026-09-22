@@ -4226,6 +4226,14 @@ public function IkuPD() {
     // ========== AMBIL DATA IKU PD ==========
     $data['Data'] = [];
     
+    // Auto-migration check untuk kolom rumus
+    if (!$this->db->field_exists('rumus', 'iku_pd')) {
+        $this->load->dbforge();
+        $this->dbforge->add_column('iku_pd', [
+            'rumus' => ['type' => 'TEXT', 'null' => TRUE, 'after' => 'indikator']
+        ]);
+    }
+    
     if ($KodeWilayah) {
         $query = $this->db->from('iku_pd')
             ->where('kode_wilayah', $KodeWilayah)
@@ -4273,6 +4281,8 @@ public function InputIkuPD() {
     
     $indikator = trim($this->input->post('indikator', true));
     $satuan = trim($this->input->post('satuan', true));
+    $rawRumus = (string)$this->input->post('rumus', FALSE);
+    $rumus = trim(strip_tags($rawRumus, '<sup><sub>'));
     
     if (empty($indikator)) {
         echo "Indikator harus diisi!";
@@ -4284,18 +4294,25 @@ public function InputIkuPD() {
         return;
     }
     
+    $cleanTarget = function($v) {
+        if ($v === null || $v === '') return null;
+        $val = str_replace(',', '.', trim((string)$v));
+        return is_numeric($val) ? $val : null;
+    };
+
     $data = [
         'kode_wilayah'   => $KodeWilayah,
         'id_instansi'    => $instansi_id,
         'indikator'      => $indikator,
+        'rumus'          => !empty($rumus) ? $rumus : null,
         'satuan'         => $satuan,
-        'baseline_2024'  => $this->input->post('baseline_2024', true),
-        't_2025'         => $this->input->post('t_2025', true),
-        't_2026'         => $this->input->post('t_2026', true),
-        't_2027'         => $this->input->post('t_2027', true),
-        't_2028'         => $this->input->post('t_2028', true),
-        't_2029'         => $this->input->post('t_2029', true),
-        't_2030'         => $this->input->post('t_2030', true),
+        'baseline_2024'  => $cleanTarget($this->input->post('baseline_2024', true)),
+        't_2025'         => $cleanTarget($this->input->post('t_2025', true)),
+        't_2026'         => $cleanTarget($this->input->post('t_2026', true)),
+        't_2027'         => $cleanTarget($this->input->post('t_2027', true)),
+        't_2028'         => $cleanTarget($this->input->post('t_2028', true)),
+        't_2029'         => $cleanTarget($this->input->post('t_2029', true)),
+        't_2030'         => $cleanTarget($this->input->post('t_2030', true)),
         'keterangan'     => $this->input->post('keterangan', true),
         'created_at'     => date('Y-m-d H:i:s')
     ];
@@ -4344,22 +4361,31 @@ public function EditIkuPD() {
     
     $indikator = trim($this->input->post('indikator', true));
     $satuan = trim($this->input->post('satuan', true));
+    $rawRumus = (string)$this->input->post('rumus', FALSE);
+    $rumus = trim(strip_tags($rawRumus, '<sup><sub>'));
     
     if (empty($indikator)) {
         echo "Indikator harus diisi!";
         return;
     }
     
+    $cleanTarget = function($v) {
+        if ($v === null || $v === '') return null;
+        $val = str_replace(',', '.', trim((string)$v));
+        return is_numeric($val) ? $val : null;
+    };
+
     $data = [
         'indikator'      => $indikator,
+        'rumus'          => !empty($rumus) ? $rumus : null,
         'satuan'         => $satuan,
-        'baseline_2024'  => $this->input->post('baseline_2024', true),
-        't_2025'         => $this->input->post('t_2025', true),
-        't_2026'         => $this->input->post('t_2026', true),
-        't_2027'         => $this->input->post('t_2027', true),
-        't_2028'         => $this->input->post('t_2028', true),
-        't_2029'         => $this->input->post('t_2029', true),
-        't_2030'         => $this->input->post('t_2030', true),
+        'baseline_2024'  => $cleanTarget($this->input->post('baseline_2024', true)),
+        't_2025'         => $cleanTarget($this->input->post('t_2025', true)),
+        't_2026'         => $cleanTarget($this->input->post('t_2026', true)),
+        't_2027'         => $cleanTarget($this->input->post('t_2027', true)),
+        't_2028'         => $cleanTarget($this->input->post('t_2028', true)),
+        't_2029'         => $cleanTarget($this->input->post('t_2029', true)),
+        't_2030'         => $cleanTarget($this->input->post('t_2030', true)),
         'keterangan'     => $this->input->post('keterangan', true),
         'updated_at'     => date('Y-m-d H:i:s')
     ];
@@ -4368,6 +4394,58 @@ public function EditIkuPD() {
     $this->db->update('iku_pd', $data);
     
     echo $this->db->affected_rows() > 0 ? '1' : 'Tidak ada perubahan!';
+}
+
+/**
+ * Simpan Rumus IKU PD (AJAX) - HANYA UNTUK ROLE 4
+ */
+public function SimpanRumusIkuPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    if (!$this->can_crud()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat mengubah rumus.']);
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', true);
+    $instansi_id = $this->get_instansi_id();
+    
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID IKU PD tidak valid!']);
+        return;
+    }
+    
+    $existing = $this->db->where('id', $id)
+        ->where('deleted_at IS NULL')
+        ->get('iku_pd')
+        ->row_array();
+    
+    if (!$existing) {
+        echo json_encode(['status' => 'error', 'message' => 'Data IKU PD tidak ditemukan!']);
+        return;
+    }
+    
+    if ($existing['id_instansi'] != $instansi_id) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda hanya dapat mengubah data instansi sendiri.']);
+        return;
+    }
+    
+    $rawRumus = (string)$this->input->post('rumus', FALSE);
+    $rumus = trim(strip_tags($rawRumus, '<sup><sub>'));
+    
+    $this->db->where('id', $id)->update('iku_pd', [
+        'rumus' => !empty($rumus) ? $rumus : null,
+        'updated_at' => date('Y-m-d H:i:s')
+    ]);
+    
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Rumus IKU PD berhasil disimpan!',
+        'rumus' => $rumus
+    ]);
 }
 
 /**
@@ -4474,50 +4552,15 @@ public function IkkPD() {
         $active_instansi_id = (int)$filter_instansi_id;
     }
 
-    // Data Urusan PD berdasarkan instansi yang dipilih pada Daftar Instansi
+    // Data Bidang Urusan PD berdasarkan instansi yang dipilih pada Daftar Instansi
     $data['Urusan'] = [];
     if ($KodeWilayah && $active_instansi_id) {
-        $instansiRow = $this->db->select('urusan_id')
-            ->from('akun_instansi')
-            ->where('id', $active_instansi_id)
-            ->where('deleted_at IS NULL')
-            ->get()
-            ->row_array();
-
-        if (!empty($instansiRow['urusan_id'])) {
-            $uIds = array_filter(array_map('trim', explode(',', $instansiRow['urusan_id'])));
-            if (!empty($uIds)) {
-                // Ambil dari nomenklaturprovinsi
-                $nomenUrusan = $this->db->select('Kode as id, CONCAT(Kode, " - ", Nomenklatur) as nama_urusan')
-                    ->from('nomenklaturprovinsi')
-                    ->where_in('Kode', $uIds)
-                    ->order_by('Kode', 'ASC')
-                    ->get()
-                    ->result_array();
-
-                // Fallback untuk id urusan_pd lama
-                $remainingIds = array_diff($uIds, array_column($nomenUrusan, 'id'));
-                $oldUrusan = [];
-                if (!empty($remainingIds)) {
-                    $provKode = substr($KodeWilayah, 0, 2);
-                    $oldUrusan = $this->db->select('id, nama_urusan')
-                        ->from('urusan_pd')
-                        ->where("(kodewilayah = " . $this->db->escape($KodeWilayah) . " OR kodewilayah = " . $this->db->escape($provKode) . ")")
-                        ->where_in('id', $remainingIds)
-                        ->where('deleted_at IS NULL')
-                        ->order_by('nama_urusan', 'ASC')
-                        ->get()
-                        ->result_array();
-                }
-
-                $data['Urusan'] = array_merge($nomenUrusan, $oldUrusan);
-            }
-        }
+        $data['Urusan'] = $this->get_bidang_urusan_for_instansi($active_instansi_id, $KodeWilayah);
     }
 
-    // Validasi UrusanAktif agar sesuai dengan daftar urusan instansi terpilih
+    // Validasi UrusanAktif agar sesuai dengan daftar bidang urusan instansi terpilih
     $validUrusanIds = !empty($data['Urusan']) ? array_column($data['Urusan'], 'id') : [];
-    if (!empty($urusan_id) && !in_array($urusan_id, $validUrusanIds)) {
+    if (!empty($urusan_id) && !in_array((string)$urusan_id, array_map('strval', $validUrusanIds))) {
         $data['UrusanAktif'] = '';
         $urusan_id = null;
     }
@@ -4525,10 +4568,18 @@ public function IkkPD() {
     // ========== AMBIL DATA IKK PD ==========
     $data['Data'] = [];
     
+    // Auto-migration check untuk kolom rumus dan tipe data urusan_id
+    if (!$this->db->field_exists('rumus', 'ikk_pd')) {
+        $this->load->dbforge();
+        $this->dbforge->add_column('ikk_pd', [
+            'rumus' => ['type' => 'TEXT', 'null' => TRUE, 'after' => 'indikator']
+        ]);
+    }
+    
     if ($KodeWilayah && $urusan_id) {
         $query = $this->db->from('ikk_pd')
             ->where('kode_wilayah', $KodeWilayah)
-            ->where('urusan_id', $urusan_id)
+            ->where('urusan_id', (string)$urusan_id)
             ->where('deleted_at IS NULL');
         
         if ($is_role_4 && $instansi_id) {
@@ -4545,7 +4596,129 @@ public function IkkPD() {
 }
 
 /**
- * Get Urusan PD berdasarkan Instansi yang dipilih (AJAX)
+ * Helper Private: Ambil daftar Bidang Urusan untuk Instansi tertentu
+ */
+private function get_bidang_urusan_for_instansi($instansi_id, $KodeWilayah = null) {
+    if (!$instansi_id) return [];
+
+    $inst = $this->db->select('id, nama, kodewilayah, urusan_id, bidang_urusan_id')
+        ->from('akun_instansi')
+        ->where('id', $instansi_id)
+        ->where('deleted_at IS NULL')
+        ->get()
+        ->row_array();
+    if (!$inst) return [];
+
+    $wilayah = !empty($KodeWilayah) ? $KodeWilayah : $inst['kodewilayah'];
+    $nomenTable = (!empty($wilayah) && substr_count($wilayah, '.') >= 1) ? 'nomenklaturkabupaten' : 'nomenklaturprovinsi';
+
+    $codes = [];
+    if (!empty($inst['bidang_urusan_id'])) {
+        $codes = array_merge($codes, explode(',', $inst['bidang_urusan_id']));
+    }
+    if (!empty($inst['urusan_id'])) {
+        $codes = array_merge($codes, explode(',', $inst['urusan_id']));
+    }
+    // Ambil juga bidang urusan dari sub_unit
+    $subUnits = $this->db->select('DISTINCT(bidang_urusan_id) as bidang_urusan_id')
+        ->from('sub_unit')
+        ->where('instansi_id', $instansi_id)
+        ->where('deleted_at IS NULL')
+        ->where('bidang_urusan_id IS NOT NULL', null, false)
+        ->where("bidang_urusan_id != ''", null, false)
+        ->get()
+        ->result_array();
+
+    foreach ($subUnits as $su) {
+        if (!empty($su['bidang_urusan_id'])) {
+            $codes = array_merge($codes, explode(',', $su['bidang_urusan_id']));
+        }
+    }
+    $codes = array_values(array_unique(array_filter(array_map('trim', $codes))));
+
+    $bidangCodes = [];
+    $topUrusanCodes = [];
+    $oldUrusanIds = [];
+
+    foreach ($codes as $c) {
+        if (strpos($c, '.') !== false) {
+            $bidangCodes[] = $c;
+        } elseif (is_numeric($c)) {
+            $num = (int)$c;
+            if ($num <= 5) {
+                $topUrusanCodes[] = (string)$num;
+            } else {
+                $oldUrusanIds[] = $num;
+            }
+        }
+    }
+
+    $result = [];
+
+    // 1. Ambil Bidang Urusan langsung (memiliki titik: 1.01, 2.16, 4.01, dll)
+    if (!empty($bidangCodes)) {
+        $nomen = $this->db->select('TRIM(Kode) as id, CONCAT(TRIM(Kode), " - ", TRIM(Nomenklatur)) as nama_urusan')
+            ->from($nomenTable)
+            ->where_in('Kode', $bidangCodes)
+            ->order_by('Kode', 'ASC')
+            ->get()
+            ->result_array();
+        foreach ($nomen as $row) {
+            $result[$row['id']] = $row;
+        }
+    }
+
+    // 2. Jika kode berupa urusan level 1 (1, 2, 3, 4, 5), ambil semua bidang urusan turunannya (1 dot)
+    foreach ($topUrusanCodes as $top) {
+        $nomenTop = $this->db->select('TRIM(Kode) as id, CONCAT(TRIM(Kode), " - ", TRIM(Nomenklatur)) as nama_urusan')
+            ->from($nomenTable)
+            ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 1)
+            ->like('Kode', $top . '.', 'after')
+            ->order_by('Kode', 'ASC')
+            ->get()
+            ->result_array();
+        foreach ($nomenTop as $row) {
+            if (!isset($result[$row['id']])) {
+                $result[$row['id']] = $row;
+            }
+        }
+    }
+
+    // 3. Fallback jika masih ada ID urusan_pd lama
+    if (!empty($oldUrusanIds)) {
+        $oldUrusan = $this->db->select('id, nama_urusan')
+            ->from('urusan_pd')
+            ->where_in('id', $oldUrusanIds)
+            ->where('deleted_at IS NULL')
+            ->order_by('nama_urusan', 'ASC')
+            ->get()
+            ->result_array();
+        foreach ($oldUrusan as $row) {
+            $row['id'] = (string)$row['id'];
+            if (!isset($result[$row['id']])) {
+                $result[$row['id']] = $row;
+            }
+        }
+    }
+
+    // 4. Fallback jika belum terkonfigurasi, tampilkan semua Bidang Urusan Nomenklatur
+    if (empty($result)) {
+        $allBidang = $this->db->select('TRIM(Kode) as id, CONCAT(TRIM(Kode), " - ", TRIM(Nomenklatur)) as nama_urusan')
+            ->from($nomenTable)
+            ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 1)
+            ->order_by('Kode', 'ASC')
+            ->get()
+            ->result_array();
+        foreach ($allBidang as $row) {
+            $result[$row['id']] = $row;
+        }
+    }
+
+    return array_values($result);
+}
+
+/**
+ * Get Bidang Urusan PD berdasarkan Instansi yang dipilih (AJAX)
  */
 public function GetUrusanByInstansi() {
     $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: $this->input->get('instansi_id', TRUE));
@@ -4556,54 +4729,11 @@ public function GetUrusanByInstansi() {
         return;
     }
 
-    $instansi = $this->db->select('urusan_id, kodewilayah')
-        ->from('akun_instansi')
-        ->where('id', $instansi_id)
-        ->where('deleted_at IS NULL')
-        ->get()
-        ->row_array();
-
-    if (!$instansi || empty($instansi['urusan_id'])) {
-        $this->output->set_content_type('application/json')->set_output(json_encode([]));
-        return;
-    }
-
-    $urusan_ids = array_filter(array_map('trim', explode(',', $instansi['urusan_id'])));
-    if (empty($urusan_ids)) {
-        $this->output->set_content_type('application/json')->set_output(json_encode([]));
-        return;
-    }
-
-    // Ambil dari nomenklaturprovinsi
-    $nomenUrusan = $this->db->select('Kode as id, CONCAT(Kode, " - ", Nomenklatur) as nama_urusan')
-        ->from('nomenklaturprovinsi')
-        ->where_in('Kode', $urusan_ids)
-        ->order_by('Kode', 'ASC')
-        ->get()
-        ->result_array();
-
-    // Fallback untuk id urusan_pd lama
-    $remainingIds = array_diff($urusan_ids, array_column($nomenUrusan, 'id'));
-    $oldUrusan = [];
-    if (!empty($remainingIds)) {
-        $query = $this->db->select('id, nama_urusan')
-            ->from('urusan_pd')
-            ->where_in('id', $remainingIds)
-            ->where('deleted_at IS NULL');
-
-        $wilayahToUse = $KodeWilayah ?: $instansi['kodewilayah'];
-        if ($wilayahToUse) {
-            $provKode = substr($wilayahToUse, 0, 2);
-            $query->where("(kodewilayah = " . $this->db->escape($wilayahToUse) . " OR kodewilayah = " . $this->db->escape($provKode) . ")");
-        }
-        $oldUrusan = $query->order_by('nama_urusan', 'ASC')->get()->result_array();
-    }
-
-    $urusan = array_merge($nomenUrusan, $oldUrusan);
+    $bidangUrusan = $this->get_bidang_urusan_for_instansi($instansi_id, $KodeWilayah);
 
     $this->output
         ->set_content_type('application/json')
-        ->set_output(json_encode($urusan));
+        ->set_output(json_encode($bidangUrusan));
 }
 
 /**
@@ -4636,33 +4766,29 @@ public function InputIkkPD() {
         return;
     }
     
-    $urusan_id = (int)$this->input->post('urusan_id', true);
+    $urusan_id = trim((string)$this->input->post('urusan_id', true));
     $indikator = trim($this->input->post('indikator', true));
     $satuan = trim($this->input->post('satuan', true));
     
     // Debug
     log_message('debug', "urusan_id: $urusan_id, indikator: $indikator, satuan: $satuan");
     
-    if (!$urusan_id) {
-        echo "Urusan PD harus dipilih!";
+    if ($urusan_id === '') {
+        echo "Bidang Urusan PD harus dipilih!";
         return;
     }
 
-    // Validasi bahwa urusan_id sesuai dengan urusan pada instansi ini
-    $instansiRow = $this->db->select('urusan_id')
-        ->from('akun_instansi')
-        ->where('id', $instansi_id)
-        ->where('deleted_at IS NULL')
-        ->get()
-        ->row_array();
+    // Validasi bahwa urusan_id (Bidang Urusan) sesuai dengan instansi ini
+    $validBidang = $this->get_bidang_urusan_for_instansi($instansi_id, $KodeWilayah);
+    $validIds = array_map('strval', array_column($validBidang, 'id'));
 
-    if (!empty($instansiRow['urusan_id'])) {
-        $uIds = array_filter(array_map('trim', explode(',', $instansiRow['urusan_id'])));
-        if (!in_array((string)$urusan_id, $uIds)) {
-            echo "Urusan PD tidak sesuai dengan instansi Anda!";
-            return;
-        }
+    if (!empty($validIds) && !in_array((string)$urusan_id, $validIds)) {
+        echo "Bidang Urusan PD tidak sesuai dengan instansi Anda!";
+        return;
     }
+    
+    $rawRumus = (string)$this->input->post('rumus', FALSE);
+    $rumus = trim(strip_tags($rawRumus, '<sup><sub>'));
     
     if (empty($indikator)) {
         echo "Indikator harus diisi!";
@@ -4674,19 +4800,26 @@ public function InputIkkPD() {
         return;
     }
     
+    $cleanTarget = function($v) {
+        if ($v === null || $v === '') return null;
+        $val = str_replace(',', '.', trim((string)$v));
+        return is_numeric($val) ? $val : null;
+    };
+
     $data = [
         'kode_wilayah'   => $KodeWilayah,
         'id_instansi'    => $instansi_id,
         'urusan_id'      => $urusan_id,
         'indikator'      => $indikator,
+        'rumus'          => !empty($rumus) ? $rumus : null,
         'satuan'         => $satuan,
-        'baseline_2024'  => $this->input->post('baseline_2024', true),
-        't_2025'         => $this->input->post('t_2025', true),
-        't_2026'         => $this->input->post('t_2026', true),
-        't_2027'         => $this->input->post('t_2027', true),
-        't_2028'         => $this->input->post('t_2028', true),
-        't_2029'         => $this->input->post('t_2029', true),
-        't_2030'         => $this->input->post('t_2030', true),
+        'baseline_2024'  => $cleanTarget($this->input->post('baseline_2024', true)),
+        't_2025'         => $cleanTarget($this->input->post('t_2025', true)),
+        't_2026'         => $cleanTarget($this->input->post('t_2026', true)),
+        't_2027'         => $cleanTarget($this->input->post('t_2027', true)),
+        't_2028'         => $cleanTarget($this->input->post('t_2028', true)),
+        't_2029'         => $cleanTarget($this->input->post('t_2029', true)),
+        't_2030'         => $cleanTarget($this->input->post('t_2030', true)),
         'keterangan'     => $this->input->post('keterangan', true),
         'created_at'     => date('Y-m-d H:i:s')
     ];
@@ -4745,22 +4878,31 @@ public function EditIkkPD() {
     
     $indikator = trim($this->input->post('indikator', true));
     $satuan = trim($this->input->post('satuan', true));
+    $rawRumus = (string)$this->input->post('rumus', FALSE);
+    $rumus = trim(strip_tags($rawRumus, '<sup><sub>'));
     
     if (empty($indikator)) {
         echo "Indikator harus diisi!";
         return;
     }
     
+    $cleanTarget = function($v) {
+        if ($v === null || $v === '') return null;
+        $val = str_replace(',', '.', trim((string)$v));
+        return is_numeric($val) ? $val : null;
+    };
+
     $data = [
         'indikator'      => $indikator,
+        'rumus'          => !empty($rumus) ? $rumus : null,
         'satuan'         => $satuan,
-        'baseline_2024'  => $this->input->post('baseline_2024', true),
-        't_2025'         => $this->input->post('t_2025', true),
-        't_2026'         => $this->input->post('t_2026', true),
-        't_2027'         => $this->input->post('t_2027', true),
-        't_2028'         => $this->input->post('t_2028', true),
-        't_2029'         => $this->input->post('t_2029', true),
-        't_2030'         => $this->input->post('t_2030', true),
+        'baseline_2024'  => $cleanTarget($this->input->post('baseline_2024', true)),
+        't_2025'         => $cleanTarget($this->input->post('t_2025', true)),
+        't_2026'         => $cleanTarget($this->input->post('t_2026', true)),
+        't_2027'         => $cleanTarget($this->input->post('t_2027', true)),
+        't_2028'         => $cleanTarget($this->input->post('t_2028', true)),
+        't_2029'         => $cleanTarget($this->input->post('t_2029', true)),
+        't_2030'         => $cleanTarget($this->input->post('t_2030', true)),
         'keterangan'     => $this->input->post('keterangan', true),
         'updated_at'     => date('Y-m-d H:i:s')
     ];
@@ -4769,6 +4911,58 @@ public function EditIkkPD() {
     $this->db->update('ikk_pd', $data);
     
     echo $this->db->affected_rows() > 0 ? '1' : 'Tidak ada perubahan data!';
+}
+
+/**
+ * Simpan Rumus IKK PD (AJAX) - HANYA UNTUK ROLE 4
+ */
+public function SimpanRumusIkkPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    if (!$this->can_crud()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat mengubah rumus.']);
+        return;
+    }
+    
+    $id = (int)$this->input->post('id', true);
+    $instansi_id = $this->get_instansi_id();
+    
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID IKK PD tidak valid!']);
+        return;
+    }
+    
+    $existing = $this->db->where('id', $id)
+        ->where('deleted_at IS NULL')
+        ->get('ikk_pd')
+        ->row_array();
+    
+    if (!$existing) {
+        echo json_encode(['status' => 'error', 'message' => 'Data IKK PD tidak ditemukan!']);
+        return;
+    }
+    
+    if ($existing['id_instansi'] != $instansi_id) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda hanya dapat mengubah data instansi sendiri.']);
+        return;
+    }
+    
+    $rawRumus = (string)$this->input->post('rumus', FALSE);
+    $rumus = trim(strip_tags($rawRumus, '<sup><sub>'));
+    
+    $this->db->where('id', $id)->update('ikk_pd', [
+        'rumus' => !empty($rumus) ? $rumus : null,
+        'updated_at' => date('Y-m-d H:i:s')
+    ]);
+    
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Rumus IKK PD berhasil disimpan!',
+        'rumus' => $rumus
+    ]);
 }
 
 /**
