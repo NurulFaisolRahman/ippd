@@ -4490,11 +4490,19 @@
                 $mapKem[$k['username']] = $k['username'];
             }
 
-            // URUSAN DARI NOMENKLATUR PROVINSI (Hanya Urusan, tanpa Bidang Urusan)
+            // URUSAN DARI NOMENKLATUR PROVINSI (Level 1)
             $Data['Urusan'] = $this->db
                 ->select('TRIM(Kode) as Kode, TRIM(Nomenklatur) as Nomenklatur')
                 ->where('Kode NOT LIKE', '%.%')
                 ->where('LENGTH(TRIM(Kode)) =', 1)
+                ->order_by('Kode', 'ASC')
+                ->get('nomenklaturprovinsi')
+                ->result_array();
+
+            // BIDANG URUSAN DARI NOMENKLATUR PROVINSI (Level 2)
+            $Data['BidangUrusan'] = $this->db
+                ->select('TRIM(Kode) as Kode, TRIM(Nomenklatur) as Nomenklatur')
+                ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 1)
                 ->order_by('Kode', 'ASC')
                 ->get('nomenklaturprovinsi')
                 ->result_array();

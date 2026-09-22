@@ -129,13 +129,16 @@
                           <td class="text-center" style="vertical-align:middle;">
                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
                               <button
+                                type="button"
                                 class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit"
+                                data-toggle="modal"
+                                data-target="#ModalEditInstansi"
                                 data-id="<?= $key['id'] ?>"
                                 data-kode-instansi="<?= htmlspecialchars($key['kode_instansi'] ?? '', ENT_QUOTES) ?>"
-                                data-nama="<?= htmlspecialchars($key['nama'], ENT_QUOTES) ?>"
-                                data-tahun-mulai="<?= $key['tahun_mulai'] ?>"
-                                data-tahun-akhir="<?= $key['tahun_akhir'] ?>"
-                                data-idkementerian="<?= $key['idkementerian'] ?>"
+                                data-nama="<?= htmlspecialchars($key['nama'] ?? '', ENT_QUOTES) ?>"
+                                data-tahun-mulai="<?= htmlspecialchars($key['tahun_mulai'] ?? '', ENT_QUOTES) ?>"
+                                data-tahun-akhir="<?= htmlspecialchars($key['tahun_akhir'] ?? '', ENT_QUOTES) ?>"
+                                data-idkementerian="<?= htmlspecialchars($key['idkementerian'] ?? '', ENT_QUOTES) ?>"
                                 data-urusan-ids="<?= htmlspecialchars($key['urusan_id'] ?? '', ENT_QUOTES) ?>"
                                 title="Edit Instansi"
                               >
@@ -355,20 +358,20 @@
                   </div>
                 </div>
 
-                <!-- URUSAN (NOMENKLATUR PROVINSI) -->
+                <!-- BIDANG URUSAN (NOMENKLATUR PROVINSI) -->
                 <div class="form-example-int form-horizental">
                   <div class="form-group">
                     <div class="row">
                       <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Urusan</b></label>
+                        <label class="hrzn-fm"><b>Bidang Urusan</b></label>
                       </div>
                       <div class="col-lg-8">
                         <div id="urusanContainerAdd"></div>
                         <button type="button" class="btn btn-info btn-sm" id="addUrusanRowAdd" style="margin-top:8px;">
-                          + Tambah Urusan
+                          + Tambah Bidang Urusan
                         </button>
                         <div style="margin-top:6px; font-size:12px; color:#888;">
-                          * Boleh pilih lebih dari 1 urusan
+                          * Pilih Urusan pada dropdown kiri, lalu pilih Bidang Urusan pada dropdown kanan
                         </div>
                       </div>
                     </div>
@@ -511,20 +514,20 @@
                   </div>
                 </div>
 
-                <!-- URUSAN (NOMENKLATUR PROVINSI) -->
+                <!-- BIDANG URUSAN (NOMENKLATUR PROVINSI) -->
                 <div class="form-example-int form-horizental">
                   <div class="form-group">
                     <div class="row">
                       <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Urusan</b></label>
+                        <label class="hrzn-fm"><b>Bidang Urusan</b></label>
                       </div>
                       <div class="col-lg-8">
                         <div id="urusanContainerEdit"></div>
                         <button type="button" class="btn btn-info btn-sm" id="addUrusanRowEdit" style="margin-top:8px;">
-                          + Tambah Urusan
+                          + Tambah Bidang Urusan
                         </button>
                         <div style="margin-top:6px; font-size:12px; color:#888;">
-                          * Boleh pilih lebih dari 1 urusan
+                          * Pilih Urusan pada dropdown kiri, lalu pilih Bidang Urusan pada dropdown kanan
                         </div>
                       </div>
                     </div>
@@ -981,25 +984,57 @@
   });
 
   // =====================================================
-  // URUSAN NOMENKLATUR - HELPER JS (UNTUK INSTANSI)
+  // URUSAN & BIDANG URUSAN NOMENKLATUR (UNTUK INSTANSI)
   // =====================================================
   var URUSAN_LIST = <?= json_encode($Urusan ?? []) ?>;
+  var BIDANG_URUSAN_LIST = <?= json_encode($BidangUrusan ?? []) ?>;
 
-  function buildUrusanSelect(nameAttr, selectedId) {
+  function buildUrusanSelect(nameAttr, selectedBidangKode) {
+    var selectedUrusanKode = '';
+    var selectedBidangVal = '';
+
+    if (selectedBidangKode) {
+      selectedBidangKode = String(selectedBidangKode).trim();
+      if (selectedBidangKode.indexOf('.') !== -1) {
+        selectedUrusanKode = selectedBidangKode.split('.')[0];
+        selectedBidangVal = selectedBidangKode;
+      } else {
+        selectedUrusanKode = selectedBidangKode;
+        selectedBidangVal = '';
+      }
+    }
+
     var html = '<div class="urusan-row" style="display:flex; gap:8px; margin-bottom:6px;">';
-    html += '<select class="form-control input-sm urusan-select" style="flex:1;">';
+    
+    // Dropdown 1: Urusan
+    html += '<select class="form-control input-sm urusan-select-instansi" style="flex:1;">';
     html += '<option value="">-- Pilih Urusan --</option>';
-
     if (URUSAN_LIST && URUSAN_LIST.length > 0) {
       URUSAN_LIST.forEach(function(u){
         var val = (u.Kode !== undefined && u.Kode !== null) ? u.Kode : u.id;
         var text = u.nama_urusan ? u.nama_urusan : (u.Kode + ' - ' + u.Nomenklatur);
-        var sel = (selectedId && String(selectedId) === String(val)) ? 'selected' : '';
+        var sel = (selectedUrusanKode && String(selectedUrusanKode) === String(val)) ? 'selected' : '';
         html += '<option value="'+val+'" '+sel+'>'+text+'</option>';
       });
     }
-
     html += '</select>';
+
+    // Dropdown 2: Bidang Urusan (di sebelah dropdown urusan)
+    var isBidangDisabled = !selectedUrusanKode ? 'disabled' : '';
+    html += '<select class="form-control input-sm bidang-select-instansi" style="flex:1;" '+isBidangDisabled+'>';
+    html += '<option value="">-- Pilih Bidang Urusan --</option>';
+
+    if (selectedUrusanKode && BIDANG_URUSAN_LIST && BIDANG_URUSAN_LIST.length > 0) {
+      var filtered = BIDANG_URUSAN_LIST.filter(function(b){
+        return b.Kode.startsWith(selectedUrusanKode + '.');
+      });
+      filtered.forEach(function(b){
+        var selB = (selectedBidangVal && String(selectedBidangVal) === String(b.Kode)) ? 'selected' : '';
+        html += '<option value="'+b.Kode+'" '+selB+'>'+b.Kode+' - '+b.Nomenklatur+'</option>';
+      });
+    }
+    html += '</select>';
+
     html += '<button type="button" class="btn btn-danger btn-sm remove-urusan" style="white-space:nowrap;">Hapus</button>';
     html += '</div>';
     return html;
@@ -1018,11 +1053,40 @@
     }
   }
 
+  // Event saat dropdown urusan instansi diubah
+  $(document).on('change', '.urusan-select-instansi', function(){
+    var kodeUrusan = $(this).val();
+    var $bidangSelect = $(this).closest('.urusan-row').find('.bidang-select-instansi');
+    $bidangSelect.find('option:not(:first)').remove();
+
+    if (!kodeUrusan) {
+      $bidangSelect.val('').prop('disabled', true);
+      return;
+    }
+
+    var filtered = BIDANG_URUSAN_LIST.filter(function(b){
+      return b.Kode.startsWith(kodeUrusan + '.');
+    });
+
+    if (filtered.length > 0) {
+      filtered.forEach(function(b){
+        $bidangSelect.append('<option value="'+b.Kode+'">'+b.Kode+' - '+b.Nomenklatur+'</option>');
+      });
+      $bidangSelect.prop('disabled', false);
+    } else {
+      $bidangSelect.append('<option value="">-- Tidak ada bidang urusan --</option>');
+      $bidangSelect.prop('disabled', true);
+    }
+  });
+
   function collectUrusan(containerId) {
     var arr = [];
-    $('#'+containerId+' select.urusan-select').each(function(){
-      var v = $(this).val();
-      if (v) arr.push(v);
+    $('#'+containerId+' .urusan-row').each(function(){
+      var bidangVal = $(this).find('.bidang-select-instansi').val();
+      var urusanVal = $(this).find('.urusan-select-instansi').val();
+      // Yang tersimpan adalah bidang urusannya
+      var val = bidangVal ? bidangVal : urusanVal;
+      if (val) arr.push(val);
     });
     return arr.filter(function(v, i, a){ return a.indexOf(v) === i; });
   }
@@ -1043,7 +1107,8 @@
     if (container.find('.urusan-row').length > 1) {
       $(this).closest('.urusan-row').remove();
     } else {
-      $(this).closest('.urusan-row').find('select').val('');
+      $(this).closest('.urusan-row').find('.urusan-select-instansi').val('');
+      $(this).closest('.urusan-row').find('.bidang-select-instansi').find('option:not(:first)').remove().end().val('').prop('disabled', true);
     }
   });
 
@@ -1562,14 +1627,15 @@
   });
 
   // EDIT INSTANSI
-  $(document).on("click", ".Edit", function(){
-    var id = $(this).data('id');
-    var kodeInstansi = $(this).data('kode-instansi') || '';
-    var nama = $(this).data('nama');
-    var tm = $(this).data('tahun-mulai');
-    var ta = $(this).data('tahun-akhir');
-    var idKem = $(this).data('idkementerian');
-    var urusanIds = $(this).data('urusan-ids');
+  $(document).on("click", ".Edit", function(e){
+    var $btn = $(this).closest('.Edit');
+    var id = $btn.attr('data-id') || $btn.data('id');
+    var kodeInstansi = $btn.attr('data-kode-instansi') || '';
+    var nama = $btn.attr('data-nama') || '';
+    var tm = $btn.attr('data-tahun-mulai') || '';
+    var ta = $btn.attr('data-tahun-akhir') || '';
+    var idKem = $btn.attr('data-idkementerian') || '';
+    var urusanIds = $btn.attr('data-urusan-ids') || '';
 
     $("#Id").val(id);
     $("#_KodeInstansi").val(kodeInstansi);
