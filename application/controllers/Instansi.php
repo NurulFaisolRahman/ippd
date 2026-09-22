@@ -18495,7 +18495,7 @@ public function updateStatusPerjanjianKinerja() {
             } else {
                 $this->db->select('Kode as kode, Nomenklatur as nama')
                     ->from('nomenklaturkabupaten')
-                    ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 1);
+                    ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) = 1', null, false);
                 if ($this->db->field_exists('deleted_at', 'nomenklaturkabupaten')) {
                     $this->db->where('deleted_at IS NULL', null, false);
                 }
@@ -18627,7 +18627,7 @@ public function updateStatusPerjanjianKinerja() {
             $this->db->select('Kode as kode, Nomenklatur as nama')
                 ->from('nomenklaturkabupaten')
                 ->where('Kode LIKE', $bidang_kode . '.%')
-                ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', 2);
+                ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) = 2', null, false);
             if ($this->db->field_exists('deleted_at', 'nomenklaturkabupaten')) {
                 $this->db->where('deleted_at IS NULL', null, false);
             }
@@ -18690,14 +18690,14 @@ public function updateStatusPerjanjianKinerja() {
             }
 
             // 2. Cek dari renstra_kegiatan (Rankhir Renja)
-            $this->db->select('DISTINCT(rk.kode_nomenklatur), rk.nama as nama_kegiatan')
+            $this->db->select('DISTINCT(rk.kode_kegiatan) as kode_nomenklatur, rk.nama_kegiatan as nama_kegiatan')
                 ->from('renstra_kegiatan rk')
                 ->join('renstra_program rp', 'rp.id = rk.program_id')
                 ->join('renstra_sasaran rs', 'rs.id = rp.sasaran_id')
                 ->join('renstra_tujuan rt', 'rt.id = rs.tujuan_id')
                 ->where('rt.id_instansi', $instansi_id)
                 ->where('rk.deleted_at IS NULL')
-                ->like('rk.kode_nomenklatur', $program_kode . '.', 'after');
+                ->like('rk.kode_kegiatan', $program_kode . '.', 'after');
             if (!empty($KodeWilayah)) {
                 $this->db->where('rt.kode_wilayah', $KodeWilayah);
             }
@@ -18759,8 +18759,8 @@ public function updateStatusPerjanjianKinerja() {
             $this->db->select('Kode as kode, Nomenklatur as nama')
                 ->from('nomenklaturkabupaten')
                 ->where('Kode LIKE', $program_kode . '.%')
-                ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) >=', 3)
-                ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) <=', 4);
+                ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) >= 3', null, false)
+                ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) <= 4', null, false);
             if ($this->db->field_exists('deleted_at', 'nomenklaturkabupaten')) {
                 $this->db->where('deleted_at IS NULL', null, false);
             }
@@ -18893,7 +18893,7 @@ public function updateStatusPerjanjianKinerja() {
             $this->db->select('Kode as kode, Nomenklatur as nama')
                 ->from('nomenklaturkabupaten')
                 ->where('Kode LIKE', $kegiatan_kode . '.%')
-                ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) >=', 4);
+                ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) >= 4', null, false);
             if ($this->db->field_exists('deleted_at', 'nomenklaturkabupaten')) {
                 $this->db->where('deleted_at IS NULL', null, false);
             }

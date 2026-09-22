@@ -14,9 +14,9 @@
     <link rel="stylesheet" href="<?=base_url()?>css/data-table/bootstrap-editable.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="../js/vendor/jquery-1.12.4.min.js"></script>
-    <script src="../js/bootstrap.min.js"></script>
-    <script src="../js/data-table/jquery.dataTables.min.js"></script>
-    <script src=".../bootstrap.bundle.min.js"></script> 
+    <script src="<?=base_url()?>js/bootstrap.min.js"></script>
+    <script src="<?=base_url()?>js/data-table/jquery.dataTables.min.js"></script>
+    <script src="<?=base_url()?>assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script> 
     
     <!-- Custom CSS -->
     <style>

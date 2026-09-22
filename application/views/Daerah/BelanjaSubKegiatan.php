@@ -2,6 +2,7 @@
 <?php $this->load->view('Daerah/Cssumum'); ?>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
 <style>
   :root {
@@ -688,6 +689,143 @@
     color: var(--ui-text-subtle);
   }
 
+  /* ---------- Select2 Searchable Dropdown Styling for Modal ---------- */
+  .modal-overlay .select2-container {
+    width: 100% !important;
+  }
+  .modal-overlay .select2-container .select2-selection--single {
+    height: 42px !important;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: 6px !important;
+    padding: 6px 13px !important;
+    background: #ffffff !important;
+    display: flex !important;
+    align-items: center !important;
+    transition: all 0.15s ease !important;
+  }
+  .modal-overlay .select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: var(--ui-text-main) !important;
+    font-size: 13.5px !important;
+    line-height: normal !important;
+    padding-left: 0 !important;
+    padding-right: 24px !important;
+    font-weight: 500 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  .modal-overlay .select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #94a3b8 !important;
+    font-size: 13.5px !important;
+  }
+  .modal-overlay .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 40px !important;
+    right: 10px !important;
+  }
+  .modal-overlay .select2-container--default .select2-selection--single .select2-selection__arrow b {
+    border-color: #64748b transparent transparent transparent !important;
+    border-width: 5px 4px 0 4px !important;
+  }
+  .modal-overlay .select2-container--default.select2-container--open .select2-selection--single {
+    border-color: var(--notika-green) !important;
+    box-shadow: 0 0 0 2px rgba(0, 194, 146, 0.2) !important;
+  }
+  .modal-overlay .select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
+    border-color: transparent transparent var(--notika-green) transparent !important;
+    border-width: 0 4px 5px 4px !important;
+  }
+  .select2-dropdown {
+    border: 1px solid var(--ui-border) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+    z-index: 1000005 !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
+  }
+  .select2-search--dropdown {
+    padding: 10px 12px !important;
+    background: #f8fafc !important;
+    border-bottom: 1px solid var(--ui-border-light) !important;
+  }
+  .select2-search--dropdown .select2-search__field {
+    border: 1px solid var(--ui-border) !important;
+    border-radius: 6px !important;
+    padding: 8px 12px !important;
+    font-size: 13.5px !important;
+    outline: none !important;
+    width: 100% !important;
+    font-family: inherit !important;
+    background: #ffffff !important;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.03) !important;
+  }
+  .select2-search--dropdown .select2-search__field:focus {
+    border-color: var(--notika-green) !important;
+    box-shadow: 0 0 0 2px rgba(0, 194, 146, 0.2) !important;
+  }
+  .select2-results__options {
+    max-height: 260px !important;
+    padding: 4px 0 !important;
+    font-size: 13.5px !important;
+  }
+  .select2-results__option {
+    padding: 9px 14px !important;
+    color: var(--ui-text-main) !important;
+    border-bottom: 1px solid #f8fafc !important;
+    transition: background 0.1s ease !important;
+  }
+  .select2-results__option:last-child {
+    border-bottom: none !important;
+  }
+  .select2-results__option--highlighted[aria-selected] {
+    background-color: #f0faf7 !important;
+    color: #00897b !important;
+  }
+  .select2-results__option[aria-selected=true] {
+    background-color: #e8f8f5 !important;
+    color: var(--notika-green-dark) !important;
+    font-weight: 700 !important;
+  }
+  .select2-container--default .select2-selection--single .select2-selection__clear {
+    margin-right: 18px !important;
+    font-size: 18px !important;
+    color: #94a3b8 !important;
+    line-height: 40px !important;
+  }
+  .select2-container--default .select2-selection--single .select2-selection__clear:hover {
+    color: var(--ui-red) !important;
+  }
+  .rekening-opt-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 2px 0;
+  }
+  .rekening-opt-code {
+    font-family: "Roboto Mono", monospace;
+    font-weight: 700;
+    font-size: 12px;
+    color: #0284c7;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    padding: 2px 7px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    letter-spacing: 0.3px;
+    margin-top: 1px;
+  }
+  .rekening-opt-name {
+    font-size: 13.5px;
+    color: #1e293b;
+    line-height: 1.4;
+  }
+  .select2-results__option--highlighted .rekening-opt-code {
+    background: #ffffff;
+    border-color: #93c5fd;
+  }
+  .select2-results__option--highlighted .rekening-opt-name {
+    color: #00796b;
+  }
+
   .modal-footer-custom {
     display: flex;
     justify-content: flex-end;
@@ -1291,8 +1429,8 @@
         </div>
 
         <div class="form-field full">
-          <label>Rekening / Akun <span class="req">*</span></label>
-          <select id="fRekeningAkun"></select>
+          <label for="fRekeningAkun">Rekening / Akun <span class="req">*</span> <small style="font-weight:600; color:#0284c7; background:#eff6ff; padding:2px 8px; border-radius:4px; font-size:11.5px; border:1px solid #bfdbfe; margin-left:6px;"><i class="fa fa-search"></i> Ketik untuk mencari</small></label>
+          <select id="fRekeningAkun" style="width:100%;"></select>
         </div>
 
         <div class="form-field">
@@ -1310,8 +1448,8 @@
         </div>
 
         <div class="form-field">
-          <label>Sumber Dana</label>
-          <select id="fSumberDana">
+          <label for="fSumberDana">Sumber Dana <small style="font-weight:600; color:#0284c7; background:#eff6ff; padding:2px 8px; border-radius:4px; font-size:11.5px; border:1px solid #bfdbfe; margin-left:6px;"><i class="fa fa-search"></i> Ketik untuk mencari</small></label>
+          <select id="fSumberDana" style="width:100%;">
             <option value="">Pilih sumber dana (opsional)</option>
             <option>Pendapatan Bagi Hasil</option>
             <option>Dana Alokasi Umum (DAU)</option>
@@ -1350,13 +1488,16 @@
         </div>
 
         <div class="form-field">
-          <label>Satuan <span class="req">*</span></label>
-          <select id="fSatuan">
+          <label for="fSatuan">Satuan <span class="req">*</span> <small style="font-weight:600; color:#0284c7; background:#eff6ff; padding:2px 8px; border-radius:4px; font-size:11.5px; border:1px solid #bfdbfe; margin-left:6px;"><i class="fa fa-search"></i> Ketik untuk mencari</small></label>
+          <select id="fSatuan" style="width:100%;">
             <option value="">Pilih satuan</option>
             <option>Buah</option><option>Pak</option><option>Kotak</option><option>Rim</option>
             <option>Lembar</option><option>Unit</option><option>Paket</option><option>Set</option>
-            <option>M2</option><option>Ls</option><option>Botol</option><option>Dus</option>
-            <option>Orang</option><option>Bulan</option><option>Hari</option>
+            <option>M2</option><option>M3</option><option>Meter</option><option>Ls</option>
+            <option>Botol</option><option>Dus</option><option>Kg</option><option>Liter</option>
+            <option>Orang</option><option>Bulan</option><option>Hari</option><option>Tahun</option>
+            <option>Kegiatan</option><option>Laporan</option><option>Dokumen</option><option>Kali</option>
+            <option>Orang / Bulan</option><option>Orang / Hari</option><option>Orang / Jam</option>
           </select>
         </div>
 
@@ -1473,6 +1614,7 @@
 <script src="<?= base_url('js/vendor/jquery-1.12.4.min.js') ?>"></script>
 <script src="<?= base_url('js/bootstrap.min.js') ?>"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
 (function(){
@@ -1872,25 +2014,133 @@
     });
   }
 
-  function populateRekeningSelect(){
-    f.rekening.innerHTML = REKENING_OPTIONS.map(function(r){
-      return '<option value="'+esc(r.kode)+'">'+esc(r.kode)+' '+esc(r.nama)+'</option>';
+  function matchCustom(params, data) {
+    if ($.trim(params.term) === '') return data;
+    if (typeof data.text === 'undefined') return null;
+
+    var termWords = params.term.toLowerCase().split(/\s+/).filter(Boolean);
+    var textLower = data.text.toLowerCase();
+
+    var matchAll = termWords.every(function(word) {
+      return textLower.indexOf(word) > -1;
+    });
+
+    return matchAll ? data : null;
+  }
+
+  function formatRekeningOption(state) {
+    if (!state.id) return state.text;
+    var text = state.text;
+    var idx = text.indexOf(' - ');
+    if (idx > -1) {
+      var kode = text.substring(0, idx).trim();
+      var nama = text.substring(idx + 3).trim();
+      return $(
+        '<div class="rekening-opt-item">' +
+          '<span class="rekening-opt-code">' + esc(kode) + '</span>' +
+          '<span class="rekening-opt-name">' + esc(nama) + '</span>' +
+        '</div>'
+      );
+    }
+    return state.text;
+  }
+
+  function formatRekeningSelection(state) {
+    return state.text || state.id;
+  }
+
+  function initModalSelect2() {
+    if (!$().select2) return;
+
+    if (!$('#fRekeningAkun').hasClass('select2-hidden-accessible')) {
+      $('#fRekeningAkun').select2({
+        dropdownParent: $('#modalOverlay'),
+        width: '100%',
+        placeholder: '-- Ketik kode atau nama rekening belanja --',
+        allowClear: true,
+        matcher: matchCustom,
+        templateResult: formatRekeningOption,
+        templateSelection: formatRekeningSelection
+      });
+    }
+
+    if (!$('#fSatuan').hasClass('select2-hidden-accessible')) {
+      $('#fSatuan').select2({
+        dropdownParent: $('#modalOverlay'),
+        width: '100%',
+        placeholder: 'Pilih / ketik satuan...',
+        allowClear: true,
+        tags: true
+      });
+    }
+
+    if (!$('#fSumberDana').hasClass('select2-hidden-accessible')) {
+      $('#fSumberDana').select2({
+        dropdownParent: $('#modalOverlay'),
+        width: '100%',
+        placeholder: 'Pilih sumber dana (opsional)...',
+        allowClear: true
+      });
+    }
+  }
+
+  $(document).on('select2:open', function() {
+    setTimeout(function() {
+      var searchField = document.querySelector('.select2-container--open .select2-search__field');
+      if (searchField) {
+        searchField.focus();
+      }
+    }, 50);
+  });
+
+  $('#fRekeningAkun').on('change', function() {
+    var val = $(this).val();
+    if (val && (!f.uraian.value || f.uraian.value.trim() === '')) {
+      var rOpt = findRekening(val);
+      if (rOpt && rOpt.nama) {
+        f.uraian.value = rOpt.nama;
+      }
+    }
+  });
+
+  function populateRekeningSelect(selectedKode){
+    var list = REKENING_OPTIONS.filter(function(r){
+      return (r.kode && r.kode.indexOf('5') === 0) || (selectedKode && r.kode === selectedKode);
+    });
+    if (list.length === 0) list = REKENING_OPTIONS;
+    f.rekening.innerHTML = '<option value="">-- Pilih Rekening / Akun Belanja --</option>' + list.map(function(r){
+      return '<option value="'+esc(r.kode)+'">'+esc(r.kode)+' - '+esc(r.nama)+'</option>';
     }).join("");
+
+    if ($('#fRekeningAkun').hasClass('select2-hidden-accessible')) {
+      $('#fRekeningAkun').val(selectedKode || '').trigger('change.select2');
+    }
   }
 
   function openModal(item){
     editingItem = item || null;
     document.getElementById("modalTitle").textContent = item ? "Ubah Rincian Sub Kegiatan" : "Tambah Rincian Sub Kegiatan";
+    overlay.classList.remove("hidden");
+    initModalSelect2();
+
     if(item){
       f.objek.value = item.objekBelanja || "Belanja Barang Jasa dan Modal";
       f.rekening.value = item.rekeningKode;
+      $('#fRekeningAkun').val(item.rekeningKode).trigger('change');
       f.tipe.value = item.pengelompokanTipe || "Pengelompokan Belanja";
       f.uraian.value = item.uraianPengelompokan || "";
       f.sumberDana.value = item.sumberDana || "";
+      $('#fSumberDana').val(item.sumberDana || '').trigger('change');
       f.jsh.value = item.jenisStandarHarga || "";
       f.komponen.value = item.komponen || "";
       f.spesifikasi.value = item.spesifikasi || "";
       f.satuan.value = item.satuan || "";
+      if (item.satuan && !$('#fSatuan option[value="' + item.satuan + '"]').length) {
+        var newOpt = new Option(item.satuan, item.satuan, true, true);
+        $('#fSatuan').append(newOpt).trigger('change');
+      } else {
+        $('#fSatuan').val(item.satuan || '').trigger('change');
+      }
       f.harga.value = item.hargaSatuan || "";
       f.ppn.value = item.ppn || 0;
       f.keterangan.value = item.keterangan || "";
@@ -1901,7 +2151,6 @@
       resetForm();
     }
     updateTotalPreview();
-    overlay.classList.remove("hidden");
   }
   function closeModal(){
     overlay.classList.add("hidden");
@@ -1909,14 +2158,17 @@
   }
   function resetForm(){
     f.objek.value = "Belanja Barang Jasa dan Modal";
-    if(f.rekening.options.length) f.rekening.selectedIndex = 0;
+    f.rekening.value = "";
+    $('#fRekeningAkun').val('').trigger('change');
     f.tipe.value = "Pengelompokan Belanja";
     f.uraian.value = "";
     f.sumberDana.value = "";
+    $('#fSumberDana').val('').trigger('change');
     f.jsh.value = "";
     f.komponen.value = "";
     f.spesifikasi.value = "";
     f.satuan.value = "";
+    $('#fSatuan').val('').trigger('change');
     f.harga.value = "";
     f.ppn.value = 0;
     f.keterangan.value = "";
@@ -2526,7 +2778,14 @@
 
     f.komponen.value = item.uraian_barang || "";
     f.spesifikasi.value = (item.spesifikasi && item.spesifikasi !== '-') ? item.spesifikasi : "";
-    f.satuan.value = item.satuan || "Unit";
+    var sVal = item.satuan || "Unit";
+    f.satuan.value = sVal;
+    if (sVal && !$('#fSatuan option[value="' + sVal + '"]').length) {
+      var newOpt = new Option(sVal, sVal, true, true);
+      $('#fSatuan').append(newOpt).trigger('change');
+    } else {
+      $('#fSatuan').val(sVal).trigger('change');
+    }
     f.harga.value = item.harga_satuan || 0;
     f.koefisien.value = 1;
     f.volume.value = 1;
@@ -2541,6 +2800,7 @@
         populateRekeningSelect();
       }
       f.rekening.value = kRek;
+      $('#fRekeningAkun').val(kRek).trigger('change');
       f.uraian.value = item.uraian_kelompok_barang || "";
     }
 

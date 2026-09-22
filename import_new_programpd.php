@@ -128,7 +128,16 @@ $createTables = [
       PRIMARY KEY (`id`),
       KEY `idx_prog_ind_wil_out` (`kode_wilayah`, `outcome_id`, `deleted_at`),
       KEY `idx_prog_ind_pd` (`perangkat_daerah_id`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
+
+    "ALTER TABLE `akun_instansi` ADD COLUMN IF NOT EXISTS `kode_instansi` VARCHAR(50) DEFAULT NULL AFTER `kodewilayah`;",
+    "ALTER TABLE `akun_instansi` ADD COLUMN IF NOT EXISTS `bidang_urusan_id` VARCHAR(255) DEFAULT NULL AFTER `urusan_id`;",
+    "ALTER TABLE `sub_unit` ADD COLUMN IF NOT EXISTS `instansi_id` INT(11) DEFAULT NULL AFTER `id`;",
+    "ALTER TABLE `sub_unit` ADD COLUMN IF NOT EXISTS `kode_sub_unit` VARCHAR(50) DEFAULT NULL AFTER `instansi_id`;",
+    "ALTER TABLE `sub_unit` ADD COLUMN IF NOT EXISTS `nama_sub_unit` VARCHAR(255) DEFAULT NULL AFTER `kode_sub_unit`;",
+    "ALTER TABLE `sub_unit` ADD COLUMN IF NOT EXISTS `password` VARCHAR(255) DEFAULT NULL AFTER `level`;",
+    "ALTER TABLE `sub_unit` ADD COLUMN IF NOT EXISTS `bidang_urusan_id` TEXT DEFAULT NULL AFTER `parent_id`;",
+    "ALTER TABLE `sub_unit` ADD COLUMN IF NOT EXISTS `urutan` INT(11) DEFAULT 10 AFTER `kode_wilayah`;"
 ];
 
 foreach ($createTables as $ct) {
