@@ -176,12 +176,12 @@ class Instansi extends CI_Controller {
         if ($this->is_role_4()) {
             return isset($_SESSION['IdInstansi']) ? (int)$_SESSION['IdInstansi'] : null;
         }
-        if (isset($_SESSION['TempInstansiId']) && !empty($_SESSION['TempInstansiId'])) {
-            return (int)$_SESSION['TempInstansiId'];
-        }
-        $filter_instansi = $this->input->get('instansi_id', TRUE) ?: $this->input->post('instansi_id', TRUE);
+        $filter_instansi = $this->input->post('instansi_id', TRUE) ?: $this->input->get('instansi_id', TRUE);
         if (!empty($filter_instansi) && is_numeric($filter_instansi)) {
             return (int)$filter_instansi;
+        }
+        if (isset($_SESSION['TempInstansiId']) && !empty($_SESSION['TempInstansiId'])) {
+            return (int)$_SESSION['TempInstansiId'];
         }
         if (isset($_SESSION['FilterInstansiId']) && !empty($_SESSION['FilterInstansiId'])) {
             return (int)$_SESSION['FilterInstansiId'];
@@ -222,9 +222,10 @@ class Instansi extends CI_Controller {
             }
         }
 
-        // 3. Cek query parameter get 'kode_wilayah' atau 'KodeWilayah' jika belum login atau jika role read-only (Kementerian / Nasional)
+        // 3. Cek query parameter get 'kode_wilayah' atau 'KodeWilayah'
         $getKw = $this->input->get('kode_wilayah', TRUE) ?: $this->input->get('KodeWilayah', TRUE);
-        if ((!$this->is_logged_in() || $this->is_lkpj_readonly()) && !empty($getKw)) {
+        $is_superadmin = (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 0);
+        if ((!$this->is_logged_in() || $this->is_lkpj_readonly() || $is_superadmin) && !empty($getKw)) {
             $this->session->set_userdata('TempKodeWilayah', $getKw);
             $_SESSION['TempKodeWilayah'] = $getKw;
             return $getKw;
@@ -259,42 +260,106 @@ class Instansi extends CI_Controller {
     /**
      * Set TempKodeWilayah (untuk filter wilayah)
      */
-    // Di controller Instansi.php
-public function SetTempKodeWilayah() {
-    if (!$this->input->is_ajax_request()) {
-        show_404();
-        return;
-    }
-    
-    $kodeWilayah = $this->input->post('KodeWilayah', TRUE);
-    $instansiId = $this->input->post('InstansiId', TRUE);
-    
-    if ($kodeWilayah && $this->db->where('Kode', $kodeWilayah)->get('kodewilayah')->num_rows() > 0) {
-        $this->session->set_userdata('TempKodeWilayah', $kodeWilayah);
-        
-        // ✅ SIMPAN JUGA INSTANSI ID
-        if (!empty($instansiId) && is_numeric($instansiId)) {
-            $this->session->set_userdata('TempInstansiId', $instansiId);
-        } else {
-            $this->session->unset_userdata('TempInstansiId');
+    public function SetTempKodeWilayah() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
         }
         
-        echo '1';
-    } else {
-        echo 'Kode Wilayah tidak valid';
+        $kodeWilayah = $this->input->post('KodeWilayah', TRUE);
+        $instansiId = $this->input->post('FilterInstansiId', TRUE) ?: $this->input->post('InstansiId', TRUE);
+        
+        if ($kodeWilayah && $this->db->where('Kode', $kodeWilayah)->get('kodewilayah')->num_rows() > 0) {
+            $this->session->set_userdata('TempKodeWilayah', $kodeWilayah);
+            $_SESSION['TempKodeWilayah'] = $kodeWilayah;
+            
+            if (!empty($instansiId) && is_numeric($instansiId)) {
+                $this->session->set_userdata('TempInstansiId', (int)$instansiId);
+                $this->session->set_userdata('FilterInstansiId', (int)$instansiId);
+                $_SESSION['TempInstansiId'] = (int)$instansiId;
+                $_SESSION['FilterInstansiId'] = (int)$instansiId;
+            } else {
+                $this->session->unset_userdata('TempInstansiId');
+                $this->session->unset_userdata('FilterInstansiId');
+                unset($_SESSION['TempInstansiId'], $_SESSION['FilterInstansiId']);
+            }
+            
+            echo '1';
+        } else {
+            echo 'Kode Wilayah tidak valid';
+        }
     }
-}
 
-// Tambah method untuk reset filter
-public function ResetTempFilter() {
-    if (!$this->input->is_ajax_request()) {
-        show_404();
-        return;
+    /**
+     * Simpan Filter Wilayah (AJAX) - Digunakan oleh view IkuPD dan IkkPD
+     */
+    public function SimpanFilterWilayah() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        
+        $kodeWilayah = $this->input->post('KodeWilayah', TRUE) ?: $this->input->get('KodeWilayah', TRUE);
+        $instansiId = $this->input->post('FilterInstansiId', TRUE) ?: $this->input->post('InstansiId', TRUE);
+        if (!$instansiId) {
+            $instansiId = $this->input->get('FilterInstansiId', TRUE) ?: $this->input->get('InstansiId', TRUE);
+        }
+        
+        if ($kodeWilayah && $this->db->where('Kode', $kodeWilayah)->get('kodewilayah')->num_rows() > 0) {
+            $this->session->set_userdata('TempKodeWilayah', $kodeWilayah);
+            $_SESSION['TempKodeWilayah'] = $kodeWilayah;
+            
+            if (!empty($instansiId) && is_numeric($instansiId)) {
+                $this->session->set_userdata('TempInstansiId', (int)$instansiId);
+                $this->session->set_userdata('FilterInstansiId', (int)$instansiId);
+                $_SESSION['TempInstansiId'] = (int)$instansiId;
+                $_SESSION['FilterInstansiId'] = (int)$instansiId;
+            } else {
+                $this->session->unset_userdata('TempInstansiId');
+                $this->session->unset_userdata('FilterInstansiId');
+                unset($_SESSION['TempInstansiId'], $_SESSION['FilterInstansiId']);
+            }
+            
+            echo '1';
+        } else {
+            echo 'Kode Wilayah tidak valid';
+        }
     }
-    $this->session->unset_userdata('TempKodeWilayah');
-    $this->session->unset_userdata('TempInstansiId');
-    echo '1';
-}
+
+    /**
+     * Ambil daftar instansi berdasarkan Kab/Kota (AJAX)
+     */
+    public function GetInstansiByKabKota() {
+        $kodewilayah = $this->input->post('kodewilayah', TRUE) ?: $this->input->post('KodeWilayah', TRUE);
+        if (!$kodewilayah) {
+            $kodewilayah = $this->input->get('kodewilayah', TRUE) ?: $this->input->get('KodeWilayah', TRUE);
+        }
+        if (!$kodewilayah) {
+            $this->output->set_content_type('application/json')->set_output(json_encode([]));
+            return;
+        }
+        $instansi = $this->db->select('id, nama')
+            ->from('akun_instansi')
+            ->where('kodewilayah', $kodewilayah)
+            ->where('deleted_at IS NULL')
+            ->order_by('nama', 'ASC')
+            ->get()
+            ->result_array();
+        $this->output->set_content_type('application/json')->set_output(json_encode($instansi));
+    }
+
+    // Tambah method untuk reset filter
+    public function ResetTempFilter() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        $this->session->unset_userdata('TempKodeWilayah');
+        $this->session->unset_userdata('TempInstansiId');
+        $this->session->unset_userdata('FilterInstansiId');
+        unset($_SESSION['TempKodeWilayah'], $_SESSION['TempInstansiId'], $_SESSION['FilterInstansiId']);
+        echo '1';
+    }
 
     /**
      * Halaman Permasalahan PD
@@ -4528,13 +4593,43 @@ public function IkkPD() {
     $is_role_4 = $this->is_role_4();
     $filter_instansi_id = $this->input->get('instansi_id', TRUE);
     $urusan_id = $this->input->get('urusan_id', TRUE);
+
+    // Sinkronisasi session filter instansi
+    if ($this->input->get('reset', TRUE) == '1') {
+        $this->session->unset_userdata('TempInstansiId');
+        $this->session->unset_userdata('FilterInstansiId');
+        $filter_instansi_id = null;
+        $urusan_id = null;
+    } elseif (!empty($filter_instansi_id) && is_numeric($filter_instansi_id)) {
+        $this->session->set_userdata('TempInstansiId', (int)$filter_instansi_id);
+        $this->session->set_userdata('FilterInstansiId', (int)$filter_instansi_id);
+    } elseif (empty($filter_instansi_id) && !$is_role_4) {
+        if (isset($_SESSION['FilterInstansiId']) && !empty($_SESSION['FilterInstansiId'])) {
+            $filter_instansi_id = $_SESSION['FilterInstansiId'];
+        } elseif (isset($_SESSION['TempInstansiId']) && !empty($_SESSION['TempInstansiId'])) {
+            $filter_instansi_id = $_SESSION['TempInstansiId'];
+        }
+    }
+
+    // Tentukan instansi yang aktif (Role 4 = instansi login, Non-Role 4 = instansi dari filter/session)
+    $active_instansi_id = null;
+    if ($is_role_4 && $instansi_id) {
+        $active_instansi_id = (int)$instansi_id;
+    } elseif (!empty($filter_instansi_id) && is_numeric($filter_instansi_id)) {
+        $active_instansi_id = (int)$filter_instansi_id;
+    }
     
+    $can_crud = $is_role_4 || (!$is_role_4 && !empty($active_instansi_id));
+
     $data['KodeWilayah'] = $KodeWilayah;
     $data['InstansiId'] = $instansi_id;
+    $data['ActiveInstansiId'] = $active_instansi_id;
     $data['IsLoggedIn'] = $is_logged_in;
     $data['IsRole4'] = $is_role_4;
+    $data['CanCrud'] = $can_crud;
     $data['FilterInstansiId'] = $filter_instansi_id;
     $data['NamaInstansi'] = isset($_SESSION['NamaInstansi']) ? $_SESSION['NamaInstansi'] : '';
+    $data['NamaInstansiAktif'] = '';
     $data['UrusanAktif'] = $urusan_id;
     
     // Ambil nama wilayah
@@ -4561,13 +4656,21 @@ public function IkkPD() {
             ->get()
             ->result_array();
     }
-    
-    // Tentukan instansi yang aktif (Role 4 = instansi login, Non-Role 4 = instansi dari filter)
-    $active_instansi_id = null;
-    if ($is_role_4 && $instansi_id) {
-        $active_instansi_id = $instansi_id;
-    } elseif (!empty($filter_instansi_id)) {
-        $active_instansi_id = (int)$filter_instansi_id;
+
+    // Jika non-role 4 dan belum ada instansi yang dipilih, otomatis pilih instansi pertama
+    if (!$is_role_4 && empty($active_instansi_id) && !empty($data['ListInstansi'])) {
+        $active_instansi_id = (int)$data['ListInstansi'][0]['id'];
+        $data['ActiveInstansiId'] = $active_instansi_id;
+        $data['FilterInstansiId'] = $active_instansi_id;
+        $filter_instansi_id = $active_instansi_id;
+        $data['CanCrud'] = true;
+    }
+
+    if (!$is_role_4 && $active_instansi_id) {
+        $activeRow = $this->db->select('nama')->where('id', $active_instansi_id)->get('akun_instansi')->row_array();
+        if ($activeRow) {
+            $data['NamaInstansiAktif'] = $activeRow['nama'];
+        }
     }
 
     // Data Bidang Urusan PD berdasarkan instansi yang dipilih pada Daftar Instansi
@@ -4599,17 +4702,25 @@ public function IkkPD() {
             'definisi_operasional' => ['type' => 'TEXT', 'null' => TRUE, 'after' => 'rumus']
         ]);
     }
+    // Pastikan urusan_id bertipe VARCHAR agar mendukung kode nomenklatur bertitik (contoh: 1.01)
+    try {
+        $fields = $this->db->field_data('ikk_pd');
+        foreach ($fields as $field) {
+            if ($field->name === 'urusan_id' && in_array(strtolower($field->type), ['int', 'integer', 'tinyint', 'smallint', 'bigint'])) {
+                $this->db->query("ALTER TABLE `ikk_pd` MODIFY COLUMN `urusan_id` VARCHAR(50) NOT NULL");
+                break;
+            }
+        }
+    } catch (Exception $e) {}
     
-    if ($KodeWilayah && $urusan_id) {
+    if ($KodeWilayah && $active_instansi_id) {
         $query = $this->db->from('ikk_pd')
             ->where('kode_wilayah', $KodeWilayah)
-            ->where('urusan_id', (string)$urusan_id)
+            ->where('id_instansi', $active_instansi_id)
             ->where('deleted_at IS NULL');
         
-        if ($is_role_4 && $instansi_id) {
-            $query->where('id_instansi', $instansi_id);
-        } elseif (!empty($filter_instansi_id)) {
-            $query->where('id_instansi', (int)$filter_instansi_id);
+        if (!empty($urusan_id)) {
+            $query->where('urusan_id', (string)$urusan_id);
         }
         
         $data['Data'] = $query->order_by('id', 'ASC')->get()->result_array();
@@ -4778,7 +4889,17 @@ public function InputIkkPD() {
     }
     
     $KodeWilayah = $this->get_kode_wilayah();
-    $instansi_id = $this->get_instansi_id();
+    $instansi_id = null;
+    if ($this->is_role_4()) {
+        $instansi_id = $this->get_instansi_id();
+    } else {
+        $post_instansi = $this->input->post('instansi_id', TRUE) ?: $this->input->get('instansi_id', TRUE);
+        if (!empty($post_instansi) && is_numeric($post_instansi)) {
+            $instansi_id = (int)$post_instansi;
+        } else {
+            $instansi_id = $this->get_instansi_id();
+        }
+    }
     
     if (!$KodeWilayah) {
         echo "Wilayah belum dipilih!";
@@ -4788,6 +4909,11 @@ public function InputIkkPD() {
     if (!$instansi_id) {
         echo "Data instansi tidak ditemukan!";
         return;
+    }
+
+    if (!$this->is_role_4()) {
+        $this->session->set_userdata('TempInstansiId', $instansi_id);
+        $this->session->set_userdata('FilterInstansiId', $instansi_id);
     }
     
     $urusan_id = trim((string)$this->input->post('urusan_id', true));
@@ -4807,7 +4933,7 @@ public function InputIkkPD() {
     $validIds = array_map('strval', array_column($validBidang, 'id'));
 
     if (!empty($validIds) && !in_array((string)$urusan_id, $validIds)) {
-        echo "Bidang Urusan PD tidak sesuai dengan instansi Anda!";
+        echo "Bidang Urusan PD tidak sesuai dengan instansi yang dipilih!";
         return;
     }
     
@@ -4866,7 +4992,7 @@ public function InputIkkPD() {
 }
 
 /**
- * Edit IKK PD (AJAX) - HANYA UNTUK ROLE 4
+ * Edit IKK PD (AJAX)
  */
 public function EditIkkPD() {
     if (!$this->input->is_ajax_request()) {
@@ -4875,7 +5001,7 @@ public function EditIkkPD() {
     }
     
     if (!$this->can_crud()) {
-        echo "Akses ditolak! Hanya Instansi yang dapat mengedit data.";
+        echo "Akses ditolak! Anda tidak memiliki izin untuk mengedit data.";
         return;
     }
     
@@ -4898,9 +5024,17 @@ public function EditIkkPD() {
         return;
     }
     
-    if ($existing['id_instansi'] != $instansi_id) {
-        echo "Akses ditolak! Anda hanya dapat mengedit data instansi sendiri.";
-        return;
+    $KodeWilayah = $this->get_kode_wilayah();
+    if ($this->is_role_4()) {
+        if ($existing['id_instansi'] != $instansi_id) {
+            echo "Akses ditolak! Anda hanya dapat mengedit data instansi sendiri.";
+            return;
+        }
+    } elseif ($this->is_role_3()) {
+        if ($existing['kode_wilayah'] != $KodeWilayah) {
+            echo "Akses ditolak! Data bukan milik wilayah Anda.";
+            return;
+        }
     }
     
     $indikator = trim($this->input->post('indikator', true));
@@ -4944,7 +5078,7 @@ public function EditIkkPD() {
 }
 
 /**
- * Simpan Rumus IKK PD (AJAX) - HANYA UNTUK ROLE 4
+ * Simpan Rumus IKK PD (AJAX)
  */
 public function SimpanRumusIkkPD() {
     if (!$this->input->is_ajax_request()) {
@@ -4953,7 +5087,7 @@ public function SimpanRumusIkkPD() {
     }
     
     if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat mengubah rumus.']);
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda tidak memiliki izin untuk mengubah rumus.']);
         return;
     }
     
@@ -4975,9 +5109,17 @@ public function SimpanRumusIkkPD() {
         return;
     }
     
-    if ($existing['id_instansi'] != $instansi_id) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda hanya dapat mengubah data instansi sendiri.']);
-        return;
+    $KodeWilayah = $this->get_kode_wilayah();
+    if ($this->is_role_4()) {
+        if ($existing['id_instansi'] != $instansi_id) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda hanya dapat mengubah data instansi sendiri.']);
+            return;
+        }
+    } elseif ($this->is_role_3()) {
+        if ($existing['kode_wilayah'] != $KodeWilayah) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Data bukan milik wilayah Anda.']);
+            return;
+        }
     }
     
     $rawRumus = (string)$this->input->post('rumus', FALSE);
@@ -5002,7 +5144,7 @@ public function SimpanRumusIkkPD() {
 }
 
 /**
- * Hapus IKK PD (AJAX) - HANYA UNTUK ROLE 4
+ * Hapus IKK PD (AJAX)
  */
 public function HapusIkkPD() {
     if (!$this->input->is_ajax_request()) {
@@ -5011,7 +5153,7 @@ public function HapusIkkPD() {
     }
     
     if (!$this->can_crud()) {
-        echo "Akses ditolak! Hanya Instansi yang dapat menghapus data.";
+        echo "Akses ditolak! Anda tidak memiliki izin untuk menghapus data.";
         return;
     }
     
@@ -5034,9 +5176,17 @@ public function HapusIkkPD() {
         return;
     }
     
-    if ($existing['id_instansi'] != $instansi_id) {
-        echo "Akses ditolak! Anda hanya dapat menghapus data instansi sendiri.";
-        return;
+    $KodeWilayah = $this->get_kode_wilayah();
+    if ($this->is_role_4()) {
+        if ($existing['id_instansi'] != $instansi_id) {
+            echo "Akses ditolak! Anda hanya dapat menghapus data instansi sendiri.";
+            return;
+        }
+    } elseif ($this->is_role_3()) {
+        if ($existing['kode_wilayah'] != $KodeWilayah) {
+            echo "Akses ditolak! Data bukan milik wilayah Anda.";
+            return;
+        }
     }
     
     $this->db->where('id', $id);

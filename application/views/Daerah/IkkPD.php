@@ -656,14 +656,14 @@ sup {
                             <div class="col-lg-4">
                                 <label><b>Bidang Urusan PD <span style="color:red">*</span></b></label>
                                 <select class="form-control" id="UrusanPD">
-                                    <?php if (!$IsRole4 && empty($FilterInstansiId)) { ?>
+                                    <?php if (empty($ActiveInstansiId) && !$IsRole4) { ?>
                                         <option value="">-- Pilih Instansi terlebih dahulu --</option>
                                     <?php } else { ?>
-                                        <option value="">-- Pilih Bidang Urusan --</option>
+                                        <option value="">-- Semua Bidang Urusan --</option>
                                         <?php if (!empty($Urusan)) { ?>
                                             <?php foreach ($Urusan as $u) { ?>
                                                 <option value="<?= $u['id'] ?>"
-                                                    <?= ($UrusanAktif == $u['id']) ? 'selected' : '' ?>>
+                                                    <?= ((string)$UrusanAktif === (string)$u['id']) ? 'selected' : '' ?>>
                                                     <?= html_escape($u['nama_urusan']) ?>
                                                 </option>
                                             <?php } ?>
@@ -673,7 +673,7 @@ sup {
                                     <?php } ?>
                                 </select>
                             </div>
-                            <?php if ($IsRole4 && $UrusanAktif) { ?>
+                            <?php if (!empty($CanCrud)) { ?>
                                 <div class="col-lg-3" style="margin-top:25px;">
                                     <button type="button" class="btn btn-success notika-btn-success" id="BtnTambahIkkPD">
                                         <i class="notika-icon bi-plus-lg"></i> <b>Tambah IKK</b>
@@ -695,7 +695,7 @@ sup {
                                         <th class="text-center" rowspan="2" width="90" style="vertical-align: middle !important;">Baseline<br>2024</th>
                                         <th class="text-center" colspan="6">Target Tahun</th>
                                         <th rowspan="2" style="vertical-align: middle !important;">Keterangan</th>
-                                        <?php if ($IsRole4) { ?>
+                                        <?php if (!empty($CanCrud)) { ?>
                                             <th class="text-center" rowspan="2" width="130" style="vertical-align: middle !important;">Aksi</th>
                                         <?php } ?>
                                     </tr>
@@ -709,7 +709,7 @@ sup {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php if ($UrusanAktif && !empty($Data)) { ?>
+                                    <?php if (!empty($Data)) { ?>
                                         <?php $no = 1; foreach ($Data as $row) { ?>
                                             <tr>
                                                 <td class="text-center" style="vertical-align: middle !important;"><?= $no++ ?></td>
@@ -752,9 +752,9 @@ if (!function_exists('format_target_koma')) {
                                                 <td class="text-center" style="vertical-align: middle !important;"><?= format_target_koma($row['t_2029'] ?? null) ?></td>
                                                 <td class="text-center" style="vertical-align: middle !important;"><?= format_target_koma($row['t_2030'] ?? null) ?></td>
                                                 <td style="vertical-align: middle !important;"><?= nl2br(html_escape($row['keterangan'])) ?></td>
-                                                <?php if ($IsRole4) { ?>
+                                                <?php if (!empty($CanCrud)) { ?>
                                                     <td class="text-center" style="vertical-align: middle !important;">
-                                                        <?php if ($InstansiId == ($row['id_instansi'] ?? null)) { ?>
+                                                        <?php if ($IsRole4 ? ($InstansiId == ($row['id_instansi'] ?? null)) : true) { ?>
 
                                                             <button type="button" class="btn btn-warning btn-sm BtnEdit"
                                                                 data-json='<?= json_encode($row) ?>'
@@ -775,8 +775,17 @@ if (!function_exists('format_target_koma')) {
                                         <?php } ?>
                                     <?php } else { ?>
                                         <tr>
-                                            <td colspan="<?= $IsRole4 ? '14' : '13' ?>" class="text-center">
-                                                <?= $UrusanAktif ? 'Belum ada data IKK PD' : 'Silakan pilih Bidang Urusan PD terlebih dahulu' ?>
+                                            <td colspan="<?= !empty($CanCrud) ? '14' : '13' ?>" class="text-center" style="padding: 30px; color: #888;">
+                                                <i class="fa fa-info-circle fa-2x" style="margin-bottom: 10px; color: #00c292;"></i>
+                                                <p style="margin: 0; font-size: 14px;">
+                                                    <?php if (empty($ActiveInstansiId) && !$IsRole4) { ?>
+                                                        Silakan pilih <b>Filter Instansi</b> terlebih dahulu untuk melihat data IKK.
+                                                    <?php } elseif (!empty($UrusanAktif)) { ?>
+                                                        Belum ada data IKK PD untuk Bidang Urusan ini.
+                                                    <?php } else { ?>
+                                                        Belum ada data IKK PD untuk Instansi ini. Silakan pilih <b>Bidang Urusan PD</b> atau klik <b>Tambah IKK</b>.
+                                                    <?php } ?>
+                                                </p>
                                             </td>
                                         </tr>
                                     <?php } ?>
@@ -811,6 +820,10 @@ if (!function_exists('format_target_koma')) {
                     <?php if ($IsRole4 && !empty($NamaInstansi)) { ?>
                         <div class="alert alert-info" style="border-radius: 6px; padding: 10px 14px; margin-bottom: 15px;">
                             <strong>Instansi:</strong> <?= htmlspecialchars($NamaInstansi) ?>
+                        </div>
+                    <?php } elseif (!empty($NamaInstansiAktif)) { ?>
+                        <div class="alert alert-info" style="border-radius: 6px; padding: 10px 14px; margin-bottom: 15px;">
+                            <strong>Instansi:</strong> <?= htmlspecialchars($NamaInstansiAktif) ?>
                         </div>
                     <?php } ?>
                     
@@ -1194,10 +1207,10 @@ jQuery(document).ready(function($){
         $("#FilterInstansiBtn").click(function() {
             var instansiId = $("#FilterInstansi").val();
             var url = BaseURL + "Instansi/IkkPD";
-            if (instansiId && instansiId != '') { url += "?instansi_id=" + instansiId; }
+            if (instansiId && instansiId != '') { url += "?instansi_id=" + encodeURIComponent(instansiId); }
             window.location.href = url;
         });
-        $("#ResetFilterBtn").click(function() { window.location.href = BaseURL + "Instansi/IkkPD"; });
+        $("#ResetFilterBtn").click(function() { window.location.href = BaseURL + "Instansi/IkkPD?reset=1"; });
     <?php } ?>
 
     /* ================= FILTER URUSAN PD ================= */
@@ -1206,15 +1219,13 @@ jQuery(document).ready(function($){
         var url = BaseURL + "Instansi/IkkPD";
         var params = [];
 
-        var instansiId = '';
-        <?php if ($IsLoggedIn && !$IsRole4 && !empty($FilterInstansiId)) { ?>
-            instansiId = '<?= $FilterInstansiId ?>';
-        <?php } elseif (!isset($_SESSION['KodeWilayah']) && !empty($FilterInstansiId)) { ?>
-            instansiId = '<?= $FilterInstansiId ?>';
-        <?php } ?>
+        var instansiId = '<?= !empty($ActiveInstansiId) ? $ActiveInstansiId : (!empty($FilterInstansiId) ? $FilterInstansiId : ($InstansiId ?? '')) ?>';
+        if (!instansiId) {
+            instansiId = $("#FilterInstansi").val() || '';
+        }
 
-        if (instansiId) { params.push("instansi_id=" + instansiId); }
-        if (urusanId) { params.push("urusan_id=" + urusanId); }
+        if (instansiId) { params.push("instansi_id=" + encodeURIComponent(instansiId)); }
+        if (urusanId) { params.push("urusan_id=" + encodeURIComponent(urusanId)); }
 
         if (params.length > 0) { url += "?" + params.join("&"); }
         window.location.href = url;
@@ -1343,11 +1354,17 @@ jQuery(document).ready(function($){
         $(this).val($(this).val().replace(/\./g, ','));
     });
 
-    /* ================= CRUD OPERATIONS (HANYA UNTUK ROLE 4) ================= */
-    <?php if ($IsRole4) { ?>
+    /* ================= CRUD OPERATIONS ================= */
+    <?php if (!empty($CanCrud)) { ?>
 
     // Reset form tambah IKK PD
     $("#BtnTambahIkkPD").click(function(){
+        var urusanVal = $("#UrusanPD").val();
+        if (!urusanVal) {
+            alert("Silakan pilih Bidang Urusan PD terlebih dahulu pada dropdown sebelum menambah IKK!");
+            $("#UrusanPD").focus();
+            return;
+        }
         $("#EditId").val("");
         $("#ModalInputIKKTitle").text("Tambah Indikator Kunci (IKK) Bidang Urusan");
         $("#ModalInputIKKIcon").html('<i class="fa fa-plus"></i>');
@@ -1373,7 +1390,12 @@ jQuery(document).ready(function($){
         var rumus = $("#rumus").val().trim();
         var definisi_operasional = $("#definisi_operasional").val().trim();
         var urusan_id = $("#UrusanPD").val();
+        var activeInstansiId = '<?= !empty($ActiveInstansiId) ? $ActiveInstansiId : (!empty($FilterInstansiId) ? $FilterInstansiId : ($InstansiId ?? '')) ?>';
+        if (!activeInstansiId) {
+            activeInstansiId = $("#FilterInstansi").val() || "";
+        }
         
+        console.log("Active Instansi ID:", activeInstansiId);
         console.log("Urusan ID:", urusan_id);
         console.log("Indikator:", indikator);
         console.log("Satuan:", satuan);
@@ -1399,6 +1421,7 @@ jQuery(document).ready(function($){
         var postData = {
             [CSRF_NAME]: CSRF_TOKEN,
             id: id,
+            instansi_id: activeInstansiId,
             urusan_id: urusan_id,
             indikator: indikator,
             rumus: rumus,
@@ -1424,7 +1447,12 @@ jQuery(document).ready(function($){
             success: function(res){
                 console.log("Response:", res);
                 if (res === '1') {
-                    location.reload();
+                    var reloadUrl = BaseURL + "Instansi/IkkPD";
+                    var rParams = [];
+                    if (activeInstansiId) rParams.push("instansi_id=" + encodeURIComponent(activeInstansiId));
+                    if (urusan_id) rParams.push("urusan_id=" + encodeURIComponent(urusan_id));
+                    if (rParams.length > 0) reloadUrl += "?" + rParams.join("&");
+                    window.location.href = reloadUrl;
                 } else {
                     alert(res || "Gagal menyimpan data!");
                 }
@@ -1452,6 +1480,9 @@ jQuery(document).ready(function($){
             $("#t_" + y).val(d["t_" + y] ? String(d["t_" + y]).replace(/\./g, ',') : "");
         }
         $("#keterangan").val(d.keterangan);
+        if (d.urusan_id && $("#UrusanPD option[value='" + d.urusan_id + "']").length > 0) {
+            $("#UrusanPD").val(d.urusan_id);
+        }
         var bidangText = $("#UrusanPD option:selected").text().trim() || '-';
         $("#ModalInputIKKBidangLabel").text(bidangText);
         updateRumusLivePreviewIkkPD();
@@ -1461,11 +1492,13 @@ jQuery(document).ready(function($){
     // HAPUS button
     $(document).on("click", ".BtnHapus", function(){
         if (!confirm("Hapus data IKK ini?")) return;
+        var activeInstansiId = '<?= !empty($ActiveInstansiId) ? $ActiveInstansiId : (!empty($FilterInstansiId) ? $FilterInstansiId : ($InstansiId ?? '')) ?>';
         $.ajax({
             url: BaseURL + "Instansi/HapusIkkPD",
             type: "POST",
             data: {
                 id: $(this).data("id"),
+                instansi_id: activeInstansiId,
                 [CSRF_NAME]: CSRF_TOKEN
             },
             success: function(res){
