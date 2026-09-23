@@ -104,15 +104,16 @@ if (!function_exists('format_rumus_rpjmd')) {
                             <table id="data-table-basic" class="table table-striped">
                                 <thead>
                                     <tr>
-                                        <th class="text-center" style="width: 4%; vertical-align: middle !important;">No</th>
-                                        <th style="width: 28%; vertical-align: middle !important;">Indikator Kinerja Utama</th>
-                                        <th style="width: 25%; vertical-align: middle !important;">Rumus </th>
-                                        <th class="text-center" style="width: 11%; vertical-align: middle !important;">Periode</th>
-                                        <th class="text-center" style="width: 6%; vertical-align: middle !important;">Target <br><small>Tahun 1</small></th>
-                                        <th class="text-center" style="width: 6%; vertical-align: middle !important;">Target <br><small>Tahun 2</small></th>
-                                        <th class="text-center" style="width: 6%; vertical-align: middle !important;">Target <br><small>Tahun 3</small></th>
-                                        <th class="text-center" style="width: 6%; vertical-align: middle !important;">Target <br><small>Tahun 4</small></th>
-                                        <th class="text-center" style="width: 6%; vertical-align: middle !important;">Target <br><small>Tahun 5</small></th>
+                                        <th class="text-center" style="width: 3%; vertical-align: middle !important;">No</th>
+                                        <th style="width: 23%; vertical-align: middle !important;">Indikator Kinerja Utama</th>
+                                        <th style="width: 18%; vertical-align: middle !important;">Rumus</th>
+                                        <th style="width: 18%; vertical-align: middle !important;">Definisi Operasional</th>
+                                        <th class="text-center" style="width: 10%; vertical-align: middle !important;">Periode</th>
+                                        <th class="text-center" style="width: 5%; vertical-align: middle !important;">Target <br><small>Tahun 1</small></th>
+                                        <th class="text-center" style="width: 5%; vertical-align: middle !important;">Target <br><small>Tahun 2</small></th>
+                                        <th class="text-center" style="width: 5%; vertical-align: middle !important;">Target <br><small>Tahun 3</small></th>
+                                        <th class="text-center" style="width: 5%; vertical-align: middle !important;">Target <br><small>Tahun 4</small></th>
+                                        <th class="text-center" style="width: 5%; vertical-align: middle !important;">Target <br><small>Tahun 5</small></th>
                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                                             <th class="text-center" style="width: 6%; vertical-align: middle !important;">Aksi</th>
                                         <?php } ?>
@@ -138,12 +139,24 @@ if (!function_exists('format_rumus_rpjmd')) {
                                                                     data-id="<?= $key['id'] ?>" 
                                                                     data-indikator="<?= html_escape($key['indikator_tujuan']) ?>" 
                                                                     data-rumus=""
+                                                                    data-definisi="<?= html_escape($key['definisi_operasional'] ?? '') ?>"
                                                                     data-periode="<?= (!empty($key['tahun_mulai']) && !empty($key['tahun_akhir'])) ? html_escape($key['tahun_mulai']) . ' - ' . html_escape($key['tahun_akhir']) : '-' ?>">
                                                                 <i class="fa fa-plus-circle"></i> Tambah Rumus
                                                             </button>
                                                         <?php } else { ?>
                                                             <span class="text-muted"><small><em>Belum ada rumus</em></small></span>
                                                         <?php } ?>
+                                                    <?php } ?>
+                                                </div>
+                                            </td>
+                                            <td style="vertical-align: middle;">
+                                                <div class="definisi-display-box" id="definisi-box-<?= $key['id'] ?>">
+                                                    <?php if (!empty($key['definisi_operasional'])) { ?>
+                                                        <div class="definisi-text-wrapper">
+                                                            <?= nl2br(html_escape($key['definisi_operasional'])) ?>
+                                                        </div>
+                                                    <?php } else { ?>
+                                                        <span class="text-muted" style="font-size:11px; font-style:italic;">-</span>
                                                     <?php } ?>
                                                 </div>
                                             </td>
@@ -182,8 +195,9 @@ if (!function_exists('format_target_koma')) {
                                                             data-id="<?= $key['id'] ?>"
                                                             data-indikator="<?= html_escape($key['indikator_tujuan']) ?>"
                                                             data-rumus="<?= html_escape($key['rumus'] ?? '') ?>"
+                                                            data-definisi="<?= html_escape($key['definisi_operasional'] ?? '') ?>"
                                                             data-periode="<?= (!empty($key['tahun_mulai']) && !empty($key['tahun_akhir'])) ? html_escape($key['tahun_mulai']) . ' - ' . html_escape($key['tahun_akhir']) : '-' ?>"
-                                                            title="Tambah / Edit Rumus RPJMD">
+                                                            title="Tambah / Edit Rumus & Definisi Operasional RPJMD">
                                                         <i class="fa fa-calculator"></i>
                                                     </button>
                                                 </td>
@@ -255,7 +269,7 @@ if (!function_exists('format_target_koma')) {
                     <button type="button" class="close" data-dismiss="modal" title="Tutup">&times;</button>
                     <h4 class="modal-title">
                         <span class="modal-title-icon"><i class="fa fa-calculator"></i></span>
-                        Rumus / Cara Penghitungan
+                        Rumus & Definisi Operasional
                     </h4>
                     <div style="clear: both;"></div>
                 </div>
@@ -472,10 +486,20 @@ if (!function_exists('format_target_koma')) {
                             </div>
                         </div>
 
+                        <!-- Input Definisi Operasional -->
+                        <div class="form-group" style="margin-top: 15px; margin-bottom: 12px;">
+                            <label for="DefinisiOperasionalText" style="font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                                <b>Definisi Operasional</b>
+                            </label>
+                            <textarea class="form-control" id="DefinisiOperasionalText" name="definisi_operasional" rows="3"
+                                      placeholder="Masukkan penjelasan definisi operasional indikator (opsional)..."
+                                      style="border-radius: 8px; font-size: 13px; resize: vertical; padding: 10px 12px; border: 1.5px solid #cbd5e1; line-height: 1.5;"></textarea>
+                        </div>
+
                         <div class="modal-footer modal-iku-footer" style="margin-top: 16px;">
                             <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 6px;">Batal</button>
                             <button type="submit" class="btn btn-primary notika-btn-primary" id="BtnProsesSimpanRumus" style="border-radius: 6px;">
-                                <i class="fa fa-save"></i> <b>Simpan Rumus</b>
+                                <i class="fa fa-save"></i> <b>Simpan Data</b>
                             </button>
                         </div>
                     </form>
@@ -943,6 +967,24 @@ if (!function_exists('format_target_koma')) {
             padding: 2px 8px;
             min-width: unset;
         }
+        .rumus-content {
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-weight: 600;
+            font-size: 12.5px;
+            color: #1e293b;
+            letter-spacing: 0.2px;
+        }
+
+        /* Definisi Operasional Styling pada Tabel */
+        .definisi-display-box {
+            min-height: 20px;
+        }
+        .definisi-text-wrapper {
+            font-size: 12px;
+            color: #334155;
+            line-height: 1.45;
+            word-break: break-word;
+        }
         .math-template-list {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
@@ -1366,12 +1408,14 @@ if (!function_exists('format_target_koma')) {
                 var id = $(this).data('id');
                 var indikator = $(this).data('indikator');
                 var rumus = $(this).data('rumus') || '';
+                var definisi = $(this).data('definisi') || '';
                 var periode = $(this).data('periode') || '-';
 
                 $("#RumusIkuId").val(id);
                 $("#RumusIndikatorNama").text(indikator);
                 $("#RumusIndikatorPeriode").html('<i class="fa fa-calendar text-muted"></i> Periode RPJMD: <b>' + (periode ? periode : '-') + '</b>');
                 $("#RumusText").val(rumus);
+                $("#DefinisiOperasionalText").val(definisi);
 
                 updateRumusLivePreview();
                 $("#ModalInputRumus").modal('show');
@@ -1383,13 +1427,10 @@ if (!function_exists('format_target_koma')) {
 
                 var id = $("#RumusIkuId").val();
                 var rumus = $("#RumusText").val().trim();
+                var definisi = $("#DefinisiOperasionalText").val().trim();
 
                 if (!id) {
                     alert("ID IKU tidak valid!");
-                    return false;
-                }
-                if (!rumus) {
-                    alert("Silakan masukkan Rumus / Cara Penghitungan RPJMD!");
                     return false;
                 }
 
@@ -1403,6 +1444,7 @@ if (!function_exists('format_target_koma')) {
                     data: {
                         id: id,
                         rumus: rumus,
+                        definisi_operasional: definisi,
                         [CSRF_NAME]: CSRF_TOKEN
                     },
                     dataType: "json",

@@ -4226,11 +4226,17 @@ public function IkuPD() {
     // ========== AMBIL DATA IKU PD ==========
     $data['Data'] = [];
     
-    // Auto-migration check untuk kolom rumus
+    // Auto-migration check untuk kolom rumus dan definisi_operasional
     if (!$this->db->field_exists('rumus', 'iku_pd')) {
         $this->load->dbforge();
         $this->dbforge->add_column('iku_pd', [
             'rumus' => ['type' => 'TEXT', 'null' => TRUE, 'after' => 'indikator']
+        ]);
+    }
+    if (!$this->db->field_exists('definisi_operasional', 'iku_pd')) {
+        $this->load->dbforge();
+        $this->dbforge->add_column('iku_pd', [
+            'definisi_operasional' => ['type' => 'TEXT', 'null' => TRUE, 'after' => 'rumus']
         ]);
     }
     
@@ -4283,6 +4289,8 @@ public function InputIkuPD() {
     $satuan = trim($this->input->post('satuan', true));
     $rawRumus = (string)$this->input->post('rumus', FALSE);
     $rumus = trim(strip_tags($rawRumus, '<sup><sub>'));
+    $defInput = $this->input->post('definisi_operasional', true);
+    $definisi = !empty($defInput) ? trim($defInput) : null;
     
     if (empty($indikator)) {
         echo "Indikator harus diisi!";
@@ -4305,6 +4313,7 @@ public function InputIkuPD() {
         'id_instansi'    => $instansi_id,
         'indikator'      => $indikator,
         'rumus'          => !empty($rumus) ? $rumus : null,
+        'definisi_operasional' => $definisi,
         'satuan'         => $satuan,
         'baseline_2024'  => $cleanTarget($this->input->post('baseline_2024', true)),
         't_2025'         => $cleanTarget($this->input->post('t_2025', true)),
@@ -4363,6 +4372,8 @@ public function EditIkuPD() {
     $satuan = trim($this->input->post('satuan', true));
     $rawRumus = (string)$this->input->post('rumus', FALSE);
     $rumus = trim(strip_tags($rawRumus, '<sup><sub>'));
+    $defInput = $this->input->post('definisi_operasional', true);
+    $definisi = !empty($defInput) ? trim($defInput) : null;
     
     if (empty($indikator)) {
         echo "Indikator harus diisi!";
@@ -4378,6 +4389,7 @@ public function EditIkuPD() {
     $data = [
         'indikator'      => $indikator,
         'rumus'          => !empty($rumus) ? $rumus : null,
+        'definisi_operasional' => $definisi,
         'satuan'         => $satuan,
         'baseline_2024'  => $cleanTarget($this->input->post('baseline_2024', true)),
         't_2025'         => $cleanTarget($this->input->post('t_2025', true)),
@@ -4436,10 +4448,16 @@ public function SimpanRumusIkuPD() {
     $rawRumus = (string)$this->input->post('rumus', FALSE);
     $rumus = trim(strip_tags($rawRumus, '<sup><sub>'));
     
-    $this->db->where('id', $id)->update('iku_pd', [
+    $updateData = [
         'rumus' => !empty($rumus) ? $rumus : null,
         'updated_at' => date('Y-m-d H:i:s')
-    ]);
+    ];
+    if ($this->input->post('definisi_operasional') !== null) {
+        $defInput = trim((string)$this->input->post('definisi_operasional', true));
+        $updateData['definisi_operasional'] = !empty($defInput) ? $defInput : null;
+    }
+    
+    $this->db->where('id', $id)->update('iku_pd', $updateData);
     
     echo json_encode([
         'status' => 'success',
@@ -4568,11 +4586,17 @@ public function IkkPD() {
     // ========== AMBIL DATA IKK PD ==========
     $data['Data'] = [];
     
-    // Auto-migration check untuk kolom rumus dan tipe data urusan_id
+    // Auto-migration check untuk kolom rumus, definisi_operasional, dan tipe data urusan_id
     if (!$this->db->field_exists('rumus', 'ikk_pd')) {
         $this->load->dbforge();
         $this->dbforge->add_column('ikk_pd', [
             'rumus' => ['type' => 'TEXT', 'null' => TRUE, 'after' => 'indikator']
+        ]);
+    }
+    if (!$this->db->field_exists('definisi_operasional', 'ikk_pd')) {
+        $this->load->dbforge();
+        $this->dbforge->add_column('ikk_pd', [
+            'definisi_operasional' => ['type' => 'TEXT', 'null' => TRUE, 'after' => 'rumus']
         ]);
     }
     
@@ -4789,6 +4813,8 @@ public function InputIkkPD() {
     
     $rawRumus = (string)$this->input->post('rumus', FALSE);
     $rumus = trim(strip_tags($rawRumus, '<sup><sub>'));
+    $defInput = $this->input->post('definisi_operasional', true);
+    $definisi = !empty($defInput) ? trim($defInput) : null;
     
     if (empty($indikator)) {
         echo "Indikator harus diisi!";
@@ -4812,6 +4838,7 @@ public function InputIkkPD() {
         'urusan_id'      => $urusan_id,
         'indikator'      => $indikator,
         'rumus'          => !empty($rumus) ? $rumus : null,
+        'definisi_operasional' => $definisi,
         'satuan'         => $satuan,
         'baseline_2024'  => $cleanTarget($this->input->post('baseline_2024', true)),
         't_2025'         => $cleanTarget($this->input->post('t_2025', true)),
@@ -4880,6 +4907,8 @@ public function EditIkkPD() {
     $satuan = trim($this->input->post('satuan', true));
     $rawRumus = (string)$this->input->post('rumus', FALSE);
     $rumus = trim(strip_tags($rawRumus, '<sup><sub>'));
+    $defInput = $this->input->post('definisi_operasional', true);
+    $definisi = !empty($defInput) ? trim($defInput) : null;
     
     if (empty($indikator)) {
         echo "Indikator harus diisi!";
@@ -4895,6 +4924,7 @@ public function EditIkkPD() {
     $data = [
         'indikator'      => $indikator,
         'rumus'          => !empty($rumus) ? $rumus : null,
+        'definisi_operasional' => $definisi,
         'satuan'         => $satuan,
         'baseline_2024'  => $cleanTarget($this->input->post('baseline_2024', true)),
         't_2025'         => $cleanTarget($this->input->post('t_2025', true)),
@@ -4953,10 +4983,16 @@ public function SimpanRumusIkkPD() {
     $rawRumus = (string)$this->input->post('rumus', FALSE);
     $rumus = trim(strip_tags($rawRumus, '<sup><sub>'));
     
-    $this->db->where('id', $id)->update('ikk_pd', [
+    $updateData = [
         'rumus' => !empty($rumus) ? $rumus : null,
         'updated_at' => date('Y-m-d H:i:s')
-    ]);
+    ];
+    if ($this->input->post('definisi_operasional') !== null) {
+        $defInput = trim((string)$this->input->post('definisi_operasional', true));
+        $updateData['definisi_operasional'] = !empty($defInput) ? $defInput : null;
+    }
+    
+    $this->db->where('id', $id)->update('ikk_pd', $updateData);
     
     echo json_encode([
         'status' => 'success',

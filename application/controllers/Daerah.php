@@ -5755,9 +5755,14 @@
 
                 log_message('debug', 'KodeWilayah diterima untuk IKU: ' . $KodeWilayah);
 
-                // Auto-migration: pastikan kolom rumus tersedia pada tabel iku
-                if ($this->db->table_exists('iku') && !$this->db->field_exists('rumus', 'iku')) {
-                    $this->db->query("ALTER TABLE `iku` ADD COLUMN `rumus` TEXT DEFAULT NULL AFTER `indikator_tujuan`");
+                // Auto-migration: pastikan kolom rumus dan definisi_operasional tersedia pada tabel iku
+                if ($this->db->table_exists('iku')) {
+                    if (!$this->db->field_exists('rumus', 'iku')) {
+                        $this->db->query("ALTER TABLE `iku` ADD COLUMN `rumus` TEXT DEFAULT NULL AFTER `indikator_tujuan`");
+                    }
+                    if (!$this->db->field_exists('definisi_operasional', 'iku')) {
+                        $this->db->query("ALTER TABLE `iku` ADD COLUMN `definisi_operasional` TEXT DEFAULT NULL AFTER `rumus`");
+                    }
                 }
 
                 $Data = [];
@@ -5918,10 +5923,15 @@
             // Simpan rumus yang sudah ada agar tidak hilang saat sinkronisasi ulang
             $existingRumus = [];
             $oldIku = $this->db->where('kodewilayah', $KodeWilayah)->where('deleted_at IS NULL')->get('iku')->result_array();
+            $existingRumus = [];
+            $existingDefinisi = [];
             foreach ($oldIku as $oi) {
+                $cleanName = trim(mb_strtolower($oi['indikator_tujuan']));
                 if (!empty($oi['rumus'])) {
-                    $cleanName = trim(mb_strtolower($oi['indikator_tujuan']));
                     $existingRumus[$cleanName] = $oi['rumus'];
+                }
+                if (!empty($oi['definisi_operasional'])) {
+                    $existingDefinisi[$cleanName] = $oi['definisi_operasional'];
                 }
             }
 
@@ -5935,6 +5945,7 @@
                 $namaIndikator = !empty($row['nama_indikator']) ? $row['nama_indikator'] : 'Indikator Tujuan';
                 $cleanName = trim(mb_strtolower($namaIndikator));
                 $rumusVal = isset($existingRumus[$cleanName]) ? $existingRumus[$cleanName] : null;
+                $definisiVal = isset($existingDefinisi[$cleanName]) ? $existingDefinisi[$cleanName] : null;
 
                 $insertData[] = [
                     'kodewilayah' => $KodeWilayah,
@@ -5943,6 +5954,7 @@
                     'tahun_akhir' => $tahunAkhir,
                     'indikator_tujuan' => $namaIndikator,
                     'rumus' => $rumusVal,
+                    'definisi_operasional' => $definisiVal,
                     'target_1' => ($row['target_2025'] !== null && $row['target_2025'] !== '') ? $row['target_2025'] : null,
                     'target_2' => ($row['target_2026'] !== null && $row['target_2026'] !== '') ? $row['target_2026'] : null,
                     'target_3' => ($row['target_2027'] !== null && $row['target_2027'] !== '') ? $row['target_2027'] : null,
@@ -5957,6 +5969,7 @@
                 $namaIndikator = !empty($row['nama_indikator']) ? $row['nama_indikator'] : 'Indikator Sasaran';
                 $cleanName = trim(mb_strtolower($namaIndikator));
                 $rumusVal = isset($existingRumus[$cleanName]) ? $existingRumus[$cleanName] : null;
+                $definisiVal = isset($existingDefinisi[$cleanName]) ? $existingDefinisi[$cleanName] : null;
 
                 $insertData[] = [
                     'kodewilayah' => $KodeWilayah,
@@ -5965,6 +5978,7 @@
                     'tahun_akhir' => $tahunAkhir,
                     'indikator_tujuan' => $namaIndikator,
                     'rumus' => $rumusVal,
+                    'definisi_operasional' => $definisiVal,
                     'target_1' => ($row['target_2025'] !== null && $row['target_2025'] !== '') ? $row['target_2025'] : null,
                     'target_2' => ($row['target_2026'] !== null && $row['target_2026'] !== '') ? $row['target_2026'] : null,
                     'target_3' => ($row['target_2027'] !== null && $row['target_2027'] !== '') ? $row['target_2027'] : null,
@@ -6006,6 +6020,7 @@
             $rawRumus = (string)$this->input->post('rumus', FALSE);
             // Izinkan ekspresi matematika, unicode, serta tag pangkat/subscript yang aman (sup/sub)
             $rumus = trim(strip_tags($rawRumus, '<sup><sub>'));
+            $definisi = trim((string)$this->input->post('definisi_operasional', TRUE));
 
             if ($id <= 0) {
                 echo json_encode(['status' => 'error', 'message' => 'ID IKU tidak valid!']);
@@ -6024,13 +6039,15 @@
 
             $this->db->where('id', $id)->update('iku', [
                 'rumus' => !empty($rumus) ? $rumus : null,
+                'definisi_operasional' => !empty($definisi) ? $definisi : null,
                 'updated_at' => date('Y-m-d H:i:s')
             ]);
 
             echo json_encode([
                 'status' => 'success',
-                'message' => 'Rumus RPJMD berhasil disimpan!',
-                'rumus' => $rumus
+                'message' => 'Rumus & Definisi Operasional RPJMD berhasil disimpan!',
+                'rumus' => $rumus,
+                'definisi_operasional' => $definisi
             ]);
         }
 
@@ -6051,6 +6068,7 @@
             $id = (int)$this->input->post('id', TRUE);
             $indikator = trim((string)$this->input->post('indikator_tujuan', TRUE));
             $rumus = trim((string)$this->input->post('rumus', TRUE));
+            $definisi = trim((string)$this->input->post('definisi_operasional', TRUE));
             $periode = trim((string)$this->input->post('periode', TRUE));
             $tahunMulai = trim((string)$this->input->post('tahun_mulai', TRUE));
             $tahunAkhir = trim((string)$this->input->post('tahun_akhir', TRUE));
@@ -6082,6 +6100,7 @@
                 'kodewilayah' => $KodeWilayah,
                 'indikator_tujuan' => $indikator,
                 'rumus' => !empty($rumus) ? $rumus : null,
+                'definisi_operasional' => !empty($definisi) ? $definisi : null,
                 'tahun_mulai' => !empty($tahunMulai) ? $tahunMulai : null,
                 'tahun_akhir' => !empty($tahunAkhir) ? $tahunAkhir : null,
                 'target_1' => $cleanTarget($t1),
@@ -6146,9 +6165,14 @@
 
                 log_message('debug', 'KodeWilayah diterima untuk IKD: ' . $KodeWilayah);
 
-                // Auto-migration: pastikan kolom rumus tersedia pada tabel ikd
-                if ($this->db->table_exists('ikd') && !$this->db->field_exists('rumus', 'ikd')) {
-                    $this->db->query("ALTER TABLE `ikd` ADD COLUMN `rumus` TEXT DEFAULT NULL AFTER `indikator_sasaran`");
+                // Auto-migration: pastikan kolom rumus dan definisi_operasional tersedia pada tabel ikd
+                if ($this->db->table_exists('ikd')) {
+                    if (!$this->db->field_exists('rumus', 'ikd')) {
+                        $this->db->query("ALTER TABLE `ikd` ADD COLUMN `rumus` TEXT DEFAULT NULL AFTER `indikator_sasaran`");
+                    }
+                    if (!$this->db->field_exists('definisi_operasional', 'ikd')) {
+                        $this->db->query("ALTER TABLE `ikd` ADD COLUMN `definisi_operasional` TEXT DEFAULT NULL AFTER `rumus`");
+                    }
                 }
 
                 $Data = [];
@@ -6319,12 +6343,15 @@
 
             $rumusInput = $this->input->post('rumus', FALSE);
             $rumusClean = $rumusInput !== null && $rumusInput !== '' ? trim(strip_tags($rumusInput, '<sup><sub>')) : null;
+            $definisiInput = $this->input->post('definisi_operasional', TRUE);
+            $definisiClean = !empty($definisiInput) ? trim($definisiInput) : null;
 
             $data = [
                 'kodewilayah' => $KodeWilayah,
                 'aspek' => $aspek,
                 'indikator_sasaran' => $nama,
                 'rumus' => $rumusClean,
+                'definisi_operasional' => $definisiClean,
                 'satuan' => $satuan,
                 'pd_penanggung_jawab' => $opd,
                 'id_instansi' => !empty($id_instansi) ? (int)$id_instansi : null,
@@ -6402,6 +6429,11 @@
                 $data['rumus'] = $rawRumus !== '' ? trim(strip_tags($rawRumus, '<sup><sub>')) : null;
             }
 
+            if ($this->input->post('definisi_operasional') !== null) {
+                $rawDefinisi = trim((string)$this->input->post('definisi_operasional', TRUE));
+                $data['definisi_operasional'] = !empty($rawDefinisi) ? $rawDefinisi : null;
+            }
+
             if (!empty($id_instansi)) {
                 $data['id_instansi'] = (int)$id_instansi;
             }
@@ -6447,6 +6479,7 @@
             $rawRumus = (string)$this->input->post('rumus', FALSE);
             // Izinkan ekspresi matematika, unicode, serta tag pangkat/subscript yang aman (sup/sub)
             $rumus = trim(strip_tags($rawRumus, '<sup><sub>'));
+            $definisi = trim((string)$this->input->post('definisi_operasional', TRUE));
 
             if ($id <= 0) {
                 echo json_encode(['status' => 'error', 'message' => 'ID IKD tidak valid!']);
@@ -6463,15 +6496,21 @@
                 return;
             }
 
-            $this->db->where('id', $id)->update('ikd', [
+            $updateData = [
                 'rumus' => $rumus ?: null,
                 'updated_at' => date('Y-m-d H:i:s')
-            ]);
+            ];
+            if ($this->input->post('definisi_operasional') !== null) {
+                $updateData['definisi_operasional'] = !empty($definisi) ? $definisi : null;
+            }
+
+            $this->db->where('id', $id)->update('ikd', $updateData);
 
             echo json_encode([
                 'status' => 'success',
                 'message' => 'Rumus perhitungan IKD berhasil disimpan!',
-                'rumus' => $rumus
+                'rumus' => $rumus,
+                'definisi_operasional' => $definisi
             ]);
         }
 

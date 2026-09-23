@@ -983,7 +983,7 @@
       <!-- Brand Identik dengan Beranda -->
       <a href="<?= base_url(); ?>" class="navbar-brand">
         <i class="fas fa-chart-line"></i>
-        IPPD
+        Sistem Perencanaan Daerah
       </a>
 
       <!-- Menu Dropdown Laporan Sakip & Navigasi -->

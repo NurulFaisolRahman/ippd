@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beranda IPPD</title>
+    <title>Beranda Sistem Perencanaan Daerah</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -405,7 +405,7 @@
         <div class="navbar-container">
             <a href="/ippd/Beranda" class="navbar-brand">
                 <i class="fas fa-chart-line"></i>
-                IPPD
+                Sistem Perencanaan Daerah
             </a>
             
             <div class="navbar-menu">
@@ -480,7 +480,7 @@
         <!-- Header -->
         <div class="text-start mb-10">
             <h1 class="text-3xl font-bold text-gray-800 mb-2">
-                Beranda IPPD
+                Beranda Sistem Perencanaan Daerah
             </h1>
         </div>
 

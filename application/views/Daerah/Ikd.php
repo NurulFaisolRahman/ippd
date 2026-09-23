@@ -543,6 +543,12 @@ table.dataTable thead .sorting_desc_disabled {
     max-width: 100%;
     word-break: break-word;
 }
+.definisi-text-wrapper {
+    font-size: 12px;
+    color: #334155;
+    line-height: 1.45;
+    word-break: break-word;
+}
 .rumus-badge-icon {
     color: #03a9f3;
     font-size: 12px;
@@ -924,18 +930,19 @@ sub {
                                     <thead>
                                         <tr>
                                             <th class="text-center" style="width: 3%; vertical-align: middle !important;">No</th>
-                                            <th style="width: 22%; text-align: left; vertical-align: middle !important;">Indikator Sasaran (IKD)</th>
-                                            <th style="width: 20%; text-align: left; vertical-align: middle !important;">Rumus</th>
-                                            <th class="text-center" style="width: 6%; vertical-align: middle !important;">Satuan</th>
-                                            <th class="text-center" style="width: 5.5%; vertical-align: middle !important;">Target <br><small>2025</small></th>
-                                            <th class="text-center" style="width: 5.5%; vertical-align: middle !important;">Target <br><small>2026</small></th>
-                                            <th class="text-center" style="width: 5.5%; vertical-align: middle !important;">Target <br><small>2027</small></th>
-                                            <th class="text-center" style="width: 5.5%; vertical-align: middle !important;">Target <br><small>2028</small></th>
-                                            <th class="text-center" style="width: 5.5%; vertical-align: middle !important;">Target <br><small>2029</small></th>
-                                            <th class="text-center" style="width: 5.5%; vertical-align: middle !important;">Target <br><small>2030</small></th>
-                                            <th style="width: 10%; text-align: left; vertical-align: middle !important;">Perangkat Daerah Pengampu</th>
+                                            <th style="width: 19%; text-align: left; vertical-align: middle !important;">Indikator Sasaran (IKD)</th>
+                                            <th style="width: 16%; text-align: left; vertical-align: middle !important;">Rumus</th>
+                                            <th style="width: 16%; text-align: left; vertical-align: middle !important;">Definisi Operasional</th>
+                                            <th class="text-center" style="width: 5%; vertical-align: middle !important;">Satuan</th>
+                                            <th class="text-center" style="width: 4.5%; vertical-align: middle !important;">Target <br><small>2025</small></th>
+                                            <th class="text-center" style="width: 4.5%; vertical-align: middle !important;">Target <br><small>2026</small></th>
+                                            <th class="text-center" style="width: 4.5%; vertical-align: middle !important;">Target <br><small>2027</small></th>
+                                            <th class="text-center" style="width: 4.5%; vertical-align: middle !important;">Target <br><small>2028</small></th>
+                                            <th class="text-center" style="width: 4.5%; vertical-align: middle !important;">Target <br><small>2029</small></th>
+                                            <th class="text-center" style="width: 4.5%; vertical-align: middle !important;">Target <br><small>2030</small></th>
+                                            <th style="width: 9%; text-align: left; vertical-align: middle !important;">Perangkat Daerah Pengampu</th>
                                             <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                                <th class="text-center" style="width: 6%; vertical-align: middle !important;">Aksi</th>
+                                                <th class="text-center" style="width: 5%; vertical-align: middle !important;">Aksi</th>
                                             <?php } ?>
                                         </tr>
                                     </thead>
@@ -952,6 +959,15 @@ sub {
                                                             <div class="rumus-tag-wrapper">
                                                                 <i class="fa fa-calculator rumus-badge-icon"></i>
                                                                 <span><?= format_rumus_rpjmd($row['rumus']) ?></span>
+                                                            </div>
+                                                        <?php } else { ?>
+                                                            <span class="text-muted" style="font-size:11px; font-style:italic;">-</span>
+                                                        <?php } ?>
+                                                    </td>
+                                                    <td style="vertical-align: middle !important;">
+                                                        <?php if (!empty($row['definisi_operasional'])) { ?>
+                                                            <div class="definisi-text-wrapper">
+                                                                <?= nl2br(html_escape($row['definisi_operasional'])) ?>
                                                             </div>
                                                         <?php } else { ?>
                                                             <span class="text-muted" style="font-size:11px; font-style:italic;">-</span>
@@ -980,6 +996,7 @@ sub {
                                                                         data-aspek="<?= html_escape($row['aspek'] ?? $key) ?>"
                                                                         data-nama="<?= html_escape($row['indikator_sasaran']) ?>"
                                                                         data-rumus="<?= html_escape($row['rumus'] ?? '') ?>"
+                                                                        data-definisi="<?= html_escape($row['definisi_operasional'] ?? '') ?>"
                                                                         data-satuan="<?= html_escape($row['satuan'] ?? '') ?>"
                                                                         data-opd="<?= html_escape($row['pd_penanggung_jawab'] ?? '') ?>"
                                                                         data-t1="<?= html_escape(str_replace('.', ',', $row['target_1'] ?? $row['target_2025'] ?? '')) ?>"
@@ -1269,6 +1286,11 @@ MODAL TAMBAH IKD (DESAIN MENARIK & MODERN)
                                     <div class="rumus-preview-body" id="TambahRumusLivePreview">
                                         <span class="text-muted" style="font-style: italic; color: #94a3b8;">Belum ada rumus yang dimasukkan. Ketik rumus atau klik tombol simbol di atas.</span>
                                     </div>
+                                </div>
+
+                                <div class="form-group" style="margin-top: 15px;">
+                                    <label class="form-label-ikd">Definisi Operasional (Opsional)</label>
+                                    <textarea class="form-control-ikd" name="definisi_operasional" id="TambahDefinisiOperasional" rows="3" placeholder="Masukkan penjelasan definisi operasional indikator (opsional)..." style="font-size: 13px; line-height: 1.5; border-radius: 8px; padding: 10px 12px;"></textarea>
                                 </div>
                             </div>
 
@@ -1580,7 +1602,12 @@ MODAL EDIT IKD (DESAIN MENARIK & MODERN)
                                         <span class="text-muted" style="font-style: italic; color: #94a3b8;">Belum ada rumus yang dimasukkan. Ketik rumus atau klik tombol simbol di atas.</span>
                                     </div>
                                 </div>
-                            <div class="target-grid-card">
+
+                                <div class="form-group" style="margin-top: 15px;">
+                                    <label class="form-label-ikd">Definisi Operasional (Opsional)</label>
+                                    <textarea class="form-control-ikd" name="definisi_operasional" id="EditDefinisiOperasional" rows="3" placeholder="Masukkan penjelasan definisi operasional indikator (opsional)..." style="font-size: 13px; line-height: 1.5; border-radius: 8px; padding: 10px 12px;"></textarea>
+                                </div>
+                            </div>
                                 <div class="grid-title"><i class="fa fa-calendar-check-o text-warning"></i> Target Kinerja Tahunan (2025 - 2030)</div>
                                 <div class="row">
                                     <div class="col-xs-4 col-sm-2">
@@ -1972,6 +1999,7 @@ $(document).ready(function () {
         $('#TambahSatuan').val('');
         $('#TambahOpd').val('');
         $('#TambahRumus').val('');
+        $('#TambahDefinisiOperasional').val('');
         updateRumusLivePreviewInModal('#ModalInputIKD');
         $('#ModalInputIKD').modal('show');
     });
@@ -2020,6 +2048,7 @@ $(document).ready(function () {
         $('#EditAspekLabel').text(label);
         $('#EditNama').val(d.nama);
         $('#EditRumus').val(d.rumus || '');
+        $('#EditDefinisiOperasional').val(d.definisi || '');
         updateRumusLivePreviewInModal('#ModalEditIKD');
         $('#EditSatuan').val(d.satuan || '');
         if (d.opd && $('#EditOpd option[value="' + d.opd + '"]').length === 0) {

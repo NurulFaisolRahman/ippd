@@ -48,6 +48,12 @@ if (!function_exists('format_rumus_rpjmd')) {
     max-width: 100%;
     word-break: break-word;
 }
+.definisi-text-wrapper {
+    font-size: 12px;
+    color: #334155;
+    line-height: 1.45;
+    word-break: break-word;
+}
 .rumus-badge-icon {
     color: #03a9f3;
     font-size: 12px;
@@ -684,6 +690,7 @@ sup {
                                         <th rowspan="2" width="40" style="vertical-align: middle !important;">No</th>
                                         <th rowspan="2" style="min-width:180px; text-align: left; vertical-align: middle !important;">Indikator</th>
                                         <th rowspan="2" style="min-width:180px; text-align: left; vertical-align: middle !important;">Rumus</th>
+                                        <th rowspan="2" style="min-width:180px; text-align: left; vertical-align: middle !important;">Definisi Operasional</th>
                                         <th class="text-center" rowspan="2" width="80" style="vertical-align: middle !important;">Satuan</th>
                                         <th class="text-center" rowspan="2" width="90" style="vertical-align: middle !important;">Baseline<br>2024</th>
                                         <th class="text-center" colspan="6">Target Tahun</th>
@@ -712,6 +719,15 @@ sup {
                                                         <div class="rumus-tag-wrapper">
                                                             <i class="fa fa-calculator rumus-badge-icon"></i>
                                                             <span><?= format_rumus_rpjmd($row['rumus']) ?></span>
+                                                        </div>
+                                                    <?php } else { ?>
+                                                        <span class="text-muted" style="font-size:11px; font-style:italic;">-</span>
+                                                    <?php } ?>
+                                                </td>
+                                                <td style="vertical-align: middle !important;">
+                                                    <?php if (!empty($row['definisi_operasional'])) { ?>
+                                                        <div class="definisi-text-wrapper">
+                                                            <?= nl2br(html_escape($row['definisi_operasional'])) ?>
                                                         </div>
                                                     <?php } else { ?>
                                                         <span class="text-muted" style="font-size:11px; font-style:italic;">-</span>
@@ -759,7 +775,7 @@ if (!function_exists('format_target_koma')) {
                                         <?php } ?>
                                     <?php } else { ?>
                                         <tr>
-                                            <td colspan="<?= $IsRole4 ? '13' : '12' ?>" class="text-center">
+                                            <td colspan="<?= $IsRole4 ? '14' : '13' ?>" class="text-center">
                                                 <?= $UrusanAktif ? 'Belum ada data IKK PD' : 'Silakan pilih Bidang Urusan PD terlebih dahulu' ?>
                                             </td>
                                         </tr>
@@ -975,6 +991,11 @@ if (!function_exists('format_target_koma')) {
                                 <span class="text-muted" style="font-style: italic; color: #94a3b8;">Belum ada rumus.</span>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 14px;">
+                        <label class="form-label-ikd">Definisi Operasional (Opsional)</label>
+                        <textarea id="definisi_operasional" name="definisi_operasional" class="form-control-ikd" rows="3" placeholder="Masukkan penjelasan definisi operasional indikator (opsional)..." style="border-radius: 8px; font-size: 13px; resize: vertical; padding: 10px 12px; border: 1.5px solid #cbd5e1; line-height: 1.5;"></textarea>
                     </div>
 
                     <div class="target-grid-card">
@@ -1332,6 +1353,7 @@ jQuery(document).ready(function($){
         $("#ModalInputIKKIcon").html('<i class="fa fa-plus"></i>');
         $("#indikator").val("");
         $("#rumus").val("");
+        $("#definisi_operasional").val("");
         $("#satuan").val("");
         $("#baseline_2024").val("");
         for (let y = 2025; y <= 2030; y++) {
@@ -1349,6 +1371,7 @@ jQuery(document).ready(function($){
         var indikator = $("#indikator").val().trim();
         var satuan = $("#satuan").val().trim();
         var rumus = $("#rumus").val().trim();
+        var definisi_operasional = $("#definisi_operasional").val().trim();
         var urusan_id = $("#UrusanPD").val();
         
         console.log("Urusan ID:", urusan_id);
@@ -1379,6 +1402,7 @@ jQuery(document).ready(function($){
             urusan_id: urusan_id,
             indikator: indikator,
             rumus: rumus,
+            definisi_operasional: definisi_operasional,
             satuan: satuan,
             baseline_2024: $("#baseline_2024").val(),
             t_2025: $("#t_2025").val(),
@@ -1421,6 +1445,7 @@ jQuery(document).ready(function($){
         $("#ModalInputIKKIcon").html('<i class="fa fa-pencil"></i>');
         $("#indikator").val(d.indikator);
         $("#rumus").val(d.rumus || "");
+        $("#definisi_operasional").val(d.definisi_operasional || "");
         $("#satuan").val(d.satuan);
         $("#baseline_2024").val(d.baseline_2024 ? String(d.baseline_2024).replace(/\./g, ',') : "");
         for (let y = 2025; y <= 2030; y++) {
