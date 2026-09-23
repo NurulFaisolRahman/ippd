@@ -334,35 +334,36 @@
                                 <?php } ?>
                             <?php } ?>
 
-                            <!-- FILTER INSTANSI -->
+                            <!-- FILTER INSTANSI (UNTUK NON-ROLE 4 SEPERTI DAERAH) -->
                             <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
-                                <div class="form-example-wrap" style="margin-bottom:20px;">
-                                    <div class="row filter-row">
+                                <div class="form-example-wrap" style="margin-bottom:20px; background:#fff; padding:15px 20px; border-radius:6px; border:1px solid #e2e8f0; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                                    <div class="row filter-row" style="display:flex; align-items:flex-end; flex-wrap:wrap; gap:12px;">
                                         <div class="col-lg-4 col-md-6">
                                             <div class="filter-group">
-                                                <label for="FilterInstansi"><b>Filter Instansi</b></label>
-                                                <select class="form-control" id="FilterInstansi">
+                                                <label for="FilterInstansi"><b><i class="fa fa-building"></i> Filter Perangkat Daerah / Instansi</b></label>
+                                                <select class="form-control filter-select" id="FilterInstansi" style="width:100%;">
                                                     <option value="">-- Semua Instansi --</option>
                                                     <?php foreach ($ListInstansi as $ins) { ?>
-                                                        <option value="<?= $ins['id'] ?>" <?= ($FilterInstansiId == $ins['id']) ? 'selected' : '' ?>>
+                                                        <option value="<?= $ins['id'] ?>" <?= (!empty($FilterInstansiId) && $FilterInstansiId == $ins['id']) ? 'selected' : '' ?>>
                                                             <?= html_escape($ins['nama']) ?>
                                                         </option>
                                                     <?php } ?>
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="col-lg-2 col-md-6">
+                                        <div class="col-lg-2 col-md-3">
                                             <div class="filter-group" style="margin-top:28px;">
-                                                <button class="btn btn-info btn-block" id="FilterInstansiBtn"><b>Tampilkan</b></button>
+                                                <button class="btn btn-info btn-block" id="FilterInstansiBtn" style="font-weight:600;"><i class="fa fa-filter"></i> Tampilkan</button>
                                             </div>
                                         </div>
-                                        <div class="col-lg-2 col-md-6">
+                                        <div class="col-lg-2 col-md-3">
                                             <div class="filter-group" style="margin-top:28px;">
-                                                <button class="btn btn-default btn-block" id="ResetFilterBtn"><b>Reset</b></button>
+                                                <button class="btn btn-default btn-block" id="ResetFilterBtn" style="font-weight:600;"><i class="fa fa-refresh"></i> Reset</button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+
                             <?php } ?>
 
                             <!-- INFO INSTANSI -->
@@ -430,6 +431,9 @@
                                                     <td class="text-left level-tujuan" rowspan="<?= $tujuanRowspan ?>">
                                                         <span class="badge-tujuan">Tujuan <?= $no_tujuan ?></span>
                                                         <strong><?= html_escape($tujuan_uraian) ?></strong>
+                                                        <?php if (!empty($tujuan['nama_instansi']) && empty($FilterInstansiId)) { ?>
+                                                            <br><small class="text-muted" style="display:inline-block; margin-top:3px;"><i class="fa fa-building"></i> <?= html_escape($tujuan['nama_instansi']) ?></small>
+                                                        <?php } ?>
                                                     </td>
                                                     <!-- INDIKATOR -->
                                                     <td class="indikator-text" style="text-align:left; padding-left:5px;"><?= html_escape($firstIndTujuan['indikator'] ?? ($tujuan['indikator'] ?? '-')) ?></td>
@@ -1938,11 +1942,15 @@
         $("#FilterInstansiBtn").click(function() {
             var instansiId = $("#FilterInstansi").val();
             var url = BaseURL + "Instansi/MenuRenstraPD";
-            if (instansiId && instansiId != '') { url += "?instansi_id=" + instansiId; }
+            if (instansiId && instansiId != '') { 
+                url += "?instansi_id=" + encodeURIComponent(instansiId); 
+            } else {
+                url += "?instansi_id=";
+            }
             window.location.href = url;
         });
         $("#ResetFilterBtn").click(function() {
-            window.location.href = BaseURL + "Instansi/MenuRenstraPD";
+            window.location.href = BaseURL + "Instansi/MenuRenstraPD?reset=1";
         });
         <?php } ?>
 

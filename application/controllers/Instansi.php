@@ -170,6 +170,37 @@ class Instansi extends CI_Controller {
     }
 
     /**
+     * Cek apakah user bisa melakukan CRUD pada menu Renstra PD.
+     * Aturan:
+     * - Akun Daerah (Level 3 dan Level 2) TIDAK BISA CRUD, hanya bisa melihat data (Read-Only).
+     * - Akun Kementerian dan Nasional juga Read-Only.
+     * - Hanya akun Instansi (Level 4 / Role 4) dan Superadmin (Level 0) yang dapat melakukan CRUD.
+     */
+    private function can_crud_renstra() {
+        if (!$this->is_logged_in()) {
+            return false;
+        }
+        // Daerah (Level 3 dan Level 2) HANYA BISA MELIHAT DATA, TIDAK BISA CRUD
+        if ($this->is_role_3() || (isset($_SESSION['Level']) && in_array((string)$_SESSION['Level'], ['2', '3']))) {
+            return false;
+        }
+        // Kementerian dan Nasional Read-Only
+        if ($this->is_kementerian() || $this->is_nasional()) {
+            return false;
+        }
+        // Instansi (Level 4 / Role 4)
+        if ($this->is_role_4()) {
+            return true;
+        }
+        // Superadmin (Level 0) dengan instansi aktif
+        if (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 0) {
+            $instansi_id = $this->get_instansi_id();
+            return !empty($instansi_id);
+        }
+        return false;
+    }
+
+    /**
      * Mendapatkan ID instansi dari session atau parameter filter
      */
     private function get_instansi_id() {
@@ -4007,12 +4038,38 @@ public function SubKegiatanPrioritas() {
     $instansi_id = $this->get_instansi_id();
     $is_logged_in = $this->is_logged_in();
     $is_role_4 = $this->is_role_4();
-    $filter_instansi_id = $this->input->get('instansi_id', TRUE);
+    $is_daerah = $this->is_role_3() || (isset($_SESSION['Level']) && in_array((string)$_SESSION['Level'], ['2', '3']));
+    
+    // Sinkronisasi session filter instansi
+    $filter_instansi_id = null;
+    if ($this->input->get('reset', TRUE) == '1') {
+        $this->session->unset_userdata('TempInstansiId');
+        $this->session->unset_userdata('FilterInstansiId');
+        $filter_instansi_id = null;
+    } elseif ($this->input->get('instansi_id') !== null) {
+        $get_id = $this->input->get('instansi_id', TRUE);
+        if (!empty($get_id) && is_numeric($get_id)) {
+            $filter_instansi_id = (int)$get_id;
+            $this->session->set_userdata('TempInstansiId', $filter_instansi_id);
+            $this->session->set_userdata('FilterInstansiId', $filter_instansi_id);
+        } else {
+            $this->session->unset_userdata('TempInstansiId');
+            $this->session->unset_userdata('FilterInstansiId');
+            $filter_instansi_id = null;
+        }
+    } elseif (!$is_role_4) {
+        if (isset($_SESSION['FilterInstansiId']) && !empty($_SESSION['FilterInstansiId'])) {
+            $filter_instansi_id = (int)$_SESSION['FilterInstansiId'];
+        } elseif (isset($_SESSION['TempInstansiId']) && !empty($_SESSION['TempInstansiId'])) {
+            $filter_instansi_id = (int)$_SESSION['TempInstansiId'];
+        }
+    }
     
     $data['KodeWilayah'] = $KodeWilayah;
     $data['InstansiId'] = $instansi_id;
     $data['IsLoggedIn'] = $is_logged_in;
     $data['IsRole4'] = $is_role_4;
+    $data['IsDaerah'] = $is_daerah;
     $data['FilterInstansiId'] = $filter_instansi_id;
     $data['NamaInstansi'] = isset($_SESSION['NamaInstansi']) ? $_SESSION['NamaInstansi'] : '';
     
@@ -4057,9 +4114,180 @@ public function SubKegiatanPrioritas() {
         
         $data['Data'] = $query->order_by('id', 'ASC')->get()->result_array();
     }
+
+    // ========== AMBIL DAFTAR PROGRAM RENSTRA ==========
+    $data['ListProgramRenstra'] = [];
+    $target_instansi_prog = $is_role_4 ? $instansi_id : (!empty($filter_instansi_id) ? (int)$filter_instansi_id : null);
+    
+    if ($KodeWilayah) {
+        $this->db->select('p.id, p.nama, p.kode_program')
+            ->from('renstra_program p')
+            ->join('renstra_sasaran s', 's.id = p.sasaran_id', 'inner')
+            ->join('renstra_tujuan t', 't.id = s.tujuan_id', 'inner')
+            ->where('p.deleted_at IS NULL')
+            ->where('s.deleted_at IS NULL')
+            ->where('t.deleted_at IS NULL')
+            ->where('t.kode_wilayah', $KodeWilayah);
+        
+        if ($target_instansi_prog) {
+            $this->db->where('t.id_instansi', $target_instansi_prog);
+        }
+        
+        $data['ListProgramRenstra'] = $this->db
+            ->order_by('p.kode_program', 'ASC')
+            ->order_by('p.id', 'ASC')
+            ->get()
+            ->result_array();
+    }
     
     $this->load->view('Daerah/header', $Header);
     $this->load->view('Daerah/SubKegiatanPrioritas', $data);
+}
+
+/**
+ * AJAX: Ambil Detail Program Renstra (Outcomes & Kegiatans) untuk Sub Kegiatan Prioritas
+ */
+public function GetRenstraProgramDetailForPrioritas() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $program_id = (int)$this->input->post('program_id', TRUE);
+    if (!$program_id) {
+        echo json_encode(['status' => 'error', 'message' => 'Program ID tidak valid']);
+        return;
+    }
+    
+    // Ambil program
+    $program = $this->db
+        ->select('id, nama, kode_program')
+        ->where('id', $program_id)
+        ->where('deleted_at IS NULL')
+        ->get('renstra_program')
+        ->row_array();
+    
+    if (!$program) {
+        echo json_encode(['status' => 'error', 'message' => 'Program tidak ditemukan']);
+        return;
+    }
+    
+    // Ambil outcome dari renstra_program_outcome
+    $outcomes = $this->db
+        ->select('outcome_text')
+        ->where('program_id', $program_id)
+        ->where('deleted_at IS NULL')
+        ->order_by('urutan', 'ASC')
+        ->get('renstra_program_outcome')
+        ->result_array();
+    
+    $outcome_list = [];
+    foreach ($outcomes as $o) {
+        $txt = trim($o['outcome_text'] ?? '');
+        if (!empty($txt)) {
+            $outcome_list[] = $txt;
+        }
+    }
+    
+    // Fallback ke kolom outcome di renstra_program jika kosong
+    if (empty($outcome_list)) {
+        $pRow = $this->db->select('outcome')->where('id', $program_id)->get('renstra_program')->row_array();
+        $raw_outcome = trim($pRow['outcome'] ?? '');
+        if (!empty($raw_outcome)) {
+            if (strpos($raw_outcome, "\n") !== false) {
+                $lines = explode("\n", $raw_outcome);
+                foreach ($lines as $ln) {
+                    $ln = trim($ln);
+                    if (!empty($ln)) {
+                        $outcome_list[] = $ln;
+                    }
+                }
+            } elseif (strpos($raw_outcome, ";") !== false) {
+                $lines = explode(";", $raw_outcome);
+                foreach ($lines as $ln) {
+                    $ln = trim($ln);
+                    if (!empty($ln)) {
+                        $outcome_list[] = $ln;
+                    }
+                }
+            } else {
+                $outcome_list[] = $raw_outcome;
+            }
+        }
+    }
+    
+    $outcome_str = '';
+    if (count($outcome_list) === 1) {
+        $outcome_str = $outcome_list[0];
+    } elseif (count($outcome_list) > 1) {
+        foreach ($outcome_list as $i => $ot) {
+            $clean_ot = preg_replace('/^\d+[\.\)]\s*/', '', trim($ot));
+            $outcome_str .= ($i + 1) . ". " . $clean_ot . "\n";
+        }
+        $outcome_str = trim($outcome_str);
+    }
+    
+    // Ambil kegiatans dari renstra_kegiatan
+    $kegiatans = $this->db
+        ->select('id, kode_nomenklatur, nama')
+        ->where('program_id', $program_id)
+        ->where('deleted_at IS NULL')
+        ->order_by('kode_nomenklatur', 'ASC')
+        ->order_by('id', 'ASC')
+        ->get('renstra_kegiatan')
+        ->result_array();
+    
+    // Ambil seluruh sub kegiatan di bawah program ini (join ke renstra_kegiatan)
+    $all_sub_kegiatans = $this->db
+        ->select('s.id, s.kegiatan_id, s.kode_nomenklatur, s.nama, k.nama as kegiatan_nama, k.kode_nomenklatur as kegiatan_kode')
+        ->from('renstra_sub_kegiatan s')
+        ->join('renstra_kegiatan k', 'k.id = s.kegiatan_id', 'inner')
+        ->where('k.program_id', $program_id)
+        ->where('s.deleted_at IS NULL')
+        ->where('k.deleted_at IS NULL')
+        ->order_by('k.kode_nomenklatur', 'ASC')
+        ->order_by('s.kode_nomenklatur', 'ASC')
+        ->get()
+        ->result_array();
+    
+    echo json_encode([
+        'status' => 'success',
+        'program' => $program,
+        'outcomes' => $outcome_list,
+        'outcome_str' => $outcome_str,
+        'kegiatans' => $kegiatans,
+        'all_sub_kegiatans' => $all_sub_kegiatans
+    ]);
+}
+
+/**
+ * AJAX: Ambil Sub Kegiatan dari Renstra untuk Sub Kegiatan Prioritas
+ */
+public function GetRenstraSubKegiatanForPrioritas() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    
+    $kegiatan_id = (int)$this->input->post('kegiatan_id', TRUE);
+    if (!$kegiatan_id) {
+        echo json_encode(['status' => 'error', 'message' => 'Kegiatan ID tidak valid']);
+        return;
+    }
+    
+    $sub_kegiatans = $this->db
+        ->select('id, kode_nomenklatur, nama')
+        ->where('kegiatan_id', $kegiatan_id)
+        ->where('deleted_at IS NULL')
+        ->order_by('kode_nomenklatur', 'ASC')
+        ->order_by('id', 'ASC')
+        ->get('renstra_sub_kegiatan')
+        ->result_array();
+    
+    echo json_encode([
+        'status' => 'success',
+        'sub_kegiatans' => $sub_kegiatans
+    ]);
 }
 
 /**
@@ -4091,8 +4319,6 @@ public function InputSubKegiatanPrioritas() {
     
     $program_prioritas = trim($this->input->post('program_prioritas', true));
     $outcome = trim($this->input->post('outcome', true));
-    $kegiatan = trim($this->input->post('kegiatan', true));
-    $sub_kegiatan = trim($this->input->post('sub_kegiatan', true));
     $keterangan = trim($this->input->post('keterangan', true));
     
     if (empty($program_prioritas)) {
@@ -4104,6 +4330,47 @@ public function InputSubKegiatanPrioritas() {
         echo "Outcome harus diisi!";
         return;
     }
+    
+    $now = date('Y-m-d H:i:s');
+    
+    // Cek apakah data dikirim dalam bentuk multi items (Repeater)
+    $items_raw = $this->input->post('items');
+    if (!empty($items_raw)) {
+        $items = is_string($items_raw) ? json_decode($items_raw, true) : $items_raw;
+        
+        if (is_array($items) && count($items) > 0) {
+            $insert_batch = [];
+            foreach ($items as $item) {
+                $keg = trim($item['kegiatan'] ?? '');
+                $sub = trim($item['sub_kegiatan'] ?? '');
+                if (!empty($keg) && !empty($sub)) {
+                    $insert_batch[] = [
+                        'kode_wilayah'      => $KodeWilayah,
+                        'id_instansi'       => $instansi_id,
+                        'program_prioritas' => $program_prioritas,
+                        'outcome'           => $outcome,
+                        'kegiatan'          => $keg,
+                        'sub_kegiatan'      => $sub,
+                        'keterangan'        => $keterangan,
+                        'created_at'        => $now
+                    ];
+                }
+            }
+            
+            if (empty($insert_batch)) {
+                echo "Minimal satu pasangan Kegiatan dan Sub Kegiatan harus dipilih!";
+                return;
+            }
+            
+            $this->db->insert_batch('sub_kegiatan_prioritas', $insert_batch);
+            echo $this->db->affected_rows() > 0 ? '1' : 'Gagal menyimpan data!';
+            return;
+        }
+    }
+    
+    // Fallback: single item
+    $kegiatan = trim($this->input->post('kegiatan', true));
+    $sub_kegiatan = trim($this->input->post('sub_kegiatan', true));
     
     if (empty($kegiatan)) {
         echo "Kegiatan harus diisi!";
@@ -4123,7 +4390,7 @@ public function InputSubKegiatanPrioritas() {
         'kegiatan'          => $kegiatan,
         'sub_kegiatan'      => $sub_kegiatan,
         'keterangan'        => $keterangan,
-        'created_at'        => date('Y-m-d H:i:s')
+        'created_at'        => $now
     ];
     
     $this->db->insert('sub_kegiatan_prioritas', $data);
@@ -4170,8 +4437,6 @@ public function EditSubKegiatanPrioritas() {
     
     $program_prioritas = trim($this->input->post('program_prioritas', true));
     $outcome = trim($this->input->post('outcome', true));
-    $kegiatan = trim($this->input->post('kegiatan', true));
-    $sub_kegiatan = trim($this->input->post('sub_kegiatan', true));
     $keterangan = trim($this->input->post('keterangan', true));
     
     if (empty($program_prioritas)) {
@@ -4179,19 +4444,77 @@ public function EditSubKegiatanPrioritas() {
         return;
     }
     
+    $now = date('Y-m-d H:i:s');
+    
+    $ids_raw = $this->input->post('ids', true);
+    $ids = [];
+    if (!empty($ids_raw)) {
+        $ids = is_array($ids_raw) ? $ids_raw : explode(',', $ids_raw);
+        $ids = array_map('intval', array_filter($ids));
+    }
+    if (empty($ids) && $id) {
+        $ids = [$id];
+    }
+    
+    // Cek apakah data dikirim dalam bentuk multi items (Repeater)
+    $items_raw = $this->input->post('items');
+    if (!empty($items_raw)) {
+        $items = is_string($items_raw) ? json_decode($items_raw, true) : $items_raw;
+        if (is_array($items) && count($items) > 0) {
+            $insert_batch = [];
+            foreach ($items as $it) {
+                $keg = trim($it['kegiatan'] ?? '');
+                $sub = trim($it['sub_kegiatan'] ?? '');
+                if (!empty($keg) && !empty($sub)) {
+                    $insert_batch[] = [
+                        'kode_wilayah'      => $existing['kode_wilayah'],
+                        'id_instansi'       => $instansi_id,
+                        'program_prioritas' => $program_prioritas,
+                        'outcome'           => $outcome,
+                        'kegiatan'          => $keg,
+                        'sub_kegiatan'      => $sub,
+                        'keterangan'        => $keterangan,
+                        'created_at'        => $now
+                    ];
+                }
+            }
+            
+            if (empty($insert_batch)) {
+                echo "Minimal satu pasangan Kegiatan dan Sub Kegiatan harus dipilih!";
+                return;
+            }
+            
+            // Soft-delete data lama dalam grup ini
+            if (!empty($ids)) {
+                $this->db->where_in('id', $ids)
+                    ->where('id_instansi', $instansi_id)
+                    ->update('sub_kegiatan_prioritas', ['deleted_at' => $now]);
+            }
+            
+            // Insert data baru hasil edit
+            $this->db->insert_batch('sub_kegiatan_prioritas', $insert_batch);
+            echo '1';
+            return;
+        }
+    }
+    
+    // Fallback: single item
+    $kegiatan = trim($this->input->post('kegiatan', true));
+    $sub_kegiatan = trim($this->input->post('sub_kegiatan', true));
+    
     $data = [
         'program_prioritas' => $program_prioritas,
         'outcome'           => $outcome,
         'kegiatan'          => $kegiatan,
         'sub_kegiatan'      => $sub_kegiatan,
         'keterangan'        => $keterangan,
-        'updated_at'        => date('Y-m-d H:i:s')
+        'updated_at'        => $now
     ];
     
     $this->db->where('id', $id);
     $this->db->update('sub_kegiatan_prioritas', $data);
     
-    echo $this->db->affected_rows() > 0 ? '1' : 'Tidak ada perubahan data!';
+    echo '1';
 }
 
 /**
@@ -4208,9 +4531,24 @@ public function HapusSubKegiatanPrioritas() {
         return;
     }
     
-    $id = (int)$this->input->post('id', true);
     $instansi_id = $this->get_instansi_id();
+    $now = date('Y-m-d H:i:s');
     
+    // Mendukung hapus sekaligus untuk seluruh grup program
+    $ids_raw = $this->input->post('ids', true);
+    if (!empty($ids_raw)) {
+        $ids = is_array($ids_raw) ? $ids_raw : explode(',', $ids_raw);
+        $ids = array_map('intval', array_filter($ids));
+        if (!empty($ids)) {
+            $this->db->where_in('id', $ids)
+                ->where('id_instansi', $instansi_id)
+                ->update('sub_kegiatan_prioritas', ['deleted_at' => $now]);
+            echo '1';
+            return;
+        }
+    }
+    
+    $id = (int)$this->input->post('id', true);
     if (!$id) {
         echo "ID tidak valid!";
         return;
@@ -4228,13 +4566,13 @@ public function HapusSubKegiatanPrioritas() {
     }
     
     if ($existing['id_instansi'] != $instansi_id) {
-        echo "Akses ditolak! Anda hanya dapat menghapusdata-table-basic instansi sendiri.";
+        echo "Akses ditolak! Anda hanya dapat menghapus data instansi sendiri.";
         return;
     }
     
     $this->db->where('id', $id);
     $this->db->update('sub_kegiatan_prioritas', [
-        'deleted_at' => date('Y-m-d H:i:s')
+        'deleted_at' => $now
     ]);
     
     echo $this->db->affected_rows() > 0 ? '1' : 'Gagal menghapus!';
@@ -14244,6 +14582,10 @@ public function getSubKegiatanByProgram() {
 // RENSTRA PERANGKAT DAERAH (PD) - CRUD TANPA JSON
 // =====================================================
 
+public function MenuRenstra() {
+    redirect('Instansi/MenuRenstraPD');
+}
+
 public function MenuRenstraPD() {
     $Header['Halaman'] = 'Menu Renstra PD';
     
@@ -14251,19 +14593,52 @@ public function MenuRenstraPD() {
     $instansi_id = $this->get_instansi_id();
     $is_logged_in = $this->is_logged_in();
     $is_role_4 = $this->is_role_4();
+    $is_daerah = $this->is_role_3() || (isset($_SESSION['Level']) && in_array((string)$_SESSION['Level'], ['2', '3']));
     $level = isset($_SESSION['Level']) ? $_SESSION['Level'] : null;
-    $filter_instansi_id = $this->input->get('instansi_id', TRUE);
-    if (empty($filter_instansi_id) && isset($_SESSION['TempInstansiId']) && !empty($_SESSION['TempInstansiId'])) {
-        $filter_instansi_id = $_SESSION['TempInstansiId'];
+    
+    // Sinkronisasi filter instansi
+    $filter_instansi_id = null;
+    if ($this->input->get('reset', TRUE) == '1') {
+        $this->session->unset_userdata('TempInstansiId');
+        $this->session->unset_userdata('FilterInstansiId');
+        $filter_instansi_id = null;
+    } elseif ($this->input->get('instansi_id') !== null) {
+        $get_instansi = $this->input->get('instansi_id', TRUE);
+        if (!empty($get_instansi) && is_numeric($get_instansi)) {
+            $filter_instansi_id = (int)$get_instansi;
+            $this->session->set_userdata('TempInstansiId', $filter_instansi_id);
+            $this->session->set_userdata('FilterInstansiId', $filter_instansi_id);
+        } else {
+            // User memilih "-- Semua Instansi --"
+            $this->session->unset_userdata('TempInstansiId');
+            $this->session->unset_userdata('FilterInstansiId');
+            $filter_instansi_id = null;
+        }
+    } elseif (!$is_role_4) {
+        if (isset($_SESSION['FilterInstansiId']) && !empty($_SESSION['FilterInstansiId'])) {
+            $filter_instansi_id = (int)$_SESSION['FilterInstansiId'];
+        } elseif (isset($_SESSION['TempInstansiId']) && !empty($_SESSION['TempInstansiId'])) {
+            $filter_instansi_id = (int)$_SESSION['TempInstansiId'];
+        }
     }
     
     $data['KodeWilayah'] = $KodeWilayah;
     $data['InstansiId'] = $instansi_id;
     $data['IsLoggedIn'] = $is_logged_in;
-    $data['IsRole4'] = $is_role_4 || ($is_logged_in && !empty($filter_instansi_id));
+    $data['IsRole4'] = $is_role_4; // KUNCI: Daerah (Level 3/2) BUKAN Role 4, sehingga TIDAK BISA CRUD (Read-Only)
+    $data['IsDaerah'] = $is_daerah;
     $data['Level'] = $level;
     $data['FilterInstansiId'] = $filter_instansi_id;
     $data['NamaInstansi'] = isset($_SESSION['NamaInstansi']) ? $_SESSION['NamaInstansi'] : '';
+    
+    // Ambil nama instansi yang sedang difilter jika ada
+    $data['NamaFilterInstansi'] = '';
+    if (!empty($filter_instansi_id)) {
+        $instRow = $this->db->select('nama')->where('id', $filter_instansi_id)->get('akun_instansi')->row_array();
+        if ($instRow) {
+            $data['NamaFilterInstansi'] = $instRow['nama'];
+        }
+    }
     
     // Ambil nama wilayah
     $data['NamaWilayah'] = '';
@@ -14328,16 +14703,17 @@ private function getRenstraPDDataWithOutcome($KodeWilayah, $instansi_id, $is_rol
     if (!$KodeWilayah) return $result;
     
     // 1. Ambil semua Tujuan
-    $this->db->select('*');
-    $this->db->from('renstra_tujuan');
-    $this->db->where('kode_wilayah', $KodeWilayah);
-    $this->db->where('deleted_at IS NULL');
+    $this->db->select('t.*, a.nama as nama_instansi');
+    $this->db->from('renstra_tujuan t');
+    $this->db->join('akun_instansi a', 'a.id = t.id_instansi', 'left');
+    $this->db->where('t.kode_wilayah', $KodeWilayah);
+    $this->db->where('t.deleted_at IS NULL');
     if ($is_role_4 && $instansi_id) {
-        $this->db->where('id_instansi', $instansi_id);
+        $this->db->where('t.id_instansi', $instansi_id);
     } elseif (!empty($filter_instansi_id)) {
-        $this->db->where('id_instansi', (int)$filter_instansi_id);
+        $this->db->where('t.id_instansi', (int)$filter_instansi_id);
     }
-    $tujuan_list = $this->db->order_by('id', 'ASC')->get()->result_array();
+    $tujuan_list = $this->db->order_by('t.id', 'ASC')->get()->result_array();
     
     foreach ($tujuan_list as &$tujuan) {
         // Ambil Indikator Tujuan
@@ -14890,8 +15266,8 @@ public function tambahRenstraTujuanPD() {
         show_404();
         return;
     }
-    if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda tidak memiliki izin untuk menambah data.']);
+    if (!$this->can_crud_renstra()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Akun Daerah hanya dapat melihat data (Read-Only) dan tidak dapat menambah data Renstra.']);
         return;
     }
     $KodeWilayah = $this->get_kode_wilayah();
@@ -15028,8 +15404,8 @@ public function editRenstraTujuanPD() {
         show_404();
         return;
     }
-    if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda tidak memiliki izin untuk mengedit data.']);
+    if (!$this->can_crud_renstra()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Akun Daerah hanya dapat melihat data (Read-Only) dan tidak dapat mengedit data Renstra.']);
         return;
     }
     
@@ -15173,8 +15549,8 @@ public function hapusRenstraTujuanPD() {
         show_404();
         return;
     }
-    if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menghapus data.']);
+    if (!$this->can_crud_renstra()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Akun Daerah hanya dapat melihat data (Read-Only) dan tidak dapat menghapus data Renstra.']);
         return;
     }
     $id = (int)$this->input->post('id', TRUE);
@@ -15251,8 +15627,8 @@ public function tambahRenstraSasaranPD() {
         show_404();
         return;
     }
-    if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda tidak memiliki izin untuk menambah data.']);
+    if (!$this->can_crud_renstra()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Akun Daerah hanya dapat melihat data (Read-Only) dan tidak dapat menambah data Renstra.']);
         return;
     }
     
@@ -15393,8 +15769,8 @@ public function editRenstraSasaranPD() {
         show_404();
         return;
     }
-    if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda tidak memiliki izin untuk mengedit data.']);
+    if (!$this->can_crud_renstra()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Akun Daerah hanya dapat melihat data (Read-Only) dan tidak dapat mengedit data Renstra.']);
         return;
     }
     
@@ -15535,8 +15911,8 @@ public function hapusRenstraSasaranPD() {
         show_404();
         return;
     }
-    if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menghapus data.']);
+    if (!$this->can_crud_renstra()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Akun Daerah hanya dapat melihat data (Read-Only) dan tidak dapat menghapus data Renstra.']);
         return;
     }
     $id = (int)$this->input->post('id', TRUE);
@@ -15609,8 +15985,8 @@ public function tambahRenstraProgramPD() {
         show_404();
         return;
     }
-    if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menambah data.']);
+    if (!$this->can_crud_renstra()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Akun Daerah hanya dapat melihat data (Read-Only) dan tidak dapat menambah data Renstra.']);
         return;
     }
     
@@ -15758,8 +16134,8 @@ public function editRenstraProgramPD() {
         return;
     }
     
-    if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat mengedit data.']);
+    if (!$this->can_crud_renstra()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Akun Daerah hanya dapat melihat data (Read-Only) dan tidak dapat mengedit data Renstra.']);
         return;
     }
     
@@ -15986,8 +16362,8 @@ public function hapusRenstraProgramPD() {
         show_404();
         return;
     }
-    if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menghapus data.']);
+    if (!$this->can_crud_renstra()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Akun Daerah hanya dapat melihat data (Read-Only) dan tidak dapat menghapus data Renstra.']);
         return;
     }
     
@@ -16159,8 +16535,8 @@ public function tambahRenstraKegiatanPD() {
         show_404();
         return;
     }
-    if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menambah data.']);
+    if (!$this->can_crud_renstra()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Akun Daerah hanya dapat melihat data (Read-Only) dan tidak dapat menambah data Renstra.']);
         return;
     }
     
@@ -16305,8 +16681,8 @@ public function editRenstraKegiatanPD() {
         show_404();
         return;
     }
-    if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat mengedit data.']);
+    if (!$this->can_crud_renstra()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Akun Daerah hanya dapat melihat data (Read-Only) dan tidak dapat mengedit data Renstra.']);
         return;
     }
     
@@ -16616,8 +16992,8 @@ public function hapusRenstraKegiatanPD() {
         show_404();
         return;
     }
-    if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menghapus data.']);
+    if (!$this->can_crud_renstra()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Akun Daerah hanya dapat melihat data (Read-Only) dan tidak dapat menghapus data Renstra.']);
         return;
     }
     $id = (int)$this->input->post('id', TRUE);
@@ -16670,8 +17046,8 @@ public function tambahRenstraSubKegiatanPD() {
         show_404();
         return;
     }
-    if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menambah data.']);
+    if (!$this->can_crud_renstra()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Akun Daerah hanya dapat melihat data (Read-Only) dan tidak dapat menambah data Renstra.']);
         return;
     }
     
@@ -16819,8 +17195,8 @@ public function editRenstraSubKegiatanPD() {
         show_404();
         return;
     }
-    if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat mengedit data.']);
+    if (!$this->can_crud_renstra()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Akun Daerah hanya dapat melihat data (Read-Only) dan tidak dapat mengedit data Renstra.']);
         return;
     }
     
@@ -17136,8 +17512,8 @@ public function hapusRenstraSubKegiatanPD() {
         show_404();
         return;
     }
-    if (!$this->can_crud()) {
-        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Hanya Instansi yang dapat menghapus data.']);
+    if (!$this->can_crud_renstra()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Akun Daerah hanya dapat melihat data (Read-Only) dan tidak dapat menghapus data Renstra.']);
         return;
     }
     $id = (int)$this->input->post('id', TRUE);
