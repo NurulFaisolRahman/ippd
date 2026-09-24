@@ -13692,8 +13692,14 @@
             $Header['Halaman'] = 'Pagu Urusan';
             
             // Ambil KodeWilayah
+            $getKodeWilayah = $this->input->get('KodeWilayah', TRUE);
+            if (!empty($getKodeWilayah)) {
+                $this->session->set_userdata('TempKodeWilayah', $getKodeWilayah);
+            }
+
             $kodeWilayah = $this->session->userdata('KodeWilayah') 
                         ?? $this->session->userdata('TempKodeWilayah') 
+                        ?? $getKodeWilayah
                         ?? '';
             
             // Data untuk filter provinsi
@@ -13799,11 +13805,15 @@
                         return;
                     }
                 }
+
+                // Ambil nama dinas dari akun_instansi sebagai nilai urusan
+                $inst = $this->db->select('nama')->where('id', (int)$instansiId)->get('akun_instansi')->row_array();
+                $namaDinas = $inst ? $inst['nama'] : '';
                 
                 $data = [
                     'kode_wilayah' => $kodeWilayah,
                     'kode_urusan' => null,
-                    'urusan' => null,
+                    'urusan' => $namaDinas,
                     'pagu' => $paguClean,
                     'instansi_id' => (string)$instansiId,
                     'created_at' => date('Y-m-d H:i:s')
@@ -13884,10 +13894,14 @@
                         return;
                     }
                 }
+
+                // Ambil nama dinas dari akun_instansi sebagai nilai urusan
+                $inst = $this->db->select('nama')->where('id', (int)$instansiId)->get('akun_instansi')->row_array();
+                $namaDinas = $inst ? $inst['nama'] : '';
                 
                 $data = [
                     'kode_urusan' => null,
-                    'urusan' => null,
+                    'urusan' => $namaDinas,
                     'pagu' => $paguClean,
                     'instansi_id' => (string)$instansiId,
                     'updated_at' => date('Y-m-d H:i:s')
@@ -13897,17 +13911,10 @@
                 $this->db->where('kode_wilayah', $kodeWilayah);
                 $this->db->update('pagu_urusan', $data);
                 
-                if ($this->db->affected_rows() > 0) {
-                    echo json_encode([
-                        'status' => 'success',
-                        'message' => 'Data berhasil diupdate!'
-                    ]);
-                } else {
-                    echo json_encode([
-                        'status' => 'error',
-                        'message' => 'Tidak ada perubahan data!'
-                    ]);
-                }
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Data berhasil diupdate!'
+                ]);
                 
             } catch (Exception $e) {
                 log_message('error', 'EditPaguUrusan: ' . $e->getMessage());
