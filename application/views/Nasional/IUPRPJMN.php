@@ -226,7 +226,6 @@
             </div>
             <div class="modal-footer" style="padding-top: 15px;">
                 <button type="button" class="btn btn-success btn-action" id="SimpanIUP"><i class="fa fa-save"></i> Simpan</button>
-                <button type="button" class="btn btn-default btn-action" data-dismiss="modal">Batal</button>
             </div>
         </div>
     </div>
@@ -292,7 +291,6 @@
             </div>
             <div class="modal-footer" style="padding-top: 15px;">
                 <button type="button" class="btn btn-info btn-action" id="Edit"><i class="fa fa-save"></i> Simpan Perubahan</button>
-                <button type="button" class="btn btn-default btn-action" data-dismiss="modal">Batal</button>
             </div>
         </div>
     </div>

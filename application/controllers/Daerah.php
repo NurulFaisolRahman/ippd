@@ -919,8 +919,12 @@
             }
 
         public function GetSasaranRPJPN(){
-            echo json_encode($this->db->query("SELECT s.* FROM visirpjpn as v, misirpjpn as m, tujuanrpjpn as t, sasaranrpjpn as s WHERE s._Id = t.Id AND t._Id = m.Id AND m._Id = v.Id AND s.deleted_at IS NULL")->result_array());
+            if (isset($_POST['Id']) && !empty($_POST['Id'])) {
+                echo json_encode($this->db->query("SELECT s.* FROM visirpjpn as v, sasaranrpjpn as s WHERE s._Id = v.Id AND v.Id = ".$this->db->escape($_POST['Id'])." AND s.deleted_at IS NULL")->result_array());
+            } else {
+                echo json_encode($this->db->query("SELECT s.* FROM visirpjpn as v, sasaranrpjpn as s WHERE s._Id = v.Id AND s.deleted_at IS NULL")->result_array());
             }
+        }
 
         public function GetPeriodeSasaranRPJPD(){
             echo json_encode($this->db->query("SELECT v.Id as IdVisi FROM visirpjpd as v, misirpjpd as m, tujuanrpjpd as t WHERE t._Id = ".$_POST['Id']." AND t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL AND t.KodeWilayah = ".$_SESSION['KodeWilayah'])->result_array());

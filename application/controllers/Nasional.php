@@ -82,52 +82,39 @@ class Nasional extends CI_Controller {
             'Periode'    => $periode,
             'TahunMulai' => $v['TahunMulai'],
             'TahunAkhir' => $v['TahunAkhir'],
-            'Misi'       => []
+            'Sasaran'    => []
         ];
 
-        // 2. Ambil data Misi berdasarkan _Id (Id Visi)
+        // 2. Ambil data Sasaran langsung berdasarkan _Id (Id Visi)
         $this->db->where('_Id', $v['Id']);
-        $misi_data = $this->db->where("deleted_at IS NULL")->get('misirpjpn')->result_array();
+        $sasaran_data = $this->db->where("deleted_at IS NULL")->get('sasaranrpjpn')->result_array();
 
-        foreach ($misi_data as $m) {
-            $misi_item = [
-                'Id'      => $m['Id'],
-                'Misi'    => $m['Misi'],
-                'Periode' => $periode, // Misi mengikuti periode Visi
-                'Tujuan'  => []
+        foreach ($sasaran_data as $s) {
+            $sasaran_item = [
+                'Id'        => $s['Id'],
+                'Sasaran'   => $s['Sasaran'],
+                'Periode'   => $periode,
+                'Indikator' => []
             ];
 
-            // 3. Ambil data Tujuan berdasarkan _Id (Id Misi)
-            $this->db->where('_Id', $m['Id']);
-            $tujuan_data = $this->db->where("deleted_at IS NULL")->get('tujuanrpjpn')->result_array();
+            // 3. Ambil data Indikator berdasarkan _Id (Id Sasaran)
+            $this->db->where('_Id', $s['Id']);
+            $indikator_data = $this->db->where("deleted_at IS NULL")->get('indikator_sasaran_rpjpn')->result_array();
 
-            foreach ($tujuan_data as $t) {
-                $tujuan_item = [
-                    'Id'      => $t['Id'],
-                    'Tujuan'  => $t['Tujuan'],
-                    'Periode' => $periode,
-                    'Sasaran' => []
+            foreach ($indikator_data as $ind) {
+                $indikator_item = [
+                    'Id'        => $ind['Id'],
+                    'Indikator' => $ind['Indikator'],
+                    'Baseline'  => $ind['Baseline'],
+                    'Target'    => $ind['Target'],
+                    'Periode'   => $periode
                 ];
-
-                // 4. Ambil data Sasaran berdasarkan _Id (Id Tujuan)
-                $this->db->where('_Id', $t['Id']);
-                $sasaran_data = $this->db->where("deleted_at IS NULL")->get('sasaranrpjpn')->result_array();
-
-                foreach ($sasaran_data as $s) {
-                    $sasaran_item = [
-                        'Id'      => $s['Id'],
-                        'Sasaran' => $s['Sasaran'],
-                        'Periode' => $periode
-                    ];
-                    // Masukkan sasaran ke dalam array Tujuan
-                    $tujuan_item['Sasaran'][] = $sasaran_item;
-                }
-                // Masukkan tujuan ke dalam array Misi
-                $misi_item['Tujuan'][] = $tujuan_item;
+                $sasaran_item['Indikator'][] = $indikator_item;
             }
-            // Masukkan misi ke dalam array Visi
-            $visi_item['Misi'][] = $misi_item;
+
+            $visi_item['Sasaran'][] = $sasaran_item;
         }
+
         // Masukkan visi ke hasil akhir
         $result[] = $visi_item;
     }
@@ -170,7 +157,79 @@ class Nasional extends CI_Controller {
     echo json_encode($this->db->where("Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("visirpjpn")->result_array());
 	}
 
-  public function InputMisiRPJPN(){  
+  public function MisiRPJPN(){
+		$Header['Halaman'] = 'RPJPN';
+
+    // Ambil data Visi aktif (untuk pilihan periode jika input / modal)
+    $Data['DataVisi'] = $this->db->where("deleted_at IS NULL")->order_by("Id", "DESC")->get("visirpjpn")->result_array();
+
+    // 3 Kategori Misi RPJPN
+    $kategori_list = [
+        'Transformasi Indonesia',
+        'Landasan Transformasi',
+        'Kerangka Implementasi Transformasi'
+    ];
+
+    $grouped_misi = [
+        'Transformasi Indonesia' => [],
+        'Landasan Transformasi' => [],
+        'Kerangka Implementasi Transformasi' => []
+    ];
+
+    $all_misi = $this->db->query("
+        SELECT m.*, v.TahunMulai, v.TahunAkhir 
+        FROM misirpjpn as m 
+        LEFT JOIN visirpjpn as v ON m._Id = v.Id 
+        WHERE m.deleted_at IS NULL 
+        ORDER BY m.Id ASC
+    ")->result_array();
+
+    foreach ($all_misi as $m) {
+        $periode = !empty($m['Periode']) ? $m['Periode'] : (!empty($m['TahunMulai']) ? ($m['TahunMulai'] . '-' . $m['TahunAkhir']) : '-');
+        $misi_item = [
+            'Id'         => $m['Id'],
+            '_Id'        => $m['_Id'],
+            'Misi'       => $m['Misi'],
+            'Kategori'   => $m['Kategori'],
+            'Periode'    => $periode
+        ];
+
+        // Kelompokkan berdasarkan kategori
+        $kat = $m['Kategori'];
+        if (isset($grouped_misi[$kat])) {
+            $grouped_misi[$kat][] = $misi_item;
+        } else {
+            $grouped_misi['Transformasi Indonesia'][] = $misi_item;
+        }
+    }
+
+    $Data['MisiGrouped'] = $grouped_misi;
+    $Data['KategoriList'] = $kategori_list;
+
+		$this->load->view('Nasional/header', $Header);
+		$this->load->view('Nasional/MisiRPJPN', $Data);
+	}
+
+  public function InputMisiRPJPN(){
+    if (empty($_POST['_Id'])) {
+      $visi = null;
+      if (!empty($_POST['Periode'])) {
+        $cleanPeriode = str_replace(' ', '', $_POST['Periode']);
+        $parts = explode('-', $cleanPeriode);
+        if (count($parts) == 2) {
+          $visi = $this->db->where('TahunMulai', trim($parts[0]))
+                           ->where('TahunAkhir', trim($parts[1]))
+                           ->where('deleted_at IS NULL')
+                           ->get('visirpjpn')->row_array();
+        }
+      }
+      if (!$visi) {
+        $visi = $this->db->where('deleted_at IS NULL')->order_by('Id', 'ASC')->get('visirpjpn')->row_array();
+      }
+      if ($visi) {
+        $_POST['_Id'] = $visi['Id'];
+      }
+    }
     $this->db->insert('misirpjpn',$_POST);
     if ($this->db->affected_rows()){
       echo '1';
@@ -204,7 +263,10 @@ class Nasional extends CI_Controller {
 	}
 
   public function InputTujuanRPJPN(){  
-    $this->db->insert('tujuanrpjpn',$_POST);
+    if (empty($_POST['_Id'])) {
+      $_POST['_Id'] = 1;
+    }
+    $this->db->insert('tujuanrpjpn', $_POST);
     if ($this->db->affected_rows()){
       echo '1';
     } else {
@@ -215,11 +277,7 @@ class Nasional extends CI_Controller {
 	public function EditTujuanRPJPN(){  
 		$this->db->where('Id',$_POST['Id']); 
 		$this->db->update('tujuanrpjpn', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Update Data!';
-    }
+    echo '1';
   }
 
   public function HapusTujuanRPJPN(){  
@@ -265,16 +323,55 @@ class Nasional extends CI_Controller {
     }
   }
 
+  public function InputIndikatorRPJPN(){  
+    $this->db->insert('indikator_sasaran_rpjpn', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Menyimpan Data!';
+    }
+  }
+	
+  public function EditIndikatorRPJPN(){  
+    $this->db->where('Id', $_POST['Id']); 
+    $this->db->update('indikator_sasaran_rpjpn', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Update Data!';
+    }
+  }
+
+  public function HapusIndikatorRPJPN(){  
+    $_POST['deleted_at'] = date('Y-m-d H:i:s');
+    $this->db->where('Id', $_POST['Id'])->update('indikator_sasaran_rpjpn', $_POST);
+    if ($this->db->affected_rows()){
+      echo '1';
+    } else {
+      echo 'Gagal Hapus Data!';
+    }
+  }
+
   public function TahapanRPJPN(){
 		$Header['Halaman'] = 'RPJPN';
     $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjpn")->result_array();
-		$Data['Tahapan'] = $this->db->query("SELECT v.*,t.* FROM visirpjpn as v, tahapanrpjpn as t WHERE t._Id = v.Id AND t.deleted_at IS NULL")->result_array();
-		$this->load->view('Nasional/header',$Header);
-		$this->load->view('Nasional/TahapanRPJPN',$Data);
+    $Data['Tahapan'] = $this->db->where("deleted_at IS NULL")->order_by("Id", "ASC")->get("tahapanrpjpn")->result_array();
+
+		$this->load->view('Nasional/header', $Header);
+		$this->load->view('Nasional/TahapanRPJPN', $Data);
 	}
 
   public function InputTahapanRPJPN(){  
-    $this->db->insert('tahapanrpjpn',$_POST);
+    if (empty($_POST['_Id'])) {
+      $visi = $this->db->where('deleted_at IS NULL')->order_by('Id', 'ASC')->get('visirpjpn')->row_array();
+      if ($visi) {
+        $_POST['_Id'] = $visi['Id'];
+      }
+    }
+    if (isset($_POST['Tahapan']) && !isset($_POST['Tahap'])) {
+      $_POST['Tahap'] = mb_substr($_POST['Tahapan'], 0, 150);
+    }
+    $this->db->insert('tahapanrpjpn', $_POST);
     if ($this->db->affected_rows()){
       echo '1';
     } else {
@@ -283,13 +380,12 @@ class Nasional extends CI_Controller {
 	}
 	
 	public function EditTahapanRPJPN(){  
+    if (isset($_POST['Tahapan']) && !isset($_POST['Tahap'])) {
+      $_POST['Tahap'] = mb_substr($_POST['Tahapan'], 0, 150);
+    }
 		$this->db->where('Id',$_POST['Id']); 
 		$this->db->update('tahapanrpjpn', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Update Data!';
-    }
+    echo '1';
   }
 
   public function HapusTahapanRPJPN(){  
@@ -687,14 +783,37 @@ class Nasional extends CI_Controller {
 
   public function IUPRPJPN(){
 		$Header['Halaman'] = 'RPJPN';
-    $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjpn")->result_array();
-		$Data['IUP'] = $this->db->query("SELECT v.*,t.* FROM visirpjpn as v, iuprpjpn as t WHERE t._Id = v.Id AND t.deleted_at IS NULL")->result_array();
-		$this->load->view('Nasional/header',$Header);
-		$this->load->view('Nasional/IUPRPJPN',$Data);
+    $Data['Agenda'] = $this->db->where("deleted_at IS NULL")->order_by("Urutan ASC, Id ASC")->get("agenda_transformasi_rpjpn")->result_array();
+    $Data['Tujuan'] = $this->db->where("deleted_at IS NULL")->order_by("Id", "ASC")->get("tujuanrpjpn")->result_array();
+    $Data['IUP'] = $this->db->where("deleted_at IS NULL")->order_by("Urutan ASC, Id ASC")->get("iuprpjpn")->result_array();
+		$this->load->view('Nasional/header', $Header);
+		$this->load->view('Nasional/IUPRPJPN', $Data);
 	}
 
+  public function InputAgendaRPJPN(){  
+    $this->db->insert('agenda_transformasi_rpjpn', $_POST);
+    echo $this->db->affected_rows() ? '1' : 'Gagal Menyimpan Agenda Transformasi!';
+	}
+	
+	public function EditAgendaRPJPN(){  
+		$this->db->where('Id', $_POST['Id'])->update('agenda_transformasi_rpjpn', $_POST);
+    if (!empty($_POST['NamaAgenda'])) {
+      $this->db->where('IdAgenda', $_POST['Id'])->update('tujuanrpjpn', ['AgendaTransformasi' => $_POST['NamaAgenda']]);
+    }
+    echo '1';
+  }
+
+  public function HapusAgendaRPJPN(){  
+		$deleted_at = date('Y-m-d H:i:s');
+		$this->db->where('Id', $_POST['Id'])->update('agenda_transformasi_rpjpn', ['deleted_at' => $deleted_at]);
+    echo '1';
+  }
+
   public function InputIUPRPJPN(){  
-    $this->db->insert('iuprpjpn',$_POST);
+    if (isset($_POST['Sasaran'])) {
+      $_POST['TargetAkhir'] = $_POST['Sasaran'];
+    }
+    $this->db->insert('iuprpjpn', $_POST);
     if ($this->db->affected_rows()){
       echo '1';
     } else {
@@ -703,23 +822,18 @@ class Nasional extends CI_Controller {
 	}
 	
 	public function EditIUPRPJPN(){  
-		$this->db->where('Id',$_POST['Id']); 
-		$this->db->update('iuprpjpn', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Update Data!';
+    if (isset($_POST['Sasaran'])) {
+      $_POST['TargetAkhir'] = $_POST['Sasaran'];
     }
+		$this->db->where('Id', $_POST['Id']); 
+		$this->db->update('iuprpjpn', $_POST);
+    echo '1';
   }
 
   public function HapusIUPRPJPN(){  
-		$_POST['deleted_at'] = date('Y-m-d H:i:s');
-		$this->db->where('Id',$_POST['Id'])->update('iuprpjpn', $_POST);
-    if ($this->db->affected_rows()){
-      echo '1';
-    } else {
-      echo 'Gagal Hapus Data!';
-    }
+		$deleted_at = date('Y-m-d H:i:s');
+		$this->db->where('Id', $_POST['Id'])->or_where('ParentId', $_POST['Id'])->update('iuprpjpn', ['deleted_at' => $deleted_at]);
+    echo '1';
   }
 
   public function IUPRPJMN(){

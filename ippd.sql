@@ -92161,7 +92161,9 @@ INSERT INTO `misirpjpdp` (`Id`, `_Id`, `Id_`, `IdP`, `KodeWilayah`, `Misi`, `cre
 CREATE TABLE `misirpjpn` (
   `Id` int(11) NOT NULL,
   `_Id` int(11) NOT NULL,
+  `Periode` varchar(50) DEFAULT NULL,
   `Misi` varchar(535) NOT NULL,
+  `Kategori` varchar(100) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `deleted_at` timestamp NULL DEFAULT NULL
@@ -104259,7 +104261,7 @@ ALTER TABLE `permasalahan_pokok`
 -- Ketidakleluasaan untuk tabel `sasaranrpjpn`
 --
 ALTER TABLE `sasaranrpjpn`
-  ADD CONSTRAINT `sasaranrpjpn_ibfk_1` FOREIGN KEY (`_Id`) REFERENCES `tujuanrpjpn` (`Id`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `sasaranrpjpn_ibfk_1` FOREIGN KEY (`_Id`) REFERENCES `visirpjpn` (`Id`) ON UPDATE CASCADE;
 
 --
 -- Ketidakleluasaan untuk tabel `sasaran_strategis`
@@ -104283,3 +104285,21 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+--
+-- Struktur dari tabel `indikator_sasaran_rpjpn`
+--
+
+CREATE TABLE IF NOT EXISTS `indikator_sasaran_rpjpn` (
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
+  `_Id` int(11) NOT NULL,
+  `Indikator` text NOT NULL,
+  `Baseline` varchar(255) DEFAULT NULL,
+  `Target` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`Id`),
+  KEY `_Id` (`_Id`),
+  CONSTRAINT `indikator_sasaran_rpjpn_ibfk_1` FOREIGN KEY (`_Id`) REFERENCES `sasaranrpjpn` (`Id`) ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
