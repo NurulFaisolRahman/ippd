@@ -1044,9 +1044,10 @@
             ->result_array();
     }
   ?>
-    <div class="card" style="padding: 16px 20px; margin-bottom: 20px;">
-      <div style="font-size: 14px; font-weight: 700; color: var(--ui-text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-        <i class="fa fa-filter" style="color: var(--notika-green);"></i> <?= empty($IsLoggedIn) ? 'Filter Wilayah &amp; Perangkat Daerah' : 'Filter Perangkat Daerah' ?>
+    <div class="card" style="padding: 16px 20px; margin-bottom: 20px; border-left: 4px solid var(--notika-green);">
+      <div style="font-size: 14.5px; font-weight: 700; color: var(--ui-text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+        <i class="fa fa-filter" style="color: var(--notika-green); font-size: 16px;"></i> 
+        <span><?= empty($IsLoggedIn) ? 'Filter Wilayah &amp; Perangkat Daerah' : 'Filter Perangkat Daerah (Instansi)' ?></span>
       </div>
       <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;">
         <?php if (empty($IsLoggedIn)): ?>
@@ -1078,10 +1079,10 @@
           <input type="hidden" id="selKabKotaTop" value="<?= !empty($KodeWilayah) ? $KodeWilayah : '' ?>">
         <?php endif; ?>
 
-        <div id="grpInstansiTop" style="flex: 1.2; min-width: 220px; <?= (!empty($IsLoggedIn) || !empty($KodeWilayah)) ? '' : 'display:none;' ?>">
-          <label style="font-size: 12px; font-weight: 600; color: var(--ui-text-muted); margin-bottom: 4px; display: block;">Perangkat Daerah / Instansi</label>
-          <select id="selInstansiTop" style="width: 100%; height: 38px; border-radius: 6px; border: 1px solid var(--ui-border); padding: 6px 10px; font-size: 13px;">
-            <option value="">-- Semua Perangkat Daerah --</option>
+        <div id="grpInstansiTop" style="flex: 1.5; min-width: 250px; <?= (!empty($IsLoggedIn) || !empty($KodeWilayah)) ? '' : 'display:none;' ?>">
+          <label style="font-size: 12px; font-weight: 700; color: var(--ui-text-main); margin-bottom: 4px; display: block;">Perangkat Daerah / Instansi</label>
+          <select id="selInstansiTop" style="width: 100%; height: 38px; border-radius: 6px; border: 1px solid var(--ui-border); padding: 6px 10px; font-size: 13px; font-weight: 600;">
+            <option value="">-- Pilih Perangkat Daerah --</option>
             <?php if (!empty($ListInstansi)) { foreach ($ListInstansi as $ins) { ?>
               <option value="<?= $ins['id'] ?>" <?= ($ActiveInstansiId == $ins['id']) ? 'selected' : '' ?>>
                 <?= html_escape($ins['nama']) ?>
@@ -1090,9 +1091,20 @@
           </select>
         </div>
 
+        <?php if (!empty($IsDaerah)): ?>
+          <div style="flex: 0.8; min-width: 130px;">
+            <label style="font-size: 12px; font-weight: 700; color: var(--ui-text-main); margin-bottom: 4px; display: block;">Tahun Anggaran</label>
+            <select id="selTahunTop" style="width: 100%; height: 38px; border-radius: 6px; border: 1px solid var(--ui-border); padding: 6px 10px; font-size: 13px; font-weight: 600;">
+              <?php foreach ($ListTahun as $y): ?>
+                <option value="<?= $y ?>" <?= ($y == $TahunAktif) ? 'selected' : '' ?>><?= $y ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+        <?php endif; ?>
+
         <div style="width: auto;">
-          <button type="button" id="btnFilterWilayahTop" class="btn btn-primary" style="height: 38px; padding: 0 18px; font-size: 13px; font-weight: 600; border-radius: 6px; background: var(--notika-green); color: #fff; border: none; cursor: pointer;">
-            <i class="fa fa-search"></i> <?= empty($IsLoggedIn) ? 'Terapkan Wilayah' : 'Terapkan Filter' ?>
+          <button type="button" id="btnFilterWilayahTop" class="btn btn-primary" style="height: 38px; padding: 0 20px; font-size: 13px; font-weight: 700; border-radius: 6px; background: var(--notika-green); color: #fff; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa fa-search"></i> <?= empty($IsLoggedIn) ? 'Terapkan Wilayah' : 'Tampilkan Rincian' ?>
           </button>
         </div>
       </div>
@@ -1206,6 +1218,19 @@
 
         if (btnApply) {
           btnApply.onclick = function() {
+            <?php if (!empty($IsDaerah)): ?>
+              var selInst = document.getElementById('selInstansiTop');
+              var inst = selInst ? selInst.value : '';
+              var thn = document.getElementById('selTahunTop') ? document.getElementById('selTahunTop').value : (document.getElementById('ctxTahun') ? document.getElementById('ctxTahun').value : '');
+              var url = BaseURL + 'Instansi/BelanjaSubKegiatan';
+              var queryParams = [];
+              if (inst) queryParams.push('instansi_id=' + encodeURIComponent(inst));
+              if (thn) queryParams.push('tahun=' + encodeURIComponent(thn));
+              if (queryParams.length > 0) url += '?' + queryParams.join('&');
+              window.location.href = url;
+              return;
+            <?php endif; ?>
+
             var prov = selProv ? selProv.value : '';
             var kab = selKab ? selKab.value : '';
             var selInst = document.getElementById('selInstansiTop');
@@ -1371,10 +1396,12 @@
         <h2>Tabel Rincian Belanja</h2>
         <p id="toolbarContext">Lengkapi pilihan Sub Unit sampai Sub Kegiatan terlebih dahulu.</p>
       </div>
+      <?php if (!empty($CanCrud)): ?>
       <button class="btn-add" id="btnTambah" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
         Tambah Rincian
       </button>
+      <?php endif; ?>
     </div>
     <div class="table-wrap">
       <table>
@@ -1383,7 +1410,9 @@
             <th rowspan="2" style="width:160px;">Kode Rekening</th>
             <th rowspan="2">Uraian</th>
             <th colspan="4" class="center">Rincian Perhitungan</th>
+            <?php if (!empty($CanCrud)): ?>
             <th rowspan="2" style="width:90px;" class="center">Aksi</th>
+            <?php endif; ?>
           </tr>
           <tr class="sub-head">
             <th class="num" style="width:120px;">Koefisien</th>
@@ -1397,7 +1426,9 @@
           <tr>
             <td colspan="5" class="label">Jumlah Total</td>
             <td class="num" id="grandTotal"><span class="money-cell"><span class="cur">Rp</span><span class="val">0,00</span></span></td>
+            <?php if (!empty($CanCrud)): ?>
             <td></td>
+            <?php endif; ?>
           </tr>
         </tfoot>
       </table>
@@ -1635,6 +1666,7 @@
   var isLoggedIn = <?= !empty($IsLoggedIn) ? 'true' : 'false' ?>;
   var hasKodeWilayah = <?= !empty($KodeWilayah) ? 'true' : 'false' ?>;
   var activeInstansiId = <?= json_encode($ActiveInstansiId) ?>;
+  var canCrud = <?= !empty($CanCrud) ? 'true' : 'false' ?>;
 
   /* ---------------- Master data ---------------- */
   var NODE_NAMES = {
@@ -1812,7 +1844,7 @@
       '<td><div class="cell-label" style="padding-left:'+pad+'px;">'+toggleBtn(code,collapsed,hasChildren)+'<span class="txt">'+esc(name)+'</span></div></td>'+
       '<td></td><td></td><td></td>'+
       '<td class="num">'+formatMoney(total)+'</td>'+
-      '<td></td>'+
+      (canCrud ? '<td></td>' : '')+
     '</tr>';
   }
   function accountRow(code, name, level, total, hasChildren){
@@ -1823,7 +1855,7 @@
       '<td><div class="cell-label" style="padding-left:'+pad+'px;">'+toggleBtn(code,collapsed,hasChildren)+'<span class="txt">'+esc(name)+'</span></div></td>'+
       '<td></td><td></td><td></td>'+
       '<td class="num">'+formatMoney(total)+'</td>'+
-      '<td></td>'+
+      (canCrud ? '<td></td>' : '')+
     '</tr>';
   }
   function groupRow(key, label, sumberDana, level, total, hasChildren){
@@ -1837,7 +1869,7 @@
         '</span></div></td>'+
       '<td></td><td></td><td></td>'+
       '<td class="num">'+formatMoney(total)+'</td>'+
-      '<td></td>'+
+      (canCrud ? '<td></td>' : '')+
     '</tr>';
   }
   function subgroupRow(key, label, level, total, hasChildren){
@@ -1848,7 +1880,7 @@
       '<td><div class="cell-label" style="padding-left:'+pad+'px;">'+toggleBtn(key,collapsed,hasChildren)+'<span class="txt">[ - ] '+esc(label)+'</span></div></td>'+
       '<td></td><td></td><td></td>'+
       '<td class="num">'+formatMoney(total)+'</td>'+
-      '<td></td>'+
+      (canCrud ? '<td></td>' : '')+
     '</tr>';
   }
   function itemRow(it, level){
@@ -1865,10 +1897,10 @@
       '<td class="num">'+formatMoney(it.hargaSatuan)+'</td>'+
       '<td class="center font-mono">'+(parseFloat(it.ppn)||0)+'%</td>'+
       '<td class="num" style="font-weight:700;">'+formatMoney(calcJumlah(it))+'</td>'+
-      '<td class="center"><div class="actions">'+
+      (canCrud ? ('<td class="center"><div class="actions">'+
         '<button class="icon-btn edit" data-edit="'+it.id+'" title="Ubah">'+ICON_EDIT+'</button>'+
         '<button class="icon-btn del" data-del="'+it.id+'" title="Hapus">'+ICON_DEL+'</button>'+
-      '</div></td>'+
+      '</div></td>') : '')+
     '</tr>';
   }
 
@@ -1929,7 +1961,7 @@
       items.filter(function(it){ return it.subKegiatanKode === currentSubKegiatanKode; }) : 
       [];
 
-    var emptyColspan = 7;
+    var emptyColspan = canCrud ? 7 : 6;
     if(!currentSubKegiatanKode){
       tbody.innerHTML = '<tr><td colspan="'+emptyColspan+'"><div class="empty-state">'+ICON_EMPTY+
         '<p>Pilih Sub Unit, Bidang Urusan, Program, Kegiatan dan Sub Kegiatan di atas terlebih dahulu untuk menampilkan rincian belanja.</p></div></td></tr>';
@@ -1946,7 +1978,9 @@
     });
 
     if(out.length===0){
-      var emptyMsg = 'Belum ada rincian belanja untuk Sub Kegiatan ini. Klik <strong>+ Tambah Rincian</strong> untuk menambahkan.';
+      var emptyMsg = canCrud ? 
+        'Belum ada rincian belanja untuk Sub Kegiatan ini. Klik <strong>+ Tambah Rincian</strong> untuk menambahkan.' :
+        'Belum ada data rincian belanja untuk Sub Kegiatan ini.';
       tbody.innerHTML = '<tr><td colspan="'+emptyColspan+'"><div class="empty-state">'+ICON_EMPTY+
         '<p>' + emptyMsg + '</p></div></td></tr>';
     } else {
@@ -2339,6 +2373,24 @@
     var btn = el("btnTambah");
     var hint = el("contextHint");
     var toolbar = el("toolbarContext");
+    if (!canCrud) {
+      if (btn) btn.style.display = 'none';
+      if (currentSubKegiatanKode) {
+        var sk = MASTER.subKegiatan ? MASTER.subKegiatan.find(function(s){ return s.kode===currentSubKegiatanKode; }) : null;
+        if (hint) {
+          hint.className = "context-hint ok";
+          hint.textContent = "Sub Kegiatan aktif: " + currentSubKegiatanKode + " - " + (sk?sk.nama:"");
+        }
+        if (toolbar) toolbar.textContent = "Sub Kegiatan aktif: " + currentSubKegiatanKode + " - " + (sk?sk.nama:"");
+      } else {
+        if (hint) {
+          hint.className = "context-hint";
+          hint.textContent = "Pilih Sub Unit sampai Sub Kegiatan di atas untuk melihat rincian belanja.";
+        }
+        if (toolbar) toolbar.textContent = "Lengkapi pilihan Sub Unit sampai Sub Kegiatan terlebih dahulu.";
+      }
+      return;
+    }
     if(currentSubKegiatanKode){
       var sk = MASTER.subKegiatan ? MASTER.subKegiatan.find(function(s){ return s.kode===currentSubKegiatanKode; }) : null;
       if (btn) btn.disabled = false;
@@ -2839,6 +2891,7 @@
       render();
       return;
     }
+    if(!canCrud) return;
     var editEl = e.target.closest("[data-edit]");
     if(editEl){
       var id = parseFloat(editEl.getAttribute("data-edit"));

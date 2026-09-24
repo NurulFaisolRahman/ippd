@@ -18342,7 +18342,10 @@ public function updateStatusPerjanjianKinerja() {
         $Data['NamaWilayah'] = '';
         $Data['IsRole4'] = $is_role_4;
         $Data['IsDaerah'] = $is_logged_in && !$is_role_4;
+        // Akun Daerah (Level 3) hanya bisa melihat data (Read-Only), tidak bisa CRUD
+        $Data['CanCrud'] = $is_role_4;
         $Data['InstansiId'] = $instansi_id;
+        $Data['FilterInstansi'] = $filter_instansi;
         $Data['ControllerName'] = 'Instansi';
         
         // Ambil Nama Wilayah jika ada
@@ -19323,6 +19326,11 @@ public function updateStatusPerjanjianKinerja() {
         
         header('Content-Type: application/json');
         
+        if (!$this->is_role_4() && !(isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 0)) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Akun Daerah hanya memiliki hak akses untuk melihat data (Read-Only).']);
+            return;
+        }
+        
         try {
             $KodeWilayah = $this->get_kode_wilayah();
             if (empty($KodeWilayah)) {
@@ -19494,6 +19502,11 @@ public function updateStatusPerjanjianKinerja() {
         
         header('Content-Type: application/json');
         
+        if (!$this->is_role_4() && !(isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 0)) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Akun Daerah hanya memiliki hak akses untuk melihat data (Read-Only).']);
+            return;
+        }
+        
         $id = (int)$this->input->post('id', TRUE);
         
         if ($id <= 0) {
@@ -19644,6 +19657,11 @@ public function updateStatusPerjanjianKinerja() {
         }
         header('Content-Type: application/json');
 
+        if (!$this->is_role_4() && !(isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 0)) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Akun Daerah hanya memiliki hak akses untuk melihat data (Read-Only).']);
+            return;
+        }
+
         try {
             $KodeWilayah = $this->get_kode_wilayah();
             if (empty($KodeWilayah)) {
@@ -19785,6 +19803,11 @@ public function updateStatusPerjanjianKinerja() {
             return;
         }
         header('Content-Type: application/json');
+
+        if (!$this->is_role_4() && !(isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 0)) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Akun Daerah hanya memiliki hak akses untuk melihat data (Read-Only).']);
+            return;
+        }
 
         $rincian_id = (int)$this->input->post('rincian_id', TRUE);
         if ($rincian_id <= 0) {
