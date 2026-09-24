@@ -186,17 +186,17 @@ class Nasional extends CI_Controller {
 
     foreach ($all_misi as $m) {
         $periode = !empty($m['Periode']) ? $m['Periode'] : (!empty($m['TahunMulai']) ? ($m['TahunMulai'] . '-' . $m['TahunAkhir']) : '-');
+        $kat = isset($m['Kategori']) ? $m['Kategori'] : '';
         $misi_item = [
             'Id'         => $m['Id'],
             '_Id'        => $m['_Id'],
             'Misi'       => $m['Misi'],
-            'Kategori'   => $m['Kategori'],
+            'Kategori'   => $kat,
             'Periode'    => $periode
         ];
 
         // Kelompokkan berdasarkan kategori
-        $kat = $m['Kategori'];
-        if (isset($grouped_misi[$kat])) {
+        if (!empty($kat) && isset($grouped_misi[$kat])) {
             $grouped_misi[$kat][] = $misi_item;
         } else {
             $grouped_misi['Transformasi Indonesia'][] = $misi_item;
@@ -266,7 +266,7 @@ class Nasional extends CI_Controller {
     if (empty($_POST['_Id'])) {
       $_POST['_Id'] = 1;
     }
-    $this->db->insert('tujuanrpjpn', $_POST);
+    $this->db->insert('arahtujuanrpjpn', $_POST);
     if ($this->db->affected_rows()){
       echo '1';
     } else {
@@ -276,13 +276,13 @@ class Nasional extends CI_Controller {
 	
 	public function EditTujuanRPJPN(){  
 		$this->db->where('Id',$_POST['Id']); 
-		$this->db->update('tujuanrpjpn', $_POST);
+		$this->db->update('arahtujuanrpjpn', $_POST);
     echo '1';
   }
 
   public function HapusTujuanRPJPN(){  
 		$_POST['deleted_at'] = date('Y-m-d H:i:s');
-		$this->db->where('Id',$_POST['Id'])->update('tujuanrpjpn', $_POST);
+		$this->db->where('Id',$_POST['Id'])->update('arahtujuanrpjpn', $_POST);
     if ($this->db->affected_rows()){
       echo '1';
     } else {
@@ -291,7 +291,7 @@ class Nasional extends CI_Controller {
   }
 
   public function GetTujuanRPJPN(){
-    echo json_encode($this->db->query("SELECT t.* FROM visirpjpn as v, misirpjpn as m, tujuanrpjpn as t WHERE v.Id = ".$_POST['Id']." AND t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL")->result_array());
+    echo json_encode($this->db->query("SELECT t.* FROM visirpjpn as v, misirpjpn as m, arahtujuanrpjpn as t WHERE v.Id = ".$_POST['Id']." AND t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL")->result_array());
 	}
 
   public function InputSasaranRPJPN(){  
@@ -784,7 +784,7 @@ class Nasional extends CI_Controller {
   public function IUPRPJPN(){
 		$Header['Halaman'] = 'RPJPN';
     $Data['Agenda'] = $this->db->where("deleted_at IS NULL")->order_by("Urutan ASC, Id ASC")->get("agenda_transformasi_rpjpn")->result_array();
-    $Data['Tujuan'] = $this->db->where("deleted_at IS NULL")->order_by("Id", "ASC")->get("tujuanrpjpn")->result_array();
+    $Data['Tujuan'] = $this->db->where("deleted_at IS NULL")->order_by("Id", "ASC")->get("arahtujuanrpjpn")->result_array();
     $Data['IUP'] = $this->db->where("deleted_at IS NULL")->order_by("Urutan ASC, Id ASC")->get("iuprpjpn")->result_array();
 		$this->load->view('Nasional/header', $Header);
 		$this->load->view('Nasional/IUPRPJPN', $Data);
@@ -798,7 +798,7 @@ class Nasional extends CI_Controller {
 	public function EditAgendaRPJPN(){  
 		$this->db->where('Id', $_POST['Id'])->update('agenda_transformasi_rpjpn', $_POST);
     if (!empty($_POST['NamaAgenda'])) {
-      $this->db->where('IdAgenda', $_POST['Id'])->update('tujuanrpjpn', ['AgendaTransformasi' => $_POST['NamaAgenda']]);
+      $this->db->where('IdAgenda', $_POST['Id'])->update('arahtujuanrpjpn', ['AgendaTransformasi' => $_POST['NamaAgenda']]);
     }
     echo '1';
   }
