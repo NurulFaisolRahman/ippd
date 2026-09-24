@@ -1273,99 +1273,108 @@
     </div>
   </div>
 
-  <!-- Context Card (Parameter & Konteks Belanja) - HANYA DITAMPILKAN UNTUK ROLE 4 -->
-  <?php if (!empty($IsRole4)): ?>
-    <div class="card context-card">
-      <div class="card-header-simple">
-        <div class="card-header-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-          </svg>
-          <span>Parameter & Konteks Belanja</span>
-        </div>
-        <span class="card-header-desc">Pilih tingkatan struktur belanja untuk menampilkan data rincian</span>
+  <!-- Context Card (Parameter & Konteks Belanja) -->
+  <div class="card context-card">
+    <div class="card-header-simple">
+      <div class="card-header-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+        </svg>
+        <span>Parameter & Konteks Belanja</span>
       </div>
-      <div class="card-body">
-        <div class="context-grid">
-          <div class="context-row">
-            <div class="label">Tahun</div>
-            <div class="colon">:</div>
-            <div class="control-wrap">
-              <select id="ctxTahun" class="font-mono">
-                <?php if (!empty($ListTahun)): ?>
-                  <?php foreach ($ListTahun as $y): ?>
-                    <option value="<?= $y ?>" <?= ($y == $TahunAktif) ? 'selected' : '' ?>><?= $y ?></option>
-                  <?php endforeach; ?>
-                <?php else: ?>
-                  <option value="2025">2025</option>
-                  <option value="2026">2026</option>
-                  <option value="2027">2027</option>
-                <?php endif; ?>
-              </select>
-            </div>
+      <span class="card-header-desc">Pilih tingkatan struktur belanja untuk menampilkan data rincian</span>
+    </div>
+    <div class="card-body">
+      <div class="context-grid">
+        <div class="context-row">
+          <div class="label">Tahun</div>
+          <div class="colon">:</div>
+          <div class="control-wrap">
+            <select id="ctxTahun" class="font-mono">
+              <?php if (!empty($ListTahun)): ?>
+                <?php foreach ($ListTahun as $y): ?>
+                  <option value="<?= $y ?>" <?= ($y == $TahunAktif) ? 'selected' : '' ?>><?= $y ?></option>
+                <?php endforeach; ?>
+              <?php else: ?>
+                <option value="2025">2025</option>
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+              <?php endif; ?>
+            </select>
           </div>
-          <div class="context-row">
-            <div class="label">Perangkat Daerah</div>
-            <div class="colon">:</div>
-            <div class="control-wrap">
+        </div>
+        <div class="context-row">
+          <div class="label">Perangkat Daerah</div>
+          <div class="colon">:</div>
+          <div class="control-wrap">
+            <?php if (!empty($IsRole4)): ?>
               <input id="ctxPerangkatDaerah" class="context-readonly" readonly value="<?= html_escape($CurrentInstansi ? $CurrentInstansi['nama'] : 'PERANGKAT DAERAH') ?>" placeholder="Perangkat Daerah">
               <input type="hidden" id="ctxInstansiSelect" value="<?= $ActiveInstansiId ?: '' ?>">
-            </div>
+            <?php else: ?>
+              <select id="ctxInstansiSelect">
+                <?php if (!empty($ListInstansi)): ?>
+                  <?php foreach ($ListInstansi as $ins): ?>
+                    <option value="<?= $ins['id'] ?>" <?= ($ActiveInstansiId == $ins['id']) ? 'selected' : '' ?>><?= html_escape($ins['nama']) ?></option>
+                  <?php endforeach; ?>
+                <?php else: ?>
+                  <option value="">-- Tidak ada perangkat daerah --</option>
+                <?php endif; ?>
+              </select>
+              <input type="hidden" id="ctxPerangkatDaerah" value="<?= html_escape($CurrentInstansi ? $CurrentInstansi['nama'] : '') ?>">
+            <?php endif; ?>
           </div>
-          <div class="context-row">
-            <div class="label">Sub Unit</div>
-            <div class="colon">:</div>
-            <div class="control-wrap">
-              <select id="ctxSubUnit"></select>
-            </div>
+        </div>
+        <div class="context-row">
+          <div class="label">Sub Unit</div>
+          <div class="colon">:</div>
+          <div class="control-wrap">
+            <select id="ctxSubUnit"></select>
           </div>
-          <div class="context-row">
-            <div class="label">Bidang Urusan</div>
-            <div class="colon">:</div>
-            <div class="control-wrap">
-              <select id="ctxBidangUrusan"></select>
-            </div>
+        </div>
+        <div class="context-row">
+          <div class="label">Bidang Urusan</div>
+          <div class="colon">:</div>
+          <div class="control-wrap">
+            <select id="ctxBidangUrusan"></select>
           </div>
-          <div class="context-row">
-            <div class="label">Program</div>
-            <div class="colon">:</div>
-            <div class="control-wrap">
-              <select id="ctxProgram"></select>
-            </div>
+        </div>
+        <div class="context-row">
+          <div class="label">Program</div>
+          <div class="colon">:</div>
+          <div class="control-wrap">
+            <select id="ctxProgram"></select>
           </div>
-          <div class="context-row">
-            <div class="label">Kegiatan</div>
-            <div class="colon">:</div>
-            <div class="control-wrap">
-              <select id="ctxKegiatan"></select>
-            </div>
+        </div>
+        <div class="context-row">
+          <div class="label">Kegiatan</div>
+          <div class="colon">:</div>
+          <div class="control-wrap">
+            <select id="ctxKegiatan"></select>
           </div>
-          <div class="context-row">
-            <div class="label">Sub Kegiatan</div>
-            <div class="colon">:</div>
-            <div class="control-wrap">
-              <select id="ctxSubKegiatan"></select>
-            </div>
+        </div>
+        <div class="context-row">
+          <div class="label">Sub Kegiatan</div>
+          <div class="colon">:</div>
+          <div class="control-wrap">
+            <select id="ctxSubKegiatan"></select>
           </div>
         </div>
       </div>
-      <div class="context-hint" id="contextHint"></div>
     </div>
-  <?php endif; ?>
+    <div class="context-hint" id="contextHint"></div>
+  </div>
 
   <!-- Table card -->
   <div class="card">
     <div class="table-toolbar">
       <div>
         <h2>Tabel Rincian Belanja</h2>
-        <p id="toolbarContext"><?= !empty($IsRole4) ? 'Lengkapi pilihan Sub Unit sampai Sub Kegiatan terlebih dahulu.' : 'Rincian Belanja: ' . html_escape($CurrentInstansi ? $CurrentInstansi['nama'] : 'Perangkat Daerah') . ' (Tahun ' . $TahunAktif . ')' ?></p>
+        <p id="toolbarContext">Lengkapi pilihan Sub Unit sampai Sub Kegiatan terlebih dahulu.</p>
       </div>
-      <?php if (!empty($IsRole4)): ?>
-        <button class="btn-add" id="btnTambah" type="button">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-          Tambah Rincian
-        </button>
-      <?php endif; ?>
+      <button class="btn-add" id="btnTambah" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Tambah Rincian
+      </button>
     </div>
     <div class="table-wrap">
       <table>
@@ -1374,9 +1383,7 @@
             <th rowspan="2" style="width:160px;">Kode Rekening</th>
             <th rowspan="2">Uraian</th>
             <th colspan="4" class="center">Rincian Perhitungan</th>
-            <?php if (!empty($IsRole4)): ?>
-              <th rowspan="2" style="width:90px;" class="center">Aksi</th>
-            <?php endif; ?>
+            <th rowspan="2" style="width:90px;" class="center">Aksi</th>
           </tr>
           <tr class="sub-head">
             <th class="num" style="width:120px;">Koefisien</th>
@@ -1390,9 +1397,7 @@
           <tr>
             <td colspan="5" class="label">Jumlah Total</td>
             <td class="num" id="grandTotal"><span class="money-cell"><span class="cur">Rp</span><span class="val">0,00</span></span></td>
-            <?php if (!empty($IsRole4)): ?>
-              <td></td>
-            <?php endif; ?>
+            <td></td>
           </tr>
         </tfoot>
       </table>
@@ -1620,7 +1625,7 @@
 (function(){
   "use strict";
 
-  var BaseURL = '<?= base_url() ?>';
+  var BaseURL = '<?= rtrim(base_url(), "/") . "/" ?>';
   var controllerName = '<?= isset($ControllerName) ? $ControllerName : $this->router->fetch_class() ?>';
   var ControllerURL = BaseURL + controllerName + '/';
   var rawBelanjaHeaders = <?= json_encode(!empty($BelanjaData) ? $BelanjaData : []) ?>;
@@ -1807,7 +1812,7 @@
       '<td><div class="cell-label" style="padding-left:'+pad+'px;">'+toggleBtn(code,collapsed,hasChildren)+'<span class="txt">'+esc(name)+'</span></div></td>'+
       '<td></td><td></td><td></td>'+
       '<td class="num">'+formatMoney(total)+'</td>'+
-      (isRole4 ? '<td></td>' : '')+
+      '<td></td>'+
     '</tr>';
   }
   function accountRow(code, name, level, total, hasChildren){
@@ -1818,7 +1823,7 @@
       '<td><div class="cell-label" style="padding-left:'+pad+'px;">'+toggleBtn(code,collapsed,hasChildren)+'<span class="txt">'+esc(name)+'</span></div></td>'+
       '<td></td><td></td><td></td>'+
       '<td class="num">'+formatMoney(total)+'</td>'+
-      (isRole4 ? '<td></td>' : '')+
+      '<td></td>'+
     '</tr>';
   }
   function groupRow(key, label, sumberDana, level, total, hasChildren){
@@ -1832,7 +1837,7 @@
         '</span></div></td>'+
       '<td></td><td></td><td></td>'+
       '<td class="num">'+formatMoney(total)+'</td>'+
-      (isRole4 ? '<td></td>' : '')+
+      '<td></td>'+
     '</tr>';
   }
   function subgroupRow(key, label, level, total, hasChildren){
@@ -1843,7 +1848,7 @@
       '<td><div class="cell-label" style="padding-left:'+pad+'px;">'+toggleBtn(key,collapsed,hasChildren)+'<span class="txt">[ - ] '+esc(label)+'</span></div></td>'+
       '<td></td><td></td><td></td>'+
       '<td class="num">'+formatMoney(total)+'</td>'+
-      (isRole4 ? '<td></td>' : '')+
+      '<td></td>'+
     '</tr>';
   }
   function itemRow(it, level){
@@ -1860,10 +1865,10 @@
       '<td class="num">'+formatMoney(it.hargaSatuan)+'</td>'+
       '<td class="center font-mono">'+(parseFloat(it.ppn)||0)+'%</td>'+
       '<td class="num" style="font-weight:700;">'+formatMoney(calcJumlah(it))+'</td>'+
-      (isRole4 ? ('<td class="center"><div class="actions">'+
+      '<td class="center"><div class="actions">'+
         '<button class="icon-btn edit" data-edit="'+it.id+'" title="Ubah">'+ICON_EDIT+'</button>'+
         '<button class="icon-btn del" data-del="'+it.id+'" title="Hapus">'+ICON_DEL+'</button>'+
-      '</div></td>') : '') +
+      '</div></td>'+
     '</tr>';
   }
 
@@ -1920,12 +1925,12 @@
 
   function render(){
     var tbody = document.getElementById("tableBody");
-    var visibleItems = isRole4 ? 
-      (currentSubKegiatanKode ? items.filter(function(it){ return it.subKegiatanKode===currentSubKegiatanKode; }) : []) : 
-      items;
+    var visibleItems = currentSubKegiatanKode ? 
+      items.filter(function(it){ return it.subKegiatanKode === currentSubKegiatanKode; }) : 
+      [];
 
-    var emptyColspan = isRole4 ? 7 : 6;
-    if(isRole4 && !currentSubKegiatanKode){
+    var emptyColspan = 7;
+    if(!currentSubKegiatanKode){
       tbody.innerHTML = '<tr><td colspan="'+emptyColspan+'"><div class="empty-state">'+ICON_EMPTY+
         '<p>Pilih Sub Unit, Bidang Urusan, Program, Kegiatan dan Sub Kegiatan di atas terlebih dahulu untuk menampilkan rincian belanja.</p></div></td></tr>';
       document.getElementById("grandTotal").innerHTML = formatMoney(0);
@@ -1941,9 +1946,7 @@
     });
 
     if(out.length===0){
-      var emptyMsg = (!isLoggedIn && !hasKodeWilayah) ? 
-        'Silakan pilih Filter Wilayah & Perangkat Daerah di atas terlebih dahulu untuk menampilkan data.' : 
-        ('Belum ada rincian belanja untuk Perangkat Daerah ini.' + (isRole4 ? ' Klik <strong>+ Tambah Rincian</strong> untuk menambahkan.' : ''));
+      var emptyMsg = 'Belum ada rincian belanja untuk Sub Kegiatan ini. Klik <strong>+ Tambah Rincian</strong> untuk menambahkan.';
       tbody.innerHTML = '<tr><td colspan="'+emptyColspan+'"><div class="empty-state">'+ICON_EMPTY+
         '<p>' + emptyMsg + '</p></div></td></tr>';
     } else {
@@ -2198,13 +2201,17 @@
     if(!f.koefisien.value || parseFloat(f.koefisien.value)<=0){ alert("Koefisien (Perkalian) wajib diisi."); f.koefisien.focus(); return; }
 
     var rOpt = findRekening(f.rekening.value);
-    var sk = MASTER.subKegiatan.find(function(s){ return s.kode===currentSubKegiatanKode; });
-    var su = MASTER.subUnit.find(function(s){ return s.kode===el("ctxSubUnit").value; });
-    var prg = MASTER.program.find(function(p){ return p.kode===el("ctxProgram").value; });
-    var keg = MASTER.kegiatan.find(function(k){ return k.kode===el("ctxKegiatan").value; });
-    var bu = MASTER.bidangUrusan.find(function(b){ return b.kode===el("ctxBidangUrusan").value; });
+    var sk = MASTER.subKegiatan ? MASTER.subKegiatan.find(function(s){ return s.kode===currentSubKegiatanKode; }) : null;
+    var suVal = el("ctxSubUnit") ? el("ctxSubUnit").value : "";
+    var su = MASTER.subUnit ? MASTER.subUnit.find(function(s){ return s.kode===suVal; }) : null;
+    var prgVal = el("ctxProgram") ? el("ctxProgram").value : "";
+    var prg = MASTER.program ? MASTER.program.find(function(p){ return p.kode===prgVal; }) : null;
+    var kegVal = el("ctxKegiatan") ? el("ctxKegiatan").value : "";
+    var keg = MASTER.kegiatan ? MASTER.kegiatan.find(function(k){ return k.kode===kegVal; }) : null;
+    var buVal = el("ctxBidangUrusan") ? el("ctxBidangUrusan").value : "";
+    var bu = MASTER.bidangUrusan ? MASTER.bidangUrusan.find(function(b){ return b.kode===buVal; }) : null;
 
-    var pdNama = el("ctxPerangkatDaerah").value || (currentInstansi ? currentInstansi.nama : "");
+    var pdNama = (el("ctxPerangkatDaerah") ? el("ctxPerangkatDaerah").value : "") || (currentInstansi ? currentInstansi.nama : "");
     var pdKode = currentInstansi && currentInstansi.kode_instansi ? currentInstansi.kode_instansi : (su && su.kode ? su.kode.substring(0, 10) : "");
     var instId = activeInstansiId || (currentInstansi ? currentInstansi.id : (su ? su.id_instansi : 0));
 
@@ -2212,7 +2219,7 @@
       rincian_id: editingItem ? editingItem.id : 0,
       sub_kegiatan_kode: currentSubKegiatanKode,
       nama_sub_kegiatan: sk ? sk.nama : "",
-      tahun: el("ctxTahun").value,
+      tahun: el("ctxTahun") ? el("ctxTahun").value : '<?= $TahunAktif ?>',
       id_instansi: instId,
       kode_perangkat_daerah: pdKode,
       nama_perangkat_daerah: pdNama,
@@ -2282,14 +2289,18 @@
 
           closeModal();
           render();
-          Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'success',
-            title: res.message,
-            showConfirmButton: false,
-            timer: 1500
-          });
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'success',
+              title: res.message,
+              showConfirmButton: false,
+              timer: 1500
+            });
+          } else {
+            alert(res.message);
+          }
         } else {
           alert(res.message || "Gagal menyimpan data.");
         }
@@ -2329,20 +2340,20 @@
     var hint = el("contextHint");
     var toolbar = el("toolbarContext");
     if(currentSubKegiatanKode){
-      var sk = MASTER.subKegiatan.find(function(s){ return s.kode===currentSubKegiatanKode; });
+      var sk = MASTER.subKegiatan ? MASTER.subKegiatan.find(function(s){ return s.kode===currentSubKegiatanKode; }) : null;
       if (btn) btn.disabled = false;
       if (hint) {
         hint.className = "context-hint ok";
         hint.textContent = "Konteks siap. Sub Kegiatan aktif: " + currentSubKegiatanKode + " - " + (sk?sk.nama:"");
       }
-      if (toolbar && isRole4) toolbar.textContent = "Sub Kegiatan aktif: " + currentSubKegiatanKode + " - " + (sk?sk.nama:"");
+      if (toolbar) toolbar.textContent = "Sub Kegiatan aktif: " + currentSubKegiatanKode + " - " + (sk?sk.nama:"");
     } else {
       if (btn) btn.disabled = true;
       if (hint) {
         hint.className = "context-hint";
         hint.textContent = "Lengkapi pilihan Sub Unit \u2192 Bidang Urusan \u2192 Program \u2192 Kegiatan \u2192 Sub Kegiatan di atas sebelum mengisi rincian belanja.";
       }
-      if (toolbar && isRole4) toolbar.textContent = "Lengkapi pilihan Sub Unit sampai Sub Kegiatan terlebih dahulu.";
+      if (toolbar) toolbar.textContent = "Lengkapi pilihan Sub Unit sampai Sub Kegiatan terlebih dahulu.";
     }
   }
 
@@ -2385,6 +2396,7 @@
       },
       error: function() {
         if (el("ctxBidangUrusan")) el("ctxBidangUrusan").innerHTML = '<option value="">Gagal memuat</option>';
+        render();
       }
     });
   }
@@ -2430,6 +2442,7 @@
       },
       error: function() {
         if (el("ctxProgram")) el("ctxProgram").innerHTML = '<option value="">Gagal memuat</option>';
+        render();
       }
     });
   }
@@ -2474,6 +2487,7 @@
       },
       error: function() {
         if (el("ctxKegiatan")) el("ctxKegiatan").innerHTML = '<option value="">Gagal memuat</option>';
+        render();
       }
     });
   }
@@ -2573,18 +2587,13 @@
       if (el("ctxSubUnit")) el("ctxSubUnit").value = firstSU;
       updatePerangkatDaerah(firstSU);
 
-      if (isRole4) {
-        var firstHeader = (rawBelanjaHeaders && rawBelanjaHeaders.length > 0) ? rawBelanjaHeaders[0] : null;
-        var presetBidang = firstHeader ? (firstHeader.kode_bidang_urusan || '') : '';
-        var presetProg = firstHeader ? (firstHeader.kode_program || '') : '';
-        var presetKeg = firstHeader ? (firstHeader.kode_kegiatan || '') : '';
-        var presetSubKeg = firstHeader ? (firstHeader.kode_sub_kegiatan || '') : '';
+      var firstHeader = (rawBelanjaHeaders && rawBelanjaHeaders.length > 0) ? rawBelanjaHeaders[0] : null;
+      var presetBidang = firstHeader ? (firstHeader.kode_bidang_urusan || '') : '';
+      var presetProg = firstHeader ? (firstHeader.kode_program || '') : '';
+      var presetKeg = firstHeader ? (firstHeader.kode_kegiatan || '') : '';
+      var presetSubKeg = firstHeader ? (firstHeader.kode_sub_kegiatan || '') : '';
 
-        loadCascadeBidangUrusan(MASTER.subUnit[0], presetBidang, presetProg, presetKeg, presetSubKeg);
-      } else {
-        updateTambahState();
-        render();
-      }
+      loadCascadeBidangUrusan(MASTER.subUnit[0], presetBidang, presetProg, presetKeg, presetSubKeg);
     } else {
       updateTambahState();
       render();
@@ -2602,18 +2611,15 @@
         if (res.status === 'success') {
           rawBelanjaHeaders = res.data || [];
           buildMasterFromDatabase();
-          if (isRole4) {
-            var firstHeader = (rawBelanjaHeaders && rawBelanjaHeaders.length > 0) ? rawBelanjaHeaders[0] : null;
-            var presetBidang = firstHeader ? (firstHeader.kode_bidang_urusan || '') : '';
-            var presetProg = firstHeader ? (firstHeader.kode_program || '') : '';
-            var presetKeg = firstHeader ? (firstHeader.kode_kegiatan || '') : '';
-            var presetSubKeg = firstHeader ? (firstHeader.kode_sub_kegiatan || '') : '';
 
-            var curSU = MASTER.subUnit.find(function(s){ return s.kode === (el("ctxSubUnit") ? el("ctxSubUnit").value : ''); });
-            loadCascadeBidangUrusan(curSU || MASTER.subUnit[0], presetBidang, presetProg, presetKeg, presetSubKeg);
-          } else {
-            render();
-          }
+          var firstHeader = (rawBelanjaHeaders && rawBelanjaHeaders.length > 0) ? rawBelanjaHeaders[0] : null;
+          var presetBidang = firstHeader ? (firstHeader.kode_bidang_urusan || '') : '';
+          var presetProg = firstHeader ? (firstHeader.kode_program || '') : '';
+          var presetKeg = firstHeader ? (firstHeader.kode_kegiatan || '') : '';
+          var presetSubKeg = firstHeader ? (firstHeader.kode_sub_kegiatan || '') : '';
+
+          var curSU = MASTER.subUnit.find(function(s){ return s.kode === (el("ctxSubUnit") ? el("ctxSubUnit").value : ''); });
+          loadCascadeBidangUrusan(curSU || MASTER.subUnit[0], presetBidang, presetProg, presetKeg, presetSubKeg);
         }
       }
     });
@@ -2878,14 +2884,18 @@
           if (res.status === 'success') {
             items = items.filter(function(x){ return x.id!==did; });
             render();
-            Swal.fire({
-              toast: true,
-              position: 'top-end',
-              icon: 'success',
-              title: res.message,
-              showConfirmButton: false,
-              timer: 1500
-            });
+            if (typeof Swal !== 'undefined') {
+              Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: res.message,
+                showConfirmButton: false,
+                timer: 1500
+              });
+            } else {
+              alert(res.message);
+            }
           } else {
             alert(res.message || "Gagal menghapus data.");
           }

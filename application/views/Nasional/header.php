@@ -456,12 +456,12 @@
     <script>
         // Log Out Clear Session in Controller Beranda
         function logout() {
-            window.location.href = '/ippd';
+            window.location.href = '/';
         }
 
         // Redirect to Login
         function Login() {    
-            window.location.href = '/ippd/Home';
+            window.location.href = '/Home';
         }
 
         // Mobile menu handling

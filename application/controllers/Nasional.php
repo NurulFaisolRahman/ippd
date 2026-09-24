@@ -1074,14 +1074,171 @@ public function HapusPembangunanKewilayahanSubKawasanRPJMN(){
     }
   }
   
+  // =========================================================================
+  // FUNGSI UTAMA RKP: LOAD DATA & RAKIT HIERARKI 4 LEVEL DARI TABEL RKP_PS_*
+  // =========================================================================
   public function SasaranPrioritasNasional(){
-		$Header['Halaman'] = 'RKP';
-    $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjmn")->result_array();
-		$Data['SasaranPembangunan'] = $this->db->query("SELECT v.Id as IdVisi,v.TahunMulai,v.TahunAkhir,p.Id as IdPrioritasNasional,p.PrioritasNasional,s.* FROM visirpjmn as v, prioritas_nasional_rpjmn as p, sasaran_prioritas_nasional as s WHERE s._Id = p.Id AND p._Id = v.Id AND s.deleted_at IS NULL")->result_array();
-		$this->load->view('Nasional/header',$Header);
-		$this->load->view('Nasional/SasaranPrioritasNasional',$Data);
-	}
+    $Header['Halaman'] = 'RKP';
+    
+    // Load data untuk form select Periode (Visi RPJMN)
+    $Data['ComboVisi'] = $this->db->where("deleted_at IS NULL")->get("visirpjmn")->result_array();
 
+    $Data['Kementerian'] = $this->db->where("deleted_at IS NULL")->get("kementerian")->result_array();
+    $MapKementerian = [];
+    foreach($Data['Kementerian'] as $k) {
+        $MapKementerian[$k['Id']] = $k['NamaKementerian'];
+    }
+    $Data['MapKementerian'] = $MapKementerian;
+
+    // 1. Fetching Semua Tabel RKP
+    // LEVEL 1: PN
+    $DataPN = $this->db->query("SELECT a.*, b.TahunMulai, b.TahunAkhir FROM rkp_ps_prioritas_nasional a LEFT JOIN visirpjmn b ON a._IdVisi = b.Id WHERE a.deleted_at IS NULL ORDER BY a.Id ASC")->result_array();
+    $SasaranPN   = $this->db->where('deleted_at IS NULL')->get('rkp_ps_pn_sasaran')->result_array();
+    $IndikatorPN = $this->db->where('deleted_at IS NULL')->get('rkp_ps_pn_indikator')->result_array();
+
+    // LEVEL 2: PP
+    $DataPP = $this->db->where('deleted_at IS NULL')->get('rkp_ps_program_prioritas')->result_array();
+    $SasaranPP   = $this->db->where('deleted_at IS NULL')->get('rkp_ps_pp_sasaran')->result_array();
+    $IndikatorPP = $this->db->where('deleted_at IS NULL')->get('rkp_ps_pp_indikator')->result_array();
+
+    // LEVEL 3: KP
+    $DataKP = $this->db->where('deleted_at IS NULL')->get('rkp_ps_kegiatan_prioritas')->result_array();
+    $SasaranKP   = $this->db->where('deleted_at IS NULL')->get('rkp_ps_kp_sasaran')->result_array();
+    $IndikatorKP = $this->db->where('deleted_at IS NULL')->get('rkp_ps_kp_indikator')->result_array();
+
+    // LEVEL 4: PROYEK
+    $DataProyek = $this->db->where('deleted_at IS NULL')->get('rkp_ps_proyek_prioritas')->result_array();
+
+    // 2. Merakit Array Bersarang Menggunakan Algoritma Mapping
+    $mapIndPN = []; foreach($IndikatorPN as $i) { $mapIndPN[$i['_IdSasaranPN']][] = $i; }
+    $mapIndPP = []; foreach($IndikatorPP as $i) { $mapIndPP[$i['_IdSasaranPP']][] = $i; }
+    $mapIndKP = []; foreach($IndikatorKP as $i) { $mapIndKP[$i['_IdSasaranKP']][] = $i; }
+
+    $mapSasPN = []; foreach($SasaranPN as $s) { $s['Indikator'] = $mapIndPN[$s['Id']] ?? []; $mapSasPN[$s['_IdPN']][] = $s; }
+    $mapSasPP = []; foreach($SasaranPP as $s) { $s['Indikator'] = $mapIndPP[$s['Id']] ?? []; $mapSasPP[$s['_IdPP']][] = $s; }
+    $mapSasKP = []; foreach($SasaranKP as $s) { $s['Indikator'] = $mapIndKP[$s['Id']] ?? []; $mapSasKP[$s['_IdKP']][] = $s; }
+
+    $mapProyek = []; foreach($DataProyek as $p) { $mapProyek[$p['_IdKP']][] = $p; }
+
+    $mapKP = []; 
+    foreach($DataKP as $kp) { 
+        $kp['Sasaran'] = $mapSasKP[$kp['Id']] ?? []; 
+        $kp['Proyek']  = $mapProyek[$kp['Id']] ?? [];
+        $mapKP[$kp['_IdPP']][] = $kp; 
+    }
+
+    $mapPP = []; 
+    foreach($DataPP as $pp) { 
+        $pp['Sasaran'] = $mapSasPP[$pp['Id']] ?? []; 
+        $pp['KegiatanPrioritas'] = $mapKP[$pp['Id']] ?? [];
+        $mapPP[$pp['_IdPN']][] = $pp; 
+    }
+
+    foreach($DataPN as &$pn) {
+        $pn['Sasaran'] = $mapSasPN[$pn['Id']] ?? [];
+        $pn['ProgramPrioritas'] = $mapPP[$pn['Id']] ?? [];
+    }
+
+    $Data['SasaranPrioritas'] = $DataPN;
+    $Data['ProyekStrategis']  = $DataPN;
+
+    $this->load->view('Nasional/header', $Header);
+    $this->load->view('Nasional/SasaranPrioritasNasional', $Data);
+  }
+
+  // =========================================================================
+  // CRUD RKP LEVEL 1 : PRIORITAS NASIONAL (PN)
+  // =========================================================================
+  public function InputRKP_PN(){ $this->db->insert('rkp_ps_prioritas_nasional', $_POST); echo $this->db->affected_rows() ? '1' : 'Gagal Menyimpan Data!'; }
+  public function EditRKP_PN(){ $this->db->where('Id', $_POST['Id'])->update('rkp_ps_prioritas_nasional', $_POST); echo $this->db->affected_rows() ? '1' : 'Gagal Update Data!'; }
+  public function HapusRKP_PN(){ 
+      $_POST['deleted_at'] = date('Y-m-d H:i:s');
+      $this->db->where('Id', $_POST['Id'])->update('rkp_ps_prioritas_nasional', $_POST); 
+      echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!'; 
+  }
+
+  public function InputRKP_SasaranPN(){ $this->db->insert('rkp_ps_pn_sasaran', $_POST); echo $this->db->affected_rows() ? '1' : 'Gagal Menyimpan Sasaran PN!'; }
+  public function EditRKP_SasaranPN(){ $this->db->where('Id', $_POST['Id'])->update('rkp_ps_pn_sasaran', $_POST); echo $this->db->affected_rows() ? '1' : 'Gagal Update Sasaran PN!'; }
+  public function HapusRKP_SasaranPN(){ 
+      $_POST['deleted_at'] = date('Y-m-d H:i:s'); 
+      $this->db->where('Id', $_POST['Id'])->update('rkp_ps_pn_sasaran', $_POST); 
+      echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Sasaran PN!'; 
+  }
+
+  public function InputRKP_IndikatorPN(){ $this->db->insert('rkp_ps_pn_indikator', $_POST); echo $this->db->affected_rows() ? '1' : 'Gagal Menyimpan Indikator PN!'; }
+  public function EditRKP_IndikatorPN(){ $this->db->where('Id', $_POST['Id'])->update('rkp_ps_pn_indikator', $_POST); echo $this->db->affected_rows() ? '1' : 'Gagal Update Indikator PN!'; }
+  public function HapusRKP_IndikatorPN(){ 
+      $_POST['deleted_at'] = date('Y-m-d H:i:s'); 
+      $this->db->where('Id', $_POST['Id'])->update('rkp_ps_pn_indikator', $_POST); 
+      echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Indikator PN!'; 
+  }
+
+  // =========================================================================
+  // CRUD RKP LEVEL 2 : PROGRAM PRIORITAS (PP)
+  // =========================================================================
+  public function InputRKP_PP(){ $this->db->insert('rkp_ps_program_prioritas', $_POST); echo $this->db->affected_rows() ? '1' : 'Gagal Menyimpan Data!'; }
+  public function EditRKP_PP(){ $this->db->where('Id', $_POST['Id'])->update('rkp_ps_program_prioritas', $_POST); echo $this->db->affected_rows() ? '1' : 'Gagal Update Data!'; }
+  public function HapusRKP_PP(){ 
+      $_POST['deleted_at'] = date('Y-m-d H:i:s'); 
+      $this->db->where('Id', $_POST['Id'])->update('rkp_ps_program_prioritas', $_POST); 
+      echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!'; 
+  }
+
+  public function InputRKP_SasaranPP(){ $this->db->insert('rkp_ps_pp_sasaran', $_POST); echo $this->db->affected_rows() ? '1' : 'Gagal Menyimpan Sasaran PP!'; }
+  public function EditRKP_SasaranPP(){ $this->db->where('Id', $_POST['Id'])->update('rkp_ps_pp_sasaran', $_POST); echo $this->db->affected_rows() ? '1' : 'Gagal Update Sasaran PP!'; }
+  public function HapusRKP_SasaranPP(){ 
+      $_POST['deleted_at'] = date('Y-m-d H:i:s'); 
+      $this->db->where('Id', $_POST['Id'])->update('rkp_ps_pp_sasaran', $_POST); 
+      echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Sasaran PP!'; 
+  }
+
+  public function InputRKP_IndikatorPP(){ $this->db->insert('rkp_ps_pp_indikator', $_POST); echo $this->db->affected_rows() ? '1' : 'Gagal Menyimpan Indikator PP!'; }
+  public function EditRKP_IndikatorPP(){ $this->db->where('Id', $_POST['Id'])->update('rkp_ps_pp_indikator', $_POST); echo $this->db->affected_rows() ? '1' : 'Gagal Update Indikator PP!'; }
+  public function HapusRKP_IndikatorPP(){ 
+      $_POST['deleted_at'] = date('Y-m-d H:i:s'); 
+      $this->db->where('Id', $_POST['Id'])->update('rkp_ps_pp_indikator', $_POST); 
+      echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Indikator PP!'; 
+  }
+
+  // =========================================================================
+  // CRUD RKP LEVEL 3 : KEGIATAN PRIORITAS (KP)
+  // =========================================================================
+  public function InputRKP_KP(){ $this->db->insert('rkp_ps_kegiatan_prioritas', $_POST); echo $this->db->affected_rows() ? '1' : 'Gagal Menyimpan Data!'; }
+  public function EditRKP_KP(){ $this->db->where('Id', $_POST['Id'])->update('rkp_ps_kegiatan_prioritas', $_POST); echo $this->db->affected_rows() ? '1' : 'Gagal Update Data!'; }
+  public function HapusRKP_KP(){ 
+      $_POST['deleted_at'] = date('Y-m-d H:i:s'); 
+      $this->db->where('Id', $_POST['Id'])->update('rkp_ps_kegiatan_prioritas', $_POST); 
+      echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Data!'; 
+  }
+
+  public function InputRKP_SasaranKP(){ $this->db->insert('rkp_ps_kp_sasaran', $_POST); echo $this->db->affected_rows() ? '1' : 'Gagal Menyimpan Sasaran KP!'; }
+  public function EditRKP_SasaranKP(){ $this->db->where('Id', $_POST['Id'])->update('rkp_ps_kp_sasaran', $_POST); echo $this->db->affected_rows() ? '1' : 'Gagal Update Sasaran KP!'; }
+  public function HapusRKP_SasaranKP(){ 
+      $_POST['deleted_at'] = date('Y-m-d H:i:s'); 
+      $this->db->where('Id', $_POST['Id'])->update('rkp_ps_kp_sasaran', $_POST); 
+      echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Sasaran KP!'; 
+  }
+
+  public function InputRKP_IndikatorKP(){ $this->db->insert('rkp_ps_kp_indikator', $_POST); echo $this->db->affected_rows() ? '1' : 'Gagal Menyimpan Indikator KP!'; }
+  public function EditRKP_IndikatorKP(){ $this->db->where('Id', $_POST['Id'])->update('rkp_ps_kp_indikator', $_POST); echo $this->db->affected_rows() ? '1' : 'Gagal Update Indikator KP!'; }
+  public function HapusRKP_IndikatorKP(){ 
+      $_POST['deleted_at'] = date('Y-m-d H:i:s'); 
+      $this->db->where('Id', $_POST['Id'])->update('rkp_ps_kp_indikator', $_POST); 
+      echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Indikator KP!'; 
+  }
+
+  // =========================================================================
+  // CRUD RKP LEVEL 4 : PROYEK PRIORITAS
+  // =========================================================================
+  public function InputRKP_Proyek(){ $this->db->insert('rkp_ps_proyek_prioritas', $_POST); echo $this->db->affected_rows() ? '1' : 'Gagal Menyimpan Proyek Prioritas!'; }
+  public function EditRKP_Proyek(){ $this->db->where('Id', $_POST['Id'])->update('rkp_ps_proyek_prioritas', $_POST); echo $this->db->affected_rows() ? '1' : 'Gagal Update Proyek Prioritas!'; }
+  public function HapusRKP_Proyek(){ 
+      $_POST['deleted_at'] = date('Y-m-d H:i:s'); 
+      $this->db->where('Id', $_POST['Id'])->update('rkp_ps_proyek_prioritas', $_POST); 
+      echo $this->db->affected_rows() ? '1' : 'Gagal Hapus Proyek Prioritas!'; 
+  }
+
+  // Legacy fallback
   public function InputSasaranPrioritasNasional(){  
     $this->db->insert('sasaran_prioritas_nasional',$_POST);
     if ($this->db->affected_rows()){

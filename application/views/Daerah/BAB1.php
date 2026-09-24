@@ -702,36 +702,34 @@ body {
 
 /* Action Icons */
 .btn-action-icon {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 30px !important;
-  height: 30px !important;
-  min-width: 30px !important;
-  border-radius: 50% !important;
-  border: none !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: none;
   cursor: pointer;
-  transition: all 0.2s ease !important;
+  transition: all 0.15s;
   font-size: 12px;
-  box-shadow: 0 2px 5px rgba(0,0,0,.15) !important;
-}
-.btn-action-icon:hover {
-  transform: translateY(-2px) scale(1.06);
-  box-shadow: 0 4px 10px rgba(0,0,0,.25) !important;
 }
 .btn-action-edit {
-  background: #2196F3 !important;
-  color: #fff !important;
+  background: #e8f8f5;
+  color: #007a5a;
 }
 .btn-action-edit:hover {
-  background: #1e88e5 !important;
+  background: #00c292;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 194, 146, 0.4);
 }
 .btn-action-del {
-  background: #F44336 !important;
-  color: #fff !important;
+  background: var(--ui-red-light);
+  color: var(--ui-red);
 }
 .btn-action-del:hover {
-  background: #e53935 !important;
+  background: var(--ui-red);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
 }
 
 /* Empty State Box */
@@ -1060,7 +1058,16 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
 
   <!-- Breadcrumb & Page Title -->
   <div class="page-header-box">
-    <h1 class="page-title">BAB 1 PENDAHULUAN & GAMBARAN UMUM DAERAH</h1>
+    <div class="page-badge">
+      <i class="fa fa-book"></i> E-LKPJ &bull; Bab I
+      <?php if (!empty($NamaWilayah)): ?>
+        &bull; <i class="fa fa-map-marker"></i> <?= htmlspecialchars($NamaWilayah) ?>
+      <?php endif; ?>
+      <?php if (!empty($IsRole4) && !empty($NamaInstansi)): ?>
+        &bull; <i class="fa fa-building"></i> <?= htmlspecialchars($NamaInstansi) ?> (Role Instansi)
+      <?php endif; ?>
+    </div>
+    <h1 class="page-title">BAB 1 : Pendahuluan & Gambaran Umum Daerah</h1>
     <p class="page-subtitle">Pencatatan dan pelaporan data statistik kondisi geografis, administratif, demografis, dan indikator makro daerah <?= htmlspecialchars($NamaWilayah ?: 'Kabupaten Situbondo') ?>.</p>
   </div>
 
@@ -4279,14 +4286,20 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
               <h4 style="margin: 0; font-size: 16px; font-weight: 700; color: #007a5a; letter-spacing: -0.2px;">
-                Narasi &amp; Interpretasi Data Tabel <?= htmlspecialchars($activeTabel) ?><?= !empty($metaTabel['judul_singkat']) ? ' (' . htmlspecialchars($metaTabel['judul_singkat']) . ')' : '' ?> 
+                Narasi &amp; Interpretasi Data Tabel <?= htmlspecialchars($activeTabel) ?><?= !empty($metaTabel['judul_singkat']) ? ' (' . htmlspecialchars($metaTabel['judul_singkat']) . ')' : '' ?> (AI Assistant)
               </h4>
+              <span style="display: inline-flex; align-items: center; gap: 4px; background: #dcfce7; color: #15803d; border: 1px solid #86efac; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 12px;">
+                <i class="fa fa-bolt"></i> Gemini AI
+              </span>
             </div>
+            <p style="margin: 3px 0 0; font-size: 12px; color: #4b6358;">
+              <i class="fa fa-user-circle"></i> <b>Persona:</b> Peneliti Riset Ekonomi Pembangunan &mdash; Analisis komprehensif, evaluatif, dan siap cetak untuk LKPJ.
+            </p>
           </div>
         </div>
         <div style="display: flex; gap: 8px; align-items: center;">
           <button type="button" id="btnGenerateAI" onclick="generateNarasiAI('1', '<?= $activeTabel ?>')" class="btn-notika-primary" style="background: linear-gradient(135deg, #00c292 0%, #009688 100%); border: none; color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 3px 10px rgba(0, 194, 146, 0.25); transition: all 0.2s ease;">
-            <i class="fa fa-magic"></i> <span>Generate Narasi</span>
+            <i class="fa fa-magic"></i> <span>Generate Narasi AI</span>
           </button>
         </div>
       </div>
@@ -4295,7 +4308,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
         <div id="aiLoadingIndicator" style="display: none; padding: 18px; background: #f8fafc; border: 1px dashed #00c292; border-radius: 8px; margin-bottom: 15px; text-align: center;">
           <div style="display: inline-flex; align-items: center; gap: 10px; color: #007a5a; font-weight: 600; font-size: 14px;">
             <i class="fa fa-circle-o-notch fa-spin fa-lg"></i>
-            <span>AI (Gemini) sedang menyusun narasi komunikatif dan apresiatif Tabel <?= htmlspecialchars($activeTabel) ?>... Harap tunggu sejenak.</span>
+            <span>Gemini AI sedang meneliti dan menyusun narasi akademik Tabel <?= htmlspecialchars($activeTabel) ?>... Harap tunggu sejenak.</span>
           </div>
         </div>
 
@@ -9842,8 +9855,8 @@ function generateNarasiAI(bab, tabel) {
       textarea.value = data.narasi;
       Swal.fire({
         icon: 'success',
-        title: 'Narasi Berhasil Disusun!',
-        text: 'Narasi ramah publik dan apresiatif Tabel ' + tabel + ' telah dibuat oleh AI (Gemini). Anda dapat meninjau, menyunting, atau menyimpannya.',
+        title: 'Narasi Berhasil Di-generate!',
+        text: 'Analisis naratif akademik Tabel ' + tabel + ' telah dibuat oleh Gemini AI. Anda dapat meninjau, menyunting, atau menyimpannya.',
         timer: 3000,
         showConfirmButton: true,
         confirmButtonColor: '#00c292'

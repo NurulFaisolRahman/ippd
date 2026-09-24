@@ -966,7 +966,16 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
 
   <!-- Breadcrumb & Page Title -->
   <div class="page-header-box">
-    <h1 class="page-title">BAB 2 PENGELOLAAN KEUANGAN DAERAH</h1>
+    <div class="page-badge">
+      <i class="fa fa-book"></i> E-LKPJ &bull; Bab II
+      <?php if (!empty($NamaWilayah)): ?>
+        &bull; <i class="fa fa-map-marker"></i> <?= htmlspecialchars($NamaWilayah) ?>
+      <?php endif; ?>
+      <?php if (!empty($IsRole4) && !empty($NamaInstansi)): ?>
+        &bull; <i class="fa fa-building"></i> <?= htmlspecialchars($NamaInstansi) ?> (Role Instansi)
+      <?php endif; ?>
+    </div>
+    <h1 class="page-title">BAB 2 : Pengelolaan Keuangan Daerah</h1>
     <p class="page-subtitle">Perubahan Anggaran Pendapatan, Belanja, dan Pembiayaan Daerah <?= htmlspecialchars($NamaWilayah ?: 'Kabupaten Situbondo') ?> Tahun Anggaran <?= $tahunAktif ?> (Sebelum dan Sesudah Perubahan).</p>
   </div>
 
@@ -1501,14 +1510,17 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
                 Narasi &amp; Interpretasi Data Tabel <?= htmlspecialchars($activeTabel) ?><?= !empty($metaTabel['judul_singkat']) ? ' (' . htmlspecialchars($metaTabel['judul_singkat']) . ')' : '' ?> (AI Assistant)
               </h4>
               <span style="display: inline-flex; align-items: center; gap: 4px; background: #dcfce7; color: #15803d; border: 1px solid #86efac; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 12px;">
-                <i class="fa fa-bolt"></i> AI
+                <i class="fa fa-bolt"></i> Gemini AI
               </span>
             </div>
+            <p style="margin: 3px 0 0; font-size: 12px; color: #4b6358;">
+              <i class="fa fa-user-circle"></i> <b>Persona:</b> Peneliti Riset Ekonomi Pembangunan &mdash; Analisis komprehensif, evaluatif, dan siap cetak untuk LKPJ.
+            </p>
           </div>
         </div>
         <div style="display: flex; gap: 8px; align-items: center;">
           <button type="button" id="btnGenerateAI" onclick="generateNarasiAI('2', '<?= $activeTabel ?>')" class="btn-notika-primary" style="background: linear-gradient(135deg, #00c292 0%, #009688 100%); border: none; color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 3px 10px rgba(0, 194, 146, 0.25); transition: all 0.2s ease;">
-            <i class="fa fa-magic"></i> <span>Generate Narasi</span>
+            <i class="fa fa-magic"></i> <span>Generate Narasi AI</span>
           </button>
         </div>
       </div>
@@ -1517,7 +1529,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
         <div id="aiLoadingIndicator" style="display: none; padding: 18px; background: #f8fafc; border: 1px dashed #00c292; border-radius: 8px; margin-bottom: 15px; text-align: center;">
           <div style="display: inline-flex; align-items: center; gap: 10px; color: #007a5a; font-weight: 600; font-size: 14px;">
             <i class="fa fa-circle-o-notch fa-spin fa-lg"></i>
-            <span>AI (Gemini) sedang menyusun narasi komunikatif dan apresiatif Tabel <?= htmlspecialchars($activeTabel) ?>... Harap tunggu sejenak.</span>
+            <span>Gemini AI sedang meneliti dan menyusun narasi akademik Tabel <?= htmlspecialchars($activeTabel) ?>... Harap tunggu sejenak.</span>
           </div>
         </div>
 
@@ -2089,8 +2101,8 @@ function generateNarasiAI(bab, tabel) {
       textarea.value = data.narasi;
       Swal.fire({
         icon: 'success',
-        title: 'Narasi Berhasil Disusun!',
-        text: 'Narasi ramah publik dan apresiatif Tabel ' + tabel + ' telah dibuat oleh AI (Gemini). Anda dapat meninjau, menyunting, atau menyimpannya.',
+        title: 'Narasi Berhasil Di-generate!',
+        text: 'Analisis naratif akademik Tabel ' + tabel + ' telah dibuat oleh Gemini AI. Anda dapat meninjau, menyunting, atau menyimpannya.',
         timer: 3000,
         showConfirmButton: true,
         confirmButtonColor: '#00c292'

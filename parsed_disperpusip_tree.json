@@ -1,0 +1,2612 @@
+[
+  {
+    "uraian": "Tujuan 1: Meningkatnya Pembangunan Literasi Masyarakat dan Pengelolaan Arsip",
+    "indikators": [
+      {
+        "indikator": "Indeks pembangunan literasi masyarakat",
+        "satuan": "Indeks",
+        "kondisi_awal": null,
+        "target_2026": 7.07,
+        "anggaran_2026": null,
+        "target_2027": 7.17,
+        "anggaran_2027": null,
+        "target_2028": 7.3,
+        "anggaran_2028": null,
+        "target_2029": 7.42,
+        "anggaran_2029": null,
+        "target_2030": 7.55,
+        "anggaran_2030": null
+      },
+      {
+        "indikator": "Indeks Hasil Pengawasan Kearsipan di lingkup Pemerintahan Daerah",
+        "satuan": "Nilai",
+        "kondisi_awal": null,
+        "target_2026": 68.36,
+        "anggaran_2026": null,
+        "target_2027": 68.7,
+        "anggaran_2027": null,
+        "target_2028": 69.05,
+        "anggaran_2028": null,
+        "target_2029": 69.39,
+        "anggaran_2029": null,
+        "target_2030": 69.74,
+        "anggaran_2030": null
+      }
+    ],
+    "sasaran_list": [
+      {
+        "uraian": "Sasaran 1: Meningkatnya Capaian Nilai SAKIP OPD",
+        "indikators": [
+          {
+            "indikator": "Nilai Sakip",
+            "satuan": "Nilai",
+            "kondisi_awal": null,
+            "target_2026": 85.07,
+            "anggaran_2026": null,
+            "target_2027": 85.16,
+            "anggaran_2027": null,
+            "target_2028": 85.24,
+            "anggaran_2028": null,
+            "target_2029": 85.33,
+            "anggaran_2029": null,
+            "target_2030": 85.41,
+            "anggaran_2030": null
+          }
+        ],
+        "program_list": [
+          {
+            "kode_program": "2.23.01",
+            "nama": "PROGRAM PENUNJANG URUSAN PEMERINTAHAN DAERAH KABUPATEN/KOTA",
+            "outcomes": [
+              {
+                "outcome_text": "Meningkatnya Tata Kelola Pemerintahan Perangkat Daerah",
+                "indikators": [
+                  {
+                    "indikator": "Capaian Nilai SAKIP Perangkat Daerah",
+                    "satuan": "Nilai",
+                    "kondisi_awal": null,
+                    "target_2026": 85.07,
+                    "anggaran_2026": 4934819769,
+                    "target_2027": 85.16,
+                    "anggaran_2027": 5038798240,
+                    "target_2028": 85.24,
+                    "anggaran_2028": 5622751415,
+                    "target_2029": 85.33,
+                    "anggaran_2029": 6292642593,
+                    "target_2030": 85.41,
+                    "anggaran_2030": 6515358527
+                  }
+                ]
+              }
+            ],
+            "kegiatan_list": [
+              {
+                "kode_nomenklatur": "2.23.01.2.01",
+                "nama": "Perencanaan, Penganggaran, danEvaluasi Kinerja Perangkat Daerah",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terlaksananya perencanaan, penganggaran, dan evaluasi kinerja perangkat daerah",
+                    "indikators": [
+                      {
+                        "indikator": "Jumlah Dokumen Perubahan DPA-SKPD dan Laporan Hasil Koordinasi Penyusunan Dokumen Perubahan DPA-SKPD",
+                        "satuan": "Dokumen",
+                        "kondisi_awal": null,
+                        "target_2026": 1,
+                        "anggaran_2026": 72225000,
+                        "target_2027": 1,
+                        "anggaran_2027": 65738125,
+                        "target_2028": 1,
+                        "anggaran_2028": 71832578,
+                        "target_2029": 1,
+                        "anggaran_2029": 78568562,
+                        "target_2030": 1,
+                        "anggaran_2030": 79354248
+                      },
+                      {
+                        "indikator": "Jumlah Dokumen Perubahan RKA-SKPD dan Laporan Hasil Koordinasi Penyusunan Dokumen Perubahan RKA-SKPD",
+                        "satuan": "Dokumen",
+                        "kondisi_awal": null,
+                        "target_2026": 1,
+                        "anggaran_2026": null,
+                        "target_2027": 1,
+                        "anggaran_2027": null,
+                        "target_2028": 1,
+                        "anggaran_2028": null,
+                        "target_2029": 1,
+                        "anggaran_2029": null,
+                        "target_2030": 1,
+                        "anggaran_2030": null
+                      },
+                      {
+                        "indikator": "Jumlah Dokumen RKA-SKPD danLaporan Hasil Koordinasi PenyusunanDokumen RKA-SKPD",
+                        "satuan": "Dokumen",
+                        "kondisi_awal": null,
+                        "target_2026": 1,
+                        "anggaran_2026": null,
+                        "target_2027": 1,
+                        "anggaran_2027": null,
+                        "target_2028": 1,
+                        "anggaran_2028": null,
+                        "target_2029": 1,
+                        "anggaran_2029": null,
+                        "target_2030": 1,
+                        "anggaran_2030": null
+                      },
+                      {
+                        "indikator": "Jumlah Laporan Capaian Kinerja dan Ikhtisar Realisasi Kinerja SKPD dan Laporan Hasil Koordinasi Penyusunan Laporan Capaian Kinerja dan Ikhtisar Realisasi Kinerja SKPD",
+                        "satuan": "Laporan",
+                        "kondisi_awal": null,
+                        "target_2026": 3,
+                        "anggaran_2026": null,
+                        "target_2027": 3,
+                        "anggaran_2027": null,
+                        "target_2028": 3,
+                        "anggaran_2028": null,
+                        "target_2029": 3,
+                        "anggaran_2029": null,
+                        "target_2030": 3,
+                        "anggaran_2030": null
+                      },
+                      {
+                        "indikator": "Jumlah Laporan Evaluasi Kinerja Perangkat Daerah",
+                        "satuan": "Laporan",
+                        "kondisi_awal": null,
+                        "target_2026": 4,
+                        "anggaran_2026": null,
+                        "target_2027": 4,
+                        "anggaran_2027": null,
+                        "target_2028": 4,
+                        "anggaran_2028": null,
+                        "target_2029": 4,
+                        "anggaran_2029": null,
+                        "target_2030": 4,
+                        "anggaran_2030": null
+                      },
+                      {
+                        "indikator": "Jumlah Dokumen DPA-SKPD dan Laporan Hasil Koordinasi PenyusunanDokumen DPA-SKPD",
+                        "satuan": "Dokumen",
+                        "kondisi_awal": null,
+                        "target_2026": 1,
+                        "anggaran_2026": null,
+                        "target_2027": 1,
+                        "anggaran_2027": null,
+                        "target_2028": 1,
+                        "anggaran_2028": null,
+                        "target_2029": 1,
+                        "anggaran_2029": null,
+                        "target_2030": 1,
+                        "anggaran_2030": null
+                      },
+                      {
+                        "indikator": "Jumlah Dokumen Perencanaan Perangkat Daerah",
+                        "satuan": "Dokumen",
+                        "kondisi_awal": null,
+                        "target_2026": 2,
+                        "anggaran_2026": null,
+                        "target_2027": 2,
+                        "anggaran_2027": null,
+                        "target_2028": 2,
+                        "anggaran_2028": null,
+                        "target_2029": 2,
+                        "anggaran_2029": null,
+                        "target_2030": 3,
+                        "anggaran_2030": null
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "2.23.01.2.01.0001",
+                    "nama": "Penyusunan Dokumen Perencanaan Perangkat Daerah",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersusunnya Dokumen Perencanaan Perangkat Daerah",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Dokumen Perencanaan Perangkat Daerah",
+                            "satuan": "Dokumen",
+                            "kondisi_awal": null,
+                            "target_2026": 2,
+                            "anggaran_2026": 13460000,
+                            "target_2027": 2,
+                            "anggaran_2027": 14471875,
+                            "target_2028": 2,
+                            "anggaran_2028": 15439703,
+                            "target_2029": 2,
+                            "anggaran_2029": 16536398,
+                            "target_2030": 3,
+                            "anggaran_2030": 16701762
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.01.2.01.0002",
+                    "nama": "Koordinasi danPenyusunan Dokumen RKA-SKPD",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Dokumen RKA-SKPD danLaporan Hasil Koordinasi Penyusunan Dokumen RKA-SKPD",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Dokumen RKA-SKPD danLaporan Hasil Koordinasi PenyusunanDokumen RKA-SKPD",
+                            "satuan": "Dokumen",
+                            "kondisi_awal": null,
+                            "target_2026": 1,
+                            "anggaran_2026": 6730000,
+                            "target_2027": 1,
+                            "anggaran_2027": 7350000,
+                            "target_2028": 1,
+                            "anggaran_2028": 8085000,
+                            "target_2029": 1,
+                            "anggaran_2029": 8893500,
+                            "target_2030": 1,
+                            "anggaran_2030": 8982435
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.01.2.01.0003",
+                    "nama": "Koordinasi dan Penyusunan DokumenPerubahan RKA-SKPD",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Dokumen Perubahan RKA-SKPD dan Laporan Hasil Koordinasi Penyusunan Dokumen Perubahan RKA-SKPD",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Dokumen Perubahan RKA-SKPD dan Laporan Hasil Koordinasi Penyusunan Dokumen Perubahan RKA-SKPD",
+                            "satuan": "Dokumen",
+                            "kondisi_awal": null,
+                            "target_2026": 1,
+                            "anggaran_2026": 6730000,
+                            "target_2027": 1,
+                            "anggaran_2027": 7218750,
+                            "target_2028": 1,
+                            "anggaran_2028": 7940625,
+                            "target_2029": 1,
+                            "anggaran_2029": 8734688,
+                            "target_2030": 1,
+                            "anggaran_2030": 8822035
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.01.2.01.0004",
+                    "nama": "Koordinasi dan Penyusunan DPA-SKPD",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Dokumen DPA-SKPD danLaporan Hasil Koordinasi Penyusunan Dokumen DPA-SKPD",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Dokumen DPA-SKPD danLaporan Hasil Koordinasi Penyusunan Dokumen DPA-SKPD",
+                            "satuan": "Dokumen",
+                            "kondisi_awal": null,
+                            "target_2026": 1,
+                            "anggaran_2026": 6730000,
+                            "target_2027": 1,
+                            "anggaran_2027": 7218750,
+                            "target_2028": 1,
+                            "anggaran_2028": 7940625,
+                            "target_2029": 1,
+                            "anggaran_2029": 8734688,
+                            "target_2030": 1,
+                            "anggaran_2030": 8822035
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.01.2.01.0005",
+                    "nama": "Koordinasi danPenyusunan Perubahan DPA- SKPD",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Dokumen Perubahan DPA-SKPD dan Laporan Hasil Koordinasi Penyusunan Dokumen Perubahan DPA-SKPD",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Dokumen Perubahan DPA-SKPD dan Laporan Hasil Koordinasi Penyusunan Dokumen Perubahan DPA-SKPD",
+                            "satuan": "Dokumen",
+                            "kondisi_awal": null,
+                            "target_2026": 1,
+                            "anggaran_2026": 6730000,
+                            "target_2027": 1,
+                            "anggaran_2027": 7218750,
+                            "target_2028": 1,
+                            "anggaran_2028": 7940625,
+                            "target_2029": 1,
+                            "anggaran_2029": 8734688,
+                            "target_2030": 1,
+                            "anggaran_2030": 8822035
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.01.2.01.0006",
+                    "nama": "Koordinasi dan Penyusunan Laporan Capaian Kinerja danIkhtisar Realisasi Kinerja SKPD",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Laporan Capaian Kinerja dan Ikhtisar Realisasi Kinerja SKPD dan Laporan Hasil Koordinasi Penyusunan Laporan Capaian Kinerja dan Ikhtisar Realisasi Kinerja SKPD",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Laporan Capaian Kinerja dan Ikhtisar Realisasi Kinerja SKPD dan Laporan Hasil Koordinasi Penyusunan Laporan Capaian Kinerja dan Ikhtisar RealisasiKinerja SKPD",
+                            "satuan": "Laporan",
+                            "kondisi_awal": null,
+                            "target_2026": 3,
+                            "anggaran_2026": 12695000,
+                            "target_2027": 3,
+                            "anggaran_2027": 10920000,
+                            "target_2028": 3,
+                            "anggaran_2028": 12012000,
+                            "target_2029": 3,
+                            "anggaran_2029": 13213200,
+                            "target_2030": 3,
+                            "anggaran_2030": 13345332
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.01.2.01.0007",
+                    "nama": "Evaluasi Kinerja Perangkat Daerah",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Evaluasi Kinerja Perangkat Daerah",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Laporan Evaluasi Kinerja Perangkat Daerah",
+                            "satuan": "Laporan",
+                            "kondisi_awal": null,
+                            "target_2026": 4,
+                            "anggaran_2026": 19150000,
+                            "target_2027": 4,
+                            "anggaran_2027": 11340000,
+                            "target_2028": 4,
+                            "anggaran_2028": 12474000,
+                            "target_2029": 4,
+                            "anggaran_2029": 13721400,
+                            "target_2030": 4,
+                            "anggaran_2030": 13858614
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kode_nomenklatur": "2.23.01.2.02",
+                "nama": "Administrasi KeuanganPerangkat Daerah",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terlaksananya administrasi keuangan perangkat daerah",
+                    "indikators": [
+                      {
+                        "indikator": "Jumlah Laporan Keuangan Akhir Tahun SKPD dan Laporan Hasil Koordinasi Penyusunan Laporan Keuangan Akhir Tahun SKPD",
+                        "satuan": "Laporan",
+                        "kondisi_awal": null,
+                        "target_2026": 1,
+                        "anggaran_2026": 3122101481,
+                        "target_2027": 1,
+                        "anggaran_2027": 3839705657,
+                        "target_2028": 1,
+                        "anggaran_2028": 4217676223,
+                        "target_2029": 1,
+                        "anggaran_2029": 4635443844,
+                        "target_2030": 1,
+                        "anggaran_2030": 4778347583
+                      },
+                      {
+                        "indikator": "Jumlah Dokumen Penatausahaan dan Pengujian/Verifikasi Keuangan SKPD",
+                        "satuan": "Dokumen",
+                        "kondisi_awal": null,
+                        "target_2026": 12,
+                        "anggaran_2026": null,
+                        "target_2027": 12,
+                        "anggaran_2027": null,
+                        "target_2028": 12,
+                        "anggaran_2028": null,
+                        "target_2029": 12,
+                        "anggaran_2029": null,
+                        "target_2030": 12,
+                        "anggaran_2030": null
+                      },
+                      {
+                        "indikator": "Jumlah Orang yang Menerima Gaji dan Tunjangan ASN",
+                        "satuan": "Orang/bulan",
+                        "kondisi_awal": null,
+                        "target_2026": 30,
+                        "anggaran_2026": null,
+                        "target_2027": 30,
+                        "anggaran_2027": null,
+                        "target_2028": 30,
+                        "anggaran_2028": null,
+                        "target_2029": 30,
+                        "anggaran_2029": null,
+                        "target_2030": 30,
+                        "anggaran_2030": null
+                      },
+                      {
+                        "indikator": "Jumlah Dokumen Hasil Penyediaan Administrasi Pelaksanaan TugasASN",
+                        "satuan": "Dokumen",
+                        "kondisi_awal": null,
+                        "target_2026": 12,
+                        "anggaran_2026": null,
+                        "target_2027": 12,
+                        "anggaran_2027": null,
+                        "target_2028": 12,
+                        "anggaran_2028": null,
+                        "target_2029": 12,
+                        "anggaran_2029": null,
+                        "target_2030": 12,
+                        "anggaran_2030": null
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "2.23.01.2.02.0001",
+                    "nama": "Penyediaan Gaji danTunjangan ASN",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Gaji dan Tunjangan ASN",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Orang yang Menerima Gaji dan Tunjangan ASN",
+                            "satuan": "Orang/bulan",
+                            "kondisi_awal": null,
+                            "target_2026": 30,
+                            "anggaran_2026": 2968581481,
+                            "target_2027": 30,
+                            "anggaran_2027": 3677114497,
+                            "target_2028": 30,
+                            "anggaran_2028": 4038825947,
+                            "target_2029": 30,
+                            "anggaran_2029": 4442708541,
+                            "target_2030": 30,
+                            "anggaran_2030": 4576843969
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.01.2.02.0002",
+                    "nama": "Penyediaan Administrasi Pelaksanaan TugasASN",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Administrasi Pelaksanaan Tugas ASN",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Dokumen Hasil Penyediaan AdministrasiPelaksanaan Tugas ASN",
+                            "satuan": "Dokumen",
+                            "kondisi_awal": null,
+                            "target_2026": 12,
+                            "anggaran_2026": 108000000,
+                            "target_2027": 12,
+                            "anggaran_2027": 120644500,
+                            "target_2028": 12,
+                            "anggaran_2028": 132708950,
+                            "target_2029": 12,
+                            "anggaran_2029": 141979845,
+                            "target_2030": 12,
+                            "anggaran_2030": 148210383
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.01.2.02.0003",
+                    "nama": "Pelaksanaan Penatausahaan danPengujian/Verifikasi Keuangan SKPD",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Penatausahaan dan Pengujian/Verifikasi Keuangan SKPD",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Dokumen Penatausahaan dan Pengujian/Verifikasi Keuangan SKPD",
+                            "satuan": "Dokumen",
+                            "kondisi_awal": null,
+                            "target_2026": 12,
+                            "anggaran_2026": 34140000,
+                            "target_2027": 12,
+                            "anggaran_2027": 29382360,
+                            "target_2028": 12,
+                            "anggaran_2028": 32320596,
+                            "target_2029": 12,
+                            "anggaran_2029": 35552655,
+                            "target_2030": 12,
+                            "anggaran_2030": 37330288
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.01.2.02.0005",
+                    "nama": "Koordinasi dan Penyusunan Laporan Keuangan Akhir TahunSKPD",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Laporan Keuangan Akhir Tahun SKPD dan Laporan Hasil Koordinasi Penyusunan Laporan Keuangan Akhir Tahun SKPD",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Laporan Keuangan Akhir Tahun SKPD dan Laporan Hasil Koordinasi Penyusunan Laporan Keuangan Akhir Tahun SKPD",
+                            "satuan": "Laporan",
+                            "kondisi_awal": null,
+                            "target_2026": 1,
+                            "anggaran_2026": 11380000,
+                            "target_2027": 1,
+                            "anggaran_2027": 12564300,
+                            "target_2028": 1,
+                            "anggaran_2028": 13820730,
+                            "target_2029": 1,
+                            "anggaran_2029": 15202803,
+                            "target_2030": 1,
+                            "anggaran_2030": 15962943
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kode_nomenklatur": "2.23.01.2.05",
+                "nama": "Administrasi Kepegawaian Perangkat Daerah",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terlaksananya administrasi kepegawaian perangkatdaerah",
+                    "indikators": [
+                      {
+                        "indikator": "Jumlah Paket Pakaian Dinas beserta AtributKelengkapan",
+                        "satuan": "Paket",
+                        "kondisi_awal": null,
+                        "target_2026": 27,
+                        "anggaran_2026": 13084680,
+                        "target_2027": 30,
+                        "anggaran_2027": 27600000,
+                        "target_2028": 30,
+                        "anggaran_2028": 31120000,
+                        "target_2029": 30,
+                        "anggaran_2029": 35344000,
+                        "target_2030": 30,
+                        "anggaran_2030": 37111200
+                      },
+                      {
+                        "indikator": "Jumlah Dokumen Pendataan dan Pengolahan Administrasi Kepegawaian",
+                        "satuan": "Dokumen",
+                        "kondisi_awal": null,
+                        "target_2026": 1,
+                        "anggaran_2026": null,
+                        "target_2027": 1,
+                        "anggaran_2027": null,
+                        "target_2028": 1,
+                        "anggaran_2028": null,
+                        "target_2029": 1,
+                        "anggaran_2029": null,
+                        "target_2030": 1,
+                        "anggaran_2030": null
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "2.23.01.2.05.0002",
+                    "nama": "Pengadaan Pakaian Dinas beserta Atribut Kelengkapannya",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Pakaian Dinas beserta Atribut Kelengkapan",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Paket Pakaian Dinas beserta AtributKelengkapan",
+                            "satuan": "Paket",
+                            "kondisi_awal": null,
+                            "target_2026": 27,
+                            "anggaran_2026": 13084680,
+                            "target_2027": 30,
+                            "anggaran_2027": 17600000,
+                            "target_2028": 30,
+                            "anggaran_2028": 21120000,
+                            "target_2029": 30,
+                            "anggaran_2029": 25344000,
+                            "target_2030": 30,
+                            "anggaran_2030": 26611200
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.01.2.05.0003",
+                    "nama": "Pendataan dan PengolahanAdministrasi Kepegawaian",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pendataan dan Pengolahan Administrasi Kepegawaian",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Dokumen Pendataan dan Pengolahan Administrasi Kepegawaian",
+                            "satuan": "Dokumen",
+                            "kondisi_awal": null,
+                            "target_2026": 1,
+                            "anggaran_2026": 0,
+                            "target_2027": 1,
+                            "anggaran_2027": 10000000,
+                            "target_2028": 1,
+                            "anggaran_2028": 10000000,
+                            "target_2029": 1,
+                            "anggaran_2029": 10000000,
+                            "target_2030": 1,
+                            "anggaran_2030": 10500000
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kode_nomenklatur": "2.23.01.2.06",
+                "nama": "Administrasi Umum Perangkat Daerah",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terlaksananya administrasi umum perangkat daerah",
+                    "indikators": [
+                      {
+                        "indikator": "Jumlah Paket Komponen Instalasi Listrik/Penerangan Bangunan Kantor yang Disediakan",
+                        "satuan": "Paket",
+                        "kondisi_awal": null,
+                        "target_2026": 1,
+                        "anggaran_2026": 734503570,
+                        "target_2027": 1,
+                        "anggaran_2027": 281605854,
+                        "target_2028": 1,
+                        "anggaran_2028": 333573120,
+                        "target_2029": 1,
+                        "anggaran_2029": 395498449,
+                        "target_2030": 1,
+                        "anggaran_2030": 415273372
+                      },
+                      {
+                        "indikator": "Jumlah Dokumen Dukungan Pelaksanaan Sistem Pemerintahan Berbasis Elektronikpada SKPD",
+                        "satuan": "Dokumen",
+                        "kondisi_awal": null,
+                        "target_2026": 1,
+                        "anggaran_2026": null,
+                        "target_2027": 1,
+                        "anggaran_2027": null,
+                        "target_2028": 1,
+                        "anggaran_2028": null,
+                        "target_2029": 1,
+                        "anggaran_2029": null,
+                        "target_2030": 1,
+                        "anggaran_2030": null
+                      },
+                      {
+                        "indikator": "Jumlah Dokumen Bahan Bacaan dan PeraturanPerundang-Undangan yang Disediakan",
+                        "satuan": "Dokumen",
+                        "kondisi_awal": null,
+                        "target_2026": 12,
+                        "anggaran_2026": null,
+                        "target_2027": 12,
+                        "anggaran_2027": null,
+                        "target_2028": 12,
+                        "anggaran_2028": null,
+                        "target_2029": 12,
+                        "anggaran_2029": null,
+                        "target_2030": 12,
+                        "anggaran_2030": null
+                      },
+                      {
+                        "indikator": "Jumlah Laporan Fasilitasi KunjunganTamu",
+                        "satuan": "Laporan",
+                        "kondisi_awal": null,
+                        "target_2026": 1,
+                        "anggaran_2026": null,
+                        "target_2027": 1,
+                        "anggaran_2027": null,
+                        "target_2028": 1,
+                        "anggaran_2028": null,
+                        "target_2029": 1,
+                        "anggaran_2029": null,
+                        "target_2030": 1,
+                        "anggaran_2030": null
+                      },
+                      {
+                        "indikator": "Jumlah Laporan Penyelenggaraan Rapat Koordinasi dan Konsultasi SKPD",
+                        "satuan": "Paket",
+                        "kondisi_awal": null,
+                        "target_2026": 12,
+                        "anggaran_2026": null,
+                        "target_2027": 12,
+                        "anggaran_2027": null,
+                        "target_2028": 12,
+                        "anggaran_2028": null,
+                        "target_2029": 12,
+                        "anggaran_2029": null,
+                        "target_2030": 12,
+                        "anggaran_2030": null
+                      },
+                      {
+                        "indikator": "Jumlah Paket Bahan Logistik Kantor yangDisediakan",
+                        "satuan": "Paket",
+                        "kondisi_awal": null,
+                        "target_2026": 1,
+                        "anggaran_2026": null,
+                        "target_2027": 1,
+                        "anggaran_2027": null,
+                        "target_2028": 1,
+                        "anggaran_2028": null,
+                        "target_2029": 1,
+                        "anggaran_2029": null,
+                        "target_2030": 1,
+                        "anggaran_2030": null
+                      },
+                      {
+                        "indikator": "Jumlah Paket Barang Cetakan danPenggandaan yang Disediakan",
+                        "satuan": "Paket",
+                        "kondisi_awal": null,
+                        "target_2026": 1,
+                        "anggaran_2026": null,
+                        "target_2027": 1,
+                        "anggaran_2027": null,
+                        "target_2028": 1,
+                        "anggaran_2028": null,
+                        "target_2029": 1,
+                        "anggaran_2029": null,
+                        "target_2030": 1,
+                        "anggaran_2030": null
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "2.23.01.2.06.0001",
+                    "nama": "Penyediaan Komponen InstalasiListrik/Penerangan Bangunan Kantor",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Komponen Instalasi Listrik/PeneranganBangunan Kantor",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Paket Komponen Instalasi Listrik/PeneranganBangunan Kantor yang Disediakan",
+                            "satuan": "Paket",
+                            "kondisi_awal": null,
+                            "target_2026": 1,
+                            "anggaran_2026": 5850588,
+                            "target_2027": 1,
+                            "anggaran_2027": 5382753,
+                            "target_2028": 1,
+                            "anggaran_2028": 6459303,
+                            "target_2029": 1,
+                            "anggaran_2029": 7751164,
+                            "target_2030": 1,
+                            "anggaran_2030": 8138722
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.01.2.06.0004",
+                    "nama": "Penyediaan Bahan Logistik Kantor",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Bahan Logistik Kantor",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Paket BahanLogistik Kantor yang Disediakan",
+                            "satuan": "Paket",
+                            "kondisi_awal": null,
+                            "target_2026": 1,
+                            "anggaran_2026": 27278694,
+                            "target_2027": 1,
+                            "anggaran_2027": 29400000,
+                            "target_2028": 1,
+                            "anggaran_2028": 35280000,
+                            "target_2029": 1,
+                            "anggaran_2029": 42336000,
+                            "target_2030": 1,
+                            "anggaran_2030": 44452800
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.01.2.06.0005",
+                    "nama": "Penyediaan Barang Cetakan danPenggandaan",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Barang Cetakan dan Penggandaan",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Paket Barang Cetakan dan Penggandaan yangDisediakan",
+                            "satuan": "Paket",
+                            "kondisi_awal": null,
+                            "target_2026": 1,
+                            "anggaran_2026": 6492168,
+                            "target_2027": 1,
+                            "anggaran_2027": 13234058,
+                            "target_2028": 1,
+                            "anggaran_2028": 15880870,
+                            "target_2029": 1,
+                            "anggaran_2029": 19057044,
+                            "target_2030": 1,
+                            "anggaran_2030": 20009896
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.01.2.06.0006",
+                    "nama": "Penyediaan Bahan Bacaan dan PeraturanPerundang-undangan",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Bahan Bacaan dan Peraturan Perundang-undangan",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Dokumen Bahan Bacaan dan PeraturanPerundang-Undanganyang Disediakan",
+                            "satuan": "Dokumen",
+                            "kondisi_awal": null,
+                            "target_2026": 12,
+                            "anggaran_2026": 4440000,
+                            "target_2027": 12,
+                            "anggaran_2027": 9450000,
+                            "target_2028": 12,
+                            "anggaran_2028": 11340000,
+                            "target_2029": 12,
+                            "anggaran_2029": 13608000,
+                            "target_2030": 12,
+                            "anggaran_2030": 14288400
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.01.2.06.0008",
+                    "nama": "Fasilitasi Kunjungan Tamu",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Fasilitasi Kunjungan Tamu",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah LaporanFasilitasi Kunjungan Tamu",
+                            "satuan": "Laporan",
+                            "kondisi_awal": null,
+                            "target_2026": 1,
+                            "anggaran_2026": 20742120,
+                            "target_2027": 1,
+                            "anggaran_2027": 21000000,
+                            "target_2028": 1,
+                            "anggaran_2028": 23100000,
+                            "target_2029": 1,
+                            "anggaran_2029": 25410000,
+                            "target_2030": 1,
+                            "anggaran_2030": 26680500
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.01.2.06.0009",
+                    "nama": "Penyelenggaraan Rapat Koordinasi danKonsultasi SKPD",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Penyelenggaraan Rapat Koordinasi dan Konsultasi SKPD",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Laporan Penyelenggaraan Rapat Koordinasi dan Konsultasi SKPD",
+                            "satuan": "Laporan",
+                            "kondisi_awal": null,
+                            "target_2026": 12,
+                            "anggaran_2026": 669700000,
+                            "target_2027": 12,
+                            "anggaran_2027": 180600000,
+                            "target_2028": 12,
+                            "anggaran_2028": 216720000,
+                            "target_2029": 12,
+                            "anggaran_2029": 260064000,
+                            "target_2030": 12,
+                            "anggaran_2030": 273067200
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.01.2.06.0011",
+                    "nama": "Dukungan Pelaksanaan Sistem Pemerintahan Berbasis Elektronikpada SKPD",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Dukungan Pelaksanaan Sistem Pemerintahan Berbasis Elektronik pada SKPD",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Dokumen Dukungan Pelaksanaan Sistem Pemerintahan Berbasis Elektronik pada SKPD",
+                            "satuan": "Dokumen",
+                            "kondisi_awal": null,
+                            "target_2026": 1,
+                            "anggaran_2026": 0,
+                            "target_2027": 1,
+                            "anggaran_2027": 22539043,
+                            "target_2028": 1,
+                            "anggaran_2028": 24792947,
+                            "target_2029": 1,
+                            "anggaran_2029": 27272241,
+                            "target_2030": 1,
+                            "anggaran_2030": 28635854
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kode_nomenklatur": "2.23.01.2.07",
+                "nama": "Pengadaan Barang Milik Daerah Penunjang Urusan PemerintahDaerah",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terlaksananya pengadaan Barang Milik Daerah",
+                    "indikators": [
+                      {
+                        "indikator": "Jumlah Paket Mebel yang Disediakan",
+                        "satuan": "Unit",
+                        "kondisi_awal": null,
+                        "target_2026": 7,
+                        "anggaran_2026": 121250894,
+                        "target_2027": 8,
+                        "anggaran_2027": 208272000,
+                        "target_2028": 9,
+                        "anggaran_2028": 279926400,
+                        "target_2029": 10,
+                        "anggaran_2029": 380911680,
+                        "target_2030": 11,
+                        "anggaran_2030": 399957264
+                      },
+                      {
+                        "indikator": "Jumlah Unit Gedung Kantor atau Bangunan Lainnya yang Disediakan",
+                        "satuan": "Unit",
+                        "kondisi_awal": null,
+                        "target_2026": 1,
+                        "anggaran_2026": null,
+                        "target_2027": 1,
+                        "anggaran_2027": null,
+                        "target_2028": 1,
+                        "anggaran_2028": null,
+                        "target_2029": 1,
+                        "anggaran_2029": null,
+                        "target_2030": 1,
+                        "anggaran_2030": null
+                      },
+                      {
+                        "indikator": "Jumlah Unit Peralatan dan Mesin Lainnyayang Disediakan",
+                        "satuan": "Unit",
+                        "kondisi_awal": null,
+                        "target_2026": 7,
+                        "anggaran_2026": null,
+                        "target_2027": 7,
+                        "anggaran_2027": null,
+                        "target_2028": 7,
+                        "anggaran_2028": null,
+                        "target_2029": 7,
+                        "anggaran_2029": null,
+                        "target_2030": 7,
+                        "anggaran_2030": null
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "2.23.01.2.07.0005",
+                    "nama": "Pengadaan Mebel",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Mebel",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Paket Mebelyang Disediakan",
+                            "satuan": "Unit",
+                            "kondisi_awal": null,
+                            "target_2026": 7,
+                            "anggaran_2026": 62825334,
+                            "target_2027": 8,
+                            "anggaran_2027": 44440000,
+                            "target_2028": 9,
+                            "anggaran_2028": 53328000,
+                            "target_2029": 10,
+                            "anggaran_2029": 63993600,
+                            "target_2030": 11,
+                            "anggaran_2030": 67193280
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.01.2.07.0006",
+                    "nama": "Pengadaan Peralatan dan Mesin Lainnya",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Peralatan dan Mesin Lainnya",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Unit Peralatan dan Mesin Lainnya yang Disediakan",
+                            "satuan": "Unit",
+                            "kondisi_awal": null,
+                            "target_2026": 7,
+                            "anggaran_2026": 58425560,
+                            "target_2027": 7,
+                            "anggaran_2027": 63832000,
+                            "target_2028": 7,
+                            "anggaran_2028": 76598400,
+                            "target_2029": 7,
+                            "anggaran_2029": 91918080,
+                            "target_2030": 7,
+                            "anggaran_2030": 96513984
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.01.2.07.0009",
+                    "nama": "Pengadaan GedungKantor atau Bangunan Lainnya",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Gedung Kantor atau Bangunan Lainnya",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Unit Gedung Kantor atau Bangunan Lainnyayang Disediakan",
+                            "satuan": "",
+                            "kondisi_awal": null,
+                            "target_2026": 1,
+                            "anggaran_2026": 0,
+                            "target_2027": 1,
+                            "anggaran_2027": 100000000,
+                            "target_2028": 1,
+                            "anggaran_2028": 150000000,
+                            "target_2029": 1,
+                            "anggaran_2029": 225000000,
+                            "target_2030": 1,
+                            "anggaran_2030": 236250000
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kode_nomenklatur": "2.23.01.2.08",
+                "nama": "Penyediaan Jasa Penunjang UrusanPemerintahan Daerah",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Tersedianya jasa penunjang urusan pemerintahan daerah",
+                    "indikators": [
+                      {
+                        "indikator": "Jumlah Laporan Penyediaan Jasa Surat Menyurat",
+                        "satuan": "Laporan",
+                        "kondisi_awal": null,
+                        "target_2026": 1,
+                        "anggaran_2026": 419416992,
+                        "target_2027": 1,
+                        "anggaran_2027": 317300000,
+                        "target_2028": 1,
+                        "anggaran_2028": 350310000,
+                        "target_2029": 1,
+                        "anggaran_2029": 383371000,
+                        "target_2030": 1,
+                        "anggaran_2030": 402634550
+                      },
+                      {
+                        "indikator": "Jumlah Laporan Penyediaan Jasa Pelayanan UmumKantor yang Disediakan",
+                        "satuan": "Laporan",
+                        "kondisi_awal": null,
+                        "target_2026": 12,
+                        "anggaran_2026": null,
+                        "target_2027": 12,
+                        "anggaran_2027": null,
+                        "target_2028": 12,
+                        "anggaran_2028": null,
+                        "target_2029": 12,
+                        "anggaran_2029": null,
+                        "target_2030": 12,
+                        "anggaran_2030": null
+                      },
+                      {
+                        "indikator": "Jumlah Laporan Penyediaan Jasa Komunikasi, Sumber Daya Air dan Listrik yang Disediakan",
+                        "satuan": "Laporan",
+                        "kondisi_awal": null,
+                        "target_2026": 12,
+                        "anggaran_2026": null,
+                        "target_2027": 12,
+                        "anggaran_2027": null,
+                        "target_2028": 12,
+                        "anggaran_2028": null,
+                        "target_2029": 12,
+                        "anggaran_2029": null,
+                        "target_2030": 12,
+                        "anggaran_2030": null
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "2.23.01.2.08.0001",
+                    "nama": "Penyediaan Jasa SuratMenyurat",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Penyediaan Jasa Surat Menyurat",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Laporan Penyediaan Jasa Surat Menyurat",
+                            "satuan": "Laporan",
+                            "kondisi_awal": null,
+                            "target_2026": 1,
+                            "anggaran_2026": 1500000,
+                            "target_2027": 1,
+                            "anggaran_2027": 2200000,
+                            "target_2028": 1,
+                            "anggaran_2028": 3700000,
+                            "target_2029": 1,
+                            "anggaran_2029": 2100000,
+                            "target_2030": 1,
+                            "anggaran_2030": 2300000
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.01.2.08.0002",
+                    "nama": "Penyediaan Jasa Komunikasi, SumberDaya Air dan Listrik",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Jasa Komunikasi, Sumber Daya Air dan Listrik",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Laporan Penyediaan Jasa Komunikasi, Sumber Daya Air dan Listrik yang Disediakan",
+                            "satuan": "Laporan",
+                            "kondisi_awal": null,
+                            "target_2026": 12,
+                            "anggaran_2026": 139187400,
+                            "target_2027": 12,
+                            "anggaran_2027": 111100000,
+                            "target_2028": 12,
+                            "anggaran_2028": 122210000,
+                            "target_2029": 12,
+                            "anggaran_2029": 134431000,
+                            "target_2030": 12,
+                            "anggaran_2030": 141152550
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.01.2.08.0004",
+                    "nama": "Penyediaan Jasa Pelayanan UmumKantor",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Jasa Pelayanan Umum Kantor",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Laporan Penyediaan Jasa Pelayanan Umum Kantor yangDisediakan",
+                            "satuan": "Laporan",
+                            "kondisi_awal": null,
+                            "target_2026": 12,
+                            "anggaran_2026": 278729592,
+                            "target_2027": 12,
+                            "anggaran_2027": 204000000,
+                            "target_2028": 12,
+                            "anggaran_2028": 224400000,
+                            "target_2029": 12,
+                            "anggaran_2029": 246840000,
+                            "target_2030": 12,
+                            "anggaran_2030": 259182000
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kode_nomenklatur": "2.23.01.2.09",
+                "nama": "Pemeliharaan Barang Milik Daerah Penunjang Urusan Pemerintahan Daerah",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terlaksananya pemeliharaan terhadap Barang Milik Daerah",
+                    "indikators": [
+                      {
+                        "indikator": "Jumlah Kendaraan Perorangan Dinas atau Kendaraan Dinas Jabatan yang Dipelihara dan dibayarkan Pajaknya",
+                        "satuan": "Unit",
+                        "kondisi_awal": null,
+                        "target_2026": 14,
+                        "anggaran_2026": 452237152,
+                        "target_2027": 14,
+                        "anggaran_2027": 298576604,
+                        "target_2028": 14,
+                        "anggaran_2028": 338313094,
+                        "target_2029": 14,
+                        "anggaran_2029": 383505058,
+                        "target_2030": 14,
+                        "anggaran_2030": 402680310
+                      },
+                      {
+                        "indikator": "Jumlah Kendaraan Dinas Operasional atau Lapangan yang Dipelihara dan dibayarkan Pajak danPerizinannya",
+                        "satuan": "Unit",
+                        "kondisi_awal": null,
+                        "target_2026": 3,
+                        "anggaran_2026": null,
+                        "target_2027": 3,
+                        "anggaran_2027": null,
+                        "target_2028": 3,
+                        "anggaran_2028": null,
+                        "target_2029": 3,
+                        "anggaran_2029": null,
+                        "target_2030": 3,
+                        "anggaran_2030": null
+                      },
+                      {
+                        "indikator": "Jumlah Gedung Kantor dan Bangunan Lainnya yangDipelihara/Direhabilita si",
+                        "satuan": "Unit",
+                        "kondisi_awal": null,
+                        "target_2026": 1,
+                        "anggaran_2026": null,
+                        "target_2027": 1,
+                        "anggaran_2027": null,
+                        "target_2028": 1,
+                        "anggaran_2028": null,
+                        "target_2029": 1,
+                        "anggaran_2029": null,
+                        "target_2030": 1,
+                        "anggaran_2030": null
+                      },
+                      {
+                        "indikator": "Jumlah Peralatan danMesin Lainnya yang Dipelihara",
+                        "satuan": "Unit",
+                        "kondisi_awal": null,
+                        "target_2026": 12,
+                        "anggaran_2026": null,
+                        "target_2027": 12,
+                        "anggaran_2027": null,
+                        "target_2028": 12,
+                        "anggaran_2028": null,
+                        "target_2029": 12,
+                        "anggaran_2029": null,
+                        "target_2030": 12,
+                        "anggaran_2030": null
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "2.23.01.2.09.0001",
+                    "nama": "Penyediaan Jasa Pemeliharaan, Biaya Pemeliharaan, dan Pajak Kendaraan Perorangan Dinas atau Kendaraan DinasJabatan",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Jasa Pemeliharaan, Biaya Pemeliharaan dan Pajak Kendaraan Perorangan Dinas atau Kendaraan DinasJabatan",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Kendaraan Perorangan Dinas atau Kendaraan Dinas Jabatan yang Dipelihara dan dibayarkan Pajaknya",
+                            "satuan": "Unit",
+                            "kondisi_awal": null,
+                            "target_2026": 14,
+                            "anggaran_2026": 140160657,
+                            "target_2027": 14,
+                            "anggaran_2027": 118039996,
+                            "target_2028": 14,
+                            "anggaran_2028": 135745996,
+                            "target_2029": 14,
+                            "anggaran_2029": 156107895,
+                            "target_2030": 14,
+                            "anggaran_2030": 163913290
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.01.2.09.0002",
+                    "nama": "Penyediaan Jasa Pemeliharaan, Biaya Pemeliharaan, Pajak dan Perizinan Kendaraan DinasOperasional atau Lapangan",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Jasa Pemeliharaan, Biaya Pemeliharaan, Pajak dan Perizinan Kendaraan Dinas Operasional atauLapangan",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Kendaraan Dinas Operasional atau Lapangan yang Dipelihara dan dibayarkan Pajak dan Perizinannya",
+                            "satuan": "Unit",
+                            "kondisi_awal": null,
+                            "target_2026": 3,
+                            "anggaran_2026": 102076495,
+                            "target_2027": 3,
+                            "anggaran_2027": 79536608,
+                            "target_2028": 3,
+                            "anggaran_2028": 91467098,
+                            "target_2029": 3,
+                            "anggaran_2029": 105187163,
+                            "target_2030": 3,
+                            "anggaran_2030": 110446520
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.01.2.09.0006",
+                    "nama": "Pemeliharaan Peralatandan Mesin Lainnya",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pemeliharaan Peralatandan Mesin Lainnya",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Peralatan dan Mesin Lainnya yangDipelihara",
+                            "satuan": "Unit",
+                            "kondisi_awal": null,
+                            "target_2026": 12,
+                            "anggaran_2026": 10000000,
+                            "target_2027": 12,
+                            "anggaran_2027": 21000000,
+                            "target_2028": 12,
+                            "anggaran_2028": 23100000,
+                            "target_2029": 12,
+                            "anggaran_2029": 25410000,
+                            "target_2030": 12,
+                            "anggaran_2030": 26680500
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.01.2.09.0009",
+                    "nama": "Pemeliharaan/Rehabilitasi Gedung Kantor dan Bangunan Lainnya",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pemeliharaan/Rehabilit asi Gedung Kantor dan Bangunan Lainnya",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Gedung Kantor dan Bangunan Lainnya yangDipelihara/Direhabilita si",
+                            "satuan": "Unit",
+                            "kondisi_awal": null,
+                            "target_2026": 1,
+                            "anggaran_2026": 200000000,
+                            "target_2027": 1,
+                            "anggaran_2027": 80000000,
+                            "target_2028": 1,
+                            "anggaran_2028": 88000000,
+                            "target_2029": 1,
+                            "anggaran_2029": 96800000,
+                            "target_2030": 1,
+                            "anggaran_2030": 101640000
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "uraian": "Sasaran 2: Meningkatnya budaya baca dan literasi masyarakat",
+        "indikators": [
+          {
+            "indikator": "Persentase Peningkatan Jumlah Kunjungan Perpustakaan",
+            "satuan": "%",
+            "kondisi_awal": null,
+            "target_2026": 35,
+            "anggaran_2026": null,
+            "target_2027": 35.5,
+            "anggaran_2027": null,
+            "target_2028": 36,
+            "anggaran_2028": null,
+            "target_2029": 36.5,
+            "anggaran_2029": null,
+            "target_2030": 37,
+            "anggaran_2030": null
+          }
+        ],
+        "program_list": [
+          {
+            "kode_program": "2.23.02",
+            "nama": "PROGRAM PEMBINAAN PERPUSTAKAAN",
+            "outcomes": [
+              {
+                "outcome_text": "Meningkatnya layanan perpustakaan sesuai Standar Nasional Perpustakaan",
+                "indikators": [
+                  {
+                    "indikator": "Nilai tingkat kegemaran membaca masyarakat",
+                    "satuan": "",
+                    "kondisi_awal": null,
+                    "target_2026": 65,
+                    "anggaran_2026": 318099595,
+                    "target_2027": 65.5,
+                    "anggaran_2027": 961597914,
+                    "target_2028": 66,
+                    "anggaran_2028": 1015151596,
+                    "target_2029": 66.5,
+                    "anggaran_2029": 1074423889,
+                    "target_2030": 67,
+                    "anggaran_2030": 1140358527
+                  },
+                  {
+                    "indikator": "Indeks KepuasanMasyarakat (IKM)",
+                    "satuan": "Indeks",
+                    "kondisi_awal": null,
+                    "target_2026": 88.56,
+                    "anggaran_2026": null,
+                    "target_2027": 89.06,
+                    "anggaran_2027": null,
+                    "target_2028": 89.56,
+                    "anggaran_2028": null,
+                    "target_2029": 90.06,
+                    "anggaran_2029": null,
+                    "target_2030": 90.81,
+                    "anggaran_2030": null
+                  }
+                ]
+              }
+            ],
+            "kegiatan_list": [
+              {
+                "kode_nomenklatur": "2.23.02.2.01",
+                "nama": "Pengelolaan Perpustakaan TingkatDaerah Kabupaten/Kota",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terlaksananya pengelolaan perpustakaan daerah yang profesional, inklusif, dan berkelanjutan",
+                    "indikators": [
+                      {
+                        "indikator": "Jumlah  Bahan Perpustakaan yang dikelola dan dikembangkan untuk Mewujudkan Keberagaman Koleksi Perpustakaan",
+                        "satuan": "Eksemplar",
+                        "kondisi_awal": null,
+                        "target_2026": 400,
+                        "anggaran_2026": 201979595,
+                        "target_2027": 120,
+                        "anggaran_2027": 192848165,
+                        "target_2028": 150,
+                        "anggaran_2028": 216473569,
+                        "target_2029": 175,
+                        "anggaran_2029": 243763690,
+                        "target_2030": 200,
+                        "anggaran_2030": 275475650
+                      },
+                      {
+                        "indikator": "Jumlah Data dan informasi Perpustakaan",
+                        "satuan": "Dokumen",
+                        "kondisi_awal": null,
+                        "target_2026": 2,
+                        "anggaran_2026": null,
+                        "target_2027": 2,
+                        "anggaran_2027": null,
+                        "target_2028": 2,
+                        "anggaran_2028": null,
+                        "target_2029": 2,
+                        "anggaran_2029": null,
+                        "target_2030": 2,
+                        "anggaran_2030": null
+                      },
+                      {
+                        "indikator": "Jumlah layanan perpustakaan rujukan tingkat Daerah Kabupaten/Kota  yang dikembangkan melalui peningkatankoleksi",
+                        "satuan": "Layanan",
+                        "kondisi_awal": null,
+                        "target_2026": 4,
+                        "anggaran_2026": null,
+                        "target_2027": 4,
+                        "anggaran_2027": null,
+                        "target_2028": 4,
+                        "anggaran_2028": null,
+                        "target_2029": 4,
+                        "anggaran_2029": null,
+                        "target_2030": 4,
+                        "anggaran_2030": null
+                      },
+                      {
+                        "indikator": "Jumlah Perpustakaan pada Satuan Pendidikan Dasar dan yang Dilakukan Pembinaan dalam Mewujudkan Standar Nasional Perpustakaan",
+                        "satuan": "Perpustakaan",
+                        "kondisi_awal": null,
+                        "target_2026": 20,
+                        "anggaran_2026": null,
+                        "target_2027": 20,
+                        "anggaran_2027": null,
+                        "target_2028": 25,
+                        "anggaran_2028": null,
+                        "target_2029": 30,
+                        "anggaran_2029": null,
+                        "target_2030": 35,
+                        "anggaran_2030": null
+                      },
+                      {
+                        "indikator": "Jumlah tenaga perpustakaan yang ditingkatkan kapasitasnya dan mendapat sertifikasi Tenaga Perpustakaan dan Pustakawan Tingkat DaerahKabupaten/Kota",
+                        "satuan": "Orang",
+                        "kondisi_awal": null,
+                        "target_2026": 0,
+                        "anggaran_2026": null,
+                        "target_2027": 3,
+                        "anggaran_2027": null,
+                        "target_2028": 4,
+                        "anggaran_2028": null,
+                        "target_2029": 5,
+                        "anggaran_2029": null,
+                        "target_2030": 6,
+                        "anggaran_2030": null
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "2.23.02.2.01.0004",
+                    "nama": "Pembinaan Perpustakaan pada Satuan Pendidikan Dasar di Seluruh Wilayah Kabupaten/Kota Sesuaidengan Standar Nasional Perpustakaan",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pembinaan Perpustakaan pada Satuan Pendidikan Dasar Di Seluruh Wilayah Kabupaten/Kota dalamMewujudkan Standar Nasional Perpustakaan",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Perpustakaan pada Satuan Pendidikan Dasar dan yang Dilakukan Pembinaan dalam Mewujudkan Standar NasionalPerpustakaan",
+                            "satuan": "Perpustakaan",
+                            "kondisi_awal": null,
+                            "target_2026": 20,
+                            "anggaran_2026": 21979595,
+                            "target_2027": 20,
+                            "anggaran_2027": 22709389,
+                            "target_2028": 25,
+                            "anggaran_2028": 24980325,
+                            "target_2029": 30,
+                            "anggaran_2029": 27478357,
+                            "target_2030": 35,
+                            "anggaran_2030": 30226197
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.02.2.01.0012",
+                    "nama": "Pengembangan Layanan PerpustakaanRujukan Tingkat Kabupaten/Kota",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pengembangan Layanan Perpustakaan Rujukan Tingkat Daerah Kabupaten/Kota melalui peningkatan koleksi",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah layanan perpustakaan rujukan tingkat Daerah Kabupaten/Kota  yang dikembangkanmelalui peningkatan koleksi",
+                            "satuan": "Layanan",
+                            "kondisi_awal": null,
+                            "target_2026": 4,
+                            "anggaran_2026": 105000000,
+                            "target_2027": 4,
+                            "anggaran_2027": 65508960,
+                            "target_2028": 4,
+                            "anggaran_2028": 72059858,
+                            "target_2029": 4,
+                            "anggaran_2029": 79265846,
+                            "target_2030": 4,
+                            "anggaran_2030": 87192425
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.02.2.01.0016",
+                    "nama": "Peningkatan Kapasitas Tenaga Perpustakaan dan Pustakawan Tingkat DaerahKabupaten/Kota",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Peningkatan Kapasitas dan Sertifikasi Tenaga Perpustakaan dan Pustakawan Tingkat Daerah Kabupaten/Kota",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah tenaga perpustakaan yang ditingkatkan kapasitasnya dan mendapat sertifikasi Tenaga Perpustakaan dan Pustakawan Tingkat Daerah Kabupaten/Kota",
+                            "satuan": "Orang",
+                            "kondisi_awal": null,
+                            "target_2026": 0,
+                            "anggaran_2026": 0,
+                            "target_2027": 3,
+                            "anggaran_2027": 16830000,
+                            "target_2028": 4,
+                            "anggaran_2028": 18513000,
+                            "target_2029": 5,
+                            "anggaran_2029": 20364300,
+                            "target_2030": 6,
+                            "anggaran_2030": 22400730
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.02.2.01.0017",
+                    "nama": "Penyusunan Data dan Informasi Perpustakaan",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Penyusunan Data dan Informasi PerpustakaanTingkat Daerah Kabupaten/Kota",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Data dan informasi Perpustakaan",
+                            "satuan": "Dokumen",
+                            "kondisi_awal": null,
+                            "target_2026": 2,
+                            "anggaran_2026": 10000000,
+                            "target_2027": 2,
+                            "anggaran_2027": 66096882,
+                            "target_2028": 2,
+                            "anggaran_2028": 72706570,
+                            "target_2029": 2,
+                            "anggaran_2029": 79977227,
+                            "target_2030": 2,
+                            "anggaran_2030": 87974950
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.02.2.01.0018",
+                    "nama": "Pengelolaan danPengembangan Bahan Perpustakaan",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pengelolaan dan Pengembangan  Bahan Perpustakaan Kabupaten/Kota  untuk MewujudkanKeberagaman Koleksi Perpustakaan",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah  Bahan Perpustakaan yang dikelola dan dikembangkan untuk Mewujudkan Keberagaman KoleksiPerpustakaan",
+                            "satuan": "Eksemplar",
+                            "kondisi_awal": null,
+                            "target_2026": 400,
+                            "anggaran_2026": 65000000,
+                            "target_2027": 120,
+                            "anggaran_2027": 21702934,
+                            "target_2028": 150,
+                            "anggaran_2028": 28213816,
+                            "target_2029": 175,
+                            "anggaran_2029": 36677960,
+                            "target_2030": 200,
+                            "anggaran_2030": 47681348
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kode_nomenklatur": "2.23.02.2.02",
+                "nama": "Pembudayaan GemarMembaca Tingkat Daerah Kabupaten/Kota",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Meningkatnya Efektivitas Promosi Perpustakaan",
+                    "indikators": [
+                      {
+                        "indikator": "Jumlah Lokus Pembudayaan Kegemaran Membaca dan Literasi pada Satuan PendidikanDasar dan Masyarakat",
+                        "satuan": "Lokus",
+                        "kondisi_awal": null,
+                        "target_2026": 2,
+                        "anggaran_2026": 116120000,
+                        "target_2027": 4,
+                        "anggaran_2027": 768749749,
+                        "target_2028": 4,
+                        "anggaran_2028": 798678027,
+                        "target_2029": 4,
+                        "anggaran_2029": 830660199,
+                        "target_2030": 4,
+                        "anggaran_2030": 864882877
+                      },
+                      {
+                        "indikator": "Jumlah sarana Perpustakaan yang Dibangun dan dipelihara di Tempat-Tempat Umum yang Menjadi Kewenangan DaerahKabupaten/Kota",
+                        "satuan": "Perpustakaan",
+                        "kondisi_awal": null,
+                        "target_2026": 0,
+                        "anggaran_2026": null,
+                        "target_2027": 1,
+                        "anggaran_2027": null,
+                        "target_2028": 1,
+                        "anggaran_2028": null,
+                        "target_2029": 1,
+                        "anggaran_2029": null,
+                        "target_2030": 1,
+                        "anggaran_2030": null
+                      },
+                      {
+                        "indikator": "Jumlah Orang yang Mendapatkan Penghargaan Gerakan Budaya Gemar MembacaTingkat Kabupaten Kota",
+                        "satuan": "Orang",
+                        "kondisi_awal": null,
+                        "target_2026": 6,
+                        "anggaran_2026": null,
+                        "target_2027": 12,
+                        "anggaran_2027": null,
+                        "target_2028": 12,
+                        "anggaran_2028": null,
+                        "target_2029": 12,
+                        "anggaran_2029": null,
+                        "target_2030": 12,
+                        "anggaran_2030": null
+                      },
+                      {
+                        "indikator": "Jumlah layanan perpustakaan berbasis inklusi sosial di wilayah Kabupaten/Kota yangdikembangkan",
+                        "satuan": "Perpustakaan",
+                        "kondisi_awal": null,
+                        "target_2026": 5,
+                        "anggaran_2026": null,
+                        "target_2027": 4,
+                        "anggaran_2027": null,
+                        "target_2028": 4,
+                        "anggaran_2028": null,
+                        "target_2029": 4,
+                        "anggaran_2029": null,
+                        "target_2030": 4,
+                        "anggaran_2030": null
+                      },
+                      {
+                        "indikator": "Jumlah Duta Baca/Bunda Baca/Bunda Literasi Tingkat Daerah Kabupaten/Kota yangdipilih dan didukung kegiatannya",
+                        "satuan": "Orang",
+                        "kondisi_awal": null,
+                        "target_2026": 0,
+                        "anggaran_2026": null,
+                        "target_2027": 1,
+                        "anggaran_2027": null,
+                        "target_2028": 1,
+                        "anggaran_2028": null,
+                        "target_2029": 1,
+                        "anggaran_2029": null,
+                        "target_2030": 1,
+                        "anggaran_2030": null
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "2.23.02.2.02.0006",
+                    "nama": "Pemilihan Duta Baca/Bunda Baca/Bunda Literasi Tingkat  DaerahKabupaten/Kota",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pemilihan Duta Baca/Bunda Baca/Bunda Literasi Tingkat Daerah Kabupaten/Kota",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Duta Baca/Bunda Baca/Bunda Literasi Tingkat DaerahKabupaten/Kota yang dipilih dan didukung kegiatannya",
+                            "satuan": "Orang",
+                            "kondisi_awal": null,
+                            "target_2026": 0,
+                            "anggaran_2026": 0,
+                            "target_2027": 1,
+                            "anggaran_2027": 10000000,
+                            "target_2028": 1,
+                            "anggaran_2028": 11000000,
+                            "target_2029": 1,
+                            "anggaran_2029": 12100000,
+                            "target_2030": 1,
+                            "anggaran_2030": 13310000
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.02.2.02.0007",
+                    "nama": "Pengembangan LiterasiBerbasis Inklusi Sosial",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pengembangan Layanan Perpustakaan Berbasis Inklusi Sosial di Wilayah Kabupaten/Kota",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah layanan perpustakaan berbasis inklusi sosial di wilayah Kabupaten/Kota yang dikembangkan",
+                            "satuan": "Perpustakaan",
+                            "kondisi_awal": null,
+                            "target_2026": 5,
+                            "anggaran_2026": 46120000,
+                            "target_2027": 4,
+                            "anggaran_2027": 22235042,
+                            "target_2028": 4,
+                            "anggaran_2028": 24458546,
+                            "target_2029": 4,
+                            "anggaran_2029": 26904401,
+                            "target_2030": 4,
+                            "anggaran_2030": 29594841
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.02.2.02.0008",
+                    "nama": "Pembangunan dan Pemeliharaan Sarana Perpustakaan di Tempat-Tempat Umum yang MenjadiKewenangan Daerah Kabupaten/Kota",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pembangunan Sarana Perpustakaan di Tempat-Tempat Umum yang Menjadi Kewenangan Daerah Kabupaten/Kota",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah sarana Perpustakaan yang Dibangun dan dipelihara di Tempat-Tempat Umum yang Menjadi Kewenangan DaerahKabupaten/Kota",
+                            "satuan": "Perpustakaan",
+                            "kondisi_awal": null,
+                            "target_2026": 0,
+                            "anggaran_2026": 0,
+                            "target_2027": 1,
+                            "anggaran_2027": 33990000,
+                            "target_2028": 1,
+                            "anggaran_2028": 37389000,
+                            "target_2029": 1,
+                            "anggaran_2029": 41127900,
+                            "target_2030": 1,
+                            "anggaran_2030": 45240690
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.02.2.02.0009",
+                    "nama": "Pemberian Penghargaan GerakanBudaya Gemar Membaca",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pemberian Penghargaan Gerakan Budaya Gemar Membaca Tingkat Kabupaten Kota",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Orang yang Mendapatkan Penghargaan Gerakan Budaya Gemar MembacaTingkat Kabupaten Kota",
+                            "satuan": "Orang",
+                            "kondisi_awal": null,
+                            "target_2026": 6,
+                            "anggaran_2026": 30000000,
+                            "target_2027": 12,
+                            "anggaran_2027": 586833703,
+                            "target_2028": 12,
+                            "anggaran_2028": 598570377,
+                            "target_2029": 12,
+                            "anggaran_2029": 610541784,
+                            "target_2030": 12,
+                            "anggaran_2030": 622752620
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.02.2.02.0010",
+                    "nama": "Sosialisasi Budaya Baca dan Literasi pada Satuan PendidikanDasar dan Masyarakat",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Meningkatnya Keterlibatan Satuan Pendidikan Dasar dan masyarakat dalam Sosialisasi Budaya Baca dan Literasi",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Lokus Pembudayaan Kegemaran Membaca dan Literasi pada Satuan PendidikanDasar dan Masyarakat",
+                            "satuan": "Lokus",
+                            "kondisi_awal": null,
+                            "target_2026": 2,
+                            "anggaran_2026": 40000000,
+                            "target_2027": 4,
+                            "anggaran_2027": 115691004,
+                            "target_2028": 4,
+                            "anggaran_2028": 127260104,
+                            "target_2029": 4,
+                            "anggaran_2029": 139986114,
+                            "target_2030": 4,
+                            "anggaran_2030": 153984726
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "uraian": "Sasaran 3: Meningkatnya aksesibilitas masyarakat terhadap informasi dan pengetahuan yang terkandung dalam koleksi nasional dan naskah kuno yang telah dilestarikan",
+        "indikators": [
+          {
+            "indikator": "Persentase koleksi nasional dan naskah kuno yang telah didigitalisasi dan dapat diakses secara daring",
+            "satuan": "%",
+            "kondisi_awal": null,
+            "target_2026": 100,
+            "anggaran_2026": null,
+            "target_2027": 100,
+            "anggaran_2027": null,
+            "target_2028": 100,
+            "anggaran_2028": null,
+            "target_2029": 100,
+            "anggaran_2029": null,
+            "target_2030": 100,
+            "anggaran_2030": null
+          }
+        ],
+        "program_list": [
+          {
+            "kode_program": "2.23.03",
+            "nama": "PROGRAM PELESTARIAN KOLEKSI NASIONALDAN NASKAH KUNO",
+            "outcomes": [
+              {
+                "outcome_text": "Meningkatnya Pelestarian Naskah Kuno Milik Kabupaten / Kota",
+                "indikators": [
+                  {
+                    "indikator": "Persentase Koleksi Nasional dan Naskah Kuno yang Diakuisisi",
+                    "satuan": "%",
+                    "kondisi_awal": null,
+                    "target_2026": 75,
+                    "anggaran_2026": 47000000,
+                    "target_2027": 80,
+                    "anggaran_2027": 53821978,
+                    "target_2028": 85,
+                    "anggaran_2028": 61002339,
+                    "target_2029": 90,
+                    "anggaran_2029": 69260370,
+                    "target_2030": 100,
+                    "anggaran_2030": 78775763
+                  }
+                ]
+              }
+            ],
+            "kegiatan_list": [
+              {
+                "kode_nomenklatur": "2.23.03.2.01",
+                "nama": "Pelestarian NaskahKuno Milik Daerah Kabupaten/Kota",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terselenggaranya pelestarian naskah kuno milik daerah untuk menjaga warisan budaya dan sejarah lokal",
+                    "indikators": [
+                      {
+                        "indikator": "Jumlah masyarakat yang berperan dalam penyimpanan, perawatan, pelestarian danpendaftaran naskah kuno",
+                        "satuan": "Orang",
+                        "kondisi_awal": null,
+                        "target_2026": 11,
+                        "anggaran_2026": 47000000,
+                        "target_2027": 60,
+                        "anggaran_2027": 53821978,
+                        "target_2028": 75,
+                        "anggaran_2028": 61002339,
+                        "target_2029": 85,
+                        "anggaran_2029": 69260370,
+                        "target_2030": 100,
+                        "anggaran_2030": 78775763
+                      },
+                      {
+                        "indikator": "Jumlah Naskah Kuno yang dimiliki masyarakat yang dilakukan pengembangan, pengolahan, pengalihmediaan untuk dilestarikan dan didayagunakan(Eksemplar)",
+                        "satuan": "Eksemplar",
+                        "kondisi_awal": null,
+                        "target_2026": 0,
+                        "anggaran_2026": null,
+                        "target_2027": 1,
+                        "anggaran_2027": null,
+                        "target_2028": 2,
+                        "anggaran_2028": null,
+                        "target_2029": 3,
+                        "anggaran_2029": null,
+                        "target_2030": 4,
+                        "anggaran_2030": null
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "2.23.03.2.01.0003",
+                    "nama": "Peningkatan Peran Serta Masyarakat dalam Penyimpanan, Perawatan, Pelestarian, dan PendaftaranNaskah Kuno",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Meningkatnya Peran serta Masyarakat dalam Penyimpanan, Perawatan, Pelestarian, dan Pendaftaran Naskah Kuno",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah masyarakat yang berperan dalam penyimpanan, perawatan, pelestarian dan pendaftaran naskahkuno",
+                            "satuan": "Orang",
+                            "kondisi_awal": null,
+                            "target_2026": 11,
+                            "anggaran_2026": 47000000,
+                            "target_2027": 60,
+                            "anggaran_2027": 35840338,
+                            "target_2028": 75,
+                            "anggaran_2028": 39424371,
+                            "target_2029": 85,
+                            "anggaran_2029": 43366808,
+                            "target_2030": 100,
+                            "anggaran_2030": 47703489
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.23.03.2.01.0004",
+                    "nama": "Pengembangan, Pengolahan dan Pengalihmediaan Naskah Kuno yang Dimiliki oleh Masyarakatuntuk Dilestarikan dan Didayagunakan",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pengembangan, Pengolahan dan Pengalihmediaan Naskah Kuno yang dimiliki Oleh Masyarakat untuk dilestarikan dan didayagunakan",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Naskah Kuno yang dimiliki masyarakat yang dilakukan pengembangan, pengolahan, pengalihmediaan untuk dilestarikan dan didayagunakan",
+                            "satuan": "Eksemplar",
+                            "kondisi_awal": null,
+                            "target_2026": 0,
+                            "anggaran_2026": 0,
+                            "target_2027": 1,
+                            "anggaran_2027": 17981640,
+                            "target_2028": 2,
+                            "anggaran_2028": 21577968,
+                            "target_2029": 3,
+                            "anggaran_2029": 25893562,
+                            "target_2030": 4,
+                            "anggaran_2030": 31072274
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "uraian": "Sasaran 4: Meningkatnya kualitas pengelolaan arsip dinamis dan statis",
+        "indikators": [
+          {
+            "indikator": "Persentase Organisasi Perangkat Daerah (OPD) yang menerapkan Sistem Kearsipan Dinamis dan Statis",
+            "satuan": "%",
+            "kondisi_awal": null,
+            "target_2026": 37.03,
+            "anggaran_2026": null,
+            "target_2027": 66.6,
+            "anggaran_2027": null,
+            "target_2028": 77.7,
+            "anggaran_2028": null,
+            "target_2029": 88.8,
+            "anggaran_2029": null,
+            "target_2030": 100,
+            "anggaran_2030": null
+          }
+        ],
+        "program_list": [
+          {
+            "kode_program": "2.24.02",
+            "nama": "PROGRAM PENGELOLAAN ARSIP",
+            "outcomes": [
+              {
+                "outcome_text": "Meningkatnya tata kelola arsip dinamis dan statis",
+                "indikators": [
+                  {
+                    "indikator": "Tingkat Ketersediaan Arsip",
+                    "satuan": "Persentase",
+                    "kondisi_awal": null,
+                    "target_2026": 75,
+                    "anggaran_2026": 245939262,
+                    "target_2027": 75,
+                    "anggaran_2027": 159212178,
+                    "target_2028": 75,
+                    "anggaran_2028": 110581831,
+                    "target_2029": 75,
+                    "anggaran_2029": 120140014,
+                    "target_2030": 75,
+                    "anggaran_2030": 130654015
+                  }
+                ]
+              }
+            ],
+            "kegiatan_list": [
+              {
+                "kode_nomenklatur": "2.24.02.2.01",
+                "nama": "Pengelolaan Arsip Dinamis Daerah Kabupaten/Kota",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terwujudnya pengelolaan arsip dinamis yang efisien dan tertib",
+                    "indikators": [
+                      {
+                        "indikator": "Jumlah Laporan Hasil Pengawasan Arsip Dinamis KewenanganKabupaten/Kota",
+                        "satuan": "Laporan",
+                        "kondisi_awal": null,
+                        "target_2026": 44,
+                        "anggaran_2026": 93786654,
+                        "target_2027": 44,
+                        "anggaran_2027": 63142573,
+                        "target_2028": 44,
+                        "anggaran_2028": 47229807,
+                        "target_2029": 44,
+                        "anggaran_2029": 52004235,
+                        "target_2030": 44,
+                        "anggaran_2030": 57166395
+                      },
+                      {
+                        "indikator": "Jumlah orang yang mendapatkan penghargaanGerakan Sadar Tertib Arsip",
+                        "satuan": "Lembaga",
+                        "kondisi_awal": null,
+                        "target_2026": 0,
+                        "anggaran_2026": null,
+                        "target_2027": 3,
+                        "anggaran_2027": null,
+                        "target_2028": 0,
+                        "anggaran_2028": null,
+                        "target_2029": 0,
+                        "anggaran_2029": null,
+                        "target_2030": 0,
+                        "anggaran_2030": null
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "2.24.02.2.01.0003",
+                    "nama": "Pengawasan Arsip Dinamis KewenanganKabupaten/Kota",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pengawasan Arsip Dinamis Kewenangan Kabupaten/Kota",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Laporan Hasil Pengawasan Arsip Dinamis Kewenangan Kabupaten/Kota",
+                            "satuan": "Laporan",
+                            "kondisi_awal": null,
+                            "target_2026": 44,
+                            "anggaran_2026": 93786654,
+                            "target_2027": 44,
+                            "anggaran_2027": 48142573,
+                            "target_2028": 44,
+                            "anggaran_2028": 47229807,
+                            "target_2029": 44,
+                            "anggaran_2029": 52004235,
+                            "target_2030": 44,
+                            "anggaran_2030": 57166395
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.24.02.2.01.0008",
+                    "nama": "Pemberian Penghargaan Gerakan Sadar Tertib Arsip",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya pemberian penghargaan Gerakan Sadar Tertib Arsip",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah orang yang mendapatkan penghargaanGerakan Sadar Tertib Arsip",
+                            "satuan": "Lembaga",
+                            "kondisi_awal": null,
+                            "target_2026": 0,
+                            "anggaran_2026": 0,
+                            "target_2027": 3,
+                            "anggaran_2027": 15000000,
+                            "target_2028": 0,
+                            "anggaran_2028": 0,
+                            "target_2029": 0,
+                            "anggaran_2029": 0,
+                            "target_2030": 0,
+                            "anggaran_2030": 0
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kode_nomenklatur": "2.24.02.2.02",
+                "nama": "Pengelolaan Arsip Statis Daerah Kabupaten/Kota",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terwujudnya pengelolaan arsip statis yang terstruktur dan terpelihara dengan baik",
+                    "indikators": [
+                      {
+                        "indikator": "Jumlah Arsip Statis yang Dilakukan Akusisi, Pengolahan, Preservasi dan AksesArsip Statis",
+                        "satuan": "Arsip",
+                        "kondisi_awal": null,
+                        "target_2026": 100,
+                        "anggaran_2026": 67417008,
+                        "target_2027": 100,
+                        "anggaran_2027": 20404605,
+                        "target_2028": 100,
+                        "anggaran_2028": 14485524,
+                        "target_2029": 100,
+                        "anggaran_2029": 19382629,
+                        "target_2030": 100,
+                        "anggaran_2030": 25259155
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "2.24.02.2.02.0004",
+                    "nama": "Akuisisi, Pengolahan,Preservasi, dan Akses Arsip Statis",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Akusisi, Pengolahan, Preservasi dan Akses Arsip Statis",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Arsip Statis yang Dilakukan Akusisi, Pengolahan,Preservasi dan Akses Arsip Statis",
+                            "satuan": "Arsip",
+                            "kondisi_awal": null,
+                            "target_2026": 100,
+                            "anggaran_2026": 67417008,
+                            "target_2027": 100,
+                            "anggaran_2027": 20404605,
+                            "target_2028": 100,
+                            "anggaran_2028": 14485524,
+                            "target_2029": 100,
+                            "anggaran_2029": 19382629,
+                            "target_2030": 100,
+                            "anggaran_2030": 25259155
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kode_nomenklatur": "2.24.02.2.03",
+                "nama": "Pengelolaan Simpul Jaringan Informasi Kearsipan NasionalTingkat Kabupaten/Kota",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terwujudnya pengelolaan simpul jaringan informasi kearsipan nasional yang efektif",
+                    "indikators": [
+                      {
+                        "indikator": "Jumlah Laporan Hasil Pemberdayaan Kapasitas Unit Kearsipan dan Lembaga Kearsipan DaerahKabupaten/Kota",
+                        "satuan": "Laporan",
+                        "kondisi_awal": null,
+                        "target_2026": 10,
+                        "anggaran_2026": 84735600,
+                        "target_2027": 10,
+                        "anggaran_2027": 75665000,
+                        "target_2028": 10,
+                        "anggaran_2028": 48866500,
+                        "target_2029": 10,
+                        "anggaran_2029": 48753150,
+                        "target_2030": 10,
+                        "anggaran_2030": 48228465
+                      },
+                      {
+                        "indikator": "Jumlah Layanan Penyediaan Informasi, Akses dan Layanan Kearsipan Tingkat Daerah Kabupaten/KotaMelalui JIKN",
+                        "satuan": "Pengguna",
+                        "kondisi_awal": null,
+                        "target_2026": 0,
+                        "anggaran_2026": null,
+                        "target_2027": 50,
+                        "anggaran_2027": null,
+                        "target_2028": 0,
+                        "anggaran_2028": null,
+                        "target_2029": 0,
+                        "anggaran_2029": null,
+                        "target_2030": 0,
+                        "anggaran_2030": null
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "2.24.02.2.03.0001",
+                    "nama": "Penyediaan Informasi, Akses dan Layanan Kearsipan Tingkat Daerah Kabupaten/KotaMelalui JIKN",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Informasi, Akses dan Layanan Kearsipan Tingkat Daerah Kabupaten/Kota Melalui JIKN",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Layanan Penyediaan Informasi, Akses dan Layanan Kearsipan Tingkat Daerah Kabupaten/Kota Melalui JIKN",
+                            "satuan": "Pengguna",
+                            "kondisi_awal": null,
+                            "target_2026": 0,
+                            "anggaran_2026": 0,
+                            "target_2027": 50,
+                            "anggaran_2027": 22150000,
+                            "target_2028": 0,
+                            "anggaran_2028": 0,
+                            "target_2029": 0,
+                            "anggaran_2029": 0,
+                            "target_2030": 0,
+                            "anggaran_2030": 0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "2.24.02.2.03.0002",
+                    "nama": "Pemberdayaan Kapasitas Unit Kearsipan dan Lembaga KearsipanDaerah Kabupaten/Kota",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pemberdayaan Kapasitas Unit Kearsipan dan Lembaga Kearsipan Daerah Kabupaten/Kota",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Laporan Hasil Pemberdayaan Kapasitas Unit Kearsipan dan Lembaga Kearsipan Daerah Kabupaten/Kota",
+                            "satuan": "Laporan",
+                            "kondisi_awal": null,
+                            "target_2026": 10,
+                            "anggaran_2026": 84735600,
+                            "target_2027": 10,
+                            "anggaran_2027": 53515000,
+                            "target_2028": 10,
+                            "anggaran_2028": 48866500,
+                            "target_2029": 10,
+                            "anggaran_2029": 48753150,
+                            "target_2030": 10,
+                            "anggaran_2030": 48228465
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "uraian": "Sasaran 5: Meningkatnya perlindungan dan penyelamatan arsip daerah yang memastikan kelestarian informasi penting untuk kepentingan publik",
+        "indikators": [
+          {
+            "indikator": "Jumlah arsip milik Kabupaten/Kota yang berhasil\ndilindungi dan diselamatkan",
+            "satuan": "Arsip",
+            "kondisi_awal": null,
+            "target_2026": 0,
+            "anggaran_2026": null,
+            "target_2027": 5,
+            "anggaran_2027": null,
+            "target_2028": 10,
+            "anggaran_2028": null,
+            "target_2029": 15,
+            "anggaran_2029": null,
+            "target_2030": 20,
+            "anggaran_2030": null
+          }
+        ],
+        "program_list": [
+          {
+            "kode_program": "2.24.03",
+            "nama": "PROGRAM PERLINDUNGAN DAN PENYELAMATAN ARSIP",
+            "outcomes": [
+              {
+                "outcome_text": "Meningkatnya perlindungan dan penyelamatan arsip sesuai NSPK",
+                "indikators": [
+                  {
+                    "indikator": "Persentase Cakupan Perlindungan dan Penyelamatan Arsip",
+                    "satuan": "Persentase",
+                    "kondisi_awal": null,
+                    "target_2026": null,
+                    "anggaran_2026": 0,
+                    "target_2027": 100,
+                    "anggaran_2027": 42225000,
+                    "target_2028": 100,
+                    "anggaran_2028": 46447500,
+                    "target_2029": 100,
+                    "anggaran_2029": 51092250,
+                    "target_2030": 100,
+                    "anggaran_2030": 56201475
+                  }
+                ]
+              }
+            ],
+            "kegiatan_list": [
+              {
+                "kode_nomenklatur": "2.24.03.2.01",
+                "nama": "Pemusnahan Arsip Dilingkungan Pemerintah Daerah Kabupaten/Kota yang Memiliki Retensi diBawah 10 (Sepuluh) Tahun",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terlaksananya pemusnahan arsip pemerintah daerah yangmelewati masa retensi di bawah 10 tahun",
+                    "indikators": [
+                      {
+                        "indikator": "Jumlah Arsip yang Memiliki Retensi Di Bawah 10 Tahunyang Dimusnahkan",
+                        "satuan": "Berkas",
+                        "kondisi_awal": null,
+                        "target_2026": 0,
+                        "anggaran_2026": 0,
+                        "target_2027": 100,
+                        "anggaran_2027": 18750000,
+                        "target_2028": 100,
+                        "anggaran_2028": 20625000,
+                        "target_2029": 100,
+                        "anggaran_2029": 22687500,
+                        "target_2030": 100,
+                        "anggaran_2030": 24956250
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "2.24.03.2.01.0003",
+                    "nama": "Pelaksanaan Pemusnahan Arsipyang Memiliki Retensi di Bawah 10 Tahun",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pemusnahan Arsip yang Memiliki Retensi Di Bawah 10 Tahun",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Arsip yang Memiliki Retensi Di Bawah 10 Tahun yang Dimusnahkan",
+                            "satuan": "Berkas",
+                            "kondisi_awal": null,
+                            "target_2026": 0,
+                            "anggaran_2026": 0,
+                            "target_2027": 100,
+                            "anggaran_2027": 18750000,
+                            "target_2028": 100,
+                            "anggaran_2028": 20625000,
+                            "target_2029": 100,
+                            "anggaran_2029": 22687500,
+                            "target_2030": 100,
+                            "anggaran_2030": 24956250
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kode_nomenklatur": "2.24.03.2.05",
+                "nama": "Pencarian Arsip Statis Kabupaten/Kota yang Dinyatakan Hilang",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terlaksananya upaya pencarian arsip statis daerah yang dinyatakan hilang",
+                    "indikators": [
+                      {
+                        "indikator": "Jumlah Daftar Pencarian Arsip (DPA) yang DilakukanPenetapan dan Pengumuman",
+                        "satuan": "Arsip",
+                        "kondisi_awal": null,
+                        "target_2026": 0,
+                        "anggaran_2026": 0,
+                        "target_2027": 100,
+                        "anggaran_2027": 23475000,
+                        "target_2028": 100,
+                        "anggaran_2028": 25822500,
+                        "target_2029": 100,
+                        "anggaran_2029": 28404750,
+                        "target_2030": 100,
+                        "anggaran_2030": 31245225
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "2.24.03.2.05.0003",
+                    "nama": "Penetapan dan Pengumuman DaftarPencarian Arsip (DPA)",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Penetapan dan Pengumuman Daftar Pencarian Arsip (DPA)",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Daftar Pencarian Arsip (DPA) yang Dilakukan Penetapan danPengumuman",
+                            "satuan": "Arsip",
+                            "kondisi_awal": null,
+                            "target_2026": 0,
+                            "anggaran_2026": 0,
+                            "target_2027": 100,
+                            "anggaran_2027": 23475000,
+                            "target_2028": 100,
+                            "anggaran_2028": 25822500,
+                            "target_2029": 100,
+                            "anggaran_2029": 28404750,
+                            "target_2030": 100,
+                            "anggaran_2030": 31245225
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "uraian": "Sasaran 6: Meningkatnya tata kelola perizinan kearsipan yang transparan, akuntabel, dan berbasis digital",
+        "indikators": [
+          {
+            "indikator": "Persentase pemohon perizinan arsip yang dilayani sesuai standar waktu pelayanan",
+            "satuan": "%",
+            "kondisi_awal": null,
+            "target_2026": 100,
+            "anggaran_2026": null,
+            "target_2027": 100,
+            "anggaran_2027": null,
+            "target_2028": 100,
+            "anggaran_2028": null,
+            "target_2029": 100,
+            "anggaran_2029": null,
+            "target_2030": 100,
+            "anggaran_2030": null
+          }
+        ],
+        "program_list": [
+          {
+            "kode_program": "2.24.04",
+            "nama": "PROGRAM PERIZINAN PENGGUNAAN ARSIP",
+            "outcomes": [
+              {
+                "outcome_text": "Meningkatnya akses masyarakat terhadap penggunaan arsip yang bersifat tertutup",
+                "indikators": [
+                  {
+                    "indikator": "Persentase Akses Masyarakat terhadap Penggunaan Arsip yang Bersifat Tertutup",
+                    "satuan": "Persentase",
+                    "kondisi_awal": null,
+                    "target_2026": null,
+                    "anggaran_2026": 0,
+                    "target_2027": 100,
+                    "anggaran_2027": 20000000,
+                    "target_2028": 100,
+                    "anggaran_2028": 22000000,
+                    "target_2029": 100,
+                    "anggaran_2029": 24200000,
+                    "target_2030": 100,
+                    "anggaran_2030": 26620000
+                  }
+                ]
+              }
+            ],
+            "kegiatan_list": [
+              {
+                "kode_nomenklatur": "2.24.04.2.01",
+                "nama": "Pelayanan Izin Penggunaan Arsip yang Bersifat Tertutup diKabupaten/Kota",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terlaksananya pelayanan izin penggunaan arsip yang bersifat tertutup dengan prosedur dan ketentuanperundang-undangan",
+                    "indikators": [
+                      {
+                        "indikator": "Jumlah Daftar Arsip Hasil Penyediaan Daftar dan Penetapan Izin Penggunaan Arsip yang BersifatTertutup",
+                        "satuan": "Arsip",
+                        "kondisi_awal": null,
+                        "target_2026": 0,
+                        "anggaran_2026": 0,
+                        "target_2027": 10,
+                        "anggaran_2027": 20000000,
+                        "target_2028": 10,
+                        "anggaran_2028": 22000000,
+                        "target_2029": 10,
+                        "anggaran_2029": 24200000,
+                        "target_2030": 10,
+                        "anggaran_2030": 26620000
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "2.24.04.2.01.0004",
+                    "nama": "Penyediaan Daftar dan Penetapan Izin Penggunaan Arsip yangBersifat Tertutup",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Penyediaan Daftar dan Penetapan Izin Penggunaan Arsip yang Bersifat Tertutup",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Daftar Arsip Hasil Penyediaan Daftar dan Penetapan Izin Penggunaan Arsip yang BersifatTertutup",
+                            "satuan": "Arsip",
+                            "kondisi_awal": null,
+                            "target_2026": 0,
+                            "anggaran_2026": 0,
+                            "target_2027": 10,
+                            "anggaran_2027": 20000000,
+                            "target_2028": 10,
+                            "anggaran_2028": 22000000,
+                            "target_2029": 10,
+                            "anggaran_2029": 24200000,
+                            "target_2030": 10,
+                            "anggaran_2030": 26620000
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

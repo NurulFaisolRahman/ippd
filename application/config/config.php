@@ -23,7 +23,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-$config['base_url'] = 'http://localhost/ippd';
+$config['base_url'] = 'http://localhost/ippd/';
 
 /*
 |--------------------------------------------------------------------------
@@ -366,8 +366,13 @@ $config['encryption_key'] = '';
 |
 |	Whether to match the user's IP address when reading the session data.
 |
+<<<<<<< HEAD
 |	WARNING: If you're using the database driver, don't forget to update
 |	         your session table's PRIMARY KEY when changing this setting.
+=======
+|	         your session table's PRIMARY KEY when changing this setting.
+|	WARNING: If you're using the database driver, don't forget to update
+>>>>>>> 64845251ca9ac50a48737a7ea4189874f49f11b9
 |
 | 'sess_time_to_update'
 |

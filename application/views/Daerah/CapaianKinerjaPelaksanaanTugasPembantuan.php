@@ -229,22 +229,18 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #00c292;
+  background: var(--ui-primary);
   color: #fff;
   border: none;
-  padding: 8px 16px;
-  font-size: 13px;
+  padding: 9px 18px;
+  font-size: 13.5px;
   font-weight: 700;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 5px rgba(0, 194, 146, 0.3);
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(0, 194, 146, 0.25);
 }
-.btn-add-primary:hover {
-  background: #00a87e;
-  box-shadow: 0 4px 10px rgba(0, 194, 146, 0.4);
-  transform: translateY(-1px);
-}
+.btn-add-primary:hover { background: var(--ui-primary-hover); }
 
 /* Table Section */
 .table-card {
@@ -329,38 +325,28 @@ body {
   white-space: nowrap;
 }
 .btn-icon {
-  width: 32px !important;
-  height: 32px !important;
-  min-width: 32px !important;
-  padding: 0 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border-radius: 50% !important;
-  border: none !important;
-  outline: none !important;
-  box-shadow: 0 2px 5px rgba(0,0,0,.16), 0 2px 10px rgba(0,0,0,.12) !important;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--ui-border);
+  background: #fff;
+  color: var(--ui-text-muted);
   cursor: pointer;
-  transition: all 0.2s ease !important;
+  transition: all 0.15s ease;
   font-size: 13px;
 }
-.btn-icon:hover {
-  transform: translateY(-2px) scale(1.06);
-  box-shadow: 0 4px 12px rgba(0,0,0,.25) !important;
-}
-.btn-icon.edit {
-  background: #2196F3 !important;
-  color: #fff !important;
-}
 .btn-icon.edit:hover {
-  background: #1e88e5 !important;
-}
-.btn-icon.delete {
-  background: #F44336 !important;
-  color: #fff !important;
+  background: var(--ui-primary-light);
+  border-color: var(--ui-primary-border);
+  color: var(--ui-primary-text);
 }
 .btn-icon.delete:hover {
-  background: #e53935 !important;
+  background: var(--ui-red-light);
+  border-color: #fecaca;
+  color: var(--ui-red);
 }
 
 /* Modals */
@@ -709,28 +695,9 @@ body {
   <?php } ?>
 
   <!-- Page Header -->
-  <?php
-  $namaInstansiTampil = '';
-  if (!empty($ListInstansi) && !empty($filterInstansi)) {
-      foreach ($ListInstansi as $ins) {
-          if ($ins['id'] == $filterInstansi) {
-              $namaInstansiTampil = $ins['nama'];
-              break;
-          }
-      }
-  }
-  ?>
   <div class="page-header-box">
-    <div class="page-badge">
-      <i class="fa fa-book"></i> E-LKPJ &bull; Bab IV &bull; 4.1
-      <?php if (!empty($NamaWilayah)): ?>
-        &bull; <i class="fa fa-map-marker"></i> <?= htmlspecialchars($NamaWilayah) ?>
-      <?php endif; ?>
-      <?php if (!empty($IsRole4) && !empty($namaInstansiTampil)): ?>
-        &bull; <i class="fa fa-building"></i> <?= htmlspecialchars($namaInstansiTampil) ?> (Role Instansi)
-      <?php endif; ?>
-    </div>
-    <h1 class="page-title">BAB 4.1 : Capaian Kinerja Pelaksanaan Tugas Pembantuan</h1>
+    <div class="page-badge"><i class="fa fa-tasks"></i> E-LKPJ Perangkat Daerah</div>
+    <h1 class="page-title">Capaian Kinerja Pelaksanaan Tugas Pembantuan</h1>
     <p class="page-subtitle">Kelola dan laporkan capaian kinerja kegiatan tugas pembantuan per kementerian/instansi pemberi tugas beserta realisasi pagu anggaran dan solusi kendala lapangan.</p>
   </div>
 
@@ -1099,8 +1066,8 @@ body {
         trHtml += 
           '<td class="center">' +
             '<div class="action-btns">' +
-              '<button type="button" class="btn-icon edit" data-id="' + r.id + '" title="Edit"><i class="notika-icon notika-edit"></i></button>' +
-              '<button type="button" class="btn-icon delete" data-id="' + r.id + '" title="Hapus"><i class="notika-icon notika-trash"></i></button>' +
+              '<button type="button" class="btn-icon edit" data-id="' + r.id + '" title="Edit"><i class="fa fa-pencil"></i></button>' +
+              '<button type="button" class="btn-icon delete" data-id="' + r.id + '" title="Hapus"><i class="fa fa-trash-o"></i></button>' +
             '</div>' +
           '</td>';
       }

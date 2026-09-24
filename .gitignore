@@ -3,7 +3,7 @@
 application/config/config.php
 application/cache/*
 !application/cache/index.html
-
+application/config/gemini.php
 application/logs/*
 !application/logs/index.html
 
@@ -38,3 +38,10 @@ application/config/nine_router.php
 scratch/
 __pycache__/
 *.pyc
+
+# Local/server temporary files
+error_log
+php.ini
+root.txt
+test.php
+test.txt

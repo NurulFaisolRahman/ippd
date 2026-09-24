@@ -33,6 +33,10 @@
             echo json_encode($this->db->query("SELECT v.Id as IdVisi,m.* FROM visirpjpn as v, misirpjpn as m WHERE m.Id = ".$_POST['Id']." AND m.deleted_at IS NULL")->result_array());
             }
 
+        public function BelanjaSubKegiatan() {
+            redirect('Instansi/BelanjaSubKegiatan');
+        }
+
         public function GetVisiRPJPD()
         {
             if (!$this->input->is_ajax_request()) show_404();

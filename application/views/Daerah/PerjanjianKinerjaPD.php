@@ -1093,7 +1093,7 @@
               id: d.pegawai_pengampu_id, nip: d.pengampu_nip, nama: d.pengampu_nama, jabatan: d.pengampu_jabatan, eselon: d.pengampu_eselon, satuanUnitKerja: d.pengampu_satuan
             };
             document.getElementById("lockedNama").textContent = emp.nama;
-            document.getElementById("lockedJabatan").textContent = emp.jabatan + (d.pengampu_eselon ? ' Â· Eselon ' + d.pengampu_eselon : '');
+            document.getElementById("lockedJabatan").textContent = emp.jabatan + (d.pengampu_eselon ? ' · Eselon ' + d.pengampu_eselon : '');
             applyEmployee(emp);
             if (d.atasan_langsung_id) {
               formAtasanId.value = d.atasan_langsung_id;
@@ -1197,7 +1197,7 @@
       pegawaiList.innerHTML = matches.map(function(emp){
         return '<div class="combo-item" data-nip="' + escapeHtml(emp.nip) + '">' +
           '<div class="ci-nama">' + escapeHtml(emp.nama) + '</div>' +
-          '<div class="ci-meta">' + escapeHtml(emp.jabatan) + ' Â· Eselon ' + escapeHtml(emp.eselon) + '</div>' +
+          '<div class="ci-meta">' + escapeHtml(emp.jabatan) + ' · Eselon ' + escapeHtml(emp.eselon) + '</div>' +
         '</div>';
       }).join("");
     }
@@ -1335,7 +1335,7 @@
 
     if (level === "program"){
       data.forEach(function(prog){
-        var progTitle = (prog.kode ? prog.kode + ' â€” ' : '') + prog.nama;
+        var progTitle = (prog.kode ? prog.kode + ' — ' : '') + prog.nama;
         var sList = prog.sasaranProgram || [];
         var progRows = sList
           .map(function(s, i){
@@ -1375,7 +1375,7 @@
 
       Object.keys(groupedProg).forEach(function(pid){
         var p = groupedProg[pid];
-        var progTitle = (p.kode ? p.kode + ' â€” ' : '') + p.nama;
+        var progTitle = (p.kode ? p.kode + ' — ' : '') + p.nama;
         var kegBlocks = [];
 
         p.kegiatans.forEach(function(k){
@@ -1413,7 +1413,7 @@
 
       Object.keys(grouped).forEach(function(pid){
         var prog = grouped[pid];
-        var progTitle = (prog.kode ? prog.kode + ' â€” ' : '') + prog.nama;
+        var progTitle = (prog.kode ? prog.kode + ' — ' : '') + prog.nama;
         var anyKeg = false;
         var pRows = [];
 
