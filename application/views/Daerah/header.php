@@ -477,8 +477,8 @@
 <div class="page-top-space"></div>
 
 <script>
-  function logout(){ window.location.href = '/Home'; }
-  function Login(){ window.location.href = '/Home'; }
+  function logout(){ window.location.href = '/ippd/Home'; }
+  function Login(){ window.location.href = '/ippd/Home'; }
 
   document.addEventListener('DOMContentLoaded', function () {
     const btn = document.getElementById('sidebarToggle');

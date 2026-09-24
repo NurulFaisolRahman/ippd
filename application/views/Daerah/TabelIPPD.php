@@ -335,10 +335,11 @@ body {
 .ippd-table tbody td:last-child { border-right: none; }
 
 /* Column Specific Widths */
-.col-no { width: 70px; min-width: 70px; text-align: center; font-weight: 700; }
-.col-bobot-maks { width: 160px; min-width: 160px; text-align: center; font-family: 'Roboto Mono', monospace; font-weight: 700; }
-.col-bobot-capaian { width: 165px; min-width: 165px; text-align: center; }
-.col-opsi-aksi { width: 200px; min-width: 200px; text-align: center; }
+.col-no { width: 60px; min-width: 60px; text-align: center; font-weight: 700; }
+.col-bobot-maks { width: 130px; min-width: 130px; text-align: center; font-family: 'Roboto Mono', monospace; font-weight: 700; }
+.col-bobot-capaian { width: 140px; min-width: 140px; text-align: center; }
+.col-opsi-aksi { width: 175px; min-width: 175px; text-align: center; }
+.col-verifikator { width: 220px; min-width: 220px; text-align: center; }
 
 /* Row Hierarchy Stylings */
 tr.type-indeks {
@@ -493,6 +494,400 @@ tr.type-sub:hover td {
 .btn-action-detail.has-score:hover {
   background: #dbeafe;
   border-color: #93c5fd;
+}
+
+/* Verifikator Column Styles */
+.btn-action-verifikator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  border: 1px solid #99f6e4;
+  background: #f0fdfa;
+  color: #0f766e;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  width: 100%;
+  max-width: 205px;
+  text-align: center;
+  line-height: 1.35;
+  box-sizing: border-box;
+}
+.btn-action-verifikator:hover {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+.btn-action-verifikator.kriteria-100 {
+  background: #ecfdf5;
+  border-color: #34d399;
+  color: #065f46;
+}
+.btn-action-verifikator.kriteria-100:hover {
+  background: #d1fae5;
+  border-color: #10b981;
+}
+.btn-action-verifikator.kriteria-75 {
+  background: #f0fdfa;
+  border-color: #2dd4bf;
+  color: #0f766e;
+}
+.btn-action-verifikator.kriteria-75:hover {
+  background: #ccfbf1;
+  border-color: #14b8a6;
+}
+.btn-action-verifikator.kriteria-50 {
+  background: #fffbeb;
+  border-color: #fcd34d;
+  color: #92400e;
+}
+.btn-action-verifikator.kriteria-50:hover {
+  background: #fef3c7;
+  border-color: #f59e0b;
+}
+.btn-action-verifikator.kriteria-0 {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #991b1b;
+}
+.btn-action-verifikator.kriteria-0:hover {
+  background: #fee2e2;
+  border-color: #ef4444;
+}
+.btn-action-verifikator.kriteria-na {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+.btn-action-verifikator.kriteria-empty {
+  background: #f8fafc;
+  border: 1px dashed #94a3b8;
+  color: #64748b;
+  font-weight: 600;
+}
+.btn-action-verifikator.kriteria-empty:hover {
+  background: #f0fdfa;
+  border-color: #0d9488;
+  color: #0f766e;
+}
+.badge-verif-pill {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: #ccfbf1;
+  color: #0f766e;
+  font-size: 11.5px;
+  font-weight: 700;
+  font-family: 'Roboto Mono', monospace;
+}
+.badge-verif-subtotal {
+  display: inline-block;
+  padding: 3px 6px;
+  border-radius: 4px;
+  background: #e6f9f3;
+  color: #059669;
+  font-family: 'Roboto Mono', monospace;
+}
+.verif-keselarasan-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 9px 16px;
+  margin-bottom: 18px;
+}
+.verif-ks-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.verif-ks-icon {
+  font-size: 14px;
+  color: #059669;
+  background: #dcfce7;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.verif-ks-title {
+  font-size: 12px;
+  color: #15803d;
+  font-weight: 600;
+  margin-right: 6px;
+}
+.verif-ks-value {
+  display: inline-block;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #047857;
+  font-family: 'Roboto Mono', monospace;
+  background: #dcfce7;
+  padding: 2px 8px;
+  border-radius: 5px;
+  border: 1px solid #86efac;
+}
+.btn-sync-keselarasan {
+  background: #ffffff;
+  border: 1.5px solid #10b981;
+  border-radius: 7px;
+  color: #047857;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 5px 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+.btn-sync-keselarasan:hover {
+  background: #059669;
+  color: #ffffff;
+  border-color: #059669;
+  box-shadow: 0 2px 5px rgba(5, 150, 105, 0.2);
+}
+.verif-col-hint {
+  font-size: 11.5px;
+  color: #64748b;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+}
+
+/* =========================================================
+   VERIFIKATOR MODAL STYLES (Clean Modern Design per Image)
+   ========================================================= */
+.verif-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.68);
+  backdrop-filter: blur(5px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100020;
+}
+.verif-modal-overlay.open {
+  display: flex;
+}
+.verif-modal-card {
+  background: #ffffff;
+  width: 100%;
+  max-width: 710px;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: verifModalPop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes verifModalPop {
+  0% { opacity: 0; transform: scale(0.96) translateY(12px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+.verif-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 24px 28px 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+.verif-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.verif-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #e6f9f3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #059669;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.verif-modal-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+.verif-modal-subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.4;
+}
+.btn-verif-close {
+  border: none;
+  background: transparent;
+  font-size: 24px;
+  color: #94a3b8;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 4px;
+  transition: color 0.15s;
+}
+.btn-verif-close:hover {
+  color: #334155;
+}
+.verif-modal-body {
+  padding: 22px 28px;
+  overflow-y: auto;
+  max-height: calc(88vh - 160px);
+}
+.verif-form-group {
+  margin-bottom: 18px;
+}
+.verif-form-group:last-child {
+  margin-bottom: 0;
+}
+.verif-label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #1e293b;
+  margin-bottom: 7px;
+}
+.verif-form-control {
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13.5px;
+  color: #1e293b;
+  background: #ffffff;
+  outline: none;
+  transition: all 0.15s;
+  box-sizing: border-box;
+}
+.verif-form-control:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+.verif-form-control[readonly] {
+  background: #f8fafc;
+  color: #334155;
+}
+.verif-form-control[disabled] {
+  background: #f1f5f9;
+  color: #64748b;
+  cursor: not-allowed;
+}
+.verif-select-active {
+  border: 1.5px solid #10b981 !important;
+}
+.verif-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.verif-col {
+  display: flex;
+  flex-direction: column;
+}
+.verif-preset-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+.verif-preset-btn {
+  flex: 1;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 6px 0;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.12s;
+}
+.verif-preset-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+.verif-preset-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.verif-notice-readonly {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  color: #92400e;
+  font-size: 12.5px;
+  margin-bottom: 18px;
+}
+.verif-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 28px;
+  border-top: 1px solid #f1f5f9;
+  background: #fafafa;
+}
+.btn-verif-cancel {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 9px 20px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-verif-cancel:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+.btn-verif-save {
+  background: #059669;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 22px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s;
+  box-shadow: 0 1px 3px rgba(5, 150, 105, 0.25);
+}
+.btn-verif-save:hover:not(:disabled) {
+  background: #047857;
+  box-shadow: 0 2px 6px rgba(5, 150, 105, 0.35);
 }
 
 /* =========================================================
@@ -1126,11 +1521,12 @@ tr.type-sub:hover td {
     <div class="table-scroll-wrap">
       <table class="ippd-table" id="tableIppd">
         <colgroup>
-          <col style="width: 70px;" />
+          <col style="width: 60px;" />
           <col />
-          <col style="width: 160px;" />
-          <col style="width: 165px;" />
-          <col style="width: 200px;" />
+          <col style="width: 130px;" />
+          <col style="width: 140px;" />
+          <col style="width: 175px;" />
+          <col style="width: 220px;" />
         </colgroup>
         <thead>
           <tr>
@@ -1139,6 +1535,7 @@ tr.type-sub:hover td {
             <th class="col-bobot-maks text-center">Bobot Maksimal</th>
             <th class="col-bobot-capaian text-center">Bobot Capaian</th>
             <th class="col-opsi-aksi text-center">Aksi & Detail Penilaian</th>
+            <th class="col-verifikator text-center">Verifikator</th>
           </tr>
         </thead>
         <tbody id="tbodyIppd">
@@ -1246,6 +1643,109 @@ tr.type-sub:hover td {
   </div>
 </div>
 
+<!-- =========================================================
+     VERIFIKATOR MODAL (Penilaian Sub-Indikator / Indikator)
+     ========================================================= -->
+<div class="verif-modal-overlay" id="modalVerifikatorOverlay">
+  <div class="verif-modal-card">
+    
+    <!-- Modal Header -->
+    <div class="verif-modal-header">
+      <div class="verif-header-left">
+        <div class="verif-icon-box">
+          <i class="fa fa-pencil-square-o"></i>
+        </div>
+        <div>
+          <h4 class="verif-modal-title" id="verifModalTitle">Penilaian Sub-Indikator (a)</h4>
+          <p class="verif-modal-subtitle">Lengkapi capaian bobot, pilihan status pemenuhan, dan catatan evaluasi.</p>
+        </div>
+      </div>
+      <button type="button" class="btn-verif-close" id="btnVerifClose" title="Tutup">&times;</button>
+    </div>
+
+    <!-- Modal Form -->
+    <form id="formVerifikatorIppd" autocomplete="off">
+      <input type="hidden" id="verifItemCode" value="">
+      <input type="hidden" id="verifBobotMaks" value="0">
+
+      <div class="verif-modal-body">
+        <!-- 1. Uraian Indikator / Sub-Indikator -->
+        <div class="verif-form-group">
+          <label class="verif-label">URAIAN INDIKATOR / SUB-INDIKATOR</label>
+          <input type="text" id="verifUraian" class="verif-form-control" readonly>
+        </div>
+
+        <!-- Info Strip Keselarasan Lembar Kerja -->
+        <div class="verif-keselarasan-strip">
+          <div class="verif-ks-info">
+            <i class="fa fa-calculator verif-ks-icon"></i>
+            <div>
+              <span class="verif-ks-title">Total Keselarasan Terbobot:</span>
+              <strong class="verif-ks-value" id="verifKeselarasanBadge">0,000</strong>
+            </div>
+          </div>
+          <button type="button" class="btn-sync-keselarasan" id="btnSyncKeselarasan" title="Klik untuk menerapkan nilai keselarasan lembar kerja ke Bobot Capaian">
+            <i class="fa fa-refresh"></i> Terapkan Nilai Keselarasan
+          </button>
+        </div>
+
+        <!-- 2. Row: Bobot Capaian & Opsi Aksi -->
+        <div class="verif-form-row">
+          <div class="verif-col">
+            <label class="verif-label">BOBOT CAPAIAN (MAKS: <span id="verifMaxBadge">0,625</span>)</label>
+            <input type="number" step="0.001" min="0" id="verifBobotInput" class="verif-form-control" placeholder="0.000" <?= empty($IsRole4) ? 'readonly' : '' ?>>
+            <div class="verif-preset-row">
+              <button type="button" class="verif-preset-btn" data-ratio="1.0" <?= empty($IsRole4) ? 'disabled' : '' ?>>100%</button>
+              <button type="button" class="verif-preset-btn" data-ratio="0.75" <?= empty($IsRole4) ? 'disabled' : '' ?>>75%</button>
+              <button type="button" class="verif-preset-btn" data-ratio="0.5" <?= empty($IsRole4) ? 'disabled' : '' ?>>50%</button>
+              <button type="button" class="verif-preset-btn" data-ratio="0.25" <?= empty($IsRole4) ? 'disabled' : '' ?>>25%</button>
+              <button type="button" class="verif-preset-btn" data-ratio="0" <?= empty($IsRole4) ? 'disabled' : '' ?>>0%</button>
+            </div>
+          </div>
+          <div class="verif-col">
+            <label class="verif-label">OPSI AKSI / KRITERIA</label>
+            <select id="verifOpsiAksi" class="verif-form-control verif-select-active" <?= empty($IsRole4) ? 'disabled' : '' ?>>
+              <option value="">-- Pilih Opsi Aksi --</option>
+              <option value="Memenuhi Sepenuhnya (100%)">Memenuhi Sepenuhnya (100%)</option>
+              <option value="Sebagian Besar Memenuhi (75%)">Sebagian Besar Memenuhi (75%)</option>
+              <option value="Sebagian Memenuhi (50%)">Sebagian Memenuhi (50%)</option>
+              <option value="Belum Memenuhi (0%)">Belum Memenuhi (0%)</option>
+              <option value="Tidak Terkait / NA">Tidak Terkait / NA</option>
+            </select>
+            <div class="verif-col-hint">
+              <i class="fa fa-info-circle"></i> Pilih kriteria pemenuhan verifikasi
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Catatan / Evaluasi / Keterangan -->
+        <div class="verif-form-group">
+          <label class="verif-label">CATATAN / EVALUASI / KETERANGAN</label>
+          <textarea id="verifCatatan" class="verif-form-control" rows="3" placeholder="Tambahkan uraian penjelasan hasil evaluasi atau catatan..." <?= empty($IsRole4) ? 'readonly' : '' ?>></textarea>
+        </div>
+
+        <!-- 4. Bukti Dukung / Sumber Data (Dokumen/Link) -->
+        <div class="verif-form-group">
+          <label class="verif-label">BUKTI DUKUNG / SUMBER DATA (DOKUMEN/LINK)</label>
+          <input type="text" id="verifBuktiDukung" class="verif-form-control" placeholder="Contoh: Bab IV RPJMD 2025-2029 / Link Dokumen Evaluasi" <?= empty($IsRole4) ? 'readonly' : '' ?>>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="verif-modal-footer">
+        <?php if (!empty($IsRole4)): ?>
+          <button type="button" class="btn-verif-cancel" id="btnVerifCancel">Batal</button>
+          <button type="button" class="btn-verif-save" id="btnVerifSave">
+            <i class="fa fa-save"></i> Simpan Penilaian
+          </button>
+        <?php else: ?>
+          <button type="button" class="btn-verif-cancel" id="btnVerifCloseBottom">Tutup</button>
+        <?php endif; ?>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- Toast Container -->
 <div class="toast-container" id="toastContainer"></div>
 
@@ -1256,6 +1756,7 @@ tr.type-sub:hover td {
   var BASE_URL = "<?= base_url() ?>";
   var MASTER_DATA = <?= json_encode($masterData) ?>;
   var SCORES_MAP = <?= json_encode($savedScores) ?> || {};
+  var IS_ROLE_4 = <?= !empty($IsRole4) ? 'true' : 'false' ?>;
 
   var tbody = document.getElementById("tbodyIppd");
   var selectTahun = document.getElementById("selectTahun");
@@ -1287,6 +1788,23 @@ tr.type-sub:hover td {
   var modalRefTabel = document.getElementById("modalRefTabel");
   var modalCatatan = document.getElementById("modalCatatan");
   var modalBuktiDukung = document.getElementById("modalBuktiDukung");
+
+  var modalVerif = document.getElementById("modalVerifikatorOverlay");
+  var verifModalTitle = document.getElementById("verifModalTitle");
+  var verifItemCode = document.getElementById("verifItemCode");
+  var verifBobotMaks = document.getElementById("verifBobotMaks");
+  var verifMaxBadge = document.getElementById("verifMaxBadge");
+  var verifUraian = document.getElementById("verifUraian");
+  var verifBobotInput = document.getElementById("verifBobotInput");
+  var verifOpsiAksi = document.getElementById("verifOpsiAksi");
+  var verifCatatan = document.getElementById("verifCatatan");
+  var verifBuktiDukung = document.getElementById("verifBuktiDukung");
+  var btnVerifSave = document.getElementById("btnVerifSave");
+  var btnVerifCancel = document.getElementById("btnVerifCancel");
+  var btnVerifClose = document.getElementById("btnVerifClose");
+  var btnVerifCloseBottom = document.getElementById("btnVerifCloseBottom");
+  var btnSyncKeselarasan = document.getElementById("btnSyncKeselarasan");
+  var verifKeselarasanBadge = document.getElementById("verifKeselarasanBadge");
 
   var collapsedKeys = new Set();
   var itemMap = {};
@@ -1347,6 +1865,7 @@ tr.type-sub:hover td {
   // Calculate Rollup Scores for Tree
   function calculateRollupScores(){
     var calculated = {};
+    var calculatedVerif = {};
     var grandTotal = 0;
     var sinergiScore = 0;
     var kualitasScore = 0;
@@ -1354,30 +1873,42 @@ tr.type-sub:hover td {
 
     MASTER_DATA.forEach(function(indeks){
       var indeksSum = 0;
+      var indeksVerifSum = 0;
       if (indeks.aspek){
         indeks.aspek.forEach(function(aspek){
           var aspekSum = 0;
+          var aspekVerifSum = 0;
           if (aspek.indikator){
             aspek.indikator.forEach(function(ind){
               var indScore = 0;
+              var indVerifScore = 0;
               if (ind.sub && ind.sub.length > 0){
                 ind.sub.forEach(function(sub){
                   var subVal = SCORES_MAP[sub.code] && SCORES_MAP[sub.code].bobot_capaian !== null ? Number(SCORES_MAP[sub.code].bobot_capaian) : 0;
                   indScore += subVal;
+                  var subVerif = SCORES_MAP[sub.code] && SCORES_MAP[sub.code].bobot_verifikator !== null ? Number(SCORES_MAP[sub.code].bobot_verifikator) : 0;
+                  indVerifScore += subVerif;
                 });
                 calculated[ind.code] = indScore;
+                calculatedVerif[ind.code] = indVerifScore;
               } else {
                 indScore = SCORES_MAP[ind.code] && SCORES_MAP[ind.code].bobot_capaian !== null ? Number(SCORES_MAP[ind.code].bobot_capaian) : 0;
                 calculated[ind.code] = indScore;
+                var indVerif = SCORES_MAP[ind.code] && SCORES_MAP[ind.code].bobot_verifikator !== null ? Number(SCORES_MAP[ind.code].bobot_verifikator) : 0;
+                calculatedVerif[ind.code] = indVerif;
               }
               aspekSum += indScore;
+              aspekVerifSum += indVerifScore;
             });
           }
           calculated[aspek.code] = aspekSum;
+          calculatedVerif[aspek.code] = aspekVerifSum;
           indeksSum += aspekSum;
+          indeksVerifSum += aspekVerifSum;
         });
       }
       calculated[indeks.code] = indeksSum;
+      calculatedVerif[indeks.code] = indeksVerifSum;
       grandTotal += indeksSum;
 
       if (indeks.code === '1') sinergiScore = indeksSum;
@@ -1398,13 +1929,53 @@ tr.type-sub:hover td {
     statKinerjaScore.textContent = numFmt(kinerjaScore);
     statKinerjaFill.style.width = Math.min(100, Math.max(0, (kinerjaScore / 10) * 100)) + "%";
 
-    return calculated;
+    return { normal: calculated, verif: calculatedVerif };
+  }
+
+  function renderVerifikatorButtonHtml(code, savedScore){
+    savedScore = savedScore || {};
+    var hasVerif = (savedScore.bobot_verifikator !== null && savedScore.bobot_verifikator !== undefined && savedScore.bobot_verifikator !== "");
+    var kriteria = (savedScore.opsi_aksi_verifikator || "").trim();
+
+    var kriteriaClass = "kriteria-empty";
+    var iconClass = IS_ROLE_4 ? "fa-pencil-square-o" : "fa-eye";
+    var labelText = IS_ROLE_4 ? "Verifikasi" : "Belum Diverifikasi";
+
+    if (kriteria !== ""){
+      labelText = kriteria;
+      iconClass = "fa-check-circle";
+      if (kriteria.indexOf("100%") !== -1 || kriteria.indexOf("Memenuhi Sepenuhnya") !== -1) {
+        kriteriaClass = "kriteria-100";
+      } else if (kriteria.indexOf("75%") !== -1 || kriteria.indexOf("Sebagian Besar") !== -1) {
+        kriteriaClass = "kriteria-75";
+      } else if (kriteria.indexOf("50%") !== -1 || kriteria.indexOf("Sebagian Memenuhi") !== -1) {
+        kriteriaClass = "kriteria-50";
+      } else if (kriteria.indexOf("0%") !== -1 || kriteria.indexOf("Belum Memenuhi") !== -1) {
+        kriteriaClass = "kriteria-0";
+      } else {
+        kriteriaClass = "kriteria-na";
+      }
+    } else if (hasVerif){
+      labelText = "Bobot: " + numFmt(savedScore.bobot_verifikator);
+      iconClass = "fa-check-circle";
+      kriteriaClass = "kriteria-75";
+    }
+
+    var titleAttr = (kriteria ? "Kriteria: " + kriteria + (hasVerif ? " (" + numFmt(savedScore.bobot_verifikator) + ")" : "") : (hasVerif ? "Bobot: " + numFmt(savedScore.bobot_verifikator) : "Belum dinilai")) + 
+                    (IS_ROLE_4 ? " | Klik untuk ubah penilaian verifikator" : " | Klik untuk lihat detail verifikasi");
+
+    return '<button type="button" class="btn-action-verifikator ' + (hasVerif || kriteria ? 'has-verif ' : '') + kriteriaClass + '" data-code="' + code + '" title="' + escapeHtml(titleAttr) + '">' +
+             '<i class="fa ' + iconClass + '"></i> ' +
+             '<span>' + escapeHtml(labelText) + '</span>' +
+           '</button>';
   }
 
   function renderTable(){
     tbody.innerHTML = "";
     var searchKeyword = inputSearch.value.trim().toLowerCase();
-    var calculatedScores = calculateRollupScores();
+    var rollup = calculateRollupScores();
+    var calculatedScores = rollup.normal;
+    var calculatedVerif = rollup.verif;
 
     MASTER_DATA.forEach(function(indeks){
       var isIndeksOpen = !collapsedKeys.has(indeks.code);
@@ -1425,7 +1996,8 @@ tr.type-sub:hover td {
         '</td>' +
         '<td class="col-bobot-maks">' + numFmt(indeks.bobot) + '</td>' +
         '<td class="col-bobot-capaian"><span class="badge-sum-score">' + numFmt(calculatedScores[indeks.code] || 0) + '</span></td>' +
-        '<td class="col-opsi-aksi"><span style="font-size:11.5px; font-weight:700; color:#b45309;"><i class="fa fa-folder-open"></i> Pilar ' + indeks.code + '</span></td>';
+        '<td class="col-opsi-aksi"><span style="font-size:11.5px; font-weight:700; color:#b45309;"><i class="fa fa-folder-open"></i> Pilar ' + indeks.code + '</span></td>' +
+        '<td class="col-verifikator"><span class="badge-verif-pill" title="Total Nilai Verifikator Pilar ' + indeks.code + '"><i class="fa fa-shield"></i> Verif: ' + numFmt(calculatedVerif[indeks.code] || 0) + '</span></td>';
       tbody.appendChild(trIndeks);
 
       if (isIndeksOpen && hasChildAspek){
@@ -1448,7 +2020,8 @@ tr.type-sub:hover td {
             '</td>' +
             '<td class="col-bobot-maks">' + numFmt(aspek.bobot) + '</td>' +
             '<td class="col-bobot-capaian"><span class="badge-sum-score">' + numFmt(calculatedScores[aspek.code] || 0) + '</span></td>' +
-            '<td class="col-opsi-aksi"><span style="font-size:11.5px; font-weight:600; color:#2563eb;">Aspek Evaluasi</span></td>';
+            '<td class="col-opsi-aksi"><span style="font-size:11.5px; font-weight:600; color:#2563eb;">Aspek Evaluasi</span></td>' +
+            '<td class="col-verifikator"><span style="font-size:11.5px; font-weight:600; color:#0d9488;">Verif: ' + numFmt(calculatedVerif[aspek.code] || 0) + '</span></td>';
           tbody.appendChild(trAspek);
 
           if (isAspekOpen && hasChildInd){
@@ -1459,6 +2032,7 @@ tr.type-sub:hover td {
               var savedScoreInd = SCORES_MAP[ind.code] || {};
               var hasScore = savedScoreInd.bobot_capaian !== null && savedScoreInd.bobot_capaian !== undefined && savedScoreInd.bobot_capaian !== "";
               var currentScoreVal = hasSub ? calculatedScores[ind.code] : (hasScore ? savedScoreInd.bobot_capaian : "");
+              var hasVerifInd = savedScoreInd.bobot_verifikator !== null && savedScoreInd.bobot_verifikator !== undefined && savedScoreInd.bobot_verifikator !== "";
 
               var trInd = document.createElement("tr");
               trInd.className = "type-indikator";
@@ -1474,6 +2048,10 @@ tr.type-sub:hover td {
                   (hasScore ? 'Detail (' + numFmt(savedScoreInd.bobot_capaian) + ')' : 'Detail Penilaian') +
                 '</button>';
 
+              var verifActionHtml = hasSub ?
+                '<span class="badge-verif-subtotal" title="Total Nilai Verifikator Indikator ' + ind.no + '"><i class="fa fa-shield"></i> ' + numFmt(calculatedVerif[ind.code] || 0) + '</span>' :
+                renderVerifikatorButtonHtml(ind.code, savedScoreInd);
+
               trInd.innerHTML = 
                 '<td class="col-no">' + ind.no + '</td>' +
                 '<td>' +
@@ -1487,7 +2065,8 @@ tr.type-sub:hover td {
                 '</td>' +
                 '<td class="col-bobot-maks">' + numFmt(ind.bobot) + '</td>' +
                 '<td class="col-bobot-capaian">' + cellInputOrBadge + '</td>' +
-                '<td class="col-opsi-aksi">' + directActionHtml + '</td>';
+                '<td class="col-opsi-aksi">' + directActionHtml + '</td>' +
+                '<td class="col-verifikator">' + verifActionHtml + '</td>';
               tbody.appendChild(trInd);
 
               if (isIndOpen && hasSub){
@@ -1495,6 +2074,9 @@ tr.type-sub:hover td {
                   var savedScoreSub = SCORES_MAP[sub.code] || {};
                   var hasSubScore = savedScoreSub.bobot_capaian !== null && savedScoreSub.bobot_capaian !== undefined && savedScoreSub.bobot_capaian !== "";
                   var currentSubScore = hasSubScore ? savedScoreSub.bobot_capaian : "";
+                  var hasSubVerif = savedScoreSub.bobot_verifikator !== null && savedScoreSub.bobot_verifikator !== undefined && savedScoreSub.bobot_verifikator !== "";
+
+                  var verifSubHtml = renderVerifikatorButtonHtml(sub.code, savedScoreSub);
 
                   var trSub = document.createElement("tr");
                   trSub.className = "type-sub";
@@ -1517,7 +2099,8 @@ tr.type-sub:hover td {
                         '<i class="fa ' + (hasSubScore ? 'fa-check-square' : 'fa-pencil-square-o') + '"></i> ' +
                         (hasSubScore ? 'Detail (' + numFmt(savedScoreSub.bobot_capaian) + ')' : 'Detail Penilaian') +
                       '</button>' +
-                    '</td>';
+                    '</td>' +
+                    '<td class="col-verifikator">' + verifSubHtml + '</td>';
                   tbody.appendChild(trSub);
                 });
               }
@@ -3683,6 +4266,14 @@ tr.type-sub:hover td {
       openDetailModal(itemCode);
       return;
     }
+
+    // Open Verifikator Modal
+    var verifBtn = e.target.closest(".btn-action-verifikator");
+    if (verifBtn){
+      var itemCode = verifBtn.getAttribute("data-code");
+      openVerifikatorModal(itemCode);
+      return;
+    }
   });
 
   // Dynamic input changes in table
@@ -4481,13 +5072,248 @@ tr.type-sub:hover td {
   if (selectInstansi && selectInstansi.tagName === 'SELECT') selectInstansi.addEventListener("change", reloadData);
   if (inputSearch) inputSearch.addEventListener("input", renderTable);
 
-  document.addEventListener("keydown", function(e){
-    if (e.key === "Escape" && modalDetail.classList.contains("open")){
-      closeDetailModal();
+  // =========================================================
+  // VERIFIKATOR MODAL LOGIC & ACTIONS
+  // =========================================================
+  function getItemKeselarasanBobot(code, maxBobot){
+    var item = itemMap[code];
+    if (!item) return 0;
+    maxBobot = parseFloat(maxBobot !== undefined ? maxBobot : item.bobot) || 0;
+
+    var saved = SCORES_MAP[code] || {};
+    var detailObj = {};
+    if (saved.detail_json){
+      try {
+        detailObj = typeof saved.detail_json === 'string' ? JSON.parse(saved.detail_json) : saved.detail_json;
+      } catch(e) { detailObj = {}; }
     }
-    if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S') && modalDetail.classList.contains("open")){
-      e.preventDefault();
-      saveModalDetail();
+
+    var prevCode = modalItemCode ? modalItemCode.value : "";
+    var prevMax = modalBobotMaks ? modalBobotMaks.value : "";
+    var prevWsContent = modalDynamicWorksheet ? modalDynamicWorksheet.innerHTML : "";
+    var prevInputVal = modalBobotInput ? modalBobotInput.value : "";
+    var prevCalc = modalCalcDisplay ? modalCalcDisplay.textContent : "";
+    var prevFx = excelFxContent ? excelFxContent.textContent : "";
+
+    var calculatedScore = maxBobot;
+
+    try {
+      if (modalItemCode) modalItemCode.value = code;
+      if (modalBobotMaks) modalBobotMaks.value = maxBobot;
+      if (modalDynamicWorksheet) modalDynamicWorksheet.innerHTML = renderDynamicWorksheet(code, maxBobot, detailObj);
+
+      updateModalWorksheetScore();
+
+      if (modalBobotInput) {
+        var val = parseFloat(modalBobotInput.value);
+        if (!isNaN(val)) {
+          calculatedScore = val;
+        }
+      }
+    } catch(err) {
+      if (saved.bobot_capaian !== null && saved.bobot_capaian !== undefined && saved.bobot_capaian !== ""){
+        calculatedScore = parseFloat(saved.bobot_capaian) || maxBobot;
+      } else {
+        calculatedScore = maxBobot;
+      }
+    } finally {
+      if (modalItemCode) modalItemCode.value = prevCode;
+      if (modalBobotMaks) modalBobotMaks.value = prevMax;
+      if (modalDynamicWorksheet) modalDynamicWorksheet.innerHTML = prevWsContent;
+      if (modalBobotInput) modalBobotInput.value = prevInputVal;
+      if (modalCalcDisplay) modalCalcDisplay.textContent = prevCalc;
+      if (excelFxContent) excelFxContent.textContent = prevFx;
+    }
+
+    return calculatedScore;
+  }
+
+  function openVerifikatorModal(code){
+    var item = itemMap[code];
+    if (!item) return;
+
+    var saved = SCORES_MAP[code] || {};
+
+    verifItemCode.value = code;
+    verifBobotMaks.value = item.bobot;
+    verifMaxBadge.textContent = numFmt(item.bobot);
+
+    var typeLabel = item.type === 'sub' ? 'Sub-Indikator (' + item.letter + ')' : 'Indikator (' + (item.no || code) + ')';
+    verifModalTitle.textContent = "Penilaian " + typeLabel;
+    verifUraian.value = item.title;
+
+    // Hitung otomatis total keselarasan bobot dari lembar kerja / formula
+    var keselarasanScore = getItemKeselarasanBobot(code, item.bobot);
+    if (verifKeselarasanBadge) {
+      verifKeselarasanBadge.textContent = numFmt(keselarasanScore);
+    }
+
+    // BOBOT CAPAIAN: otomatis terisi dari total keselarasan bobot jika belum pernah diverifikasi
+    var hasSavedVerif = (saved.bobot_verifikator !== null && saved.bobot_verifikator !== undefined && saved.bobot_verifikator !== "");
+    var targetScore = hasSavedVerif ? Number(saved.bobot_verifikator) : keselarasanScore;
+    var targetStr = targetScore.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
+    verifBobotInput.value = targetStr === "" ? "0" : targetStr;
+    verifBobotInput.max = item.bobot;
+
+    // OPSI AKSI / KRITERIA: jangan terisi otomatis (hanya dimuat jika sudah tersimpan sebelumnya)
+    verifOpsiAksi.value = saved.opsi_aksi_verifikator || "";
+
+    verifCatatan.value = saved.catatan_verifikator || "";
+    verifBuktiDukung.value = saved.bukti_dukung_verifikator || "";
+
+    if (!IS_ROLE_4) {
+      verifBobotInput.readOnly = true;
+      verifOpsiAksi.disabled = true;
+      verifCatatan.readOnly = true;
+      verifBuktiDukung.readOnly = true;
+      if (btnSyncKeselarasan) btnSyncKeselarasan.disabled = true;
+      document.querySelectorAll(".verif-preset-btn").forEach(function(b){ b.disabled = true; });
+      if (btnVerifCancel) btnVerifCancel.style.display = "none";
+      if (btnVerifSave) btnVerifSave.style.display = "none";
+      if (btnVerifCloseBottom) btnVerifCloseBottom.style.display = "";
+    } else {
+      verifBobotInput.readOnly = false;
+      verifOpsiAksi.disabled = false;
+      verifCatatan.readOnly = false;
+      verifBuktiDukung.readOnly = false;
+      if (btnSyncKeselarasan) btnSyncKeselarasan.disabled = false;
+      document.querySelectorAll(".verif-preset-btn").forEach(function(b){ b.disabled = false; });
+      if (btnVerifCancel) btnVerifCancel.style.display = "";
+      if (btnVerifCloseBottom) btnVerifCloseBottom.style.display = "none";
+      if (btnVerifSave) {
+        btnVerifSave.style.display = "";
+        btnVerifSave.disabled = false;
+        btnVerifSave.style.opacity = "1";
+        btnVerifSave.style.cursor = "pointer";
+        btnVerifSave.innerHTML = '<i class="fa fa-save"></i> Simpan Penilaian';
+        btnVerifSave.title = "Simpan Penilaian Verifikator";
+      }
+    }
+
+    modalVerif.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeVerifikatorModal(){
+    if (modalVerif) modalVerif.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+
+  function saveVerifikatorModal(){
+    if (!IS_ROLE_4){
+      showToast("Akses ditolak: Hanya akun Level 4 yang dapat mengubah penilaian verifikator.", true);
+      return;
+    }
+
+    var code = verifItemCode.value;
+    if (!code) return;
+
+    var item = itemMap[code];
+    var maxVal = item ? item.bobot : 100;
+    var inputVal = verifBobotInput.value.trim();
+    var bobotNum = inputVal === "" ? null : Number(inputVal);
+
+    if (bobotNum !== null && (bobotNum < 0 || bobotNum > (maxVal + 0.001))){
+      showToast("Nilai bobot capaian melebihi bobot maksimal (" + numFmt(maxVal) + ")", true);
+      return;
+    }
+
+    var payload = {
+      tahun: selectTahun.value,
+      instansi_id: selectInstansi.value,
+      item_code: code,
+      bobot_verifikator: bobotNum,
+      opsi_aksi_verifikator: verifOpsiAksi.value,
+      catatan_verifikator: verifCatatan.value.trim(),
+      bukti_dukung_verifikator: verifBuktiDukung.value.trim()
+    };
+
+    var btn = btnVerifSave;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menyimpan...';
+
+    $.ajax({
+      url: BASE_URL + "Instansi/SaveIPPDVerifikator",
+      type: "POST",
+      data: payload,
+      dataType: "json",
+      success: function(resp){
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-save"></i> Simpan Penilaian';
+        if (resp.status === "success"){
+          if (!SCORES_MAP[code]) SCORES_MAP[code] = {};
+          SCORES_MAP[code].bobot_verifikator = bobotNum;
+          SCORES_MAP[code].opsi_aksi_verifikator = payload.opsi_aksi_verifikator;
+          SCORES_MAP[code].catatan_verifikator = payload.catatan_verifikator;
+          SCORES_MAP[code].bukti_dukung_verifikator = payload.bukti_dukung_verifikator;
+          SCORES_MAP[code].status_verifikasi = "Terverifikasi";
+
+          closeVerifikatorModal();
+          showToast("Penilaian Verifikator poin " + code + " berhasil disimpan.");
+          renderTable();
+        } else {
+          showToast(resp.message || "Gagal menyimpan data verifikator.", true);
+        }
+      },
+      error: function(xhr){
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-save"></i> Simpan Penilaian';
+        showToast("Terjadi kesalahan pada server saat menyimpan penilaian verifikator.", true);
+      }
+    });
+  }
+
+  // Quick Preset Buttons for Verifikator
+  document.querySelectorAll(".verif-preset-btn").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      if (!IS_ROLE_4) return;
+      var ratio = parseFloat(this.getAttribute("data-ratio"));
+      var max = parseFloat(verifBobotMaks.value) || 0;
+      var calc = max * ratio;
+      var strVal = calc.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
+      verifBobotInput.value = strVal === "" ? "0.000" : strVal;
+    });
+  });
+
+
+  // Sync button from Total Keselarasan (only updates bobot capaian, leaves Opsi Aksi manual)
+  if (btnSyncKeselarasan){
+    btnSyncKeselarasan.addEventListener("click", function(){
+      if (!IS_ROLE_4) return;
+      var code = verifItemCode.value;
+      var item = itemMap[code];
+      if (!item) return;
+      var score = getItemKeselarasanBobot(code, item.bobot);
+      var strScore = score.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
+      verifBobotInput.value = strScore === "" ? "0" : strScore;
+      if (verifKeselarasanBadge) verifKeselarasanBadge.textContent = numFmt(score);
+      showToast("Bobot capaian disinkronkan dari total keselarasan: " + numFmt(score));
+    });
+  }
+
+  if (btnVerifClose) btnVerifClose.addEventListener("click", closeVerifikatorModal);
+  if (btnVerifCloseBottom) btnVerifCloseBottom.addEventListener("click", closeVerifikatorModal);
+  if (btnVerifCancel) btnVerifCancel.addEventListener("click", closeVerifikatorModal);
+  if (btnVerifSave) btnVerifSave.addEventListener("click", saveVerifikatorModal);
+  if (modalVerif) {
+    modalVerif.addEventListener("click", function(e){
+      if (e.target === modalVerif) closeVerifikatorModal();
+    });
+  }
+
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape"){
+      if (modalVerif && modalVerif.classList.contains("open")) closeVerifikatorModal();
+      else if (modalDetail && modalDetail.classList.contains("open")) closeDetailModal();
+    }
+    if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')){
+      if (modalVerif && modalVerif.classList.contains("open")){
+        e.preventDefault();
+        saveVerifikatorModal();
+      } else if (modalDetail && modalDetail.classList.contains("open")){
+        e.preventDefault();
+        saveModalDetail();
+      }
     }
   });
 
