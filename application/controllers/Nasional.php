@@ -1007,166 +1007,65 @@ class Nasional extends CI_Controller {
     }
   }
 
-  public function PembangunanKewilayahanRPJMN(){
-    $Header['Halaman'] = 'RKP';
+  // =========================================================================
+  // ARAH PEMBANGUNAN KEWILAYAHAN NASIONAL (RPJMN)
+  // Kolom: Provinsi, Lokasi Prioritas, Highlight Indikasi Intervensi, Tagging Lokasi
+  // =========================================================================
+  public function ArahPembangunanKewilayahanRPJMN(){
+    $Header['Halaman'] = 'RPJMN';
+    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama', 'ASC')->get("kodewilayah")->result_array();
     
-    // 1. Mengambil data untuk Box
-    $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjmn")->result_array();
-    
-    // Asumsi struktur tabel kodewilayah: Provinsi (2 digit), Kab/Kota (>2 digit)
-    $Data['Provinsi'] = $this->db->where("LENGTH(Kode) = 2")->get("kodewilayah")->result_array();
-    
-    $KabKota = $this->db->where("LENGTH(Kode) > 2 AND LENGTH(Kode) < 6")->get("kodewilayah")->result_array();
-    $Data['KabKota'] = $KabKota;
-
-    // Tambahan: Membuat array mapping [Kode => Nama] untuk efisiensi di View
-    // Sehingga View bisa langsung memanggil $MapKabKota['11.01'] dan mendapatkan nama Kabupatennya.
-    $MapKabKota = [];
-    foreach($KabKota as $kk) {
-        $MapKabKota[$kk['Kode']] = $kk['Nama'];
-    }
-    $Data['MapKabKota'] = $MapKabKota;
-
-    // 2. Ambil Data Provinsi (Level 1) beserta Nama Provinsi & Periode Visi dari tabel relasi
-    $Provinsi = $this->db->query("
-        SELECT p.*, k.Nama as NamaProvinsi, v.TahunMulai, v.TahunAkhir, v.Id as IdVisi 
-        FROM pembangunan_kewilayahan_provinsi p 
-        LEFT JOIN kodewilayah k ON p.KodeProvinsi = k.Kode 
-        LEFT JOIN visirpjmn v ON p._IdVisi = v.Id 
-        WHERE p.deleted_at IS NULL 
-        ORDER BY p.Id ASC
+    // Ambil data Arah Pembangunan Kewilayahan Nasional (RPJMN)
+    $Data['DataArah'] = $this->db->query("
+      SELECT a.*, k.Nama as NamaProvinsi 
+      FROM arah_pembangunan_kewilayahan_rpjmn a 
+      LEFT JOIN kodewilayah k ON a.Provinsi = k.Kode 
+      WHERE a.deleted_at IS NULL 
+      ORDER BY k.Nama ASC, a.LokasiPrioritas ASC, a.Id ASC
     ")->result_array();
 
-    // 3. Ambil Data Kawasan (Level 2)
-    $Kawasan = $this->db->where("deleted_at IS NULL")
-                        ->order_by("Id", "ASC")
-                        ->get("pembangunan_kewilayahan_kawasan")
-                        ->result_array();
-
-    // 4. Ambil Data Sub Kawasan (Level 3)
-    $SubKawasan = $this->db->where("deleted_at IS NULL")
-                            ->order_by("Id", "ASC")
-                            ->get("pembangunan_kewilayahan_subkawasan")
-                            ->result_array();
-
-    // 5. Merakit Array Bersarang (Hierarki: Provinsi -> Kawasan -> Sub Kawasan)
-    foreach ($Provinsi as $keyProv => $prov) {
-        $Provinsi[$keyProv]['Kawasan'] = [];
-        foreach ($Kawasan as $kaw) {
-            if ($kaw['_IdProvinsi'] == $prov['Id']) {
-                $kaw['SubKawasan'] = [];
-                foreach ($SubKawasan as $sub) {
-                    if ($sub['_IdKawasan'] == $kaw['Id']) {
-                        $kaw['SubKawasan'][] = $sub;
-                    }
-                }
-                $Provinsi[$keyProv]['Kawasan'][] = $kaw;
-            }
-        }
-    }
-
-    // Lempar data yang sudah dirakit ke View
-    $Data['PembangunanKewilayahan'] = $Provinsi;
-
     $this->load->view('Nasional/header', $Header);
-    $this->load->view('Nasional/PembangunanKewilayahanRPJMN', $Data);
-}
+    $this->load->view('Nasional/ArahPembangunanKewilayahanRPJMN', $Data);
+  }
 
-// ==============================================
-// CRUD LEVEL 1: PROVINSI
-// ==============================================
-public function InputPembangunanKewilayahanProvinsiRPJMN(){  
-    $this->db->insert('pembangunan_kewilayahan_provinsi', $_POST);
-    if ($this->db->affected_rows()){
-        echo '1';
-    } else {
-        echo 'Gagal Menyimpan Data!';
-    }
-}
+  // Alias untuk kompatibilitas tautan lama
+  public function PembangunanKewilayahanRPJMN(){
+    $this->ArahPembangunanKewilayahanRPJMN();
+  }
 
-public function EditPembangunanKewilayahanProvinsiRPJMN(){  
-    $this->db->where('Id', $_POST['Id']); 
-    $this->db->update('pembangunan_kewilayahan_provinsi', $_POST);
-    if ($this->db->affected_rows()){
-        echo '1';
-    } else {
-        echo 'Gagal Update Data! (Atau tidak ada perubahan)';
-    }
-}
+  public function InputArahKewilayahanRPJMN(){
+    $data = [
+      'Provinsi'            => $this->input->post('Provinsi'),
+      'LokasiPrioritas'     => $this->input->post('LokasiPrioritas'),
+      'HighlightIntervensi' => $this->input->post('HighlightIntervensi'),
+      'TaggingLokasiKode'   => $this->input->post('TaggingLokasiKode'),
+      'TaggingLokasi'       => $this->input->post('TaggingLokasi'),
+      'Tahun'               => $this->input->post('Tahun') ?: '2025-2029'
+    ];
+    $this->db->insert('arah_pembangunan_kewilayahan_rpjmn', $data);
+    echo ($this->db->affected_rows()) ? '1' : 'Gagal Menyimpan Data!';
+  }
 
-public function HapusPembangunanKewilayahanProvinsiRPJMN(){  
-    $_POST['deleted_at'] = date('Y-m-d H:i:s');
-    $this->db->where('Id', $_POST['Id'])->update('pembangunan_kewilayahan_provinsi', $_POST);
-    if ($this->db->affected_rows()){
-        echo '1';
-    } else {
-        echo 'Gagal Hapus Data!';
-    }
-}
+  public function EditArahKewilayahanRPJMN(){
+    $id = $this->input->post('Id');
+    $data = [
+      'Provinsi'            => $this->input->post('Provinsi'),
+      'LokasiPrioritas'     => $this->input->post('LokasiPrioritas'),
+      'HighlightIntervensi' => $this->input->post('HighlightIntervensi'),
+      'TaggingLokasiKode'   => $this->input->post('TaggingLokasiKode'),
+      'TaggingLokasi'       => $this->input->post('TaggingLokasi'),
+      'Tahun'               => $this->input->post('Tahun') ?: '2025-2029'
+    ];
+    $this->db->where('Id', $id)->update('arah_pembangunan_kewilayahan_rpjmn', $data);
+    echo '1';
+  }
 
-// ==============================================
-// CRUD LEVEL 2: KAWASAN
-// ==============================================
-public function InputPembangunanKewilayahanKawasanRPJMN(){  
-    $this->db->insert('pembangunan_kewilayahan_kawasan', $_POST);
-    if ($this->db->affected_rows()){
-        echo '1';
-    } else {
-        echo 'Gagal Menyimpan Data!';
-    }
-}
+  public function HapusArahKewilayahanRPJMN(){
+    $id = $this->input->post('Id');
+    $this->db->where('Id', $id)->update('arah_pembangunan_kewilayahan_rpjmn', ['deleted_at' => date('Y-m-d H:i:s')]);
+    echo '1';
+  }
 
-public function EditPembangunanKewilayahanKawasanRPJMN(){  
-    $this->db->where('Id', $_POST['Id']); 
-    $this->db->update('pembangunan_kewilayahan_kawasan', $_POST);
-    if ($this->db->affected_rows()){
-        echo '1';
-    } else {
-        echo 'Gagal Update Data! (Atau tidak ada perubahan)';
-    }
-}
-
-public function HapusPembangunanKewilayahanKawasanRPJMN(){  
-    $_POST['deleted_at'] = date('Y-m-d H:i:s');
-    $this->db->where('Id', $_POST['Id'])->update('pembangunan_kewilayahan_kawasan', $_POST);
-    if ($this->db->affected_rows()){
-        echo '1';
-    } else {
-        echo 'Gagal Hapus Data!';
-    }
-}
-
-// ==============================================
-// CRUD LEVEL 3: SUB KAWASAN
-// ==============================================
-public function InputPembangunanKewilayahanSubKawasanRPJMN(){  
-    $this->db->insert('pembangunan_kewilayahan_subkawasan', $_POST);
-    if ($this->db->affected_rows()){
-        echo '1';
-    } else {
-        echo 'Gagal Menyimpan Data!';
-    }
-}
-
-public function EditPembangunanKewilayahanSubKawasanRPJMN(){  
-    $this->db->where('Id', $_POST['Id']); 
-    $this->db->update('pembangunan_kewilayahan_subkawasan', $_POST);
-    if ($this->db->affected_rows()){
-        echo '1';
-    } else {
-        echo 'Gagal Update Data! (Atau tidak ada perubahan)';
-    }
-}
-
-public function HapusPembangunanKewilayahanSubKawasanRPJMN(){  
-    $_POST['deleted_at'] = date('Y-m-d H:i:s');
-    $this->db->where('Id', $_POST['Id'])->update('pembangunan_kewilayahan_subkawasan', $_POST);
-    if ($this->db->affected_rows()){
-        echo '1';
-    } else {
-        echo 'Gagal Hapus Data!';
-    }
-}
 
   public function TemaRKP(){
 		$Header['Halaman'] = 'RKP';

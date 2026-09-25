@@ -274,7 +274,7 @@ define('NASIONAL_SIDEBAR_LOADED', true);
                     <a href="<?=base_url('Nasional/IUPRPJMN')?>">Agenda Pembangunan (PN/PP/KP)</a>
                     <a href="<?=base_url('Nasional/ProyekStrategisRPJMN')?>">Proyek Strategis Nasional</a>
                     <a href="<?=base_url('Nasional/SasaranPembangunanDaerah')?>">Sasaran Pembangunan Wilayah</a>
-                    <a href="<?=base_url('Nasional/PembangunanKewilayahanRPJMN')?>">Pembangunan Kewilayahan</a>
+                    <a href="<?=base_url('Nasional/ArahPembangunanKewilayahanRPJMN')?>">Arah Pembangunan Kewilayahan Nasional</a>
                 </div>
             </li>
 
