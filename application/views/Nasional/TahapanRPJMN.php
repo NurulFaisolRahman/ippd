@@ -109,9 +109,7 @@
                                     <th style="width: 5%;" class="text-center">No</th>
                                     <th style="width: 50%;">Uraian (Tahapan / Sub Tahapan / Pembangunan)</th>
                                     <th style="width: 15%;" class="text-center">Periode</th>
-                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                     <th style="width: 30%;" class="text-center">Aksi</th>
-                                    <?php } ?>
                                 </tr>
                             </thead>
                             <tbody>
@@ -129,16 +127,14 @@
                                             <b>TAHAPAN:</b> <?= $tahapan['Tahapan'] ?>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge-periode"><?= $tahapan['TahunMulai'].'-'.$tahapan['TahunAkhir'] ?></span>
+                                            <span class="badge-periode"><?= !empty($tahapan['Periode']) ? $tahapan['Periode'] : ($tahapan['TahunMulai'].'-'.$tahapan['TahunAkhir']) ?></span>
                                         </td>
-                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                         <td class="text-center">
                                             <!-- Tombol Aksi di baris Tahapan -->
                                             <button class="btn btn-sm btn-success TambahSubTahapan btn-action" data-id="<?= $tahapan['Id'] ?>" title="Tambah Sub Tahapan"><i class="fa fa-plus"></i> Sub Tahapan</button>
-                                            <button class="btn btn-sm btn-info EditTahapan btn-action" data-id="<?= $tahapan['Id'] ?>" data-idvisi="<?= isset($tahapan['IdVisi']) ? $tahapan['IdVisi'] : '' ?>" data-periode="<?= $tahapan['TahunMulai'].'-'.$tahapan['TahunAkhir'] ?>" data-tahapan="<?= $tahapan['Tahapan'] ?>" title="Edit Tahapan"><i class="fa fa-edit"></i> Edit</button>
+                                            <button class="btn btn-sm btn-info EditTahapan btn-action" data-id="<?= $tahapan['Id'] ?>" data-idvisi="<?= isset($tahapan['IdVisi']) ? $tahapan['IdVisi'] : '' ?>" data-periode="<?= htmlspecialchars(!empty($tahapan['Periode']) ? $tahapan['Periode'] : ($tahapan['TahunMulai'].'-'.$tahapan['TahunAkhir']), ENT_QUOTES) ?>" data-tahapan="<?= htmlspecialchars($tahapan['Tahapan'], ENT_QUOTES) ?>" title="Edit Tahapan"><i class="fa fa-edit"></i> Edit</button>
                                             <button class="btn btn-sm btn-danger HapusTahapan btn-action" data-id="<?= $tahapan['Id'] ?>" title="Hapus Tahapan"><i class="fa fa-trash"></i> Hapus</button>
                                         </td>
-                                        <?php } ?>
                                     </tr>
 
                                     <?php 
@@ -156,14 +152,12 @@
                                             <td class="text-center">
                                                 <span class="badge-periode" style="background-color: #00bcd4; box-shadow: 0 2px 5px rgba(0, 188, 212, 0.3);"><?= $sub['Periode'] ?></span>
                                             </td>
-                                            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                             <td class="text-center">
                                                 <!-- Tombol Aksi di baris Sub Tahapan -->
                                                 <button class="btn btn-sm btn-success TambahPembangunan btn-action" data-id="<?= $sub['Id'] ?>" title="Tambah Pembangunan"><i class="fa fa-plus"></i> Pembangunan</button>
-                                                <button class="btn btn-sm btn-info EditSubTahapan btn-action" data-id="<?= $sub['Id'] ?>" data-idtahapan="<?= $tahapan['Id'] ?>" data-subtahapan="<?= $sub['SubTahapan'] ?>" title="Edit Sub Tahapan"><i class="fa fa-edit"></i> Edit</button>
+                                                <button class="btn btn-sm btn-info EditSubTahapan btn-action" data-id="<?= $sub['Id'] ?>" data-idtahapan="<?= $tahapan['Id'] ?>" data-subtahapan="<?= htmlspecialchars($sub['SubTahapan'], ENT_QUOTES) ?>" title="Edit Sub Tahapan"><i class="fa fa-edit"></i> Edit</button>
                                                 <button class="btn btn-sm btn-danger HapusSubTahapan btn-action" data-id="<?= $sub['Id'] ?>" title="Hapus Sub Tahapan"><i class="fa fa-trash"></i> Hapus</button>
                                             </td>
-                                            <?php } ?>
                                         </tr>
 
                                         <?php 
@@ -181,13 +175,11 @@
                                                 <td class="text-center">
                                                     <span class="badge-periode" style="background-color: #ff9800; box-shadow: 0 2px 5px rgba(255, 152, 0, 0.3);"><?= $pem['Periode'] ?></span>
                                                 </td>
-                                                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                                 <td class="text-center">
                                                     <!-- Tombol Aksi di baris Pembangunan -->
-                                                    <button class="btn btn-sm btn-info EditPembangunan btn-action" data-id="<?= $pem['Id'] ?>" data-idsub="<?= $sub['Id'] ?>" data-pembangunan="<?= $pem['TahapanPembangunan'] ?>" title="Edit Pembangunan"><i class="fa fa-edit"></i> Edit</button>
+                                                    <button class="btn btn-sm btn-info EditPembangunan btn-action" data-id="<?= $pem['Id'] ?>" data-idsub="<?= $sub['Id'] ?>" data-pembangunan="<?= htmlspecialchars($pem['TahapanPembangunan'], ENT_QUOTES) ?>" title="Edit Pembangunan"><i class="fa fa-edit"></i> Edit</button>
                                                     <button class="btn btn-sm btn-danger HapusPembangunan btn-action" data-id="<?= $pem['Id'] ?>" title="Hapus Pembangunan"><i class="fa fa-trash"></i> Hapus</button>
                                                 </td>
-                                                <?php } ?>
                                             </tr>
                                         <?php 
                                                 $noPem++;
@@ -229,26 +221,17 @@
             <div class="modal-body" style="padding-top: 20px;">
                 <div class="row">
                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div class="form-group ic-cmp-int">
+                        <div class="form-group ic-cmp-int float-lb floating-lb">
                             <div class="form-ic-cmp">
-                                <i class="fa fa-flag"></i>
+                                <i class="fa fa-calendar"></i>
                             </div>
-                            <div class="bootstrap-select fm-cmp-mg">
-                                <select class="selectpicker form-control" data-live-search="true" id="IdVisi">
-                                    <option value="">Pilih Periode RPJMN</option>
-                                    <?php 
-                                    if(isset($Visi)) {
-                                        foreach ($Visi as $cv) {
-                                            echo "<option value='".$cv['Id']."'>".$cv['TahunMulai']." - ".$cv['TahunAkhir']."</option>";
-                                        }
-                                    } 
-                                    ?>
-                                </select>
+                            <div class="nk-int-st">
+                                <input type="text" class="form-control" id="PeriodeTahapan" placeholder="Periode RPJMN (contoh: 2025-2029)">
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="row">
+                <div class="row" style="margin-top: 15px;">
                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <div class="form-group ic-cmp-int float-lb floating-lb">
                             <div class="form-ic-cmp">
@@ -279,6 +262,18 @@
             <div class="modal-body" style="padding-top: 20px;">
                 <input type="hidden" id="IdTahapanForm">
                 <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div class="form-group ic-cmp-int float-lb floating-lb">
+                            <div class="form-ic-cmp">
+                                <i class="fa fa-calendar"></i>
+                            </div>
+                            <div class="nk-int-st">
+                                <input type="text" class="form-control" id="_PeriodeTahapan" placeholder="Periode RPJMN (contoh: 2025-2029)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="margin-top: 15px;">
                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <div class="form-group ic-cmp-int float-lb floating-lb">
                             <div class="form-ic-cmp">
@@ -542,37 +537,51 @@
         // SCRIPT TAHAPAN RPJMN (LEVEL 1)
         // ==============================================
         $("#SimpanTahapan").click(function() {
-            if ($("#IdVisi").val() == "") {
-                alert('Pilih Periode Visi Terlebih Dahulu!')
-            } else if ($("#Tahapan").val() == "") {
-                alert('Input Tahapan Belum Benar!')
+            var periode = $.trim($("#PeriodeTahapan").val());
+            var tahapan = $.trim($("#Tahapan").val());
+            if (periode == "") {
+                alert('Mohon Masukkan Periode RPJMN (contoh: 2025-2029)!');
+                $("#PeriodeTahapan").focus();
+            } else if (tahapan == "") {
+                alert('Input Tahapan Belum Benar!');
+                $("#Tahapan").focus();
             } else {
-                var Data = { _Id  : $("#IdVisi").val(), // Menyesuaikan Payload yang baru
-                             Tahapan  : $("#Tahapan").val() }
+                var Data = { 
+                    _Id     : 0,
+                    Periode : periode,
+                    Tahapan : tahapan 
+                };
                 $.post(BaseURL+"Nasional/InputTahapanRPJMN", Data).done(function(Respon) {
                     if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
-                })                         
+                });                         
             }
         });
 
         $('#hierarki-table tbody').on('click', '.EditTahapan', function () {
             $("#IdTahapanForm").val($(this).data('id'));
-            $("#_IdVisi").val($(this).data('idvisi'));
-            $("#_PeriodeVisi").val($(this).data('periode'));
+            $("#_PeriodeTahapan").val($(this).data('periode'));
             $("#_Tahapan").val($(this).data('tahapan'));
             $('#ModalEditTahapan').modal("show");
         });
 
         $("#EditBtnTahapan").click(function() {
-            if ($("#_Tahapan").val() == "") {
-                alert('Input Tahapan Belum Benar!')
+            var periode = $.trim($("#_PeriodeTahapan").val());
+            var tahapan = $.trim($("#_Tahapan").val());
+            if (periode == "") {
+                alert('Mohon Masukkan Periode RPJMN (contoh: 2025-2029)!');
+                $("#_PeriodeTahapan").focus();
+            } else if (tahapan == "") {
+                alert('Input Tahapan Belum Benar!');
+                $("#_Tahapan").focus();
             } else {
-                var Data = { Id       : $("#IdTahapanForm").val(),
-                             _Id  : $("#_IdVisi").val(),
-                             Tahapan  : $("#_Tahapan").val() }
+                var Data = { 
+                    Id      : $("#IdTahapanForm").val(),
+                    Periode : periode,
+                    Tahapan : tahapan 
+                };
                 $.post(BaseURL+"Nasional/EditTahapanRPJMN", Data).done(function(Respon) {
                     if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
-                })                         
+                });                         
             }
         });
 

@@ -132,16 +132,14 @@
                             <thead>
                                 <tr>
                                     <th style="width: 5%;" class="text-center">No</th>
-                                    <th style="width: 30%;">Sasaran Pembangunan / Indikator</th>
-                                    <th style="width: 15%;" class="text-center">Pengampu</th>
-                                    <th style="width: 5%;" class="text-center">Satuan</th>
-                                    <th style="width: 5%;" class="text-center">Baseline</th>
-                                    <th style="width: 8%;" class="text-center">Target Awal</th>
-                                    <th style="width: 8%;" class="text-center">Target Akhir</th>
+                                    <th style="width: 28%;">Sasaran Pembangunan / Indikator</th>
+                                    <th style="width: 14%;" class="text-center">Pengampu</th>
+                                    <th style="width: 6%;" class="text-center">Satuan</th>
+                                    <th style="width: 7%;" class="text-center">Baseline</th>
+                                    <th style="width: 7%;" class="text-center">Target 2025</th>
+                                    <th style="width: 7%;" class="text-center">Target 2045</th>
                                     <th style="width: 10%;" class="text-center">Periode</th>
-                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
-                                    <th style="width: 30%;" class="text-center">Aksi</th>
-                                    <?php } ?>
+                                    <th style="width: 16%;" class="text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -162,15 +160,13 @@
                                         <td class="text-center">-</td>
                                         <td class="text-center">-</td>
                                         <td class="text-center">
-                                            <span class="badge-periode"><?= $data['TahunMulai'].'-'.$data['TahunAkhir'] ?></span>
+                                            <span class="badge-periode"><?= !empty($data['Periode']) ? $data['Periode'] : (!empty($data['PeriodeTampil']) ? $data['PeriodeTampil'] : ($data['TahunMulai'].'-'.$data['TahunAkhir'])) ?></span>
                                         </td>
-                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
-                                        <td class="text-center">
-                                            <button class="btn btn-sm btn-success Tambah btn-action" Id="<?= $data['Id'] ?>" title="Tambah Indikator"><i class="fa fa-plus"></i> </button>
-                                            <button class="btn btn-sm btn-info Edit btn-action" Id="<?= $data['Id'] ?>" SasaranPembangunan="<?= $data['SasaranPembangunan'] ?>" TahunMulai="<?= $data['TahunMulai'] ?>" TahunAkhir="<?= $data['TahunAkhir'] ?>" title="Edit Sasaran"><i class="fa fa-edit"></i> </button>
-                                            <button class="btn btn-sm btn-danger Hapus btn-action" Hapus="<?= $data['Id'] ?>" title="Hapus Sasaran"><i class="fa fa-trash"></i> </button>
+                                        <td class="text-center" style="white-space: nowrap;">
+                                            <button class="btn btn-sm btn-success Tambah btn-action" Id="<?= $data['Id'] ?>" title="Tambah Indikator"><i class="fa fa-plus"></i> Indikator</button>
+                                            <button class="btn btn-sm btn-info Edit btn-action" Id="<?= $data['Id'] ?>" SasaranPembangunan="<?= htmlspecialchars($data['SasaranPembangunan'], ENT_QUOTES) ?>" Periode="<?= htmlspecialchars(!empty($data['Periode']) ? $data['Periode'] : (!empty($data['PeriodeTampil']) ? $data['PeriodeTampil'] : ($data['TahunMulai'].'-'.$data['TahunAkhir'])), ENT_QUOTES) ?>" title="Edit Sasaran"><i class="fa fa-edit"></i></button>
+                                            <button class="btn btn-sm btn-danger Hapus btn-action" Hapus="<?= $data['Id'] ?>" title="Hapus Sasaran"><i class="fa fa-trash"></i></button>
                                         </td>
-                                        <?php } ?>
                                     </tr>
 
                                     <?php 
@@ -191,14 +187,12 @@
                                             <td class="text-center"><span class="badge-target"><?= $indikator['TargetAwal'] ?></span></td>
                                             <td class="text-center"><span class="badge-target"><?= $indikator['TargetAkhir'] ?></span></td>
                                             <td class="text-center">
-                                                <span class="badge-periode" style="background-color: #00bcd4; box-shadow: 0 2px 5px rgba(0, 188, 212, 0.3);"><?= $data['TahunMulai'].'-'.$data['TahunAkhir'] ?></span>
+                                                <span class="badge-periode" style="background-color: #00bcd4; box-shadow: 0 2px 5px rgba(0, 188, 212, 0.3);"><?= !empty($data['Periode']) ? $data['Periode'] : (!empty($data['PeriodeTampil']) ? $data['PeriodeTampil'] : ($data['TahunMulai'].'-'.$data['TahunAkhir'])) ?></span>
                                             </td>
-                                            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
-                                            <td class="text-center">
-                                                <button class="btn btn-sm btn-info _Edit btn-action" Id="<?= $indikator['Id'] ?>" _Id="<?= $data['Id'] ?>" IndikatorPembangunan="<?= $indikator['IndikatorPembangunan'] ?>" Satuan="<?= $indikator['Satuan'] ?>" Baseline="<?= $indikator['Baseline'] ?>" TargetAwal="<?= $indikator['TargetAwal'] ?>" TargetAkhir="<?= $indikator['TargetAkhir'] ?>" IdKementerian="<?= isset($indikator['Id_']) ? $indikator['Id_'] : '' ?>" title="Edit Indikator"><i class="fa fa-edit"></i> </button>
-                                                <button class="btn btn-sm btn-danger _Hapus btn-action" _Hapus="<?= $indikator['Id'] ?>" title="Hapus Indikator"><i class="fa fa-trash"></i> </button>
+                                            <td class="text-center" style="white-space: nowrap;">
+                                                <button class="btn btn-sm btn-info _Edit btn-action" Id="<?= $indikator['Id'] ?>" _Id="<?= $data['Id'] ?>" IndikatorPembangunan="<?= $indikator['IndikatorPembangunan'] ?>" Satuan="<?= $indikator['Satuan'] ?>" Baseline="<?= $indikator['Baseline'] ?>" TargetAwal="<?= $indikator['TargetAwal'] ?>" TargetAkhir="<?= $indikator['TargetAkhir'] ?>" IdKementerian="<?= isset($indikator['Id_']) ? $indikator['Id_'] : '' ?>" title="Edit Indikator"><i class="fa fa-edit"></i></button>
+                                                <button class="btn btn-sm btn-danger _Hapus btn-action" _Hapus="<?= $indikator['Id'] ?>" title="Hapus Indikator"><i class="fa fa-trash"></i></button>
                                             </td>
-                                            <?php } ?>
                                         </tr>
                                     <?php 
                                                 $noInd++;
@@ -236,26 +230,17 @@
             <div class="modal-body" style="padding-top: 20px;">
                 <div class="row">
                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div class="form-group ic-cmp-int">
+                        <div class="form-group ic-cmp-int float-lb floating-lb">
                             <div class="form-ic-cmp">
-                                <i class="fa fa-flag"></i>
+                                <i class="fa fa-calendar"></i>
                             </div>
-                            <div class="bootstrap-select fm-cmp-mg">
-                                <select class="selectpicker form-control" data-live-search="true" id="IdVisi">
-                                    <option value="">Pilih Periode RPJMN</option>
-                                    <?php 
-                                    if(isset($Visi)) {
-                                        foreach ($Visi as $cv) {
-                                            echo "<option value='".$cv['Id']."'>".$cv['TahunMulai']." - ".$cv['TahunAkhir']."</option>";
-                                        }
-                                    } 
-                                    ?>
-                                </select>
+                            <div class="nk-int-st">
+                                <input type="text" class="form-control" id="Periode" placeholder="Periode RPJMN (contoh: 2025-2029)">
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="row">
+                <div class="row" style="margin-top: 15px;">
                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <div class="form-group ic-cmp-int float-lb floating-lb">
                             <div class="form-ic-cmp">
@@ -286,6 +271,18 @@
             <div class="modal-body" style="padding-top: 20px;">
                 <input type="hidden" id="Id">
                 <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div class="form-group ic-cmp-int float-lb floating-lb">
+                            <div class="form-ic-cmp">
+                                <i class="fa fa-calendar"></i>
+                            </div>
+                            <div class="nk-int-st">
+                                <input type="text" class="form-control" id="_Periode" placeholder="Periode RPJMN (contoh: 2025-2029)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="margin-top: 15px;">
                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <div class="form-group ic-cmp-int float-lb floating-lb">
                             <div class="form-ic-cmp">
@@ -551,42 +548,59 @@
         // SCRIPT SASARAN PEMBANGUNAN
         // ==============================================
         $("#SimpanSasaranPembangunan").click(function() {
-            if ($("#IdVisi").val() == "") {
-                alert("Mohon Pilih Periode RPJMN")
-            } else if ($("#SasaranPembangunan").val() == "") {
-                alert('Input Sasaran Pembangunan Belum Benar!')
+            var periode = $.trim($("#Periode").val());
+            var sasaran = $.trim($("#SasaranPembangunan").val());
+            if (periode == "") {
+                alert("Mohon Masukkan Periode RPJMN (contoh: 2025-2029)");
+                $("#Periode").focus();
+            } else if (sasaran == "") {
+                alert('Input Sasaran Pembangunan Belum Benar!');
+                $("#SasaranPembangunan").focus();
             } else {
-                var SasaranPembangunan = { SasaranPembangunan : $("#SasaranPembangunan").val(),
-                                           _Id : $("#IdVisi").val() }
+                var SasaranPembangunan = { 
+                    SasaranPembangunan : sasaran,
+                    Periode : periode,
+                    _Id : 0
+                };
                 $.post(BaseURL+"Nasional/InputSasaranPembangunanRPJMN", SasaranPembangunan).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Nasional/SasaranPembangunanRPJMN"
+                        window.location = BaseURL+"Nasional/SasaranPembangunanRPJMN";
                     } else {
-                        alert(Respon)
+                        alert(Respon);
                     }
-                })                         
+                });                         
             }
         });
 
         $('#data-table-basic tbody').on('click', '.Edit', function () {
             $("#Id").val($(this).attr('Id'));
             $("#_SasaranPembangunan").val($(this).attr('SasaranPembangunan'));
+            $("#_Periode").val($(this).attr('Periode'));
             $('#ModalEditSasaranPembangunan').modal("show");
         });
 
         $("#Edit").click(function() {
-            if ($("#_SasaranPembangunan").val() == "") {
-                alert('Input Sasaran Pembangunan Belum Benar!')
+            var periode = $.trim($("#_Periode").val());
+            var sasaran = $.trim($("#_SasaranPembangunan").val());
+            if (periode == "") {
+                alert("Mohon Masukkan Periode RPJMN (contoh: 2025-2029)");
+                $("#_Periode").focus();
+            } else if (sasaran == "") {
+                alert('Input Sasaran Pembangunan Belum Benar!');
+                $("#_SasaranPembangunan").focus();
             } else {
-                var SasaranPembangunan = { Id : $("#Id").val(),
-                                           SasaranPembangunan : $("#_SasaranPembangunan").val() }
+                var SasaranPembangunan = { 
+                    Id : $("#Id").val(),
+                    Periode : periode,
+                    SasaranPembangunan : sasaran
+                };
                 $.post(BaseURL+"Nasional/EditSasaranPembangunanRPJMN", SasaranPembangunan).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Nasional/SasaranPembangunanRPJMN"
+                        window.location = BaseURL+"Nasional/SasaranPembangunanRPJMN";
                     } else {
-                        alert(Respon)
+                        alert(Respon);
                     }
-                })                         
+                });                         
             }
         });
 

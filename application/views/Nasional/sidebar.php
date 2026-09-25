@@ -268,13 +268,13 @@ define('NASIONAL_SIDEBAR_LOADED', true);
                     <i class="fa fa-chevron-down"></i>
                 </a>
                 <div class="sidebar-submenu">
-                    <a href="<?=base_url('Nasional/VisiRPJMN')?>">VMTS</a>
-                    <a href="<?=base_url('Nasional/TahapanRPJMN')?>">Tahapan</a>
-                    <a href="<?=base_url('Nasional/IUPRPJMN')?>">Indikator Utama Pembangunan</a>
+                    <a href="<?=base_url('Nasional/VisiRPJMN')?>">Visi & Misi Presiden</a>
                     <a href="<?=base_url('Nasional/SasaranPembangunanRPJMN')?>">Sasaran Pembangunan Nasional</a>
+                    <a href="<?=base_url('Nasional/TahapanRPJMN')?>">Tahapan</a>
+                    <a href="<?=base_url('Nasional/IUPRPJMN')?>">Agenda Pembangunan (PN/PP/KP)</a>
+                    <a href="<?=base_url('Nasional/ProyekStrategisRPJMN')?>">Proyek Strategis Nasional</a>
                     <a href="<?=base_url('Nasional/SasaranPembangunanDaerah')?>">Sasaran Pembangunan Wilayah</a>
                     <a href="<?=base_url('Nasional/PembangunanKewilayahanRPJMN')?>">Pembangunan Kewilayahan</a>
-                    <a href="<?=base_url('Nasional/ProyekStrategisRPJMN')?>">Proyek Strategis Nasional</a>
                 </div>
             </li>
 
