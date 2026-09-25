@@ -288,8 +288,8 @@ define('NASIONAL_SIDEBAR_LOADED', true);
                 <div class="sidebar-submenu">
                     <a href="<?=base_url('Nasional/TemaRKP')?>">Tema RKP</a>
                     <a href="<?=base_url('Nasional/SasaranPembangunanRKP')?>">Sasaran Pembangunan</a>
-                    <a href="<?=base_url('Nasional/SasaranPrioritasNasional')?>">Sasaran Prioritas Nasional</a>
-                    <a href="<?=base_url('Nasional/IndikasiIntervensi')?>">Indikasi Intervensi Prioritas</a>
+                    <a href="<?=base_url('Nasional/MatriksPembangunan')?>">Matriks Pembangunan</a>
+                    <a href="<?=base_url('Nasional/ArahPembangunanKewilayahan')?>">Arah Pembangunan Kewilayahan</a>
                 </div>
             </li>
 
