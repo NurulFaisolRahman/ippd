@@ -1,5 +1,6 @@
 <?php $this->load->view('Kementerian/Sidebar'); ?>
 
+<div class="main-content">
 <!-- Library utama -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -120,7 +121,7 @@
                                         <td class="nilai-detail text-right" data-full="<?= $item['total_2029'] ?? 0 ?>" data-type="Total 2029"></td>
 
                                         <td class="text-center">
-                                            <?php if ($_SESSION['Level'] == 1): ?>
+                                            <?php if (!empty($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
                                             <div class="btn-group btn-group-sm" style="display: flex; gap: 5px; justify-content: center;">
                                                 <button class="btn btn-success btn-sm btnTambahPendanaan"
                                                         data-jenis="KP" data-ref="<?= $item['kp_id'] ?>"
@@ -184,7 +185,7 @@
                                         <td class="nilai-detail text-right" data-full="<?= $item['total_2029'] ?? 0 ?>" data-type="Total 2029"></td>
 
                                         <td class="text-center">
-                                            <?php if ($_SESSION['Level'] == 1): ?>
+                                            <?php if (!empty($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
                                             <div class="btn-group btn-group-sm" style="display: flex; gap: 5px; justify-content: center;">
                                                 <button class="btn btn-success btn-sm btnTambahPendanaan"
                                                         data-jenis="ProP" data-ref="<?= $item['prop_id'] ?>"
@@ -439,3 +440,4 @@ $(document).on('click', '.btnHapusPendanaan', function() {
     }, 'json').fail(() => alert('Gagal menghubungi server'));
 });
 </script>
+</div>

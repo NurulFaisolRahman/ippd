@@ -1,0 +1,979 @@
+[
+  {
+    "uraian": "Tujuan 1: Meningkatnya Derajat Kesehatan Masyarakat",
+    "indikators": [
+      {
+        "indikator": "Usia Harapan Hidup (UHH)",
+        "satuan": "Tahun",
+        "kondisi_awal": 73.36,
+        "target_2026": 73.79,
+        "anggaran_2026": null,
+        "target_2027": 74.05,
+        "anggaran_2027": null,
+        "target_2028": 74.3,
+        "anggaran_2028": null,
+        "target_2029": 74.55,
+        "anggaran_2029": null,
+        "target_2030": 74.8,
+        "anggaran_2030": null
+      }
+    ],
+    "sasaran_list": [
+      {
+        "uraian": "Sasaran 1: Meningkatnya Akuntabilitas Kinerja Rumah Sakit",
+        "indikators": [
+          {
+            "indikator": "Nilai SAKIP Rumah sakit",
+            "satuan": "Nilai",
+            "kondisi_awal": 82.35,
+            "target_2026": 82.75,
+            "anggaran_2026": null,
+            "target_2027": 83,
+            "anggaran_2027": null,
+            "target_2028": 83.25,
+            "anggaran_2028": null,
+            "target_2029": 83.5,
+            "anggaran_2029": null,
+            "target_2030": 83.75,
+            "anggaran_2030": null
+          },
+          {
+            "indikator": "IKM (Indeks Kepuasan Masyarakat)",
+            "satuan": "Nilai",
+            "kondisi_awal": 83.25,
+            "target_2026": 85.25,
+            "anggaran_2026": null,
+            "target_2027": 86.25,
+            "anggaran_2027": null,
+            "target_2028": 87.25,
+            "anggaran_2028": null,
+            "target_2029": 88.25,
+            "anggaran_2029": null,
+            "target_2030": 89.25,
+            "anggaran_2030": null
+          }
+        ],
+        "program_list": [
+          {
+            "kode_program": "1.02.01",
+            "nama": "PROGRAM PENUNJANG URUSAN PEMERINTAHAN DAERAH KABUPATEN/KOTA",
+            "anggaran_2026": 80000000000,
+            "anggaran_2027": 84764500000,
+            "anggaran_2028": 87765500000,
+            "anggaran_2029": 90766500000,
+            "anggaran_2030": 92767500000,
+            "outcomes": [
+              {
+                "outcome_text": "Meningkatnya Akuntabilitas Kinerja Rumah Sakit",
+                "indikators": [
+                  {
+                    "indikator": "IKM (Indeks Kepuasan Masyarakat)",
+                    "satuan": "Nilai",
+                    "kondisi_awal": 83.25,
+                    "target_2026": 85.25,
+                    "anggaran_2026": 80000000000,
+                    "target_2027": 86.25,
+                    "anggaran_2027": 84764500000,
+                    "target_2028": 87.25,
+                    "anggaran_2028": 87765500000,
+                    "target_2029": 88.25,
+                    "anggaran_2029": 90766500000,
+                    "target_2030": 89.25,
+                    "anggaran_2030": 92767500000
+                  },
+                  {
+                    "indikator": "Nilai SAKIP Rumah Sakit",
+                    "satuan": "Nilai",
+                    "kondisi_awal": 82.35,
+                    "target_2026": 82.75,
+                    "anggaran_2026": null,
+                    "target_2027": 83,
+                    "anggaran_2027": null,
+                    "target_2028": 83.25,
+                    "anggaran_2028": null,
+                    "target_2029": 83.5,
+                    "anggaran_2029": null,
+                    "target_2030": 83.75,
+                    "anggaran_2030": null
+                  }
+                ]
+              }
+            ],
+            "kegiatan_list": [
+              {
+                "kode_nomenklatur": "1.02.01.2.01",
+                "nama": "Perencanaan, Penganggaran, dan Evaluasi Kinerja Perangkat Daerah",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terlaksananya Perencanaan, Penganggaran, dan Evaluasi Kinerja Perangkat Daerah",
+                    "indikators": [
+                      {
+                        "indikator": "Persentase terlaksananya Perencanaan, Penganggaran, dan Evaluasi Kinerja Perangkat Daerah",
+                        "satuan": "%",
+                        "kondisi_awal": 100,
+                        "target_2026": 100,
+                        "anggaran_2026": null,
+                        "target_2027": 100,
+                        "anggaran_2027": 12500000,
+                        "target_2028": 100,
+                        "anggaran_2028": 12500000,
+                        "target_2029": 100,
+                        "anggaran_2029": 12500000,
+                        "target_2030": 100,
+                        "anggaran_2030": 12500000
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "1.02.01.2.01.0001",
+                    "nama": "Penyusunan Dokumen Perencanaan Perangkat Daerah",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersusunnya Dokumen Perencanaan Perangkat Daerah",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Dokumen Perencanaan Perangkat Daerah",
+                            "satuan": "Dokumen",
+                            "kondisi_awal": 0,
+                            "target_2026": 0,
+                            "anggaran_2026": null,
+                            "target_2027": 4,
+                            "anggaran_2027": 4500000,
+                            "target_2028": 4,
+                            "anggaran_2028": 4500000,
+                            "target_2029": 4,
+                            "anggaran_2029": 4500000,
+                            "target_2030": 4,
+                            "anggaran_2030": 4500000
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "1.02.01.2.01.0006",
+                    "nama": "Koordinasi dan Penyusunan Laporan Capaian Kinerja dan Ikhtisar Realisasi Kinerja SKPD",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Koordinasi dan Penyusunan Laporan Capaian Kinerja dan Ikhtisar Realisasi Kinerja SKPD",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Laporan Capaian Kinerja dan Ikhtisar Realisasi Kinerja SKPD dan Laporan Hasil Koordinasi Penyusunan Laporan Capaian Kinerja dan\nIkhtisar Realisasi Kinerja SKPD",
+                            "satuan": "Dokumen",
+                            "kondisi_awal": 3,
+                            "target_2026": 0,
+                            "anggaran_2026": null,
+                            "target_2027": 3,
+                            "anggaran_2027": 3000000,
+                            "target_2028": 3,
+                            "anggaran_2028": 3000000,
+                            "target_2029": 3,
+                            "anggaran_2029": 3000000,
+                            "target_2030": 3,
+                            "anggaran_2030": 3000000
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "1.02.01.2.01.0011",
+                    "nama": "Penyusunan Dokumen Perencanaan Urusan Selain Renstra PD dan Renja PD",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersusunnya Dokumen Perencanaan Urusan Selain Renstra PD dan Renja PD",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Dokumen Perencanaan Urusan Selain Renstra PD dan Renja PD yang disusun",
+                            "satuan": "Dokumen",
+                            "kondisi_awal": 0,
+                            "target_2026": 0,
+                            "anggaran_2026": null,
+                            "target_2027": 1,
+                            "anggaran_2027": 5000000,
+                            "target_2028": 1,
+                            "anggaran_2028": 5000000,
+                            "target_2029": 1,
+                            "anggaran_2029": 5000000,
+                            "target_2030": 1,
+                            "anggaran_2030": 5000000
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kode_nomenklatur": "1.02.01.2.02",
+                "nama": "Administrasi Keuangan Perangkat Daerah",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terlaksananya Administrasi Keuangan Perangkat Daerah",
+                    "indikators": [
+                      {
+                        "indikator": "Persentase terlaksananya\nAdministrasi Keuangan Perangkat Daerah",
+                        "satuan": "%",
+                        "kondisi_awal": null,
+                        "target_2026": 0,
+                        "anggaran_2026": null,
+                        "target_2027": 100,
+                        "anggaran_2027": 96000000,
+                        "target_2028": 100,
+                        "anggaran_2028": 97000000,
+                        "target_2029": 100,
+                        "anggaran_2029": 98000000,
+                        "target_2030": 100,
+                        "anggaran_2030": 99000000
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "1.02.01.2.02.0002",
+                    "nama": "Penyediaan Administrasi Pelaksanaan Tugas ASN",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Administrasi Pelaksanaan Tugas ASN",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Dokumen Hasil\nPenyediaan Administrasi Pelaksanaan Tugas ASN",
+                            "satuan": "Dokumen",
+                            "kondisi_awal": 1,
+                            "target_2026": 0,
+                            "anggaran_2026": null,
+                            "target_2027": 12,
+                            "anggaran_2027": 96000000,
+                            "target_2028": 12,
+                            "anggaran_2028": 97000000,
+                            "target_2029": 12,
+                            "anggaran_2029": 98000000,
+                            "target_2030": 12,
+                            "anggaran_2030": 99000000
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kode_nomenklatur": "1.02.01.2.07",
+                "nama": "Pengadaan Barang Milik Daerah Penunjang Urusan Pemerintah Daerah",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Tersedianya Barang Milik Daerah Penunjang Urusan Pemerintah Daerah",
+                    "indikators": [
+                      {
+                        "indikator": "Persentase Barang Milik Daerah Penunjang Urusan Pemerintah Daerah",
+                        "satuan": "%",
+                        "kondisi_awal": 0,
+                        "target_2026": 0,
+                        "anggaran_2026": null,
+                        "target_2027": 100,
+                        "anggaran_2027": 1500000000,
+                        "target_2028": 100,
+                        "anggaran_2028": 1500000000,
+                        "target_2029": 100,
+                        "anggaran_2029": 1500000000,
+                        "target_2030": 100,
+                        "anggaran_2030": 1500000000
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "1.02.01.2.07.0009",
+                    "nama": "Pengadaan Gedung Kantor atau Bangunan Lainnya",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Gedung Kantor atau Bangunan Lainnya",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Unit Gedung Kantor atau Bangunan Lainnya yang\nDisediakan",
+                            "satuan": "unit",
+                            "kondisi_awal": 0,
+                            "target_2026": 0,
+                            "anggaran_2026": null,
+                            "target_2027": 1,
+                            "anggaran_2027": 1500000000,
+                            "target_2028": 1,
+                            "anggaran_2028": 1500000000,
+                            "target_2029": 1,
+                            "anggaran_2029": 1500000000,
+                            "target_2030": 1,
+                            "anggaran_2030": 1500000000
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kode_nomenklatur": "1.02.01.2.08",
+                "nama": "Penyediaan Jasa Penunjang Urusan Pemerintahan Daerah",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Tersedianya Jasa Penunjang Urusan Pemerintahan Daerah",
+                    "indikators": [
+                      {
+                        "indikator": "Persentase tersedianya jasa penunjang perangkat daerah",
+                        "satuan": "%",
+                        "kondisi_awal": null,
+                        "target_2026": 0,
+                        "anggaran_2026": null,
+                        "target_2027": 100,
+                        "anggaran_2027": 156000000,
+                        "target_2028": 100,
+                        "anggaran_2028": 156000000,
+                        "target_2029": 100,
+                        "anggaran_2029": 156000000,
+                        "target_2030": 100,
+                        "anggaran_2030": 156000000
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "1.02.01.2.08.0004",
+                    "nama": "Penyediaan Jasa Pelayanan Umum Kantor",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Jasa Pelayanan Umum Kantor",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah   Laporan   Penyediaan Jasa   Pelayanan Umum Kantor yang Disediakan",
+                            "satuan": "Laporan",
+                            "kondisi_awal": null,
+                            "target_2026": 0,
+                            "anggaran_2026": null,
+                            "target_2027": 12,
+                            "anggaran_2027": 156000000,
+                            "target_2028": 12,
+                            "anggaran_2028": 156000000,
+                            "target_2029": 12,
+                            "anggaran_2029": 156000000,
+                            "target_2030": 12,
+                            "anggaran_2030": 156000000
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kode_nomenklatur": "1.02.01.2.10",
+                "nama": "Peningkatan Pelayanan BLUD",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terlaksananya Peningkatan Pelayanan BLUD",
+                    "indikators": [
+                      {
+                        "indikator": "Persentase Cost Recovery Rate",
+                        "satuan": "%",
+                        "kondisi_awal": 0,
+                        "target_2026": 90,
+                        "anggaran_2026": 80000000000,
+                        "target_2027": 92,
+                        "anggaran_2027": 83000000000,
+                        "target_2028": 94,
+                        "anggaran_2028": 86000000000,
+                        "target_2029": 96,
+                        "anggaran_2029": 89000000000,
+                        "target_2030": 98,
+                        "anggaran_2030": 91000000000
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "1.02.01.2.10.0001",
+                    "nama": "Pelayanan dan Penunjang Pelayanan BLUD",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pelayanan dan Penunjang Pelayanan BLUD",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah BLUD yang Menyediakan Pelayanan dan\nPenunjang Pelayanan",
+                            "satuan": "unit",
+                            "kondisi_awal": 19,
+                            "target_2026": 24,
+                            "anggaran_2026": 80000000000,
+                            "target_2027": 24,
+                            "anggaran_2027": 83000000000,
+                            "target_2028": 24,
+                            "anggaran_2028": 86000000000,
+                            "target_2029": 24,
+                            "anggaran_2029": 89000000000,
+                            "target_2030": 24,
+                            "anggaran_2030": 91000000000
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "uraian": "Sasaran 2: Meningkatnya Aksesbilitas dan Kualitas Mutu Pelayanan Rumah Sakit",
+        "indikators": [
+          {
+            "indikator": "Persentase Sarana, Prasarana, dan Alat Kesehatan Rumah Sakit Sesuai Standart",
+            "satuan": "%",
+            "kondisi_awal": 64,
+            "target_2026": 64.5,
+            "anggaran_2026": null,
+            "target_2027": 64.64999999999999,
+            "anggaran_2027": null,
+            "target_2028": 64.8,
+            "anggaran_2028": null,
+            "target_2029": 64.95,
+            "anggaran_2029": null,
+            "target_2030": 65.10000000000001,
+            "anggaran_2030": null
+          },
+          {
+            "indikator": "Persentase Indikator Nasional Mutu (INM) yang mencapai target",
+            "satuan": "%",
+            "kondisi_awal": 92.30000000000001,
+            "target_2026": 92.9,
+            "anggaran_2026": null,
+            "target_2027": 93.2,
+            "anggaran_2027": null,
+            "target_2028": 93.5,
+            "anggaran_2028": null,
+            "target_2029": 93.8,
+            "anggaran_2029": null,
+            "target_2030": 94.1,
+            "anggaran_2030": null
+          },
+          {
+            "indikator": "Persentase Indikator Prioiritas Rumah Sakit (IMPRS) yang mencapai target",
+            "satuan": "%",
+            "kondisi_awal": 80,
+            "target_2026": 80.60000000000001,
+            "anggaran_2026": null,
+            "target_2027": 80.9,
+            "anggaran_2027": null,
+            "target_2028": 81.2,
+            "anggaran_2028": null,
+            "target_2029": 81.5,
+            "anggaran_2029": null,
+            "target_2030": 81.8,
+            "anggaran_2030": null
+          },
+          {
+            "indikator": "Persentase Indikator Perunit Layanan yangmencapai target",
+            "satuan": "%",
+            "kondisi_awal": 92.9,
+            "target_2026": 93.5,
+            "anggaran_2026": null,
+            "target_2027": 93.8,
+            "anggaran_2027": null,
+            "target_2028": 94.1,
+            "anggaran_2028": null,
+            "target_2029": 94.4,
+            "anggaran_2029": null,
+            "target_2030": 94.69999999999999,
+            "anggaran_2030": null
+          }
+        ],
+        "program_list": [
+          {
+            "kode_program": "1.02.02",
+            "nama": "PROGRAM PEMENUHAN UPAYA KESEHATAN PERORANGAN DAN UPAYA KESEHATAN MASYARAKAT",
+            "anggaran_2026": 8082597203,
+            "anggaran_2027": 13572881316,
+            "anggaran_2028": 13708610130,
+            "anggaran_2029": 13845696231,
+            "anggaran_2030": 13984153193,
+            "outcomes": [
+              {
+                "outcome_text": "Meningkatnya Aksesbilitas dan Kualitas Mutu Pelayanan Rumah Sakit",
+                "indikators": [
+                  {
+                    "indikator": "Persentase Sarana, Prasarana, dan Alat Kesehatan Rumah Sakit Sesuai Standart",
+                    "satuan": "%",
+                    "kondisi_awal": 64,
+                    "target_2026": 64.5,
+                    "anggaran_2026": 8082597203,
+                    "target_2027": 64.64999999999999,
+                    "anggaran_2027": 13572881316,
+                    "target_2028": 64.8,
+                    "anggaran_2028": 13708610130,
+                    "target_2029": 64.95,
+                    "anggaran_2029": 13845696231,
+                    "target_2030": 65.10000000000001,
+                    "anggaran_2030": 13984153193
+                  },
+                  {
+                    "indikator": "Persentase Indikator Nasional Mutu (INM) yang mencapai target",
+                    "satuan": "%",
+                    "kondisi_awal": 92.30000000000001,
+                    "target_2026": 92.9,
+                    "anggaran_2026": null,
+                    "target_2027": 93.2,
+                    "anggaran_2027": null,
+                    "target_2028": 93.5,
+                    "anggaran_2028": null,
+                    "target_2029": 93.8,
+                    "anggaran_2029": null,
+                    "target_2030": 94.1,
+                    "anggaran_2030": null
+                  },
+                  {
+                    "indikator": "Persentase Indikator Prioiritas Rumah Sakit (IMPRS) yang mencapai target",
+                    "satuan": "%",
+                    "kondisi_awal": 80,
+                    "target_2026": 80.60000000000001,
+                    "anggaran_2026": null,
+                    "target_2027": 80.9,
+                    "anggaran_2027": null,
+                    "target_2028": 81.2,
+                    "anggaran_2028": null,
+                    "target_2029": 81.5,
+                    "anggaran_2029": null,
+                    "target_2030": 81.8,
+                    "anggaran_2030": null
+                  },
+                  {
+                    "indikator": "Persentase Indikator Perunit Layanan yangmencapai target",
+                    "satuan": "%",
+                    "kondisi_awal": 92.9,
+                    "target_2026": 93.5,
+                    "anggaran_2026": null,
+                    "target_2027": 93.8,
+                    "anggaran_2027": null,
+                    "target_2028": 94.1,
+                    "anggaran_2028": null,
+                    "target_2029": 94.4,
+                    "anggaran_2029": null,
+                    "target_2030": 94.69999999999999,
+                    "anggaran_2030": null
+                  }
+                ]
+              }
+            ],
+            "kegiatan_list": [
+              {
+                "kode_nomenklatur": "1.02.02.2.01",
+                "nama": "Penyediaan Fasilitas Pelayanan Kesehatan untuk UKM dan UKP Kewenangan Daerah Kabupaten/Kota",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Tersedianya Fasilitas Pelayanan Kesehatan untuk UKM dan UKP Kewenangan Daerah Kabupaten/Kota",
+                    "indikators": [
+                      {
+                        "indikator": "Persentase Kelengkapan Sarana Rumah Sakit Sesuai Standar",
+                        "satuan": "%",
+                        "kondisi_awal": 70.25,
+                        "target_2026": 71.5,
+                        "anggaran_2026": 8082597203,
+                        "target_2027": 71.75,
+                        "anggaran_2027": 13572881316,
+                        "target_2028": 72,
+                        "anggaran_2028": 13708610130,
+                        "target_2029": 72.25,
+                        "anggaran_2029": 13845696231,
+                        "target_2030": 72.5,
+                        "anggaran_2030": 13984153193
+                      },
+                      {
+                        "indikator": "Persentase Kelengkapan Prasarana Rumah Sakit\nSesuai Standar",
+                        "satuan": "%",
+                        "kondisi_awal": 73.25,
+                        "target_2026": 74.5,
+                        "anggaran_2026": null,
+                        "target_2027": 74.75,
+                        "anggaran_2027": null,
+                        "target_2028": 75,
+                        "anggaran_2028": null,
+                        "target_2029": 75.25,
+                        "anggaran_2029": null,
+                        "target_2030": 75.5,
+                        "anggaran_2030": null
+                      },
+                      {
+                        "indikator": "Persentase Kelengkapan Alat Kesehatan Rumah Sakit\nSesuai Standar",
+                        "satuan": "%",
+                        "kondisi_awal": 30.84,
+                        "target_2026": 37,
+                        "anggaran_2026": null,
+                        "target_2027": 37.5,
+                        "anggaran_2027": null,
+                        "target_2028": 38,
+                        "anggaran_2028": null,
+                        "target_2029": 38.5,
+                        "anggaran_2029": null,
+                        "target_2030": 39,
+                        "anggaran_2030": null
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "1.02.02.2.01.0001",
+                    "nama": "Pembangunan Rumah Sakit beserta Sarana dan Prasarana Pendukungnya",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pembangunan Rumah Sakit beserta Sarana dan Prasarana Pendukungnya",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Rumah Sakit Baru yang Memenuhi Rasio Tempat Tidur Terhadap Jumlah\nPenduduk Minimal 1:1000",
+                            "satuan": "unit",
+                            "kondisi_awal": 46,
+                            "target_2026": 2,
+                            "anggaran_2026": 1701246000,
+                            "target_2027": 1,
+                            "anggaran_2027": 1500000000,
+                            "target_2028": 1,
+                            "anggaran_2028": 1500000000,
+                            "target_2029": 1,
+                            "anggaran_2029": 1500000000,
+                            "target_2030": 1,
+                            "anggaran_2030": 1500000000
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "1.02.02.2.01.0007",
+                    "nama": "Pengembangan Fasilitas Kesehatan Lainnya",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pengembangan Fasilitas Kesehatan Lainnya",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Fasilitas Kesehatan Lainnya yang Ditingkatkan Sarana, Prasarana, Alat Kesehatan dan SDM agar\nSesuai Standar",
+                            "satuan": "unit",
+                            "kondisi_awal": 0,
+                            "target_2026": 0,
+                            "anggaran_2026": null,
+                            "target_2027": 1,
+                            "anggaran_2027": 1000000000,
+                            "target_2028": 1,
+                            "anggaran_2028": 1000000000,
+                            "target_2029": 1,
+                            "anggaran_2029": 1000000000,
+                            "target_2030": 1,
+                            "anggaran_2030": 1000000000
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "1.02.02.2.01.0008",
+                    "nama": "Rehabilitasi dan Pemeliharaan Rumah Sakit",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Rehabilitasi dan Pemeliharaan Rumah Sakit",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Sarana, Prasarana dan Alat Kesehatan yang Telah Dilakukan Program Rehabilitasi dan Pemeliharaan\nOleh Rumah Sakit",
+                            "satuan": "unit",
+                            "kondisi_awal": 2,
+                            "target_2026": 3,
+                            "anggaran_2026": 4886961950,
+                            "target_2027": 1,
+                            "anggaran_2027": 1500000000,
+                            "target_2028": 1,
+                            "anggaran_2028": 1500000000,
+                            "target_2029": 1,
+                            "anggaran_2029": 1500000000,
+                            "target_2030": 1,
+                            "anggaran_2030": 1500000000
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "1.02.02.2.01.0014",
+                    "nama": "Pengadaan Alat Kesehatan/Alat Penunjang Medik Fasilitas Pelayanan Kesehatan",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Alat Kesehatan/Alat Penunjang Medik Fasilitas Pelayanan Kesehatan",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Alat Kesehatan/Alat Penunjang Medik Fasilitas Pelayanan Kesehatan yang Disediakan",
+                            "satuan": "unit",
+                            "kondisi_awal": 1432,
+                            "target_2026": 10,
+                            "anggaran_2026": 1493389253,
+                            "target_2027": 8,
+                            "anggaran_2027": 4322881316,
+                            "target_2028": 9,
+                            "anggaran_2028": 4208610130,
+                            "target_2029": 9,
+                            "anggaran_2029": 4095696231,
+                            "target_2030": 11,
+                            "anggaran_2030": 3984153193
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "1.02.02.2.01.0020",
+                    "nama": "Pemeliharaan Rutin dan Berkala Alat Kesehatan/Alat Penunjang Medik Fasilitas Pelayanan Kesehatan",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pemeliharaan Rutin dan Berkala Alat Kesehatan/Alat Penunjang Medik Fasilitas Pelayanan Kesehatan",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Alat Kesehatan/Alat Penunjang Medik Fasilitas Layanan Kesehatan yang Terpelihara Sesuai Standar",
+                            "satuan": "unit",
+                            "kondisi_awal": null,
+                            "target_2026": 0,
+                            "anggaran_2026": null,
+                            "target_2027": 2,
+                            "anggaran_2027": 1250000000,
+                            "target_2028": 2,
+                            "anggaran_2028": 1500000000,
+                            "target_2029": 1,
+                            "anggaran_2029": 1750000000,
+                            "target_2030": 1,
+                            "anggaran_2030": 2000000000
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "1.02.02.2.01.0022",
+                    "nama": "Pengembangan Rumah Sakit",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pengembangan Rumah Sakit",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Rumah sakit yang ditingkatkan  sarana, prasarana, alat kesehatan  dan SDM agar sesuai standar jenis pelayanan rumah sakit berdasarkan kelas rumah sakit yang memenuhi rasio tempat tidur terhadap jumlah penduduk minimal 1:1000 dan/atau dalam rangka peningkatan kapasitas\npelayanan rumah sakit",
+                            "satuan": "unit",
+                            "kondisi_awal": null,
+                            "target_2026": 1,
+                            "anggaran_2026": 1000000,
+                            "target_2027": 1,
+                            "anggaran_2027": 1500000000,
+                            "target_2028": 1,
+                            "anggaran_2028": 1500000000,
+                            "target_2029": 1,
+                            "anggaran_2029": 1500000000,
+                            "target_2030": 1,
+                            "anggaran_2030": 1500000000
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "1.02.02.2.01.0023",
+                    "nama": "Pengadaan Obat, Bahan Habis Pakai, Bahan Medis Habis Pakai,, Vaksin, Makanan dan Minuman di Fasilitas Kesehatan",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Obat, Bahan Habis Pakai, Bahan Medis Habis Pakai,, Vaksin, Makanan dan Minuman di Fasilitas Kesehatan",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Obat, Bahan Habis Pakai, Bahan Medis Habis Pakai, Vaksin, Makanan dan Minuman di Fasilitas Kesehatan  yang disediakan",
+                            "satuan": "Paket",
+                            "kondisi_awal": 1,
+                            "target_2026": 1,
+                            "anggaran_2026": null,
+                            "target_2027": 1,
+                            "anggaran_2027": 2500000000,
+                            "target_2028": 1,
+                            "anggaran_2028": 2500000000,
+                            "target_2029": 1,
+                            "anggaran_2029": 2500000000,
+                            "target_2030": 1,
+                            "anggaran_2030": 2500000000
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "uraian": "Sasaran 3: Meningkatnya Kualitas Sumber Daya Manusia Kesehatan di Rumah Sakit",
+        "indikators": [
+          {
+            "indikator": "Persentase Tercukupinya Kebutuhan SDM Kesehatan Rumah Sakit sesuai standar",
+            "satuan": "%",
+            "kondisi_awal": 0,
+            "target_2026": 0,
+            "anggaran_2026": null,
+            "target_2027": 90.5,
+            "anggaran_2027": 200000000,
+            "target_2028": 91,
+            "anggaran_2028": 200000000,
+            "target_2029": 91.5,
+            "anggaran_2029": 200000000,
+            "target_2030": 92,
+            "anggaran_2030": 200000000
+          }
+        ],
+        "program_list": [
+          {
+            "kode_program": "1.02.03",
+            "nama": "PROGRAM PENINGKATAN KAPASITAS SUMBER DAYA MANUSIA KESEHATAN",
+            "anggaran_2026": null,
+            "anggaran_2027": 200000000,
+            "anggaran_2028": 200000000,
+            "anggaran_2029": 200000000,
+            "anggaran_2030": 200000000,
+            "outcomes": [
+              {
+                "outcome_text": "Meningkatnya Kualitas Sumber Daya Manusia Kesehatan di Rumah Sakit",
+                "indikators": [
+                  {
+                    "indikator": "Persentase Tercukupinya Kebutuhan SDM Kesehatan Rumah Sakit sesuai standar",
+                    "satuan": "%",
+                    "kondisi_awal": 0,
+                    "target_2026": 0,
+                    "anggaran_2026": null,
+                    "target_2027": 90.5,
+                    "anggaran_2027": 200000000,
+                    "target_2028": 91,
+                    "anggaran_2028": 200000000,
+                    "target_2029": 91.5,
+                    "anggaran_2029": 200000000,
+                    "target_2030": 92,
+                    "anggaran_2030": 200000000
+                  }
+                ]
+              }
+            ],
+            "kegiatan_list": [
+              {
+                "kode_nomenklatur": "1.02.03.2.02",
+                "nama": "Perencanaan Kebutuhan dan Pendayagunaan Sumber Daya Manusia Kesehatan untuk UKP dan UKM di Wilayah Kabupaten/Kota",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terlaksananya Perencanaan Kebutuhan dan Pendayagunaan Sumber Daya Manusia Kesehatan untuk UKP dan UKM di Wilayah Kabupaten/Kota",
+                    "indikators": [
+                      {
+                        "indikator": "Jumlah dokumen analisa rencana kebutuhan SDM Kesehatan yang ter update",
+                        "satuan": "orang",
+                        "kondisi_awal": 0,
+                        "target_2026": 0,
+                        "anggaran_2026": null,
+                        "target_2027": 360,
+                        "anggaran_2027": 100000000,
+                        "target_2028": 370,
+                        "anggaran_2028": 100000000,
+                        "target_2029": 380,
+                        "anggaran_2029": 100000000,
+                        "target_2030": 390,
+                        "anggaran_2030": 100000000
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "1.02.03.2.02.0002",
+                    "nama": "Pemenuhan Kebutuhan Sumber Daya Manusia Kesehatan Sesuai Standar",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pemenuhan Kebutuhan Sumber Daya Manusia Kesehatan Sesuai Standar",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Sumber Daya Manusia Kesehatan yang Memenuhi Standar di Fasilitas Pelayanan\nKesehatan (Fasyankes)",
+                            "satuan": "orang",
+                            "kondisi_awal": 0,
+                            "target_2026": 0,
+                            "anggaran_2026": null,
+                            "target_2027": 360,
+                            "anggaran_2027": 100000000,
+                            "target_2028": 370,
+                            "anggaran_2028": 100000000,
+                            "target_2029": 380,
+                            "anggaran_2029": 100000000,
+                            "target_2030": 390,
+                            "anggaran_2030": 100000000
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kode_nomenklatur": "1.02.03.2.03",
+                "nama": "Pengembangan Mutu dan Peningkatan Kompetensi Teknis Sumber Daya Manusia Kesehatan Tingkat Daerah Kabupaten/Kota",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terlaksananya Pengembangan Mutu dan Peningkatan Kompetensi Teknis Sumber Daya Manusia Kesehatan Tingkat Daerah Kabupaten/Kota",
+                    "indikators": [
+                      {
+                        "indikator": "Jumlah SDM Kesehatan Rumah Sakit sesuai standar",
+                        "satuan": "orang",
+                        "kondisi_awal": 0,
+                        "target_2026": 0,
+                        "anggaran_2026": null,
+                        "target_2027": 25,
+                        "anggaran_2027": 100000000,
+                        "target_2028": 25,
+                        "anggaran_2028": 100000000,
+                        "target_2029": 25,
+                        "anggaran_2029": 100000000,
+                        "target_2030": 25,
+                        "anggaran_2030": 100000000
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "1.02.03.2.03.0001",
+                    "nama": "Peningkatan kompetensi dan kualifikasi Sumber Daya Manusia Kesehatan",
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Peningkatan kompetensi dan kualifikasi Sumber Daya Manusia Kesehatan",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah SDM Kesehatan yang mendapat peningkatan kompetensi",
+                            "satuan": "orang",
+                            "kondisi_awal": 0,
+                            "target_2026": 0,
+                            "anggaran_2026": null,
+                            "target_2027": 25,
+                            "anggaran_2027": 100000000,
+                            "target_2028": 25,
+                            "anggaran_2028": 100000000,
+                            "target_2029": 25,
+                            "anggaran_2029": 100000000,
+                            "target_2030": 25,
+                            "anggaran_2030": 100000000
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

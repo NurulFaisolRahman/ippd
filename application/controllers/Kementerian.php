@@ -1,4 +1,3 @@
-
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
@@ -109,20 +108,67 @@ class Kementerian extends CI_Controller {
         $Header['Halaman'] = 'Isu';
         $kemenSession = $this->get_kementerian_session();
 
+        $Data = [
+            'UserPeriode'         => null,
+            'UserKementerianName' => null,
+            'UserKementerianId'   => null,
+            'CurrentPeriode'      => null,
+            'Kementerian'         => [],
+            'AllPeriode'          => []
+        ];
+
+        /* ================= SESSION LEVEL 1 ================= */
         if ($kemenSession['isKementerian']) {
-            $Data['Kementerian'] = $this->db->where('Id', $kemenSession['idKementerian'])
+            $kemenRow = $this->db
+                ->select('Id, NamaKementerian, TahunMulai, TahunAkhir')
+                ->where('Id', $kemenSession['idKementerian'])
+                ->where('deleted_at IS NULL', null, false)
+                ->get('kementerian')
+                ->row_array();
+
+            if ($kemenRow) {
+                $Data['UserKementerianName'] = $kemenRow['NamaKementerian'];
+                $Data['UserKementerianId']   = $kemenRow['Id'];
+                $Data['UserPeriode']         = $kemenRow['TahunMulai'] . ' - ' . $kemenRow['TahunAkhir'];
+            }
+
+            $Data['Kementerian'] = $this->db
+                ->where('Id', $kemenSession['idKementerian'])
                 ->where('deleted_at IS NULL')
                 ->get('kementerian')
                 ->result_array();
         } else {
-            $Data['Kementerian'] = $this->db->query("SELECT * FROM `kementerian` WHERE deleted_at IS NULL ORDER BY NamaKementerian ASC")->result_array();
+            /* ================= FILTER PERIODE ================= */
+            $periodeFilter = $this->input->get('periode');
+
+            $this->db->where('deleted_at IS NULL');
+            if (!empty($periodeFilter)) {
+                $parts = explode('|', $periodeFilter);
+                if (count($parts) === 2) {
+                    $this->db->where('TahunMulai', $parts[0]);
+                    $this->db->where('TahunAkhir', $parts[1]);
+                    $Data['CurrentPeriode'] = $periodeFilter;
+                }
+            }
+            $this->db->order_by('NamaKementerian', 'ASC');
+            $Data['Kementerian'] = $this->db->get('kementerian')->result_array();
+
+            $Data['AllPeriode'] = $this->db->query("
+                SELECT DISTINCT TahunMulai, TahunAkhir
+                FROM kementerian
+                WHERE deleted_at IS NULL
+                ORDER BY TahunMulai DESC
+            ")->result_array();
         }
 
-        $Data['userLevel'] = $kemenSession['userLevel'];
+        $Data['userLevel']         = $kemenSession['userLevel'];
         $Data['userIdKementerian'] = $kemenSession['idKementerian'];
+        $Data['isLoggedIn']        = $kemenSession['isLoggedIn'];
+
         $this->load->view('Kementerian/header', $Header);
         $this->load->view('Kementerian/Kementerian', $Data);
     }
+
 
   public function InputKementerian() {
     $TahunMulai = $this->input->post('TahunMulai');
@@ -2045,7 +2091,7 @@ public function IsuKLHS()
 
     /* ================= QUERY DATA ================= */
     $this->db->select('ig.*, k.NamaKementerian');
-    $this->db->from('isu_KLHS ig');
+    $this->db->from('isu_klhs ig');
     $this->db->join('kementerian k', 'ig.IdKementerian = k.Id', 'left');
     $this->db->where('ig.deleted_at IS NULL', null, false);
     $this->db->where('k.deleted_at IS NULL', null, false);
@@ -2111,7 +2157,7 @@ public function InputIsuKLHS()
         return;
     }
 
-    $this->db->insert('isu_KLHS', [
+    $this->db->insert('isu_klhs', [
         'IdKementerian' => $_SESSION['IdKementerian'],
         'NamaIsuKLHS' => $nama,
         'TahunMulai'    => $_SESSION['TahunMulai'],
@@ -2131,7 +2177,7 @@ public function UpdateIsuKLHS()
 {
     $this->db->where('Id',$this->input->post('Id'));
     $this->db->where('IdKementerian',$_SESSION['IdKementerian']);
-    $this->db->update('isu_KLHS',[
+    $this->db->update('isu_klhs',[
         'NamaIsuKLHS'=>$this->input->post('NamaIsuKLHS'),
         'edited_at'=>date('Y-m-d H:i:s')
     ]);
@@ -2143,7 +2189,7 @@ public function DeleteIsuKLHS()
 {
     $this->db->where('Id',$this->input->post('Id'));
     $this->db->where('IdKementerian',$_SESSION['IdKementerian']);
-    $this->db->update('isu_KLHS',[
+    $this->db->update('isu_klhs',[
         'deleted_at'=>date('Y-m-d H:i:s')
     ]);
 
@@ -2172,7 +2218,7 @@ public function getIsuKLHSById()
         ->where('Id', $id)
         ->where('IdKementerian', $_SESSION['IdKementerian'])
         ->where('deleted_at IS NULL', null, false)
-        ->get('isu_KLHS')
+        ->get('isu_klhs')
         ->row_array();
     
     if ($data) {
@@ -2430,7 +2476,7 @@ public function IsuNasional()
 
     /* ================= QUERY DATA ================= */
     $this->db->select('ig.*, k.NamaKementerian');
-    $this->db->from('isu_Nasional ig');
+    $this->db->from('isu_nasional ig');
     $this->db->join('kementerian k', 'ig.IdKementerian = k.Id', 'left');
     $this->db->where('ig.deleted_at IS NULL', null, false);
     $this->db->where('k.deleted_at IS NULL', null, false);
@@ -2496,7 +2542,7 @@ public function InputIsuNasional()
         return;
     }
 
-    $this->db->insert('isu_Nasional', [
+    $this->db->insert('isu_nasional', [
         'IdKementerian' => $_SESSION['IdKementerian'],
         'NamaIsuNasional' => $nama,
         'TahunMulai'    => $_SESSION['TahunMulai'],
@@ -2516,7 +2562,7 @@ public function UpdateIsuNasional()
 {
     $this->db->where('Id',$this->input->post('Id'));
     $this->db->where('IdKementerian',$_SESSION['IdKementerian']);
-    $this->db->update('isu_Nasional',[
+    $this->db->update('isu_nasional',[
         'NamaIsuNasional'=>$this->input->post('NamaIsuNasional'),
         'edited_at'=>date('Y-m-d H:i:s')
     ]);
@@ -2528,7 +2574,7 @@ public function DeleteIsuNasional()
 {
     $this->db->where('Id',$this->input->post('Id'));
     $this->db->where('IdKementerian',$_SESSION['IdKementerian']);
-    $this->db->update('isu_Nasional',[
+    $this->db->update('isu_nasional',[
         'deleted_at'=>date('Y-m-d H:i:s')
     ]);
 
@@ -2559,7 +2605,7 @@ public function getIsuNasionalById()
         ->where('Id', $id)
         ->where('IdKementerian', $_SESSION['IdKementerian'])
         ->where('deleted_at IS NULL', null, false)
-        ->get('isu_Nasional')
+        ->get('isu_nasional')
         ->row_array();
     
     if ($data) {
@@ -2963,7 +3009,9 @@ public function NSPK() {
     $Header['Halaman'] = 'NSPK';
 
     $kemenSession = $this->get_kementerian_session();
-    if ($kemenSession['isKementerian']) {
+
+    // Jika level 1 (Kementerian), hanya tampilkan data NSPK miliknya
+    if ($kemenSession['isLoggedIn'] && $kemenSession['userLevel'] === 1 && !empty($kemenSession['idKementerian'])) {
         $this->db->where('IdKementerian', $kemenSession['idKementerian']);
     }
     $this->db->where('deleted_at IS NULL');
@@ -2971,21 +3019,45 @@ public function NSPK() {
     $this->db->order_by('id', 'ASC');
     $Data['NSPK'] = $this->db->get('nspk')->result_array();
 
-    // Info Kementerian
-    $Data['UserKementerianName'] = '-';
-    $Data['UserPeriode'] = '-';
-    if ($kemenSession['isKementerian']) {
-        $this->db->where('Id', $kemenSession['idKementerian']);
-        $this->db->where('deleted_at IS NULL');
-        $kementerian = $this->db->get('kementerian')->row_array();
-        if ($kementerian) {
-            $Data['UserKementerianName'] = $kementerian['NamaKementerian'] ?? '-';
-            $Data['UserPeriode'] = ($kementerian['TahunMulai'] ?? '-') . ' - ' . ($kementerian['TahunAkhir'] ?? '-');
+    // Info Kementerian & Periode (Sama seperti menu Kementerian lainnya)
+    $Data['UserKementerianName'] = null;
+    $Data['UserPeriode']         = null;
+    $Data['UserTahunMulai']      = null;
+    $Data['UserTahunAkhir']      = null;
+
+    $idKemen = $kemenSession['idKementerian'] 
+        ?? ($this->session->userdata('IdKementerian') 
+        ?? ($_SESSION['IdKementerian'] ?? null));
+
+    if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1 && !empty($idKemen)) {
+        $k = $this->db->get_where('kementerian', [
+            'Id' => $idKemen,
+            'deleted_at' => NULL
+        ])->row_array();
+
+        if ($k) {
+            $Data['UserKementerianName'] = $k['NamaKementerian'];
+            $Data['UserTahunMulai']      = $k['TahunMulai'];
+            $Data['UserTahunAkhir']      = $k['TahunAkhir'];
+            $Data['UserPeriode']         = $k['TahunMulai'] . ' - ' . $k['TahunAkhir'];
         }
     }
 
+    // Hak Akses CRUD: HANYA untuk Super Admin (0) atau Kementerian (1 dengan IdKementerian)
+    $isSuperAdmin = ($kemenSession['isLoggedIn'] && $kemenSession['userLevel'] === 0);
+    $isKemen      = ($kemenSession['isLoggedIn'] && $kemenSession['userLevel'] === 1 && !empty($idKemen));
+    $canCrud      = ($isSuperAdmin || $isKemen);
+
+    // Kirim data autentikasi resmi ke view
+    $Data['isLoggedIn']    = $kemenSession['isLoggedIn'];
+    $Data['userLevel']     = $kemenSession['userLevel'];
+    $Data['idKementerian'] = $kemenSession['idKementerian'];
+    $Data['isSuperAdmin']  = $isSuperAdmin;
+    $Data['isKemen']       = $isKemen;
+    $Data['canCrud']       = $canCrud;
+
     $this->load->view('Kementerian/header', $Header);
-    $this->load->view('Kementerian/NSPK', $Data);
+    $this->load->view('Kementerian/Nspk', $Data);
 }
 
 public function GetNSPKDetails() {
@@ -3836,13 +3908,19 @@ public function DeleteProP() {
 public function pendanaan() {
         $Header['Halaman'] = 'Matriks Pendanaan Renstra';
 
+        $kemenSession = $this->get_kementerian_session();
+        $idKemen = $kemenSession['idKementerian'] 
+            ?? ($this->session->userdata('IdKementerian') 
+            ?? ($_SESSION['IdKementerian'] 
+            ?? ($this->input->get('id_kementerian') ? (int)$this->input->get('id_kementerian') : null)));
+
         // Default info kementerian & periode
         $Data['UserKementerianName'] = '-';
         $Data['UserPeriode']         = '-';
 
-        // Ambil data kementerian dari session
-        if (isset($_SESSION['IdKementerian']) && is_numeric($_SESSION['IdKementerian'])) {
-            $this->db->where('Id', $_SESSION['IdKementerian']);
+        // Ambil data kementerian dari session jika ada
+        if ($idKemen && is_numeric($idKemen)) {
+            $this->db->where('Id', $idKemen);
             $this->db->where('deleted_at IS NULL');
             $kementerian = $this->db->get('kementerian')->row_array();
 
@@ -3852,6 +3930,8 @@ public function pendanaan() {
             } else {
                 $Data['UserKementerianName'] = 'Data kementerian tidak ditemukan';
             }
+        } else {
+            $Data['UserKementerianName'] = 'Login sebagai user kementerian (level 1) untuk melihat info';
         }
 
         // Kegiatan Prioritas (KP)
@@ -3865,7 +3945,9 @@ public function pendanaan() {
         $this->db->join('renstra_pp pp', 'kp.id_pp = pp.id', 'inner');
         $this->db->join('renstra_pn pn', 'pp.id_pn = pn.id', 'inner');
         $this->db->join('renstra_pendanaan pend', 'pend.id_kp = kp.id AND pend.jenis = "KP" AND pend.deleted_at IS NULL', 'left');
-        $this->db->where('pn.id_kementerian', $_SESSION['IdKementerian']);
+        if (!empty($idKemen)) {
+            $this->db->where('pn.id_kementerian', $idKemen);
+        }
         $this->db->where('kp.deleted_at IS NULL');
         $this->db->order_by('kp.kode_kp', 'ASC');
         $Data['Kegiatan'] = $this->db->get()->result_array();
@@ -3882,7 +3964,9 @@ public function pendanaan() {
         $this->db->join('renstra_pp pp', 'kp.id_pp = pp.id', 'inner');
         $this->db->join('renstra_pn pn', 'pp.id_pn = pn.id', 'inner');
         $this->db->join('renstra_pendanaan pend', 'pend.id_prop = prop.id AND pend.jenis = "ProP" AND pend.deleted_at IS NULL', 'left');
-        $this->db->where('pn.id_kementerian', $_SESSION['IdKementerian']);
+        if (!empty($idKemen)) {
+            $this->db->where('pn.id_kementerian', $idKemen);
+        }
         $this->db->where('prop.deleted_at IS NULL');
         $this->db->order_by('prop.kode_prop', 'ASC');
         $Data['Proyek'] = $this->db->get()->result_array();

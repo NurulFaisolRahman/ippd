@@ -1,4 +1,5 @@
     <?php $this->load->view('Kementerian/Sidebar'); ?>
+    <div class="main-content">
     <div class="breadcomb-area">
         <div class="container">
             <div class="row">
@@ -385,7 +386,7 @@
                                     </div>
                                     <div class="col-lg-9">
                                         <div class="nk-int-st">
-                                            <?php if($_SESSION['Level']==0): ?>
+                                            <?php if (!isset($_SESSION['Level']) || $_SESSION['Level'] == 0): ?>
                                                 <select class="form-control" id="Periode" name="Periode" required>
                                                     <option value="">-- Pilih Periode --</option>
                                                     <?php foreach ($Periode as $periode): ?>
@@ -415,12 +416,12 @@
                                     </div>
                                     <div class="col-lg-9">
                                         <div class="nk-int-st">
-                                            <?php if($_SESSION['Level']==0): ?>
+                                            <?php if (!isset($_SESSION['Level']) || $_SESSION['Level'] == 0): ?>
                                                 <select class="form-control" id="IdKementerian" name="IdKementerian" required>
                                                     <option value="">-- Pilih Kementerian --</option>
                                                 </select>
                                             <?php else: ?>
-                                                <input type="hidden" name="IdKementerian" id="IdKementerian" value="<?= $_SESSION['IdKementerian'] ?>">
+                                                <input type="hidden" name="IdKementerian" id="IdKementerian" value="<?= $_SESSION['IdKementerian'] ?? '' ?>">
                                                 <input type="text" class="form-control" value="<?= $UserKementerianName ?>" readonly>
                                             <?php endif; ?>
                                         </div>
@@ -631,7 +632,7 @@
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <?php if($_SESSION['Level']==0): ?>
+                                                <?php if (!isset($_SESSION['Level']) || $_SESSION['Level'] == 0): ?>
 
                                                     <select class="form-control" id="EditPeriode" name="Periode" required>
                                                         <option value="">-- Pilih Periode --</option>
@@ -666,7 +667,7 @@
                                         </div>
                                         <div class="col-lg-9">
                                             <div class="nk-int-st">
-                                                <?php if($_SESSION['Level']==0): ?>
+                                                <?php if (!isset($_SESSION['Level']) || $_SESSION['Level'] == 0): ?>
 
                                                     <select class="form-control" id="EditIdKementerian" name="IdKementerian" required>
                                                         <option value="">-- Pilih Kementerian --</option>
@@ -674,7 +675,7 @@
 
                                                     <?php else: ?>
 
-                                                    <input type="hidden" name="IdKementerian" id="EditIdKementerian" value="<?= $_SESSION['IdKementerian'] ?>">
+                                                    <input type="hidden" name="IdKementerian" id="EditIdKementerian" value="<?= $_SESSION['IdKementerian'] ?? '' ?>">
                                                     <input type="text" class="form-control" value="<?= $UserKementerianName ?>" readonly>
 
                                                     <?php endif; ?>
@@ -2685,3 +2686,4 @@ $(document).on('click', '.DetailRegional', function() {
     });
 });
 </script>
+</div>

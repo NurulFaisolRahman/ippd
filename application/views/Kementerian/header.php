@@ -444,21 +444,47 @@
 <div class="page-top-space"></div>
 
 <script>
-  function logout(){ window.location.href = '/ippd'; }
-  function Login(){ window.location.href = '/ippd/Home'; }
+  function logout(){ window.location.href = '<?= base_url('Beranda'); ?>'; }
+  function Login(){ window.location.href = '<?= base_url('Home'); ?>'; }
 
-  document.addEventListener('DOMContentLoaded', function () {
-    const btn = document.getElementById('sidebarToggle');
-    if (!btn) return;
+  function toggleSidebar(e) {
+    if (e && e.preventDefault) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    document.body.classList.toggle('sidebar-mini');
+    var isMini = document.body.classList.contains('sidebar-mini');
+    try {
+      localStorage.setItem('sidebarMini', isMini ? 'true' : 'false');
+    } catch(err) {}
 
+    if (typeof triggerDynamicTableResize === 'function') {
+      triggerDynamicTableResize();
+    } else if (typeof adjustKementerianDataTables === 'function') {
+      adjustKementerianDataTables();
+    } else {
+      window.dispatchEvent(new Event('resize'));
+    }
+  }
+
+  // Restore sidebar state immediately
+  try {
     if (localStorage.getItem('sidebarMini') === 'true') {
       document.body.classList.add('sidebar-mini');
     }
+  } catch(err) {}
 
-    btn.dataset.hasToggleEvent = "true";
-    btn.addEventListener('click', function () {
-      document.body.classList.toggle('sidebar-mini');
-      localStorage.setItem('sidebarMini', document.body.classList.contains('sidebar-mini'));
-    });
+  document.addEventListener('DOMContentLoaded', function () {
+    const btn = document.getElementById('sidebarToggle');
+    if (btn && !btn.dataset.hasToggleEvent) {
+      btn.dataset.hasToggleEvent = "true";
+      btn.addEventListener('click', toggleSidebar);
+    }
+  });
+
+  window.addEventListener('load', function() {
+    if (typeof adjustKementerianDataTables === 'function') {
+      setTimeout(adjustKementerianDataTables, 300);
+    }
   });
 </script>

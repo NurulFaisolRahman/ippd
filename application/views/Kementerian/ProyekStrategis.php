@@ -1,4 +1,5 @@
 <?php $this->load->view('Kementerian/Sidebar'); ?>
+<div class="main-content">
 <!-- Breadcrumb -->
 <div class="breadcomb-area">
     <div class="container">
@@ -1329,3 +1330,4 @@ $(document).ready(function() {
     });
 });
 </script>
+</div>

@@ -1,4 +1,5 @@
 <?php $this->load->view('Kementerian/Sidebar'); ?>
+<div class="main-content">
 <?php
 $userLevel = isset($_SESSION['Level']) ? (int)$_SESSION['Level'] : (isset($_SESSION['userLevel']) ? (int)$_SESSION['userLevel'] : null);
 $isSuperAdmin = ($userLevel === 0);
@@ -1616,3 +1617,4 @@ $(document).ready(function() {
     }
 });
 </script>
+</div>

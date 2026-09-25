@@ -1,5 +1,6 @@
 <?php $this->load->view('Kementerian/Sidebar'); ?>
 
+<div class="main-content">
 <div class="breadcomb-area">
     <div class="container">
         <div class="row">
@@ -1916,3 +1917,4 @@ $(document).ready(function() {
 
 });
 </script>
+</div>
