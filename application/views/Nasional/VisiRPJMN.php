@@ -93,12 +93,14 @@
                     <!-- Header Kontainer Tabel -->
                     <div class="basic-tb-hd" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
                         <h3 style="margin: 0; color: #333; font-weight: 600; line-height: 1.5;">Visi & Misi Presiden</h3>
+                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                         <div class="button-icon-btn sm-res-mg-t-30">
                             <!-- Tombol Input Visi tetap di atas sebagai level tertinggi -->
                             <button type="button" class="btn btn-success notika-btn-success btn-action" data-toggle="modal" data-target="#ModalInputVisi" style="padding: 8px 15px;">
                                 <i class="fa fa-plus-circle" style="margin-right: 5px;"></i> <b>Input Visi Presiden</b>
                             </button>
                         </div>
+                        <?php } ?>
                     </div>
                     
                     <div class="table-responsive">
@@ -173,7 +175,7 @@
                                     } // End Visi
                                 } else { ?>
                                     <tr>
-                                        <td colspan="4" class="text-center" style="padding: 30px; color: #999;">Belum ada data Visi & Misi Presiden.</td>
+                                        <td colspan="<?= (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) ? '4' : '3' ?>" class="text-center" style="padding: 30px; color: #999;">Belum ada data Visi & Misi Presiden.</td>
                                     </tr>
                                 <?php } ?>
                             </tbody>

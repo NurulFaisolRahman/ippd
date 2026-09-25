@@ -83,11 +83,13 @@
                     <!-- Penyesuaian Header Kontainer Tabel -->
                     <div class="basic-tb-hd" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
                         <h3 style="margin: 0; color: #333; font-weight: 600; line-height: 1.5;">Proyek Strategis Nasional (RPJMN)</h3>
+                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                         <div class="button-icon-btn sm-res-mg-t-30">
                             <button type="button" class="btn btn-success notika-btn-success btn-action" data-toggle="modal" data-target="#ModalInputProyek" style="padding: 8px 15px;">
                                 <i class="fa fa-plus-circle" style="margin-right: 5px;"></i> <b>Input Proyek Strategis</b>
                             </button>
                         </div>
+                        <?php } ?>
                     </div>
 
                     <div class="table-responsive">
@@ -98,7 +100,9 @@
                                     <th style="width: 40%;">Proyek</th>
                                     <th style="width: 25%;">Lokasi</th>
                                     <th style="width: 20%;">Pelaksana</th>
+                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                     <th style="width: 10%;" class="text-center">Aksi</th>
+                                    <?php } ?>
                                 </tr>
                             </thead>
                             <tbody>
@@ -126,6 +130,7 @@
                                                 <span style="color: #aaa; font-style: italic;">-</span>
                                             <?php endif; ?>
                                         </td>
+                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                         <td class="text-center" style="white-space: nowrap;">
                                             <button type="button" class="btn btn-sm btn-info EditProyek btn-action" 
                                                     data-id="<?= $row['Id'] ?>" 
@@ -141,6 +146,7 @@
                                                 <i class="fa fa-trash"></i> Hapus
                                             </button>
                                         </td>
+                                        <?php } ?>
                                     </tr>
                                 <?php 
                                     }
@@ -165,46 +171,22 @@
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <h2>Tambah Proyek Strategis Nasional</h2>
             </div>
-            <div class="modal-body" style="padding-top: 20px;">
-                <div class="row">
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div class="form-group ic-cmp-int float-lb floating-lb">
-                            <div class="form-ic-cmp">
-                                <i class="notika-icon notika-edit"></i>
-                            </div>
-                            <div class="nk-int-st">
-                                <textarea class="form-control" id="Proyek" rows="3" style="resize: vertical;" placeholder="Uraian / Nama Proyek Strategis"></textarea>
-                            </div>
-                        </div>
-                    </div>
+            <div class="modal-body" style="padding-top: 15px;">
+                <div class="form-group">
+                    <label style="font-weight: 600; color: #444; font-size: 13px; margin-bottom: 5px;">Uraian / Nama Proyek</label>
+                    <textarea class="form-control" id="Proyek" rows="3" style="resize: vertical;" placeholder="Masukkan nama atau uraian proyek strategis nasional..."></textarea>
                 </div>
-                <div class="row" style="margin-top: 15px;">
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div class="form-group ic-cmp-int float-lb floating-lb">
-                            <div class="form-ic-cmp">
-                                <i class="fa fa-map-marker"></i>
-                            </div>
-                            <div class="nk-int-st">
-                                <textarea class="form-control" id="Lokasi" rows="2" style="resize: vertical;" placeholder="Lokasi Proyek"></textarea>
-                            </div>
-                        </div>
-                    </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label style="font-weight: 600; color: #444; font-size: 13px; margin-bottom: 5px;">Lokasi</label>
+                    <textarea class="form-control" id="Lokasi" rows="2" style="resize: vertical;" placeholder="Masukkan lokasi proyek..."></textarea>
                 </div>
-                <div class="row" style="margin-top: 15px;">
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div class="form-group ic-cmp-int float-lb floating-lb">
-                            <div class="form-ic-cmp">
-                                <i class="fa fa-building"></i>
-                            </div>
-                            <div class="nk-int-st">
-                                <input type="text" class="form-control" id="Pelaksana" placeholder="Pelaksana / Pengampu Proyek">
-                            </div>
-                        </div>
-                    </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label style="font-weight: 600; color: #444; font-size: 13px; margin-bottom: 5px;">Pelaksana</label>
+                    <input type="text" class="form-control" id="Pelaksana" placeholder="Masukkan instansi / kementerian / badan pelaksana...">
                 </div>
             </div>
             <div class="modal-footer" style="padding-top: 15px;">
-                <button type="button" class="btn btn-success btn-action" id="SimpanProyek"><i class="fa fa-save"></i> Simpan</button>
+                <button type="button" class="btn btn-success btn-action" id="SimpanProyek">Simpan</button>
                 <button type="button" class="btn btn-default btn-action" data-dismiss="modal">Tutup</button>
             </div>
         </div>
@@ -221,47 +203,23 @@
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <h2>Edit Proyek Strategis Nasional</h2>
             </div>
-            <div class="modal-body" style="padding-top: 20px;">
+            <div class="modal-body" style="padding-top: 15px;">
                 <input type="hidden" id="_Id">
-                <div class="row">
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div class="form-group ic-cmp-int float-lb floating-lb">
-                            <div class="form-ic-cmp">
-                                <i class="notika-icon notika-edit"></i>
-                            </div>
-                            <div class="nk-int-st">
-                                <textarea class="form-control" id="_Proyek" rows="3" style="resize: vertical;" placeholder="Uraian / Nama Proyek Strategis"></textarea>
-                            </div>
-                        </div>
-                    </div>
+                <div class="form-group">
+                    <label style="font-weight: 600; color: #444; font-size: 13px; margin-bottom: 5px;">Uraian / Nama Proyek</label>
+                    <textarea class="form-control" id="_Proyek" rows="3" style="resize: vertical;" placeholder="Masukkan nama atau uraian proyek strategis nasional..."></textarea>
                 </div>
-                <div class="row" style="margin-top: 15px;">
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div class="form-group ic-cmp-int float-lb floating-lb">
-                            <div class="form-ic-cmp">
-                                <i class="fa fa-map-marker"></i>
-                            </div>
-                            <div class="nk-int-st">
-                                <textarea class="form-control" id="_Lokasi" rows="2" style="resize: vertical;" placeholder="Lokasi Proyek"></textarea>
-                            </div>
-                        </div>
-                    </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label style="font-weight: 600; color: #444; font-size: 13px; margin-bottom: 5px;">Lokasi</label>
+                    <textarea class="form-control" id="_Lokasi" rows="2" style="resize: vertical;" placeholder="Masukkan lokasi proyek..."></textarea>
                 </div>
-                <div class="row" style="margin-top: 15px;">
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div class="form-group ic-cmp-int float-lb floating-lb">
-                            <div class="form-ic-cmp">
-                                <i class="fa fa-building"></i>
-                            </div>
-                            <div class="nk-int-st">
-                                <input type="text" class="form-control" id="_Pelaksana" placeholder="Pelaksana / Pengampu Proyek">
-                            </div>
-                        </div>
-                    </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label style="font-weight: 600; color: #444; font-size: 13px; margin-bottom: 5px;">Pelaksana</label>
+                    <input type="text" class="form-control" id="_Pelaksana" placeholder="Masukkan instansi / kementerian / badan pelaksana...">
                 </div>
             </div>
             <div class="modal-footer" style="padding-top: 15px;">
-                <button type="button" class="btn btn-info btn-action" id="UpdateProyek"><i class="fa fa-save"></i> Update</button>
+                <button type="button" class="btn btn-info btn-action" id="UpdateProyek">Update</button>
                 <button type="button" class="btn btn-default btn-action" data-dismiss="modal">Tutup</button>
             </div>
         </div>

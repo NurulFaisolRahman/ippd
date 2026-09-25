@@ -931,7 +931,20 @@ class Nasional extends CI_Controller {
     $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjmn")->result_array();
     $Data['Kementerian'] = $this->db->where("deleted_at IS NULL")->get("kementerian")->result_array();
 		$Data['SasaranPembangunan'] = $this->db->query("SELECT p.*, COALESCE(p.Periode, CONCAT(v.TahunMulai, '-', v.TahunAkhir)) as PeriodeTampil, v.TahunMulai, v.TahunAkhir FROM sasaran_pembangunan_rpjmn as p LEFT JOIN visirpjmn as v ON p._Id = v.Id WHERE p.deleted_at IS NULL ORDER BY p.Id DESC")->result_array();
-    $Data['IndikatorPembangunan'] = $this->db->query("SELECT t.*,s.*,k.NamaKementerian FROM sasaran_pembangunan_rpjmn as t, indikator_pembangunan_rpjmn as s, kementerian as k WHERE s._Id = t.Id AND s.Id_ = k.Id AND s.deleted_at IS NULL ORDER BY s.Id ASC")->result_array();
+
+    // Pastikan kolom relasi kementerian diperiksa agar tidak terjadi Unknown column 's.Id_'
+    $hasId_ = $this->db->field_exists('Id_', 'indikator_pembangunan_rpjmn');
+    $hasIdKem = $this->db->field_exists('IdKementerian', 'indikator_pembangunan_rpjmn');
+    $kemJoin = "";
+    if ($hasId_) {
+      $kemJoin = "LEFT JOIN kementerian as k ON s.Id_ = k.Id";
+    } elseif ($hasIdKem) {
+      $kemJoin = "LEFT JOIN kementerian as k ON s.IdKementerian = k.Id";
+    } else {
+      $kemJoin = "LEFT JOIN kementerian as k ON 1=0";
+    }
+
+    $Data['IndikatorPembangunan'] = $this->db->query("SELECT s.*, k.NamaKementerian FROM indikator_pembangunan_rpjmn as s {$kemJoin} WHERE s.deleted_at IS NULL ORDER BY s.Id ASC")->result_array();
 		$this->load->view('Nasional/header',$Header);
 		$this->load->view('Nasional/SasaranPembangunanRPJMN',$Data);
 	}

@@ -236,11 +236,13 @@
                             <h3 style="margin: 0; color: #333; font-weight: 600; line-height: 1.5;">Agenda Pembangunan (PN / PP / KP)</h3>
                             <small style="color: #888;">Hierarki Terstruktur: Prioritas Nasional → Program Prioritas → Kegiatan Prioritas</small>
                         </div>
+                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                         <div class="button-icon-btn sm-res-mg-t-30">
                             <button type="button" class="btn btn-success notika-btn-success btn-action" data-toggle="modal" data-target="#ModalInputPN" style="padding: 8px 15px;">
                                 <i class="fa fa-plus-circle" style="margin-right: 5px;"></i> <b>Input Prioritas Nasional</b>
                             </button>
                         </div>
+                        <?php } ?>
                     </div>
 
                     <div class="table-responsive">
@@ -256,18 +258,24 @@
                                     <th style="width: 6%;">Target 2029</th>
                                     <th style="width: 9%;">Agenda Transformasi</th>
                                     <th style="width: 9%;">Koordinator</th>
+                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                     <th colspan="3" style="width: 10%;">Aksi</th>
+                                    <?php } ?>
                                 </tr>
                                 <tr class="th-sub">
                                     <th colspan="9" style="letter-spacing: 0.5px;">— Data Agenda Pembangunan & Target RPJMN —</th>
+                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                     <th style="width: 3.5%; color: #00c292;">PN/PP/KP</th>
                                     <th style="width: 3.5%; color: #7b1fa2;">Sasaran</th>
                                     <th style="width: 3%; color: #455a64;">Indikator</th>
+                                    <?php } ?>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php
                                 if (isset($DataAgenda) && count($DataAgenda) > 0):
+
+                                    $canAksi = (isset($_SESSION['Level']) && $_SESSION['Level'] == 0);
 
                                     function agendaRowspan($sasaranList) {
                                         if (empty($sasaranList)) return 1;
@@ -315,26 +323,29 @@
                                             . '<i class="fa fa-trash"></i></button>';
                                     }
 
-                                    function renderSection($nomor, $tipe, $uraian, $id, $sasaranList, $periode = '') {
+                                    function renderSection($nomor, $tipe, $uraian, $id, $sasaranList, $periode = '', $canAksi = true) {
                                         $agRS   = agendaRowspan($sasaranList);
                                         $css    = 'cell-' . strtolower($tipe);
                                         $agCell = '<span class="tipe-badge tipe-' . $tipe . '">' . $tipe . '</span><b>' . $nomor . '</b> ' . htmlspecialchars($uraian)
                                             . ($periode ? ' <span class="badge-periode">' . htmlspecialchars($periode) . '</span>' : '');
-                                        $agAksi = agendaActBtns($id, $tipe, $uraian, $periode);
+                                        $agAksi = $canAksi ? agendaActBtns($id, $tipe, $uraian, $periode) : '';
 
                                         $html = '';
                                         $agFirst = true;
                                         $agAksiFirst = true;
 
                                         if (empty($sasaranList)) {
-                                            return '<tr>'
+                                            $html .= '<tr>'
                                                 . '<td rowspan="1" class="' . $css . '">' . $agCell . '</td>'
                                                 . '<td class="empty-cell">Belum ada sasaran</td>'
-                                                . '<td colspan="7" class="empty-cell">-</td>'
-                                                . '<td class="cell-aksi">' . $agAksi . '</td>'
-                                                . '<td class="empty-cell">-</td>'
-                                                . '<td class="empty-cell">-</td>'
-                                                . '</tr>';
+                                                . '<td colspan="7" class="empty-cell">-</td>';
+                                            if ($canAksi) {
+                                                $html .= '<td class="cell-aksi">' . $agAksi . '</td>'
+                                                    . '<td class="empty-cell">-</td>'
+                                                    . '<td class="empty-cell">-</td>';
+                                            }
+                                            $html .= '</tr>';
+                                            return $html;
                                         }
 
                                         $nSas = 0;
@@ -342,8 +353,9 @@
                                             $nSas++;
                                             $sasRS   = max(1, count($s['Indikator']));
                                             $sasCont = '<span class="nomor-cell">' . $nSas . '</span> ' . htmlspecialchars($s['Sasaran']);
-                                            $sasAksi = sasaranActBtns($s['Id'], $s['Sasaran']);
+                                            $sasAksi = $canAksi ? sasaranActBtns($s['Id'], $s['Sasaran']) : '';
                                             $sasFirst = true;
+                                            $sasAksiFirst = true;
 
                                             if (empty($s['Indikator'])) {
                                                 $html .= '<tr>';
@@ -353,12 +365,14 @@
                                                 }
                                                 $html .= '<td rowspan="1" class="cell-sasaran">' . $sasCont . '</td>';
                                                 $html .= '<td colspan="7" class="empty-cell">Belum ada indikator</td>';
-                                                if ($agAksiFirst) {
-                                                    $html .= '<td rowspan="' . $agRS . '" class="cell-aksi">' . $agAksi . '</td>';
-                                                    $agAksiFirst = false;
+                                                if ($canAksi) {
+                                                    if ($agAksiFirst) {
+                                                        $html .= '<td rowspan="' . $agRS . '" class="cell-aksi">' . $agAksi . '</td>';
+                                                        $agAksiFirst = false;
+                                                    }
+                                                    $html .= '<td rowspan="1" class="cell-aksi">' . $sasAksi . '</td>';
+                                                    $html .= '<td class="empty-cell">-</td>';
                                                 }
-                                                $html .= '<td rowspan="1" class="cell-aksi">' . $sasAksi . '</td>';
-                                                $html .= '<td class="empty-cell">-</td>';
                                                 $html .= '</tr>';
                                             } else {
                                                 $nInd = 0;
@@ -386,15 +400,17 @@
                                                     $html .= '<td class="cell-data">' . $t2029Badge . '</td>';
                                                     $html .= '<td class="cell-data">' . $agendaBadge . '</td>';
                                                     $html .= '<td class="cell-data" style="font-size:11px; color:#455a64;">' . htmlspecialchars($ind['Koordinator'] ?: '-') . '</td>';
-                                                    if ($agAksiFirst) {
-                                                        $html .= '<td rowspan="' . $agRS . '" class="cell-aksi">' . $agAksi . '</td>';
-                                                        $agAksiFirst = false;
+                                                    if ($canAksi) {
+                                                        if ($agAksiFirst) {
+                                                            $html .= '<td rowspan="' . $agRS . '" class="cell-aksi">' . $agAksi . '</td>';
+                                                            $agAksiFirst = false;
+                                                        }
+                                                        if ($sasAksiFirst) {
+                                                            $html .= '<td rowspan="' . $sasRS . '" class="cell-aksi">' . $sasAksi . '</td>';
+                                                            $sasAksiFirst = false;
+                                                        }
+                                                        $html .= '<td class="cell-aksi">' . indikatorActBtns($ind) . '</td>';
                                                     }
-                                                    if ($sasFirst) {
-                                                        $html .= '<td rowspan="' . $sasRS . '" class="cell-aksi">' . $sasAksi . '</td>';
-                                                        $sasFirst = false;
-                                                    }
-                                                    $html .= '<td class="cell-aksi">' . indikatorActBtns($ind) . '</td>';
                                                     $html .= '</tr>';
                                                 }
                                             }
@@ -405,24 +421,24 @@
                                     $nPN = 0;
                                     foreach ($DataAgenda as $pn):
                                         $nPN++;
-                                        echo renderSection($nPN, 'PN', $pn['Uraian'], $pn['Id'], $pn['Sasaran'], $pn['Periode']);
+                                        echo renderSection($nPN, 'PN', $pn['Uraian'], $pn['Id'], $pn['Sasaran'], $pn['Periode'], $canAksi);
                                         $nPP = 0;
                                         foreach ($pn['PP'] as $pp):
                                             $nPP++;
                                             $ppNo = $nPN . '.' . $nPP;
-                                            echo renderSection($ppNo, 'PP', $pp['Uraian'], $pp['Id'], $pp['Sasaran']);
+                                            echo renderSection($ppNo, 'PP', $pp['Uraian'], $pp['Id'], $pp['Sasaran'], '', $canAksi);
                                             $nKP = 0;
                                             foreach ($pp['KP'] as $kp):
                                                 $nKP++;
-                                                echo renderSection($ppNo . '.' . $nKP, 'KP', $kp['Uraian'], $kp['Id'], $kp['Sasaran']);
+                                                echo renderSection($ppNo . '.' . $nKP, 'KP', $kp['Uraian'], $kp['Id'], $kp['Sasaran'], '', $canAksi);
                                             endforeach;
                                         endforeach;
                                     endforeach;
 
                                 else: ?>
                                     <tr>
-                                        <td colspan="12" class="empty-cell" style="padding: 40px;">
-                                            Belum ada data agenda pembangunan. Klik <b>Input Prioritas Nasional</b> untuk memulai.
+                                        <td colspan="<?= (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) ? '12' : '9' ?>" class="empty-cell" style="padding: 40px;">
+                                            Belum ada data agenda pembangunan.
                                         </td>
                                     </tr>
                                 <?php endif; ?>

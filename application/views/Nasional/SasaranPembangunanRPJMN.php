@@ -119,12 +119,14 @@
                     <!-- Penyesuaian Header Kontainer Tabel -->
                     <div class="basic-tb-hd" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
                         <h3 style="margin: 0; color: #333; font-weight: 600; line-height: 1.5;">Hierarki Sasaran & Indikator Pembangunan RPJMN</h3>
+                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                         <div class="button-icon-btn sm-res-mg-t-30">
                             <!-- Tombol Input Induk Level 1 -->
                             <button type="button" class="btn btn-success notika-btn-success btn-action" data-toggle="modal" data-target="#ModalInputSasaranPembangunan" style="padding: 8px 15px;">
                                 <i class="fa fa-plus-circle" style="margin-right: 5px;"></i> <b>Input Sasaran Pembangunan</b>
                             </button>
                         </div>
+                        <?php } ?>
                     </div>
                     
                     <div class="table-responsive">
@@ -139,7 +141,9 @@
                                     <th style="width: 7%;" class="text-center">Target 2025</th>
                                     <th style="width: 7%;" class="text-center">Target 2045</th>
                                     <th style="width: 10%;" class="text-center">Periode</th>
+                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                     <th style="width: 16%;" class="text-center">Aksi</th>
+                                    <?php } ?>
                                 </tr>
                             </thead>
                             <tbody>
@@ -162,11 +166,13 @@
                                         <td class="text-center">
                                             <span class="badge-periode"><?= !empty($data['Periode']) ? $data['Periode'] : (!empty($data['PeriodeTampil']) ? $data['PeriodeTampil'] : ($data['TahunMulai'].'-'.$data['TahunAkhir'])) ?></span>
                                         </td>
+                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                         <td class="text-center" style="white-space: nowrap;">
                                             <button class="btn btn-sm btn-success Tambah btn-action" Id="<?= $data['Id'] ?>" title="Tambah Indikator"><i class="fa fa-plus"></i> Indikator</button>
                                             <button class="btn btn-sm btn-info Edit btn-action" Id="<?= $data['Id'] ?>" SasaranPembangunan="<?= htmlspecialchars($data['SasaranPembangunan'], ENT_QUOTES) ?>" Periode="<?= htmlspecialchars(!empty($data['Periode']) ? $data['Periode'] : (!empty($data['PeriodeTampil']) ? $data['PeriodeTampil'] : ($data['TahunMulai'].'-'.$data['TahunAkhir'])), ENT_QUOTES) ?>" title="Edit Sasaran"><i class="fa fa-edit"></i></button>
                                             <button class="btn btn-sm btn-danger Hapus btn-action" Hapus="<?= $data['Id'] ?>" title="Hapus Sasaran"><i class="fa fa-trash"></i></button>
                                         </td>
+                                        <?php } ?>
                                     </tr>
 
                                     <?php 
@@ -189,10 +195,12 @@
                                             <td class="text-center">
                                                 <span class="badge-periode" style="background-color: #00bcd4; box-shadow: 0 2px 5px rgba(0, 188, 212, 0.3);"><?= !empty($data['Periode']) ? $data['Periode'] : (!empty($data['PeriodeTampil']) ? $data['PeriodeTampil'] : ($data['TahunMulai'].'-'.$data['TahunAkhir'])) ?></span>
                                             </td>
+                                            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
                                             <td class="text-center" style="white-space: nowrap;">
                                                 <button class="btn btn-sm btn-info _Edit btn-action" Id="<?= $indikator['Id'] ?>" _Id="<?= $data['Id'] ?>" IndikatorPembangunan="<?= $indikator['IndikatorPembangunan'] ?>" Satuan="<?= $indikator['Satuan'] ?>" Baseline="<?= $indikator['Baseline'] ?>" TargetAwal="<?= $indikator['TargetAwal'] ?>" TargetAkhir="<?= $indikator['TargetAkhir'] ?>" IdKementerian="<?= isset($indikator['Id_']) ? $indikator['Id_'] : '' ?>" title="Edit Indikator"><i class="fa fa-edit"></i></button>
                                                 <button class="btn btn-sm btn-danger _Hapus btn-action" _Hapus="<?= $indikator['Id'] ?>" title="Hapus Indikator"><i class="fa fa-trash"></i></button>
                                             </td>
+                                            <?php } ?>
                                         </tr>
                                     <?php 
                                                 $noInd++;
@@ -205,7 +213,7 @@
                                     } 
                                 } else { ?>
                                     <tr>
-                                        <td colspan="9" class="text-center" style="padding: 30px; color: #999;">Belum ada data Sasaran Pembangunan RPJMN.</td>
+                                        <td colspan="<?= (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) ? '9' : '8' ?>" class="text-center" style="padding: 30px; color: #999;">Belum ada data Sasaran Pembangunan RPJMN.</td>
                                     </tr>
                                 <?php } ?>
                             </tbody>
