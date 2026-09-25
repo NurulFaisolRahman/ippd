@@ -18342,7 +18342,10 @@ public function updateStatusPerjanjianKinerja() {
         $Data['NamaWilayah'] = '';
         $Data['IsRole4'] = $is_role_4;
         $Data['IsDaerah'] = $is_logged_in && !$is_role_4;
+        // Akun Daerah (Level 3) hanya bisa melihat data (Read-Only), tidak bisa CRUD
+        $Data['CanCrud'] = $is_role_4;
         $Data['InstansiId'] = $instansi_id;
+        $Data['FilterInstansi'] = $filter_instansi;
         $Data['ControllerName'] = 'Instansi';
         
         // Ambil Nama Wilayah jika ada
@@ -19323,6 +19326,11 @@ public function updateStatusPerjanjianKinerja() {
         
         header('Content-Type: application/json');
         
+        if (!$this->is_role_4() && !(isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 0)) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Akun Daerah hanya memiliki hak akses untuk melihat data (Read-Only).']);
+            return;
+        }
+        
         try {
             $KodeWilayah = $this->get_kode_wilayah();
             if (empty($KodeWilayah)) {
@@ -19494,6 +19502,11 @@ public function updateStatusPerjanjianKinerja() {
         
         header('Content-Type: application/json');
         
+        if (!$this->is_role_4() && !(isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 0)) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Akun Daerah hanya memiliki hak akses untuk melihat data (Read-Only).']);
+            return;
+        }
+        
         $id = (int)$this->input->post('id', TRUE);
         
         if ($id <= 0) {
@@ -19644,6 +19657,11 @@ public function updateStatusPerjanjianKinerja() {
         }
         header('Content-Type: application/json');
 
+        if (!$this->is_role_4() && !(isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 0)) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Akun Daerah hanya memiliki hak akses untuk melihat data (Read-Only).']);
+            return;
+        }
+
         try {
             $KodeWilayah = $this->get_kode_wilayah();
             if (empty($KodeWilayah)) {
@@ -19785,6 +19803,11 @@ public function updateStatusPerjanjianKinerja() {
             return;
         }
         header('Content-Type: application/json');
+
+        if (!$this->is_role_4() && !(isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 0)) {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Akun Daerah hanya memiliki hak akses untuk melihat data (Read-Only).']);
+            return;
+        }
 
         $rincian_id = (int)$this->input->post('rincian_id', TRUE);
         if ($rincian_id <= 0) {
@@ -27567,7 +27590,12 @@ public function updateStatusPerjanjianKinerja() {
                 'opsi_aksi' => $sc['opsi_aksi'],
                 'catatan' => $sc['catatan'],
                 'bukti_dukung' => $sc['bukti_dukung'],
-                'status_verifikasi' => $sc['status_verifikasi']
+                'bobot_verifikator' => (isset($sc['bobot_verifikator']) && $sc['bobot_verifikator'] !== null) ? (float)$sc['bobot_verifikator'] : null,
+                'opsi_aksi_verifikator' => isset($sc['opsi_aksi_verifikator']) ? $sc['opsi_aksi_verifikator'] : '',
+                'catatan_verifikator' => isset($sc['catatan_verifikator']) ? $sc['catatan_verifikator'] : '',
+                'bukti_dukung_verifikator' => isset($sc['bukti_dukung_verifikator']) ? $sc['bukti_dukung_verifikator'] : '',
+                'status_verifikasi' => isset($sc['status_verifikasi']) ? $sc['status_verifikasi'] : 'Draft',
+                'tgl_verifikasi' => isset($sc['tgl_verifikasi']) ? $sc['tgl_verifikasi'] : null
             ];
         }
         $Data['SavedScores'] = $scoresMap;
@@ -27606,7 +27634,12 @@ public function updateStatusPerjanjianKinerja() {
                 'opsi_aksi' => $sc['opsi_aksi'],
                 'catatan' => $sc['catatan'],
                 'bukti_dukung' => $sc['bukti_dukung'],
-                'status_verifikasi' => $sc['status_verifikasi']
+                'bobot_verifikator' => (isset($sc['bobot_verifikator']) && $sc['bobot_verifikator'] !== null) ? (float)$sc['bobot_verifikator'] : null,
+                'opsi_aksi_verifikator' => isset($sc['opsi_aksi_verifikator']) ? $sc['opsi_aksi_verifikator'] : '',
+                'catatan_verifikator' => isset($sc['catatan_verifikator']) ? $sc['catatan_verifikator'] : '',
+                'bukti_dukung_verifikator' => isset($sc['bukti_dukung_verifikator']) ? $sc['bukti_dukung_verifikator'] : '',
+                'status_verifikasi' => isset($sc['status_verifikasi']) ? $sc['status_verifikasi'] : 'Draft',
+                'tgl_verifikasi' => isset($sc['tgl_verifikasi']) ? $sc['tgl_verifikasi'] : null
             ];
         }
 
@@ -27615,6 +27648,79 @@ public function updateStatusPerjanjianKinerja() {
             'master' => $this->get_ippd_master_data(),
             'scores' => $scoresMap
         ]);
+    }
+
+    public function SaveIPPDVerifikator() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        try {
+            // Strictly enforce Level 4 requirement: hanya akun level 4 yang dapat mengubah
+            if (!$this->is_role_4()) {
+                throw new Exception('Akses ditolak: Hanya akun Level 4 yang dapat mengubah penilaian verifikator.');
+            }
+
+            $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
+            $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
+            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $item_code = trim($this->input->post('item_code', TRUE));
+            $bobot_verifikator = $this->input->post('bobot_verifikator', TRUE);
+            $opsi_aksi_verifikator = trim($this->input->post('opsi_aksi_verifikator', TRUE));
+            $catatan_verifikator = trim($this->input->post('catatan_verifikator', TRUE));
+            $bukti_dukung_verifikator = trim($this->input->post('bukti_dukung_verifikator', TRUE));
+
+            if (empty($item_code)) {
+                throw new Exception('Item indikator / sub-indikator tidak valid.');
+            }
+
+            $bobot_val = ($bobot_verifikator !== '' && $bobot_verifikator !== null) ? (float)$bobot_verifikator : null;
+
+            // Check if existing record
+            $existing = $this->db->where([
+                'kodewilayah' => $kode_wilayah,
+                'instansi_id' => $instansi_id,
+                'tahun' => $tahun,
+                'item_code' => $item_code,
+                'deleted_at IS NULL' => null
+            ])->get('ippd_penilaian')->row_array();
+
+            $verifikator_id = isset($_SESSION['IdAkun']) ? (int)$_SESSION['IdAkun'] : ($this->get_instansi_id() ?: null);
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah,
+                'instansi_id' => $instansi_id,
+                'tahun' => $tahun,
+                'item_code' => $item_code,
+                'bobot_verifikator' => $bobot_val,
+                'opsi_aksi_verifikator' => $opsi_aksi_verifikator,
+                'catatan_verifikator' => $catatan_verifikator,
+                'bukti_dukung_verifikator' => $bukti_dukung_verifikator,
+                'status_verifikasi' => ($bobot_val !== null) ? 'Terverifikasi' : 'Draft',
+                'verifikator_id' => $verifikator_id,
+                'tgl_verifikasi' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($existing) {
+                $this->db->where('id', $existing['id'])->update('ippd_penilaian', $saveData);
+                $id = $existing['id'];
+            } else {
+                $saveData['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('ippd_penilaian', $saveData);
+                $id = $this->db->insert_id();
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Penilaian Verifikator berhasil disimpan.',
+                'data' => array_merge(['id' => $id], $saveData)
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
     }
 
     public function SaveIPPDScore() {

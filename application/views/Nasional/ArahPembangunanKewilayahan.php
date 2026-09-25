@@ -6,8 +6,8 @@ $isLoggedIn = !empty($_SESSION['isLoggedIn']) || !empty($this->session->userdata
 $canEdit = $isLoggedIn && ($userLevel !== null && $userLevel !== '' && (string)$userLevel === '0');
 
 // Helper untuk merender Highlight Indikasi Intervensi: setiap kategori & sub-kategori terpisah dengan point rapi
-if (!function_exists('renderHighlightPointsRPJMN')) {
-    function renderHighlightPointsRPJMN($text) {
+if (!function_exists('renderHighlightPoints')) {
+    function renderHighlightPoints($text) {
         if (empty(trim($text))) return '-';
         $lines = explode("\n", str_replace(["\r\n", "\r"], "\n", trim($text)));
         $html = '<div class="highlight-points-wrapper">';
@@ -34,8 +34,8 @@ if (!function_exists('renderHighlightPointsRPJMN')) {
 }
 
 // Helper untuk merender Tagging Lokasi dengan bullet point
-if (!function_exists('renderTaggingPointsRPJMN')) {
-    function renderTaggingPointsRPJMN($text) {
+if (!function_exists('renderTaggingPoints')) {
+    function renderTaggingPoints($text) {
         if (empty(trim($text))) return '-';
         $lines = explode("\n", str_replace(["\r\n", "\r"], "\n", trim($text)));
         $html = '<div class="tagging-points-wrapper">';
@@ -101,203 +101,232 @@ if (!function_exists('renderTaggingPointsRPJMN')) {
         background-color: #f8f9fa;
         color: #455a64;
         font-weight: 700;
+        font-size: 11px;
         text-transform: uppercase;
-        font-size: 12px;
         letter-spacing: 0.5px;
         border: 1px solid #e0e0e0;
-        padding: 12px 10px;
-        vertical-align: middle;
         text-align: center;
+        vertical-align: middle;
+        padding: 11px 10px;
     }
-    #kewilayahan-table > tbody > tr > td {
-        border: 1px solid #e9ecef;
-        padding: 10px 12px;
+    #kewilayahan-table td {
+        border: 1px solid #e0e0e0;
+        padding: 12px 14px;
         vertical-align: top;
         color: #333;
-        line-height: 1.55;
-    }
-    #kewilayahan-table > tbody > tr:hover {
-        background-color: #fcfdfe;
+        font-size: 12px;
+        line-height: 1.5;
     }
 
-    /* Cell styling */
-    .cell-provinsi {
+    /* Hover baris tabel */
+    #kewilayahan-table tbody tr:hover td {
+        background-color: #fbfcfd;
+    }
+
+    /* Sel Styling */
+    td.cell-provinsi {
+        background-color: #ffffff;
         font-weight: 700;
         color: #1e293b;
-        background-color: #fafbfc;
-        vertical-align: top !important;
-        font-size: 12px;
+        vertical-align: top;
+        width: 13%;
     }
-    .cell-lokasi {
+    td.cell-lokasi {
+        background-color: #ffffff;
         font-weight: 600;
         color: #334155;
-        vertical-align: top !important;
+        vertical-align: top;
+        width: 25%;
+    }
+    td.cell-highlight {
         background-color: #ffffff;
+        color: #1e293b;
+        vertical-align: top;
+        width: 44%;
     }
-    .cell-highlight {
-        vertical-align: top !important;
+    td.cell-tagging {
+        background-color: #ffffff;
+        color: #0f172a;
+        vertical-align: top;
+        width: 18%;
     }
-    .cell-tagging {
-        vertical-align: top !important;
-        background-color: #fdfefe;
-    }
-    .cell-aksi {
+    td.cell-aksi {
+        background-color: #fafbfc;
         text-align: center;
-        vertical-align: middle !important;
+        vertical-align: middle;
         white-space: nowrap;
+        width: 8%;
     }
 
-    /* Highlight Points Formatting */
+    /* Highlight Points List Styling */
     .highlight-points-wrapper {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
+        font-size: 12px;
+        line-height: 1.6;
+        color: #1e293b;
     }
     .point-main {
         display: flex;
         align-items: flex-start;
-        gap: 6px;
-        font-weight: 500;
-        color: #1e293b;
+        margin-top: 6px;
+        margin-bottom: 4px;
+        font-weight: 600;
+        color: #0f172a;
+    }
+    .point-main:first-child {
+        margin-top: 0;
     }
     .point-main .bullet-main {
-        color: #00c292;
+        color: #0f172a;
         font-size: 14px;
-        line-height: 1.2;
+        line-height: 1.3;
+        margin-right: 8px;
         flex-shrink: 0;
     }
     .point-sub {
         display: flex;
         align-items: flex-start;
-        gap: 6px;
-        padding-left: 18px;
-        color: #475569;
-        font-size: 11.5px;
+        margin-left: 18px;
+        margin-bottom: 3px;
+        font-weight: 400;
+        color: #334155;
     }
     .point-sub .bullet-sub {
-        color: #03a9f4;
+        color: #475569;
         font-size: 11px;
-        line-height: 1.3;
+        line-height: 1.5;
+        margin-right: 8px;
         flex-shrink: 0;
-        font-weight: bold;
+        font-family: monospace, sans-serif;
+    }
+    .point-text {
+        flex: 1;
     }
 
-    /* Tagging Lokasi Formatting */
+    /* Tagging Points List Styling */
     .tagging-points-wrapper {
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
+        font-size: 12px;
+        line-height: 1.6;
+        color: #0f172a;
+        font-weight: 500;
     }
     .tag-point {
         display: flex;
         align-items: flex-start;
-        gap: 6px;
-        color: #334155;
-        font-size: 11.5px;
+        margin-bottom: 4px;
     }
     .tag-point .bullet-main {
-        color: #00c292;
-        font-size: 13px;
-        line-height: 1.2;
+        color: #0f172a;
+        font-size: 14px;
+        line-height: 1.3;
+        margin-right: 8px;
         flex-shrink: 0;
+    }
+    .tag-text {
+        flex: 1;
     }
 
     /* Action Buttons */
     .btn-action {
         border-radius: 4px;
-        font-weight: 500;
-        transition: all 0.2s ease;
+        padding: 4px 8px;
+        font-size: 11px;
+        font-weight: 600;
         margin: 2px;
+        transition: all 0.2s ease;
+        display: inline-block;
+        cursor: pointer;
     }
     .btn-action:hover {
         transform: translateY(-1px);
-        box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
     }
 
-    /* Search Box */
+    /* Search & Filter Box */
     .table-search-box {
         position: relative;
-        display: inline-block;
+        max-width: 260px;
+        width: 100%;
     }
     .table-search-box input {
-        border: 1px solid #ddd;
+        width: 100%;
+        padding: 6px 12px 6px 32px;
         border-radius: 20px;
-        padding: 6px 15px 6px 32px;
+        border: 1px solid #cbd5e1;
         font-size: 12px;
         outline: none;
-        transition: border-color 0.2s;
-        width: 230px;
+        transition: all 0.2s;
     }
     .table-search-box input:focus {
         border-color: #00c292;
+        box-shadow: 0 0 0 3px rgba(0, 194, 146, 0.15);
     }
-    .table-search-box .fa-search {
+    .table-search-box i {
         position: absolute;
         left: 11px;
-        top: 9px;
-        color: #aaa;
-        font-size: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 13px;
     }
 
-    /* Tagging Location Pills in Modal */
+    .form-section-title {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: #455a64;
+        margin: 14px 0 6px;
+        padding-bottom: 4px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    /* Tag Item Pill */
     .tag-pill {
         display: inline-flex;
         align-items: center;
-        background: #e0f2fe;
-        color: #0369a1;
-        border: 1px solid #bae6fd;
-        border-radius: 14px;
-        padding: 3px 10px;
-        font-size: 11px;
+        background: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
         font-weight: 500;
+        color: #1e293b;
         margin: 3px;
     }
     .tag-pill .btn-del-tag {
-        margin-left: 6px;
+        margin-left: 8px;
+        color: #ef4444;
         cursor: pointer;
-        color: #0284c7;
         font-weight: bold;
         font-size: 13px;
         line-height: 1;
     }
     .tag-pill .btn-del-tag:hover {
-        color: #dc2626;
+        color: #b91c1c;
     }
 
-    /* Builder Point Items in Modal */
+    /* Highlight Point Builder Item */
     .point-item-card {
         background: #f8fafc;
         border: 1px solid #e2e8f0;
         border-radius: 6px;
-        padding: 6px 10px;
-        margin-bottom: 6px;
+        padding: 8px 10px;
+        margin-bottom: 8px;
         display: flex;
         align-items: center;
         gap: 8px;
     }
     .point-item-card.is-sub {
         margin-left: 20px;
-        background: #f1f5f9;
-        border-color: #cbd5e1;
+        background: #ffffff;
+        border-left: 3px solid #03a9f4;
     }
-    .point-item-card .btn-delete-point {
-        padding: 3px 7px;
-        font-size: 11px;
-        border-radius: 4px;
-    }
-    .form-section-title {
-        font-weight: 700;
-        font-size: 12px;
-        color: #334155;
-        margin-top: 14px;
-        margin-bottom: 6px;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-        border-bottom: 1px solid #f1f5f9;
-        padding-bottom: 4px;
+    .point-item-card.is-main {
+        border-left: 3px solid #00c292;
     }
     .badge-point-type {
         font-size: 10px;
+        font-weight: 700;
         padding: 3px 6px;
         border-radius: 4px;
         white-space: nowrap;
@@ -315,12 +344,12 @@ if (!function_exists('renderTaggingPointsRPJMN')) {
                     <!-- Header Kontainer Tabel Selaras dengan Halaman Lain -->
                     <div class="basic-tb-hd" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px;">
                         <div>
-                            <h3 style="margin: 0; color: #333; font-weight: 600; line-height: 1.5;">Arah Pembangunan Kewilayahan Nasional</h3>
-                            <small style="color: #888; display: block; margin-bottom: 10px;">Pemetaan Wilayah, Lokasi Prioritas, Highlight Indikasi Intervensi, dan Tagging Lokasi RPJMN</small>
+                            <h3 style="margin: 0; color: #333; font-weight: 600; line-height: 1.5;">Arah Pembangunan Kewilayahan</h3>
+                            <small style="color: #888; display: block; margin-bottom: 10px;">Pemetaan Wilayah, Lokasi Prioritas, Highlight Indikasi Intervensi, dan Tagging Lokasi RKP</small>
                             <?php if ($canEdit) { ?>
                             <div class="button-icon-btn">
                                 <button type="button" class="btn btn-success notika-btn-success btn-action" id="BtnOpenModalInput" style="padding: 6px 14px;">
-                                    <i class="fa fa-plus-circle" style="margin-right: 5px;"></i> <b>Input Arah Kewilayahan Nasional</b>
+                                    <i class="fa fa-plus-circle" style="margin-right: 5px;"></i> <b>Input Arah Kewilayahan</b>
                                 </button>
                             </div>
                             <?php } ?>
@@ -386,10 +415,10 @@ if (!function_exists('renderTaggingPointsRPJMN')) {
                                                     <?php $isLokasiFirst = false; } ?>
 
                                                     <td class="cell-highlight">
-                                                        <?= renderHighlightPointsRPJMN($item['HighlightIntervensi']) ?>
+                                                        <?= renderHighlightPoints($item['HighlightIntervensi']) ?>
                                                     </td>
                                                     <td class="cell-tagging">
-                                                        <?= renderTaggingPointsRPJMN($item['TaggingLokasi']) ?>
+                                                        <?= renderTaggingPoints($item['TaggingLokasi']) ?>
                                                     </td>
 
                                                     <?php if ($canEdit) { ?>
@@ -398,10 +427,10 @@ if (!function_exists('renderTaggingPointsRPJMN')) {
                                                                 data-provinsi="<?= htmlspecialchars($item['Provinsi'], ENT_QUOTES) ?>"
                                                                 data-lokasi="<?= htmlspecialchars($item['LokasiPrioritas'], ENT_QUOTES) ?>"
                                                                 title="Tambah Intervensi Baru di Lokasi Ini">
-                                                                <i class="fa fa-plus"></i> Highlight
+                                                                <i class="fa fa-plus"></i> Highliht
                                                             </button>
                                                             <button type="button" class="btn btn-xs btn-info btn-action EditArah" 
-                                                                data-id="<?= $item['Id'] ?>" 
+                                                                data-id="<?= $item['Id'] ?>"
                                                                 title="Edit Data">
                                                                 <i class="fa fa-edit"></i>
                                                             </button>
@@ -420,7 +449,7 @@ if (!function_exists('renderTaggingPointsRPJMN')) {
                                 else: ?>
                                     <tr>
                                         <td colspan="<?= $canEdit ? '5' : '4' ?>" style="text-align: center; padding: 40px; color: #888;">
-                                            Belum ada data Arah Pembangunan Kewilayahan Nasional.
+                                            Belum ada data Arah Pembangunan Kewilayahan.
                                         </td>
                                     </tr>
                                 <?php endif; ?>
@@ -435,18 +464,18 @@ if (!function_exists('renderTaggingPointsRPJMN')) {
 </div>
 
 <?php if ($canEdit) { ?>
-<!-- ======== MODAL INPUT / EDIT ARAH KEWILAYAHAN NASIONAL ======== -->
+<!-- ======== MODAL INPUT / EDIT ARAH KEWILAYAHAN ======== -->
 <div class="modal fade" id="ModalFormArah" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h2 id="ModalFormTitle"><i class="fa fa-plus-circle" style="color: #00c292; margin-right: 6px;"></i> Input Arah Pembangunan Kewilayahan Nasional</h2>
+                <h2 id="ModalFormTitle"><i class="fa fa-plus-circle" style="color: #00c292; margin-right: 6px;"></i> Input Arah Pembangunan Kewilayahan</h2>
             </div>
             <div class="modal-body" style="padding-top: 15px; max-height: 75vh; overflow-y: auto;">
                 <input type="hidden" id="FormId" value="">
 
-                <!-- 1. Pilih Provinsi -->
+                <!-- 1. Provinsi -->
                 <div class="form-section-title">1. Pilih Provinsi</div>
                 <select class="form-control" id="FormProvinsi">
                     <option value="">-- Pilih Provinsi --</option>
@@ -672,7 +701,7 @@ $(function(){
     // 7. Klik Buka Modal Input Baru
     $('#BtnOpenModalInput').click(function(){
         $('#FormId').val('');
-        $('#ModalFormTitle').html('<i class="fa fa-plus-circle" style="color: #00c292; margin-right: 6px;"></i> Input Arah Pembangunan Kewilayahan Nasional');
+        $('#ModalFormTitle').html('<i class="fa fa-plus-circle" style="color: #00c292; margin-right: 6px;"></i> Input Arah Pembangunan Kewilayahan');
         $('#FormProvinsi').val('');
         $('#FormLokasiPrioritas').val('');
         $('#HighlightPointsContainer').empty();
@@ -690,7 +719,7 @@ $(function(){
         var lokasi = $(this).attr('data-lokasi');
 
         $('#FormId').val('');
-        $('#ModalFormTitle').html('<i class="fa fa-plus-circle" style="color: #00c292; margin-right: 6px;"></i> Tambah Highlight di Lokasi Terpilih');
+        $('#ModalFormTitle').html('<i class="fa fa-plus-circle" style="color: #00c292; margin-right: 6px;"></i> Tambah Intervensi di Lokasi Terpilih');
         $('#FormProvinsi').val(prov);
         $('#FormLokasiPrioritas').val(lokasi);
         $('#HighlightPointsContainer').empty();
@@ -720,7 +749,7 @@ $(function(){
         }
 
         $('#FormId').val(item.Id);
-        $('#ModalFormTitle').html('<i class="fa fa-edit" style="color: #03a9f4; margin-right: 6px;"></i> Edit Arah Pembangunan Kewilayahan Nasional');
+        $('#ModalFormTitle').html('<i class="fa fa-edit" style="color: #03a9f4; margin-right: 6px;"></i> Edit Arah Pembangunan Kewilayahan');
         $('#FormProvinsi').val(item.Provinsi);
         $('#FormLokasiPrioritas').val(item.LokasiPrioritas);
 
@@ -815,14 +844,13 @@ $(function(){
         var taggingKodeStr = taggingKodes.join(',');
         var taggingNameStr = taggingNames.join('\n');
 
-        var url = id ? (BaseURL + 'Nasional/EditArahKewilayahanRPJMN') : (BaseURL + 'Nasional/InputArahKewilayahanRPJMN');
+        var url = id ? (BaseURL + 'Nasional/EditArahKewilayahan') : (BaseURL + 'Nasional/InputArahKewilayahan');
         var postData = {
             Provinsi: prov,
             LokasiPrioritas: lokasi,
             HighlightIntervensi: highlightText,
             TaggingLokasiKode: taggingKodeStr,
-            TaggingLokasi: taggingNameStr,
-            Tahun: '2025-2029'
+            TaggingLokasi: taggingNameStr
         };
         if (id) {
             postData.Id = id;
@@ -844,7 +872,7 @@ $(function(){
         e.preventDefault();
         var id = $(this).attr('data-id');
         if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-            $.post(BaseURL + 'Nasional/HapusArahKewilayahanRPJMN', { Id: id }).done(function(res){
+            $.post(BaseURL + 'Nasional/HapusArahKewilayahan', { Id: id }).done(function(res){
                 if (res === '1') {
                     location.reload();
                 } else {

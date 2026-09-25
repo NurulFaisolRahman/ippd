@@ -1,8 +1,16 @@
+<?php 
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+$userLevel = $_SESSION['Level'] ?? ($this->session->userdata('Level') ?? null);
+$isLoggedIn = !empty($_SESSION['isLoggedIn']) || !empty($this->session->userdata('isLoggedIn'));
+$canEdit = $isLoggedIn && ($userLevel !== null && $userLevel !== '' && (string)$userLevel === '0');
+?>
+
 <style>
     /* CSS Modal Vertical Center */
     .modal {
         text-align: center;
-        padding: 0!important;
+        padding: 0 !important;
     }
     .modal:before {
         content: '';
@@ -15,7 +23,7 @@
         display: inline-block;
         text-align: left;
         vertical-align: middle;
-        width: 700px;
+        width: 620px;
         max-width: 95%;
     }
     .modal-header h2 {
@@ -23,26 +31,27 @@
         color: #333;
         font-weight: 600;
         margin-bottom: 0;
-        padding-bottom: 10px;
+        padding-bottom: 8px;
         border-bottom: 1px solid #eee;
     }
 
-    /* CSS Card Container Enhancement */
+    /* Container Card */
     .data-table-list {
         background: #ffffff;
         border-radius: 10px;
         box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
         padding: 25px;
         border: none;
+        margin-bottom: 30px;
     }
 
     /* CSS Table Enhancement - Selaras dengan Halaman Lain (#f8f9fa / #455a64) */
-    #agenda-table {
+    #matriks-table {
         border-collapse: collapse;
         width: 100%;
         font-size: 12px;
     }
-    #agenda-table > thead > tr > th {
+    #matriks-table > thead > tr > th {
         background-color: #f8f9fa;
         color: #455a64;
         font-weight: 700;
@@ -54,7 +63,7 @@
         vertical-align: middle;
         padding: 10px 6px;
     }
-    #agenda-table > thead > tr.th-sub > th {
+    #matriks-table > thead > tr.th-sub > th {
         background-color: #f1f3f5;
         color: #546e7a;
         font-size: 10px;
@@ -62,7 +71,7 @@
         padding: 6px 4px;
         border: 1px solid #e0e0e0;
     }
-    #agenda-table td {
+    #matriks-table td {
         border: 1px solid #e9ecef;
         padding: 7px 8px;
         vertical-align: middle;
@@ -70,7 +79,7 @@
     }
 
     /* Hover baris tabel */
-    #agenda-table tbody tr:hover {
+    #matriks-table tbody tr:hover {
         background-color: #fbfcfd;
     }
 
@@ -150,36 +159,36 @@
         padding: 3px 10px;
         border-radius: 12px;
         font-size: 10px;
-        font-weight: 600;
-        margin-left: 5px;
+        font-weight: 700;
         display: inline-block;
+        margin-left: 6px;
     }
     .badge-satuan {
         background-color: #e1f5fe;
-        color: #0277bd;
-        padding: 3px 8px;
-        border-radius: 10px;
+        color: #0288d1;
+        border: 1px solid #b3e5fc;
+        padding: 2px 6px;
+        border-radius: 6px;
         font-size: 10px;
         font-weight: 600;
-        display: inline-block;
-    }
-    .badge-target {
-        background-color: #fff3e0;
-        color: #e65100;
-        padding: 3px 8px;
-        border-radius: 10px;
-        font-size: 10px;
-        font-weight: 600;
-        display: inline-block;
     }
     .badge-baseline {
-        background-color: #eceff1;
-        color: #455a64;
-        padding: 3px 8px;
-        border-radius: 10px;
+        background-color: #fff3e0;
+        color: #e65100;
+        border: 1px solid #ffe0b2;
+        padding: 2px 6px;
+        border-radius: 6px;
         font-size: 10px;
         font-weight: 600;
-        display: inline-block;
+    }
+    .badge-target {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        border: 1px solid #c8e6c9;
+        padding: 2px 6px;
+        border-radius: 6px;
+        font-size: 10px;
+        font-weight: 700;
     }
 
     /* Action Buttons */
@@ -222,6 +231,34 @@
         padding-bottom: 4px;
         border-bottom: 1px solid #e0e0e0;
     }
+
+    /* Search Box */
+    .table-search-box {
+        position: relative;
+        max-width: 280px;
+        width: 100%;
+    }
+    .table-search-box input {
+        width: 100%;
+        padding: 6px 12px 6px 32px;
+        border-radius: 20px;
+        border: 1px solid #cbd5e1;
+        font-size: 12px;
+        outline: none;
+        transition: all 0.2s;
+    }
+    .table-search-box input:focus {
+        border-color: #00c292;
+        box-shadow: 0 0 0 3px rgba(0, 194, 146, 0.15);
+    }
+    .table-search-box i {
+        position: absolute;
+        left: 11px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 13px;
+    }
 </style>
 
 <div class="data-table-area">
@@ -231,43 +268,49 @@
                 <div class="data-table-list">
 
                     <!-- Header Kontainer Tabel Selaras dengan Halaman Lain -->
-                    <div class="basic-tb-hd" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                    <div class="basic-tb-hd" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px;">
                         <div>
-                            <h3 style="margin: 0; color: #333; font-weight: 600; line-height: 1.5;">Agenda Pembangunan (PN / PP / KP)</h3>
-                            <small style="color: #888;">Hierarki Terstruktur: Prioritas Nasional → Program Prioritas → Kegiatan Prioritas</small>
+                            <h3 style="margin: 0; color: #333; font-weight: 600; line-height: 1.5;">Matriks Pembangunan</h3>
+                            <small style="color: #888; display: block; margin-bottom: 10px;">Hierarki Prioritas Nasional (PN) → Program Prioritas (PP) → Kegiatan Prioritas (KP), Sasaran, dan Indikator ditarik dari Agenda Pembangunan RPJMN</small>
+                            <?php if ($canEdit) { ?>
+                            <div class="button-icon-btn">
+                                <button type="button" class="btn btn-success notika-btn-success btn-action" data-toggle="modal" data-target="#ModalInputPN" style="padding: 6px 14px;">
+                                    <i class="fa fa-plus-circle" style="margin-right: 5px;"></i> <b>Input Prioritas Nasional</b>
+                                </button>
+                            </div>
+                            <?php } ?>
                         </div>
-                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
-                        <div class="button-icon-btn sm-res-mg-t-30">
-                            <button type="button" class="btn btn-success notika-btn-success btn-action" data-toggle="modal" data-target="#ModalInputPN" style="padding: 8px 15px;">
-                                <i class="fa fa-plus-circle" style="margin-right: 5px;"></i> <b>Input Prioritas Nasional</b>
-                            </button>
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <div class="table-search-box">
+                                <i class="fa fa-search"></i>
+                                <input type="text" id="searchInput" placeholder="Cari matriks pembangunan...">
+                            </div>
                         </div>
-                        <?php } ?>
                     </div>
 
                     <div class="table-responsive">
-                        <table id="agenda-table">
+                        <table id="matriks-table">
                             <thead>
                                 <tr>
                                     <th style="width: 20%;">Prioritas Nasional / Program Prioritas / Kegiatan Prioritas</th>
                                     <th style="width: 15%;">Sasaran</th>
-                                    <th style="width: 14%;">Indikator</th>
-                                    <th style="width: 5%;">Satuan</th>
+                                    <th style="width: 15%;">Indikator</th>
+                                    <th style="width: 6%;">Satuan</th>
                                     <th style="width: 6%;">Baseline 2024</th>
-                                    <th style="width: 6%;">Target 2025</th>
-                                    <th style="width: 6%;">Target 2029</th>
+                                    <th style="width: 6%;">Target 2025 (RKP)</th>
+                                    <th style="width: 6%;">Target 2029 (RPJMN)</th>
                                     <th style="width: 9%;">Agenda Transformasi</th>
                                     <th style="width: 9%;">Koordinator</th>
-                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
-                                    <th colspan="3" style="width: 10%;">Aksi</th>
+                                    <?php if ($canEdit) { ?>
+                                    <th colspan="3" style="width: 8%;">Aksi</th>
                                     <?php } ?>
                                 </tr>
                                 <tr class="th-sub">
-                                    <th colspan="9" style="letter-spacing: 0.5px;">— Data Agenda Pembangunan & Target RPJMN —</th>
-                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
-                                    <th style="width: 3.5%; color: #00c292;">PN/PP/KP</th>
-                                    <th style="width: 3.5%; color: #7b1fa2;">Sasaran</th>
-                                    <th style="width: 3%; color: #455a64;">Indikator</th>
+                                    <th colspan="9" style="letter-spacing: 0.5px;">— Data Agenda Pembangunan & Target Matriks Pembangunan —</th>
+                                    <?php if ($canEdit) { ?>
+                                    <th style="width: 3%; color: #00c292;">PN/PP/KP</th>
+                                    <th style="width: 3%; color: #7b1fa2;">Sasaran</th>
+                                    <th style="width: 2%; color: #455a64;">Indikator</th>
                                     <?php } ?>
                                 </tr>
                             </thead>
@@ -275,170 +318,180 @@
                                 <?php
                                 if (isset($DataAgenda) && count($DataAgenda) > 0):
 
-                                    $canAksi = (isset($_SESSION['Level']) && $_SESSION['Level'] == 0);
+                                    $canAksi = $canEdit;
 
-                                    function agendaRowspan($sasaranList) {
-                                        if (empty($sasaranList)) return 1;
-                                        $n = 0;
-                                        foreach ($sasaranList as $s) {
-                                            $n += max(1, count($s['Indikator']));
-                                        }
-                                        return $n;
-                                    }
-
-                                    function agendaActBtns($id, $tipe, $uraian, $periode = '') {
-                                        $u = htmlspecialchars($uraian, ENT_QUOTES);
-                                        $p = htmlspecialchars($periode, ENT_QUOTES);
-                                        $html = '';
-                                        if ($tipe === 'PN') {
-                                            $html .= '<button class="btn btn-xs btn-success btn-action TambahPP" data-id="' . $id . '" title="Tambah Program Prioritas"><i class="fa fa-plus"></i> PP</button><br>';
-                                        }
-                                        if ($tipe === 'PP') {
-                                            $html .= '<button class="btn btn-xs btn-success btn-action TambahKP" data-id="' . $id . '" title="Tambah Kegiatan Prioritas"><i class="fa fa-plus"></i> KP</button><br>';
-                                        }
-                                        $html .= '<button class="btn btn-xs btn-warning btn-action TambahSasaran" data-id="' . $id . '" style="color:#fff;" title="Tambah Sasaran"><i class="fa fa-plus"></i> Sasaran</button><br>';
-                                        $html .= '<button class="btn btn-xs btn-info btn-action EditAgenda" data-id="' . $id . '" data-tipe="' . $tipe . '" data-uraian="' . $u . '" data-periode="' . $p . '" title="Edit ' . $tipe . '"><i class="fa fa-edit"></i></button>';
-                                        $html .= '<button class="btn btn-xs btn-danger btn-action HapusAgenda" data-id="' . $id . '" title="Hapus ' . $tipe . '"><i class="fa fa-trash"></i></button>';
-                                        return $html;
-                                    }
-
-                                    function sasaranActBtns($id, $sasaran) {
-                                        $s = htmlspecialchars($sasaran, ENT_QUOTES);
-                                        return '<button class="btn btn-xs btn-success btn-action TambahIndikator" data-id="' . $id . '" title="Tambah Indikator"><i class="fa fa-plus"></i> Indikator</button><br>'
-                                            . '<button class="btn btn-xs btn-info btn-action EditSasaran" data-id="' . $id . '" data-sasaran="' . $s . '" title="Edit Sasaran"><i class="fa fa-edit"></i></button>'
-                                            . '<button class="btn btn-xs btn-danger btn-action HapusSasaran" data-id="' . $id . '" title="Hapus Sasaran"><i class="fa fa-trash"></i></button>';
-                                    }
-
-                                    function indikatorActBtns($ind) {
-                                        return '<button class="btn btn-xs btn-info btn-action EditIndikator"'
-                                            . ' data-id="' . $ind['Id'] . '" data-indikator="' . htmlspecialchars($ind['Indikator'], ENT_QUOTES) . '"'
-                                            . ' data-satuan="' . htmlspecialchars($ind['Satuan'], ENT_QUOTES) . '"'
-                                            . ' data-baseline="' . htmlspecialchars($ind['Baseline2024'], ENT_QUOTES) . '"'
-                                            . ' data-t2025="' . htmlspecialchars($ind['Target2025'], ENT_QUOTES) . '"'
-                                            . ' data-t2029="' . htmlspecialchars($ind['Target2029'], ENT_QUOTES) . '"'
-                                            . ' data-agenda="' . htmlspecialchars($ind['AgendaTransformasi'], ENT_QUOTES) . '"'
-                                            . ' data-koordinator="' . htmlspecialchars($ind['Koordinator'], ENT_QUOTES) . '" title="Edit Indikator">'
-                                            . '<i class="fa fa-edit"></i></button>'
-                                            . '<button class="btn btn-xs btn-danger btn-action HapusIndikator" data-id="' . $ind['Id'] . '" title="Hapus Indikator">'
-                                            . '<i class="fa fa-trash"></i></button>';
-                                    }
-
-                                    function renderSection($nomor, $tipe, $uraian, $id, $sasaranList, $periode = '', $canAksi = true) {
-                                        $agRS   = agendaRowspan($sasaranList);
-                                        $css    = 'cell-' . strtolower($tipe);
-                                        $agCell = '<span class="tipe-badge tipe-' . $tipe . '">' . $tipe . '</span><b>' . $nomor . '</b> ' . htmlspecialchars($uraian)
-                                            . ($periode ? ' <span class="badge-periode">' . htmlspecialchars($periode) . '</span>' : '');
-                                        $agAksi = $canAksi ? agendaActBtns($id, $tipe, $uraian, $periode) : '';
-
-                                        $html = '';
-                                        $agFirst = true;
-                                        $agAksiFirst = true;
-
-                                        if (empty($sasaranList)) {
-                                            $html .= '<tr>'
-                                                . '<td rowspan="1" class="' . $css . '">' . $agCell . '</td>'
-                                                . '<td class="empty-cell">Belum ada sasaran</td>'
-                                                . '<td colspan="7" class="empty-cell">-</td>';
-                                            if ($canAksi) {
-                                                $html .= '<td class="cell-aksi">' . $agAksi . '</td>'
-                                                    . '<td class="empty-cell">-</td>'
-                                                    . '<td class="empty-cell">-</td>';
+                                    if (!function_exists('matriksRowspan')) {
+                                        function matriksRowspan($sasaranList) {
+                                            if (empty($sasaranList)) return 1;
+                                            $n = 0;
+                                            foreach ($sasaranList as $s) {
+                                                $n += max(1, count($s['Indikator']));
                                             }
-                                            $html .= '</tr>';
+                                            return $n;
+                                        }
+                                    }
+
+                                    if (!function_exists('matriksAgendaActBtns')) {
+                                        function matriksAgendaActBtns($id, $tipe, $uraian, $periode = '') {
+                                            $u = htmlspecialchars($uraian, ENT_QUOTES);
+                                            $p = htmlspecialchars($periode, ENT_QUOTES);
+                                            $html = '';
+                                            if ($tipe === 'PN') {
+                                                $html .= '<button class="btn btn-xs btn-success btn-action TambahPP" data-id="' . $id . '" title="Tambah Program Prioritas"><i class="fa fa-plus"></i> PP</button><br>';
+                                            }
+                                            if ($tipe === 'PP') {
+                                                $html .= '<button class="btn btn-xs btn-success btn-action TambahKP" data-id="' . $id . '" title="Tambah Kegiatan Prioritas"><i class="fa fa-plus"></i> KP</button><br>';
+                                            }
+                                            $html .= '<button class="btn btn-xs btn-warning btn-action TambahSasaran" data-id="' . $id . '" style="color:#fff;" title="Tambah Sasaran"><i class="fa fa-plus"></i> Sasaran</button><br>';
+                                            $html .= '<button class="btn btn-xs btn-info btn-action EditAgenda" data-id="' . $id . '" data-tipe="' . $tipe . '" data-uraian="' . $u . '" data-periode="' . $p . '" title="Edit ' . $tipe . '"><i class="fa fa-edit"></i></button>';
+                                            $html .= '<button class="btn btn-xs btn-danger btn-action HapusAgenda" data-id="' . $id . '" title="Hapus ' . $tipe . '"><i class="fa fa-trash"></i></button>';
                                             return $html;
                                         }
+                                    }
 
-                                        $nSas = 0;
-                                        foreach ($sasaranList as $s) {
-                                            $nSas++;
-                                            $sasRS   = max(1, count($s['Indikator']));
-                                            $sasCont = '<span class="nomor-cell">' . $nSas . '</span> ' . htmlspecialchars($s['Sasaran']);
-                                            $sasAksi = $canAksi ? sasaranActBtns($s['Id'], $s['Sasaran']) : '';
-                                            $sasFirst = true;
-                                            $sasAksiFirst = true;
+                                    if (!function_exists('matriksSasaranActBtns')) {
+                                        function matriksSasaranActBtns($id, $sasaran) {
+                                            $s = htmlspecialchars($sasaran, ENT_QUOTES);
+                                            return '<button class="btn btn-xs btn-success btn-action TambahIndikator" data-id="' . $id . '" title="Tambah Indikator"><i class="fa fa-plus"></i> Indikator</button><br>'
+                                                . '<button class="btn btn-xs btn-info btn-action EditSasaran" data-id="' . $id . '" data-sasaran="' . $s . '" title="Edit Sasaran"><i class="fa fa-edit"></i></button>'
+                                                . '<button class="btn btn-xs btn-danger btn-action HapusSasaran" data-id="' . $id . '" title="Hapus Sasaran"><i class="fa fa-trash"></i></button>';
+                                        }
+                                    }
 
-                                            if (empty($s['Indikator'])) {
-                                                $html .= '<tr>';
-                                                if ($agFirst) {
-                                                    $html .= '<td rowspan="' . $agRS . '" class="' . $css . '">' . $agCell . '</td>';
-                                                    $agFirst = false;
-                                                }
-                                                $html .= '<td rowspan="1" class="cell-sasaran">' . $sasCont . '</td>';
-                                                $html .= '<td colspan="7" class="empty-cell">Belum ada indikator</td>';
+                                    if (!function_exists('matriksIndikatorActBtns')) {
+                                        function matriksIndikatorActBtns($ind) {
+                                            return '<button class="btn btn-xs btn-info btn-action EditIndikator"'
+                                                . ' data-id="' . $ind['Id'] . '" data-indikator="' . htmlspecialchars($ind['Indikator'], ENT_QUOTES) . '"'
+                                                . ' data-satuan="' . htmlspecialchars($ind['Satuan'], ENT_QUOTES) . '"'
+                                                . ' data-baseline="' . htmlspecialchars($ind['Baseline2024'], ENT_QUOTES) . '"'
+                                                . ' data-t2025="' . htmlspecialchars($ind['Target2025'], ENT_QUOTES) . '"'
+                                                . ' data-t2029="' . htmlspecialchars($ind['Target2029'], ENT_QUOTES) . '"'
+                                                . ' data-agenda="' . htmlspecialchars($ind['AgendaTransformasi'], ENT_QUOTES) . '"'
+                                                . ' data-koordinator="' . htmlspecialchars($ind['Koordinator'], ENT_QUOTES) . '" title="Edit Indikator">'
+                                                . '<i class="fa fa-edit"></i></button>'
+                                                . '<button class="btn btn-xs btn-danger btn-action HapusIndikator" data-id="' . $ind['Id'] . '" title="Hapus Indikator">'
+                                                . '<i class="fa fa-trash"></i></button>';
+                                        }
+                                    }
+
+                                    if (!function_exists('renderMatriksSection')) {
+                                        function renderMatriksSection($nomor, $tipe, $uraian, $id, $sasaranList, $periode = '', $canAksi = true) {
+                                            $agRS   = matriksRowspan($sasaranList);
+                                            $css    = 'cell-' . strtolower($tipe);
+                                            $agCell = '<span class="tipe-badge tipe-' . $tipe . '">' . $tipe . '</span><b>' . $nomor . '</b> ' . htmlspecialchars($uraian)
+                                                . ($periode ? ' <span class="badge-periode">' . htmlspecialchars($periode) . '</span>' : '');
+                                            $agAksi = $canAksi ? matriksAgendaActBtns($id, $tipe, $uraian, $periode) : '';
+
+                                            $html = '';
+                                            $agFirst = true;
+                                            $agAksiFirst = true;
+
+                                            if (empty($sasaranList)) {
+                                                $html .= '<tr class="matriks-row">'
+                                                    . '<td rowspan="1" class="' . $css . '">' . $agCell . '</td>'
+                                                    . '<td class="empty-cell">Belum ada sasaran</td>'
+                                                    . '<td colspan="7" class="empty-cell">-</td>';
                                                 if ($canAksi) {
-                                                    if ($agAksiFirst) {
-                                                        $html .= '<td rowspan="' . $agRS . '" class="cell-aksi">' . $agAksi . '</td>';
-                                                        $agAksiFirst = false;
-                                                    }
-                                                    $html .= '<td rowspan="1" class="cell-aksi">' . $sasAksi . '</td>';
-                                                    $html .= '<td class="empty-cell">-</td>';
+                                                    $html .= '<td class="cell-aksi">' . $agAksi . '</td>'
+                                                        . '<td class="empty-cell">-</td>'
+                                                        . '<td class="empty-cell">-</td>';
                                                 }
                                                 $html .= '</tr>';
-                                            } else {
-                                                $nInd = 0;
-                                                foreach ($s['Indikator'] as $ind) {
-                                                    $nInd++;
-                                                    $agendaBadge = !empty($ind['AgendaTransformasi']) ? '<span class="badge-agenda">' . htmlspecialchars($ind['AgendaTransformasi']) . '</span>' : '-';
-                                                    $satuanBadge = !empty($ind['Satuan']) ? '<span class="badge-satuan">' . htmlspecialchars($ind['Satuan']) . '</span>' : '-';
-                                                    $baseBadge = !empty($ind['Baseline2024']) ? '<span class="badge-baseline">' . htmlspecialchars($ind['Baseline2024']) . '</span>' : '-';
-                                                    $t2025Badge = !empty($ind['Target2025']) ? '<span class="badge-target">' . htmlspecialchars($ind['Target2025']) . '</span>' : '-';
-                                                    $t2029Badge = !empty($ind['Target2029']) ? '<span class="badge-target">' . htmlspecialchars($ind['Target2029']) . '</span>' : '-';
+                                                return $html;
+                                            }
 
-                                                    $html .= '<tr>';
+                                            $nSas = 0;
+                                            foreach ($sasaranList as $s) {
+                                                $nSas++;
+                                                $sasRS   = max(1, count($s['Indikator']));
+                                                $sasCont = '<span class="nomor-cell">' . $nSas . '</span> ' . htmlspecialchars($s['Sasaran']);
+                                                $sasAksi = $canAksi ? matriksSasaranActBtns($s['Id'], $s['Sasaran']) : '';
+                                                $sasFirst = true;
+                                                $sasAksiFirst = true;
+
+                                                if (empty($s['Indikator'])) {
+                                                    $html .= '<tr class="matriks-row">';
                                                     if ($agFirst) {
                                                         $html .= '<td rowspan="' . $agRS . '" class="' . $css . '">' . $agCell . '</td>';
                                                         $agFirst = false;
                                                     }
-                                                    if ($sasFirst) {
-                                                        $html .= '<td rowspan="' . $sasRS . '" class="cell-sasaran">' . $sasCont . '</td>';
-                                                        $sasFirst = false;
-                                                    }
-                                                    $html .= '<td class="cell-ind"><span class="nomor-cell">' . $nInd . '</span> ' . htmlspecialchars($ind['Indikator']) . '</td>';
-                                                    $html .= '<td class="cell-data">' . $satuanBadge . '</td>';
-                                                    $html .= '<td class="cell-data">' . $baseBadge . '</td>';
-                                                    $html .= '<td class="cell-data">' . $t2025Badge . '</td>';
-                                                    $html .= '<td class="cell-data">' . $t2029Badge . '</td>';
-                                                    $html .= '<td class="cell-data">' . $agendaBadge . '</td>';
-                                                    $html .= '<td class="cell-data" style="font-size:11px; color:#455a64;">' . htmlspecialchars($ind['Koordinator'] ?: '-') . '</td>';
+                                                    $html .= '<td rowspan="1" class="cell-sasaran">' . $sasCont . '</td>';
+                                                    $html .= '<td colspan="7" class="empty-cell">Belum ada indikator</td>';
                                                     if ($canAksi) {
                                                         if ($agAksiFirst) {
                                                             $html .= '<td rowspan="' . $agRS . '" class="cell-aksi">' . $agAksi . '</td>';
                                                             $agAksiFirst = false;
                                                         }
-                                                        if ($sasAksiFirst) {
-                                                            $html .= '<td rowspan="' . $sasRS . '" class="cell-aksi">' . $sasAksi . '</td>';
-                                                            $sasAksiFirst = false;
-                                                        }
-                                                        $html .= '<td class="cell-aksi">' . indikatorActBtns($ind) . '</td>';
+                                                        $html .= '<td rowspan="1" class="cell-aksi">' . $sasAksi . '</td>';
+                                                        $html .= '<td class="empty-cell">-</td>';
                                                     }
                                                     $html .= '</tr>';
+                                                } else {
+                                                    $nInd = 0;
+                                                    foreach ($s['Indikator'] as $ind) {
+                                                        $nInd++;
+                                                        $agendaBadge = !empty($ind['AgendaTransformasi']) ? '<span class="badge-agenda">' . htmlspecialchars($ind['AgendaTransformasi']) . '</span>' : '-';
+                                                        $satuanBadge = !empty($ind['Satuan']) ? '<span class="badge-satuan">' . htmlspecialchars($ind['Satuan']) . '</span>' : '-';
+                                                        $baseBadge = !empty($ind['Baseline2024']) ? '<span class="badge-baseline">' . htmlspecialchars($ind['Baseline2024']) . '</span>' : '-';
+                                                        $t2025Badge = !empty($ind['Target2025']) ? '<span class="badge-target">' . htmlspecialchars($ind['Target2025']) . '</span>' : '-';
+                                                        $t2029Badge = !empty($ind['Target2029']) ? '<span class="badge-target">' . htmlspecialchars($ind['Target2029']) . '</span>' : '-';
+
+                                                        $html .= '<tr class="matriks-row">';
+                                                        if ($agFirst) {
+                                                            $html .= '<td rowspan="' . $agRS . '" class="' . $css . '">' . $agCell . '</td>';
+                                                            $agFirst = false;
+                                                        }
+                                                        if ($sasFirst) {
+                                                            $html .= '<td rowspan="' . $sasRS . '" class="cell-sasaran">' . $sasCont . '</td>';
+                                                            $sasFirst = false;
+                                                        }
+                                                        $html .= '<td class="cell-ind"><span class="nomor-cell">' . $nInd . '</span> ' . htmlspecialchars($ind['Indikator']) . '</td>';
+                                                        $html .= '<td class="cell-data">' . $satuanBadge . '</td>';
+                                                        $html .= '<td class="cell-data">' . $baseBadge . '</td>';
+                                                        $html .= '<td class="cell-data">' . $t2025Badge . '</td>';
+                                                        $html .= '<td class="cell-data">' . $t2029Badge . '</td>';
+                                                        $html .= '<td class="cell-data">' . $agendaBadge . '</td>';
+                                                        $html .= '<td class="cell-data" style="font-size:11px; color:#455a64;">' . htmlspecialchars($ind['Koordinator'] ?: '-') . '</td>';
+                                                        if ($canAksi) {
+                                                            if ($agAksiFirst) {
+                                                                $html .= '<td rowspan="' . $agRS . '" class="cell-aksi">' . $agAksi . '</td>';
+                                                                $agAksiFirst = false;
+                                                            }
+                                                            if ($sasAksiFirst) {
+                                                                $html .= '<td rowspan="' . $sasRS . '" class="cell-aksi">' . $sasAksi . '</td>';
+                                                                $sasAksiFirst = false;
+                                                            }
+                                                            $html .= '<td class="cell-aksi">' . matriksIndikatorActBtns($ind) . '</td>';
+                                                        }
+                                                        $html .= '</tr>';
+                                                    }
                                                 }
                                             }
+                                            return $html;
                                         }
-                                        return $html;
                                     }
 
                                     $nPN = 0;
                                     foreach ($DataAgenda as $pn):
                                         $nPN++;
-                                        echo renderSection($nPN, 'PN', $pn['Uraian'], $pn['Id'], $pn['Sasaran'], $pn['Periode'], $canAksi);
+                                        echo renderMatriksSection($nPN, 'PN', $pn['Uraian'], $pn['Id'], $pn['Sasaran'], $pn['Periode'], $canAksi);
                                         $nPP = 0;
                                         foreach ($pn['PP'] as $pp):
                                             $nPP++;
                                             $ppNo = $nPN . '.' . $nPP;
-                                            echo renderSection($ppNo, 'PP', $pp['Uraian'], $pp['Id'], $pp['Sasaran'], '', $canAksi);
+                                            echo renderMatriksSection($ppNo, 'PP', $pp['Uraian'], $pp['Id'], $pp['Sasaran'], '', $canAksi);
                                             $nKP = 0;
                                             foreach ($pp['KP'] as $kp):
                                                 $nKP++;
-                                                echo renderSection($ppNo . '.' . $nKP, 'KP', $kp['Uraian'], $kp['Id'], $kp['Sasaran'], '', $canAksi);
+                                                echo renderMatriksSection($ppNo . '.' . $nKP, 'KP', $kp['Uraian'], $kp['Id'], $kp['Sasaran'], '', $canAksi);
                                             endforeach;
                                         endforeach;
                                     endforeach;
 
                                 else: ?>
                                     <tr>
-                                        <td colspan="<?= (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) ? '12' : '9' ?>" class="empty-cell" style="padding: 40px;">
-                                            Belum ada data agenda pembangunan.
+                                        <td colspan="<?= $canEdit ? '12' : '9' ?>" class="empty-cell" style="padding: 40px; color: #888;">
+                                            Belum ada data Matriks Pembangunan. Data akan otomatis ditampilkan saat data Prioritas Nasional / Agenda Pembangunan RPJMN tersedia.
                                         </td>
                                     </tr>
                                 <?php endif; ?>
@@ -451,6 +504,7 @@
     </div>
 </div>
 
+<?php if ($canEdit) { ?>
 <!-- ======== MODAL TAMBAH PN ======== -->
 <div class="modal fade" id="ModalInputPN" role="dialog">
     <div class="modal-dialog">
@@ -460,7 +514,7 @@
                 <h2><span class="tipe-badge tipe-PN">PN</span> Tambah Prioritas Nasional</h2>
             </div>
             <div class="modal-body" style="padding-top: 15px;">
-                <div class="form-section-title">Periode RPJMN</div>
+                <div class="form-section-title">Periode RKP / RPJMN</div>
                 <input type="text" class="form-control" id="PeriodePN" placeholder="cth: 2025-2029">
                 <div class="form-section-title">Uraian Prioritas Nasional</div>
                 <textarea class="form-control" id="UraianPN" rows="3" placeholder="Uraian Prioritas Nasional..."></textarea>
@@ -528,7 +582,7 @@
             <div class="modal-body" style="padding-top: 15px;">
                 <input type="hidden" id="_IdAgenda"><input type="hidden" id="_TipeAgenda">
                 <div id="GroupEditPeriode" style="display: none;">
-                    <div class="form-section-title">Periode RPJMN</div>
+                    <div class="form-section-title">Periode</div>
                     <input type="text" class="form-control" id="_PeriodeAgenda" placeholder="cth: 2025-2029">
                 </div>
                 <div class="form-section-title">Uraian</div>
@@ -649,21 +703,31 @@
         </div>
     </div>
 </div>
+<?php } ?>
 
-<script src="../js/vendor/jquery-1.12.4.min.js"></script>
-<script src="../js/bootstrap.min.js"></script>
-<script src="../js/wow.min.js"></script>
-<script src="../js/jquery-price-slider.js"></script>
-<script src="../js/owl.carousel.min.js"></script>
-<script src="../js/jquery.scrollUp.min.js"></script>
-<script src="../js/meanmenu/jquery.meanmenu.js"></script>
-<script src="../js/scrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
-<script src="../js/data-table/jquery.dataTables.min.js"></script>
-<script src="../js/data-table/data-table-act.js"></script>
-<script src="../js/main.js"></script>
+<script src="<?= base_url('js/vendor/jquery-1.12.4.min.js') ?>"></script>
+<script src="<?= base_url('js/bootstrap.min.js') ?>"></script>
+<script src="<?= base_url('js/wow.min.js') ?>"></script>
+<script src="<?= base_url('js/jquery-price-slider.js') ?>"></script>
+<script src="<?= base_url('js/owl.carousel.min.js') ?>"></script>
+<script src="<?= base_url('js/jquery.scrollUp.min.js') ?>"></script>
+<script src="<?= base_url('js/meanmenu/jquery.meanmenu.js') ?>"></script>
+<script src="<?= base_url('js/scrollbar/jquery.mCustomScrollbar.concat.min.js') ?>"></script>
+<script src="<?= base_url('js/main.js') ?>"></script>
+
 <script>
 var BaseURL = '<?= base_url() ?>';
 $(function(){
+    // Live Search Filter Table
+    $('#searchInput').on('keyup', function() {
+        var value = $(this).val().toLowerCase();
+        $('#matriks-table tbody tr.matriks-row').filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+        });
+    });
+
+    <?php if ($canEdit) { ?>
+    // Simpan PN
     $('#SimpanPN').click(function(){
         if(!$('#PeriodePN').val()) return alert('Periode belum diisi!');
         if(!$('#UraianPN').val()) return alert('Uraian PN belum diisi!');
@@ -677,6 +741,7 @@ $(function(){
         });
     });
 
+    // Tambah PP
     $('body').on('click', '.TambahPP', function(){
         $('#IdPNforPP').val($(this).data('id'));
         $('#LabelPNno').text('');
@@ -695,6 +760,7 @@ $(function(){
         });
     });
 
+    // Tambah KP
     $('body').on('click', '.TambahKP', function(){
         $('#IdPPforKP').val($(this).data('id'));
         $('#UraianKP').val('');
@@ -712,6 +778,7 @@ $(function(){
         });
     });
 
+    // Edit Agenda
     $('body').on('click', '.EditAgenda', function(){
         var tipe = $(this).data('tipe');
         $('#_IdAgenda').val($(this).data('id'));
@@ -743,6 +810,7 @@ $(function(){
         });
     });
 
+    // Hapus Agenda
     $('body').on('click', '.HapusAgenda', function(){
         if(confirm('Hapus item agenda pembangunan ini?')) {
             $.post(BaseURL + 'Nasional/HapusIUPRPJMN', {Id: $(this).data('id')}).done(function(r){
@@ -751,6 +819,7 @@ $(function(){
         }
     });
 
+    // Tambah Sasaran
     $('body').on('click', '.TambahSasaran', function(){
         $('#IdAgendaForSasaran').val($(this).data('id'));
         $('#Sasaran').val('');
@@ -758,7 +827,7 @@ $(function(){
     });
 
     $('#SimpanSasaran').click(function(){
-        if(!$('#Sasaran').val()) return alert('Sasaran belum diisi!');
+        if(!$('#Sasaran').val()) return alert('Uraian sasaran belum diisi!');
         $.post(BaseURL + 'Nasional/InputSasaranAgenda', {
             _Id: $('#IdAgendaForSasaran').val(),
             Sasaran: $('#Sasaran').val()
@@ -767,6 +836,7 @@ $(function(){
         });
     });
 
+    // Edit Sasaran
     $('body').on('click', '.EditSasaran', function(){
         $('#_IdSasaran').val($(this).data('id'));
         $('#_Sasaran').val($(this).data('sasaran'));
@@ -774,7 +844,7 @@ $(function(){
     });
 
     $('#UpdateSasaran').click(function(){
-        if(!$('#_Sasaran').val()) return alert('Sasaran belum diisi!');
+        if(!$('#_Sasaran').val()) return alert('Uraian sasaran belum diisi!');
         $.post(BaseURL + 'Nasional/EditSasaranAgenda', {
             Id: $('#_IdSasaran').val(),
             Sasaran: $('#_Sasaran').val()
@@ -783,22 +853,30 @@ $(function(){
         });
     });
 
+    // Hapus Sasaran
     $('body').on('click', '.HapusSasaran', function(){
-        if(confirm('Hapus Sasaran beserta semua Indikator di bawahnya?')) {
+        if(confirm('Hapus sasaran ini? Semua indikator di bawahnya juga akan terhapus.')) {
             $.post(BaseURL + 'Nasional/HapusSasaranAgenda', {Id: $(this).data('id')}).done(function(r){
                 r == '1' ? location.reload() : alert(r);
             });
         }
     });
 
+    // Tambah Indikator
     $('body').on('click', '.TambahIndikator', function(){
         $('#IdSasaranForInd').val($(this).data('id'));
-        $('#Indikator,#Satuan,#Baseline2024,#Target2025,#Target2029,#AgendaTransformasi,#Koordinator').val('');
+        $('#Indikator').val('');
+        $('#Satuan').val('');
+        $('#Baseline2024').val('');
+        $('#Target2025').val('');
+        $('#Target2029').val('');
+        $('#AgendaTransformasi').val('');
+        $('#Koordinator').val('');
         $('#ModalInputIndikator').modal('show');
     });
 
     $('#SimpanIndikator').click(function(){
-        if(!$('#Indikator').val()) return alert('Indikator belum diisi!');
+        if(!$('#Indikator').val()) return alert('Uraian indikator belum diisi!');
         $.post(BaseURL + 'Nasional/InputIndikatorAgenda', {
             _Id: $('#IdSasaranForInd').val(),
             Indikator: $('#Indikator').val(),
@@ -813,6 +891,7 @@ $(function(){
         });
     });
 
+    // Edit Indikator
     $('body').on('click', '.EditIndikator', function(){
         $('#_IdInd').val($(this).data('id'));
         $('#_Indikator').val($(this).data('indikator'));
@@ -826,7 +905,7 @@ $(function(){
     });
 
     $('#UpdateIndikator').click(function(){
-        if(!$('#_Indikator').val()) return alert('Indikator belum diisi!');
+        if(!$('#_Indikator').val()) return alert('Uraian indikator belum diisi!');
         $.post(BaseURL + 'Nasional/EditIndikatorAgenda', {
             Id: $('#_IdInd').val(),
             Indikator: $('#_Indikator').val(),
@@ -841,12 +920,14 @@ $(function(){
         });
     });
 
+    // Hapus Indikator
     $('body').on('click', '.HapusIndikator', function(){
-        if(confirm('Hapus Indikator ini?')) {
+        if(confirm('Hapus indikator ini?')) {
             $.post(BaseURL + 'Nasional/HapusIndikatorAgenda', {Id: $(this).data('id')}).done(function(r){
                 r == '1' ? location.reload() : alert(r);
             });
         }
     });
+    <?php } ?>
 });
 </script>

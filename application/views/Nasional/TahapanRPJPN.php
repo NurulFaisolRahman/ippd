@@ -1,5 +1,10 @@
+<?php
+$userLevel = $_SESSION['Level'] ?? ($this->session->userdata('Level') ?? null);
+$isLoggedIn = !empty($_SESSION['isLoggedIn']) || !empty($this->session->userdata('isLoggedIn'));
+$canEdit = $isLoggedIn && ($userLevel !== null && $userLevel !== '' && (string)$userLevel === '0');
+?>
 <style>
-    /* CSS untuk membuat Modal persis di tengah (Vertical Center) */
+    /* CSS Modal Vertical Center */
     .modal {
         text-align: center;
         padding: 0!important;
@@ -15,7 +20,7 @@
         display: inline-block;
         text-align: left;
         vertical-align: middle;
-        width: 600px; 
+        width: 750px; 
         max-width: 95%; 
     }
     .modal-header h2 {
@@ -27,184 +32,210 @@
         border-bottom: 1px solid #eee;
     }
 
-    /* CSS Card Container Enhancement */
+    /* CSS Card Container */
     .data-table-list {
         background: #ffffff;
         border-radius: 10px;
         box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
         padding: 25px;
         border: none;
+        margin-bottom: 30px;
     }
 
-    /* CSS Table Enhancement */
-    #hierarki-table > thead > tr > th {
+    /* Header Tabel 1 Baris Sesuai Desain */
+    .tahapan-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        border: 1px solid #d99b26;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+    .tahapan-table > thead > tr > th {
         background-color: #f8f9fa;
-        color: #455a64;
+        color: #111827;
         font-weight: 700;
-        text-transform: uppercase;
-        font-size: 12px;
-        letter-spacing: 0.5px;
-        border-bottom: 2px solid #e0e0e0;
+        font-size: 13.5px;
+        line-height: 1.45;
+        border-top: 3px solid #d99b26 !important;
+        border-bottom: 2px solid #d99b26 !important;
+        border-right: 1px solid #d99b26;
+        border-left: none;
         vertical-align: middle;
+        padding: 14px 12px;
+        text-align: center;
     }
-    #hierarki-table > tbody > tr > td {
-        vertical-align: middle;
-        color: #444;
-        border-top: 1px solid #f2f2f2;
+    .tahapan-table > thead > tr > th:last-child {
+        border-right: none;
     }
-    
-    /* Efek hover baris tabel hierarki */
-    #hierarki-table > tbody > tr {
-        transition: filter 0.2s ease;
+    .tahapan-table > tbody > tr > td {
+        vertical-align: top;
+        color: #374151;
+        font-size: 13.5px;
+        line-height: 1.55;
+        border-top: 1px solid #e5e7eb;
+        border-right: 1px solid #e5e7eb;
+        padding: 14px 16px;
+        background-color: #ffffff;
     }
-    #hierarki-table > tbody > tr:hover {
-        filter: brightness(0.96); /* Menggelapkan sedikit baris saat di-hover tanpa merusak warna latar bawaan */
+    .tahapan-table > tbody > tr > td:last-child {
+        border-right: none;
+    }
+    .tahapan-table > tbody > tr:hover > td {
+        background-color: #fdfaf3;
     }
 
-    /* CSS Button & Badge Enhancements */
+    /* Button Action & Group */
     .btn-action {
         border-radius: 5px;
-        margin: 0 2px;
+        margin: 0;
         transition: all 0.3s ease;
         padding: 5px 10px;
         font-weight: 600;
+        white-space: nowrap;
     }
     .btn-action:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
+    .btn-action-group {
+        display: inline-flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        white-space: nowrap;
+        flex-wrap: nowrap;
+    }
+    .td-aksi {
+        white-space: nowrap !important;
+        vertical-align: middle !important;
+    }
+
     .badge-periode {
         background-color: #00c292;
         color: white;
-        padding: 5px 12px;
-        border-radius: 15px;
+        padding: 4px 10px;
+        border-radius: 12px;
         font-size: 11px;
         font-weight: 600;
         display: inline-block;
-        box-shadow: 0 2px 5px rgba(0, 194, 146, 0.3);
     }
 </style>
 
 <div class="data-table-area">
     <div class="container">
+        
+        <!-- Judul Halaman Utama -->
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div style="background: #ffffff; border-radius: 10px; padding: 20px 25px; margin-bottom: 25px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                    <div>
+                        <h2 style="margin: 0; color: #2c3e50; font-weight: 700; font-size: 22px;">
+                            <i class="fa fa-tasks" style="color: #00c292; margin-right: 8px;"></i> Tahapan Pembangunan RPJPN
+                        </h2>
+                        <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 13px;">
+                            Tahapan Pembangunan Jangka Panjang Nasional Menuju Indonesia Emas 2045
+                        </p>
+                    </div>
+                    <?php if ($canEdit) { ?>
+                    <div>
+                        <button type="button" class="btn btn-success notika-btn-success btn-action BtnTambahTahapan" data-toggle="modal" data-target="#ModalInputTahapan" style="padding: 9px 18px;">
+                            <i class="fa fa-plus-circle" style="margin-right: 5px;"></i> <b>Input Tahapan Pembangunan</b>
+                        </button>
+                    </div>
+                    <?php } ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1 TABEL TAHAPAN PEMBANGUNAN -->
         <div class="row">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="data-table-list">
-                    <!-- Penyesuaian Header Kontainer Tabel -->
-                    <div class="basic-tb-hd" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-                        <h3 style="margin: 0; color: #333; font-weight: 600; line-height: 1.5;">Hierarki Tahapan RPJPN</h3>
-                        <div class="button-icon-btn sm-res-mg-t-30">
-                            <!-- Tombol Input Induk Level 1 -->
-                            <button type="button" class="btn btn-success notika-btn-success btn-action" data-toggle="modal" data-target="#ModalInputTahapan" style="padding: 8px 15px;">
-                                <i class="fa fa-plus-circle" style="margin-right: 5px;"></i> <b>Input Tahapan RPJPN</b>
-                            </button>
-                        </div>
-                    </div>
-                    
                     <div class="table-responsive">
-                        <!-- Menggunakan class table standar, tanpa datatable-basic default agar custom toggle berfungsi baik -->
-                        <table id="hierarki-table" class="table table-striped">
+                        <table id="table-tahapan-rpjpn" class="table tahapan-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 5%;" class="text-center">No</th>
-                                    <th style="width: 50%;">Uraian (Tahapan / Sub Tahapan / Pembangunan)</th>
-                                    <th style="width: 15%;" class="text-center">Periode</th>
-                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
-                                    <th style="width: 30%;" class="text-center">Aksi</th>
+                                    <th style="width: 4%;" class="text-center">No</th>
+                                    <th style="width: 20%;">
+                                        Nama Tahap Pembangunan
+                                    </th>
+                                    <th style="width: 17%;">
+                                        Tahap 1 (2025-2029)<br>
+                                        Penguatan Fondasi Transformasi
+                                    </th>
+                                    <th style="width: 17%;">
+                                        Tahap 2 (2030-2034)<br>
+                                        Akselerasi Transformasi
+                                    </th>
+                                    <th style="width: 17%;">
+                                        Tahap 3 (2035-2039)<br>
+                                        Ekspansi Global
+                                    </th>
+                                    <th style="width: 17%;">
+                                        Tahap 4 (2040-2045)<br>
+                                        Perwujudan Indonesia Emas
+                                    </th>
+                                    <?php if ($canEdit) { ?>
+                                    <th style="width: 8%; white-space: nowrap;" class="text-center">Aksi</th>
                                     <?php } ?>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php 
-                                /* LOGIKA FOREACH BERSARANG DENGAN PENOMORAN OTOMATIS */
-                                if(isset($Tahapan) && count($Tahapan) > 0) {
-                                    $noTahapan = 1;
-                                    foreach ($Tahapan as $tahapan) { 
+                                if (!empty($Tahapan)) {
+                                    $no = 1;
+                                    foreach ($Tahapan as $item) {
                                 ?>
-                                    <!-- LEVEL 1: TAHAPAN RPJPN -->
-                                    <tr data-id="tahapan-<?= $tahapan['Id'] ?>" data-parent="" data-expanded="false" style="background-color: #f1f8e9;">
-                                        <td class="text-center" style="font-size: 14px;"><b><?= $noTahapan ?></b></td>
-                                        <!-- Teks dibuat bisa diklik tanpa icon + / - -->
-                                        <td style="cursor: pointer; font-size: 14px; border-left: 3px solid #8bc34a;" onclick="toggleLevel('tahapan-<?= $tahapan['Id'] ?>', this)">
-                                            <b>TAHAPAN:</b> <?= $tahapan['Tahapan'] ?>
+                                    <tr>
+                                        <td class="text-center" style="font-size: 14px; font-weight: 600; vertical-align: middle;">
+                                            <?= $no ?>
                                         </td>
-                                        <td class="text-center">
-                                            <span class="badge-periode"><?= $tahapan['TahunMulai'].'-'.$tahapan['TahunAkhir'] ?></span>
+                                        <td style="font-weight: 600; color: #1e293b;">
+                                            <?= !empty($item['Tahapan']) ? nl2br(htmlspecialchars($item['Tahapan'])) : (!empty($item['Tahap']) ? htmlspecialchars($item['Tahap']) : '-') ?>
                                         </td>
-                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
-                                        <td class="text-center">
-                                            <!-- Tombol Aksi di baris Tahapan -->
-                                            <button class="btn btn-sm btn-success TambahSubTahapan btn-action" data-id="<?= $tahapan['Id'] ?>" title="Tambah Sub Tahapan"><i class="fa fa-plus"></i> Sub Tahapan</button>
-                                            <button class="btn btn-sm btn-info EditTahapan btn-action" data-id="<?= $tahapan['Id'] ?>" data-idvisi="<?= isset($tahapan['IdVisi']) ? $tahapan['IdVisi'] : '' ?>" data-periode="<?= $tahapan['TahunMulai'].'-'.$tahapan['TahunAkhir'] ?>" data-tahapan="<?= $tahapan['Tahapan'] ?>" title="Edit Tahapan"><i class="fa fa-edit"></i> Edit</button>
-                                            <button class="btn btn-sm btn-danger HapusTahapan btn-action" data-id="<?= $tahapan['Id'] ?>" title="Hapus Tahapan"><i class="fa fa-trash"></i> Hapus</button>
+                                        <td>
+                                            <?= !empty($item['Tahap1']) ? nl2br(htmlspecialchars($item['Tahap1'])) : '-' ?>
+                                        </td>
+                                        <td>
+                                            <?= !empty($item['Tahap2']) ? nl2br(htmlspecialchars($item['Tahap2'])) : '-' ?>
+                                        </td>
+                                        <td>
+                                            <?= !empty($item['Tahap3']) ? nl2br(htmlspecialchars($item['Tahap3'])) : '-' ?>
+                                        </td>
+                                        <td>
+                                            <?= !empty($item['Tahap4']) ? nl2br(htmlspecialchars($item['Tahap4'])) : '-' ?>
+                                        </td>
+                                        <?php if ($canEdit) { ?>
+                                        <td class="text-center td-aksi">
+                                            <div class="btn-action-group">
+                                                <button class="btn btn-sm btn-info EditTahapan btn-action" 
+                                                    data-id="<?= $item['Id'] ?>" 
+                                                    data-periode="<?= htmlspecialchars($item['Periode'] ?? '', ENT_QUOTES) ?>" 
+                                                    data-tahapan="<?= htmlspecialchars($item['Tahapan'] ?? ($item['Tahap'] ?? ''), ENT_QUOTES) ?>" 
+                                                    data-tahap1="<?= htmlspecialchars($item['Tahap1'] ?? '', ENT_QUOTES) ?>" 
+                                                    data-tahap2="<?= htmlspecialchars($item['Tahap2'] ?? '', ENT_QUOTES) ?>" 
+                                                    data-tahap3="<?= htmlspecialchars($item['Tahap3'] ?? '', ENT_QUOTES) ?>" 
+                                                    data-tahap4="<?= htmlspecialchars($item['Tahap4'] ?? '', ENT_QUOTES) ?>" 
+                                                    title="Edit Data">
+                                                    <i class="fa fa-edit"></i> Edit
+                                                </button>
+                                                <button class="btn btn-sm btn-danger HapusTahapan btn-action" data-id="<?= $item['Id'] ?>" title="Hapus Data">
+                                                    <i class="fa fa-trash"></i> Hapus
+                                                </button>
+                                            </div>
                                         </td>
                                         <?php } ?>
                                     </tr>
-
-                                    <?php 
-                                    // Pengecekan Sub Tahapan berdasarkan Tahapan ini
-                                    if(isset($tahapan['SubTahapan'])) {
-                                        $noSub = 1;
-                                        foreach ($tahapan['SubTahapan'] as $sub) { 
-                                    ?>
-                                        <!-- LEVEL 2: SUB TAHAPAN RPJPN -->
-                                        <tr data-id="sub-<?= $sub['Id'] ?>" data-parent="tahapan-<?= $tahapan['Id'] ?>" data-expanded="false" style="display: none; background-color: #e0f7fa;">
-                                            <td></td>
-                                            <td style="padding-left: 30px; cursor: pointer; border-left: 3px solid #00bcd4;" onclick="toggleLevel('sub-<?= $sub['Id'] ?>', this)">
-                                                <b style="color: #00838f;">SUB TAHAPAN <?= $noSub ?>:</b> <?= $sub['SubTahapan'] ?>
-                                            </td>
-                                            <td class="text-center">
-                                                <span class="badge-periode" style="background-color: #00bcd4; box-shadow: 0 2px 5px rgba(0, 188, 212, 0.3);"><?= $sub['Periode'] ?></span>
-                                            </td>
-                                            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
-                                            <td class="text-center">
-                                                <!-- Tombol Aksi di baris Sub Tahapan -->
-                                                <button class="btn btn-sm btn-success TambahPembangunan btn-action" data-id="<?= $sub['Id'] ?>" title="Tambah Pembangunan"><i class="fa fa-plus"></i> Pembangunan</button>
-                                                <button class="btn btn-sm btn-info EditSubTahapan btn-action" data-id="<?= $sub['Id'] ?>" data-idtahapan="<?= $tahapan['Id'] ?>" data-subtahapan="<?= $sub['SubTahapan'] ?>" title="Edit Sub Tahapan"><i class="fa fa-edit"></i> Edit</button>
-                                                <button class="btn btn-sm btn-danger HapusSubTahapan btn-action" data-id="<?= $sub['Id'] ?>" title="Hapus Sub Tahapan"><i class="fa fa-trash"></i> Hapus</button>
-                                            </td>
-                                            <?php } ?>
-                                        </tr>
-
-                                        <?php 
-                                        // Pengecekan Pembangunan berdasarkan Sub Tahapan ini
-                                        if(isset($sub['Pembangunan'])) {
-                                            $noPem = 1;
-                                            foreach ($sub['Pembangunan'] as $pem) { 
-                                        ?>
-                                            <!-- LEVEL 3: PEMBANGUNAN -->
-                                            <tr data-id="pem-<?= $pem['Id'] ?>" data-parent="sub-<?= $sub['Id'] ?>" data-expanded="false" style="display: none; background-color: #fff3e0;">
-                                                <td></td>
-                                                <td style="padding-left: 60px; border-left: 3px solid #ff9800;">
-                                                    <b style="color: #ef6c00;">PEMBANGUNAN <?= $noSub . '.' . $noPem ?>:</b> <?= $pem['TahapanPembangunan'] ?>
-                                                </td>
-                                                <td class="text-center">
-                                                    <span class="badge-periode" style="background-color: #ff9800; box-shadow: 0 2px 5px rgba(255, 152, 0, 0.3);"><?= $pem['Periode'] ?></span>
-                                                </td>
-                                                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
-                                                <td class="text-center">
-                                                    <!-- Tombol Aksi di baris Pembangunan -->
-                                                    <button class="btn btn-sm btn-info EditPembangunan btn-action" data-id="<?= $pem['Id'] ?>" data-idsub="<?= $sub['Id'] ?>" data-pembangunan="<?= $pem['TahapanPembangunan'] ?>" title="Edit Pembangunan"><i class="fa fa-edit"></i> Edit</button>
-                                                    <button class="btn btn-sm btn-danger HapusPembangunan btn-action" data-id="<?= $pem['Id'] ?>" title="Hapus Pembangunan"><i class="fa fa-trash"></i> Hapus</button>
-                                                </td>
-                                                <?php } ?>
-                                            </tr>
-                                        <?php 
-                                                $noPem++;
-                                            } // End Pembangunan
-                                        } 
-                                        ?>
-                                    <?php 
-                                            $noSub++;
-                                        } // End Sub Tahapan
-                                    } 
-                                    ?>
                                 <?php 
-                                        $noTahapan++;
-                                    } // End Tahapan
+                                        $no++;
+                                    }
                                 } else { ?>
                                     <tr>
-                                        <td colspan="4" class="text-center" style="padding: 30px; color: #999;">Belum ada data Tahapan RPJPN.</td>
+                                        <td colspan="<?= $canEdit ? '7' : '6' ?>" class="text-center" style="padding: 30px; color: #999;">
+                                            Belum ada data Tahapan Pembangunan RPJPN.
+                                        </td>
                                     </tr>
                                 <?php } ?>
                             </tbody>
@@ -213,50 +244,60 @@
                 </div>
             </div>
         </div>
+
     </div>
 </div>
 
 <!-- ============================================== -->
-<!-- MODAL INPUT & EDIT TAHAPAN (LEVEL 1)           -->
+<!-- MODAL INPUT TAHAPAN PEMBANGUNAN                -->
 <!-- ============================================== -->
 <div class="modal fade" id="ModalInputTahapan" role="dialog">
     <div class="modal-dialog modals-default">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h2>Tambah Tahapan RPJPN</h2>
+                <h2>Tambah Tahapan Pembangunan RPJPN</h2>
             </div>
             <div class="modal-body" style="padding-top: 20px;">
                 <div class="row">
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div class="form-group ic-cmp-int">
-                            <div class="form-ic-cmp">
-                                <i class="fa fa-flag"></i>
-                            </div>
-                            <div class="bootstrap-select fm-cmp-mg">
-                                <select class="selectpicker form-control" data-live-search="true" id="IdVisi">
-                                    <option value="">Pilih Periode RPJPN</option>
-                                    <?php 
-                                    if(isset($Visi)) {
-                                        foreach ($Visi as $cv) {
-                                            echo "<option value='".$cv['Id']."'>".$cv['TahunMulai']." - ".$cv['TahunAkhir']."</option>";
-                                        }
-                                    } 
-                                    ?>
-                                </select>
-                            </div>
+                    <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12">
+                        <div class="form-group">
+                            <label style="font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 5px;">Nama Tahap Pembangunan</label>
+                            <textarea class="form-control" id="Tahapan" rows="2" style="resize: vertical;" placeholder="Contoh: Transformasi Sosial / Nama Tahap Pembangunan"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                        <div class="form-group">
+                            <label style="font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 5px;">Periode</label>
+                            <input type="text" class="form-control" id="Periode" value="2025-2045" placeholder="Contoh: 2025-2045">
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div class="form-group ic-cmp-int float-lb floating-lb">
-                            <div class="form-ic-cmp">
-                                <i class="notika-icon notika-edit"></i>
-                            </div>
-                            <div class="nk-int-st">
-                                <textarea class="form-control" id="Tahapan" rows="3" style="resize: vertical;" placeholder="Uraian Tahapan RPJPN"></textarea>
-                            </div>
+                <div class="row" style="margin-top: 10px;">
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                        <div class="form-group">
+                            <label style="font-size: 12px; color: #1e88e5; font-weight: 600; margin-bottom: 5px;">Tahap 1 (2025-2029): Penguatan Fondasi Transformasi</label>
+                            <textarea class="form-control" id="Tahap1" rows="3" style="resize: vertical;" placeholder="Uraian Tahap 1"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                        <div class="form-group">
+                            <label style="font-size: 12px; color: #00897b; font-weight: 600; margin-bottom: 5px;">Tahap 2 (2030-2034): Akselerasi Transformasi</label>
+                            <textarea class="form-control" id="Tahap2" rows="3" style="resize: vertical;" placeholder="Uraian Tahap 2"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="margin-top: 10px;">
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                        <div class="form-group">
+                            <label style="font-size: 12px; color: #f57c00; font-weight: 600; margin-bottom: 5px;">Tahap 3 (2035-2039): Ekspansi Global</label>
+                            <textarea class="form-control" id="Tahap3" rows="3" style="resize: vertical;" placeholder="Uraian Tahap 3"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                        <div class="form-group">
+                            <label style="font-size: 12px; color: #7b1fa2; font-weight: 600; margin-bottom: 5px;">Tahap 4 (2040-2045): Perwujudan Indonesia Emas</label>
+                            <textarea class="form-control" id="Tahap4" rows="3" style="resize: vertical;" placeholder="Uraian Tahap 4"></textarea>
                         </div>
                     </div>
                 </div>
@@ -269,166 +310,63 @@
     </div>
 </div>
 
+<!-- ============================================== -->
+<!-- MODAL EDIT TAHAPAN PEMBANGUNAN                  -->
+<!-- ============================================== -->
 <div class="modal fade" id="ModalEditTahapan" role="dialog">
     <div class="modal-dialog modals-default">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h2>Edit Tahapan RPJPN</h2>
+                <h2>Edit Tahapan Pembangunan RPJPN</h2>
             </div>
             <div class="modal-body" style="padding-top: 20px;">
                 <input type="hidden" id="IdTahapanForm">
                 <div class="row">
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div class="form-group ic-cmp-int float-lb floating-lb">
-                            <div class="form-ic-cmp">
-                                <i class="notika-icon notika-edit"></i>
-                            </div>
-                            <div class="nk-int-st">
-                                <textarea class="form-control" id="_Tahapan" rows="3" style="resize: vertical;" placeholder="Uraian Tahapan RPJPN"></textarea>
-                            </div>
+                    <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12">
+                        <div class="form-group">
+                            <label style="font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 5px;">Nama Tahap Pembangunan</label>
+                            <textarea class="form-control" id="_TahapanEdit" rows="2" style="resize: vertical;" placeholder="Contoh: Transformasi Sosial / Nama Tahap Pembangunan"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                        <div class="form-group">
+                            <label style="font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 5px;">Periode</label>
+                            <input type="text" class="form-control" id="_PeriodeEdit" placeholder="Contoh: 2025-2045">
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="margin-top: 10px;">
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                        <div class="form-group">
+                            <label style="font-size: 12px; color: #1e88e5; font-weight: 600; margin-bottom: 5px;">Tahap 1 (2025-2029): Penguatan Fondasi Transformasi</label>
+                            <textarea class="form-control" id="_Tahap1Edit" rows="3" style="resize: vertical;" placeholder="Uraian Tahap 1"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                        <div class="form-group">
+                            <label style="font-size: 12px; color: #00897b; font-weight: 600; margin-bottom: 5px;">Tahap 2 (2030-2034): Akselerasi Transformasi</label>
+                            <textarea class="form-control" id="_Tahap2Edit" rows="3" style="resize: vertical;" placeholder="Uraian Tahap 2"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="margin-top: 10px;">
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                        <div class="form-group">
+                            <label style="font-size: 12px; color: #f57c00; font-weight: 600; margin-bottom: 5px;">Tahap 3 (2035-2039): Ekspansi Global</label>
+                            <textarea class="form-control" id="_Tahap3Edit" rows="3" style="resize: vertical;" placeholder="Uraian Tahap 3"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                        <div class="form-group">
+                            <label style="font-size: 12px; color: #7b1fa2; font-weight: 600; margin-bottom: 5px;">Tahap 4 (2040-2045): Perwujudan Indonesia Emas</label>
+                            <textarea class="form-control" id="_Tahap4Edit" rows="3" style="resize: vertical;" placeholder="Uraian Tahap 4"></textarea>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer" style="padding-top: 15px;">
                 <button type="button" class="btn btn-info btn-action" id="EditBtnTahapan"><i class="fa fa-save"></i> Update</button>
-                <button type="button" class="btn btn-default btn-action" data-dismiss="modal">Tutup</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ============================================== -->
-<!-- MODAL INPUT & EDIT SUB TAHAPAN (LEVEL 2)       -->
-<!-- ============================================== -->
-<div class="modal fade" id="ModalInputSubTahapan" role="dialog">
-    <div class="modal-dialog modals-default">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h2>Tambah Sub Tahapan RPJPN</h2>
-            </div>
-            <div class="modal-body" style="padding-top: 20px;">
-                <div class="row" style="display: none;">
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <input type="hidden" id="IdTahapan">
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div class="form-group ic-cmp-int float-lb floating-lb">
-                            <div class="form-ic-cmp">
-                                <i class="notika-icon notika-edit"></i>
-                            </div>
-                            <div class="nk-int-st">
-                                <textarea class="form-control" id="SubTahapan" rows="3" style="resize: vertical;" placeholder="Uraian Sub Tahapan RPJPN"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer" style="padding-top: 15px;">
-                <button type="button" class="btn btn-success btn-action" id="SimpanSubTahapan"><i class="fa fa-save"></i> Simpan</button>
-                <button type="button" class="btn btn-default btn-action" data-dismiss="modal">Tutup</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="ModalEditSubTahapan" role="dialog">
-    <div class="modal-dialog modals-default">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h2>Edit Sub Tahapan RPJPN</h2>
-            </div>
-            <div class="modal-body" style="padding-top: 20px;">
-                <input type="hidden" id="IdSubTahapanForm">
-                <input type="hidden" id="_IdTahapan">
-                <div class="row">
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div class="form-group ic-cmp-int float-lb floating-lb">
-                            <div class="form-ic-cmp">
-                                <i class="notika-icon notika-edit"></i>
-                            </div>
-                            <div class="nk-int-st">
-                                <textarea class="form-control" id="_SubTahapan" rows="3" style="resize: vertical;" placeholder="Uraian Sub Tahapan RPJPN"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer" style="padding-top: 15px;">
-                <button type="button" class="btn btn-info btn-action" id="EditBtnSubTahapan"><i class="fa fa-save"></i> Update</button>
-                <button type="button" class="btn btn-default btn-action" data-dismiss="modal">Tutup</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ============================================== -->
-<!-- MODAL INPUT & EDIT PEMBANGUNAN (LEVEL 3)       -->
-<!-- ============================================== -->
-<div class="modal fade" id="ModalInputPembangunan" role="dialog">
-    <div class="modal-dialog modals-default">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h2>Tambah Tahapan Pembangunan</h2>
-            </div>
-            <div class="modal-body" style="padding-top: 20px;">
-                <div class="row" style="display: none;">
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <input type="hidden" id="IdSubTahapan">
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div class="form-group ic-cmp-int float-lb floating-lb">
-                            <div class="form-ic-cmp">
-                                <i class="notika-icon notika-edit"></i>
-                            </div>
-                            <div class="nk-int-st">
-                                <textarea class="form-control" id="TahapanPembangunan" rows="3" style="resize: vertical;" placeholder="Uraian Tahapan Pembangunan"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer" style="padding-top: 15px;">
-                <button type="button" class="btn btn-success btn-action" id="SimpanPembangunan"><i class="fa fa-save"></i> Simpan</button>
-                <button type="button" class="btn btn-default btn-action" data-dismiss="modal">Tutup</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="ModalEditPembangunan" role="dialog">
-    <div class="modal-dialog modals-default">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h2>Edit Tahapan Pembangunan</h2>
-            </div>
-            <div class="modal-body" style="padding-top: 20px;">
-                <input type="hidden" id="IdPembangunanForm">
-                <input type="hidden" id="_IdSubTahapan">
-                <div class="row">
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div class="form-group ic-cmp-int float-lb floating-lb">
-                            <div class="form-ic-cmp">
-                                <i class="notika-icon notika-edit"></i>
-                            </div>
-                            <div class="nk-int-st">
-                                <textarea class="form-control" id="_TahapanPembangunan" rows="3" style="resize: vertical;" placeholder="Uraian Tahapan Pembangunan"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer" style="padding-top: 15px;">
-                <button type="button" class="btn btn-info btn-action" id="EditBtnPembangunan"><i class="fa fa-save"></i> Update</button>
                 <button type="button" class="btn btn-default btn-action" data-dismiss="modal">Tutup</button>
             </div>
         </div>
@@ -447,229 +385,103 @@
 <script src="../js/data-table/data-table-act.js"></script>
 <script src="../js/main.js"></script>
 <script>
-    // JS Logic untuk Toggle Hierarki Tabel dengan klik text (Tanpa Icon)
-    function toggleLevel(parentId, element) {
-        var trs = document.querySelectorAll('tr[data-parent="' + parentId + '"]');
-        var parentTr = element.closest('tr');
-        
-        // Membaca status berdasarkan atribut custom data-expanded
-        var isExpanded = parentTr.getAttribute('data-expanded') === 'true';
-
-        if (isExpanded) {
-            // Tutup (Collapse)
-            parentTr.setAttribute('data-expanded', 'false');
-            hideAllChildren(parentId);
-        } else {
-            // Buka (Expand)
-            parentTr.setAttribute('data-expanded', 'true');
-            trs.forEach(function(tr) {
-                tr.style.display = 'table-row';
-            });
-        }
-        
-        saveExpandedState();
-    }
-
-    // Fungsi Rekursif untuk menyembunyikan semua turunan di bawahnya
-    function hideAllChildren(parentId) {
-        var children = document.querySelectorAll('tr[data-parent="' + parentId + '"]');
-        
-        children.forEach(function(child) {
-            child.style.display = 'none';
-            child.setAttribute('data-expanded', 'false'); // Set turunan jadi tertutup
-            var childId = child.getAttribute('data-id');
-            
-            hideAllChildren(childId); // Jalankan ke anak yang lebih dalam
-        });
-    }
-
-    // Simpan state secara presisi dengan memindai atribut data-expanded
-    function saveExpandedState() {
-        var expanded = [];
-        document.querySelectorAll('tr[data-expanded="true"]').forEach(function(tr) {
-            expanded.push(tr.getAttribute('data-id'));
-        });
-        sessionStorage.setItem('expandedRowsTahapan', JSON.stringify(expanded)); // Nama session dibedakan khusus Tahapan
-    }
-
     $(document).ready(function() {
         var BaseURL = '<?= base_url() ?>';
 
-        // --- Restore & Reset Bug State dari Session ---
-        var expandedRows = JSON.parse(sessionStorage.getItem('expandedRowsTahapan')) || [];
-        
-        // Membaca dari atas ke bawah (DOM order) agar parent terbuka terlebih dahulu 
-        // sehingga child yang seharusnya tampil tidak terblokir status display 'none'
-        document.querySelectorAll('#hierarki-table tbody tr').forEach(function(tr) {
-            var id = tr.getAttribute('data-id');
-            if (expandedRows.includes(id)) {
-                tr.setAttribute('data-expanded', 'true');
-                var trs = document.querySelectorAll('tr[data-parent="' + id + '"]');
-                trs.forEach(function(childTr) {
-                    childTr.style.display = 'table-row';
-                });
-            }
-        });
-        saveExpandedState();
-        // ---------------------------------------------------------------
-
-        // Trigger Auto-Select ComboBox saat tombol "Tambah di setiap baris" diklik
-        $('#hierarki-table tbody').on('click', '.TambahSubTahapan', function() {
-            var parentRow = $(this).closest('tr')[0];
-            
-            // Buka otomatis induknya jika saat diklik kondisinya masih tertutup
-            if (parentRow.getAttribute('data-expanded') !== 'true') {
-                toggleLevel(parentRow.getAttribute('data-id'), parentRow);
-            }
-
-            $('#IdTahapanForm').val($(this).data('id'));
-            $('#ModalInputSubTahapan').modal('show');
-        });
-
-        $('#hierarki-table tbody').on('click', '.TambahPembangunan', function() {
-            var parentRow = $(this).closest('tr')[0];
-            
-            // Buka otomatis induknya jika saat diklik kondisinya masih tertutup
-            if (parentRow.getAttribute('data-expanded') !== 'true') {
-                toggleLevel(parentRow.getAttribute('data-id'), parentRow);
-            }
-
-            $('#IdSubTahapanForm').val($(this).data('id'));
-            $('#ModalInputPembangunan').modal('show');
+        $('.BtnTambahTahapan').click(function() {
+            $('#Tahapan').val('');
+            $('#Periode').val('2025-2045');
+            $('#Tahap1').val('');
+            $('#Tahap2').val('');
+            $('#Tahap3').val('');
+            $('#Tahap4').val('');
         });
 
         // ==============================================
-        // SCRIPT TAHAPAN RPJPN (LEVEL 1)
+        // SCRIPT SIMPAN TAHAPAN
         // ==============================================
         $("#SimpanTahapan").click(function() {
-            if ($("#IdVisi").val() == "") {
-                alert('Pilih Periode Visi Terlebih Dahulu!')
-            } else if ($("#Tahapan").val() == "") {
-                alert('Input Tahapan Belum Benar!')
-            } else {
-                var Data = { _Id  : $("#IdVisi").val(), // Menyesuaikan Payload yang baru
-                             Tahapan  : $("#Tahapan").val() }
-                $.post(BaseURL+"Nasional/InputTahapanRPJPN", Data).done(function(Respon) {
-                    if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
-                })                         
+            var tahapan = $("#Tahapan").val().trim();
+            var tahap1 = $("#Tahap1").val().trim();
+            var tahap2 = $("#Tahap2").val().trim();
+            var tahap3 = $("#Tahap3").val().trim();
+            var tahap4 = $("#Tahap4").val().trim();
+
+            if (tahapan == "" && tahap1 == "" && tahap2 == "" && tahap3 == "" && tahap4 == "") {
+                alert('Silakan isi Nama Tahap Pembangunan atau minimal salah satu uraian Tahap!');
+                return;
             }
+
+            var Data = { 
+                Tahapan : tahapan,
+                Periode : $("#Periode").val().trim(),
+                Tahap1  : tahap1,
+                Tahap2  : tahap2,
+                Tahap3  : tahap3,
+                Tahap4  : tahap4
+            };
+
+            $.post(BaseURL + "Nasional/InputTahapanRPJPN", Data).done(function(Respon) {
+                if (Respon == '1') { 
+                    window.location.reload(); 
+                } else { 
+                    alert(Respon); 
+                }
+            });                         
         });
 
-        $('#hierarki-table tbody').on('click', '.EditTahapan', function () {
+        $('.tahapan-table tbody').on('click', '.EditTahapan', function () {
             $("#IdTahapanForm").val($(this).data('id'));
-            $("#_IdVisi").val($(this).data('idvisi'));
-            $("#_PeriodeVisi").val($(this).data('periode'));
-            $("#_Tahapan").val($(this).data('tahapan'));
+            $("#_TahapanEdit").val($(this).data('tahapan'));
+            $("#_PeriodeEdit").val($(this).data('periode'));
+            $("#_Tahap1Edit").val($(this).data('tahap1'));
+            $("#_Tahap2Edit").val($(this).data('tahap2'));
+            $("#_Tahap3Edit").val($(this).data('tahap3'));
+            $("#_Tahap4Edit").val($(this).data('tahap4'));
             $('#ModalEditTahapan').modal("show");
         });
 
         $("#EditBtnTahapan").click(function() {
-            if ($("#_Tahapan").val() == "") {
-                alert('Input Tahapan Belum Benar!')
-            } else {
-                var Data = { Id       : $("#IdTahapanForm").val(),
-                             _Id  : $("#_IdVisi").val(),
-                             Tahapan  : $("#_Tahapan").val() }
-                $.post(BaseURL+"Nasional/EditTahapanRPJPN", Data).done(function(Respon) {
-                    if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
-                })                         
+            var tahapan = $("#_TahapanEdit").val().trim();
+            var tahap1 = $("#_Tahap1Edit").val().trim();
+            var tahap2 = $("#_Tahap2Edit").val().trim();
+            var tahap3 = $("#_Tahap3Edit").val().trim();
+            var tahap4 = $("#_Tahap4Edit").val().trim();
+
+            if (tahapan == "" && tahap1 == "" && tahap2 == "" && tahap3 == "" && tahap4 == "") {
+                alert('Silakan isi Nama Tahap Pembangunan atau minimal salah satu uraian Tahap!');
+                return;
             }
+
+            var Data = { 
+                Id      : $("#IdTahapanForm").val(),
+                Tahapan : tahapan,
+                Periode : $("#_PeriodeEdit").val().trim(),
+                Tahap1  : tahap1,
+                Tahap2  : tahap2,
+                Tahap3  : tahap3,
+                Tahap4  : tahap4
+            };
+
+            $.post(BaseURL + "Nasional/EditTahapanRPJPN", Data).done(function(Respon) {
+                if (Respon == '1') { 
+                    window.location.reload(); 
+                } else { 
+                    alert(Respon); 
+                }
+            });                         
         });
 
-        $('#hierarki-table tbody').on('click', '.HapusTahapan', function () {
-            if(confirm("Yakin ingin menghapus Tahapan ini? Seluruh sub-data dibawahnya mungkin akan ikut terhapus.")) {
-                var Data = { Id: $(this).data('id') }
-                $.post(BaseURL+"Nasional/HapusTahapanRPJPN", Data).done(function(Respon) {
-                    if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
-                })
-            }
-        });
-
-        // ==============================================
-        // SCRIPT SUB TAHAPAN RPJPN (LEVEL 2)
-        // ==============================================
-        $("#SimpanSubTahapan").click(function() {
-            if ($("#SubTahapan").val() == "") {
-                alert('Input Sub Tahapan Belum Benar!')
-            } else {
-                var Data = { _Id        : $("#IdTahapanForm").val(),
-                             SubTahapan : $("#SubTahapan").val() }
-                $.post(BaseURL+"Nasional/InputSubTahapanRPJPN", Data).done(function(Respon) {
-                    if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
-                })                         
-            }
-        });
-
-        $('#hierarki-table tbody').on('click', '.EditSubTahapan', function () {
-            $("#IdSubTahapanForm").val($(this).data('id'));
-            $("#_IdTahapan").val($(this).data('idtahapan'));
-            $("#_SubTahapan").val($(this).data('subtahapan'));
-            $('#ModalEditSubTahapan').modal("show");
-        });
-
-        $("#EditBtnSubTahapan").click(function() {
-            if ($("#_SubTahapan").val() == "") {
-                alert('Input Sub Tahapan Belum Benar!')
-            } else {
-                var Data = { Id         : $("#IdSubTahapanForm").val(),
-                             _Id        : $("#_IdTahapan").val(),
-                             SubTahapan : $("#_SubTahapan").val() }
-                $.post(BaseURL+"Nasional/EditSubTahapanRPJPN", Data).done(function(Respon) {
-                    if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
-                })                         
-            }
-        });
-
-        $('#hierarki-table tbody').on('click', '.HapusSubTahapan', function () {
-            if(confirm("Yakin ingin menghapus Sub Tahapan ini? Seluruh sub-data dibawahnya mungkin akan ikut terhapus.")) {
-                var Data = { Id: $(this).data('id') }
-                $.post(BaseURL+"Nasional/HapusSubTahapanRPJPN", Data).done(function(Respon) {
-                    if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
-                })
-            }
-        });
-
-        // ==============================================
-        // SCRIPT TAHAPAN PEMBANGUNAN (LEVEL 3)
-        // ==============================================
-        $("#SimpanPembangunan").click(function() {
-            if ($("#TahapanPembangunan").val() == "") {
-                alert('Input Tahapan Pembangunan Belum Benar!')
-            } else {
-                var Data = { _Id                : $("#IdSubTahapanForm").val(),
-                             Pembangunan : $("#TahapanPembangunan").val() }
-                $.post(BaseURL+"Nasional/InputPembangunanTahapanRPJPN", Data).done(function(Respon) {
-                    if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
-                })                         
-            }
-        });
-
-        $('#hierarki-table tbody').on('click', '.EditPembangunan', function () {
-            $("#IdPembangunanForm").val($(this).data('id'));
-            $("#_IdSubTahapan").val($(this).data('idsub'));
-            $("#_TahapanPembangunan").val($(this).data('pembangunan'));
-            $('#ModalEditPembangunan').modal("show");
-        });
-
-        $("#EditBtnPembangunan").click(function() {
-            if ($("#_TahapanPembangunan").val() == "") {
-                alert('Input Tahapan Pembangunan Belum Benar!')
-            } else {
-                var Data = { Id                 : $("#IdPembangunanForm").val(),
-                             _Id                : $("#_IdSubTahapan").val(),
-                             Pembangunan : $("#_TahapanPembangunan").val() }
-                $.post(BaseURL+"Nasional/EditPembangunanTahapanRPJPN", Data).done(function(Respon) {
-                    if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
-                })                         
-            }
-        });
-
-        $('#hierarki-table tbody').on('click', '.HapusPembangunan', function () {
-            if(confirm("Yakin ingin menghapus Tahapan Pembangunan ini?")) {
-                var Data = { Id: $(this).data('id') }
-                $.post(BaseURL+"Nasional/HapusPembangunanTahapanRPJPN", Data).done(function(Respon) {
-                    if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
-                })
+        $('.tahapan-table tbody').on('click', '.HapusTahapan', function () {
+            if (confirm("Yakin ingin menghapus baris data Tahapan Pembangunan ini?")) {
+                var Data = { Id: $(this).data('id') };
+                $.post(BaseURL + "Nasional/HapusTahapanRPJPN", Data).done(function(Respon) {
+                    if (Respon == '1') { 
+                        window.location.reload(); 
+                    } else { 
+                        alert(Respon); 
+                    }
+                });
             }
         });
     });
