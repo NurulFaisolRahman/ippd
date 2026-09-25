@@ -1,3 +1,9 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+$userLevel = $_SESSION['Level'] ?? ($this->session->userdata('Level') ?? null);
+$isLoggedIn = !empty($_SESSION['isLoggedIn']) || !empty($this->session->userdata('isLoggedIn'));
+$canEdit = $isLoggedIn && ($userLevel !== null && $userLevel !== '' && (string)$userLevel === '0');
+?>
 <style>
     /* CSS untuk membuat Modal persis di tengah (Vertical Center) */
     .modal {
@@ -37,7 +43,7 @@
     }
 
     /* CSS Table Enhancement */
-    #data-table-basic > thead > tr > th {
+    #hierarki-table > thead > tr > th {
         background-color: #f8f9fa;
         color: #455a64;
         font-weight: 700;
@@ -47,17 +53,17 @@
         border-bottom: 2px solid #e0e0e0;
         vertical-align: middle;
     }
-    #data-table-basic > tbody > tr > td {
+    #hierarki-table > tbody > tr > td {
         vertical-align: middle;
         color: #444;
         border-top: 1px solid #f2f2f2;
     }
     
     /* Efek hover baris tabel hierarki */
-    #data-table-basic > tbody > tr {
+    #hierarki-table > tbody > tr {
         transition: filter 0.2s ease;
     }
-    #data-table-basic > tbody > tr:hover {
+    #hierarki-table > tbody > tr:hover {
         filter: brightness(0.96); /* Menggelapkan sedikit baris saat di-hover */
     }
 
@@ -119,7 +125,7 @@
                     <!-- Penyesuaian Header Kontainer Tabel -->
                     <div class="basic-tb-hd" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
                         <h3 style="margin: 0; color: #333; font-weight: 600; line-height: 1.5;">Hierarki Sasaran & Indikator Pembangunan RPJMN</h3>
-                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
+                        <?php if ($canEdit) { ?>
                         <div class="button-icon-btn sm-res-mg-t-30">
                             <!-- Tombol Input Induk Level 1 -->
                             <button type="button" class="btn btn-success notika-btn-success btn-action" data-toggle="modal" data-target="#ModalInputSasaranPembangunan" style="padding: 8px 15px;">
@@ -130,7 +136,7 @@
                     </div>
                     
                     <div class="table-responsive">
-                        <table id="data-table-basic" class="table table-striped">
+                        <table id="hierarki-table" class="table table-striped">
                             <thead>
                                 <tr>
                                     <th style="width: 5%;" class="text-center">No</th>
@@ -141,7 +147,7 @@
                                     <th style="width: 7%;" class="text-center">Target 2025</th>
                                     <th style="width: 7%;" class="text-center">Target 2045</th>
                                     <th style="width: 10%;" class="text-center">Periode</th>
-                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
+                                    <?php if ($canEdit) { ?>
                                     <th style="width: 16%;" class="text-center">Aksi</th>
                                     <?php } ?>
                                 </tr>
@@ -166,7 +172,7 @@
                                         <td class="text-center">
                                             <span class="badge-periode"><?= !empty($data['Periode']) ? $data['Periode'] : (!empty($data['PeriodeTampil']) ? $data['PeriodeTampil'] : ($data['TahunMulai'].'-'.$data['TahunAkhir'])) ?></span>
                                         </td>
-                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
+                                        <?php if ($canEdit) { ?>
                                         <td class="text-center" style="white-space: nowrap;">
                                             <button class="btn btn-sm btn-success Tambah btn-action" Id="<?= $data['Id'] ?>" title="Tambah Indikator"><i class="fa fa-plus"></i> Indikator</button>
                                             <button class="btn btn-sm btn-info Edit btn-action" Id="<?= $data['Id'] ?>" SasaranPembangunan="<?= htmlspecialchars($data['SasaranPembangunan'], ENT_QUOTES) ?>" Periode="<?= htmlspecialchars(!empty($data['Periode']) ? $data['Periode'] : (!empty($data['PeriodeTampil']) ? $data['PeriodeTampil'] : ($data['TahunMulai'].'-'.$data['TahunAkhir'])), ENT_QUOTES) ?>" title="Edit Sasaran"><i class="fa fa-edit"></i></button>
@@ -195,7 +201,7 @@
                                             <td class="text-center">
                                                 <span class="badge-periode" style="background-color: #00bcd4; box-shadow: 0 2px 5px rgba(0, 188, 212, 0.3);"><?= !empty($data['Periode']) ? $data['Periode'] : (!empty($data['PeriodeTampil']) ? $data['PeriodeTampil'] : ($data['TahunMulai'].'-'.$data['TahunAkhir'])) ?></span>
                                             </td>
-                                            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
+                                            <?php if ($canEdit) { ?>
                                             <td class="text-center" style="white-space: nowrap;">
                                                 <button class="btn btn-sm btn-info _Edit btn-action" Id="<?= $indikator['Id'] ?>" _Id="<?= $data['Id'] ?>" IndikatorPembangunan="<?= $indikator['IndikatorPembangunan'] ?>" Satuan="<?= $indikator['Satuan'] ?>" Baseline="<?= $indikator['Baseline'] ?>" TargetAwal="<?= $indikator['TargetAwal'] ?>" TargetAkhir="<?= $indikator['TargetAkhir'] ?>" IdKementerian="<?= isset($indikator['Id_']) ? $indikator['Id_'] : '' ?>" title="Edit Indikator"><i class="fa fa-edit"></i></button>
                                                 <button class="btn btn-sm btn-danger _Hapus btn-action" _Hapus="<?= $indikator['Id'] ?>" title="Hapus Indikator"><i class="fa fa-trash"></i></button>
@@ -213,7 +219,7 @@
                                     } 
                                 } else { ?>
                                     <tr>
-                                        <td colspan="<?= (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) ? '9' : '8' ?>" class="text-center" style="padding: 30px; color: #999;">Belum ada data Sasaran Pembangunan RPJMN.</td>
+                                        <td colspan="<?= $canEdit ? '9' : '8' ?>" class="text-center" style="padding: 30px; color: #999;">Belum ada data Sasaran Pembangunan RPJMN.</td>
                                     </tr>
                                 <?php } ?>
                             </tbody>
@@ -263,7 +269,6 @@
             </div>
             <div class="modal-footer" style="padding-top: 15px;">
                 <button type="button" class="btn btn-success btn-action" id="SimpanSasaranPembangunan"><i class="fa fa-save"></i> Simpan</button>
-                <button type="button" class="btn btn-default btn-action" data-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>
@@ -305,7 +310,6 @@
             </div>
             <div class="modal-footer" style="padding-top: 15px;">
                 <button type="button" class="btn btn-info btn-action" id="Edit"><i class="fa fa-save"></i> Update</button>
-                <button type="button" class="btn btn-default btn-action" data-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>
@@ -399,7 +403,6 @@
             </div>
             <div class="modal-footer" style="padding-top: 15px;">
                 <button type="button" class="btn btn-success btn-action" id="SimpanIndikatorPembangunan"><i class="fa fa-save"></i> Simpan</button>
-                <button type="button" class="btn btn-default btn-action" data-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>
@@ -491,7 +494,6 @@
             </div>
             <div class="modal-footer" style="padding-top: 15px;">
                 <button type="button" class="btn btn-info btn-action" id="_Edit"><i class="fa fa-save"></i> Update</button>
-                <button type="button" class="btn btn-default btn-action" data-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>
@@ -505,8 +507,6 @@
 <script src="../js/jquery.scrollUp.min.js"></script>
 <script src="../js/meanmenu/jquery.meanmenu.js"></script>
 <script src="../js/scrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
-<script src="../js/data-table/jquery.dataTables.min.js"></script>
-<script src="../js/data-table/data-table-act.js"></script>
 <script src="../js/main.js"></script>
 
 <script>
@@ -580,7 +580,7 @@
             }
         });
 
-        $('#data-table-basic tbody').on('click', '.Edit', function () {
+        $('#hierarki-table').on('click', '.Edit', function () {
             $("#Id").val($(this).attr('Id'));
             $("#_SasaranPembangunan").val($(this).attr('SasaranPembangunan'));
             $("#_Periode").val($(this).attr('Periode'));
@@ -612,7 +612,7 @@
             }
         });
 
-        $('#data-table-basic tbody').on('click', '.Hapus', function () {
+        $('#hierarki-table').on('click', '.Hapus', function () {
             if(confirm("Yakin ingin menghapus Sasaran Pembangunan ini?")) {
                 var SasaranPembangunan = { Id: $(this).attr('Hapus') }
                 $.post(BaseURL+"Nasional/HapusSasaranPembangunanRPJMN", SasaranPembangunan).done(function(Respon) {
@@ -628,7 +628,7 @@
         // ==============================================
         // SCRIPT INDIKATOR PEMBANGUNAN
         // ==============================================
-        $('#data-table-basic tbody').on('click', '.Tambah', function () {
+        $('#hierarki-table').on('click', '.Tambah', function () {
             var parentRow = $(this).closest('tr')[0];
             
             // Buka otomatis induknya jika saat diklik kondisinya masih tertutup
@@ -688,7 +688,7 @@
             }
         });
 
-        $('#data-table-basic tbody').on('click', '._Edit', function () {
+        $('#hierarki-table').on('click', '._Edit', function () {
             $("#_Id").val($(this).attr('Id'));
             $("#_IdSasaran").val($(this).attr('_Id'));
             $("#_IdKementerian").val($(this).attr('IdKementerian')); // Set data Kementerian dropdown
@@ -741,7 +741,7 @@
             }
         });
 
-        $('#data-table-basic tbody').on('click', '._Hapus', function () {
+        $('#hierarki-table').on('click', '._Hapus', function () {
             if(confirm("Yakin ingin menghapus Indikator ini?")) {
                 var trClasses = $(this).closest('tr').attr('class');
                 var className = null;

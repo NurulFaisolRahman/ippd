@@ -706,7 +706,7 @@
         // Login function
         function Login() {
             // Redirect to Login page or clear session
-            window.location.href = '/Home';
+            window.location.href = '/ippd/Home';
         }
 
         // Mobile menu handling
