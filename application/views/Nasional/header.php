@@ -340,10 +340,14 @@
 <body class="bg-gray-50 font-sans">
 
 <?php
+  $sessionLevel = $_SESSION['Level'] ?? ($this->session->userdata('Level') ?? null);
+  $isLoggedInSession = !empty($_SESSION['isLoggedIn']) || !empty($this->session->userdata('isLoggedIn'));
+  $isSuperAdmin = $isLoggedInSession && ($sessionLevel !== null && $sessionLevel !== '' && (string)$sessionLevel === '0');
+
   $LoginInfo = '';
-  if (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 0) {
-    $LoginInfo = $_SESSION['Username'] ?? 'Super Admin';
-  } elseif (!empty($_SESSION['Username'])) {
+  if ($isSuperAdmin) {
+    $LoginInfo = $_SESSION['Username'] ?? ($this->session->userdata('Username') ?? 'Super Admin');
+  } elseif ($isLoggedInSession && !empty($_SESSION['Username'])) {
     $LoginInfo = $_SESSION['Username'];
   }
 ?>
@@ -442,7 +446,7 @@
             <a href="#" class="navbar-item">Tentang Kami</a>
 
             <!-- Tombol Logout / Login -->
-            <?php if (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 0) { ?>
+            <?php if ($isLoggedInSession) { ?>
                 <button class="logout-btn" onclick="logout()" type="button">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </button>

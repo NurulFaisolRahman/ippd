@@ -1,3 +1,8 @@
+<?php
+$userLevel = $_SESSION['Level'] ?? ($this->session->userdata('Level') ?? null);
+$isLoggedIn = !empty($_SESSION['isLoggedIn']) || !empty($this->session->userdata('isLoggedIn'));
+$canEdit = $isLoggedIn && ($userLevel !== null && $userLevel !== '' && (string)$userLevel === '0');
+?>
 <style>
     /* CSS untuk membuat Modal persis di tengah (Vertical Center) */
     .modal {
@@ -127,12 +132,14 @@
                     <!-- Header Kontainer Tabel -->
                     <div class="basic-tb-hd" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
                         <h3 style="margin: 0; color: #333; font-weight: 600; line-height: 1.5;">Visi Pembangunan RPJPN</h3>
+                        <?php if ($canEdit) { ?>
                         <div class="button-icon-btn sm-res-mg-t-30">
                             <!-- Tombol Input Visi -->
                             <button type="button" class="btn btn-success notika-btn-success btn-action" data-toggle="modal" data-target="#ModalInputVisi" style="padding: 8px 15px;">
                                 <i class="fa fa-plus-circle" style="margin-right: 5px;"></i> <b>Input Visi RPJPN</b>
                             </button>
                         </div>
+                        <?php } ?>
                     </div>
                     
                     <div class="table-responsive">
@@ -144,7 +151,7 @@
                                     <th style="width: 10%;" class="text-center">Periode</th>
                                     <th style="width: 12%;" class="text-center">2025 (Baseline)</th>
                                     <th style="width: 12%;" class="text-center">2045 (Target)</th>
-                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
+                                    <?php if ($canEdit) { ?>
                                     <th style="width: 20%; white-space: nowrap;" class="text-center">Aksi</th>
                                     <?php } ?>
                                 </tr>
@@ -167,7 +174,7 @@
                                         </td>
                                         <td class="text-center"><span class="text-muted">-</span></td>
                                         <td class="text-center"><span class="text-muted">-</span></td>
-                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
+                                        <?php if ($canEdit) { ?>
                                         <td class="text-center td-aksi">
                                             <div class="btn-action-group">
                                                 <button class="btn btn-sm btn-success TambahSasaran btn-action" data-id="<?= $visi['Id'] ?>" title="Tambah Sasaran"><i class="fa fa-plus"></i> Sasaran</button>
@@ -195,7 +202,7 @@
                                             </td>
                                             <td class="text-center"><span class="text-muted">-</span></td>
                                             <td class="text-center"><span class="text-muted">-</span></td>
-                                            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
+                                            <?php if ($canEdit) { ?>
                                             <td class="text-center td-aksi">
                                                 <div class="btn-action-group">
                                                     <button class="btn btn-sm btn-success TambahIndikator btn-action" data-id="<?= $sasaran['Id'] ?>" title="Tambah Indikator"><i class="fa fa-plus"></i> Indikator</button>
@@ -227,7 +234,7 @@
                                                 <td class="text-center">
                                                     <span class="badge-target"><?= (!empty($ind['Target']) ? $ind['Target'] : '-') ?></span>
                                                 </td>
-                                                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
+                                                <?php if ($canEdit) { ?>
                                                 <td class="text-center td-aksi">
                                                     <div class="btn-action-group">
                                                         <button class="btn btn-sm btn-info EditIndikator btn-action" data-id="<?= $ind['Id'] ?>" data-idsasaran="<?= $sasaran['Id'] ?>" data-indikator="<?= htmlspecialchars($ind['Indikator'], ENT_QUOTES) ?>" data-baseline="<?= htmlspecialchars($ind['Baseline'], ENT_QUOTES) ?>" data-target="<?= htmlspecialchars($ind['Target'], ENT_QUOTES) ?>" title="Edit Indikator"><i class="fa fa-edit"></i></button>
@@ -252,7 +259,7 @@
                                     } // End Visi
                                 } else { ?>
                                     <tr>
-                                        <td colspan="6" class="text-center" style="padding: 30px; color: #999;">Belum ada data Visi RPJPN.</td>
+                                        <td colspan="<?= $canEdit ? '6' : '5' ?>" class="text-center" style="padding: 30px; color: #999;">Belum ada data Visi RPJPN.</td>
                                     </tr>
                                 <?php } ?>
                             </tbody>

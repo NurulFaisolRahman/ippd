@@ -1,3 +1,8 @@
+<?php
+$userLevel = $_SESSION['Level'] ?? ($this->session->userdata('Level') ?? null);
+$isLoggedIn = !empty($_SESSION['isLoggedIn']) || !empty($this->session->userdata('isLoggedIn'));
+$canEdit = $isLoggedIn && ($userLevel !== null && $userLevel !== '' && (string)$userLevel === '0');
+?>
 <style>
     /* CSS Modal Vertical Center */
     .modal {
@@ -133,7 +138,7 @@
                             Tahapan Pembangunan Jangka Panjang Nasional Menuju Indonesia Emas 2045
                         </p>
                     </div>
-                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
+                    <?php if ($canEdit) { ?>
                     <div>
                         <button type="button" class="btn btn-success notika-btn-success btn-action BtnTambahTahapan" data-toggle="modal" data-target="#ModalInputTahapan" style="padding: 9px 18px;">
                             <i class="fa fa-plus-circle" style="margin-right: 5px;"></i> <b>Input Tahapan Pembangunan</b>
@@ -172,7 +177,7 @@
                                         Tahap 4 (2040-2045)<br>
                                         Perwujudan Indonesia Emas
                                     </th>
-                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
+                                    <?php if ($canEdit) { ?>
                                     <th style="width: 8%; white-space: nowrap;" class="text-center">Aksi</th>
                                     <?php } ?>
                                 </tr>
@@ -202,7 +207,7 @@
                                         <td>
                                             <?= !empty($item['Tahap4']) ? nl2br(htmlspecialchars($item['Tahap4'])) : '-' ?>
                                         </td>
-                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
+                                        <?php if ($canEdit) { ?>
                                         <td class="text-center td-aksi">
                                             <div class="btn-action-group">
                                                 <button class="btn btn-sm btn-info EditTahapan btn-action" 
@@ -228,7 +233,7 @@
                                     }
                                 } else { ?>
                                     <tr>
-                                        <td colspan="<?= (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) ? '7' : '6' ?>" class="text-center" style="padding: 30px; color: #999;">
+                                        <td colspan="<?= $canEdit ? '7' : '6' ?>" class="text-center" style="padding: 30px; color: #999;">
                                             Belum ada data Tahapan Pembangunan RPJPN.
                                         </td>
                                     </tr>

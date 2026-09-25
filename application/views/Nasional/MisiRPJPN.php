@@ -1,3 +1,8 @@
+<?php
+$userLevel = $_SESSION['Level'] ?? ($this->session->userdata('Level') ?? null);
+$isLoggedIn = !empty($_SESSION['isLoggedIn']) || !empty($this->session->userdata('isLoggedIn'));
+$canEdit = $isLoggedIn && ($userLevel !== null && $userLevel !== '' && (string)$userLevel === '0');
+?>
 <style>
     /* CSS Modal Vertical Center */
     .modal {
@@ -210,7 +215,7 @@
                                 <?= $config['desc'] ?>
                             </small>
                         </div>
-                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
+                        <?php if ($canEdit) { ?>
                         <div class="button-icon-btn">
                             <button type="button" class="btn btn-sm btn-action BtnTambahMisiKategori" data-kategori="<?= htmlspecialchars($kategoriName, ENT_QUOTES) ?>" style="background-color: <?= $config['bg_color'] ?>; color: #fff; padding: 7px 14px;">
                                 <i class="fa fa-plus"></i> Tambah Misi <?= htmlspecialchars($kategoriName) ?>
@@ -226,7 +231,7 @@
                                     <th style="width: 5%;" class="text-center">No</th>
                                     <th style="width: 65%;">Uraian Misi</th>
                                     <th style="width: 15%;" class="text-center">Periode</th>
-                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
+                                    <?php if ($canEdit) { ?>
                                     <th style="width: 15%; white-space: nowrap;" class="text-center">Aksi</th>
                                     <?php } ?>
                                 </tr>
@@ -246,7 +251,7 @@
                                         <td class="text-center">
                                             <span class="badge-periode"><?= $misi['Periode'] ?></span>
                                         </td>
-                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
+                                        <?php if ($canEdit) { ?>
                                         <td class="text-center td-aksi">
                                             <div class="btn-action-group">
                                                 <button class="btn btn-sm btn-info EditMisi btn-action" data-id="<?= $misi['Id'] ?>" data-periode="<?= htmlspecialchars($misi['Periode'], ENT_QUOTES) ?>" data-kategori="<?= htmlspecialchars($misi['Kategori'], ENT_QUOTES) ?>" data-misi="<?= htmlspecialchars($misi['Misi'], ENT_QUOTES) ?>" title="Edit Misi"><i class="fa fa-edit"></i> Edit</button>
@@ -260,7 +265,7 @@
                                     }
                                 } else { ?>
                                     <tr>
-                                        <td colspan="4" class="text-center" style="padding: 25px; color: #999;">Belum ada data Misi pada kategori ini.</td>
+                                        <td colspan="<?= $canEdit ? '4' : '3' ?>" class="text-center" style="padding: 25px; color: #999;">Belum ada data Misi pada kategori ini.</td>
                                     </tr>
                                 <?php } ?>
                             </tbody>

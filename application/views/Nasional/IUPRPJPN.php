@@ -1,3 +1,8 @@
+<?php
+$userLevel = $_SESSION['Level'] ?? ($this->session->userdata('Level') ?? null);
+$isLoggedIn = !empty($_SESSION['isLoggedIn']) || !empty($this->session->userdata('isLoggedIn'));
+$canEdit = $isLoggedIn && ($userLevel !== null && $userLevel !== '' && (string)$userLevel === '0');
+?>
 <style>
     /* CSS Modal Vertical Center */
     .modal {
@@ -107,7 +112,7 @@
                             Agenda Transformasi, Arah (Tujuan) Pembangunan, serta Indikator Utama Pembangunan (IUP) Indonesia Emas 2045
                         </p>
                     </div>
-                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
+                    <?php if ($canEdit) { ?>
                     <div style="margin-top: 8px;">
                         <button type="button" class="btn btn-primary notika-btn-primary btn-action" data-toggle="modal" data-target="#ModalInputAgenda" style="padding: 7px 15px; font-size: 12px;">
                             <i class="fa fa-plus-circle"></i> <b>Input Agenda Transformasi</b>
@@ -141,7 +146,7 @@
                                     <th style="width: 10%; text-align: center; vertical-align: middle;">Satuan</th>
                                     <th style="width: 8%; text-align: center; vertical-align: middle;">Baseline<br>2025*</th>
                                     <th style="width: 8%; text-align: center; vertical-align: middle;">Sasaran<br>2045</th>
-                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 0) { ?>
+                                    <?php if ($canEdit) { ?>
                                     <th style="width: 7%; text-align: center; vertical-align: middle;">Aksi</th>
                                     <?php } ?>
                                 </tr>
@@ -165,7 +170,7 @@
                                     }
                                 }
 
-                                $hasAdmin = (isset($_SESSION['Level']) && $_SESSION['Level'] == 0);
+                                $hasAdmin = $canEdit;
 
                                 if (isset($Agenda) && !empty($Agenda)) {
                                     foreach ($Agenda as $agenda) {
