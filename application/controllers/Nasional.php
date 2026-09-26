@@ -69,7 +69,7 @@ class Nasional extends CI_Controller {
 		$Header['Halaman'] = 'RPJPN';
     // 1. Ambil semua data Visi
     $visi_data = $this->db->where("deleted_at IS NULL")
-                      ->order_by("Id", "DESC")
+                      ->order_by("Id", "ASC")
                       ->get("visirpjpn")
                       ->result_array();
     $result = [];
@@ -87,7 +87,7 @@ class Nasional extends CI_Controller {
 
         // 2. Ambil data Sasaran langsung berdasarkan _Id (Id Visi)
         $this->db->where('_Id', $v['Id']);
-        $sasaran_data = $this->db->where("deleted_at IS NULL")->get('sasaranrpjpn')->result_array();
+        $sasaran_data = $this->db->where("deleted_at IS NULL")->order_by("Id", "ASC")->get('sasaranrpjpn')->result_array();
 
         foreach ($sasaran_data as $s) {
             $sasaran_item = [
@@ -99,7 +99,7 @@ class Nasional extends CI_Controller {
 
             // 3. Ambil data Indikator berdasarkan _Id (Id Sasaran)
             $this->db->where('_Id', $s['Id']);
-            $indikator_data = $this->db->where("deleted_at IS NULL")->get('indikator_sasaran_rpjpn')->result_array();
+            $indikator_data = $this->db->where("deleted_at IS NULL")->order_by("Id", "ASC")->get('indikator_sasaran_rpjpn')->result_array();
 
             foreach ($indikator_data as $ind) {
                 $indikator_item = [
@@ -161,7 +161,7 @@ class Nasional extends CI_Controller {
 		$Header['Halaman'] = 'RPJPN';
 
     // Ambil data Visi aktif (untuk pilihan periode jika input / modal)
-    $Data['DataVisi'] = $this->db->where("deleted_at IS NULL")->order_by("Id", "DESC")->get("visirpjpn")->result_array();
+    $Data['DataVisi'] = $this->db->where("deleted_at IS NULL")->order_by("Id", "ASC")->get("visirpjpn")->result_array();
 
     // 3 Kategori Misi RPJPN
     $kategori_list = [
@@ -354,7 +354,7 @@ class Nasional extends CI_Controller {
 
   public function TahapanRPJPN(){
 		$Header['Halaman'] = 'RPJPN';
-    $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjpn")->result_array();
+    $Data['Visi'] = $this->db->where("deleted_at IS NULL")->order_by("Id", "ASC")->get("visirpjpn")->result_array();
     $Data['Tahapan'] = $this->db->where("deleted_at IS NULL")->order_by("Id", "ASC")->get("tahapanrpjpn")->result_array();
 
 		$this->load->view('Nasional/header', $Header);
@@ -400,9 +400,9 @@ class Nasional extends CI_Controller {
 
   public function TahapanRPJMN(){
 		$Header['Halaman'] = 'RPJMN';
-    $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjmn")->result_array(); 
+    $Data['Visi'] = $this->db->where("deleted_at IS NULL")->order_by("Id", "ASC")->get("visirpjmn")->result_array(); 
     // Jika ingin berdasarkan _Id Visi tertentu, tambahkan: $this->db->where('_Id', $id_visi);
-    $tahapan_data = $this->db->query("SELECT t.*, COALESCE(t.Periode, CONCAT(v.TahunMulai, '-', v.TahunAkhir)) as PeriodeTampil, v.TahunMulai, v.TahunAkhir FROM tahapanrpjmn as t LEFT JOIN visirpjmn as v ON t._Id = v.Id WHERE t.deleted_at IS NULL ORDER BY t.Id Desc")->result_array();
+    $tahapan_data = $this->db->query("SELECT t.*, COALESCE(t.Periode, CONCAT(v.TahunMulai, '-', v.TahunAkhir)) as PeriodeTampil, v.TahunMulai, v.TahunAkhir FROM tahapanrpjmn as t LEFT JOIN visirpjmn as v ON t._Id = v.Id WHERE t.deleted_at IS NULL ORDER BY t.Id ASC")->result_array();
 
     $result = [];
     foreach ($tahapan_data as $t) {
@@ -413,6 +413,7 @@ class Nasional extends CI_Controller {
         
         $tahapan_item = [
             'Id'         => $t['Id'],
+            'IdVisi'     => $t['_Id'],
             '_Id'        => $t['_Id'], 
             'Tahapan'    => $t['Tahapan'],
             'Periode'    => $periode,
@@ -423,7 +424,7 @@ class Nasional extends CI_Controller {
 
         // 2. Ambil data Sub Tahapan RPJMN (Level 2)
         $this->db->where('_Id', $t['Id']);
-        $sub_data = $this->db->get('subtahapanrpjmn')->result_array();
+        $sub_data = $this->db->where('deleted_at IS NULL')->order_by('Id', 'ASC')->get('subtahapanrpjmn')->result_array();
 
         foreach ($sub_data as $s) {
             $sub_item = [
@@ -436,7 +437,7 @@ class Nasional extends CI_Controller {
 
             // 3. Ambil data Pembangunan Tahapan (Level 3)
             $this->db->where('_Id', $s['Id']);
-            $pem_data = $this->db->get('pembangunantahapanrpjmn')->result_array();
+            $pem_data = $this->db->where('deleted_at IS NULL')->order_by('Id', 'ASC')->get('pembangunantahapanrpjmn')->result_array();
 
             foreach ($pem_data as $p) {
                 // Field disesuaikan untuk menangkap baik 'TahapanPembangunan' atau 'PembangunanTahapan'
@@ -549,7 +550,7 @@ class Nasional extends CI_Controller {
 		$Header['Halaman'] = 'RPJMN';
     // 1. Ambil semua data Visi
     $visi_data = $this->db->where("deleted_at IS NULL")
-                      ->order_by("Id", "DESC")
+                      ->order_by("Id", "ASC")
                       ->get("visirpjmn")
                       ->result_array();
     $result = [];
@@ -567,7 +568,7 @@ class Nasional extends CI_Controller {
 
         // 2. Ambil data Misi berdasarkan _Id (Id Visi)
         $this->db->where('_Id', $v['Id']);
-        $misi_data = $this->db->where("deleted_at IS NULL")->get('misirpjmn')->result_array();
+        $misi_data = $this->db->where("deleted_at IS NULL")->order_by("Id", "ASC")->get('misirpjmn')->result_array();
 
         foreach ($misi_data as $m) {
             $misi_item = [
@@ -621,39 +622,39 @@ class Nasional extends CI_Controller {
 	}
 
   public function GetTahapanRPJMN(){
-    echo json_encode($this->db->where("_Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("tahapanrpjmn")->result_array());
+    echo json_encode($this->db->where("_Id = ".$_POST['Id']." AND deleted_at IS NULL")->order_by("Id", "ASC")->get("tahapanrpjmn")->result_array());
 	}
 
   public function GetSubTahapanRPJMN(){
-    echo json_encode($this->db->query("SELECT t.* FROM visirpjmn as v, tahapanrpjmn as m, subtahapanrpjmn as t WHERE v.Id = ".$_POST['Id']." AND t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL")->result_array());
+    echo json_encode($this->db->query("SELECT t.* FROM visirpjmn as v, tahapanrpjmn as m, subtahapanrpjmn as t WHERE v.Id = ".$_POST['Id']." AND t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL ORDER BY t.Id ASC")->result_array());
 	}
 
   public function GetSasaranPrioritasRPJMN(){
-    echo json_encode($this->db->query("SELECT t.* FROM visirpjmn as v, prioritas_nasional_rpjmn as m, sasaran_prioritas_rpjmn as t WHERE v.Id = ".$_POST['Id']." AND t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL")->result_array());
+    echo json_encode($this->db->query("SELECT t.* FROM visirpjmn as v, prioritas_nasional_rpjmn as m, sasaran_prioritas_rpjmn as t WHERE v.Id = ".$_POST['Id']." AND t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL ORDER BY t.Id ASC")->result_array());
 	}
 
   public function GetSasaranProgramRPJMN(){
-    echo json_encode($this->db->query("SELECT t.* FROM program_prioritas_rpjmn as t WHERE t.Id_ = ".$_POST['Id']." AND t.deleted_at IS NULL")->result_array());
+    echo json_encode($this->db->query("SELECT t.* FROM program_prioritas_rpjmn as t WHERE t.Id_ = ".$_POST['Id']." AND t.deleted_at IS NULL ORDER BY t.Id ASC")->result_array());
 	}
 
   public function GetSasaranKegiatanRPJMN(){
-    echo json_encode($this->db->query("SELECT t.* FROM kegiatan_prioritas_rpjmn as t WHERE t.Id_ = ".$_POST['Id']." AND t.deleted_at IS NULL")->result_array());
+    echo json_encode($this->db->query("SELECT t.* FROM kegiatan_prioritas_rpjmn as t WHERE t.Id_ = ".$_POST['Id']." AND t.deleted_at IS NULL ORDER BY t.Id ASC")->result_array());
 	}
 
   public function GetSasaranPembangunanRPJMN(){
-    echo json_encode($this->db->where("_Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("sasaran_pembangunan_rpjmn")->result_array());
+    echo json_encode($this->db->where("_Id = ".$_POST['Id']." AND deleted_at IS NULL")->order_by("Id", "ASC")->get("sasaran_pembangunan_rpjmn")->result_array());
 	}
 
   public function GetPrioritasNasionalRPJMN(){
-    echo json_encode($this->db->where("_Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("prioritas_nasional_rpjmn")->result_array());
+    echo json_encode($this->db->where("_Id = ".$_POST['Id']." AND deleted_at IS NULL")->order_by("Id", "ASC")->get("prioritas_nasional_rpjmn")->result_array());
 	}
 
   public function GetProgramPrioritasRPJMN(){
-    echo json_encode($this->db->where("Id_ = ".$_POST['Id']." AND deleted_at IS NULL")->get("program_prioritas_rpjmn")->result_array());
+    echo json_encode($this->db->where("Id_ = ".$_POST['Id']." AND deleted_at IS NULL")->order_by("Id", "ASC")->get("program_prioritas_rpjmn")->result_array());
 	}
 
   public function GetKegiatanPrioritasRPJMN(){
-    echo json_encode($this->db->where("Id_ = ".$_POST['Id']." AND deleted_at IS NULL")->get("kegiatan_prioritas_rpjmn")->result_array());
+    echo json_encode($this->db->where("Id_ = ".$_POST['Id']." AND deleted_at IS NULL")->order_by("Id", "ASC")->get("kegiatan_prioritas_rpjmn")->result_array());
 	}
 
   public function InputMisiRPJMN(){  
@@ -753,14 +754,18 @@ class Nasional extends CI_Controller {
 
   public function IUPRPJPN(){
 		$Header['Halaman'] = 'RPJPN';
-    $Data['Agenda'] = $this->db->where("deleted_at IS NULL")->order_by("Urutan ASC, Id ASC")->get("agenda_transformasi_rpjpn")->result_array();
+    $Data['Agenda'] = $this->db->where("deleted_at IS NULL")->order_by("CASE WHEN Urutan IS NULL OR Urutan = 0 THEN 999999 ELSE Urutan END ASC, Id ASC")->get("agenda_transformasi_rpjpn")->result_array();
     $Data['Tujuan'] = $this->db->where("deleted_at IS NULL")->order_by("Id", "ASC")->get("arahtujuanrpjpn")->result_array();
-    $Data['IUP'] = $this->db->where("deleted_at IS NULL")->order_by("Urutan ASC, Id ASC")->get("iuprpjpn")->result_array();
+    $Data['IUP'] = $this->db->where("deleted_at IS NULL")->order_by("CASE WHEN Urutan IS NULL OR Urutan = 0 THEN 999999 ELSE Urutan END ASC, Id ASC")->get("iuprpjpn")->result_array();
 		$this->load->view('Nasional/header', $Header);
 		$this->load->view('Nasional/IUPRPJPN', $Data);
 	}
 
   public function InputAgendaRPJPN(){  
+    if (empty($_POST['Urutan'])) {
+      $max = $this->db->select_max('Urutan')->where('deleted_at IS NULL')->get('agenda_transformasi_rpjpn')->row_array();
+      $_POST['Urutan'] = (!empty($max['Urutan']) ? (int)$max['Urutan'] : 0) + 1;
+    }
     $this->db->insert('agenda_transformasi_rpjpn', $_POST);
     echo $this->db->affected_rows() ? '1' : 'Gagal Menyimpan Agenda Transformasi!';
 	}
@@ -782,6 +787,10 @@ class Nasional extends CI_Controller {
   public function InputIUPRPJPN(){  
     if (isset($_POST['Sasaran'])) {
       $_POST['TargetAkhir'] = $_POST['Sasaran'];
+    }
+    if (empty($_POST['Urutan'])) {
+      $max = $this->db->select_max('Urutan')->where('deleted_at IS NULL')->get('iuprpjpn')->row_array();
+      $_POST['Urutan'] = (!empty($max['Urutan']) ? (int)$max['Urutan'] : 0) + 1;
     }
     $this->db->insert('iuprpjpn', $_POST);
     if ($this->db->affected_rows()){
@@ -829,7 +838,9 @@ class Nasional extends CI_Controller {
       // Ambil PP di bawah PN ini (_Id → PN.Id)
       $pp_list = $this->db
         ->where('_Id', $pn['Id'])->where('Tipe', 'PP')
-        ->where('deleted_at IS NULL')->get('agendapn_rpjmn')->result_array();
+        ->where('deleted_at IS NULL')
+        ->order_by('Id', 'ASC')
+        ->get('agendapn_rpjmn')->result_array();
 
       foreach ($pp_list as $pp) {
         $pp['Sasaran'] = $this->_getSasaran($pp['Id']);
@@ -838,7 +849,9 @@ class Nasional extends CI_Controller {
         // Ambil KP di bawah PP ini (_Id → PP.Id)
         $kp_list = $this->db
           ->where('_Id', $pp['Id'])->where('Tipe', 'KP')
-          ->where('deleted_at IS NULL')->get('agendapn_rpjmn')->result_array();
+          ->where('deleted_at IS NULL')
+          ->order_by('Id', 'ASC')
+          ->get('agendapn_rpjmn')->result_array();
 
         foreach ($kp_list as $kp) {
           $kp['Sasaran'] = $this->_getSasaran($kp['Id']);
@@ -858,10 +871,12 @@ class Nasional extends CI_Controller {
   private function _getSasaran($agendaId) {
     $list = $this->db->where('_Id', $agendaId)
                      ->where('deleted_at IS NULL')
+                     ->order_by('Id', 'ASC')
                      ->get('sasaran_agendapn')->result_array();
     foreach ($list as &$s) {
       $s['Indikator'] = $this->db->where('_Id', $s['Id'])
                                   ->where('deleted_at IS NULL')
+                                  ->order_by('Id', 'ASC')
                                   ->get('indikator_agendapn')->result_array();
     }
     return $list;
@@ -928,9 +943,9 @@ class Nasional extends CI_Controller {
 
   public function SasaranPembangunanRPJMN(){
 		$Header['Halaman'] = 'RKP';
-    $Data['Visi'] = $this->db->where("deleted_at IS NULL")->get("visirpjmn")->result_array();
-    $Data['Kementerian'] = $this->db->where("deleted_at IS NULL")->get("kementerian")->result_array();
-		$Data['SasaranPembangunan'] = $this->db->query("SELECT p.*, COALESCE(p.Periode, CONCAT(v.TahunMulai, '-', v.TahunAkhir)) as PeriodeTampil, v.TahunMulai, v.TahunAkhir FROM sasaran_pembangunan_rpjmn as p LEFT JOIN visirpjmn as v ON p._Id = v.Id WHERE p.deleted_at IS NULL ORDER BY p.Id DESC")->result_array();
+    $Data['Visi'] = $this->db->where("deleted_at IS NULL")->order_by("Id", "ASC")->get("visirpjmn")->result_array();
+    $Data['Kementerian'] = $this->db->where("deleted_at IS NULL")->order_by("Id", "ASC")->get("kementerian")->result_array();
+		$Data['SasaranPembangunan'] = $this->db->query("SELECT p.*, COALESCE(p.Periode, CONCAT(v.TahunMulai, '-', v.TahunAkhir)) as PeriodeTampil, v.TahunMulai, v.TahunAkhir FROM sasaran_pembangunan_rpjmn as p LEFT JOIN visirpjmn as v ON p._Id = v.Id WHERE p.deleted_at IS NULL ORDER BY p.Id ASC")->result_array();
 
     // Pastikan kolom relasi kementerian diperiksa agar tidak terjadi Unknown column 's.Id_'
     $hasId_ = $this->db->field_exists('Id_', 'indikator_pembangunan_rpjmn');
@@ -950,6 +965,12 @@ class Nasional extends CI_Controller {
 	}
 
   public function InputSasaranPembangunanRPJMN(){  
+    if (empty($_POST['_Id'])) {
+      $visi = $this->db->where('deleted_at IS NULL')->order_by('Id', 'ASC')->get('visirpjmn')->row_array();
+      if ($visi) {
+        $_POST['_Id'] = $visi['Id'];
+      }
+    }
     $this->db->insert('sasaran_pembangunan_rpjmn',$_POST);
     if ($this->db->affected_rows()){
       echo '1';
@@ -1069,7 +1090,7 @@ class Nasional extends CI_Controller {
 
   public function TemaRKP(){
 		$Header['Halaman'] = 'RKP';
-		$Data['TemaRKP'] = $this->db->where("deleted_at IS NULL")->get("temarkp")->result_array();
+		$Data['TemaRKP'] = $this->db->where("deleted_at IS NULL")->order_by("Id", "ASC")->get("temarkp")->result_array();
 		$this->load->view('Nasional/header',$Header);
 		$this->load->view('Nasional/TemaRKP',$Data);
 	}
@@ -1105,7 +1126,7 @@ class Nasional extends CI_Controller {
 
   public function SasaranPembangunanRKP(){
 		$Header['Halaman'] = 'RKP';
-		$Data['SasaranPembangunanRKP'] = $this->db->where("deleted_at IS NULL")->get("sasaran_pembangunan_rkp")->result_array();
+		$Data['SasaranPembangunanRKP'] = $this->db->where("deleted_at IS NULL")->order_by("Id", "ASC")->get("sasaran_pembangunan_rkp")->result_array();
 		$this->load->view('Nasional/header',$Header);
 		$this->load->view('Nasional/SasaranPembangunanRKP',$Data);
 	}
@@ -1161,7 +1182,9 @@ class Nasional extends CI_Controller {
       // Ambil PP di bawah PN ini (_Id → PN.Id)
       $pp_list = $this->db
         ->where('_Id', $pn['Id'])->where('Tipe', 'PP')
-        ->where('deleted_at IS NULL')->get('agendapn_rpjmn')->result_array();
+        ->where('deleted_at IS NULL')
+        ->order_by('Id', 'ASC')
+        ->get('agendapn_rpjmn')->result_array();
 
       foreach ($pp_list as $pp) {
         $pp['Sasaran'] = $this->_getSasaran($pp['Id']);
@@ -1170,7 +1193,9 @@ class Nasional extends CI_Controller {
         // Ambil KP di bawah PP ini (_Id → PP.Id)
         $kp_list = $this->db
           ->where('_Id', $pp['Id'])->where('Tipe', 'KP')
-          ->where('deleted_at IS NULL')->get('agendapn_rpjmn')->result_array();
+          ->where('deleted_at IS NULL')
+          ->order_by('Id', 'ASC')
+          ->get('agendapn_rpjmn')->result_array();
 
         foreach ($kp_list as $kp) {
           $kp['Sasaran'] = $this->_getSasaran($kp['Id']);
@@ -1320,8 +1345,8 @@ class Nasional extends CI_Controller {
 
   public function SasaranPembangunanDaerah(){
 		$Header['Halaman'] = 'RKP';
-    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->get("kodewilayah")->result_array();
-		$Data['SasaranPembangunanDaerah'] = $this->db->query("SELECT s.*,k.* FROM sasaran_pembangunan_daerah as s,kodewilayah as k WHERE s.Provinsi=k.Kode AND s.deleted_at IS NULL")->result_array();
+    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama', 'ASC')->get("kodewilayah")->result_array();
+		$Data['SasaranPembangunanDaerah'] = $this->db->query("SELECT s.*,k.* FROM sasaran_pembangunan_daerah as s,kodewilayah as k WHERE s.Provinsi=k.Kode AND s.deleted_at IS NULL ORDER BY s.Id ASC")->result_array();
 		$this->load->view('Nasional/header',$Header);
 		$this->load->view('Nasional/SasaranPembangunanDaerah',$Data);
 	}
@@ -1472,6 +1497,158 @@ class Nasional extends CI_Controller {
     $data = ['deleted_at' => date('Y-m-d H:i:s')];
     $this->db->where('Id', $id)->update('proyek_strategis_nasional', $data);
     echo ($this->db->affected_rows()) ? '1' : 'Gagal Hapus Data!';
+  }
+
+  // ===================== KEGIATAN PRIORITAS UTAMA (KPU) RPJMN =====================
+
+  public function KegiatanPrioritasUtama(){
+    $Header['Halaman'] = 'RPJMN';
+
+    // Ambil data hierarki: Prioritas -> Kegiatan -> Sasaran (Urut Id ASC agar data baru di bawah)
+    $prioritas = $this->db->where('deleted_at IS NULL')->order_by('Id', 'ASC')->get('rpjmn_kpu_prioritas')->result_array();
+    $kegiatan  = $this->db->where('deleted_at IS NULL')->order_by('Id', 'ASC')->get('rpjmn_kpu_kegiatan')->result_array();
+    $sasaran   = $this->db->where('deleted_at IS NULL')->order_by('Id', 'ASC')->get('rpjmn_kpu_sasaran')->result_array();
+
+    $sasaran_by_kegiatan = [];
+    foreach ($sasaran as $s) {
+      $sasaran_by_kegiatan[$s['_Id']][] = $s;
+    }
+
+    $kegiatan_by_prioritas = [];
+    foreach ($kegiatan as $k) {
+      $k['sasaran'] = $sasaran_by_kegiatan[$k['Id']] ?? [];
+      $kegiatan_by_prioritas[$k['_Id']][] = $k;
+    }
+
+    $kpu_data = [];
+    foreach ($prioritas as $p) {
+      $p['kegiatan'] = $kegiatan_by_prioritas[$p['Id']] ?? [];
+      $kpu_data[] = $p;
+    }
+
+    $Data['KPU'] = $kpu_data;
+    $Data['PrioritasList'] = $prioritas;
+    $Data['KegiatanList'] = $kegiatan;
+    $Data['Kementerian'] = $this->db->where('deleted_at IS NULL')->order_by('NamaKementerian', 'ASC')->get('kementerian')->result_array();
+
+    $this->load->view('Nasional/header', $Header);
+    $this->load->view('Nasional/KegiatanPrioritasUtama', $Data);
+  }
+
+  // --- CRUD PRIORITAS PEMBANGUNAN ---
+  public function InputPrioritasKPU(){
+    $data = [
+      'Kode'                 => $this->input->post('Kode'),
+      'PrioritasPembangunan' => $this->input->post('PrioritasPembangunan')
+    ];
+    $this->db->insert('rpjmn_kpu_prioritas', $data);
+    echo ($this->db->affected_rows()) ? '1' : 'Gagal Menyimpan Data Prioritas!';
+  }
+
+  public function EditPrioritasKPU(){
+    $id = $this->input->post('Id');
+    $data = [
+      'Kode'                 => $this->input->post('Kode'),
+      'PrioritasPembangunan' => $this->input->post('PrioritasPembangunan')
+    ];
+    $this->db->where('Id', $id)->update('rpjmn_kpu_prioritas', $data);
+    echo ($this->db->affected_rows()) ? '1' : 'Gagal Update Data Prioritas!';
+  }
+
+  public function HapusPrioritasKPU(){
+    $id = $this->input->post('Id');
+    $data = ['deleted_at' => date('Y-m-d H:i:s')];
+    $this->db->where('Id', $id)->update('rpjmn_kpu_prioritas', $data);
+    echo ($this->db->affected_rows()) ? '1' : 'Gagal Hapus Data Prioritas!';
+  }
+
+  // --- CRUD KEGIATAN PRIORITAS ---
+  public function InputKegiatanKPU(){
+    $data = [
+      '_Id'               => $this->input->post('_Id'), // Id Prioritas
+      'Kode'              => $this->input->post('Kode'),
+      'KegiatanPrioritas' => $this->input->post('KegiatanPrioritas'),
+      'SumberDana'        => $this->input->post('SumberDana'),
+      'Pelaksana'         => $this->input->post('Pelaksana')
+    ];
+    $this->db->insert('rpjmn_kpu_kegiatan', $data);
+    echo ($this->db->affected_rows()) ? '1' : 'Gagal Menyimpan Data Kegiatan!';
+  }
+
+  public function EditKegiatanKPU(){
+    $id = $this->input->post('Id');
+    $data = [
+      'Kode'              => $this->input->post('Kode'),
+      'KegiatanPrioritas' => $this->input->post('KegiatanPrioritas'),
+      'SumberDana'        => $this->input->post('SumberDana'),
+      'Pelaksana'         => $this->input->post('Pelaksana')
+    ];
+    if ($this->input->post('_Id')) {
+      $data['_Id'] = $this->input->post('_Id');
+    }
+    $this->db->where('Id', $id)->update('rpjmn_kpu_kegiatan', $data);
+    echo ($this->db->affected_rows()) ? '1' : 'Gagal Update Data Kegiatan!';
+  }
+
+  public function HapusKegiatanKPU(){
+    $id = $this->input->post('Id');
+    $data = ['deleted_at' => date('Y-m-d H:i:s')];
+    $this->db->where('Id', $id)->update('rpjmn_kpu_kegiatan', $data);
+    echo ($this->db->affected_rows()) ? '1' : 'Gagal Hapus Data Kegiatan!';
+  }
+
+  // --- CRUD SASARAN ---
+  public function InputSasaranKPU(){
+    $data = [
+      '_Id'     => $this->input->post('_Id'), // Id Kegiatan
+      'Sasaran' => $this->input->post('Sasaran')
+    ];
+    $this->db->insert('rpjmn_kpu_sasaran', $data);
+    echo ($this->db->affected_rows()) ? '1' : 'Gagal Menyimpan Data Sasaran!';
+  }
+
+  public function EditSasaranKPU(){
+    $id = $this->input->post('Id');
+    $data = [
+      'Sasaran' => $this->input->post('Sasaran')
+    ];
+    if ($this->input->post('_Id')) {
+      $data['_Id'] = $this->input->post('_Id');
+    }
+    $this->db->where('Id', $id)->update('rpjmn_kpu_sasaran', $data);
+    echo ($this->db->affected_rows()) ? '1' : 'Gagal Update Data Sasaran!';
+  }
+
+  public function HapusSasaranKPU(){
+    $id = $this->input->post('Id');
+    $data = ['deleted_at' => date('Y-m-d H:i:s')];
+    $this->db->where('Id', $id)->update('rpjmn_kpu_sasaran', $data);
+    echo ($this->db->affected_rows()) ? '1' : 'Gagal Hapus Data Sasaran!';
+  }
+
+  // --- CRUD KHUSUS SUMBER DANA & PELAKSANA ---
+  public function UpdateSumberDanaKPU(){
+    $id = $this->input->post('Id');
+    $data = ['SumberDana' => $this->input->post('SumberDana')];
+    $this->db->where('Id', $id)->update('rpjmn_kpu_kegiatan', $data);
+    echo '1';
+  }
+
+  public function UpdatePelaksanaKPU(){
+    $id = $this->input->post('Id');
+    $data = ['Pelaksana' => $this->input->post('Pelaksana')];
+    $this->db->where('Id', $id)->update('rpjmn_kpu_kegiatan', $data);
+    echo '1';
+  }
+
+  public function UpdateDanaPelaksanaKPU(){
+    $id = $this->input->post('Id');
+    $data = [
+      'SumberDana' => $this->input->post('SumberDana'),
+      'Pelaksana'  => $this->input->post('Pelaksana')
+    ];
+    $this->db->where('Id', $id)->update('rpjmn_kpu_kegiatan', $data);
+    echo '1';
   }
 }
 
