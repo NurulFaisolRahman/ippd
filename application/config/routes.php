@@ -52,3 +52,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['default_controller'] = 'Beranda';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
+
+// ========== API & REALTIME ROUTES ==========
+$route['api/iku/stream'] = 'Api/stream_iku';
+$route['api/iku/realtime'] = 'Api/stream_iku';
+$route['api/iku/changes'] = 'Api/changes_iku';
+$route['api/iku/detail/(:num)'] = 'Api/detail_iku/$1';
+$route['api/iku/create'] = 'Api/create_iku';
+$route['api/iku/update/(:num)'] = 'Api/update_iku/$1';
+$route['api/iku/delete/(:num)'] = 'Api/delete_iku/$1';
+$route['api/iku/(:num)'] = 'Api/iku/$1';
+$route['api/iku'] = 'Api/iku';
+$route['api/iku_pd'] = 'Api/iku_pd';
+$route['api/(.+)'] = 'Api/$1';
+

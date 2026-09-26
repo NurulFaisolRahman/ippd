@@ -86,7 +86,7 @@ if (!function_exists('format_rumus_rpjmd')) {
                                 <?php } ?>
                             <?php } ?>
 
-                            <div class="button-icon-btn sm-res-mg-t-30" style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+                            <div class="button-icon-btn sm-res-mg-t-30" style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; align-items: center;">
                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                                     <button type="button" class="btn btn-primary notika-btn-primary BtnBukaSinkron" data-tipe="tujuan" data-label="Sinkron Tujuan">
                                         <i class="fa fa-refresh"></i> <b>Sinkron Tujuan</b>
@@ -98,6 +98,29 @@ if (!function_exists('format_rumus_rpjmd')) {
                                         <i class="fa fa-refresh"></i> <b>Sinkron Tujuan &amp; Sasaran</b>
                                     </button>
                                 <?php } ?>
+
+                                <button type="button" class="btn btn-primary BtnBukaIntegrasiApi" id="BtnOpenIntegrasiApi" style="background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%) !important; color: #fff !important; border: none !important; font-weight: 700; border-radius: 4px; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.25);">
+                                    <i class="fa fa-cloud-download"></i> <b>Integrasi &amp; Impor API</b>
+                                </button>
+
+                                <!-- Realtime Status Pill -->
+                                <div class="realtime-status-pill" id="RealtimeStatusPill" title="Koneksi realtime perubahan data IKU aktif" style="display: inline-flex; align-items: center; gap: 8px; margin-left: auto; padding: 6px 14px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 9999px; font-size: 12px; font-weight: 600; color: #065f46;">
+                                    <span class="realtime-pulse-dot"></span>
+                                    <span id="RealtimeStatusText">Realtime IKU Aktif</span>
+                                </div>
+                            </div>
+
+                            <!-- Alert Banner Realtime Update -->
+                            <div id="AlertRealtimeUpdate" class="alert alert-warning" style="display: none; border-left: 5px solid #f59e0b; border-radius: 6px; margin-bottom: 15px; padding: 12px 16px; background: #fffbeb; color: #92400e;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                                    <div>
+                                        <i class="fa fa-bell" style="margin-right: 6px; color: #d97706;"></i>
+                                        <strong>Pemberitahuan Realtime:</strong> <span id="AlertRealtimeText">Terjadi perubahan data pada menu IKU.</span>
+                                    </div>
+                                    <button type="button" class="btn btn-xs btn-warning" id="BtnRefreshTableRealtime" style="font-weight: 700; border-radius: 4px;">
+                                        <i class="fa fa-refresh"></i> Muat Ulang Tabel
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -503,6 +526,465 @@ if (!function_exists('format_target_koma')) {
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL INTEGRASI API, IMPOR DATA EKSTERNAL & WEBHOOK REALTIME -->
+    <!-- ========================================================================= -->
+    <div class="modal fade" id="ModalIntegrasiApi" role="dialog">
+        <div class="modal-dialog modal-lg" style="width: 92%; max-width: 1050px; margin: 30px auto;">
+            <div class="modal-content modal-iku-content" style="border-radius: 12px; border: none; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); overflow: hidden;">
+                <div class="modal-header modal-iku-header" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%); color: #fff; padding: 18px 24px;">
+                    <button type="button" class="close" data-dismiss="modal" style="color: #fff; opacity: 0.8; font-size: 24px;">&times;</button>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span class="modal-title-icon" style="background: rgba(255, 255, 255, 0.2); width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; font-size: 20px;">
+                            <i class="fa fa-plug"></i>
+                        </span>
+                        <div>
+                            <h4 class="modal-title" style="color: #fff; font-weight: 700; margin: 0; font-size: 18px;">
+                                Integrasi API &amp; Webhook Realtime IKU
+                            </h4>
+                            <p style="margin: 2px 0 0 0; font-size: 12px; color: #cbd5e1;">
+                                Impor data IKU dari API eksternal, kelola webhook perubahan realtime ke web lain, dan dokumentasi REST API IPPD.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-body modal-iku-body" style="padding: 20px 24px; background: #f8fafc;">
+                    <!-- Nav Tabs -->
+                    <ul class="nav nav-tabs nav-tabs-api" role="tablist" style="border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; display: flex; gap: 6px; flex-wrap: wrap;">
+                        <li role="presentation" class="active">
+                            <a href="#tab-impor-api" aria-controls="tab-impor-api" role="tab" data-toggle="tab" style="font-weight: 700; border-radius: 8px 8px 0 0; padding: 10px 16px;">
+                                <i class="fa fa-cloud-download text-primary"></i> <b>1. Impor dari API Eksternal</b>
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a href="#tab-webhook-api" aria-controls="tab-webhook-api" role="tab" data-toggle="tab" style="font-weight: 700; border-radius: 8px 8px 0 0; padding: 10px 16px;">
+                                <i class="fa fa-bolt text-warning"></i> <b>2. Webhook Realtime (Kirim ke Web Lain)</b>
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a href="#tab-endpoint-api" aria-controls="tab-endpoint-api" role="tab" data-toggle="tab" style="font-weight: 700; border-radius: 8px 8px 0 0; padding: 10px 16px;">
+                                <i class="fa fa-code text-info"></i> <b>3. REST API IPPD (Diambil Web Lain)</b>
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a href="#tab-logs-api" aria-controls="tab-logs-api" role="tab" data-toggle="tab" style="font-weight: 700; border-radius: 8px 8px 0 0; padding: 10px 16px;">
+                                <i class="fa fa-history text-success"></i> <b>4. Log Realtime &amp; Perubahan</b>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content" style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; min-height: 420px;">
+                        
+                        <!-- TAB 1: IMPOR DARI API EKSTERNAL -->
+                        <div role="tabpanel" class="tab-pane active" id="tab-impor-api">
+                            <div class="alert alert-info" style="border-radius: 6px; padding: 12px 16px; margin-bottom: 20px; background: #eff6ff; border-left: 4px solid #3b82f6; color: #1e40af;">
+                                <i class="fa fa-info-circle"></i> <strong>Tarik Data IKU Otomatis:</strong> Masukkan URL Endpoint REST API dari sistem / website lain (misal: SIPD, Sistem Bappeda, atau Aplikasi Perencanaan lain). Sistem akan menarik JSON data, menganalisis struktur indikator, dan memberikan pratinjau sebelum disimpan ke IKU IPPD.
+                            </div>
+
+                            <form id="FormTarikApi">
+                                <div class="row">
+                                    <div class="col-md-8 col-sm-12">
+                                        <div class="form-group">
+                                            <label style="font-weight: 700; font-size: 13px; color: #1e293b;">
+                                                URL Endpoint API Eksternal <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                <input type="url" class="form-control" id="ImportApiUrl" placeholder="https://contoh-domain-lain.go.id/api/iku" required style="border-radius: 6px; height: 38px; font-family: monospace;">
+                                            </div>
+                                            <small class="text-muted">Mendukung respons JSON berupa array objek indikator, atau dibungkus dalam properti <code>data</code> / <code>items</code> / <code>results</code>.</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 col-sm-12">
+                                        <div class="form-group">
+                                            <label style="font-weight: 700; font-size: 13px; color: #1e293b;">Metode HTTP</label>
+                                            <select class="form-control" id="ImportApiMethod" style="border-radius: 6px; height: 38px;">
+                                                <option value="GET" selected>GET (Standar)</option>
+                                                <option value="POST">POST</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-4 col-sm-12">
+                                        <div class="form-group">
+                                            <label style="font-weight: 700; font-size: 13px; color: #1e293b;">Tipe Autentikasi API</label>
+                                            <select class="form-control" id="ImportApiAuthType" style="border-radius: 6px; height: 38px;">
+                                                <option value="none" selected>Tanpa Autentikasi (Publik)</option>
+                                                <option value="bearer">Bearer Token (JWT / Auth Token)</option>
+                                                <option value="api_key">Header X-API-KEY</option>
+                                                <option value="basic">Basic Auth (user:pass)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8 col-sm-12">
+                                        <div class="form-group">
+                                            <label style="font-weight: 700; font-size: 13px; color: #1e293b;" id="LabelImportApiToken">Token / API Key (Opsional)</label>
+                                            <input type="text" class="form-control" id="ImportApiToken" placeholder="Masukkan token jika API eksternal membutuhkan autentikasi..." style="border-radius: 6px; height: 38px; font-family: monospace;">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 col-sm-12">
+                                        <div class="form-group">
+                                            <label style="font-weight: 700; font-size: 13px; color: #1e293b;">Periode Target RPJMD</label>
+                                            <select class="form-control" id="ImportApiPeriode" style="border-radius: 6px; height: 38px;">
+                                                <option value="" selected>-- Otomatis Dari Data API atau VMTS --</option>
+                                                <?php if (!empty($Periods)) { ?>
+                                                    <?php foreach ($Periods as $p) { ?>
+                                                        <option value="<?= html_escape($p['TahunMulai'] . '-' . $p['TahunAkhir']) ?>">
+                                                            Periode <?= html_escape($p['TahunMulai'] . ' - ' . $p['TahunAkhir']) ?>
+                                                        </option>
+                                                    <?php } ?>
+                                                <?php } ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-sm-12">
+                                        <div class="form-group">
+                                            <label style="font-weight: 700; font-size: 13px; color: #1e293b;">Mode Penanganan Data (Impor)</label>
+                                            <select class="form-control" id="ImportApiMode" style="border-radius: 6px; height: 38px;">
+                                                <option value="upsert" selected>Perbarui &amp; Tambah (Upsert - Rekomendasi)</option>
+                                                <option value="append">Tambahkan Semua sebagai Data Baru (Append)</option>
+                                                <option value="replace">Timpa / Gantikan Seluruh IKU Wilayah Ini (Replace Total)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; gap: 10px; margin-top: 5px;">
+                                    <button type="submit" class="btn btn-primary" id="BtnTarikApi" style="font-weight: 700; border-radius: 6px; padding: 8px 20px; background: #2563eb;">
+                                        <i class="fa fa-search"></i> Tarik &amp; Pratinjau Data API
+                                    </button>
+                                    <button type="button" class="btn btn-default" id="BtnResetTarikApi" style="border-radius: 6px;">
+                                        Reset Form
+                                    </button>
+                                </div>
+                            </form>
+
+                            <!-- Pratinjau Hasil Penarikan Data API -->
+                            <div id="ContainerPreviewApi" style="display: none; margin-top: 25px; border-top: 2px dashed #cbd5e1; padding-top: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+                                    <div>
+                                        <h5 style="margin: 0; font-weight: 700; color: #0f172a;">
+                                            <i class="fa fa-table text-primary"></i> Pratinjau Data yang Siap Diimpor
+                                        </h5>
+                                        <span class="badge badge-success" id="BadgeTotalFound" style="background: #10b981; font-size: 12px; padding: 4px 10px; margin-top: 4px;">0 Indikator Ditemukan</span>
+                                    </div>
+                                    <button type="button" class="btn btn-success" id="BtnEksekusiImpor" style="font-weight: 700; border-radius: 6px; padding: 8px 22px; background: #059669; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);">
+                                        <i class="fa fa-download"></i> Konfirmasi &amp; Eksekusi Impor ke IKU
+                                    </button>
+                                </div>
+
+                                <div class="table-responsive" style="max-height: 380px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px;">
+                                    <table class="table table-bordered table-striped" style="margin-bottom: 0; font-size: 12.5px;">
+                                        <thead style="background: #f1f5f9; position: sticky; top: 0; z-index: 2;">
+                                            <tr>
+                                                <th class="text-center" style="width: 4%;">No</th>
+                                                <th style="width: 25%;">Indikator Kinerja Utama</th>
+                                                <th style="width: 20%;">Rumus Penghitungan</th>
+                                                <th style="width: 20%;">Definisi Operasional</th>
+                                                <th class="text-center" style="width: 6%;">T1</th>
+                                                <th class="text-center" style="width: 6%;">T2</th>
+                                                <th class="text-center" style="width: 6%;">T3</th>
+                                                <th class="text-center" style="width: 6%;">T4</th>
+                                                <th class="text-center" style="width: 6%;">T5</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="TbodyPreviewApi">
+                                            <!-- Rendered dynamically via JS -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB 2: WEBHOOK REALTIME (KIRIM KE WEB LAIN) -->
+                        <div role="tabpanel" class="tab-pane" id="tab-webhook-api">
+                            <div class="alert alert-warning" style="border-radius: 6px; padding: 12px 16px; margin-bottom: 20px; background: #fffbeb; border-left: 4px solid #f59e0b; color: #92400e;">
+                                <i class="fa fa-bolt"></i> <strong>Koneksi Otomatis Realtime:</strong> Daftarkan URL webhook dari sistem atau website lain. Setiap kali data IKU ditambah, diubah rumus/targetnya, dihapus, disinkronisasi, atau diimpor, IPPD akan langsung mengirimkan payload HTTP POST secara realtime dengan payload JSON lengkap ke URL terdaftar.
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h5 style="margin: 0; font-weight: 700; color: #0f172a;">
+                                    <i class="fa fa-globe text-primary"></i> Daftar Webhook Terhubung
+                                </h5>
+                                <button type="button" class="btn btn-sm btn-primary" id="BtnBukaFormWebhook" style="border-radius: 6px; font-weight: 600;">
+                                    <i class="fa fa-plus"></i> Tambah Webhook Baru
+                                </button>
+                            </div>
+
+                            <!-- Form Tambah Webhook (Collapsible) -->
+                            <div id="FormWebhookContainer" style="display: none; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+                                <h6 style="margin-top: 0; font-weight: 700; color: #1e293b;">
+                                    <i class="fa fa-plus-circle text-primary"></i> Daftarkan Webhook Baru
+                                </h6>
+                                <form id="FormSimpanWebhook">
+                                    <input type="hidden" id="WebhookId" value="">
+                                    <div class="row">
+                                        <div class="col-md-5 col-sm-12">
+                                            <div class="form-group">
+                                                <label style="font-weight: 700; font-size: 12px; color: #334155;">Nama Sistem / Web Tujuan <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" id="WebhookName" placeholder="Contoh: Portal Data Bappeda / SIPD" required style="border-radius: 6px; height: 36px;">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-7 col-sm-12">
+                                            <div class="form-group">
+                                                <label style="font-weight: 700; font-size: 12px; color: #334155;">URL Target Webhook (HTTP POST) <span class="text-danger">*</span></label>
+                                                <input type="url" class="form-control" id="WebhookTargetUrl" placeholder="https://website-lain.go.id/api/receive-iku-webhook" required style="border-radius: 6px; height: 36px; font-family: monospace;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-12">
+                                            <div class="form-group">
+                                                <label style="font-weight: 700; font-size: 12px; color: #334155;">Secret Token (Opsional untuk HMAC SHA-256 Signature)</label>
+                                                <input type="text" class="form-control" id="WebhookSecretToken" placeholder="Kunci rahasia untuk memvalidasi header X-IPPD-Signature" style="border-radius: 6px; height: 36px; font-family: monospace;">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 col-sm-6">
+                                            <div class="form-group">
+                                                <label style="font-weight: 700; font-size: 12px; color: #334155;">Event yang Dipantau</label>
+                                                <select class="form-control" id="WebhookEvents" style="border-radius: 6px; height: 36px;">
+                                                    <option value="all" selected>Semua Event Perubahan</option>
+                                                    <option value="iku.create,iku.update">Hanya Create &amp; Update</option>
+                                                    <option value="iku.delete">Hanya Delete</option>
+                                                    <option value="iku.sync,iku.import_api">Hanya Sync &amp; Import</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 col-sm-6">
+                                            <div class="form-group">
+                                                <label style="font-weight: 700; font-size: 12px; color: #334155;">Status</label>
+                                                <select class="form-control" id="WebhookIsActive" style="border-radius: 6px; height: 36px;">
+                                                    <option value="1" selected>Aktif (Live Kirim)</option>
+                                                    <option value="0">Non-Aktif (Jeda)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button type="submit" class="btn btn-sm btn-primary" id="BtnSubmitWebhook" style="font-weight: 700; border-radius: 4px;">
+                                            <i class="fa fa-save"></i> Simpan Webhook
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-info" id="BtnTestPingWebhook" style="font-weight: 600; border-radius: 4px;">
+                                            <i class="fa fa-paper-plane"></i> Kirim Tes Ping
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-default" id="BtnTutupFormWebhook" style="border-radius: 4px;">
+                                            Batal
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Tabel Daftar Webhook -->
+                            <div class="table-responsive" style="border: 1px solid #e2e8f0; border-radius: 6px;">
+                                <table class="table table-bordered table-hover" style="margin-bottom: 0; font-size: 13px;">
+                                    <thead style="background: #f1f5f9;">
+                                        <tr>
+                                            <th style="width: 22%;">Nama Sistem</th>
+                                            <th style="width: 35%;">URL Target Webhook</th>
+                                            <th class="text-center" style="width: 12%;">Status Terakhir</th>
+                                            <th style="width: 16%;">Terakhir Dipicu</th>
+                                            <th class="text-center" style="width: 15%;">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="TbodyListWebhook">
+                                        <!-- Rendered dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- TAB 3: REST API IPPD (DIAMBIL OLEH WEB LAIN) -->
+                        <div role="tabpanel" class="tab-pane" id="tab-endpoint-api">
+                            <div class="alert alert-success" style="border-radius: 6px; padding: 12px 16px; margin-bottom: 20px; background: #f0fdf4; border-left: 4px solid #10b981; color: #166534;">
+                                <i class="fa fa-check-circle"></i> <strong>Endpoint REST API Terbuka:</strong> Website atau aplikasi eksternal dapat mengambil, mengimpor, atau streaming data IKU wilayah ini menggunakan endpoint di bawah ini. Mendukung format JSON standar dan SSE (Server-Sent Events) untuk streaming realtime.
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <!-- Endpoint GET Data IKU -->
+                                    <div class="api-endpoint-box" style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px 16px; margin-bottom: 14px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                                            <div>
+                                                <span class="badge" style="background: #2563eb; color: #fff; font-weight: 700; padding: 4px 8px; border-radius: 4px; font-size: 11px;">GET</span>
+                                                <strong style="margin-left: 6px; color: #0f172a; font-size: 13.5px;">Endpoint Data IKU (JSON)</strong>
+                                            </div>
+                                            <button type="button" class="btn btn-xs btn-default BtnCopyText" data-target="#EndpointUrlIku" style="font-weight: 600; border-radius: 4px;">
+                                                <i class="fa fa-copy"></i> Salin URL
+                                            </button>
+                                        </div>
+                                        <input type="text" readonly id="EndpointUrlIku" class="form-control" style="font-family: monospace; font-size: 12.5px; background: #fff; border-color: #cbd5e1;" value="">
+                                        <small class="text-muted" style="display: block; margin-top: 4px;">
+                                            Parameter query opsional: <code>tahun_mulai</code>, <code>tahun_akhir</code>, <code>q</code> (pencarian), <code>since</code> (tanggal perubahan), <code>limit</code>, <code>offset</code>.
+                                        </small>
+                                    </div>
+
+                                    <!-- Endpoint SSE Realtime Stream -->
+                                    <div class="api-endpoint-box" style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px 16px; margin-bottom: 14px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                                            <div>
+                                                <span class="badge" style="background: #059669; color: #fff; font-weight: 700; padding: 4px 8px; border-radius: 4px; font-size: 11px;">SSE STREAM</span>
+                                                <strong style="margin-left: 6px; color: #0f172a; font-size: 13.5px;">Endpoint Realtime Stream (Server-Sent Events)</strong>
+                                            </div>
+                                            <button type="button" class="btn btn-xs btn-default BtnCopyText" data-target="#EndpointUrlStream" style="font-weight: 600; border-radius: 4px;">
+                                                <i class="fa fa-copy"></i> Salin URL
+                                            </button>
+                                        </div>
+                                        <input type="text" readonly id="EndpointUrlStream" class="form-control" style="font-family: monospace; font-size: 12.5px; background: #fff; border-color: #cbd5e1;" value="">
+                                        <small class="text-muted" style="display: block; margin-top: 4px;">
+                                            Gunakan <code>new EventSource(url)</code> di Javascript browser / server untuk menerima event <code>iku_change</code> seketika tanpa polling!
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Kelola Kunci Akses (API Key) -->
+                            <div style="margin-top: 15px; border-top: 1px solid #e2e8f0; padding-top: 18px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+                                    <h5 style="margin: 0; font-weight: 700; color: #0f172a;">
+                                        <i class="fa fa-key text-warning"></i> Kelola API Key
+                                    </h5>
+                                    <button type="button" class="btn btn-sm btn-primary" id="BtnBukaFormApiKey" style="border-radius: 6px; font-weight: 600;">
+                                        <i class="fa fa-plus"></i> Buat Kunci Akses Baru
+                                    </button>
+                                </div>
+
+                                <!-- Form Buat API Key Baru -->
+                                <div id="FormApiKeyContainer" style="display: none; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px; margin-bottom: 15px;">
+                                    <form id="FormSimpanApiKey" style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
+                                        <div style="flex: 2; min-width: 200px;">
+                                            <label style="font-weight: 700; font-size: 12px; color: #334155; margin-bottom: 4px;">Nama Aplikasi / Deskripsi Kunci</label>
+                                            <input type="text" class="form-control" id="ApiKeyNameInput" placeholder="Contoh: Web SIPD Bappeda" required style="border-radius: 6px; height: 36px;">
+                                        </div>
+                                        <div style="flex: 1; min-width: 140px;">
+                                            <label style="font-weight: 700; font-size: 12px; color: #334155; margin-bottom: 4px;">Hak Akses</label>
+                                            <select class="form-control" id="ApiKeyPermsInput" style="border-radius: 6px; height: 36px;">
+                                                <option value="read,write" selected>Baca &amp; Tulis (Read/Write)</option>
+                                                <option value="read">Hanya Baca (Read-Only)</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <button type="submit" class="btn btn-primary" style="border-radius: 6px; height: 36px; font-weight: 700;">
+                                                <i class="fa fa-check"></i> Buat Kunci
+                                            </button>
+                                            <button type="button" class="btn btn-default" id="BtnTutupFormApiKey" style="border-radius: 6px; height: 36px;">
+                                                Batal
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <div class="table-responsive" style="border: 1px solid #e2e8f0; border-radius: 6px;">
+                                    <table class="table table-bordered table-striped" style="margin-bottom: 0; font-size: 13px;">
+                                        <thead style="background: #f1f5f9;">
+                                            <tr>
+                                                <th style="width: 25%;">Nama Kunci / Sistem</th>
+                                                <th style="width: 35%;">API Key (Token)</th>
+                                                <th class="text-center" style="width: 15%;">Hak Akses</th>
+                                                <th style="width: 15%;">Terakhir Digunakan</th>
+                                                <th class="text-center" style="width: 10%;">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="TbodyListApiKeys">
+                                            <!-- Rendered dynamically -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Contoh Kode Integrasi -->
+                            <div style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+                                <h6 style="margin-top: 0; font-weight: 700; color: #334155;">
+                                    <i class="fa fa-laptop-code text-info"></i> Contoh Kode Integrasi Web Lain
+                                </h6>
+                                <div style="background: #0f172a; color: #f8fafc; border-radius: 8px; padding: 14px; font-family: monospace; font-size: 12px; overflow-x: auto;" id="CodeSnippetExample">
+// JavaScript / Fetch Contoh:
+const res = await fetch("<?= base_url('api/iku?kode_wilayah=') ?>" + kodeWilayah, {
+  headers: { "X-API-KEY": "MASUKKAN_API_KEY" }
+});
+const json = await res.json();
+console.log("Data IKU:", json.data);
+
+// Realtime Server-Sent Events (SSE) Listener:
+const stream = new EventSource("<?= base_url('api/iku/stream?kode_wilayah=') ?>" + kodeWilayah);
+stream.addEventListener("iku_change", (e) => {
+  const update = JSON.parse(e.data);
+  console.log("Realtime Update IKU:", update);
+  alert("Data IKU telah diperbarui oleh web lain: " + update.indikator);
+});
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB 4: LOG REALTIME & AKTIVITAS -->
+                        <div role="tabpanel" class="tab-pane" id="tab-logs-api">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 8px;">
+                                <div>
+                                    <h5 style="margin: 0; font-weight: 700; color: #0f172a;">
+                                        <i class="fa fa-history text-success"></i> Riwayat Perubahan Data &amp; Webhook
+                                    </h5>
+                                    <small class="text-muted">Mencatat setiap kali data IKU ditambah, diubah rumus/targetnya, disinkronkan, atau diimpor.</small>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-default" id="BtnRefreshLogs" style="border-radius: 6px; font-weight: 600;">
+                                    <i class="fa fa-refresh"></i> Segarkan Log
+                                </button>
+                            </div>
+
+                            <div class="table-responsive" style="max-height: 420px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px;">
+                                <table class="table table-bordered table-striped" style="margin-bottom: 0; font-size: 12.5px;">
+                                    <thead style="background: #f1f5f9; position: sticky; top: 0; z-index: 2;">
+                                        <tr>
+                                            <th style="width: 16%;">Waktu</th>
+                                            <th class="text-center" style="width: 14%;">Event</th>
+                                            <th style="width: 38%;">Indikator / Deskripsi</th>
+                                            <th class="text-center" style="width: 16%;">Sumber</th>
+                                            <th class="text-center" style="width: 16%;">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="TbodyListLogs">
+                                        <!-- Rendered dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="modal-footer modal-iku-footer" style="padding: 14px 24px; background: #f1f5f9; border-top: 1px solid #e2e8f0;">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 6px; font-weight: 600; padding: 8px 20px;">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detail Payload Log -->
+    <div class="modal fade" id="ModalDetailLog" role="dialog" style="z-index: 106000 !important;">
+        <div class="modal-dialog" style="max-width: 600px; margin: 60px auto;">
+            <div class="modal-content" style="border-radius: 10px; overflow: hidden;">
+                <div class="modal-header" style="background: #1e293b; color: #fff; padding: 14px 20px;">
+                    <button type="button" class="close" data-dismiss="modal" style="color: #fff;">&times;</button>
+                    <h5 class="modal-title" style="color: #fff; font-weight: 700; margin: 0;">
+                        <i class="fa fa-code"></i> Detail Payload Aktivitas
+                    </h5>
+                </div>
+                <div class="modal-body" style="padding: 16px; background: #0f172a;">
+                    <pre id="PreDetailLogPayload" style="background: transparent; border: none; color: #38bdf8; font-size: 12px; margin: 0; max-height: 400px; overflow-y: auto;"></pre>
+                </div>
+                <div class="modal-footer" style="padding: 10px 16px;">
+                    <button type="button" class="btn btn-sm btn-default" data-dismiss="modal">Tutup</button>
                 </div>
             </div>
         </div>
@@ -1082,6 +1564,53 @@ if (!function_exists('format_target_koma')) {
                 margin: 15px auto !important;
             }
         }
+
+        /* Realtime Pulsing Dot Animation */
+        .realtime-pulse-dot {
+            width: 9px;
+            height: 9px;
+            background-color: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
+            animation: pulseGreen 1.8s infinite;
+        }
+        @keyframes pulseGreen {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 7px rgba(16, 185, 129, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+
+        /* Nav Tabs Styling Inside API Modal */
+        .nav-tabs-api > li > a {
+            color: #475569 !important;
+            background-color: #f1f5f9;
+            border: 1px solid #cbd5e1 !important;
+            border-bottom: none !important;
+            margin-right: 4px;
+            transition: all 0.2s ease;
+        }
+        .nav-tabs-api > li.active > a,
+        .nav-tabs-api > li.active > a:hover,
+        .nav-tabs-api > li.active > a:focus {
+            color: #1e1b4b !important;
+            background-color: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            border-bottom: 2px solid #ffffff !important;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.03);
+        }
+        .nav-tabs-api > li > a:hover {
+            background-color: #e2e8f0;
+        }
     </style>
 
     <!-- Scripts -->
@@ -1464,6 +1993,594 @@ if (!function_exists('format_target_koma')) {
                     }
                 });
             });
+
+            // =========================================================================
+            // JAVASCRIPT INTEGRASI API, IMPOR EKSTERNAL & REALTIME STREAM ENGINE
+            // =========================================================================
+            var currentKodeWilayah = '<?= html_escape($KodeWilayah) ?>';
+            var importedApiItems = [];
+            var latestObservedLogId = 0;
+            var realtimeSseSource = null;
+
+            // Buka Modal Integrasi & Impor API
+            $("#BtnOpenIntegrasiApi, .BtnBukaIntegrasiApi").on('click', function(e) {
+                e.preventDefault();
+                $("#ModalIntegrasiApi").modal('show');
+                loadApiIntegrasiData();
+            });
+
+            // Fungsi memuat data integrasi API, Keys, Webhooks, dan Logs
+            function loadApiIntegrasiData() {
+                $.ajax({
+                    url: BaseURL + "Daerah/ApiIntegrasiInfo",
+                    type: "GET",
+                    dataType: "json",
+                    success: function(res) {
+                        if (res.status === 'success') {
+                            // Update URLs
+                            $("#EndpointUrlIku").val(res.api_url);
+                            $("#EndpointUrlStream").val(res.stream_url);
+
+                            // Render Webhooks
+                            renderWebhooksTable(res.webhooks);
+
+                            // Render API Keys
+                            renderApiKeysTable(res.keys);
+
+                            // Render Logs
+                            renderLogsTable(res.logs);
+
+                            // Update periods jika ada
+                            if (res.periods && res.periods.length > 0) {
+                                var optHtml = '<option value="">-- Otomatis Dari Data API atau VMTS --</option>';
+                                $.each(res.periods, function(i, p) {
+                                    optHtml += '<option value="' + p.TahunMulai + '-' + p.TahunAkhir + '">Periode ' + p.TahunMulai + ' - ' + p.TahunAkhir + '</option>';
+                                });
+                                $("#ImportApiPeriode").html(optHtml);
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Render Webhooks
+            function renderWebhooksTable(webhooks) {
+                var tbody = $("#TbodyListWebhook");
+                tbody.empty();
+                if (!webhooks || webhooks.length === 0) {
+                    tbody.html('<tr><td colspan="5" class="text-center text-muted" style="padding: 20px;"><em>Belum ada Webhook yang didaftarkan untuk wilayah ini.</em></td></tr>');
+                    return;
+                }
+
+                $.each(webhooks, function(i, wh) {
+                    var statusBadge = '<span class="badge" style="background: #94a3b8; font-size: 11px;">Belum Diuji</span>';
+                    if (wh.last_status) {
+                        if (wh.last_status >= 200 && wh.last_status < 300) {
+                            statusBadge = '<span class="badge" style="background: #10b981; font-size: 11px;">HTTP ' + wh.last_status + ' OK</span>';
+                        } else {
+                            statusBadge = '<span class="badge" style="background: #ef4444; font-size: 11px;">HTTP ' + wh.last_status + '</span>';
+                        }
+                    }
+
+                    var tr = $('<tr></tr>');
+                    tr.append('<td><strong>' + $('<div>').text(wh.name).html() + '</strong></td>');
+                    tr.append('<td><code style="word-break: break-all; font-size: 11.5px;">' + $('<div>').text(wh.target_url).html() + '</code></td>');
+                    tr.append('<td class="text-center">' + statusBadge + '</td>');
+                    tr.append('<td style="font-size: 11.5px;">' + (wh.last_triggered_at || '-') + '</td>');
+                    tr.append('<td class="text-center">' +
+                        '<button type="button" class="btn btn-xs btn-info BtnTestPingRow" data-url="' + $('<div>').text(wh.target_url).html() + '" data-secret="' + $('<div>').text(wh.secret_token || '').html() + '" style="margin-right: 4px;" title="Uji Koneksi Ping">' +
+                            '<i class="fa fa-paper-plane"></i> Tes' +
+                        '</button>' +
+                        '<button type="button" class="btn btn-xs btn-danger BtnHapusWebhookRow" data-id="' + wh.id + '" title="Hapus Webhook">' +
+                            '<i class="fa fa-trash"></i>' +
+                        '</button>' +
+                    '</td>');
+                    tbody.append(tr);
+                });
+            }
+
+            // Render API Keys
+            function renderApiKeysTable(keys) {
+                var tbody = $("#TbodyListApiKeys");
+                tbody.empty();
+                if (!keys || keys.length === 0) {
+                    tbody.html('<tr><td colspan="5" class="text-center text-muted" style="padding: 20px;"><em>Belum ada API Key aktif. Buat kunci baru menggunakan tombol di atas.</em></td></tr>');
+                    return;
+                }
+
+                $.each(keys, function(i, k) {
+                    var tr = $('<tr></tr>');
+                    tr.append('<td><strong>' + $('<div>').text(k.key_name).html() + '</strong></td>');
+                    tr.append('<td>' +
+                        '<div class="input-group input-group-sm" style="width: 100%;">' +
+                            '<input type="text" readonly class="form-control" value="' + $('<div>').text(k.api_key).html() + '" style="font-family: monospace; font-size: 11.5px; background: #fff;">' +
+                            '<span class="input-group-btn">' +
+                                '<button class="btn btn-default BtnCopyDirect" data-text="' + $('<div>').text(k.api_key).html() + '" type="button" title="Salin Key"><i class="fa fa-copy"></i></button>' +
+                            '</span>' +
+                        '</div>' +
+                    '</td>');
+                    tr.append('<td class="text-center"><span class="badge" style="background: #3b82f6; font-size: 11px;">' + $('<div>').text(k.permissions).html() + '</span></td>');
+                    tr.append('<td style="font-size: 11.5px;">' + (k.last_used_at || 'Belum pernah') + '</td>');
+                    tr.append('<td class="text-center">' +
+                        '<button type="button" class="btn btn-xs btn-danger BtnHapusApiKeyRow" data-id="' + k.id + '" title="Hapus API Key">' +
+                            '<i class="fa fa-trash"></i>' +
+                        '</button>' +
+                    '</td>');
+                    tbody.append(tr);
+                });
+            }
+
+            // Render Activity Logs
+            function renderLogsTable(logs) {
+                var tbody = $("#TbodyListLogs");
+                tbody.empty();
+                if (!logs || logs.length === 0) {
+                    tbody.html('<tr><td colspan="5" class="text-center text-muted" style="padding: 20px;"><em>Belum ada riwayat aktivitas untuk wilayah ini.</em></td></tr>');
+                    return;
+                }
+
+                if (logs[0] && logs[0].id) {
+                    latestObservedLogId = Math.max(latestObservedLogId, parseInt(logs[0].id));
+                }
+
+                $.each(logs, function(i, l) {
+                    var evBadge = '<span class="badge" style="font-size: 11px; background: #64748b;">' + l.event_type + '</span>';
+                    if (l.event_type === 'CREATE') evBadge = '<span class="badge" style="font-size: 11px; background: #10b981;">TAMBAH</span>';
+                    if (l.event_type === 'UPDATE' || l.event_type === 'UPDATE_RUMUS') evBadge = '<span class="badge" style="font-size: 11px; background: #f59e0b;">UBAH</span>';
+                    if (l.event_type === 'DELETE') evBadge = '<span class="badge" style="font-size: 11px; background: #ef4444;">HAPUS</span>';
+                    if (l.event_type === 'SYNC') evBadge = '<span class="badge" style="font-size: 11px; background: #06b6d4;">SYNC VMTS</span>';
+                    if (l.event_type === 'IMPORT_API') evBadge = '<span class="badge" style="font-size: 11px; background: #6366f1;">IMPOR API</span>';
+
+                    var tr = $('<tr></tr>');
+                    tr.append('<td style="font-size: 11.5px;">' + (l.created_at || '-') + '</td>');
+                    tr.append('<td class="text-center">' + evBadge + '</td>');
+                    tr.append('<td>' + $('<div>').text(l.indikator || '-').html() + '</td>');
+                    tr.append('<td class="text-center"><span class="badge" style="background: #e2e8f0; color: #334155; font-size: 10.5px;">' + (l.source || 'WEB_UI') + '</span></td>');
+                    tr.append('<td class="text-center">' +
+                        '<button type="button" class="btn btn-xs btn-default BtnLihatPayloadLog" data-payload=\'' + JSON.stringify(l.details || {}) + '\'>' +
+                            '<i class="fa fa-code"></i> Detail' +
+                        '</button>' +
+                    '</td>');
+                    tbody.append(tr);
+                });
+            }
+
+            // Klik Detail Payload Log
+            $(document).on('click', '.BtnLihatPayloadLog', function() {
+                var raw = $(this).attr('data-payload');
+                try {
+                    var parsed = JSON.parse(raw);
+                    $("#PreDetailLogPayload").text(JSON.stringify(parsed, null, 2));
+                } catch(e) {
+                    $("#PreDetailLogPayload").text(raw || "(Kosong)");
+                }
+                $("#ModalDetailLog").modal('show');
+            });
+
+            // Segarkan Log
+            $("#BtnRefreshLogs").on('click', function() {
+                loadApiIntegrasiData();
+            });
+
+            // Copy to Clipboard
+            $(document).on('click', '.BtnCopyText', function() {
+                var target = $(this).attr('data-target');
+                var val = $(target).val();
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(val);
+                } else {
+                    $(target).select();
+                    document.execCommand("copy");
+                }
+                var btn = $(this);
+                var orig = btn.html();
+                btn.html('<i class="fa fa-check text-success"></i> Tersalin!');
+                setTimeout(function() { btn.html(orig); }, 2000);
+            });
+
+            $(document).on('click', '.BtnCopyDirect', function() {
+                var text = $(this).attr('data-text');
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text);
+                }
+                var btn = $(this);
+                btn.html('<i class="fa fa-check text-success"></i>');
+                setTimeout(function() { btn.html('<i class="fa fa-copy"></i>'); }, 2000);
+            });
+
+            // Toggle Form Webhook
+            $("#BtnBukaFormWebhook").on('click', function() {
+                $("#FormWebhookContainer").slideToggle(200);
+            });
+            $("#BtnTutupFormWebhook").on('click', function() {
+                $("#FormWebhookContainer").slideUp(200);
+            });
+
+            // Simpan Webhook
+            $("#FormSimpanWebhook").on('submit', function(e) {
+                e.preventDefault();
+                var btn = $("#BtnSubmitWebhook");
+                var origText = btn.html();
+                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
+
+                $.ajax({
+                    url: BaseURL + "Daerah/SimpanWebhook",
+                    type: "POST",
+                    data: {
+                        id: $("#WebhookId").val(),
+                        name: $("#WebhookName").val().trim(),
+                        target_url: $("#WebhookTargetUrl").val().trim(),
+                        secret_token: $("#WebhookSecretToken").val().trim(),
+                        events: $("#WebhookEvents").val(),
+                        is_active: $("#WebhookIsActive").val(),
+                        [CSRF_NAME]: CSRF_TOKEN
+                    },
+                    dataType: "json",
+                    success: function(res) {
+                        btn.prop('disabled', false).html(origText);
+                        if (res.status === 'success') {
+                            alert(res.message);
+                            $("#FormSimpanWebhook")[0].reset();
+                            $("#FormWebhookContainer").slideUp(200);
+                            loadApiIntegrasiData();
+                        } else {
+                            alert(res.message || "Gagal menyimpan webhook!");
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        btn.prop('disabled', false).html(origText);
+                        alert("Terjadi kesalahan: " + error);
+                    }
+                });
+            });
+
+            // Tes Ping Webhook dari Form
+            $("#BtnTestPingWebhook").on('click', function() {
+                var url = $("#WebhookTargetUrl").val().trim();
+                var secret = $("#WebhookSecretToken").val().trim();
+                if (!url) {
+                    alert("Masukkan URL Target Webhook terlebih dahulu!");
+                    return;
+                }
+                eksekusiTesPing(url, secret, $(this));
+            });
+
+            // Tes Ping dari Baris Tabel
+            $(document).on('click', '.BtnTestPingRow', function() {
+                var url = $(this).attr('data-url');
+                var secret = $(this).attr('data-secret');
+                eksekusiTesPing(url, secret, $(this));
+            });
+
+            function eksekusiTesPing(url, secret, btn) {
+                var origText = btn.html();
+                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Tes...');
+
+                $.ajax({
+                    url: BaseURL + "Daerah/TesWebhook",
+                    type: "POST",
+                    data: {
+                        target_url: url,
+                        secret_token: secret,
+                        [CSRF_NAME]: CSRF_TOKEN
+                    },
+                    dataType: "json",
+                    success: function(res) {
+                        btn.prop('disabled', false).html(origText);
+                        alert(res.message + (res.latency_ms ? "\nWaktu respons: " + res.latency_ms + "ms" : ""));
+                        loadApiIntegrasiData();
+                    },
+                    error: function(xhr, status, error) {
+                        btn.prop('disabled', false).html(origText);
+                        alert("Gagal menguji webhook: " + error);
+                    }
+                });
+            }
+
+            // Hapus Webhook
+            $(document).on('click', '.BtnHapusWebhookRow', function() {
+                if (!confirm("Apakah Anda yakin ingin menghapus Webhook ini?")) return;
+                var id = $(this).attr('data-id');
+                $.ajax({
+                    url: BaseURL + "Daerah/HapusWebhook",
+                    type: "POST",
+                    data: { id: id, [CSRF_NAME]: CSRF_TOKEN },
+                    dataType: "json",
+                    success: function(res) {
+                        alert(res.message);
+                        loadApiIntegrasiData();
+                    }
+                });
+            });
+
+            // Toggle Form API Key
+            $("#BtnBukaFormApiKey").on('click', function() {
+                $("#FormApiKeyContainer").slideToggle(200);
+            });
+            $("#BtnTutupFormApiKey").on('click', function() {
+                $("#FormApiKeyContainer").slideUp(200);
+            });
+
+            // Buat API Key Baru
+            $("#FormSimpanApiKey").on('submit', function(e) {
+                e.preventDefault();
+                var keyName = $("#ApiKeyNameInput").val().trim();
+                var perms = $("#ApiKeyPermsInput").val();
+
+                $.ajax({
+                    url: BaseURL + "Daerah/BuatApiKey",
+                    type: "POST",
+                    data: {
+                        key_name: keyName,
+                        permissions: perms,
+                        [CSRF_NAME]: CSRF_TOKEN
+                    },
+                    dataType: "json",
+                    success: function(res) {
+                        if (res.status === 'success') {
+                            alert(res.message + "\nKunci: " + res.api_key);
+                            $("#ApiKeyNameInput").val('');
+                            $("#FormApiKeyContainer").slideUp(200);
+                            loadApiIntegrasiData();
+                        } else {
+                            alert(res.message || "Gagal membuat kunci!");
+                        }
+                    }
+                });
+            });
+
+            // Hapus API Key
+            $(document).on('click', '.BtnHapusApiKeyRow', function() {
+                if (!confirm("Apakah Anda yakin ingin menghapus API Key ini? Akses eksternal dengan kunci ini akan terputus.")) return;
+                var id = $(this).attr('data-id');
+                $.ajax({
+                    url: BaseURL + "Daerah/HapusApiKey",
+                    type: "POST",
+                    data: { id: id, [CSRF_NAME]: CSRF_TOKEN },
+                    dataType: "json",
+                    success: function(res) {
+                        alert(res.message);
+                        loadApiIntegrasiData();
+                    }
+                });
+            });
+
+            // =========================================================================
+            // TAB 1: LOGIKA TARIK & IMPOR DARI API EKSTERNAL
+            // =========================================================================
+            $("#ImportApiAuthType").on('change', function() {
+                var v = $(this).val();
+                if (v === 'bearer') {
+                    $("#LabelImportApiToken").text("Bearer Token (JWT / String Token)");
+                    $("#ImportApiToken").attr("placeholder", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...").prop('disabled', false);
+                } else if (v === 'api_key') {
+                    $("#LabelImportApiToken").text("Kunci API (X-API-KEY)");
+                    $("#ImportApiToken").attr("placeholder", "ippd_live_xxxxxxxx...").prop('disabled', false);
+                } else if (v === 'basic') {
+                    $("#LabelImportApiToken").text("Kredensial Basic Auth (format: username:password)");
+                    $("#ImportApiToken").attr("placeholder", "admin:password123").prop('disabled', false);
+                } else {
+                    $("#LabelImportApiToken").text("Token / API Key (Tidak Diperlukan)");
+                    $("#ImportApiToken").attr("placeholder", "").prop('disabled', true).val('');
+                }
+            });
+
+            // Submit Form Tarik Data API
+            $("#FormTarikApi").on('submit', function(e) {
+                e.preventDefault();
+                var url = $("#ImportApiUrl").val().trim();
+                var method = $("#ImportApiMethod").val();
+                var authType = $("#ImportApiAuthType").val();
+                var token = $("#ImportApiToken").val().trim();
+
+                if (!url) {
+                    alert("URL Endpoint API Eksternal harus diisi!");
+                    return;
+                }
+
+                var btn = $("#BtnTarikApi");
+                var origText = btn.html();
+                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menghubungi API Eksternal...');
+
+                $.ajax({
+                    url: BaseURL + "Daerah/TarikDataApiEksternal",
+                    type: "POST",
+                    data: {
+                        url: url,
+                        method: method,
+                        auth_type: authType,
+                        token: token,
+                        [CSRF_NAME]: CSRF_TOKEN
+                    },
+                    dataType: "json",
+                    success: function(res) {
+                        btn.prop('disabled', false).html(origText);
+                        if (res.status === 'success') {
+                            importedApiItems = res.items || [];
+                            renderPreviewImport(importedApiItems);
+                        } else {
+                            alert(res.message || "Gagal menarik data dari API eksternal!");
+                            $("#ContainerPreviewApi").slideUp(200);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        btn.prop('disabled', false).html(origText);
+                        alert("Terjadi kesalahan jaringan / server saat menarik data: " + error);
+                    }
+                });
+            });
+
+            // Render Preview Import Table
+            function renderPreviewImport(items) {
+                var tbody = $("#TbodyPreviewApi");
+                tbody.empty();
+
+                if (!items || items.length === 0) {
+                    alert("API berhasil dihubungi namun tidak ada item indikator yang dapat dideteksi dalam respons JSON.");
+                    $("#ContainerPreviewApi").slideUp(200);
+                    return;
+                }
+
+                $("#BadgeTotalFound").text(items.length + " Indikator Ditemukan");
+
+                $.each(items, function(i, itm) {
+                    var tr = $('<tr></tr>');
+                    tr.append('<td class="text-center">' + (i + 1) + '</td>');
+                    tr.append('<td><strong>' + $('<div>').text(itm.indikator_tujuan).html() + '</strong></td>');
+                    tr.append('<td><small>' + (itm.rumus ? $('<div>').text(itm.rumus).html() : '<em class="text-muted">-</em>') + '</small></td>');
+                    tr.append('<td><small>' + (itm.definisi_operasional ? $('<div>').text(itm.definisi_operasional).html() : '<em class="text-muted">-</em>') + '</small></td>');
+                    tr.append('<td class="text-center">' + (itm.target_1 !== null ? itm.target_1 : '-') + '</td>');
+                    tr.append('<td class="text-center">' + (itm.target_2 !== null ? itm.target_2 : '-') + '</td>');
+                    tr.append('<td class="text-center">' + (itm.target_3 !== null ? itm.target_3 : '-') + '</td>');
+                    tr.append('<td class="text-center">' + (itm.target_4 !== null ? itm.target_4 : '-') + '</td>');
+                    tr.append('<td class="text-center">' + (itm.target_5 !== null ? itm.target_5 : '-') + '</td>');
+                    tbody.append(tr);
+                });
+
+                $("#ContainerPreviewApi").slideDown(300);
+            }
+
+            // Eksekusi Konfirmasi Impor ke IKU
+            $("#BtnEksekusiImpor").on('click', function() {
+                if (!importedApiItems || importedApiItems.length === 0) {
+                    alert("Tidak ada data yang dapat diimpor!");
+                    return;
+                }
+
+                var mode = $("#ImportApiMode").val();
+                var periode = $("#ImportApiPeriode").val();
+
+                var modeText = "Perbarui & Tambah (Upsert)";
+                if (mode === 'append') modeText = "Tambahkan Semua sebagai Data Baru (Append)";
+                if (mode === 'replace') modeText = "TIMPA TOTAL (Seluruh data IKU wilayah ini akan dihapus & digantikan)";
+
+                var confirmMsg = "Konfirmasi Eksekusi Impor:\n" +
+                                 "- Jumlah Indikator: " + importedApiItems.length + "\n" +
+                                 "- Mode: " + modeText + "\n\n" +
+                                 "Lanjutkan proses impor data ke database IKU?";
+
+                if (!confirm(confirmMsg)) return;
+
+                var btn = $(this);
+                var origText = btn.html();
+                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan ke Database...');
+
+                $.ajax({
+                    url: BaseURL + "Daerah/EksekusiImporApi",
+                    type: "POST",
+                    data: {
+                        mode: mode,
+                        periode: periode,
+                        items: JSON.stringify(importedApiItems),
+                        [CSRF_NAME]: CSRF_TOKEN
+                    },
+                    dataType: "json",
+                    success: function(res) {
+                        btn.prop('disabled', false).html(origText);
+                        if (res.status === 'success') {
+                            alert(res.message);
+                            $("#ModalIntegrasiApi").modal('hide');
+                            location.reload();
+                        } else {
+                            alert(res.message || "Gagal melakukan impor data!");
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        btn.prop('disabled', false).html(origText);
+                        alert("Terjadi kesalahan sistem saat mengeksekusi impor: " + error);
+                    }
+                });
+            });
+
+            // =========================================================================
+            // REALTIME ENGINE: SSE (SERVER-SENT EVENTS) & LIVE NOTIFICATION
+            // =========================================================================
+            function initRealtimeStream() {
+                if (!currentKodeWilayah) return;
+
+                if (window.EventSource) {
+                    var sseUrl = BaseURL + "api/iku/stream?kode_wilayah=" + encodeURIComponent(currentKodeWilayah);
+                    try {
+                        if (realtimeSseSource) realtimeSseSource.close();
+                        realtimeSseSource = new EventSource(sseUrl);
+
+                        realtimeSseSource.addEventListener('connected', function(e) {
+                            $("#RealtimeStatusText").text("Realtime IKU Aktif");
+                            $("#RealtimeStatusPill").css({"background": "#ecfdf5", "border-color": "#a7f3d0", "color": "#065f46"});
+                        });
+
+                        realtimeSseSource.addEventListener('iku_change', function(e) {
+                            try {
+                                var payload = JSON.parse(e.data);
+                                handleIncomingRealtimeChange(payload);
+                            } catch(err) {
+                                console.warn("Error parsing realtime SSE payload", err);
+                            }
+                        });
+
+                        realtimeSseSource.onerror = function() {
+                            // Browser EventSource automatically reconnects
+                            $("#RealtimeStatusText").text("Menghubungkan Ulang...");
+                            $("#RealtimeStatusPill").css({"background": "#fef3c7", "border-color": "#fde68a", "color": "#92400e"});
+                        };
+                    } catch(e) {
+                        startPollingFallback();
+                    }
+                } else {
+                    startPollingFallback();
+                }
+            }
+
+            function handleIncomingRealtimeChange(payload) {
+                var eventName = payload.event_type || 'UPDATE';
+                var indikator = payload.indikator || 'Indikator IKU';
+                var time = new Date().toLocaleTimeString();
+
+                $("#AlertRealtimeText").html(
+                    'Perubahan <strong>' + eventName + '</strong> pada <em>"' + $('<div>').text(indikator).html() + '"</em> diterima secara realtime pukul ' + time + '.'
+                );
+                $("#AlertRealtimeUpdate").slideDown(300);
+
+                // Flash status badge
+                var pill = $("#RealtimeStatusPill");
+                pill.css({"background": "#fef3c7", "border-color": "#f59e0b", "color": "#b45309"});
+                $("#RealtimeStatusText").text("Data Baru Masuk!");
+
+                setTimeout(function() {
+                    pill.css({"background": "#ecfdf5", "border-color": "#a7f3d0", "color": "#065f46"});
+                    $("#RealtimeStatusText").text("Realtime IKU Aktif");
+                }, 4000);
+            }
+
+            // Polling Fallback jika SSE diblokir oleh proxy/jaringan
+            function startPollingFallback() {
+                setInterval(function() {
+                    if (!currentKodeWilayah) return;
+                    $.ajax({
+                        url: BaseURL + "Daerah/CekPerubahanRealtime",
+                        type: "POST",
+                        data: {
+                            last_log_id: latestObservedLogId,
+                            [CSRF_NAME]: CSRF_TOKEN
+                        },
+                        dataType: "json",
+                        success: function(res) {
+                            if (res.status === 'success' && res.has_changes) {
+                                latestObservedLogId = res.latest_id;
+                                handleIncomingRealtimeChange(res.latest_change || { event_type: 'UPDATE', indikator: 'Data IKU' });
+                            }
+                        }
+                    });
+                }, 12000); // Cek setiap 12 detik
+            }
+
+            // Refresh Tabel saat alert diklik
+            $("#BtnRefreshTableRealtime").on('click', function() {
+                location.reload();
+            });
+
+            // Mulai stream realtime saat halaman dibuka
+            initRealtimeStream();
         });
     </script>
 </div>

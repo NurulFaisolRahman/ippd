@@ -823,17 +823,210 @@ tr.type-sub:hover td {
   color: #334155;
   cursor: pointer;
   text-align: center;
-  transition: all 0.12s;
+  transition: all 0.15s ease;
 }
 .verif-preset-btn:hover:not(:disabled) {
   background: #f1f5f9;
   border-color: #94a3b8;
   color: #0f172a;
+  transform: translateY(-1px);
+}
+.verif-preset-btn.active {
+  background: #059669 !important;
+  border-color: #047857 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(5, 150, 105, 0.4) !important;
+  transform: translateY(-1px);
 }
 .verif-preset-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Dynamic Percentage Badge & Progress Bar */
+.verif-calc-pill {
+  font-size: 11.5px;
+  font-weight: 800;
+  font-family: 'Roboto Mono', monospace;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #e6f9f3;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+  transition: all 0.2s ease;
+}
+.verif-calc-pill.level-100 {
+  background: #d1fae5;
+  color: #065f46;
+  border-color: #6ee7b7;
+}
+.verif-calc-pill.level-75 {
+  background: #dbeafe;
+  color: #1e40af;
+  border-color: #93c5fd;
+}
+.verif-calc-pill.level-50 {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fde68a;
+}
+.verif-calc-pill.level-0 {
+  background: #f1f5f9;
+  color: #64748b;
+  border-color: #cbd5e1;
+}
+.verif-calc-pill.level-over {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #fca5a5;
+  animation: pulseWarning 1.2s infinite;
+}
+@keyframes pulseWarning {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.verif-input-wrapper {
+  position: relative;
+}
+.verif-progress-bar-wrap {
+  width: 100%;
+  height: 4px;
+  background: #e2e8f0;
+  border-radius: 0 0 8px 8px;
+  overflow: hidden;
+  margin-top: -3px;
+  position: relative;
+  z-index: 2;
+}
+.verif-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+  width: 0%;
+  transition: width 0.25s ease, background 0.25s ease;
+}
+
+/* Quick Chips & Tags */
+.quick-chips-wrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.quick-chips-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  margin-right: 2px;
+}
+.quick-chip {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1.3;
+}
+.quick-chip:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  color: #0f172a;
+  transform: translateY(-1px);
+}
+.quick-chip:active {
+  transform: translateY(0);
+}
+.quick-chip.chip-clear {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+.quick-chip.chip-clear:hover {
+  background: #fecaca;
+  border-color: #f87171;
+  color: #991b1b;
+}
+
+.chip-mini {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #e2efda;
+  color: #107c41;
+  cursor: pointer;
+  border: 1px solid #b7db9f;
+  transition: all 0.15s;
+}
+.chip-mini:hover {
+  background: #107c41;
+  color: #ffffff;
+  border-color: #0b5c30;
+  transform: translateY(-1px);
+}
+.excel-meta-quick {
+  display: flex;
+  gap: 5px;
+}
+
+.btn-preview-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-decoration: none !important;
+  transition: all 0.15s ease;
+}
+.btn-preview-link:hover {
+  background: #2563eb;
+  color: #ffffff !important;
+}
+
+.shortcut-pill {
+  display: inline-block;
+  font-size: 10px;
+  font-family: 'Roboto Mono', monospace;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-left: 4px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+.excel-pct-badge {
+  font-size: 11.5px;
+  font-weight: 800;
+  font-family: 'Roboto Mono', monospace;
+  background: #e2efda;
+  color: #1b5e20;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid #b7db9f;
+}
+
+/* Excel Sheet Cell Focus Highlight */
+.excel-grid-table input.calc-inp {
+  transition: all 0.15s ease;
+}
+.excel-grid-table input.calc-inp:focus {
+  background: #fafff8 !important;
+  border-color: #107c41 !important;
+  box-shadow: 0 0 0 2px rgba(16, 124, 65, 0.25) !important;
+  outline: none !important;
+}
+
 .verif-notice-readonly {
   display: flex;
   align-items: center;
@@ -1322,6 +1515,13 @@ tr.type-sub:hover td {
   border-color: #107c41;
   color: #107c41;
 }
+.excel-preset-btn.active {
+  background: #107c41 !important;
+  border-color: #0b5c30 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 5px rgba(16, 124, 65, 0.4) !important;
+  transform: translateY(-1px);
+}
 
 .excel-actions-right {
   display: flex;
@@ -1590,7 +1790,14 @@ tr.type-sub:hover td {
         <div class="excel-meta-title"><i class="fa fa-bookmark"></i> Referensi Dokumen & Pembuktian (Audit Trail)</div>
         <div class="meta-grid-3">
           <div class="meta-field">
-            <label for="modalRefDokumen">Dokumen Sumber</label>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <label for="modalRefDokumen" style="margin-bottom:0;">Dokumen Sumber</label>
+              <div class="excel-meta-quick">
+                <span class="chip-mini chip-doc" data-text="RPJMD 2025-2029">RPJMD</span>
+                <span class="chip-mini chip-doc" data-text="RKPD 2026">RKPD</span>
+                <span class="chip-mini chip-doc" data-text="Renstra PD">Renstra</span>
+              </div>
+            </div>
             <input type="text" id="modalRefDokumen" placeholder="Contoh: RPJMD 2025-2029 / RKPD 2026">
           </div>
           <div class="meta-field">
@@ -1606,9 +1813,20 @@ tr.type-sub:hover td {
           <div class="meta-field">
             <label for="modalCatatan">Catatan / Analisis Evaluasi</label>
             <textarea id="modalCatatan" rows="2" placeholder="Catatan evaluasi, justifikasi, atau keterangan pendukung..."></textarea>
+            <div class="quick-chips-wrap" style="margin-top:4px;">
+              <button type="button" class="quick-chip excel-catatan-chip" data-text="Target telah selaras dan konsisten.">Target Selaras</button>
+              <button type="button" class="quick-chip excel-catatan-chip" data-text="Sesuai dokumen perencanaan daerah.">Sesuai Dokumen</button>
+              <button type="button" class="quick-chip excel-catatan-chip" data-text="Bukti dukung telah diverifikasi.">Diverifikasi</button>
+              <button type="button" class="quick-chip excel-catatan-chip" data-text="Perlu penyesuaian indikator dan target.">Perlu Revisi</button>
+            </div>
           </div>
           <div class="meta-field">
-            <label for="modalBuktiDukung">Bukti Dukung / Tautan Digital</label>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <label for="modalBuktiDukung" style="margin-bottom:0;">Bukti Dukung / Tautan Digital</label>
+              <a href="#" target="_blank" id="btnPreviewExcelLink" class="btn-preview-link" style="display:none;" title="Buka tautan di tab baru">
+                <i class="fa fa-external-link"></i> Buka Tautan ↗
+              </a>
+            </div>
             <textarea id="modalBuktiDukung" rows="2" placeholder="Link tautan dokumen, Google Drive, atau screenshot..."></textarea>
           </div>
         </div>
@@ -1632,10 +1850,11 @@ tr.type-sub:hover td {
           <div class="excel-score-input-wrap">
             <label for="modalBobotInput">Capaian:</label>
             <input type="number" step="0.001" min="0" id="modalBobotInput" placeholder="0.000">
+            <span class="excel-pct-badge" id="excelScorePctBadge">100%</span>
           </div>
           <button type="button" class="btn-excel-cancel" id="btnModalCancel">Batal</button>
           <button type="button" class="btn-excel-save" id="btnModalSave">
-            <i class="fa fa-save"></i> Simpan Penilaian
+            <i class="fa fa-save"></i> Simpan Penilaian <span class="shortcut-pill">Ctrl+S</span>
           </button>
         </div>
       </div>
@@ -1692,14 +1911,25 @@ tr.type-sub:hover td {
         <!-- 2. Row: Bobot Capaian & Opsi Aksi -->
         <div class="verif-form-row">
           <div class="verif-col">
-            <label class="verif-label">BOBOT CAPAIAN (MAKS: <span id="verifMaxBadge">0,625</span>)</label>
-            <input type="number" step="0.001" min="0" id="verifBobotInput" class="verif-form-control" placeholder="0.000" <?= empty($IsRole4) ? 'readonly' : '' ?>>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:7px;">
+              <label class="verif-label" style="margin-bottom:0;">BOBOT CAPAIAN (MAKS: <span id="verifMaxBadge">0,625</span>)</label>
+              <span class="verif-calc-pill level-0" id="verifPillPercent">0%</span>
+            </div>
+            <div class="verif-input-wrapper">
+              <input type="number" step="0.001" min="0" id="verifBobotInput" class="verif-form-control" placeholder="0.000" <?= empty($IsRole4) ? 'readonly' : '' ?>>
+              <div class="verif-progress-bar-wrap">
+                <div class="verif-progress-bar" id="verifProgressBar" style="width: 0%;"></div>
+              </div>
+            </div>
+            <div class="verif-validation-hint" id="verifValidationHint" style="display:none; color:#ef4444; font-size:11.5px; font-weight:600; margin-top:4px;">
+              <i class="fa fa-exclamation-triangle"></i> Nilai melebihi bobot maksimal!
+            </div>
             <div class="verif-preset-row">
-              <button type="button" class="verif-preset-btn" data-ratio="1.0" <?= empty($IsRole4) ? 'disabled' : '' ?>>100%</button>
-              <button type="button" class="verif-preset-btn" data-ratio="0.75" <?= empty($IsRole4) ? 'disabled' : '' ?>>75%</button>
-              <button type="button" class="verif-preset-btn" data-ratio="0.5" <?= empty($IsRole4) ? 'disabled' : '' ?>>50%</button>
-              <button type="button" class="verif-preset-btn" data-ratio="0.25" <?= empty($IsRole4) ? 'disabled' : '' ?>>25%</button>
-              <button type="button" class="verif-preset-btn" data-ratio="0" <?= empty($IsRole4) ? 'disabled' : '' ?>>0%</button>
+              <button type="button" class="verif-preset-btn" data-ratio="1.0" title="100% Bobot Maksimal" <?= empty($IsRole4) ? 'disabled' : '' ?>>100%</button>
+              <button type="button" class="verif-preset-btn" data-ratio="0.75" title="75% Sebagian Besar" <?= empty($IsRole4) ? 'disabled' : '' ?>>75%</button>
+              <button type="button" class="verif-preset-btn" data-ratio="0.5" title="50% Sebagian" <?= empty($IsRole4) ? 'disabled' : '' ?>>50%</button>
+              <button type="button" class="verif-preset-btn" data-ratio="0.25" title="25% Belum Memadai" <?= empty($IsRole4) ? 'disabled' : '' ?>>25%</button>
+              <button type="button" class="verif-preset-btn" data-ratio="0" title="0% Belum Memenuhi" <?= empty($IsRole4) ? 'disabled' : '' ?>>0%</button>
             </div>
           </div>
           <div class="verif-col">
@@ -1713,21 +1943,46 @@ tr.type-sub:hover td {
               <option value="Tidak Terkait / NA">Tidak Terkait / NA</option>
             </select>
             <div class="verif-col-hint">
-              <i class="fa fa-info-circle"></i> Pilih kriteria pemenuhan verifikasi
+              <i class="fa fa-info-circle"></i> Memilih opsi aksi otomatis menyesuaikan nilai bobot capaian & preset.
             </div>
           </div>
         </div>
 
         <!-- 3. Catatan / Evaluasi / Keterangan -->
         <div class="verif-form-group">
-          <label class="verif-label">CATATAN / EVALUASI / KETERANGAN</label>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:7px;">
+            <label class="verif-label" style="margin-bottom:0;">CATATAN / EVALUASI / KETERANGAN</label>
+            <span style="font-size:11px; color:#64748b; font-weight:600;"><i class="fa fa-magic"></i> Template Cepat:</span>
+          </div>
           <textarea id="verifCatatan" class="verif-form-control" rows="3" placeholder="Tambahkan uraian penjelasan hasil evaluasi atau catatan..." <?= empty($IsRole4) ? 'readonly' : '' ?>></textarea>
+          <div class="quick-chips-wrap">
+            <span class="quick-chips-label"><i class="fa fa-tags"></i> Pilih Cepat:</span>
+            <button type="button" class="quick-chip verif-catatan-chip" data-text="Telah sesuai dokumen RPJMD dan RKPD.">Sesuai RPJMD/RKPD</button>
+            <button type="button" class="quick-chip verif-catatan-chip" data-text="Target telah selaras dan konsisten.">Target Selaras</button>
+            <button type="button" class="quick-chip verif-catatan-chip" data-text="Bukti dukung telah diverifikasi lengkap.">Bukti Lengkap</button>
+            <button type="button" class="quick-chip verif-catatan-chip" data-text="Perlu penyesuaian target pada dokumen berikutnya.">Perlu Penyesuaian</button>
+            <button type="button" class="quick-chip verif-catatan-chip" data-text="Belum melampirkan matriks/tabel pendukung yang memadai.">Bukti Kurang</button>
+            <button type="button" class="quick-chip chip-clear" id="btnClearVerifCatatan" title="Bersihkan Catatan"><i class="fa fa-times"></i> Bersihkan</button>
+          </div>
         </div>
 
         <!-- 4. Bukti Dukung / Sumber Data (Dokumen/Link) -->
         <div class="verif-form-group">
-          <label class="verif-label">BUKTI DUKUNG / SUMBER DATA (DOKUMEN/LINK)</label>
-          <input type="text" id="verifBuktiDukung" class="verif-form-control" placeholder="Contoh: Bab IV RPJMD 2025-2029 / Link Dokumen Evaluasi" <?= empty($IsRole4) ? 'readonly' : '' ?>>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:7px;">
+            <label class="verif-label" style="margin-bottom:0;">BUKTI DUKUNG / SUMBER DATA (DOKUMEN/LINK)</label>
+            <a href="#" target="_blank" id="btnPreviewVerifLink" class="btn-preview-link" style="display:none;" title="Buka tautan di tab baru">
+              <i class="fa fa-external-link"></i> Buka Tautan ↗
+            </a>
+          </div>
+          <input type="text" id="verifBuktiDukung" class="verif-form-control" placeholder="Contoh: Bab IV RPJMD 2025-2029 / Link Dokumen Google Drive" <?= empty($IsRole4) ? 'readonly' : '' ?>>
+          <div class="quick-chips-wrap">
+            <span class="quick-chips-label"><i class="fa fa-file-text-o"></i> Referensi:</span>
+            <button type="button" class="quick-chip verif-bukti-chip" data-text="Bab IV Dokumen RPJMD 2025-2029">Bab IV RPJMD</button>
+            <button type="button" class="quick-chip verif-bukti-chip" data-text="Matriks Program & Kegiatan RKPD 2026">Matriks RKPD</button>
+            <button type="button" class="quick-chip verif-bukti-chip" data-text="Perda RPJMD No. 2 Tahun 2025">Perda RPJMD</button>
+            <button type="button" class="quick-chip verif-bukti-chip" data-text="Dokumen Renstra Perangkat Daerah">Renstra PD</button>
+            <button type="button" class="quick-chip verif-bukti-chip" data-text="Laporan Evaluasi IKU Triwulan">Laporan IKU</button>
+          </div>
         </div>
       </div>
 
@@ -1736,7 +1991,7 @@ tr.type-sub:hover td {
         <?php if (!empty($IsRole4)): ?>
           <button type="button" class="btn-verif-cancel" id="btnVerifCancel">Batal</button>
           <button type="button" class="btn-verif-save" id="btnVerifSave">
-            <i class="fa fa-save"></i> Simpan Penilaian
+            <i class="fa fa-save"></i> Simpan Penilaian <span class="shortcut-pill">Ctrl+S</span>
           </button>
         <?php else: ?>
           <button type="button" class="btn-verif-cancel" id="btnVerifCloseBottom">Tutup</button>
@@ -4060,6 +4315,9 @@ tr.type-sub:hover td {
     // Initial Calculation Trigger
     updateModalWorksheetScore();
 
+    syncExcelScoreUI(modalBobotInput.value, item.bobot);
+    updateExcelLinkPreview(saved.bukti_dukung || "");
+
     modalDetail.classList.add("open");
     document.body.style.overflow = "hidden";
   }
@@ -4295,6 +4553,34 @@ tr.type-sub:hover td {
     }
   });
 
+  // Excel Preset & UI Sync Helpers
+  function updateExcelPresetActive(ratio) {
+    document.querySelectorAll(".excel-preset-btn").forEach(function(btn){
+      var btnRatio = parseFloat(btn.getAttribute("data-ratio"));
+      if (Math.abs(btnRatio - ratio) < 0.02) {
+        btn.classList.add("active");
+      } else {
+        btn.classList.remove("active");
+      }
+    });
+  }
+
+  function syncExcelScoreUI(val, maxVal) {
+    var badge = document.getElementById("excelScorePctBadge");
+    var numVal = parseFloat(val);
+    if (isNaN(numVal) || val === "" || val === null) {
+      if (badge) badge.textContent = "0%";
+      updateExcelPresetActive(-1);
+      return;
+    }
+    var pct = maxVal > 0 ? (numVal / maxVal) * 100 : 0;
+    var ratio = maxVal > 0 ? (numVal / maxVal) : 0;
+    if (badge) {
+      badge.textContent = Math.min(Math.max(pct, 0), 100).toFixed(0) + "%";
+    }
+    updateExcelPresetActive(ratio);
+  }
+
   // Quick Preset Buttons in Modal
   document.querySelectorAll(".excel-preset-btn").forEach(function(btn){
     btn.addEventListener("click", function(){
@@ -4304,11 +4590,57 @@ tr.type-sub:hover td {
       var strVal = calc.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
       modalBobotInput.value = strVal;
       modalCalcDisplay.textContent = numFmt(strVal);
+      syncExcelScoreUI(strVal, max);
     });
   });
 
   modalBobotInput.addEventListener("input", function(){
+    var max = parseFloat(modalBobotMaks.value) || 0;
     modalCalcDisplay.textContent = numFmt(modalBobotInput.value);
+    syncExcelScoreUI(modalBobotInput.value, max);
+  });
+
+  modalBobotInput.addEventListener("focus", function(){
+    this.select();
+  });
+
+  // Excel quick doc chips
+  document.querySelectorAll(".chip-doc").forEach(function(chip){
+    chip.addEventListener("click", function(){
+      modalRefDokumen.value = this.getAttribute("data-text");
+      modalRefDokumen.focus();
+    });
+  });
+
+  // Excel catatan quick chips
+  document.querySelectorAll(".excel-catatan-chip").forEach(function(chip){
+    chip.addEventListener("click", function(){
+      var textToAdd = this.getAttribute("data-text");
+      var cur = modalCatatan.value.trim();
+      if (!cur) {
+        modalCatatan.value = textToAdd;
+      } else if (cur.indexOf(textToAdd) === -1) {
+        modalCatatan.value = cur + (cur.endsWith(".") ? " " : ", ") + textToAdd;
+      }
+      modalCatatan.focus();
+    });
+  });
+
+  // Excel Bukti Dukung Link Preview
+  function updateExcelLinkPreview(val) {
+    var btn = document.getElementById("btnPreviewExcelLink");
+    if (!btn) return;
+    var match = (val || "").match(/https?:\/\/[^\s]+/i);
+    if (match) {
+      btn.href = match[0];
+      btn.style.display = "inline-flex";
+    } else {
+      btn.style.display = "none";
+    }
+  }
+
+  modalBuktiDukung.addEventListener("input", function(){
+    updateExcelLinkPreview(this.value);
   });
 
   // Reactive Calculation on input and change events inside modal worksheet
@@ -4321,6 +4653,47 @@ tr.type-sub:hover td {
   modalDynamicWorksheet.addEventListener("change", function(e){
     if (e.target.classList.contains("calc-inp") || e.target.tagName === 'SELECT' || e.target.id === 'wsSelectPersandingan'){
       updateModalWorksheetScore();
+    }
+  });
+
+  // Auto select on focus for all calc inputs & Arrow key navigation
+  modalDynamicWorksheet.addEventListener("focusin", function(e){
+    if (e.target.classList.contains("calc-inp") && e.target.select){
+      e.target.select();
+    }
+  });
+
+  modalDynamicWorksheet.addEventListener("keydown", function(e){
+    if (e.target.classList.contains("calc-inp")){
+      if (e.key === "Enter" || e.key === "ArrowDown"){
+        var td = e.target.closest("td");
+        var tr = e.target.closest("tr");
+        if (td && tr && tr.nextElementSibling){
+          var colIdx = Array.from(tr.children).indexOf(td);
+          var nextTd = tr.nextElementSibling.children[colIdx];
+          if (nextTd){
+            var nextInp = nextTd.querySelector(".calc-inp");
+            if (nextInp){
+              e.preventDefault();
+              nextInp.focus();
+            }
+          }
+        }
+      } else if (e.key === "ArrowUp"){
+        var td = e.target.closest("td");
+        var tr = e.target.closest("tr");
+        if (td && tr && tr.previousElementSibling){
+          var colIdx = Array.from(tr.children).indexOf(td);
+          var prevTd = tr.previousElementSibling.children[colIdx];
+          if (prevTd){
+            var prevInp = prevTd.querySelector(".calc-inp");
+            if (prevInp){
+              e.preventDefault();
+              prevInp.focus();
+            }
+          }
+        }
+      }
     }
   });
 
@@ -5190,6 +5563,9 @@ tr.type-sub:hover td {
       }
     }
 
+    syncVerifScoreUI(targetStr, item.bobot);
+    updateVerifLinkPreview(saved.bukti_dukung_verifikator || "");
+
     modalVerif.classList.add("open");
     document.body.style.overflow = "hidden";
   }
@@ -5263,6 +5639,136 @@ tr.type-sub:hover td {
     });
   }
 
+  // --- VERIFIKATOR REACTIVE & DYNAMIC TWO-WAY BINDING ---
+  function updateVerifPresetActive(ratio) {
+    document.querySelectorAll(".verif-preset-btn").forEach(function(btn){
+      var btnRatio = parseFloat(btn.getAttribute("data-ratio"));
+      if (Math.abs(btnRatio - ratio) < 0.02) {
+        btn.classList.add("active");
+      } else {
+        btn.classList.remove("active");
+      }
+    });
+  }
+
+  function syncVerifScoreUI(val, maxVal) {
+    var pill = document.getElementById("verifPillPercent");
+    var pBar = document.getElementById("verifProgressBar");
+    var hint = document.getElementById("verifValidationHint");
+    var btnSave = document.getElementById("btnVerifSave");
+
+    var numVal = parseFloat(val);
+    if (isNaN(numVal) || val === "" || val === null) {
+      if (pill) {
+        pill.textContent = "0%";
+        pill.className = "verif-calc-pill level-0";
+      }
+      if (pBar) {
+        pBar.style.width = "0%";
+        pBar.style.background = "#94a3b8";
+      }
+      if (hint) hint.style.display = "none";
+      updateVerifPresetActive(-1);
+      return;
+    }
+
+    var pct = maxVal > 0 ? (numVal / maxVal) * 100 : 0;
+    var ratio = maxVal > 0 ? (numVal / maxVal) : 0;
+
+    // Check overflow
+    var isOver = numVal > (maxVal + 0.001);
+    if (hint) {
+      hint.style.display = isOver ? "block" : "none";
+      if (isOver) {
+        hint.innerHTML = '<i class="fa fa-exclamation-triangle"></i> Nilai melebihi bobot maksimal (' + numFmt(maxVal) + ')';
+      }
+    }
+    if (btnSave && IS_ROLE_4) {
+      btnSave.disabled = isOver;
+      btnSave.style.opacity = isOver ? "0.6" : "1";
+    }
+
+    if (pill) {
+      pill.textContent = pct.toFixed(0) + "%";
+      if (isOver) {
+        pill.className = "verif-calc-pill level-over";
+      } else if (pct >= 99) {
+        pill.className = "verif-calc-pill level-100";
+      } else if (pct >= 74) {
+        pill.className = "verif-calc-pill level-75";
+      } else if (pct >= 49) {
+        pill.className = "verif-calc-pill level-50";
+      } else {
+        pill.className = "verif-calc-pill level-0";
+      }
+    }
+
+    if (pBar) {
+      pBar.style.width = Math.min(Math.max(pct, 0), 100) + "%";
+      if (isOver) {
+        pBar.style.background = "#ef4444";
+      } else if (pct >= 99) {
+        pBar.style.background = "linear-gradient(90deg, #10b981 0%, #059669 100%)";
+      } else if (pct >= 74) {
+        pBar.style.background = "linear-gradient(90deg, #3b82f6 0%, #2563eb 100%)";
+      } else if (pct >= 49) {
+        pBar.style.background = "linear-gradient(90deg, #f59e0b 0%, #d97706 100%)";
+      } else {
+        pBar.style.background = "linear-gradient(90deg, #94a3b8 0%, #64748b 100%)";
+      }
+    }
+
+    updateVerifPresetActive(ratio);
+  }
+
+  // Two-way sync: Opsi Aksi change -> Updates Bobot Input & Presets
+  if (verifOpsiAksi) {
+    verifOpsiAksi.addEventListener("change", function(){
+      if (!IS_ROLE_4) return;
+      var max = parseFloat(verifBobotMaks.value) || 0;
+      var selVal = this.value;
+      var ratio = null;
+
+      if (selVal === 'Memenuhi Sepenuhnya (100%)') ratio = 1.0;
+      else if (selVal === 'Sebagian Besar Memenuhi (75%)') ratio = 0.75;
+      else if (selVal === 'Sebagian Memenuhi (50%)') ratio = 0.50;
+      else if (selVal === 'Belum Memenuhi (0%)') ratio = 0.0;
+      else if (selVal === 'Tidak Terkait / NA') {
+        verifBobotInput.value = "";
+        syncVerifScoreUI("", max);
+        return;
+      }
+
+      if (ratio !== null) {
+        var calc = max * ratio;
+        var strVal = calc.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
+        verifBobotInput.value = strVal === "" ? "0" : strVal;
+        syncVerifScoreUI(calc, max);
+      }
+    });
+  }
+
+  // Two-way sync: Bobot input typing -> Updates UI & syncs Opsi Aksi
+  if (verifBobotInput) {
+    verifBobotInput.addEventListener("input", function(){
+      var max = parseFloat(verifBobotMaks.value) || 0;
+      var numVal = parseFloat(this.value);
+      syncVerifScoreUI(this.value, max);
+
+      if (!isNaN(numVal) && max > 0 && verifOpsiAksi && IS_ROLE_4) {
+        var ratio = numVal / max;
+        if (Math.abs(ratio - 1.0) < 0.02) verifOpsiAksi.value = "Memenuhi Sepenuhnya (100%)";
+        else if (Math.abs(ratio - 0.75) < 0.02) verifOpsiAksi.value = "Sebagian Besar Memenuhi (75%)";
+        else if (Math.abs(ratio - 0.50) < 0.02) verifOpsiAksi.value = "Sebagian Memenuhi (50%)";
+        else if (Math.abs(ratio - 0.0) < 0.02) verifOpsiAksi.value = "Belum Memenuhi (0%)";
+      }
+    });
+
+    verifBobotInput.addEventListener("focus", function(){
+      this.select();
+    });
+  }
+
   // Quick Preset Buttons for Verifikator
   document.querySelectorAll(".verif-preset-btn").forEach(function(btn){
     btn.addEventListener("click", function(){
@@ -5271,12 +5777,81 @@ tr.type-sub:hover td {
       var max = parseFloat(verifBobotMaks.value) || 0;
       var calc = max * ratio;
       var strVal = calc.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
-      verifBobotInput.value = strVal === "" ? "0.000" : strVal;
+      verifBobotInput.value = strVal === "" ? "0" : strVal;
+
+      // Sync Opsi Aksi automatically
+      if (verifOpsiAksi) {
+        if (ratio >= 0.99) verifOpsiAksi.value = "Memenuhi Sepenuhnya (100%)";
+        else if (ratio >= 0.74) verifOpsiAksi.value = "Sebagian Besar Memenuhi (75%)";
+        else if (ratio >= 0.49) verifOpsiAksi.value = "Sebagian Memenuhi (50%)";
+        else if (ratio <= 0.01) verifOpsiAksi.value = "Belum Memenuhi (0%)";
+      }
+
+      syncVerifScoreUI(calc, max);
     });
   });
 
+  // Catatan Evaluasi Quick Chips (Smart Templates)
+  document.querySelectorAll(".verif-catatan-chip").forEach(function(chip){
+    chip.addEventListener("click", function(){
+      if (!IS_ROLE_4) return;
+      var textToAdd = this.getAttribute("data-text");
+      if (!textToAdd) return;
+      var cur = verifCatatan.value.trim();
+      if (!cur) {
+        verifCatatan.value = textToAdd;
+      } else if (cur.indexOf(textToAdd) === -1) {
+        verifCatatan.value = cur + (cur.endsWith(".") ? " " : ", ") + textToAdd;
+      }
+      verifCatatan.focus();
+    });
+  });
 
-  // Sync button from Total Keselarasan (only updates bobot capaian, leaves Opsi Aksi manual)
+  var btnClearVerifCatatan = document.getElementById("btnClearVerifCatatan");
+  if (btnClearVerifCatatan) {
+    btnClearVerifCatatan.addEventListener("click", function(){
+      if (!IS_ROLE_4) return;
+      verifCatatan.value = "";
+      verifCatatan.focus();
+    });
+  }
+
+  // Bukti Dukung Quick Chips & Link Preview
+  function updateVerifLinkPreview(val) {
+    var btn = document.getElementById("btnPreviewVerifLink");
+    if (!btn) return;
+    var match = (val || "").match(/https?:\/\/[^\s]+/i);
+    if (match) {
+      btn.href = match[0];
+      btn.style.display = "inline-flex";
+    } else {
+      btn.style.display = "none";
+    }
+  }
+
+  if (verifBuktiDukung) {
+    verifBuktiDukung.addEventListener("input", function(){
+      updateVerifLinkPreview(this.value);
+    });
+  }
+
+  document.querySelectorAll(".verif-bukti-chip").forEach(function(chip){
+    chip.addEventListener("click", function(){
+      if (!IS_ROLE_4) return;
+      var textToAdd = this.getAttribute("data-text");
+      if (!textToAdd) return;
+      var cur = verifBuktiDukung.value.trim();
+      if (!cur) {
+        verifBuktiDukung.value = textToAdd;
+      } else if (cur.indexOf(textToAdd) === -1) {
+        verifBuktiDukung.value = cur + " | " + textToAdd;
+      }
+      updateVerifLinkPreview(verifBuktiDukung.value);
+      verifBuktiDukung.focus();
+    });
+  });
+
+  // Sync button from Total Keselarasan
   if (btnSyncKeselarasan){
     btnSyncKeselarasan.addEventListener("click", function(){
       if (!IS_ROLE_4) return;
@@ -5287,6 +5862,19 @@ tr.type-sub:hover td {
       var strScore = score.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
       verifBobotInput.value = strScore === "" ? "0" : strScore;
       if (verifKeselarasanBadge) verifKeselarasanBadge.textContent = numFmt(score);
+
+      var max = parseFloat(verifBobotMaks.value) || item.bobot || 0;
+      syncVerifScoreUI(score, max);
+
+      // Auto update matching opsi aksi
+      if (verifOpsiAksi && max > 0) {
+        var ratio = score / max;
+        if (ratio >= 0.99) verifOpsiAksi.value = "Memenuhi Sepenuhnya (100%)";
+        else if (ratio >= 0.74) verifOpsiAksi.value = "Sebagian Besar Memenuhi (75%)";
+        else if (ratio >= 0.49) verifOpsiAksi.value = "Sebagian Memenuhi (50%)";
+        else if (ratio <= 0.01) verifOpsiAksi.value = "Belum Memenuhi (0%)";
+      }
+
       showToast("Bobot capaian disinkronkan dari total keselarasan: " + numFmt(score));
     });
   }

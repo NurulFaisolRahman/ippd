@@ -5998,6 +5998,12 @@
 
             if (!empty($insertData)) {
                 $this->db->insert_batch('iku', $insertData);
+                $this->load->library('IkuSyncService');
+                $this->ikusyncservice->log_activity($KodeWilayah, null, 'SYNC', "Sinkronisasi VMTS: {$namaTipe}", [
+                    'tipe' => $tipe,
+                    'periode' => "{$tahunMulai} - {$tahunAkhir}",
+                    'total_indikator' => $totalData
+                ], 'WEB_UI');
             }
 
             $namaTipe = 'Tujuan & Sasaran';
@@ -6050,6 +6056,13 @@
                 'definisi_operasional' => !empty($definisi) ? $definisi : null,
                 'updated_at' => date('Y-m-d H:i:s')
             ]);
+
+            // Catat log aktivitas & dispatch webhook realtime
+            $this->load->library('IkuSyncService');
+            $this->ikusyncservice->log_activity($KodeWilayah, $id, 'UPDATE_RUMUS', $check['indikator_tujuan'], [
+                'rumus' => $rumus,
+                'definisi_operasional' => $definisi
+            ], 'WEB_UI');
 
             echo json_encode([
                 'status' => 'success',
@@ -6119,6 +6132,8 @@
                 'updated_at' => date('Y-m-d H:i:s')
             ];
 
+            $this->load->library('IkuSyncService');
+
             if ($id > 0) {
                 $check = $this->db->where('id', $id)->where('kodewilayah', $KodeWilayah)->get('iku')->row_array();
                 if (!$check) {
@@ -6127,10 +6142,13 @@
                 }
                 $this->db->where('id', $id)->update('iku', $data);
                 $msg = 'Data IKU dan Rumus RPJMD berhasil diperbarui!';
+                $this->ikusyncservice->log_activity($KodeWilayah, $id, 'UPDATE', $indikator, $data, 'WEB_UI');
             } else {
                 $data['created_at'] = date('Y-m-d H:i:s');
                 $this->db->insert('iku', $data);
+                $newId = $this->db->insert_id();
                 $msg = 'Data IKU dan Rumus RPJMD berhasil ditambahkan!';
+                $this->ikusyncservice->log_activity($KodeWilayah, $newId, 'CREATE', $indikator, $data, 'WEB_UI');
             }
 
             echo json_encode(['status' => 'success', 'message' => $msg]);
@@ -6163,7 +6181,515 @@
             }
 
             $this->db->where('id', $id)->delete('iku');
+
+            // Log aktivitas dan dispatch webhook realtime
+            $this->load->library('IkuSyncService');
+            $this->ikusyncservice->log_activity($KodeWilayah, $id, 'DELETE', $check['indikator_tujuan'], $check, 'WEB_UI');
+
             echo json_encode(['status' => 'success', 'message' => 'Data IKU berhasil dihapus!']);
+        }
+
+        // =========================================================================
+        // FITUR INTEGRASI API, IMPOR DARI API EKSTERNAL & WEBHOOK REALTIME
+        // =========================================================================
+
+        /**
+         * Mengambil informasi integrasi API, daftar Key, Webhook, dan Log Aktivitas
+         */
+        public function ApiIntegrasiInfo() {
+            if (!$this->input->is_ajax_request()) {
+                show_404();
+                return;
+            }
+
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+
+            $this->load->library('IkuSyncService');
+            $this->ikusyncservice->auto_migrate();
+
+            $baseUrl = base_url();
+            $apiUrl = $baseUrl . 'api/iku' . (!empty($KodeWilayah) ? '?kode_wilayah=' . $KodeWilayah : '');
+            $streamUrl = $baseUrl . 'api/iku/stream' . (!empty($KodeWilayah) ? '?kode_wilayah=' . $KodeWilayah : '');
+            $changesUrl = $baseUrl . 'api/iku/changes' . (!empty($KodeWilayah) ? '?kode_wilayah=' . $KodeWilayah : '');
+
+            // Daftar API Key aktif
+            $keys = $this->db->where('status', 'active')
+                             ->group_start()
+                                 ->where('kodewilayah', $KodeWilayah)
+                                 ->or_where('kodewilayah IS NULL', null, false)
+                             ->group_end()
+                             ->order_by('id', 'DESC')
+                             ->get('api_keys')
+                             ->result_array();
+
+            // Daftar Webhook untuk wilayah ini
+            $webhooks = [];
+            if (!empty($KodeWilayah)) {
+                $webhooks = $this->db->where('kodewilayah', $KodeWilayah)
+                                     ->order_by('id', 'DESC')
+                                     ->get('iku_webhooks')
+                                     ->result_array();
+            }
+
+            // Log aktivitas terakhir
+            $logs = [];
+            if (!empty($KodeWilayah)) {
+                $logs = $this->db->where('kodewilayah', $KodeWilayah)
+                                 ->order_by('id', 'DESC')
+                                 ->limit(25)
+                                 ->get('iku_activity_logs')
+                                 ->result_array();
+            }
+
+            // Periode VMTS yang tersedia untuk dropdown impor
+            $periods = [];
+            if (!empty($KodeWilayah)) {
+                $periods = $this->db->query(
+                    "SELECT DISTINCT TahunMulai, TahunAkhir 
+                    FROM visirpjmd 
+                    WHERE KodeWilayah = ? 
+                    AND deleted_at IS NULL 
+                    ORDER BY TahunMulai",
+                    [$KodeWilayah]
+                )->result_array();
+            }
+
+            $namaWilayah = '';
+            if (!empty($KodeWilayah)) {
+                $w = $this->db->select('Nama')->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+                if ($w) $namaWilayah = $w['Nama'];
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'kodewilayah' => $KodeWilayah,
+                'nama_wilayah' => $namaWilayah,
+                'api_url' => $apiUrl,
+                'stream_url' => $streamUrl,
+                'changes_url' => $changesUrl,
+                'keys' => $keys,
+                'webhooks' => $webhooks,
+                'logs' => $logs,
+                'periods' => $periods
+            ]);
+        }
+
+        /**
+         * Membuat API Key Baru
+         */
+        public function BuatApiKey() {
+            if (!$this->input->is_ajax_request()) {
+                show_404();
+                return;
+            }
+
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+
+            $keyName = trim($this->input->post('key_name', TRUE));
+            $permissions = $this->input->post('permissions', TRUE) ?: 'read,write';
+
+            if (empty($keyName)) {
+                echo json_encode(['status' => 'error', 'message' => 'Nama / Deskripsi API Key wajib diisi!']);
+                return;
+            }
+
+            $this->load->library('IkuSyncService');
+            $newApiKey = 'ippd_' . bin2hex(random_bytes(16));
+
+            $this->db->insert('api_keys', [
+                'key_name' => $keyName,
+                'api_key' => $newApiKey,
+                'kodewilayah' => !empty($KodeWilayah) ? $KodeWilayah : null,
+                'permissions' => $permissions,
+                'status' => 'active',
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'API Key berhasil dibuat!',
+                'api_key' => $newApiKey,
+                'key_name' => $keyName
+            ]);
+        }
+
+        /**
+         * Menghapus / Menonaktifkan API Key
+         */
+        public function HapusApiKey() {
+            if (!$this->input->is_ajax_request()) {
+                show_404();
+                return;
+            }
+
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) {
+                echo json_encode(['status' => 'error', 'message' => 'ID Key tidak valid!']);
+                return;
+            }
+
+            $this->db->where('id', $id)->delete('api_keys');
+            echo json_encode(['status' => 'success', 'message' => 'API Key berhasil dihapus!']);
+        }
+
+        /**
+         * Menyimpan Webhook URL untuk website lain
+         */
+        public function SimpanWebhook() {
+            if (!$this->input->is_ajax_request()) {
+                show_404();
+                return;
+            }
+
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+
+            if (empty($KodeWilayah)) {
+                echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+                return;
+            }
+
+            $id = (int)$this->input->post('id', TRUE);
+            $name = trim($this->input->post('name', TRUE));
+            $targetUrl = trim($this->input->post('target_url', TRUE));
+            $secretToken = trim($this->input->post('secret_token', TRUE));
+            $events = trim($this->input->post('events', TRUE)) ?: 'all';
+            $isActive = (int)$this->input->post('is_active', TRUE);
+
+            if (empty($name) || empty($targetUrl)) {
+                echo json_encode(['status' => 'error', 'message' => 'Nama Webhook dan URL Tujuan wajib diisi!']);
+                return;
+            }
+
+            if (!filter_var($targetUrl, FILTER_VALIDATE_URL)) {
+                echo json_encode(['status' => 'error', 'message' => 'Format URL Target tidak valid! Harus diawali http:// atau https://']);
+                return;
+            }
+
+            $data = [
+                'kodewilayah' => $KodeWilayah,
+                'name' => $name,
+                'target_url' => $targetUrl,
+                'secret_token' => !empty($secretToken) ? $secretToken : null,
+                'events' => $events,
+                'is_active' => $isActive ? 1 : 0,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($id > 0) {
+                $this->db->where('id', $id)->where('kodewilayah', $KodeWilayah)->update('iku_webhooks', $data);
+                $msg = 'Webhook berhasil diperbarui!';
+            } else {
+                $data['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('iku_webhooks', $data);
+                $msg = 'Webhook berhasil ditambahkan!';
+            }
+
+            echo json_encode(['status' => 'success', 'message' => $msg]);
+        }
+
+        /**
+         * Menghapus Webhook
+         */
+        public function HapusWebhook() {
+            if (!$this->input->is_ajax_request()) {
+                show_404();
+                return;
+            }
+
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+
+            $id = (int)$this->input->post('id', TRUE);
+            if ($id <= 0) {
+                echo json_encode(['status' => 'error', 'message' => 'ID Webhook tidak valid!']);
+                return;
+            }
+
+            $this->db->where('id', $id)->where('kodewilayah', $KodeWilayah)->delete('iku_webhooks');
+            echo json_encode(['status' => 'success', 'message' => 'Webhook berhasil dihapus!']);
+        }
+
+        /**
+         * Menguji Pengiriman Webhook Realtime (Ping Test)
+         */
+        public function TesWebhook() {
+            if (!$this->input->is_ajax_request()) {
+                show_404();
+                return;
+            }
+
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+
+            $targetUrl = trim($this->input->post('target_url', TRUE));
+            $secretToken = trim($this->input->post('secret_token', TRUE));
+
+            if (empty($targetUrl) || !filter_var($targetUrl, FILTER_VALIDATE_URL)) {
+                echo json_encode(['status' => 'error', 'message' => 'URL Webhook tidak valid!']);
+                return;
+            }
+
+            $testPayload = [
+                'event' => 'iku.test_ping',
+                'timestamp' => date('c'),
+                'kodewilayah' => $KodeWilayah,
+                'message' => 'Uji koneksi realtime webhook dari IPPD berhasil!',
+                'system' => 'IPPD - Indikator Kinerja Utama Realtime Integration'
+            ];
+
+            $jsonPayload = json_encode($testPayload);
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $targetUrl);
+            curl_setopt($ch, CURLOPT_POST, TRUE);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonPayload);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 6);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 4);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+
+            $headers = [
+                'Content-Type: application/json',
+                'User-Agent: IPPD-IKU-Realtime-Webhook-Test/1.0',
+                'X-IPPD-Event: iku.test_ping',
+                'X-IPPD-Timestamp: ' . time()
+            ];
+
+            if (!empty($secretToken)) {
+                $sig = hash_hmac('sha256', $jsonPayload, $secretToken);
+                $headers[] = 'X-IPPD-Signature: sha256=' . $sig;
+            }
+
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+            $startTime = microtime(true);
+            $response = curl_exec($ch);
+            $duration = round((microtime(true) - $startTime) * 1000);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($ch);
+            curl_close($ch);
+
+            if ($curlError) {
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Gagal menghubungi server target: ' . $curlError,
+                    'latency_ms' => $duration
+                ]);
+                return;
+            }
+
+            echo json_encode([
+                'status' => ($httpCode >= 200 && $httpCode < 300) ? 'success' : 'warning',
+                'http_code' => $httpCode,
+                'latency_ms' => $duration,
+                'message' => ($httpCode >= 200 && $httpCode < 300) 
+                             ? "Koneksi Webhook Berhasil! Server merespons HTTP {$httpCode} dalam {$duration}ms."
+                             : "Server merespons HTTP {$httpCode}. Pastikan endpoint menerima metode POST JSON.",
+                'response_preview' => substr((string)$response, 0, 300)
+            ]);
+        }
+
+        /**
+         * Mengambil dan Menganalisis Data dari API Eksternal (Preview Impor)
+         */
+        public function TarikDataApiEksternal() {
+            if (!$this->input->is_ajax_request()) {
+                show_404();
+                return;
+            }
+
+            $url = trim($this->input->post('url', TRUE));
+            $method = strtoupper(trim($this->input->post('method', TRUE) ?: 'GET'));
+            $authType = trim($this->input->post('auth_type', TRUE) ?: 'none');
+            $token = trim($this->input->post('token', TRUE));
+            $rawCustomHeaders = $this->input->post('custom_headers', TRUE);
+            $postBody = $this->input->post('post_body', FALSE);
+
+            $customHeaders = [];
+            if (!empty($rawCustomHeaders)) {
+                $lines = explode("\n", $rawCustomHeaders);
+                foreach ($lines as $line) {
+                    $line = trim($line);
+                    if (!empty($line) && strpos($line, ':') !== false) {
+                        $customHeaders[] = $line;
+                    }
+                }
+            }
+
+            $this->load->library('IkuSyncService');
+            $res = $this->ikusyncservice->fetch_external_api($url, $method, $authType, $token, $customHeaders, $postBody);
+
+            if (!$res['success']) {
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => $res['message'],
+                    'http_code' => $res['http_code'] ?? null
+                ]);
+                return;
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => "Berhasil mengambil {$res['total_items']} indikator dari API eksternal!",
+                'total_items' => $res['total_items'],
+                'items' => $res['items'],
+                'detected_fields' => $res['detected_fields']
+            ]);
+        }
+
+        /**
+         * Mengeksekusi Impor Data API ke Tabel IKU
+         */
+        public function EksekusiImporApi() {
+            if (!$this->input->is_ajax_request()) {
+                show_404();
+                return;
+            }
+
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+
+            if (empty($KodeWilayah)) {
+                echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+                return;
+            }
+
+            $mode = $this->input->post('mode', TRUE) ?: 'append'; // 'append', 'upsert', 'replace'
+            $periode = $this->input->post('periode', TRUE);
+            $tahunMulai = (int)$this->input->post('tahun_mulai', TRUE);
+            $tahunAkhir = (int)$this->input->post('tahun_akhir', TRUE);
+            $rawItems = $this->input->post('items', FALSE);
+
+            if (!empty($periode) && strpos($periode, '-') !== false) {
+                $parts = explode('-', $periode);
+                $tahunMulai = (int)trim($parts[0]);
+                $tahunAkhir = (int)trim($parts[1]);
+            }
+
+            $items = json_decode($rawItems, true);
+            if (!is_array($items) || empty($items)) {
+                echo json_encode(['status' => 'error', 'message' => 'Data indikator yang akan diimpor kosong!']);
+                return;
+            }
+
+            $this->load->library('IkuSyncService');
+
+            // Jika mode REPLACE: Hapus seluruh data IKU untuk wilayah ini
+            if ($mode === 'replace') {
+                $this->db->where('kodewilayah', $KodeWilayah)->delete('iku');
+            }
+
+            // Ambil data yang sudah ada untuk pengecekan pada mode UPSERT
+            $existingMap = [];
+            if ($mode === 'upsert') {
+                $existingRows = $this->db->where('kodewilayah', $KodeWilayah)->where('deleted_at IS NULL')->get('iku')->result_array();
+                foreach ($existingRows as $er) {
+                    $key = trim(mb_strtolower($er['indikator_tujuan']));
+                    $existingMap[$key] = $er['id'];
+                }
+            }
+
+            $insertedCount = 0;
+            $updatedCount = 0;
+
+            foreach ($items as $item) {
+                $indikator = trim((string)($item['indikator_tujuan'] ?? ''));
+                if (empty($indikator)) continue;
+
+                $rowMulai = !empty($item['tahun_mulai']) ? (int)$item['tahun_mulai'] : $tahunMulai;
+                $rowAkhir = !empty($item['tahun_akhir']) ? (int)$item['tahun_akhir'] : $tahunAkhir;
+
+                $cleanTarget = function($v) {
+                    if ($v === null || $v === '' || $v === '-') return null;
+                    $val = str_replace(',', '.', trim((string)$v));
+                    return is_numeric($val) ? (float)$val : null;
+                };
+
+                $record = [
+                    'kodewilayah' => $KodeWilayah,
+                    'IdTujuan' => !empty($item['id_tujuan']) ? (int)$item['id_tujuan'] : 0,
+                    'tahun_mulai' => $rowMulai ?: null,
+                    'tahun_akhir' => $rowAkhir ?: null,
+                    'indikator_tujuan' => $indikator,
+                    'rumus' => !empty($item['rumus']) ? trim((string)$item['rumus']) : null,
+                    'definisi_operasional' => !empty($item['definisi_operasional']) ? trim((string)$item['definisi_operasional']) : null,
+                    'target_1' => $cleanTarget($item['target_1'] ?? null),
+                    'target_2' => $cleanTarget($item['target_2'] ?? null),
+                    'target_3' => $cleanTarget($item['target_3'] ?? null),
+                    'target_4' => $cleanTarget($item['target_4'] ?? null),
+                    'target_5' => $cleanTarget($item['target_5'] ?? null),
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+
+                $cleanKey = trim(mb_strtolower($indikator));
+
+                if ($mode === 'upsert' && isset($existingMap[$cleanKey])) {
+                    $existingId = $existingMap[$cleanKey];
+                    $this->db->where('id', $existingId)->update('iku', $record);
+                    $updatedCount++;
+                } else {
+                    $record['created_at'] = date('Y-m-d H:i:s');
+                    $this->db->insert('iku', $record);
+                    $insertedCount++;
+                }
+            }
+
+            // Catat Log Aktivitas & Webhook Realtime
+            $summary = "Impor API: {$insertedCount} ditambahkan, {$updatedCount} diperbarui (Mode: {$mode})";
+            $this->ikusyncservice->log_activity($KodeWilayah, null, 'IMPORT_API', $summary, [
+                'mode' => $mode,
+                'inserted' => $insertedCount,
+                'updated' => $updatedCount,
+                'total' => count($items)
+            ], 'IMPORT_API');
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => "Proses impor selesai! {$insertedCount} data baru ditambahkan dan {$updatedCount} data diperbarui.",
+                'inserted' => $insertedCount,
+                'updated' => $updatedCount
+            ]);
+        }
+
+        /**
+         * Memeriksa Perubahan Data Realtime (Live Polling Fallback)
+         */
+        public function CekPerubahanRealtime() {
+            if (!$this->input->is_ajax_request()) {
+                show_404();
+                return;
+            }
+
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+
+            $lastLogId = (int)$this->input->get_post('last_log_id', TRUE);
+
+            $this->db->from('iku_activity_logs');
+            if (!empty($KodeWilayah)) {
+                $this->db->where('kodewilayah', $KodeWilayah);
+            }
+            if ($lastLogId > 0) {
+                $this->db->where('id >', $lastLogId);
+            }
+
+            $newLogs = $this->db->order_by('id', 'DESC')->limit(10)->get()->result_array();
+
+            $hasChanges = !empty($newLogs);
+            $latestId = $hasChanges ? (int)$newLogs[0]['id'] : $lastLogId;
+
+            echo json_encode([
+                'status' => 'success',
+                'has_changes' => $hasChanges,
+                'latest_id' => $latestId,
+                'count' => count($newLogs),
+                'latest_change' => $hasChanges ? $newLogs[0] : null,
+                'timestamp' => date('Y-m-d H:i:s')
+            ]);
         }
 
         public function IKD() {
