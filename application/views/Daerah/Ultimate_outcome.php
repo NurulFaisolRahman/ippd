@@ -1764,7 +1764,7 @@ $(document).ready(function() {
 
     $(this).prop('disabled', true).text('Menyimpan...');
     $.post(BaseURL + 'Daerah/Intermediate_sektor_simpan', {
-      id: id, ultimate_id: ultimate, kinerja: kinerja,
+      id: id, ultimate_id: ultimate, ultimate_outcome_id: ultimate, kinerja: kinerja,
       indikator: indikator, pelaksana: pelaksana || null,
       inovasi_daerah: inovasi.join('|||'), outcome_inovasi: outcome.join('|||'),
       output_inovasi: output.join('|||'), crosscutting: crosscut.length ? crosscut : null
@@ -1883,7 +1883,7 @@ $(document).ready(function() {
 
     $(this).prop('disabled', true).text('Menyimpan...');
     $.post(BaseURL + 'Daerah/Intermediate_taktikal_simpan', {
-      id: id, intermediate_sektor_id: sektor, kinerja: kinerja,
+      id: id, sektor_id: sektor, intermediate_sektor_id: sektor, kinerja: kinerja,
       indikator: indikator, pelaksana: pelaksana || null,
       inovasi_daerah: inovasi.join('|||'), outcome_inovasi: outcome.join('|||'),
       output_inovasi: output.join('|||'), crosscutting: crosscut.length ? crosscut : null
@@ -2002,7 +2002,7 @@ $(document).ready(function() {
 
     $(this).prop('disabled', true).text('Menyimpan...');
     $.post(BaseURL + 'Daerah/Immediate_outcome_simpan', {
-      id: id, taktikal_id: taktikal, kinerja: kinerja,
+      id: id, taktikal_id: taktikal, intermediate_taktikal_id: taktikal, kinerja: kinerja,
       indikator: indikator, pelaksana: pelaksana || null,
       inovasi_daerah: inovasi.join('|||'), outcome_inovasi: outcome.join('|||'),
       output_inovasi: output.join('|||'), crosscutting: crosscut.length ? crosscut : null
@@ -2121,7 +2121,7 @@ $(document).ready(function() {
 
     $(this).prop('disabled', true).text('Menyimpan...');
     $.post(BaseURL + 'Daerah/Output_simpan', {
-      id: id, immediate_id: immediate, kinerja: kinerja,
+      id: id, immediate_id: immediate, immediate_outcome_id: immediate, kinerja: kinerja,
       indikator: indikator, pelaksana: pelaksana || null,
       inovasi_daerah: inovasi.join('|||'), outcome_inovasi: outcome.join('|||'),
       output_inovasi: output.join('|||'), crosscutting: crosscut.length ? crosscut : null

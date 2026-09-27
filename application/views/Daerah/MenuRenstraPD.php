@@ -364,7 +364,18 @@
                                     </div>
                                 </div>
 
-                                
+                                <?php if (!empty($FilterInstansiId)) { 
+                                    $nama_terpilih = '';
+                                    foreach ($ListInstansi as $ins) {
+                                        if ($ins['id'] == $FilterInstansiId) {
+                                            $nama_terpilih = $ins['nama'];
+                                            break;
+                                        }
+                                    }
+                                    if (!empty($nama_terpilih)) {
+                                ?>
+                                    
+                                <?php } } ?>
                             <?php } ?>
 
                             <!-- INFO INSTANSI -->

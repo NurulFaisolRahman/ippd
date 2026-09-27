@@ -11525,7 +11525,7 @@
                 }
 
                 $id               = $this->input->post('id', TRUE);
-                $ultimate_id      = $this->input->post('ultimate_id', TRUE);
+                $ultimate_id      = $this->input->post('ultimate_id', TRUE) ?: $this->input->post('ultimate_outcome_id', TRUE);
                 $kinerja          = trim($this->input->post('kinerja', TRUE));
                 $ind_list         = $this->input->post('indikator') ?: [];
                 $pelaksana_id     = $this->input->post('pelaksana', TRUE);
@@ -11884,7 +11884,7 @@
                 }
 
                 $id               = $this->input->post('id', TRUE);
-                $sektor_id        = $this->input->post('sektor_id', TRUE);
+                $sektor_id        = $this->input->post('sektor_id', TRUE) ?: $this->input->post('intermediate_sektor_id', TRUE);
                 $kinerja          = trim($this->input->post('kinerja', TRUE));
                 $ind_list         = $this->input->post('indikator') ?: [];
                 $pelaksana_id     = $this->input->post('pelaksana', TRUE); // BERISI ID
@@ -12243,7 +12243,7 @@
                 }
 
                 $id               = $this->input->post('id', TRUE);
-                $taktikal_id      = $this->input->post('taktikal_id', TRUE);
+                $taktikal_id      = $this->input->post('taktikal_id', TRUE) ?: $this->input->post('intermediate_taktikal_id', TRUE);
                 $kinerja          = trim($this->input->post('kinerja', TRUE));
                 $ind_list         = $this->input->post('indikator') ?: [];
                 $pelaksana_id     = $this->input->post('pelaksana', TRUE);
@@ -12558,7 +12558,7 @@
                 }
 
                 $id               = $this->input->post('id', TRUE);
-                $immediate_id     = $this->input->post('immediate_id', TRUE);
+                $immediate_id     = $this->input->post('immediate_id', TRUE) ?: $this->input->post('immediate_outcome_id', TRUE);
                 $kinerja          = trim($this->input->post('kinerja', TRUE));
                 $ind_list         = $this->input->post('indikator') ?: [];
                 $pelaksana_id     = $this->input->post('pelaksana', TRUE);
@@ -26433,6 +26433,14 @@
 
     public function BAB3_5() {
         redirect('Instansi/BAB3_5' . (!empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : ''));
+    }
+
+    public function CapaianIkkPD() {
+        redirect('Instansi/CapaianIkkPD' . (!empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : ''));
+    }
+
+    public function IkkPD() {
+        redirect('Instansi/IkkPD' . (!empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : ''));
     }
 }
 

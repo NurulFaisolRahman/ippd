@@ -468,11 +468,11 @@
 
 <script>
     function logout() {
-        window.location.href = '/ippd/Home';
+        window.location.href = '<?= base_url('Home/Logout'); ?>';
     }
 
     function Login() {
-        window.location.href = '/ippd/Home';
+        window.location.href = '<?= base_url('Home'); ?>';
     }
 
     document.addEventListener('DOMContentLoaded', function () {
