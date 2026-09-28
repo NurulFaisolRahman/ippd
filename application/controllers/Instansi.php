@@ -18253,20 +18253,8 @@ public function simpanPerjanjianKinerja() {
         return;
     }
     
-    // Cek atau set atasan_langsung_id
-    if (!$atasan_langsung_id) {
-        $emp = $this->db->select('id, eselon, dinas_id')->where('id', $pegawai_pengampu_id)->get('akun_karyawan')->row_array();
-        if ($emp) {
-            $atasan = $this->db->select('id')
-                ->where('kodewilayah', $KodeWilayah)
-                ->where('dinas_id', $emp['dinas_id'])
-                ->where('id !=', $pegawai_pengampu_id)
-                ->order_by('id', 'ASC')
-                ->get('akun_karyawan')
-                ->row_array();
-            $atasan_langsung_id = $atasan ? $atasan['id'] : $pegawai_pengampu_id;
-        }
-    }
+    // Atasan langsung ID (jika dipilih manual, gunakan ID tersebut. Jika Bupati/Kepala Daerah atau kosong, set null)
+    $atasan_langsung_id = ($atasan_langsung_id > 0) ? $atasan_langsung_id : null;
     
     $doc_num = rand(2060, 2999);
     $doc_id_str = (string)$doc_num;
@@ -18293,6 +18281,7 @@ public function simpanPerjanjianKinerja() {
             $updateData['status_plt'] = 'menunggu';
         } else {
             $updateData['definitif_doc_id'] = $existing->definitif_doc_id ?: $doc_id_str;
+            $updateData['atasan_langsung_id'] = $atasan_langsung_id;
             $updateData['sasaran_data'] = $sasaran_data;
             $updateData['periode_awal'] = $periode_awal;
             $updateData['periode_akhir'] = $periode_akhir;
