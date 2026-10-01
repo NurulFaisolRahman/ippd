@@ -14436,6 +14436,869 @@ public function MenuRenstraPD() {
     $this->load->view('Daerah/MenuRenstraPD', $data);
 }
 
+// =====================================================
+// CASCADING PERANGKAT DAERAH (PD) DARI POHON KINERJA PD
+// Level 1: Tujuan PD (Ultimate Outcome)
+// Level 2: Sasaran Perangkat Daerah (Intermediate Outcome)
+// Level 3: Program / Kegiatan Perangkat Daerah (Immediate Outcome - selectable)
+// Level 4: Sub Kegiatan Perangkat Daerah (Output)
+// =====================================================
+
+public function CascadingPD() {
+    $Header['Halaman'] = 'Cascading PD';
+    
+    // Pastikan kolom-kolom pendukung Cascading PD ada di database
+    $this->load->dbforge();
+    if (!$this->db->field_exists('cascading_type', 'immediate_outcome_pd')) {
+        $this->dbforge->add_column('immediate_outcome_pd', [
+            'cascading_type' => [
+                'type' => "ENUM('program', 'kegiatan')",
+                'default' => 'program',
+                'null' => FALSE
+            ]
+        ]);
+    }
+    if (!$this->db->field_exists('parent_immediate_id', 'immediate_outcome_pd')) {
+        $this->dbforge->add_column('immediate_outcome_pd', [
+            'parent_immediate_id' => [
+                'type' => 'INT',
+                'constraint' => 11,
+                'null' => TRUE,
+                'default' => NULL
+            ]
+        ]);
+    }
+    if (!$this->db->field_exists('kode_nomenklatur', 'immediate_outcome_pd')) {
+        $this->dbforge->add_column('immediate_outcome_pd', [
+            'kode_nomenklatur' => ['type' => 'TEXT', 'null' => TRUE],
+            'nomenklatur_sipd' => ['type' => 'TEXT', 'null' => TRUE]
+        ]);
+    }
+    if (!$this->db->field_exists('kode_nomenklatur', 'output_pd')) {
+        $this->dbforge->add_column('output_pd', [
+            'kode_nomenklatur' => ['type' => 'TEXT', 'null' => TRUE],
+            'nomenklatur_sipd' => ['type' => 'TEXT', 'null' => TRUE]
+        ]);
+    }
+
+    $KodeWilayah = $this->get_kode_wilayah();
+    $instansi_id = $this->get_instansi_id();
+    $is_logged_in = $this->is_logged_in();
+    $is_role_4 = $this->is_role_4();
+    $level = isset($_SESSION['Level']) ? $_SESSION['Level'] : null;
+    
+    // Filter dan reset instansi
+    $reset = $this->input->get('reset', TRUE);
+    $get_instansi_id = $this->input->get('instansi_id', TRUE);
+    $filter_ultimate_id = $this->input->get('ultimate_id', TRUE);
+    
+    if ($reset == '1' || $this->input->get('instansi_id') === '') {
+        unset($_SESSION['TempInstansiId']);
+        unset($_SESSION['FilterInstansiId']);
+        $filter_instansi_id = null;
+    } elseif (!empty($get_instansi_id)) {
+        $filter_instansi_id = $get_instansi_id;
+        $_SESSION['TempInstansiId'] = $filter_instansi_id;
+    } elseif (isset($_SESSION['TempInstansiId']) && !empty($_SESSION['TempInstansiId'])) {
+        $filter_instansi_id = $_SESSION['TempInstansiId'];
+    } else {
+        $filter_instansi_id = null;
+    }
+    
+    $effective_instansi = ($is_role_4 && $instansi_id) ? $instansi_id : ($filter_instansi_id ?: null);
+    
+    // Fallback KodeWilayah jika belum ada di session (misal user Admin / non-wilayah)
+    if (empty($KodeWilayah) && $effective_instansi) {
+        $inst = $this->db->select('kodewilayah')->where('id', $effective_instansi)->get('akun_instansi')->row_array();
+        if ($inst && !empty($inst['kodewilayah'])) {
+            $KodeWilayah = $inst['kodewilayah'];
+        }
+    }
+    
+    // Periksa apakah KodeWilayah saat ini memiliki data di ultimate_outcome_pd.
+    // Jika tidak ada data sama sekali (misal default 35.12 Situbondo tapi belum terinput, atau user admin),
+    // otomatis ambil KodeWilayah dari data yang tersedia di ultimate_outcome_pd.
+    $has_data_in_wilayah = 0;
+    if (!empty($KodeWilayah)) {
+        $has_data_in_wilayah = $this->db->where('kode_wilayah', $KodeWilayah)->where('deleted_at IS NULL')->count_all_results('ultimate_outcome_pd');
+    }
+    if ($has_data_in_wilayah == 0) {
+        $first_ult = $this->db->select('kode_wilayah')->where('deleted_at IS NULL')->limit(1)->get('ultimate_outcome_pd')->row_array();
+        if ($first_ult && !empty($first_ult['kode_wilayah'])) {
+            $KodeWilayah = $first_ult['kode_wilayah'];
+        }
+    }
+
+    $data['KodeWilayah'] = $KodeWilayah;
+    $data['InstansiId'] = $instansi_id;
+    $data['IsLoggedIn'] = $is_logged_in;
+    $data['IsRole4'] = $is_role_4;
+    $data['Level'] = $level;
+    $data['FilterInstansiId'] = $filter_instansi_id;
+    $data['FilterUltimateId'] = $filter_ultimate_id;
+    $data['NamaInstansi'] = isset($_SESSION['NamaInstansi']) ? $_SESSION['NamaInstansi'] : '';
+    
+    // Nama wilayah
+    $data['NamaWilayah'] = '';
+    if ($KodeWilayah) {
+        $wilayah = $this->db->select('Nama')->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+        $data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
+    }
+    
+    // Data provinsi untuk dropdown filter
+    $data['Provinsi'] = $this->db->where("Kode LIKE '__'")
+                                 ->order_by('Nama')
+                                 ->get('kodewilayah')
+                                 ->result_array();
+    
+    // Daftar instansi untuk filter
+    $data['ListInstansi'] = [];
+    if (!$is_role_4 && $KodeWilayah) {
+        $data['ListInstansi'] = $this->db->select('id, nama')
+            ->from('akun_instansi')
+            ->where('kodewilayah', $KodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->order_by('nama', 'ASC')
+            ->get()
+            ->result_array();
+    }
+    
+    // Data seluruh perangkat daerah untuk resolusi crosscutting
+    $data['perangkat_daerah'] = [];
+    if ($KodeWilayah) {
+        $data['perangkat_daerah'] = $this->db
+            ->select('id, nama')
+            ->from('akun_instansi')
+            ->where('kodewilayah', $KodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->order_by('nama', 'ASC')
+            ->get()
+            ->result_array();
+    }
+    $pelaksanaMap = [];
+    if ($KodeWilayah) {
+        $pelaksanaQuery = $this->db->select('
+                akun_karyawan.id,
+                akun_karyawan.nama,
+                akun_karyawan.nip,
+                akun_karyawan.jabatan,
+                akun_karyawan.dinas_id,
+                GROUP_CONCAT(akun_instansi.nama SEPARATOR ", ") as nama_dinas
+            ')
+            ->from('akun_karyawan')
+            ->join('akun_instansi', 'FIND_IN_SET(akun_instansi.id, akun_karyawan.dinas_id)', 'left')
+            ->where('akun_karyawan.Level', 4)
+            ->where('akun_karyawan.kodewilayah', $KodeWilayah)
+            ->where('akun_karyawan.deleted_at IS NULL')
+            ->group_by('akun_karyawan.id')
+            ->get()
+            ->result_array();
+        
+        foreach ($pelaksanaQuery as $p) {
+            $pelaksanaMap[$p['id']] = [
+                'nama' => $p['nama'],
+                'nip' => $p['nip'],
+                'jabatan' => $p['jabatan'],
+                'dinas' => $p['nama_dinas'] ?? '-'
+            ];
+        }
+    }
+    $data['PelaksanaData'] = $pelaksanaMap;
+    
+    $effective_instansi = ($is_role_4 && $instansi_id) ? $instansi_id : ($filter_instansi_id ?: null);
+    
+    // 1. Ultimate Outcome (Level 1: Tujuan PD)
+    $q_ult = $this->db->select('id, kinerja as nama, indikator, urutan, id_instansi, kode_wilayah')
+        ->from('ultimate_outcome_pd')
+        ->where('deleted_at IS NULL');
+    if ($KodeWilayah) {
+        $q_ult->where('kode_wilayah', $KodeWilayah);
+    }
+    if ($effective_instansi) {
+        $q_ult->where('id_instansi', $effective_instansi);
+    }
+    $ultimate = $q_ult->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get()->result_array();
+    
+    // Seluruh Tujuan PD untuk dropdown filter di header
+    $q_all_ult = $this->db->select('id, kinerja as nama, urutan')
+        ->from('ultimate_outcome_pd')
+        ->where('deleted_at IS NULL');
+    if ($KodeWilayah) {
+        $q_all_ult->where('kode_wilayah', $KodeWilayah);
+    }
+    if ($effective_instansi) {
+        $q_all_ult->where('id_instansi', $effective_instansi);
+    }
+    $all_ultimate_list = $q_all_ult->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get()->result_array();
+    if (empty($all_ultimate_list)) {
+        $all_ultimate_list = $this->db->select('id, kinerja as nama, urutan')
+            ->from('ultimate_outcome_pd')
+            ->where('deleted_at IS NULL')
+            ->order_by('urutan', 'ASC')
+            ->order_by('id', 'ASC')
+            ->get()
+            ->result_array();
+    }
+    
+    // 2. Intermediate Outcome (Level 2: Sasaran PD)
+    $q_inter = $this->db->select('
+            id, kinerja as nama, indikator, pelaksana, inovasi_daerah,
+            outcome_inovasi, output_inovasi, crosscutting_pd, crosscutting_keterangan,
+            ultimate_outcome_id as parent_id, urutan, id_instansi
+        ')
+        ->from('intermediate_outcome_pd')
+        ->where('kode_wilayah', $KodeWilayah)
+        ->where('deleted_at IS NULL');
+    if ($effective_instansi) {
+        $q_inter->where('id_instansi', $effective_instansi);
+    }
+    $intermediate = $q_inter->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get()->result_array();
+    
+    // Auto-create columns if needed
+    if (!$this->db->field_exists('kode_nomenklatur', 'immediate_outcome_pd')) {
+        $this->load->dbforge();
+        $this->dbforge->add_column('immediate_outcome_pd', [
+            'kode_nomenklatur' => ['type' => 'VARCHAR', 'constraint' => '100', 'null' => TRUE],
+            'nomenklatur_sipd' => ['type' => 'TEXT', 'null' => TRUE]
+        ]);
+    }
+    if (!$this->db->field_exists('kode_nomenklatur', 'output_pd')) {
+        $this->load->dbforge();
+        $this->dbforge->add_column('output_pd', [
+            'kode_nomenklatur' => ['type' => 'VARCHAR', 'constraint' => '100', 'null' => TRUE],
+            'nomenklatur_sipd' => ['type' => 'TEXT', 'null' => TRUE]
+        ]);
+    }
+
+    // 3. Immediate Outcome (Level 3: Program / Kegiatan PD)
+    $q_imm = $this->db->select('
+            id, kinerja as nama, indikator, pelaksana, inovasi_daerah,
+            outcome_inovasi, output_inovasi, crosscutting_pd, crosscutting_keterangan,
+            cascading_type, parent_immediate_id, intermediate_outcome_id as parent_id, urutan, id_instansi,
+            kode_nomenklatur, nomenklatur_sipd
+        ')
+        ->from('immediate_outcome_pd')
+        ->where('kode_wilayah', $KodeWilayah)
+        ->where('deleted_at IS NULL');
+    if ($effective_instansi) {
+        $q_imm->where('id_instansi', $effective_instansi);
+    }
+    $immediate = $q_imm->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get()->result_array();
+    
+    // 4. Output (Level 4: Sub Kegiatan PD)
+    $q_out = $this->db->select('
+            id, kinerja as nama, indikator, pelaksana, inovasi_daerah,
+            outcome_inovasi, output_inovasi, crosscutting_pd, crosscutting_keterangan,
+            immediate_outcome_id as parent_id, urutan, id_instansi,
+            kode_nomenklatur, nomenklatur_sipd
+        ')
+        ->from('output_pd')
+        ->where('kode_wilayah', $KodeWilayah)
+        ->where('deleted_at IS NULL');
+    if ($effective_instansi) {
+        $q_out->where('id_instansi', $effective_instansi);
+    }
+    $output = $q_out->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get()->result_array();
+    
+    // Perkaya data dengan pelaksana
+    $intermediate = $this->enrichWithPelaksanaDetail($intermediate, $pelaksanaMap);
+    $immediate = $this->enrichWithPelaksanaDetail($immediate, $pelaksanaMap);
+    $output = $this->enrichWithPelaksanaDetail($output, $pelaksanaMap);
+    
+    // Hitung counts
+    $countProgram = 0;
+    $countKegiatan = 0;
+    foreach ($immediate as $immItem) {
+        if (($immItem['cascading_type'] ?? 'program') === 'kegiatan') {
+            $countKegiatan++;
+        } else {
+            $countProgram++;
+        }
+    }
+    
+    $data['TotalData'] = [
+        'tujuan' => count($ultimate),
+        'sasaran' => count($intermediate),
+        'program' => $countProgram,
+        'kegiatan' => $countKegiatan,
+        'sub_kegiatan' => count($output),
+        'immediate_total' => count($immediate)
+    ];
+    
+    $tree_data = $this->buildCascadingTreeData($ultimate, $intermediate, $immediate, $output);
+    
+    $data['UltimateList'] = $all_ultimate_list;
+    $data['ChartData'] = json_encode([
+        'nama' => 'ROOT',
+        'children' => $tree_data
+    ]);
+    
+    $this->load->view('Daerah/header', $Header);
+    $this->load->view('Daerah/CascadingPD', $data);
+}
+
+/**
+ * Update tipe cascading untuk satu node immediate outcome (Program vs Kegiatan)
+ */
+/**
+ * Update tipe cascading untuk satu node immediate outcome (Program vs Kegiatan)
+ */
+public function updateCascadingType() {
+    $this->output->set_content_type('application/json');
+    
+    $id = (int)$this->input->post('id', TRUE);
+    $type = $this->input->post('type', TRUE);
+    $parent_program_id = $this->input->post('parent_program_id', TRUE);
+    
+    if (!$id || !in_array($type, ['program', 'kegiatan'])) {
+        echo json_encode(['status' => 'error', 'message' => 'Parameter tidak valid']);
+        return;
+    }
+    
+    $curr_imm = $this->db->where('id', $id)->get('immediate_outcome_pd')->row_array();
+    if (!$curr_imm) {
+        echo json_encode(['status' => 'error', 'message' => 'Data immediate outcome tidak ditemukan']);
+        return;
+    }
+    
+    $update_data = [
+        'cascading_type' => $type,
+        'updated_at' => date('Y-m-d H:i:s')
+    ];
+    
+    if ($type === 'kegiatan') {
+        if (!empty($parent_program_id)) {
+            $update_data['parent_immediate_id'] = (int)$parent_program_id;
+        } else {
+            // Otomatis cari Program dalam Sasaran yang sama
+            $sibling_prog = $this->db->where('intermediate_outcome_id', $curr_imm['intermediate_outcome_id'])
+                ->where('id !=', $id)
+                ->where('cascading_type', 'program')
+                ->where('deleted_at IS NULL')
+                ->order_by('urutan', 'ASC')
+                ->order_by('id', 'ASC')
+                ->get('immediate_outcome_pd')
+                ->row_array();
+            if ($sibling_prog) {
+                $update_data['parent_immediate_id'] = (int)$sibling_prog['id'];
+            } else {
+                $update_data['parent_immediate_id'] = NULL;
+            }
+        }
+    } elseif ($type === 'program') {
+        $update_data['parent_immediate_id'] = NULL;
+    }
+    
+    $this->db->where('id', $id)->update('immediate_outcome_pd', $update_data);
+    
+    // Ambil data terbaru untuk mengembalikan chart_data yang up-to-date
+    $KodeWilayah = $this->get_kode_wilayah();
+    $instansi_id = $this->get_instansi_id();
+    $is_role_4 = $this->is_role_4();
+    $filter_instansi_id = $this->input->post('instansi_id', TRUE);
+    $effective_instansi = ($is_role_4 && $instansi_id) ? $instansi_id : ($filter_instansi_id ?: null);
+    
+    $q_ult = $this->db->select('id, kinerja as nama, indikator, urutan, id_instansi, kode_wilayah')
+        ->from('ultimate_outcome_pd')
+        ->where('kode_wilayah', $KodeWilayah)
+        ->where('deleted_at IS NULL');
+    if ($effective_instansi) $q_ult->where('id_instansi', $effective_instansi);
+    $ultimate = $q_ult->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get()->result_array();
+    
+    $q_inter = $this->db->select('id, kinerja as nama, indikator, pelaksana, inovasi_daerah, outcome_inovasi, output_inovasi, crosscutting_pd, crosscutting_keterangan, ultimate_outcome_id as parent_id, urutan, id_instansi')
+        ->from('intermediate_outcome_pd')
+        ->where('kode_wilayah', $KodeWilayah)
+        ->where('deleted_at IS NULL');
+    if ($effective_instansi) $q_inter->where('id_instansi', $effective_instansi);
+    $intermediate = $q_inter->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get()->result_array();
+    
+    $q_imm = $this->db->select('id, kinerja as nama, indikator, pelaksana, inovasi_daerah, outcome_inovasi, output_inovasi, crosscutting_pd, crosscutting_keterangan, cascading_type, parent_immediate_id, intermediate_outcome_id as parent_id, urutan, id_instansi, kode_nomenklatur, nomenklatur_sipd')
+        ->from('immediate_outcome_pd')
+        ->where('kode_wilayah', $KodeWilayah)
+        ->where('deleted_at IS NULL');
+    if ($effective_instansi) $q_imm->where('id_instansi', $effective_instansi);
+    $immediate = $q_imm->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get()->result_array();
+    
+    $q_out = $this->db->select('id, kinerja as nama, indikator, pelaksana, inovasi_daerah, outcome_inovasi, output_inovasi, crosscutting_pd, crosscutting_keterangan, immediate_outcome_id as parent_id, urutan, id_instansi, kode_nomenklatur, nomenklatur_sipd')
+        ->from('output_pd')
+        ->where('kode_wilayah', $KodeWilayah)
+        ->where('deleted_at IS NULL');
+    if ($effective_instansi) $q_out->where('id_instansi', $effective_instansi);
+    $output = $q_out->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get()->result_array();
+    
+    $tree_data = $this->buildCascadingTreeData($ultimate, $intermediate, $immediate, $output);
+    
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Tipe berhasil diubah menjadi ' . ($type === 'kegiatan' ? 'Kegiatan Perangkat Daerah (di bawah Program)' : 'Program Perangkat Daerah'),
+        'id' => $id,
+        'type' => $type,
+        'label' => ($type === 'kegiatan' ? 'Kegiatan Perangkat Daerah' : 'Program Perangkat Daerah'),
+        'chart_data' => [
+            'nama' => 'ROOT',
+            'children' => $tree_data
+        ]
+    ]);
+}
+
+/**
+ * Update bulk tipe cascading untuk seluruh immediate outcome
+ */
+public function updateBulkCascadingType() {
+    $this->output->set_content_type('application/json');
+    
+    $type = $this->input->post('type', TRUE);
+    $instansi_id = $this->input->post('instansi_id', TRUE);
+    $kode_wilayah = $this->get_kode_wilayah();
+    
+    if (!in_array($type, ['program', 'kegiatan'])) {
+        echo json_encode(['status' => 'error', 'message' => 'Parameter type tidak valid']);
+        return;
+    }
+    
+    $this->db->where('kode_wilayah', $kode_wilayah);
+    if (!empty($instansi_id)) {
+        $this->db->where('id_instansi', (int)$instansi_id);
+    } elseif ($this->is_role_4()) {
+        $this->db->where('id_instansi', (int)$this->get_instansi_id());
+    }
+    
+    $this->db->where('deleted_at IS NULL');
+    $this->db->update('immediate_outcome_pd', [
+        'cascading_type' => $type,
+        'updated_at' => date('Y-m-d H:i:s')
+    ]);
+    
+    // Ambil data terbaru untuk mengembalikan chart_data yang up-to-date
+    $is_role_4 = $this->is_role_4();
+    $effective_instansi = ($is_role_4 && $this->get_instansi_id()) ? $this->get_instansi_id() : ($instansi_id ?: null);
+    
+    $q_ult = $this->db->select('id, kinerja as nama, indikator, urutan, id_instansi, kode_wilayah')
+        ->from('ultimate_outcome_pd')
+        ->where('kode_wilayah', $kode_wilayah)
+        ->where('deleted_at IS NULL');
+    if ($effective_instansi) $q_ult->where('id_instansi', $effective_instansi);
+    $ultimate = $q_ult->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get()->result_array();
+    
+    $q_inter = $this->db->select('id, kinerja as nama, indikator, pelaksana, inovasi_daerah, outcome_inovasi, output_inovasi, crosscutting_pd, crosscutting_keterangan, ultimate_outcome_id as parent_id, urutan, id_instansi')
+        ->from('intermediate_outcome_pd')
+        ->where('kode_wilayah', $kode_wilayah)
+        ->where('deleted_at IS NULL');
+    if ($effective_instansi) $q_inter->where('id_instansi', $effective_instansi);
+    $intermediate = $q_inter->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get()->result_array();
+    
+    $q_imm = $this->db->select('id, kinerja as nama, indikator, pelaksana, inovasi_daerah, outcome_inovasi, output_inovasi, crosscutting_pd, crosscutting_keterangan, cascading_type, parent_immediate_id, intermediate_outcome_id as parent_id, urutan, id_instansi, kode_nomenklatur, nomenklatur_sipd')
+        ->from('immediate_outcome_pd')
+        ->where('kode_wilayah', $kode_wilayah)
+        ->where('deleted_at IS NULL');
+    if ($effective_instansi) $q_imm->where('id_instansi', $effective_instansi);
+    $immediate = $q_imm->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get()->result_array();
+    
+    $q_out = $this->db->select('id, kinerja as nama, indikator, pelaksana, inovasi_daerah, outcome_inovasi, output_inovasi, crosscutting_pd, crosscutting_keterangan, immediate_outcome_id as parent_id, urutan, id_instansi, kode_nomenklatur, nomenklatur_sipd')
+        ->from('output_pd')
+        ->where('kode_wilayah', $kode_wilayah)
+        ->where('deleted_at IS NULL');
+    if ($effective_instansi) $q_out->where('id_instansi', $effective_instansi);
+    $output = $q_out->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get()->result_array();
+    
+    $tree_data = $this->buildCascadingTreeData($ultimate, $intermediate, $immediate, $output);
+    
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Semua Immediate Outcome berhasil diubah menjadi ' . ($type === 'kegiatan' ? 'Kegiatan Perangkat Daerah' : 'Program Perangkat Daerah'),
+        'type' => $type,
+        'chart_data' => [
+            'nama' => 'ROOT',
+            'children' => $tree_data
+        ]
+    ]);
+}
+
+/**
+ * AJAX: Cari Nomenklatur SIPD dari tabel nomenklaturkabupaten
+ */
+public function searchNomenklaturSIPD() {
+    $this->output->set_content_type('application/json');
+    
+    $type = $this->input->get('type', TRUE) ?: $this->input->post('type', TRUE);
+    $q = trim($this->input->get('q', TRUE) ?: $this->input->post('q', TRUE));
+    $parent_code = trim($this->input->get('parent_code', TRUE) ?: $this->input->post('parent_code', TRUE));
+    $limit = (int)($this->input->get('limit', TRUE) ?: 50);
+    if ($limit <= 0 || $limit > 100) $limit = 50;
+    
+    // Tentukan jumlah titik dalam kode berdasarkan tipe:
+    // program = 2 dots (e.g. 1.01.01)
+    // kegiatan = 4 dots (e.g. 1.01.01.2.01)
+    // sub_kegiatan = 5 dots (e.g. 1.01.01.2.01.0001)
+    $dot_count = 2;
+    if ($type === 'kegiatan') {
+        $dot_count = 4;
+    } elseif ($type === 'sub_kegiatan' || $type === 'subkegiatan') {
+        $dot_count = 5;
+    }
+    
+    $builder = $this->db->select('Kode, Nomenklatur, Kinerja, Indikator, Satuan')
+        ->from('nomenklaturkabupaten')
+        ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) =', $dot_count);
+        
+    if (!empty($parent_code)) {
+        if (strpos($parent_code, '|||') !== false) {
+            $parents = array_filter(array_map('trim', explode('|||', $parent_code)));
+            if (!empty($parents)) {
+                $builder->group_start();
+                foreach ($parents as $idx => $p) {
+                    if ($idx === 0) {
+                        $builder->like('Kode', $p . '.', 'after');
+                    } else {
+                        $builder->or_like('Kode', $p . '.', 'after');
+                    }
+                }
+                $builder->group_end();
+            }
+        } else {
+            $builder->like('Kode', $parent_code . '.', 'after');
+        }
+    }
+    
+    if (!empty($q)) {
+        $builder->group_start()
+            ->like('Kode', $q)
+            ->or_like('Nomenklatur', $q)
+            ->group_end();
+    }
+    
+    $results = $builder->order_by('Kode', 'ASC')->limit($limit)->get()->result_array();
+    
+    echo json_encode([
+        'status' => 'success',
+        'type' => $type,
+        'count' => count($results),
+        'data' => $results
+    ]);
+}
+
+/**
+ * AJAX: Simpan pilihan Nomenklatur SIPD ke immediate_outcome_pd atau output_pd
+ */
+public function saveNomenklaturSIPD() {
+    $this->output->set_content_type('application/json');
+    
+    $id = (int)$this->input->post('id', TRUE);
+    $type = $this->input->post('type', TRUE);
+    $kode_raw = $this->input->post('kode_nomenklatur', TRUE);
+    $nama_raw = $this->input->post('nomenklatur_sipd', TRUE);
+    
+    if (is_array($kode_raw)) {
+        $kode_nomenklatur = implode('|||', array_filter(array_map('trim', $kode_raw)));
+    } else {
+        $kode_nomenklatur = trim((string)$kode_raw);
+    }
+    
+    if (is_array($nama_raw)) {
+        $nomenklatur_sipd = implode('|||', array_filter(array_map('trim', $nama_raw)));
+    } else {
+        $nomenklatur_sipd = trim((string)$nama_raw);
+    }
+    
+    if (!$id || empty($type)) {
+        echo json_encode(['status' => 'error', 'message' => 'Parameter tidak valid']);
+        return;
+    }
+    
+    $update_data = [
+        'kode_nomenklatur' => (!empty($kode_nomenklatur) && $kode_nomenklatur !== 'null') ? $kode_nomenklatur : NULL,
+        'nomenklatur_sipd' => (!empty($nomenklatur_sipd) && $nomenklatur_sipd !== 'null') ? $nomenklatur_sipd : NULL,
+        'updated_at' => date('Y-m-d H:i:s')
+    ];
+    
+    if ($type === 'program' || $type === 'kegiatan') {
+        $exists = $this->db->where('id', $id)->get('immediate_outcome_pd')->row_array();
+        if (!$exists) {
+            echo json_encode(['status' => 'error', 'message' => 'Data Program/Kegiatan tidak ditemukan']);
+            return;
+        }
+        $this->db->where('id', $id)->update('immediate_outcome_pd', $update_data);
+    } elseif ($type === 'sub_kegiatan' || $type === 'subkegiatan') {
+        $exists = $this->db->where('id', $id)->get('output_pd')->row_array();
+        if (!$exists) {
+            echo json_encode(['status' => 'error', 'message' => 'Data Sub Kegiatan tidak ditemukan']);
+            return;
+        }
+        $this->db->where('id', $id)->update('output_pd', $update_data);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Tipe node tidak dikenali']);
+        return;
+    }
+    
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Nomenklatur SIPD berhasil disimpan!',
+        'id' => $id,
+        'type' => $type,
+        'kode_nomenklatur' => $update_data['kode_nomenklatur'],
+        'nomenklatur_sipd' => $update_data['nomenklatur_sipd']
+    ]);
+}
+
+/**
+ * Membangun struktur tree data untuk Cascading PD
+ * Apabila Immediate Outcome bertipe 'kegiatan', maka posisinya diletakkan di BAWAH 'program' (Tier 4 under Tier 3)
+ */
+private function buildCascadingTreeData($ultimate, $intermediate, $immediate, $output) {
+    $tree_data = [];
+    
+    // Group children by parent
+    $inter_by_parent = [];
+    foreach ($intermediate as $item) {
+        $inter_by_parent[$item['parent_id']][] = $item;
+    }
+    
+    $imm_by_parent = [];
+    foreach ($immediate as $item) {
+        $imm_by_parent[$item['parent_id']][] = $item;
+    }
+    
+    $out_by_parent = [];
+    foreach ($output as $item) {
+        $out_by_parent[$item['parent_id']][] = $item;
+    }
+    
+    foreach ($ultimate as $ult) {
+        $ult_node = [
+            'id' => 'tujuan_' . $ult['id'],
+            'original_id' => $ult['id'],
+            'tipe' => 'tujuan_pd',
+            'tipe_label' => 'Tujuan PD',
+            'level' => 1,
+            'nama' => $ult['nama'] ?? '—',
+            'indikator' => $ult['indikator'] ?? null,
+            'children' => []
+        ];
+        
+        if (isset($inter_by_parent[$ult['id']])) {
+            foreach ($inter_by_parent[$ult['id']] as $inter) {
+                $inter_node = [
+                    'id' => 'sasaran_' . $inter['id'],
+                    'original_id' => $inter['id'],
+                    'tipe' => 'sasaran_pd',
+                    'tipe_label' => 'Sasaran Perangkat Daerah',
+                    'level' => 2,
+                    'nama' => $inter['nama'] ?? '—',
+                    'indikator' => $inter['indikator'] ?? null,
+                    'crosscutting_pd' => $inter['crosscutting_pd'] ?? null,
+                    'crosscutting_ket' => $inter['crosscutting_keterangan'] ?? null,
+                    'children' => []
+                ];
+                
+                if (isset($imm_by_parent[$inter['id']])) {
+                    $immediates = $imm_by_parent[$inter['id']];
+                    
+                    // Pisahkan Program dan Kegiatan
+                    $programs = [];
+                    $kegiatans = [];
+                    foreach ($immediates as $imm_item) {
+                        if (($imm_item['cascading_type'] ?? 'program') === 'kegiatan') {
+                            $kegiatans[] = $imm_item;
+                        } else {
+                            $programs[] = $imm_item;
+                        }
+                    }
+                    
+                    // Daftar program di Sasaran ini untuk dropdown opsi
+                    $all_prog_options = [];
+                    foreach ($programs as $p) {
+                        $all_prog_options[] = [
+                            'id' => $p['id'],
+                            'nama' => $p['nama'],
+                            'kode_nomenklatur' => $p['kode_nomenklatur'] ?? null,
+                            'nomenklatur_sipd' => $p['nomenklatur_sipd'] ?? null
+                        ];
+                    }
+                    
+                    if (!empty($programs)) {
+                        // Jika ada Program di bawah Sasaran ini
+                        $prog_nodes = [];
+                        foreach ($programs as $p) {
+                            $prog_nodes[$p['id']] = [
+                                'id' => 'imm_' . $p['id'],
+                                'original_id' => $p['id'],
+                                'tipe' => 'program_pd',
+                                'tipe_label' => 'Program Perangkat Daerah',
+                                'cascading_type' => 'program',
+                                'level' => 3,
+                                'nama' => $p['nama'] ?? '—',
+                                'indikator' => $p['indikator'] ?? null,
+                                'crosscutting_pd' => $p['crosscutting_pd'] ?? null,
+                                'crosscutting_ket' => $p['crosscutting_keterangan'] ?? null,
+                                'kode_nomenklatur' => $p['kode_nomenklatur'] ?? null,
+                                'nomenklatur_sipd' => $p['nomenklatur_sipd'] ?? null,
+                                'available_programs' => $all_prog_options,
+                                'children' => []
+                            ];
+                        }
+                        
+                        $first_prog_id = array_key_first($prog_nodes);
+                        
+                        // Masukkan Kegiatan di BAWAH Program (Tier 4 di bawah Tier 3)
+                        foreach ($kegiatans as $k) {
+                            $target_p_id = (!empty($k['parent_immediate_id']) && isset($prog_nodes[$k['parent_immediate_id']]))
+                                ? $k['parent_immediate_id']
+                                : $first_prog_id;
+                            
+                            $keg_node = [
+                                'id' => 'imm_' . $k['id'],
+                                'original_id' => $k['id'],
+                                'tipe' => 'kegiatan_pd',
+                                'tipe_label' => 'Kegiatan Perangkat Daerah',
+                                'cascading_type' => 'kegiatan',
+                                'parent_immediate_id' => $target_p_id,
+                                'available_programs' => $all_prog_options,
+                                'level' => 4,
+                                'nama' => $k['nama'] ?? '—',
+                                'indikator' => $k['indikator'] ?? null,
+                                'crosscutting_pd' => $k['crosscutting_pd'] ?? null,
+                                'crosscutting_ket' => $k['crosscutting_keterangan'] ?? null,
+                                'kode_nomenklatur' => $k['kode_nomenklatur'] ?? null,
+                                'nomenklatur_sipd' => $k['nomenklatur_sipd'] ?? null,
+                                'children' => []
+                            ];
+                            
+                            // Masukkan Sub Kegiatan (Output) milik Kegiatan ini (Tier 5)
+                            if (isset($out_by_parent[$k['id']])) {
+                                foreach ($out_by_parent[$k['id']] as $out_item) {
+                                    $keg_node['children'][] = [
+                                        'id' => 'subkeg_' . $out_item['id'],
+                                        'original_id' => $out_item['id'],
+                                        'tipe' => 'sub_kegiatan_pd',
+                                        'tipe_label' => 'Sub Kegiatan Perangkat Daerah',
+                                        'level' => 5,
+                                        'nama' => $out_item['nama'] ?? '—',
+                                        'indikator' => $out_item['indikator'] ?? null,
+                                        'crosscutting_pd' => $out_item['crosscutting_pd'] ?? null,
+                                        'crosscutting_ket' => $out_item['crosscutting_keterangan'] ?? null,
+                                        'kode_nomenklatur' => $out_item['kode_nomenklatur'] ?? null,
+                                        'nomenklatur_sipd' => $out_item['nomenklatur_sipd'] ?? null,
+                                        'children' => []
+                                    ];
+                                }
+                            }
+                            
+                            $prog_nodes[$target_p_id]['children'][] = $keg_node;
+                        }
+                        
+                        // Output yang terdaftar pada program:
+                        // Jika program memiliki anak kegiatan, tempatkan di bawah kegiatan pertama agar Tier 5 selalu berada di bawah Tier 4
+                        foreach ($programs as $p) {
+                            if (isset($out_by_parent[$p['id']])) {
+                                $has_kegiatan_child = false;
+                                $first_keg_index = null;
+                                foreach ($prog_nodes[$p['id']]['children'] as $idx => $child) {
+                                    if ($child['tipe'] === 'kegiatan_pd') {
+                                        $has_kegiatan_child = true;
+                                        $first_keg_index = $idx;
+                                        break;
+                                    }
+                                }
+                                
+                                foreach ($out_by_parent[$p['id']] as $out_item) {
+                                    $out_node = [
+                                        'id' => 'subkeg_' . $out_item['id'],
+                                        'original_id' => $out_item['id'],
+                                        'tipe' => 'sub_kegiatan_pd',
+                                        'tipe_label' => 'Sub Kegiatan Perangkat Daerah',
+                                        'level' => 5,
+                                        'nama' => $out_item['nama'] ?? '—',
+                                        'indikator' => $out_item['indikator'] ?? null,
+                                        'crosscutting_pd' => $out_item['crosscutting_pd'] ?? null,
+                                        'crosscutting_ket' => $out_item['crosscutting_keterangan'] ?? null,
+                                        'kode_nomenklatur' => $out_item['kode_nomenklatur'] ?? null,
+                                        'nomenklatur_sipd' => $out_item['nomenklatur_sipd'] ?? null,
+                                        'children' => []
+                                    ];
+                                    
+                                    if ($has_kegiatan_child && $first_keg_index !== null) {
+                                        $prog_nodes[$p['id']]['children'][$first_keg_index]['children'][] = $out_node;
+                                    } else {
+                                        $prog_nodes[$p['id']]['children'][] = $out_node;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        $inter_node['children'] = array_values($prog_nodes);
+                    } else {
+                        // Jika belum ada node Program (misal semua diset Kegiatan),
+                        // sediakan node Program pembungkus agar Kegiatan selalu BERADA DI BAWAH PROGRAM (Tier 4 under Tier 3)
+                        $auto_prog_node = [
+                            'id' => 'prog_auto_' . $inter['id'],
+                            'original_id' => null,
+                            'tipe' => 'program_pd',
+                            'tipe_label' => 'Program Perangkat Daerah',
+                            'cascading_type' => 'program',
+                            'level' => 3,
+                            'nama' => 'Program ' . ($inter['nama'] ?? 'Perangkat Daerah'),
+                            'indikator' => null,
+                            'crosscutting_pd' => null,
+                            'crosscutting_ket' => null,
+                            'kode_nomenklatur' => null,
+                            'nomenklatur_sipd' => null,
+                            'available_programs' => [],
+                            'children' => []
+                        ];
+                        
+                        foreach ($kegiatans as $k) {
+                            $keg_node = [
+                                'id' => 'imm_' . $k['id'],
+                                'original_id' => $k['id'],
+                                'tipe' => 'kegiatan_pd',
+                                'tipe_label' => 'Kegiatan Perangkat Daerah',
+                                'cascading_type' => 'kegiatan',
+                                'parent_immediate_id' => null,
+                                'available_programs' => [],
+                                'level' => 4,
+                                'nama' => $k['nama'] ?? '—',
+                                'indikator' => $k['indikator'] ?? null,
+                                'crosscutting_pd' => $k['crosscutting_pd'] ?? null,
+                                'crosscutting_ket' => $k['crosscutting_keterangan'] ?? null,
+                                'kode_nomenklatur' => $k['kode_nomenklatur'] ?? null,
+                                'nomenklatur_sipd' => $k['nomenklatur_sipd'] ?? null,
+                                'children' => []
+                            ];
+                            
+                            if (isset($out_by_parent[$k['id']])) {
+                                foreach ($out_by_parent[$k['id']] as $out_item) {
+                                    $keg_node['children'][] = [
+                                        'id' => 'subkeg_' . $out_item['id'],
+                                        'original_id' => $out_item['id'],
+                                        'tipe' => 'sub_kegiatan_pd',
+                                        'tipe_label' => 'Sub Kegiatan Perangkat Daerah',
+                                        'level' => 5,
+                                        'nama' => $out_item['nama'] ?? '—',
+                                        'indikator' => $out_item['indikator'] ?? null,
+                                        'crosscutting_pd' => $out_item['crosscutting_pd'] ?? null,
+                                        'crosscutting_ket' => $out_item['crosscutting_keterangan'] ?? null,
+                                        'kode_nomenklatur' => $out_item['kode_nomenklatur'] ?? null,
+                                        'nomenklatur_sipd' => $out_item['nomenklatur_sipd'] ?? null,
+                                        'children' => []
+                                    ];
+                                }
+                            }
+                            
+                            $auto_prog_node['children'][] = $keg_node;
+                        }
+                        
+                        $inter_node['children'] = [$auto_prog_node];
+                    }
+                }
+                $ult_node['children'][] = $inter_node;
+            }
+        }
+        $tree_data[] = $ult_node;
+    }
+    
+    return $tree_data;
+}
+
 /**
  * GET DATA RENSTRA PD DENGAN STRUKTUR OUTCOME → INDIKATOR
  */

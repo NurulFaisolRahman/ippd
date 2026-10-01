@@ -529,6 +529,7 @@
                     <a href="<?=base_url('Instansi/IkuPD')?>">IKU PD</a>
                     <a href="<?=base_url('Instansi/IkkPD')?>">IKK PD</a>
                     <a href="<?=base_url('Instansi/MenuRenstraPD')?>">Menu Renstra PD</a>
+                    <a href="<?=base_url('Instansi/CascadingPD')?>">Cascading PD</a>
                 </div>
             </li>
 
