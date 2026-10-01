@@ -785,6 +785,15 @@
     align-items: center;
     justify-content: center;
     padding: 20px;
+    overflow-y: auto;
+}
+
+/* Memastikan overlay selalu flexbox di tengah saat ditampilkan */
+.cascading-modal-overlay[style*="display: block"],
+.cascading-modal-overlay.active {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 .cascading-modal-content {
@@ -799,6 +808,7 @@
     overflow: hidden;
     animation: modalIn 0.25s ease-out;
     border-left: 6px solid #3b82f6;
+    margin: auto; /* Memastikan posisi horizontal dan vertikal tepat di tengah */
 }
 
 @keyframes modalIn {
@@ -974,8 +984,88 @@
             </div>
         </div>
 
-        <!-- FILTER BAR (Untuk Non Role 4 / Admin / Ganti Instansi) -->
-        <?php if (!$IsRole4 && !empty($KodeWilayah)): ?>
+        <!-- FILTER BAR (SEBELUM LOGIN ATAU ADMIN TINGKAT ATAS) -->
+        <?php if (empty($IsLoggedIn) || (isset($Level) && ($Level == 1 || $Level == 2))): ?>
+        <div class="cascading-filter-bar">
+            <div class="cascading-filter-left">
+                <!-- Dropdown Provinsi -->
+                <div style="display:flex; align-items:center; gap:6px;">
+                    <label style="font-size:12px; font-weight:600; color:#475569; margin:0;">
+                        <i class="fa fa-map" style="color:#3b82f6;"></i> Provinsi:
+                    </label>
+                    <select id="FilterProvinsi" style="min-width: 170px;">
+                        <option value="">-- Pilih Provinsi --</option>
+                        <?php if (!empty($Provinsi)): ?>
+                            <?php foreach ($Provinsi as $prov): ?>
+                                <option value="<?= html_escape($prov['Kode']) ?>" <?= (!empty($KodeWilayah) && substr($KodeWilayah, 0, 2) == $prov['Kode']) ? 'selected' : '' ?>>
+                                    <?= html_escape($prov['Nama']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
+                </div>
+
+                <!-- Dropdown Kab/Kota -->
+                <div style="display:flex; align-items:center; gap:6px;">
+                    <label style="font-size:12px; font-weight:600; color:#475569; margin:0;">
+                        <i class="fa fa-city" style="color:#0ea5e9;"></i> Kab/Kota:
+                    </label>
+                    <select id="FilterKabKota" style="min-width: 200px;" <?= empty($KodeWilayah) ? 'disabled' : '' ?>>
+                        <option value="">-- Pilih Kab/Kota --</option>
+                        <?php 
+                        if (!empty($KodeWilayah)) {
+                            $provKode = substr($KodeWilayah, 0, 2);
+                            $listKabKota = $this->db->select('Kode, Nama')
+                                                   ->from('kodewilayah')
+                                                   ->where("Kode LIKE '{$provKode}.%'")
+                                                   ->where('LENGTH(REPLACE(Kode, ".", "")) = 4', null, false)
+                                                   ->order_by('Nama', 'ASC')
+                                                   ->get()
+                                                   ->result_array();
+                            foreach ($listKabKota as $kab) { ?>
+                                <option value="<?= html_escape($kab['Kode']) ?>" <?= ($KodeWilayah == $kab['Kode'] || str_replace('.', '', $KodeWilayah) == str_replace('.', '', $kab['Kode'])) ? 'selected' : '' ?>>
+                                    <?= html_escape($kab['Nama']) ?>
+                                </option>
+                            <?php }
+                        }
+                        ?>
+                    </select>
+                </div>
+
+                <!-- Dropdown Perangkat Daerah -->
+                <div style="display:flex; align-items:center; gap:6px;" id="wrapperFilterInstansiBefore">
+                    <label style="font-size:12px; font-weight:600; color:#475569; margin:0;">
+                        <i class="fa fa-building" style="color:#0d9488;"></i> Perangkat Daerah:
+                    </label>
+                    <select id="FilterInstansiBeforeLogin" style="min-width: 230px;">
+                        <option value="">-- Semua Perangkat Daerah --</option>
+                        <?php if (!empty($ListInstansi)): ?>
+                            <?php foreach ($ListInstansi as $ins): ?>
+                                <option value="<?= $ins['id'] ?>" <?= ($FilterInstansiId == $ins['id']) ? 'selected' : '' ?>>
+                                    <?= html_escape($ins['nama']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
+                </div>
+
+                <button type="button" class="btn-filter-action btn-filter-apply" id="btnFilterWilayah">
+                    <i class="fa fa-filter"></i> Terapkan
+                </button>
+                <button type="button" class="btn-filter-action btn-filter-reset" id="btnResetFilterWilayah" title="Reset Filter Wilayah">
+                    <i class="fa fa-refresh"></i> Reset
+                </button>
+            </div>
+
+            <div>
+                <span style="font-size: 11.5px; color:#475569; background:#e0f2fe; padding:4px 10px; border-radius:6px; border:1px solid #bae6fd; font-weight:600;">
+                    <i class="fa fa-map-marker-alt" style="color:#0284c7;"></i> Wilayah: <strong><?= html_escape($NamaWilayah ?: 'Belum Dipilih') ?></strong>
+                </span>
+            </div>
+        </div>
+
+        <!-- FILTER BAR (UNTUK USER LOGIN NON-ROLE 4 DENGAN WILAYAH TERKUNCI) -->
+        <?php elseif (!$IsRole4 && !empty($KodeWilayah)): ?>
         <div class="cascading-filter-bar">
             <div class="cascading-filter-left">
                 <label style="font-size:12px; font-weight:600; color:#475569; margin:0;"><i class="fa fa-building"></i> Filter Instansi / Perangkat Daerah:</label>
@@ -997,8 +1087,8 @@
                 </button>
             </div>
             <div>
-                <span style="font-size: 11px; color:#64748b;">
-                    <i class="fa fa-map-marker-alt text-primary"></i> Wilayah: <strong><?= html_escape($NamaWilayah ?: 'Nasional/Daerah') ?></strong>
+                <span style="font-size: 11.5px; color:#475569; background:#e0f2fe; padding:4px 10px; border-radius:6px; border:1px solid #bae6fd; font-weight:600;">
+                    <i class="fa fa-map-marker-alt" style="color:#0284c7;"></i> Wilayah: <strong><?= html_escape($NamaWilayah ?: 'Nasional/Daerah') ?></strong>
                 </span>
             </div>
         </div>
@@ -1034,10 +1124,16 @@
         <!-- CANVAS SVG CHART -->
         <div id="chart-canvas-container">
             <svg id="cascading-svg"></svg>
-            <div id="empty-state-view" class="empty-state-cascading" style="display:none;">
-                <i class="fa fa-folder-open"></i>
-                <h5 style="margin:0 0 6px 0; color:#334155; font-weight:700;">Belum Ada Data Cascading PD</h5>
-                <p style="margin:0; max-width:440px; font-size:13px;">Data pohon kinerja perangkat daerah belum tersedia atau belum terinput untuk wilayah / instansi yang dipilih.</p>
+            <div id="empty-state-view" class="empty-state-cascading" style="<?= empty($KodeWilayah) || empty($ChartData) || $ChartData == '{"nama":"ROOT","children":[]}' ? 'display:flex;' : 'display:none;' ?>">
+                <?php if (empty($KodeWilayah)): ?>
+                    <i class="fa fa-map-marked-alt" style="font-size: 54px; color: #94a3b8; margin-bottom: 14px;"></i>
+                    <h5 style="margin:0 0 6px 0; color:#334155; font-weight:700;">Silakan Pilih Filter Wilayah Terlebih Dahulu</h5>
+                    <p style="margin:0; max-width:480px; font-size:13px; color:#64748b; line-height: 1.5;">Pilih <strong>Provinsi</strong> dan <strong>Kabupaten/Kota</strong> pada toolbar filter di atas, kemudian klik tombol <strong>Terapkan</strong> untuk menampilkan diagram pohon kinerja cascading perangkat daerah.</p>
+                <?php else: ?>
+                    <i class="fa fa-folder-open" style="font-size: 54px; color: #cbd5e1; margin-bottom: 14px;"></i>
+                    <h5 style="margin:0 0 6px 0; color:#334155; font-weight:700;">Belum Ada Data Cascading PD</h5>
+                    <p style="margin:0; max-width:440px; font-size:13px; color:#64748b; line-height: 1.5;">Data pohon kinerja perangkat daerah belum tersedia atau belum terinput untuk wilayah / instansi yang dipilih.</p>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -1143,7 +1239,102 @@ function formatCrosscutting(pd, ket) {
 // Inisialisasi Aplikasi Cascading
 $(document).ready(function() {
 
-    // Filter Perangkat Daerah
+    // Filter Wilayah (Provinsi, Kab/Kota, dan Instansi untuk sebelum login / admin)
+    $("#FilterProvinsi").on('change', function() {
+        var prov = $(this).val();
+        if (!prov) {
+            $("#FilterKabKota").html('<option value="">-- Pilih Kab/Kota --</option>').prop('disabled', true);
+            $("#FilterInstansiBeforeLogin").html('<option value="">-- Semua Perangkat Daerah --</option>');
+            return;
+        }
+        $.post(BaseURL + "Instansi/GetListKabKota", { Kode: prov }, function(Data) {
+            var res = (typeof Data === 'string') ? JSON.parse(Data) : Data;
+            var opt = '<option value="">-- Pilih Kab/Kota --</option>';
+            if (res && res.length > 0) {
+                for (var i = 0; i < res.length; i++) {
+                    opt += '<option value="' + res[i].Kode + '">' + res[i].Nama + '</option>';
+                }
+            }
+            $("#FilterKabKota").html(opt).prop('disabled', false);
+        });
+    });
+
+    $("#FilterKabKota").on('change', function() {
+        var kab = $(this).val();
+        if (!kab) {
+            $("#FilterInstansiBeforeLogin").html('<option value="">-- Semua Perangkat Daerah --</option>');
+            return;
+        }
+        $.post(BaseURL + "Instansi/GetListInstansiLevel4", { KodeWilayah: kab }, function(res) {
+            var data = (typeof res === 'string') ? JSON.parse(res) : res;
+            var opt = '<option value="">-- Semua Perangkat Daerah --</option>';
+            if (data && data.length > 0) {
+                for (var i = 0; i < data.length; i++) {
+                    opt += '<option value="' + data[i].id + '">' + data[i].nama + '</option>';
+                }
+            }
+            $("#FilterInstansiBeforeLogin").html(opt);
+        });
+    });
+
+    $("#btnFilterWilayah").on('click', function() {
+        var prov = $("#FilterProvinsi").val();
+        var kab = $("#FilterKabKota").val();
+        var instansiId = $("#FilterInstansiBeforeLogin").val();
+
+        if (!prov && !kab) {
+            alert("Silakan pilih Provinsi dan Kabupaten/Kota terlebih dahulu!");
+            return;
+        }
+
+        var selectedKode = kab ? kab : prov;
+        var $btn = $(this);
+        $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Memuat...');
+
+        $.ajax({
+            url: BaseURL + "Instansi/SimpanFilterWilayah",
+            type: "POST",
+            data: {
+                KodeWilayah: selectedKode,
+                FilterInstansiId: instansiId || '',
+                [CSRF_NAME]: CSRF_TOKEN
+            },
+            success: function(res) {
+                if (res === "1") {
+                    var redirectUrl = BaseURL + "Instansi/CascadingPD";
+                    if (instansiId) {
+                        redirectUrl += "?instansi_id=" + instansiId;
+                    }
+                    window.location.href = redirectUrl;
+                } else {
+                    alert(res || "Gagal menerapkan filter wilayah!");
+                    $btn.prop('disabled', false).html('<i class="fa fa-filter"></i> Terapkan');
+                }
+            },
+            error: function() {
+                alert("Gagal menghubungi server!");
+                $btn.prop('disabled', false).html('<i class="fa fa-filter"></i> Terapkan');
+            }
+        });
+    });
+
+    $("#btnResetFilterWilayah").on('click', function() {
+        var $btn = $(this);
+        $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
+        $.ajax({
+            url: BaseURL + "Instansi/ResetFilterWilayah",
+            type: "POST",
+            data: { [CSRF_NAME]: CSRF_TOKEN },
+            success: function() {
+                window.location.href = BaseURL + "Instansi/CascadingPD?reset=1";
+            },
+            error: function() {
+                window.location.href = BaseURL + "Instansi/CascadingPD?reset=1";
+            }
+        });
+    });
+
+    // Filter Perangkat Daerah (untuk user login non-role 4)
     $("#btnApplyInstansi").click(function() {
         var val = $("#FilterInstansiSelect").val();
         var url = BaseURL + "Instansi/CascadingPD";
@@ -2062,7 +2253,7 @@ function openNodeModal(nodeD3) {
     }
 
     $("#modalNodeBody").html(html);
-    $("#cascadingModal").fadeIn(150);
+    $("#cascadingModal").css("display", "flex").hide().fadeIn(150);
 
     // Event binding untuk Nomenklatur SIPD
     var tempSelectedSipd = [];

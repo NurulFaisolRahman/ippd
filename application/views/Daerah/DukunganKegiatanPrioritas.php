@@ -1,5 +1,9 @@
 <?php $this->load->view('Daerah/sidebar'); ?>
 <?php $this->load->view('Daerah/Cssumum'); ?>
+<?php 
+// Hanya pengguna yang login sebagai Daerah (Level 3) yang dapat melakukan aksi CRUD
+$isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Level']) && $_SESSION['Level'] == 3); 
+?>
 
 <!-- Select2 CSS -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
@@ -122,6 +126,34 @@
     .select2-container--default .select2-selection--single .select2-selection__arrow {
         height: 36px !important;
     }
+    .select2-container .select2-selection--multiple {
+        min-height: 38px !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 4px !important;
+        padding: 3px 6px !important;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: #fdf6e7 !important;
+        border: 1px solid #fbe2b5 !important;
+        color: #d97706 !important;
+        font-weight: 600 !important;
+        font-size: 11.5px !important;
+        border-radius: 4px !important;
+        padding: 2px 6px !important;
+        margin-top: 3px !important;
+        margin-right: 5px !important;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        color: #b45309 !important;
+        margin-right: 4px !important;
+        font-weight: bold !important;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+        color: #ef4444 !important;
+    }
+    .select2-container--default.select2-container--focus .select2-selection--multiple {
+        border-color: #20c997 !important;
+    }
     .select2-dropdown {
         border: 1px solid #cbd5e1 !important;
         border-radius: 4px !important;
@@ -221,9 +253,11 @@
                                     <input type="text" id="FilterTableInput" class="form-control" placeholder="Cari dalam tabel..." style="height: 35px; width: 220px; font-size: 13px; padding-left: 32px; border-radius: 4px; border: 1px solid #cbd5e1;">
                                     <i class="fa fa-search" style="position: absolute; left: 11px; top: 11px; color: #94a3b8; font-size: 13px;"></i>
                                 </div>
-                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputDukungan">
-                                    <i class="fa fa-plus"></i> <b>Tambah Dukungan</b>
-                                </button>
+                                <?php if ($isDaerah) { ?>
+                                    <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputDukungan">
+                                        <i class="fa fa-plus"></i> <b>Tambah Dukungan</b>
+                                    </button>
+                                <?php } ?>
                             </div>
                         </div>
 
@@ -235,8 +269,10 @@
                                         <th style="width: 5%;" class="text-center">No</th>
                                         <th style="width: 25%;">Prioritas Nasional</th>
                                         <th style="width: 32%;">Kegiatan Prioritas Utama</th>
-                                        <th style="width: 28%;">Dukungan Program pada RPJMD</th>
-                                        <th style="width: 10%;" class="text-center">Aksi</th>
+                                        <th style="width: <?= $isDaerah ? '28%' : '38%' ?>;">Dukungan Program pada RPJMD</th>
+                                        <?php if ($isDaerah) { ?>
+                                            <th style="width: 10%;" class="text-center">Aksi</th>
+                                        <?php } ?>
                                     </tr>
                                 </thead>
                                 <tbody id="table-dukungan-tbody">
@@ -280,25 +316,63 @@
                                                 </span>
                                             </td>
                                             <td style="vertical-align: middle;">
-                                                <span class="badge-program"><?= html_escape($row['KodeProgram']) ?></span>
-                                                <div style="font-weight: 500; color: #0f172a; margin-top: 3px;">
-                                                    <?= html_escape($row['NamaProgram'] ?: '-') ?>
-                                                </div>
+                                                <?php
+                                                $listKodeProg = [];
+                                                $listNamaProg = [];
+
+                                                if (!empty($row['KodeProgram'])) {
+                                                    if (strpos($row['KodeProgram'], '|||') !== false) {
+                                                        $listKodeProg = array_values(array_filter(array_map('trim', explode('|||', $row['KodeProgram']))));
+                                                    } elseif (strpos($row['KodeProgram'], ',') !== false) {
+                                                        $listKodeProg = array_values(array_filter(array_map('trim', explode(',', $row['KodeProgram']))));
+                                                    } else {
+                                                        $listKodeProg = [trim($row['KodeProgram'])];
+                                                    }
+                                                }
+
+                                                if (!empty($row['NamaProgram'])) {
+                                                    if (strpos($row['NamaProgram'], '|||') !== false) {
+                                                        $listNamaProg = array_values(array_filter(array_map('trim', explode('|||', $row['NamaProgram']))));
+                                                    } elseif (strpos($row['NamaProgram'], "\n") !== false) {
+                                                        $listNamaProg = array_values(array_filter(array_map('trim', explode("\n", $row['NamaProgram']))));
+                                                    } else {
+                                                        $listNamaProg = [trim($row['NamaProgram'])];
+                                                    }
+                                                }
+                                                ?>
+                                                <?php if (!empty($listKodeProg)) { ?>
+                                                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                                                        <?php foreach ($listKodeProg as $idx => $kProg) { 
+                                                            $nProg = $listNamaProg[$idx] ?? ($listNamaProg[0] ?? '-');
+                                                        ?>
+                                                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 10px;">
+                                                                <span class="badge-program"><?= html_escape($kProg) ?></span>
+                                                                <div style="font-weight: 500; color: #0f172a; margin-top: 3px; font-size: 12.5px;">
+                                                                    <?= html_escape($nProg) ?>
+                                                                </div>
+                                                            </div>
+                                                        <?php } ?>
+                                                    </div>
+                                                <?php } else { ?>
+                                                    <span class="text-muted">-</span>
+                                                <?php } ?>
                                             </td>
-                                            <td class="text-center" style="vertical-align: middle;">
-                                                <div class="btn-action-group">
-                                                    <button type="button" class="btn btn-xs btn-warning btn-edit" 
-                                                            data-id="<?= $row['Id'] ?>" 
-                                                            title="Edit Data" style="background-color: #ffc107 !important; border-color: #e0a800 !important; color: #212529 !important; padding: 4px 8px; border-radius: 4px;">
-                                                        <i class="fa fa-pencil"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-xs btn-danger btn-hapus" 
-                                                            data-id="<?= $row['Id'] ?>" 
-                                                            title="Hapus Data" style="padding: 4px 8px; border-radius: 4px;">
-                                                        <i class="fa fa-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
+                                            <?php if ($isDaerah) { ?>
+                                                <td class="text-center" style="vertical-align: middle;">
+                                                    <div class="btn-action-group">
+                                                        <button type="button" class="btn btn-xs btn-warning btn-edit" 
+                                                                data-id="<?= $row['Id'] ?>" 
+                                                                title="Edit Data" style="background-color: #ffc107 !important; border-color: #e0a800 !important; color: #212529 !important; padding: 4px 8px; border-radius: 4px;">
+                                                            <i class="fa fa-pencil"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-xs btn-danger btn-hapus" 
+                                                                data-id="<?= $row['Id'] ?>" 
+                                                                title="Hapus Data" style="padding: 4px 8px; border-radius: 4px;">
+                                                            <i class="fa fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            <?php } ?>
                                         </tr>
                                     <?php 
                                                 $first = false;
@@ -306,7 +380,7 @@
                                         } 
                                     } else { ?>
                                         <tr>
-                                            <td colspan="5" class="text-center" style="padding: 30px; color: #64748b;">
+                                            <td colspan="<?= $isDaerah ? '5' : '4' ?>" class="text-center" style="padding: 30px; color: #64748b;">
                                                 <i class="fa fa-info-circle" style="font-size: 16px; margin-right: 5px;"></i> Belum ada data Dukungan Kegiatan Prioritas Utama
                                             </td>
                                         </tr>
@@ -321,6 +395,7 @@
         </div>
     </div>
 
+    <?php if ($isDaerah) { ?>
     <!-- ============================================================ -->
     <!-- MODAL TAMBAH DUKUNGAN KEGIATAN PRIORITAS -->
     <!-- ============================================================ -->
@@ -365,18 +440,18 @@
 
                         <!-- 3. Dukungan Program pada RPJMD -->
                         <div class="form-group-kpu">
-                            <label for="Input_KodeProgram">
+                            <label>
                                 3. Dukungan Program pada RPJMD <span class="text-danger">*</span>
                             </label>
-                            <select id="Input_KodeProgram" class="form-control select2-modal" style="width: 100%;">
-                                <option value="">-- Pilih Program RPJMD --</option>
-                                <?php foreach ($ProgramRPJMD as $prg) { ?>
-                                    <option value="<?= html_escape($prg['Kode']) ?>">
-                                        [<?= html_escape($prg['Kode']) ?>] <?= html_escape($prg['Nomenklatur']) ?>
-                                    </option>
-                                <?php } ?>
-                            </select>
-                            <div class="field-desc">Data diambil dari tabel Nomenklatur bagian Program.</div>
+                            <div id="wrapper-program-input" class="program-repeater-container">
+                                <!-- Baris dropdown dinamis akan digenerate di sini -->
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <button type="button" class="btn btn-sm btn-success" id="BtnTambahRowProgramInput" style="border-radius: 4px; font-weight: 600; padding: 6px 14px;">
+                                    <i class="fa fa-plus-circle"></i> Tambah Program Dukungan
+                                </button>
+                            </div>
+                            <div class="field-desc">Gunakan tombol <b>Tambah Program Dukungan</b> untuk menambahkan lebih dari satu program RPJMD.</div>
                         </div>
                     </form>
                 </div>
@@ -434,17 +509,18 @@
 
                         <!-- 3. Dukungan Program pada RPJMD -->
                         <div class="form-group-kpu">
-                            <label for="Edit_KodeProgram">
+                            <label>
                                 3. Dukungan Program pada RPJMD <span class="text-danger">*</span>
                             </label>
-                            <select id="Edit_KodeProgram" class="form-control select2-modal-edit" style="width: 100%;">
-                                <option value="">-- Pilih Program RPJMD --</option>
-                                <?php foreach ($ProgramRPJMD as $prg) { ?>
-                                    <option value="<?= html_escape($prg['Kode']) ?>">
-                                        [<?= html_escape($prg['Kode']) ?>] <?= html_escape($prg['Nomenklatur']) ?>
-                                    </option>
-                                <?php } ?>
-                            </select>
+                            <div id="wrapper-program-edit" class="program-repeater-container">
+                                <!-- Baris dropdown dinamis akan digenerate di sini -->
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <button type="button" class="btn btn-sm btn-success" id="BtnTambahRowProgramEdit" style="border-radius: 4px; font-weight: 600; padding: 6px 14px;">
+                                    <i class="fa fa-plus-circle"></i> Tambah Program Dukungan
+                                </button>
+                            </div>
+                            <div class="field-desc">Gunakan tombol <b>Tambah Program Dukungan</b> untuk menambahkan lebih dari satu program RPJMD.</div>
                         </div>
                     </form>
                 </div>
@@ -484,6 +560,26 @@
         </div>
     </div>
 
+    <!-- TEMPLATE REPEATER BARIS PROGRAM RPJMD -->
+    <div id="tmplProgramRow" style="display: none;">
+        <div class="program-row-item" style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+            <div style="flex: 1;">
+                <select class="form-control program-select-row" style="width: 100%;">
+                    <option value="">-- Pilih Program RPJMD --</option>
+                    <?php foreach ($ProgramRPJMD as $prg) { ?>
+                        <option value="<?= html_escape($prg['Kode']) ?>">
+                            [<?= html_escape($prg['Kode']) ?>] <?= html_escape($prg['Nomenklatur']) ?>
+                        </option>
+                    <?php } ?>
+                </select>
+            </div>
+            <button type="button" class="btn btn-danger btn-remove-program-row" title="Hapus Baris" style="height: 38px; width: 38px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 4px; flex-shrink: 0;">
+                <i class="fa fa-trash"></i>
+            </button>
+        </div>
+    </div>
+    <?php } ?>
+
 </div>
 
 <!-- SCRIPT LIBRARIES -->
@@ -513,6 +609,7 @@
             });
         });
 
+        <?php if ($isDaerah) { ?>
         // Inisialisasi Select2 pada Modal Tambah
         $('#Input_PrioritasId').select2({
             dropdownParent: $('#ModalInputDukungan'),
@@ -526,10 +623,46 @@
             allowClear: true
         });
 
-        $('#Input_KodeProgram').select2({
-            dropdownParent: $('#ModalInputDukungan'),
-            placeholder: "-- Pilih Program RPJMD --",
-            allowClear: true
+        // Fungsi Tambah Baris Dropdown Program
+        function addProgramRow(containerSelector, modalSelector, selectedVal) {
+            var $newRow = $('#tmplProgramRow .program-row-item').clone();
+            $(containerSelector).append($newRow);
+
+            var $select = $newRow.find('select');
+            $select.select2({
+                dropdownParent: $(modalSelector),
+                placeholder: "-- Pilih Program RPJMD --",
+                allowClear: true,
+                width: '100%'
+            });
+
+            if (selectedVal) {
+                $select.val(selectedVal).trigger('change');
+            }
+        }
+
+        // Hapus baris dropdown program
+        $(document).on('click', '.btn-remove-program-row', function(e) {
+            e.preventDefault();
+            var $container = $(this).closest('.program-repeater-container');
+            var rowCount = $container.find('.program-row-item').length;
+            if (rowCount > 1) {
+                $(this).closest('.program-row-item').remove();
+            } else {
+                $(this).closest('.program-row-item').find('select').val('').trigger('change');
+            }
+        });
+
+        // Tombol Tambah Baris pada Modal Input
+        $('#BtnTambahRowProgramInput').on('click', function(e) {
+            e.preventDefault();
+            addProgramRow('#wrapper-program-input', '#ModalInputDukungan', '');
+        });
+
+        // Tombol Tambah Baris pada Modal Edit
+        $('#BtnTambahRowProgramEdit').on('click', function(e) {
+            e.preventDefault();
+            addProgramRow('#wrapper-program-edit', '#ModalEditDukungan', '');
         });
 
         // Inisialisasi Select2 pada Modal Edit
@@ -543,10 +676,8 @@
             placeholder: "-- Pilih Kegiatan Prioritas Utama --"
         });
 
-        $('#Edit_KodeProgram').select2({
-            dropdownParent: $('#ModalEditDukungan'),
-            placeholder: "-- Pilih Program RPJMD --"
-        });
+        // Inisialisasi awal 1 baris dropdown pada modal input
+        addProgramRow('#wrapper-program-input', '#ModalInputDukungan', '');
 
         // ============================================================
         // CHAINED DROPDOWN: Prioritas Nasional -> Kegiatan Prioritas
@@ -641,7 +772,6 @@
         $('#BtnSimpanDukungan').on('click', function() {
             var prioritasId = $('#Input_PrioritasId').val();
             var kegiatanId  = $('#Input_KegiatanId').val();
-            var kodeProgram = $('#Input_KodeProgram').val();
             var $alertBox   = $('#AlertInput');
 
             $alertBox.hide().empty();
@@ -656,11 +786,23 @@
                 $('#Input_KegiatanId').select2('open');
                 return;
             }
-            if (!kodeProgram) {
-                $alertBox.text('Silakan pilih Dukungan Program pada RPJMD!').slideDown();
-                $('#Input_KodeProgram').select2('open');
+            var kodePrograms = [];
+            $('#wrapper-program-input select.program-select-row').each(function() {
+                var val = $(this).val();
+                if (val && val !== '') {
+                    kodePrograms.push(val);
+                }
+            });
+
+            if (kodePrograms.length === 0) {
+                $alertBox.text('Silakan pilih minimal 1 Dukungan Program pada RPJMD!').slideDown();
                 return;
             }
+
+            // Deduplikasi pilihan jika user memilih program yang sama pada baris berbeda
+            kodePrograms = kodePrograms.filter(function(item, pos) {
+                return kodePrograms.indexOf(item) === pos;
+            });
 
             var $btn = $(this);
             $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
@@ -671,7 +813,7 @@
                 data: {
                     PrioritasId: prioritasId,
                     KegiatanId: kegiatanId,
-                    KodeProgram: kodeProgram,
+                    KodeProgram: kodePrograms,
                     [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
                 },
                 dataType: 'json',
@@ -708,7 +850,26 @@
                     $btn.prop('disabled', false);
                     if (data && data.Id) {
                         $('#Edit_Id').val(data.Id);
-                        $('#Edit_KodeProgram').val(data.KodeProgram).trigger('change');
+                        
+                        var kodes = [];
+                        if (data.KodeProgram) {
+                            if (data.KodeProgram.indexOf('|||') !== -1) {
+                                kodes = data.KodeProgram.split('|||').map(function(s) { return $.trim(s); }).filter(function(s) { return s.length > 0; });
+                            } else if (data.KodeProgram.indexOf(',') !== -1) {
+                                kodes = data.KodeProgram.split(',').map(function(s) { return $.trim(s); }).filter(function(s) { return s.length > 0; });
+                            } else {
+                                kodes = [$.trim(data.KodeProgram)];
+                            }
+                        }
+                        // Isi repeater program pada modal edit
+                        $('#wrapper-program-edit').empty();
+                        if (kodes.length > 0) {
+                            for (var i = 0; i < kodes.length; i++) {
+                                addProgramRow('#wrapper-program-edit', '#ModalEditDukungan', kodes[i]);
+                            }
+                        } else {
+                            addProgramRow('#wrapper-program-edit', '#ModalEditDukungan', '');
+                        }
                         $('#Edit_PrioritasId').val(data.PrioritasId).trigger('change', [data.KegiatanId]);
                         $('#ModalEditDukungan').modal('show');
                     }
@@ -726,15 +887,23 @@
             var id          = $('#Edit_Id').val();
             var prioritasId = $('#Edit_PrioritasId').val();
             var kegiatanId  = $('#Edit_KegiatanId').val();
-            var kodeProgram = $('#Edit_KodeProgram').val();
             var $alertBox   = $('#AlertEdit');
+            var kodePrograms = [];
+            $('#wrapper-program-edit select.program-select-row').each(function() {
+                var val = $(this).val();
+                if (val && val !== '') {
+                    kodePrograms.push(val);
+                }
+            });
 
-            $alertBox.hide().empty();
-
-            if (!id || !prioritasId || !kegiatanId || !kodeProgram) {
-                $alertBox.text('Harap lengkapi semua field sebelum menyimpan!').slideDown();
+            if (!id || !prioritasId || !kegiatanId || kodePrograms.length === 0) {
+                $alertBox.text('Harap lengkapi semua field dan pilih minimal 1 Dukungan Program!').slideDown();
                 return;
             }
+
+            kodePrograms = kodePrograms.filter(function(item, pos) {
+                return kodePrograms.indexOf(item) === pos;
+            });
 
             var $btn = $(this);
             $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Mengupdate...');
@@ -746,7 +915,7 @@
                     Id: id,
                     PrioritasId: prioritasId,
                     KegiatanId: kegiatanId,
-                    KodeProgram: kodeProgram,
+                    KodeProgram: kodePrograms,
                     [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
                 },
                 dataType: 'json',
@@ -801,12 +970,15 @@
             $('#AlertInput').hide().empty();
             $('#Input_PrioritasId').val('').trigger('change');
             $('#Input_KegiatanId').empty().append('<option value="">-- Pilih Prioritas Nasional Terlebih Dahulu --</option>').prop('disabled', true).trigger('change');
-            $('#Input_KodeProgram').val('').trigger('change');
+            // Reset repeater ke 1 baris kosong
+            $('#wrapper-program-input').empty();
+            addProgramRow('#wrapper-program-input', '#ModalInputDukungan', '');
         });
 
         $('#ModalEditDukungan').on('hidden.bs.modal', function() {
             $('#AlertEdit').hide().empty();
         });
+        <?php } ?>
 
         // ============================================================
         // FILTER WILAYAH (Jika belum login)

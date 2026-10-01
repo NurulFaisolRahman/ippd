@@ -14492,7 +14492,14 @@ public function CascadingPD() {
     $get_instansi_id = $this->input->get('instansi_id', TRUE);
     $filter_ultimate_id = $this->input->get('ultimate_id', TRUE);
     
-    if ($reset == '1' || $this->input->get('instansi_id') === '') {
+    if ($reset == '1') {
+        unset($_SESSION['TempKodeWilayah']);
+        unset($_SESSION['KodeWilayah']);
+        unset($_SESSION['TempInstansiId']);
+        unset($_SESSION['FilterInstansiId']);
+        $filter_instansi_id = null;
+        $KodeWilayah = $this->get_kode_wilayah();
+    } elseif ($this->input->get('instansi_id') === '') {
         unset($_SESSION['TempInstansiId']);
         unset($_SESSION['FilterInstansiId']);
         $filter_instansi_id = null;
@@ -14515,19 +14522,48 @@ public function CascadingPD() {
         }
     }
     
-    // Periksa apakah KodeWilayah saat ini memiliki data di ultimate_outcome_pd.
-    // Jika tidak ada data sama sekali (misal default 35.12 Situbondo tapi belum terinput, atau user admin),
-    // otomatis ambil KodeWilayah dari data yang tersedia di ultimate_outcome_pd.
-    $has_data_in_wilayah = 0;
-    if (!empty($KodeWilayah)) {
-        $has_data_in_wilayah = $this->db->where('kode_wilayah', $KodeWilayah)->where('deleted_at IS NULL')->count_all_results('ultimate_outcome_pd');
+    $has_temp_wilayah = !empty($this->session->userdata('TempKodeWilayah')) || !empty($_SESSION['TempKodeWilayah']) || !empty($this->input->get('kode_wilayah')) || !empty($this->input->get('KodeWilayah'));
+    
+    // Jika user belum login atau admin tingkat atas, dan belum memilih filter wilayah, kosongkan KodeWilayah
+    if ((!$is_logged_in || $level == 1 || $level == 2) && !$has_temp_wilayah) {
+        $KodeWilayah = null;
     }
-    if ($has_data_in_wilayah == 0) {
-        $first_ult = $this->db->select('kode_wilayah')->where('deleted_at IS NULL')->limit(1)->get('ultimate_outcome_pd')->row_array();
-        if ($first_ult && !empty($first_ult['kode_wilayah'])) {
-            $KodeWilayah = $first_ult['kode_wilayah'];
-        }
+
+    // Jika KodeWilayah belum dipilih (belum filter wilayah)
+    if (empty($KodeWilayah)) {
+        $data['KodeWilayah'] = '';
+        $data['NamaWilayah'] = '';
+        $data['InstansiId'] = $instansi_id;
+        $data['IsLoggedIn'] = $is_logged_in;
+        $data['IsRole4'] = $is_role_4;
+        $data['Level'] = $level;
+        $data['FilterInstansiId'] = null;
+        $data['FilterUltimateId'] = null;
+        $data['NamaInstansi'] = '';
+        $data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
+        $data['ListInstansi'] = [];
+        $data['perangkat_daerah'] = [];
+        $data['PelaksanaData'] = [];
+        $data['UltimateList'] = [];
+        $data['TotalData'] = [
+            'tujuan' => 0,
+            'sasaran' => 0,
+            'program' => 0,
+            'kegiatan' => 0,
+            'sub_kegiatan' => 0,
+            'immediate_total' => 0
+        ];
+        $data['ChartData'] = json_encode([
+            'nama' => 'ROOT',
+            'children' => []
+        ]);
+        
+        $this->load->view('Daerah/CascadingPD', $data);
+        return;
     }
+
+    // Jika ada KodeWilayah terpilih
+    $has_data_in_wilayah = $this->db->where('kode_wilayah', $KodeWilayah)->where('deleted_at IS NULL')->count_all_results('ultimate_outcome_pd');
 
     $data['KodeWilayah'] = $KodeWilayah;
     $data['InstansiId'] = $instansi_id;

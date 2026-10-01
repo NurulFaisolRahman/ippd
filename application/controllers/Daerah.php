@@ -4251,7 +4251,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 `KodeWilayah` varchar(50) NOT NULL,
                 `PrioritasId` int(11) NOT NULL,
                 `KegiatanId` int(11) NOT NULL,
-                `KodeProgram` varchar(100) NOT NULL,
+                `KodeProgram` text NOT NULL,
                 `NamaProgram` text DEFAULT NULL,
                 `created_at` datetime DEFAULT NULL,
                 `updated_at` datetime DEFAULT NULL,
@@ -4261,6 +4261,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 KEY `idx_prioritas` (`PrioritasId`),
                 KEY `idx_kegiatan` (`KegiatanId`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+            // Pastikan kolom KodeProgram bertipe TEXT
+            $fields = $this->db->field_data('dukungan_kpu_rpjmd');
+            foreach ($fields as $f) {
+                if ($f->name === 'KodeProgram' && $f->type === 'varchar') {
+                    $this->db->query("ALTER TABLE `dukungan_kpu_rpjmd` MODIFY `KodeProgram` TEXT NOT NULL;");
+                    break;
+                }
+            }
 
             // Provinsi (filter untuk pengguna yang belum login)
             $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
@@ -4312,6 +4321,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $this->db->order_by('k.Id', 'ASC');
             $this->db->order_by('d.Id', 'ASC');
             $Data['DukunganList'] = $this->db->get()->result_array();
+            $Data['IsDaerah'] = (isset($_SESSION['Level']) && $_SESSION['Level'] == 3);
 
             $this->load->view('Daerah/header', $Header);
             $this->load->view('Daerah/DukunganKegiatanPrioritas', $Data);
@@ -4345,29 +4355,65 @@ defined('BASEPATH') OR exit('No direct script access allowed');
          */
         public function InputDukunganKegiatanPrioritas()
         {
+            if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 3) {
+                echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda harus login sebagai Daerah untuk melakukan aksi ini.']);
+                return;
+            }
+
             $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
                         (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
                         $this->input->post('KodeWilayah', TRUE));
 
             $prioritasId = (int)$this->input->post('PrioritasId', TRUE);
             $kegiatanId  = (int)$this->input->post('KegiatanId', TRUE);
-            $kodeProgram = $this->input->post('KodeProgram', TRUE);
+            $kodeProgram = $this->input->post('KodeProgram');
 
             if (empty($prioritasId) || empty($kegiatanId) || empty($kodeProgram)) {
-                echo 'Data belum lengkap! Harap isi semua field.';
+                echo json_encode(['status' => 'error', 'message' => 'Data belum lengkap! Harap isi semua field.']);
+                return;
+            }
+
+            // Normalisasi kode program (bisa array dari multi-select atau string)
+            $kodeProgramList = [];
+            if (is_array($kodeProgram)) {
+                $kodeProgramList = array_values(array_filter(array_map('trim', $kodeProgram)));
+            } else {
+                if (strpos($kodeProgram, ',') !== false) {
+                    $kodeProgramList = array_values(array_filter(array_map('trim', explode(',', $kodeProgram))));
+                } else {
+                    $kodeProgramList = [trim($kodeProgram)];
+                }
+            }
+
+            if (empty($kodeProgramList)) {
+                echo json_encode(['status' => 'error', 'message' => 'Silakan pilih minimal 1 Dukungan Program pada RPJMD!']);
                 return;
             }
 
             // Ambil nama program dari tabel nomenklatur
-            $prog = $this->db->select('Nomenklatur')->where('Kode', $kodeProgram)->get('nomenklaturkabupaten')->row_array();
-            $namaProgram = $prog ? $prog['Nomenklatur'] : '';
+            $mapNama = [];
+            $progs = $this->db->select('Kode, Nomenklatur')
+                              ->where_in('Kode', $kodeProgramList)
+                              ->get('nomenklaturkabupaten')
+                              ->result_array();
+            foreach ($progs as $p) {
+                $mapNama[$p['Kode']] = $p['Nomenklatur'];
+            }
+
+            $namaPrograms = [];
+            foreach ($kodeProgramList as $kp) {
+                $namaPrograms[] = $mapNama[$kp] ?? '-';
+            }
+
+            $kodeProgramStr = implode(', ', $kodeProgramList);
+            $namaProgramStr = implode(' ||| ', $namaPrograms);
 
             $insertData = [
                 'KodeWilayah' => $KodeWilayah,
                 'PrioritasId' => $prioritasId,
                 'KegiatanId'  => $kegiatanId,
-                'KodeProgram' => $kodeProgram,
-                'NamaProgram' => $namaProgram,
+                'KodeProgram' => $kodeProgramStr,
+                'NamaProgram' => $namaProgramStr,
                 'created_at'  => date('Y-m-d H:i:s'),
                 'updated_at'  => date('Y-m-d H:i:s')
             ];
@@ -4385,24 +4431,59 @@ defined('BASEPATH') OR exit('No direct script access allowed');
          */
         public function EditDukunganKegiatanPrioritas()
         {
+            if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 3) {
+                echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda harus login sebagai Daerah untuk melakukan aksi ini.']);
+                return;
+            }
+
             $id          = (int)$this->input->post('Id', TRUE);
             $prioritasId = (int)$this->input->post('PrioritasId', TRUE);
             $kegiatanId  = (int)$this->input->post('KegiatanId', TRUE);
-            $kodeProgram = $this->input->post('KodeProgram', TRUE);
+            $kodeProgram = $this->input->post('KodeProgram');
 
             if (empty($id) || empty($prioritasId) || empty($kegiatanId) || empty($kodeProgram)) {
                 echo json_encode(['status' => 'error', 'message' => 'Data belum lengkap!']);
                 return;
             }
 
-            $prog = $this->db->select('Nomenklatur')->where('Kode', $kodeProgram)->get('nomenklaturkabupaten')->row_array();
-            $namaProgram = $prog ? $prog['Nomenklatur'] : '';
+            $kodeProgramList = [];
+            if (is_array($kodeProgram)) {
+                $kodeProgramList = array_values(array_filter(array_map('trim', $kodeProgram)));
+            } else {
+                if (strpos($kodeProgram, ',') !== false) {
+                    $kodeProgramList = array_values(array_filter(array_map('trim', explode(',', $kodeProgram))));
+                } else {
+                    $kodeProgramList = [trim($kodeProgram)];
+                }
+            }
+
+            if (empty($kodeProgramList)) {
+                echo json_encode(['status' => 'error', 'message' => 'Silakan pilih minimal 1 Dukungan Program pada RPJMD!']);
+                return;
+            }
+
+            $mapNama = [];
+            $progs = $this->db->select('Kode, Nomenklatur')
+                              ->where_in('Kode', $kodeProgramList)
+                              ->get('nomenklaturkabupaten')
+                              ->result_array();
+            foreach ($progs as $p) {
+                $mapNama[$p['Kode']] = $p['Nomenklatur'];
+            }
+
+            $namaPrograms = [];
+            foreach ($kodeProgramList as $kp) {
+                $namaPrograms[] = $mapNama[$kp] ?? '-';
+            }
+
+            $kodeProgramStr = implode(', ', $kodeProgramList);
+            $namaProgramStr = implode(' ||| ', $namaPrograms);
 
             $updateData = [
                 'PrioritasId' => $prioritasId,
                 'KegiatanId'  => $kegiatanId,
-                'KodeProgram' => $kodeProgram,
-                'NamaProgram' => $namaProgram,
+                'KodeProgram' => $kodeProgramStr,
+                'NamaProgram' => $namaProgramStr,
                 'updated_at'  => date('Y-m-d H:i:s')
             ];
 
@@ -4415,6 +4496,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
          */
         public function HapusDukunganKegiatanPrioritas()
         {
+            if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 3) {
+                echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda harus login sebagai Daerah untuk melakukan aksi ini.']);
+                return;
+            }
+
             $id = (int)$this->input->post('Id', TRUE);
             if (empty($id)) {
                 echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
@@ -4433,6 +4519,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
          */
         public function GetDukunganKegiatanPrioritasById()
         {
+            if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 3) {
+                echo json_encode([]);
+                return;
+            }
+
             $id = (int)$this->input->post('Id', TRUE);
             $row = $this->db->where('Id', $id)->where('deleted_at IS NULL')->get('dukungan_kpu_rpjmd')->row_array();
             echo json_encode($row ?: []);
