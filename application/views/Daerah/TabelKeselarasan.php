@@ -245,7 +245,7 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
                                 <div class="col-md-8">
                                     <h2 class="card-header-title">
                                         <i class="fa fa-handshake-o" style="color: #00c292; margin-right: 8px;"></i>
-                                        Tabel 3.1 Keselarasan untuk Mendukung Tercapainya Asta Cita dan Misi <?= html_escape($NamaProvinsi) ?>
+                                        Keselarasan untuk Mendukung Tercapainya Asta Cita dan Misi <?= html_escape($NamaProvinsi) ?>
                                     </h2>
                                     <p class="card-header-subtitle">
                                         Wilayah: <strong><?= !empty($NamaWilayah) ? html_escape($NamaWilayah) : 'Pilih Wilayah Terlebih Dahulu' ?></strong>

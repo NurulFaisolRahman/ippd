@@ -36,13 +36,36 @@
         }
 
         .navbar-container {
+            position: relative;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            height: 100%;
         }
 
+
+        .navbar-center {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        .navbar-center a {
+            pointer-events: auto;
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
         .navbar-brand {
             color: white;
             font-weight: bold;
@@ -167,20 +190,40 @@
         .login-badge {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
+            gap: 10px;
+            padding: 11px 20px;
             border-radius: 1000px;
             background: rgba(255, 255, 255, 0.18);
             border: 1px solid rgba(255, 255, 255, 0.28);
             color: #fff;
-            font-weight: 600;
-            font-size: 0.95rem;
+            font-weight: 800;
+            font-size: 1.08rem;
             white-space: nowrap;
         }
 
         .daerah-badge {
             background: rgba(255, 255, 255, 0.13);
             border-color: rgba(255, 255, 255, 0.25);
+            font-weight: 800;
+            font-size: 1.05rem;
+        }
+        
+        .sidebar-header-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: .2s ease;
+        }
+        .sidebar-header-btn:hover {
+            background: rgba(255,255,255,0.25);
         }
 
         /* Mobile Responsiveness */
@@ -516,14 +559,35 @@
     <!-- Navbar -->
     <nav class="navbar">
         <div class="navbar-container">
-            <a href="/ippd/Beranda" class="navbar-brand">
-                <i class="fas fa-chart-line"></i>
-                IPPD
-            </a>
+            <div class="navbar-left">
+                <button class="sidebar-header-btn" id="sidebarToggle">
+                    <i class="fa fa-bars"></i>
+                </button>
+                
+                <?php if (!empty($NamaProvinsi)) { ?>
+                    <div class="login-badge daerah-badge" title="Provinsi: <?= html_escape($NamaProvinsi) ?>">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <?= html_escape($NamaProvinsi) ?>
+                    </div>
+                <?php } ?>
+                
+                <?php if (!empty($LoginInfo)) { ?>
+                    <div class="login-badge" title="<?= html_escape($LoginInfo) ?>">
+                        <i class="fas fa-user"></i>
+                        <?= html_escape($LoginInfo) ?>
+                    </div>
+                <?php } ?>
+            </div>
+            <div class="navbar-center">
+                <a href="<?= base_url('Provinsi/VisiRPJPD'); ?>" class="navbar-brand">
+                    <i class="fas fa-chart-line"></i>
+                    Sistem Perencanaan Daerah
+                </a>
+            </div>
             <div class="navbar-menu">
                 <!-- Menu Provinsi dengan Submenu -->
                 <div class="dropdown">
-                    <a href="#" class="navbar-item active">Laporan Sakip <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
+                    <a href="#" class="navbar-item active">Laporan <i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
                     <div class="dropdown-content">
                         <div class="dropdown-submenu">
                             <a href="#" class="dropdown-item">Perencanaan</a>
@@ -573,11 +637,7 @@
                     </div>
                 </div>
                 
-                <!-- Kontak Menu (tanpa dropdown) -->
-                <a href="mailto:info@ippd.example.com" class="navbar-item">Kontak</a>
-                
-                <!-- Tentang Kami Menu (tanpa dropdown) -->
-                <a href="#" class="navbar-item">Tentang Kami</a>
+
                 
 
                 
@@ -595,26 +655,7 @@
             </div>
         </div>
     </nav>
-    <!-- Toggle Button & Badges Container -->
-    <div style="position: fixed; top: 15px; left: 15px; z-index: 1000; display: flex; align-items: center; gap: 15px;">
-        <button class="sidebar-toggle" id="sidebarToggle" style="position: static !important; margin: 0;">
-            <i class="fa fa-bars"></i>
-        </button>
-        
-        <?php if (!empty($NamaProvinsi)) { ?>
-            <div class="login-badge daerah-badge" title="Provinsi: <?= html_escape($NamaProvinsi) ?>" style="margin: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
-                <i class="fas fa-map-marker-alt"></i>
-                <?= html_escape($NamaProvinsi) ?>
-            </div>
-        <?php } ?>
-        
-        <?php if (!empty($LoginInfo)) { ?>
-            <div class="login-badge" title="<?= html_escape($LoginInfo) ?>" style="margin: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
-                <i class="fas fa-user"></i>
-                <?= html_escape($LoginInfo) ?>
-            </div>
-        <?php } ?>
-    </div>
+
 
     <!-- Sidebar -->
     <div class="sidebar-wrapper">
@@ -744,6 +785,14 @@
                 body.classList.toggle('sidebar-mini');
                 // Save state to localStorage
                 localStorage.setItem('sidebarMini', body.classList.contains('sidebar-mini'));
+                
+                // Trigger window resize so DataTables redraws its layout correctly
+                setTimeout(function() {
+                    window.dispatchEvent(new Event('resize'));
+                    if ($.fn.dataTable) {
+                        $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+                    }
+                }, 300); // 300ms matches the CSS transition speed
             });
             
             // Close all dropdowns except the active one

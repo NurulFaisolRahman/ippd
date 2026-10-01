@@ -77,8 +77,9 @@
     }
 </style>
 
+<div class="main-content">
 <div class="data-table-area">
-    <div class="container">
+    <div class="container-fluid">
         <div class="row">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="data-table-list">
@@ -394,3 +395,4 @@
         });
     });
 </script>
+</div><!-- /.main-content -->
