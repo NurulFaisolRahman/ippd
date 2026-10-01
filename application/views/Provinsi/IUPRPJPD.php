@@ -332,9 +332,9 @@
                             Baseline    : $("#Baseline").val(),
                             TargetAwal  : $("#TargetAwal").val(),
                             TargetAkhir : $("#TargetAkhir").val() }
-                $.post(BaseURL+"Nasional/InputIUPRPJPD", IUP).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/InputIUPRPJPD", IUP).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Nasional/IUPRPJPD"
+                        window.location = BaseURL+"Provinsi/IUPRPJPD"
                     } else {
                         alert(Respon)
                     }
@@ -370,9 +370,9 @@
                             Baseline    : $("#_Baseline").val(),
                             TargetAwal  : $("#_TargetAwal").val(),
                             TargetAkhir : $("#_TargetAkhir").val() }
-                $.post(BaseURL+"Nasional/EditIUPRPJPD", IUP).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/EditIUPRPJPD", IUP).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Nasional/IUPRPJPD"
+                        window.location = BaseURL+"Provinsi/IUPRPJPD"
                     } else {
                         alert(Respon)
                     }
@@ -383,9 +383,9 @@
         $('#data-table-basic tbody').on('click', '.Hapus', function () {
             if(confirm("Apakah Anda yakin ingin menghapus data IUP ini?")) {
                 var IUP = { Id: $(this).attr('Hapus') }
-                $.post(BaseURL+"Nasional/HapusIUPRPJPD", IUP).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/HapusIUPRPJPD", IUP).done(function(Respon) {
                     if (Respon == '1') {
-                        window.location = BaseURL+"Nasional/IUPRPJPD"
+                        window.location = BaseURL+"Provinsi/IUPRPJPD"
                     } else {
                         alert(Respon)
                     }

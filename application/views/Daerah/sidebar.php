@@ -497,7 +497,8 @@
                     <!-- <a href="<?=base_url('Daerah/SasaranRPJMD')?>">Sasaran</a> -->
                     <a href="<?=base_url('Daerah/ProgramPD')?>">Program</a>
                     <a href="<?=base_url('Daerah/ArahKebijakanRPJMD')?>">Arah Kebijakan</a>
-                    <a href="<?=base_url('Daerah/IsuKLHS')?>">Isu KLHS</a>
+                    <a href="<?=base_url('Daerah/IsuStrategisDaerah')?>">Isu Strategis Daerah</a>
+                    <a href="<?=base_url('Daerah/TabelKeselarasan')?>">Tabel Keselarasan</a>
                     <a href="<?=base_url('Daerah/TahapanRPJMD')?>">Tahapan</a>
                     <a href="<?=base_url('Daerah/Iku')?>">IKU</a>
                     <a href="<?=base_url('Daerah/Ikd')?>">IKD</a>

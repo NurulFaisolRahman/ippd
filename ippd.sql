@@ -280,13 +280,16 @@ INSERT INTO `isuklhs` (`Id`, `_Id`, `NamaIsuKLHS`, `TahunMulai`, `TahunAkhir`, `
 
 CREATE TABLE `isustrategisdaerah` (
   `Id` int(11) NOT NULL,
-  `_Id` char(255) NOT NULL,
-  `NamaIsuStrategis` varchar(255) NOT NULL,
+  `_Id` varchar(255) DEFAULT '',
+  `NamaIsuStrategis` text NOT NULL,
   `TahunMulai` int(4) NOT NULL,
   `TahunAkhir` int(4) NOT NULL,
   `KodeWilayah` varchar(10) NOT NULL,
   `permasalahan_pokok` text DEFAULT NULL,
   `isu_klhs` text DEFAULT NULL,
+  `isu_global` text DEFAULT NULL,
+  `isu_nasional` text DEFAULT NULL,
+  `isu_regional` text DEFAULT NULL,
   `potensi_daerah` text DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),

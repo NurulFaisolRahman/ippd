@@ -549,7 +549,7 @@
             } else {
                 var Data = { _Id  : $("#IdVisi").val(), // Menyesuaikan Payload yang baru
                              Tahapan  : $("#Tahapan").val() }
-                $.post(BaseURL+"Nasional/InputTahapanRPJPD", Data).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/InputTahapanRPJPD", Data).done(function(Respon) {
                     if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
                 })                         
             }
@@ -570,7 +570,7 @@
                 var Data = { Id       : $("#IdTahapanForm").val(),
                              _Id  : $("#_IdVisi").val(),
                              Tahapan  : $("#_Tahapan").val() }
-                $.post(BaseURL+"Nasional/EditTahapanRPJPD", Data).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/EditTahapanRPJPD", Data).done(function(Respon) {
                     if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
                 })                         
             }
@@ -579,7 +579,7 @@
         $('#hierarki-table tbody').on('click', '.HapusTahapan', function () {
             if(confirm("Yakin ingin menghapus Tahapan ini? Seluruh sub-data dibawahnya mungkin akan ikut terhapus.")) {
                 var Data = { Id: $(this).data('id') }
-                $.post(BaseURL+"Nasional/HapusTahapanRPJPD", Data).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/HapusTahapanRPJPD", Data).done(function(Respon) {
                     if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
                 })
             }
@@ -594,7 +594,7 @@
             } else {
                 var Data = { _Id        : $("#IdTahapanForm").val(),
                              SubTahapan : $("#SubTahapan").val() }
-                $.post(BaseURL+"Nasional/InputSubTahapanRPJPD", Data).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/InputSubTahapanRPJPD", Data).done(function(Respon) {
                     if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
                 })                         
             }
@@ -614,7 +614,7 @@
                 var Data = { Id         : $("#IdSubTahapanForm").val(),
                              _Id        : $("#_IdTahapan").val(),
                              SubTahapan : $("#_SubTahapan").val() }
-                $.post(BaseURL+"Nasional/EditSubTahapanRPJPD", Data).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/EditSubTahapanRPJPD", Data).done(function(Respon) {
                     if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
                 })                         
             }
@@ -623,7 +623,7 @@
         $('#hierarki-table tbody').on('click', '.HapusSubTahapan', function () {
             if(confirm("Yakin ingin menghapus Sub Tahapan ini? Seluruh sub-data dibawahnya mungkin akan ikut terhapus.")) {
                 var Data = { Id: $(this).data('id') }
-                $.post(BaseURL+"Nasional/HapusSubTahapanRPJPD", Data).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/HapusSubTahapanRPJPD", Data).done(function(Respon) {
                     if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
                 })
             }
@@ -638,7 +638,7 @@
             } else {
                 var Data = { _Id                : $("#IdSubTahapanForm").val(),
                              Pembangunan : $("#TahapanPembangunan").val() }
-                $.post(BaseURL+"Nasional/InputPembangunanTahapanRPJPD", Data).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/InputPembangunanTahapanRPJPD", Data).done(function(Respon) {
                     if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
                 })                         
             }
@@ -658,7 +658,7 @@
                 var Data = { Id                 : $("#IdPembangunanForm").val(),
                              _Id                : $("#_IdSubTahapan").val(),
                              Pembangunan : $("#_TahapanPembangunan").val() }
-                $.post(BaseURL+"Nasional/EditPembangunanTahapanRPJPD", Data).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/EditPembangunanTahapanRPJPD", Data).done(function(Respon) {
                     if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
                 })                         
             }
@@ -667,7 +667,7 @@
         $('#hierarki-table tbody').on('click', '.HapusPembangunan', function () {
             if(confirm("Yakin ingin menghapus Tahapan Pembangunan ini?")) {
                 var Data = { Id: $(this).data('id') }
-                $.post(BaseURL+"Nasional/HapusPembangunanTahapanRPJPD", Data).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/HapusPembangunanTahapanRPJPD", Data).done(function(Respon) {
                     if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
                 })
             }

@@ -776,7 +776,7 @@
                 var Visi = { Visi       : $("#Visi").val(),
                              TahunMulai : $("#TahunMulai").val(),
                              TahunAkhir : $("#TahunAkhir").val() }
-                $.post(BaseURL+"Nasional/InputVisiRPJMD", Visi).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/InputVisiRPJMD", Visi).done(function(Respon) {
                     if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
                 })                         
             }
@@ -802,7 +802,7 @@
                              Visi       : $("#_Visi").val(),
                              TahunMulai : $("#_TahunMulai").val(),
                              TahunAkhir : $("#_TahunAkhir").val() }
-                $.post(BaseURL+"Nasional/EditVisiRPJMD", Visi).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/EditVisiRPJMD", Visi).done(function(Respon) {
                     if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
                 })                         
             }
@@ -811,7 +811,7 @@
         $('#hierarki-table tbody').on('click', '.HapusVisi', function () {
             if(confirm("Yakin ingin menghapus Visi ini? Seluruh sub-data dibawahnya mungkin akan ikut terhapus.")) {
                 var Visi = { Id: $(this).data('id') }
-                $.post(BaseURL+"Nasional/HapusVisiRPJMD", Visi).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/HapusVisiRPJMD", Visi).done(function(Respon) {
                     if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
                 })
             }
@@ -826,7 +826,7 @@
             } else {
                 var Misi = { _Id   : $("#IdVisiForm").val(),
                              Misi : $("#Misi").val() }
-                $.post(BaseURL+"Nasional/InputMisiRPJMD", Misi).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/InputMisiRPJMD", Misi).done(function(Respon) {
                     if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
                 })                         
             }
@@ -846,7 +846,7 @@
                 var Misi = { Id   : $("#IdMisiForm").val(),
                              _Id  : $("#_IdVisi").val(),
                              Misi : $("#_Misi").val() }
-                $.post(BaseURL+"Nasional/EditMisiRPJMD", Misi).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/EditMisiRPJMD", Misi).done(function(Respon) {
                     if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
                 })                         
             }
@@ -855,7 +855,7 @@
         $('#hierarki-table tbody').on('click', '.HapusMisi', function () {
             if(confirm("Yakin ingin menghapus Misi ini?")) {
                 var Misi = { Id: $(this).data('id') }
-                $.post(BaseURL+"Nasional/HapusMisiRPJMD", Misi).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/HapusMisiRPJMD", Misi).done(function(Respon) {
                     if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
                 })
             }
@@ -870,7 +870,7 @@
             } else {
                 var Tujuan = { _Id     : $("#IdMisiForm").val(),
                                Tujuan : $("#Tujuan").val() }
-                $.post(BaseURL+"Nasional/InputTujuanRPJMD", Tujuan).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/InputTujuanRPJMD", Tujuan).done(function(Respon) {
                     if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
                 })                         
             }
@@ -890,7 +890,7 @@
                 var Tujuan = { Id       : $("#IdTujuanForm").val(),
                                _Id      : $("#_IdMisi").val(),
                                Tujuan   : $("#_Tujuan").val() }
-                $.post(BaseURL+"Nasional/EditTujuanRPJMD", Tujuan).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/EditTujuanRPJMD", Tujuan).done(function(Respon) {
                     if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
                 })                         
             }
@@ -899,7 +899,7 @@
         $('#hierarki-table tbody').on('click', '.HapusTujuan', function () {
             if(confirm("Yakin ingin menghapus Tujuan ini?")) {
                 var Tujuan = { Id: $(this).data('id') }
-                $.post(BaseURL+"Nasional/HapusTujuanRPJMD", Tujuan).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/HapusTujuanRPJMD", Tujuan).done(function(Respon) {
                     if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
                 })
             }
@@ -914,7 +914,7 @@
             } else {
                 var Sasaran = { _Id      : $("#IdTujuanForm").val(),
                                 Sasaran : $("#Sasaran").val() }
-                $.post(BaseURL+"Nasional/InputSasaranRPJMD", Sasaran).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/InputSasaranRPJMD", Sasaran).done(function(Respon) {
                     if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
                 })                         
             }
@@ -934,7 +934,7 @@
                 var Sasaran = { Id      : $("#IdSasaranForm").val(),
                                 _Id     : $("#_IdTujuan").val(),
                                 Sasaran : $("#_Sasaran").val() }
-                $.post(BaseURL+"Nasional/EditSasaranRPJMD", Sasaran).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/EditSasaranRPJMD", Sasaran).done(function(Respon) {
                     if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
                 })                         
             }
@@ -943,7 +943,7 @@
         $('#hierarki-table tbody').on('click', '.HapusSasaran', function () {
             if(confirm("Yakin ingin menghapus Sasaran ini?")) {
                 var Sasaran = { Id: $(this).data('id') }
-                $.post(BaseURL+"Nasional/HapusSasaranRPJMD", Sasaran).done(function(Respon) {
+                $.post(BaseURL+"Provinsi/HapusSasaranRPJMD", Sasaran).done(function(Respon) {
                     if (Respon == '1') { window.location.reload(); } else { alert(Respon) }
                 })
             }

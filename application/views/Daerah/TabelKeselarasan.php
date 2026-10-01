@@ -2,27 +2,45 @@
 $this->load->view('Daerah/sidebar'); 
 $this->load->view('Daerah/Cssumum'); 
 
-// Helper function to format multiline cell into bullet list or clean lines
-if (!function_exists('formatLinearitasCell')) {
-    function formatLinearitasCell($text) {
-        if ($text === null || trim($text) === '') {
+// Helper function to format list of missions with clean dividers
+if (!function_exists('renderMisiItems')) {
+    function renderMisiItems($misiJsonOrCsv, $misiMap = []) {
+        if (empty($misiJsonOrCsv)) {
             return '<span class="text-muted">-</span>';
         }
-        $lines = preg_split('/\r\n|\r|\n/', trim($text));
-        $lines = array_filter(array_map('trim', $lines), function($item) {
-            return $item !== '';
-        });
-        if (count($lines) <= 1) {
-            return nl2br(htmlspecialchars(reset($lines)));
+        $ids = [];
+        if (is_array($misiJsonOrCsv)) {
+            $ids = $misiJsonOrCsv;
+        } else {
+            $decoded = json_decode($misiJsonOrCsv, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $ids = $decoded;
+            } else {
+                $ids = explode(',', $misiJsonOrCsv);
+            }
         }
-        $html = '<ul class="linearitas-list">';
-        foreach ($lines as $line) {
-            // Strip existing bullet prefix if typed manually
-            $cleanLine = preg_replace('/^[\•\-\*\d\.\)\s]+/u', '', $line);
-            if ($cleanLine === '') $cleanLine = $line;
-            $html .= '<li>' . htmlspecialchars($cleanLine) . '</li>';
+        $output = [];
+        foreach ($ids as $val) {
+            $val = trim((string)$val);
+            if ($val === '') continue;
+            if (isset($misiMap[$val])) {
+                $output[] = $misiMap[$val];
+            } else {
+                $output[] = $val;
+            }
         }
-        $html .= '</ul>';
+        if (empty($output)) {
+            return '<span class="text-muted">-</span>';
+        }
+        
+        $html = '<div class="misi-item-stack">';
+        foreach ($output as $idx => $item) {
+            if ($idx > 0) {
+                $html .= '<div class="misi-divider-line"></div>';
+            }
+            $html .= '<div class="misi-text-block">' . nl2br(htmlspecialchars($item)) . '</div>';
+        }
+        $html .= '</div>';
         return $html;
     }
 }
@@ -40,56 +58,47 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
         --theme-green-border: #a7f3d0;
     }
 
-    .table-linearitas {
+    .table-keselarasan {
         width: 100% !important;
         border-collapse: collapse !important;
         background-color: #ffffff;
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
-    .table-linearitas thead tr:first-child th {
+    .table-keselarasan thead th {
         background-color: var(--theme-green-primary) !important;
         color: #ffffff !important;
         font-weight: 700;
         text-align: center;
         vertical-align: middle !important;
         border: 1px solid var(--theme-green-hover) !important;
-        padding: 10px 8px;
-        font-size: 13px;
+        padding: 12px 10px;
+        font-size: 13.5px;
         letter-spacing: 0.3px;
     }
-    .table-linearitas thead tr:last-child th {
-        background-color: var(--theme-green-hover) !important;
-        color: #ffffff !important;
-        font-weight: 600;
-        text-align: center;
-        vertical-align: middle !important;
-        border: 1px solid var(--theme-green-dark) !important;
-        padding: 8px 6px;
-        font-size: 12px;
-    }
-    .table-linearitas tbody td {
+    .table-keselarasan tbody td {
         vertical-align: top !important;
         border: 1px solid #e5e7eb !important;
-        padding: 10px 12px !important;
+        padding: 12px 14px !important;
         font-size: 13px;
-        line-height: 1.5;
+        line-height: 1.55;
         color: #374151;
     }
-    .table-linearitas tbody tr:hover {
+    .table-keselarasan tbody tr:hover {
         background-color: var(--theme-green-light) !important;
     }
-    .linearitas-list {
-        padding-left: 18px;
-        margin: 0;
-        list-style-type: disc;
+    .misi-item-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
     }
-    .linearitas-list li {
-        margin-bottom: 6px;
-        line-height: 1.45;
+    .misi-divider-line {
+        height: 1px;
+        background-color: #d1d5db;
+        margin: 4px 0;
+    }
+    .misi-text-block {
+        line-height: 1.5;
         text-align: left;
-    }
-    .linearitas-list li:last-child {
-        margin-bottom: 0;
     }
     .card-header-title {
         font-size: 17px;
@@ -133,7 +142,6 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
         padding: 22px 25px !important;
         background-color: #f8fafc;
     }
-    /* Custom Green Scrollbar */
     .modal-body-scrollable::-webkit-scrollbar {
         width: 7px;
     }
@@ -149,7 +157,7 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
         background: #008f6b;
     }
     
-    /* Uniform Form Field Card */
+    /* Form Field Card */
     .form-field-card {
         background: #ffffff;
         border: 1px solid #e2e8f0;
@@ -170,45 +178,56 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
         font-size: 13.5px;
         font-weight: 700;
         color: #1e293b;
-        margin-bottom: 6px;
+        margin-bottom: 8px;
     }
     .form-field-card label .field-hint {
         font-size: 11.5px;
         font-weight: 400;
         color: #64748b;
     }
-    .form-field-card textarea.form-control {
-        width: 100% !important;
-        min-height: 84px !important;
-        height: 84px !important;
-        resize: vertical;
-        font-size: 13px !important;
-        line-height: 1.5 !important;
-        border-radius: 6px !important;
-        border: 1px solid #cbd5e1 !important;
-        padding: 8px 12px !important;
-        box-sizing: border-box !important;
-    }
     .form-field-card select.form-control {
-        height: 40px !important;
+        height: 42px !important;
         border-radius: 6px !important;
         border: 1px solid #cbd5e1 !important;
         font-size: 13px !important;
     }
 
-    .modal-section-badge {
-        display: inline-block;
-        font-size: 12px;
-        font-weight: 700;
-        color: #065f46;
-        background-color: #ecfdf5;
-        border: 1px solid #a7f3d0;
-        border-radius: 20px;
-        padding: 4px 12px;
-        margin-bottom: 12px;
-        margin-top: 5px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+    /* Multi-select Checklist Box */
+    .checklist-container {
+        max-height: 180px;
+        overflow-y: auto;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 8px 12px;
+        background-color: #ffffff;
+    }
+    .checklist-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 6px 0;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 13px;
+        color: #334155;
+        cursor: pointer;
+        line-height: 1.4;
+    }
+    .checklist-item:last-child {
+        border-bottom: none;
+    }
+    .checklist-item input[type="checkbox"] {
+        margin-top: 3px;
+        cursor: pointer;
+        accent-color: #00c292;
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+    }
+    .checklist-item span {
+        flex-grow: 1;
+    }
+    .checklist-item:hover {
+        background-color: #f8fafc;
     }
 </style>
 
@@ -225,8 +244,8 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
                             <div class="row">
                                 <div class="col-md-8">
                                     <h2 class="card-header-title">
-                                        <i class="fa fa-sitemap" style="color: #00c292; margin-right: 8px;"></i>
-                                        Linearitas Isu Strategis RPJMN, KLHS dan RPJMD
+                                        <i class="fa fa-handshake-o" style="color: #00c292; margin-right: 8px;"></i>
+                                        Tabel 3.1 Keselarasan untuk Mendukung Tercapainya Asta Cita dan Misi <?= html_escape($NamaProvinsi) ?>
                                     </h2>
                                     <p class="card-header-subtitle">
                                         Wilayah: <strong><?= !empty($NamaWilayah) ? html_escape($NamaWilayah) : 'Pilih Wilayah Terlebih Dahulu' ?></strong>
@@ -234,8 +253,8 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
                                 </div>
                                 <div class="col-md-4 text-right">
                                     <?php if ($canManage && !empty($KodeWilayah)) { ?>
-                                    <button type="button" class="btn btn-success notika-btn-success" id="BtnTambahIsuStrategis" style="border-radius: 6px; background-color: #00c292; border-color: #00c292;">
-                                        <i class="fa fa-plus"></i> <b>Tambah Isu Strategis</b>
+                                    <button type="button" class="btn btn-success notika-btn-success" id="BtnTambahKeselarasan" style="border-radius: 6px; background-color: #00c292; border-color: #00c292;">
+                                        <i class="fa fa-plus"></i> <b>Tambah Keselarasan</b>
                                     </button>
                                     <?php } ?>
                                 </div>
@@ -296,66 +315,59 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
                             </div>
                         </div>
 
-                        <!-- Alert Notice jika belum ada data atau belum pilih wilayah -->
+                        <!-- Alert Notice jika belum ada wilayah -->
                         <?php if (empty($KodeWilayah)) { ?>
                             <div class="alert alert-warning" style="border-radius: 6px;">
-                                <i class="fa fa-info-circle"></i> Silakan pilih Provinsi dan Kabupaten/Kota terlebih dahulu untuk melihat data Isu Strategis Daerah.
+                                <i class="fa fa-info-circle"></i> Silakan pilih Provinsi dan Kabupaten/Kota terlebih dahulu untuk melihat Tabel Keselarasan.
                             </div>
                         <?php } ?>
 
-                        <!-- Tabel Linearitas Isu Strategis -->
+                        <!-- Tabel Keselarasan Asta Cita & Misi -->
                         <div class="table-responsive" style="margin-top: 15px;">
-                            <table class="table table-bordered table-linearitas" id="tabelIsuStrategis">
+                            <table class="table table-bordered table-keselarasan" id="tabelKeselarasan">
                                 <thead>
                                     <tr>
-                                        <th rowspan="2" style="width: 4%;">No</th>
-                                        <th rowspan="2" style="width: 23%;">Permasalahan</th>
-                                        <th rowspan="2" style="width: 15%;">Isu KLHS</th>
-                                        <th colspan="3" style="width: 38%;">Isu Lingkungan Dinamis</th>
-                                        <th rowspan="2" style="width: 14%;">Isu Strategis</th>
+                                        <th style="width: 4%;">No</th>
+                                        <th style="width: 32%;">Asta Cita</th>
+                                        <th style="width: 32%;">Misi <?= html_escape($NamaProvinsi) ?></th>
+                                        <th style="width: 26%;">Misi <?= html_escape($NamaWilayah) ?></th>
                                         <?php if ($canManage) { ?>
-                                        <th rowspan="2" style="width: 6%;">Aksi</th>
+                                        <th style="width: 6%;">Aksi</th>
                                         <?php } ?>
-                                    </tr>
-                                    <tr>
-                                        <th style="width: 13%;">Global</th>
-                                        <th style="width: 12%;">Nasional</th>
-                                        <th style="width: 13%;">Regional</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php if (!empty($IsuStrategis)) { 
+                                    <?php if (!empty($Keselarasan)) { 
                                         $no = 1;
-                                        foreach ($IsuStrategis as $row) {
+                                        foreach ($Keselarasan as $row) {
+                                            $pnNumber = $row['id_prioritas_nasional'];
+                                            $pnLabel = '<strong>PN' . $pnNumber . '.</strong> ' . htmlspecialchars($row['nama_pn'] ?? '-');
                                     ?>
                                         <tr>
                                             <td class="text-center" style="font-weight: 600;"><?= $no++ ?></td>
-                                            <td><?= formatLinearitasCell($row['permasalahan_pokok']) ?></td>
-                                            <td><?= formatLinearitasCell($row['isu_klhs']) ?></td>
-                                            <td><?= formatLinearitasCell($row['isu_global'] ?? '') ?></td>
-                                            <td><?= formatLinearitasCell($row['isu_nasional'] ?? '') ?></td>
-                                            <td><?= formatLinearitasCell($row['isu_regional'] ?? '') ?></td>
-                                            <td style="font-weight: 600; color: #1f2937;">
-                                                <?= formatLinearitasCell($row['NamaIsuStrategis']) ?>
-                                                <?php if (!empty($row['TahunMulai']) && !empty($row['TahunAkhir'])) { ?>
+                                            <td style="color: #1e293b; font-weight: 600;">
+                                                <?= $pnLabel ?>
+                                                <?php if (!empty($row['tahun_mulai']) && !empty($row['tahun_akhir'])) { ?>
                                                     <div style="margin-top: 6px;">
                                                         <span class="badge" style="background-color: #ecfdf5; color: #065f46; font-size: 11px; border: 1px solid #a7f3d0; font-weight: 600;">
-                                                            <?= html_escape($row['TahunMulai']) ?> - <?= html_escape($row['TahunAkhir']) ?>
+                                                            <?= html_escape($row['tahun_mulai']) ?> - <?= html_escape($row['tahun_akhir']) ?>
                                                         </span>
                                                     </div>
                                                 <?php } ?>
                                             </td>
+                                            <td><?= renderMisiItems($row['id_misi_provinsi'], $MisiProvMap) ?></td>
+                                            <td><?= renderMisiItems($row['id_misi_daerah'], $MisiDaerahMap) ?></td>
                                             <?php if ($canManage) { ?>
                                             <td class="text-center" style="vertical-align: middle !important;">
                                                 <div class="btn-action-group">
-                                                    <button type="button" class="btn btn-sm EditIsuStrategis" 
-                                                            data-id="<?= $row['Id'] ?>" 
+                                                    <button type="button" class="btn btn-sm EditKeselarasan" 
+                                                            data-id="<?= $row['id'] ?>" 
                                                             title="Edit Data" 
                                                             style="background: #00c292; border-color: #00a87e; color: #fff;">
                                                         <i class="fa fa-pencil"></i>
                                                     </button>
-                                                    <button type="button" class="btn btn-danger btn-sm HapusIsuStrategis" 
-                                                            data-id="<?= $row['Id'] ?>" 
+                                                    <button type="button" class="btn btn-danger btn-sm HapusKeselarasan" 
+                                                            data-id="<?= $row['id'] ?>" 
                                                             title="Hapus Data" 
                                                             style="background: #ef4444; border-color: #dc2626; color: #fff;">
                                                         <i class="fa fa-trash"></i>
@@ -368,9 +380,9 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
                                         } 
                                     } else { ?>
                                         <tr>
-                                            <td colspan="<?= $canManage ? '8' : '7' ?>" class="text-center text-muted" style="padding: 30px !important;">
+                                            <td colspan="<?= $canManage ? '5' : '4' ?>" class="text-center text-muted" style="padding: 30px !important;">
                                                 <i class="fa fa-folder-open-o fa-2x" style="display: block; margin-bottom: 8px; color: #9ca3af;"></i>
-                                                Belum ada data Isu Strategis Daerah untuk wilayah ini.
+                                                Belum ada data Keselarasan untuk wilayah ini.
                                             </td>
                                         </tr>
                                     <?php } ?>
@@ -385,17 +397,17 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
     </div>
 </div>
 
-<!-- MODAL TAMBAH ISU STRATEGIS DAERAH -->
-<div class="modal fade" id="ModalTambahIsuStrategis" role="dialog" data-backdrop="static" data-keyboard="false">
+<!-- MODAL TAMBAH KESELARASAN -->
+<div class="modal fade" id="ModalTambahKeselarasan" role="dialog" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-dialog-custom" role="document">
         <div class="modal-content" style="border-radius: 10px; overflow: hidden; text-align: left; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
             <div class="modal-header" style="background: linear-gradient(135deg, #00c292 0%, #008f6b 100%); color: #fff; padding: 16px 24px; border-bottom: none;">
                 <button type="button" class="close" data-dismiss="modal" style="color: #fff; opacity: 0.9; font-size: 24px;">&times;</button>
                 <h4 class="modal-title" style="color: #fff; font-weight: 700; font-size: 16px;">
-                    <i class="fa fa-plus-circle" style="margin-right: 6px;"></i> Tambah Isu Strategis Daerah
+                    <i class="fa fa-plus-circle" style="margin-right: 6px;"></i> Tambah Keselarasan Asta Cita & Misi
                 </h4>
             </div>
-            <form id="FormTambahIsuStrategis">
+            <form id="FormTambahKeselarasan">
                 <div class="modal-body modal-body-scrollable">
                     
                     <!-- 1. Periode RPJMD -->
@@ -417,70 +429,62 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
                         </select>
                     </div>
 
-                    <!-- 2. Isu Strategis -->
+                    <!-- 2. Dropdown Asta Cita (PN) -->
                     <div class="form-field-card">
-                        <label for="TambahNamaIsuStrategis">
-                            <span>2. Isu Strategis Daerah <span class="text-danger">*</span></span>
-                            <span class="field-hint">Rumusan isu strategis daerah</span>
+                        <label for="TambahAstaCita">
+                            <span>2. Asta Cita (Prioritas Nasional / PN) <span class="text-danger">*</span></span>
+                            <span class="field-hint">Ditarik dari data PN Menu Kementerian</span>
                         </label>
-                        <textarea class="form-control" name="NamaIsuStrategis" id="TambahNamaIsuStrategis" placeholder="Contoh: Sumber Daya Manusia yang Belum Berdaya Saing" required></textarea>
+                        <select class="form-control" name="id_prioritas_nasional" id="TambahAstaCita" required>
+                            <option value="">-- Pilih Asta Cita (PN) --</option>
+                            <?php if (!empty($ListAstaCita)) { foreach ($ListAstaCita as $pn) { ?>
+                                <option value="<?= $pn['Id'] ?>">
+                                    PN<?= $pn['Id'] ?>. <?= htmlspecialchars($pn['PrioritasNasional']) ?>
+                                </option>
+                            <?php } } ?>
+                        </select>
                     </div>
 
-                    <!-- 3. Permasalahan -->
+                    <!-- 3. Misi Provinsi (Checklist / Dropdown Pilihan) -->
                     <div class="form-field-card">
-                        <label for="TambahPermasalahan">
-                            <span>3. Permasalahan</span>
-                            <span class="field-hint">Tekan Enter untuk butir permasalahan baru</span>
+                        <label>
+                            <span>3. Misi <?= html_escape($NamaProvinsi) ?></span>
+                            <span class="field-hint">Ditarik dari VMTS Menu Provinsi (Pilih satu atau lebih)</span>
                         </label>
-                        <textarea class="form-control" name="permasalahan_pokok" id="TambahPermasalahan" placeholder="Contoh:&#10;Infrastruktur kesehatan penyakit menular dan tidak menular belum merata&#10;Belum meratanya jaminan Kesehatan&#10;Masih adanya kasus Stunting"></textarea>
+                        <div class="checklist-container" id="ContainerMisiProvinsiTambah">
+                            <?php if (!empty($ListMisiProvinsi)) { foreach ($ListMisiProvinsi as $mp) { ?>
+                                <label class="checklist-item">
+                                    <input type="checkbox" name="id_misi_provinsi[]" value="<?= $mp['Id'] ?>">
+                                    <span><?= htmlspecialchars($mp['Misi']) ?></span>
+                                </label>
+                            <?php } } else { ?>
+                                <p class="text-muted" style="margin: 5px 0;">Belum ada data Misi pada VMTS Provinsi.</p>
+                            <?php } ?>
+                        </div>
                     </div>
 
-                    <!-- 4. Isu KLHS -->
+                    <!-- 4. Misi Kabupaten / Kota (Checklist / Dropdown Pilihan) -->
                     <div class="form-field-card">
-                        <label for="TambahIsuKLHS">
-                            <span>4. Isu KLHS</span>
-                            <span class="field-hint">Isu Kajian Lingkungan Hidup Strategis</span>
+                        <label>
+                            <span>4. Misi <?= html_escape($NamaWilayah) ?></span>
+                            <span class="field-hint">Ditarik dari VMTS Menu Daerah (Pilih satu atau lebih)</span>
                         </label>
-                        <textarea class="form-control" name="isu_klhs" id="TambahIsuKLHS" placeholder="Contoh: Kualitas SDM"></textarea>
-                    </div>
-
-                    <div class="text-center" style="margin: 10px 0;">
-                        <span class="modal-section-badge">
-                            <i class="fa fa-globe"></i> Isu Lingkungan Dinamis
-                        </span>
-                    </div>
-
-                    <!-- 5. Isu Lingkungan Dinamis: Global -->
-                    <div class="form-field-card">
-                        <label for="TambahIsuGlobal">
-                            <span>5. Isu Global</span>
-                            <span class="field-hint">Tekan Enter untuk butir baru</span>
-                        </label>
-                        <textarea class="form-control" name="isu_global" id="TambahIsuGlobal" placeholder="Contoh:&#10;Persaingan Talenta Global&#10;Aging Population&#10;Transformasi Digital"></textarea>
-                    </div>
-
-                    <!-- 6. Isu Lingkungan Dinamis: Nasional -->
-                    <div class="form-field-card">
-                        <label for="TambahIsuNasional">
-                            <span>6. Isu Nasional</span>
-                            <span class="field-hint">Tekan Enter untuk butir baru</span>
-                        </label>
-                        <textarea class="form-control" name="isu_nasional" id="TambahIsuNasional" placeholder="Contoh: Rendahnya Kualitas SDM"></textarea>
-                    </div>
-
-                    <!-- 7. Isu Lingkungan Dinamis: Regional -->
-                    <div class="form-field-card">
-                        <label for="TambahIsuRegional">
-                            <span>7. Isu Regional</span>
-                            <span class="field-hint">Tekan Enter untuk butir baru</span>
-                        </label>
-                        <textarea class="form-control" name="isu_regional" id="TambahIsuRegional" placeholder="Contoh: Pengembangan SDM berkualitas melalui peningkatan akses pendidikan, kesehatan dan standar hidup layak"></textarea>
+                        <div class="checklist-container" id="ContainerMisiDaerahTambah">
+                            <?php if (!empty($ListMisiDaerah)) { foreach ($ListMisiDaerah as $md) { ?>
+                                <label class="checklist-item">
+                                    <input type="checkbox" name="id_misi_daerah[]" value="<?= $md['Id'] ?>">
+                                    <span><?= htmlspecialchars($md['Misi']) ?></span>
+                                </label>
+                            <?php } } else { ?>
+                                <p class="text-muted" style="margin: 5px 0;">Belum ada data Misi pada VMTS Daerah ini.</p>
+                            <?php } ?>
+                        </div>
                     </div>
 
                 </div>
                 <div class="modal-footer" style="background-color: #ffffff; border-top: 1px solid #e2e8f0; padding: 14px 25px;">
                     <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 6px; padding: 7px 18px;">Batal</button>
-                    <button type="submit" class="btn btn-success notika-btn-success" id="BtnSimpanTambah" style="background-color: #00c292; border-color: #00c292; border-radius: 6px; padding: 7px 20px;">
+                    <button type="submit" class="btn btn-success notika-btn-success" id="BtnSimpanTambahKeselarasan" style="background-color: #00c292; border-color: #00c292; border-radius: 6px; padding: 7px 20px;">
                         <i class="fa fa-save"></i> <b>Simpan Data</b>
                     </button>
                 </div>
@@ -489,18 +493,18 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
     </div>
 </div>
 
-<!-- MODAL EDIT ISU STRATEGIS DAERAH -->
-<div class="modal fade" id="ModalEditIsuStrategis" role="dialog" data-backdrop="static" data-keyboard="false">
+<!-- MODAL EDIT KESELARASAN -->
+<div class="modal fade" id="ModalEditKeselarasan" role="dialog" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-dialog-custom" role="document">
         <div class="modal-content" style="border-radius: 10px; overflow: hidden; text-align: left; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
             <div class="modal-header" style="background: linear-gradient(135deg, #00c292 0%, #00a87e 100%); color: #fff; padding: 16px 24px; border-bottom: none;">
                 <button type="button" class="close" data-dismiss="modal" style="color: #fff; opacity: 0.9; font-size: 24px;">&times;</button>
                 <h4 class="modal-title" style="color: #fff; font-weight: 700; font-size: 16px;">
-                    <i class="fa fa-edit" style="margin-right: 6px;"></i> Edit Isu Strategis Daerah
+                    <i class="fa fa-edit" style="margin-right: 6px;"></i> Edit Keselarasan Asta Cita & Misi
                 </h4>
             </div>
-            <form id="FormEditIsuStrategis">
-                <input type="hidden" name="Id" id="EditId">
+            <form id="FormEditKeselarasan">
+                <input type="hidden" name="id" id="EditId">
                 <div class="modal-body modal-body-scrollable">
                     
                     <!-- 1. Periode RPJMD -->
@@ -522,70 +526,62 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
                         </select>
                     </div>
 
-                    <!-- 2. Isu Strategis -->
+                    <!-- 2. Dropdown Asta Cita (PN) -->
                     <div class="form-field-card">
-                        <label for="EditNamaIsuStrategis">
-                            <span>2. Isu Strategis Daerah <span class="text-danger">*</span></span>
-                            <span class="field-hint">Rumusan isu strategis daerah</span>
+                        <label for="EditAstaCita">
+                            <span>2. Asta Cita (Prioritas Nasional / PN) <span class="text-danger">*</span></span>
+                            <span class="field-hint">Ditarik dari data PN Menu Kementerian</span>
                         </label>
-                        <textarea class="form-control" name="NamaIsuStrategis" id="EditNamaIsuStrategis" placeholder="Contoh: Sumber Daya Manusia yang Belum Berdaya Saing" required></textarea>
+                        <select class="form-control" name="id_prioritas_nasional" id="EditAstaCita" required>
+                            <option value="">-- Pilih Asta Cita (PN) --</option>
+                            <?php if (!empty($ListAstaCita)) { foreach ($ListAstaCita as $pn) { ?>
+                                <option value="<?= $pn['Id'] ?>">
+                                    PN<?= $pn['Id'] ?>. <?= htmlspecialchars($pn['PrioritasNasional']) ?>
+                                </option>
+                            <?php } } ?>
+                        </select>
                     </div>
 
-                    <!-- 3. Permasalahan -->
+                    <!-- 3. Misi Provinsi (Checklist / Dropdown Pilihan) -->
                     <div class="form-field-card">
-                        <label for="EditPermasalahan">
-                            <span>3. Permasalahan</span>
-                            <span class="field-hint">Tekan Enter untuk butir permasalahan baru</span>
+                        <label>
+                            <span>3. Misi <?= html_escape($NamaProvinsi) ?></span>
+                            <span class="field-hint">Ditarik dari VMTS Menu Provinsi (Pilih satu atau lebih)</span>
                         </label>
-                        <textarea class="form-control" name="permasalahan_pokok" id="EditPermasalahan" placeholder="Contoh:&#10;Infrastruktur kesehatan penyakit menular dan tidak menular belum merata&#10;Belum meratanya jaminan Kesehatan&#10;Masih adanya kasus Stunting"></textarea>
+                        <div class="checklist-container" id="ContainerMisiProvinsiEdit">
+                            <?php if (!empty($ListMisiProvinsi)) { foreach ($ListMisiProvinsi as $mp) { ?>
+                                <label class="checklist-item">
+                                    <input type="checkbox" name="id_misi_provinsi[]" value="<?= $mp['Id'] ?>" class="edit-misi-prov-chk">
+                                    <span><?= htmlspecialchars($mp['Misi']) ?></span>
+                                </label>
+                            <?php } } else { ?>
+                                <p class="text-muted" style="margin: 5px 0;">Belum ada data Misi pada VMTS Provinsi.</p>
+                            <?php } ?>
+                        </div>
                     </div>
 
-                    <!-- 4. Isu KLHS -->
+                    <!-- 4. Misi Kabupaten / Kota (Checklist / Dropdown Pilihan) -->
                     <div class="form-field-card">
-                        <label for="EditIsuKLHS">
-                            <span>4. Isu KLHS</span>
-                            <span class="field-hint">Isu Kajian Lingkungan Hidup Strategis</span>
+                        <label>
+                            <span>4. Misi <?= html_escape($NamaWilayah) ?></span>
+                            <span class="field-hint">Ditarik dari VMTS Menu Daerah (Pilih satu atau lebih)</span>
                         </label>
-                        <textarea class="form-control" name="isu_klhs" id="EditIsuKLHS" placeholder="Contoh: Kualitas SDM"></textarea>
-                    </div>
-
-                    <div class="text-center" style="margin: 10px 0;">
-                        <span class="modal-section-badge">
-                            <i class="fa fa-globe"></i> Isu Lingkungan Dinamis
-                        </span>
-                    </div>
-
-                    <!-- 5. Isu Lingkungan Dinamis: Global -->
-                    <div class="form-field-card">
-                        <label for="EditIsuGlobal">
-                            <span>5. Isu Global</span>
-                            <span class="field-hint">Tekan Enter untuk butir baru</span>
-                        </label>
-                        <textarea class="form-control" name="isu_global" id="EditIsuGlobal" placeholder="Contoh:&#10;Persaingan Talenta Global&#10;Aging Population&#10;Transformasi Digital"></textarea>
-                    </div>
-
-                    <!-- 6. Isu Lingkungan Dinamis: Nasional -->
-                    <div class="form-field-card">
-                        <label for="EditIsuNasional">
-                            <span>6. Isu Nasional</span>
-                            <span class="field-hint">Tekan Enter untuk butir baru</span>
-                        </label>
-                        <textarea class="form-control" name="isu_nasional" id="EditIsuNasional" placeholder="Contoh: Rendahnya Kualitas SDM"></textarea>
-                    </div>
-
-                    <!-- 7. Isu Lingkungan Dinamis: Regional -->
-                    <div class="form-field-card">
-                        <label for="EditIsuRegional">
-                            <span>7. Isu Regional</span>
-                            <span class="field-hint">Tekan Enter untuk butir baru</span>
-                        </label>
-                        <textarea class="form-control" name="isu_regional" id="EditIsuRegional" placeholder="Contoh: Pengembangan SDM berkualitas melalui peningkatan akses pendidikan, kesehatan dan standar hidup layak"></textarea>
+                        <div class="checklist-container" id="ContainerMisiDaerahEdit">
+                            <?php if (!empty($ListMisiDaerah)) { foreach ($ListMisiDaerah as $md) { ?>
+                                <label class="checklist-item">
+                                    <input type="checkbox" name="id_misi_daerah[]" value="<?= $md['Id'] ?>" class="edit-misi-daerah-chk">
+                                    <span><?= htmlspecialchars($md['Misi']) ?></span>
+                                </label>
+                            <?php } } else { ?>
+                                <p class="text-muted" style="margin: 5px 0;">Belum ada data Misi pada VMTS Daerah ini.</p>
+                            <?php } ?>
+                        </div>
                     </div>
 
                 </div>
                 <div class="modal-footer" style="background-color: #ffffff; border-top: 1px solid #e2e8f0; padding: 14px 25px;">
                     <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 6px; padding: 7px 18px;">Batal</button>
-                    <button type="submit" class="btn btn-success notika-btn-success" id="BtnSimpanEdit" style="background-color: #00c292; border-color: #00c292; border-radius: 6px; padding: 7px 20px;">
+                    <button type="submit" class="btn btn-success notika-btn-success" id="BtnSimpanEditKeselarasan" style="background-color: #00c292; border-color: #00c292; border-radius: 6px; padding: 7px 20px;">
                         <i class="fa fa-save"></i> <b>Simpan Perubahan</b>
                     </button>
                 </div>
@@ -631,24 +627,22 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
         // Tombol Terapkan Filter
         $('#BtnTerapkanFilter').on('click', function() {
             var kabKode = $('#KabKota').val();
-            var provKode = $('#Provinsi').val();
             var periode = $('#FilterPeriode').val();
 
             if (kabKode) {
-                // Set session wilayah via AJAX lalu reload
                 $.ajax({
                     url: BaseURL + 'Daerah/SetSessionWilayah',
                     type: 'POST',
                     data: { KodeWilayah: kabKode },
                     success: function() {
-                        var url = BaseURL + 'Daerah/IsuStrategisDaerah';
+                        var url = BaseURL + 'Daerah/TabelKeselarasan';
                         if (periode) {
                             url += '?periode=' + encodeURIComponent(periode);
                         }
                         window.location.href = url;
                     },
                     error: function() {
-                        var url = BaseURL + 'Daerah/IsuStrategisDaerah';
+                        var url = BaseURL + 'Daerah/TabelKeselarasan';
                         if (periode) {
                             url += '?periode=' + encodeURIComponent(periode);
                         }
@@ -656,7 +650,7 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
                     }
                 });
             } else {
-                var url = BaseURL + 'Daerah/IsuStrategisDaerah';
+                var url = BaseURL + 'Daerah/TabelKeselarasan';
                 if (periode) {
                     url += '?periode=' + encodeURIComponent(periode);
                 }
@@ -665,29 +659,29 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
         });
 
         // Buka Modal Tambah
-        $('#BtnTambahIsuStrategis').on('click', function() {
-            $('#FormTambahIsuStrategis')[0].reset();
+        $('#BtnTambahKeselarasan').on('click', function() {
+            $('#FormTambahKeselarasan')[0].reset();
             var curPeriode = $('#FilterPeriode').val();
             if (curPeriode) {
                 $('#TambahPeriodeRPJMD').val(curPeriode);
             }
-            $('#ModalTambahIsuStrategis').modal('show');
+            $('#ModalTambahKeselarasan').modal('show');
         });
 
         // Submit Form Tambah
-        $('#FormTambahIsuStrategis').on('submit', function(e) {
+        $('#FormTambahKeselarasan').on('submit', function(e) {
             e.preventDefault();
             var formData = $(this).serialize();
 
-            $('#BtnSimpanTambah').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
+            $('#BtnSimpanTambahKeselarasan').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
 
             $.ajax({
-                url: BaseURL + 'Daerah/InputIsuStrategis',
+                url: BaseURL + 'Daerah/InputKeselarasan',
                 type: 'POST',
                 data: formData,
                 dataType: 'json',
                 success: function(res) {
-                    $('#BtnSimpanTambah').prop('disabled', false).html('<i class="fa fa-save"></i> <b>Simpan Data</b>');
+                    $('#BtnSimpanTambahKeselarasan').prop('disabled', false).html('<i class="fa fa-save"></i> <b>Simpan Data</b>');
                     if (res.status === 'success') {
                         Swal.fire({
                             icon: 'success',
@@ -707,7 +701,7 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
                     }
                 },
                 error: function() {
-                    $('#BtnSimpanTambah').prop('disabled', false).html('<i class="fa fa-save"></i> <b>Simpan Data</b>');
+                    $('#BtnSimpanTambahKeselarasan').prop('disabled', false).html('<i class="fa fa-save"></i> <b>Simpan Data</b>');
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
@@ -718,35 +712,47 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
         });
 
         // Buka Modal Edit
-        $(document).on('click', '.EditIsuStrategis', function() {
+        $(document).on('click', '.EditKeselarasan', function() {
             var id = $(this).data('id');
             if (!id) return;
 
             $.ajax({
-                url: BaseURL + 'Daerah/GetIsuStrategisById',
+                url: BaseURL + 'Daerah/GetKeselarasanById',
                 type: 'POST',
                 data: { id: id },
                 dataType: 'json',
                 success: function(res) {
                     if (res.status === 'success' && res.data) {
                         var d = res.data;
-                        $('#EditId').val(d.Id);
+                        $('#EditId').val(d.id);
                         
-                        var perVal = d.TahunMulai + '-' + d.TahunAkhir;
+                        var perVal = d.tahun_mulai + '-' + d.tahun_akhir;
                         $('#EditPeriodeRPJMD').val(perVal);
                         if (!$('#EditPeriodeRPJMD').val()) {
-                            // If not existing in select option, append it
-                            $('#EditPeriodeRPJMD').append('<option value="' + perVal + '" selected>' + d.TahunMulai + ' - ' + d.TahunAkhir + '</option>');
+                            $('#EditPeriodeRPJMD').append('<option value="' + perVal + '" selected>' + d.tahun_mulai + ' - ' + d.tahun_akhir + '</option>');
                         }
 
-                        $('#EditNamaIsuStrategis').val(d.NamaIsuStrategis);
-                        $('#EditPermasalahan').val(d.permasalahan_pokok);
-                        $('#EditIsuKLHS').val(d.isu_klhs);
-                        $('#EditIsuGlobal').val(d.isu_global || '');
-                        $('#EditIsuNasional').val(d.isu_nasional || '');
-                        $('#EditIsuRegional').val(d.isu_regional || '');
+                        $('#EditAstaCita').val(d.id_prioritas_nasional);
 
-                        $('#ModalEditIsuStrategis').modal('show');
+                        // Uncheck all checkboxes first
+                        $('.edit-misi-prov-chk').prop('checked', false);
+                        $('.edit-misi-daerah-chk').prop('checked', false);
+
+                        // Check selected Provinsi missions
+                        if (d.id_misi_provinsi_array && Array.isArray(d.id_misi_provinsi_array)) {
+                            d.id_misi_provinsi_array.forEach(function(val) {
+                                $('.edit-misi-prov-chk[value="' + val + '"]').prop('checked', true);
+                            });
+                        }
+
+                        // Check selected Daerah missions
+                        if (d.id_misi_daerah_array && Array.isArray(d.id_misi_daerah_array)) {
+                            d.id_misi_daerah_array.forEach(function(val) {
+                                $('.edit-misi-daerah-chk[value="' + val + '"]').prop('checked', true);
+                            });
+                        }
+
+                        $('#ModalEditKeselarasan').modal('show');
                     } else {
                         Swal.fire({
                             icon: 'error',
@@ -766,19 +772,19 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
         });
 
         // Submit Form Edit
-        $('#FormEditIsuStrategis').on('submit', function(e) {
+        $('#FormEditKeselarasan').on('submit', function(e) {
             e.preventDefault();
             var formData = $(this).serialize();
 
-            $('#BtnSimpanEdit').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
+            $('#BtnSimpanEditKeselarasan').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
 
             $.ajax({
-                url: BaseURL + 'Daerah/UpdateIsuStrategis',
+                url: BaseURL + 'Daerah/UpdateKeselarasan',
                 type: 'POST',
                 data: formData,
                 dataType: 'json',
                 success: function(res) {
-                    $('#BtnSimpanEdit').prop('disabled', false).html('<i class="fa fa-save"></i> <b>Simpan Perubahan</b>');
+                    $('#BtnSimpanEditKeselarasan').prop('disabled', false).html('<i class="fa fa-save"></i> <b>Simpan Perubahan</b>');
                     if (res.status === 'success') {
                         Swal.fire({
                             icon: 'success',
@@ -798,7 +804,7 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
                     }
                 },
                 error: function() {
-                    $('#BtnSimpanEdit').prop('disabled', false).html('<i class="fa fa-save"></i> <b>Simpan Perubahan</b>');
+                    $('#BtnSimpanEditKeselarasan').prop('disabled', false).html('<i class="fa fa-save"></i> <b>Simpan Perubahan</b>');
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
@@ -808,14 +814,14 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
             });
         });
 
-        // Hapus Isu Strategis
-        $(document).on('click', '.HapusIsuStrategis', function() {
+        // Hapus Keselarasan
+        $(document).on('click', '.HapusKeselarasan', function() {
             var id = $(this).data('id');
             if (!id) return;
 
             Swal.fire({
                 title: 'Konfirmasi Hapus',
-                text: 'Apakah Anda yakin ingin menghapus data Isu Strategis Daerah ini?',
+                text: 'Apakah Anda yakin ingin menghapus data Keselarasan ini?',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444',
@@ -825,9 +831,9 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: BaseURL + 'Daerah/DeleteIsuStrategis',
+                        url: BaseURL + 'Daerah/DeleteKeselarasan',
                         type: 'POST',
-                        data: { Id: id },
+                        data: { id: id },
                         dataType: 'json',
                         success: function(res) {
                             if (res.status === 'success') {

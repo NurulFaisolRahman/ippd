@@ -164,6 +164,25 @@
             background-color: rgba(255, 255, 255, 0.2);
         }
 
+        .login-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 1000px;
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+
+        .daerah-badge {
+            background: rgba(255, 255, 255, 0.13);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
             .navbar-container {
@@ -473,6 +492,27 @@
 </head>
 
 <body class="bg-gray-50 font-sans">
+<?php
+  $LoginInfo   = '';
+  $NamaProvinsi = '';
+
+  if (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 2) {
+    $KodeWilayah = $_SESSION['KodeWilayah'] ?? '';
+    $LoginInfo = $_SESSION['Username'] ?? 'Provinsi';
+
+    if (!empty($KodeWilayah)) {
+      $rowWilayah = $this->db->select('Nama')
+        ->from('kodewilayah')
+        ->where('Kode', $KodeWilayah)
+        ->limit(1)
+        ->get()
+        ->row_array();
+      $NamaProvinsi = $rowWilayah['Nama'] ?? '';
+    }
+  } elseif (!empty($_SESSION['Username'])) {
+    $LoginInfo = $_SESSION['Username'];
+  }
+?>
     <!-- Navbar -->
     <nav class="navbar">
         <div class="navbar-container">
@@ -539,6 +579,8 @@
                 <!-- Tentang Kami Menu (tanpa dropdown) -->
                 <a href="#" class="navbar-item">Tentang Kami</a>
                 
+
+                
                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 2) { ?>
                 <button class="logout-btn" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i>
@@ -553,10 +595,26 @@
             </div>
         </div>
     </nav>
-    <!-- Toggle Button -->
-    <button class="sidebar-toggle" id="sidebarToggle">
-        <i class="fa fa-bars"></i>
-    </button>
+    <!-- Toggle Button & Badges Container -->
+    <div style="position: fixed; top: 15px; left: 15px; z-index: 1000; display: flex; align-items: center; gap: 15px;">
+        <button class="sidebar-toggle" id="sidebarToggle" style="position: static !important; margin: 0;">
+            <i class="fa fa-bars"></i>
+        </button>
+        
+        <?php if (!empty($NamaProvinsi)) { ?>
+            <div class="login-badge daerah-badge" title="Provinsi: <?= html_escape($NamaProvinsi) ?>" style="margin: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+                <i class="fas fa-map-marker-alt"></i>
+                <?= html_escape($NamaProvinsi) ?>
+            </div>
+        <?php } ?>
+        
+        <?php if (!empty($LoginInfo)) { ?>
+            <div class="login-badge" title="<?= html_escape($LoginInfo) ?>" style="margin: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+                <i class="fas fa-user"></i>
+                <?= html_escape($LoginInfo) ?>
+            </div>
+        <?php } ?>
+    </div>
 
     <!-- Sidebar -->
     <div class="sidebar-wrapper">
