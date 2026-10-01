@@ -492,6 +492,7 @@
                 </a>
                 <div class="sidebar-submenu">
                     <a href="<?=base_url('Daerah/VisiRPJMD')?>">VMTS</a>
+                    <a href="<?=base_url('Daerah/DukunganKegiatanPrioritas')?>">Dukungan Kegiatan Prioritas Utama</a>
                     <!-- <a href="<?=base_url('Daerah/MisiRPJMD')?>">Misi</a> -->
                     <!-- <a href="<?=base_url('Daerah/TujuanRPJMD')?>">Tujuan</a> -->
                     <!-- <a href="<?=base_url('Daerah/SasaranRPJMD')?>">Sasaran</a> -->

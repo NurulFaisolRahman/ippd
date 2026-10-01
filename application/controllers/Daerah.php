@@ -1,6 +1,5 @@
-
-        <?php
-        defined('BASEPATH') OR exit('No direct script access allowed');
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
 
         class Daerah extends CI_Controller {
             
@@ -4236,6 +4235,207 @@
             } else {
             echo 'Gagal Hapus Data!';
             }
+        }
+
+        // ============================================================
+        // DUKUNGAN KEGIATAN PRIORITAS UTAMA (RPJMD)
+        // ============================================================
+
+        public function DukunganKegiatanPrioritas()
+        {
+            $Header['Halaman'] = 'RPJMD';
+            
+            // Auto create table jika belum ada
+            $this->db->query("CREATE TABLE IF NOT EXISTS `dukungan_kpu_rpjmd` (
+                `Id` int(11) NOT NULL AUTO_INCREMENT,
+                `KodeWilayah` varchar(50) NOT NULL,
+                `PrioritasId` int(11) NOT NULL,
+                `KegiatanId` int(11) NOT NULL,
+                `KodeProgram` varchar(100) NOT NULL,
+                `NamaProgram` text DEFAULT NULL,
+                `created_at` datetime DEFAULT NULL,
+                `updated_at` datetime DEFAULT NULL,
+                `deleted_at` datetime DEFAULT NULL,
+                PRIMARY KEY (`Id`),
+                KEY `idx_kodewilayah` (`KodeWilayah`),
+                KEY `idx_prioritas` (`PrioritasId`),
+                KEY `idx_kegiatan` (`KegiatanId`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+            // Provinsi (filter untuk pengguna yang belum login)
+            $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
+
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
+                        ($this->input->get('KodeWilayah', TRUE) ?: ''));
+
+            if ($KodeWilayah) {
+                $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+                if ($wilayah) {
+                    $Data['KodeWilayah'] = $KodeWilayah;
+                    $Data['NamaWilayah'] = $wilayah['Nama'];
+                } else {
+                    $Data['KodeWilayah'] = $KodeWilayah;
+                    $Data['NamaWilayah'] = '';
+                }
+            } else {
+                $Data['KodeWilayah'] = '';
+                $Data['NamaWilayah'] = '';
+            }
+
+            // 1. Data Prioritas Nasional (dari Kegiatan Prioritas Utama pada Prioritas Pembangunan: rpjmn_kpu_prioritas)
+            $Data['PrioritasNasional'] = $this->db
+                ->where('deleted_at IS NULL')
+                ->order_by('Id', 'ASC')
+                ->get('rpjmn_kpu_prioritas')
+                ->result_array();
+
+            // 2. Data Program RPJMD dari Nomenklatur bagian program (2 titik)
+            $Data['ProgramRPJMD'] = $this->db
+                ->select('Kode, Nomenklatur')
+                ->from('nomenklaturkabupaten')
+                ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) = 2', NULL, FALSE)
+                ->order_by('Kode', 'ASC')
+                ->get()
+                ->result_array();
+
+            // 3. List Dukungan Kegiatan Prioritas Utama yang sudah diinput
+            $this->db->select('d.*, p.Kode as KodePrioritas, p.PrioritasPembangunan, k.Kode as KodeKegiatan, k.KegiatanPrioritas');
+            $this->db->from('dukungan_kpu_rpjmd d');
+            $this->db->join('rpjmn_kpu_prioritas p', 'd.PrioritasId = p.Id', 'left');
+            $this->db->join('rpjmn_kpu_kegiatan k', 'd.KegiatanId = k.Id', 'left');
+            $this->db->where('d.deleted_at IS NULL');
+            if (!empty($KodeWilayah)) {
+                $this->db->where('d.KodeWilayah', $KodeWilayah);
+            }
+            $this->db->order_by('p.Id', 'ASC');
+            $this->db->order_by('k.Id', 'ASC');
+            $this->db->order_by('d.Id', 'ASC');
+            $Data['DukunganList'] = $this->db->get()->result_array();
+
+            $this->load->view('Daerah/header', $Header);
+            $this->load->view('Daerah/DukunganKegiatanPrioritas', $Data);
+        }
+
+        /**
+         * AJAX: Ambil Kegiatan Prioritas Utama berdasarkan Prioritas Nasional yang dipilih
+         */
+        public function GetKegiatanKpuByPrioritas()
+        {
+            $prioritasId = (int)$this->input->post('PrioritasId', TRUE);
+            if (empty($prioritasId)) {
+                echo json_encode([]);
+                return;
+            }
+
+            $kegiatan = $this->db
+                ->select('Id, Kode, KegiatanPrioritas')
+                ->from('rpjmn_kpu_kegiatan')
+                ->where('_Id', $prioritasId)
+                ->where('deleted_at IS NULL')
+                ->order_by('Id', 'ASC')
+                ->get()
+                ->result_array();
+
+            echo json_encode($kegiatan);
+        }
+
+        /**
+         * Input Dukungan Kegiatan Prioritas Utama
+         */
+        public function InputDukunganKegiatanPrioritas()
+        {
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
+                        $this->input->post('KodeWilayah', TRUE));
+
+            $prioritasId = (int)$this->input->post('PrioritasId', TRUE);
+            $kegiatanId  = (int)$this->input->post('KegiatanId', TRUE);
+            $kodeProgram = $this->input->post('KodeProgram', TRUE);
+
+            if (empty($prioritasId) || empty($kegiatanId) || empty($kodeProgram)) {
+                echo 'Data belum lengkap! Harap isi semua field.';
+                return;
+            }
+
+            // Ambil nama program dari tabel nomenklatur
+            $prog = $this->db->select('Nomenklatur')->where('Kode', $kodeProgram)->get('nomenklaturkabupaten')->row_array();
+            $namaProgram = $prog ? $prog['Nomenklatur'] : '';
+
+            $insertData = [
+                'KodeWilayah' => $KodeWilayah,
+                'PrioritasId' => $prioritasId,
+                'KegiatanId'  => $kegiatanId,
+                'KodeProgram' => $kodeProgram,
+                'NamaProgram' => $namaProgram,
+                'created_at'  => date('Y-m-d H:i:s'),
+                'updated_at'  => date('Y-m-d H:i:s')
+            ];
+
+            $this->db->insert('dukungan_kpu_rpjmd', $insertData);
+            if ($this->db->affected_rows() > 0) {
+                echo json_encode(['status' => 'success', 'message' => 'Data berhasil disimpan']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Gagal Menyimpan Data!']);
+            }
+        }
+
+        /**
+         * Edit Dukungan Kegiatan Prioritas Utama
+         */
+        public function EditDukunganKegiatanPrioritas()
+        {
+            $id          = (int)$this->input->post('Id', TRUE);
+            $prioritasId = (int)$this->input->post('PrioritasId', TRUE);
+            $kegiatanId  = (int)$this->input->post('KegiatanId', TRUE);
+            $kodeProgram = $this->input->post('KodeProgram', TRUE);
+
+            if (empty($id) || empty($prioritasId) || empty($kegiatanId) || empty($kodeProgram)) {
+                echo json_encode(['status' => 'error', 'message' => 'Data belum lengkap!']);
+                return;
+            }
+
+            $prog = $this->db->select('Nomenklatur')->where('Kode', $kodeProgram)->get('nomenklaturkabupaten')->row_array();
+            $namaProgram = $prog ? $prog['Nomenklatur'] : '';
+
+            $updateData = [
+                'PrioritasId' => $prioritasId,
+                'KegiatanId'  => $kegiatanId,
+                'KodeProgram' => $kodeProgram,
+                'NamaProgram' => $namaProgram,
+                'updated_at'  => date('Y-m-d H:i:s')
+            ];
+
+            $this->db->where('Id', $id)->update('dukungan_kpu_rpjmd', $updateData);
+            echo json_encode(['status' => 'success', 'message' => 'Data berhasil diupdate']);
+        }
+
+        /**
+         * Hapus Dukungan Kegiatan Prioritas Utama (Soft Delete)
+         */
+        public function HapusDukunganKegiatanPrioritas()
+        {
+            $id = (int)$this->input->post('Id', TRUE);
+            if (empty($id)) {
+                echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+                return;
+            }
+
+            $this->db->where('Id', $id)->update('dukungan_kpu_rpjmd', [
+                'deleted_at' => date('Y-m-d H:i:s')
+            ]);
+
+            echo json_encode(['status' => 'success', 'message' => 'Data berhasil dihapus']);
+        }
+
+        /**
+         * AJAX: Ambil detail 1 baris untuk modal edit
+         */
+        public function GetDukunganKegiatanPrioritasById()
+        {
+            $id = (int)$this->input->post('Id', TRUE);
+            $row = $this->db->where('Id', $id)->where('deleted_at IS NULL')->get('dukungan_kpu_rpjmd')->row_array();
+            echo json_encode($row ?: []);
         }
 
         public function ArahKebijakanRPJMD()
