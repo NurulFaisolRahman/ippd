@@ -1,0 +1,1467 @@
+[
+  {
+    "uraian": "Tujuan 1: Meningkatnya Kualitas Pelayanan Publik",
+    "indikators": [
+      {
+        "indikator": "Indeks Kinerja Wilayah (IKW)",
+        "satuan": "Indeks",
+        "kondisi_awal": 85,
+        "target_2026": "86",
+        "target_2027": "87",
+        "target_2028": "88",
+        "target_2029": "89",
+        "target_2030": "90"
+      }
+    ],
+    "sasaran_list": [
+      {
+        "uraian": "Sasaran 1: Meningkatnya Kualitas Layanan Administrasi",
+        "indikators": [
+          {
+            "indikator": "Indeks Kepuasan Masyarakat (IKM) Kecamatan",
+            "satuan": "Indeks",
+            "kondisi_awal": 90,
+            "target_2026": "91",
+            "target_2027": "92",
+            "target_2028": "93",
+            "target_2029": "94",
+            "target_2030": "95"
+          }
+        ],
+        "program_list": [
+          {
+            "kode_program": "7.01.01",
+            "nama": "PROGRAM PENUNJANG URUSAN PEMERINTAHAN DAERAH KABUPATEN/KOTA",
+            "outcomes": [
+              {
+                "outcome_text": "Meningkatnya kualitas Pemenuhan Kebutuhan Penunjang Perangkat Daerah",
+                "indikators": [
+                  {
+                    "indikator": "Persentase Pemenuhan Kebutuhan Penunjang Perangkat Daerah",
+                    "satuan": "%",
+                    "kondisi_awal": 95,
+                    "target_2026": "95.5",
+                    "target_2027": "96",
+                    "target_2028": "96.5",
+                    "target_2029": "97",
+                    "target_2030": "97"
+                  }
+                ]
+              }
+            ],
+            "kegiatan_list": [
+              {
+                "kode_nomenklatur": "7.01.01.2.01",
+                "nama": "Perencanaan, Penganggaran, dan Evaluasi Kinerja Perangkat Daerah",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Meningkatnya Ketepatan Penyusunan Perencanaan dan Evaluasi PD",
+                    "indikators": [
+                      {
+                        "indikator": "Cakupan Perencanaan, Penganggaran, dan Evaluasi Kinerja Perangkat Daerah",
+                        "satuan": "%",
+                        "kondisi_awal": 100,
+                        "target_2026": "100",
+                        "target_2027": "100",
+                        "target_2028": "100",
+                        "target_2029": "100",
+                        "target_2030": "100"
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "7.01.01.2.01.0001",
+                    "nama": "Penyusunan Dokumen Perencanaan Perangkat Daerah",
+                    "row_data": {
+                      "anggaran_2026": 2500000.0,
+                      "anggaran_2027": 2500000.0,
+                      "anggaran_2028": 2500000.0,
+                      "anggaran_2029": 2500000.0,
+                      "anggaran_2030": 2500000.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersusunnya Dokumen Perencanaan Perangkat Daerah",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Dokumen Perencanaan Perangkat Daerah",
+                            "satuan": "dokumen",
+                            "kondisi_awal": 1,
+                            "target_2026": "1",
+                            "anggaran_2026": 2500000.0,
+                            "target_2027": "1",
+                            "anggaran_2027": 2500000.0,
+                            "target_2028": "1",
+                            "anggaran_2028": 2500000.0,
+                            "target_2029": "1",
+                            "anggaran_2029": 2500000.0,
+                            "target_2030": "1",
+                            "anggaran_2030": 2500000.0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "7.01.01.2.01.0007",
+                    "nama": "Evaluasi Kinerja Perangkat Daerah",
+                    "row_data": {
+                      "anggaran_2026": 1500000.0,
+                      "anggaran_2027": 1575000.0,
+                      "anggaran_2028": 1653750.0,
+                      "anggaran_2029": 1736438.0,
+                      "anggaran_2030": 1823259.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersusunnya Dokumen Laporan Capaian Kinerja",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Laporan Evaluasi Kinerja Perangkat Daerah",
+                            "satuan": "laporan",
+                            "kondisi_awal": 7,
+                            "target_2026": "7",
+                            "anggaran_2026": 1500000.0,
+                            "target_2027": "7",
+                            "anggaran_2027": 1575000.0,
+                            "target_2028": "7",
+                            "anggaran_2028": 1653750.0,
+                            "target_2029": "7",
+                            "anggaran_2029": 1736438.0,
+                            "target_2030": "7",
+                            "anggaran_2030": 1823259.0
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kode_nomenklatur": "7.01.01.2.02",
+                "nama": "Administrasi Keuangan Perangkat Daerah",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Meningkatnya Administrasi Keuangan Perangkat Daerah",
+                    "indikators": [
+                      {
+                        "indikator": "Cakupan Administrasi Keuangan Perangkat Daerah",
+                        "satuan": "%",
+                        "kondisi_awal": 90,
+                        "target_2026": "91",
+                        "target_2027": "92",
+                        "target_2028": "93",
+                        "target_2029": "94",
+                        "target_2030": "94"
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "7.01.01.2.02.0001",
+                    "nama": "Penyediaan Gaji dan Tunjangan ASN",
+                    "row_data": {
+                      "anggaran_2026": 2327224591.0,
+                      "anggaran_2027": 2443585821.0,
+                      "anggaran_2028": 2565765112.0,
+                      "anggaran_2029": 2694053367.0,
+                      "anggaran_2030": 2828756036.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Penyediaan Gaji dan Tunjangan ASN",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Orang yang Menerima Gaji dan Tunjangan ASN",
+                            "satuan": "org/bln",
+                            "kondisi_awal": 15,
+                            "target_2026": "14",
+                            "anggaran_2026": 2327224591.0,
+                            "target_2027": "14",
+                            "anggaran_2027": 2443585821.0,
+                            "target_2028": "14",
+                            "anggaran_2028": 2565765112.0,
+                            "target_2029": "14",
+                            "anggaran_2029": 2694053367.0,
+                            "target_2030": "14",
+                            "anggaran_2030": 2828756036.0
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kode_nomenklatur": "7.01.01.2.06",
+                "nama": "Administrasi Umum Perangkat Daerah",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Meningkatnya Administrasi Umum Perangkat Daerah",
+                    "indikators": [
+                      {
+                        "indikator": "Cakupan Administrasi Umum Perangkat Daerah",
+                        "satuan": "%",
+                        "kondisi_awal": 100,
+                        "target_2026": "100",
+                        "target_2027": "100",
+                        "target_2028": "100",
+                        "target_2029": "100",
+                        "target_2030": "100"
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "7.01.01.2.06.0001",
+                    "nama": "Penyediaan Komponen Instalasi Listrik/Penerangan Bangunan Kantor",
+                    "row_data": {
+                      "anggaran_2026": 7999500.0,
+                      "anggaran_2027": 8399475.0,
+                      "anggaran_2028": 8819449.0,
+                      "anggaran_2029": 9260421.0,
+                      "anggaran_2030": 9723442.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Komponen Instalasi Listrik/Penerangan Bangunan Kantor",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Paket Komponen Instalasi Listrik/Penerangan Bangunan Kantor yang Disediakan",
+                            "satuan": "paket",
+                            "kondisi_awal": 1,
+                            "target_2026": "1",
+                            "anggaran_2026": 7999500.0,
+                            "target_2027": "1",
+                            "anggaran_2027": 8399475.0,
+                            "target_2028": "1",
+                            "anggaran_2028": 8819449.0,
+                            "target_2029": "1",
+                            "anggaran_2029": 9260421.0,
+                            "target_2030": "1",
+                            "anggaran_2030": 9723442.0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "7.01.01.2.06.0002",
+                    "nama": "Penyediaan Peralatan dan Perlengkapan Kantor",
+                    "row_data": {
+                      "anggaran_2026": 20280000.0,
+                      "anggaran_2027": 21294000.0,
+                      "anggaran_2028": 22358700.0,
+                      "anggaran_2029": 23476635.0,
+                      "anggaran_2030": 24650467.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Peralatan dan Perlengkapan Kantor",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Paket Peralatan dan Perlengkapan Kantor yang Disediakan",
+                            "satuan": "paket",
+                            "kondisi_awal": 1,
+                            "target_2026": "2",
+                            "anggaran_2026": 20280000.0,
+                            "target_2027": "2",
+                            "anggaran_2027": 21294000.0,
+                            "target_2028": "2",
+                            "anggaran_2028": 22358700.0,
+                            "target_2029": "2",
+                            "anggaran_2029": 23476635.0,
+                            "target_2030": "2",
+                            "anggaran_2030": 24650467.0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "7.01.01.2.06.0003",
+                    "nama": "7.01.01.2.06.000 Penyediaan Peralatan Rumah Tangga",
+                    "row_data": {
+                      "anggaran_2026": 7999900.0,
+                      "anggaran_2027": 7999900.0,
+                      "anggaran_2028": 7999900.0,
+                      "anggaran_2029": 7999900.0,
+                      "anggaran_2030": 7999900.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Peralatan Rumah Tangga",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Paket Peralatan Rumah Tangga yang Disediakan",
+                            "satuan": "paket",
+                            "kondisi_awal": 1,
+                            "target_2026": "1",
+                            "anggaran_2026": 7999900.0,
+                            "target_2027": "1",
+                            "anggaran_2027": 7999900.0,
+                            "target_2028": "1",
+                            "anggaran_2028": 7999900.0,
+                            "target_2029": "1",
+                            "anggaran_2029": 7999900.0,
+                            "target_2030": "1",
+                            "anggaran_2030": 7999900.0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "7.01.01.2.06.0004",
+                    "nama": "Penyediaan Bahan Logistik Kantor",
+                    "row_data": {
+                      "anggaran_2026": 30075000.0,
+                      "anggaran_2027": 31578750.0,
+                      "anggaran_2028": 33157688.0,
+                      "anggaran_2029": 34815572.0,
+                      "anggaran_2030": 36556350.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Bahan Logistik Kantor",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Paket Bahan Logistik Kantor yang Disediakan",
+                            "satuan": "paket",
+                            "kondisi_awal": 1,
+                            "target_2026": "10",
+                            "anggaran_2026": 30075000.0,
+                            "target_2027": "10",
+                            "anggaran_2027": 31578750.0,
+                            "target_2028": "10",
+                            "anggaran_2028": 33157688.0,
+                            "target_2029": "10",
+                            "anggaran_2029": 34815572.0,
+                            "target_2030": "10",
+                            "anggaran_2030": 36556350.0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "7.01.01.2.06.0005",
+                    "nama": "Penyediaan Barang Cetakan dan Penggandaan",
+                    "row_data": {
+                      "anggaran_2026": 6000000.0,
+                      "anggaran_2027": 6300000.0,
+                      "anggaran_2028": 6615000.0,
+                      "anggaran_2029": 6945750.0,
+                      "anggaran_2030": 7293038.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Barang Cetakan dan Penggandaan",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Paket Barang Cetakan dan Penggandaan yang Disediakan",
+                            "satuan": "paket",
+                            "kondisi_awal": 1,
+                            "target_2026": "2",
+                            "anggaran_2026": 6000000.0,
+                            "target_2027": "2",
+                            "anggaran_2027": 6300000.0,
+                            "target_2028": "2",
+                            "anggaran_2028": 6615000.0,
+                            "target_2029": "2",
+                            "anggaran_2029": 6945750.0,
+                            "target_2030": "2",
+                            "anggaran_2030": 7293038.0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "7.01.01.2.06.0009",
+                    "nama": "Penyelenggaran Rapat Koordinasi dan Konsultasi SKPD",
+                    "row_data": {
+                      "anggaran_2026": 54500000.0,
+                      "anggaran_2027": 57225000.0,
+                      "anggaran_2028": 60086250.0,
+                      "anggaran_2029": 63090563.0,
+                      "anggaran_2030": 66245091.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terselenggaranya Rapat Koordinasi dan Konsultasi SKPD",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Laporan Penyelenggaraan Rapat Koordinasi dan Konsultasi SKPD",
+                            "satuan": "laporan",
+                            "kondisi_awal": 1,
+                            "target_2026": "11",
+                            "anggaran_2026": 54500000.0,
+                            "target_2027": "11",
+                            "anggaran_2027": 57225000.0,
+                            "target_2028": "11",
+                            "anggaran_2028": 60086250.0,
+                            "target_2029": "11",
+                            "anggaran_2029": 63090563.0,
+                            "target_2030": "11",
+                            "anggaran_2030": 66245091.0
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kode_nomenklatur": "7.01.01.2.07",
+                "nama": "Pengadaan Barang Milik Daerah Penunjang Urusan Pemerintah Daerah",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Tersedianya sarana dan prasarana",
+                    "indikators": [
+                      {
+                        "indikator": "Cakupan Pengadaan Barang Milik Daerah Penunjang Urusan Pemerintah Daerah",
+                        "satuan": "%",
+                        "kondisi_awal": 90,
+                        "target_2026": "91",
+                        "target_2027": "92",
+                        "target_2028": "93",
+                        "target_2029": "94",
+                        "target_2030": "94"
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "7.01.01.2.07.0005",
+                    "nama": "Pengadaan Mebel",
+                    "row_data": {
+                      "anggaran_2026": 0.0,
+                      "anggaran_2027": 0.0,
+                      "anggaran_2028": 0.0,
+                      "anggaran_2029": 0.0,
+                      "anggaran_2030": 0.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Mebel",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Unit Mebel yang Disediakan",
+                            "satuan": "unit",
+                            "kondisi_awal": 0,
+                            "target_2026": "",
+                            "anggaran_2026": 0.0,
+                            "target_2027": "0",
+                            "anggaran_2027": 0.0,
+                            "target_2028": "",
+                            "anggaran_2028": 0.0,
+                            "target_2029": "",
+                            "anggaran_2029": 0.0,
+                            "target_2030": "0",
+                            "anggaran_2030": 0.0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "7.01.01.2.07.0006",
+                    "nama": "Pengadaan Peralatan dan Mesin Lainnya",
+                    "row_data": {
+                      "anggaran_2026": 16500000.0,
+                      "anggaran_2027": 17325000.0,
+                      "anggaran_2028": 18191250.0,
+                      "anggaran_2029": 19100813.0,
+                      "anggaran_2030": 20055853.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Peralatan dan Mesin Lainnya",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Unit Peralatan dan Mesin Lainnya yang Disediakan",
+                            "satuan": "unit",
+                            "kondisi_awal": 0,
+                            "target_2026": "1",
+                            "anggaran_2026": 16500000.0,
+                            "target_2027": "1",
+                            "anggaran_2027": 17325000.0,
+                            "target_2028": "1",
+                            "anggaran_2028": 18191250.0,
+                            "target_2029": "1",
+                            "anggaran_2029": 19100813.0,
+                            "target_2030": "1",
+                            "anggaran_2030": 20055853.0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "7.01.01.2.07.0009",
+                    "nama": "Pengadaan Gedung Kantor atau Bangunan Lainnya",
+                    "row_data": {
+                      "anggaran_2026": 0.0,
+                      "anggaran_2027": 0.0,
+                      "anggaran_2028": 0.0,
+                      "anggaran_2029": 0.0,
+                      "anggaran_2030": 0.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Gedung Kantor atau Bangunan Lainnya",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Unit Gedung Kantor atau Bangunan Lainnya yang Disediakan",
+                            "satuan": "unit",
+                            "kondisi_awal": 1,
+                            "target_2026": "",
+                            "anggaran_2026": 0.0,
+                            "target_2027": "",
+                            "anggaran_2027": 0.0,
+                            "target_2028": "",
+                            "anggaran_2028": 0.0,
+                            "target_2029": "",
+                            "anggaran_2029": 0.0,
+                            "target_2030": "",
+                            "anggaran_2030": 0.0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "7.01.01.2.07.0010",
+                    "nama": "Pengadaan Sarana dan Prasarana Gedung Kantor atau Bangunan Lainnya",
+                    "row_data": {
+                      "anggaran_2026": 0.0,
+                      "anggaran_2027": 0.0,
+                      "anggaran_2028": 0.0,
+                      "anggaran_2029": 0.0,
+                      "anggaran_2030": 0.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Sarana dan Prasarana Gedung Kantor atau Bangunan Lainnya",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Unit Sarana dan Prasarana Gedung Kantor atau Bangunan Lainnya yang Disediakan",
+                            "satuan": "unit",
+                            "kondisi_awal": 0,
+                            "target_2026": "",
+                            "anggaran_2026": 0.0,
+                            "target_2027": "",
+                            "anggaran_2027": 0.0,
+                            "target_2028": "",
+                            "anggaran_2028": 0.0,
+                            "target_2029": "",
+                            "anggaran_2029": 0.0,
+                            "target_2030": "0",
+                            "anggaran_2030": 0.0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "7.01.01.2.07.0011",
+                    "nama": "Pengadaan Sarana dan Prasarana Pendukung Gedung Kantor atau Bangunan Lainnya",
+                    "row_data": {
+                      "anggaran_2026": 0.0,
+                      "anggaran_2027": 0.0,
+                      "anggaran_2028": 0.0,
+                      "anggaran_2029": 0.0,
+                      "anggaran_2030": 0.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Sarana dan Prasarana Pendukung Gedung Kantor atau Bangunan Lainnya",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Unit Sarana dan Prasarana Pendukung Gedung Kantor atau Bangunan Lainnya yang Disediakan",
+                            "satuan": "unit",
+                            "kondisi_awal": 0,
+                            "target_2026": "",
+                            "anggaran_2026": 0.0,
+                            "target_2027": "",
+                            "anggaran_2027": 0.0,
+                            "target_2028": "",
+                            "anggaran_2028": 0.0,
+                            "target_2029": "",
+                            "anggaran_2029": 0.0,
+                            "target_2030": "0",
+                            "anggaran_2030": 0.0
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kode_nomenklatur": "7.01.01.2.08",
+                "nama": "Penyediaan Jasa Penunjang Urusan Pemerintahan Daerah",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Tersedianya Jasa Penunjang Urusan Pemerintahan Daerah",
+                    "indikators": [
+                      {
+                        "indikator": "Cakupan Penyediaan Jasa Penunjang Urusan Pemerintahan Daerah",
+                        "satuan": "%",
+                        "kondisi_awal": 100,
+                        "target_2026": "100",
+                        "target_2027": "100",
+                        "target_2028": "100",
+                        "target_2029": "100",
+                        "target_2030": "100"
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "7.01.01.2.08.0001",
+                    "nama": "Penyediaan Jasa Surat Menyurat",
+                    "row_data": {
+                      "anggaran_2026": 2000000.0,
+                      "anggaran_2027": 2100000.0,
+                      "anggaran_2028": 2205000.0,
+                      "anggaran_2029": 2315250.0,
+                      "anggaran_2030": 2431013.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Jasa Surat Menyurat",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Laporan Penyediaan Jasa Surat Menyurat",
+                            "satuan": "laporan",
+                            "kondisi_awal": 1,
+                            "target_2026": "1",
+                            "anggaran_2026": 2000000.0,
+                            "target_2027": "1",
+                            "anggaran_2027": 2100000.0,
+                            "target_2028": "1",
+                            "anggaran_2028": 2205000.0,
+                            "target_2029": "1",
+                            "anggaran_2029": 2315250.0,
+                            "target_2030": "1",
+                            "anggaran_2030": 2431013.0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "7.01.01.2.08.0002",
+                    "nama": "Penyedian Jasa Komunikasi, Sumber Daya Air dan Listrik",
+                    "row_data": {
+                      "anggaran_2026": 51884210.0,
+                      "anggaran_2027": 54478421.0,
+                      "anggaran_2028": 57202342.0,
+                      "anggaran_2029": 60062459.0,
+                      "anggaran_2030": 63065582.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Jasa Komunikasi, Sumber Daya Air dan Listrik",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Laporan Penyediaan Jasa Komunikasi, Sumber Daya Air dan Listrik yang Disediakan",
+                            "satuan": "laporan",
+                            "kondisi_awal": 12,
+                            "target_2026": "12",
+                            "anggaran_2026": 51884210.0,
+                            "target_2027": "12",
+                            "anggaran_2027": 54478421.0,
+                            "target_2028": "12",
+                            "anggaran_2028": 57202342.0,
+                            "target_2029": "12",
+                            "anggaran_2029": 60062459.0,
+                            "target_2030": "12",
+                            "anggaran_2030": 63065582.0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "7.01.01.2.08.0003",
+                    "nama": "Penyediaan Pasa Peralatan dan Perlengkapan Kantor",
+                    "row_data": {
+                      "anggaran_2026": 5000000.0,
+                      "anggaran_2027": 5250000.0,
+                      "anggaran_2028": 5512500.0,
+                      "anggaran_2029": 5788125.0,
+                      "anggaran_2030": 6077531.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Jasa Peralatan dan Perlengkapan Kantor",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Laporan Penyediaan Jasa Peralatan dan Perlengkapan Kantor yang Disediakan",
+                            "satuan": "laporan",
+                            "kondisi_awal": 1,
+                            "target_2026": "1",
+                            "anggaran_2026": 5000000.0,
+                            "target_2027": "1",
+                            "anggaran_2027": 5250000.0,
+                            "target_2028": "1",
+                            "anggaran_2028": 5512500.0,
+                            "target_2029": "1",
+                            "anggaran_2029": 5788125.0,
+                            "target_2030": "1",
+                            "anggaran_2030": 6077531.0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "7.01.01.2.08.0004",
+                    "nama": "Penyediaan Jasa Pelayanan Umum Kantor",
+                    "row_data": {
+                      "anggaran_2026": 123000000.0,
+                      "anggaran_2027": 129150000.0,
+                      "anggaran_2028": 135607500.0,
+                      "anggaran_2029": 142387875.0,
+                      "anggaran_2030": 149507269.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Jasa Pelayanan Umum Kantor",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Laporan Penyediaan Jasa Pelayanan Umum Kantor yang Disediakan",
+                            "satuan": "laporan",
+                            "kondisi_awal": 12,
+                            "target_2026": "12",
+                            "anggaran_2026": 123000000.0,
+                            "target_2027": "12",
+                            "anggaran_2027": 129150000.0,
+                            "target_2028": "12",
+                            "anggaran_2028": 135607500.0,
+                            "target_2029": "12",
+                            "anggaran_2029": 142387875.0,
+                            "target_2030": "12",
+                            "anggaran_2030": 149507269.0
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kode_nomenklatur": "7.01.01.2.09",
+                "nama": "Pemeliharaan Barang Milik Daerah Penunjang Urusan Pemerintahan Daerah",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terpeliharanya sarana dan prasarana",
+                    "indikators": [
+                      {
+                        "indikator": "Cakupan Pemeliharaan Barang Milik Daerah Penunjang Urusan Pemerintahan Daerah",
+                        "satuan": "%",
+                        "kondisi_awal": 90,
+                        "target_2026": "91",
+                        "target_2027": "92",
+                        "target_2028": "93",
+                        "target_2029": "94",
+                        "target_2030": "94"
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "7.01.01.2.09.0002",
+                    "nama": "Penyediaan Jasa Pemeliharaan, Biaya Pemeliharaan, Pajak, dan Perizinan Kendaraan Dinas Operasional atau Lapangan",
+                    "row_data": {
+                      "anggaran_2026": 19990600.0,
+                      "anggaran_2027": 20990130.0,
+                      "anggaran_2028": 22039637.0,
+                      "anggaran_2029": 23141618.0,
+                      "anggaran_2030": 24298699.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Penyediaan Jasa Pemeliharaan, Biaya Pemeliharaan, Pajak, dan Perizinan Kendaraan Dinas Operasional atau Lapangan",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Kendaraan Dinas Operasional atau Lapangan yang Dipemelihara dan Dibayarkan Pajak dan Perizinannya",
+                            "satuan": "unit",
+                            "kondisi_awal": 1,
+                            "target_2026": "5",
+                            "anggaran_2026": 19990600.0,
+                            "target_2027": "5",
+                            "anggaran_2027": 20990130.0,
+                            "target_2028": "5",
+                            "anggaran_2028": 22039637.0,
+                            "target_2029": "5",
+                            "anggaran_2029": 23141618.0,
+                            "target_2030": "5",
+                            "anggaran_2030": 24298699.0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "7.01.01.2.09.0005",
+                    "nama": "Pemeliharaan Mebel",
+                    "row_data": {
+                      "anggaran_2026": 0.0,
+                      "anggaran_2027": 0.0,
+                      "anggaran_2028": 0.0,
+                      "anggaran_2029": 0.0,
+                      "anggaran_2030": 0.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pemeliharaan Mebel",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Mebel yang Dipelihara",
+                            "satuan": "unit",
+                            "kondisi_awal": 0,
+                            "target_2026": "0",
+                            "anggaran_2026": 0.0,
+                            "target_2027": "0",
+                            "anggaran_2027": 0.0,
+                            "target_2028": "0",
+                            "anggaran_2028": 0.0,
+                            "target_2029": "0",
+                            "anggaran_2029": 0.0,
+                            "target_2030": "0",
+                            "anggaran_2030": 0.0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "7.01.01.2.09.0006",
+                    "nama": "Pemeliharaan Peralatan dan Mesin Lainnya",
+                    "row_data": {
+                      "anggaran_2026": 7493000.0,
+                      "anggaran_2027": 7867650.0,
+                      "anggaran_2028": 8261033.0,
+                      "anggaran_2029": 8674084.0,
+                      "anggaran_2030": 9107788.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pemeliharaan Peralatan dan Mesin Lainnya",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Peralatan dan Mesin Lainnya yang Dipelihara",
+                            "satuan": "unit",
+                            "kondisi_awal": 1,
+                            "target_2026": "12",
+                            "anggaran_2026": 7493000.0,
+                            "target_2027": "12",
+                            "anggaran_2027": 7867650.0,
+                            "target_2028": "12",
+                            "anggaran_2028": 8261033.0,
+                            "target_2029": "12",
+                            "anggaran_2029": 8674084.0,
+                            "target_2030": "12",
+                            "anggaran_2030": 9107788.0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "7.01.01.2.09.0009",
+                    "nama": "Pemeliharaan/Rehabilitasi Gedung Kantor dan Bangunan Lainnya",
+                    "row_data": {
+                      "anggaran_2026": 0.0,
+                      "anggaran_2027": 0.0,
+                      "anggaran_2028": 0.0,
+                      "anggaran_2029": 0.0,
+                      "anggaran_2030": 0.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pemeliharaan/Rehabilitasi Gedung Kantor dan Bangunan Lainnya",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah  Gedung Kantor atau Bangunan Lainnya yang Dipelihara/Direhabilitasi",
+                            "satuan": "unit",
+                            "kondisi_awal": "-",
+                            "target_2026": "",
+                            "anggaran_2026": 0.0,
+                            "target_2027": "",
+                            "anggaran_2027": 0.0,
+                            "target_2028": "",
+                            "anggaran_2028": 0.0,
+                            "target_2029": "",
+                            "anggaran_2029": 0.0,
+                            "target_2030": "",
+                            "anggaran_2030": 0.0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "7.01.01.2.09.0010",
+                    "nama": "Pemeliharaan/Rehabilitasi Sarana dan Prasarana Gedung Kantor dan Bangunan Lainnya",
+                    "row_data": {
+                      "anggaran_2026": 0.0,
+                      "anggaran_2027": 0.0,
+                      "anggaran_2028": 0.0,
+                      "anggaran_2029": 0.0,
+                      "anggaran_2030": 0.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pemeliharaan/Rehabilitasi Sarana dan Prasarana Gedung Kantor dan Bangunan Lainnya",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Sarana dan Prasarana Gedung Kantor atau Bangunan Lainnya yang Dipelihara/Direhabilitasi",
+                            "satuan": "unit",
+                            "kondisi_awal": "-",
+                            "target_2026": "",
+                            "anggaran_2026": 0.0,
+                            "target_2027": "",
+                            "anggaran_2027": 0.0,
+                            "target_2028": "",
+                            "anggaran_2028": 0.0,
+                            "target_2029": "",
+                            "anggaran_2029": 0.0,
+                            "target_2030": "",
+                            "anggaran_2030": 0.0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "7.01.01.2.09.0011",
+                    "nama": "Pemeliharaan/Rehabilitasi Sarana dan Prasarana Pendukung Gedung Kantor dan Bangunan Lainnya",
+                    "row_data": {
+                      "anggaran_2026": 0.0,
+                      "anggaran_2027": 0.0,
+                      "anggaran_2028": 0.0,
+                      "anggaran_2029": 0.0,
+                      "anggaran_2030": 0.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Pemeliharaan/Rehabilitasi Sarana dan Prasarana Pendukung Gedung Kantor dan Bangunan Lainnya",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Sarana dan Prasarana Pendukung Gedung Kantor atau Bangunan Lainnya yang Dipelihara/Direhabilitasi",
+                            "satuan": "unit",
+                            "kondisi_awal": "-",
+                            "target_2026": "",
+                            "anggaran_2026": 0.0,
+                            "target_2027": "",
+                            "anggaran_2027": 0.0,
+                            "target_2028": "",
+                            "anggaran_2028": 0.0,
+                            "target_2029": "",
+                            "anggaran_2029": 0.0,
+                            "target_2030": "",
+                            "anggaran_2030": 0.0
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "uraian": "Sasaran 2: Meningkatnya Kualitas Kinerja Kecamatan",
+        "indikators": [
+          {
+            "indikator": "Persentase Kepuasan Masyarakat terhadap Pelaksanaan Tugas Atributif dan Delegatif Kecamatan",
+            "satuan": "%",
+            "kondisi_awal": 80,
+            "target_2026": "81",
+            "target_2027": "82",
+            "target_2028": "83",
+            "target_2029": "84",
+            "target_2030": "85"
+          }
+        ],
+        "program_list": [
+          {
+            "kode_program": "7.01.02",
+            "nama": "PROGRAM PENYELENGGARAAN PEMERINTAHAN DAN PELAYANAN PUBLIK",
+            "outcomes": [
+              {
+                "outcome_text": "Meningkatnya Kualitas Penyelenggaraan Urusan Pemerintahan Lainnya di Kecamatan",
+                "indikators": [
+                  {
+                    "indikator": "Persentase Fasiltasi Penyelenggaraan Urusan Pemerintahan lainnya yang Dilaksanakan",
+                    "satuan": "%",
+                    "kondisi_awal": 100,
+                    "target_2026": "100",
+                    "target_2027": "100",
+                    "target_2028": "100",
+                    "target_2029": "100",
+                    "target_2030": "100"
+                  }
+                ]
+              }
+            ],
+            "kegiatan_list": [
+              {
+                "kode_nomenklatur": "7.01.02.2.01",
+                "nama": "Koordinasi Penyelenggaraan Kegiatan Pemerintahan di Tingkat Kecamatan",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terlaksananya Koordinasi Penyelenggaraan Kegiatan Pemerintahan di Tingkat Kecamatan",
+                    "indikators": [
+                      {
+                        "indikator": "Cakupan Koordinasi Penyelenggaraan Kegiatan Pemerintahan di Tingkat Kecamatan",
+                        "satuan": "%",
+                        "kondisi_awal": 100,
+                        "target_2026": "100",
+                        "target_2027": "100",
+                        "target_2028": "100",
+                        "target_2029": "100",
+                        "target_2030": "100"
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "7.01.02.2.01.0001",
+                    "nama": "Koordinasi/Sinergi Perencanaan dan Pelaksanaan Kegiatan Pemerintahan dengan Perangkat Daerah dan Instansi Vertikal Terkait",
+                    "row_data": {
+                      "anggaran_2026": 114281400.0,
+                      "anggaran_2027": 119995470.0,
+                      "anggaran_2028": 125995244.0,
+                      "anggaran_2029": 132295006.0,
+                      "anggaran_2030": 138909756.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Laporan Koordinasi Penyelenggaraan Kegiatan Pemerintahan di Tingkat Kecamatan",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Laporan Koordinasi/Sinergi Perencanaan dan Pelaksanaan Kegiatan Pemerintahan dengan Perangkat Daerah dan Instansi Vertikal Terkait",
+                            "satuan": "laporan",
+                            "kondisi_awal": 1,
+                            "target_2026": "1",
+                            "anggaran_2026": 114281400.0,
+                            "target_2027": "1",
+                            "anggaran_2027": 119995470.0,
+                            "target_2028": "1",
+                            "anggaran_2028": 125995244.0,
+                            "target_2029": "1",
+                            "anggaran_2029": 132295006.0,
+                            "target_2030": "1",
+                            "anggaran_2030": 138909756.0
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kode_nomenklatur": "7.01.02.2.04",
+                "nama": "Pelaksanaan Urusan Pemerintahan yang Dilimpahkan kepada Camat",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terlaksananya Urusan Pemerintahan yang Dilimpahkan kepada Camat",
+                    "indikators": [
+                      {
+                        "indikator": "Cakupan Pelaksanaan Urusan Pemerintahan yang Dilimpahkan kepada Camat",
+                        "satuan": "%",
+                        "kondisi_awal": 100,
+                        "target_2026": "100",
+                        "target_2027": "100",
+                        "target_2028": "100",
+                        "target_2029": "100",
+                        "target_2030": "100"
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "7.01.02.2.04.0003",
+                    "nama": "Pelaksanaan Urusan Pemerintahan yang Terkait dengan Kewenangan Lain yang Dilimpahkan",
+                    "row_data": {
+                      "anggaran_2026": 80000000.0,
+                      "anggaran_2027": 84000000.0,
+                      "anggaran_2028": 88200000.0,
+                      "anggaran_2029": 92610000.0,
+                      "anggaran_2030": 97240500.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Tersedianya Laporan Pelaksanaan Urusan Pemerintahan yang Dilimpahkan kepada Camat",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Laporan Pelaksanaan Kewenangan Lain yang Dilimpahkan",
+                            "satuan": "laporan",
+                            "kondisi_awal": 4,
+                            "target_2026": "4",
+                            "anggaran_2026": 80000000.0,
+                            "target_2027": "4",
+                            "anggaran_2027": 84000000.0,
+                            "target_2028": "4",
+                            "anggaran_2028": 88200000.0,
+                            "target_2029": "4",
+                            "anggaran_2029": 92610000.0,
+                            "target_2030": "4",
+                            "anggaran_2030": 97240500.0
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kode_program": "7.01.03",
+            "nama": "PROGRAM PEMBERDAYAAN MASYARAKAT DESA DAN KELURAHAN",
+            "outcomes": [
+              {
+                "outcome_text": "Meningkatnya Kualitas Pemberdayaan Masyarakat",
+                "indikators": [
+                  {
+                    "indikator": "Persentase Kegiatan Pemberdayaan Masyarakat yang Terlaksana",
+                    "satuan": "%",
+                    "kondisi_awal": 91,
+                    "target_2026": "92",
+                    "target_2027": "93",
+                    "target_2028": "94",
+                    "target_2029": "95",
+                    "target_2030": "95"
+                  }
+                ]
+              }
+            ],
+            "kegiatan_list": [
+              {
+                "kode_nomenklatur": "7.01.03.2.01",
+                "nama": "Koordinasi Kegiatan Pemberdayaan Desa",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terselenggaranya Koordinasi Kegiatan Pemberdayaan Desa",
+                    "indikators": [
+                      {
+                        "indikator": "Cakupan Koordinasi Kegiatan Pemberdayaan Desa",
+                        "satuan": "%",
+                        "kondisi_awal": 100,
+                        "target_2026": "100",
+                        "target_2027": "100",
+                        "target_2028": "100",
+                        "target_2029": "100",
+                        "target_2030": "100"
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "7.01.03.2.01.0002",
+                    "nama": "Sinkronisasi Program Kerja dan Kegiatan Pemberdayaan Masyarakat yang Dilakukan oleh Pemerintah dan Swasta di Wilayah Kerja Kecamatan",
+                    "row_data": {
+                      "anggaran_2026": 10000000.0,
+                      "anggaran_2027": 10500000.0,
+                      "anggaran_2028": 11025000.0,
+                      "anggaran_2029": 11576250.0,
+                      "anggaran_2030": 12155063.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terselenggaranya Musrenbang Desa/Kelurahan",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Dokumen Sinkronisasi Program Kerja dan Kegiatan Pemberdayaan Masyarakat yang Dilakukan oleh Pemerintah dan Swasta di Wilayah Kerja Kecamatan",
+                            "satuan": "dokumen",
+                            "kondisi_awal": 1,
+                            "target_2026": "1",
+                            "anggaran_2026": 10000000.0,
+                            "target_2027": "1",
+                            "anggaran_2027": 10500000.0,
+                            "target_2028": "1",
+                            "anggaran_2028": 11025000.0,
+                            "target_2029": "1",
+                            "anggaran_2029": 11576250.0,
+                            "target_2030": "1",
+                            "anggaran_2030": 12155063.0
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kode_nomenklatur": "7.01.03.2.01.0003",
+                    "nama": "Peningkatan Efektifitas Kegiatan Pemberdayaan Masyarakat di Wilayah Kecamatan",
+                    "row_data": {
+                      "anggaran_2026": 673405000.0,
+                      "anggaran_2027": 707075250.0,
+                      "anggaran_2028": 742429013.0,
+                      "anggaran_2029": 779550463.0,
+                      "anggaran_2030": 818527986.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terselenggaranya Peningkatan Efektifitas Kegiatan Pemberdayaan Masyarakat di Wilayah Kecamatan",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Laporan Peningkatan Efektifitas Kegiatan Pemberdayaan Masyarakat di Wilayah Kecamatan",
+                            "satuan": "laporan",
+                            "kondisi_awal": 4,
+                            "target_2026": "4",
+                            "anggaran_2026": 673405000.0,
+                            "target_2027": "4",
+                            "anggaran_2027": 707075250.0,
+                            "target_2028": "4",
+                            "anggaran_2028": 742429013.0,
+                            "target_2029": "4",
+                            "anggaran_2029": 779550463.0,
+                            "target_2030": "4",
+                            "anggaran_2030": 818527986.0
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kode_nomenklatur": "7.01.03.2.03",
+                "nama": "Pemberdayaan Lembaga Kemasyarakatan Tingkat Kecamatan",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terselenggaranya Pemberdayaan Lembaga Kemasyarakatan Tingkat Kecamatan",
+                    "indikators": [
+                      {
+                        "indikator": "Cakupan Kegiatan Pemberdayaan Lembaga Kemasyarakatan Tingkat Kecamatan",
+                        "satuan": "%",
+                        "kondisi_awal": 82,
+                        "target_2026": "84",
+                        "target_2027": "86",
+                        "target_2028": "88",
+                        "target_2029": "90",
+                        "target_2030": "90"
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "7.01.03.2.03.0001",
+                    "nama": "Penyelenggaraan Lembaga Kemasyarakatan",
+                    "row_data": {
+                      "anggaran_2026": 20000000.0,
+                      "anggaran_2027": 21000000.0,
+                      "anggaran_2028": 22050000.0,
+                      "anggaran_2029": 23152500.0,
+                      "anggaran_2030": 24310125.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Fasilitasi Penyelenggaraan Lembaga Kemasyarakatan",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Lembaga Kemasyarakatan yang Diselenggarakan",
+                            "satuan": "Lembaga Kemasyaraka tan",
+                            "kondisi_awal": 1157,
+                            "target_2026": "1157",
+                            "anggaran_2026": 20000000.0,
+                            "target_2027": "1157",
+                            "anggaran_2027": 21000000.0,
+                            "target_2028": "1157",
+                            "anggaran_2028": 22050000.0,
+                            "target_2029": "1157",
+                            "anggaran_2029": 23152500.0,
+                            "target_2030": "1157",
+                            "anggaran_2030": 24310125.0
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kode_program": "7.01.04",
+            "nama": "PROGRAM KOORDINASI KETENTRAMAN DAN KETERTIBAN UMUM",
+            "outcomes": [
+              {
+                "outcome_text": "Meningkatnya keamanan dan kenyamanan masyarakat",
+                "indikators": [
+                  {
+                    "indikator": "Persentase Penyelesaian Pengaduan Masyarakat",
+                    "satuan": "%",
+                    "kondisi_awal": 90,
+                    "target_2026": "92",
+                    "target_2027": "94",
+                    "target_2028": "96",
+                    "target_2029": "98",
+                    "target_2030": "98"
+                  }
+                ]
+              }
+            ],
+            "kegiatan_list": [
+              {
+                "kode_nomenklatur": "7.01.04.2.02",
+                "nama": "Koordinasi Penerapan dan Penegakan Peraturan Daerah dan Peraturan Kepala Daerah",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terselenggaranya Koordinasi Penerapan dan Penegakan Peraturan Daerah dan Peraturan Kepala Daerah",
+                    "indikators": [
+                      {
+                        "indikator": "Cakupan Koordinasi Penerapan dan Penegakan Peraturan Daerah dan Peraturan Kepala Daerah",
+                        "satuan": "%",
+                        "kondisi_awal": 90,
+                        "target_2026": "92",
+                        "target_2027": "94",
+                        "target_2028": "96",
+                        "target_2029": "98",
+                        "target_2030": "98"
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "7.01.04.2.02.0001",
+                    "nama": "Koordinasi/Sinergi dengan Perangkat Daerah yang Tugas dan Fungsinya di Bidang Penegakan Peraturan Perundang-Undangan dan/atau Kepolisian Negara Republik Indonesia",
+                    "row_data": {
+                      "anggaran_2026": 14172000.0,
+                      "anggaran_2027": 14880600.0,
+                      "anggaran_2028": 15624630.0,
+                      "anggaran_2029": 16405862.0,
+                      "anggaran_2030": 17226155.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terselenggaranya Koordinasi/Sinergi dengan Perangkat Daerah yang Tugas dan Fungsinya di Bidang Penegakan Peraturan Perundang-Undangan dan/atau Kepolisian Negara Republik Indonesia",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Laporan Koordinasi/Sinergi dengan Perangkat Daerah yang Tugas dan Fungsinya di Bidang Penegakan Peraturan Perundang-Undangan dan/atau Kepolisian Negara Republik Indonesia",
+                            "satuan": "laporan",
+                            "kondisi_awal": 4,
+                            "target_2026": "4",
+                            "anggaran_2026": 14172000.0,
+                            "target_2027": "4",
+                            "anggaran_2027": 14880600.0,
+                            "target_2028": "4",
+                            "anggaran_2028": 15624630.0,
+                            "target_2029": "4",
+                            "anggaran_2029": 16405862.0,
+                            "target_2030": "4",
+                            "anggaran_2030": 17226155.0
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kode_program": "7.01.06",
+            "nama": "PROGRAM PEMBINAAN DAN PENGAWASAN PEMERINTAHAN DESA",
+            "outcomes": [
+              {
+                "outcome_text": "Meningkatnya Kualitas Pemerintahan Desa",
+                "indikators": [
+                  {
+                    "indikator": "Persentase Desa yang Menyelesaikan Laporan Kinerja Tepat Waktu",
+                    "satuan": "%",
+                    "kondisi_awal": 100,
+                    "target_2026": "100",
+                    "target_2027": "100",
+                    "target_2028": "100",
+                    "target_2029": "100",
+                    "target_2030": "100"
+                  }
+                ]
+              }
+            ],
+            "kegiatan_list": [
+              {
+                "kode_nomenklatur": "7.01.06.2.01",
+                "nama": "Fasilitasi, Rekomendasi dan Koordinasi Pembinaan dan Pengawasan Pemerintahan Desa",
+                "sasaran_list": [
+                  {
+                    "sasaran_text": "Terlaksananya Fasilitasi, Rekomendasi dan Koordinasi Pembinaan dan Pengawasan Pemerintahan Desa",
+                    "indikators": [
+                      {
+                        "indikator": "Cakupan Fasilitasi, Rekomendasi dan Koordinasi Pembinaan dan Pengawasan Pemerintahan Desa",
+                        "satuan": "%",
+                        "kondisi_awal": 100,
+                        "target_2026": "100",
+                        "target_2027": "100",
+                        "target_2028": "100",
+                        "target_2029": "100",
+                        "target_2030": "100"
+                      }
+                    ]
+                  }
+                ],
+                "sub_kegiatan_list": [
+                  {
+                    "kode_nomenklatur": "7.01.06.2.01.0003",
+                    "nama": "Fasilitasi Pengelolaan Keuangan Desa dan Pendayagunaan Aset Desa",
+                    "row_data": {
+                      "anggaran_2026": 14908500.0,
+                      "anggaran_2027": 15653925.0,
+                      "anggaran_2028": 16436621.0,
+                      "anggaran_2029": 17258452.0,
+                      "anggaran_2030": 18121375.0
+                    },
+                    "sasaran_list": [
+                      {
+                        "sasaran_text": "Terlaksananya Fasilitasi Pengelolaan Keuangan Desa dan Pendayagunaan Aset Desa",
+                        "indikators": [
+                          {
+                            "indikator": "Jumlah Dokumen yang Difasilitasi dalam rangka Pengelolaan Keuangan Desa dan Pendayagunaan Aset Desa",
+                            "satuan": "dokumen",
+                            "kondisi_awal": 20,
+                            "target_2026": "20",
+                            "anggaran_2026": 14908500.0,
+                            "target_2027": "20",
+                            "anggaran_2027": 15653925.0,
+                            "target_2028": "20",
+                            "anggaran_2028": 16436621.0,
+                            "target_2029": "20",
+                            "anggaran_2029": 17258452.0,
+                            "target_2030": "20",
+                            "anggaran_2030": 18121375.0
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

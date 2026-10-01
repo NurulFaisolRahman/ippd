@@ -1767,8 +1767,8 @@ tr.type-sub:hover td {
     <!-- 2. Excel Formula Bar -->
     <div class="excel-formula-bar">
       <div class="excel-name-box" id="excelNameBox">POIN 1.a.1.a</div>
-      <div class="excel-fx-icon">fx</div>
-      <div class="excel-fx-text" id="excelFxContent">Uraian Indikator Evaluasi...</div>
+      <div class="excel-fx-icon" style="display:none;">fx</div>
+      <div class="excel-fx-text" id="excelFxContent" style="display:none;">Uraian Indikator Evaluasi...</div>
       <div class="excel-score-pill">
         <span>Bobot Maks: <strong id="modalMaxBadge">0.500</strong></span>
         <span>|</span>
@@ -2421,95 +2421,51 @@ tr.type-sub:hover td {
 
     var html = 
       '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px; color:#64748b;">' +
-        '<span style="font-weight:700;"><i class="fa fa-table"></i> Lembar Kerja Excel Poin 1.a.1.a</span>' +
-        '<span style="font-style:italic;"><i class="fa fa-arrows-h"></i> Geser ke kanan untuk melihat kolom perhitungan & margin</span>' +
+        '<span style="font-weight:700;"><i class="fa fa-table"></i> Lembar Kerja Poin 1.a.1.a</span>' +
       '</div>' +
       '<div style="overflow-x:auto;">' +
-      '<table class="excel-grid-table" id="wsTable_1_a_1_a" style="min-width: 1580px;">' +
+      '<table class="excel-grid-table" id="wsTable_1_a_1_a" style="min-width: 950px;">' +
         '<thead>' +
           '<tr>' +
-            '<th class="excel-col-letter"></th>' +
-            '<th class="excel-col-letter">A</th><th class="excel-col-letter">B</th><th class="excel-col-letter">C</th><th class="excel-col-letter">D</th><th class="excel-col-letter">E</th>' +
-            '<th class="excel-col-letter">F</th><th class="excel-col-letter">G</th><th class="excel-col-letter">H</th><th class="excel-col-letter">I</th><th class="excel-col-letter">J</th>' +
-            '<th class="excel-col-letter">K</th><th class="excel-col-letter">L</th><th class="excel-col-letter">M</th><th class="excel-col-letter">N</th><th class="excel-col-letter">O</th>' +
-            '<th class="excel-col-letter">P</th><th class="excel-col-letter">Q</th><th class="excel-col-letter">R</th><th class="excel-col-letter">S</th><th class="excel-col-letter">T</th><th class="excel-col-letter">U</th><th class="excel-col-letter">V</th>' +
-          '</tr>' +
-          '<tr>' +
-            '<th class="excel-row-num" rowspan="3">1</th>' +
+            '<th class="excel-row-num" rowspan="3" style="width:45px; text-align:center;">No</th>' +
             '<th colspan="5" class="th-blue" style="font-size:13px;">RPJMN (Nasional)</th>' +
             '<th colspan="5" class="th-amber" style="font-size:13px;">RPJMD (Daerah)</th>' +
-            '<th colspan="3" class="th-green">Cek Target Baseline</th>' +
-            '<th colspan="3" class="th-green">Cek Target Akhir</th>' +
-            '<th colspan="3" class="th-green">Cek Gap Target</th>' +
-            '<th rowspan="3" class="th-green" style="width:85px; white-space:nowrap;">Nilai Rata-rata (%)</th>' +
-            '<th rowspan="3" class="th-green" style="width:65px; white-space:nowrap;">Bobot</th>' +
-            '<th rowspan="3" class="th-green" style="width:95px; white-space:nowrap;">Keselarasan Terbobot</th>' +
           '</tr>' +
           '<tr>' +
-            '<th rowspan="2" class="th-blue" style="width:200px; white-space:nowrap;">Indikator Sasaran PN</th>' +
+            '<th rowspan="2" class="th-blue" style="width:220px; white-space:nowrap;">Indikator Sasaran PN</th>' +
             '<th colspan="3" class="th-blue">Target RPJMN</th>' +
-            '<th rowspan="2" class="th-blue" style="width:65px; white-space:nowrap;">Satuan</th>' +
-            '<th rowspan="2" class="th-amber" style="width:200px; white-space:nowrap;">Indikator Sasaran Daerah</th>' +
+            '<th rowspan="2" class="th-blue" style="width:70px; white-space:nowrap;">Satuan</th>' +
+            '<th rowspan="2" class="th-amber" style="width:220px; white-space:nowrap;">Indikator Sasaran Daerah</th>' +
             '<th colspan="3" class="th-amber">Target RPJMD</th>' +
-            '<th rowspan="2" class="th-amber" style="width:65px; white-space:nowrap;">Satuan</th>' +
-            '<th rowspan="2" class="th-green" style="width:70px; white-space:nowrap;">Margin</th>' +
-            '<th rowspan="2" class="th-green" style="width:75px; white-space:nowrap;">Keterangan</th>' +
-            '<th rowspan="2" class="th-green" style="width:60px; white-space:nowrap;">Nilai</th>' +
-            '<th rowspan="2" class="th-green" style="width:70px; white-space:nowrap;">Margin</th>' +
-            '<th rowspan="2" class="th-green" style="width:75px; white-space:nowrap;">Keterangan</th>' +
-            '<th rowspan="2" class="th-green" style="width:60px; white-space:nowrap;">Nilai</th>' +
-            '<th rowspan="2" class="th-green" style="width:70px; white-space:nowrap;">Margin</th>' +
-            '<th rowspan="2" class="th-green" style="width:75px; white-space:nowrap;">Keterangan</th>' +
-            '<th rowspan="2" class="th-green" style="width:60px; white-space:nowrap;">Nilai</th>' +
+            '<th rowspan="2" class="th-amber" style="width:70px; white-space:nowrap;">Satuan</th>' +
           '</tr>' +
           '<tr>' +
-            '<th class="th-blue" style="width:65px;">Baseline</th><th class="th-blue" style="width:65px;">Akhir</th><th class="th-blue" style="width:60px;">Gap</th>' +
-            '<th class="th-amber" style="width:65px;">Baseline</th><th class="th-amber" style="width:65px;">Akhir</th><th class="th-amber" style="width:60px;">Gap</th>' +
+            '<th class="th-blue" style="width:70px;">Baseline</th><th class="th-blue" style="width:70px;">Akhir</th><th class="th-blue" style="width:65px;">Gap</th>' +
+            '<th class="th-amber" style="width:70px;">Baseline</th><th class="th-amber" style="width:70px;">Akhir</th><th class="th-amber" style="width:65px;">Gap</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>';
 
     rowsData.forEach(function(r, idx){
-      var rNum = idx + 4;
+      var rNum = idx + 1;
       html += 
         '<tr class="ws-1a1a-row" data-row-id="' + r.id + '" data-positive="' + (r.isPositive ? '1' : '0') + '">' +
           '<td class="excel-row-num">' + rNum + '</td>' +
           '<td><strong>' + r.name + '</strong></td>' +
           '<td><input type="number" step="0.01" class="calc-inp mn-base" value="' + escapeHtml(r.mn_base) + '"></td>' +
           '<td><input type="number" step="0.01" class="calc-inp mn-end" value="' + escapeHtml(r.mn_end) + '"></td>' +
-          '<td class="cell-formula mn-gap">0.00</td>' +
+          '<td class="cell-formula mn-gap" style="text-align:center;">0.00</td>' +
           '<td style="text-align:center; font-weight:600; color:#475569;">' + r.unit + '</td>' +
           '<td><strong>' + r.name + '</strong></td>' +
           '<td><input type="number" step="0.01" class="calc-inp md-base" value="' + escapeHtml(r.md_base) + '"></td>' +
           '<td><input type="number" step="0.01" class="calc-inp md-end" value="' + escapeHtml(r.md_end) + '"></td>' +
-          '<td class="cell-formula md-gap">0.00</td>' +
+          '<td class="cell-formula md-gap" style="text-align:center;">0.00</td>' +
           '<td style="text-align:center; font-weight:600; color:#475569;">' + r.unit + '</td>' +
-          '<td class="cell-formula margin-base">0.0%</td>' +
-          '<td class="cell-formula ket-base" style="font-size:11.5px;">100%</td>' +
-          '<td class="cell-formula score-base" style="font-weight:700; color:#107c41;">100%</td>' +
-          '<td class="cell-formula margin-end">0.0%</td>' +
-          '<td class="cell-formula ket-end" style="font-size:11.5px;">100%</td>' +
-          '<td class="cell-formula score-end" style="font-weight:700; color:#107c41;">100%</td>' +
-          '<td class="cell-formula margin-gap">0.0%</td>' +
-          '<td class="cell-formula ket-gap" style="font-size:11.5px;">100%</td>' +
-          '<td class="cell-formula score-gap" style="font-weight:700; color:#107c41;">100%</td>' +
-          '<td class="cell-formula row-avg" style="font-weight:800; background:#e2efda; color:#107c41;">100.0%</td>' +
-          '<td style="text-align:center; font-family:\'Roboto Mono\'; font-weight:700;">' + numFmt(maxBobot) + '</td>' +
-          '<td class="cell-formula row-terbobot" style="font-weight:800; background:#d1fae5; color:#065f46;">' + numFmt(maxBobot) + '</td>' +
         '</tr>';
     });
 
     html += 
         '</tbody>' +
-        '<tfoot>' +
-          '<tr style="background:#f8fafc; font-weight:800;">' +
-            '<td class="excel-row-num">7</td>' +
-            '<td colspan="19" style="text-align:right; padding-right:14px; font-size:13px;">RATA-RATA KESELARASAN TERBOBOT =AVERAGE(V4:V6)</td>' +
-            '<td class="cell-formula" id="ws1a1aGrandAvg" style="text-align:center; background:#e2efda; color:#107c41; font-size:13px;">100.0%</td>' +
-            '<td style="text-align:center; font-family:\'Roboto Mono\'; font-size:13px;">' + numFmt(maxBobot) + '</td>' +
-            '<td class="cell-formula" id="ws1a1aGrandTerbobot" style="text-align:center; font-size:14.5px; background:#d1fae5; color:#065f46;">' + numFmt(maxBobot) + '</td>' +
-          '</tr>' +
-        '</tfoot>' +
       '</table>' +
       '</div>';
 
@@ -2526,36 +2482,23 @@ tr.type-sub:hover td {
 
     var html = 
       '<div style="overflow-x:auto;">' +
-      '<table class="excel-grid-table" style="min-width: 900px;">' +
+      '<table class="excel-grid-table" style="width: 100%;">' +
         '<thead>' +
           '<tr>' +
-            '<th class="excel-col-letter"></th>' +
-            '<th class="excel-col-letter">A</th>' +
-            '<th class="excel-col-letter">B</th>' +
-            '<th class="excel-col-letter">C</th>' +
-            '<th class="excel-col-letter">D</th>' +
-          '</tr>' +
-          '<tr>' +
-            '<th class="excel-row-num">1</th>' +
-            '<th class="th-green" style="width: 45%;">Parameter Pemeriksaan Dokumen (RPJMD)</th>' +
-            '<th class="th-blue" style="width: 25%;">Status Ketersediaan Tabel</th>' +
-            '<th class="th-green" style="width: 15%;">Formula Excel</th>' +
-            '<th class="th-green" style="width: 15%;">Keselarasan Terbobot</th>' +
+            '<th class="excel-row-num" style="width: 45px; text-align:center;">No</th>' +
+            '<th class="th-green" style="width: 65%;">Parameter Pemeriksaan Dokumen (RPJMD)</th>' +
+            '<th class="th-blue" style="width: 30%;">Status Ketersediaan Tabel</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>' +
           '<tr>' +
-            '<td class="excel-row-num">2</td>' +
+            '<td class="excel-row-num">1</td>' +
             '<td><strong>' + labelItem + '</strong></td>' +
             '<td>' +
-              '<select id="wsSelectPersandingan" style="font-weight:700; color:#107c41;">' +
+              '<select id="wsSelectPersandingan" style="font-weight:700; color:#107c41; width:100%;">' +
                 '<option value="Ada"' + (curVal === 'Ada' ? ' selected' : '') + '>Ada (Tersedia dalam Dokumen)</option>' +
                 '<option value="Tidak Ada"' + (curVal === 'Tidak Ada' ? ' selected' : '') + '>Tidak Ada (Belum Tersedia)</option>' +
               '</select>' +
-            '</td>' +
-            '<td style="font-family:\'Roboto Mono\'; font-size:11.5px; color:#64748b; text-align:center;">=IF(B2="Ada", ' + numFmt(maxBobot) + ', 0)</td>' +
-            '<td class="cell-formula" id="wsPersandinganResult" style="font-size:14.5px; font-weight:800; text-align:center; background:#d1fae5; color:#065f46;">' + 
-              (curVal === 'Ada' ? numFmt(maxBobot) : '0,000') + 
             '</td>' +
           '</tr>' +
         '</tbody>' +
@@ -2607,30 +2550,22 @@ tr.type-sub:hover td {
     var html = 
       '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px; color:#64748b;">' +
         '<span style="font-weight:700;"><i class="fa fa-table"></i> Matriks Prioritas Daerah vs Prioritas Nasional</span>' +
-        '<span style="font-style:italic;"><i class="fa fa-arrows-h"></i> Geser horizontal jika diperlukan</span>' +
       '</div>' +
       '<div style="overflow-x:auto;">' +
-      '<table class="excel-grid-table" id="wsTable_1_a_1_c" style="min-width: 1200px;">' +
+      '<table class="excel-grid-table" id="wsTable_1_a_1_c" style="width: 100%; min-width: 800px;">' +
         '<thead>' +
           '<tr>' +
-            '<th class="excel-col-letter"></th>' +
-            '<th class="excel-col-letter">A</th><th class="excel-col-letter">B</th><th class="excel-col-letter">C</th><th class="excel-col-letter">D</th><th class="excel-col-letter">E</th><th class="excel-col-letter">F</th><th class="excel-col-letter">G</th><th class="excel-col-letter">H</th>' +
-          '</tr>' +
-          '<tr>' +
-            '<th class="excel-row-num">1</th>' +
-            '<th class="th-blue" style="width: 28%;">Prioritas Pembangunan Nasional (RPJMN)</th>' +
-            '<th class="th-amber" style="width: 32%;">Prioritas Pembangunan Daerah (RPJMD)</th>' +
-            '<th class="th-green" style="width: 14%;">Nilai Keselarasan</th>' +
-            '<th class="th-gray" style="width: 12%;">Keterangan</th>' +
-            '<th class="th-green" style="width: 9%;">Rata-rata PN</th>' +
-            '<th class="th-green" style="width: 7%;">Bobot</th>' +
-            '<th class="th-green" style="width: 10%;">Keselarasan Terbobot</th>' +
-            '<th class="th-gray" style="width: 4%;">Aksi</th>' +
+            '<th class="excel-row-num" style="width: 45px; text-align:center;">No</th>' +
+            '<th class="th-blue" style="width: 35%;">Prioritas Pembangunan Nasional (RPJMN)</th>' +
+            '<th class="th-amber" style="width: 35%;">Prioritas Pembangunan Daerah (RPJMD)</th>' +
+            '<th class="th-green" style="width: 15%;">Nilai Keselarasan</th>' +
+            '<th class="th-gray" style="width: 15%;">Keterangan</th>' +
+            '<th class="th-gray" style="width: 50px;">Aksi</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>';
 
-    var rowCounter = 2;
+    var rowCounter = 1;
     pns.forEach(function(pn, pnIdx){
       var pdCount = pn.pds && pn.pds.length > 0 ? pn.pds.length : 1;
       (pn.pds || [{ title: '', score: 1.0, ket: '' }]).forEach(function(pd, pdIdx){
@@ -2660,9 +2595,6 @@ tr.type-sub:hover td {
 
         if (pdIdx === 0){
           html += 
-            '<td rowspan="' + pdCount + '" class="cell-formula pn-avg" style="vertical-align:middle; text-align:center; font-weight:700; background:#f0fdf4; color:#107c41;">100%</td>' +
-            '<td rowspan="' + pdCount + '" style="vertical-align:middle; text-align:center; font-family:\'Roboto Mono\'; font-weight:700;">' + numFmt(maxBobot) + '</td>' +
-            '<td rowspan="' + pdCount + '" class="cell-formula pn-terbobot" style="vertical-align:middle; text-align:center; font-weight:800; background:#d1fae5; color:#065f46;">' + numFmt(maxBobot) + '</td>' +
             '<td rowspan="' + pdCount + '" style="vertical-align:middle; text-align:center;">' +
               '<button type="button" class="btn-del-pn" data-pn-idx="' + pnIdx + '" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus Blok PN"><i class="fa fa-trash"></i></button>' +
             '</td>';
@@ -2677,15 +2609,6 @@ tr.type-sub:hover td {
 
     html += 
         '</tbody>' +
-        '<tfoot>' +
-          '<tr style="background:#f8fafc; font-weight:800;">' +
-            '<td class="excel-row-num">' + rowCounter + '</td>' +
-            '<td colspan="5" style="text-align:right; padding-right:14px; font-size:13px;">RATA-RATA TOTAL KESELARASAN TERBOBOT =AVERAGE(G:G)</td>' +
-            '<td style="text-align:center; font-family:\'Roboto Mono\'; font-size:13px;">' + numFmt(maxBobot) + '</td>' +
-            '<td class="cell-formula" id="ws1a1cGrandTerbobot" style="text-align:center; font-size:14.5px; background:#d1fae5; color:#065f46;">' + numFmt(maxBobot) + '</td>' +
-            '<td></td>' +
-          '</tr>' +
-        '</tfoot>' +
       '</table>' +
       '<button type="button" class="btn-excel-add-row" id="btnAddPnBlock"><i class="fa fa-plus-circle"></i> Tambah Blok Prioritas Nasional (PN)</button>' +
       '</div>';
@@ -2709,27 +2632,20 @@ tr.type-sub:hover td {
 
     var html = 
       '<div style="overflow-x:auto;">' +
-      '<table class="excel-grid-table" id="wsTable_1_a_2_a" style="min-width: 1280px;">' +
+      '<table class="excel-grid-table" id="wsTable_1_a_2_a" style="width: 100%; min-width: 850px;">' +
         '<thead>' +
           '<tr>' +
-            '<th class="excel-col-letter"></th>' +
-            '<th class="excel-col-letter">A</th><th class="excel-col-letter">B</th><th class="excel-col-letter">C</th><th class="excel-col-letter">D</th><th class="excel-col-letter">E</th><th class="excel-col-letter">F</th><th class="excel-col-letter">G</th><th class="excel-col-letter">H</th>' +
-          '</tr>' +
-          '<tr>' +
-            '<th class="excel-row-num">1</th>' +
-            '<th class="th-blue" style="width: 25%;">Prioritas Nasional (RPJMN)</th>' +
-            '<th class="th-blue" style="width: 28%;">Program Prioritas (PP)</th>' +
+            '<th class="excel-row-num" style="width: 45px; text-align:center;">No</th>' +
+            '<th class="th-blue" style="width: 30%;">Prioritas Nasional (RPJMN)</th>' +
+            '<th class="th-blue" style="width: 30%;">Program Prioritas (PP)</th>' +
             '<th class="th-amber" style="width: 30%;">Dukungan Program Daerah (RPJMD)</th>' +
-            '<th class="th-green" style="width: 13%;">Keselarasan</th>' +
-            '<th class="th-green" style="width: 9%;">Rata-rata PP</th>' +
-            '<th class="th-green" style="width: 7%;">Bobot</th>' +
-            '<th class="th-green" style="width: 10%;">Keselarasan Terbobot</th>' +
-            '<th class="th-gray" style="width: 4%;">Aksi</th>' +
+            '<th class="th-green" style="width: 15%;">Keselarasan</th>' +
+            '<th class="th-gray" style="width: 50px;">Aksi</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>';
 
-    var rowCounter = 2;
+    var rowCounter = 1;
     ppList.forEach(function(pp, ppIdx){
       var pdCount = pp.pds && pp.pds.length > 0 ? pp.pds.length : 1;
       (pp.pds || [{ title: '', score: 1.0 }]).forEach(function(pd, pdIdx){
@@ -2765,9 +2681,6 @@ tr.type-sub:hover td {
 
         if (pdIdx === 0){
           html += 
-            '<td rowspan="' + pdCount + '" class="cell-formula pp-avg" style="vertical-align:middle; text-align:center; font-weight:700; background:#f0fdf4; color:#107c41;">100%</td>' +
-            '<td rowspan="' + pdCount + '" style="vertical-align:middle; text-align:center; font-family:\'Roboto Mono\'; font-weight:700;">' + numFmt(maxBobot) + '</td>' +
-            '<td rowspan="' + pdCount + '" class="cell-formula pp-terbobot" style="vertical-align:middle; text-align:center; font-weight:800; background:#d1fae5; color:#065f46;">' + numFmt(maxBobot) + '</td>' +
             '<td rowspan="' + pdCount + '" style="vertical-align:middle; text-align:center;">' +
               '<button type="button" class="btn-del-pp-2a" data-pp-idx="' + ppIdx + '" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus PP"><i class="fa fa-trash"></i></button>' +
             '</td>';
@@ -2782,15 +2695,6 @@ tr.type-sub:hover td {
 
     html += 
         '</tbody>' +
-        '<tfoot>' +
-          '<tr style="background:#f8fafc; font-weight:800;">' +
-            '<td class="excel-row-num">' + rowCounter + '</td>' +
-            '<td colspan="5" style="text-align:right; padding-right:14px; font-size:13px;">RATA-RATA TOTAL KESELARASAN TERBOBOT =AVERAGE(H:H)</td>' +
-            '<td style="text-align:center; font-family:\'Roboto Mono\'; font-size:13px;">' + numFmt(maxBobot) + '</td>' +
-            '<td class="cell-formula" id="ws1a2aGrandTerbobot" style="text-align:center; font-size:14.5px; background:#d1fae5; color:#065f46;">' + numFmt(maxBobot) + '</td>' +
-            '<td></td>' +
-          '</tr>' +
-        '</tfoot>' +
       '</table>' +
       '<button type="button" class="btn-excel-add-row" id="btnAddPp2a"><i class="fa fa-plus-circle"></i> Tambah Program Prioritas (PP)</button>' +
       '</div>';
@@ -2817,28 +2721,21 @@ tr.type-sub:hover td {
 
     var html = 
       '<div style="overflow-x:auto;">' +
-      '<table class="excel-grid-table" id="wsTable_1_a_2_bg" style="min-width: 1320px;">' +
+      '<table class="excel-grid-table" id="wsTable_1_a_2_bg" style="width: 100%; min-width: 900px;">' +
         '<thead>' +
           '<tr>' +
-            '<th class="excel-col-letter"></th>' +
-            '<th class="excel-col-letter">A</th><th class="excel-col-letter">B</th><th class="excel-col-letter">C</th><th class="excel-col-letter">D</th><th class="excel-col-letter">E</th><th class="excel-col-letter">F</th><th class="excel-col-letter">G</th><th class="excel-col-letter">H</th><th class="excel-col-letter">I</th>' +
-          '</tr>' +
-          '<tr>' +
-            '<th class="excel-row-num">1</th>' +
-            '<th class="th-blue" style="width: 22%;">Prioritas Nasional (RPJMN)</th>' +
-            '<th class="th-blue" style="width: 24%;">Program Prioritas (PP)</th>' +
-            '<th class="th-amber" style="width: 24%;">Dukungan Program Daerah</th>' +
-            '<th class="th-green" style="width: 16%;">Hasil Review TA Bidang</th>' +
+            '<th class="excel-row-num" style="width: 45px; text-align:center;">No</th>' +
+            '<th class="th-blue" style="width: 25%;">Prioritas Nasional (RPJMN)</th>' +
+            '<th class="th-blue" style="width: 25%;">Program Prioritas (PP)</th>' +
+            '<th class="th-amber" style="width: 25%;">Dukungan Program Daerah</th>' +
+            '<th class="th-green" style="width: 15%;">Hasil Review TA Bidang</th>' +
             '<th class="th-green" style="width: 10%;">Keselarasan</th>' +
-            '<th class="th-green" style="width: 8%;">Rata-rata PP</th>' +
-            '<th class="th-green" style="width: 6%;">Bobot</th>' +
-            '<th class="th-green" style="width: 9%;">Keselarasan Terbobot</th>' +
-            '<th class="th-gray" style="width: 4%;">Aksi</th>' +
+            '<th class="th-gray" style="width: 50px;">Aksi</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>';
 
-    var rowCounter = 2;
+    var rowCounter = 1;
     ppList.forEach(function(pp, ppIdx){
       var pdCount = pp.pds && pp.pds.length > 0 ? pp.pds.length : 1;
       (pp.pds || [{ title: '', ta_review: '', score: 1.0 }]).forEach(function(pd, pdIdx){
@@ -2875,9 +2772,6 @@ tr.type-sub:hover td {
 
         if (pdIdx === 0){
           html += 
-            '<td rowspan="' + pdCount + '" class="cell-formula pp-avg" style="vertical-align:middle; text-align:center; font-weight:700; background:#f0fdf4; color:#107c41;">100%</td>' +
-            '<td rowspan="' + pdCount + '" style="vertical-align:middle; text-align:center; font-family:\'Roboto Mono\'; font-weight:700;">' + numFmt(maxBobot) + '</td>' +
-            '<td rowspan="' + pdCount + '" class="cell-formula pp-terbobot" style="vertical-align:middle; text-align:center; font-weight:800; background:#d1fae5; color:#065f46;">' + numFmt(maxBobot) + '</td>' +
             '<td rowspan="' + pdCount + '" style="vertical-align:middle; text-align:center;">' +
               '<button type="button" class="btn-del-pp-bg" data-pp-idx="' + ppIdx + '" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus PP"><i class="fa fa-trash"></i></button>' +
             '</td>';
@@ -2892,15 +2786,6 @@ tr.type-sub:hover td {
 
     html += 
         '</tbody>' +
-        '<tfoot>' +
-          '<tr style="background:#f8fafc; font-weight:800;">' +
-            '<td class="excel-row-num">' + rowCounter + '</td>' +
-            '<td colspan="6" style="text-align:right; padding-right:14px; font-size:13px;">RATA-RATA TOTAL KESELARASAN TERBOBOT =AVERAGE(I:I)</td>' +
-            '<td style="text-align:center; font-family:\'Roboto Mono\'; font-size:13px;">' + numFmt(maxBobot) + '</td>' +
-            '<td class="cell-formula" id="ws1a2bgGrandTerbobot" style="text-align:center; font-size:14.5px; background:#d1fae5; color:#065f46;">' + numFmt(maxBobot) + '</td>' +
-            '<td></td>' +
-          '</tr>' +
-        '</tfoot>' +
       '</table>' +
       '<button type="button" class="btn-excel-add-row" id="btnAddPpBlock"><i class="fa fa-plus-circle"></i> Tambah Program Prioritas (PP)</button>' +
       '</div>';
@@ -2921,76 +2806,41 @@ tr.type-sub:hover td {
     var html = 
       '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px; color:#64748b;">' +
         '<span style="font-weight:700;"><i class="fa fa-table"></i> Lembar Kerja Indikator Makro RPJMD vs RPJMN (' + (isTpt ? 'TPT' : 'TK') + ')</span>' +
-        '<span style="font-style:italic;"><i class="fa fa-arrows-h"></i> Geser ke kanan untuk melihat kolom margin</span>' +
       '</div>' +
       '<div style="overflow-x:auto;">' +
-      '<table class="excel-grid-table" id="wsTable_1_a_3" style="min-width: 1520px;">' +
+      '<table class="excel-grid-table" id="wsTable_1_a_3" style="min-width: 950px;">' +
         '<thead>' +
           '<tr>' +
-            '<th class="excel-col-letter"></th>' +
-            '<th class="excel-col-letter">A</th><th class="excel-col-letter">B</th><th class="excel-col-letter">C</th><th class="excel-col-letter">D</th><th class="excel-col-letter">E</th>' +
-            '<th class="excel-col-letter">F</th><th class="excel-col-letter">G</th><th class="excel-col-letter">H</th><th class="excel-col-letter">I</th><th class="excel-col-letter">J</th>' +
-            '<th class="excel-col-letter">K</th><th class="excel-col-letter">L</th><th class="excel-col-letter">M</th><th class="excel-col-letter">N</th><th class="excel-col-letter">O</th>' +
-            '<th class="excel-col-letter">P</th><th class="excel-col-letter">Q</th><th class="excel-col-letter">R</th><th class="excel-col-letter">S</th><th class="excel-col-letter">T</th><th class="excel-col-letter">U</th><th class="excel-col-letter">V</th>' +
-          '</tr>' +
-          '<tr>' +
-            '<th class="excel-row-num" rowspan="3">1</th>' +
+            '<th class="excel-row-num" rowspan="3" style="width:45px; text-align:center;">No</th>' +
             '<th colspan="5" class="th-blue" style="font-size:13px;">RPJMN (Nasional)</th>' +
             '<th colspan="5" class="th-amber" style="font-size:13px;">RPJMD (Daerah)</th>' +
-            '<th colspan="3" class="th-green">Cek Target Baseline</th>' +
-            '<th colspan="3" class="th-green">Cek Target Akhir</th>' +
-            '<th colspan="3" class="th-green">Cek Gap Target</th>' +
-            '<th rowspan="3" class="th-green" style="width:85px; white-space:nowrap;">Nilai Rata-rata (%)</th>' +
-            '<th rowspan="3" class="th-green" style="width:65px; white-space:nowrap;">Bobot</th>' +
-            '<th rowspan="3" class="th-green" style="width:95px; white-space:nowrap;">Keselarasan Terbobot</th>' +
           '</tr>' +
           '<tr>' +
-            '<th rowspan="2" class="th-blue" style="width:200px; white-space:nowrap;">Indikator Makro</th>' +
+            '<th rowspan="2" class="th-blue" style="width:220px; white-space:nowrap;">Indikator Makro</th>' +
             '<th colspan="3" class="th-blue">Target RPJMN</th>' +
-            '<th rowspan="2" class="th-blue" style="width:65px; white-space:nowrap;">Satuan</th>' +
-            '<th rowspan="2" class="th-amber" style="width:200px; white-space:nowrap;">Indikator Makro</th>' +
+            '<th rowspan="2" class="th-blue" style="width:70px; white-space:nowrap;">Satuan</th>' +
+            '<th rowspan="2" class="th-amber" style="width:220px; white-space:nowrap;">Indikator Makro</th>' +
             '<th colspan="3" class="th-amber">Target RPJMD</th>' +
-            '<th rowspan="2" class="th-amber" style="width:65px; white-space:nowrap;">Satuan</th>' +
-            '<th rowspan="2" class="th-green" style="width:70px; white-space:nowrap;">Margin</th>' +
-            '<th rowspan="2" class="th-green" style="width:75px; white-space:nowrap;">Keterangan</th>' +
-            '<th rowspan="2" class="th-green" style="width:60px; white-space:nowrap;">Nilai</th>' +
-            '<th rowspan="2" class="th-green" style="width:70px; white-space:nowrap;">Margin</th>' +
-            '<th rowspan="2" class="th-green" style="width:75px; white-space:nowrap;">Keterangan</th>' +
-            '<th rowspan="2" class="th-green" style="width:60px; white-space:nowrap;">Nilai</th>' +
-            '<th rowspan="2" class="th-green" style="width:70px; white-space:nowrap;">Margin</th>' +
-            '<th rowspan="2" class="th-green" style="width:75px; white-space:nowrap;">Keterangan</th>' +
-            '<th rowspan="2" class="th-green" style="width:60px; white-space:nowrap;">Nilai</th>' +
+            '<th rowspan="2" class="th-amber" style="width:70px; white-space:nowrap;">Satuan</th>' +
           '</tr>' +
           '<tr>' +
-            '<th class="th-blue" style="width:65px;">Baseline</th><th class="th-blue" style="width:65px;">Akhir</th><th class="th-blue" style="width:60px;">Gap</th>' +
-            '<th class="th-amber" style="width:65px;">Baseline</th><th class="th-amber" style="width:65px;">Akhir</th><th class="th-amber" style="width:60px;">Gap</th>' +
+            '<th class="th-blue" style="width:70px;">Baseline</th><th class="th-blue" style="width:70px;">Akhir</th><th class="th-blue" style="width:65px;">Gap</th>' +
+            '<th class="th-amber" style="width:70px;">Baseline</th><th class="th-amber" style="width:70px;">Akhir</th><th class="th-amber" style="width:65px;">Gap</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>' +
           '<tr class="ws-1a3-row" data-positive="0">' +
-            '<td class="excel-row-num">4</td>' +
+            '<td class="excel-row-num">1</td>' +
             '<td><strong>' + indName + '</strong></td>' +
             '<td><input type="number" step="0.01" class="calc-inp mn-base" value="' + escapeHtml(mn_base) + '"></td>' +
             '<td><input type="number" step="0.01" class="calc-inp mn-end" value="' + escapeHtml(mn_end) + '"></td>' +
-            '<td class="cell-formula mn-gap">0.00</td>' +
+            '<td class="cell-formula mn-gap" style="text-align:center;">0.00</td>' +
             '<td style="text-align:center; font-weight:600; color:#475569;">Persen</td>' +
             '<td><strong>' + indName + '</strong></td>' +
             '<td><input type="number" step="0.01" class="calc-inp md-base" value="' + escapeHtml(md_base) + '"></td>' +
             '<td><input type="number" step="0.01" class="calc-inp md-end" value="' + escapeHtml(md_end) + '"></td>' +
-            '<td class="cell-formula md-gap">0.00</td>' +
+            '<td class="cell-formula md-gap" style="text-align:center;">0.00</td>' +
             '<td style="text-align:center; font-weight:600; color:#475569;">Persen</td>' +
-            '<td class="cell-formula margin-base">0.0%</td>' +
-            '<td class="cell-formula ket-base" style="font-size:11.5px;">100%</td>' +
-            '<td class="cell-formula score-base" style="font-weight:700; color:#107c41;">100%</td>' +
-            '<td class="cell-formula margin-end">0.0%</td>' +
-            '<td class="cell-formula ket-end" style="font-size:11.5px;">100%</td>' +
-            '<td class="cell-formula score-end" style="font-weight:700; color:#107c41;">100%</td>' +
-            '<td class="cell-formula margin-gap">0.0%</td>' +
-            '<td class="cell-formula ket-gap" style="font-size:11.5px;">100%</td>' +
-            '<td class="cell-formula score-gap" style="font-weight:700; color:#107c41;">100%</td>' +
-            '<td class="cell-formula row-avg" style="font-weight:800; background:#e2efda; color:#107c41;">100.0%</td>' +
-            '<td style="text-align:center; font-family:\'Roboto Mono\'; font-weight:700;">' + numFmt(maxBobot) + '</td>' +
-            '<td class="cell-formula row-terbobot" style="font-weight:800; background:#d1fae5; color:#065f46;">' + numFmt(maxBobot) + '</td>' +
           '</tr>' +
         '</tbody>' +
       '</table>' +
@@ -3011,25 +2861,19 @@ tr.type-sub:hover td {
 
     var html = 
       '<div style="overflow-x:auto;">' +
-      '<table class="excel-grid-table" id="wsTable_1_a_4" style="min-width: 1180px;">' +
+      '<table class="excel-grid-table" id="wsTable_1_a_4" style="width: 100%; min-width: 800px;">' +
         '<thead>' +
           '<tr>' +
-            '<th class="excel-col-letter"></th>' +
-            '<th class="excel-col-letter">A</th><th class="excel-col-letter">B</th><th class="excel-col-letter">C</th><th class="excel-col-letter">D</th><th class="excel-col-letter">E</th><th class="excel-col-letter">F</th>' +
-          '</tr>' +
-          '<tr>' +
-            '<th class="excel-row-num">1</th>' +
-            '<th class="th-blue" style="width: 35%;">Proyek Prioritas Strategis (Major Project RPJMN)</th>' +
-            '<th class="th-amber" style="width: 35%;">Dukungan Program Daerah (RPJMD)</th>' +
-            '<th class="th-green" style="width: 14%;">Nilai Keselarasan</th>' +
-            '<th class="th-green" style="width: 8%;">Rata-rata MP</th>' +
-            '<th class="th-green" style="width: 8%;">Keselarasan Terbobot</th>' +
-            '<th class="th-gray" style="width: 4%;">Aksi</th>' +
+            '<th class="excel-row-num" style="width: 45px; text-align:center;">No</th>' +
+            '<th class="th-blue" style="width: 45%;">Proyek Prioritas Strategis (Major Project RPJMN)</th>' +
+            '<th class="th-amber" style="width: 45%;">Dukungan Program Daerah (RPJMD)</th>' +
+            '<th class="th-green" style="width: 15%;">Nilai Keselarasan</th>' +
+            '<th class="th-gray" style="width: 50px;">Aksi</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>';
 
-    var rowCounter = 2;
+    var rowCounter = 1;
     mpList.forEach(function(mp, mpIdx){
       var pdCount = mp.pds && mp.pds.length > 0 ? mp.pds.length : 1;
       (mp.pds || [{ title: '', score: 1.0 }]).forEach(function(pd, pdIdx){
@@ -3056,8 +2900,6 @@ tr.type-sub:hover td {
 
         if (pdIdx === 0){
           html += 
-            '<td rowspan="' + pdCount + '" class="cell-formula mp-avg" style="vertical-align:middle; text-align:center; font-weight:700; background:#f0fdf4; color:#107c41;">100%</td>' +
-            '<td rowspan="' + pdCount + '" class="cell-formula mp-terbobot" style="vertical-align:middle; text-align:center; font-weight:800; background:#d1fae5; color:#065f46;">' + numFmt(maxBobot) + '</td>' +
             '<td rowspan="' + pdCount + '" style="vertical-align:middle; text-align:center;">' +
               '<button type="button" class="btn-del-mp-1a4" data-mp-idx="' + mpIdx + '" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus MP"><i class="fa fa-trash"></i></button>' +
             '</td>';
@@ -3072,14 +2914,6 @@ tr.type-sub:hover td {
 
     html += 
         '</tbody>' +
-        '<tfoot>' +
-          '<tr style="background:#f8fafc; font-weight:800;">' +
-            '<td class="excel-row-num">' + rowCounter + '</td>' +
-            '<td colspan="3" style="text-align:right; padding-right:14px; font-size:13px;">RATA-RATA KESELARASAN TERBOBOT =AVERAGE(E:E)</td>' +
-            '<td class="cell-formula" id="ws1a4GrandTerbobot" style="text-align:center; font-size:14.5px; background:#d1fae5; color:#065f46;">' + numFmt(maxBobot) + '</td>' +
-            '<td></td>' +
-          '</tr>' +
-        '</tfoot>' +
       '</table>' +
       '<button type="button" class="btn-excel-add-row" id="btnAdd1a4Mp"><i class="fa fa-plus-circle"></i> Tambah Major Project (MP)</button>' +
       '</div>';
@@ -3102,27 +2936,20 @@ tr.type-sub:hover td {
 
     var html = 
       '<div style="overflow-x:auto;">' +
-      '<table class="excel-grid-table" id="wsTable_SPM" style="min-width: 1220px;">' +
+      '<table class="excel-grid-table" id="wsTable_SPM" style="min-width: 850px;">' +
         '<thead>' +
           '<tr>' +
-            '<th class="excel-col-letter"></th>' +
-            '<th class="excel-col-letter">A</th><th class="excel-col-letter">B</th><th class="excel-col-letter">C</th>' +
-            (isTarget ? '<th class="excel-col-letter">D</th><th class="excel-col-letter">E</th>' : '') +
-            '<th class="excel-col-letter">' + (isTarget ? 'F' : 'D') + '</th><th class="excel-col-letter">' + (isTarget ? 'G' : 'E') + '</th><th class="excel-col-letter">' + (isTarget ? 'H' : 'F') + '</th>' +
-          '</tr>' +
-          '<tr>' +
-            '<th class="excel-row-num">1</th>' +
-            '<th class="th-green" style="width: 22%;">6 Bidang SPM (PP 2/2018)</th>' +
-            '<th class="th-amber" style="width: 30%;">Indikator SPM di Daerah</th>' +
-            (isTarget ? '<th class="th-blue" style="width: 12%;">Target</th><th class="th-blue" style="width: 10%;">Satuan</th>' : '') +
+            '<th class="excel-row-num" style="width: 45px; text-align:center;">No</th>' +
+            '<th class="th-green" style="width: 25%;">6 Bidang SPM (PP 2/2018)</th>' +
+            '<th class="th-amber" style="width: 35%;">Indikator SPM di Daerah</th>' +
+            (isTarget ? '<th class="th-blue" style="width: 14%;">Target</th><th class="th-blue" style="width: 12%;">Satuan</th>' : '') +
             '<th class="th-green" style="width: 14%;">Nilai Keselarasan</th>' +
-            '<th class="th-green" style="width: 10%;">Rata-rata per Bidang</th>' +
-            '<th class="th-gray" style="width: 4%;">Aksi</th>' +
+            '<th class="th-gray" style="width: 50px;">Aksi</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>';
 
-    var rowCounter = 2;
+    var rowCounter = 1;
     spmList.forEach(function(bid, bidIdx){
       var indCount = bid.ind_list && bid.ind_list.length > 0 ? bid.ind_list.length : 1;
       (bid.ind_list || [{ name: '', target: '100%', unit: 'Persen', score: 1.0 }]).forEach(function(ind, indIdx){
@@ -3157,11 +2984,10 @@ tr.type-sub:hover td {
 
         if (indIdx === 0){
           html += 
-            '<td rowspan="' + indCount + '" class="cell-formula bid-avg" style="vertical-align:middle; text-align:center; font-weight:700; background:#e2efda; color:#107c41;">100%</td>' +
-            '<td rowspan="' + indCount + '"></td>';
+            '<td style="text-align:center;"></td>';
         } else {
           html += 
-            '<td style="text-align:center;"><button type="button" class="btn-del-ind-spm" data-bid-idx="' + bidIdx + '" data-ind-idx="' + indIdx + '" style="border:none; background:transparent; color:#94a3b8; cursor:pointer;" title="Hapus Indikator"><i class="fa fa-times"></i></button></td>';
+            '<td style="text-align:center;"><button type="button" class="btn-del-ind-spm" data-bid-idx="' + bidIdx + '" data-ind-idx="' + indIdx + '" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus Indikator"><i class="fa fa-times"></i></button></td>';
         }
 
         html += '</tr>';
@@ -3170,14 +2996,6 @@ tr.type-sub:hover td {
 
     html += 
         '</tbody>' +
-        '<tfoot>' +
-          '<tr style="background:#f8fafc; font-weight:800;">' +
-            '<td class="excel-row-num">' + rowCounter + '</td>' +
-            '<td colspan="' + (isTarget ? 5 : 3) + '" style="text-align:right; padding-right:14px; font-size:13px;">RATA-RATA TOTAL KESELARASAN TERBOBOT =AVERAGE() * ' + numFmt(maxBobot) + '</td>' +
-            '<td class="cell-formula" id="wsSpmGrandTerbobot" style="text-align:center; font-size:14.5px; background:#d1fae5; color:#065f46;">' + numFmt(maxBobot) + '</td>' +
-            '<td></td>' +
-          '</tr>' +
-        '</tfoot>' +
       '</table>' +
       '</div>';
 
@@ -3197,76 +3015,41 @@ tr.type-sub:hover td {
     var html = 
       '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px; color:#64748b;">' +
         '<span style="font-weight:700;"><i class="fa fa-table"></i> Lembar Kerja Indikator Makro RKPD vs RKP (' + (isTpt ? 'TPT' : 'TK') + ')</span>' +
-        '<span style="font-style:italic;"><i class="fa fa-arrows-h"></i> Geser ke kanan untuk melihat kolom margin</span>' +
       '</div>' +
       '<div style="overflow-x:auto;">' +
-      '<table class="excel-grid-table" id="wsTable_1_b_8" style="min-width: 1520px;">' +
+      '<table class="excel-grid-table" id="wsTable_1_b_8" style="min-width: 950px;">' +
         '<thead>' +
           '<tr>' +
-            '<th class="excel-col-letter"></th>' +
-            '<th class="excel-col-letter">A</th><th class="excel-col-letter">B</th><th class="excel-col-letter">C</th><th class="excel-col-letter">D</th><th class="excel-col-letter">E</th>' +
-            '<th class="excel-col-letter">F</th><th class="excel-col-letter">G</th><th class="excel-col-letter">H</th><th class="excel-col-letter">I</th><th class="excel-col-letter">J</th>' +
-            '<th class="excel-col-letter">K</th><th class="excel-col-letter">L</th><th class="excel-col-letter">M</th><th class="excel-col-letter">N</th><th class="excel-col-letter">O</th>' +
-            '<th class="excel-col-letter">P</th><th class="excel-col-letter">Q</th><th class="excel-col-letter">R</th><th class="excel-col-letter">S</th><th class="excel-col-letter">T</th><th class="excel-col-letter">U</th><th class="excel-col-letter">V</th>' +
-          '</tr>' +
-          '<tr>' +
-            '<th class="excel-row-num" rowspan="3">1</th>' +
+            '<th class="excel-row-num" rowspan="3" style="width:45px; text-align:center;">No</th>' +
             '<th colspan="5" class="th-blue" style="font-size:13px;">RKP (Nasional)</th>' +
             '<th colspan="5" class="th-amber" style="font-size:13px;">RKPD (Daerah)</th>' +
-            '<th colspan="3" class="th-green">Cek Target Realisasi</th>' +
-            '<th colspan="3" class="th-green">Cek Target Tahun Berjalan</th>' +
-            '<th colspan="3" class="th-green">Cek Gap Target</th>' +
-            '<th rowspan="3" class="th-green" style="width:85px; white-space:nowrap;">Nilai Rata-rata (%)</th>' +
-            '<th rowspan="3" class="th-green" style="width:65px; white-space:nowrap;">Bobot</th>' +
-            '<th rowspan="3" class="th-green" style="width:95px; white-space:nowrap;">Keselarasan Terbobot</th>' +
           '</tr>' +
           '<tr>' +
-            '<th rowspan="2" class="th-blue" style="width:200px; white-space:nowrap;">Indikator Makro</th>' +
+            '<th rowspan="2" class="th-blue" style="width:220px; white-space:nowrap;">Indikator Makro</th>' +
             '<th colspan="3" class="th-blue">Nilai RKP</th>' +
-            '<th rowspan="2" class="th-blue" style="width:65px; white-space:nowrap;">Satuan</th>' +
-            '<th rowspan="2" class="th-amber" style="width:200px; white-space:nowrap;">Indikator Makro</th>' +
+            '<th rowspan="2" class="th-blue" style="width:70px; white-space:nowrap;">Satuan</th>' +
+            '<th rowspan="2" class="th-amber" style="width:220px; white-space:nowrap;">Indikator Makro</th>' +
             '<th colspan="3" class="th-amber">Nilai RKPD</th>' +
-            '<th rowspan="2" class="th-amber" style="width:65px; white-space:nowrap;">Satuan</th>' +
-            '<th rowspan="2" class="th-green" style="width:70px; white-space:nowrap;">Margin</th>' +
-            '<th rowspan="2" class="th-green" style="width:75px; white-space:nowrap;">Keterangan</th>' +
-            '<th rowspan="2" class="th-green" style="width:60px; white-space:nowrap;">Nilai</th>' +
-            '<th rowspan="2" class="th-green" style="width:70px; white-space:nowrap;">Margin</th>' +
-            '<th rowspan="2" class="th-green" style="width:75px; white-space:nowrap;">Keterangan</th>' +
-            '<th rowspan="2" class="th-green" style="width:60px; white-space:nowrap;">Nilai</th>' +
-            '<th rowspan="2" class="th-green" style="width:70px; white-space:nowrap;">Margin</th>' +
-            '<th rowspan="2" class="th-green" style="width:75px; white-space:nowrap;">Keterangan</th>' +
-            '<th rowspan="2" class="th-green" style="width:60px; white-space:nowrap;">Nilai</th>' +
+            '<th rowspan="2" class="th-amber" style="width:70px; white-space:nowrap;">Satuan</th>' +
           '</tr>' +
           '<tr>' +
-            '<th class="th-blue" style="width:65px;">Realisasi</th><th class="th-blue" style="width:65px;">Target</th><th class="th-blue" style="width:60px;">Gap</th>' +
-            '<th class="th-amber" style="width:65px;">Realisasi</th><th class="th-amber" style="width:65px;">Target</th><th class="th-amber" style="width:60px;">Gap</th>' +
+            '<th class="th-blue" style="width:70px;">Realisasi</th><th class="th-blue" style="width:70px;">Target</th><th class="th-blue" style="width:65px;">Gap</th>' +
+            '<th class="th-amber" style="width:70px;">Realisasi</th><th class="th-amber" style="width:70px;">Target</th><th class="th-amber" style="width:65px;">Gap</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>' +
           '<tr class="ws-1b8-row" data-positive="0">' +
-            '<td class="excel-row-num">4</td>' +
+            '<td class="excel-row-num">1</td>' +
             '<td><strong>' + indName + '</strong></td>' +
             '<td><input type="number" step="0.01" class="calc-inp rkp-real" value="' + escapeHtml(rkp_real) + '"></td>' +
             '<td><input type="number" step="0.01" class="calc-inp rkp-tgt" value="' + escapeHtml(rkp_tgt) + '"></td>' +
-            '<td class="cell-formula rkp-gap">0.00</td>' +
+            '<td class="cell-formula rkp-gap" style="text-align:center;">0.00</td>' +
             '<td style="text-align:center; font-weight:600; color:#475569;">Persen</td>' +
             '<td><strong>' + indName + '</strong></td>' +
             '<td><input type="number" step="0.01" class="calc-inp rkpd-real" value="' + escapeHtml(rkpd_real) + '"></td>' +
             '<td><input type="number" step="0.01" class="calc-inp rkpd-tgt" value="' + escapeHtml(rkpd_tgt) + '"></td>' +
-            '<td class="cell-formula rkpd-gap">0.00</td>' +
+            '<td class="cell-formula rkpd-gap" style="text-align:center;">0.00</td>' +
             '<td style="text-align:center; font-weight:600; color:#475569;">Persen</td>' +
-            '<td class="cell-formula margin-real">0.0%</td>' +
-            '<td class="cell-formula ket-real" style="font-size:11.5px;">100%</td>' +
-            '<td class="cell-formula score-real" style="font-weight:700; color:#107c41;">100%</td>' +
-            '<td class="cell-formula margin-tgt">0.0%</td>' +
-            '<td class="cell-formula ket-tgt" style="font-size:11.5px;">100%</td>' +
-            '<td class="cell-formula score-tgt" style="font-weight:700; color:#107c41;">100%</td>' +
-            '<td class="cell-formula margin-gap">0.0%</td>' +
-            '<td class="cell-formula ket-gap" style="font-size:11.5px;">100%</td>' +
-            '<td class="cell-formula score-gap" style="font-weight:700; color:#107c41;">100%</td>' +
-            '<td class="cell-formula row-avg" style="font-weight:800; background:#e2efda; color:#107c41;">100.0%</td>' +
-            '<td style="text-align:center; font-family:\'Roboto Mono\'; font-weight:700;">' + numFmt(maxBobot) + '</td>' +
-            '<td class="cell-formula row-terbobot" style="font-weight:800; background:#d1fae5; color:#065f46;">' + numFmt(maxBobot) + '</td>' +
           '</tr>' +
         '</tbody>' +
       '</table>' +
@@ -3286,20 +3069,16 @@ tr.type-sub:hover td {
 
     var html = 
       '<div style="overflow-x:auto;">' +
-      '<table class="excel-grid-table" id="wsTable_1_c_1" style="min-width: 1200px;">' +
+      '<table class="excel-grid-table" id="wsTable_1_c_1" style="min-width: 900px;">' +
         '<thead>' +
           '<tr>' +
-            '<th class="excel-col-letter"></th>' +
-            '<th class="excel-col-letter">A</th><th class="excel-col-letter">B</th><th class="excel-col-letter">C</th><th class="excel-col-letter">D</th><th class="excel-col-letter">E</th><th class="excel-col-letter">F</th><th class="excel-col-letter">G</th>' +
-          '</tr>' +
-          '<tr>' +
-            '<th class="excel-row-num">1</th>' +
+            '<th class="excel-row-num" style="width: 45px; text-align:center;">No</th>' +
             '<th class="th-blue" style="width: 25%;">Prioritas Nasional (RKP)</th>' +
             '<th class="th-blue" style="width: 25%;">Program Prioritas (PP) / Major Project (MP)</th>' +
             '<th class="th-amber" style="width: 25%;">Dukungan Program Daerah (RKPD)</th>' +
             '<th class="th-amber" style="width: 15%;">Pagu Indikatif APBD (Rp)</th>' +
             '<th class="th-green" style="width: 10%;">Keselarasan</th>' +
-            '<th class="th-gray" style="width: 4%;">Aksi</th>' +
+            '<th class="th-gray" style="width: 45px;">Aksi</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>';
@@ -3307,7 +3086,7 @@ tr.type-sub:hover td {
     rows.forEach(function(r, idx){
       html += 
         '<tr class="ws-1c1-row">' +
-          '<td class="excel-row-num">' + (idx + 2) + '</td>' +
+          '<td class="excel-row-num">' + (idx + 1) + '</td>' +
           '<td><input type="text" class="calc-inp pn-inp" value="' + escapeHtml(r.pn) + '" placeholder="Prioritas Nasional..."></td>' +
           '<td><input type="text" class="calc-inp pp-inp" value="' + escapeHtml(r.pp_mp) + '" placeholder="PP / Major Project..."></td>' +
           '<td><input type="text" class="calc-inp pd-inp" value="' + escapeHtml(r.pd) + '" placeholder="Program Daerah..."></td>' +
@@ -3319,20 +3098,12 @@ tr.type-sub:hover td {
               '<option value="0"' + (r.score == 0 ? ' selected' : '') + '>0% (Belum Tersedia)</option>' +
             '</select>' +
           '</td>' +
-          '<td style="text-align:center;"><button type="button" class="btn-del-1c1-row" style="border:none; background:transparent; color:#ef4444; cursor:pointer;"><i class="fa fa-times"></i></button></td>' +
+          '<td style="text-align:center;"><button type="button" class="btn-del-1c1-row" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus Baris"><i class="fa fa-times"></i></button></td>' +
         '</tr>';
     });
 
     html += 
         '</tbody>' +
-        '<tfoot>' +
-          '<tr style="background:#f8fafc; font-weight:800;">' +
-            '<td class="excel-row-num">' + (rows.length + 2) + '</td>' +
-            '<td colspan="4" style="text-align:right; padding-right:14px; font-size:13px;">RATA-RATA TOTAL KESELARASAN TERBOBOT =AVERAGE() * ' + numFmt(maxBobot) + '</td>' +
-            '<td class="cell-formula" id="ws1c1GrandTerbobot" style="text-align:center; font-size:14.5px; background:#d1fae5; color:#065f46;">' + numFmt(maxBobot) + '</td>' +
-            '<td></td>' +
-          '</tr>' +
-        '</tfoot>' +
       '</table>' +
       '<button type="button" class="btn-excel-add-row" id="btnAdd1c1Row"><i class="fa fa-plus"></i> Tambah Alokasi Program APBD</button>' +
       '</div>';
@@ -3352,20 +3123,15 @@ tr.type-sub:hover td {
 
     var html = 
       '<div style="overflow-x:auto;">' +
-      '<table class="excel-grid-table" id="wsTable_3_a_1_a" style="min-width: 1100px;">' +
+      '<table class="excel-grid-table" id="wsTable_3_a_1_a" style="min-width: 900px;">' +
         '<thead>' +
           '<tr>' +
-            '<th class="excel-col-letter"></th>' +
-            '<th class="excel-col-letter">A</th><th class="excel-col-letter">B</th><th class="excel-col-letter">C</th><th class="excel-col-letter">D</th><th class="excel-col-letter">E</th><th class="excel-col-letter">F</th>' +
-          '</tr>' +
-          '<tr>' +
-            '<th class="excel-row-num">1</th>' +
+            '<th class="excel-row-num" style="width: 45px; text-align:center;">No</th>' +
             '<th class="th-green" style="width: 25%;">Bidang Program Prioritas</th>' +
-            '<th class="th-amber" style="width: 30%;">Program Prioritas Daerah (RKPD)</th>' +
+            '<th class="th-amber" style="width: 35%;">Program Prioritas Daerah (RKPD)</th>' +
             '<th class="th-blue" style="width: 25%;">OPD Penanggungjawab</th>' +
-            '<th class="th-green" style="width: 10%;">Nilai Keselarasan</th>' +
-            '<th class="th-green" style="width: 10%;">Keselarasan Terbobot</th>' +
-            '<th class="th-gray" style="width: 4%;">Aksi</th>' +
+            '<th class="th-green" style="width: 15%;">Nilai Keselarasan</th>' +
+            '<th class="th-gray" style="width: 45px;">Aksi</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>';
@@ -3373,26 +3139,17 @@ tr.type-sub:hover td {
     rows.forEach(function(r, idx){
       html += 
         '<tr class="ws-3a1a-row">' +
-          '<td class="excel-row-num">' + (idx + 2) + '</td>' +
+          '<td class="excel-row-num">' + (idx + 1) + '</td>' +
           '<td><input type="text" class="calc-inp bidang-inp" value="' + escapeHtml(r.bidang) + '" placeholder="Bidang Urusan..."></td>' +
           '<td><input type="text" class="calc-inp prog-inp" value="' + escapeHtml(r.prog) + '" placeholder="Program Prioritas..."></td>' +
           '<td><input type="text" class="calc-inp opd-inp" value="' + escapeHtml(r.opd) + '" placeholder="Nama Perangkat Daerah (jika tidak ada isi -)..."></td>' +
           '<td class="cell-formula row-score" style="text-align:center; font-weight:700; color:#107c41;">100%</td>' +
-          '<td class="cell-formula row-terbobot" style="text-align:center; font-weight:800; background:#d1fae5; color:#065f46;">' + numFmt(maxBobot) + '</td>' +
-          '<td style="text-align:center;"><button type="button" class="btn-del-3a1a-row" style="border:none; background:transparent; color:#ef4444; cursor:pointer;"><i class="fa fa-times"></i></button></td>' +
+          '<td style="text-align:center;"><button type="button" class="btn-del-3a1a-row" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus Baris"><i class="fa fa-times"></i></button></td>' +
         '</tr>';
     });
 
     html += 
         '</tbody>' +
-        '<tfoot>' +
-          '<tr style="background:#f8fafc; font-weight:800;">' +
-            '<td class="excel-row-num">' + (rows.length + 2) + '</td>' +
-            '<td colspan="4" style="text-align:right; padding-right:14px; font-size:13px;">RATA-RATA TOTAL KESELARASAN TERBOBOT =AVERAGE(E:E)</td>' +
-            '<td class="cell-formula" id="ws3a1aGrandTerbobot" style="text-align:center; font-size:14.5px; background:#d1fae5; color:#065f46;">' + numFmt(maxBobot) + '</td>' +
-            '<td></td>' +
-          '</tr>' +
-        '</tfoot>' +
       '</table>' +
       '<button type="button" class="btn-excel-add-row" id="btnAdd3a1aRow"><i class="fa fa-plus"></i> Tambah Program Prioritas OPD</button>' +
       '</div>';
@@ -3412,26 +3169,16 @@ tr.type-sub:hover td {
     var html = 
       '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px; color:#64748b;">' +
         '<span style="font-weight:700;"><i class="fa fa-table"></i> Lembar Kerja Target & Sasaran Daerah vs IKU Renstra/Renja OPD</span>' +
-        '<span style="font-style:italic;"><i class="fa fa-arrows-h"></i> Geser ke kanan untuk melihat perbandingan target & margin</span>' +
       '</div>' +
       '<div style="overflow-x:auto;">' +
-      '<table class="excel-grid-table" id="wsTable_3_a_1_b" style="min-width: 1540px;">' +
+      '<table class="excel-grid-table" id="wsTable_3_a_1_b" style="min-width: 950px;">' +
         '<thead>' +
           '<tr>' +
-            '<th class="excel-col-letter"></th>' +
-            '<th class="excel-col-letter">A</th><th class="excel-col-letter">B</th><th class="excel-col-letter">C</th><th class="excel-col-letter">D</th><th class="excel-col-letter">E</th>' +
-            '<th class="excel-col-letter">F</th><th class="excel-col-letter">G</th><th class="excel-col-letter">H</th><th class="excel-col-letter">I</th><th class="excel-col-letter">J</th>' +
-            '<th class="excel-col-letter">K</th><th class="excel-col-letter">L</th><th class="excel-col-letter">M</th><th class="excel-col-letter">N</th>' +
-          '</tr>' +
-          '<tr>' +
-            '<th class="excel-row-num" rowspan="2">1</th>' +
+            '<th class="excel-row-num" rowspan="2" style="width: 45px; text-align:center;">No</th>' +
             '<th colspan="3" class="th-amber" style="font-size:13px;">RPJMD / RKPD (Daerah)</th>' +
             '<th colspan="4" class="th-blue" style="font-size:13px;">Renstra / Renja OPD</th>' +
-            '<th rowspan="2" class="th-gray" style="width: 100px; white-space:nowrap;">Ekspektasi</th>' +
-            '<th colspan="3" class="th-green">Cek Target</th>' +
-            '<th rowspan="2" class="th-green" style="width: 65px; white-space:nowrap;">Bobot</th>' +
-            '<th rowspan="2" class="th-green" style="width: 95px; white-space:nowrap;">Keselarasan Terbobot</th>' +
-            '<th rowspan="2" class="th-gray" style="width: 4%;">Aksi</th>' +
+            '<th rowspan="2" class="th-gray" style="width: 110px; white-space:nowrap;">Ekspektasi</th>' +
+            '<th rowspan="2" class="th-gray" style="width: 45px;">Aksi</th>' +
           '</tr>' +
           '<tr>' +
             '<th class="th-amber" style="width: 220px; white-space:nowrap;">Indikator Kinerja</th>' +
@@ -3441,9 +3188,6 @@ tr.type-sub:hover td {
             '<th class="th-blue" style="width: 220px; white-space:nowrap;">IKU OPD</th>' +
             '<th class="th-blue" style="width: 70px; white-space:nowrap;">Target</th>' +
             '<th class="th-blue" style="width: 65px; white-space:nowrap;">Satuan</th>' +
-            '<th class="th-green" style="width: 70px; white-space:nowrap;">Margin</th>' +
-            '<th class="th-green" style="width: 75px; white-space:nowrap;">Keterangan</th>' +
-            '<th class="th-green" style="width: 60px; white-space:nowrap;">Nilai</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>';
@@ -3451,7 +3195,7 @@ tr.type-sub:hover td {
     rows.forEach(function(r, idx){
       html += 
         '<tr class="ws-3a1b-row">' +
-          '<td class="excel-row-num">' + (idx + 3) + '</td>' +
+          '<td class="excel-row-num">' + (idx + 1) + '</td>' +
           '<td><input type="text" class="calc-inp ind-daerah" value="' + escapeHtml(r.ind_daerah) + '" placeholder="Indikator Daerah..."></td>' +
           '<td><input type="number" step="0.01" class="calc-inp tgt-daerah" value="' + escapeHtml(r.target_daerah) + '"></td>' +
           '<td><input type="text" class="calc-inp unit-daerah" value="' + escapeHtml(r.unit_daerah) + '"></td>' +
@@ -3465,25 +3209,12 @@ tr.type-sub:hover td {
               '<option value="Kecil"' + (r.ekspektasi === 'Kecil' ? ' selected' : '') + '>Kecil (Makin Kecil Baik)</option>' +
             '</select>' +
           '</td>' +
-          '<td class="cell-formula margin-cell">0.0%</td>' +
-          '<td class="cell-formula ket-cell" style="font-size:11.5px;">100%</td>' +
-          '<td class="cell-formula score-cell" style="font-weight:700; color:#107c41;">100%</td>' +
-          '<td style="text-align:center; font-family:\'Roboto Mono\'; font-weight:700;">' + numFmt(maxBobot) + '</td>' +
-          '<td class="cell-formula row-terbobot" style="font-weight:800; background:#d1fae5; color:#065f46;">' + numFmt(maxBobot) + '</td>' +
-          '<td style="text-align:center;"><button type="button" class="btn-del-3a1b-row" style="border:none; background:transparent; color:#ef4444; cursor:pointer;"><i class="fa fa-times"></i></button></td>' +
+          '<td style="text-align:center;"><button type="button" class="btn-del-3a1b-row" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus Baris"><i class="fa fa-times"></i></button></td>' +
         '</tr>';
     });
 
     html += 
         '</tbody>' +
-        '<tfoot>' +
-          '<tr style="background:#f8fafc; font-weight:800;">' +
-            '<td class="excel-row-num">' + (rows.length + 3) + '</td>' +
-            '<td colspan="12" style="text-align:right; padding-right:14px; font-size:13px;">RATA-RATA TOTAL KESELARASAN TERBOBOT =AVERAGE(N:N)</td>' +
-            '<td class="cell-formula" id="ws3a1bGrandTerbobot" style="text-align:center; font-size:14.5px; background:#d1fae5; color:#065f46;">' + numFmt(maxBobot) + '</td>' +
-            '<td></td>' +
-          '</tr>' +
-        '</tfoot>' +
       '</table>' +
       '<button type="button" class="btn-excel-add-row" id="btnAdd3a1bRow"><i class="fa fa-plus"></i> Tambah Sasaran / IKU OPD</button>' +
       '</div>';
@@ -3501,19 +3232,14 @@ tr.type-sub:hover td {
 
     var html = 
       '<div style="overflow-x:auto;">' +
-      '<table class="excel-grid-table" id="wsTable_General" style="min-width: 1060px;">' +
+      '<table class="excel-grid-table" id="wsTable_General" style="min-width: 850px;">' +
         '<thead>' +
           '<tr>' +
-            '<th class="excel-col-letter"></th>' +
-            '<th class="excel-col-letter">A</th><th class="excel-col-letter">B</th><th class="excel-col-letter">C</th><th class="excel-col-letter">D</th><th class="excel-col-letter">E</th>' +
-          '</tr>' +
-          '<tr>' +
-            '<th class="excel-row-num">1</th>' +
-            '<th class="th-green" style="width: 42%;">Parameter / Kriteria Pemenuhan Indikator (Pedoman IPPD)</th>' +
-            '<th class="th-blue" style="width: 24%;">Tingkat Pemenuhan</th>' +
-            '<th class="th-amber" style="width: 20%;">Catatan / Justifikasi</th>' +
-            '<th class="th-green" style="width: 10%;">Keselarasan Terbobot</th>' +
-            '<th class="th-gray" style="width: 4%;">Aksi</th>' +
+            '<th class="excel-row-num" style="width: 45px; text-align:center;">No</th>' +
+            '<th class="th-green" style="width: 48%;">Parameter / Kriteria Pemenuhan Indikator (Pedoman IPPD)</th>' +
+            '<th class="th-blue" style="width: 25%;">Tingkat Pemenuhan</th>' +
+            '<th class="th-amber" style="width: 25%;">Catatan / Justifikasi</th>' +
+            '<th class="th-gray" style="width: 45px;">Aksi</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>';
@@ -3521,7 +3247,7 @@ tr.type-sub:hover td {
     rows.forEach(function(r, idx){
       html += 
         '<tr class="ws-gen-row">' +
-          '<td class="excel-row-num">' + (idx + 2) + '</td>' +
+          '<td class="excel-row-num">' + (idx + 1) + '</td>' +
           '<td><input type="text" class="calc-inp kriteria-inp" value="' + escapeHtml(r.kriteria) + '" placeholder="Kriteria parameter..."></td>' +
           '<td>' +
             '<select class="calc-inp score-sel">' +
@@ -3533,21 +3259,12 @@ tr.type-sub:hover td {
             '</select>' +
           '</td>' +
           '<td><input type="text" class="calc-inp catatan-inp" value="' + escapeHtml(r.catatan || '') + '" placeholder="Catatan evaluasi..."></td>' +
-          '<td class="cell-formula row-terbobot" style="text-align:center; font-weight:800; background:#d1fae5; color:#065f46;">' + numFmt(maxBobot * (r.score || 1.0)) + '</td>' +
           '<td style="text-align:center;"><button type="button" class="btn-del-gen-row" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus Kriteria"><i class="fa fa-times"></i></button></td>' +
         '</tr>';
     });
 
     html += 
         '</tbody>' +
-        '<tfoot>' +
-          '<tr style="background:#f8fafc; font-weight:800;">' +
-            '<td class="excel-row-num">' + (rows.length + 2) + '</td>' +
-            '<td colspan="3" style="text-align:right; padding-right:14px; font-size:13px;">RATA-RATA TOTAL KESELARASAN TERBOBOT =AVERAGE() * ' + numFmt(maxBobot) + '</td>' +
-            '<td class="cell-formula" id="wsGenGrandTerbobot" style="text-align:center; font-size:14.5px; background:#d1fae5; color:#065f46;">' + numFmt(maxBobot) + '</td>' +
-            '<td></td>' +
-          '</tr>' +
-        '</tfoot>' +
       '</table>' +
       '<button type="button" class="btn-excel-add-row" id="btnAddGenRow"><i class="fa fa-plus-circle"></i> Tambah Parameter Kriteria</button>' +
       '</div>';
@@ -3594,8 +3311,8 @@ tr.type-sub:hover td {
 
         var mnGap = mnE - mnB;
         var mdGap = mdE - mdB;
-        row.querySelector(".mn-gap").textContent = numFmt(mnGap);
-        row.querySelector(".md-gap").textContent = numFmt(mdGap);
+        var elMnGap = row.querySelector(".mn-gap"); if (elMnGap) elMnGap.textContent = numFmt(mnGap);
+        var elMdGap = row.querySelector(".md-gap"); if (elMdGap) elMdGap.textContent = numFmt(mdGap);
 
         var marginB = 0;
         if (mnB !== 0){
@@ -3616,14 +3333,14 @@ tr.type-sub:hover td {
         var rowAvg = (scoreB + scoreE + scoreG) / 3;
         var rowTerbobot = (rowAvg / 100) * maxBobot;
 
-        row.querySelector(".margin-base").textContent = marginB.toFixed(1) + "%";
-        row.querySelector(".score-base").textContent = scoreB + "%";
-        row.querySelector(".margin-end").textContent = marginE.toFixed(1) + "%";
-        row.querySelector(".score-end").textContent = scoreE + "%";
-        row.querySelector(".margin-gap").textContent = marginGap.toFixed(1) + "%";
-        row.querySelector(".score-gap").textContent = scoreG + "%";
-        row.querySelector(".row-avg").textContent = rowAvg.toFixed(1) + "%";
-        row.querySelector(".row-terbobot").textContent = numFmt(rowTerbobot);
+        var elMarginB = row.querySelector(".margin-base"); if (elMarginB) elMarginB.textContent = marginB.toFixed(1) + "%";
+        var elScoreB = row.querySelector(".score-base"); if (elScoreB) elScoreB.textContent = scoreB + "%";
+        var elMarginE = row.querySelector(".margin-end"); if (elMarginE) elMarginE.textContent = marginE.toFixed(1) + "%";
+        var elScoreE = row.querySelector(".score-end"); if (elScoreE) elScoreE.textContent = scoreE + "%";
+        var elMarginG = row.querySelector(".margin-gap"); if (elMarginG) elMarginG.textContent = marginGap.toFixed(1) + "%";
+        var elScoreG = row.querySelector(".score-gap"); if (elScoreG) elScoreG.textContent = scoreG + "%";
+        var elRowAvg = row.querySelector(".row-avg"); if (elRowAvg) elRowAvg.textContent = rowAvg.toFixed(1) + "%";
+        var elRowTerb = row.querySelector(".row-terbobot"); if (elRowTerb) elRowTerb.textContent = numFmt(rowTerbobot);
 
         sumAvg += rowAvg;
       });
@@ -3634,7 +3351,7 @@ tr.type-sub:hover td {
       var elGrandTerbobot = document.getElementById("ws1a1aGrandTerbobot");
       if (elGrandAvg) elGrandAvg.textContent = grandAvg.toFixed(1) + "%";
       if (elGrandTerbobot) elGrandTerbobot.textContent = numFmt(computedFinalScore);
-      excelFxContent.textContent = "=AVERAGE(V4:V6) -> Keselarasan: " + grandAvg.toFixed(1) + "% (" + numFmt(computedFinalScore) + ")";
+      if (excelFxContent) excelFxContent.textContent = "";
     }
 
     // 2. Sheet 1.a.1.b & 1.a.1.d Persandingan
@@ -3644,7 +3361,7 @@ tr.type-sub:hover td {
       computedFinalScore = isAda ? maxBobot : 0;
       var elRes = document.getElementById("wsPersandinganResult");
       if (elRes) elRes.textContent = numFmt(computedFinalScore);
-      excelFxContent.textContent = '=IF(B2="Ada", ' + numFmt(maxBobot) + ', 0) -> ' + (isAda ? 'Tersedia (100%)' : 'Belum Ada (0%)');
+      if (excelFxContent) excelFxContent.textContent = "";
     }
 
     // 3. Sheet 1.a.1.c Matrix
@@ -3681,7 +3398,7 @@ tr.type-sub:hover td {
       computedFinalScore = pnCount > 0 ? (allTerbobotSum / pnCount) : maxBobot;
       var elGrand = document.getElementById("ws1a1cGrandTerbobot");
       if (elGrand) elGrand.textContent = numFmt(computedFinalScore);
-      excelFxContent.textContent = "=AVERAGE(G:G) -> Skor Akhir Keselarasan: " + numFmt(computedFinalScore);
+      if (excelFxContent) excelFxContent.textContent = "";
     }
 
     // 4. Sheet 1.a.2.a
@@ -3715,7 +3432,7 @@ tr.type-sub:hover td {
       computedFinalScore = ppCount > 0 ? (allPpSum / ppCount) : maxBobot;
       var elGrand = document.getElementById("ws1a2aGrandTerbobot");
       if (elGrand) elGrand.textContent = numFmt(computedFinalScore);
-      excelFxContent.textContent = "=AVERAGE(H:H) -> Capaian Program PN 1: " + numFmt(computedFinalScore);
+      if (excelFxContent) excelFxContent.textContent = "";
     }
 
     // 5. Sheets 1.a.2.b s.d 1.a.2.g
@@ -3749,7 +3466,7 @@ tr.type-sub:hover td {
       computedFinalScore = ppCount > 0 ? (allPpSum / ppCount) : maxBobot;
       var elGrand = document.getElementById("ws1a2bgGrandTerbobot");
       if (elGrand) elGrand.textContent = numFmt(computedFinalScore);
-      excelFxContent.textContent = "=AVERAGE(I:I) -> Capaian Dukungan PN: " + numFmt(computedFinalScore);
+      if (excelFxContent) excelFxContent.textContent = "";
     }
 
     // 6. Sheet 1.a.3.a & 1.a.3.b (TPT & TK)
@@ -3763,8 +3480,8 @@ tr.type-sub:hover td {
 
         var mnGap = mnE - mnB;
         var mdGap = mdE - mdB;
-        row.querySelector(".mn-gap").textContent = numFmt(mnGap);
-        row.querySelector(".md-gap").textContent = numFmt(mdGap);
+        var elMnGap = row.querySelector(".mn-gap"); if (elMnGap) elMnGap.textContent = numFmt(mnGap);
+        var elMdGap = row.querySelector(".md-gap"); if (elMdGap) elMdGap.textContent = numFmt(mdGap);
 
         var marginB = (mnB !== 0) ? (mdB <= mnB ? 0 : (Math.abs(mdB - mnB)/Math.abs(mnB))*100) : 0;
         var marginE = (mnE !== 0) ? (mdE <= mnE ? 0 : (Math.abs(mdE - mnE)/Math.abs(mnE))*100) : 0;
@@ -3776,16 +3493,16 @@ tr.type-sub:hover td {
         var rowAvg = (scoreB + scoreE + scoreG) / 3;
         computedFinalScore = (rowAvg / 100) * maxBobot;
 
-        row.querySelector(".margin-base").textContent = marginB.toFixed(1) + "%";
-        row.querySelector(".score-base").textContent = scoreB + "%";
-        row.querySelector(".margin-end").textContent = marginE.toFixed(1) + "%";
-        row.querySelector(".score-end").textContent = scoreE + "%";
-        row.querySelector(".margin-gap").textContent = marginGap.toFixed(1) + "%";
-        row.querySelector(".score-gap").textContent = scoreG + "%";
-        row.querySelector(".row-avg").textContent = rowAvg.toFixed(1) + "%";
-        row.querySelector(".row-terbobot").textContent = numFmt(computedFinalScore);
+        var elMarginB = row.querySelector(".margin-base"); if (elMarginB) elMarginB.textContent = marginB.toFixed(1) + "%";
+        var elScoreB = row.querySelector(".score-base"); if (elScoreB) elScoreB.textContent = scoreB + "%";
+        var elMarginE = row.querySelector(".margin-end"); if (elMarginE) elMarginE.textContent = marginE.toFixed(1) + "%";
+        var elScoreE = row.querySelector(".score-end"); if (elScoreE) elScoreE.textContent = scoreE + "%";
+        var elMarginG = row.querySelector(".margin-gap"); if (elMarginG) elMarginG.textContent = marginGap.toFixed(1) + "%";
+        var elScoreG = row.querySelector(".score-gap"); if (elScoreG) elScoreG.textContent = scoreG + "%";
+        var elRowAvg = row.querySelector(".row-avg"); if (elRowAvg) elRowAvg.textContent = rowAvg.toFixed(1) + "%";
+        var elRowTerb = row.querySelector(".row-terbobot"); if (elRowTerb) elRowTerb.textContent = numFmt(computedFinalScore);
 
-        excelFxContent.textContent = "=AVERAGE(M4,P4,S4)*Bobot -> Rata-rata: " + rowAvg.toFixed(1) + "% (" + numFmt(computedFinalScore) + ")";
+        if (excelFxContent) excelFxContent.textContent = "";
       }
     }
 
@@ -3820,7 +3537,7 @@ tr.type-sub:hover td {
       computedFinalScore = mpCount > 0 ? (allMpSum / mpCount) : maxBobot;
       var elGrand = document.getElementById("ws1a4GrandTerbobot");
       if (elGrand) elGrand.textContent = numFmt(computedFinalScore);
-      excelFxContent.textContent = "=AVERAGE(E:E) -> Capaian Major Project: " + numFmt(computedFinalScore);
+      if (excelFxContent) excelFxContent.textContent = "";
     }
 
     // 8. Sheet 1.a.5 & 1.a.6 (SPM)
@@ -3852,7 +3569,7 @@ tr.type-sub:hover td {
       computedFinalScore = grandAvg * maxBobot;
       var elGrand = document.getElementById("wsSpmGrandTerbobot");
       if (elGrand) elGrand.textContent = numFmt(computedFinalScore);
-      excelFxContent.textContent = "=AVERAGE(Bidang) * " + numFmt(maxBobot) + " -> " + numFmt(computedFinalScore);
+      if (excelFxContent) excelFxContent.textContent = "";
     }
 
     // 9. Sheet 1.b.8.a & 1.b.8.b (RKP vs RKPD Makro)
@@ -3866,8 +3583,8 @@ tr.type-sub:hover td {
 
         var rGap = rTgt - rReal;
         var dGap = dTgt - dReal;
-        row.querySelector(".rkp-gap").textContent = numFmt(rGap);
-        row.querySelector(".rkpd-gap").textContent = numFmt(dGap);
+        var elRGap = row.querySelector(".rkp-gap"); if (elRGap) elRGap.textContent = numFmt(rGap);
+        var elDGap = row.querySelector(".rkpd-gap"); if (elDGap) elDGap.textContent = numFmt(dGap);
 
         var marginReal = (rReal !== 0) ? (dReal <= rReal ? 0 : (Math.abs(dReal - rReal)/Math.abs(rReal))*100) : 0;
         var marginTgt  = (rTgt !== 0) ? (dTgt <= rTgt ? 0 : (Math.abs(dTgt - rTgt)/Math.abs(rTgt))*100) : 0;
@@ -3879,16 +3596,16 @@ tr.type-sub:hover td {
         var rowAvg = (scoreReal + scoreTgt + scoreGap) / 3;
         computedFinalScore = (rowAvg / 100) * maxBobot;
 
-        row.querySelector(".margin-real").textContent = marginReal.toFixed(1) + "%";
-        row.querySelector(".score-real").textContent = scoreReal + "%";
-        row.querySelector(".margin-tgt").textContent = marginTgt.toFixed(1) + "%";
-        row.querySelector(".score-tgt").textContent = scoreTgt + "%";
-        row.querySelector(".margin-gap").textContent = marginGap.toFixed(1) + "%";
-        row.querySelector(".score-gap").textContent = scoreGap + "%";
-        row.querySelector(".row-avg").textContent = rowAvg.toFixed(1) + "%";
-        row.querySelector(".row-terbobot").textContent = numFmt(computedFinalScore);
+        var elMarginReal = row.querySelector(".margin-real"); if (elMarginReal) elMarginReal.textContent = marginReal.toFixed(1) + "%";
+        var elScoreReal = row.querySelector(".score-real"); if (elScoreReal) elScoreReal.textContent = scoreReal + "%";
+        var elMarginTgt = row.querySelector(".margin-tgt"); if (elMarginTgt) elMarginTgt.textContent = marginTgt.toFixed(1) + "%";
+        var elScoreTgt = row.querySelector(".score-tgt"); if (elScoreTgt) elScoreTgt.textContent = scoreTgt + "%";
+        var elMarginGap = row.querySelector(".margin-gap"); if (elMarginGap) elMarginGap.textContent = marginGap.toFixed(1) + "%";
+        var elScoreGap = row.querySelector(".score-gap"); if (elScoreGap) elScoreGap.textContent = scoreGap + "%";
+        var elRowAvg = row.querySelector(".row-avg"); if (elRowAvg) elRowAvg.textContent = rowAvg.toFixed(1) + "%";
+        var elRowTerb = row.querySelector(".row-terbobot"); if (elRowTerb) elRowTerb.textContent = numFmt(computedFinalScore);
 
-        excelFxContent.textContent = "=AVERAGE(Real,Tgt,Gap)*Bobot -> RKP-RKPD: " + rowAvg.toFixed(1) + "% (" + numFmt(computedFinalScore) + ")";
+        if (excelFxContent) excelFxContent.textContent = "";
       }
     }
 
@@ -3904,7 +3621,7 @@ tr.type-sub:hover td {
       computedFinalScore = avgRatio * maxBobot;
       var elGrand = document.getElementById("ws1c1GrandTerbobot");
       if (elGrand) elGrand.textContent = numFmt(computedFinalScore);
-      excelFxContent.textContent = "=AVERAGE(F:F)*10.00 -> Alokasi APBD RKP: " + numFmt(computedFinalScore);
+      if (excelFxContent) excelFxContent.textContent = "";
     }
 
     // 11. Sheet 3.a.1.a (OPD Penanggungjawab)
@@ -3915,15 +3632,15 @@ tr.type-sub:hover td {
         var opdVal = r.querySelector(".opd-inp").value.trim();
         var isFilled = opdVal !== '' && opdVal !== '-';
         var rowScoreRatio = isFilled ? 1.0 : (opdVal === '-' ? 0.5 : 0.0);
-        r.querySelector(".row-score").textContent = (rowScoreRatio * 100) + "%";
-        r.querySelector(".row-terbobot").textContent = numFmt(rowScoreRatio * maxBobot);
+        var elRowScore = r.querySelector(".row-score"); if (elRowScore) elRowScore.textContent = (rowScoreRatio * 100) + "%";
+        var elRowTerb = r.querySelector(".row-terbobot"); if (elRowTerb) elRowTerb.textContent = numFmt(rowScoreRatio * maxBobot);
         sumScore += rowScoreRatio;
       });
       var avgRatio = rows.length > 0 ? (sumScore / rows.length) : 1.0;
       computedFinalScore = avgRatio * maxBobot;
       var elGrand = document.getElementById("ws3a1aGrandTerbobot");
       if (elGrand) elGrand.textContent = numFmt(computedFinalScore);
-      excelFxContent.textContent = '=IF(C4<>"-", 100%, 0%) -> Rata-rata Terbobot: ' + numFmt(computedFinalScore);
+      if (excelFxContent) excelFxContent.textContent = "";
     }
 
     // 12. Sheet 3.a.1.b (Target Daerah vs IKU OPD)
@@ -3946,17 +3663,17 @@ tr.type-sub:hover td {
         var scorePct = calcMarginScore(margin);
         var rowTerb = (scorePct / 100) * maxBobot;
 
-        r.querySelector(".margin-cell").textContent = margin.toFixed(1) + "%";
-        r.querySelector(".ket-cell").textContent = scorePct + "%";
-        r.querySelector(".score-cell").textContent = scorePct + "%";
-        r.querySelector(".row-terbobot").textContent = numFmt(rowTerb);
+        var elMargin = r.querySelector(".margin-cell"); if (elMargin) elMargin.textContent = margin.toFixed(1) + "%";
+        var elKet = r.querySelector(".ket-cell"); if (elKet) elKet.textContent = scorePct + "%";
+        var elScore = r.querySelector(".score-cell"); if (elScore) elScore.textContent = scorePct + "%";
+        var elRowTerb = r.querySelector(".row-terbobot"); if (elRowTerb) elRowTerb.textContent = numFmt(rowTerb);
         sumTerb += rowTerb;
       });
 
       computedFinalScore = rows.length > 0 ? (sumTerb / rows.length) : maxBobot;
       var elGrand = document.getElementById("ws3a1bGrandTerbobot");
       if (elGrand) elGrand.textContent = numFmt(computedFinalScore);
-      excelFxContent.textContent = "=AVERAGE(N:N) -> Keterhubungan IKU OPD: " + numFmt(computedFinalScore);
+      if (excelFxContent) excelFxContent.textContent = "";
     }
 
     // 13. General / Pilar 2 Kualitas Perencanaan
@@ -3966,14 +3683,14 @@ tr.type-sub:hover td {
       rows.forEach(function(r){
         var sel = r.querySelector(".score-sel");
         var ratio = sel ? parseFloat(sel.value) : 1.0;
-        r.querySelector(".row-terbobot").textContent = numFmt(ratio * maxBobot);
+        var elRowTerb = r.querySelector(".row-terbobot"); if (elRowTerb) elRowTerb.textContent = numFmt(ratio * maxBobot);
         sumRatio += ratio;
       });
       var avgRatio = rows.length > 0 ? (sumRatio / rows.length) : 1.0;
       computedFinalScore = avgRatio * maxBobot;
       var elGrand = document.getElementById("wsGenGrandTerbobot");
       if (elGrand) elGrand.textContent = numFmt(computedFinalScore);
-      excelFxContent.textContent = "=AVERAGE(Criteria) * " + numFmt(maxBobot) + " -> " + numFmt(computedFinalScore);
+      if (excelFxContent) excelFxContent.textContent = "";
     }
 
     // Sync computed score to Capaian input and pill display
@@ -4699,9 +4416,7 @@ tr.type-sub:hover td {
 
   function renumberExcelSheetRows(table){
     if (!table) return;
-    var theadRows = table.querySelectorAll("thead tr");
-    var startNum = theadRows.length + 1;
-    var curNum = startNum;
+    var curNum = 1;
     table.querySelectorAll("tbody tr").forEach(function(tr){
       var cellNum = tr.querySelector(".excel-row-num");
       if (cellNum) cellNum.textContent = curNum++;
@@ -4801,9 +4516,6 @@ tr.type-sub:hover td {
             '</select>' +
           '</td>' +
           '<td><input type="text" class="pd-ket-inp" placeholder="Keterangan..."></td>' +
-          '<td rowspan="1" class="cell-formula pn-avg" style="vertical-align:middle; text-align:center; font-weight:700; background:#f0fdf4; color:#107c41;">100%</td>' +
-          '<td rowspan="1" style="vertical-align:middle; text-align:center; font-family:\'Roboto Mono\'; font-weight:700;">' + numFmt(modalBobotMaks.value) + '</td>' +
-          '<td rowspan="1" class="cell-formula pn-terbobot" style="vertical-align:middle; text-align:center; font-weight:800; background:#d1fae5; color:#065f46;">' + numFmt(modalBobotMaks.value) + '</td>' +
           '<td rowspan="1" style="vertical-align:middle; text-align:center;">' +
             '<button type="button" class="btn-del-pn" data-pn-idx="' + newPnIdx + '" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus PN"><i class="fa fa-trash"></i></button>' +
           '</td>';
@@ -4942,9 +4654,6 @@ tr.type-sub:hover td {
               '<option value="0">0% (Tidak Selaras)</option>' +
             '</select>' +
           '</td>' +
-          '<td rowspan="1" class="cell-formula pp-avg" style="vertical-align:middle; text-align:center; font-weight:700; background:#f0fdf4; color:#107c41;">100%</td>' +
-          '<td rowspan="1" style="vertical-align:middle; text-align:center; font-family:\'Roboto Mono\'; font-weight:700;">' + numFmt(modalBobotMaks.value) + '</td>' +
-          '<td rowspan="1" class="cell-formula pp-terbobot" style="vertical-align:middle; text-align:center; font-weight:800; background:#d1fae5; color:#065f46;">' + numFmt(modalBobotMaks.value) + '</td>' +
           '<td rowspan="1" style="vertical-align:middle; text-align:center;">' +
             '<button type="button" class="btn-del-pp-2a" data-pp-idx="' + newPpIdx + '" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus PP"><i class="fa fa-trash"></i></button>' +
           '</td>';
@@ -5081,9 +4790,6 @@ tr.type-sub:hover td {
               '<option value="0">0% (Tidak)</option>' +
             '</select>' +
           '</td>' +
-          '<td rowspan="1" class="cell-formula pp-avg" style="vertical-align:middle; text-align:center; font-weight:700; background:#f0fdf4; color:#107c41;">100%</td>' +
-          '<td rowspan="1" style="vertical-align:middle; text-align:center; font-family:\'Roboto Mono\'; font-weight:700;">' + numFmt(modalBobotMaks.value) + '</td>' +
-          '<td rowspan="1" class="cell-formula pp-terbobot" style="vertical-align:middle; text-align:center; font-weight:800; background:#d1fae5; color:#065f46;">' + numFmt(modalBobotMaks.value) + '</td>' +
           '<td rowspan="1" style="vertical-align:middle; text-align:center;"><button type="button" class="btn-del-pp-bg" data-pp-idx="' + newPpIdx + '" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus PP"><i class="fa fa-trash"></i></button></td>';
 
         tbodyBg.appendChild(newTr);
@@ -5212,8 +4918,6 @@ tr.type-sub:hover td {
               '<option value="0.5">Tidak (50%)</option>' +
             '</select>' +
           '</td>' +
-          '<td rowspan="1" class="cell-formula mp-avg" style="vertical-align:middle; text-align:center; font-weight:700; background:#f0fdf4; color:#107c41;">100%</td>' +
-          '<td rowspan="1" class="cell-formula mp-terbobot" style="vertical-align:middle; text-align:center; font-weight:800; background:#d1fae5; color:#065f46;">' + numFmt(modalBobotMaks.value) + '</td>' +
           '<td rowspan="1" style="vertical-align:middle; text-align:center;">' +
             '<button type="button" class="btn-del-mp-1a4" data-mp-idx="' + newMpIdx + '" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus MP"><i class="fa fa-trash"></i></button>' +
           '</td>';
@@ -5336,7 +5040,6 @@ tr.type-sub:hover td {
           '<td><input type="text" class="calc-inp prog-inp" placeholder="Program Prioritas..."></td>' +
           '<td><input type="text" class="calc-inp opd-inp" placeholder="Nama Perangkat Daerah..."></td>' +
           '<td class="cell-formula row-score" style="text-align:center; font-weight:700; color:#107c41;">100%</td>' +
-          '<td class="cell-formula row-terbobot" style="text-align:center; font-weight:800; background:#d1fae5; color:#065f46;">' + numFmt(modalBobotMaks.value) + '</td>' +
           '<td style="text-align:center;"><button type="button" class="btn-del-3a1a-row" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus Baris"><i class="fa fa-times"></i></button></td>';
         tbody3a1a.appendChild(newTr);
         updateModalWorksheetScore();
@@ -5367,11 +5070,6 @@ tr.type-sub:hover td {
               '<option value="Kecil">Kecil (Makin Kecil Baik)</option>' +
             '</select>' +
           '</td>' +
-          '<td class="cell-formula margin-cell">0.0%</td>' +
-          '<td class="cell-formula ket-cell" style="font-size:11.5px;">100%</td>' +
-          '<td class="cell-formula score-cell" style="font-weight:700; color:#107c41;">100%</td>' +
-          '<td style="text-align:center; font-family:\'Roboto Mono\'; font-weight:700;">' + numFmt(modalBobotMaks.value) + '</td>' +
-          '<td class="cell-formula row-terbobot" style="font-weight:800; background:#d1fae5; color:#065f46;">' + numFmt(modalBobotMaks.value) + '</td>' +
           '<td style="text-align:center;"><button type="button" class="btn-del-3a1b-row" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus Baris"><i class="fa fa-times"></i></button></td>';
         tbody3a1b.appendChild(newTr);
         updateModalWorksheetScore();
@@ -5400,7 +5098,6 @@ tr.type-sub:hover td {
             '</select>' +
           '</td>' +
           '<td><input type="text" class="calc-inp catatan-inp" placeholder="Catatan evaluasi..."></td>' +
-          '<td class="cell-formula row-terbobot" style="text-align:center; font-weight:800; background:#d1fae5; color:#065f46;">' + numFmt(modalBobotMaks.value) + '</td>' +
           '<td style="text-align:center;"><button type="button" class="btn-del-gen-row" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus Kriteria"><i class="fa fa-times"></i></button></td>';
         tbodyGen.appendChild(newTr);
         updateModalWorksheetScore();
