@@ -309,12 +309,141 @@
                 left: calc(var(--sidebar-mini-width) - 20px);
             }
         }
+
+        /* Sidebar Section Header / Separator */
+        .sidebar-header {
+            padding: 22px 20px 8px 20px;
+            font-size: 13.5px;
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            display: flex;
+            align-items: center;
+            background: transparent;
+            user-select: none;
+            list-style: none;
+        }
+
+        .sidebar-header .header-icon-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 7px;
+            margin-right: 10px;
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+
+        .sidebar-header .header-text {
+            white-space: nowrap;
+            font-size: 13.5px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+        }
+
+        .sidebar-header::after {
+            content: '';
+            flex-grow: 1;
+            height: 2px;
+            margin-left: 12px;
+            border-radius: 2px;
+        }
+
+        /* 1. Warna Pengaturan (Slate / Neutral Dark) */
+        .sidebar-header.header-pengaturan {
+            color: #334155;
+        }
+        .sidebar-header.header-pengaturan .header-icon-box {
+            background: rgba(100, 116, 139, 0.15);
+            color: #475569;
+        }
+        .sidebar-header.header-pengaturan::after {
+            background: linear-gradient(to right, #94a3b8, transparent);
+        }
+
+        /* 2. Warna Perencanaan (Royal Blue) */
+        .sidebar-header.header-perencanaan {
+            color: #1d4ed8;
+        }
+        .sidebar-header.header-perencanaan .header-icon-box {
+            background: rgba(37, 99, 235, 0.15);
+            color: #2563eb;
+        }
+        .sidebar-header.header-perencanaan::after {
+            background: linear-gradient(to right, #3b82f6, transparent);
+        }
+
+        /* 3. Warna Kinerja (Teal / Emerald) */
+        .sidebar-header.header-kinerja {
+            color: #0f766e;
+        }
+        .sidebar-header.header-kinerja .header-icon-box {
+            background: rgba(13, 148, 136, 0.15);
+            color: #0d9488;
+        }
+        .sidebar-header.header-kinerja::after {
+            background: linear-gradient(to right, #14b8a6, transparent);
+        }
+
+        /* 4. Warna Anggaran (Vibrant Orange / Amber) */
+        .sidebar-header.header-anggaran {
+            color: #c2410c;
+        }
+        .sidebar-header.header-anggaran .header-icon-box {
+            background: rgba(234, 88, 12, 0.15);
+            color: #ea580c;
+        }
+        .sidebar-header.header-anggaran::after {
+            background: linear-gradient(to right, #f97316, transparent);
+        }
+
+        /* 5. Warna Evaluasi (Royal Purple / Violet) */
+        .sidebar-header.header-evaluasi {
+            color: #6d28d9;
+        }
+        .sidebar-header.header-evaluasi .header-icon-box {
+            background: rgba(124, 58, 237, 0.15);
+            color: #7c3aed;
+        }
+        .sidebar-header.header-evaluasi::after {
+            background: linear-gradient(to right, #8b5cf6, transparent);
+        }
+
+        /* Aksen Warna Ikon Tiap Kategori */
+        .section-perencanaan .menu-icon, .section-perencanaan .bi { color: #2563eb !important; }
+        .section-kinerja .menu-icon, .section-kinerja .bi { color: #0d9488 !important; }
+        .section-anggaran .menu-icon, .section-anggaran .bi { color: #ea580c !important; }
+        .section-evaluasi .menu-icon, .section-evaluasi .bi { color: #7c3aed !important; }
+
+        /* Di mini sidebar, header menjadi garis pembatas tipis */
+        .sidebar-mini .sidebar-header {
+            padding: 8px 15px;
+            height: 1px;
+            overflow: hidden;
+            border-bottom: 1px solid #e9ecef;
+            margin: 6px 0;
+            display: block !important;
+        }
+        .sidebar-mini .sidebar-header * {
+            display: none !important;
+        }
+        .sidebar-mini .sidebar-header::after {
+            display: none !important;
+        }
     </style>
 </head>
 <!-- Sidebar -->
 <div class="sidebar-wrapper">
     <div class="sidebar-content">
         <ul class="sidebar-menu">
+
+            <!-- DAFTAR AKUN -->
+            <li class="sidebar-header header-pengaturan">
+                <span class="header-icon-box"><i class="fa fa-users"></i></span>
+                <span class="header-text">Pengaturan</span>
+            </li>
 
             <li class="sidebar-dropdown">
                 <a href="#">
@@ -329,6 +458,15 @@
                 </div>
             </li>
 
+            <!-- ==============================================
+                 1. PERENCANAAN
+                 ============================================== -->
+            <li class="sidebar-header header-perencanaan">
+                <span class="header-icon-box"><i class="fa fa-calendar-check-o"></i></span>
+                <span class="header-text">Perencanaan</span>
+            </li>
+
+            <!-- RPJPD -->
             <li class="sidebar-dropdown">
                 <a href="#">
                     <i class="menu-icon fa fa-area-chart"></i>
@@ -345,6 +483,7 @@
                 </div>
             </li>
 
+            <!-- RPJMD -->
             <li class="sidebar-dropdown">
                 <a href="#">
                     <i class="menu-icon fa fa-line-chart"></i>
@@ -365,11 +504,11 @@
                     <a href="<?=base_url('Daerah/cascade')?>">Cascade</a>
                     <a href="<?=base_url('Daerah/PotensiDaerah')?>">Potensi Daerah</a>
                     <a href="<?=base_url('Daerah/PermasalahanPokok')?>">Permasalahan Pokok</a>
-                  
                 </div>
             </li>
 
-             <li class="sidebar-dropdown">
+            <!-- Renstra -->
+            <li class="sidebar-dropdown">
                 <a href="#">
                     <i class="bi bi-briefcase-fill"></i>
                     <span>Renstra</span>
@@ -392,22 +531,20 @@
                 </div>
             </li>
 
+            <!-- RKPD -->
             <li class="sidebar-dropdown">
-            <a href="#">
-                <i class="bi bi-file-text-fill"></i>
-                <span>RKPD</span>
-                <i class="fa fa-chevron-down"></i>
-            </a>
-
+                <a href="#">
+                    <i class="bi bi-file-text-fill"></i>
+                    <span>RKPD</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
                 <div class="sidebar-submenu">
-
                     <!-- Rancangan Awal -->
                     <div class="sidebar-dropdown">
                         <a href="#">
                             <span>Rancangan Awal</span>
                             <i class="fa fa-chevron-down"></i>
                         </a>
-
                         <div class="sidebar-submenu">
                             <a href="<?=base_url('Daerah/TemaPembangunan')?>">Tema Pembangunan</a>
                             <a href="<?=base_url('Daerah/PaguUrusan')?>">Input Pagu Anggaran</a>
@@ -422,10 +559,8 @@
                             <span>Rancangan RKPD</span>
                             <i class="fa fa-chevron-down"></i>
                         </a>
-
                         <div class="sidebar-submenu">
                             <a href="<?=base_url('Daerah/RancanganRKPD')?>">Rancangan RKPD</a>
-                            <!-- Tambahkan menu lain jika ada -->
                         </div>
                     </div>
 
@@ -435,11 +570,9 @@
                             <span>Rancangan Akhir</span>
                             <i class="fa fa-chevron-down"></i>
                         </a>
-
                         <div class="sidebar-submenu">
                             <a href="<?=base_url('Daerah/RankhirRKPD')?>">Rancangan Akhir RKPD</a>
                             <a href="<?=base_url('Daerah/PaguUrusanRankhir')?>">Pagu Urusan Rankhir RKPD</a>
-                            <!-- Tambahkan menu lain jika ada -->
                         </div>
                     </div>
 
@@ -449,15 +582,14 @@
                             <span>Perubahan RKPD</span>
                             <i class="fa fa-chevron-down"></i>
                         </a>
-
                         <div class="sidebar-submenu">
                             <a href="<?=base_url('Daerah/PerubahanRKPD')?>">Perubahan RKPD</a>
                         </div>
                     </div>
-
                 </div>
             </li>
 
+            <!-- Renja -->
             <li class="sidebar-dropdown">
                 <a href="#">
                     <i class="bi bi-file-text-fill"></i>
@@ -472,6 +604,7 @@
                 </div>
             </li>
 
+            <!-- Konsistensi/Keselarasan RKPD -->
             <li class="sidebar-dropdown">
                 <a href="#">
                     <i class="menu-icon fa fa-repeat"></i>
@@ -489,7 +622,29 @@
                 </div>
             </li>
 
-             <li class="sidebar-dropdown">
+            <!-- Rencana Aksi -->
+            <li class="sidebar-dropdown">
+                <a href="#">
+                    <i class="menu-icon fa fa-tasks"></i>
+                    <span>Rencana Aksi</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Instansi/TargetRenaksi')?>">Target</a>
+                    <a href="<?=base_url('Instansi/RealisasiRenaksi')?>">Realisasi</a>
+                </div>
+            </li>
+
+            <!-- ==============================================
+                 2. KINERJA
+                 ============================================== -->
+            <li class="sidebar-header header-kinerja">
+                <span class="header-icon-box"><i class="fa fa-tachometer"></i></span>
+                <span class="header-text">Kinerja</span>
+            </li>
+
+            <!-- Perjanjian Kinerja -->
+            <li class="sidebar-dropdown">
                 <a href="#">
                     <i class="bi bi-file-check"></i>
                     <span>Perjanjian Kinerja</span>
@@ -500,6 +655,42 @@
                 </div>
             </li>
 
+            <!-- Pohon Kinerja -->
+            <li class="sidebar-dropdown">
+                <a href="#">
+                    <i class="menu-icon fa fa-sitemap"></i>
+                    <span>Pohon Kinerja</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Daerah/Ultimate_outcome')?>">Pohon Kinerja</a>
+                    <a href="<?=base_url('Daerah/TampilPohonKinerja')?>">Tampilan Pohon Kinerja</a>
+                    <a href="<?=base_url('Instansi/Ultimate_outcome_pd')?>">Pohon Kinerja PD</a>
+                    <a href="<?=base_url('Instansi/TampilPohonKinerjaPD')?>">Tampilan Pohon Kinerja PD</a>
+                </div>
+            </li>
+
+            <!-- ==============================================
+                 3. ANGGARAN
+                 ============================================== -->
+            <li class="sidebar-header header-anggaran">
+                <span class="header-icon-box"><i class="fa fa-money"></i></span>
+                <span class="header-text">Anggaran</span>
+            </li>
+
+            <!-- Sub Kegiatan -->
+            <li class="sidebar-dropdown">
+                <a href="#">
+                    <i class="menu-icon fa fa-list-alt"></i>
+                    <span>Sub Kegiatan</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Instansi/BelanjaSubKegiatan')?>">Belanja Sub Kegiatan</a>
+                </div>
+            </li>
+
+            <!-- Anggaran -->
             <li class="sidebar-dropdown">
                 <a href="#">
                     <i class="bi bi-cash"></i>
@@ -512,36 +703,10 @@
                 </div>
             </li>
 
+            <!-- DPA -->
             <li class="sidebar-dropdown">
                 <a href="#">
-                    <i class="menu-icon fa fa-sitemap"></i>
-                    <span>Pohon Kinerja</span>
-                    <i class="fa fa-chevron-down"></i>
-                </a>
-                <div class="sidebar-submenu">
-                    <a href="<?=base_url('Daerah/Ultimate_outcome')?>">Pohon Kinerja</a>
-                    <a href="<?=base_url('Daerah/TampilPohonKinerja')?>">Tampilan Pohon Kinerja</a>
-                     <a href="<?=base_url('Instansi/Ultimate_outcome_pd')?>">Pohon Kinerja PD</a>
-                     <a href="<?=base_url('Instansi/TampilPohonKinerjaPD')?>">Tampilan Pohon Kinerja PD</a>
-            
-                </div>
-            </li>
-
-            <li class="sidebar-dropdown">
-                <a href="#">
-                    <i class="menu-icon fa fa-sitemap"></i>
-                    <span>Sub Kegiatan</span>
-                    <i class="fa fa-chevron-down"></i>
-                </a>
-                <div class="sidebar-submenu">
-                    <a href="<?=base_url('Instansi/BelanjaSubKegiatan')?>">Belanja Sub Kegiatan</a>
-            
-                </div>
-            </li>
-
-            <li class="sidebar-dropdown">
-                <a href="#">
-                    <i class="menu-icon fa fa-sitemap"></i>
+                    <i class="menu-icon fa fa-book"></i>
                     <span>DPA</span>
                     <i class="fa fa-chevron-down"></i>
                 </a>
@@ -550,18 +715,7 @@
                 </div>
             </li>
 
-            <li class="sidebar-dropdown">
-                <a href="#">
-                    <i class="menu-icon fa fa-sitemap"></i>
-                    <span>Rencana Aksi</span>
-                    <i class="fa fa-chevron-down"></i>
-                </a>
-                <div class="sidebar-submenu">
-                    <a href="<?=base_url('Instansi/TargetRenaksi')?>">Target</a>
-                    <a href="<?=base_url('Instansi/RealisasiRenaksi')?>">Realisasi</a>
-                </div>
-            </li>
-
+            <!-- Laporan -->
             <li class="sidebar-dropdown">
                 <a href="#">
                     <i class="menu-icon fa fa-file-text"></i>
@@ -573,9 +727,18 @@
                 </div>
             </li>
 
+            <!-- ==============================================
+                 4. EVALUASI
+                 ============================================== -->
+            <li class="sidebar-header header-evaluasi">
+                <span class="header-icon-box"><i class="fa fa-check-circle-o"></i></span>
+                <span class="header-text">Evaluasi</span>
+            </li>
+
+            <!-- E - LKPJ -->
             <li class="sidebar-dropdown">
                 <a href="#">
-                    <i class="menu-icon fa fa-file-text"></i>
+                    <i class="menu-icon fa fa-file-text-o"></i>
                     <span>E - LKPJ</span>
                     <i class="fa fa-chevron-down"></i>
                 </a>
@@ -607,11 +770,11 @@
                         </div>
                     </div>
 
-                    
                     <a href="<?=base_url('Instansi/BAB5')?>">BAB 5</a>
                 </div>
             </li>
 
+            <!-- IPPD -->
             <li class="sidebar-dropdown">
                 <a href="#">
                     <i class="menu-icon fa fa-bar-chart"></i>
@@ -620,6 +783,18 @@
                 </a>
                 <div class="sidebar-submenu">
                     <a href="<?=base_url('Instansi/TabelIPPD')?>">Tabel IPPD</a>
+                </div>
+            </li>
+
+            <!-- Capaian IKK -->
+            <li class="sidebar-dropdown">
+                <a href="#">
+                    <i class="menu-icon fa fa-check-square-o"></i>
+                    <span>Capaian IKK</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Instansi/CapaianIkkPD')?>">Capaian IKK PD</a>
                 </div>
             </li>
 

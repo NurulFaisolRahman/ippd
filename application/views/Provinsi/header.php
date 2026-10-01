@@ -596,14 +596,14 @@
         </div>
     </div>
 <script>
-        // Log Out Clear Session in Controller Beranda
+        // Log Out Clear Session in Controller Home/Logout
         function logout() {
-            window.location.href = '/ippd';
+            window.location.href = '<?= base_url('Home/Logout'); ?>';
         }
 
         // Redirect to Login
         function Login() {    
-            window.location.href = '/ippd/Home';
+            window.location.href = '<?= base_url('Home'); ?>';
         }
 
         // Mobile menu handling

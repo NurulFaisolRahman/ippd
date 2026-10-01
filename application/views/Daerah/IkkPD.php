@@ -17,31 +17,518 @@ if (!function_exists('format_rumus_rpjmd')) {
         return nl2br($formatted);
     }
 }
+
+if (!function_exists('format_target_koma')) {
+    function format_target_koma($v) {
+        if ($v === null || $v === '') return '-';
+        $str = trim((string)$v);
+        if ($str === '' || $str === '-') return '-';
+        return html_escape(str_replace('.', ',', $str));
+    }
+}
 ?>
 <?php $this->load->view('Daerah/sidebar'); ?>
 <?php $this->load->view('Daerah/Cssumum'); ?>
 
 <style>
+/* Layout Offset agar tidak tertimpa sidebar */
+.main-content {
+    margin-left: var(--sidebar-width, 280px) !important;
+    padding: 24px 28px 60px 28px !important;
+    min-height: calc(100vh - 64px) !important;
+    transition: all var(--transition-speed, 0.3s) ease;
+    box-sizing: border-box !important;
+    width: auto !important;
+}
+
+.sidebar-mini .main-content {
+    margin-left: var(--sidebar-mini-width, 70px) !important;
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0 !important;
+        padding: 15px 12px !important;
+    }
+}
+
 /* Card Modern Curve untuk Tabel dan Data IKK PD */
-.data-table-list {
+.data-table-list-full {
     border-radius: 14px !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
-    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06) !important;
+    border: 1px solid #e2e8f0;
     overflow: hidden;
     background: #ffffff;
-    padding: 24px !important;
+    padding: 24px 28px !important;
+    width: 100% !important;
+}
+
+/* Header & Controls */
+.ikk-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 22px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #e2e8f0;
+}
+.ikk-title h3 {
+    font-size: 21px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.ikk-title p {
+    margin: 6px 0 0 0;
+    font-size: 13px;
+    color: #64748b;
+}
+.badge-wilayah {
+    font-size: 12px;
+    font-weight: 600;
+    background: #0284c7;
+    color: #ffffff;
+    padding: 3px 10px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    vertical-align: middle;
+}
+.ikk-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.btn-head-link {
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 8px 16px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none !important;
+    transition: all 0.2s ease;
+}
+.btn-head-link:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+.btn-head-primary {
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 8px 18px;
+    background: #00c292;
+    border: none;
+    color: #ffffff;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 194, 146, 0.25);
+    transition: all 0.2s ease;
+}
+.btn-head-primary:hover {
+    background: #00a87e;
+    color: #ffffff;
+}
+
+/* Integrated Filter Bar */
+.filter-card-integrated {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 22px;
+}
+.filter-flex-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+.filter-col {
+    margin-bottom: 10px;
+}
+.filter-card-integrated .filter-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 7px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.filter-card-integrated .form-control {
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-size: 13px;
+    height: 40px;
+    box-shadow: none;
+    transition: all 0.2s ease;
+    background-color: #ffffff;
+    color: #1e293b;
+}
+.filter-card-integrated .form-control:focus {
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+}
+.filter-btn-group {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+.btn-filter-act {
+    height: 40px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+.btn-filter-tampilkan {
+    background: #0ea5e9;
+    border: none;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(14, 165, 233, 0.25);
+    flex: 1;
+}
+.btn-filter-tampilkan:hover {
+    background: #0284c7;
+    color: #ffffff;
+}
+.btn-filter-reset {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    flex: 1;
+}
+.btn-filter-reset:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+.btn-filter-tambah {
+    background: #00c292;
+    border: none;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 194, 146, 0.25);
+    padding: 0 20px;
+}
+.btn-filter-tambah:hover {
+    background: #00a87e;
+    color: #ffffff;
+}
+.role4-instansi-banner {
+    margin-top: 14px;
+    font-size: 12.5px;
+    color: #065f46;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    padding: 10px 14px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.role4-instansi-banner i {
+    font-size: 16px;
+    color: #059669;
+}
+
+/* Tabel Utama IKK PD */
+.table-ikk-wrapper {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #ffffff;
+    margin-bottom: 10px;
+}
+.table-ikk-custom {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    font-size: 12.5px;
+    margin-bottom: 0 !important;
+}
+.table-ikk-custom thead tr th {
+    background: #f8fafc !important;
+    color: #334155 !important;
+    font-weight: 700 !important;
+    font-size: 12px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    padding: 12px 8px !important;
+    border-bottom: 2px solid #cbd5e1 !important;
+    border-right: 1px solid #e2e8f0 !important;
+    vertical-align: middle !important;
+    text-align: center;
+}
+.table-ikk-custom thead tr th:last-child {
+    border-right: none !important;
+}
+.table-ikk-custom thead tr th.th-target-group {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    font-weight: 800 !important;
+    border-bottom: 1.5px solid #cbd5e1 !important;
+}
+.table-ikk-custom thead tr.th-years-sub th {
+    background: #f8fafc !important;
+    font-size: 11.5px !important;
+    color: #0369a1 !important;
+    font-weight: 700 !important;
+    padding: 9px 6px !important;
+}
+.table-ikk-custom tbody td {
+    padding: 11px 8px !important;
+    border-top: 1px solid #f1f5f9 !important;
+    border-right: 1px solid #f1f5f9 !important;
+    vertical-align: middle !important;
+    color: #1e293b;
+    line-height: 1.45;
+}
+.table-ikk-custom tbody td:last-child {
+    border-right: none !important;
+}
+.table-ikk-custom tbody tr:hover td {
+    background-color: #f8fafc !important;
+}
+
+/* Kolom Nilai Baseline & Target */
+.td-baseline-val {
+    background-color: #f8fafc;
+    font-weight: 700;
+    color: #334155;
+    font-family: 'Consolas', 'Roboto Mono', monospace;
+    font-size: 12px;
+    text-align: center;
+    border-right: 1.5px solid #cbd5e1 !important;
+    min-width: 65px;
+}
+.td-target-val {
+    background-color: #ffffff;
+    font-weight: 600;
+    color: #0369a1;
+    font-family: 'Consolas', 'Roboto Mono', monospace;
+    font-size: 12px;
+    text-align: center;
+    border-right: 1px dashed #e2e8f0 !important;
+    min-width: 60px;
+}
+.td-empty-dash {
+    color: #cbd5e1;
+    font-style: italic;
+    font-size: 12px;
+}
+.badge-satuan {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    font-size: 11.5px;
+    font-weight: 600;
+}
+
+/* Tombol Aksi */
+.action-buttons-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+}
+.btn-act-table {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    border: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+.btn-act-edit {
+    background: #fef3c7;
+    color: #d97706;
+    border: 1px solid #fde68a;
+}
+.btn-act-edit:hover {
+    background: #d97706;
+    color: #ffffff;
+    border-color: #d97706;
+}
+.btn-act-del {
+    background: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+.btn-act-del:hover {
+    background: #dc2626;
+    color: #ffffff;
+    border-color: #dc2626;
+}
+
+/* Empty State Table */
+.empty-table-state {
+    padding: 35px 20px;
+    color: #64748b;
+    font-size: 13.5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+.empty-table-state i {
+    font-size: 34px;
+    color: #cbd5e1;
+}
+
+/* DataTables Controls & Wrapper Styling */
+.dataTables_wrapper {
+    padding-top: 6px;
+}
+.dataTables_wrapper .dataTables_length {
+    float: left;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #64748b;
+}
+.dataTables_wrapper .dataTables_length select {
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    padding: 4px 8px !important;
+    margin: 0 6px !important;
+    outline: none !important;
+    background: #ffffff !important;
+    font-size: 13px !important;
+    color: #334155 !important;
+    height: 34px !important;
+}
+.dataTables_wrapper .dataTables_filter {
+    float: right;
+    margin-bottom: 16px;
+    position: relative;
+}
+.dataTables_wrapper .dataTables_filter label {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: normal;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.dataTables_wrapper .dataTables_filter input {
+    height: 36px !important;
+    padding: 6px 14px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 20px !important;
+    font-size: 13px !important;
+    color: #1e293b !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    outline: none !important;
+    transition: all 0.2s ease !important;
+    width: 220px !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
+    margin-left: 0 !important;
+}
+.dataTables_wrapper .dataTables_filter input:focus {
+    width: 260px !important;
+    border-color: #0ea5e9 !important;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15) !important;
+}
+.dataTables_wrapper .dataTables_filter label:after,
+.dataTables_wrapper .dataTables_filter label::after,
+.dataTables_filter label:after,
+.dataTables_filter label::after {
+    display: none !important;
+    content: none !important;
+}
+
+/* Pagination & Info */
+.dataTables_wrapper .dataTables_info {
+    float: left;
+    margin-top: 18px;
+    font-size: 12.5px;
+    color: #64748b;
+    font-weight: 500;
+}
+.dataTables_wrapper .dataTables_paginate {
+    float: right;
+    margin-top: 18px;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.previous:before,
+.dataTables_wrapper .dataTables_paginate .paginate_button.next:before {
+    display: none !important;
+    content: "" !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    min-width: 32px !important;
+    height: 32px !important;
+    line-height: 30px !important;
+    padding: 0 8px !important;
+    text-align: center !important;
+    font-size: 12px !important;
+    border-radius: 6px !important;
+    background: #ffffff !important;
+    color: #475569 !important;
+    border: 1px solid #e2e8f0 !important;
+    margin: 0 3px !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    box-sizing: border-box !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+    background: #00c292 !important;
+    border-color: #00c292 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover {
+    opacity: 0.4 !important;
+    cursor: not-allowed !important;
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+    color: #94a3b8 !important;
 }
 
 /* Badge & styling tampilan rumus pada tabel */
 .rumus-tag-wrapper {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-left: 3px solid #03a9f3;
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-left: 3px solid #0284c7;
     border-radius: 6px;
     padding: 6px 10px;
     font-size: 12px;
-    color: #334155;
-    line-height: 1.4;
+    color: #0369a1;
+    line-height: 1.45;
     display: inline-flex;
     align-items: flex-start;
     gap: 7px;
@@ -55,7 +542,7 @@ if (!function_exists('format_rumus_rpjmd')) {
     word-break: break-word;
 }
 .rumus-badge-icon {
-    color: #03a9f3;
+    color: #0284c7;
     font-size: 12px;
     margin-top: 2px;
     flex-shrink: 0;
@@ -514,279 +1001,358 @@ sup {
 </style>
 
 <div class="main-content">
-    <div class="data-table-area">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <div class="data-table-list">
+    <div class="container-fluid" style="padding: 0;">
+        <div class="data-table-list-full">
 
-                        <!-- FILTER WILAYAH (Provinsi, Kab/Kota, dan Instansi) - SEBELUM LOGIN -->
-                        <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-                            <div class="form-example-wrap" style="margin-bottom: 20px;">
-                                <div class="form-example-int form-horizental">
-                                    <div class="form-group">
-                                        <div class="row filter-row">
-                                            <div class="col-lg-3 col-md-6">
-                                                <div class="filter-group">
-                                                    <label for="Provinsi"><b>Provinsi</b></label>
-                                                    <select class="form-control filter-select" id="Provinsi">
-                                                        <option value="">Pilih Provinsi</option>
-                                                        <?php foreach ($Provinsi as $prov) { ?>
-                                                            <option value="<?= html_escape($prov['Kode']) ?>"
-                                                                <?= (!empty($KodeWilayah) && substr($KodeWilayah,0,2)==$prov['Kode']) ? 'selected' : '' ?>>
-                                                                <?= html_escape($prov['Nama']) ?>
-                                                            </option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-lg-3 col-md-6">
-                                                <div class="filter-group">
-                                                    <label for="KabKota"><b>Kab/Kota</b></label>
-                                                    <select class="form-control filter-select" id="KabKota">
-                                                        <option value="">Pilih Kab/Kota</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <!-- FILTER INSTANSI SEBELUM LOGIN -->
-                                            <div class="col-lg-3 col-md-6" id="FilterInstansiGroupBefore" style="display: none;">
-                                                <div class="filter-group">
-                                                    <label for="FilterInstansiBeforeLogin"><b>Filter Instansi</b></label>
-                                                    <select class="form-control filter-select" id="FilterInstansiBeforeLogin">
-                                                        <option value="">-- Semua Instansi --</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-lg-2 col-md-6">
-                                                <div class="filter-group" style="margin-top: 28px;">
-                                                    <button class="btn btn-primary notika-btn-primary btn-block" id="Filter">
-                                                        <b>Filter</b>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <?php if (!empty($KodeWilayah)) { ?>
-                                <?php
-                                    $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-                                    $nama_wilayah = $wilayah ? html_escape($wilayah['Nama']) : 'Wilayah Tidak Ditemukan';
-                                ?>
-                                <div class="alert alert-info" style="margin-bottom: 20px;">
-                                    <strong>Wilayah terpilih:</strong> <?= $nama_wilayah ?>
-                                    <?php 
-                                    $filter_instansi_id = $this->input->get('instansi_id', TRUE);
-                                    if (!empty($filter_instansi_id)) { 
-                                        $instansi_terpilih = $this->db->select('nama')->from('akun_instansi')->where('id', $filter_instansi_id)->get()->row_array();
-                                    ?>
-                                        <br><strong>Instansi terpilih:</strong> <?= htmlspecialchars($instansi_terpilih['nama'] ?? '-') ?>
-                                    <?php } ?>
-                                </div>
-                            <?php } ?>
-                        <?php } ?>
-                        <!-- END FILTER WILAYAH -->
-
-                        <!-- FILTER INSTANSI (UNTUK YANG SUDAH LOGIN DAN BUKAN ROLE 4) -->
-                        <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
-                            <div class="form-example-wrap" style="margin-bottom: 20px;">
-                                <div class="form-example-int form-horizental">
-                                    <div class="form-group">
-                                        <div class="row filter-row">
-                                            <div class="col-lg-4 col-md-6">
-                                                <div class="filter-group">
-                                                    <label for="FilterInstansi"><b>Filter Instansi</b></label>
-                                                    <select class="form-control filter-select" id="FilterInstansi">
-                                                        <option value="">-- Semua Instansi --</option>
-                                                        <?php foreach ($ListInstansi as $ins) { ?>
-                                                            <option value="<?= $ins['id'] ?>" <?= ($FilterInstansiId == $ins['id']) ? 'selected' : '' ?>>
-                                                                <?= html_escape($ins['nama']) ?>
-                                                            </option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-2 col-md-6">
-                                                <div class="filter-group" style="margin-top: 28px;">
-                                                    <button class="btn btn-info notika-btn-info btn-block" id="FilterInstansiBtn">
-                                                        <b>Tampilkan</b>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-2 col-md-6">
-                                                <div class="filter-group" style="margin-top: 28px;">
-                                                    <button class="btn btn-default notika-btn-default btn-block" id="ResetFilterBtn">
-                                                        <b>Reset</b>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php } ?>
-                        <!-- END FILTER INSTANSI -->
-
-                        <!-- TAMPILKAN NAMA INSTANSI YANG SEDANG LOGIN (UNTUK ROLE 4) -->
-                        <?php if ($IsRole4 && !empty($NamaInstansi)) { ?>
-                            <div class="alert alert-success" style="margin-bottom: 20px;">
-                                <i class="fa fa-building"></i> <strong>Instansi:</strong> <?= htmlspecialchars($NamaInstansi) ?>
-                                <br><small>Anda hanya dapat melihat dan mengelola data milik instansi Anda sendiri.</small>
-                            </div>
-                        <?php } ?>
-
-                        <?php
-                        $NamaBidangAktif = '';
-                        if (!empty($Urusan) && !empty($UrusanAktif)) {
-                            foreach ($Urusan as $u) {
-                                if ((string)$u['id'] === (string)$UrusanAktif) {
-                                    $NamaBidangAktif = $u['nama_urusan'];
-                                    break;
-                                }
-                            }
-                        }
-                        ?>
-
-                        <!-- ================= BIDANG URUSAN PD ================= -->
-                        <div class="row" style="margin-bottom:15px;">
-                            <div class="col-lg-4">
-                                <label><b>Bidang Urusan PD <span style="color:red">*</span></b></label>
-                                <select class="form-control" id="UrusanPD">
-                                    <?php if (!$IsRole4 && empty($FilterInstansiId)) { ?>
-                                        <option value="">-- Pilih Instansi terlebih dahulu --</option>
-                                    <?php } else { ?>
-                                        <option value="">-- Pilih Bidang Urusan --</option>
-                                        <?php if (!empty($Urusan)) { ?>
-                                            <?php foreach ($Urusan as $u) { ?>
-                                                <option value="<?= $u['id'] ?>"
-                                                    <?= ($UrusanAktif == $u['id']) ? 'selected' : '' ?>>
-                                                    <?= html_escape($u['nama_urusan']) ?>
-                                                </option>
-                                            <?php } ?>
-                                        <?php } else { ?>
-                                            <option value="" disabled>-- Instansi ini belum memiliki Bidang Urusan PD --</option>
-                                        <?php } ?>
-                                    <?php } ?>
-                                </select>
-                            </div>
-                            <?php if ($IsRole4 && $UrusanAktif) { ?>
-                                <div class="col-lg-3" style="margin-top:25px;">
-                                    <button type="button" class="btn btn-success notika-btn-success" id="BtnTambahIkkPD">
-                                        <i class="notika-icon bi-plus-lg"></i> <b>Tambah IKK</b>
-                                    </button>
-                                </div>
-                            <?php } ?>
-                        </div>
-
-                        <!-- ================= TABLE ================= -->
-                        <div class="table-responsive">
-                            <table id="data-table-basic" class="table table-striped">
-                                <thead>
-                                    <tr class="text-center">
-                                        <th rowspan="2" width="40" style="vertical-align: middle !important;">No</th>
-                                        <th rowspan="2" style="min-width:180px; text-align: left; vertical-align: middle !important;">Indikator</th>
-                                        <th rowspan="2" style="min-width:180px; text-align: left; vertical-align: middle !important;">Rumus</th>
-                                        <th rowspan="2" style="min-width:180px; text-align: left; vertical-align: middle !important;">Definisi Operasional</th>
-                                        <th class="text-center" rowspan="2" width="80" style="vertical-align: middle !important;">Satuan</th>
-                                        <th class="text-center" rowspan="2" width="90" style="vertical-align: middle !important;">Baseline<br>2024</th>
-                                        <th class="text-center" colspan="6">Target Tahun</th>
-                                        <th rowspan="2" style="vertical-align: middle !important;">Keterangan</th>
-                                        <?php if ($IsRole4) { ?>
-                                            <th class="text-center" rowspan="2" width="130" style="vertical-align: middle !important;">Aksi</th>
-                                        <?php } ?>
-                                    </tr>
-                                    <tr class="text-center">
-                                        <th class="text-center">2025</th>
-                                        <th class="text-center">2026</th>
-                                        <th class="text-center">2027</th>
-                                        <th class="text-center">2028</th>
-                                        <th class="text-center">2029</th>
-                                        <th class="text-center">2030</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php if ($UrusanAktif && !empty($Data)) { ?>
-                                        <?php $no = 1; foreach ($Data as $row) { ?>
-                                            <tr>
-                                                <td class="text-center" style="vertical-align: middle !important;"><?= $no++ ?></td>
-                                                <td style="vertical-align: middle !important;"><?= nl2br(html_escape($row['indikator'])) ?></td>
-                                                <td style="vertical-align: middle !important;">
-                                                    <?php if (!empty($row['rumus'])) { ?>
-                                                        <div class="rumus-tag-wrapper">
-                                                            <i class="fa fa-calculator rumus-badge-icon"></i>
-                                                            <span><?= format_rumus_rpjmd($row['rumus']) ?></span>
-                                                        </div>
-                                                    <?php } else { ?>
-                                                        <span class="text-muted" style="font-size:11px; font-style:italic;">-</span>
-                                                    <?php } ?>
-                                                </td>
-                                                <td style="vertical-align: middle !important;">
-                                                    <?php if (!empty($row['definisi_operasional'])) { ?>
-                                                        <div class="definisi-text-wrapper">
-                                                            <?= nl2br(html_escape($row['definisi_operasional'])) ?>
-                                                        </div>
-                                                    <?php } else { ?>
-                                                        <span class="text-muted" style="font-size:11px; font-style:italic;">-</span>
-                                                    <?php } ?>
-                                                </td>
-<?php
-if (!function_exists('format_target_koma')) {
-    function format_target_koma($v) {
-        if ($v === null || $v === '') return '-';
-        $str = trim((string)$v);
-        if ($str === '' || $str === '-') return '-';
-        return html_escape(str_replace('.', ',', $str));
-    }
-}
-?>
-                                                <td class="text-center" style="vertical-align: middle !important;"><?= html_escape($row['satuan']) ?></td>
-                                                <td class="text-center" style="vertical-align: middle !important;"><?= format_target_koma($row['baseline_2024'] ?? null) ?></td>
-                                                <td class="text-center" style="vertical-align: middle !important;"><?= format_target_koma($row['t_2025'] ?? null) ?></td>
-                                                <td class="text-center" style="vertical-align: middle !important;"><?= format_target_koma($row['t_2026'] ?? null) ?></td>
-                                                <td class="text-center" style="vertical-align: middle !important;"><?= format_target_koma($row['t_2027'] ?? null) ?></td>
-                                                <td class="text-center" style="vertical-align: middle !important;"><?= format_target_koma($row['t_2028'] ?? null) ?></td>
-                                                <td class="text-center" style="vertical-align: middle !important;"><?= format_target_koma($row['t_2029'] ?? null) ?></td>
-                                                <td class="text-center" style="vertical-align: middle !important;"><?= format_target_koma($row['t_2030'] ?? null) ?></td>
-                                                <td style="vertical-align: middle !important;"><?= nl2br(html_escape($row['keterangan'])) ?></td>
-                                                <?php if ($IsRole4) { ?>
-                                                    <td class="text-center" style="vertical-align: middle !important;">
-                                                        <?php if ($InstansiId == ($row['id_instansi'] ?? null)) { ?>
-
-                                                            <button type="button" class="btn btn-warning btn-sm BtnEdit"
-                                                                data-json='<?= json_encode($row) ?>'
-                                                                title="Edit IKK PD">
-                                                                <i class="notika-icon notika-edit"></i>
-                                                            </button>
-                                                            <button type="button" class="btn btn-sm btn-danger BtnHapus"
-                                                                data-id="<?= $row['id'] ?>"
-                                                                title="Hapus IKK PD">
-                                                                <i class="notika-icon notika-trash"></i>
-                                                            </button>
-                                                        <?php } else { ?>
-                                                            <span class="text-muted">-</span>
-                                                        <?php } ?>
-                                                    </td>
-                                                <?php } ?>
-                                            </tr>
-                                        <?php } ?>
-                                    <?php } else { ?>
-                                        <tr>
-                                            <td colspan="<?= $IsRole4 ? '14' : '13' ?>" class="text-center">
-                                                <?= $UrusanAktif ? 'Belum ada data IKK PD' : 'Silakan pilih Bidang Urusan PD terlebih dahulu' ?>
-                                            </td>
-                                        </tr>
-                                    <?php } ?>
-                                </tbody>
-                            </table>
-                        </div>
-
-                    </div>
+            <!-- ================= HEADER & CONTROL BAR ================= -->
+            <div class="ikk-header-bar">
+                <div class="ikk-title">
+                    <h3>
+                        <i class="fa fa-list-alt text-success" style="font-size: 24px;"></i>
+                        Indikator Kinerja Kunci (IKK) Perangkat Daerah
+                        <?php if (!empty($NamaWilayah)): ?>
+                            <span class="badge-wilayah">
+                                <i class="fa fa-map-marker"></i> <?= html_escape($NamaWilayah) ?>
+                            </span>
+                        <?php endif; ?>
+                    </h3>
+                    <p>Pengelolaan data indikator kunci (IKK), definisi operasional, rumus perhitungan, baseline, dan target tahunan Perangkat Daerah.</p>
+                </div>
+                <div class="ikk-actions">
+                    <a href="<?= base_url('Instansi/CapaianIkkPD' . (!empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '')) ?>" class="btn-head-link">
+                        <i class="fa fa-line-chart text-info"></i> Capaian IKK PD
+                    </a>
+                    <?php if ($IsRole4 && $UrusanAktif) { ?>
+                        <button type="button" class="btn-head-primary" id="BtnTambahIkkPDHeader">
+                            <i class="fa fa-plus"></i> Tambah IKK
+                        </button>
+                    <?php } ?>
                 </div>
             </div>
+
+            <!-- ================= FILTER SECTION ================= -->
+            <!-- 1. FILTER WILAYAH (SEBELUM LOGIN) -->
+            <?php if (empty($IsLoggedIn)) { ?>
+                <div class="filter-card-integrated">
+                    <div class="row filter-flex-row">
+                        <div class="col-lg-3 col-md-6 col-sm-12 filter-col">
+                            <label class="filter-label" for="Provinsi"><i class="fa fa-map text-primary"></i> Provinsi</label>
+                            <select class="form-control" id="Provinsi">
+                                <option value="">Pilih Provinsi</option>
+                                <?php foreach ($Provinsi as $prov) { ?>
+                                    <option value="<?= html_escape($prov['Kode']) ?>"
+                                        <?= (!empty($KodeWilayah) && substr($KodeWilayah,0,2)==$prov['Kode']) ? 'selected' : '' ?>>
+                                        <?= html_escape($prov['Nama']) ?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div class="col-lg-3 col-md-6 col-sm-12 filter-col">
+                            <label class="filter-label" for="KabKota"><i class="fa fa-building-o text-primary"></i> Kab/Kota</label>
+                            <select class="form-control" id="KabKota">
+                                <option value="">Pilih Kab/Kota</option>
+                                <?php 
+                                if (!empty($KodeWilayah)) {
+                                    $provKode = substr($KodeWilayah, 0, 2);
+                                    $listKabKota = $this->db->select('Kode, Nama')
+                                                           ->from('kodewilayah')
+                                                           ->where("Kode LIKE '{$provKode}.%'")
+                                                           ->where('LENGTH(REPLACE(Kode, ".", "")) = 4', null, false)
+                                                           ->order_by('Nama', 'ASC')
+                                                           ->get()
+                                                           ->result_array();
+                                    foreach ($listKabKota as $kab) { ?>
+                                        <option value="<?= html_escape($kab['Kode']) ?>" <?= ($KodeWilayah == $kab['Kode'] || str_replace('.', '', $KodeWilayah) == str_replace('.', '', $kab['Kode'])) ? 'selected' : '' ?>>
+                                            <?= html_escape($kab['Nama']) ?>
+                                        </option>
+                                    <?php }
+                                }
+                                ?>
+                            </select>
+                        </div>
+
+                        <div class="col-lg-4 col-md-6 col-sm-12 filter-col" id="FilterInstansiGroupBefore" style="<?= (!empty($KodeWilayah) && !empty($ListInstansi)) ? '' : 'display: none;' ?>">
+                            <label class="filter-label" for="FilterInstansiBeforeLogin"><i class="fa fa-university text-primary"></i> Filter Instansi</label>
+                            <select class="form-control" id="FilterInstansiBeforeLogin">
+                                <option value="">-- Semua Instansi --</option>
+                                <?php if (!empty($ListInstansi)) { ?>
+                                    <?php foreach ($ListInstansi as $ins) { ?>
+                                        <option value="<?= $ins['id'] ?>" <?= ($FilterInstansiId == $ins['id']) ? 'selected' : '' ?>>
+                                            <?= html_escape($ins['nama']) ?>
+                                        </option>
+                                    <?php } ?>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div class="col-lg-2 col-md-6 col-sm-12 filter-col">
+                            <label class="filter-label">&nbsp;</label>
+                            <div class="filter-btn-group">
+                                <button class="btn btn-primary notika-btn-primary btn-block btn-filter-act btn-filter-tampilkan" id="Filter">
+                                    <i class="fa fa-search"></i> <b>Filter</b>
+                                </button>
+                                <?php if (!empty($KodeWilayah)) { ?>
+                                    <button type="button" class="btn btn-default btn-filter-act btn-filter-reset" id="ResetWilayahBtn" title="Reset Wilayah">
+                                        <i class="fa fa-refresh"></i>
+                                    </button>
+                                <?php } ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <?php if (!empty($KodeWilayah)) { ?>
+                        <?php
+                            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+                            $nama_wilayah = $wilayah ? html_escape($wilayah['Nama']) : 'Wilayah Tidak Ditemukan';
+                        ?>
+                        <div style="margin-top:12px; padding:10px 14px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; font-size:13px; color:#1e40af; display:flex; align-items:center; gap:8px;">
+                            <i class="fa fa-info-circle" style="font-size:16px;"></i>
+                            <div>
+                                <strong>Wilayah terpilih:</strong> <?= $nama_wilayah ?>
+                                <?php 
+                                $filter_instansi_id = $this->input->get('instansi_id', TRUE);
+                                if (!empty($filter_instansi_id)) { 
+                                    $instansi_terpilih = $this->db->select('nama')->from('akun_instansi')->where('id', $filter_instansi_id)->get()->row_array();
+                                    if ($instansi_terpilih) {
+                                ?>
+                                    &nbsp;|&nbsp; <strong>Instansi terpilih:</strong> <?= htmlspecialchars($instansi_terpilih['nama']) ?>
+                                <?php 
+                                    }
+                                } 
+                                ?>
+                            </div>
+                        </div>
+                    <?php } ?>
+                </div>
+            <?php } ?>
+
+            <!-- 2. FILTER INSTANSI & BIDANG URUSAN (NON-ROLE 4) -->
+            <?php if (!$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
+                <div class="filter-card-integrated">
+                    <div class="row filter-flex-row">
+                        <!-- Filter Instansi -->
+                        <div class="col-lg-4 col-md-5 col-sm-12 filter-col">
+                            <label class="filter-label" for="FilterInstansi">
+                                <i class="fa fa-university text-primary"></i> Pilih Instansi
+                            </label>
+                            <select class="form-control" id="FilterInstansi">
+                                <option value="">-- Semua Instansi --</option>
+                                <?php foreach ($ListInstansi as $ins) { ?>
+                                    <option value="<?= $ins['id'] ?>" <?= ($FilterInstansiId == $ins['id']) ? 'selected' : '' ?>>
+                                        <?= html_escape($ins['nama']) ?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <!-- Bidang Urusan PD -->
+                        <div class="col-lg-5 col-md-4 col-sm-12 filter-col">
+                            <label class="filter-label" for="UrusanPD">
+                                <i class="fa fa-sitemap text-info"></i> Bidang Urusan PD <span style="color:#ef4444;">*</span>
+                            </label>
+                            <select class="form-control" id="UrusanPD">
+                                <?php if (empty($FilterInstansiId)) { ?>
+                                    <option value="">-- Pilih Instansi terlebih dahulu --</option>
+                                <?php } else { ?>
+                                    <option value="">-- Pilih Bidang Urusan --</option>
+                                    <?php if (!empty($Urusan)) { ?>
+                                        <?php foreach ($Urusan as $u) { ?>
+                                            <option value="<?= $u['id'] ?>"
+                                                <?= ($UrusanAktif == $u['id']) ? 'selected' : '' ?>>
+                                                <?= html_escape($u['nama_urusan']) ?>
+                                            </option>
+                                        <?php } ?>
+                                    <?php } else { ?>
+                                        <option value="" disabled>-- Instansi ini belum memiliki Bidang Urusan PD --</option>
+                                    <?php } ?>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <!-- Tombol Aksi Filter -->
+                        <div class="col-lg-3 col-md-3 col-sm-12 filter-col">
+                            <div class="filter-btn-group">
+                                <button class="btn btn-filter-act btn-filter-tampilkan" id="FilterInstansiBtn">
+                                    <i class="fa fa-eye"></i> Tampilkan
+                                </button>
+                                <button class="btn btn-filter-act btn-filter-reset" id="ResetFilterBtn">
+                                    <i class="fa fa-refresh"></i> Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php } ?>
+
+            <!-- 3. FILTER BIDANG URUSAN & TAMBAH IKK (ROLE 4) -->
+            <?php if ($IsRole4) { ?>
+                <div class="filter-card-integrated">
+                    <div class="row filter-flex-row">
+                        <!-- Bidang Urusan PD -->
+                        <div class="<?= $UrusanAktif ? 'col-lg-8 col-md-7 col-sm-12' : 'col-lg-12 col-md-12 col-sm-12' ?> filter-col">
+                            <label class="filter-label" for="UrusanPD">
+                                <i class="fa fa-sitemap text-info"></i> Bidang Urusan PD <span style="color:#ef4444;">*</span>
+                            </label>
+                            <select class="form-control" id="UrusanPD">
+                                <option value="">-- Pilih Bidang Urusan --</option>
+                                <?php if (!empty($Urusan)) { ?>
+                                    <?php foreach ($Urusan as $u) { ?>
+                                        <option value="<?= $u['id'] ?>"
+                                            <?= ($UrusanAktif == $u['id']) ? 'selected' : '' ?>>
+                                            <?= html_escape($u['nama_urusan']) ?>
+                                        </option>
+                                    <?php } ?>
+                                <?php } else { ?>
+                                    <option value="" disabled>-- Instansi Anda belum memiliki Bidang Urusan PD --</option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <!-- Tombol Tambah IKK -->
+                        <?php if ($UrusanAktif) { ?>
+                            <div class="col-lg-4 col-md-5 col-sm-12 filter-col">
+                                <div class="filter-btn-group">
+                                    <button type="button" class="btn btn-filter-act btn-filter-tambah btn-block" id="BtnTambahIkkPD">
+                                        <i class="fa fa-plus-circle"></i> Tambah IKK
+                                    </button>
+                                </div>
+                            </div>
+                        <?php } ?>
+                    </div>
+
+                    <?php if (!empty($NamaInstansi)) { ?>
+                        <div class="role4-instansi-banner">
+                            <i class="fa fa-building-o"></i>
+                            <div>
+                                <span>Instansi: <strong><?= htmlspecialchars($NamaInstansi) ?></strong></span>
+                                <span style="color:#047857; font-size:12px; margin-left: 6px;">(Menampilkan data indikator kinerja kunci instansi Anda)</span>
+                            </div>
+                        </div>
+                    <?php } ?>
+                </div>
+            <?php } ?>
+
+            <?php
+            $NamaBidangAktif = '';
+            if (!empty($Urusan) && !empty($UrusanAktif)) {
+                foreach ($Urusan as $u) {
+                    if ((string)$u['id'] === (string)$UrusanAktif) {
+                        $NamaBidangAktif = $u['nama_urusan'];
+                        break;
+                    }
+                }
+            }
+            ?>
+
+            <!-- ================= TABLE IKK PD ================= -->
+            <div class="table-ikk-wrapper">
+                <div class="table-responsive">
+                    <table id="data-table-basic" class="table table-ikk-custom">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" style="width: 45px;">No</th>
+                                <th rowspan="2" style="min-width: 180px; text-align: left;">Indikator</th>
+                                <th rowspan="2" style="min-width: 170px; text-align: left;">Rumus</th>
+                                <th rowspan="2" style="min-width: 180px; text-align: left;">Definisi Operasional</th>
+                                <th rowspan="2" style="width: 75px;">Satuan</th>
+                                <th rowspan="2" style="width: 85px;">Baseline<br><span style="font-size: 11px; opacity: 0.85;">2024</span></th>
+                                <th colspan="6" class="th-target-group">Target Tahun</th>
+                                <th rowspan="2" style="min-width: 140px; text-align: left;">Keterangan</th>
+                                <?php if ($IsRole4) { ?>
+                                    <th rowspan="2" style="width: 95px;">Aksi</th>
+                                <?php } ?>
+                            </tr>
+                            <tr class="th-years-sub">
+                                <th>2025</th>
+                                <th>2026</th>
+                                <th>2027</th>
+                                <th>2028</th>
+                                <th>2029</th>
+                                <th>2030</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if ($UrusanAktif && !empty($Data)) { ?>
+                                <?php $no = 1; foreach ($Data as $row) { ?>
+                                    <tr>
+                                        <td class="text-center" style="color: #64748b; font-weight: 600;"><?= $no++ ?></td>
+                                        <td style="font-weight: 600; color: #0f172a;"><?= nl2br(html_escape($row['indikator'])) ?></td>
+                                        <td>
+                                            <?php if (!empty($row['rumus'])) { ?>
+                                                <div class="rumus-tag-wrapper" title="Rumus Penghitungan">
+                                                    <i class="fa fa-calculator rumus-badge-icon"></i>
+                                                    <span><?= format_rumus_rpjmd($row['rumus']) ?></span>
+                                                </div>
+                                            <?php } else { ?>
+                                                <span class="td-empty-dash">-</span>
+                                            <?php } ?>
+                                        </td>
+                                        <td>
+                                            <?php if (!empty($row['definisi_operasional'])) { ?>
+                                                <div class="definisi-text-wrapper">
+                                                    <?= nl2br(html_escape($row['definisi_operasional'])) ?>
+                                                </div>
+                                            <?php } else { ?>
+                                                <span class="td-empty-dash">-</span>
+                                            <?php } ?>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge-satuan"><?= html_escape($row['satuan']) ?></span>
+                                        </td>
+                                        <td class="td-baseline-val">
+                                            <?= format_target_koma($row['baseline_2024'] ?? null) ?>
+                                        </td>
+                                        <td class="td-target-val"><?= format_target_koma($row['t_2025'] ?? null) ?></td>
+                                        <td class="td-target-val"><?= format_target_koma($row['t_2026'] ?? null) ?></td>
+                                        <td class="td-target-val"><?= format_target_koma($row['t_2027'] ?? null) ?></td>
+                                        <td class="td-target-val"><?= format_target_koma($row['t_2028'] ?? null) ?></td>
+                                        <td class="td-target-val"><?= format_target_koma($row['t_2029'] ?? null) ?></td>
+                                        <td class="td-target-val"><?= format_target_koma($row['t_2030'] ?? null) ?></td>
+                                        <td>
+                                            <?php if (!empty($row['keterangan'])) { ?>
+                                                <span style="font-size: 12px; color: #475569;"><?= nl2br(html_escape($row['keterangan'])) ?></span>
+                                            <?php } else { ?>
+                                                <span class="td-empty-dash">-</span>
+                                            <?php } ?>
+                                        </td>
+                                        <?php if ($IsRole4) { ?>
+                                            <td class="text-center">
+                                                <?php if ($InstansiId == ($row['id_instansi'] ?? null)) { ?>
+                                                    <div class="action-buttons-wrap">
+                                                        <button type="button" class="btn-act-table btn-act-edit BtnEdit"
+                                                            data-json='<?= json_encode($row) ?>'
+                                                            title="Edit IKK PD">
+                                                            <i class="fa fa-pencil"></i>
+                                                        </button>
+                                                        <button type="button" class="btn-act-table btn-act-del BtnHapus"
+                                                            data-id="<?= $row['id'] ?>"
+                                                            title="Hapus IKK PD">
+                                                            <i class="fa fa-trash-o"></i>
+                                                        </button>
+                                                    </div>
+                                                <?php } else { ?>
+                                                    <span class="text-muted">-</span>
+                                                <?php } ?>
+                                            </td>
+                                        <?php } ?>
+                                    </tr>
+                                <?php } ?>
+                            <?php } else { ?>
+                                <tr>
+                                    <td colspan="<?= $IsRole4 ? '14' : '13' ?>" class="text-center">
+                                        <div class="empty-table-state">
+                                            <i class="fa fa-folder-open-o"></i>
+                                            <span><?= $UrusanAktif ? 'Belum ada data IKK PD pada Bidang Urusan ini.' : 'Silakan pilih Bidang Urusan PD terlebih dahulu untuk menampilkan data IKK PD.' ?></span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -1080,32 +1646,49 @@ jQuery(document).ready(function($){
     }, 100);
 
     /* ================= FILTER WILAYAH SEBELUM LOGIN ================= */
-    <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
+    <?php if (empty($IsLoggedIn)) { ?>
 
     $("#Provinsi").change(function() {
-        if ($(this).val() === "") {
+        var prov = $(this).val();
+        if (!prov) {
             $("#KabKota").html('<option value="">Pilih Kab/Kota</option>');
             $("#FilterInstansiGroupBefore").hide();
             return;
         }
 
+        $("#KabKota").html('<option value="">Memuat Kab/Kota...</option>');
+
         $.ajax({
             url: BaseURL + "Instansi/GetListKabKota",
             type: "POST",
-            data: { Kode: $(this).val(), [CSRF_NAME]: CSRF_TOKEN },
+            data: { Kode: prov },
             dataType: 'json',
             success: function(res) {
                 var opt = '<option value="">Pilih Kab/Kota</option>';
                 if (res && res.length > 0) {
                     $.each(res, function(i, item) {
-                        opt += '<option value="' + item.Kode + '">' + item.Nama + '</option>';
+                        var sel = (KODE_WILAYAH === item.Kode || (KODE_WILAYAH && KODE_WILAYAH.replace(/\./g, '') === item.Kode.replace(/\./g, ''))) ? 'selected' : '';
+                        opt += '<option value="' + item.Kode + '" ' + sel + '>' + item.Nama + '</option>';
                     });
                 }
                 $("#KabKota").html(opt);
-                $("#FilterInstansiGroupBefore").hide();
+                if ($("#KabKota").val()) {
+                    $("#KabKota").trigger('change');
+                } else {
+                    $("#FilterInstansiGroupBefore").hide();
+                }
+            },
+            error: function() {
+                $("#KabKota").html('<option value="">Gagal memuat Kab/Kota</option>');
             }
         });
     });
+
+    // Auto-load KabKota jika Provinsi sudah terpilih pada saat halaman dibuka tetapi dropdown Kab/Kota masih kosong
+    var initProvVal = $("#Provinsi").val();
+    if (initProvVal && $("#KabKota option").length <= 1) {
+        $("#Provinsi").trigger('change');
+    }
 
     $("#KabKota").change(function() {
         var kabKotaKode = $(this).val();
@@ -1171,32 +1754,74 @@ jQuery(document).ready(function($){
         });
     });
 
-    <?php if (!empty($KodeWilayah)) { ?>
-        var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
-        var kodeKab  = "<?= $KodeWilayah ?>";
-        $("#Provinsi").val(kodeProv).trigger('change');
-        setTimeout(function() {
-            $("#KabKota").val(kodeKab).trigger('change');
-            <?php if (!empty($FilterInstansiId)) { ?>
-                setTimeout(function() {
-                    if ($("#FilterInstansiBeforeLogin option[value='<?= $FilterInstansiId ?>']").length > 0) {
-                        $("#FilterInstansiBeforeLogin").val("<?= $FilterInstansiId ?>");
+    $("#ResetWilayahBtn").click(function() {
+        $(this).prop('disabled', true);
+        $.ajax({
+            url: BaseURL + "Instansi/ResetFilterWilayah",
+            type: "POST",
+            data: { [CSRF_NAME]: CSRF_TOKEN },
+            success: function() {
+                window.location.href = BaseURL + "Instansi/IkkPD";
+            },
+            error: function() {
+                window.location.href = BaseURL + "Instansi/IkkPD";
+            }
+        });
+    });
+
+    <?php } ?>
+
+    /* ================= FILTER INSTANSI (UNTUK YANG SUDAH MEMILIH WILAYAH DAN BUKAN ROLE 4) ================= */
+    <?php if (!$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
+        // AJAX: Ketika selesai memilih Instansi, langsung ambil dan munculkan daftar Bidang Urusan PD
+        $("#FilterInstansi").change(function(){
+            var instansiId = $(this).val();
+            if (!instansiId) {
+                $("#UrusanPD").html('<option value="">-- Pilih Instansi terlebih dahulu --</option>');
+                return;
+            }
+
+            $("#UrusanPD").html('<option value="">Memuat Bidang Urusan...</option>').prop('disabled', true);
+
+            $.ajax({
+                url: BaseURL + "Instansi/GetUrusanByInstansi",
+                type: "POST",
+                data: {
+                    instansi_id: instansiId,
+                    kodewilayah: KODE_WILAYAH,
+                    [CSRF_NAME]: CSRF_TOKEN
+                },
+                dataType: 'json',
+                success: function(res) {
+                    $("#UrusanPD").prop('disabled', false);
+                    var opt = '<option value="">-- Pilih Bidang Urusan --</option>';
+                    if (res && res.length > 0) {
+                        $.each(res, function(i, item) {
+                            opt += '<option value="' + item.id + '">' + item.nama_urusan + '</option>';
+                        });
+                    } else {
+                        opt = '<option value="" disabled>-- Instansi ini belum memiliki Bidang Urusan PD --</option>';
                     }
-                }, 800);
-            <?php } ?>
-        }, 500);
-    <?php } ?>
+                    $("#UrusanPD").html(opt);
+                },
+                error: function() {
+                    $("#UrusanPD").prop('disabled', false);
+                    $("#UrusanPD").html('<option value="">Gagal memuat Bidang Urusan</option>');
+                }
+            });
+        });
 
-    <?php } ?>
-
-    /* ================= FILTER INSTANSI (UNTUK YANG SUDAH LOGIN DAN BUKAN ROLE 4) ================= */
-    <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
         $("#FilterInstansiBtn").click(function() {
             var instansiId = $("#FilterInstansi").val();
+            var urusanId = $("#UrusanPD").val();
             var url = BaseURL + "Instansi/IkkPD";
-            if (instansiId && instansiId != '') { url += "?instansi_id=" + instansiId; }
+            var params = [];
+            if (instansiId && instansiId != '') { params.push("instansi_id=" + instansiId); }
+            if (urusanId && urusanId != '') { params.push("urusan_id=" + urusanId); }
+            if (params.length > 0) { url += "?" + params.join("&"); }
             window.location.href = url;
         });
+
         $("#ResetFilterBtn").click(function() { window.location.href = BaseURL + "Instansi/IkkPD"; });
     <?php } ?>
 
@@ -1206,11 +1831,9 @@ jQuery(document).ready(function($){
         var url = BaseURL + "Instansi/IkkPD";
         var params = [];
 
-        var instansiId = '';
-        <?php if ($IsLoggedIn && !$IsRole4 && !empty($FilterInstansiId)) { ?>
-            instansiId = '<?= $FilterInstansiId ?>';
-        <?php } elseif (!isset($_SESSION['KodeWilayah']) && !empty($FilterInstansiId)) { ?>
-            instansiId = '<?= $FilterInstansiId ?>';
+        var instansiId = $("#FilterInstansi").val();
+        <?php if (!$IsRole4 && !empty($FilterInstansiId)) { ?>
+            if (!instansiId) { instansiId = '<?= $FilterInstansiId ?>'; }
         <?php } ?>
 
         if (instansiId) { params.push("instansi_id=" + instansiId); }
@@ -1347,7 +1970,7 @@ jQuery(document).ready(function($){
     <?php if ($IsRole4) { ?>
 
     // Reset form tambah IKK PD
-    $("#BtnTambahIkkPD").click(function(){
+    $(document).on("click", "#BtnTambahIkkPD, #BtnTambahIkkPDHeader", function(){
         $("#EditId").val("");
         $("#ModalInputIKKTitle").text("Tambah Indikator Kunci (IKK) Bidang Urusan");
         $("#ModalInputIKKIcon").html('<i class="fa fa-plus"></i>');

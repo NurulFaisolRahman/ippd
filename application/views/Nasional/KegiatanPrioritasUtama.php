@@ -1,8 +1,8 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 $userLevel = $_SESSION['Level'] ?? (isset($this) ? ($this->session->userdata('Level') ?? null) : null);
-// Pastikan fitur CRUD selalu aktif
-$canEdit = ($userLevel === null || (string)$userLevel === '' || (string)$userLevel === '0');
+$isLoggedIn = !empty($_SESSION['isLoggedIn']) || (isset($this) && !empty($this->session->userdata('isLoggedIn')));
+$canEdit = $isLoggedIn && ($userLevel !== null && $userLevel !== '' && (string)$userLevel === '0');
 
 // Helper untuk format tampilan Sumber Dana (Setiap baris berawalan bullet "· ")
 if (!function_exists('formatSumberDanaKPU')) {
@@ -281,11 +281,13 @@ if (!function_exists('formatPelaksanaKPU')) {
                             <h3 style="margin: 0; color: #333; font-weight: 600; line-height: 1.5;">Hierarki Kegiatan Prioritas Utama RPJMN</h3>
                             <small style="color: #666;">Prioritas Pembangunan &rarr; Kegiatan Prioritas &rarr; Sasaran, Sumber Dana & Pelaksana</small>
                         </div>
+                        <?php if ($canEdit) { ?>
                         <div class="button-icon-btn sm-res-mg-t-30">
                             <button type="button" class="btn btn-success notika-btn-success btn-action" data-toggle="modal" data-target="#ModalInputPrioritas" style="padding: 8px 16px;">
                                 <i class="fa fa-plus-circle" style="margin-right: 5px;"></i> <b>Input Prioritas Pembangunan</b>
                             </button>
                         </div>
+                        <?php } ?>
                     </div>
 
                     <div class="table-responsive">
@@ -328,15 +330,19 @@ if (!function_exists('formatPelaksanaKPU')) {
                                                         <span class="badge-pn-tag"><?= htmlspecialchars($p['Kode']) ?></span>
                                                     <?php } ?>
                                                     <div><?= nl2br(htmlspecialchars($p['PrioritasPembangunan'])) ?></div>
+                                                    <?php if ($canEdit) { ?>
                                                     <div class="action-group">
                                                         <button class="btn btn-xs btn-success btn-action TambahKegiatanBtn" data-id="<?= $p['Id'] ?>" data-pn="<?= htmlspecialchars($pnLabel, ENT_QUOTES) ?>" title="Tambah KP"><i class="fa fa-plus"></i> KP</button>
                                                         <button class="btn btn-xs btn-info btn-action EditPrioritasBtn" data-id="<?= $p['Id'] ?>" data-kode="<?= htmlspecialchars($p['Kode'], ENT_QUOTES) ?>" data-nama="<?= htmlspecialchars($p['PrioritasPembangunan'], ENT_QUOTES) ?>" title="Edit Prioritas"><i class="fa fa-pencil"></i></button>
                                                         <button class="btn btn-xs btn-danger btn-action HapusPrioritasBtn" data-id="<?= $p['Id'] ?>" title="Hapus Prioritas"><i class="fa fa-trash"></i></button>
                                                     </div>
+                                                    <?php } ?>
                                                 </td>
                                                 <td colspan="4" style="color: #999; font-style: italic; text-align: center; vertical-align: middle;">
                                                     Belum ada Kegiatan Prioritas. 
+                                                    <?php if ($canEdit) { ?>
                                                     <button class="btn btn-xs btn-success btn-action TambahKegiatanBtn" data-id="<?= $p['Id'] ?>" data-pn="<?= htmlspecialchars($pnLabel, ENT_QUOTES) ?>"><i class="fa fa-plus"></i> Tambah KP</button>
+                                                    <?php } ?>
                                                 </td>
                                             </tr>
                                 <?php
@@ -357,11 +363,13 @@ if (!function_exists('formatPelaksanaKPU')) {
                                                                 <span class="badge-pn-tag"><?= htmlspecialchars($p['Kode']) ?></span>
                                                             <?php } ?>
                                                             <div><?= nl2br(htmlspecialchars($p['PrioritasPembangunan'])) ?></div>
+                                                            <?php if ($canEdit) { ?>
                                                             <div class="action-group">
                                                                 <button class="btn btn-xs btn-success btn-action TambahKegiatanBtn" data-id="<?= $p['Id'] ?>" data-pn="<?= htmlspecialchars($pnLabel, ENT_QUOTES) ?>" title="Tambah KP"><i class="fa fa-plus"></i> KP</button>
                                                                 <button class="btn btn-xs btn-info btn-action EditPrioritasBtn" data-id="<?= $p['Id'] ?>" data-kode="<?= htmlspecialchars($p['Kode'], ENT_QUOTES) ?>" data-nama="<?= htmlspecialchars($p['PrioritasPembangunan'], ENT_QUOTES) ?>" title="Edit Prioritas"><i class="fa fa-pencil"></i></button>
                                                                 <button class="btn btn-xs btn-danger btn-action HapusPrioritasBtn" data-id="<?= $p['Id'] ?>" title="Hapus Prioritas"><i class="fa fa-trash"></i></button>
                                                             </div>
+                                                            <?php } ?>
                                                         </td>
                                                         <?php $is_first_p_row = false; } ?>
 
@@ -370,31 +378,39 @@ if (!function_exists('formatPelaksanaKPU')) {
                                                                 <div><span class="badge-kp-tag"><?= htmlspecialchars($k['Kode']) ?></span></div>
                                                             <?php } ?>
                                                             <div style="margin-top: 4px;"><?= nl2br(htmlspecialchars($k['KegiatanPrioritas'])) ?></div>
+                                                            <?php if ($canEdit) { ?>
                                                             <div class="action-group">
                                                                 <button class="btn btn-xs btn-warning btn-action TambahSasaranBtn" data-id="<?= $k['Id'] ?>" data-kp="<?= htmlspecialchars($kpLabel, ENT_QUOTES) ?>" style="color:#fff;" title="Tambah Sasaran"><i class="fa fa-plus"></i> Sasaran</button>
                                                                 <button class="btn btn-xs btn-info btn-action EditKegiatanBtn" data-id="<?= $k['Id'] ?>" data-pid="<?= $k['_Id'] ?>" data-kode="<?= htmlspecialchars($k['Kode'], ENT_QUOTES) ?>" data-nama="<?= htmlspecialchars($k['KegiatanPrioritas'], ENT_QUOTES) ?>" data-dana="<?= htmlspecialchars($k['SumberDana'], ENT_QUOTES) ?>" data-pelaksana="<?= htmlspecialchars($k['Pelaksana'], ENT_QUOTES) ?>" title="Edit KP"><i class="fa fa-pencil"></i></button>
                                                                 <button class="btn btn-xs btn-danger btn-action HapusKegiatanBtn" data-id="<?= $k['Id'] ?>" title="Hapus KP"><i class="fa fa-trash"></i></button>
                                                             </div>
+                                                            <?php } ?>
                                                         </td>
                                                         <td style="color: #999; font-style: italic; vertical-align: middle;">
                                                             Belum ada sasaran.
+                                                            <?php if ($canEdit) { ?>
                                                             <button class="btn btn-xs btn-warning btn-action TambahSasaranBtn" data-id="<?= $k['Id'] ?>" data-kp="<?= htmlspecialchars($kpLabel, ENT_QUOTES) ?>" style="color:#fff;"><i class="fa fa-plus"></i> Tambah Sasaran</button>
+                                                            <?php } ?>
                                                         </td>
                                                         <td rowspan="1" class="cell-dana">
                                                             <div><?= formatSumberDanaKPU($k['SumberDana']) ?></div>
+                                                            <?php if ($canEdit) { ?>
                                                             <div>
                                                                 <button class="btn-edit-col EditDanaBtn" data-id="<?= $k['Id'] ?>" data-kp="<?= htmlspecialchars($kpLabel, ENT_QUOTES) ?>" data-dana="<?= htmlspecialchars($k['SumberDana'], ENT_QUOTES) ?>" title="Kelola Sumber Dana">
                                                                     <i class="fa fa-pencil text-info"></i> Kelola Dana
                                                                 </button>
                                                             </div>
+                                                            <?php } ?>
                                                         </td>
                                                         <td rowspan="1" class="cell-pelaksana">
                                                             <div><?= formatPelaksanaKPU($k['Pelaksana']) ?></div>
+                                                            <?php if ($canEdit) { ?>
                                                             <div>
                                                                 <button class="btn-edit-col EditPelaksanaBtn" data-id="<?= $k['Id'] ?>" data-kp="<?= htmlspecialchars($kpLabel, ENT_QUOTES) ?>" data-pelaksana="<?= htmlspecialchars($k['Pelaksana'], ENT_QUOTES) ?>" title="Kelola Pelaksana">
                                                                     <i class="fa fa-pencil text-info"></i> Kelola Pelaksana
                                                                 </button>
                                                             </div>
+                                                            <?php } ?>
                                                         </td>
                                                     </tr>
                                 <?php
@@ -409,11 +425,13 @@ if (!function_exists('formatPelaksanaKPU')) {
                                                                     <span class="badge-pn-tag"><?= htmlspecialchars($p['Kode']) ?></span>
                                                                 <?php } ?>
                                                                 <div><?= nl2br(htmlspecialchars($p['PrioritasPembangunan'])) ?></div>
+                                                                <?php if ($canEdit) { ?>
                                                                 <div class="action-group">
                                                                     <button class="btn btn-xs btn-success btn-action TambahKegiatanBtn" data-id="<?= $p['Id'] ?>" data-pn="<?= htmlspecialchars($pnLabel, ENT_QUOTES) ?>" title="Tambah KP"><i class="fa fa-plus"></i> KP</button>
                                                                     <button class="btn btn-xs btn-info btn-action EditPrioritasBtn" data-id="<?= $p['Id'] ?>" data-kode="<?= htmlspecialchars($p['Kode'], ENT_QUOTES) ?>" data-nama="<?= htmlspecialchars($p['PrioritasPembangunan'], ENT_QUOTES) ?>" title="Edit Prioritas"><i class="fa fa-pencil"></i></button>
                                                                     <button class="btn btn-xs btn-danger btn-action HapusPrioritasBtn" data-id="<?= $p['Id'] ?>" title="Hapus Prioritas"><i class="fa fa-trash"></i></button>
                                                                 </div>
+                                                                <?php } ?>
                                                             </td>
                                                             <?php $is_first_p_row = false; } ?>
 
@@ -423,39 +441,47 @@ if (!function_exists('formatPelaksanaKPU')) {
                                                                     <div><span class="badge-kp-tag"><?= htmlspecialchars($k['Kode']) ?></span></div>
                                                                 <?php } ?>
                                                                 <div style="margin-top: 4px;"><?= nl2br(htmlspecialchars($k['KegiatanPrioritas'])) ?></div>
+                                                                <?php if ($canEdit) { ?>
                                                                 <div class="action-group">
                                                                     <button class="btn btn-xs btn-warning btn-action TambahSasaranBtn" data-id="<?= $k['Id'] ?>" data-kp="<?= htmlspecialchars($kpLabel, ENT_QUOTES) ?>" style="color:#fff;" title="Tambah Sasaran"><i class="fa fa-plus"></i> Sasaran</button>
                                                                     <button class="btn btn-xs btn-info btn-action EditKegiatanBtn" data-id="<?= $k['Id'] ?>" data-pid="<?= $k['_Id'] ?>" data-kode="<?= htmlspecialchars($k['Kode'], ENT_QUOTES) ?>" data-nama="<?= htmlspecialchars($k['KegiatanPrioritas'], ENT_QUOTES) ?>" data-dana="<?= htmlspecialchars($k['SumberDana'], ENT_QUOTES) ?>" data-pelaksana="<?= htmlspecialchars($k['Pelaksana'], ENT_QUOTES) ?>" title="Edit KP"><i class="fa fa-pencil"></i></button>
                                                                     <button class="btn btn-xs btn-danger btn-action HapusKegiatanBtn" data-id="<?= $k['Id'] ?>" title="Hapus KP"><i class="fa fa-trash"></i></button>
                                                                 </div>
+                                                                <?php } ?>
                                                             </td>
                                                             <?php } ?>
 
                                                             <!-- Kolom Sasaran (dengan tombol Edit & Hapus Sasaran) -->
                                                             <td class="cell-sasaran">
                                                                 <div><?= nl2br(htmlspecialchars($s['Sasaran'])) ?></div>
+                                                                <?php if ($canEdit) { ?>
                                                                 <div class="action-group" style="margin-top: 6px; padding-top: 4px;">
                                                                     <button class="btn btn-xs btn-info btn-action EditSasaranBtn" data-id="<?= $s['Id'] ?>" data-kid="<?= $s['_Id'] ?>" data-sasaran="<?= htmlspecialchars($s['Sasaran'], ENT_QUOTES) ?>" title="Edit Sasaran"><i class="fa fa-pencil"></i> Edit</button>
                                                                     <button class="btn btn-xs btn-danger btn-action HapusSasaranBtn" data-id="<?= $s['Id'] ?>" title="Hapus Sasaran"><i class="fa fa-trash"></i> Hapus</button>
                                                                 </div>
+                                                                <?php } ?>
                                                             </td>
 
                                                             <?php if ($is_first_k_row) { ?>
                                                             <td rowspan="<?= $k_total_rows ?>" class="cell-dana">
                                                                 <div><?= formatSumberDanaKPU($k['SumberDana']) ?></div>
+                                                                <?php if ($canEdit) { ?>
                                                                 <div>
                                                                     <button class="btn-edit-col EditDanaBtn" data-id="<?= $k['Id'] ?>" data-kp="<?= htmlspecialchars($kpLabel, ENT_QUOTES) ?>" data-dana="<?= htmlspecialchars($k['SumberDana'], ENT_QUOTES) ?>" title="Kelola Sumber Dana">
                                                                         <i class="fa fa-pencil text-info"></i> Kelola Dana
                                                                     </button>
                                                                 </div>
+                                                                <?php } ?>
                                                             </td>
                                                             <td rowspan="<?= $k_total_rows ?>" class="cell-pelaksana">
                                                                 <div><?= formatPelaksanaKPU($k['Pelaksana']) ?></div>
+                                                                <?php if ($canEdit) { ?>
                                                                 <div>
                                                                     <button class="btn-edit-col EditPelaksanaBtn" data-id="<?= $k['Id'] ?>" data-kp="<?= htmlspecialchars($kpLabel, ENT_QUOTES) ?>" data-pelaksana="<?= htmlspecialchars($k['Pelaksana'], ENT_QUOTES) ?>" title="Kelola Pelaksana">
                                                                         <i class="fa fa-pencil text-info"></i> Kelola Pelaksana
                                                                     </button>
                                                                 </div>
+                                                                <?php } ?>
                                                             </td>
                                                             <?php $is_first_k_row = false; } ?>
                                                         </tr>
@@ -468,10 +494,13 @@ if (!function_exists('formatPelaksanaKPU')) {
                                 } else { ?>
                                     <tr>
                                         <td colspan="5" class="text-center" style="padding: 35px; color: #999;">
-                                            Belum ada data Kegiatan Prioritas Utama RPJMN.<br><br>
+                                            Belum ada data Kegiatan Prioritas Utama RPJMN.
+                                            <?php if ($canEdit) { ?>
+                                            <br><br>
                                             <button type="button" class="btn btn-success notika-btn-success btn-action" data-toggle="modal" data-target="#ModalInputPrioritas">
                                                 <i class="fa fa-plus-circle"></i> Input Prioritas Pembangunan Sekarang
                                             </button>
+                                            <?php } ?>
                                         </td>
                                     </tr>
                                 <?php } ?>
@@ -484,6 +513,7 @@ if (!function_exists('formatPelaksanaKPU')) {
     </div>
 </div>
 
+<?php if ($canEdit) { ?>
 <!-- ==================== MODALS UNTUK CRUD (Gaya Notika Standar) ==================== -->
 
 <!-- Modal Input Prioritas -->
@@ -755,6 +785,7 @@ if (!function_exists('formatPelaksanaKPU')) {
         </div>
     </div>
 </div>
+<?php } ?>
 
 <!-- Vendor Scripts yang Wajib untuk Bootstrap Modal & Notika UI -->
 <script src="<?= base_url('js/vendor/jquery-1.12.4.min.js') ?>"></script>
@@ -768,6 +799,7 @@ if (!function_exists('formatPelaksanaKPU')) {
 <script src="<?= base_url('js/main.js') ?>"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<?php if ($canEdit) { ?>
 <script>
 $(document).ready(function() {
     var baseUrl = "<?= base_url('Nasional/') ?>";
@@ -1247,3 +1279,4 @@ $(document).ready(function() {
     }
 });
 </script>
+<?php } ?>

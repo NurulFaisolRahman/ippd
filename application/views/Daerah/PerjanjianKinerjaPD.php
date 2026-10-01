@@ -725,25 +725,38 @@
 
       <hr class="divider">
 
-      <div class="row-2">
-        <div class="field">
-          <label>Atasan Langsung</label>
-          <input type="text" id="atasanLangsung" readonly placeholder="Atasan langsung">
-        </div>
-        <div class="field">
-          <label>NIP Atasan Langsung</label>
-          <input type="text" id="nipAtasan" readonly placeholder="NIP atasan langsung">
+      <!-- Pilihan Manual Atasan Langsung -->
+      <div class="field">
+        <label>Pilih Atasan Langsung (Pihak Kedua) <span class="req">*</span></label>
+        <div class="combo-wrap">
+          <input type="text" id="atasanInput" placeholder="Pilih atau ketik nama atasan langsung..." autocomplete="off">
+          <div class="combo-list hidden" id="atasanList"></div>
         </div>
       </div>
+
+      <div class="field">
+        <div style="display:flex; gap:8px;">
+          <div style="flex:1;">
+            <label>NIP Atasan Langsung</label>
+            <input type="text" id="nipAtasan" placeholder="Masukkan NIP atasan langsung">
+          </div>
+          <button type="button" class="btn btn-primary" id="btnCekNipAtasan" style="align-self:flex-end; height:38px; background:var(--brand-green); border-color:var(--brand-green); font-weight:700;">Cek</button>
+        </div>
+      </div>
+
       <div class="row-2">
+        <div class="field">
+          <label>Nama Atasan Langsung</label>
+          <input type="text" id="atasanLangsung" readonly placeholder="Nama atasan langsung">
+        </div>
         <div class="field">
           <label>Jabatan Atasan Langsung</label>
           <input type="text" id="jabatanAtasan" readonly placeholder="Jabatan atasan langsung">
         </div>
-        <div class="field">
-          <label>Satuan Unit Kerja Atasan</label>
-          <input type="text" id="satuanUnitKerjaAtasan" readonly placeholder="Satuan unit kerja atasan">
-        </div>
+      </div>
+      <div class="field">
+        <label>Satuan Unit Kerja Atasan</label>
+        <input type="text" id="satuanUnitKerjaAtasan" readonly placeholder="Satuan unit kerja atasan">
       </div>
 
       <!-- STEP 2: Ketentuan Perjanjian -->
@@ -966,6 +979,8 @@
   var jabatanPengampu = document.getElementById("jabatanPengampu");
   var satuanUnitKerja = document.getElementById("satuanUnitKerja");
   var atasanLangsung = document.getElementById("atasanLangsung");
+  var atasanInput = document.getElementById("atasanInput");
+  var atasanList = document.getElementById("atasanList");
   var nipAtasan = document.getElementById("nipAtasan");
   var jabatanAtasan = document.getElementById("jabatanAtasan");
   var satuanUnitKerjaAtasan = document.getElementById("satuanUnitKerjaAtasan");
@@ -1008,6 +1023,7 @@
     namaPengampu.value = "";
     jabatanPengampu.value = "";
     satuanUnitKerja.value = "";
+    if (atasanInput) atasanInput.value = "";
     atasanLangsung.value = "";
     nipAtasan.value = "";
     jabatanAtasan.value = "";
@@ -1029,6 +1045,7 @@
     updateSelectedCount();
     renderAnggaranSection();
     pegawaiList.classList.add("hidden");
+    if (atasanList) atasanList.classList.add("hidden");
   }
 
   function applyEmployee(emp){
@@ -1040,24 +1057,19 @@
     jabatanPengampu.value = emp.jabatan;
     satuanUnitKerja.value = emp.satuanUnitKerja;
     pegawaiInput.value = emp.nama;
-
-    var atasan = defaultAtasanOf(emp);
-    if (atasan){
-      modalState.selectedAtasan = atasan;
-      formAtasanId.value = atasan.id;
-      atasanLangsung.value = atasan.nama;
-      nipAtasan.value = atasan.nip;
-      jabatanAtasan.value = atasan.jabatan;
-      satuanUnitKerjaAtasan.value = atasan.satuanUnitKerja;
-    } else {
-      modalState.selectedAtasan = null;
-      formAtasanId.value = "";
-      atasanLangsung.value = "Bupati / Wali Kota";
-      nipAtasan.value = "-";
-      jabatanAtasan.value = "Kepala Daerah";
-      satuanUnitKerjaAtasan.value = CURRENT_ORG_CITY_LABEL;
-    }
     pegawaiList.classList.add("hidden");
+  }
+
+  function applyAtasan(atasan){
+    if (!atasan) return;
+    modalState.selectedAtasan = atasan;
+    formAtasanId.value = (atasan.id && atasan.id > 0) ? atasan.id : "";
+    if (atasanInput) atasanInput.value = atasan.nama || "";
+    atasanLangsung.value = atasan.nama || "";
+    nipAtasan.value = atasan.nip || "-";
+    jabatanAtasan.value = atasan.jabatan || "-";
+    satuanUnitKerjaAtasan.value = atasan.satuanUnitKerja || CURRENT_ORG_CITY_LABEL;
+    if (atasanList) atasanList.classList.add("hidden");
   }
 
   function openModal(mode, pkId){
@@ -1093,14 +1105,25 @@
               id: d.pegawai_pengampu_id, nip: d.pengampu_nip, nama: d.pengampu_nama, jabatan: d.pengampu_jabatan, eselon: d.pengampu_eselon, satuanUnitKerja: d.pengampu_satuan
             };
             document.getElementById("lockedNama").textContent = emp.nama;
-            document.getElementById("lockedJabatan").textContent = emp.jabatan + (d.pengampu_eselon ? ' · Eselon ' + d.pengampu_eselon : '');
+            document.getElementById("lockedJabatan").textContent = emp.jabatan + (d.pengampu_eselon ? ' - Eselon ' + d.pengampu_eselon : '');
             applyEmployee(emp);
             if (d.atasan_langsung_id) {
-              formAtasanId.value = d.atasan_langsung_id;
-              atasanLangsung.value = d.atasan_nama;
-              nipAtasan.value = d.atasan_nip;
-              jabatanAtasan.value = d.atasan_jabatan;
-              satuanUnitKerjaAtasan.value = d.atasan_satuan;
+              var atasanEmp = findById(parseInt(d.atasan_langsung_id, 10)) || {
+                id: d.atasan_langsung_id,
+                nip: d.atasan_nip,
+                nama: d.atasan_nama,
+                jabatan: d.atasan_jabatan,
+                satuanUnitKerja: d.atasan_satuan
+              };
+              applyAtasan(atasanEmp);
+            } else if (d.atasan_nama) {
+              applyAtasan({
+                id: 0,
+                nip: d.atasan_nip || "-",
+                nama: d.atasan_nama,
+                jabatan: d.atasan_jabatan || "-",
+                satuanUnitKerja: d.atasan_satuan || ""
+              });
             }
             modalOverlay.classList.remove("hidden");
             document.body.style.overflow = "hidden";
@@ -1128,6 +1151,24 @@
               id: d.pegawai_pengampu_id, nip: d.pengampu_nip, nama: d.pengampu_nama, jabatan: d.pengampu_jabatan, eselon: d.pengampu_eselon, satuanUnitKerja: d.pengampu_satuan
             };
             applyEmployee(emp);
+            if (d.atasan_langsung_id) {
+              var atasanEmp = findById(parseInt(d.atasan_langsung_id, 10)) || {
+                id: d.atasan_langsung_id,
+                nip: d.atasan_nip,
+                nama: d.atasan_nama,
+                jabatan: d.atasan_jabatan,
+                satuanUnitKerja: d.atasan_satuan
+              };
+              applyAtasan(atasanEmp);
+            } else if (d.atasan_nama) {
+              applyAtasan({
+                id: 0,
+                nip: d.atasan_nip || "-",
+                nama: d.atasan_nama,
+                jabatan: d.atasan_jabatan || "-",
+                satuanUnitKerja: d.atasan_satuan || ""
+              });
+            }
             if (d.jenis_perjanjian) {
               var jp = d.jenis_perjanjian.toUpperCase();
               jenisPerjanjianSel.value = jp;
@@ -1197,7 +1238,7 @@
       pegawaiList.innerHTML = matches.map(function(emp){
         return '<div class="combo-item" data-nip="' + escapeHtml(emp.nip) + '">' +
           '<div class="ci-nama">' + escapeHtml(emp.nama) + '</div>' +
-          '<div class="ci-meta">' + escapeHtml(emp.jabatan) + ' · Eselon ' + escapeHtml(emp.eselon) + '</div>' +
+          '<div class="ci-meta">' + escapeHtml(emp.jabatan) + ' - Eselon ' + escapeHtml(emp.eselon) + '</div>' +
         '</div>';
       }).join("");
     }
@@ -1223,6 +1264,66 @@
     if (!emp){ showToast("NIP tidak ditemukan pada daftar kepegawaian.", true); return; }
     applyEmployee(emp);
     showToast("Data pegawai ditemukan dan berhasil dimuat.");
+  });
+
+  /* ---------- Combobox Atasan Langsung (Pilihan Manual) ---------- */
+  function renderAtasanList(query){
+    if (!atasanList) return;
+    var q = (query || "").trim().toLowerCase();
+
+    var matches = employees.filter(function(emp){
+      if (modalState.selectedEmployee && emp.id === modalState.selectedEmployee.id) return false;
+      if (!q) return true;
+      return emp.nama.toLowerCase().indexOf(q) > -1 ||
+             emp.jabatan.toLowerCase().indexOf(q) > -1 ||
+             emp.nip.indexOf(q) > -1;
+    });
+
+    if (matches.length === 0){
+      atasanList.innerHTML = '<div class="combo-empty">Pegawai atasan tidak ditemukan</div>';
+    } else {
+      atasanList.innerHTML = matches.map(function(emp){
+        return '<div class="combo-item atasan-combo-item" data-id="' + emp.id + '" data-nip="' + escapeHtml(emp.nip) + '">' +
+          '<div class="ci-nama">' + escapeHtml(emp.nama) + '</div>' +
+          '<div class="ci-meta">' + escapeHtml(emp.jabatan) + ' - Eselon ' + escapeHtml(emp.eselon) + '</div>' +
+        '</div>';
+      }).join("");
+    }
+    atasanList.classList.remove("hidden");
+  }
+
+  if (atasanInput){
+    atasanInput.addEventListener("focus", function(){ renderAtasanList(atasanInput.value); });
+    atasanInput.addEventListener("input", function(){ renderAtasanList(atasanInput.value); });
+  }
+
+  if (atasanList){
+    atasanList.addEventListener("click", function(ev){
+      var item = ev.target.closest(".atasan-combo-item");
+      if (!item) return;
+      var empId = parseInt(item.getAttribute("data-id"), 10);
+      var emp = findById(empId) || findByNip(item.getAttribute("data-nip"));
+      if (emp) applyAtasan(emp);
+    });
+  }
+
+  var btnCekNipAtasan = document.getElementById("btnCekNipAtasan");
+  if (btnCekNipAtasan){
+    btnCekNipAtasan.addEventListener("click", function(){
+      var nip = nipAtasan.value.trim();
+      if (!nip){ showToast("Masukkan NIP atasan terlebih dahulu.", true); return; }
+      var emp = findByNip(nip);
+      if (!emp){ showToast("NIP atasan tidak ditemukan pada daftar kepegawaian.", true); return; }
+      applyAtasan(emp);
+      showToast("Data atasan langsung ditemukan dan berhasil dimuat.");
+    });
+  }
+
+  document.addEventListener("click", function(ev){
+    if (!ev.target.closest(".combo-wrap")){
+      if (pegawaiList) pegawaiList.classList.add("hidden");
+      if (atasanList) atasanList.classList.add("hidden");
+    }
   });
 
   /* ---------- Sasaran Picker & AJAX Loader ---------- */
@@ -1335,7 +1436,7 @@
 
     if (level === "program"){
       data.forEach(function(prog){
-        var progTitle = (prog.kode ? prog.kode + ' — ' : '') + prog.nama;
+        var progTitle = (prog.kode ? prog.kode + ' - ' : '') + prog.nama;
         var sList = prog.sasaranProgram || [];
         var progRows = sList
           .map(function(s, i){
@@ -1375,7 +1476,7 @@
 
       Object.keys(groupedProg).forEach(function(pid){
         var p = groupedProg[pid];
-        var progTitle = (p.kode ? p.kode + ' — ' : '') + p.nama;
+        var progTitle = (p.kode ? p.kode + ' - ' : '') + p.nama;
         var kegBlocks = [];
 
         p.kegiatans.forEach(function(k){
@@ -1413,7 +1514,7 @@
 
       Object.keys(grouped).forEach(function(pid){
         var prog = grouped[pid];
-        var progTitle = (prog.kode ? prog.kode + ' — ' : '') + prog.nama;
+        var progTitle = (prog.kode ? prog.kode + ' - ' : '') + prog.nama;
         var anyKeg = false;
         var pRows = [];
 
@@ -1544,6 +1645,9 @@
     if (!modalState.selectedEmployee && !formEmployeeId.value){
       showToast("Pilih pegawai pengampu terlebih dahulu.", true); return;
     }
+    if (!formAtasanId.value && !atasanLangsung.value){
+      showToast("Pilih atasan langsung terlebih dahulu.", true); return;
+    }
     if (!jenisPerjanjianSel.value){ showToast("Pilih jenis perjanjian.", true); return; }
     if (!sasaranPerjanjianSel.value){ showToast("Pilih sasaran perjanjian.", true); return; }
     if (!periodeAwalSel.value || !periodeAkhirSel.value){ showToast("Lengkapi periode awal dan akhir.", true); return; }
@@ -1656,8 +1760,8 @@
         '</div>'
       : "";
 
-    var atasanNama = d.atasan_nama || "Bupati / Wali Kota";
-    var atasanJabatan = d.atasan_jabatan || "Kepala Daerah";
+    var atasanNama = d.atasan_nama || "-";
+    var atasanJabatan = d.atasan_jabatan || "-";
     var atasanNip = d.atasan_nip || "-";
 
     return alertHtml +
@@ -1688,7 +1792,7 @@
     if (docType === "plt") titleLine = "PERJANJIAN KINERJA PLT TAHUN " + tahun;
 
     var dateStr = buildDocDate(d.periode_awal, tahun);
-    var atasanNama = d.atasan_nama || "Bupati / Wali Kota";
+    var atasanNama = d.atasan_nama || "-";
     var atasanNip = d.atasan_nip || "-";
 
     var rawData = (docType === "perubahan") ? d.pk_perubahan_data : ((docType === "plt") ? d.pk_plt_data : d.sasaran_data);

@@ -14,6 +14,27 @@ class Instansi extends CI_Controller {
         }
     }
 
+    public function Logout() {
+        $this->session->sess_destroy();
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            $_SESSION = array();
+            if (ini_get("session.use_cookies")) {
+                $params = session_get_cookie_params();
+                setcookie(session_name(), '', time() - 42000,
+                    $params["path"], $params["domain"],
+                    $params["secure"], $params["httponly"]
+                );
+            }
+            @session_destroy();
+        }
+        $redirect = $this->input->get('redirect', TRUE);
+        if (!empty($redirect)) {
+            redirect($redirect);
+        } else {
+            redirect(base_url('Home'));
+        }
+    }
+
     /**
      * Cek apakah user sudah login
      */
@@ -24,10 +45,10 @@ class Instansi extends CI_Controller {
         if (isset($this->session) && $this->session->userdata('isLoggedIn') === true) {
             return true;
         }
-        if (!empty($_SESSION['Username']) || isset($_SESSION['Level']) || !empty($_SESSION['KodeWilayah'])) {
+        if (!empty($_SESSION['Username']) && isset($_SESSION['Level'])) {
             return true;
         }
-        if (isset($this->session) && ($this->session->userdata('Username') || $this->session->userdata('Level') !== null)) {
+        if (isset($this->session) && ($this->session->userdata('Username') && $this->session->userdata('Level') !== null)) {
             return true;
         }
         return false;
@@ -639,6 +660,9 @@ public function GetListKabKota() {
             $kode_wilayah = $this->input->post('KodeWilayah', TRUE) ?: $this->input->get('KodeWilayah', TRUE);
         }
         if (!$kode_wilayah) {
+            $kode_wilayah = $this->input->post('kodewilayah', TRUE) ?: $this->input->get('kodewilayah', TRUE);
+        }
+        if (!$kode_wilayah) {
             $kode_wilayah = $this->input->post('Kode', TRUE) ?: $this->input->get('Kode', TRUE);
         }
         if (!$kode_wilayah) {
@@ -658,6 +682,57 @@ public function GetListKabKota() {
         $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode($instansi));
+    }
+
+    /**
+     * Alias endpoint untuk AJAX filter daftar instansi
+     */
+    public function GetListInstansiByWilayah() {
+        return $this->GetListInstansiLevel4();
+    }
+
+    public function GetInstansiByKabKota() {
+        return $this->GetListInstansiLevel4();
+    }
+
+    /**
+     * Simpan Filter Wilayah & Instansi sebelum login (AJAX)
+     */
+    public function SimpanFilterWilayah() {
+        $kode = $this->input->post('KodeWilayah', TRUE);
+        $instansi_id = $this->input->post('FilterInstansiId', TRUE);
+        if ($kode) {
+            $this->session->set_userdata('TempKodeWilayah', $kode);
+            $_SESSION['TempKodeWilayah'] = $kode;
+            $this->session->set_userdata('KodeWilayah', $kode);
+            $_SESSION['KodeWilayah'] = $kode;
+        } else {
+            $this->session->unset_userdata('TempKodeWilayah');
+            unset($_SESSION['TempKodeWilayah']);
+            $this->session->unset_userdata('KodeWilayah');
+            unset($_SESSION['KodeWilayah']);
+        }
+        if ($instansi_id !== null && $instansi_id !== '') {
+            $this->session->set_userdata('FilterInstansiId', $instansi_id);
+            $_SESSION['FilterInstansiId'] = $instansi_id;
+        } else {
+            $this->session->unset_userdata('FilterInstansiId');
+            unset($_SESSION['FilterInstansiId']);
+        }
+        echo "1";
+    }
+
+    /**
+     * Reset filter wilayah dari sesi
+     */
+    public function ResetFilterWilayah() {
+        $this->session->unset_userdata('TempKodeWilayah');
+        unset($_SESSION['TempKodeWilayah']);
+        $this->session->unset_userdata('KodeWilayah');
+        unset($_SESSION['KodeWilayah']);
+        $this->session->unset_userdata('FilterInstansiId');
+        unset($_SESSION['FilterInstansiId']);
+        echo "1";
     }
 
     // =====================================================
@@ -4519,6 +4594,10 @@ public function HapusIkuPD() {
 /**
  * Halaman IKK PD
  */
+public function CapaianIKK() {
+    $this->IkkPD();
+}
+
 public function IkkPD() {
     $Header['Halaman'] = 'IKK Perangkat Daerah';
     
@@ -4746,7 +4825,7 @@ private function get_bidang_urusan_for_instansi($instansi_id, $KodeWilayah = nul
  */
 public function GetUrusanByInstansi() {
     $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: $this->input->get('instansi_id', TRUE));
-    $KodeWilayah = $this->get_kode_wilayah();
+    $KodeWilayah = $this->input->post('kodewilayah', TRUE) ?: $this->input->get('kodewilayah', TRUE) ?: $this->get_kode_wilayah();
 
     if (!$instansi_id) {
         $this->output->set_content_type('application/json')->set_output(json_encode([]));
@@ -5045,6 +5124,176 @@ public function HapusIkkPD() {
     ]);
     
     echo $this->db->affected_rows() > 0 ? '1' : 'Gagal menghapus data!';
+}
+
+/**
+ * =========================================================================
+ * MENU CAPAIAN IKK PERANGKAT DAERAH
+ * Mengambil data dari tabel ikk_pd (sama dengan menu IKK PD).
+ * Menampilkan Target dan Realisasi di setiap tahunnya yang diisi oleh pihak Daerah.
+ * =========================================================================
+ */
+public function CapaianIkkPD() {
+    $Header['Halaman'] = 'Capaian IKK Perangkat Daerah';
+    
+    $KodeWilayah = $this->get_kode_wilayah();
+    $instansi_id = $this->get_instansi_id();
+    $is_logged_in = $this->is_logged_in();
+    $is_role_4 = $this->is_role_4();
+    $is_role_3 = $this->is_role_3();
+    $filter_instansi_id = $this->input->get('instansi_id', TRUE);
+    if (!isset($_GET['instansi_id']) && isset($_SESSION['FilterInstansiId']) && !empty($_SESSION['FilterInstansiId'])) {
+        $filter_instansi_id = $_SESSION['FilterInstansiId'];
+    }
+    $urusan_id = $this->input->get('urusan_id', TRUE);
+    
+    $data['KodeWilayah'] = $KodeWilayah;
+    $data['InstansiId'] = $instansi_id;
+    $data['IsLoggedIn'] = $is_logged_in;
+    $data['IsRole4'] = $is_role_4;
+    $data['IsRole3'] = $is_role_3;
+    $data['FilterInstansiId'] = $filter_instansi_id;
+    $data['NamaInstansi'] = isset($_SESSION['NamaInstansi']) ? $_SESSION['NamaInstansi'] : '';
+    $data['UrusanAktif'] = $urusan_id;
+    // Pengisian Realisasi hanya dilakukan oleh Daerah (Role 3 & Admin), tidak ada aksi untuk Instansi (Role 4)
+    $data['CanInputRealisasi'] = $is_logged_in && !$is_role_4 && ($is_role_3 || (isset($_SESSION['Level']) && (int)$_SESSION['Level'] !== 4));
+    
+    // Ambil nama wilayah
+    $data['NamaWilayah'] = '';
+    if ($KodeWilayah) {
+        $wilayah = $this->db->select('Nama')->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+        $data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
+    }
+    
+    // Data provinsi untuk dropdown filter
+    $data['Provinsi'] = $this->db->where("Kode LIKE '__'")
+                                 ->order_by('Nama')
+                                 ->get('kodewilayah')
+                                 ->result_array();
+    
+    // Daftar instansi untuk filter
+    $data['ListInstansi'] = [];
+    if (!$is_role_4 && $KodeWilayah) {
+        $data['ListInstansi'] = $this->db->select('id, nama')
+            ->from('akun_instansi')
+            ->where('kodewilayah', $KodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->order_by('nama', 'ASC')
+            ->get()
+            ->result_array();
+    }
+    
+    // Tentukan instansi yang aktif (Role 4 = instansi login, Non-Role 4 = instansi dari filter)
+    $active_instansi_id = null;
+    if ($is_role_4 && $instansi_id) {
+        $active_instansi_id = $instansi_id;
+    } elseif (!empty($filter_instansi_id)) {
+        $active_instansi_id = (int)$filter_instansi_id;
+    }
+
+    // Data Bidang Urusan PD berdasarkan instansi yang dipilih pada Daftar Instansi
+    $data['Urusan'] = [];
+    if ($KodeWilayah && $active_instansi_id) {
+        $data['Urusan'] = $this->get_bidang_urusan_for_instansi($active_instansi_id, $KodeWilayah);
+    }
+
+    // Validasi UrusanAktif agar sesuai dengan daftar bidang urusan instansi terpilih
+    $validUrusanIds = !empty($data['Urusan']) ? array_column($data['Urusan'], 'id') : [];
+    if (!empty($urusan_id) && !in_array((string)$urusan_id, array_map('strval', $validUrusanIds))) {
+        $data['UrusanAktif'] = '';
+        $urusan_id = null;
+    }
+    
+    // ========== AMBIL DATA IKK PD ==========
+    $data['Data'] = [];
+    if ($KodeWilayah && $urusan_id) {
+        $query = $this->db->from('ikk_pd')
+            ->where('kode_wilayah', $KodeWilayah)
+            ->where('urusan_id', (string)$urusan_id)
+            ->where('deleted_at IS NULL');
+        
+        if ($is_role_4 && $instansi_id) {
+            $query->where('id_instansi', $instansi_id);
+        } elseif (!empty($filter_instansi_id)) {
+            $query->where('id_instansi', (int)$filter_instansi_id);
+        }
+        
+        $data['Data'] = $query->order_by('id', 'ASC')->get()->result_array();
+    }
+    
+    $this->load->view('Daerah/header', $Header);
+    $this->load->view('Daerah/CapaianIkkPD', $data);
+}
+
+/**
+ * Simpan Data Realisasi IKK PD (AJAX)
+ */
+public function SimpanRealisasiIkkPD() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+
+    if (!$this->is_logged_in()) {
+        echo json_encode(['status' => 'error', 'message' => 'Silakan login terlebih dahulu!']);
+        return;
+    }
+
+    $id = (int)$this->input->post('id', true);
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID IKK tidak valid!']);
+        return;
+    }
+
+    $existing = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('ikk_pd')->row_array();
+    if (!$existing) {
+        echo json_encode(['status' => 'error', 'message' => 'Data IKK tidak ditemukan!']);
+        return;
+    }
+
+    // Role 4 (Instansi) tidak diizinkan mengisi / mengubah realisasi (hanya Daerah / Role 3 / Admin yang mengisi)
+    if ($this->is_role_4()) {
+        echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Akun Instansi hanya dapat melihat data capaian IKK. Pengisian realisasi dilakukan oleh Daerah.']);
+        return;
+    }
+
+    $cleanNum = function($v) {
+        if ($v === null || $v === '') return null;
+        $val = str_replace(',', '.', trim((string)$v));
+        return is_numeric($val) ? (float)$val : null;
+    };
+
+    $update = [
+        'r_baseline_2024'      => $cleanNum($this->input->post('r_baseline_2024', true)),
+        'r_2025'               => $cleanNum($this->input->post('r_2025', true)),
+        'r_2026'               => $cleanNum($this->input->post('r_2026', true)),
+        'r_2027'               => $cleanNum($this->input->post('r_2027', true)),
+        'r_2028'               => $cleanNum($this->input->post('r_2028', true)),
+        'r_2029'               => $cleanNum($this->input->post('r_2029', true)),
+        'r_2030'               => $cleanNum($this->input->post('r_2030', true)),
+        'keterangan_realisasi' => trim((string)$this->input->post('keterangan_realisasi', true)) ?: null,
+        'updated_at'           => date('Y-m-d H:i:s')
+    ];
+
+    $this->db->where('id', $id)->update('ikk_pd', $update);
+
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Data Realisasi IKK PD berhasil disimpan!'
+    ]);
+}
+
+/**
+ * Get Detail IKK PD (AJAX)
+ */
+public function GetIkkPDDetail() {
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+        return;
+    }
+    $id = (int)$this->input->post('id', true);
+    $data = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('ikk_pd')->row_array();
+    echo json_encode($data ?: []);
 }
 
 /**
@@ -14094,6 +14343,10 @@ public function getSubKegiatanByProgram() {
 // RENSTRA PERANGKAT DAERAH (PD) - CRUD TANPA JSON
 // =====================================================
 
+public function MenuRenstra() {
+    $this->MenuRenstraPD();
+}
+
 public function MenuRenstraPD() {
     $Header['Halaman'] = 'Menu Renstra PD';
     
@@ -14102,15 +14355,28 @@ public function MenuRenstraPD() {
     $is_logged_in = $this->is_logged_in();
     $is_role_4 = $this->is_role_4();
     $level = isset($_SESSION['Level']) ? $_SESSION['Level'] : null;
-    $filter_instansi_id = $this->input->get('instansi_id', TRUE);
-    if (empty($filter_instansi_id) && isset($_SESSION['TempInstansiId']) && !empty($_SESSION['TempInstansiId'])) {
+    
+    // Tangani parameter filter dan reset instansi
+    $reset = $this->input->get('reset', TRUE);
+    $get_instansi_id = $this->input->get('instansi_id', TRUE);
+    
+    if ($reset == '1' || $this->input->get('instansi_id') === '') {
+        unset($_SESSION['TempInstansiId']);
+        unset($_SESSION['FilterInstansiId']);
+        $filter_instansi_id = null;
+    } elseif (!empty($get_instansi_id)) {
+        $filter_instansi_id = $get_instansi_id;
+        $_SESSION['TempInstansiId'] = $filter_instansi_id;
+    } elseif (isset($_SESSION['TempInstansiId']) && !empty($_SESSION['TempInstansiId'])) {
         $filter_instansi_id = $_SESSION['TempInstansiId'];
+    } else {
+        $filter_instansi_id = null;
     }
     
     $data['KodeWilayah'] = $KodeWilayah;
     $data['InstansiId'] = $instansi_id;
     $data['IsLoggedIn'] = $is_logged_in;
-    $data['IsRole4'] = $is_role_4 || ($is_logged_in && !empty($filter_instansi_id));
+    $data['IsRole4'] = $is_role_4;
     $data['Level'] = $level;
     $data['FilterInstansiId'] = $filter_instansi_id;
     $data['NamaInstansi'] = isset($_SESSION['NamaInstansi']) ? $_SESSION['NamaInstansi'] : '';
@@ -14178,16 +14444,17 @@ private function getRenstraPDDataWithOutcome($KodeWilayah, $instansi_id, $is_rol
     if (!$KodeWilayah) return $result;
     
     // 1. Ambil semua Tujuan
-    $this->db->select('*');
+    $this->db->select('renstra_tujuan.*, ai.nama as nama_instansi');
     $this->db->from('renstra_tujuan');
-    $this->db->where('kode_wilayah', $KodeWilayah);
-    $this->db->where('deleted_at IS NULL');
+    $this->db->join('akun_instansi ai', 'ai.id = renstra_tujuan.id_instansi', 'left');
+    $this->db->where('renstra_tujuan.kode_wilayah', $KodeWilayah);
+    $this->db->where('renstra_tujuan.deleted_at IS NULL');
     if ($is_role_4 && $instansi_id) {
-        $this->db->where('id_instansi', $instansi_id);
+        $this->db->where('renstra_tujuan.id_instansi', $instansi_id);
     } elseif (!empty($filter_instansi_id)) {
-        $this->db->where('id_instansi', (int)$filter_instansi_id);
+        $this->db->where('renstra_tujuan.id_instansi', (int)$filter_instansi_id);
     }
-    $tujuan_list = $this->db->order_by('id', 'ASC')->get()->result_array();
+    $tujuan_list = $this->db->order_by('renstra_tujuan.id', 'ASC')->get()->result_array();
     
     foreach ($tujuan_list as &$tujuan) {
         // Ambil Indikator Tujuan
@@ -17986,20 +18253,8 @@ public function simpanPerjanjianKinerja() {
         return;
     }
     
-    // Cek atau set atasan_langsung_id
-    if (!$atasan_langsung_id) {
-        $emp = $this->db->select('id, eselon, dinas_id')->where('id', $pegawai_pengampu_id)->get('akun_karyawan')->row_array();
-        if ($emp) {
-            $atasan = $this->db->select('id')
-                ->where('kodewilayah', $KodeWilayah)
-                ->where('dinas_id', $emp['dinas_id'])
-                ->where('id !=', $pegawai_pengampu_id)
-                ->order_by('id', 'ASC')
-                ->get('akun_karyawan')
-                ->row_array();
-            $atasan_langsung_id = $atasan ? $atasan['id'] : $pegawai_pengampu_id;
-        }
-    }
+    // Atasan langsung ID (jika dipilih manual, gunakan ID tersebut. Jika Bupati/Kepala Daerah atau kosong, set null)
+    $atasan_langsung_id = ($atasan_langsung_id > 0) ? $atasan_langsung_id : null;
     
     $doc_num = rand(2060, 2999);
     $doc_id_str = (string)$doc_num;
@@ -18026,6 +18281,7 @@ public function simpanPerjanjianKinerja() {
             $updateData['status_plt'] = 'menunggu';
         } else {
             $updateData['definitif_doc_id'] = $existing->definitif_doc_id ?: $doc_id_str;
+            $updateData['atasan_langsung_id'] = $atasan_langsung_id;
             $updateData['sasaran_data'] = $sasaran_data;
             $updateData['periode_awal'] = $periode_awal;
             $updateData['periode_akhir'] = $periode_akhir;

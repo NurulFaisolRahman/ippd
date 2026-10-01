@@ -334,7 +334,7 @@ sub {
           <div class="data-table-list">
 
             <!-- FILTER WILAYAH (Provinsi, Kab/Kota, dan Instansi) - SEBELUM LOGIN -->
-            <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
+            <?php if (empty($IsLoggedIn)) { ?>
               <div class="form-example-wrap" style="margin-bottom: 20px;">
                 <div class="form-example-int form-horizental">
                   <div class="form-group">
@@ -360,25 +360,54 @@ sub {
                           <label for="KabKota"><b>Kab/Kota</b></label>
                           <select class="form-control filter-select" id="KabKota">
                             <option value="">Pilih Kab/Kota</option>
+                            <?php 
+                            if (!empty($KodeWilayah)) {
+                                $provKode = substr($KodeWilayah, 0, 2);
+                                $listKabKota = $this->db->select('Kode, Nama')
+                                                       ->from('kodewilayah')
+                                                       ->where("Kode LIKE '{$provKode}.%'")
+                                                       ->where('LENGTH(REPLACE(Kode, ".", "")) = 4', null, false)
+                                                       ->order_by('Nama', 'ASC')
+                                                       ->get()
+                                                       ->result_array();
+                                foreach ($listKabKota as $kab) { ?>
+                                    <option value="<?= html_escape($kab['Kode']) ?>" <?= ($KodeWilayah == $kab['Kode'] || str_replace('.', '', $KodeWilayah) == str_replace('.', '', $kab['Kode'])) ? 'selected' : '' ?>>
+                                        <?= html_escape($kab['Nama']) ?>
+                                    </option>
+                                <?php }
+                            }
+                            ?>
                           </select>
                         </div>
                       </div>
 
                       <!-- FILTER INSTANSI SEBELUM LOGIN -->
-                      <div class="col-lg-3 col-md-6" id="FilterInstansiGroupBefore" style="display: none;">
+                      <div class="col-lg-3 col-md-6" id="FilterInstansiGroupBefore" style="<?= (!empty($KodeWilayah) && !empty($ListInstansi)) ? '' : 'display: none;' ?>">
                         <div class="filter-group">
                           <label for="FilterInstansiBeforeLogin"><b>Filter Instansi</b></label>
                           <select class="form-control filter-select" id="FilterInstansiBeforeLogin">
                             <option value="">-- Semua Instansi --</option>
+                            <?php if (!empty($ListInstansi)) { ?>
+                              <?php foreach ($ListInstansi as $ins) { ?>
+                                <option value="<?= $ins['id'] ?>" <?= ($FilterInstansiId == $ins['id']) ? 'selected' : '' ?>>
+                                  <?= html_escape($ins['nama']) ?>
+                                </option>
+                              <?php } ?>
+                            <?php } ?>
                           </select>
                         </div>
                       </div>
 
-                      <div class="col-lg-2 col-md-6">
-                        <div class="filter-group" style="margin-top: 28px;">
-                          <button class="btn btn-primary notika-btn-primary btn-block" id="Filter">
+                      <div class="col-lg-3 col-md-6">
+                        <div class="filter-group" style="margin-top: 28px; display: flex; gap: 6px;">
+                          <button class="btn btn-primary notika-btn-primary btn-block" id="Filter" style="flex: 1;">
                             <b>Filter</b>
                           </button>
+                          <?php if (!empty($KodeWilayah)) { ?>
+                            <button type="button" class="btn btn-default" id="ResetWilayahBtn" title="Reset Wilayah">
+                              <i class="fa fa-refresh"></i>
+                            </button>
+                          <?php } ?>
                         </div>
                       </div>
 
@@ -406,8 +435,8 @@ sub {
             <?php } ?>
             <!-- END FILTER WILAYAH -->
 
-            <!-- FILTER INSTANSI (UNTUK YANG SUDAH LOGIN DAN BUKAN ROLE 4) -->
-            <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
+            <!-- FILTER INSTANSI (UNTUK YANG SUDAH MEMILIH WILAYAH DAN BUKAN ROLE 4) -->
+            <?php if (!$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
               <div class="form-example-wrap" style="margin-bottom: 20px;">
                 <div class="form-example-int form-horizental">
                   <div class="form-group">
@@ -873,32 +902,48 @@ jQuery(document).ready(function($){
   }, 100);
 
   /* ================= FILTER WILAYAH SEBELUM LOGIN ================= */
-  <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
+  <?php if (empty($IsLoggedIn)) { ?>
 
   $("#Provinsi").change(function() {
-    if ($(this).val() === "") {
+    var prov = $(this).val();
+    if (!prov) {
       $("#KabKota").html('<option value="">Pilih Kab/Kota</option>');
       $("#FilterInstansiGroupBefore").hide();
       return;
     }
 
+    $("#KabKota").html('<option value="">Memuat Kab/Kota...</option>');
+
     $.ajax({
       url: BaseURL + "Instansi/GetListKabKota",
       type: "POST",
-      data: { Kode: $(this).val(), [CSRF_NAME]: CSRF_TOKEN },
+      data: { Kode: prov },
       dataType: 'json',
       success: function(res) {
         var opt = '<option value="">Pilih Kab/Kota</option>';
         if (res && res.length > 0) {
           $.each(res, function(i, item) {
-            opt += '<option value="' + item.Kode + '">' + item.Nama + '</option>';
+            var sel = (KODE_WILAYAH === item.Kode || (KODE_WILAYAH && KODE_WILAYAH.replace(/\./g, '') === item.Kode.replace(/\./g, ''))) ? 'selected' : '';
+            opt += '<option value="' + item.Kode + '" ' + sel + '>' + item.Nama + '</option>';
           });
         }
         $("#KabKota").html(opt);
-        $("#FilterInstansiGroupBefore").hide();
+        if ($("#KabKota").val()) {
+          $("#KabKota").trigger('change');
+        } else {
+          $("#FilterInstansiGroupBefore").hide();
+        }
+      },
+      error: function() {
+        $("#KabKota").html('<option value="">Gagal memuat Kab/Kota</option>');
       }
     });
   });
+
+  var initProvVal = $("#Provinsi").val();
+  if (initProvVal && $("#KabKota option").length <= 1) {
+    $("#Provinsi").trigger('change');
+  }
 
   $("#KabKota").change(function() {
     var kabKotaKode = $(this).val();
@@ -964,26 +1009,25 @@ jQuery(document).ready(function($){
     });
   });
 
-  <?php if (!empty($KodeWilayah)) { ?>
-    var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
-    var kodeKab  = "<?= $KodeWilayah ?>";
-    $("#Provinsi").val(kodeProv).trigger('change');
-    setTimeout(function() {
-      $("#KabKota").val(kodeKab).trigger('change');
-      <?php if (!empty($FilterInstansiId)) { ?>
-        setTimeout(function() {
-          if ($("#FilterInstansiBeforeLogin option[value='<?= $FilterInstansiId ?>']").length > 0) {
-            $("#FilterInstansiBeforeLogin").val("<?= $FilterInstansiId ?>");
-          }
-        }, 800);
-      <?php } ?>
-    }, 500);
-  <?php } ?>
+  $("#ResetWilayahBtn").click(function() {
+    $(this).prop('disabled', true);
+    $.ajax({
+      url: BaseURL + "Instansi/ResetFilterWilayah",
+      type: "POST",
+      data: { [CSRF_NAME]: CSRF_TOKEN },
+      success: function() {
+        window.location.href = BaseURL + "Instansi/IkuPD";
+      },
+      error: function() {
+        window.location.href = BaseURL + "Instansi/IkuPD";
+      }
+    });
+  });
 
   <?php } ?>
 
-  /* ================= FILTER INSTANSI (UNTUK YANG SUDAH LOGIN DAN BUKAN ROLE 4) ================= */
-  <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
+  /* ================= FILTER INSTANSI (UNTUK YANG SUDAH MEMILIH WILAYAH DAN BUKAN ROLE 4) ================= */
+  <?php if (!$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
     $("#FilterInstansiBtn").click(function() {
       var instansiId = $("#FilterInstansi").val();
       var url = BaseURL + "Instansi/IkuPD";

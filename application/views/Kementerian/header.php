@@ -444,7 +444,7 @@
 <div class="page-top-space"></div>
 
 <script>
-  function logout(){ window.location.href = '<?= base_url('Beranda'); ?>'; }
+  function logout(){ window.location.href = '<?= base_url('Home/Logout'); ?>'; }
   function Login(){ window.location.href = '<?= base_url('Home'); ?>'; }
 
   function toggleSidebar(e) {

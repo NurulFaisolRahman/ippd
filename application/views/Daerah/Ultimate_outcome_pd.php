@@ -306,7 +306,7 @@
         <div class="data-table-list">
 
           <!-- ================= FILTER WILAYAH (SEBELUM LOGIN) ================= -->
-          <?php if (!isset($_SESSION['KodeWilayah'])): ?>
+          <?php if (empty($IsLoggedIn)): ?>
             <div class="well well-sm" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; margin-bottom:20px; padding:16px;">
               <div class="row">
                 <div class="col-lg-3 col-md-6">
@@ -324,25 +324,54 @@
                   <label><b>Kab/Kota</b></label>
                   <select class="form-control" id="KabKota" <?= empty($KodeWilayah) ? 'disabled' : '' ?>>
                     <option value="">Pilih Kab/Kota</option>
+                    <?php 
+                    if (!empty($KodeWilayah)) {
+                        $provKode = substr($KodeWilayah, 0, 2);
+                        $listKabKota = $this->db->select('Kode, Nama')
+                                               ->from('kodewilayah')
+                                               ->where("Kode LIKE '{$provKode}.%'")
+                                               ->where('LENGTH(REPLACE(Kode, ".", "")) = 4', null, false)
+                                               ->order_by('Nama', 'ASC')
+                                               ->get()
+                                               ->result_array();
+                        foreach ($listKabKota as $kab) { ?>
+                            <option value="<?= html_escape($kab['Kode']) ?>" <?= ($KodeWilayah == $kab['Kode'] || str_replace('.', '', $KodeWilayah) == str_replace('.', '', $kab['Kode'])) ? 'selected' : '' ?>>
+                                <?= html_escape($kab['Nama']) ?>
+                            </option>
+                        <?php }
+                    }
+                    ?>
                   </select>
                 </div>
-                <div class="col-lg-3 col-md-6" id="FilterInstansiBeforeGroup" style="display: none;">
+                <div class="col-lg-3 col-md-6" id="FilterInstansiBeforeGroup" style="<?= (!empty($KodeWilayah) && !empty($ListInstansi)) ? '' : 'display: none;' ?>">
                   <label><b>Filter Instansi</b></label>
                   <select class="form-control" id="FilterInstansiBeforeLogin">
                     <option value="">-- Semua Instansi --</option>
+                    <?php if (!empty($ListInstansi)): ?>
+                      <?php foreach ($ListInstansi as $ins): ?>
+                        <option value="<?= $ins['id'] ?>" <?= ($FilterInstansiId == $ins['id']) ? 'selected' : '' ?>>
+                          <?= html_escape($ins['nama']) ?>
+                        </option>
+                      <?php endforeach; ?>
+                    <?php endif; ?>
                   </select>
                 </div>
-                <div class="col-lg-3 col-md-6" style="margin-top: 25px;">
-                  <button class="btn btn-primary btn-block" id="Filter">
+                <div class="col-lg-3 col-md-6" style="margin-top: 25px; display: flex; gap: 6px;">
+                  <button class="btn btn-primary btn-block" id="Filter" style="flex: 1;">
                     Filter
                   </button>
+                  <?php if (!empty($KodeWilayah)): ?>
+                    <button type="button" class="btn btn-default" id="ResetWilayahBtn" title="Reset Wilayah">
+                      <i class="fa fa-refresh"></i>
+                    </button>
+                  <?php endif; ?>
                 </div>
               </div>
             </div>
           <?php endif; ?>
 
-          <!-- FILTER INSTANSI (LOGIN NON-ROLE 4) -->
-          <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)): ?>
+          <!-- FILTER INSTANSI (LOGIN / SETELAH PILIH WILAYAH NON-ROLE 4) -->
+          <?php if (!$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)): ?>
             <div class="well well-sm" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; margin-bottom:20px; padding:16px;">
               <div class="row">
                 <div class="col-lg-8 col-md-8">
@@ -1166,7 +1195,7 @@ $(document).ready(function() {
   });
 
   // ================= FILTER WILAYAH & INSTANSI =================
-  <?php if (!isset($_SESSION['KodeWilayah'])): ?>
+  <?php if (empty($IsLoggedIn)): ?>
     $("#Provinsi").change(function() {
       var prov = $(this).val();
       if (!prov) {
@@ -1217,6 +1246,20 @@ $(document).ready(function() {
           if (ins) url += "?instansi_id=" + ins;
           window.location.href = url;
         } else alert(res || "Gagal filter");
+      });
+    });
+    $("#ResetWilayahBtn").click(function() {
+      $(this).prop('disabled', true);
+      $.ajax({
+        url: BaseURL + "Instansi/ResetFilterWilayah",
+        type: "POST",
+        data: { [CSRF_NAME]: CSRF_TOKEN },
+        success: function() {
+          window.location.href = BaseURL + "Instansi/Ultimate_outcome_pd";
+        },
+        error: function() {
+          window.location.href = BaseURL + "Instansi/Ultimate_outcome_pd";
+        }
       });
     });
   <?php endif; ?>

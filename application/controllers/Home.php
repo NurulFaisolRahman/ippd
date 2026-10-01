@@ -7,6 +7,32 @@ class Home extends CI_Controller {
 		$this->load->view('index');
 	}
 
+	public function Logout(){
+		// 1. Hapus semua data sesi CodeIgniter
+		$this->session->sess_destroy();
+
+		// 2. Bersihkan variabel $_SESSION dan cookie session PHP
+		if (session_status() === PHP_SESSION_ACTIVE) {
+			$_SESSION = array();
+			if (ini_get("session.use_cookies")) {
+				$params = session_get_cookie_params();
+				setcookie(session_name(), '', time() - 42000,
+					$params["path"], $params["domain"],
+					$params["secure"], $params["httponly"]
+				);
+			}
+			@session_destroy();
+		}
+
+		// 3. Redirect ke Beranda/Home
+		$redirect = $this->input->get('redirect', TRUE);
+		if (!empty($redirect)) {
+			redirect($redirect);
+		} else {
+			redirect(base_url('Home'));
+		}
+	}
+
 	public function Login(){  
 		$username = trim(htmlentities($this->input->post('Username', TRUE)));
 		$password = $this->input->post('Password');
