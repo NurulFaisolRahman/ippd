@@ -4653,9 +4653,22 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             // Provinsi (filter untuk pengguna yang belum login / admin)
             $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
 
-            $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
-                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
-                        ($this->input->get('KodeWilayah', TRUE) ?: ''));
+            // Jika login sebagai daerah, gunakan sesi KodeWilayah login
+            if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3 && !empty($_SESSION['KodeWilayah'])) {
+                $KodeWilayah = $_SESSION['KodeWilayah'];
+            } else {
+                // Saat belum login, data HANYA muncul berdasarkan filter wilayah (Kab/Kota) yang dipilih
+                $KodeWilayah = $this->input->get('KodeWilayah', TRUE) ?: (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+
+                // Pastikan kode wilayah berupa tingkat Kab/Kota (4 digit)
+                if (!empty($KodeWilayah) && strlen(str_replace('.', '', $KodeWilayah)) !== 4) {
+                    $KodeWilayah = '';
+                }
+
+                if (!empty($KodeWilayah)) {
+                    $this->session->set_userdata('TempKodeWilayah', $KodeWilayah);
+                }
+            }
 
             if ($KodeWilayah) {
                 $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
@@ -4681,39 +4694,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                             ->result_array();
             }
 
-            // Auto-seeding bidang dan indikator standar jika belum ada data
-            if (!empty($KodeWilayah)) {
-                // 1. Cek bidang
-                $bidangCount = $this->db->where('KodeWilayah', $KodeWilayah)->where('deleted_at IS NULL')->count_all_results('spm_bidang_rpjmd');
-                if ($bidangCount === 0) {
-                    $defBidang = $this->GetMasterBidangList();
-                    foreach ($defBidang as $bNum => $bName) {
-                        $this->db->insert('spm_bidang_rpjmd', [
-                            'KodeWilayah' => $KodeWilayah,
-                            'NoBidang'    => $bNum,
-                            'NamaBidang'  => $bName,
-                            'created_at'  => date('Y-m-d H:i:s'),
-                            'updated_at'  => date('Y-m-d H:i:s')
-                        ]);
-                    }
-                }
-
-                // 2. Cek indikator SPM
-                $existingCount = $this->db->where('KodeWilayah', $KodeWilayah)
-                                          ->where('deleted_at IS NULL')
-                                          ->count_all_results('spm_rpjmd');
-                if ($existingCount === 0) {
-                    $masterSPM = $this->GetMasterSPMData();
-                    foreach ($masterSPM as $item) {
-                        $item['KodeWilayah'] = $KodeWilayah;
-                        $item['created_at']  = date('Y-m-d H:i:s');
-                        $item['updated_at']  = date('Y-m-d H:i:s');
-                        $this->db->insert('spm_rpjmd', $item);
-                    }
-                }
-            }
-
-            // Ambil daftar Bidang SPM dari database
+            // Ambil daftar Bidang SPM dari database jika wilayah dipilih
             $bidangDb = [];
             if (!empty($KodeWilayah)) {
                 $bidangDb = $this->db->where('KodeWilayah', $KodeWilayah)
@@ -4722,26 +4703,22 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                      ->get('spm_bidang_rpjmd')
                                      ->result_array();
             }
-            if (empty($bidangDb)) {
-                $defBidang = $this->GetMasterBidangList();
-                foreach ($defBidang as $bNum => $bName) {
-                    $bidangDb[] = ['NoBidang' => $bNum, 'NamaBidang' => $bName];
-                }
-            }
             $Data['BidangList'] = $bidangDb;
 
-            // Data SPM RPJMD diurutkan berdasarkan NoBidang, NoUrut, Id
-            $this->db->from('spm_rpjmd');
-            $this->db->where('deleted_at IS NULL');
+            // Data SPM RPJMD jika wilayah dipilih
             if (!empty($KodeWilayah)) {
+                $this->db->from('spm_rpjmd');
+                $this->db->where('deleted_at IS NULL');
                 $this->db->where('KodeWilayah', $KodeWilayah);
+                $this->db->order_by('NoBidang', 'ASC');
+                $this->db->order_by('NoUrut', 'ASC');
+                $this->db->order_by('Id', 'ASC');
+                $Data['SPMList'] = $this->db->get()->result_array();
+            } else {
+                $Data['SPMList'] = [];
             }
-            $this->db->order_by('NoBidang', 'ASC');
-            $this->db->order_by('NoUrut', 'ASC');
-            $this->db->order_by('Id', 'ASC');
-            $Data['SPMList'] = $this->db->get()->result_array();
 
-            $Data['IsDaerah'] = (isset($_SESSION['Level']) && ($_SESSION['Level'] == 3 || $_SESSION['Level'] == 1)) || !empty($_SESSION['KodeWilayah']) || !empty($_SESSION['TempKodeWilayah']);
+            $Data['IsDaerah'] = (isset($_SESSION['Level']) && $_SESSION['Level'] == 3);
 
             $this->load->view('Daerah/header', $Header);
             $this->load->view('Daerah/SPM', $Data);
@@ -4752,7 +4729,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
          */
         public function InputBidangSPM()
         {
-            $isAllowed = (isset($_SESSION['Level']) && ($_SESSION['Level'] == 3 || $_SESSION['Level'] == 1)) || !empty($_SESSION['KodeWilayah']) || !empty($_SESSION['TempKodeWilayah']);
+            $isAllowed = (isset($_SESSION['Level']) && $_SESSION['Level'] == 3);
             if (!$isAllowed) {
                 echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda tidak memiliki izin.']);
                 return;
@@ -4792,7 +4769,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
          */
         public function EditBidangSPM()
         {
-            $isAllowed = (isset($_SESSION['Level']) && ($_SESSION['Level'] == 3 || $_SESSION['Level'] == 1)) || !empty($_SESSION['KodeWilayah']) || !empty($_SESSION['TempKodeWilayah']);
+            $isAllowed = (isset($_SESSION['Level']) && $_SESSION['Level'] == 3);
             if (!$isAllowed) {
                 echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda tidak memiliki izin.']);
                 return;
@@ -4833,7 +4810,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
          */
         public function HapusBidangSPM()
         {
-            $isAllowed = (isset($_SESSION['Level']) && ($_SESSION['Level'] == 3 || $_SESSION['Level'] == 1)) || !empty($_SESSION['KodeWilayah']) || !empty($_SESSION['TempKodeWilayah']);
+            $isAllowed = (isset($_SESSION['Level']) && $_SESSION['Level'] == 3);
             if (!$isAllowed) {
                 echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda tidak memiliki izin.']);
                 return;
@@ -4866,7 +4843,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
          */
         public function InisialisasiSPMStandar()
         {
-            $isAllowed = (isset($_SESSION['Level']) && ($_SESSION['Level'] == 3 || $_SESSION['Level'] == 1)) || !empty($_SESSION['KodeWilayah']) || !empty($_SESSION['TempKodeWilayah']);
+            $isAllowed = (isset($_SESSION['Level']) && $_SESSION['Level'] == 3);
             if (!$isAllowed) {
                 echo json_encode(['status' => 'error', 'message' => 'Akses ditolak!']);
                 return;
@@ -4914,7 +4891,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
          */
         public function InputSPM()
         {
-            $isAllowed = (isset($_SESSION['Level']) && ($_SESSION['Level'] == 3 || $_SESSION['Level'] == 1)) || !empty($_SESSION['KodeWilayah']) || !empty($_SESSION['TempKodeWilayah']);
+            $isAllowed = (isset($_SESSION['Level']) && $_SESSION['Level'] == 3);
             if (!$isAllowed) {
                 echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda tidak memiliki izin untuk menambah data.']);
                 return;
@@ -4997,7 +4974,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
          */
         public function EditSPM()
         {
-            $isAllowed = (isset($_SESSION['Level']) && ($_SESSION['Level'] == 3 || $_SESSION['Level'] == 1)) || !empty($_SESSION['KodeWilayah']) || !empty($_SESSION['TempKodeWilayah']);
+            $isAllowed = (isset($_SESSION['Level']) && $_SESSION['Level'] == 3);
             if (!$isAllowed) {
                 echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda tidak memiliki izin untuk mengedit data.']);
                 return;
@@ -5068,7 +5045,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
          */
         public function HapusSPM()
         {
-            $isAllowed = (isset($_SESSION['Level']) && ($_SESSION['Level'] == 3 || $_SESSION['Level'] == 1)) || !empty($_SESSION['KodeWilayah']) || !empty($_SESSION['TempKodeWilayah']);
+            $isAllowed = (isset($_SESSION['Level']) && $_SESSION['Level'] == 3);
             if (!$isAllowed) {
                 echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda tidak memiliki izin untuk menghapus data.']);
                 return;
