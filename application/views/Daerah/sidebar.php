@@ -506,6 +506,7 @@
                     <a href="<?=base_url('Daerah/cascade')?>">Cascade</a>
                     <a href="<?=base_url('Daerah/PotensiDaerah')?>">Potensi Daerah</a>
                     <a href="<?=base_url('Daerah/PermasalahanPokok')?>">Permasalahan Pokok</a>
+                    <a href="<?=base_url('Daerah/SPM')?>">SPM</a>
                 </div>
             </li>
 

@@ -4529,6 +4529,579 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             echo json_encode($row ?: []);
         }
 
+        /**
+         * Halaman SPM (Standar Pelayanan Minimal) RPJMD
+         */
+        /**
+         * Master Data 6 Bidang SPM beserta Indikator Standar (Hanya Indikator, kolom lain kosong)
+         */
+        private function GetMasterSPMData()
+        {
+            return [
+                // 1. BIDANG PENDIDIKAN (14 Indikator)
+                ['NoBidang' => 1, 'NamaBidang' => 'BIDANG PENDIDIKAN', 'NoUrut' => 1, 'Indikator' => 'Jumlah anak usia 5-6 tahun yang berpartisipasi dalam pendidikan anak usia dini (APS)', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 1, 'NamaBidang' => 'BIDANG PENDIDIKAN', 'NoUrut' => 2, 'Indikator' => 'Jumlah anak usia 7-15 Tahun yang berpartisipasi dalam pendidikan dasar (APS)', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 1, 'NamaBidang' => 'BIDANG PENDIDIKAN', 'NoUrut' => 3, 'Indikator' => 'Jumlah anak usia 7-18 Tahun yang berpartisipasi dalam pendidikan kesetaraan (Paket A/B/C) (APS)', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 1, 'NamaBidang' => 'BIDANG PENDIDIKAN', 'NoUrut' => 4, 'Indikator' => 'Skor kemampuan Literasi SD', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 1, 'NamaBidang' => 'BIDANG PENDIDIKAN', 'NoUrut' => 5, 'Indikator' => 'Skor kemampuan Numerasi SD', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 1, 'NamaBidang' => 'BIDANG PENDIDIKAN', 'NoUrut' => 6, 'Indikator' => 'Skor kemampuan Literasi SMP', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 1, 'NamaBidang' => 'BIDANG PENDIDIKAN', 'NoUrut' => 7, 'Indikator' => 'Skor kemampuan Numerasi SMP', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 1, 'NamaBidang' => 'BIDANG PENDIDIKAN', 'NoUrut' => 8, 'Indikator' => 'Pertumbuhan Pendidik PAUD yang Memiliki Kualifikasi Akademik Paling Rendah D-IV/S1', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 1, 'NamaBidang' => 'BIDANG PENDIDIKAN', 'NoUrut' => 9, 'Indikator' => 'Indeks Iklim Keamanan SD', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 1, 'NamaBidang' => 'BIDANG PENDIDIKAN', 'NoUrut' => 10, 'Indikator' => 'Indeks Iklim Kebinekaan SD', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 1, 'NamaBidang' => 'BIDANG PENDIDIKAN', 'NoUrut' => 11, 'Indikator' => 'Indeks Inklusivitas SD', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 1, 'NamaBidang' => 'BIDANG PENDIDIKAN', 'NoUrut' => 12, 'Indikator' => 'Indeks Iklim Keamanan SMP', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 1, 'NamaBidang' => 'BIDANG PENDIDIKAN', 'NoUrut' => 13, 'Indikator' => 'Indeks Iklim Kebinekaan SMP', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 1, 'NamaBidang' => 'BIDANG PENDIDIKAN', 'NoUrut' => 14, 'Indikator' => 'Indeks Inklusivitas SMP', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+
+                // 2. BIDANG KESEHATAN (12 Indikator)
+                ['NoBidang' => 2, 'NamaBidang' => 'BIDANG KESEHATAN', 'NoUrut' => 1, 'Indikator' => 'Pelayanan Kesehatan Ibu Hamil', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 2, 'NamaBidang' => 'BIDANG KESEHATAN', 'NoUrut' => 2, 'Indikator' => 'Pelayanan Kesehatan Ibu Bersalin', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 2, 'NamaBidang' => 'BIDANG KESEHATAN', 'NoUrut' => 3, 'Indikator' => 'Pelayanan Kesehatan Bayi Baru Lahir', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 2, 'NamaBidang' => 'BIDANG KESEHATAN', 'NoUrut' => 4, 'Indikator' => 'Pelayanan Kesehatan Balita', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 2, 'NamaBidang' => 'BIDANG KESEHATAN', 'NoUrut' => 5, 'Indikator' => 'Pelayanan Kesehatan pada Usia Pendidikan Dasar', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 2, 'NamaBidang' => 'BIDANG KESEHATAN', 'NoUrut' => 6, 'Indikator' => 'Pelayanan Kesehatan pada Usia Produktif', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 2, 'NamaBidang' => 'BIDANG KESEHATAN', 'NoUrut' => 7, 'Indikator' => 'Pelayanan Kesehatan pada Usia Lanjut', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 2, 'NamaBidang' => 'BIDANG KESEHATAN', 'NoUrut' => 8, 'Indikator' => 'Pelayanan Kesehatan Penderita Hipertensi', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 2, 'NamaBidang' => 'BIDANG KESEHATAN', 'NoUrut' => 9, 'Indikator' => 'Pelayanan Kesehatan Penderita Diabetes Melitus (DM)', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 2, 'NamaBidang' => 'BIDANG KESEHATAN', 'NoUrut' => 10, 'Indikator' => 'Pelayanan Kesehatan Orang dengan Gangguan Jiwa (ODGJ) Berat', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 2, 'NamaBidang' => 'BIDANG KESEHATAN', 'NoUrut' => 11, 'Indikator' => 'Pelayanan Kesehatan Orang Terduga Tuberkulosis', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 2, 'NamaBidang' => 'BIDANG KESEHATAN', 'NoUrut' => 12, 'Indikator' => 'Pelayanan Kesehatan Orang Dengan Risiko Terinfeksi Virus yang Melemahkan Daya Tahan Tubuh Manusia (HIV)', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+
+                // 3. BIDANG PEKERJAAN UMUM (2 Indikator)
+                ['NoBidang' => 3, 'NamaBidang' => 'BIDANG PEKERJAAN UMUM', 'NoUrut' => 1, 'Indikator' => 'Persentase Penyediaan Kebutuhan Pokok Air Minum Sehari-hari', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 3, 'NamaBidang' => 'BIDANG PEKERJAAN UMUM', 'NoUrut' => 2, 'Indikator' => 'Persentase Penyediaan Pelayanan Pengolahan Air Limbah Domestik', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+
+                // 4. BIDANG PERUMAHAN RAKYAT (2 Indikator)
+                ['NoBidang' => 4, 'NamaBidang' => 'BIDANG PERUMAHAN RAKYAT', 'NoUrut' => 1, 'Indikator' => 'Penyediaan & Rehabilitasi Rumah yang Layak Huni Bagi Korban Bencana Kabupaten/Kota', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 4, 'NamaBidang' => 'BIDANG PERUMAHAN RAKYAT', 'NoUrut' => 2, 'Indikator' => 'Fasilitasi Penyediaan Rumah Yang Layak Huni Bagi Masyarakat Yang Terkena Relokasi Program Pemerintah Daerah Kabupaten/Kota', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+
+                // 5. BIDANG KETENTRAMAN, KETERTIBAN PERLINDUNGAN MASYARAKAT (5 Indikator)
+                ['NoBidang' => 5, 'NamaBidang' => 'BIDANG KETENTRAMAN, KETERTIBAN PERLINDUNGAN MASYARAKAT', 'NoUrut' => 1, 'Indikator' => 'Pelayanan Ketenteraman dan Ketertiban Umum', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 5, 'NamaBidang' => 'BIDANG KETENTRAMAN, KETERTIBAN PERLINDUNGAN MASYARAKAT', 'NoUrut' => 2, 'Indikator' => 'Pelayanan Informasi Rawan Bencana', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 5, 'NamaBidang' => 'BIDANG KETENTRAMAN, KETERTIBAN PERLINDUNGAN MASYARAKAT', 'NoUrut' => 3, 'Indikator' => 'Pelayanan Pencegahan dan Kesiapsiagaan Terhadap Bencana', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 5, 'NamaBidang' => 'BIDANG KETENTRAMAN, KETERTIBAN PERLINDUNGAN MASYARAKAT', 'NoUrut' => 4, 'Indikator' => 'Pelayanan Penyelamatan dan Evakuasi Korban Bencana', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 5, 'NamaBidang' => 'BIDANG KETENTRAMAN, KETERTIBAN PERLINDUNGAN MASYARAKAT', 'NoUrut' => 5, 'Indikator' => 'Pelayanan Penyelamatan dan Evakuasi Korban Kebakaran', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+
+                // 6. BIDANG SOSIAL (5 Indikator)
+                ['NoBidang' => 6, 'NamaBidang' => 'BIDANG SOSIAL', 'NoUrut' => 1, 'Indikator' => 'Rehabilitasi sosial dasar penyandang disabilitas telantar diluar panti', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 6, 'NamaBidang' => 'BIDANG SOSIAL', 'NoUrut' => 2, 'Indikator' => 'Rehabilitasi sosial dasar anak telantar diluar panti', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 6, 'NamaBidang' => 'BIDANG SOSIAL', 'NoUrut' => 3, 'Indikator' => 'Rehabilitasi sosial dasar lanjut usia terlantar diluar panti', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 6, 'NamaBidang' => 'BIDANG SOSIAL', 'NoUrut' => 4, 'Indikator' => 'Rehabilitasi sosial dasar tuna sosial khususnya gelandangan dan pengemis diluar panti', 'Satuan' => null, 'PerangkatDaerahPengampu' => null],
+                ['NoBidang' => 6, 'NamaBidang' => 'BIDANG SOSIAL', 'NoUrut' => 5, 'Indikator' => 'Perlindungan dan jaminan sosial pada saat tanggap dan pasca bencana bagi korban bencana Kab/Kota', 'Satuan' => null, 'PerangkatDaerahPengampu' => null]
+            ];
+        }
+
+        /**
+         * 6 Bidang Standar SPM
+         */
+        private function GetMasterBidangList()
+        {
+            return [
+                1 => 'BIDANG PENDIDIKAN',
+                2 => 'BIDANG KESEHATAN',
+                3 => 'BIDANG PEKERJAAN UMUM',
+                4 => 'BIDANG PERUMAHAN RAKYAT',
+                5 => 'BIDANG KETENTRAMAN, KETERTIBAN PERLINDUNGAN MASYARAKAT',
+                6 => 'BIDANG SOSIAL'
+            ];
+        }
+
+        /**
+         * Halaman SPM (Standar Pelayanan Minimal) RPJMD
+         */
+        public function SPM()
+        {
+            $Header['Halaman'] = 'RPJMD';
+
+            // Auto create table spm_bidang_rpjmd jika belum ada
+            $this->db->query("CREATE TABLE IF NOT EXISTS `spm_bidang_rpjmd` (
+                `Id` int(11) NOT NULL AUTO_INCREMENT,
+                `KodeWilayah` varchar(50) NOT NULL,
+                `NoBidang` int(11) NOT NULL,
+                `NamaBidang` varchar(255) NOT NULL,
+                `created_at` datetime DEFAULT NULL,
+                `updated_at` datetime DEFAULT NULL,
+                `deleted_at` datetime DEFAULT NULL,
+                PRIMARY KEY (`Id`),
+                KEY `idx_kodewilayah` (`KodeWilayah`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+            // Auto create table spm_rpjmd jika belum ada
+            $this->db->query("CREATE TABLE IF NOT EXISTS `spm_rpjmd` (
+                `Id` int(11) NOT NULL AUTO_INCREMENT,
+                `KodeWilayah` varchar(50) NOT NULL,
+                `NoBidang` int(11) DEFAULT 1,
+                `NamaBidang` varchar(255) DEFAULT NULL,
+                `NoUrut` int(11) DEFAULT 1,
+                `Indikator` text NOT NULL,
+                `Satuan` varchar(100) DEFAULT NULL,
+                `Target2025` varchar(50) DEFAULT NULL,
+                `Target2026` varchar(50) DEFAULT NULL,
+                `Target2027` varchar(50) DEFAULT NULL,
+                `Target2028` varchar(50) DEFAULT NULL,
+                `Target2029` varchar(50) DEFAULT NULL,
+                `Target2030` varchar(50) DEFAULT NULL,
+                `PerangkatDaerahPengampu` text DEFAULT NULL,
+                `created_at` datetime DEFAULT NULL,
+                `updated_at` datetime DEFAULT NULL,
+                `deleted_at` datetime DEFAULT NULL,
+                PRIMARY KEY (`Id`),
+                KEY `idx_kodewilayah` (`KodeWilayah`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+            // Provinsi (filter untuk pengguna yang belum login / admin)
+            $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
+
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
+                        ($this->input->get('KodeWilayah', TRUE) ?: ''));
+
+            if ($KodeWilayah) {
+                $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+                if ($wilayah) {
+                    $Data['KodeWilayah'] = $KodeWilayah;
+                    $Data['NamaWilayah'] = $wilayah['Nama'];
+                } else {
+                    $Data['KodeWilayah'] = $KodeWilayah;
+                    $Data['NamaWilayah'] = '';
+                }
+            } else {
+                $Data['KodeWilayah'] = '';
+                $Data['NamaWilayah'] = '';
+            }
+
+            // Perangkat Daerah Pengampu (OPD dari akun_instansi)
+            $Data['Instansi'] = [];
+            if (!empty($KodeWilayah)) {
+                $Data['Instansi'] = $this->db->where('deleted_at IS NULL')
+                                            ->where('kodewilayah', $KodeWilayah)
+                                            ->order_by('nama', 'ASC')
+                                            ->get('akun_instansi')
+                                            ->result_array();
+            }
+
+            // Auto-seeding bidang dan indikator standar jika belum ada data
+            if (!empty($KodeWilayah)) {
+                // 1. Cek bidang
+                $bidangCount = $this->db->where('KodeWilayah', $KodeWilayah)->where('deleted_at IS NULL')->count_all_results('spm_bidang_rpjmd');
+                if ($bidangCount === 0) {
+                    $defBidang = $this->GetMasterBidangList();
+                    foreach ($defBidang as $bNum => $bName) {
+                        $this->db->insert('spm_bidang_rpjmd', [
+                            'KodeWilayah' => $KodeWilayah,
+                            'NoBidang'    => $bNum,
+                            'NamaBidang'  => $bName,
+                            'created_at'  => date('Y-m-d H:i:s'),
+                            'updated_at'  => date('Y-m-d H:i:s')
+                        ]);
+                    }
+                }
+
+                // 2. Cek indikator SPM
+                $existingCount = $this->db->where('KodeWilayah', $KodeWilayah)
+                                          ->where('deleted_at IS NULL')
+                                          ->count_all_results('spm_rpjmd');
+                if ($existingCount === 0) {
+                    $masterSPM = $this->GetMasterSPMData();
+                    foreach ($masterSPM as $item) {
+                        $item['KodeWilayah'] = $KodeWilayah;
+                        $item['created_at']  = date('Y-m-d H:i:s');
+                        $item['updated_at']  = date('Y-m-d H:i:s');
+                        $this->db->insert('spm_rpjmd', $item);
+                    }
+                }
+            }
+
+            // Ambil daftar Bidang SPM dari database
+            $bidangDb = [];
+            if (!empty($KodeWilayah)) {
+                $bidangDb = $this->db->where('KodeWilayah', $KodeWilayah)
+                                     ->where('deleted_at IS NULL')
+                                     ->order_by('NoBidang', 'ASC')
+                                     ->get('spm_bidang_rpjmd')
+                                     ->result_array();
+            }
+            if (empty($bidangDb)) {
+                $defBidang = $this->GetMasterBidangList();
+                foreach ($defBidang as $bNum => $bName) {
+                    $bidangDb[] = ['NoBidang' => $bNum, 'NamaBidang' => $bName];
+                }
+            }
+            $Data['BidangList'] = $bidangDb;
+
+            // Data SPM RPJMD diurutkan berdasarkan NoBidang, NoUrut, Id
+            $this->db->from('spm_rpjmd');
+            $this->db->where('deleted_at IS NULL');
+            if (!empty($KodeWilayah)) {
+                $this->db->where('KodeWilayah', $KodeWilayah);
+            }
+            $this->db->order_by('NoBidang', 'ASC');
+            $this->db->order_by('NoUrut', 'ASC');
+            $this->db->order_by('Id', 'ASC');
+            $Data['SPMList'] = $this->db->get()->result_array();
+
+            $Data['IsDaerah'] = (isset($_SESSION['Level']) && ($_SESSION['Level'] == 3 || $_SESSION['Level'] == 1)) || !empty($_SESSION['KodeWilayah']) || !empty($_SESSION['TempKodeWilayah']);
+
+            $this->load->view('Daerah/header', $Header);
+            $this->load->view('Daerah/SPM', $Data);
+        }
+
+        /**
+         * Tambah Bidang SPM Baru
+         */
+        public function InputBidangSPM()
+        {
+            $isAllowed = (isset($_SESSION['Level']) && ($_SESSION['Level'] == 3 || $_SESSION['Level'] == 1)) || !empty($_SESSION['KodeWilayah']) || !empty($_SESSION['TempKodeWilayah']);
+            if (!$isAllowed) {
+                echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda tidak memiliki izin.']);
+                return;
+            }
+
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
+                        $this->input->post('KodeWilayah', TRUE));
+
+            $namaBidang = trim($this->input->post('NamaBidang', TRUE));
+            if (empty($namaBidang)) {
+                echo json_encode(['status' => 'error', 'message' => 'Nama Bidang harus diisi!']);
+                return;
+            }
+
+            // Hitung NoBidang berikutnya
+            $maxRow = $this->db->select_max('NoBidang')
+                               ->where('KodeWilayah', $KodeWilayah)
+                               ->where('deleted_at IS NULL')
+                               ->get('spm_bidang_rpjmd')
+                               ->row_array();
+            $nextNo = ($maxRow && !empty($maxRow['NoBidang'])) ? ((int)$maxRow['NoBidang'] + 1) : 1;
+
+            $this->db->insert('spm_bidang_rpjmd', [
+                'KodeWilayah' => $KodeWilayah,
+                'NoBidang'    => $nextNo,
+                'NamaBidang'  => strtoupper($namaBidang),
+                'created_at'  => date('Y-m-d H:i:s'),
+                'updated_at'  => date('Y-m-d H:i:s')
+            ]);
+
+            echo json_encode(['status' => 'success', 'message' => 'Bidang SPM berhasil ditambahkan!', 'NoBidang' => $nextNo]);
+        }
+
+        /**
+         * Edit Nama Bidang SPM
+         */
+        public function EditBidangSPM()
+        {
+            $isAllowed = (isset($_SESSION['Level']) && ($_SESSION['Level'] == 3 || $_SESSION['Level'] == 1)) || !empty($_SESSION['KodeWilayah']) || !empty($_SESSION['TempKodeWilayah']);
+            if (!$isAllowed) {
+                echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda tidak memiliki izin.']);
+                return;
+            }
+
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
+                        $this->input->post('KodeWilayah', TRUE));
+
+            $noBidang   = (int)$this->input->post('NoBidang', TRUE);
+            $namaBidang = trim($this->input->post('NamaBidang', TRUE));
+
+            if (empty($noBidang) || empty($namaBidang)) {
+                echo json_encode(['status' => 'error', 'message' => 'Nomor dan Nama Bidang harus diisi!']);
+                return;
+            }
+
+            $this->db->where('KodeWilayah', $KodeWilayah)
+                     ->where('NoBidang', $noBidang)
+                     ->update('spm_bidang_rpjmd', [
+                         'NamaBidang' => strtoupper($namaBidang),
+                         'updated_at' => date('Y-m-d H:i:s')
+                     ]);
+
+            // Update juga nama bidang di tabel indikator
+            $this->db->where('KodeWilayah', $KodeWilayah)
+                     ->where('NoBidang', $noBidang)
+                     ->update('spm_rpjmd', [
+                         'NamaBidang' => strtoupper($namaBidang),
+                         'updated_at' => date('Y-m-d H:i:s')
+                     ]);
+
+            echo json_encode(['status' => 'success', 'message' => 'Nama Bidang berhasil diperbarui!']);
+        }
+
+        /**
+         * Hapus Bidang SPM (Beserta Indikator di dalamnya)
+         */
+        public function HapusBidangSPM()
+        {
+            $isAllowed = (isset($_SESSION['Level']) && ($_SESSION['Level'] == 3 || $_SESSION['Level'] == 1)) || !empty($_SESSION['KodeWilayah']) || !empty($_SESSION['TempKodeWilayah']);
+            if (!$isAllowed) {
+                echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda tidak memiliki izin.']);
+                return;
+            }
+
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
+                        $this->input->post('KodeWilayah', TRUE));
+
+            $noBidang = (int)$this->input->post('NoBidang', TRUE);
+            if (empty($noBidang)) {
+                echo json_encode(['status' => 'error', 'message' => 'Nomor Bidang tidak valid!']);
+                return;
+            }
+
+            $now = date('Y-m-d H:i:s');
+            $this->db->where('KodeWilayah', $KodeWilayah)
+                     ->where('NoBidang', $noBidang)
+                     ->update('spm_bidang_rpjmd', ['deleted_at' => $now]);
+
+            $this->db->where('KodeWilayah', $KodeWilayah)
+                     ->where('NoBidang', $noBidang)
+                     ->update('spm_rpjmd', ['deleted_at' => $now]);
+
+            echo json_encode(['status' => 'success', 'message' => 'Bidang dan indikator di dalamnya berhasil dihapus!']);
+        }
+
+        /**
+         * Reset / Sinkronisasi 40 Indikator SPM Standar (6 Bidang Kosong Target)
+         */
+        public function InisialisasiSPMStandar()
+        {
+            $isAllowed = (isset($_SESSION['Level']) && ($_SESSION['Level'] == 3 || $_SESSION['Level'] == 1)) || !empty($_SESSION['KodeWilayah']) || !empty($_SESSION['TempKodeWilayah']);
+            if (!$isAllowed) {
+                echo json_encode(['status' => 'error', 'message' => 'Akses ditolak!']);
+                return;
+            }
+
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
+                        $this->input->post('KodeWilayah', TRUE));
+
+            if (empty($KodeWilayah)) {
+                echo json_encode(['status' => 'error', 'message' => 'Kode Wilayah tidak ditemukan!']);
+                return;
+            }
+
+            // Hapus data lama bidang & indikator
+            $this->db->where('KodeWilayah', $KodeWilayah)->delete('spm_bidang_rpjmd');
+            $this->db->where('KodeWilayah', $KodeWilayah)->delete('spm_rpjmd');
+
+            // Inisialisasi 6 bidang standar
+            $defBidang = $this->GetMasterBidangList();
+            foreach ($defBidang as $bNum => $bName) {
+                $this->db->insert('spm_bidang_rpjmd', [
+                    'KodeWilayah' => $KodeWilayah,
+                    'NoBidang'    => $bNum,
+                    'NamaBidang'  => $bName,
+                    'created_at'  => date('Y-m-d H:i:s'),
+                    'updated_at'  => date('Y-m-d H:i:s')
+                ]);
+            }
+
+            // Inisialisasi 40 indikator standar (kolom target/satuan/OPD kosong)
+            $masterSPM = $this->GetMasterSPMData();
+            foreach ($masterSPM as $item) {
+                $item['KodeWilayah'] = $KodeWilayah;
+                $item['created_at']  = date('Y-m-d H:i:s');
+                $item['updated_at']  = date('Y-m-d H:i:s');
+                $this->db->insert('spm_rpjmd', $item);
+            }
+
+            echo json_encode(['status' => 'success', 'message' => '40 Indikator Standar pada 6 Bidang SPM berhasil diatur ulang (tabel target telah dikosongkan)!']);
+        }
+
+        /**
+         * Input / Tambah Data SPM RPJMD
+         */
+        public function InputSPM()
+        {
+            $isAllowed = (isset($_SESSION['Level']) && ($_SESSION['Level'] == 3 || $_SESSION['Level'] == 1)) || !empty($_SESSION['KodeWilayah']) || !empty($_SESSION['TempKodeWilayah']);
+            if (!$isAllowed) {
+                echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda tidak memiliki izin untuk menambah data.']);
+                return;
+            }
+
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
+                        $this->input->post('KodeWilayah', TRUE));
+
+            $noBidang  = (int)$this->input->post('NoBidang', TRUE) ?: 1;
+            $bidangRow = $this->db->where('KodeWilayah', $KodeWilayah)->where('NoBidang', $noBidang)->where('deleted_at IS NULL')->get('spm_bidang_rpjmd')->row_array();
+            if ($bidangRow && !empty($bidangRow['NamaBidang'])) {
+                $namaBidang = $bidangRow['NamaBidang'];
+            } else {
+                $bidangMap = [
+                    1 => 'BIDANG PENDIDIKAN',
+                    2 => 'BIDANG KESEHATAN',
+                    3 => 'BIDANG PEKERJAAN UMUM',
+                    4 => 'BIDANG PERUMAHAN RAKYAT',
+                    5 => 'BIDANG KETENTRAMAN, KETERTIBAN PERLINDUNGAN MASYARAKAT',
+                    6 => 'BIDANG SOSIAL'
+                ];
+                $namaBidang = $bidangMap[$noBidang] ?? 'BIDANG LAINNYA';
+            }
+
+            $noUrut = (int)$this->input->post('NoUrut', TRUE);
+            if (empty($noUrut)) {
+                $lastRow = $this->db->where('KodeWilayah', $KodeWilayah)
+                                    ->where('NoBidang', $noBidang)
+                                    ->where('deleted_at IS NULL')
+                                    ->order_by('NoUrut', 'DESC')
+                                    ->get('spm_rpjmd')
+                                    ->row_array();
+                $noUrut = $lastRow ? ((int)$lastRow['NoUrut'] + 1) : 1;
+            }
+
+            $indikator = trim($this->input->post('Indikator', TRUE));
+            $satuan    = trim($this->input->post('Satuan', TRUE));
+            $t2025     = trim($this->input->post('Target2025', TRUE));
+            $t2026     = trim($this->input->post('Target2026', TRUE));
+            $t2027     = trim($this->input->post('Target2027', TRUE));
+            $t2028     = trim($this->input->post('Target2028', TRUE));
+            $t2029     = trim($this->input->post('Target2029', TRUE));
+            $t2030     = trim($this->input->post('Target2030', TRUE));
+            $pengampu  = trim($this->input->post('PerangkatDaerahPengampu', TRUE));
+
+            if (empty($indikator)) {
+                echo json_encode(['status' => 'error', 'message' => 'Kolom Indikator SPM harus diisi!']);
+                return;
+            }
+
+            $insertData = [
+                'KodeWilayah'            => $KodeWilayah,
+                'NoBidang'               => $noBidang,
+                'NamaBidang'             => $namaBidang,
+                'NoUrut'                 => $noUrut,
+                'Indikator'              => $indikator,
+                'Satuan'                 => $satuan,
+                'Target2025'             => $t2025,
+                'Target2026'             => $t2026,
+                'Target2027'             => $t2027,
+                'Target2028'             => $t2028,
+                'Target2029'             => $t2029,
+                'Target2030'             => $t2030,
+                'PerangkatDaerahPengampu'=> $pengampu,
+                'created_at'             => date('Y-m-d H:i:s'),
+                'updated_at'             => date('Y-m-d H:i:s')
+            ];
+
+            $this->db->insert('spm_rpjmd', $insertData);
+            if ($this->db->affected_rows() > 0) {
+                echo json_encode(['status' => 'success', 'message' => 'Data SPM berhasil disimpan!']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data SPM!']);
+            }
+        }
+
+        /**
+         * Edit / Update Data SPM RPJMD
+         */
+        public function EditSPM()
+        {
+            $isAllowed = (isset($_SESSION['Level']) && ($_SESSION['Level'] == 3 || $_SESSION['Level'] == 1)) || !empty($_SESSION['KodeWilayah']) || !empty($_SESSION['TempKodeWilayah']);
+            if (!$isAllowed) {
+                echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda tidak memiliki izin untuk mengedit data.']);
+                return;
+            }
+
+            $id        = (int)$this->input->post('Id', TRUE);
+            $noBidang  = (int)$this->input->post('NoBidang', TRUE) ?: 1;
+            
+            // Ambil data lama untuk tahu KodeWilayah
+            $oldRow = $this->db->where('Id', $id)->get('spm_rpjmd')->row_array();
+            $KodeWilayah = $oldRow ? $oldRow['KodeWilayah'] : (isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : '');
+
+            $bidangRow = $this->db->where('KodeWilayah', $KodeWilayah)->where('NoBidang', $noBidang)->where('deleted_at IS NULL')->get('spm_bidang_rpjmd')->row_array();
+            if ($bidangRow && !empty($bidangRow['NamaBidang'])) {
+                $namaBidang = $bidangRow['NamaBidang'];
+            } else {
+                $bidangMap = [
+                    1 => 'BIDANG PENDIDIKAN',
+                    2 => 'BIDANG KESEHATAN',
+                    3 => 'BIDANG PEKERJAAN UMUM',
+                    4 => 'BIDANG PERUMAHAN RAKYAT',
+                    5 => 'BIDANG KETENTRAMAN, KETERTIBAN PERLINDUNGAN MASYARAKAT',
+                    6 => 'BIDANG SOSIAL'
+                ];
+                $namaBidang = $bidangMap[$noBidang] ?? 'BIDANG LAINNYA';
+            }
+            $noUrut    = (int)$this->input->post('NoUrut', TRUE) ?: 1;
+
+            $indikator = trim($this->input->post('Indikator', TRUE));
+            $satuan    = trim($this->input->post('Satuan', TRUE));
+            $t2025     = trim($this->input->post('Target2025', TRUE));
+            $t2026     = trim($this->input->post('Target2026', TRUE));
+            $t2027     = trim($this->input->post('Target2027', TRUE));
+            $t2028     = trim($this->input->post('Target2028', TRUE));
+            $t2029     = trim($this->input->post('Target2029', TRUE));
+            $t2030     = trim($this->input->post('Target2030', TRUE));
+            $pengampu  = trim($this->input->post('PerangkatDaerahPengampu', TRUE));
+
+            if (empty($id) || empty($indikator)) {
+                echo json_encode(['status' => 'error', 'message' => 'ID atau Indikator tidak boleh kosong!']);
+                return;
+            }
+
+            $updateData = [
+                'NoBidang'               => $noBidang,
+                'NamaBidang'             => $namaBidang,
+                'NoUrut'                 => $noUrut,
+                'Indikator'              => $indikator,
+                'Satuan'                 => $satuan,
+                'Target2025'             => $t2025,
+                'Target2026'             => $t2026,
+                'Target2027'             => $t2027,
+                'Target2028'             => $t2028,
+                'Target2029'             => $t2029,
+                'Target2030'             => $t2030,
+                'PerangkatDaerahPengampu'=> $pengampu,
+                'updated_at'             => date('Y-m-d H:i:s')
+            ];
+
+            $this->db->where('Id', $id);
+            $this->db->update('spm_rpjmd', $updateData);
+
+            echo json_encode(['status' => 'success', 'message' => 'Data SPM berhasil diperbarui!']);
+        }
+
+        /**
+         * Hapus Data SPM RPJMD (Soft Delete)
+         */
+        public function HapusSPM()
+        {
+            $isAllowed = (isset($_SESSION['Level']) && ($_SESSION['Level'] == 3 || $_SESSION['Level'] == 1)) || !empty($_SESSION['KodeWilayah']) || !empty($_SESSION['TempKodeWilayah']);
+            if (!$isAllowed) {
+                echo json_encode(['status' => 'error', 'message' => 'Akses ditolak! Anda tidak memiliki izin untuk menghapus data.']);
+                return;
+            }
+
+            $id = (int)$this->input->post('Id', TRUE);
+            if (empty($id)) {
+                echo json_encode(['status' => 'error', 'message' => 'ID data tidak valid!']);
+                return;
+            }
+
+            $this->db->where('Id', $id);
+            $this->db->update('spm_rpjmd', [
+                'deleted_at' => date('Y-m-d H:i:s')
+            ]);
+
+            if ($this->db->affected_rows() > 0) {
+                echo json_encode(['status' => 'success', 'message' => 'Data SPM berhasil dihapus!']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus data SPM!']);
+            }
+        }
+
+        /**
+         * Ambil Data SPM by ID (Untuk Modal Edit)
+         */
+        public function GetSPMById()
+        {
+            $id = (int)$this->input->post('Id', TRUE);
+            $row = $this->db->where('Id', $id)->where('deleted_at IS NULL')->get('spm_rpjmd')->row_array();
+            echo json_encode($row ?: []);
+        }
+
         public function ArahKebijakanRPJMD()
         {
             $Header['Halaman'] = 'Daerah';
