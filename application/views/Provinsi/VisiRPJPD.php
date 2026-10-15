@@ -96,12 +96,14 @@
                     <!-- Penyesuaian Header Kontainer Tabel -->
                     <div class="basic-tb-hd" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
                         <h3 style="margin: 0; color: #333; font-weight: 600; line-height: 1.5;">Hierarki Visi Hingga Sasaran RPJPD</h3>
-                        <div class="button-icon-btn sm-res-mg-t-30">
+                        <?php if (isset($_SESSION['Level']) && in_array($_SESSION['Level'], [1, 2])) { ?>
+<div class="button-icon-btn sm-res-mg-t-30">
                             <!-- Tombol Input Visi tetap di atas sebagai level tertinggi -->
                             <button type="button" class="btn btn-success notika-btn-success btn-action" data-toggle="modal" data-target="#ModalInputVisi" style="padding: 8px 15px;">
                                 <i class="fa fa-plus-circle" style="margin-right: 5px;"></i> <b>Input Visi RPJPD</b>
                             </button>
                         </div>
+<?php } ?>
                     </div>
                     
                     <div class="table-responsive">
@@ -112,7 +114,7 @@
                                     <th style="width: 5%;" class="text-center">No</th>
                                     <th style="width: 55%;">Uraian (Visi / Misi / Tujuan / Sasaran)</th>
                                     <th style="width: 15%;" class="text-center">Periode</th>
-                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 2) { ?>
+                                    <?php if (isset($_SESSION['Level']) && in_array($_SESSION['Level'], [1, 2])) { ?>
                                     <th style="width: 25%;" class="text-center">Aksi</th>
                                     <?php } ?>
                                 </tr>
@@ -134,7 +136,7 @@
                                         <td class="text-center">
                                             <span class="badge-periode"><?= $visi['Periode'] ?></span>
                                         </td>
-                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 2) { ?>
+                                        <?php if (isset($_SESSION['Level']) && in_array($_SESSION['Level'], [1, 2])) { ?>
                                         <td class="text-center">
                                             <!-- Tombol Aksi di baris Visi -->
                                             <button class="btn btn-sm btn-success TambahMisi btn-action" data-id="<?= $visi['Id'] ?>" title="Tambah Misi"><i class="fa fa-plus"></i> Misi</button>
@@ -159,7 +161,7 @@
                                             <td class="text-center">
                                                 <span class="badge-periode" style="background-color: #00bcd4; box-shadow: 0 2px 5px rgba(0, 188, 212, 0.3);"><?= $misi['Periode'] ?></span>
                                             </td>
-                                            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 2) { ?>
+                                            <?php if (isset($_SESSION['Level']) && in_array($_SESSION['Level'], [1, 2])) { ?>
                                             <td class="text-center">
                                                 <!-- Tombol Aksi di baris Misi -->
                                                 <button class="btn btn-sm btn-success TambahTujuan btn-action" data-id="<?= $misi['Id'] ?>" title="Tambah Tujuan"><i class="fa fa-plus"></i> Tujuan</button>
@@ -184,7 +186,7 @@
                                                 <td class="text-center">
                                                     <span class="badge-periode" style="background-color: #ff9800; box-shadow: 0 2px 5px rgba(255, 152, 0, 0.3);"><?= $tujuan['Periode'] ?></span>
                                                 </td>
-                                                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 2) { ?>
+                                                <?php if (isset($_SESSION['Level']) && in_array($_SESSION['Level'], [1, 2])) { ?>
                                                 <td class="text-center">
                                                     <!-- Tombol Aksi di baris Tujuan -->
                                                     <button class="btn btn-sm btn-success TambahSasaran btn-action" data-id="<?= $tujuan['Id'] ?>" title="Tambah Sasaran"><i class="fa fa-plus"></i> Sasaran</button>
@@ -209,7 +211,7 @@
                                                     <td class="text-center">
                                                         <span class="badge-periode" style="background-color: #9e9e9e; box-shadow: 0 2px 5px rgba(158, 158, 158, 0.3);"><?= $sasaran['Periode'] ?></span>
                                                     </td>
-                                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 2) { ?>
+                                                    <?php if (isset($_SESSION['Level']) && in_array($_SESSION['Level'], [1, 2])) { ?>
                                                     <td class="text-center">
                                                         <!-- Tombol Aksi di baris Sasaran -->
                                                         <button class="btn btn-sm btn-info EditSasaran btn-action" data-id="<?= $sasaran['Id'] ?>" data-idtujuan="<?= $tujuan['Id'] ?>" data-sasaran="<?= $sasaran['Sasaran'] ?>" title="Edit Sasaran"><i class="fa fa-edit"></i> Edit</button>

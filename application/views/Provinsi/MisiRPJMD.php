@@ -5,9 +5,11 @@
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <div class="data-table-list">
                         <div class="basic-tb-hd">
-                            <div class="button-icon-btn sm-res-mg-t-30">
+                            <?php if (isset($_SESSION['Level']) && in_array($_SESSION['Level'], [1, 2])) { ?>
+<div class="button-icon-btn sm-res-mg-t-30">
                                 <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputMisi"><i class="notika-icon notika-edit"></i> <b>Input Misi RPJMD</b></button>
                             </div>
+<?php } ?>
                         </div>
                         <div class="table-responsive">
                             <table id="data-table-basic" class="table table-striped">
@@ -17,7 +19,7 @@
                                         <th style="width: 15%;">Provinsi</th>
                                         <th style="width: 55%;">Misi RPJMD</th>
                                         <th style="width: 10%;">Periode</th>
-                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 2) { ?>
+                                        <?php if (isset($_SESSION['Level']) && in_array($_SESSION['Level'], [1, 2])) { ?>
                                         <th style="width: 10%;" class="text-center">Edit</th>
                                         <?php } ?>
                                     </tr>
@@ -29,7 +31,7 @@
                                         <td style="vertical-align: middle;"><?=$key['Nama']?></td>
                                         <td style="vertical-align: middle;"><?=$key['Misi']?></td>
                                         <td style="vertical-align: middle;"><?=$key['TahunMulai'].' - '.$key['TahunAkhir']?></td>
-                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 2) { ?>
+                                        <?php if (isset($_SESSION['Level']) && in_array($_SESSION['Level'], [1, 2])) { ?>
                                         <td class="text-center">
                                             <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
                                                 <button class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg Edit" Edit="<?=$key['Id'].'|'.$key['_Id'].'|'.$key['Misi'].'|'.$key['KodeWilayah']?>"><i class="notika-icon notika-edit"></i></button>

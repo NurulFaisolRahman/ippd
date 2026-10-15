@@ -102,7 +102,11 @@ class Provinsi extends CI_Controller {
 		$this->load->view('Provinsi/VisiRPJPD',$Data);
 	}
 
-  public function InputVisiRPJPD(){  
+  public function InputVisiRPJPD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
     if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
         $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
     }
@@ -114,7 +118,11 @@ class Provinsi extends CI_Controller {
     }
 	}
 	
-	public function EditVisiRPJPD(){  
+	public function EditVisiRPJPD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
         if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
             $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);
         }
@@ -127,7 +135,11 @@ class Provinsi extends CI_Controller {
     }
   }
 
-  public function HapusVisiRPJPD(){  
+  public function HapusVisiRPJPD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
 		$_POST['deleted_at'] = date('Y-m-d H:i:s');
         if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
             $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);
@@ -148,7 +160,11 @@ class Provinsi extends CI_Controller {
     echo json_encode($this->db->where("KodeWilayah = ".$_POST['Id']." AND deleted_at IS NULL")->get("visirpjpdp")->result_array());
 	}
 
-  public function InputMisiRPJPD(){  
+  public function InputMisiRPJPD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
     if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
         $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
     }
@@ -160,7 +176,11 @@ class Provinsi extends CI_Controller {
     }
 	}
 	
-	public function EditMisiRPJPD(){  
+	public function EditMisiRPJPD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
         if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
             $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);
         }
@@ -173,7 +193,11 @@ class Provinsi extends CI_Controller {
     }
   }
 
-  public function HapusMisiRPJPD(){  
+  public function HapusMisiRPJPD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
 		$_POST['deleted_at'] = date('Y-m-d H:i:s');
         if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
             $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);
@@ -190,7 +214,11 @@ class Provinsi extends CI_Controller {
     echo json_encode($this->db->where("_Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("misirpjpdp")->result_array());
 	}
 
-  public function InputTujuanRPJPD(){  
+  public function InputTujuanRPJPD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
     if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
         $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
     }
@@ -202,7 +230,11 @@ class Provinsi extends CI_Controller {
     }
 	}
 	
-	public function EditTujuanRPJPD(){  
+	public function EditTujuanRPJPD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
         if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
             $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);
         }
@@ -215,7 +247,11 @@ class Provinsi extends CI_Controller {
     }
   }
 
-  public function HapusTujuanRPJPD(){  
+  public function HapusTujuanRPJPD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
 		$_POST['deleted_at'] = date('Y-m-d H:i:s');
         if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
             $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);
@@ -232,7 +268,11 @@ class Provinsi extends CI_Controller {
     echo json_encode($this->db->query("SELECT t.* FROM visirpjpdp as v, misirpjpdp as m, tujuanrpjpdp as t WHERE v.Id = ".$_POST['Id']." AND t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL")->result_array());
 	}
 
-  public function InputSasaranRPJPD(){  
+  public function InputSasaranRPJPD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
     if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
         $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
     }
@@ -244,7 +284,11 @@ class Provinsi extends CI_Controller {
     }
 	}
 	
-	public function EditSasaranRPJPD(){  
+	public function EditSasaranRPJPD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
         if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
             $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);
         }
@@ -257,7 +301,11 @@ class Provinsi extends CI_Controller {
     }
   }
 
-  public function HapusSasaranRPJPD(){  
+  public function HapusSasaranRPJPD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
 		$_POST['deleted_at'] = date('Y-m-d H:i:s');
         if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
             $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);
@@ -287,7 +335,11 @@ class Provinsi extends CI_Controller {
 		$this->load->view('Provinsi/TahapanRPJPD',$Data);
 	}
 
-  public function InputTahapanRPJPD(){  
+  public function InputTahapanRPJPD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
     if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
         $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
     }
@@ -299,7 +351,11 @@ class Provinsi extends CI_Controller {
     }
 	}
 	
-	public function EditTahapanRPJPD(){  
+	public function EditTahapanRPJPD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
         if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
             $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);
         }
@@ -312,7 +368,11 @@ class Provinsi extends CI_Controller {
     }
   }
 
-  public function HapusTahapanRPJPD(){  
+  public function HapusTahapanRPJPD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
 		$_POST['deleted_at'] = date('Y-m-d H:i:s');
         if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
             $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);
@@ -403,7 +463,11 @@ class Provinsi extends CI_Controller {
 		$this->load->view('Provinsi/VisiRPJMD',$Data);
 	}
 
-  public function InputVisiRPJMD(){  
+  public function InputVisiRPJMD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
     if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
         $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
     }
@@ -415,7 +479,11 @@ class Provinsi extends CI_Controller {
     }
 	}
 	
-	public function EditVisiRPJMD(){  
+	public function EditVisiRPJMD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
         if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
             $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);
         }
@@ -428,7 +496,11 @@ class Provinsi extends CI_Controller {
     }
   }
 
-  public function HapusVisiRPJMD(){  
+  public function HapusVisiRPJMD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
 		$_POST['deleted_at'] = date('Y-m-d H:i:s');
         if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
             $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);
@@ -449,7 +521,11 @@ class Provinsi extends CI_Controller {
     echo json_encode($this->db->where("Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("visirpjmdp")->result_array());
 	}
 
-  public function InputMisiRPJMD(){  
+  public function InputMisiRPJMD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
     if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
         $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
     }
@@ -461,7 +537,11 @@ class Provinsi extends CI_Controller {
     }
 	}
 	
-	public function EditMisiRPJMD(){  
+	public function EditMisiRPJMD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
         if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
             $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);
         }
@@ -474,7 +554,11 @@ class Provinsi extends CI_Controller {
     }
   }
 
-  public function HapusMisiRPJMD(){  
+  public function HapusMisiRPJMD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
 		$_POST['deleted_at'] = date('Y-m-d H:i:s');
         if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
             $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);
@@ -491,7 +575,11 @@ class Provinsi extends CI_Controller {
     echo json_encode($this->db->where("_Id = ".$_POST['Id']." AND deleted_at IS NULL")->get("misirpjmdp")->result_array());
 	}
 
-  public function InputTujuanRPJMD(){  
+  public function InputTujuanRPJMD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
     if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
         $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
     }
@@ -503,7 +591,11 @@ class Provinsi extends CI_Controller {
     }
 	}
 	
-	public function EditTujuanRPJMD(){  
+	public function EditTujuanRPJMD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
         if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
             $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);
         }
@@ -516,7 +608,11 @@ class Provinsi extends CI_Controller {
     }
   }
 
-  public function HapusTujuanRPJMD(){  
+  public function HapusTujuanRPJMD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
 		$_POST['deleted_at'] = date('Y-m-d H:i:s');
         if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
             $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);
@@ -533,7 +629,11 @@ class Provinsi extends CI_Controller {
     echo json_encode($this->db->query("SELECT t.* FROM visirpjmdp as v, misirpjmdp as m, tujuanrpjmdp as t WHERE v.Id = ".$_POST['Id']." AND t._Id = m.Id AND m._Id = v.Id AND t.deleted_at IS NULL")->result_array());
 	}
 
-  public function InputSasaranRPJMD(){  
+  public function InputSasaranRPJMD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
     if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
         $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
     }
@@ -545,7 +645,11 @@ class Provinsi extends CI_Controller {
     }
 	}
 	
-	public function EditSasaranRPJMD(){  
+	public function EditSasaranRPJMD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
         if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
             $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);
         }
@@ -558,7 +662,11 @@ class Provinsi extends CI_Controller {
     }
   }
 
-  public function HapusSasaranRPJMD(){  
+  public function HapusSasaranRPJMD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
 		$_POST['deleted_at'] = date('Y-m-d H:i:s');
         if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
             $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);
@@ -588,7 +696,11 @@ class Provinsi extends CI_Controller {
 		$this->load->view('Provinsi/TahapanRPJMD',$Data);
 	}
 
-  public function InputTahapanRPJMD(){  
+  public function InputTahapanRPJMD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
     if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
         $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
     }
@@ -600,7 +712,11 @@ class Provinsi extends CI_Controller {
     }
 	}
 	
-	public function EditTahapanRPJMD(){  
+	public function EditTahapanRPJMD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
         if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
             $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);
         }
@@ -613,7 +729,11 @@ class Provinsi extends CI_Controller {
     }
   }
 
-  public function HapusTahapanRPJMD(){  
+  public function HapusTahapanRPJMD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
 		$_POST['deleted_at'] = date('Y-m-d H:i:s');
         if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
             $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);
@@ -643,7 +763,11 @@ class Provinsi extends CI_Controller {
 		$this->load->view('Provinsi/IUPRPJPD',$Data);
 	}
 
-  public function InputIUPRPJPD(){  
+  public function InputIUPRPJPD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
     if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
         $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
     }
@@ -655,7 +779,11 @@ class Provinsi extends CI_Controller {
     }
 	}
 	
-	public function EditIUPRPJPD(){  
+	public function EditIUPRPJPD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
         if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
             $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);
         }
@@ -668,7 +796,11 @@ class Provinsi extends CI_Controller {
     }
   }
 
-  public function HapusIUPRPJPD(){  
+  public function HapusIUPRPJPD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
 		$_POST['deleted_at'] = date('Y-m-d H:i:s');
         if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
             $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);
@@ -698,7 +830,11 @@ class Provinsi extends CI_Controller {
 		$this->load->view('Provinsi/IUPRPJMD',$Data);
 	} 
 
-  public function InputIUPRPJMD(){  
+  public function InputIUPRPJMD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
     if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
         $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
     }
@@ -710,7 +846,11 @@ class Provinsi extends CI_Controller {
     }
 	}
 	
-	public function EditIUPRPJMD(){  
+	public function EditIUPRPJMD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
         if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
             $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);
         }
@@ -723,7 +863,11 @@ class Provinsi extends CI_Controller {
     }
   }
 
-  public function HapusIUPRPJMD(){  
+  public function HapusIUPRPJMD(){
+      if (!isset($_SESSION['Level']) || !in_array($_SESSION['Level'], [1, 2])) {
+          echo "Unauthorized access";
+          exit;
+      }  
 		$_POST['deleted_at'] = date('Y-m-d H:i:s');
         if(isset($_SESSION['KodeWilayah']) && $_SESSION['KodeWilayah'] != ''){
             $this->db->where('KodeWilayah', $_SESSION['KodeWilayah']);

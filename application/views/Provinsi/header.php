@@ -22,8 +22,6 @@
     <link rel="stylesheet" href="<?=base_url()?>css/bootstrap.min.css">
     <link rel="stylesheet" href="<?=base_url()?>css/font-awesome.min.css">
     <link rel="stylesheet" href="<?=base_url()?>css/notika-custom-icon.css">
-    <link rel="stylesheet" href="<?=base_url()?>css/data-table/bootstrap-table.css">
-    <link rel="stylesheet" href="<?=base_url()?>css/data-table/bootstrap-editable.css">
     <style>
         /* Navbar Styles */
         .navbar {
@@ -539,7 +537,7 @@
   $LoginInfo   = '';
   $NamaProvinsi = '';
 
-  if (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 2) {
+  if (isset($_SESSION['Level']) && in_array((int)$_SESSION['Level'], [1, 2])) {
     $KodeWilayah = $_SESSION['KodeWilayah'] ?? '';
     $LoginInfo = $_SESSION['Username'] ?? 'Provinsi';
 
@@ -641,7 +639,7 @@
                 
 
                 
-                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 2) { ?>
+                <?php if (isset($_SESSION['Level']) && in_array($_SESSION['Level'], [1, 2])) { ?>
                 <button class="logout-btn" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i>
                     Logout

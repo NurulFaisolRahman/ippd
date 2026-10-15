@@ -41,6 +41,10 @@ $summary2_3 = isset($SummaryTabel2_3) ? $SummaryTabel2_3 : [
     'sumber' => 'BKAD Tahun 2026, Unaudited'
 ];
 
+$namaWilayahFormat = !empty($NamaWilayahFormat)
+    ? $NamaWilayahFormat
+    : (!empty($NamaWilayah) ? ucwords(strtolower(preg_replace('/^KAB\.\s*/i', 'Kabupaten ', preg_replace('/^KOTA\s*/i', 'Kota ', preg_replace('/^PROV\.\s*/i', 'Provinsi ', $NamaWilayah))))) : 'Kabupaten Situbondo');
+
 // Helper format uang LKPJ (kurung bila minus)
 function formatUangLKPJ($nilai, $showRp = true) {
     $val = (float)$nilai;
@@ -976,7 +980,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
       <?php endif; ?>
     </div>
     <h1 class="page-title">BAB 2 : Pengelolaan Keuangan Daerah</h1>
-    <p class="page-subtitle">Perubahan Anggaran Pendapatan, Belanja, dan Pembiayaan Daerah <?= htmlspecialchars($NamaWilayah ?: 'Kabupaten Situbondo') ?> Tahun Anggaran <?= $tahunAktif ?> (Sebelum dan Sesudah Perubahan).</p>
+    <p class="page-subtitle">Perubahan Anggaran Pendapatan, Belanja, dan Pembiayaan Daerah <?= htmlspecialchars($namaWilayahFormat) ?> Tahun Anggaran <?= $tahunAktif ?> (Sebelum dan Sesudah Perubahan).</p>
   </div>
 
   

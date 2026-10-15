@@ -16,8 +16,10 @@ $savedScores = isset($SavedScores) ? $SavedScores : [];
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
+.swal2-container { z-index: 999999 !important; }
 :root {
   --ui-primary: #00c292;
   --ui-primary-hover: #00a87e;
@@ -1103,7 +1105,7 @@ tr.type-sub:hover td {
 .excel-window-container {
   background: #ffffff;
   width: 98%;
-  max-width: 1420px;
+  max-width: 1580px;
   border-radius: 10px;
   border: 1px solid var(--excel-green);
   box-shadow: 0 25px 70px rgba(0,0,0,0.45);
@@ -1827,7 +1829,17 @@ tr.type-sub:hover td {
                 <i class="fa fa-external-link"></i> Buka Tautan ↗
               </a>
             </div>
-            <textarea id="modalBuktiDukung" rows="2" placeholder="Link tautan dokumen, Google Drive, atau screenshot..."></textarea>
+            <div style="display:flex; gap: 8px; flex-direction: column;">
+              <div style="display:flex; gap: 8px;">
+                <input type="text" id="modalBuktiDukung" class="form-control" style="flex:1; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px;" placeholder="Link tautan dokumen, Google Drive, atau hasil upload...">
+                <input type="file" id="uploadBuktiFile" style="display:none;" accept=".jpg,.jpeg,.png,.pdf" multiple>
+                <button type="button" class="btn-ui btn-ui-primary" id="btnUploadBuktiFile" style="white-space: nowrap; padding: 6px 12px; font-size: 12px;" onclick="document.getElementById('uploadBuktiFile').click()">
+                  <i class="fa fa-upload"></i> Upload
+                </button>
+              </div>
+              <div id="uploadBuktiLoading" style="display:none; font-size: 11px; color: #b45309;"><i class="fa fa-spinner fa-spin"></i> Sedang mengunggah...</div>
+              <div id="previewBuktiContainer" style="display:none; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px; background: #f8fafc; text-align: center;"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -1974,7 +1986,19 @@ tr.type-sub:hover td {
               <i class="fa fa-external-link"></i> Buka Tautan ↗
             </a>
           </div>
-          <input type="text" id="verifBuktiDukung" class="verif-form-control" placeholder="Contoh: Bab IV RPJMD 2025-2029 / Link Dokumen Google Drive" <?= empty($IsRole4) ? 'readonly' : '' ?>>
+          <div style="display:flex; gap: 8px; flex-direction: column;">
+            <div style="display:flex; gap: 8px;">
+              <input type="text" id="verifBuktiDukung" class="verif-form-control" style="flex:1;" placeholder="Contoh: Bab IV RPJMD 2025-2029 / Link Dokumen Google Drive" <?= empty($IsRole4) ? 'readonly' : '' ?>>
+              <?php if (!empty($IsRole4)): ?>
+              <input type="file" id="verifUploadBuktiFile" style="display:none;" accept=".jpg,.jpeg,.png,.pdf" multiple>
+              <button type="button" class="btn-ui btn-ui-primary" id="btnVerifUploadBuktiFile" style="white-space: nowrap; padding: 6px 12px; font-size: 12px; border-radius: 4px;" onclick="document.getElementById('verifUploadBuktiFile').click()">
+                <i class="fa fa-upload"></i> Upload
+              </button>
+              <?php endif; ?>
+            </div>
+            <div id="verifUploadBuktiLoading" style="display:none; font-size: 11px; color: #b45309;"><i class="fa fa-spinner fa-spin"></i> Sedang mengunggah...</div>
+            <div id="verifPreviewBuktiContainer" style="display:none; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px; background: #f8fafc; text-align: center;"></div>
+          </div>
           <div class="quick-chips-wrap">
             <span class="quick-chips-label"><i class="fa fa-file-text-o"></i> Referensi:</span>
             <button type="button" class="quick-chip verif-bukti-chip" data-text="Bab IV Dokumen RPJMD 2025-2029">Bab IV RPJMD</button>
@@ -2009,8 +2033,20 @@ tr.type-sub:hover td {
   "use strict";
 
   var BASE_URL = "<?= base_url() ?>";
-  var MASTER_DATA = <?= json_encode($masterData) ?>;
-  var SCORES_MAP = <?= json_encode($savedScores) ?> || {};
+  var MASTER_DATA = <?= json_encode($MasterData) ?>;
+  var SCORES_MAP = <?= json_encode($SavedScores) ?> || {};
+  var AUTO_DATA_1_A_1_A = <?= isset($AutoData_1_a_1_a) ? json_encode($AutoData_1_a_1_a) : '{}' ?>;
+  var AUTO_DATA_1_A_1_C = <?= isset($AutoData_1_a_1_c) ? json_encode($AutoData_1_a_1_c) : '[]' ?>;
+  var AUTO_DATA_1_A_2_A = <?= isset($AutoData_1_a_2_a) ? json_encode($AutoData_1_a_2_a) : '[]' ?>;
+  var AUTO_DATA_1_A_2_ALL = <?= isset($AutoData_1_a_2_ALL) ? json_encode($AutoData_1_a_2_ALL) : '{}' ?>;
+  var AUTO_DATA_1_A_3_A = <?= isset($AutoData_1_a_3_a) ? json_encode($AutoData_1_a_3_a) : '{}' ?>;
+  var AUTO_DATA_1_A_3_B = <?= isset($AutoData_1_a_3_b) ? json_encode($AutoData_1_a_3_b) : '{}' ?>;
+  var AUTO_DATA_1_A_4 = <?= isset($AutoData_1_a_4) ? json_encode($AutoData_1_a_4) : '[]' ?>;
+  var AUTO_DATA_1_A_5 = <?= isset($AutoData_1_a_5) ? json_encode($AutoData_1_a_5) : '[]' ?>;
+  var AUTO_DATA_1_A_6 = <?= isset($AutoData_1_a_6) ? json_encode($AutoData_1_a_6) : '[]' ?>;
+  var AUTO_DATA_1_B_10_A = <?= isset($AutoData_1_b_10_a) ? json_encode($AutoData_1_b_10_a) : '{}' ?>;
+  var AUTO_DATA_1_B_10_B = <?= isset($AutoData_1_b_10_b) ? json_encode($AutoData_1_b_10_b) : '{}' ?>;
+  var AUTO_DATA_1_C_1 = <?= isset($AutoData_1_c_1) ? json_encode($AutoData_1_c_1) : '[]' ?>;
   var IS_ROLE_4 = <?= !empty($IsRole4) ? 'true' : 'false' ?>;
 
   var tbody = document.getElementById("tbodyIppd");
@@ -2069,6 +2105,24 @@ tr.type-sub:hover td {
     var num = Number(n);
     var s = num.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
     return s.replace(".", ",");
+  }
+
+  function parseNum(val){
+    if (val === null || val === undefined) return 0;
+    if (typeof val === 'number') return isNaN(val) ? 0 : val;
+    var s = String(val).trim();
+    if (!s) return 0;
+    if (s.indexOf('-') !== -1 && !s.startsWith('-')) {
+      var parts = s.split('-');
+      if (parts.length === 2) {
+        var p1 = parseNum(parts[0]);
+        var p2 = parseNum(parts[1]);
+        return (p1 + p2) / 2;
+      }
+    }
+    s = s.replace(',', '.');
+    var num = parseFloat(s);
+    return isNaN(num) ? 0 : num;
   }
 
   function showToast(msg, isError){
@@ -2403,20 +2457,20 @@ tr.type-sub:hover td {
     d = d || {};
     var rowsData = [
       { id: 'lpe', name: 'Laju Pertumbuhan Ekonomi (LPE)', unit: 'Persen', isPositive: true,
-        mn_base: d.lpe_mn_base !== undefined ? d.lpe_mn_base : '5.3',
-        mn_end:  d.lpe_mn_end  !== undefined ? d.lpe_mn_end  : '6.2',
-        md_base: d.lpe_md_base !== undefined ? d.lpe_md_base : '5.1',
-        md_end:  d.lpe_md_end  !== undefined ? d.lpe_md_end  : '6.0' },
-      { id: 'tk', name: 'Tingkat Kemiskinan (TK)', unit: 'Persen', isPositive: false,
-        mn_base: d.tk_mn_base !== undefined ? d.tk_mn_base : '9.2',
-        mn_end:  d.tk_mn_end  !== undefined ? d.tk_mn_end  : '6.5',
-        md_base: d.tk_md_base !== undefined ? d.tk_md_base : '11.4',
-        md_end:  d.tk_md_end  !== undefined ? d.tk_md_end  : '7.8' },
+        mn_base: d.lpe_mn_base !== undefined ? d.lpe_mn_base : (AUTO_DATA_1_A_1_A.mn_lpe_base || ''),
+        mn_end:  d.lpe_mn_end  !== undefined ? d.lpe_mn_end  : (AUTO_DATA_1_A_1_A.mn_lpe_end || ''),
+        md_base: d.lpe_md_base !== undefined ? d.lpe_md_base : (AUTO_DATA_1_A_1_A.md_lpe_base || ''),
+        md_end:  d.lpe_md_end  !== undefined ? d.lpe_md_end  : (AUTO_DATA_1_A_1_A.md_lpe_end || '') },
+      { id: 'tk', name: 'Tingkat Kemiskinan (TK)', unit: 'Persen', isPositive: true,
+        mn_base: d.tk_mn_base !== undefined ? d.tk_mn_base : (AUTO_DATA_1_A_1_A.mn_tk_base || ''),
+        mn_end:  d.tk_mn_end  !== undefined ? d.tk_mn_end  : (AUTO_DATA_1_A_1_A.mn_tk_end || ''),
+        md_base: d.tk_md_base !== undefined ? d.tk_md_base : (AUTO_DATA_1_A_1_A.md_tk_base || ''),
+        md_end:  d.tk_md_end  !== undefined ? d.tk_md_end  : (AUTO_DATA_1_A_1_A.md_tk_end || '') },
       { id: 'tpt', name: 'Tingkat Pengangguran Terbuka (TPT)', unit: 'Persen', isPositive: false,
-        mn_base: d.tpt_mn_base !== undefined ? d.tpt_mn_base : '5.2',
-        mn_end:  d.tpt_mn_end  !== undefined ? d.tpt_mn_end  : '4.0',
-        md_base: d.tpt_md_base !== undefined ? d.tpt_md_base : '7.8',
-        md_end:  d.tpt_md_end  !== undefined ? d.tpt_md_end  : '5.2' }
+        mn_base: d.tpt_mn_base !== undefined ? d.tpt_mn_base : (AUTO_DATA_1_A_1_A.mn_tpt_base || ''),
+        mn_end:  d.tpt_mn_end  !== undefined ? d.tpt_mn_end  : (AUTO_DATA_1_A_1_A.mn_tpt_end || ''),
+        md_base: d.tpt_md_base !== undefined ? d.tpt_md_base : (AUTO_DATA_1_A_1_A.md_tpt_base || ''),
+        md_end:  d.tpt_md_end  !== undefined ? d.tpt_md_end  : (AUTO_DATA_1_A_1_A.md_tpt_end || '') }
     ];
 
     var html = 
@@ -2452,13 +2506,13 @@ tr.type-sub:hover td {
         '<tr class="ws-1a1a-row" data-row-id="' + r.id + '" data-positive="' + (r.isPositive ? '1' : '0') + '">' +
           '<td class="excel-row-num">' + rNum + '</td>' +
           '<td><strong>' + r.name + '</strong></td>' +
-          '<td><input type="number" step="0.01" class="calc-inp mn-base" value="' + escapeHtml(r.mn_base) + '"></td>' +
-          '<td><input type="number" step="0.01" class="calc-inp mn-end" value="' + escapeHtml(r.mn_end) + '"></td>' +
+          '<td><input type="text" class="calc-inp mn-base" value="' + escapeHtml(r.mn_base) + '" readonly style="text-align:center; background:#f8fafc; font-weight:600;"></td>' +
+          '<td><input type="text" class="calc-inp mn-end" value="' + escapeHtml(r.mn_end) + '" readonly style="text-align:center; background:#f8fafc; font-weight:600;"></td>' +
           '<td class="cell-formula mn-gap" style="text-align:center;">0.00</td>' +
           '<td style="text-align:center; font-weight:600; color:#475569;">' + r.unit + '</td>' +
           '<td><strong>' + r.name + '</strong></td>' +
-          '<td><input type="number" step="0.01" class="calc-inp md-base" value="' + escapeHtml(r.md_base) + '"></td>' +
-          '<td><input type="number" step="0.01" class="calc-inp md-end" value="' + escapeHtml(r.md_end) + '"></td>' +
+          '<td><input type="text" class="calc-inp md-base" value="' + escapeHtml(r.md_base) + '" readonly style="text-align:center; background:#f8fafc; font-weight:600;"></td>' +
+          '<td><input type="text" class="calc-inp md-end" value="' + escapeHtml(r.md_end) + '" readonly style="text-align:center; background:#f8fafc; font-weight:600;"></td>' +
           '<td class="cell-formula md-gap" style="text-align:center;">0.00</td>' +
           '<td style="text-align:center; font-weight:600; color:#475569;">' + r.unit + '</td>' +
         '</tr>';
@@ -2511,41 +2565,7 @@ tr.type-sub:hover td {
   // 3. Sheet 1.a.1.c (Prioritas Pembangunan Daerah vs Prioritas Nasional RPJMN)
   function renderWs_1_a_1_c(d, maxBobot){
     d = d || {};
-    var pns = d.pn_list || [
-      {
-        pn_title: 'PN 1 : Memperkuat Ketahanan Ekonomi untuk Pertumbuhan yang Berkualitas dan Berkeadilan',
-        pds: [
-          { title: 'Prioritas Daerah 1 : Peningkatan Ekonomi Berkelanjutan & Pertanian Modern', score: 1.0, ket: 'Selaras Sepenuhnya' },
-          { title: 'Prioritas Daerah 2 : Pengembangan UMKM, Industri Kreatif dan Perdagangan', score: 1.0, ket: 'Selaras Sepenuhnya' }
-        ]
-      },
-      {
-        pn_title: 'PN 2 : Mengembangkan Wilayah untuk Mengurangi Kesenjangan dan Menjamin Pemerataan',
-        pds: [
-          { title: 'Prioritas Daerah 3 : Pemerataan Pembangunan Infrastruktur Wilayah Terpadu', score: 1.0, ket: 'Selaras Sepenuhnya' },
-          { title: 'Prioritas Daerah 4 : Peningkatan Konektivitas Antar Kawasan Pedesaan dan Perkotaan', score: 1.0, ket: 'Selaras Sepenuhnya' }
-        ]
-      },
-      {
-        pn_title: 'PN 3 : Meningkatkan Sumber Daya Manusia yang Berkualitas dan Berdaya Saing',
-        pds: [
-          { title: 'Prioritas Daerah 5 : Peningkatan Kualitas dan Aksesibilitas Layanan Pendidikan', score: 1.0, ket: 'Selaras Sepenuhnya' },
-          { title: 'Prioritas Daerah 6 : Penguatan Mutu Layanan Kesehatan dan Penurunan Stunting', score: 1.0, ket: 'Selaras Sepenuhnya' }
-        ]
-      },
-      {
-        pn_title: 'PN 4 : Revolusi Mental dan Pembangunan Kebudayaan',
-        pds: [
-          { title: 'Prioritas Daerah 7 : Pelestarian Nilai Budaya Lokal dan Penguatan Karakter Masyarakat', score: 1.0, ket: 'Selaras Sepenuhnya' }
-        ]
-      },
-      {
-        pn_title: 'PN 5 : Memperkuat Infrastruktur untuk Mendukung Pengembangan Ekonomi dan Pelayanan Dasar',
-        pds: [
-          { title: 'Prioritas Daerah 8 : Penyediaan Sarana Air Bersih, Sanitasi Layak dan Hunian Berkualitas', score: 1.0, ket: 'Selaras Sepenuhnya' }
-        ]
-      }
-    ];
+    var pns = d.pn_list || (AUTO_DATA_1_A_1_C && AUTO_DATA_1_A_1_C.length > 0 ? AUTO_DATA_1_A_1_C : []);
 
     var html = 
       '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px; color:#64748b;">' +
@@ -2565,10 +2585,15 @@ tr.type-sub:hover td {
         '</thead>' +
         '<tbody>';
 
+    if (!pns || pns.length === 0){
+      return html + '<tr><td colspan="6" style="text-align: center; padding: 35px 20px; color: #64748b; font-size: 14px; background: #f8fafc;"><i class="fa fa-info-circle" style="margin-right: 8px; color: #3b82f6; font-size: 16px;"></i>Belum ada data Prioritas Daerah vs Prioritas Nasional pada menu terkait. Data akan otomatis terisi saat data diinputkan pada menu terkait.</td></tr></tbody></table></div>';
+    }
+
     var rowCounter = 1;
     pns.forEach(function(pn, pnIdx){
-      var pdCount = pn.pds && pn.pds.length > 0 ? pn.pds.length : 1;
-      (pn.pds || [{ title: '', score: 1.0, ket: '' }]).forEach(function(pd, pdIdx){
+      var pdsToRender = (pn.pds && pn.pds.length > 0) ? pn.pds : [{ title: '', score: 0, ket: 'Tidak Ada Misi Daerah' }];
+      var pdCount = pdsToRender.length;
+      pdsToRender.forEach(function(pd, pdIdx){
         html += 
           '<tr class="ws-matrix-row" data-pn-idx="' + pnIdx + '" data-pd-idx="' + pdIdx + '">' +
             '<td class="excel-row-num">' + (rowCounter++) + '</td>';
@@ -2576,13 +2601,12 @@ tr.type-sub:hover td {
         if (pdIdx === 0){
           html += 
             '<td rowspan="' + pdCount + '" class="cell-pn-wrap" style="vertical-align:top; background:#f0f7ff;">' +
-              '<textarea class="calc-inp pn-title-inp" rows="2" style="font-weight:700; color:#1e3a8a;" placeholder="Prioritas Nasional...">' + escapeHtml(pn.pn_title) + '</textarea>' +
-              '<button type="button" class="btn-mini-add-pd" data-pn-idx="' + pnIdx + '" style="font-size:10.5px; padding:3px 8px; background:#eff6ff; border:1px dashed #3b82f6; border-radius:4px; cursor:pointer; color:#1d4ed8; margin-top:6px; font-weight:700;"><i class="fa fa-plus"></i> Tambah PD</button>' +
+              '<textarea class="calc-inp pn-title-inp" rows="2" style="font-weight:700; color:#1e3a8a; background:transparent; border:none;" placeholder="Prioritas Nasional..." readonly>' + escapeHtml(pn.pn_title) + '</textarea>' +
             '</td>';
         }
 
         html += 
-            '<td><input type="text" class="calc-inp pd-title-inp" value="' + escapeHtml(pd.title) + '" placeholder="Prioritas Daerah..."></td>' +
+            '<td><textarea class="calc-inp pd-title-inp" rows="3" style="width:100%; background:transparent; border:none; resize:vertical;" placeholder="Prioritas Daerah..." readonly>' + escapeHtml(pd.title) + '</textarea></td>' +
             '<td>' +
               '<select class="calc-inp pd-score-sel">' +
                 '<option value="1.0"' + (pd.score == 1.0 || pd.score === undefined ? ' selected' : '') + '>100% (Selaras)</option>' +
@@ -2596,11 +2620,11 @@ tr.type-sub:hover td {
         if (pdIdx === 0){
           html += 
             '<td rowspan="' + pdCount + '" style="vertical-align:middle; text-align:center;">' +
-              '<button type="button" class="btn-del-pn" data-pn-idx="' + pnIdx + '" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus Blok PN"><i class="fa fa-trash"></i></button>' +
+              '<span style="color:#cbd5e1; font-size:12px;">(Otomatis)</span>' +
             '</td>';
         } else {
           html += 
-            '<td style="text-align:center;"><button type="button" class="btn-del-pd" data-pn-idx="' + pnIdx + '" data-pd-idx="' + pdIdx + '" style="border:none; background:transparent; color:#94a3b8; cursor:pointer;" title="Hapus Baris PD"><i class="fa fa-times"></i></button></td>';
+            '<td style="text-align:center;"><span style="color:#cbd5e1; font-size:12px;">(Otomatis)</span></td>';
         }
 
         html += '</tr>';
@@ -2610,7 +2634,6 @@ tr.type-sub:hover td {
     html += 
         '</tbody>' +
       '</table>' +
-      '<button type="button" class="btn-excel-add-row" id="btnAddPnBlock"><i class="fa fa-plus-circle"></i> Tambah Blok Prioritas Nasional (PN)</button>' +
       '</div>';
 
     return html;
@@ -2619,84 +2642,96 @@ tr.type-sub:hover td {
   // 4. Sheet 1.a.2.a (PN 1 Kegiatan Prioritas PP 1 s.d PP 8)
   function renderWs_1_a_2_a(d, maxBobot){
     d = d || {};
-    var ppList = d.pp_list || [
-      { pp_title: 'PP 1 : Peningkatan Ketersediaan, Akses, dan Kualitas Konsumsi Pangan', pds: [{ title: 'Dukungan Program Pengelolaan Pertanian & Ketahanan Pangan Daerah', score: 1.0 }] },
-      { pp_title: 'PP 2 : Penguatan Kewirausahaan, UMKM, dan Koperasi', pds: [{ title: 'Dukungan Program Pemberdayaan Usaha Mikro dan Koperasi Daerah', score: 1.0 }] },
-      { pp_title: 'PP 3 : Peningkatan Nilai Tambah, Lapangan Kerja, dan Investasi Sektor Riil', pds: [{ title: 'Dukungan Program Promosi Penanaman Modal & Pelayanan Perizinan Terpadu', score: 1.0 }] },
-      { pp_title: 'PP 4 : Pengembangan Ekspor dan Daya Saing Produk Lokal', pds: [{ title: 'Dukungan Program Pengembangan Perdagangan Dalam dan Luar Negeri', score: 1.0 }] },
-      { pp_title: 'PP 5 : Penguatan Pilar Ketahanan Energi & Energi Terbarukan', pds: [{ title: 'Dukungan Program Pengelolaan Energi dan Sumber Daya Alam Daerah', score: 1.0 }] },
-      { pp_title: 'PP 6 : Peningkatan Produktivitas Pertanian dan Ketahanan Air', pds: [{ title: 'Dukungan Program Pengelolaan Sumber Daya Air & Irigasi Pertanian', score: 1.0 }] },
-      { pp_title: 'PP 7 : Penguatan Ketahanan Bencana dan Pemanfaatan Maritim', pds: [{ title: 'Dukungan Program Pengelolaan Perikanan Tangkap & Budidaya', score: 1.0 }] },
-      { pp_title: 'PP 8 : Penguatan Kemitraan Sektor Swasta dan Masyarakat', pds: [{ title: 'Dukungan Program Kerjasama Pembangunan Ekonomi Inklusif Daerah', score: 1.0 }] }
-    ];
+    var savedPpList = d.pp_list || [];
+    var pnList = (AUTO_DATA_1_A_2_A && AUTO_DATA_1_A_2_A.length > 0) ? AUTO_DATA_1_A_2_A : (d.pn_list || []);
+    
+    // Fallback if no dynamic data
+    if (pnList.length === 0) {
+      pnList = [{
+        pn_title: 'Belum ada data Keselarasan Prioritas (silakan isi di menu Keselarasan Kegiatan Prioritas Utama)',
+        pps: []
+      }];
+    }
+
+    // Merge saved review & score into the fresh data
+    if (pnList.length > 0 && savedPpList.length > 0) {
+        pnList[0].pps.forEach(function(pp) {
+            var savedPp = savedPpList.find(function(s) { return s.pp_title === pp.pp_title; });
+            if (savedPp) {
+                pp.pds.forEach(function(pd) {
+                    var savedPd = savedPp.pds ? savedPp.pds.find(function(s) { return s.title === pd.title; }) : null;
+                    if (savedPd) {
+                        pd.ta_review = savedPd.ta_review;
+                        pd.score = savedPd.score;
+                    }
+                });
+            }
+        });
+    }
 
     var html = 
       '<div style="overflow-x:auto;">' +
-      '<table class="excel-grid-table" id="wsTable_1_a_2_a" style="width: 100%; min-width: 850px;">' +
+      '<table class="excel-grid-table" id="wsTable_1_a_2_a" style="width: 100%; min-width: 900px;">' +
         '<thead>' +
           '<tr>' +
             '<th class="excel-row-num" style="width: 45px; text-align:center;">No</th>' +
-            '<th class="th-blue" style="width: 30%;">Prioritas Nasional (RPJMN)</th>' +
-            '<th class="th-blue" style="width: 30%;">Program Prioritas (PP)</th>' +
-            '<th class="th-amber" style="width: 30%;">Dukungan Program Daerah (RPJMD)</th>' +
-            '<th class="th-green" style="width: 15%;">Keselarasan</th>' +
-            '<th class="th-gray" style="width: 50px;">Aksi</th>' +
+            '<th class="th-blue" style="width: 25%;">Prioritas Nasional (RPJMN)</th>' +
+            '<th class="th-blue" style="width: 25%;">Program Prioritas (PP)</th>' +
+            '<th class="th-amber" style="width: 25%;">Dukungan Program Daerah (RPJMD)</th>' +
+            '<th class="th-green" style="width: 15%;">Hasil Review TA Bidang</th>' +
+            '<th class="th-green" style="width: 10%;">Keselarasan</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>';
 
     var rowCounter = 1;
-    ppList.forEach(function(pp, ppIdx){
-      var pdCount = pp.pds && pp.pds.length > 0 ? pp.pds.length : 1;
-      (pp.pds || [{ title: '', score: 1.0 }]).forEach(function(pd, pdIdx){
-        html += 
-          '<tr class="ws-pp-row" data-pp-idx="' + ppIdx + '" data-pd-idx="' + pdIdx + '">' +
-            '<td class="excel-row-num">' + (rowCounter++) + '</td>';
+    pnList.forEach(function(pn, pnIdx) {
+        var pps = pn.pps && pn.pps.length > 0 ? pn.pps : [{ pp_title: '-', pds: [] }];
+        
+        var totalRowsForPn = pps.reduce(function(acc, pp) {
+            return acc + (pp.pds && pp.pds.length > 0 ? pp.pds.length : 1);
+        }, 0);
 
-        if (ppIdx === 0 && pdIdx === 0){
-          var totalRowsAll = ppList.reduce(function(acc, item){ return acc + (item.pds ? item.pds.length : 1); }, 0);
-          html += 
-            '<td rowspan="' + totalRowsAll + '" class="cell-pn-wrap-2a" style="vertical-align:top; background:#f0f7ff; font-weight:800; color:#1e3a8a;">' +
-              'PN 1 : Memperkuat Ketahanan Ekonomi untuk Pertumbuhan yang Berkualitas dan Berkeadilan' +
-            '</td>';
-        }
+        pps.forEach(function(pp, ppIdx) {
+            var pds = pp.pds && pp.pds.length > 0 ? pp.pds : [{ title: '-', score: 1.0, ta_review: '' }];
+            var pdCount = pds.length;
+            var globalPpIdx = pnIdx + "_" + ppIdx;
 
-        if (pdIdx === 0){
-          html += 
-            '<td rowspan="' + pdCount + '" class="cell-pp-wrap-2a" style="vertical-align:top; background:#fdfdfd;">' +
-              '<input type="text" class="calc-inp pp-title-inp" style="font-weight:700; color:#203764;" value="' + escapeHtml(pp.pp_title) + '" placeholder="Program Prioritas...">' +
-              '<button type="button" class="btn-add-pd-2a" data-pp-idx="' + ppIdx + '" style="font-size:10.5px; padding:3px 7px; background:#eff6ff; border:1px dashed #3b82f6; border-radius:4px; cursor:pointer; color:#1d4ed8; margin-top:5px; font-weight:700;"><i class="fa fa-plus"></i> Tambah PD</button>' +
-            '</td>';
-        }
+            pds.forEach(function(pd, pdIdx) {
+                html += '<tr class="ws-pp-row" data-pp-idx="' + globalPpIdx + '">';
+                html += '<td class="excel-row-num">' + (rowCounter++) + '</td>';
 
-        html += 
-            '<td><input type="text" class="calc-inp pd-title-inp" value="' + escapeHtml(pd.title) + '" placeholder="Program Daerah..."></td>' +
-            '<td>' +
-              '<select class="calc-inp pd-score-sel">' +
-                '<option value="1.0"' + (pd.score == 1.0 || pd.score === undefined ? ' selected' : '') + '>100% (Selaras)</option>' +
-                '<option value="0.5"' + (pd.score == 0.5 ? ' selected' : '') + '>50% (Sebagian)</option>' +
-                '<option value="0"' + (pd.score == 0 ? ' selected' : '') + '>0% (Tidak Selaras)</option>' +
-              '</select>' +
-            '</td>';
+                if (ppIdx === 0 && pdIdx === 0) {
+                    html += '<td rowspan="' + totalRowsForPn + '" class="cell-pn-wrap-2a" style="vertical-align:top; background:#f0f7ff; font-weight:800; color:#1e3a8a;">' +
+                            escapeHtml(pn.pn_title) +
+                            '</td>';
+                }
 
-        if (pdIdx === 0){
-          html += 
-            '<td rowspan="' + pdCount + '" style="vertical-align:middle; text-align:center;">' +
-              '<button type="button" class="btn-del-pp-2a" data-pp-idx="' + ppIdx + '" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus PP"><i class="fa fa-trash"></i></button>' +
-            '</td>';
-        } else {
-          html += 
-            '<td style="text-align:center;"><button type="button" class="btn-del-pd-2a" data-pp-idx="' + ppIdx + '" data-pd-idx="' + pdIdx + '" style="border:none; background:transparent; color:#94a3b8; cursor:pointer;" title="Hapus PD"><i class="fa fa-times"></i></button></td>';
-        }
+                if (pdIdx === 0) {
+                    html += '<td rowspan="' + pdCount + '" class="cell-pp-wrap-2a" style="vertical-align:top; background:#fdfdfd;">' +
+                            '<textarea class="calc-inp pp-title-inp" style="font-weight:700; color:#203764; width:100%; resize:none; border:none; background:transparent;" rows="3" readonly>' + escapeHtml(pp.pp_title) + '</textarea>' +
+                            '</td>';
+                }
 
-        html += '</tr>';
-      });
+                html += '<td><textarea class="calc-inp pd-title-inp" style="width:100%; resize:none; border:none; background:transparent;" rows="2" readonly>' + escapeHtml(pd.title) + '</textarea></td>';
+                html += '<td><input type="text" class="pd-review-inp" value="' + escapeHtml(pd.ta_review || '') + '" placeholder="Review TA..."></td>';
+                html += '<td>' +
+                            '<select class="calc-inp pd-score-sel">' +
+                                '<option value="1.0"' + (pd.score == 1.0 || pd.score === undefined ? ' selected' : '') + '>100% (Iya / Selaras)</option>' +
+                                '<option value="0.75"' + (pd.score == 0.75 ? ' selected' : '') + '>75% (Sebagian Besar)</option>' +
+                                '<option value="0.5"' + (pd.score == 0.5 ? ' selected' : '') + '>50% (Sebagian)</option>' +
+                                '<option value="0"' + (pd.score == 0 ? ' selected' : '') + '>0% (Tidak)</option>' +
+                            '</select>' +
+                        '</td>';
+                
+                html += '</tr>';
+            });
+        });
     });
 
     html += 
         '</tbody>' +
       '</table>' +
-      '<button type="button" class="btn-excel-add-row" id="btnAddPp2a"><i class="fa fa-plus-circle"></i> Tambah Program Prioritas (PP)</button>' +
       '</div>';
 
     return html;
@@ -2705,19 +2740,26 @@ tr.type-sub:hover td {
   // 5. Sheets 1.a.2.b s.d 1.a.2.g (PN 2 s.d PN 7 dengan Kolom Review TA Bidang)
   function renderWs_1_a_2_b_to_g(code, d, maxBobot){
     d = d || {};
-    var pnInfo = {
-      '1.a.2.b': { no: '2', title: 'PN 2 : Mengembangkan Wilayah untuk Mengurangi Kesenjangan dan Menjamin Pemerataan' },
-      '1.a.2.c': { no: '3', title: 'PN 3 : Meningkatkan Sumber Daya Manusia yang Berkualitas dan Berdaya Saing' },
-      '1.a.2.d': { no: '4', title: 'PN 4 : Revolusi Mental dan Pembangunan Kebudayaan' },
-      '1.a.2.e': { no: '5', title: 'PN 5 : Memperkuat Infrastruktur untuk Mendukung Pengembangan Ekonomi dan Pelayanan Dasar' },
-      '1.a.2.f': { no: '6', title: 'PN 6 : Membangun Lingkungan Hidup, Meningkatkan Ketahanan Bencana dan Perubahan Iklim' },
-      '1.a.2.g': { no: '7', title: 'PN 7 : Memperkuat Stabilitas Polhukhankam dan Transformasi Pelayanan Publik' }
-    }[code] || { no: '2', title: 'PN RPJMN' };
-
-    var ppList = d.pp_list || [
-      { pp_title: 'Program Prioritas 1', pds: [{ title: 'Dukungan Program Pembangunan Daerah 1', ta_review: 'Sesuai dengan Kewenangan Daerah', score: 1.0 }] },
-      { pp_title: 'Program Prioritas 2', pds: [{ title: 'Dukungan Program Pembangunan Daerah 2', ta_review: 'Sesuai dengan Kewenangan Daerah', score: 1.0 }] }
-    ];
+    var savedPpList = d.pp_list || [];
+    
+    // Get fresh data from db
+    var pnList = AUTO_DATA_1_A_2_ALL[code] ? [AUTO_DATA_1_A_2_ALL[code]] : [];
+    
+    // Merge saved review & score into the fresh data
+    if (pnList.length > 0 && savedPpList.length > 0) {
+        pnList[0].pps.forEach(function(pp) {
+            var savedPp = savedPpList.find(function(s) { return s.pp_title === pp.pp_title; });
+            if (savedPp) {
+                pp.pds.forEach(function(pd) {
+                    var savedPd = savedPp.pds ? savedPp.pds.find(function(s) { return s.title === pd.title; }) : null;
+                    if (savedPd) {
+                        pd.ta_review = savedPd.ta_review;
+                        pd.score = savedPd.score;
+                    }
+                });
+            }
+        });
+    }
 
     var html = 
       '<div style="overflow-x:auto;">' +
@@ -2730,64 +2772,58 @@ tr.type-sub:hover td {
             '<th class="th-amber" style="width: 25%;">Dukungan Program Daerah</th>' +
             '<th class="th-green" style="width: 15%;">Hasil Review TA Bidang</th>' +
             '<th class="th-green" style="width: 10%;">Keselarasan</th>' +
-            '<th class="th-gray" style="width: 50px;">Aksi</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>';
 
-    var rowCounter = 1;
-    ppList.forEach(function(pp, ppIdx){
-      var pdCount = pp.pds && pp.pds.length > 0 ? pp.pds.length : 1;
-      (pp.pds || [{ title: '', ta_review: '', score: 1.0 }]).forEach(function(pd, pdIdx){
-        html += 
-          '<tr class="ws-ppbg-row" data-pp-idx="' + ppIdx + '" data-pd-idx="' + pdIdx + '">' +
-            '<td class="excel-row-num">' + (rowCounter++) + '</td>';
+    if (pnList.length === 0) {
+        html += '<tr><td colspan="6" style="text-align:center; padding:15px; color:#666;">Data tidak ditemukan atau Instansi belum dipetakan.</td></tr>';
+    } else {
+        var rowCounter = 1;
+        pnList.forEach(function(pn, pnIdx) {
+            var pps = pn.pps && pn.pps.length > 0 ? pn.pps : [{ pp_title: '-', pds: [] }];
+            
+            pps.forEach(function(pp, ppIdx) {
+                var pds = pp.pds && pp.pds.length > 0 ? pp.pds : [{ title: '-', ta_review: '', score: 1.0 }];
+                var pdCount = pds.length;
+                var globalPpIdx = pnIdx + "_" + ppIdx;
+                
+                pds.forEach(function(pd, pdIdx) {
+                    html += '<tr class="ws-ppbg-row" data-pp-idx="' + globalPpIdx + '" data-pd-idx="' + pdIdx + '">' +
+                            '<td class="excel-row-num">' + (rowCounter++) + '</td>';
 
-        if (ppIdx === 0 && pdIdx === 0){
-          var totalRowsAll = ppList.reduce(function(acc, item){ return acc + (item.pds ? item.pds.length : 1); }, 0);
-          html += 
-            '<td rowspan="' + totalRowsAll + '" class="cell-pn-wrap-bg" style="vertical-align:top; background:#f0f7ff; font-weight:800; color:#1e3a8a;">' +
-              escapeHtml(pnInfo.title) +
-            '</td>';
-        }
+                    if (ppIdx === 0 && pdIdx === 0) {
+                        var totalRowsAll = pps.reduce(function(acc, item) { return acc + (item.pds && item.pds.length > 0 ? item.pds.length : 1); }, 0);
+                        html += '<td rowspan="' + totalRowsAll + '" class="cell-pn-wrap-bg" style="vertical-align:top; background:#f0f7ff; font-weight:800; color:#1e3a8a;">' +
+                                escapeHtml(pn.pn_title) +
+                                '</td>';
+                    }
 
-        if (pdIdx === 0){
-          html += 
-            '<td rowspan="' + pdCount + '" class="cell-pp-wrap-bg" style="vertical-align:top; background:#fdfdfd;">' +
-              '<textarea class="calc-inp pp-title-inp" rows="2" style="font-weight:700; color:#203764;" placeholder="Program Prioritas...">' + escapeHtml(pp.pp_title) + '</textarea>' +
-              '<button type="button" class="btn-add-pd-bg" data-pp-idx="' + ppIdx + '" style="font-size:10.5px; padding:3px 7px; background:#eff6ff; border:1px dashed #3b82f6; border-radius:4px; cursor:pointer; color:#1d4ed8; margin-top:5px; font-weight:700;"><i class="fa fa-plus"></i> Tambah PD</button>' +
-            '</td>';
-        }
+                    if (pdIdx === 0) {
+                        html += '<td rowspan="' + pdCount + '" class="cell-pp-wrap-bg" style="vertical-align:top; background:#fdfdfd;">' +
+                                '<textarea class="calc-inp pp-title-inp" rows="2" style="font-weight:700; color:#203764; background:#f8f9fa; cursor:not-allowed;" readonly placeholder="Program Prioritas...">' + escapeHtml(pp.pp_title) + '</textarea>' +
+                                '</td>';
+                    }
 
-        html += 
-            '<td><input type="text" class="calc-inp pd-title-inp" value="' + escapeHtml(pd.title) + '" placeholder="Program Daerah..."></td>' +
-            '<td><input type="text" class="pd-review-inp" value="' + escapeHtml(pd.ta_review || '') + '" placeholder="Review TA..."></td>' +
-            '<td>' +
-              '<select class="calc-inp pd-score-sel">' +
-                '<option value="1.0"' + (pd.score == 1.0 || pd.score === undefined ? ' selected' : '') + '>100% (Iya)</option>' +
-                '<option value="0.5"' + (pd.score == 0.5 ? ' selected' : '') + '>50% (Sebagian)</option>' +
-                '<option value="0"' + (pd.score == 0 ? ' selected' : '') + '>0% (Tidak)</option>' +
-              '</select>' +
-            '</td>';
-
-        if (pdIdx === 0){
-          html += 
-            '<td rowspan="' + pdCount + '" style="vertical-align:middle; text-align:center;">' +
-              '<button type="button" class="btn-del-pp-bg" data-pp-idx="' + ppIdx + '" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus PP"><i class="fa fa-trash"></i></button>' +
-            '</td>';
-        } else {
-          html += 
-            '<td style="text-align:center;"><button type="button" class="btn-del-pd-bg" data-pp-idx="' + ppIdx + '" data-pd-idx="' + pdIdx + '" style="border:none; background:transparent; color:#94a3b8; cursor:pointer;" title="Hapus PD"><i class="fa fa-times"></i></button></td>';
-        }
-
-        html += '</tr>';
-      });
-    });
+                    html += '<td><input type="text" class="calc-inp pd-title-inp" value="' + escapeHtml(pd.title) + '" readonly style="background:#f8f9fa; cursor:not-allowed;" placeholder="Program Daerah..."></td>' +
+                            '<td><input type="text" class="pd-review-inp" value="' + escapeHtml(pd.ta_review || '') + '" placeholder="Review TA..."></td>' +
+                            '<td>' +
+                                '<select class="calc-inp pd-score-sel">' +
+                                    '<option value="1.0"' + (pd.score == 1.0 || pd.score === undefined ? ' selected' : '') + '>100% (Iya / Selaras)</option>' +
+                                    '<option value="0.75"' + (pd.score == 0.75 ? ' selected' : '') + '>75% (Sebagian Besar)</option>' +
+                                    '<option value="0.5"' + (pd.score == 0.5 ? ' selected' : '') + '>50% (Sebagian)</option>' +
+                                    '<option value="0"' + (pd.score == 0 ? ' selected' : '') + '>0% (Tidak)</option>' +
+                                '</select>' +
+                            '</td>' +
+                            '</tr>';
+                });
+            });
+        });
+    }
 
     html += 
         '</tbody>' +
       '</table>' +
-      '<button type="button" class="btn-excel-add-row" id="btnAddPpBlock"><i class="fa fa-plus-circle"></i> Tambah Program Prioritas (PP)</button>' +
       '</div>';
 
     return html;
@@ -2798,10 +2834,10 @@ tr.type-sub:hover td {
     d = d || {};
     var isTpt = (code === '1.a.3.a');
     var indName = isTpt ? 'Tingkat Pengangguran Terbuka (TPT)' : 'Tingkat Kemiskinan (TK)';
-    var mn_base = d.mn_base !== undefined ? d.mn_base : (isTpt ? '5.2' : '9.2');
-    var mn_end  = d.mn_end  !== undefined ? d.mn_end  : (isTpt ? '4.0' : '6.5');
-    var md_base = d.md_base !== undefined ? d.md_base : (isTpt ? '7.8' : '11.4');
-    var md_end  = d.md_end  !== undefined ? d.md_end  : (isTpt ? '5.2' : '7.8');
+    var mn_base = d.mn_base !== undefined ? d.mn_base : (isTpt ? (AUTO_DATA_1_A_3_A.mn_base || AUTO_DATA_1_A_1_A.mn_tpt_base || '') : (AUTO_DATA_1_A_3_B.mn_base || AUTO_DATA_1_A_1_A.mn_tk_base || ''));
+    var mn_end  = d.mn_end  !== undefined ? d.mn_end  : (isTpt ? (AUTO_DATA_1_A_3_A.mn_end || AUTO_DATA_1_A_1_A.mn_tpt_end || '') : (AUTO_DATA_1_A_3_B.mn_end || AUTO_DATA_1_A_1_A.mn_tk_end || ''));
+    var md_base = d.md_base !== undefined ? d.md_base : (isTpt ? (AUTO_DATA_1_A_3_A.md_base || AUTO_DATA_1_A_1_A.md_tpt_base || '') : (AUTO_DATA_1_A_3_B.md_base || AUTO_DATA_1_A_1_A.md_tk_base || ''));
+    var md_end  = d.md_end  !== undefined ? d.md_end  : (isTpt ? (AUTO_DATA_1_A_3_A.md_end || AUTO_DATA_1_A_1_A.md_tpt_end || '') : (AUTO_DATA_1_A_3_B.md_end || AUTO_DATA_1_A_1_A.md_tk_end || ''));
 
     var html = 
       '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px; color:#64748b;">' +
@@ -2832,13 +2868,13 @@ tr.type-sub:hover td {
           '<tr class="ws-1a3-row" data-positive="0">' +
             '<td class="excel-row-num">1</td>' +
             '<td><strong>' + indName + '</strong></td>' +
-            '<td><input type="number" step="0.01" class="calc-inp mn-base" value="' + escapeHtml(mn_base) + '"></td>' +
-            '<td><input type="number" step="0.01" class="calc-inp mn-end" value="' + escapeHtml(mn_end) + '"></td>' +
+            '<td><input type="text" class="calc-inp mn-base" value="' + escapeHtml(mn_base) + '" readonly style="text-align:center; background:#f1f5f9; cursor:not-allowed; font-weight:600;"></td>' +
+            '<td><input type="text" class="calc-inp mn-end" value="' + escapeHtml(mn_end) + '" readonly style="text-align:center; background:#f1f5f9; cursor:not-allowed; font-weight:600;"></td>' +
             '<td class="cell-formula mn-gap" style="text-align:center;">0.00</td>' +
             '<td style="text-align:center; font-weight:600; color:#475569;">Persen</td>' +
             '<td><strong>' + indName + '</strong></td>' +
-            '<td><input type="number" step="0.01" class="calc-inp md-base" value="' + escapeHtml(md_base) + '"></td>' +
-            '<td><input type="number" step="0.01" class="calc-inp md-end" value="' + escapeHtml(md_end) + '"></td>' +
+            '<td><input type="text" class="calc-inp md-base" value="' + escapeHtml(md_base) + '" readonly style="text-align:center; background:#f1f5f9; cursor:not-allowed; font-weight:600;"></td>' +
+            '<td><input type="text" class="calc-inp md-end" value="' + escapeHtml(md_end) + '" readonly style="text-align:center; background:#f1f5f9; cursor:not-allowed; font-weight:600;"></td>' +
             '<td class="cell-formula md-gap" style="text-align:center;">0.00</td>' +
             '<td style="text-align:center; font-weight:600; color:#475569;">Persen</td>' +
           '</tr>' +
@@ -2849,63 +2885,65 @@ tr.type-sub:hover td {
     return html;
   }
 
-  // 7. Sheet 1.a.4 (Major Project RPJMN vs RPJMD)
+  // 7. Sheet 1.a.4 (Kegiatan Prioritas Utama KPU RPJMN vs Dukungan Program Daerah RPJMD)
   function renderWs_1_a_4(d, maxBobot){
     d = d || {};
-    var mpList = d.mp_list || [
-      { mp_title: 'MP 1 : Pengembangan Aksesibilitas Konektivitas Logistik Wilayah', pds: [{ title: 'Dukungan Program Penyelenggaraan Jalan & Jembatan Daerah', score: 1.0 }] },
-      { mp_title: 'MP 2 : Percepatan Penurunan Kematian Ibu dan Stunting', pds: [{ title: 'Dukungan Program Pemenuhan Upaya Kesehatan Ibu dan Anak Terpadu', score: 1.0 }] },
-      { mp_title: 'MP 3 : Transformasi Digital dan SPBE Nasional', pds: [{ title: 'Dukungan Program Aplikasi Informatika dan Transformasi SPBE Daerah', score: 1.0 }] },
-      { mp_title: 'MP 4 : Pemulihan Pasca Bencana & Pengurangan Risiko Bencana', pds: [{ title: 'Dukungan Program Pencegahan dan Kesiapsiagaan Bencana Daerah', score: 1.0 }] }
-    ];
+    var kpuList = (d.kpu_list && Array.isArray(d.kpu_list) && d.kpu_list.length > 0) ? d.kpu_list : 
+                  ((Array.isArray(AUTO_DATA_1_A_4) && AUTO_DATA_1_A_4.length > 0) ? AUTO_DATA_1_A_4 : []);
 
     var html = 
-      '<div style="overflow-x:auto;">' +
-      '<table class="excel-grid-table" id="wsTable_1_a_4" style="width: 100%; min-width: 800px;">' +
+      '<div style="overflow-x:auto; padding-bottom:10px;">' +
+      '<table class="excel-grid-table" id="wsTable_1_a_4" style="min-width: 950px; font-size: 13px;">' +
         '<thead>' +
           '<tr>' +
-            '<th class="excel-row-num" style="width: 45px; text-align:center;">No</th>' +
-            '<th class="th-blue" style="width: 45%;">Proyek Prioritas Strategis (Major Project RPJMN)</th>' +
-            '<th class="th-amber" style="width: 45%;">Dukungan Program Daerah (RPJMD)</th>' +
-            '<th class="th-green" style="width: 15%;">Nilai Keselarasan</th>' +
-            '<th class="th-gray" style="width: 50px;">Aksi</th>' +
+            '<th class="th-blue" style="width: 320px; min-width: 320px; vertical-align: middle; font-size: 13.5px; padding: 12px 10px;">RPJMN<br><small style="font-weight:600; font-size:12px; color:#1e3a8a;">Kegiatan Prioritas Utama (KPU)</small></th>' +
+            '<th class="th-amber" style="width: 340px; min-width: 340px; vertical-align: middle; font-size: 13.5px; padding: 12px 10px;">RPJMD<br><small style="font-weight:600; font-size:12px; color:#78350f;">Dukungan Program Pembangunan Daerah</small></th>' +
+            '<th class="th-green" style="width: 140px; min-width: 140px; vertical-align: middle; font-size: 13.5px; padding: 12px 10px;">Nilai Keselarasan (0,5 / 1,0)</th>' +
+            '<th class="th-amber" style="width: 280px; min-width: 280px; vertical-align: middle; font-size: 13.5px; padding: 12px 10px;">Keterangan</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>';
 
-    var rowCounter = 1;
-    mpList.forEach(function(mp, mpIdx){
-      var pdCount = mp.pds && mp.pds.length > 0 ? mp.pds.length : 1;
-      (mp.pds || [{ title: '', score: 1.0 }]).forEach(function(pd, pdIdx){
+    if (!kpuList || kpuList.length === 0){
+      return html + '<tr><td colspan="4" style="text-align: center; padding: 35px 20px; color: #64748b; font-size: 14px; background: #f8fafc;"><i class="fa fa-info-circle" style="margin-right: 8px; color: #3b82f6; font-size: 16px;"></i>Belum ada data KPU RPJMN / Dukungan Program Daerah RPJMD pada menu terkait. Data akan otomatis terisi saat data diinputkan pada menu terkait.</td></tr></tbody></table></div>';
+    }
+
+    kpuList.forEach(function(kpu, kpuIdx){
+      var pdList = (kpu.pds && kpu.pds.length > 0) ? kpu.pds : [{ title: '-', score: 0.50 }];
+      var pdCount = pdList.length;
+
+      pdList.forEach(function(pd, pdIdx){
         html += 
-          '<tr class="ws-mp-row" data-mp-idx="' + mpIdx + '" data-pd-idx="' + pdIdx + '">' +
-            '<td class="excel-row-num">' + (rowCounter++) + '</td>';
+          '<tr class="ws-1a4-row" data-kpu-idx="' + kpuIdx + '" data-pd-idx="' + pdIdx + '" data-kpu-title="' + escapeHtml(kpu.kpu_title || '') + '">';
 
         if (pdIdx === 0){
           html += 
-            '<td rowspan="' + pdCount + '" class="cell-mp-wrap" style="vertical-align:top; background:#f0f7ff;">' +
-              '<input type="text" class="calc-inp mp-title-inp" style="font-weight:700; color:#1e3a8a;" value="' + escapeHtml(mp.mp_title) + '" placeholder="Major Project...">' +
-              '<button type="button" class="btn-add-pd-1a4" data-mp-idx="' + mpIdx + '" style="font-size:10.5px; padding:3px 7px; background:#eff6ff; border:1px dashed #3b82f6; border-radius:4px; cursor:pointer; color:#1d4ed8; margin-top:5px; font-weight:700;"><i class="fa fa-plus"></i> Tambah PD</button>' +
+            '<td rowspan="' + pdCount + '" style="vertical-align: top; font-weight: 700; color: #1e3a8a; background: #f0f7ff; font-size: 13px; padding: 12px 10px; line-height: 1.55;">' +
+              escapeHtml(kpu.kpu_title || '') +
             '</td>';
         }
 
+        var isStrip = (!pd.title || pd.title === '-');
         html += 
-            '<td><input type="text" class="calc-inp pd-title-inp" value="' + escapeHtml(pd.title) + '" placeholder="Program Daerah..."></td>' +
-            '<td>' +
-              '<select class="calc-inp pd-score-sel">' +
-                '<option value="1.0"' + (pd.score == 1.0 || pd.score === undefined ? ' selected' : '') + '>Iya (100%)</option>' +
-                '<option value="0.5"' + (pd.score == 0.5 ? ' selected' : '') + '>Tidak (50%)</option>' +
-              '</select>' +
-            '</td>';
+          '<td style="vertical-align: middle; padding: 10px 12px; font-size: 13px; line-height: 1.55; color: ' + (isStrip ? '#94a3b8' : '#1e293b') + ';">' +
+            '<span class="kpu-prog-title" style="font-weight: ' + (isStrip ? '400; font-style:italic' : '600') + ';">' + escapeHtml(pd.title || '-') + '</span>' +
+          '</td>';
+
+        var curScore = (pd.score !== null && pd.score !== undefined) ? parseFloat(pd.score) : (isStrip ? 0.50 : 1.00);
+        html += 
+          '<td style="text-align: center; vertical-align: middle; padding: 6px 8px;">' +
+            '<select class="calc-inp kpu-score-sel" style="text-align: center; font-weight: 700; font-size: 13px; height: 38px; padding: 6px 8px; border-radius: 6px; background: #ffffff; cursor: pointer;">' +
+              '<option value="1.00"' + (curScore === 1.0 ? ' selected' : '') + '>1.00 (Selaras)</option>' +
+              '<option value="0.50"' + (curScore === 0.5 ? ' selected' : '') + '>0.50 (Sebagian)</option>' +
+              '<option value="0.00"' + (curScore === 0.0 ? ' selected' : '') + '>0.00 (Tidak)</option>' +
+            '</select>' +
+          '</td>';
 
         if (pdIdx === 0){
           html += 
-            '<td rowspan="' + pdCount + '" style="vertical-align:middle; text-align:center;">' +
-              '<button type="button" class="btn-del-mp-1a4" data-mp-idx="' + mpIdx + '" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus MP"><i class="fa fa-trash"></i></button>' +
+            '<td rowspan="' + pdCount + '" style="vertical-align: top; padding: 10px 8px;">' +
+              '<textarea class="calc-inp kpu-ket-inp" rows="4" style="resize: vertical; font-size: 12.5px; line-height: 1.5; padding: 8px 10px; border-radius: 6px; min-height: 85px;">' + escapeHtml(kpu.keterangan || (isStrip ? 'Tidak ada Dukungan Program Pembangunan Daerah untuk mendukung Kegiatan Prioritas Utama terkait' : 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Kegiatan Prioritas Utama terkait')) + '</textarea>' +
             '</td>';
-        } else {
-          html += 
-            '<td style="text-align:center;"><button type="button" class="btn-del-pd-1a4" data-mp-idx="' + mpIdx + '" data-pd-idx="' + pdIdx + '" style="border:none; background:transparent; color:#94a3b8; cursor:pointer;" title="Hapus PD"><i class="fa fa-times"></i></button></td>';
         }
 
         html += '</tr>';
@@ -2915,79 +2953,182 @@ tr.type-sub:hover td {
     html += 
         '</tbody>' +
       '</table>' +
-      '<button type="button" class="btn-excel-add-row" id="btnAdd1a4Mp"><i class="fa fa-plus-circle"></i> Tambah Major Project (MP)</button>' +
       '</div>';
 
     return html;
-  }
+}
 
   // 8. Sheet 1.a.5 (Komponen SPM RPJMD) & Sheet 1.a.6 (Target SPM)
   function renderWs_SPM(code, d, maxBobot){
     d = d || {};
-    var isTarget = (code === '1.a.6');
-    var spmList = d.spm_list || [
-      { bidang: '1. Pendidikan', ind_list: [{ name: 'Pendidikan Anak Usia Dini (PAUD)', target: '100%', unit: 'Persen', score: 1.0 }, { name: 'Pendidikan Dasar 9 Tahun', target: '100%', unit: 'Persen', score: 1.0 }] },
-      { bidang: '2. Kesehatan', ind_list: [{ name: 'Pelayanan Kesehatan Ibu dan Balita', target: '100%', unit: 'Persen', score: 1.0 }, { name: 'Pelayanan Kesehatan Usia Produktif & Lansia', target: '100%', unit: 'Persen', score: 1.0 }] },
-      { bidang: '3. Pekerjaan Umum', ind_list: [{ name: 'Akses Air Minum Layak', target: '100%', unit: 'Persen', score: 1.0 }, { name: 'Akses Sanitasi Layak dan Aman', target: '100%', unit: 'Persen', score: 1.0 }] },
-      { bidang: '4. Perumahan Rakyat', ind_list: [{ name: 'Penyediaan Rumah Layak Huni Korban Bencana', target: '100%', unit: 'Persen', score: 1.0 }] },
-      { bidang: '5. Ketenteraman & Ketertiban', ind_list: [{ name: 'Pelayanan Penegakan Perda dan Perlindungan Masyarakat', target: '100%', unit: 'Persen', score: 1.0 }] },
-      { bidang: '6. Sosial', ind_list: [{ name: 'Pelayanan Sosial Dasar Penyandang Disabilitas & Lansia', target: '100%', unit: 'Persen', score: 1.0 }] }
+    var is1a5 = (code === '1.a.5');
+
+    var defaultSPM = [
+      {
+        bidang_nasional: 'Bidang 1 : pendidikan',
+        bidang_daerah: 'Bidang 1 : pendidikan',
+        keterangan: 'Terdapat Indikator SPM Daerah yang selaras dengan Bidang SPM Nasional dan Daerah terkait',
+        ind_list: [
+          { no: 1, name: 'Indikator 1 : Jumlah anak usia 5-6 tahun yang berpartisipasi dalam pendidikan anak usia dini (APS)', target: '100%', unit: 'Persen', score: 1.0 },
+          { no: 2, name: 'Indikator 2 : Jumlah anak usia 7-15 Tahun yang berpartisipasi dalam pendidikan dasar (APS)', target: '100%', unit: 'Persen', score: 1.0 },
+          { no: 3, name: 'Indikator 3 : Jumlah anak usia 7-18 Tahun yang berpartisipasi dalam pendidikan kesetaraan (Paket A/B/C) (APS)', target: '100%', unit: 'Persen', score: 1.0 },
+          { no: 4, name: 'Indikator 4 : Skor kemampuan Literasi SD', target: '100', unit: 'Angka', score: 1.0 },
+          { no: 5, name: 'Indikator 5 : Skor kemampuan Numerasi SD', target: '100', unit: 'Angka', score: 1.0 },
+          { no: 6, name: 'Indikator 6 : Skor kemampuan Literasi SMP', target: '100', unit: 'Angka', score: 1.0 },
+          { no: 7, name: 'Indikator 7 : Skor kemampuan Numerasi SMP', target: '100', unit: 'Angka', score: 1.0 },
+          { no: 8, name: 'Indikator 8 : Pertumbuhan Pendidik PAUD yang Memiliki Kualifikasi Akademik Paling Rendah D-IV/S1', target: '100%', unit: 'Persen', score: 1.0 },
+          { no: 9, name: 'Indikator 9 : Indeks Iklim Keamanan SD', target: '100', unit: 'Angka', score: 1.0 },
+          { no: 10, name: 'Indikator 10 : Indeks Iklim Kebinekaan SD', target: '100', unit: 'Angka', score: 1.0 },
+          { no: 11, name: 'Indikator 11 : Indeks Inklusivitas SD', target: '100', unit: 'Angka', score: 1.0 },
+          { no: 12, name: 'Indikator 12 : Indeks Iklim Keamanan SMP', target: '100', unit: 'Angka', score: 1.0 },
+          { no: 13, name: 'Indikator 13 : Indeks Iklim Kebinekaan SMP', target: '100', unit: 'Angka', score: 1.0 },
+          { no: 14, name: 'Indikator 14 : Indeks Inklusivitas SMP', target: '100', unit: 'Angka', score: 1.0 }
+        ]
+      },
+      {
+        bidang_nasional: 'Bidang 2 : kesehatan',
+        bidang_daerah: 'Bidang 2 : kesehatan',
+        keterangan: 'Terdapat Indikator SPM Daerah yang selaras dengan Bidang SPM Nasional dan Daerah terkait',
+        ind_list: [
+          { no: 1, name: 'Indikator 1 : Pelayanan Kesehatan Ibu Hamil', target: '100%', unit: 'Persen', score: 1.0 },
+          { no: 2, name: 'Indikator 2 : Pelayanan Kesehatan Ibu Bersalin', target: '100%', unit: 'Persen', score: 1.0 },
+          { no: 3, name: 'Indikator 3 : Pelayanan Kesehatan Bayi Baru Lahir', target: '100%', unit: 'Persen', score: 1.0 },
+          { no: 4, name: 'Indikator 4 : Pelayanan Kesehatan Balita', target: '100%', unit: 'Persen', score: 1.0 },
+          { no: 5, name: 'Indikator 5 : Pelayanan Kesehatan pada Usia Pendidikan Dasar', target: '100%', unit: 'Persen', score: 1.0 },
+          { no: 6, name: 'Indikator 6 : Pelayanan Kesehatan pada Usia Produktif', target: '100%', unit: 'Persen', score: 1.0 },
+          { no: 7, name: 'Indikator 7 : Pelayanan Kesehatan pada Usia Lanjut', target: '100%', unit: 'Persen', score: 1.0 },
+          { no: 8, name: 'Indikator 8 : Pelayanan Kesehatan Penderita Hipertensi', target: '100%', unit: 'Persen', score: 1.0 },
+          { no: 9, name: 'Indikator 9 : Pelayanan Kesehatan Penderita Diabetes Melitus (DM)', target: '100%', unit: 'Persen', score: 1.0 },
+          { no: 10, name: 'Indikator 10 : Pelayanan Kesehatan Orang dengan Gangguan Jiwa (ODGJ) Berat', target: '100%', unit: 'Persen', score: 1.0 },
+          { no: 11, name: 'Indikator 11 : Pelayanan Kesehatan Orang Terduga Tuberkulosis', target: '100%', unit: 'Persen', score: 1.0 },
+          { no: 12, name: 'Indikator 12 : Pelayanan Kesehatan Orang Dengan Risiko Terinfeksi Virus yang Melemahkan Daya Tahan Tubuh Manusia (HIV)', target: '100%', unit: 'Persen', score: 1.0 }
+        ]
+      },
+      {
+        bidang_nasional: 'Bidang 3 : pekerjaan umum',
+        bidang_daerah: 'Bidang 3 : pekerjaan umum',
+        keterangan: 'Terdapat Indikator SPM Daerah yang selaras dengan Bidang SPM Nasional dan Daerah terkait',
+        ind_list: [
+          { no: 1, name: 'Indikator 1 : Persentase Penyediaan Kebutuhan Pokok Air Minum Sehari-hari', target: '100%', unit: 'Persen', score: 1.0 },
+          { no: 2, name: 'Indikator 2 : Persentase Penyediaan Pelayanan Pengolahan Air Limbah Domestik', target: '100%', unit: 'Persen', score: 1.0 }
+        ]
+      },
+      {
+        bidang_nasional: 'Bidang 4 : perumahan rakyat',
+        bidang_daerah: 'Bidang 4 : perumahan rakyat',
+        keterangan: 'Terdapat Indikator SPM Daerah yang selaras dengan Bidang SPM Nasional dan Daerah terkait',
+        ind_list: [
+          { no: 1, name: 'Indikator 1 : Persentase Penyediaan Rumah Layak Huni bagi Korban Bencana Kabupaten/Kota', target: '100%', unit: 'Persen', score: 1.0 },
+          { no: 2, name: 'Indikator 2 : Persentase Fasilitasi Penyediaan Rumah Layak Huni bagi Masyarakat yang Terkena Relokasi Program Pemerintah Daerah Kabupaten/Kota', target: '100%', unit: 'Persen', score: 1.0 }
+        ]
+      },
+      {
+        bidang_nasional: 'Bidang 5 : ketenteraman, ketertiban umum, dan pelindungan masyarakat',
+        bidang_daerah: 'Bidang 5 : ketenteraman, ketertiban umum, dan pelindungan masyarakat',
+        keterangan: 'Terdapat Indikator SPM Daerah yang selaras dengan Bidang SPM Nasional dan Daerah terkait',
+        ind_list: [
+          { no: 1, name: 'Indikator 1 : Persentase Pelayanan Ketenteraman dan Ketertiban Umum', target: '100%', unit: 'Persen', score: 1.0 },
+          { no: 2, name: 'Indikator 2 : Persentase Pelayanan Penyelamatan dan Evakuasi Korban Bencana', target: '100%', unit: 'Persen', score: 1.0 },
+          { no: 3, name: 'Indikator 3 : Persentase Pelayanan Penyelamatan dan Evakuasi Korban Kebakaran', target: '100%', unit: 'Persen', score: 1.0 }
+        ]
+      },
+      {
+        bidang_nasional: 'Bidang 6 : sosial',
+        bidang_daerah: 'Bidang 6 : sosial',
+        keterangan: 'Terdapat Indikator SPM Daerah yang selaras dengan Bidang SPM Nasional dan Daerah terkait',
+        ind_list: [
+          { no: 1, name: 'Indikator 1 : Persentase Penyandang Disabilitas Terlantar yang Terpenuhi Kebutuhan Dasarnya', target: '100%', unit: 'Persen', score: 1.0 },
+          { no: 2, name: 'Indikator 2 : Persentase Anak Terlantar yang Terpenuhi Kebutuhan Dasarnya', target: '100%', unit: 'Persen', score: 1.0 },
+          { no: 3, name: 'Indikator 3 : Persentase Lanjut Usia Terlantar yang Terpenuhi Kebutuhan Dasarnya', target: '100%', unit: 'Persen', score: 1.0 },
+          { no: 4, name: 'Indikator 4 : Persentase Gelandangan dan Pengemis yang Terpenuhi Kebutuhan Dasarnya', target: '100%', unit: 'Persen', score: 1.0 },
+          { no: 5, name: 'Indikator 5 : Persentase Korban Bencana Daerah yang Terpenuhi Kebutuhan Dasarnya Saat dan Setelah Tanggap Darurat Bencana', target: '100%', unit: 'Persen', score: 1.0 }
+        ]
+      }
     ];
 
+    var autoSource = is1a5 ? (AUTO_DATA_1_A_5 || []) : (AUTO_DATA_1_A_6 || []);
+    var spmData = (d.spm_list && Array.isArray(d.spm_list) && d.spm_list.length > 0) ? d.spm_list : 
+                  (Array.isArray(autoSource) && autoSource.length > 0 ? autoSource : []);
+
     var html = 
-      '<div style="overflow-x:auto;">' +
-      '<table class="excel-grid-table" id="wsTable_SPM" style="min-width: 850px;">' +
+      '<div style="overflow-x:auto; padding-bottom:12px;">' +
+      '<table class="excel-grid-table" id="wsTable_SPM" style="min-width: 1250px; font-size: 13px;">' +
         '<thead>' +
           '<tr>' +
-            '<th class="excel-row-num" style="width: 45px; text-align:center;">No</th>' +
-            '<th class="th-green" style="width: 25%;">6 Bidang SPM (PP 2/2018)</th>' +
-            '<th class="th-amber" style="width: 35%;">Indikator SPM di Daerah</th>' +
-            (isTarget ? '<th class="th-blue" style="width: 14%;">Target</th><th class="th-blue" style="width: 12%;">Satuan</th>' : '') +
-            '<th class="th-green" style="width: 14%;">Nilai Keselarasan</th>' +
-            '<th class="th-gray" style="width: 50px;">Aksi</th>' +
+            '<th rowspan="2" class="th-green" style="width: 200px; min-width: 200px; vertical-align: middle; font-size: 13.5px; padding: 12px 10px;">PP No. 2 Tahun 2018 tentang SPM<br><small style="font-weight:600; font-size:12px; color:#14532d;">Nasional</small></th>' +
+            '<th rowspan="2" class="th-blue" style="width: 200px; min-width: 200px; vertical-align: middle; font-size: 13.5px; padding: 12px 10px;">' + (is1a5 ? 'RPJMD' : 'RKPD') + '<br><small style="font-weight:600; font-size:12px; color:#1e3a8a;">Bidang SPM Daerah</small></th>' +
+            '<th rowspan="2" class="th-blue" style="width: 280px; min-width: 280px; vertical-align: middle; font-size: 13.5px; padding: 12px 10px;">Indikator SPM</th>' +
+            '<th colspan="2" class="th-blue" style="vertical-align: middle; font-size: 13.5px; padding: 10px 8px;">Target ' + (is1a5 ? 'RPJMD' : 'RKPD') + '</th>' +
+            '<th rowspan="2" class="th-green" style="width: 130px; min-width: 130px; vertical-align: middle; font-size: 13.5px; padding: 12px 10px;">Nilai Keselarasan<br><small style="font-size:11px;">(0% / 50% / 100%)</small></th>' +
+            '<th rowspan="2" class="th-amber" style="width: 240px; min-width: 240px; vertical-align: middle; font-size: 13.5px; padding: 12px 10px;">Keterangan</th>' +
+            '<th rowspan="2" class="th-green" style="width: 130px; min-width: 130px; vertical-align: middle; font-size: 13.5px; padding: 12px 10px; background:#dcfce7; color:#15803d; border: 2px solid #86efac;">Nilai Keselarasan per Bidang</th>' +
+          '</tr>' +
+          '<tr>' +
+            '<th class="th-blue" style="width: 85px; min-width: 85px; font-size: 12.5px; padding: 8px 6px;">Target</th>' +
+            '<th class="th-blue" style="width: 85px; min-width: 85px; font-size: 12.5px; padding: 8px 6px;">Satuan</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>';
 
-    var rowCounter = 1;
-    spmList.forEach(function(bid, bidIdx){
-      var indCount = bid.ind_list && bid.ind_list.length > 0 ? bid.ind_list.length : 1;
-      (bid.ind_list || [{ name: '', target: '100%', unit: 'Persen', score: 1.0 }]).forEach(function(ind, indIdx){
+    if (!spmData || spmData.length === 0){
+      return html + '<tr><td colspan="7" style="text-align: center; padding: 35px 20px; color: #64748b; font-size: 14px; background: #f8fafc;"><i class="fa fa-info-circle" style="margin-right: 8px; color: #3b82f6; font-size: 16px;"></i>Belum ada data SPM pada dokumen perencanaan terkait. Data akan otomatis terisi saat data diinputkan pada menu terkait.</td></tr></tbody></table></div>';
+    }
+
+    spmData.forEach(function(bid, bidIdx){
+      var indList = (bid.ind_list && bid.ind_list.length > 0) ? bid.ind_list : [{ no: 1, name: 'Indikator...', target: '-', unit: 'Persen', score: 0.50 }];
+      var indCount = indList.length;
+
+      indList.forEach(function(ind, indIdx){
         html += 
-          '<tr class="ws-spm-row" data-bid-idx="' + bidIdx + '" data-ind-idx="' + indIdx + '">' +
-            '<td class="excel-row-num">' + (rowCounter++) + '</td>';
+          '<tr class="ws-spm-row" data-bid-idx="' + bidIdx + '" data-ind-idx="' + indIdx + '" data-bid-title="' + escapeHtml(bid.bidang_daerah || bid.bidang_nasional || '') + '" data-bid-nasional="' + escapeHtml(bid.bidang_nasional || '') + '">';
 
         if (indIdx === 0){
           html += 
-            '<td rowspan="' + indCount + '" class="cell-spm-bid-wrap" style="vertical-align:top; background:#f0fdf4; font-weight:700; color:#065f46;">' +
-              escapeHtml(bid.bidang) +
-              '<br><button type="button" class="btn-add-ind-spm" data-bid-idx="' + bidIdx + '" style="font-size:10.5px; padding:3px 7px; background:#e2efda; border:1px dashed #107c41; border-radius:4px; cursor:pointer; color:#065f46; margin-top:6px; font-weight:700;"><i class="fa fa-plus"></i> Tambah Indikator</button>' +
+            '<td rowspan="' + indCount + '" style="vertical-align: top; font-weight: 700; color: #166534; background: #f0fdf4; font-size: 13.5px; padding: 12px 10px; line-height: 1.55;">' +
+              escapeHtml(bid.bidang_nasional || '') +
+            '</td>';
+
+          html += 
+            '<td rowspan="' + indCount + '" style="vertical-align: top; font-weight: 700; color: #1e3a8a; background: #f0f7ff; font-size: 13.5px; padding: 12px 10px; line-height: 1.55;">' +
+              escapeHtml(bid.bidang_daerah || '') +
             '</td>';
         }
 
         html += 
-            '<td><input type="text" class="calc-inp ind-name-inp" value="' + escapeHtml(ind.name) + '" placeholder="Indikator SPM..."></td>';
-
-        if (isTarget){
-          html += 
-            '<td><input type="text" class="calc-inp ind-target-inp" value="' + escapeHtml(ind.target) + '" placeholder="Target (e.g. 100% / -)"></td>' +
-            '<td><input type="text" class="ind-unit-inp" value="' + escapeHtml(ind.unit || 'Persen') + '"></td>';
-        }
+          '<td style="vertical-align: middle; padding: 10px 12px; font-size: 13px; line-height: 1.55; color: #1e293b;">' +
+            '<span class="ind-name-text" style="font-weight: 500;">' + escapeHtml(ind.name || '') + '</span>' +
+          '</td>';
 
         html += 
-            '<td>' +
-              '<select class="calc-inp ind-score-sel">' +
-                '<option value="1.0"' + (ind.score == 1.0 || ind.score === undefined ? ' selected' : '') + '>100% (Iya / Sesuai)</option>' +
-                '<option value="0.5"' + (ind.score == 0.5 ? ' selected' : '') + '>50% (Tidak / Sebagian)</option>' +
-              '</select>' +
-            '</td>';
+          '<td style="text-align: center; vertical-align: middle; padding: 6px 8px;">' +
+            '<input type="text" class="calc-inp ind-target-inp" value="' + escapeHtml(ind.target || '-') + '" style="text-align: center; font-weight: 700; font-size: 13px; height: 38px; padding: 6px 8px; border-radius: 6px;">' +
+          '</td>';
+
+        html += 
+          '<td style="text-align: center; vertical-align: middle; padding: 6px 8px;">' +
+            '<input type="text" class="calc-inp ind-unit-inp" value="' + escapeHtml(ind.unit || 'Persen') + '" style="text-align: center; font-size: 13px; font-weight: 600; height: 38px; padding: 6px 8px; border-radius: 6px;">' +
+          '</td>';
+
+        var curScore = (ind.score !== null && ind.score !== undefined) ? parseFloat(ind.score) : 0.50;
+        html += 
+          '<td style="text-align: center; vertical-align: middle; padding: 6px 8px;">' +
+            '<select class="calc-inp ind-score-sel" style="text-align: center; font-weight: 700; font-size: 13px; height: 38px; padding: 6px 8px; border-radius: 6px; background: #ffffff; cursor: pointer;">' +
+              '<option value="1.00"' + (curScore === 1.0 ? ' selected' : '') + '>100% (Selaras)</option>' +
+              '<option value="0.50"' + (curScore === 0.5 ? ' selected' : '') + '>50% (Sebagian)</option>' +
+              '<option value="0.00"' + (curScore === 0.0 ? ' selected' : '') + '>0% (Tidak)</option>' +
+            '</select>' +
+          '</td>';
 
         if (indIdx === 0){
           html += 
-            '<td style="text-align:center;"></td>';
-        } else {
+            '<td rowspan="' + indCount + '" style="vertical-align: top; padding: 10px 8px;">' +
+              '<textarea class="calc-inp ind-ket-inp" rows="6" style="resize: vertical; font-size: 12.5px; line-height: 1.5; padding: 8px 10px; border-radius: 6px; min-height: 110px;">' + escapeHtml(bid.keterangan || 'Terdapat Indikator SPM Daerah yang selaras dengan Bidang SPM Nasional dan Daerah terkait') + '</textarea>' +
+            '</td>';
+
           html += 
-            '<td style="text-align:center;"><button type="button" class="btn-del-ind-spm" data-bid-idx="' + bidIdx + '" data-ind-idx="' + indIdx + '" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus Indikator"><i class="fa fa-times"></i></button></td>';
+            '<td rowspan="' + indCount + '" style="vertical-align: middle; text-align: center; padding: 10px 8px; background: #f0fdf4;">' +
+              '<span class="bid-avg badge-verif-pill" data-bid-idx="' + bidIdx + '" style="font-size: 14px; font-weight: 800; padding: 8px 14px; border-radius: 6px; font-family: \'Roboto Mono\', monospace; background: #dcfce7; color: #15803d; border: 1.5px solid #86efac;">100%</span>' +
+            '</td>';
         }
 
         html += '</tr>';
@@ -3000,9 +3141,225 @@ tr.type-sub:hover td {
       '</div>';
 
     return html;
-  }
+}
 
   // 9. Sheet 1.b.8.a (TPT) & 1.b.8.b (TK) (RKP vs RKPD)
+      // 9.a Sheet 1.b.10.a (Tingkat Pengangguran Terbuka TPT RKP vs RKPD) - Tampilan Ringkas sampai Nilai Keselarasan
+  function renderWs_1_b_10_a(d, maxBobot){
+    d = d || {};
+    var mn_real = d.mn_real !== undefined ? d.mn_real : (AUTO_DATA_1_B_10_A.mn_real || '');
+    var mn_tgt  = d.mn_target !== undefined ? d.mn_target : (AUTO_DATA_1_B_10_A.mn_target || '');
+    var md_real = d.md_real !== undefined ? d.md_real : (AUTO_DATA_1_B_10_A.md_real || '');
+    var md_tgt  = d.md_target !== undefined ? d.md_target : (AUTO_DATA_1_B_10_A.md_target || '');
+
+    var html = 
+      '<div style="overflow-x:auto; padding-bottom:12px;">' +
+      '<table class="excel-grid-table" id="wsTable_1_b_10_a" style="min-width: 1650px; font-size: 13px;">' +
+        '<thead>' +
+          '<tr>' +
+            '<th colspan="5" class="th-blue" style="font-size: 13.5px; font-weight: 700; padding: 10px; background: #e0f2fe; color: #0369a1; text-align: center; border-right: 2px solid #0284c7;">RKP</th>' +
+            '<th colspan="5" class="th-amber" style="font-size: 13.5px; font-weight: 700; padding: 10px; background: #fef3c7; color: #92400e; text-align: center; border-right: 2px solid #d97706;">RKPD</th>' +
+            '<th rowspan="3" style="width: 120px; min-width: 120px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #f4cccc; color: #000000; text-align: center; padding: 8px;">Cek Target Realisasi 2023<br><i>(Margin Hitung)</i></th>' +
+            '<th rowspan="3" style="width: 120px; min-width: 120px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #f4cccc; color: #000000; text-align: center; padding: 8px;">Cek Target Realisasi 2023<br><i>(Keterangan)</i></th>' +
+            '<th rowspan="3" style="width: 120px; min-width: 120px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #f4cccc; color: #000000; text-align: center; padding: 8px;">Nilai Keselarasan Target Realisasi 2023</th>' +
+            '<th rowspan="3" style="width: 125px; min-width: 125px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;">Cek Target Tahun 2024<br><i>(Margin Hitung)</i></th>' +
+            '<th rowspan="3" style="width: 125px; min-width: 125px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;">Cek Target Tahun 2024<br><i>(Keterangan)</i></th>' +
+            '<th rowspan="3" style="width: 125px; min-width: 125px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;">Nilai Keselarasan Target Tahun 2024</th>' +
+            '<th rowspan="3" style="width: 130px; min-width: 130px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;">Cek <i>Gap</i> Target 2023 dan 2024<br><i>(Margin Hitung)</i></th>' +
+            '<th rowspan="3" style="width: 130px; min-width: 130px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;"><i>Cek</i> Gap Target 2023 dan 2024<br><i>(Keterangan)</i></th>' +
+            '<th rowspan="3" style="width: 125px; min-width: 125px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;">Nilai Keselarasan <i>Gap</i> Target</th>' +
+            '<th rowspan="3" style="width: 130px; min-width: 130px; vertical-align: middle; font-size: 13px; font-weight: 800; background: #dcfce7; color: #15803d; text-align: center; padding: 8px; border: 2px solid #86efac;">Nilai Keselarasan Rata-rata</th>' +
+          '</tr>' +
+          '<tr>' +
+            '<th rowspan="2" class="th-blue" style="width: 220px; min-width: 220px; vertical-align: middle; font-size: 13px; padding: 8px;">Indikator Makro</th>' +
+            '<th colspan="3" class="th-blue" style="vertical-align: middle; font-size: 13px; padding: 6px;">Nilai</th>' +
+            '<th rowspan="2" class="th-blue" style="width: 80px; min-width: 80px; vertical-align: middle; font-size: 13px; padding: 8px; border-right: 2px solid #0284c7;">Satuan</th>' +
+            '<th rowspan="2" class="th-amber" style="width: 220px; min-width: 220px; vertical-align: middle; font-size: 13px; padding: 8px;">Indikator Makro</th>' +
+            '<th colspan="3" class="th-amber" style="vertical-align: middle; font-size: 13px; padding: 6px;">Nilai</th>' +
+            '<th rowspan="2" class="th-amber" style="width: 80px; min-width: 80px; vertical-align: middle; font-size: 13px; padding: 8px; border-right: 2px solid #d97706;">Satuan</th>' +
+          '</tr>' +
+          '<tr>' +
+            '<th class="th-blue" style="width: 95px; min-width: 95px; font-size: 12px; padding: 6px;">Realisasi (2024)</th>' +
+            '<th class="th-blue" style="width: 95px; min-width: 95px; font-size: 12px; padding: 6px;">Target Tahun Terakhir (2026)</th>' +
+            '<th class="th-blue" style="width: 85px; min-width: 85px; font-size: 12px; font-style: italic; padding: 6px;">Gap</th>' +
+            '<th class="th-amber" style="width: 95px; min-width: 95px; font-size: 12px; padding: 6px;">Realisasi (2024)</th>' +
+            '<th class="th-amber" style="width: 95px; min-width: 95px; font-size: 12px; padding: 6px;">Target Tahun Terakhir (2026)</th>' +
+            '<th class="th-amber" style="width: 85px; min-width: 85px; font-size: 12px; font-style: italic; padding: 6px;">Gap</th>' +
+          '</tr>' +
+        '</thead>' +
+        '<tbody>' +
+          '<tr class="ws-1b10a-row">' +
+            '<td style="vertical-align: middle; font-weight: 700; color: #0369a1; background: #f0f9ff; padding: 12px 10px;">Tingkat Pengangguran Terbuka (TPT)</td>' +
+            '<td style="vertical-align: middle; text-align: center; padding: 8px 6px;">' +
+              '<input type="text" class="calc-inp rkp-real" value="' + escapeHtml(mn_real) + '" style="text-align: center; font-weight: 700; font-size: 13.5px; height: 38px; border-radius: 6px; background: #f8fafc;">' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center; padding: 8px 6px;">' +
+              '<input type="text" class="calc-inp rkp-tgt" value="' + escapeHtml(mn_tgt) + '" style="text-align: center; font-weight: 700; font-size: 13.5px; height: 38px; border-radius: 6px; background: #f8fafc;">' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center; padding: 8px 6px; background: #f1f5f9;">' +
+              '<span class="cell-formula rkp-gap" style="font-weight: 800; font-size: 13.5px; color: #1e293b;">-0.47</span>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center; font-weight: 600; color: #475569; border-right: 2px solid #0284c7;">Persen</td>' +
+            '<td style="vertical-align: middle; font-weight: 700; color: #92400e; background: #fffbeb; padding: 12px 10px;">Tingkat Pengangguran Terbuka (TPT)</td>' +
+            '<td style="vertical-align: middle; text-align: center; padding: 8px 6px;">' +
+              '<input type="text" class="calc-inp rkpd-real" value="' + escapeHtml(md_real) + '" style="text-align: center; font-weight: 700; font-size: 13.5px; height: 38px; border-radius: 6px; background: #ffffff;">' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center; padding: 8px 6px;">' +
+              '<input type="text" class="calc-inp rkpd-tgt" value="' + escapeHtml(md_tgt) + '" style="text-align: center; font-weight: 700; font-size: 13.5px; height: 38px; border-radius: 6px; background: #ffffff;">' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center; padding: 8px 6px; background: #f1f5f9;">' +
+              '<span class="cell-formula rkpd-gap" style="font-weight: 800; font-size: 13.5px; color: #1e293b;">-0.26</span>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center; font-weight: 600; color: #475569; border-right: 2px solid #d97706;">Persen</td>' +
+            '<td style="vertical-align: middle; text-align: center; background: #fff5f5;">' +
+              '<span class="margin-real-calc" style="font-weight: 700; font-size: 13px; color: #334155;">0.00%</span>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center; background: #fff5f5;">' +
+              '<span class="margin-real-ket" style="font-weight: 700; font-size: 13px; color: #334155;">0.00%</span>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center; background: #fff5f5;">' +
+              '<span class="badge-verif-pill score-real-val" style="font-weight: 800; font-size: 13px; padding: 6px 10px; background: #fee2e2; color: #991b1b; border-radius: 6px;">100.00%</span>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center;">' +
+              '<span class="margin-tgt-calc" style="font-weight: 700; font-size: 13px; color: #334155;">0.00%</span>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center;">' +
+              '<span class="margin-tgt-ket" style="font-weight: 700; font-size: 13px; color: #334155;">0.00%</span>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center;">' +
+              '<span class="badge-verif-pill score-tgt-val" style="font-weight: 800; font-size: 13px; padding: 6px 10px; background: #e0f2fe; color: #0369a1; border-radius: 6px;">100.00%</span>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center;">' +
+              '<span class="margin-gap-calc" style="font-weight: 700; font-size: 13px; color: #334155;">-44.68%</span>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center;">' +
+              '<span class="margin-gap-ket" style="font-weight: 700; font-size: 13px; color: #334155;">44.68%</span>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center;">' +
+              '<span class="badge-verif-pill score-gap-val" style="font-weight: 800; font-size: 13px; padding: 6px 10px; background: #fef3c7; color: #92400e; border-radius: 6px;">55.00%</span>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center; background: #f0fdf4;">' +
+              '<span class="badge-verif-pill avg-score-val" style="font-weight: 900; font-size: 14.5px; padding: 8px 14px; background: #dcfce7; color: #15803d; border-radius: 6px; border: 1.5px solid #86efac;">85.00%</span>' +
+            '</td>' +
+          '</tr>' +
+        '</tbody>' +
+      '</table>' +
+      '<div style="margin-top: 10px; padding: 10px 14px; background: #fff1f2; border: 1px solid #fecdd3; border-left: 4px solid #f43f5e; border-radius: 6px; color: #9f1239; font-size: 12.5px; font-weight: 600; font-style: italic;">' +
+        '<i class="fa fa-info-circle"></i> Tidak perlu dihitung, data realisasi hanya untuk data perhitungan Gap' +
+      '</div>' +
+      '</div>';
+
+    return html;
+  }
+
+      // 9.b Sheet 1.b.10.b (Tingkat Kemiskinan RKP vs RKPD) - Tampilan Ringkas sampai Nilai Keselarasan
+  function renderWs_1_b_10_b(d, maxBobot){
+    d = d || {};
+    var mn_real = d.mn_real !== undefined ? d.mn_real : (AUTO_DATA_1_B_10_B.mn_real || '');
+    var mn_tgt  = d.mn_target !== undefined ? d.mn_target : (AUTO_DATA_1_B_10_B.mn_target || '');
+    var md_real = d.md_real !== undefined ? d.md_real : (AUTO_DATA_1_B_10_B.md_real || '');
+    var md_tgt  = d.md_target !== undefined ? d.md_target : (AUTO_DATA_1_B_10_B.md_target || '');
+
+    var html = 
+      '<div style="overflow-x:auto; padding-bottom:12px;">' +
+      '<table class="excel-grid-table" id="wsTable_1_b_10_b" style="min-width: 1650px; font-size: 13px;">' +
+        '<thead>' +
+          '<tr>' +
+            '<th colspan="5" class="th-blue" style="font-size: 13.5px; font-weight: 700; padding: 10px; background: #e0f2fe; color: #0369a1; text-align: center; border-right: 2px solid #0284c7;">RKP</th>' +
+            '<th colspan="5" class="th-amber" style="font-size: 13.5px; font-weight: 700; padding: 10px; background: #fef3c7; color: #92400e; text-align: center; border-right: 2px solid #d97706;">RKPD</th>' +
+            '<th rowspan="3" style="width: 120px; min-width: 120px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #f4cccc; color: #000000; text-align: center; padding: 8px;">Cek Target Realisasi 2023<br><i>(Margin Hitung)</i></th>' +
+            '<th rowspan="3" style="width: 120px; min-width: 120px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #f4cccc; color: #000000; text-align: center; padding: 8px;">Cek Target Realisasi 2023<br><i>(Keterangan)</i></th>' +
+            '<th rowspan="3" style="width: 120px; min-width: 120px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #f4cccc; color: #000000; text-align: center; padding: 8px;">Nilai Keselarasan Target Realisasi 2023</th>' +
+            '<th rowspan="3" style="width: 125px; min-width: 125px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;">Cek Target Tahun 2024<br><i>(Margin Hitung)</i></th>' +
+            '<th rowspan="3" style="width: 125px; min-width: 125px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;">Cek Target Tahun 2024<br><i>(Keterangan)</i></th>' +
+            '<th rowspan="3" style="width: 125px; min-width: 125px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;">Nilai Keselarasan Target Tahun 2024</th>' +
+            '<th rowspan="3" style="width: 130px; min-width: 130px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;">Cek <i>Gap</i> Target 2023 dan 2024<br><i>(Margin Hitung)</i></th>' +
+            '<th rowspan="3" style="width: 130px; min-width: 130px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;"><i>Cek</i> Gap Target 2023 dan 2024<br><i>(Keterangan)</i></th>' +
+            '<th rowspan="3" style="width: 125px; min-width: 125px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;">Nilai Keselarasan <i>Gap</i> Target</th>' +
+            '<th rowspan="3" style="width: 130px; min-width: 130px; vertical-align: middle; font-size: 13px; font-weight: 800; background: #dcfce7; color: #15803d; text-align: center; padding: 8px; border: 2px solid #86efac;">Nilai Keselarasan Rata-rata</th>' +
+          '</tr>' +
+          '<tr>' +
+            '<th rowspan="2" class="th-blue" style="width: 220px; min-width: 220px; vertical-align: middle; font-size: 13px; padding: 8px;">Indikator Makro</th>' +
+            '<th colspan="3" class="th-blue" style="vertical-align: middle; font-size: 13px; padding: 6px;">Nilai</th>' +
+            '<th rowspan="2" class="th-blue" style="width: 80px; min-width: 80px; vertical-align: middle; font-size: 13px; padding: 8px; border-right: 2px solid #0284c7;">Satuan</th>' +
+            '<th rowspan="2" class="th-amber" style="width: 220px; min-width: 220px; vertical-align: middle; font-size: 13px; padding: 8px;">Indikator Makro</th>' +
+            '<th colspan="3" class="th-amber" style="vertical-align: middle; font-size: 13px; padding: 6px;">Nilai</th>' +
+            '<th rowspan="2" class="th-amber" style="width: 80px; min-width: 80px; vertical-align: middle; font-size: 13px; padding: 8px; border-right: 2px solid #d97706;">Satuan</th>' +
+          '</tr>' +
+          '<tr>' +
+            '<th class="th-blue" style="width: 95px; min-width: 95px; font-size: 12px; padding: 6px;">Realisasi (2024)</th>' +
+            '<th class="th-blue" style="width: 95px; min-width: 95px; font-size: 12px; padding: 6px;">Target Tahun Terakhir (2026)</th>' +
+            '<th class="th-blue" style="width: 85px; min-width: 85px; font-size: 12px; font-style: italic; padding: 6px;">Gap</th>' +
+            '<th class="th-amber" style="width: 95px; min-width: 95px; font-size: 12px; padding: 6px;">Realisasi (2024)</th>' +
+            '<th class="th-amber" style="width: 95px; min-width: 95px; font-size: 12px; padding: 6px;">Target Tahun Terakhir (2026)</th>' +
+            '<th class="th-amber" style="width: 85px; min-width: 85px; font-size: 12px; font-style: italic; padding: 6px;">Gap</th>' +
+          '</tr>' +
+        '</thead>' +
+        '<tbody>' +
+          '<tr class="ws-1b10b-row">' +
+            '<td style="vertical-align: middle; font-weight: 700; color: #0369a1; background: #f0f9ff; padding: 12px 10px;">Tingkat Kemiskinan (%)</td>' +
+            '<td style="vertical-align: middle; text-align: center; padding: 8px 6px;">' +
+              '<input type="text" class="calc-inp rkp-real" value="' + escapeHtml(mn_real) + '" style="text-align: center; font-weight: 700; font-size: 13.5px; height: 38px; border-radius: 6px; background: #f8fafc;">' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center; padding: 8px 6px;">' +
+              '<input type="text" class="calc-inp rkp-tgt" value="' + escapeHtml(mn_tgt) + '" style="text-align: center; font-weight: 700; font-size: 13.5px; height: 38px; border-radius: 6px; background: #f8fafc;">' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center; padding: 8px 6px; background: #f1f5f9;">' +
+              '<span class="cell-formula rkp-gap" style="font-weight: 800; font-size: 13.5px; color: #1e293b;">-1.07</span>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center; font-weight: 600; color: #475569; border-right: 2px solid #0284c7;">Persen</td>' +
+            '<td style="vertical-align: middle; font-weight: 700; color: #92400e; background: #fffbeb; padding: 12px 10px;">Tingkat Kemiskinan (%)</td>' +
+            '<td style="vertical-align: middle; text-align: center; padding: 8px 6px;">' +
+              '<input type="text" class="calc-inp rkpd-real" value="' + escapeHtml(md_real) + '" style="text-align: center; font-weight: 700; font-size: 13.5px; height: 38px; border-radius: 6px; background: #ffffff;">' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center; padding: 8px 6px;">' +
+              '<input type="text" class="calc-inp rkpd-tgt" value="' + escapeHtml(md_tgt) + '" style="text-align: center; font-weight: 700; font-size: 13.5px; height: 38px; border-radius: 6px; background: #ffffff;">' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center; padding: 8px 6px; background: #f1f5f9;">' +
+              '<span class="cell-formula rkpd-gap" style="font-weight: 800; font-size: 13.5px; color: #1e293b;">-0.95</span>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center; font-weight: 600; color: #475569; border-right: 2px solid #d97706;">Persen</td>' +
+            '<td style="vertical-align: middle; text-align: center; background: #fff5f5;">' +
+              '<span class="margin-real-calc" style="font-weight: 700; font-size: 13px; color: #334155;">0.00%</span>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center; background: #fff5f5;">' +
+              '<span class="margin-real-ket" style="font-weight: 700; font-size: 13px; color: #334155;">0.00%</span>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center; background: #fff5f5;">' +
+              '<span class="badge-verif-pill score-real-val" style="font-weight: 800; font-size: 13px; padding: 6px 10px; background: #fee2e2; color: #991b1b; border-radius: 6px;">100.00%</span>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center;">' +
+              '<span class="margin-tgt-calc" style="font-weight: 700; font-size: 13px; color: #334155;">0.00%</span>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center;">' +
+              '<span class="margin-tgt-ket" style="font-weight: 700; font-size: 13px; color: #334155;">0.00%</span>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center;">' +
+              '<span class="badge-verif-pill score-tgt-val" style="font-weight: 800; font-size: 13px; padding: 6px 10px; background: #e0f2fe; color: #0369a1; border-radius: 6px;">100.00%</span>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center;">' +
+              '<span class="margin-gap-calc" style="font-weight: 700; font-size: 13px; color: #334155;">-11.21%</span>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center;">' +
+              '<span class="margin-gap-ket" style="font-weight: 700; font-size: 13px; color: #334155;">11.21%</span>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center;">' +
+              '<span class="badge-verif-pill score-gap-val" style="font-weight: 800; font-size: 13px; padding: 6px 10px; background: #fef3c7; color: #92400e; border-radius: 6px;">90.00%</span>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center; background: #f0fdf4;">' +
+              '<span class="badge-verif-pill avg-score-val" style="font-weight: 900; font-size: 14.5px; padding: 8px 14px; background: #dcfce7; color: #15803d; border-radius: 6px; border: 1.5px solid #86efac;">96.67%</span>' +
+            '</td>' +
+          '</tr>' +
+        '</tbody>' +
+      '</table>' +
+      '<div style="margin-top: 10px; padding: 10px 14px; background: #fff1f2; border: 1px solid #fecdd3; border-left: 4px solid #f43f5e; border-radius: 6px; color: #9f1239; font-size: 12.5px; font-weight: 600; font-style: italic;">' +
+        '<i class="fa fa-info-circle"></i> Tidak perlu dihitung, data realisasi hanya untuk data perhitungan Gap' +
+      '</div>' +
+      '</div>';
+
+    return html;
+  }
+
   function renderWs_1_b_8(code, d, maxBobot){
     d = d || {};
     var isTpt = (code === '1.b.8.a');
@@ -3041,13 +3398,13 @@ tr.type-sub:hover td {
           '<tr class="ws-1b8-row" data-positive="0">' +
             '<td class="excel-row-num">1</td>' +
             '<td><strong>' + indName + '</strong></td>' +
-            '<td><input type="number" step="0.01" class="calc-inp rkp-real" value="' + escapeHtml(rkp_real) + '"></td>' +
-            '<td><input type="number" step="0.01" class="calc-inp rkp-tgt" value="' + escapeHtml(rkp_tgt) + '"></td>' +
+            '<td><input type="text" class="calc-inp rkp-real" value="' + escapeHtml(rkp_real) + '" style="text-align:center; font-weight:600;"></td>' +
+            '<td><input type="text" class="calc-inp rkp-tgt" value="' + escapeHtml(rkp_tgt) + '" style="text-align:center; font-weight:600;"></td>' +
             '<td class="cell-formula rkp-gap" style="text-align:center;">0.00</td>' +
             '<td style="text-align:center; font-weight:600; color:#475569;">Persen</td>' +
             '<td><strong>' + indName + '</strong></td>' +
-            '<td><input type="number" step="0.01" class="calc-inp rkpd-real" value="' + escapeHtml(rkpd_real) + '"></td>' +
-            '<td><input type="number" step="0.01" class="calc-inp rkpd-tgt" value="' + escapeHtml(rkpd_tgt) + '"></td>' +
+            '<td><input type="text" class="calc-inp rkpd-real" value="' + escapeHtml(rkpd_real) + '" style="text-align:center; font-weight:600;"></td>' +
+            '<td><input type="text" class="calc-inp rkpd-tgt" value="' + escapeHtml(rkpd_tgt) + '" style="text-align:center; font-weight:600;"></td>' +
             '<td class="cell-formula rkpd-gap" style="text-align:center;">0.00</td>' +
             '<td style="text-align:center; font-weight:600; color:#475569;">Persen</td>' +
           '</tr>' +
@@ -3058,54 +3415,146 @@ tr.type-sub:hover td {
     return html;
   }
 
-  // 10. Sheet 1.c.1 (Alokasi APBD untuk Prioritas Nasional / Major Project)
+      // 10. Sheet 1.c.1 (Alokasi APBD untuk Prioritas Nasional / Major Project) - Tampilan Ringkas sampai Nilai Keselarasan
   function renderWs_1_c_1(d, maxBobot){
     d = d || {};
-    var rows = d.rows || [
-      { pn: 'PN 1 : Memperkuat Ketahanan Ekonomi', pp_mp: 'PP 1 : Peningkatan Ketersediaan Pangan', pd: 'Program Pengelolaan Pertanian & Pangan Daerah', pagu: '45.000.000.000', score: 1.0 },
-      { pn: 'PN 3 : Meningkatkan Sumber Daya Manusia', pp_mp: 'PP 2 : Peningkatan Akses dan Mutu Pendidikan', pd: 'Program Pengelolaan Pendidikan Dasar dan Menengah', pagu: '120.000.000.000', score: 1.0 },
-      { pn: 'PN 5 : Memperkuat Infrastruktur', pp_mp: 'MP 1 : Konektivitas dan Logistik Wilayah', pd: 'Program Penyelenggaraan Jalan dan Jembatan', pagu: '85.000.000.000', score: 1.0 }
-    ];
-
+    var pnList = (d.pn_list && d.pn_list.length > 0) ? d.pn_list : (AUTO_DATA_1_C_1 && AUTO_DATA_1_C_1.length > 0 ? AUTO_DATA_1_C_1 : []);
+    
     var html = 
-      '<div style="overflow-x:auto;">' +
-      '<table class="excel-grid-table" id="wsTable_1_c_1" style="min-width: 900px;">' +
+      '<div style="overflow-x:auto; padding: 4px 0 12px 0;">' +
+      '<table class="excel-grid-table" id="wsTable_1_c_1" style="min-width: 1350px; border-collapse: collapse; font-family: \'Inter\', -apple-system, BlinkMacSystemFont, sans-serif; font-size: 13px;">' +
         '<thead>' +
           '<tr>' +
-            '<th class="excel-row-num" style="width: 45px; text-align:center;">No</th>' +
-            '<th class="th-blue" style="width: 25%;">Prioritas Nasional (RKP)</th>' +
-            '<th class="th-blue" style="width: 25%;">Program Prioritas (PP) / Major Project (MP)</th>' +
-            '<th class="th-amber" style="width: 25%;">Dukungan Program Daerah (RKPD)</th>' +
-            '<th class="th-amber" style="width: 15%;">Pagu Indikatif APBD (Rp)</th>' +
-            '<th class="th-green" style="width: 10%;">Keselarasan</th>' +
-            '<th class="th-gray" style="width: 45px;">Aksi</th>' +
+            '<th class="excel-row-num" rowspan="2" style="width: 45px; text-align:center; vertical-align: middle; background:#f1f5f9; border:1px solid #94a3b8; font-weight:700;">No</th>' +
+            '<th class="th-blue" colspan="2" style="text-align:center; vertical-align: middle; font-weight:700; background: #e0f2fe; color: #0369a1; border: 1px solid #94a3b8; padding: 9px 8px; font-size: 13.5px;">RKP</th>' +
+            '<th class="th-amber" colspan="2" style="text-align:center; vertical-align: middle; font-weight:700; background: #fef3c7; color: #b45309; border: 1px solid #94a3b8; padding: 9px 8px; font-size: 13.5px;">RKPD</th>' +
+            '<th class="th-green" rowspan="2" style="width: 140px; text-align:center; vertical-align: middle; font-weight:700; background: #dcfce7; color: #15803d; border: 1px solid #94a3b8; padding: 8px;">Nilai Keselarasan<br><span style="font-size:11px; font-weight:500;">(0% / 100%)</span></th>' +
+            '<th class="th-gray" rowspan="2" style="width: 320px; text-align:center; vertical-align: middle; font-weight:700; background: #f1f5f9; color: #334155; border: 1px solid #94a3b8; padding: 8px;">Keterangan</th>' +
+            '<th class="th-green" rowspan="2" style="width: 130px; text-align:center; vertical-align: middle; font-weight:700; background: #dcfce7; color: #15803d; border: 1px solid #94a3b8; padding: 8px;">Nilai Keselarasan</th>' +
+            '<th class="th-gray" rowspan="2" style="width: 50px; text-align:center; vertical-align: middle; font-weight:700; background: #f1f5f9; color: #334155; border: 1px solid #94a3b8; padding: 8px;">Aksi</th>' +
+          '</tr>' +
+          '<tr>' +
+            '<th class="th-blue" style="width: 230px; text-align:center; vertical-align: middle; font-weight:700; background: #f0f9ff; color: #0369a1; border: 1px solid #94a3b8; padding: 8px;">Prioritas Pembangunan Nasional</th>' +
+            '<th class="th-blue" style="width: 270px; text-align:center; vertical-align: middle; font-weight:700; background: #f0f9ff; color: #0369a1; border: 1px solid #94a3b8; padding: 8px;">Kegiatan Prioritas Utama (KPU)</th>' +
+            '<th class="th-amber" style="width: 340px; text-align:center; vertical-align: middle; font-weight:700; background: #fffbeb; color: #b45309; border: 1px solid #94a3b8; padding: 8px;">Dukungan Program Pembangunan Daerah</th>' +
+            '<th class="th-amber" style="width: 190px; text-align:center; vertical-align: middle; font-weight:700; background: #fffbeb; color: #b45309; border: 1px solid #94a3b8; padding: 8px;">Pagu Indikatif APBD (Rp.)</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>';
 
-    rows.forEach(function(r, idx){
-      html += 
-        '<tr class="ws-1c1-row">' +
-          '<td class="excel-row-num">' + (idx + 1) + '</td>' +
-          '<td><input type="text" class="calc-inp pn-inp" value="' + escapeHtml(r.pn) + '" placeholder="Prioritas Nasional..."></td>' +
-          '<td><input type="text" class="calc-inp pp-inp" value="' + escapeHtml(r.pp_mp) + '" placeholder="PP / Major Project..."></td>' +
-          '<td><input type="text" class="calc-inp pd-inp" value="' + escapeHtml(r.pd) + '" placeholder="Program Daerah..."></td>' +
-          '<td><input type="text" class="calc-inp pagu-inp" value="' + escapeHtml(r.pagu) + '" placeholder="Rp..."></td>' +
-          '<td>' +
-            '<select class="calc-inp score-sel">' +
-              '<option value="1.0"' + (r.score == 1.0 || r.score === undefined ? ' selected' : '') + '>100% (Tersedia)</option>' +
-              '<option value="0.5"' + (r.score == 0.5 ? ' selected' : '') + '>50% (Sebagian)</option>' +
-              '<option value="0"' + (r.score == 0 ? ' selected' : '') + '>0% (Belum Tersedia)</option>' +
-            '</select>' +
-          '</td>' +
-          '<td style="text-align:center;"><button type="button" class="btn-del-1c1-row" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus Baris"><i class="fa fa-times"></i></button></td>' +
-        '</tr>';
+    if (!pnList || pnList.length === 0){
+      return html + '<tr><td colspan="9" style="text-align: center; padding: 35px 20px; color: #64748b; font-size: 14px; background: #f8fafc;"><i class="fa fa-info-circle" style="margin-right: 8px; color: #3b82f6; font-size: 16px;"></i>Belum ada data Alokasi APBD untuk Prioritas Nasional / Major Project pada menu terkait (dukungan KPU APBD). Data akan otomatis terisi saat data diinputkan pada menu terkait.</td></tr></tbody></table></div>';
+    }
+
+    var globalRowNumber = 1;
+
+    pnList.forEach(function(pn, pnIdx){
+      var pnRowspan = 0;
+      if (pn.kpu_list){
+        pn.kpu_list.forEach(function(k){
+          var subLen = (k.subs && k.subs.length > 0) ? k.subs.length : 1;
+          pnRowspan += subLen;
+        });
+      }
+      if (pnRowspan === 0) pnRowspan = 1;
+
+      var isFirstPnRow = true;
+
+      if (pn.kpu_list && pn.kpu_list.length > 0){
+        pn.kpu_list.forEach(function(kpu, kpuIdx){
+          var subList = (kpu.subs && kpu.subs.length > 0) ? kpu.subs : [{ sub_kegiatan: '', pagu: '', score: 1.0 }];
+          var kpuRowspan = subList.length;
+          var isFirstKpuRow = true;
+
+          subList.forEach(function(sub, subIdx){
+            html += 
+              '<tr class="ws-1c1-sub-row" data-pn-idx="' + pnIdx + '" data-kpu-idx="' + kpuIdx + '" data-sub-idx="' + subIdx + '" style="background:#ffffff; border-bottom:1px solid #e2e8f0;">';
+
+            // No Baris
+            html += '<td class="excel-row-num" style="text-align:center; vertical-align:middle; background:#f8fafc; font-weight:600; border:1px solid #cbd5e1;">' + (globalRowNumber++) + '</td>';
+
+            // Col A: Prioritas Pembangunan Nasional (Rowspan per PN)
+            if (isFirstPnRow){
+              html += 
+                '<td rowspan="' + pnRowspan + '" style="vertical-align: top; padding: 12px 10px; font-weight: 700; color: #1e3a8a; background: #f8fafc; border: 1px solid #cbd5e1; line-height: 1.45;">' +
+                  escapeHtml(pn.pn_nama || ('Prioritas Nasional ' + (pnIdx + 1))) +
+                '</td>';
+              isFirstPnRow = false;
+            }
+
+            // Col B: Kegiatan Prioritas Utama (KPU) (Rowspan per KPU)
+            if (isFirstKpuRow){
+              html += 
+                '<td rowspan="' + kpuRowspan + '" style="vertical-align: top; padding: 12px 10px; font-weight: 600; color: #0f172a; background: #ffffff; border: 1px solid #cbd5e1; line-height: 1.45;">' +
+                  escapeHtml(kpu.kpu_nama || '-') +
+                '</td>';
+            }
+
+            // Col C: Dukungan Program Pembangunan Daerah (Per Subkegiatan)
+            html += 
+              '<td style="vertical-align: middle; padding: 6px 8px; border: 1px solid #cbd5e1;">' +
+                '<input type="text" class="calc-inp ws-1c1-sub-inp" value="' + escapeHtml(sub.sub_kegiatan || '') + '" placeholder="Kode & Nama Sub Kegiatan..." style="width: 100%; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 8px; font-size: 12.5px; line-height: 1.4;">' +
+              '</td>';
+
+            // Col D: Pagu Indikatif APBD (Rp.) (Per Subkegiatan)
+            html += 
+              '<td style="vertical-align: middle; padding: 6px 8px; border: 1px solid #cbd5e1;">' +
+                '<input type="text" class="calc-inp ws-1c1-pagu-inp" value="' + escapeHtml(sub.pagu || '') + '" placeholder="0,00" style="width: 100%; text-align: right; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 8px; font-size: 12.5px; font-weight: 600; color: #0f172a;">' +
+              '</td>';
+
+            // Col E: Nilai Keselarasan (0% / 100%) (Per Subkegiatan)
+            var subScore = (sub.score !== undefined && sub.score !== null) ? parseFloat(sub.score) : 1.0;
+            html += 
+              '<td style="vertical-align: middle; text-align: center; padding: 6px 8px; border: 1px solid #cbd5e1;">' +
+                '<select class="calc-inp ws-1c1-score-sel" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 4px; font-size: 12px; font-weight: 600; text-align: center; background: #f0fdf4; color: #166534; cursor: pointer;">' +
+                  '<option value="1.0"' + (subScore === 1.0 ? ' selected' : '') + '>100.00%</option>' +
+                  '<option value="0.0"' + (subScore === 0.0 ? ' selected' : '') + '>0.00%</option>' +
+                '</select>' +
+              '</td>';
+
+            // Kolom Rowspan per KPU (Col F & Col G)
+            if (isFirstKpuRow){
+              // Col F: Keterangan
+              var defaultKet = "Terdapat Dukungan APBD pada Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional / Major Project terkait";
+              html += 
+                '<td rowspan="' + kpuRowspan + '" style="vertical-align: middle; padding: 10px; font-size: 12px; line-height: 1.45; color: #334155; border: 1px solid #cbd5e1; background: #ffffff;">' +
+                  escapeHtml(kpu.keterangan || defaultKet) +
+                '</td>';
+
+              // Col G: Nilai Keselarasan (100%)
+              html += 
+                '<td rowspan="' + kpuRowspan + '" style="vertical-align: middle; text-align: center; padding: 8px; border: 1px solid #cbd5e1; background: #ffffff;">' +
+                  '<div style="font-weight: 800; color: #15803d; background: #dcfce7; padding: 6px 8px; border-radius: 6px; font-size: 13px; border: 1px solid #86efac;">100%</div>' +
+                '</td>';
+
+              isFirstKpuRow = false;
+            }
+
+            // Tombol Aksi per Subkegiatan
+            html += 
+              '<td style="text-align:center; vertical-align:middle; border:1px solid #cbd5e1; padding:4px;">' +
+                '<button type="button" class="btn-del-1c1-sub" style="border:none; background:transparent; color:#ef4444; cursor:pointer; font-size:14px;" title="Hapus Sub Kegiatan"><i class="fa fa-trash"></i></button>' +
+              '</td>';
+
+            html += '</tr>';
+          });
+        });
+      }
     });
 
     html += 
         '</tbody>' +
       '</table>' +
-      '<button type="button" class="btn-excel-add-row" id="btnAdd1c1Row"><i class="fa fa-plus"></i> Tambah Alokasi Program APBD</button>' +
+      
+      '<div style="margin-top: 16px; padding: 14px 18px; background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">' +
+        '<div style="font-size: 13.5px; font-weight: 600; color: #334155; display: flex; align-items: center; gap: 8px;">' +
+          '<i class="fa fa-info-circle" style="color: #0284c7; font-size: 16px;"></i>' +
+          '<span>Dukungan Sub Kegiatan & Pagu APBD ditarik dinamis dari dokumen RKPD daerah.</span>' +
+        '</div>' +
+        '<div>' +
+          '<button type="button" class="btn btn-sm btn-primary" id="btnAdd1c1SubRow" style="border-radius: 6px; font-weight: 600; font-size: 12.5px; padding: 6px 14px;"><i class="fa fa-plus"></i> Tambah Sub Kegiatan</button>' +
+        '</div>' +
+      '</div>' +
       '</div>';
 
     return html;
@@ -3197,11 +3646,11 @@ tr.type-sub:hover td {
         '<tr class="ws-3a1b-row">' +
           '<td class="excel-row-num">' + (idx + 1) + '</td>' +
           '<td><input type="text" class="calc-inp ind-daerah" value="' + escapeHtml(r.ind_daerah) + '" placeholder="Indikator Daerah..."></td>' +
-          '<td><input type="number" step="0.01" class="calc-inp tgt-daerah" value="' + escapeHtml(r.target_daerah) + '"></td>' +
+          '<td><input type="text" class="calc-inp tgt-daerah" value="' + escapeHtml(r.target_daerah) + '" style="text-align:center; font-weight:600;"></td>' +
           '<td><input type="text" class="calc-inp unit-daerah" value="' + escapeHtml(r.unit_daerah) + '"></td>' +
           '<td><input type="text" class="calc-inp opd-name" value="' + escapeHtml(r.opd) + '" placeholder="OPD..."></td>' +
           '<td><input type="text" class="calc-inp iku-opd" value="' + escapeHtml(r.iku_opd) + '" placeholder="IKU OPD..."></td>' +
-          '<td><input type="number" step="0.01" class="calc-inp tgt-opd" value="' + escapeHtml(r.target_opd) + '"></td>' +
+          '<td><input type="text" class="calc-inp tgt-opd" value="' + escapeHtml(r.target_opd) + '" style="text-align:center; font-weight:600;"></td>' +
           '<td><input type="text" class="calc-inp unit-opd" value="' + escapeHtml(r.unit_opd) + '"></td>' +
           '<td>' +
             '<select class="calc-inp ekspektasi-sel">' +
@@ -3282,6 +3731,8 @@ tr.type-sub:hover td {
     if (code === '1.a.3.a' || code === '1.a.3.b') return renderWs_1_a_3(code, detailData, maxBobot);
     if (code === '1.a.4') return renderWs_1_a_4(detailData, maxBobot);
     if (code === '1.a.5' || code === '1.a.6') return renderWs_SPM(code, detailData, maxBobot);
+    if (code === '1.b.10.a') return renderWs_1_b_10_a(detailData, maxBobot);
+    if (code === '1.b.10.b') return renderWs_1_b_10_b(detailData, maxBobot);
     if (code === '1.b.8.a' || code === '1.b.8.b') return renderWs_1_b_8(code, detailData, maxBobot);
     if (code === '1.c.1') return renderWs_1_c_1(detailData, maxBobot);
     if (code === '3.a.1.a') return renderWs_3_a_1_a(detailData, maxBobot);
@@ -3395,7 +3846,7 @@ tr.type-sub:hover td {
         }
       });
 
-      computedFinalScore = pnCount > 0 ? (allTerbobotSum / pnCount) : maxBobot;
+      computedFinalScore = pnCount > 0 ? (allTerbobotSum / pnCount) : 0;
       var elGrand = document.getElementById("ws1a1cGrandTerbobot");
       if (elGrand) elGrand.textContent = numFmt(computedFinalScore);
       if (excelFxContent) excelFxContent.textContent = "";
@@ -3506,38 +3957,40 @@ tr.type-sub:hover td {
       }
     }
 
-    // 7. Sheet 1.a.4 (Major Project)
+    // 7. Sheet 1.a.4 (KPU RPJMN vs Dukungan Program Daerah RPJMD) Sesuai Rumus Rata-rata Terbobot KPU
     else if (code === '1.a.4'){
-      var mpGroups = {};
-      document.querySelectorAll("#wsTable_1_a_4 .ws-mp-row").forEach(function(row){
-        var mpIdx = row.getAttribute("data-mp-idx");
-        if (!mpGroups[mpIdx]) mpGroups[mpIdx] = [];
-        var scoreSel = row.querySelector(".pd-score-sel");
-        mpGroups[mpIdx].push(scoreSel ? parseFloat(scoreSel.value) : 1.0);
+      var kpuGroups = {};
+      document.querySelectorAll("#wsTable_1_a_4 .ws-1a4-row").forEach(function(row){
+        var kpuIdx = row.getAttribute("data-kpu-idx");
+        if (!kpuGroups[kpuIdx]) kpuGroups[kpuIdx] = [];
+        var scoreSel = row.querySelector(".kpu-score-sel");
+        kpuGroups[kpuIdx].push(scoreSel ? parseFloat(scoreSel.value) : 0.50);
       });
 
-      var allMpSum = 0;
-      var mpCount = 0;
-      Object.keys(mpGroups).forEach(function(mpIdx){
-        var scores = mpGroups[mpIdx];
-        var avg = scores.reduce(function(a,b){return a+b;},0) / scores.length;
-        var terbobot = avg * maxBobot;
-        allMpSum += terbobot;
-        mpCount++;
+      var allKpuSum = 0;
+      var kpuCount = 0;
+      Object.keys(kpuGroups).forEach(function(kpuIdx){
+        var scores = kpuGroups[kpuIdx];
+        var avg = scores.length > 0 ? (scores.reduce(function(a,b){return a+b;},0) / scores.length) : 0.50;
+        allKpuSum += avg;
+        kpuCount++;
 
-        var firstRow = document.querySelector('#wsTable_1_a_4 .ws-mp-row[data-mp-idx="' + mpIdx + '"]');
-        if (firstRow){
-          var avgCell = firstRow.querySelector(".mp-avg");
-          var terbCell = firstRow.querySelector(".mp-terbobot");
-          if (avgCell) avgCell.textContent = (avg * 100).toFixed(0) + "%";
-          if (terbCell) terbCell.textContent = numFmt(terbobot);
+        var avgCell = document.querySelector('#wsTable_1_a_4 .kpu-avg[data-kpu-idx="' + kpuIdx + '"]');
+        if (avgCell){
+          avgCell.textContent = avg.toFixed(2);
         }
       });
 
-      computedFinalScore = mpCount > 0 ? (allMpSum / mpCount) : maxBobot;
+      var grandAvg = kpuCount > 0 ? (allKpuSum / kpuCount) : 0;
+      computedFinalScore = grandAvg * maxBobot;
+
       var elGrand = document.getElementById("ws1a4GrandTerbobot");
-      if (elGrand) elGrand.textContent = numFmt(computedFinalScore);
-      if (excelFxContent) excelFxContent.textContent = "";
+      if (elGrand) elGrand.textContent = grandAvg.toFixed(2);
+
+      modalBobotInput.value = computedFinalScore.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
+      modalCalcDisplay.textContent = numFmt(modalBobotInput.value);
+      syncExcelScoreUI(modalBobotInput.value, maxBobot);
+      if (excelFxContent) excelFxContent.textContent = "Rata-rata Keselarasan Terbobot KPU = " + grandAvg.toFixed(2) + " x Bobot Maksimal (" + maxBobot + ") = " + numFmt(computedFinalScore);
     }
 
     // 8. Sheet 1.a.5 & 1.a.6 (SPM)
@@ -3565,11 +4018,63 @@ tr.type-sub:hover td {
         }
       });
 
-      var grandAvg = bidCount > 0 ? (allBidSum / bidCount) : 1.0;
+      var grandAvg = bidCount > 0 ? (allBidSum / bidCount) : 0;
       computedFinalScore = grandAvg * maxBobot;
       var elGrand = document.getElementById("wsSpmGrandTerbobot");
       if (elGrand) elGrand.textContent = numFmt(computedFinalScore);
       if (excelFxContent) excelFxContent.textContent = "";
+    }
+
+    // 9. Sheet 1.b.10.a & 1.b.10.b (TPT & Kemiskinan RKP vs RKPD Makro)
+    else if (code === '1.b.10.a' || code === '1.b.10.b'){
+      var tblId = code === '1.b.10.a' ? 'wsTable_1_b_10_a' : 'wsTable_1_b_10_b';
+      var row = document.querySelector("#" + tblId + " tbody tr");
+      if (row){
+        var rkRealVal = row.querySelector(".rkp-real") ? row.querySelector(".rkp-real").value.trim() : "";
+        var rkTgtVal  = row.querySelector(".rkp-tgt") ? row.querySelector(".rkp-tgt").value.trim() : "";
+        var rdRealVal = row.querySelector(".rkpd-real") ? row.querySelector(".rkpd-real").value.trim() : "";
+        var rdTgtVal  = row.querySelector(".rkpd-tgt") ? row.querySelector(".rkpd-tgt").value.trim() : "";
+
+        var hasAnyVal = (rkRealVal !== "" || rkTgtVal !== "" || rdRealVal !== "" || rdTgtVal !== "");
+        var rReal = parseFloat(rkRealVal) || 0;
+        var rTgt  = parseFloat(rkTgtVal) || 0;
+        var dReal = parseFloat(rdRealVal) || 0;
+        var dTgt  = parseFloat(rdTgtVal) || 0;
+
+        var rGap = rTgt - rReal;
+        var dGap = dTgt - dReal;
+        var elRGap = row.querySelector(".rkp-gap"); if (elRGap) elRGap.textContent = hasAnyVal ? rGap.toFixed(2) : "-";
+        var elDGap = row.querySelector(".rkpd-gap"); if (elDGap) elDGap.textContent = hasAnyVal ? dGap.toFixed(2) : "-";
+
+        var marginReal = (rReal !== 0) ? ((Math.abs(dReal - rReal)/Math.abs(rReal))*100) : 0;
+        var marginTgt  = (rTgt !== 0) ? ((Math.abs(dTgt - rTgt)/Math.abs(rTgt))*100) : 0;
+        var marginGap  = (rGap !== 0) ? (((Math.abs(dGap) - Math.abs(rGap))/Math.abs(rGap))*100) : 0;
+
+        var scoreReal = hasAnyVal ? calcMarginScore(marginReal) : 0;
+        var scoreTgt  = hasAnyVal ? calcMarginScore(marginTgt) : 0;
+        var scoreGap  = hasAnyVal ? calcMarginScore(marginGap) : 0;
+        var avgScore  = hasAnyVal ? ((scoreReal + scoreTgt + scoreGap) / 3) : 0;
+
+        var elMarginReal = row.querySelector(".margin-real-calc"); if (elMarginReal) elMarginReal.textContent = marginReal.toFixed(2) + "%";
+        var elMarginRealKet = row.querySelector(".margin-real-ket"); if (elMarginRealKet) elMarginRealKet.textContent = marginReal.toFixed(2) + "%";
+        var elScoreReal = row.querySelector(".score-real-val"); if (elScoreReal) elScoreReal.textContent = scoreReal.toFixed(2) + "%";
+
+        var elMarginTgt = row.querySelector(".margin-tgt-calc"); if (elMarginTgt) elMarginTgt.textContent = marginTgt.toFixed(2) + "%";
+        var elMarginTgtKet = row.querySelector(".margin-tgt-ket"); if (elMarginTgtKet) elMarginTgtKet.textContent = marginTgt.toFixed(2) + "%";
+        var elScoreTgt = row.querySelector(".score-tgt-val"); if (elScoreTgt) elScoreTgt.textContent = scoreTgt.toFixed(2) + "%";
+
+        var elMarginGap = row.querySelector(".margin-gap-calc"); if (elMarginGap) elMarginGap.textContent = marginGap.toFixed(2) + "%";
+        var elMarginGapKet = row.querySelector(".margin-gap-ket"); if (elMarginGapKet) elMarginGapKet.textContent = Math.abs(marginGap).toFixed(2) + "%";
+        var elScoreGap = row.querySelector(".score-gap-val"); if (elScoreGap) elScoreGap.textContent = scoreGap.toFixed(2) + "%";
+
+        var elAvg = row.querySelector(".avg-score-val"); if (elAvg) elAvg.textContent = avgScore.toFixed(2) + "%";
+
+        computedFinalScore = (avgScore / 100) * maxBobot;
+        modalBobotInput.value = numFmt(computedFinalScore);
+        modalCalcDisplay.textContent = numFmt(computedFinalScore);
+        syncExcelScoreUI(modalBobotInput.value, maxBobot);
+        if (excelFxContent) excelFxContent.textContent = "Nilai Keselarasan Rata-rata: " + avgScore.toFixed(2) + "% x Bobot (" + maxBobot + ") = " + numFmt(computedFinalScore);
+      }
     }
 
     // 9. Sheet 1.b.8.a & 1.b.8.b (RKP vs RKPD Makro)
@@ -3609,19 +4114,21 @@ tr.type-sub:hover td {
       }
     }
 
-    // 10. Sheet 1.c.1 (Alokasi APBD)
+        // 10. Sheet 1.c.1 (Alokasi APBD untuk Prioritas Nasional / Major Project)
     else if (code === '1.c.1'){
-      var rows = document.querySelectorAll("#wsTable_1_c_1 .ws-1c1-row");
+      var subRows = document.querySelectorAll("#wsTable_1_c_1 .ws-1c1-sub-row");
       var sumScore = 0;
-      rows.forEach(function(r){
-        var sel = r.querySelector(".score-sel");
+      var count = 0;
+      subRows.forEach(function(r){
+        var sel = r.querySelector(".ws-1c1-score-sel");
         sumScore += sel ? parseFloat(sel.value) : 1.0;
+        count++;
       });
-      var avgRatio = rows.length > 0 ? (sumScore / rows.length) : 1.0;
+      var avgRatio = count > 0 ? (sumScore / count) : 0;
       computedFinalScore = avgRatio * maxBobot;
       var elGrand = document.getElementById("ws1c1GrandTerbobot");
       if (elGrand) elGrand.textContent = numFmt(computedFinalScore);
-      if (excelFxContent) excelFxContent.textContent = "";
+      if (excelFxContent) excelFxContent.textContent = "Bobot: " + numFmt(maxBobot) + " | Keselarasan Terbobot: " + numFmt(computedFinalScore);
     }
 
     // 11. Sheet 3.a.1.a (OPD Penanggungjawab)
@@ -3831,36 +4338,46 @@ tr.type-sub:hover td {
         json.md_end  = row.querySelector(".md-end").value.trim();
       }
     }
-    // 7. Sheet 1.a.4 (Major Project)
+    // 7. Sheet 1.a.4 (KPU RPJMN vs Dukungan Program Daerah RPJMD)
     else if (code === '1.a.4'){
-      var mpList = [];
-      var curMp = null;
-      var lastMpIdx = null;
+      var kpuList = [];
+      var curKpu = null;
+      var lastKpuIdx = null;
 
-      document.querySelectorAll("#wsTable_1_a_4 .ws-mp-row").forEach(function(row){
-        var mpIdx = row.getAttribute("data-mp-idx");
-        var mpInp = row.querySelector(".mp-title-inp");
-        var pdInp = row.querySelector(".pd-title-inp");
-        var scoreSel = row.querySelector(".pd-score-sel");
+      document.querySelectorAll("#wsTable_1_a_4 .ws-1a4-row").forEach(function(row){
+        var kpuIdx = row.getAttribute("data-kpu-idx");
+        var progSpan = row.querySelector(".kpu-prog-title");
+        var scoreSel = row.querySelector(".kpu-score-sel");
+        var ketInp = row.querySelector(".kpu-ket-inp");
+        var dokInp = row.querySelector(".kpu-dok-inp");
+        var halInp = row.querySelector(".kpu-hal-inp");
+        var tblInp = row.querySelector(".kpu-tbl-inp");
+        var catInp = row.querySelector(".kpu-catatan-inp");
 
-        if (mpIdx !== lastMpIdx){
-          if (curMp) mpList.push(curMp);
-          curMp = {
-            mp_title: mpInp ? mpInp.value.trim() : '',
+        if (kpuIdx !== lastKpuIdx){
+          if (curKpu) kpuList.push(curKpu);
+          curKpu = {
+            kpu_title: row.getAttribute("data-kpu-title") || '',
+            keterangan: ketInp ? ketInp.value.trim() : '',
+            dokumen: dokInp ? dokInp.value.trim() : '',
+            halaman: halInp ? halInp.value.trim() : '',
+            tabel: tblInp ? tblInp.value.trim() : '',
+            catatan: catInp ? catInp.value.trim() : '',
             pds: []
           };
-          lastMpIdx = mpIdx;
+          lastKpuIdx = kpuIdx;
         }
 
-        if (curMp && pdInp){
-          curMp.pds.push({
-            title: pdInp.value.trim(),
-            score: scoreSel ? parseFloat(scoreSel.value) : 1.0
+        var progTitle = progSpan ? progSpan.textContent.trim() : '-';
+        if (curKpu){
+          curKpu.pds.push({
+            title: progTitle,
+            score: scoreSel ? parseFloat(scoreSel.value) : 0.50
           });
         }
       });
-      if (curMp) mpList.push(curMp);
-      json.mp_list = mpList;
+      if (curKpu) kpuList.push(curKpu);
+      json.kpu_list = kpuList;
     }
     // 8. Sheet SPM
     else if (code === '1.a.5' || code === '1.a.6'){
@@ -3897,6 +4414,54 @@ tr.type-sub:hover td {
       json.spm_list = spmList;
     }
     // 9. Sheet 1.b.8
+                // 9.a Sheet 1.b.10.a (TPT RKP vs RKPD)
+    else if (code === '1.b.10.a'){
+      var row = document.querySelector("#wsTable_1_b_10_a .ws-1b10a-row");
+      if (row){
+        json.mn_real = row.querySelector(".rkp-real") ? row.querySelector(".rkp-real").value.trim() : '';
+        json.mn_target = row.querySelector(".rkp-tgt") ? row.querySelector(".rkp-tgt").value.trim() : '';
+        json.mn_gap = row.querySelector(".rkp-gap") ? row.querySelector(".rkp-gap").textContent.trim() : '';
+        json.md_real = row.querySelector(".rkpd-real") ? row.querySelector(".rkpd-real").value.trim() : '';
+        json.md_target = row.querySelector(".rkpd-tgt") ? row.querySelector(".rkpd-tgt").value.trim() : '';
+        json.md_gap = row.querySelector(".rkpd-gap") ? row.querySelector(".rkpd-gap").textContent.trim() : '';
+        json.margin_real = row.querySelector(".margin-real-calc") ? row.querySelector(".margin-real-calc").textContent.trim() : '';
+        json.margin_target = row.querySelector(".margin-tgt-calc") ? row.querySelector(".margin-tgt-calc").textContent.trim() : '';
+        json.margin_gap = row.querySelector(".margin-gap-calc") ? row.querySelector(".margin-gap-calc").textContent.trim() : '';
+        json.score_real = row.querySelector(".score-real-val") ? row.querySelector(".score-real-val").textContent.trim() : '';
+        json.score_target = row.querySelector(".score-tgt-val") ? row.querySelector(".score-tgt-val").textContent.trim() : '';
+        json.score_gap = row.querySelector(".score-gap-val") ? row.querySelector(".score-gap-val").textContent.trim() : '';
+        json.avg_score = row.querySelector(".avg-score-val") ? row.querySelector(".avg-score-val").textContent.trim() : '';
+        json.score_terbobot = row.querySelector(".terb-val") ? row.querySelector(".terb-val").textContent.trim() : '';
+        json.dokumen = row.querySelector(".ref-dok-inp") ? row.querySelector(".ref-dok-inp").value.trim() : (modalRefDokumen ? modalRefDokumen.value.trim() : '');
+        json.halaman = row.querySelector(".ref-hal-inp") ? row.querySelector(".ref-hal-inp").value.trim() : (modalRefHalaman ? modalRefHalaman.value.trim() : '');
+        json.tabel = row.querySelector(".ref-tbl-inp") ? row.querySelector(".ref-tbl-inp").value.trim() : (modalRefTabel ? modalRefTabel.value.trim() : '');
+        json.catatan = row.querySelector(".catatan-inp") ? row.querySelector(".catatan-inp").value.trim() : (modalCatatan ? modalCatatan.value.trim() : '');
+      }
+    }
+        // 9.b Sheet 1.b.10.b (Kemiskinan RKP vs RKPD)
+    else if (code === '1.b.10.b'){
+      var row = document.querySelector("#wsTable_1_b_10_b .ws-1b10b-row");
+      if (row){
+        json.mn_real = row.querySelector(".rkp-real") ? row.querySelector(".rkp-real").value.trim() : '';
+        json.mn_target = row.querySelector(".rkp-tgt") ? row.querySelector(".rkp-tgt").value.trim() : '';
+        json.mn_gap = row.querySelector(".rkp-gap") ? row.querySelector(".rkp-gap").textContent.trim() : '';
+        json.md_real = row.querySelector(".rkpd-real") ? row.querySelector(".rkpd-real").value.trim() : '';
+        json.md_target = row.querySelector(".rkpd-tgt") ? row.querySelector(".rkpd-tgt").value.trim() : '';
+        json.md_gap = row.querySelector(".rkpd-gap") ? row.querySelector(".rkpd-gap").textContent.trim() : '';
+        json.margin_real = row.querySelector(".margin-real-calc") ? row.querySelector(".margin-real-calc").textContent.trim() : '';
+        json.margin_target = row.querySelector(".margin-tgt-calc") ? row.querySelector(".margin-tgt-calc").textContent.trim() : '';
+        json.margin_gap = row.querySelector(".margin-gap-calc") ? row.querySelector(".margin-gap-calc").textContent.trim() : '';
+        json.score_real = row.querySelector(".score-real-val") ? row.querySelector(".score-real-val").textContent.trim() : '';
+        json.score_target = row.querySelector(".score-tgt-val") ? row.querySelector(".score-tgt-val").textContent.trim() : '';
+        json.score_gap = row.querySelector(".score-gap-val") ? row.querySelector(".score-gap-val").textContent.trim() : '';
+        json.avg_score = row.querySelector(".avg-score-val") ? row.querySelector(".avg-score-val").textContent.trim() : '';
+        json.score_terbobot = row.querySelector(".terb-val") ? row.querySelector(".terb-val").textContent.trim() : '';
+        json.dokumen = row.querySelector(".ref-dok-inp") ? row.querySelector(".ref-dok-inp").value.trim() : (modalRefDokumen ? modalRefDokumen.value.trim() : '');
+        json.halaman = row.querySelector(".ref-hal-inp") ? row.querySelector(".ref-hal-inp").value.trim() : (modalRefHalaman ? modalRefHalaman.value.trim() : '');
+        json.tabel = row.querySelector(".ref-tbl-inp") ? row.querySelector(".ref-tbl-inp").value.trim() : (modalRefTabel ? modalRefTabel.value.trim() : '');
+        json.catatan = row.querySelector(".catatan-inp") ? row.querySelector(".catatan-inp").value.trim() : (modalCatatan ? modalCatatan.value.trim() : '');
+      }
+    }
     else if (code === '1.b.8.a' || code === '1.b.8.b'){
       var row = document.querySelector("#wsTable_1_b_8 .ws-1b8-row");
       if (row){
@@ -3906,26 +4471,63 @@ tr.type-sub:hover td {
         json.rkpd_tgt = row.querySelector(".rkpd-tgt").value.trim();
       }
     }
-    // 10. Sheet 1.c.1
+        // 10. Sheet 1.c.1 (Format Komprehensif PN & KPU)
     else if (code === '1.c.1'){
-      var rows = [];
-      document.querySelectorAll("#wsTable_1_c_1 .ws-1c1-row").forEach(function(r){
-        var pnInp = r.querySelector(".pn-inp");
-        var ppInp = r.querySelector(".pp-inp");
-        var pdInp = r.querySelector(".pd-inp");
-        var paguInp = r.querySelector(".pagu-inp");
-        var scoreSel = r.querySelector(".score-sel");
-        if (pnInp || pdInp){
-          rows.push({
-            pn: pnInp ? pnInp.value.trim() : '',
-            pp_mp: ppInp ? ppInp.value.trim() : '',
-            pd: pdInp ? pdInp.value.trim() : '',
-            pagu: paguInp ? paguInp.value.trim() : '',
+      var pnMap = {};
+      document.querySelectorAll("#wsTable_1_c_1 .ws-1c1-sub-row").forEach(function(r){
+        var pnIdx = r.getAttribute("data-pn-idx") || "0";
+        var kpuIdx = r.getAttribute("data-kpu-idx") || "0";
+        var subInp = r.querySelector(".ws-1c1-sub-inp");
+        var paguInp = r.querySelector(".ws-1c1-pagu-inp");
+        var scoreSel = r.querySelector(".ws-1c1-score-sel");
+        var dokInp = r.querySelector(".ws-1c1-dok-inp");
+        var halInp = r.querySelector(".ws-1c1-hal-inp");
+        var tblInp = r.querySelector(".ws-1c1-tbl-inp");
+        var catInp = r.querySelector(".ws-1c1-cat-inp");
+
+        if (!pnMap[pnIdx]) {
+          pnMap[pnIdx] = {
+            pn_nama: "Prioritas Nasional " + (parseInt(pnIdx) + 1),
+            kpu_list: {}
+          };
+        }
+        if (!pnMap[pnIdx].kpu_list[kpuIdx]) {
+          pnMap[pnIdx].kpu_list[kpuIdx] = {
+            kpu_nama: "",
+            keterangan: "Terdapat Dukungan APBD pada Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional / Major Project terkait",
+            dokumen: dokInp ? dokInp.value.trim() : "",
+            halaman: halInp ? halInp.value.trim() : "",
+            tabel: tblInp ? tblInp.value.trim() : "",
+            catatan: catInp ? catInp.value.trim() : "",
+            subs: []
+          };
+        }
+
+        if (dokInp && dokInp.value.trim()) pnMap[pnIdx].kpu_list[kpuIdx].dokumen = dokInp.value.trim();
+        if (halInp && halInp.value.trim()) pnMap[pnIdx].kpu_list[kpuIdx].halaman = halInp.value.trim();
+        if (tblInp && tblInp.value.trim()) pnMap[pnIdx].kpu_list[kpuIdx].tabel = tblInp.value.trim();
+        if (catInp && catInp.value.trim()) pnMap[pnIdx].kpu_list[kpuIdx].catatan = catInp.value.trim();
+
+        if (subInp){
+          pnMap[pnIdx].kpu_list[kpuIdx].subs.push({
+            sub_kegiatan: subInp.value.trim(),
+            pagu: paguInp ? paguInp.value.trim() : "",
             score: scoreSel ? parseFloat(scoreSel.value) : 1.0
           });
         }
       });
-      json.rows = rows;
+
+      var pnList = [];
+      Object.keys(pnMap).forEach(function(pKey){
+        var pn = pnMap[pKey];
+        var kList = [];
+        Object.keys(pn.kpu_list).forEach(function(kKey){
+          kList.push(pn.kpu_list[kKey]);
+        });
+        pn.kpu_list = kList;
+        pnList.push(pn);
+      });
+      json.pn_list = pnList;
     }
     // 11. Sheet 3.a.1.a
     else if (code === '3.a.1.a'){
@@ -4025,6 +4627,7 @@ tr.type-sub:hover td {
     modalRefTabel.value = detailObj.ref_tabel || "";
     modalCatatan.value = saved.catatan || "";
     modalBuktiDukung.value = saved.bukti_dukung || "";
+    showPreviewIfImageOrPdf(modalBuktiDukung.value, 'previewBuktiContainer', 'modalBuktiDukung');
 
     // Render Dynamic Worksheet
     modalDynamicWorksheet.innerHTML = renderDynamicWorksheet(code, item.bobot, detailObj);
@@ -4190,6 +4793,17 @@ tr.type-sub:hover td {
         if (resp.status === "success"){
           MASTER_DATA = resp.master || MASTER_DATA;
           SCORES_MAP = resp.scores || {};
+          
+          if (resp.AutoData_1_a_1_c) AUTO_DATA_1_A_1_C = resp.AutoData_1_a_1_c;
+          if (resp.AutoData_1_a_2_a) AUTO_DATA_1_A_2_A = resp.AutoData_1_a_2_a;
+          if (resp.AutoData_1_a_2_ALL) AUTO_DATA_1_A_2_ALL = resp.AutoData_1_a_2_ALL;
+          if (resp.AutoData_1_a_4) AUTO_DATA_1_A_4 = resp.AutoData_1_a_4;
+          if (resp.AutoData_1_a_5) AUTO_DATA_1_A_5 = resp.AutoData_1_a_5;
+          if (resp.AutoData_1_a_6) AUTO_DATA_1_A_6 = resp.AutoData_1_a_6;
+          if (resp.AutoData_1_b_10_a) AUTO_DATA_1_B_10_A = resp.AutoData_1_b_10_a;
+          if (resp.AutoData_1_b_10_b) AUTO_DATA_1_B_10_B = resp.AutoData_1_b_10_b;
+        if (resp.AutoData_1_c_1) AUTO_DATA_1_C_1 = resp.AutoData_1_c_1;
+
           buildItemMap();
           renderTable();
         }
@@ -4999,27 +5613,41 @@ tr.type-sub:hover td {
       return;
     }
 
-    // --- 1.c.1: Add / Del Row ---
-    var btnAdd1c1 = target.closest("#btnAdd1c1Row");
+    // --- 1.c.1: Add / Del Row Sub Kegiatan ---
+    var btnAdd1c1 = target.closest("#btnAdd1c1SubRow, #btnAdd1c1Row");
     if (btnAdd1c1){
       var tbody1c1 = document.querySelector("#wsTable_1_c_1 tbody");
       if (tbody1c1){
+        var lastRow = tbody1c1.querySelector(".ws-1c1-sub-row:last-child");
+        var lastPnIdx = lastRow ? (lastRow.getAttribute("data-pn-idx") || "6") : "6";
+        var lastKpuIdx = lastRow ? (lastRow.getAttribute("data-kpu-idx") || "0") : "0";
+        var nextSubIdx = document.querySelectorAll("#wsTable_1_c_1 .ws-1c1-sub-row").length;
+
         var newTr = document.createElement("tr");
-        newTr.className = "ws-1c1-row";
+        newTr.className = "ws-1c1-sub-row";
+        newTr.setAttribute("data-pn-idx", lastPnIdx);
+        newTr.setAttribute("data-kpu-idx", lastKpuIdx);
+        newTr.setAttribute("data-sub-idx", nextSubIdx);
+        newTr.style.background = "#ffffff";
+        newTr.style.borderBottom = "1px solid #e2e8f0";
         newTr.innerHTML = 
-          '<td class="excel-row-num">+</td>' +
-          '<td><input type="text" class="calc-inp pn-inp" placeholder="Prioritas Nasional..."></td>' +
-          '<td><input type="text" class="calc-inp pp-inp" placeholder="PP / Major Project..."></td>' +
-          '<td><input type="text" class="calc-inp pd-inp" placeholder="Program Daerah..."></td>' +
-          '<td><input type="text" class="calc-inp pagu-inp" placeholder="Rp..."></td>' +
-          '<td>' +
-            '<select class="calc-inp score-sel">' +
-              '<option value="1.0">100% (Tersedia)</option>' +
-              '<option value="0.5">50% (Sebagian)</option>' +
-              '<option value="0">0% (Belum Tersedia)</option>' +
+          '<td class="excel-row-num" style="text-align:center; vertical-align:middle; background:#f8fafc; font-weight:600; border:1px solid #cbd5e1;">+</td>' +
+          '<td style="vertical-align: middle; padding: 6px 8px; border: 1px solid #cbd5e1;">' +
+            '<input type="text" class="calc-inp ws-1c1-sub-inp" placeholder="Kode & Nama Sub Kegiatan baru..." style="width: 100%; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 8px; font-size: 12.5px;">' +
+          '</td>' +
+          '<td style="vertical-align: middle; padding: 6px 8px; border: 1px solid #cbd5e1;">' +
+            '<input type="text" class="calc-inp ws-1c1-pagu-inp" placeholder="0,00" style="width: 100%; text-align: right; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 8px; font-size: 12.5px; font-weight: 600;">' +
+          '</td>' +
+          '<td style="vertical-align: middle; text-align: center; padding: 6px 8px; border: 1px solid #cbd5e1;">' +
+            '<select class="calc-inp ws-1c1-score-sel" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 4px; font-size: 12px; font-weight: 600; text-align: center; background: #f0fdf4; color: #166534; cursor: pointer;">' +
+              '<option value="1.0" selected>100.00%</option>' +
+              '<option value="0.0">0.00%</option>' +
             '</select>' +
           '</td>' +
-          '<td style="text-align:center;"><button type="button" class="btn-del-1c1-row" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus Baris"><i class="fa fa-times"></i></button></td>';
+          '<td style="text-align:center; vertical-align:middle; border:1px solid #cbd5e1; padding:4px;">' +
+            '<button type="button" class="btn-del-1c1-sub" style="border:none; background:transparent; color:#ef4444; cursor:pointer; font-size:14px;" title="Hapus Sub Kegiatan"><i class="fa fa-trash"></i></button>' +
+          '</td>';
+
         tbody1c1.appendChild(newTr);
         updateModalWorksheetScore();
         renumberExcelSheetRows(document.getElementById("wsTable_1_c_1"));
@@ -5058,11 +5686,11 @@ tr.type-sub:hover td {
         newTr.innerHTML = 
           '<td class="excel-row-num">+</td>' +
           '<td><input type="text" class="calc-inp ind-daerah" placeholder="Indikator Daerah..."></td>' +
-          '<td><input type="number" step="0.01" class="calc-inp tgt-daerah" value="100"></td>' +
+          '<td><input type="text" class="calc-inp tgt-daerah" value="100" style="text-align:center; font-weight:600;"></td>' +
           '<td><input type="text" class="calc-inp unit-daerah" value="Persen"></td>' +
           '<td><input type="text" class="calc-inp opd-name" placeholder="OPD..."></td>' +
           '<td><input type="text" class="calc-inp iku-opd" placeholder="IKU OPD..."></td>' +
-          '<td><input type="number" step="0.01" class="calc-inp tgt-opd" value="100"></td>' +
+          '<td><input type="text" class="calc-inp tgt-opd" value="100" style="text-align:center; font-weight:600;"></td>' +
           '<td><input type="text" class="calc-inp unit-opd" value="Persen"></td>' +
           '<td>' +
             '<select class="calc-inp ekspektasi-sel">' +
@@ -5107,7 +5735,7 @@ tr.type-sub:hover td {
     }
 
     // Generic Delete Row (for 1c1, 3a1a, 3a1b, gen)
-    var delGeneric = target.closest(".btn-del-1c1-row, .btn-del-3a1a-row, .btn-del-3a1b-row, .btn-del-gen-row");
+    var delGeneric = target.closest(".btn-del-1c1-row, .btn-del-1c1-sub, .btn-del-3a1a-row, .btn-del-3a1b-row, .btn-del-gen-row");
     if (delGeneric){
       var tbl = delGeneric.closest(".excel-grid-table");
       delGeneric.closest("tr").remove();
@@ -5132,6 +5760,7 @@ tr.type-sub:hover td {
 
   document.getElementById("btnModalClose").addEventListener("click", closeDetailModal);
   document.getElementById("btnModalCancel").addEventListener("click", closeDetailModal);
+  
   document.getElementById("btnModalSave").addEventListener("click", saveModalDetail);
 
   modalDetail.addEventListener("click", function(e){
@@ -5230,6 +5859,7 @@ tr.type-sub:hover td {
 
     verifCatatan.value = saved.catatan_verifikator || "";
     verifBuktiDukung.value = saved.bukti_dukung_verifikator || "";
+    showPreviewIfImageOrPdf(verifBuktiDukung.value, 'verifPreviewBuktiContainer', 'verifBuktiDukung');
 
     if (!IS_ROLE_4) {
       verifBobotInput.readOnly = true;
@@ -5603,6 +6233,253 @@ tr.type-sub:hover td {
   });
 
   // Initial Boot
+  // --- File Upload Logic ---
+  function initUpload(fileInputId, loadingId, urlInputId, previewContainerId) {
+    var fileInput = document.getElementById(fileInputId);
+    if (!fileInput) return;
+    fileInput.addEventListener('change', function() {
+      if (this.files && this.files[0]) {
+        var file = this.files[0];
+        var formData = new FormData();
+        formData.append('file', file);
+        
+        var loading = document.getElementById(loadingId);
+        var urlInput = document.getElementById(urlInputId);
+        var preview = document.getElementById(previewContainerId);
+        
+        if (loading) loading.style.display = 'block';
+        
+        fetch(BASE_URL + 'Instansi/UploadBuktiIPPD', {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (loading) loading.style.display = 'none';
+          if (data.status === 'success') {
+            if (urlInput) {
+              urlInput.value = data.file_url;
+            }
+            if (preview) {
+              var ext = data.file_name.split('.').pop().toLowerCase();
+              if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) {
+                preview.innerHTML = '<img src="' + data.file_url + '" style="max-width: 100%; max-height: 150px; object-fit: contain;">';
+              } else if (ext === 'pdf') {
+                preview.innerHTML = '<embed src="' + data.file_url + '" type="application/pdf" width="100%" height="150px" />';
+              } else {
+                preview.innerHTML = '<a href="' + data.file_url + '" target="_blank">' + data.file_name + '</a>';
+              }
+              preview.style.display = 'block';
+            }
+            showToast('File berhasil diunggah.', 'success');
+          } else {
+            showToast('Gagal mengunggah file: ' + data.message, 'error');
+          }
+        })
+        .catch(err => {
+          if (loading) loading.style.display = 'none';
+          showToast('Terjadi kesalahan jaringan.', 'error');
+          console.error(err);
+        });
+      }
+    });
+  }
+
+  // Trigger modal preview
+  // Modal for preview
+  if (!document.getElementById('previewModalBukti')) {
+    var modalHtml = '<div id="previewModalBukti" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:999999; justify-content:center; align-items:center;">' +
+      '<div style="background:#fff; padding: 20px; border-radius: 8px; width: 80%; max-width: 800px; height: 85%; display:flex; flex-direction:column; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">' +
+        '<div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">' +
+          '<h3 style="margin:0; font-size:18px; color:#1e293b; font-weight:600;">Preview Bukti Dukung</h3>' +
+          '<button type="button" onclick="document.getElementById(\'previewModalBukti\').style.display=\'none\'" style="background:none; border:none; font-size:24px; cursor:pointer; color:#64748b; line-height:1;">&times;</button>' +
+        '</div>' +
+        '<div id="previewModalBody" style="flex:1; overflow:hidden; display:flex; justify-content:center; align-items:center; background:#f1f5f9; border-radius:4px;"></div>' +
+      '</div>' +
+    '</div>';
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+  }
+
+  window.openPreviewModal = function(url) {
+    var ext = url.split('.').pop().toLowerCase();
+    var body = document.getElementById('previewModalBody');
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(ext) || (ext.length > 4 && url.match(/\.(jpeg|jpg|gif|png)$/i))) {
+        body.innerHTML = '<img src="' + url + '" style="max-width:100%; max-height:100%; object-fit:contain;">';
+    } else {
+        body.innerHTML = '<embed src="' + url + '" type="application/pdf" width="100%" height="100%" />';
+    }
+    document.getElementById('previewModalBukti').style.display = 'flex';
+  };
+
+  window.hapusBukti = function(inputId, containerId, urlToRemove) {
+    Swal.fire({
+      title: 'Hapus Bukti?',
+      text: "Apakah Anda yakin ingin menghapus bukti ini?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        var input = document.getElementById(inputId);
+        var urls = input.value.split(',').map(s => s.trim()).filter(s => s !== '');
+        var newUrls = urls.filter(u => u !== urlToRemove);
+        input.value = newUrls.join(', ');
+        
+        var event = new Event('input');
+        input.dispatchEvent(event);
+      }
+    });
+  };
+
+  function showPreviewIfImageOrPdf(urlsStr, previewContainerId, inputId) {
+    var preview = document.getElementById(previewContainerId);
+    if (!preview) return;
+    if (!urlsStr || urlsStr.trim() === '') {
+      preview.style.display = 'none';
+      preview.innerHTML = '';
+      return;
+    }
+    
+    var urls = urlsStr.split(',').map(s => s.trim()).filter(s => s !== '');
+    if (urls.length === 0) {
+      preview.style.display = 'none';
+      preview.innerHTML = '';
+      return;
+    }
+
+    var html = '<div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:5px; padding:10px;">';
+    
+    urls.forEach(function(url) {
+        var ext = url.split('.').pop().toLowerCase();
+        var isMedia = (['jpg', 'jpeg', 'png', 'gif', 'pdf'].includes(ext) || (ext.length > 4 && url.match(/\.(jpeg|jpg|gif|png|pdf)$/i)));
+        
+        if (isMedia) {
+            html += '<div style="border:1px solid #cbd5e1; border-radius:4px; padding:5px; background:#fff; text-align:center; max-width:150px; overflow:hidden;">';
+            
+            if (ext === 'pdf') {
+                html += '<div style="font-size:30px; color:#ef4444; margin-bottom:5px;"><i class="fa fa-file-pdf-o"></i></div>';
+                html += '<div style="font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="'+url+'">PDF File</div>';
+            } else {
+                html += '<img src="' + url + '" style="max-width:100%; height:60px; object-fit:contain; margin-bottom:5px;">';
+            }
+            
+            html += '<div style="display:flex; flex-direction:column; gap:4px; margin-top:5px;">' + 
+            '<button type="button" class="btn-ui btn-ui-secondary" style="font-size:11px; padding: 2px 6px;" onclick="openPreviewModal(\'' + url + '\')"><i class="fa fa-eye"></i> Lihat</button>' +
+            '<button type="button" style="font-size:11px; padding: 2px 6px; background:#ef4444; color:white; border:none; border-radius:4px; cursor:pointer;" onclick="hapusBukti(\'' + inputId + '\', \'' + previewContainerId + '\', \'' + url + '\')"><i class="fa fa-trash"></i> Hapus</button>' +
+            '</div></div>';
+        } else {
+            html += '<div style="border:1px solid #cbd5e1; border-radius:4px; padding:5px; background:#fff; text-align:center;">' +
+            '<a href="' + url + '" target="_blank" style="font-size:11px;"><i class="fa fa-external-link"></i> Tautan</a>' +
+            '<div style="margin-top:5px;"><button type="button" style="font-size:11px; padding: 2px 6px; background:#ef4444; color:white; border:none; border-radius:4px; cursor:pointer;" onclick="hapusBukti(\'' + inputId + '\', \'' + previewContainerId + '\', \'' + url + '\')"><i class="fa fa-trash"></i> Hapus</button></div>' +
+            '</div>';
+        }
+    });
+
+    html += '</div>';
+
+    preview.style.display = 'block';
+    preview.style.background = 'transparent';
+    preview.style.border = 'none';
+    preview.innerHTML = html;
+  }
+
+  function initUpload(fileInputId, loadingId, urlInputId, previewContainerId) {
+    var fileInput = document.getElementById(fileInputId);
+    var loading = document.getElementById(loadingId);
+    var urlInput = document.getElementById(urlInputId);
+
+    if (!fileInput) return;
+
+    fileInput.addEventListener('change', async function() {
+      if (this.files && this.files.length > 0) {
+        if (loading) loading.style.display = 'block';
+        
+        var uploadPromises = [];
+        var uploadedUrls = [];
+        var errors = [];
+
+        for (let i = 0; i < this.files.length; i++) {
+            let file = this.files[i];
+            let formData = new FormData();
+            formData.append('file', file);
+            
+            let p = fetch(BASE_URL + "Instansi/UploadBuktiIPPD", {
+              method: 'POST',
+              body: formData,
+              headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+              }
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.status === 'success') {
+                uploadedUrls.push(data.file_url);
+              } else {
+                errors.push(data.message);
+              }
+            })
+            .catch(err => {
+              errors.push("Gagal unggah: " + file.name);
+            });
+            
+            uploadPromises.push(p);
+        }
+
+        await Promise.all(uploadPromises);
+        
+        if (loading) loading.style.display = 'none';
+        
+        if (uploadedUrls.length > 0) {
+            var currentUrls = urlInput.value ? urlInput.value.split(',').map(s=>s.trim()).filter(s=>s!=='') : [];
+            currentUrls = currentUrls.concat(uploadedUrls);
+            urlInput.value = currentUrls.join(', ');
+            
+            var event = new Event('input');
+            urlInput.dispatchEvent(event);
+            
+            if (errors.length > 0) {
+                Swal.fire('Peringatan', 'Beberapa file diunggah, tapi ada error: ' + errors.join(', '), 'warning');
+            } else {
+                Swal.fire('Berhasil', uploadedUrls.length + ' File berhasil diunggah.', 'success');
+            }
+        } else {
+            Swal.fire('Gagal', 'Gagal mengunggah file. ' + errors.join(', '), 'error');
+        }
+        
+        fileInput.value = "";
+      }
+    });
+  }
+
+  // Listeners for links to show preview when typing
+  var modalBukti = document.getElementById('modalBuktiDukung');
+  if (modalBukti) {
+    modalBukti.addEventListener('input', function() {
+      showPreviewIfImageOrPdf(this.value, 'previewBuktiContainer', 'modalBuktiDukung');
+    });
+  }
+  
+  var verifBukti = document.getElementById('verifBuktiDukung');
+  if (verifBukti) {
+    verifBukti.addEventListener('input', function() {
+      showPreviewIfImageOrPdf(this.value, 'verifPreviewBuktiContainer', 'verifBuktiDukung');
+    });
+  }
+
+  // Bind the upload functions
+  initUpload('uploadBuktiFile', 'uploadBuktiLoading', 'modalBuktiDukung', 'previewBuktiContainer');
+  initUpload('verifUploadBuktiFile', 'verifUploadBuktiLoading', 'verifBuktiDukung', 'verifPreviewBuktiContainer');
+
+  // Modify open modal to clear or populate preview
+  var originalOpenDetailModal = window.openDetailModal; // Might not be global, but we can hook into modal display logic if we can.
+  // We'll use mutation observer or just trust the users typing/uploading if we can't easily hook openDetailModal inside the IIFE.
+
   buildItemMap();
   renderTable();
 })();

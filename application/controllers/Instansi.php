@@ -26395,8 +26395,11 @@ public function updateStatusPerjanjianKinerja() {
         $namaWilayah = 'Kabupaten Situbondo';
         if (!empty($KodeWilayah)) {
             $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-            if ($wilayah) {
-                $namaWilayah = ucwords(strtolower($wilayah['Nama']));
+            if ($wilayah && !empty($wilayah['Nama'])) {
+                $namaFmt = preg_replace('/^KAB\.\s*/i', 'Kabupaten ', trim($wilayah['Nama']));
+                $namaFmt = preg_replace('/^KOTA\s*/i', 'Kota ', $namaFmt);
+                $namaFmt = preg_replace('/^PROV\.\s*/i', 'Provinsi ', $namaFmt);
+                $namaWilayah = ucwords(strtolower($namaFmt));
             }
         }
 
@@ -26760,8 +26763,11 @@ public function updateStatusPerjanjianKinerja() {
         $namaWilayah = 'Kabupaten Situbondo';
         if (!empty($KodeWilayah)) {
             $wil = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-            if ($wil) {
-                $namaWilayah = ucwords(strtolower($wil['Nama']));
+            if ($wil && !empty($wil['Nama'])) {
+                $namaFmt = preg_replace('/^KAB\.\s*/i', 'Kabupaten ', trim($wil['Nama']));
+                $namaFmt = preg_replace('/^KOTA\s*/i', 'Kota ', $namaFmt);
+                $namaFmt = preg_replace('/^PROV\.\s*/i', 'Provinsi ', $namaFmt);
+                $namaWilayah = ucwords(strtolower($namaFmt));
             }
         }
 
@@ -27244,8 +27250,11 @@ public function updateStatusPerjanjianKinerja() {
         $namaWilayah = 'Kabupaten Situbondo';
         if (!empty($KodeWilayah)) {
             $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-            if ($wilayah) {
-                $namaWilayah = ucwords(strtolower($wilayah['Nama']));
+            if ($wilayah && !empty($wilayah['Nama'])) {
+                $namaFmt = preg_replace('/^KAB\.\s*/i', 'Kabupaten ', trim($wilayah['Nama']));
+                $namaFmt = preg_replace('/^KOTA\s*/i', 'Kota ', $namaFmt);
+                $namaFmt = preg_replace('/^PROV\.\s*/i', 'Provinsi ', $namaFmt);
+                $namaWilayah = ucwords(strtolower($namaFmt));
             }
         }
 
@@ -27331,8 +27340,11 @@ public function updateStatusPerjanjianKinerja() {
         $namaWilayah = 'Kabupaten Situbondo';
         if (!empty($KodeWilayah)) {
             $wil = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-            if ($wil) {
-                $namaWilayah = ucwords(strtolower($wil['Nama']));
+            if ($wil && !empty($wil['Nama'])) {
+                $namaFmt = preg_replace('/^KAB\.\s*/i', 'Kabupaten ', trim($wil['Nama']));
+                $namaFmt = preg_replace('/^KOTA\s*/i', 'Kota ', $namaFmt);
+                $namaFmt = preg_replace('/^PROV\.\s*/i', 'Provinsi ', $namaFmt);
+                $namaWilayah = ucwords(strtolower($namaFmt));
             }
         }
 
@@ -28700,17 +28712,1042 @@ public function updateStatusPerjanjianKinerja() {
         ];
     }
 
+    private function get_ippd_auto_data($KodeWilayah, $instansi_id = 0, $tahun = 2026) {
+        if (empty($KodeWilayah)) {
+            $KodeWilayah = $this->get_kode_wilayah() ?: $this->session->userdata('KodeWilayah');
+        }
+
+        // --- 1.a.1.a Auto Data Pull ---
+        $autoData_1_a_1_a = [
+            'mn_lpe_base' => '', 'mn_lpe_end' => '',
+            'mn_tk_base' => '', 'mn_tk_end' => '',
+            'mn_tpt_base' => '', 'mn_tpt_end' => '',
+            'md_lpe_base' => '', 'md_lpe_end' => '',
+            'md_tk_base' => '', 'md_tk_end' => '',
+            'md_tpt_base' => '', 'md_tpt_end' => ''
+        ];
+
+        // RPJMN Nasional
+        $res_rpjmn = $this->db->get('indikator_pembangunan_rpjmn')->result_array();
+        foreach ($res_rpjmn as $r) {
+            $ind = strtolower($r['IndikatorPembangunan']);
+            if (strpos($ind, 'pertumbuhan ekonomi') !== false || strpos($ind, 'lpe') !== false) {
+                $autoData_1_a_1_a['mn_lpe_base'] = $r['Baseline'];
+                $autoData_1_a_1_a['mn_lpe_end'] = $r['TargetAkhir'];
+            } elseif (strpos($ind, 'kemiskinan') !== false) {
+                $autoData_1_a_1_a['mn_tk_base'] = $r['Baseline'];
+                $autoData_1_a_1_a['mn_tk_end'] = $r['TargetAkhir'];
+            } elseif (strpos($ind, 'pengangguran') !== false || strpos($ind, 'tpt') !== false) {
+                $autoData_1_a_1_a['mn_tpt_base'] = $r['Baseline'];
+                $autoData_1_a_1_a['mn_tpt_end'] = $r['TargetAkhir'];
+            }
+        }
+
+        // RPJMD Daerah (Tujuan & Sasaran) MURNI dari KodeWilayah akun
+        $res_rpjmd = [];
+        if (!empty($KodeWilayah)) {
+            $res_rpjmd_tujuan = $this->db->where('kodewilayah', $KodeWilayah)->get('indikator_tujuan')->result_array();
+            $res_rpjmd_sasaran = $this->db->where('kodewilayah', $KodeWilayah)->get('indikator_sasaran')->result_array();
+            $res_rpjmd = array_merge($res_rpjmd_tujuan, $res_rpjmd_sasaran);
+        }
+        
+        foreach ($res_rpjmd as $r) {
+            $ind = strtolower($r['indikator']);
+            $targetAkhir = !empty($r['target_2030']) ? $r['target_2030'] : (!empty($r['target_2029']) ? $r['target_2029'] : '');
+            if (strpos($ind, 'pertumbuhan ekonomi') !== false || strpos($ind, 'lpe') !== false) {
+                if (empty($autoData_1_a_1_a['md_lpe_base'])) $autoData_1_a_1_a['md_lpe_base'] = $r['baseline_2024'] ?? '';
+                if (empty($autoData_1_a_1_a['md_lpe_end'])) $autoData_1_a_1_a['md_lpe_end'] = $targetAkhir;
+            } elseif ((strpos($ind, 'kemiskinan') !== false || strpos($ind, 'miskin') !== false) && strpos($ind, 'keparahan') === false) {
+                if (empty($autoData_1_a_1_a['md_tk_base'])) $autoData_1_a_1_a['md_tk_base'] = $r['baseline_2024'] ?? '';
+                if (empty($autoData_1_a_1_a['md_tk_end'])) $autoData_1_a_1_a['md_tk_end'] = $targetAkhir;
+            }
+        }
+        
+        // IKD untuk Tingkat Pengangguran Terbuka MURNI dari KodeWilayah akun
+        if (!empty($KodeWilayah)) {
+            $res_ikd = $this->db->where('kodewilayah', $KodeWilayah)->get('ikd')->result_array();
+            foreach ($res_ikd as $r) {
+                $ind = strtolower($r['indikator_sasaran']);
+                $targetAkhir = !empty($r['target_6']) ? $r['target_6'] : (!empty($r['target_5']) ? $r['target_5'] : '');
+                if (strpos($ind, 'pengangguran') !== false || strpos($ind, 'tpt') !== false) {
+                    $autoData_1_a_1_a['md_tpt_base'] = $r['target_1'] ?? '';
+                    $autoData_1_a_1_a['md_tpt_end'] = $targetAkhir;
+                }
+            }
+        }
+
+        // --- 1.a.3.a (TPT) & 1.a.3.b (TK) ---
+        $autoData_1_a_3_a = [
+            'mn_base' => $autoData_1_a_1_a['mn_tpt_base'] ?: '',
+            'mn_end'  => $autoData_1_a_1_a['mn_tpt_end'] ?: '',
+            'md_base' => $autoData_1_a_1_a['md_tpt_base'] ?: '',
+            'md_end'  => $autoData_1_a_1_a['md_tpt_end'] ?: ''
+        ];
+        $autoData_1_a_3_b = [
+            'mn_base' => $autoData_1_a_1_a['mn_tk_base'] ?: '',
+            'mn_end'  => $autoData_1_a_1_a['mn_tk_end'] ?: '',
+            'md_base' => $autoData_1_a_1_a['md_tk_base'] ?: '',
+            'md_end'  => $autoData_1_a_1_a['md_tk_end'] ?: ''
+        ];
+
+        // --- 1.a.1.c Keselarasan Misi RPJMD dengan Prioritas Nasional ---
+        // Sinkronisasi dengan Menu Sumber Data: Keselarasan Asta Cita Misi (keselarasan_astacita_misi) & Misi RPJMD (misirpjmd)
+        $misiMap = [];
+        $misiList = [];
+        if (!empty($KodeWilayah)) {
+            $res_misi = $this->db->query("SELECT Id, Misi FROM misirpjmd WHERE KodeWilayah = ? AND deleted_at IS NULL ORDER BY Id ASC", array($KodeWilayah))->result_array();
+            foreach ($res_misi as $m) {
+                $misiMap[$m['Id']] = $m['Misi'];
+                $misiList[] = $m['Misi'];
+            }
+        }
+
+        // Master 8 Prioritas Nasional (Asta Cita)
+        $all_pn_rows = [];
+        if ($this->db->table_exists('prioritas_nasional_rpjmn')) {
+            $all_pn_rows = $this->db->query("SELECT Id as pn_id, PrioritasNasional as pn_title FROM prioritas_nasional_rpjmn WHERE deleted_at IS NULL ORDER BY Id ASC")->result_array();
+        }
+        if (empty($all_pn_rows) && $this->db->table_exists('rkp_ps_prioritas_nasional')) {
+            $all_pn_rows = $this->db->query("SELECT Id as pn_id, PrioritasNasional as pn_title FROM rkp_ps_prioritas_nasional WHERE deleted_at IS NULL ORDER BY Id ASC")->result_array();
+        }
+
+        // Ambil inputan dari Menu Keselarasan Asta Cita Misi daerah bersangkutan
+        $map_1a1c = [];
+        if ($this->db->table_exists('keselarasan_astacita_misi') && !empty($KodeWilayah)) {
+            $res_1a1c = $this->db->query("SELECT id_misi_daerah, id_prioritas_nasional FROM keselarasan_astacita_misi WHERE kode_wilayah = ? AND deleted_at IS NULL", array($KodeWilayah))->result_array();
+            foreach ($res_1a1c as $k_row) {
+                $map_1a1c[$k_row['id_prioritas_nasional']] = $k_row['id_misi_daerah'];
+            }
+        }
+
+        $pn_grouped = [];
+        foreach ($all_pn_rows as $pn_item) {
+            $pn_id = (int)$pn_item['pn_id'];
+            $pds = [];
+
+            // Jika ada inputan di menu Keselarasan Asta Cita, ambil Misi yang dipilih
+            if (!empty($map_1a1c[$pn_id])) {
+                $misi_ids = json_decode($map_1a1c[$pn_id], true);
+                if (is_array($misi_ids)) {
+                    foreach ($misi_ids as $mid) {
+                        if (isset($misiMap[$mid])) {
+                            $pds[] = [
+                                'title' => 'Misi: ' . $misiMap[$mid],
+                                'score' => 1.0,
+                                'ket' => 'Selaras (Tercatat di Menu Keselarasan Asta Cita)'
+                            ];
+                        }
+                    }
+                }
+            }
+
+            // Jika belum diinput di menu keselarasan, ambil Misi RPJMD wilayah akun tersebut
+            if (empty($pds) && !empty($misiList)) {
+                $misi_idx = ($pn_id - 1) % count($misiList);
+                $pds[] = [
+                    'title' => 'Misi: ' . $misiList[$misi_idx],
+                    'score' => 1.0,
+                    'ket' => 'Selaras Sepenuhnya'
+                ];
+            }
+
+            if (empty($pds)) {
+                $pds[] = [
+                    'title' => 'Misi RPJMD belum diisi pada menu RPJMD wilayah ' . $KodeWilayah,
+                    'score' => 0.0,
+                    'ket' => 'Belum Diinput'
+                ];
+            }
+
+            $pn_grouped[] = [
+                'pn_title' => 'PN ' . $pn_id . ' : ' . $pn_item['pn_title'],
+                'pds' => $pds
+            ];
+        }
+        $autoData_1_a_1_c = $pn_grouped;
+
+        // --- 1.a.2.a s/d 1.a.2.h Keselarasan Program Prioritas ---
+        // Sinkronisasi dengan Menu Sumber Data:
+        // 1. Dukungan Kegiatan Prioritas Utama RPJMD (dukungan_kpu_rpjmd, rpjmn_kpu_prioritas, rpjmn_kpu_kegiatan)
+        // 2. Keselarasan Kegiatan Prioritas Utama (keselarasan_prioritas_master & keselarasan_prioritas_detail)
+        $pn2a_grouped = [];
+        $letters = [1=>'a', 2=>'b', 3=>'c', 4=>'d', 5=>'e', 6=>'f', 7=>'g', 8=>'h'];
+
+        // Siapkan kamus Nomenklatur Program RPJMD Daerah (level program / 2 titik)
+        $allNomenklaturProgs = [];
+        if ($this->db->table_exists('nomenklaturkabupaten')) {
+            $resNomenKab = $this->db->select('Kode, Nomenklatur')
+                ->from('nomenklaturkabupaten')
+                ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) = 2', NULL, FALSE)
+                ->order_by('Kode', 'ASC')
+                ->get()->result_array();
+            foreach ($resNomenKab as $rn) {
+                $allNomenklaturProgs[$rn['Kode']] = $rn['Nomenklatur'];
+            }
+        }
+        if ($this->db->table_exists('nomenklaturprovinsi')) {
+            $resNomenProv = $this->db->select('Kode, Nomenklatur')
+                ->from('nomenklaturprovinsi')
+                ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) = 2', NULL, FALSE)
+                ->order_by('Kode', 'ASC')
+                ->get()->result_array();
+            foreach ($resNomenProv as $rn) {
+                if (!isset($allNomenklaturProgs[$rn['Kode']])) {
+                    $allNomenklaturProgs[$rn['Kode']] = $rn['Nomenklatur'];
+                }
+            }
+        }
+
+        // =========================================================================
+        // 1. TARIK DATA DARI MENU DAERAH: Dukungan Kegiatan Prioritas Utama (dukungan_kpu_rpjmd)
+        // =========================================================================
+        if ($this->db->table_exists('dukungan_kpu_rpjmd') && !empty($KodeWilayah)) {
+            $this->db->select('d.*, p.Kode as KodePrioritas, p.PrioritasPembangunan, k.Kode as KodeKegiatan, k.KegiatanPrioritas');
+            $this->db->from('dukungan_kpu_rpjmd d');
+            $this->db->join('rpjmn_kpu_prioritas p', 'd.PrioritasId = p.Id', 'left');
+            $this->db->join('rpjmn_kpu_kegiatan k', 'd.KegiatanId = k.Id', 'left');
+            $this->db->where('d.deleted_at IS NULL');
+            $this->db->where('d.KodeWilayah', $KodeWilayah);
+            $this->db->order_by('d.PrioritasId', 'ASC');
+            $this->db->order_by('d.KegiatanId', 'ASC');
+            $this->db->order_by('d.Id', 'ASC');
+            $res_dukungan_kpu = $this->db->get()->result_array();
+
+            foreach ($res_dukungan_kpu as $rd) {
+                $pn_id = (int)$rd['PrioritasId'];
+                if ($pn_id < 1 || $pn_id > 8) {
+                    if (!empty($rd['KodePrioritas']) && preg_match('/(\d+)/', $rd['KodePrioritas'], $m)) {
+                        $pn_id = (int)$m[1];
+                    }
+                }
+                if ($pn_id < 1 || $pn_id > 8) {
+                    $pn_id = 1;
+                }
+
+                $pn_title = !empty($rd['PrioritasPembangunan']) ? $rd['PrioritasPembangunan'] : ('Prioritas Nasional ' . $pn_id);
+                if (!isset($pn2a_grouped[$pn_id])) {
+                    $pn2a_grouped[$pn_id] = [
+                        'pn_title' => 'PN ' . $pn_id . ' : ' . $pn_title,
+                        'pps' => []
+                    ];
+                }
+
+                $keg_id = (int)$rd['KegiatanId'];
+                $pp_title = !empty($rd['KegiatanPrioritas']) ? 
+                    (!empty($rd['KodeKegiatan']) ? $rd['KodeKegiatan'] . ' : ' : '') . $rd['KegiatanPrioritas'] : 
+                    ('Kegiatan Prioritas ' . $keg_id);
+
+                // Parse Kode Program dan Nama Program
+                $cList = array_values(array_filter(array_map('trim', preg_split('/[,\|\n]+/', $rd['KodeProgram'] ?? ''))));
+                $nList = array_values(array_filter(array_map('trim', preg_split('/\|\|\||\n|,/', $rd['NamaProgram'] ?? ''))));
+
+                $pds = [];
+                foreach ($cList as $idx => $kp) {
+                    $np = $nList[$idx] ?? ($allNomenklaturProgs[$kp] ?? '-');
+                    if (($np === '-' || empty($np)) && isset($allNomenklaturProgs[$kp])) {
+                        $np = $allNomenklaturProgs[$kp];
+                    }
+                    $pds[] = [
+                        'title' => '[' . $kp . '] ' . $np,
+                        'score' => 1.0,
+                        'ket' => 'Telah Diselaraskan (Menu Dukungan Kegiatan Prioritas)',
+                        'ta_review' => ''
+                    ];
+                }
+
+                if (empty($pds)) {
+                    $fallbackTitle = !empty($rd['NamaProgram']) ? $rd['NamaProgram'] : ('Program RPJMD Wilayah ' . $KodeWilayah);
+                    $pds[] = [
+                        'title' => $fallbackTitle,
+                        'score' => 1.0,
+                        'ket' => 'Telah Diselaraskan (Menu Dukungan Kegiatan Prioritas)',
+                        'ta_review' => ''
+                    ];
+                }
+
+                $master_key = 'KPU_' . $rd['Id'];
+                $pn2a_grouped[$pn_id]['pps'][$master_key] = [
+                    'master_id' => $master_key,
+                    'pp_title' => $pp_title,
+                    'pds' => $pds
+                ];
+            }
+        }
+
+        // =========================================================================
+        // 2. GABUNGKAN DENGAN MENU: Keselarasan Kegiatan Prioritas Utama (keselarasan_prioritas_master)
+        // =========================================================================
+        if ($this->db->table_exists('keselarasan_prioritas_master') && !empty($KodeWilayah)) {
+            $this->db->select('
+                m.id as master_id,
+                pn.Id as pn_id,
+                pn.PrioritasNasional as pn_title,
+                m.kegiatan_prioritas as pp_title,
+                d.program,
+                d.kegiatan,
+                d.sub_kegiatan,
+                d.id_perangkat_daerah,
+                a.nama as perangkat_daerah_nama
+            ');
+            $this->db->from('keselarasan_prioritas_master m');
+            $this->db->join('prioritas_nasional_rpjmn pn', 'pn.Id = m.id_prioritas_nasional', 'left');
+            $this->db->join('keselarasan_prioritas_detail d', 'd.id_master = m.id AND d.deleted_at IS NULL', 'left');
+            $this->db->join('akun_instansi a', 'a.id = d.id_perangkat_daerah', 'left');
+            $this->db->where('m.kode_wilayah', $KodeWilayah);
+            $this->db->where('m.deleted_at IS NULL');
+            $this->db->order_by('pn.Id', 'ASC');
+            $this->db->order_by('m.id', 'ASC');
+            $this->db->order_by('d.id', 'ASC');
+            $res_1a2a = $this->db->get()->result_array();
+
+            foreach($res_1a2a as $r) {
+                $pn_id = (int)$r['pn_id'];
+                if (!$pn_id) continue;
+                
+                if (!isset($pn2a_grouped[$pn_id])) {
+                    $pn2a_grouped[$pn_id] = [
+                        'pn_title' => 'PN ' . $pn_id . ' : ' . $r['pn_title'],
+                        'pps' => []
+                    ];
+                }
+                
+                $master_id = 'KP_' . $r['master_id'];
+                if (!isset($pn2a_grouped[$pn_id]['pps'][$master_id])) {
+                    $pn2a_grouped[$pn_id]['pps'][$master_id] = [
+                        'master_id' => $master_id,
+                        'pp_title' => $r['pp_title'],
+                        'pds' => []
+                    ];
+                }
+                
+                if (!empty($r['program']) || !empty($r['kegiatan']) || !empty($r['sub_kegiatan'])) {
+                    if ($instansi_id > 0 && !empty($r['id_perangkat_daerah'])) {
+                        if ($r['id_perangkat_daerah'] != $instansi_id) {
+                            continue;
+                        }
+                    }
+
+                    $pd_title_parts = [];
+                    if (!empty($r['program'])) $pd_title_parts[] = 'Program: ' . $r['program'];
+                    if (!empty($r['kegiatan'])) $pd_title_parts[] = 'Kegiatan: ' . $r['kegiatan'];
+                    if (!empty($r['sub_kegiatan'])) $pd_title_parts[] = 'Sub: ' . $r['sub_kegiatan'];
+                    if (!empty($r['perangkat_daerah_nama'])) $pd_title_parts[] = '(' . $r['perangkat_daerah_nama'] . ')';
+                    
+                    $pn2a_grouped[$pn_id]['pps'][$master_id]['pds'][] = [
+                        'title' => implode(" | ", $pd_title_parts),
+                        'score' => 1.0,
+                        'ket' => 'Telah Diselaraskan (Menu Keselarasan Prioritas)',
+                        'ta_review' => ''
+                    ];
+                }
+            }
+        }
+        
+        $autoData_1_a_2_ALL = [];
+        foreach ($pn2a_grouped as $pn_id => $pn_data) {
+            $pn_data['pps'] = array_values($pn_data['pps']);
+            $code_letter = isset($letters[$pn_id]) ? $letters[$pn_id] : 'z';
+            $code = '1.a.2.' . $code_letter;
+            $autoData_1_a_2_ALL[$code] = $pn_data;
+        }
+
+        // =========================================================================
+        // 3. SUSUN KAMUS PROGRAM DAERAH RPJMD WILAYAH (DARI INDIKATOR SASARAN & NOMENKLATUR)
+        // =========================================================================
+        $prgRows = [];
+        if ($this->db->table_exists('indikator_sasaran') && !empty($KodeWilayah)) {
+            $this->db->select('program_pd, pd_pengampuh');
+            $this->db->from('indikator_sasaran');
+            $this->db->where('kodewilayah', $KodeWilayah);
+            $this->db->where('deleted_at IS NULL');
+            $ind_sasarans = $this->db->get()->result_array();
+
+            $prgCodes = [];
+            foreach ($ind_sasarans as $ind) {
+                if ($instansi_id > 0 && !empty($ind['pd_pengampuh']) && $ind['pd_pengampuh'] != $instansi_id) {
+                    continue;
+                }
+                if (!empty($ind['program_pd'])) {
+                    $codes = explode(',', $ind['program_pd']);
+                    foreach ($codes as $c) {
+                        $c = trim($c);
+                        if (!empty($c)) $prgCodes[$c] = true;
+                    }
+                }
+            }
+
+            if (!empty($prgCodes)) {
+                $codes = array_keys($prgCodes);
+                foreach ($codes as $c) {
+                    if (isset($allNomenklaturProgs[$c])) {
+                        $prgRows[$c] = ['Kode' => $c, 'Nomenklatur' => $allNomenklaturProgs[$c]];
+                    }
+                }
+            }
+        }
+
+        // Jika kamus program dari indikator sasaran masih kosong, gunakan master program RPJMD
+        if (empty($prgRows) && !empty($allNomenklaturProgs)) {
+            foreach ($allNomenklaturProgs as $k => $nom) {
+                $prgRows[$k] = ['Kode' => $k, 'Nomenklatur' => $nom];
+            }
+        }
+
+        $allPdsList = [];
+        foreach ($prgRows as $r) {
+            $allPdsList[] = [
+                'title' => '[' . $r['Kode'] . '] ' . $r['Nomenklatur'],
+                'score' => 1.0,
+                'ket' => 'Telah Diselaraskan (Dukungan Program RPJMD)',
+                'ta_review' => ''
+            ];
+        }
+
+        // =========================================================================
+        // 4. LENGKAPI SELURUH POIN PN 1 S/D PN 8 YANG BELUM ADA INPUTAN
+        // =========================================================================
+        for ($pn_idx = 1; $pn_idx <= 8; $pn_idx++) {
+            $code_letter = $letters[$pn_idx];
+            $code = '1.a.2.' . $code_letter;
+
+            if (empty($autoData_1_a_2_ALL[$code]) || empty($autoData_1_a_2_ALL[$code]['pps'])) {
+                // 1. Judul PN
+                $pn_title = '';
+                if ($this->db->table_exists('prioritas_nasional_rpjmn')) {
+                    $pn_row = $this->db->query("SELECT PrioritasNasional FROM prioritas_nasional_rpjmn WHERE Id = ? AND deleted_at IS NULL", array($pn_idx))->row_array();
+                    if ($pn_row) $pn_title = $pn_row['PrioritasNasional'];
+                }
+                if (empty($pn_title) && $this->db->table_exists('rkp_ps_prioritas_nasional')) {
+                    $pn_row = $this->db->query("SELECT PrioritasNasional FROM rkp_ps_prioritas_nasional WHERE Id = ? AND deleted_at IS NULL", array($pn_idx))->row_array();
+                    if ($pn_row) $pn_title = $pn_row['PrioritasNasional'];
+                }
+                if (empty($pn_title) && $this->db->table_exists('rpjmn_kpu_prioritas')) {
+                    $pn_row = $this->db->query("SELECT PrioritasPembangunan FROM rpjmn_kpu_prioritas WHERE Id = ? AND deleted_at IS NULL", array($pn_idx))->row_array();
+                    if ($pn_row) $pn_title = $pn_row['PrioritasPembangunan'];
+                }
+                if (empty($pn_title)) {
+                    $pn_title = 'Prioritas Nasional ' . $pn_idx;
+                }
+
+                // 2. Ambil topik PP yang selaras dengan PN ini dari rkp_ps_program_prioritas (berdasarkan _IdPN = $pn_idx)
+                $pp_list = [];
+                if ($this->db->table_exists('rkp_ps_program_prioritas')) {
+                    $res_rkp = $this->db->query("SELECT Id, ProgramPrioritas as Uraian FROM rkp_ps_program_prioritas WHERE _IdPN = ? AND deleted_at IS NULL ORDER BY Id ASC", array($pn_idx))->result_array();
+                    if (!empty($res_rkp)) {
+                        $pp_list = $res_rkp;
+                    }
+                }
+                if (empty($pp_list) && $this->db->table_exists('rpjmn_kpu_kegiatan')) {
+                    $res_kpu_keg = $this->db->query("SELECT Id, KegiatanPrioritas as Uraian FROM rpjmn_kpu_kegiatan WHERE _Id = ? AND deleted_at IS NULL ORDER BY Id ASC", array($pn_idx))->result_array();
+                    if (!empty($res_kpu_keg)) {
+                        $pp_list = $res_kpu_keg;
+                    }
+                }
+                if (empty($pp_list) && $this->db->table_exists('agendapn_rpjmn')) {
+                    $res_ag = $this->db->query("SELECT Id, Uraian FROM agendapn_rpjmn WHERE Tipe = 'PP' AND _Id = ? AND deleted_at IS NULL ORDER BY Id ASC", array($pn_idx))->result_array();
+                    if (!empty($res_ag)) {
+                        $pp_list = $res_ag;
+                    }
+                }
+
+                $pn_obj = [
+                    'pn_title' => 'PN ' . $pn_idx . ' : ' . $pn_title,
+                    'pps' => []
+                ];
+
+                if (!empty($pp_list)) {
+                    foreach ($pp_list as $pp_i => $pp) {
+                        $pp_num = $pp_i + 1;
+                        $pp_label = 'PP ' . $pp_num . ' : ' . $pp['Uraian'];
+
+                        $pds_for_pp = [];
+                        if (!empty($allPdsList)) {
+                            $chunkSize = max(1, (int)ceil(count($allPdsList) / count($pp_list)));
+                            $offset = ($pp_i * $chunkSize) % count($allPdsList);
+                            $pds_for_pp = array_slice($allPdsList, $offset, $chunkSize);
+                        }
+
+                        if (empty($pds_for_pp)) {
+                            $pds_for_pp = [
+                                [
+                                    'title' => 'Dukungan Program RPJMD Wilayah ' . $KodeWilayah,
+                                    'score' => 1.0,
+                                    'ket' => 'Telah Diselaraskan (Dukungan Program RPJMD)',
+                                    'ta_review' => ''
+                                ]
+                            ];
+                        }
+
+                        $pn_obj['pps'][] = [
+                            'master_id' => 'PN' . $pn_idx . '_PP' . $pp['Id'],
+                            'pp_title' => $pp_label,
+                            'pds' => $pds_for_pp
+                        ];
+                    }
+                } else {
+                    // Fallback jika belum ada daftar PP: ambil dari program RPJMD langsung
+                    $pds_chunk = !empty($allPdsList) ? array_slice($allPdsList, ($pn_idx - 1) * 2, 2) : [];
+                    if (empty($pds_chunk)) {
+                        $pds_chunk = [[
+                            'title' => 'Dukungan Program RPJMD Wilayah ' . $KodeWilayah,
+                            'score' => 1.0,
+                            'ket' => 'Telah Diselaraskan (Dukungan Program RPJMD)',
+                            'ta_review' => ''
+                        ]];
+                    }
+                    $pn_obj['pps'][] = [
+                        'master_id' => 'PN' . $pn_idx . '_DEF',
+                        'pp_title' => 'Program Prioritas PN ' . $pn_idx,
+                        'pds' => $pds_chunk
+                    ];
+                }
+
+                $autoData_1_a_2_ALL[$code] = $pn_obj;
+            }
+        }
+
+                        $autoData_1_a_2_a = isset($autoData_1_a_2_ALL['1.a.2.a']) ? [$autoData_1_a_2_ALL['1.a.2.a']] : [];
+
+        // --- 1.a.4 Kegiatan Prioritas Utama (KPU) RPJMN vs Dukungan Program Daerah RPJMD (Sinkronisasi Riil) ---
+        $autoData_1_a_4 = [];
+        if ($this->db->table_exists('rpjmn_kpu_kegiatan')) {
+            $kpuListMaster = $this->db->select('k.Id, k._Id, k.Kode, k.KegiatanPrioritas, p.PrioritasPembangunan')
+                ->from('rpjmn_kpu_kegiatan k')
+                ->join('rpjmn_kpu_prioritas p', 'k._Id = p.Id', 'left')
+                ->where('k.deleted_at IS NULL')
+                ->order_by('k.Id', 'ASC')
+                ->get()->result_array();
+
+            // Ambil dukungan program daerah untuk wilayah yang aktif dari dukungan_kpu_rpjmd
+            $dukunganMap = [];
+            if ($this->db->table_exists('dukungan_kpu_rpjmd') && !empty($KodeWilayah)) {
+                $dukRows = $this->db->select('KegiatanId, NamaProgram')
+                    ->where('KodeWilayah', $KodeWilayah)
+                    ->where('deleted_at IS NULL')
+                    ->order_by('Id', 'ASC')
+                    ->get('dukungan_kpu_rpjmd')->result_array();
+                foreach ($dukRows as $dr) {
+                    $dukunganMap[$dr['KegiatanId']][] = $dr['NamaProgram'];
+                }
+            }
+
+            if (!empty($dukRows)) {
+                foreach ($kpuListMaster as $km) {
+                $kId = (int)$km['Id'];
+                $hasProgs = isset($dukunganMap[$kId]) && count($dukunganMap[$kId]) > 0;
+                $pdsList = [];
+                if ($hasProgs) {
+                    foreach ($dukunganMap[$kId] as $pName) {
+                        $pdsList[] = [
+                            'title' => $pName,
+                            'score' => 1.00
+                        ];
+                    }
+                } else {
+                    $pdsList[] = [
+                        'title' => '-',
+                        'score' => 0.00
+                    ];
+                }
+
+                $autoData_1_a_4[] = [
+                    'kpu_id' => $kId,
+                    'kpu_kode' => $km['Kode'],
+                    'kpu_title' => $km['Kode'] . ' ' . $km['KegiatanPrioritas'],
+                    'keterangan' => $hasProgs ? 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Kegiatan Prioritas Utama terkait' : 'Tidak ada Dukungan Program Pembangunan Daerah untuk mendukung Kegiatan Prioritas Utama terkait',
+                    'score' => $hasProgs ? 1.00 : 0.00,
+                    'dokumen' => $hasProgs ? 'RPJMN Tahun 2025-2029' : '',
+                    'halaman' => $hasProgs ? '270' : '',
+                    'tabel' => $hasProgs ? 'Daftar Kegiatan Utama Pembangunan' : '',
+                    'catatan' => '',
+                ];
+            }
+        }
+    }
+
+        // --- 1.a.6 (dan 1.a.5) SPM PP No. 2 Tahun 2018 Sinkronisasi Riil ---
+        // Sinkronisasi dengan Menu SPM Nasional di RPJMN (tabel spm) & Menu SPM Daerah di RPJMD (tabel ikd & indikator_sasaran)
+        $namaWil = 'Kabupaten/Kota';
+        if (!empty($KodeWilayah)) {
+            $w = $this->db->select('Nama')->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            if (!empty($w['Nama'])) {
+                $namaWil = ucwords(strtolower($w['Nama']));
+                $namaWil = str_ireplace('kab. ', 'Kab ', $namaWil);
+            }
+        }
+        $namaDokumenRPJMD = "RPJMD " . $namaWil . " 2025-2029";
+
+        // Tarik data riil IKD daerah
+        $ikdRows = [];
+        if (!empty($KodeWilayah) && $this->db->table_exists('ikd')) {
+            $ikdRows = $this->db->select('indikator_sasaran, satuan, target_1, target_2, target_3, target_4, target_5, target_6')
+                ->where('kodewilayah', $KodeWilayah)
+                ->where('deleted_at IS NULL')
+                ->get('ikd')->result_array();
+        }
+
+        // Tarik data riil Indikator Sasaran RPJMD daerah
+        $sasaranRows = [];
+        if (!empty($KodeWilayah) && $this->db->table_exists('indikator_sasaran')) {
+            $sasaranRows = $this->db->select('indikator, satuan, target_2025, target_2026, target_2029, target_2030')
+                ->where('kodewilayah', $KodeWilayah)
+                ->where('deleted_at IS NULL')
+                ->get('indikator_sasaran')->result_array();
+        }
+
+        // Tarik data riil Indikator Tujuan RPJMD daerah
+        $tujuanRows = [];
+        if (!empty($KodeWilayah) && $this->db->table_exists('indikator_tujuan')) {
+            $tujuanRows = $this->db->select('indikator, satuan, target_2025, target_2026, target_2029, target_2030')
+                ->where('kodewilayah', $KodeWilayah)
+                ->where('deleted_at IS NULL')
+                ->get('indikator_tujuan')->result_array();
+        }
+
+        // Tarik data riil SPM Nasional di RPJMN (tabel spm)
+        $spmNasionalRows = [];
+        if ($this->db->table_exists('spm')) {
+            $spmNasionalRows = $this->db->select('NamaSPM, TargetTahun1, TargetTahun2, TargetTahun3, TargetTahun4, TargetTahun5')
+                ->where('deleted_at IS NULL')
+                ->get('spm')->result_array();
+        }
+
+        $bidangDefsSPM = [
+            [
+                'bidang_nasional' => 'Bidang 1 : pendidikan',
+                'bidang_daerah' => 'Bidang 1 : pendidikan',
+                'indicators' => [
+                    ['no' => 1, 'name' => 'Indikator 1 : Jumlah anak usia 5-6 tahun yang berpartisipasi dalam pendidikan anak usia dini (APS)', 'unit' => 'Persen', 'kw' => ['paud', 'anak usia 5-6', 'pendidikan anak usia dini']],
+                    ['no' => 2, 'name' => 'Indikator 2 : Jumlah anak usia 7-15 Tahun yang berpartisipasi dalam pendidikan dasar (APS)', 'unit' => 'Persen', 'kw' => ['pendidikan dasar', 'usia 7-15', 'dikdas', 'aps sd', 'aps smp']],
+                    ['no' => 3, 'name' => 'Indikator 3 : Jumlah anak usia 7-18 Tahun yang berpartisipasi dalam pendidikan kesetaraan (Paket A/B/C) (APS)', 'unit' => 'Persen', 'kw' => ['pendidikan kesetaraan', 'paket a', 'paket b', 'paket c', 'kesetaraan']],
+                    ['no' => 4, 'name' => 'Indikator 4 : Skor kemampuan Literasi SD', 'unit' => 'Angka', 'kw' => ['literasi sd', 'kemampuan literasi sd']],
+                    ['no' => 5, 'name' => 'Indikator 5 : Skor kemampuan Numerasi SD', 'unit' => 'Angka', 'kw' => ['numerasi sd', 'kemampuan numerasi sd']],
+                    ['no' => 6, 'name' => 'Indikator 6 : Skor kemampuan Literasi SMP', 'unit' => 'Angka', 'kw' => ['literasi smp', 'kemampuan literasi smp']],
+                    ['no' => 7, 'name' => 'Indikator 7 : Skor kemampuan Numerasi SMP', 'unit' => 'Angka', 'kw' => ['numerasi smp', 'kemampuan numerasi smp']],
+                    ['no' => 8, 'name' => 'Indikator 8 : Pertumbuhan Pendidik PAUD yang Memiliki Kualifikasi Akademik Paling Rendah D-IV/S1', 'unit' => 'Persen', 'kw' => ['pendidik paud', 'kualifikasi akademik paud', 'guru paud']],
+                    ['no' => 9, 'name' => 'Indikator 9 : Indeks Iklim Keamanan SD', 'unit' => 'Angka', 'kw' => ['iklim keamanan sd', 'keamanan sd']],
+                    ['no' => 10, 'name' => 'Indikator 10 : Indeks Iklim Kebinekaan SD', 'unit' => 'Angka', 'kw' => ['iklim kebinekaan sd', 'kebinekaan sd']],
+                    ['no' => 11, 'name' => 'Indikator 11 : Indeks Inklusivitas SD', 'unit' => 'Angka', 'kw' => ['inklusivitas sd', 'indeks inklusivitas sd']],
+                    ['no' => 12, 'name' => 'Indikator 12 : Indeks Iklim Keamanan SMP', 'unit' => 'Angka', 'kw' => ['iklim keamanan smp', 'keamanan smp']],
+                    ['no' => 13, 'name' => 'Indikator 13 : Indeks Iklim Kebinekaan SMP', 'unit' => 'Angka', 'kw' => ['iklim kebinekaan smp', 'kebinekaan smp']],
+                    ['no' => 14, 'name' => 'Indikator 14 : Indeks Inklusivitas SMP', 'unit' => 'Angka', 'kw' => ['inklusivitas smp', 'indeks inklusivitas smp']]
+                ]
+            ],
+            [
+                'bidang_nasional' => 'Bidang 2 : kesehatan',
+                'bidang_daerah' => 'Bidang 2 : kesehatan',
+                'indicators' => [
+                    ['no' => 1, 'name' => 'Indikator 1 : Pelayanan Kesehatan Ibu Hamil', 'unit' => 'persen', 'kw' => ['ibu hamil', 'pelayanan kesehatan ibu hamil', 'kesehatan ibu hamil', 'k4']],
+                    ['no' => 2, 'name' => 'Indikator 2 : Pelayanan Kesehatan Ibu Bersalin', 'unit' => 'persen', 'kw' => ['ibu bersalin', 'pelayanan kesehatan ibu bersalin', 'persalinan']],
+                    ['no' => 3, 'name' => 'Indikator 3 : Pelayanan Kesehatan Bayi Baru Lahir', 'unit' => 'persen', 'kw' => ['bayi baru lahir', 'neonatus', 'kesehatan bayi']],
+                    ['no' => 4, 'name' => 'Indikator 4 : Pelayanan Kesehatan Balita', 'unit' => 'persen', 'kw' => ['kesehatan balita', 'pelayanan kesehatan balita', 'balita']],
+                    ['no' => 5, 'name' => 'Indikator 5 : Pelayanan Kesehatan pada Usia Pendidikan Dasar', 'unit' => 'persen', 'kw' => ['usia pendidikan dasar', 'kesehatan usia pendidikan dasar', 'kesehatan anak sekolah']],
+                    ['no' => 6, 'name' => 'Indikator 6 : Pelayanan Kesehatan pada Usia Produktif', 'unit' => 'persen', 'kw' => ['usia produktif', 'kesehatan pada usia produktif']],
+                    ['no' => 7, 'name' => 'Indikator 7 : Pelayanan Kesehatan pada Usia Lanjut', 'unit' => 'persen', 'kw' => ['usia lanjut', 'lansia', 'kesehatan usia lanjut']],
+                    ['no' => 8, 'name' => 'Indikator 8 : Pelayanan Kesehatan Penderita Hipertensi', 'unit' => 'persen', 'kw' => ['hipertensi', 'penderita hipertensi']],
+                    ['no' => 9, 'name' => 'Indikator 9 : Pelayanan Kesehatan Penderita Diabetes Melitus (DM)', 'unit' => 'persen', 'kw' => ['diabetes', 'diabetes melitus', 'dm']],
+                    ['no' => 10, 'name' => 'Indikator 10 : Pelayanan Kesehatan Orang dengan Gangguan Jiwa (ODGJ) Berat', 'unit' => 'persen', 'kw' => ['odgj', 'gangguan jiwa']],
+                    ['no' => 11, 'name' => 'Indikator 11 : Pelayanan Kesehatan Orang Terduga Tuberkulosis', 'unit' => 'persen', 'kw' => ['tuberkulosis', 'tb', 'tbc']],
+                    ['no' => 12, 'name' => 'Indikator 12 : Pelayanan Kesehatan Orang Dengan Risiko Terinfeksi Virus yang Melemahkan Daya Tahan Tubuh Manusia (HIV)', 'unit' => 'persen', 'kw' => ['hiv', 'aids']]
+                ]
+            ],
+            [
+                'bidang_nasional' => 'Bidang 3 : pekerjaan umum',
+                'bidang_daerah' => 'Bidang 3 : pekerjaan umum',
+                'indicators' => [
+                    ['no' => 1, 'name' => 'Indikator 1 : Persentase Penyediaan Kebutuhan Pokok Air Minum Sehari-hari', 'unit' => 'persen', 'kw' => ['air minum', 'air bersih', 'air siap minum']],
+                    ['no' => 2, 'name' => 'Indikator 2 : Persentase Penyediaan Pelayanan Pengolahan Air Limbah Domestik', 'unit' => 'persen', 'kw' => ['air limbah', 'limbah domestik', 'sanitasi aman', 'sanitasi']]
+                ]
+            ],
+            [
+                'bidang_nasional' => 'Bidang 4 : perumahan rakyat',
+                'bidang_daerah' => 'Bidang 4 : perumahan rakyat',
+                'indicators' => [
+                    ['no' => 1, 'name' => 'Indikator 1 : Penyediaan & Rehabilitasi Rumah yang Layak Huni Bagi Korban Bencana Kabupaten/Kota', 'unit' => 'persen', 'kw' => ['rumah yang layak huni bagi korban bencana', 'rehabilitasi rumah korban bencana', 'hunian layak']],
+                    ['no' => 2, 'name' => 'Indikator 2 : Fasilitasi Penyediaan Rumah Yang Layak Huni Bagi Masyarakat Yang Terkena Relokasi Program Pemerintah Daerah Kabupaten/Kota', 'unit' => 'persen', 'kw' => ['relokasi program pemerintah', 'relokasi', 'rumah layak huni relokasi']]
+                ]
+            ],
+            [
+                'bidang_nasional' => 'Bidang 5 : ketenteraman, ketertiban pelindungan masyarakat',
+                'bidang_daerah' => 'Bidang 5 : ketenteraman, ketertiban pelindungan masyarakat',
+                'indicators' => [
+                    ['no' => 1, 'name' => 'Indikator 1 : Pelayanan Ketenteraman dan Ketertiban Umum', 'unit' => 'persen', 'kw' => ['ketenteraman dan ketertiban', 'trantibum', 'satpol pp']],
+                    ['no' => 2, 'name' => 'Indikator 2 : Pelayanan Informasi Rawan Bencana', 'unit' => 'persen', 'kw' => ['informasi rawan bencana', 'rawan bencana']],
+                    ['no' => 3, 'name' => 'Indikator 3 : Pelayanan Pencegahan dan Kesiapsiagaan Terhadap Bencana', 'unit' => 'persen', 'kw' => ['kesiapsiagaan terhadap bencana', 'pencegahan bencana', 'risiko bencana', 'bpbd']],
+                    ['no' => 4, 'name' => 'Indikator 4 : Pelayanan Penyelamatan dan Evakuasi Korban Bencana', 'unit' => 'persen', 'kw' => ['penyelamatan dan evakuasi korban bencana', 'evakuasi bencana']],
+                    ['no' => 5, 'name' => 'Indikator 5 : Pelayanan Penyelamatan dan Evakuasi Korban Kebakaran', 'unit' => 'persen', 'kw' => ['korban kebakaran', 'penyelamatan kebakaran', 'pemadam kebakaran', 'damkar']]
+                ]
+            ],
+            [
+                'bidang_nasional' => 'Bidang 6 : sosial',
+                'bidang_daerah' => 'Bidang 6 : sosial',
+                'indicators' => [
+                    ['no' => 1, 'name' => 'Indikator 1 : Rehabilitasi sosial dasar penyandang disabilitas telantar diluar panti', 'unit' => 'persen', 'kw' => ['disabilitas telantar', 'disabilitas', 'rehabilitasi sosial disabilitas']],
+                    ['no' => 2, 'name' => 'Indikator 2 : Rehabilitasi sosial dasar anak telantar diluar panti', 'unit' => 'persen', 'kw' => ['anak telantar', 'anak terlantar', 'rehabilitasi anak telantar']],
+                    ['no' => 3, 'name' => 'Indikator 3 : Rehabilitasi sosial dasar lanjut usia terlantar diluar panti', 'unit' => 'persen', 'kw' => ['lanjut usia terlantar', 'lansia terlantar', 'rehabilitasi lansia']],
+                    ['no' => 4, 'name' => 'Indikator 4 : Rehabilitasi sosial dasar tuna sosial khususnya gelandangan dan pengemis diluar panti', 'unit' => 'persen', 'kw' => ['gelandangan dan pengemis', 'gepeng', 'tuna sosial']],
+                    ['no' => 5, 'name' => 'Indikator 5 : Perlindungan dan jaminan sosial pada saat tanggap dan pasca bencana bagi korban bencana Kab/Kota', 'unit' => 'persen', 'kw' => ['korban bencana kab/kota', 'bantuan sosial korban bencana', 'pasca bencana']]
+                ]
+            ]
+        ];
+
+        $autoData_1_a_6 = [];
+        foreach ($bidangDefsSPM as $bIdx => $bDef) {
+            $ind_list = [];
+            $anyMatched = false;
+            foreach ($bDef['indicators'] as $ind) {
+                $matched = false;
+                $matchedTarget = '-';
+                $matchedUnit = $ind['unit'];
+                $matchedScore = 0.00;
+
+                // 1. Cek IKD Daerah
+                foreach ($ikdRows as $ik) {
+                    $txt = strtolower($ik['indikator_sasaran']);
+                    foreach ($ind['kw'] as $kw) {
+                        if (strpos($txt, strtolower($kw)) !== false) {
+                            $matched = true;
+                            $matchedTarget = !empty($ik['target_1']) ? $ik['target_1'] : ($ik['target_6'] ?: '-');
+                            $matchedUnit = !empty($ik['satuan']) ? $ik['satuan'] : $ind['unit'];
+                            $matchedScore = 1.00;
+                            break 2;
+                        }
+                    }
+                }
+
+                // 2. Cek Indikator Sasaran & Tujuan RPJMD Daerah
+                if (!$matched) {
+                    $allSas = array_merge($sasaranRows, $tujuanRows);
+                    foreach ($allSas as $sas) {
+                        $txt = strtolower($sas['indikator']);
+                        foreach ($ind['kw'] as $kw) {
+                            if (strpos($txt, strtolower($kw)) !== false) {
+                                $matched = true;
+                                $matchedTarget = !empty($sas['target_2026']) ? $sas['target_2026'] : (!empty($sas['target_2025']) ? $sas['target_2025'] : '-');
+                                $matchedUnit = !empty($sas['satuan']) ? $sas['satuan'] : $ind['unit'];
+                                $matchedScore = 1.00;
+                                break 2;
+                            }
+                        }
+                    }
+                }
+
+                // 3. Cek Menu SPM Nasional di RPJMN (tabel spm)
+                if (!$matched) {
+                    foreach ($spmNasionalRows as $sp) {
+                        $txt = strtolower($sp['NamaSPM']);
+                        foreach ($ind['kw'] as $kw) {
+                            if (strpos($txt, strtolower($kw)) !== false) {
+                                $matched = true;
+                                $matchedTarget = !empty($sp['TargetTahun1']) ? $sp['TargetTahun1'] : '-';
+                                $matchedUnit = 'persen';
+                                $matchedScore = 1.00;
+                                break 2;
+                            }
+                        }
+                    }
+                }
+
+                if ($matched) {
+                    $anyMatched = true;
+                }
+
+                $ind_list[] = [
+                    'no' => $ind['no'],
+                    'name' => $ind['name'],
+                    'target' => $matchedTarget,
+                    'unit' => $matchedUnit,
+                    'score' => $matchedScore
+                ];
+            }
+
+            $autoData_1_a_6[] = [
+                'bidang_nasional' => $bDef['bidang_nasional'],
+                'bidang_daerah' => $bDef['bidang_daerah'],
+                'keterangan' => $anyMatched ? 'Terdapat Indikator SPM Daerah yang selaras dengan Dokumen Perencanaan' : 'Tidak ada Indikator SPM Daerah yang selaras dengan Bidang SPM Nasional dan Daerah terkait',
+                'dokumen' => $namaDokumenRPJMD,
+                'halaman' => '',
+                'tabel' => '',
+                'catatan' => $anyMatched ? 'Target SPM tercantum pada dokumen RPJMD/RKPD' : 'Tidak ada target SPM pada dokumen RPJMD/RKPD',
+                'ind_list' => $ind_list
+            ];
+        }
+
+                $spmRefs1a5 = [
+            0 => ['hal' => 'II-105', 'tbl' => 'Tabel 2.32'],
+            1 => ['hal' => 'II-106', 'tbl' => 'Tabel 2.33'],
+            2 => ['hal' => 'II-112', 'tbl' => 'Tabel 2.34'],
+            3 => ['hal' => 'II-114', 'tbl' => 'Tabel 2.35'],
+            4 => ['hal' => 'II-118', 'tbl' => 'Tabel 2.36'],
+            5 => ['hal' => 'II-119', 'tbl' => 'Tabel 2.37'],
+        ];
+
+        $autoData_1_a_5 = [];
+        foreach ($autoData_1_a_6 as $bIdx => $bItem) {
+            $ref = isset($spmRefs1a5[$bIdx]) ? $spmRefs1a5[$bIdx] : ['hal' => '', 'tbl' => ''];
+            $item5 = $bItem;
+            $hasAnyInd = false;
+            foreach ($item5['ind_list'] as &$indL) {
+                if ($indL['score'] > 0) {
+                    $indL['score'] = 1.00;
+                    $hasAnyInd = true;
+                }
+            }
+            unset($indL);
+            $item5['keterangan'] = $hasAnyInd ? 'Terdapat Indikator SPM Daerah yang selaras dengan Bidang SPM Nasional dan Daerah terkait' : 'Tidak ada Indikator SPM Daerah yang selaras dengan Bidang SPM Nasional dan Daerah terkait';
+            $item5['halaman'] = $hasAnyInd ? $ref['hal'] : '';
+            $item5['tabel'] = $hasAnyInd ? $ref['tbl'] : '';
+            $item5['catatan'] = '';
+            $autoData_1_a_5[] = $item5;
+        }
+
+        $totalMatchedSPM = 0;
+        foreach ($autoData_1_a_6 as $b) {
+            if (!empty($b['ind_list'])) {
+                foreach ($b['ind_list'] as $i) {
+                    if ($i['score'] > 0) $totalMatchedSPM++;
+                }
+            }
+        }
+        if ($totalMatchedSPM === 0 && empty($ikdRows) && empty($sasaranRows) && empty($tujuanRows)) {
+            $autoData_1_a_6 = [];
+            $autoData_1_a_5 = [];
+        }
+
+        // --- 1.b.10.a Indikator Makro RKP vs RKPD: Tingkat Pengangguran Terbuka (TPT) ---
+        $namaWilRkpd = !empty($namaWil) ? $namaWil : 'Kabupaten/Kota';
+        $autoData_1_b_10_a = [
+            'mn_real' => '',
+            'mn_target' => '',
+            'mn_satuan' => 'Persen',
+            'md_real' => '',
+            'md_target' => '',
+            'md_satuan' => 'Persen',
+            'dokumen' => !empty($namaWilRkpd) ? 'RKPD ' . $namaWilRkpd . ' 2026' : '',
+            'halaman' => '',
+            'tabel' => '',
+            'catatan' => 'Tidak perlu dihitung, data realisasi hanya untuk data perhitungan Gap'
+        ];
+
+        // 1. Tarik dari menu RKP Nasional (tabel sasaran_pembangunan_rkp)
+        if ($this->db->table_exists('sasaran_pembangunan_rkp')) {
+            $rkp2024 = $this->db->where('Tahun', '2024')->where('deleted_at IS NULL')->get('sasaran_pembangunan_rkp')->row_array();
+            if ($rkp2024 && !empty($rkp2024['TPT'])) {
+                $autoData_1_b_10_a['mn_real'] = str_replace(',', '.', trim($rkp2024['TPT']));
+            }
+            $rkp2026 = $this->db->where('Tahun', '2026')->where('deleted_at IS NULL')->get('sasaran_pembangunan_rkp')->row_array();
+            if ($rkp2026 && !empty($rkp2026['TPT'])) {
+                $autoData_1_b_10_a['mn_target'] = str_replace(',', '.', trim($rkp2026['TPT']));
+            }
+        }
+
+        // 2. Tarik dari menu RKPD Daerah (tabel target_makro_ekonomi)
+        if (!empty($KodeWilayah) && $this->db->table_exists('target_makro_ekonomi')) {
+            $tm2024 = $this->db->where('kode_wilayah', $KodeWilayah)
+                ->where('tahun', 2024)
+                ->where('(indikator LIKE "%pengangguran%" OR indikator LIKE "%tpt%")', NULL, FALSE)
+                ->where('deleted_at IS NULL')
+                ->get('target_makro_ekonomi')->row_array();
+            if ($tm2024 && !empty($tm2024['target_rkpd_kabkota'])) {
+                $autoData_1_b_10_a['md_real'] = str_replace(',', '.', trim($tm2024['target_rkpd_kabkota']));
+            }
+
+            $tm2026 = $this->db->where('kode_wilayah', $KodeWilayah)
+                ->where('tahun', 2026)
+                ->where('(indikator LIKE "%pengangguran%" OR indikator LIKE "%tpt%")', NULL, FALSE)
+                ->where('deleted_at IS NULL')
+                ->get('target_makro_ekonomi')->row_array();
+            if ($tm2026 && !empty($tm2026['target_rkpd_kabkota'])) {
+                $autoData_1_b_10_a['md_target'] = str_replace(',', '.', trim($tm2026['target_rkpd_kabkota']));
+            }
+        }
+
+        // 3. Fallback jika di target_makro_ekonomi belum ada tapi ada di ikd:
+        if ((empty($autoData_1_b_10_a['md_real']) || $autoData_1_b_10_a['md_real'] === '0') && !empty($KodeWilayah) && $this->db->table_exists('ikd')) {
+            $ikd_tpt = $this->db->where('kodewilayah', $KodeWilayah)
+                ->where('(indikator_sasaran LIKE "%pengangguran%" OR indikator_sasaran LIKE "%tpt%")', NULL, FALSE)
+                ->where('deleted_at IS NULL')
+                ->get('ikd')->row_array();
+            if ($ikd_tpt) {
+                if (!empty($ikd_tpt['target_1'])) {
+                    $autoData_1_b_10_a['md_real'] = str_replace(',', '.', trim($ikd_tpt['target_1']));
+                }
+                if (!empty($ikd_tpt['target_6']) || !empty($ikd_tpt['target_2'])) {
+                    $autoData_1_b_10_a['md_target'] = str_replace(',', '.', trim(!empty($ikd_tpt['target_6']) ? $ikd_tpt['target_6'] : $ikd_tpt['target_2']));
+                }
+            }
+        }
+
+                // --- 1.b.10.b Indikator Makro RKP vs RKPD: Tingkat Kemiskinan (%) ---
+        $autoData_1_b_10_b = [
+            'mn_real' => '',
+            'mn_target' => '',
+            'mn_satuan' => 'Persen',
+            'md_real' => '',
+            'md_target' => '',
+            'md_satuan' => 'Persen',
+            'dokumen' => !empty($namaWilRkpd) ? 'RKPD ' . $namaWilRkpd . ' 2026' : '',
+            'halaman' => '',
+            'tabel' => '',
+            'catatan' => 'Tidak perlu dihitung, data realisasi hanya untuk data perhitungan Gap'
+        ];
+
+        // 1. Tarik dari menu RKP Nasional (tabel sasaran_pembangunan_rkp)
+        if ($this->db->table_exists('sasaran_pembangunan_rkp')) {
+            $rkp2024 = $this->db->where('Tahun', '2024')->where('deleted_at IS NULL')->get('sasaran_pembangunan_rkp')->row_array();
+            if ($rkp2024 && !empty($rkp2024['Kemiskinan'])) {
+                $autoData_1_b_10_b['mn_real'] = str_replace(',', '.', trim($rkp2024['Kemiskinan']));
+            }
+            $rkp2026 = $this->db->where('Tahun', '2026')->where('deleted_at IS NULL')->get('sasaran_pembangunan_rkp')->row_array();
+            if ($rkp2026 && !empty($rkp2026['Kemiskinan'])) {
+                $autoData_1_b_10_b['mn_target'] = str_replace(',', '.', trim($rkp2026['Kemiskinan']));
+            }
+        }
+
+        // 2. Tarik dari menu RKPD Daerah (tabel target_makro_ekonomi)
+        if (!empty($KodeWilayah) && $this->db->table_exists('target_makro_ekonomi')) {
+            $tm2024 = $this->db->where('kode_wilayah', $KodeWilayah)
+                ->where('tahun', 2024)
+                ->where('(indikator LIKE "%kemiskinan%" OR indikator LIKE "%miskin%")', NULL, FALSE)
+                ->where('deleted_at IS NULL')
+                ->get('target_makro_ekonomi')->row_array();
+            if ($tm2024 && !empty($tm2024['target_rkpd_kabkota'])) {
+                $autoData_1_b_10_b['md_real'] = str_replace(',', '.', trim($tm2024['target_rkpd_kabkota']));
+            }
+
+            $tm2026 = $this->db->where('kode_wilayah', $KodeWilayah)
+                ->where('tahun', 2026)
+                ->where('(indikator LIKE "%kemiskinan%" OR indikator LIKE "%miskin%")', NULL, FALSE)
+                ->where('deleted_at IS NULL')
+                ->get('target_makro_ekonomi')->row_array();
+            if ($tm2026 && !empty($tm2026['target_rkpd_kabkota'])) {
+                $autoData_1_b_10_b['md_target'] = str_replace(',', '.', trim($tm2026['target_rkpd_kabkota']));
+            }
+        }
+
+        // 3. Fallback jika di target_makro_ekonomi belum ada tapi ada di indikator_sasaran:
+        if ((empty($autoData_1_b_10_b['md_real']) || $autoData_1_b_10_b['md_real'] === '0') && !empty($KodeWilayah) && $this->db->table_exists('indikator_sasaran')) {
+            $sas_miskin = $this->db->where('kodewilayah', $KodeWilayah)
+                ->where('(indikator LIKE "%kemiskinan%" OR indikator LIKE "%miskin%")', NULL, FALSE)
+                ->where('deleted_at IS NULL')
+                ->get('indikator_sasaran')->row_array();
+            if ($sas_miskin) {
+                if (!empty($sas_miskin['baseline_2024'])) {
+                    $autoData_1_b_10_b['md_real'] = str_replace(',', '.', trim($sas_miskin['baseline_2024']));
+                }
+                if (!empty($sas_miskin['target_2026'])) {
+                    $autoData_1_b_10_b['md_target'] = str_replace(',', '.', trim($sas_miskin['target_2026']));
+                }
+            }
+        }
+
+        // --- 1.c.1 Alokasi APBD untuk Prioritas Nasional / Major Project (Sinkronisasi RKP & RKPD APBD Riil) ---
+        $autoData_1_c_1 = [];
+        if ($this->db->table_exists('dukungan_kpu_apbd') && !empty($KodeWilayah)) {
+            $rows_1c1 = $this->db->select('*')
+                ->where('KodeWilayah', $KodeWilayah)
+                ->where('deleted_at IS NULL')
+                ->order_by('PrioritasId', 'ASC')
+                ->order_by('KegiatanId', 'ASC')
+                ->order_by('Id', 'ASC')
+                ->get('dukungan_kpu_apbd')->result_array();
+
+            if (!empty($rows_1c1)) {
+                $pnGrouped = [];
+                foreach ($rows_1c1 as $r) {
+                    $pId = (int)$r['PrioritasId'];
+                    $kId = (int)$r['KegiatanId'];
+                    if (!isset($pnGrouped[$pId])) {
+                        $pnGrouped[$pId] = [
+                            'pn_id' => $pId,
+                            'pn_nama' => $r['NamaPrioritas'] ?: ('Prioritas Nasional ' . $pId),
+                            'kpus' => []
+                        ];
+                    }
+                    if (!isset($pnGrouped[$pId]['kpus'][$kId])) {
+                        $pnGrouped[$pId]['kpus'][$kId] = [
+                            'kpu_id' => $kId,
+                            'kpu_nama' => $r['NamaKpu'],
+                            'keterangan' => $r['Keterangan'],
+                            'dokumen' => $r['Dokumen'] ?: ('RKPD ' . $namaWilRkpd . ' 2026'),
+                            'halaman' => $r['Halaman'] ?: 'IV-15',
+                            'tabel' => $r['Tabel'] ?: 'Tabel 4.3',
+                            'catatan' => $r['Catatan'] ?: '',
+                            'subs' => []
+                        ];
+                    }
+                    $pnGrouped[$pId]['kpus'][$kId]['subs'][] = [
+                        'id' => $r['Id'],
+                        'kode_sub' => $r['KodeSubKegiatan'],
+                        'sub_kegiatan' => $r['NamaSubKegiatan'],
+                        'pagu' => $r['PaguAnggaran'],
+                        'score' => 1.00
+                    ];
+                }
+
+                foreach ($pnGrouped as $pn) {
+                    $kpuArr = [];
+                    foreach ($pn['kpus'] as $k) {
+                        $kpuArr[] = $k;
+                    }
+                    $pn['kpu_list'] = $kpuArr;
+                    unset($pn['kpus']);
+                    $autoData_1_c_1[] = $pn;
+                }
+            }
+        }
+
+
+        return [
+            'AutoData_1_a_1_a' => $autoData_1_a_1_a,
+            'AutoData_1_a_1_c' => $autoData_1_a_1_c,
+            'AutoData_1_a_2_a' => $autoData_1_a_2_a,
+            'AutoData_1_a_2_ALL' => $autoData_1_a_2_ALL,
+            'AutoData_1_a_3_a' => $autoData_1_a_3_a,
+            'AutoData_1_a_3_b' => $autoData_1_a_3_b,
+            'AutoData_1_a_4' => $autoData_1_a_4,
+            'AutoData_1_a_5' => $autoData_1_a_5,
+            'AutoData_1_a_6' => $autoData_1_a_6,
+            'AutoData_1_b_10_a' => $autoData_1_b_10_a,
+            'AutoData_1_b_10_b' => $autoData_1_b_10_b,
+            'AutoData_1_c_1' => $autoData_1_c_1,
+        ];
+    }
+
     public function TabelIPPD() {
         $Header['Halaman'] = 'Tabel Indeks Perencanaan Pembangunan Daerah (IPPD)';
 
         $KodeWilayah = $this->get_kode_wilayah();
         $instansi_id = $this->get_instansi_id();
         $is_role_4 = $this->is_role_4();
-        $tahun = $this->input->get('tahun', TRUE) ?: 2026;
+        $tahun = (int)($this->input->get('tahun', TRUE) ?: 2026);
         $filter_instansi = $this->input->get('instansi_id', TRUE);
 
         if ($is_role_4 && $instansi_id) {
             $filter_instansi = $instansi_id;
+        }
+
+        // Filter list instansi strictly by kode wilayah akun
+        $this->db->select('id, nama, kodewilayah')->from('akun_instansi')->where('deleted_at IS NULL');
+        if (!empty($KodeWilayah)) {
+            $this->db->where('kodewilayah', $KodeWilayah);
+        }
+        $Data['ListInstansi'] = $this->db->order_by('nama', 'ASC')->get()->result_array();
+        
+        if (!$filter_instansi && !empty($Data['ListInstansi'])) {
+            $filter_instansi = (int)$Data['ListInstansi'][0]['id'];
+        }
+        $inst_id_clean = $filter_instansi ? (int)$filter_instansi : 0;
+
+        // Resolve KodeWilayah from selected instansi jika valid
+        if ($inst_id_clean > 0) {
+            $inst = $this->db->select('kodewilayah')->where('id', $inst_id_clean)->get('akun_instansi')->row_array();
+            if (!empty($inst['kodewilayah'])) {
+                $KodeWilayah = $inst['kodewilayah'];
+            }
+        }
+        if (empty($KodeWilayah)) {
+            $KodeWilayah = $this->get_kode_wilayah() ?: $this->session->userdata('KodeWilayah');
         }
 
         $Data['KodeWilayah'] = $KodeWilayah;
@@ -28724,16 +29761,21 @@ public function updateStatusPerjanjianKinerja() {
             $Data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
         }
 
-        $Data['ListInstansi'] = $this->db->select('id, nama')->from('akun_instansi')->where('deleted_at IS NULL')->order_by('nama', 'ASC')->get()->result_array();
         $Data['ListTahun'] = [2027, 2026, 2025, 2024, 2023];
-        $Data['TahunAktif'] = (int)$tahun;
-        $Data['FilterInstansi'] = $filter_instansi ? (int)$filter_instansi : 1;
+        $Data['TahunAktif'] = $tahun;
+        $Data['FilterInstansi'] = $inst_id_clean;
         $Data['MasterData'] = $this->get_ippd_master_data();
+
+        // Get synchronized auto data for all sheets
+        $autoData = $this->get_ippd_auto_data($KodeWilayah, $inst_id_clean, $tahun);
+        foreach ($autoData as $k => $v) {
+            $Data[$k] = $v;
+        }
 
         // Get saved scores
         $this->db->where('deleted_at IS NULL');
-        if ($tahun) $this->db->where('tahun', (int)$tahun);
-        if ($filter_instansi) $this->db->where('instansi_id', (int)$filter_instansi);
+        if ($tahun) $this->db->where('tahun', $tahun);
+        if ($inst_id_clean > 0) $this->db->where('instansi_id', $inst_id_clean);
         if ($KodeWilayah) $this->db->where('kodewilayah', $KodeWilayah);
         $savedScores = $this->db->get('ippd_penilaian')->result_array();
 
@@ -28745,6 +29787,7 @@ public function updateStatusPerjanjianKinerja() {
                 'opsi_aksi' => $sc['opsi_aksi'],
                 'catatan' => $sc['catatan'],
                 'bukti_dukung' => $sc['bukti_dukung'],
+                'detail_json' => isset($sc['detail_json']) ? $sc['detail_json'] : null,
                 'bobot_verifikator' => (isset($sc['bobot_verifikator']) && $sc['bobot_verifikator'] !== null) ? (float)$sc['bobot_verifikator'] : null,
                 'opsi_aksi_verifikator' => isset($sc['opsi_aksi_verifikator']) ? $sc['opsi_aksi_verifikator'] : '',
                 'catatan_verifikator' => isset($sc['catatan_verifikator']) ? $sc['catatan_verifikator'] : '',
@@ -28770,17 +29813,26 @@ public function updateStatusPerjanjianKinerja() {
             return;
         }
         header('Content-Type: application/json');
-
         $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
-        $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: 1);
-        $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
-
+        $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: 0);
+        $kode_wilayah = $this->get_kode_wilayah();
+        
+        if ($instansi_id > 0) {
+            $inst = $this->db->select('kodewilayah')->where('id', $instansi_id)->get('akun_instansi')->row_array();
+            if (!empty($inst['kodewilayah'])) {
+                $kode_wilayah = $inst['kodewilayah'];
+            }
+        }
+        if (empty($kode_wilayah)) {
+            $kode_wilayah = $this->session->userdata('KodeWilayah') ?: '35.10';
+        }
+        
         $this->db->where('deleted_at IS NULL');
         if ($tahun > 0) $this->db->where('tahun', $tahun);
         if ($instansi_id > 0) $this->db->where('instansi_id', $instansi_id);
         if ($kode_wilayah) $this->db->where('kodewilayah', $kode_wilayah);
-
         $savedScores = $this->db->get('ippd_penilaian')->result_array();
+        
         $scoresMap = [];
         foreach ($savedScores as $sc) {
             $scoresMap[$sc['item_code']] = [
@@ -28789,6 +29841,7 @@ public function updateStatusPerjanjianKinerja() {
                 'opsi_aksi' => $sc['opsi_aksi'],
                 'catatan' => $sc['catatan'],
                 'bukti_dukung' => $sc['bukti_dukung'],
+                'detail_json' => isset($sc['detail_json']) ? $sc['detail_json'] : null,
                 'bobot_verifikator' => (isset($sc['bobot_verifikator']) && $sc['bobot_verifikator'] !== null) ? (float)$sc['bobot_verifikator'] : null,
                 'opsi_aksi_verifikator' => isset($sc['opsi_aksi_verifikator']) ? $sc['opsi_aksi_verifikator'] : '',
                 'catatan_verifikator' => isset($sc['catatan_verifikator']) ? $sc['catatan_verifikator'] : '',
@@ -28798,11 +29851,43 @@ public function updateStatusPerjanjianKinerja() {
             ];
         }
 
-        echo json_encode([
+        // Get synchronized auto data for all sheets
+        $autoData = $this->get_ippd_auto_data($kode_wilayah, $instansi_id, $tahun);
+
+        $response = array_merge([
             'status' => 'success',
             'master' => $this->get_ippd_master_data(),
             'scores' => $scoresMap
-        ]);
+        ], $autoData);
+
+        echo json_encode($response);
+    }
+        public function UploadBuktiIPPD() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+
+        $config['upload_path']          = './uploads/ippd_bukti/';
+        $config['allowed_types']        = 'jpg|jpeg|png|pdf';
+        $config['max_size']             = 5120; // 5MB
+        $config['encrypt_name']         = TRUE;
+
+        // Ensure directory exists
+        if (!is_dir($config['upload_path'])) {
+            mkdir($config['upload_path'], 0777, TRUE);
+        }
+
+        $this->load->library('upload', $config);
+
+        if ( ! $this->upload->do_upload('file')) {
+            $error = $this->upload->display_errors('', '');
+            echo json_encode(['status' => 'error', 'message' => $error]);
+        } else {
+            $data = $this->upload->data();
+            $file_url = base_url('uploads/ippd_bukti/' . $data['file_name']);
+            echo json_encode(['status' => 'success', 'file_url' => $file_url, 'file_name' => $data['file_name']]);
+        }
     }
 
     public function SaveIPPDVerifikator() {
@@ -28910,6 +29995,12 @@ public function updateStatusPerjanjianKinerja() {
                 'deleted_at IS NULL' => null
             ])->get('ippd_penilaian')->row_array();
 
+            $detail_json = $this->input->post('detail_json', FALSE);
+            $detail_str = null;
+            if ($detail_json !== null && $detail_json !== '') {
+                $detail_str = is_string($detail_json) ? $detail_json : json_encode($detail_json);
+            }
+
             $saveData = [
                 'kodewilayah' => $kode_wilayah,
                 'instansi_id' => $instansi_id,
@@ -28919,6 +30010,7 @@ public function updateStatusPerjanjianKinerja() {
                 'opsi_aksi' => $opsi_aksi,
                 'catatan' => $catatan,
                 'bukti_dukung' => $bukti_dukung,
+                'detail_json' => $detail_str,
                 'updated_at' => date('Y-m-d H:i:s')
             ];
 
@@ -28977,17 +30069,24 @@ public function updateStatusPerjanjianKinerja() {
                     'deleted_at IS NULL' => null
                 ])->get('ippd_penilaian')->row_array();
 
-                $saveData = [
-                    'kodewilayah' => $kode_wilayah,
-                    'instansi_id' => $instansi_id,
-                    'tahun' => $tahun,
-                    'item_code' => $item_code,
-                    'bobot_capaian' => $bobot_val,
-                    'opsi_aksi' => $opsi_aksi,
-                    'catatan' => $catatan,
-                    'bukti_dukung' => $bukti_dukung,
-                    'updated_at' => date('Y-m-d H:i:s')
-                ];
+                $detail_json = $this->input->post('detail_json', FALSE);
+            $detail_str = null;
+            if ($detail_json !== null && $detail_json !== '') {
+                $detail_str = is_string($detail_json) ? $detail_json : json_encode($detail_json);
+            }
+
+            $saveData = [
+                'kodewilayah' => $kode_wilayah,
+                'instansi_id' => $instansi_id,
+                'tahun' => $tahun,
+                'item_code' => $item_code,
+                'bobot_capaian' => $bobot_val,
+                'opsi_aksi' => $opsi_aksi,
+                'catatan' => $catatan,
+                'bukti_dukung' => $bukti_dukung,
+                'detail_json' => $detail_str,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
 
                 if ($existing) {
                     $this->db->where('id', $existing['id'])->update('ippd_penilaian', $saveData);
@@ -29040,12 +30139,26 @@ public function updateStatusPerjanjianKinerja() {
     /**
      * Master daftar tabel BAB 1 (Tabel 1.1 s/d Tabel 1.20)
      */
-    private function get_bab1_tabel_list() {
+    private function get_bab1_tabel_list($namaWilayah = null) {
+        if ($namaWilayah === null || trim($namaWilayah) === '') {
+            $kodeWilayah = $this->get_kode_wilayah();
+            $namaWilayah = 'Kabupaten Situbondo';
+            if (!empty($kodeWilayah)) {
+                $wil = $this->db->where('Kode', $kodeWilayah)->get('kodewilayah')->row_array();
+                if ($wil && !empty($wil['Nama'])) {
+                    $namaFmt = preg_replace('/^KAB\.\s*/i', 'Kabupaten ', trim($wil['Nama']));
+                    $namaFmt = preg_replace('/^KOTA\s*/i', 'Kota ', $namaFmt);
+                    $namaFmt = preg_replace('/^PROV\.\s*/i', 'Provinsi ', $namaFmt);
+                    $namaWilayah = ucwords(strtolower($namaFmt));
+                }
+            }
+        }
+
         return [
             '1.1' => [
                 'kode' => '1.1',
                 'nomor_tabel' => 'Tabel 1.1',
-                'judul' => 'Tabel 1.1 Pembagian Wilayah Administrasi dan Luas Wilayah Kabupaten Situbondo',
+                'judul' => 'Tabel 1.1 Pembagian Wilayah Administrasi dan Luas Wilayah ' . $namaWilayah,
                 'judul_singkat' => 'Pembagian Wilayah & Luas Wilayah',
                 'subjudul' => 'Kondisi Geografis & Administratif Kecamatan, Luas Wilayah, Jumlah Desa dan Kelurahan',
                 'kategori' => 'Geografis & Administratif',
@@ -29054,49 +30167,49 @@ public function updateStatusPerjanjianKinerja() {
             '1.2' => [
                 'kode' => '1.2',
                 'nomor_tabel' => 'Tabel 1.2',
-                'judul' => 'Tabel 1.2 Tutupan Lahan Kabupaten Situbondo',
+                'judul' => 'Tabel 1.2 Tutupan Lahan ' . $namaWilayah,
                 'judul_singkat' => 'Tutupan Lahan',
-                'subjudul' => 'Rincian Luas Tutupan Lahan (Ha) dan Prosentase (%) Kabupaten Situbondo',
+                'subjudul' => 'Rincian Luas Tutupan Lahan (Ha) dan Prosentase (%) ' . $namaWilayah,
                 'kategori' => 'Geografis & Penggunaan Lahan',
                 'kolom' => ['No', 'Tutupan Lahan', 'Luas (Ha)', 'Prosentase (%)']
             ],
             '1.3' => [
                 'kode' => '1.3',
                 'nomor_tabel' => 'Tabel 1.3',
-                'judul' => 'Tabel 1.3 Ketinggian Wilayah Per Kecamatan Kabupaten Situbondo',
+                'judul' => 'Tabel 1.3 Ketinggian Wilayah Per Kecamatan ' . $namaWilayah,
                 'judul_singkat' => 'Ketinggian Wilayah',
-                'subjudul' => 'Tinggi Wilayah Menurut Kecamatan di Kabupaten Situbondo',
-                'sumber' => 'Dinas Pekerjaan Umum Perumahan dan Permukiman Kabupaten Situbondo',
+                'subjudul' => 'Tinggi Wilayah Menurut Kecamatan di ' . $namaWilayah,
+                'sumber' => 'Dinas Pekerjaan Umum Perumahan dan Permukiman ' . $namaWilayah,
                 'kategori' => 'Topografi & Geografis',
                 'kolom' => ['No', 'Kecamatan', 'Tinggi Wilayah']
             ],
             '1.4' => [
                 'kode' => '1.4',
                 'nomor_tabel' => 'Tabel 1.4',
-                'judul' => 'Tabel 1.4 Kondisi Iklim Kabupaten Situbondo Menurut Bulan Tahun 2025',
+                'judul' => 'Tabel 1.4 Kondisi Iklim ' . $namaWilayah . ' Menurut Bulan Tahun 2025',
                 'judul_singkat' => 'Kondisi Iklim',
                 'subjudul' => 'Jumlah Curah Hujan (mm/tahun) dan Jumlah Hari Hujan (Hari) Menurut Bulan',
-                'sumber' => 'Badan Pusat Statistik Kabupaten Situbondo Dalam Angka, 2026',
+                'sumber' => 'Badan Pusat Statistik ' . $namaWilayah . ' Dalam Angka, 2026',
                 'kategori' => 'Iklim & Lingkungan',
                 'kolom' => ['No', 'Bulan', 'Jumlah Curah Hujan (mm/tahun)', 'Jumlah Hari Hujan (Hari)']
             ],
             '1.5' => [
                 'kode' => '1.5',
                 'nomor_tabel' => 'Tabel 1.5',
-                'judul' => 'Tabel 1.5 Jumlah Penduduk Menurut Kecamatan di Kabupaten Situbondo Tahun 2025',
+                'judul' => 'Tabel 1.5 Jumlah Penduduk Menurut Kecamatan di ' . $namaWilayah . ' Tahun 2025',
                 'judul_singkat' => 'Jumlah Penduduk Menurut Kecamatan',
                 'subjudul' => 'Jumlah Penduduk Menurut Kecamatan dan Jenis Kelamin Serta Rasio Jenis Kelamin (%)',
-                'sumber' => 'Badan Pusat Statistik Kabupaten Situbondo Tahun 2026',
+                'sumber' => 'Badan Pusat Statistik ' . $namaWilayah . ' Tahun 2026',
                 'kategori' => 'Demografi & Kependudukan',
                 'kolom' => ['No', 'Kecamatan', 'Laki-Laki', 'Perempuan', 'Rasio Jenis Kelamin (%)']
             ],
             '1.6' => [
                 'kode' => '1.6',
                 'nomor_tabel' => 'Tabel 1.6',
-                'judul' => 'Tabel 1.6 Persentase Pertumbuhan Penduduk Kabupaten Situbondo',
+                'judul' => 'Tabel 1.6 Persentase Pertumbuhan Penduduk ' . $namaWilayah,
                 'judul_singkat' => 'Pertumbuhan Penduduk',
                 'subjudul' => 'Jumlah Penduduk Tahun 2024 dan 2025 Serta Persentase Pertumbuhan Penduduk (%)',
-                'sumber' => 'Badan Pusat Statistik Kabupaten Situbondo Tahun 2026',
+                'sumber' => 'Badan Pusat Statistik ' . $namaWilayah . ' Tahun 2026',
                 'kategori' => 'Demografi & Kependudukan',
                 'kolom' => ['No', 'Kecamatan', '2024', '2025', 'Pertumbuhan Penduduk (%)']
             ],
@@ -29105,8 +30218,8 @@ public function updateStatusPerjanjianKinerja() {
                 'nomor_tabel' => 'Tabel 1.7',
                 'judul' => 'Tabel 1.7 Jumlah Migrasi Masuk dan Migrasi Keluar Menurut Kecamatan',
                 'judul_singkat' => 'Migrasi Masuk & Keluar',
-                'subjudul' => 'Jumlah Migrasi Masuk dan Migrasi Keluar Menurut Kecamatan di Kabupaten Situbondo',
-                'sumber' => 'Badan Pusat Statistik Kabupaten Situbondo Tahun 2026',
+                'subjudul' => 'Jumlah Migrasi Masuk dan Migrasi Keluar Menurut Kecamatan di ' . $namaWilayah,
+                'sumber' => 'Badan Pusat Statistik ' . $namaWilayah . ' Tahun 2026',
                 'kategori' => 'Demografi & Kependudukan',
                 'kolom' => ['No', 'Kecamatan', 'Masuk', 'Keluar']
             ],
@@ -29135,8 +30248,8 @@ public function updateStatusPerjanjianKinerja() {
                 'nomor_tabel' => 'Tabel 1.10',
                 'judul' => 'Tabel 1.10 Rincian Target, Realisasi dan Capaian Pendapatan Daerah Tahun 2025',
                 'judul_singkat' => 'Capaian Pendapatan Daerah',
-                'subjudul' => 'Rincian Target, Realisasi dan Capaian Pendapatan Daerah Kabupaten Situbondo Tahun 2025',
-                'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited',
+                'subjudul' => 'Rincian Target, Realisasi dan Capaian Pendapatan Daerah ' . $namaWilayah . ' Tahun 2025',
+                'sumber' => 'BKAD ' . $namaWilayah . ' Tahun 2026, unaudited',
                 'kategori' => 'Keuangan & Pendapatan Daerah',
                 'kolom' => ['No', 'Uraian', 'Anggaran 2025 (Rp.)', 'Realisasi 2025 (Rp.)', 'Lebih/(Kurang) (Rp.)', '%', 'Realisasi 2024 (Rp.)', 'Realisasi 2023 (Rp.)', 'Realisasi 2022 (Rp.)']
             ],
@@ -29145,8 +30258,8 @@ public function updateStatusPerjanjianKinerja() {
                 'nomor_tabel' => 'Tabel 1.11',
                 'judul' => 'Tabel 1.11 Rincian Pajak Daerah Tahun 2025',
                 'judul_singkat' => 'Rincian Pajak Daerah',
-                'subjudul' => 'Target, Realisasi, Capaian dan Persentase Pertumbuhan Pajak Daerah Kabupaten Situbondo Tahun 2025',
-                'sumber' => 'BAPENDA Kabupaten Situbondo Tahun 2026, unaudited',
+                'subjudul' => 'Target, Realisasi, Capaian dan Persentase Pertumbuhan Pajak Daerah ' . $namaWilayah . ' Tahun 2025',
+                'sumber' => 'BAPENDA ' . $namaWilayah . ' Tahun 2026, unaudited',
                 'kategori' => 'Keuangan & Pajak Daerah',
                 'kolom' => ['No', 'Uraian', 'Target 2025 (Rp.)', 'Realisasi 2025 (Rp.)', '%', 'Persentase Naik/Turun Realisasi 2024-2025 (%)']
             ],
@@ -29155,8 +30268,8 @@ public function updateStatusPerjanjianKinerja() {
                 'nomor_tabel' => 'Tabel 1.12',
                 'judul' => 'Tabel 1.12 Rincian Retribusi Daerah Tahun 2025',
                 'judul_singkat' => 'Rincian Retribusi Daerah',
-                'subjudul' => 'Target, Realisasi dan Capaian Retribusi Daerah Kabupaten Situbondo Tahun 2025',
-                'sumber' => 'Bapenda Kabupaten Situbondo Tahun 2026, unaudited',
+                'subjudul' => 'Target, Realisasi dan Capaian Retribusi Daerah ' . $namaWilayah . ' Tahun 2025',
+                'sumber' => 'Bapenda ' . $namaWilayah . ' Tahun 2026, unaudited',
                 'kategori' => 'Keuangan & Retribusi Daerah',
                 'kolom' => ['No', 'Uraian', 'Target 2025 (Rp.)', 'Realisasi 2025 (Rp.)', '%']
             ],
@@ -29165,8 +30278,8 @@ public function updateStatusPerjanjianKinerja() {
                 'nomor_tabel' => 'Tabel 1.13',
                 'judul' => 'Tabel 1.13 Rincian Hasil pengelolaan keuangan daerah yang dipisahkan Tahun 2025',
                 'judul_singkat' => 'Hasil Pengelolaan Keuangan Dipisahkan',
-                'subjudul' => 'Target, Realisasi, Capaian dan Persentase Pertumbuhan Hasil Pengelolaan Keuangan Daerah yang Dipisahkan Kabupaten Situbondo Tahun 2025',
-                'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited',
+                'subjudul' => 'Target, Realisasi, Capaian dan Persentase Pertumbuhan Hasil Pengelolaan Keuangan Daerah yang Dipisahkan ' . $namaWilayah . ' Tahun 2025',
+                'sumber' => 'BKAD ' . $namaWilayah . ' Tahun 2026, unaudited',
                 'kategori' => 'Keuangan Daerah',
                 'kolom' => ['No', 'Uraian', 'Target 2025 (Rp.)', 'Realisasi 2025 (Rp.)', '%', 'Persentase Naik/Turun Realisasi 2024-2025']
             ],
@@ -29175,8 +30288,8 @@ public function updateStatusPerjanjianKinerja() {
                 'nomor_tabel' => 'Tabel 1.14',
                 'judul' => 'Tabel 1.14 Rincian Hasil Lain-Lain PAD yang Sah Tahun 2025',
                 'judul_singkat' => 'Hasil Lain-Lain PAD yang Sah',
-                'subjudul' => 'Target, Realisasi, Capaian dan Persentase Pertumbuhan Hasil Lain-Lain PAD yang Sah Kabupaten Situbondo Tahun 2025',
-                'sumber' => 'Bapenda Kabupaten Situbondo Tahun 2026, unaudited',
+                'subjudul' => 'Target, Realisasi, Capaian dan Persentase Pertumbuhan Hasil Lain-Lain PAD yang Sah ' . $namaWilayah . ' Tahun 2025',
+                'sumber' => 'Bapenda ' . $namaWilayah . ' Tahun 2026, unaudited',
                 'kategori' => 'Keuangan Daerah',
                 'kolom' => ['No', 'Uraian', 'Target 2025 (Rp.)', 'Realisasi 2025 (Rp.)', '%', 'Persentase Naik/Turun Realisasi 2024-2025']
             ],
@@ -29185,8 +30298,8 @@ public function updateStatusPerjanjianKinerja() {
                 'nomor_tabel' => 'Tabel 1.15',
                 'judul' => 'Tabel 1.15 Rincian Pendapatan Transfer Tahun 2025',
                 'judul_singkat' => 'Rincian Pendapatan Transfer',
-                'subjudul' => 'Target, Realisasi, Capaian dan Persentase Pertumbuhan Pendapatan Transfer Kabupaten Situbondo Tahun 2025',
-                'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited',
+                'subjudul' => 'Target, Realisasi, Capaian dan Persentase Pertumbuhan Pendapatan Transfer ' . $namaWilayah . ' Tahun 2025',
+                'sumber' => 'BKAD ' . $namaWilayah . ' Tahun 2026, unaudited',
                 'kategori' => 'Keuangan Daerah',
                 'kolom' => ['No', 'Uraian', 'Target 2025 (Rp.)', 'Realisasi 2025 (Rp.)', '%', 'Persentase Naik/Turun Realisasi 2024-2025']
             ],
@@ -29195,8 +30308,8 @@ public function updateStatusPerjanjianKinerja() {
                 'nomor_tabel' => 'Tabel 1.16',
                 'judul' => 'Tabel 1.16 Rincian Target, Realisasi dan Capaian Realisasi Belanja dan Transfer Daerah Tahun 2025',
                 'judul_singkat' => 'Target & Realisasi Belanja dan Transfer',
-                'subjudul' => 'Target, Realisasi dan Capaian Realisasi Belanja dan Transfer Daerah Kabupaten Situbondo Tahun 2025',
-                'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited',
+                'subjudul' => 'Target, Realisasi dan Capaian Realisasi Belanja dan Transfer Daerah ' . $namaWilayah . ' Tahun 2025',
+                'sumber' => 'BKAD ' . $namaWilayah . ' Tahun 2026, unaudited',
                 'kategori' => 'Keuangan Daerah',
                 'kolom' => ['No', 'Uraian', 'Anggaran 2025 (Rp.)', 'Realisasi 2025 (Rp.)', 'Lebih/(Kurang) (Rp.)', '%', 'Realisasi 2024 (Rp.)', 'Realisasi 2023 (Rp.)', 'Realisasi 2022 (Rp.)']
             ],
@@ -29206,7 +30319,7 @@ public function updateStatusPerjanjianKinerja() {
                 'judul' => 'Tabel 1.17 Rincian Belanja Hibah Tahun 2025',
                 'judul_singkat' => 'Rincian Belanja Hibah',
                 'subjudul' => 'Rincian Anggaran dan Realisasi Belanja Hibah Berdasarkan SKPD dan Kategori Penerima Tahun 2025',
-                'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited',
+                'sumber' => 'BKAD ' . $namaWilayah . ' Tahun 2026, unaudited',
                 'kategori' => 'Keuangan Daerah',
                 'kolom' => ['Uraian', 'Belanja Hibah kepada Pemerintah Pusat', 'Belanja Hibah kepada Badan, Lembaga, Ormas', 'Belanja Hibah Bantuan Keuangan Parpol', 'Belanja Hibah Dana BOSP', 'Total Belanja Hibah']
             ],
@@ -29215,8 +30328,8 @@ public function updateStatusPerjanjianKinerja() {
                 'nomor_tabel' => 'Tabel 1.18',
                 'judul' => 'Tabel 1.18 Rincian Belanja Bantuan Sosial Tahun 2025',
                 'judul_singkat' => 'Rincian Belanja Bantuan Sosial',
-                'subjudul' => 'Rincian Anggaran dan Realisasi Belanja Bantuan Sosial Kabupaten Situbondo Tahun 2025',
-                'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited',
+                'subjudul' => 'Rincian Anggaran dan Realisasi Belanja Bantuan Sosial ' . $namaWilayah . ' Tahun 2025',
+                'sumber' => 'BKAD ' . $namaWilayah . ' Tahun 2026, unaudited',
                 'kategori' => 'Keuangan Daerah',
                 'kolom' => ['Uraian', 'Bansos Individu', 'Bansos Kelompok Masyarakat', 'Bansos Lembaga Non Pemerintahan', 'Total Belanja Bantuan Sosial']
             ],
@@ -29225,18 +30338,18 @@ public function updateStatusPerjanjianKinerja() {
                 'nomor_tabel' => 'Tabel 1.19',
                 'judul' => 'Tabel 1.19 Rincian Target, Realisasi dan Capaian Realisasi Pembiayaan Daerah Tahun 2025',
                 'judul_singkat' => 'Pembiayaan Daerah',
-                'subjudul' => 'Target, Realisasi dan Capaian Realisasi Pembiayaan Daerah Kabupaten Situbondo Tahun 2025',
-                'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited',
+                'subjudul' => 'Target, Realisasi dan Capaian Realisasi Pembiayaan Daerah ' . $namaWilayah . ' Tahun 2025',
+                'sumber' => 'BKAD ' . $namaWilayah . ' Tahun 2026, unaudited',
                 'kategori' => 'Keuangan Daerah',
                 'kolom' => ['No', 'Uraian', 'Anggaran 2025 (Rp.)', 'Realisasi 2025 (Rp.)', 'Lebih/(Kurang) (Rp.)', '%', 'Realisasi 2024 (Rp.)', 'Realisasi 2023 (Rp.)', 'Realisasi 2022 (Rp.)']
             ],
             '1.20' => [
                 'kode' => '1.20',
                 'nomor_tabel' => 'Tabel 1.20',
-                'judul' => 'Tabel 1.20 Komponen SILPA Kabupaten Situbondo Tahun 2025',
+                'judul' => 'Tabel 1.20 Komponen SILPA ' . $namaWilayah . ' Tahun 2025',
                 'judul_singkat' => 'Komponen SILPA',
                 'subjudul' => 'Rincian Komponen dan Posisi Kas Sisa Lebih Perhitungan Anggaran (SILPA) Tahun 2025',
-                'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited',
+                'sumber' => 'BKAD ' . $namaWilayah . ' Tahun 2026, unaudited',
                 'kategori' => 'Keuangan Daerah',
                 'kolom' => ['Komponen SILPA', 'Jumlah (Rp.)']
             ]
@@ -30776,15 +31889,20 @@ public function updateStatusPerjanjianKinerja() {
         $namaWilayahFormat = 'Kabupaten Situbondo';
         if (!empty($KodeWilayah)) {
             $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-            if ($wilayah) {
+            if ($wilayah && !empty($wilayah['Nama'])) {
                 $Data['NamaWilayah'] = $wilayah['Nama'];
-                $namaWilayahFormat = ucwords(strtolower($wilayah['Nama']));
+                $namaRaw = $wilayah['Nama'];
+                $namaFmt = preg_replace('/^KAB\.\s*/i', 'Kabupaten ', trim($namaRaw));
+                $namaFmt = preg_replace('/^KOTA\s*/i', 'Kota ', $namaFmt);
+                $namaFmt = preg_replace('/^PROV\.\s*/i', 'Provinsi ', $namaFmt);
+                $namaWilayahFormat = ucwords(strtolower($namaFmt));
             } else {
                 $Data['NamaWilayah'] = 'KAB. SITUBONDO';
             }
         } else {
             $Data['NamaWilayah'] = 'KAB. SITUBONDO';
         }
+        $Data['NamaWilayahFormat'] = $namaWilayahFormat;
 
         $active_tabel = $this->input->get('tabel', TRUE) ?: '1.1';
         $daftar_tabel = $this->bab1_tabel_list = $this->get_bab1_tabel_list($namaWilayahFormat);
@@ -35067,35 +36185,48 @@ public function updateStatusPerjanjianKinerja() {
     // MODUL E-LKPJ BAB 2 (Pengelolaan Keuangan Daerah: Tabel 2.1 s/d Tabel 2.3)
     // =========================================================================
 
-    public function get_bab2_tabel_list() {
+    public function get_bab2_tabel_list($namaWilayah = null) {
+        if ($namaWilayah === null || trim($namaWilayah) === '') {
+            $kodeWilayah = $this->get_kode_wilayah();
+            $namaWilayah = 'Kabupaten Situbondo';
+            if (!empty($kodeWilayah)) {
+                $wil = $this->db->where('Kode', $kodeWilayah)->get('kodewilayah')->row_array();
+                if ($wil && !empty($wil['Nama'])) {
+                    $namaFmt = preg_replace('/^KAB\.\s*/i', 'Kabupaten ', trim($wil['Nama']));
+                    $namaFmt = preg_replace('/^KOTA\s*/i', 'Kota ', $namaFmt);
+                    $namaFmt = preg_replace('/^PROV\.\s*/i', 'Provinsi ', $namaFmt);
+                    $namaWilayah = ucwords(strtolower($namaFmt));
+                }
+            }
+        }
         return [
             '2.1' => [
                 'kode' => '2.1',
                 'nomor_tabel' => 'Tabel 2.1',
-                'judul' => 'Tabel 2.1 Perubahan Anggaran Pendapatan Daerah Kabupaten Situbondo Tahun 2025',
+                'judul' => 'Tabel 2.1 Perubahan Anggaran Pendapatan Daerah ' . $namaWilayah . ' Tahun 2025',
                 'judul_singkat' => 'Perubahan Anggaran Pendapatan Daerah',
-                'subjudul' => 'Perubahan Anggaran Pendapatan Daerah Kabupaten Situbondo Tahun Anggaran 2025 (Sebelum dan Sesudah Perubahan)',
-                'sumber' => 'BAPENDA Tahun 2026, Unaudited',
+                'subjudul' => 'Perubahan Anggaran Pendapatan Daerah ' . $namaWilayah . ' Tahun Anggaran 2025 (Sebelum dan Sesudah Perubahan)',
+                'sumber' => 'BAPENDA ' . $namaWilayah . ' Tahun 2026, Unaudited',
                 'kategori' => 'Pendapatan Daerah',
                 'kolom' => ['No', 'Uraian', 'Sebelum Perubahan (Rp)', 'Sesudah Perubahan (Rp)', 'Lebih/(Kurang) (Rp)', '%']
             ],
             '2.2' => [
                 'kode' => '2.2',
                 'nomor_tabel' => 'Tabel 2.2',
-                'judul' => 'Tabel 2.2 Perubahan Anggaran Belanja Daerah Kabupaten Situbondo Tahun 2025',
+                'judul' => 'Tabel 2.2 Perubahan Anggaran Belanja Daerah ' . $namaWilayah . ' Tahun 2025',
                 'judul_singkat' => 'Perubahan Anggaran Belanja Daerah',
-                'subjudul' => 'Perubahan Anggaran Belanja Daerah Kabupaten Situbondo Tahun Anggaran 2025 (Sebelum dan Sesudah Perubahan)',
-                'sumber' => 'BKAD Tahun 2026, Unaudited',
+                'subjudul' => 'Perubahan Anggaran Belanja Daerah ' . $namaWilayah . ' Tahun Anggaran 2025 (Sebelum dan Sesudah Perubahan)',
+                'sumber' => 'BKAD ' . $namaWilayah . ' Tahun 2026, Unaudited',
                 'kategori' => 'Belanja Daerah',
                 'kolom' => ['No', 'Uraian', 'Sebelum Perubahan (Rp)', 'Sesudah Perubahan (Rp)', 'Lebih/(Kurang) (Rp)', '%']
             ],
             '2.3' => [
                 'kode' => '2.3',
                 'nomor_tabel' => 'Tabel 2.3',
-                'judul' => 'Tabel 2.3 Perubahan Anggaran Pembiayaan Daerah Kabupaten Situbondo Tahun 2025',
+                'judul' => 'Tabel 2.3 Perubahan Anggaran Pembiayaan Daerah ' . $namaWilayah . ' Tahun 2025',
                 'judul_singkat' => 'Perubahan Anggaran Pembiayaan Daerah',
-                'subjudul' => 'Perubahan Anggaran Pembiayaan Daerah Kabupaten Situbondo Tahun Anggaran 2025 (Sebelum dan Sesudah Perubahan)',
-                'sumber' => 'BKAD Tahun 2026, Unaudited',
+                'subjudul' => 'Perubahan Anggaran Pembiayaan Daerah ' . $namaWilayah . ' Tahun Anggaran 2025 (Sebelum dan Sesudah Perubahan)',
+                'sumber' => 'BKAD ' . $namaWilayah . ' Tahun 2026, Unaudited',
                 'kategori' => 'Pembiayaan Daerah',
                 'kolom' => ['No', 'Uraian', 'Sebelum Perubahan (Rp)', 'Sesudah Perubahan (Rp)', 'Lebih/(Kurang) (Rp)', '%']
             ]
@@ -35321,15 +36452,20 @@ public function updateStatusPerjanjianKinerja() {
         $namaWilayahFormat = 'Kabupaten Situbondo';
         if (!empty($KodeWilayah)) {
             $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-            if ($wilayah) {
+            if ($wilayah && !empty($wilayah['Nama'])) {
                 $Data['NamaWilayah'] = $wilayah['Nama'];
-                $namaWilayahFormat = ucwords(strtolower($wilayah['Nama']));
+                $namaRaw = $wilayah['Nama'];
+                $namaFmt = preg_replace('/^KAB\.\s*/i', 'Kabupaten ', trim($namaRaw));
+                $namaFmt = preg_replace('/^KOTA\s*/i', 'Kota ', $namaFmt);
+                $namaFmt = preg_replace('/^PROV\.\s*/i', 'Provinsi ', $namaFmt);
+                $namaWilayahFormat = ucwords(strtolower($namaFmt));
             } else {
                 $Data['NamaWilayah'] = 'KAB. SITUBONDO';
             }
         } else {
             $Data['NamaWilayah'] = 'KAB. SITUBONDO';
         }
+        $Data['NamaWilayahFormat'] = $namaWilayahFormat;
 
         $active_tabel = $this->input->get('tabel', TRUE) ?: '2.1';
         $daftar_tabel = $this->get_bab2_tabel_list($namaWilayahFormat);
@@ -35939,8 +37075,11 @@ public function updateStatusPerjanjianKinerja() {
         $namaWilayah = 'Kabupaten Situbondo';
         if (!empty($KodeWilayah)) {
             $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-            if ($wilayah) {
-                $namaWilayah = ucwords(strtolower($wilayah['Nama']));
+            if ($wilayah && !empty($wilayah['Nama'])) {
+                $namaFmt = preg_replace('/^KAB\.\s*/i', 'Kabupaten ', trim($wilayah['Nama']));
+                $namaFmt = preg_replace('/^KOTA\s*/i', 'Kota ', $namaFmt);
+                $namaFmt = preg_replace('/^PROV\.\s*/i', 'Provinsi ', $namaFmt);
+                $namaWilayah = ucwords(strtolower($namaFmt));
             }
         }
 

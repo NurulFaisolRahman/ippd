@@ -9,8 +9,6 @@
     <link rel="stylesheet" href="<?=base_url()?>css/bootstrap.min.css">
     <link rel="stylesheet" href="<?=base_url()?>css/font-awesome.min.css">
     <link rel="stylesheet" href="<?=base_url()?>css/notika-custom-icon.css">
-    <link rel="stylesheet" href="<?=base_url()?>css/data-table/bootstrap-table.css">
-    <link rel="stylesheet" href="<?=base_url()?>css/data-table/bootstrap-editable.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <!-- Custom CSS -->

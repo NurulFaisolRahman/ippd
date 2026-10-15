@@ -35,6 +35,11 @@ $itemsTabel1_19 = isset($ItemsTabel1_19) ? $ItemsTabel1_19 : [];
 $itemsTabel1_20 = isset($ItemsTabel1_20) ? $ItemsTabel1_20 : [];
 $itemsGeneric = isset($ItemsGeneric) ? $ItemsGeneric : [];
 $narasiTabel = isset($NarasiTabel) ? $NarasiTabel : '';
+
+$namaWilayahFormat = isset($NamaWilayahFormat) && !empty($NamaWilayahFormat)
+    ? $NamaWilayahFormat
+    : (!empty($NamaWilayah) ? ucwords(strtolower(preg_replace('/^KAB\.\s*/i', 'Kabupaten ', $NamaWilayah))) : 'Kabupaten Situbondo');
+
 $summary = isset($SummaryTabel1_1) ? $SummaryTabel1_1 : [
     'total_kecamatan' => 17,
     'total_luas' => 165.505,
@@ -52,7 +57,7 @@ $summary1_3 = isset($SummaryTabel1_3) ? $SummaryTabel1_3 : [
     'total_kecamatan' => 17,
     'kec_tertinggi' => 'Bungatan (0-1250 m dpl)',
     'kec_terendah' => 'Mangaran (0-50 m dpl)',
-    'sumber' => 'Dinas Pekerjaan Umum Perumahan dan Permukiman Kabupaten Situbondo'
+    'sumber' => 'Dinas Pekerjaan Umum Perumahan dan Permukiman ' . $namaWilayahFormat
 ];
 $summary1_4 = isset($SummaryTabel1_4) ? $SummaryTabel1_4 : [
     'total_bulan' => 12,
@@ -61,7 +66,7 @@ $summary1_4 = isset($SummaryTabel1_4) ? $SummaryTabel1_4 : [
     'bulan_terbasah' => 'Februari (6.549 mm)',
     'bulan_terkering' => 'September (116 mm)',
     'hari_terbanyak' => 'Januari (27 Hari)',
-    'sumber' => 'Badan Pusat Statistik Kabupaten Situbondo Dalam Angka, 2026'
+    'sumber' => 'Badan Pusat Statistik ' . $namaWilayahFormat . ' Dalam Angka, 2026'
 ];
 $summary1_5 = isset($SummaryTabel1_5) ? $SummaryTabel1_5 : [
     'total_kecamatan' => 17,
@@ -71,7 +76,7 @@ $summary1_5 = isset($SummaryTabel1_5) ? $SummaryTabel1_5 : [
     'rasio_total' => 95.76,
     'kec_terbanyak' => 'Panji (67.923 Jiwa)',
     'kec_tersedikit' => 'Jatibanteng (23.319 Jiwa)',
-    'sumber' => 'Badan Pusat Statistik Kabupaten Situbondo Tahun 2026'
+    'sumber' => 'Badan Pusat Statistik ' . $namaWilayahFormat . ' Tahun 2026'
 ];
 $summary1_6 = isset($SummaryTabel1_6) ? $SummaryTabel1_6 : [
     'total_kecamatan' => 17,
@@ -80,7 +85,7 @@ $summary1_6 = isset($SummaryTabel1_6) ? $SummaryTabel1_6 : [
     'pertumbuhan_total' => 0.45,
     'tumbuh_tertinggi' => 'Jangkar (0,73%)',
     'tumbuh_terendah' => 'Asembagus (0,27%)',
-    'sumber' => 'Badan Pusat Statistik Kabupaten Situbondo Tahun 2026'
+    'sumber' => 'Badan Pusat Statistik ' . $namaWilayahFormat . ' Tahun 2026'
 ];
 $summary1_7 = isset($SummaryTabel1_7) ? $SummaryTabel1_7 : [
     'total_kecamatan' => 17,
@@ -89,7 +94,7 @@ $summary1_7 = isset($SummaryTabel1_7) ? $SummaryTabel1_7 : [
     'netto' => -240,
     'max_masuk' => 'Panji (228 Jiwa)',
     'max_keluar' => 'Banyuputih (262 Jiwa)',
-    'sumber' => 'Badan Pusat Statistik Kabupaten Situbondo Tahun 2026'
+    'sumber' => 'Badan Pusat Statistik ' . $namaWilayahFormat . ' Tahun 2026'
 ];
 $summary1_8 = isset($SummaryTabel1_8) ? $SummaryTabel1_8 : [
     'total_kategori' => 3,
@@ -116,42 +121,42 @@ $summary1_10 = isset($SummaryTabel1_10) ? $SummaryTabel1_10 : [
     'total_realisasi_2024' => 1838398660788.09,
     'total_realisasi_2023' => 1815035360718.99,
     'total_realisasi_2022' => 1717196006641.04,
-    'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited'
+    'sumber' => 'BKAD ' . $namaWilayahFormat . ' Tahun 2026, unaudited'
 ];
 $summary1_11 = isset($SummaryTabel1_11) ? $SummaryTabel1_11 : [
     'total_target_2025' => 95608439254.00,
     'total_realisasi_2025' => 101579639887.40,
     'total_persen' => 106.25,
     'total_pertumbuhan' => 56.50,
-    'sumber' => 'BAPENDA Kabupaten Situbondo Tahun 2026, unaudited'
+    'sumber' => 'BAPENDA ' . $namaWilayahFormat . ' Tahun 2026, unaudited'
 ];
 $summary1_12 = isset($SummaryTabel1_12) ? $SummaryTabel1_12 : [
     'total_target_2025' => 154503239288.00,
     'total_realisasi_2025' => 163468830248.82,
     'total_persen' => 105.80,
     'total_selisih' => 8965590960.82,
-    'sumber' => 'Bapenda Kabupaten Situbondo Tahun 2026, unaudited'
+    'sumber' => 'Bapenda ' . $namaWilayahFormat . ' Tahun 2026, unaudited'
 ];
 $summary1_13 = isset($SummaryTabel1_13) ? $SummaryTabel1_13 : [
     'total_target_2025' => 4965202287.00,
     'total_realisasi_2025' => 4989642157.03,
     'total_persen' => 100.49,
     'total_pertumbuhan' => -2.51,
-    'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited'
+    'sumber' => 'BKAD ' . $namaWilayahFormat . ' Tahun 2026, unaudited'
 ];
 $summary1_14 = isset($SummaryTabel1_14) ? $SummaryTabel1_14 : [
     'total_target_2025' => 47663144592.00,
     'total_realisasi_2025' => 50938653895.25,
     'total_persen' => 106.87,
     'total_pertumbuhan' => -72.85,
-    'sumber' => 'Bapenda Kabupaten Situbondo Tahun 2026, unaudited'
+    'sumber' => 'Bapenda ' . $namaWilayahFormat . ' Tahun 2026, unaudited'
 ];
 $summary1_15 = isset($SummaryTabel1_15) ? $SummaryTabel1_15 : [
     'total_target_2025' => 1447778871981.00,
     'total_realisasi_2025' => 1479934567563.00,
     'total_persen' => 102.22,
     'total_pertumbuhan' => -5.54,
-    'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited'
+    'sumber' => 'BKAD ' . $namaWilayahFormat . ' Tahun 2026, unaudited'
 ];
 $summary1_16 = isset($SummaryTabel1_16) ? $SummaryTabel1_16 : [
     'total_anggaran_2025' => 1851757572766.00,
@@ -161,7 +166,7 @@ $summary1_16 = isset($SummaryTabel1_16) ? $SummaryTabel1_16 : [
     'total_realisasi_2024' => 1907087812190.03,
     'total_realisasi_2023' => 1900286068905.39,
     'total_realisasi_2022' => 1778985460306.73,
-    'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited'
+    'sumber' => 'BKAD ' . $namaWilayahFormat . ' Tahun 2026, unaudited'
 ];
 $summary1_17 = isset($SummaryTabel1_17) ? $SummaryTabel1_17 : [
     'tot_pusat_anggaran' => 2300000000.00, 'tot_pusat_realisasi' => 2213926373.36,
@@ -170,7 +175,7 @@ $summary1_17 = isset($SummaryTabel1_17) ? $SummaryTabel1_17 : [
     'tot_bosp_anggaran' => 26968918403.00, 'tot_bosp_realisasi' => 27046941702.00,
     'tot_total_anggaran' => 74852973409.00, 'tot_total_realisasi' => 71287913551.75,
     'tot_persen' => 95.24,
-    'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited'
+    'sumber' => 'BKAD ' . $namaWilayahFormat . ' Tahun 2026, unaudited'
 ];
 $summary1_18 = isset($SummaryTabel1_18) ? $SummaryTabel1_18 : [
     'tot_individu_anggaran' => 0.00, 'tot_individu_realisasi' => 0.00,
@@ -178,19 +183,19 @@ $summary1_18 = isset($SummaryTabel1_18) ? $SummaryTabel1_18 : [
     'tot_lembaga_anggaran' => 0.00, 'tot_lembaga_realisasi' => 0.00,
     'tot_total_anggaran' => 9405000000.00, 'tot_total_realisasi' => 9405000000.00,
     'tot_persen' => 100.00,
-    'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited'
+    'sumber' => 'BKAD ' . $namaWilayahFormat . ' Tahun 2026, unaudited'
 ];
 $summary1_19 = isset($SummaryTabel1_19) ? $SummaryTabel1_19 : [
     'penerimaan_realisasi' => 104238675365.12,
     'pengeluaran_realisasi' => 0.00,
     'netto_realisasi' => 104238675365.12,
     'silpa_realisasi' => 159085204887.54,
-    'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited'
+    'sumber' => 'BKAD ' . $namaWilayahFormat . ' Tahun 2026, unaudited'
 ];
 $summary1_20 = isset($SummaryTabel1_20) ? $SummaryTabel1_20 : [
     'total_silpa' => 159085204886.86,
     'total_komponen' => 5,
-    'sumber' => 'BKAD Kabupaten Situbondo Tahun 2026, unaudited'
+    'sumber' => 'BKAD ' . $namaWilayahFormat . ' Tahun 2026, unaudited'
 ];
 ?>
 
@@ -1068,7 +1073,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
       <?php endif; ?>
     </div>
     <h1 class="page-title">BAB 1 : Pendahuluan & Gambaran Umum Daerah</h1>
-    <p class="page-subtitle">Pencatatan dan pelaporan data statistik kondisi geografis, administratif, demografis, dan indikator makro daerah <?= htmlspecialchars($NamaWilayah ?: 'Kabupaten Situbondo') ?>.</p>
+    <p class="page-subtitle">Pencatatan dan pelaporan data statistik kondisi geografis, administratif, demografis, dan indikator makro daerah <?= htmlspecialchars($namaWilayahFormat) ?>.</p>
   </div>
 
   
@@ -1312,7 +1317,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
       <div class="stat-info">
         <div class="stat-label">Sumber Data</div>
         <div class="stat-value" id="cardSumber1_3" style="font-size:14px;font-weight:700;color:#64748b;line-height:1.3;">
-          DPUPP Situbondo
+          DPUPP <?= htmlspecialchars($namaWilayahFormat) ?>
         </div>
       </div>
       <div class="stat-icon icon-purple">
@@ -1506,7 +1511,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
   <div class="stat-grid">
     <div class="stat-card">
       <div class="stat-info">
-        <div class="stat-label">Total ASN Situbondo</div>
+        <div class="stat-label">Total ASN <?= htmlspecialchars($namaWilayahFormat) ?></div>
         <div class="stat-value" id="cardTotalAsn1_8" style="color:#00a87e;"><?= number_format($summary1_8['total_asn'], 0, ',', '.') ?> <span style="font-size:13px;font-weight:600;color:var(--ui-text-muted)">Orang</span></div>
       </div>
       <div class="stat-icon icon-teal">
@@ -2419,7 +2424,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
         </tbody>
       </table>
       <div style="padding: 12px 20px; font-size: 12.5px; color: #475569; font-style: italic; border-top: 1px solid var(--ui-border-light); background: #fafdfc;">
-        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? 'Dinas Pekerjaan Umum Perumahan dan Permukiman Kabupaten Situbondo') ?>
+        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? ('Dinas Pekerjaan Umum Perumahan dan Permukiman ' . $namaWilayahFormat)) ?>
       </div>
     </div>
 
@@ -2491,7 +2496,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
         </tfoot>
       </table>
       <div style="padding: 12px 20px; font-size: 12.5px; color: #475569; font-style: italic; border-top: 1px solid var(--ui-border-light); background: #fafdfc;">
-        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? 'Badan Pusat Statistik Kabupaten Situbondo Dalam Angka, 2026') ?>
+        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? ('Badan Pusat Statistik ' . $namaWilayahFormat . ' Dalam Angka, 2026')) ?>
       </div>
     </div>
 
@@ -2563,7 +2568,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
         </tbody>
         <tfoot>
           <tr>
-            <th colspan="2" class="th-total-label" style="text-align: left; padding-left: 20px; font-weight: 800; font-size: 15px;">Kabupaten Situbondo</th>
+            <th colspan="2" class="th-total-label" style="text-align: left; padding-left: 20px; font-weight: 800; font-size: 15px;"><?= htmlspecialchars($namaWilayahFormat) ?></th>
             <th class="th-total-num" style="padding-right: 20px; font-size: 15px; font-weight: 800;" id="footTotalLaki1_5"><?= number_format($summary1_5['total_laki'], 0, ',', '.') ?></th>
             <th class="th-total-num" style="padding-right: 20px; font-size: 15px; font-weight: 800;" id="footTotalPerempuan1_5"><?= number_format($summary1_5['total_perempuan'], 0, ',', '.') ?></th>
             <th class="th-total-num" style="text-align: center; font-size: 15px; font-weight: 800;" id="footTotalRasio1_5"><?= number_format($summary1_5['rasio_total'], 2, ',', '.') ?></th>
@@ -2572,7 +2577,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
         </tfoot>
       </table>
       <div style="padding: 12px 20px; font-size: 12.5px; color: #475569; font-style: italic; border-top: 1px solid var(--ui-border-light); background: #fafdfc;">
-        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? 'Badan Pusat Statistik Kabupaten Situbondo Tahun 2026') ?>
+        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? ('Badan Pusat Statistik ' . $namaWilayahFormat . ' Tahun 2026')) ?>
       </div>
     </div>
 
@@ -2644,7 +2649,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
         </tbody>
         <tfoot>
           <tr>
-            <th colspan="2" class="th-total-label" style="text-align: left; padding-left: 20px; font-weight: 800; font-size: 15px;">Kab Situbondo</th>
+            <th colspan="2" class="th-total-label" style="text-align: left; padding-left: 20px; font-weight: 800; font-size: 15px;"><?= htmlspecialchars($namaWilayahFormat) ?></th>
             <th class="th-total-num" style="padding-right: 20px; font-size: 15px; font-weight: 800;" id="footTotalP2024_1_6"><?= number_format($summary1_6['total_2024'], 0, ',', '.') ?></th>
             <th class="th-total-num" style="padding-right: 20px; font-size: 15px; font-weight: 800;" id="footTotalP2025_1_6"><?= number_format($summary1_6['total_2025'], 0, ',', '.') ?></th>
             <th class="th-total-num" style="text-align: center; font-size: 15px; font-weight: 800;" id="footTotalTumbuh_1_6"><?= number_format($summary1_6['pertumbuhan_total'], 2, ',', '.') ?></th>
@@ -2653,7 +2658,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
         </tfoot>
       </table>
       <div style="padding: 12px 20px; font-size: 12.5px; color: #475569; font-style: italic; border-top: 1px solid var(--ui-border-light); background: #fafdfc;">
-        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? 'Badan Pusat Statistik Kabupaten Situbondo Tahun 2026') ?>
+        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? ('Badan Pusat Statistik ' . $namaWilayahFormat . ' Tahun 2026')) ?>
       </div>
     </div>
 
@@ -2720,7 +2725,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
         </tbody>
         <tfoot>
           <tr>
-            <th colspan="2" class="th-total-label" style="text-align: left; padding-left: 20px; font-weight: 800; font-size: 15px;">Kabupaten Situbondo</th>
+            <th colspan="2" class="th-total-label" style="text-align: left; padding-left: 20px; font-weight: 800; font-size: 15px;"><?= htmlspecialchars($namaWilayahFormat) ?></th>
             <th class="th-total-num" style="padding-right: 24px; font-size: 15px; font-weight: 800;" id="footTotalMasuk1_7"><?= number_format($summary1_7['total_masuk'], 0, ',', '.') ?></th>
             <th class="th-total-num" style="padding-right: 24px; font-size: 15px; font-weight: 800;" id="footTotalKeluar1_7"><?= number_format($summary1_7['total_keluar'], 0, ',', '.') ?></th>
             <th class="no-print"></th>
@@ -2728,7 +2733,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
         </tfoot>
       </table>
       <div style="padding: 12px 20px; font-size: 12.5px; color: #475569; font-style: italic; border-top: 1px solid var(--ui-border-light); background: #fafdfc;">
-        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? 'Badan Pusat Statistik Kabupaten Situbondo Tahun 2026') ?>
+        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? ('Badan Pusat Statistik ' . $namaWilayahFormat . ' Tahun 2026')) ?>
       </div>
     </div>
 
@@ -3027,7 +3032,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
         </tfoot>
       </table>
       <div style="padding: 12px 20px; font-size: 12.5px; color: #475569; font-style: italic; border-top: 1px solid var(--ui-border-light); background: #fafdfc;">
-        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? 'BKAD Kabupaten Situbondo Tahun 2026, unaudited') ?>
+        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? ('BKAD ' . $namaWilayahFormat . ' Tahun 2026, unaudited')) ?>
       </div>
     </div>
 
@@ -3156,7 +3161,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
         </tfoot>
       </table>
       <div style="padding: 12px 20px; font-size: 12.5px; color: #475569; font-style: italic; border-top: 1px solid var(--ui-border-light); background: #fafdfc;">
-        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? 'BAPENDA Kabupaten Situbondo Tahun 2026, unaudited') ?>
+        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? ('BAPENDA ' . $namaWilayahFormat . ' Tahun 2026, unaudited')) ?>
       </div>
     </div>
 
@@ -3260,7 +3265,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
         </tfoot>
       </table>
       <div style="padding: 12px 20px; font-size: 12.5px; color: #475569; font-style: italic; border-top: 1px solid var(--ui-border-light); background: #fafdfc;">
-        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? 'Bapenda Kabupaten Situbondo Tahun 2026, unaudited') ?>
+        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? ('Bapenda ' . $namaWilayahFormat . ' Tahun 2026, unaudited')) ?>
       </div>
     </div>
 
@@ -3389,7 +3394,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
         </tfoot>
       </table>
       <div style="padding: 12px 20px; font-size: 12.5px; color: #475569; font-style: italic; border-top: 1px solid var(--ui-border-light); background: #fafdfc;">
-        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? 'BKAD Kabupaten Situbondo Tahun 2026, unaudited') ?>
+        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? ('BKAD ' . $namaWilayahFormat . ' Tahun 2026, unaudited')) ?>
       </div>
     </div>
 
@@ -3513,7 +3518,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
         </tfoot>
       </table>
       <div style="padding: 12px 20px; font-size: 12.5px; color: #475569; font-style: italic; border-top: 1px solid var(--ui-border-light); background: #fafdfc;">
-        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? 'Bapenda Kabupaten Situbondo Tahun 2026, unaudited') ?>
+        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? ('Bapenda ' . $namaWilayahFormat . ' Tahun 2026, unaudited')) ?>
       </div>
     </div>
 
@@ -3645,7 +3650,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
         </tfoot>
       </table>
       <div style="padding: 12px 20px; font-size: 12.5px; color: #475569; font-style: italic; border-top: 1px solid var(--ui-border-light); background: #fafdfc;">
-        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? 'BKAD Kabupaten Situbondo Tahun 2026, unaudited') ?>
+        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? ('BKAD ' . $namaWilayahFormat . ' Tahun 2026, unaudited')) ?>
       </div>
     </div>
 
@@ -3784,7 +3789,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
         </tfoot>
       </table>
       <div style="padding: 12px 20px; font-size: 12.5px; color: #475569; font-style: italic; border-top: 1px solid var(--ui-border-light); background: #fafdfc;">
-        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? 'BKAD Kabupaten Situbondo Tahun 2026, unaudited') ?>
+        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? ('BKAD ' . $namaWilayahFormat . ' Tahun 2026, unaudited')) ?>
       </div>
     </div>
 
@@ -3907,7 +3912,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
         </tfoot>
       </table>
       <div style="padding: 12px 20px; font-size: 12.5px; color: #475569; font-style: italic; border-top: 1px solid var(--ui-border-light); background: #fafdfc;">
-        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? 'BKAD Kabupaten Situbondo Tahun 2026, unaudited') ?>
+        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? ('BKAD ' . $namaWilayahFormat . ' Tahun 2026, unaudited')) ?>
       </div>
     </div>
 
@@ -4017,7 +4022,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
         </tfoot>
       </table>
       <div style="padding: 12px 20px; font-size: 12.5px; color: #475569; font-style: italic; border-top: 1px solid var(--ui-border-light); background: #fafdfc;">
-        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? 'BKAD Kabupaten Situbondo Tahun 2026, unaudited') ?>
+        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? ('BKAD ' . $namaWilayahFormat . ' Tahun 2026, unaudited')) ?>
       </div>
     </div>
 
@@ -4137,7 +4142,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
         </tbody>
       </table>
       <div style="padding: 12px 20px; font-size: 12.5px; color: #475569; font-style: italic; border-top: 1px solid var(--ui-border-light); background: #fafdfc;">
-        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? 'BKAD Kabupaten Situbondo Tahun 2026, unaudited') ?>
+        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? ('BKAD ' . $namaWilayahFormat . ' Tahun 2026, unaudited')) ?>
       </div>
     </div>
 
@@ -4201,7 +4206,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
         </tfoot>
       </table>
       <div style="padding: 12px 20px; font-size: 12.5px; color: #475569; font-style: italic; border-top: 1px solid var(--ui-border-light); background: #fafdfc;">
-        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? 'BKAD Kabupaten Situbondo Tahun 2026, unaudited') ?>
+        <strong>Sumber:</strong> <?= htmlspecialchars($metaTabel['sumber'] ?? ('BKAD ' . $namaWilayahFormat . ' Tahun 2026, unaudited')) ?>
       </div>
     </div>
 
@@ -4445,7 +4450,7 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
             </button>
           </div>
           <small style="color:var(--ui-text-muted);font-size:11.5px;margin-top:4px;display:block;">
-            Dapat diisi manual atau dihitung otomatis berdasarkan luas total Kabupaten Situbondo (165.505 Ha).
+            Dapat diisi manual atau dihitung otomatis berdasarkan luas total <?= htmlspecialchars($namaWilayahFormat) ?> (165.505 Ha).
           </small>
         </div>
 
@@ -6093,6 +6098,7 @@ const CURRENT_TABEL = '<?= $activeTabel ?>';
 const CURRENT_TAHUN = '<?= $tahunAktif ?>';
 const IS_LOGGED_IN = <?= !empty($IsLoggedIn) ? 'true' : 'false' ?>;
 const CAN_CRUD = <?= !empty($CanCrud) ? 'true' : 'false' ?>;
+const CURRENT_NAMA_WILAYAH = <?= json_encode($namaWilayahFormat) ?>;
 
 // Script Filter Dropdown Provinsi & Kab/Kota (Saat Belum Login atau Akun Read-Only Kementerian/Nasional)
 <?php if (empty($IsLoggedIn) || !empty($IsReadOnly)): ?>
@@ -6368,7 +6374,7 @@ function deleteRow1_1(id, namaKecamatan) {
 function konfirmasiReset1_1() {
   Swal.fire({
     title: 'Reset ke Data Bawaan?',
-    text: 'Tabel 1.1 akan dikembalikan persis ke 17 kecamatan Kabupaten Situbondo sesuai dokumen resmi.',
+    text: 'Tabel 1.1 akan dikembalikan persis ke data kecamatan ' + CURRENT_NAMA_WILAYAH + ' sesuai dokumen resmi.',
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#cf7e2f',
@@ -6543,7 +6549,7 @@ function deleteRow1_2(id, namaTutupan) {
 function konfirmasiReset1_2() {
   Swal.fire({
     title: 'Reset ke Data Bawaan?',
-    text: 'Tabel 1.2 akan dikembalikan ke 19 data tutupan lahan standar Kabupaten Situbondo sesuai dokumen resmi.',
+    text: 'Tabel 1.2 akan dikembalikan ke data tutupan lahan standar ' + CURRENT_NAMA_WILAYAH + ' sesuai dokumen resmi.',
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#00c292',
@@ -6696,7 +6702,7 @@ function deleteRow1_3(id, namaKecamatan) {
 function konfirmasiReset1_3() {
   Swal.fire({
     title: 'Reset ke Data Bawaan?',
-    text: 'Tabel 1.3 akan dikembalikan ke 17 data ketinggian kecamatan Kabupaten Situbondo sesuai dokumen resmi.',
+    text: 'Tabel 1.3 akan dikembalikan ke data ketinggian kecamatan ' + CURRENT_NAMA_WILAYAH + ' sesuai dokumen resmi.',
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#00c292',
@@ -6848,7 +6854,7 @@ function deleteRow1_4(id, namaBulan) {
 function konfirmasiReset1_4() {
   Swal.fire({
     title: 'Reset ke Data Bawaan?',
-    text: 'Tabel 1.4 akan dikembalikan ke 12 bulan kondisi iklim Kabupaten Situbondo sesuai data resmi BPS.',
+    text: 'Tabel 1.4 akan dikembalikan ke data kondisi iklim ' + CURRENT_NAMA_WILAYAH + ' sesuai data resmi BPS.',
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#00c292',
@@ -7029,7 +7035,7 @@ function deleteRow1_5(id, namaKecamatan) {
 function konfirmasiReset1_5() {
   Swal.fire({
     title: 'Reset ke Data Bawaan?',
-    text: 'Tabel 1.5 akan dikembalikan ke 17 data kependudukan kecamatan Kabupaten Situbondo sesuai rilis resmi BPS.',
+    text: 'Tabel 1.5 akan dikembalikan ke data kependudukan kecamatan ' + CURRENT_NAMA_WILAYAH + ' sesuai rilis resmi BPS.',
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#00c292',
@@ -7472,7 +7478,7 @@ function deleteRow1_8(id, namaJenis) {
 function konfirmasiReset1_8() {
   Swal.fire({
     title: 'Reset ke Data Bawaan?',
-    text: 'Tabel 1.8 akan dikembalikan ke data ASN resmi BKPSDM Kabupaten Situbondo.',
+    text: 'Tabel 1.8 akan dikembalikan ke data ASN resmi BKPSDM ' + CURRENT_NAMA_WILAYAH + '.',
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#00c292',
@@ -7629,7 +7635,7 @@ function deleteRow1_9(id, namaTingkat) {
 function konfirmasiReset1_9() {
   Swal.fire({
     title: 'Reset ke Data Bawaan?',
-    text: 'Tabel 1.9 akan dikembalikan ke data pendidikan ASN resmi BKPSDM Kabupaten Situbondo.',
+    text: 'Tabel 1.9 akan dikembalikan ke data pendidikan ASN resmi BKPSDM ' + CURRENT_NAMA_WILAYAH + '.',
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#00c292',
@@ -8450,7 +8456,7 @@ function deleteRow1_13(id, uraian) {
 function konfirmasiReset1_13() {
   Swal.fire({
     title: 'Reset Tabel 1.13 ke Data Resmi BKAD?',
-    text: 'Tabel 1.13 akan dikembalikan persis ke data hasil pengelolaan keuangan daerah resmi Kabupaten Situbondo sesuai dokumen LKPJ.',
+    text: 'Tabel 1.13 akan dikembalikan persis ke data hasil pengelolaan keuangan daerah resmi ' + CURRENT_NAMA_WILAYAH + ' sesuai dokumen LKPJ.',
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#00c292',
@@ -8650,7 +8656,7 @@ function deleteRow1_14(id, uraian) {
 function konfirmasiReset1_14() {
   Swal.fire({
     title: 'Reset Tabel 1.14 ke Data Resmi Bapenda?',
-    text: 'Tabel 1.14 akan dikembalikan persis ke data rincian hasil lain-lain PAD yang sah resmi Kabupaten Situbondo sesuai dokumen LKPJ.',
+    text: 'Tabel 1.14 akan dikembalikan persis ke data rincian hasil lain-lain PAD yang sah resmi ' + CURRENT_NAMA_WILAYAH + ' sesuai dokumen LKPJ.',
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#00c292',
@@ -8857,7 +8863,7 @@ function deleteRow1_15(id, uraian) {
 function konfirmasiReset1_15() {
   Swal.fire({
     title: 'Reset Tabel 1.15 ke Data Resmi BKAD?',
-    text: 'Tabel 1.15 akan dikembalikan persis ke data rincian pendapatan transfer resmi Kabupaten Situbondo sesuai dokumen LKPJ.',
+    text: 'Tabel 1.15 akan dikembalikan persis ke data rincian pendapatan transfer resmi ' + CURRENT_NAMA_WILAYAH + ' sesuai dokumen LKPJ.',
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#00c292',
@@ -9070,7 +9076,7 @@ function deleteRow1_16(id, uraian) {
 function konfirmasiReset1_16() {
   Swal.fire({
     title: 'Reset Tabel 1.16 ke Data Resmi BKAD?',
-    text: 'Tabel 1.16 akan dikembalikan persis ke data rincian belanja dan transfer resmi Kabupaten Situbondo sesuai dokumen LKPJ.',
+    text: 'Tabel 1.16 akan dikembalikan persis ke data rincian belanja dan transfer resmi ' + CURRENT_NAMA_WILAYAH + ' sesuai dokumen LKPJ.',
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#00c292',
@@ -9217,7 +9223,7 @@ function deleteRow1_17(id, uraian) {
 function konfirmasiReset1_17() {
   Swal.fire({
     title: 'Reset Tabel 1.17 ke Data Resmi BKAD?',
-    text: 'Tabel 1.17 akan dikembalikan persis ke data rincian belanja hibah resmi Kabupaten Situbondo sesuai dokumen LKPJ.',
+    text: 'Tabel 1.17 akan dikembalikan persis ke data rincian belanja hibah resmi ' + CURRENT_NAMA_WILAYAH + ' sesuai dokumen LKPJ.',
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#00c292', cancelButtonColor: '#64748b',
@@ -9355,7 +9361,7 @@ function deleteRow1_18(id, uraian) {
 function konfirmasiReset1_18() {
   Swal.fire({
     title: 'Reset Tabel 1.18 ke Data Resmi BKAD?',
-    text: 'Tabel 1.18 akan dikembalikan persis ke data rincian belanja bantuan sosial resmi Kabupaten Situbondo sesuai dokumen LKPJ.',
+    text: 'Tabel 1.18 akan dikembalikan persis ke data rincian belanja bantuan sosial resmi ' + CURRENT_NAMA_WILAYAH + ' sesuai dokumen LKPJ.',
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#00c292', cancelButtonColor: '#64748b',
@@ -9545,7 +9551,7 @@ function deleteRow1_19(id, uraian) {
 function konfirmasiReset1_19() {
   Swal.fire({
     title: 'Reset Tabel 1.19 ke Data Resmi BKAD?',
-    text: 'Tabel 1.19 akan dikembalikan persis ke data pembiayaan daerah resmi Kabupaten Situbondo sesuai dokumen LKPJ.',
+    text: 'Tabel 1.19 akan dikembalikan persis ke data pembiayaan daerah resmi ' + CURRENT_NAMA_WILAYAH + ' sesuai dokumen LKPJ.',
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#00c292', cancelButtonColor: '#64748b',
@@ -9659,7 +9665,7 @@ function deleteRow1_20(id, komponen) {
 function konfirmasiReset1_20() {
   Swal.fire({
     title: 'Reset Tabel 1.20 ke Data Resmi BKAD?',
-    text: 'Tabel 1.20 akan dikembalikan persis ke data komponen SILPA resmi Kabupaten Situbondo sesuai dokumen LKPJ.',
+    text: 'Tabel 1.20 akan dikembalikan persis ke data komponen SILPA resmi ' + CURRENT_NAMA_WILAYAH + ' sesuai dokumen LKPJ.',
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#00c292', cancelButtonColor: '#64748b',

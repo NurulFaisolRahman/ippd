@@ -85,11 +85,13 @@
                 <div class="data-table-list">
                     <div class="basic-tb-hd" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
                         <h3 style="margin: 0; color: #333; font-weight: 600;">Indikator Utama Pembangunan (IUP) RPJMD</h3>
-                        <div class="button-icon-btn">
+                        <?php if (isset($_SESSION['Level']) && in_array($_SESSION['Level'], [1, 2])) { ?>
+<div class="button-icon-btn">
                             <button type="button" class="btn btn-success notika-btn-success btn-action" data-toggle="modal" data-target="#ModalInputIUP" style="padding: 8px 15px;">
                                 <i class="fa fa-plus-circle" style="margin-right: 5px;"></i> <b>Input IUP RPJMD</b>
                             </button>
                         </div>
+<?php } ?>
                     </div>
                     <div class="table-responsive">
                         <!-- Tambahkan class table-hover -->
@@ -102,7 +104,7 @@
                                     <th style="width: 12%;" class="text-center">Target Awal</th>
                                     <th style="width: 12%;" class="text-center">Target Akhir</th>
                                     <th style="width: 12%;" class="text-center">Periode</th>
-                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 2) { ?>
+                                    <?php if (isset($_SESSION['Level']) && in_array($_SESSION['Level'], [1, 2])) { ?>
                                     <th style="width: 12%;" class="text-center">Aksi</th>
                                     <?php } ?>
                                 </tr>
@@ -123,7 +125,7 @@
                                         <td class="text-center">
                                             <span class="badge-periode"><?= $value['TahunMulai'].' - '.$value['TahunAkhir'] ?></span>
                                         </td>
-                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 2) { ?>
+                                        <?php if (isset($_SESSION['Level']) && in_array($_SESSION['Level'], [1, 2])) { ?>
                                         <td class="text-center">
                                             <!-- Tombol Edit & Hapus dengan UI yang dipercantik namun tetap mempertahankan custom Attribute Edit="" dan Hapus="" untuk trigger JS -->
                                             <button class="btn btn-sm btn-info btn-action Edit" Edit="<?= $value['Id'].'_'.$value['_Id'].'_'.$value['IUP'].'_'.$value['Baseline'].'_'.$value['TargetAwal'].'_'.$value['TargetAkhir'] ?>" title="Edit IUP">

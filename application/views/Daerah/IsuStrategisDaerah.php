@@ -29,6 +29,57 @@ if (!function_exists('formatLinearitasCell')) {
 
 $userLevel = isset($_SESSION['Level']) ? (int)$_SESSION['Level'] : (isset($_SESSION['userLevel']) ? (int)$_SESSION['userLevel'] : null);
 $canManage = ($userLevel === 0 || $userLevel === 3);
+
+$uniqueIsuStrategis = [];
+$uniquePermasalahan = [];
+$uniqueKLHS = [];
+$uniqueGlobal = [];
+$uniqueNasional = [];
+$uniqueRegional = [];
+
+if (!empty($IsuStrategis)) {
+    if (!function_exists('addUniqueIsu')) {
+        function addUniqueIsu(&$array, $val) {
+            $val = trim($val);
+            if (empty($val)) return;
+            $valLower = strtolower($val);
+            foreach ($array as $u) {
+                if (strtolower($u) === $valLower) return;
+            }
+            $array[] = $val;
+        }
+    }
+
+    foreach ($IsuStrategis as $isu) {
+        addUniqueIsu($uniqueIsuStrategis, $isu['NamaIsuStrategis']);
+        
+        $pm_list = explode("||", str_replace([",", "\n", "\r"], "||", $isu['permasalahan_pokok']));
+        foreach($pm_list as $pm) {
+            addUniqueIsu($uniquePermasalahan, $pm);
+        }
+        
+        $klhs_list = explode("||", str_replace([",", "\n", "\r"], "||", $isu['isu_klhs']));
+        foreach($klhs_list as $klhs) {
+            addUniqueIsu($uniqueKLHS, $klhs);
+        }
+
+        $glb_list = explode("||", str_replace([",", "\n", "\r"], "||", $isu['isu_global']));
+        foreach($glb_list as $glb) {
+            addUniqueIsu($uniqueGlobal, $glb);
+        }
+
+        $nas_list = explode("||", str_replace([",", "\n", "\r"], "||", $isu['isu_nasional']));
+        foreach($nas_list as $nas) {
+            addUniqueIsu($uniqueNasional, $nas);
+        }
+
+        $reg_list = explode("||", str_replace([",", "\n", "\r"], "||", $isu['isu_regional']));
+        foreach($reg_list as $reg) {
+            addUniqueIsu($uniqueRegional, $reg);
+        }
+    }
+}
+
 ?>
 
 <style>
@@ -324,57 +375,68 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php if (!empty($IsuStrategis)) { 
-                                        $no = 1;
-                                        foreach ($IsuStrategis as $row) {
-                                    ?>
-                                        <tr>
-                                            <td class="text-center" style="font-weight: 600;"><?= $no++ ?></td>
-                                            <td><?= formatLinearitasCell($row['permasalahan_pokok']) ?></td>
-                                            <td><?= formatLinearitasCell($row['isu_klhs']) ?></td>
-                                            <td><?= formatLinearitasCell($row['isu_global'] ?? '') ?></td>
-                                            <td><?= formatLinearitasCell($row['isu_nasional'] ?? '') ?></td>
-                                            <td><?= formatLinearitasCell($row['isu_regional'] ?? '') ?></td>
-                                            <td style="font-weight: 600; color: #1f2937;">
-                                                <?= formatLinearitasCell($row['NamaIsuStrategis']) ?>
-                                                <?php if (!empty($row['TahunMulai']) && !empty($row['TahunAkhir'])) { ?>
-                                                    <div style="margin-top: 6px;">
-                                                        <span class="badge" style="background-color: #ecfdf5; color: #065f46; font-size: 11px; border: 1px solid #a7f3d0; font-weight: 600;">
-                                                            <?= html_escape($row['TahunMulai']) ?> - <?= html_escape($row['TahunAkhir']) ?>
-                                                        </span>
-                                                    </div>
-                                                <?php } ?>
-                                            </td>
-                                            <?php if ($canManage) { ?>
-                                            <td class="text-center" style="vertical-align: middle !important;">
-                                                <div class="btn-action-group">
-                                                    <button type="button" class="btn btn-sm EditIsuStrategis" 
-                                                            data-id="<?= $row['Id'] ?>" 
-                                                            title="Edit Data" 
-                                                            style="background: #00c292; border-color: #00a87e; color: #fff;">
-                                                        <i class="fa fa-pencil"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-danger btn-sm HapusIsuStrategis" 
-                                                            data-id="<?= $row['Id'] ?>" 
-                                                            title="Hapus Data" 
-                                                            style="background: #ef4444; border-color: #dc2626; color: #fff;">
-                                                        <i class="fa fa-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                            <?php } ?>
-                                        </tr>
-                                    <?php 
-                                        } 
-                                    } else { ?>
-                                        <tr>
-                                            <td colspan="<?= $canManage ? '8' : '7' ?>" class="text-center text-muted" style="padding: 30px !important;">
-                                                <i class="fa fa-folder-open-o fa-2x" style="display: block; margin-bottom: 8px; color: #9ca3af;"></i>
-                                                Belum ada data Isu Strategis Daerah untuk wilayah ini.
-                                            </td>
-                                        </tr>
-                                    <?php } ?>
-                                </tbody>
+                                      <?php if (!empty($IsuStrategis)) { 
+                                          // Grouping logic for rowspan
+                                          $grouped = [];
+                                          foreach ($IsuStrategis as $row) {
+                                              $nama = trim($row['NamaIsuStrategis']);
+                                              $grouped[$nama][] = $row;
+                                          }
+                                          $no = 1;
+                                          foreach ($grouped as $nama => $rows) {
+                                              $rowspan = count($rows);
+                                              foreach ($rows as $index => $row) {
+                                      ?>
+                                          <tr>
+                                              <td class="text-center dt-index" style="font-weight: 600; vertical-align: middle;"><?= $no++ ?></td>
+                                              
+                                              <td style="vertical-align: middle;"><?= formatLinearitasCell($row['permasalahan_pokok']) ?></td>
+                                              <td style="vertical-align: middle;"><?= formatLinearitasCell($row['isu_klhs']) ?></td>
+                                              <td style="vertical-align: middle;"><?= formatLinearitasCell($row['isu_global'] ?? '') ?></td>
+                                              <td style="vertical-align: middle;"><?= formatLinearitasCell($row['isu_nasional'] ?? '') ?></td>
+                                              <td style="vertical-align: middle;"><?= formatLinearitasCell($row['isu_regional'] ?? '') ?></td>
+                                              
+                                              <?php if ($index === 0) { ?>
+                                              <td rowspan="<?= $rowspan ?>" style="font-weight: 600; color: #1f2937; vertical-align: middle;">
+                                                  <?= formatLinearitasCell($row['NamaIsuStrategis']) ?>
+                                                  <?php if (!empty($row['TahunMulai']) && !empty($row['TahunAkhir'])) { ?>
+                                                      <div style="margin-top: 6px;">
+                                                          <span class="badge" style="background-color: #ecfdf5; color: #065f46; font-size: 11px; border: 1px solid #a7f3d0; font-weight: 600;">
+                                                              <?= html_escape($row['TahunMulai']) ?> - <?= html_escape($row['TahunAkhir']) ?>
+                                                          </span>
+                                                      </div>
+                                                  <?php } ?>
+                                              </td>
+                                              <?php } ?>
+                                              
+                                              <?php if ($canManage) { ?>
+                                              <td class="text-center" style="vertical-align: middle !important;">
+                                                  <div class="btn-action-group">
+                                                      <button type="button" class="btn btn-sm EditIsuStrategis" 
+                                                              data-id="<?= $row['Id'] ?>" 
+                                                              title="Edit Data" 
+                                                              style="background: #00c292; border-color: #00a87e; color: #fff;">
+                                                          <i class="fa fa-pencil"></i>
+                                                      </button>
+                                                      <button type="button" class="btn btn-danger btn-sm HapusIsuStrategis" 
+                                                              data-id="<?= $row['Id'] ?>" 
+                                                              title="Hapus Data" 
+                                                              style="background: #ef4444; border-color: #dc2626; color: #fff;">
+                                                          <i class="fa fa-trash"></i>
+                                                      </button>
+                                                  </div>
+                                              </td>
+                                              <?php } ?>
+                                          </tr>
+                                      <?php } } } else { ?>
+                                          <tr>
+                                              <td colspan="<?= $canManage ? '8' : '7' ?>" class="text-center text-muted" style="padding: 30px !important;">
+                                                  <i class="fa fa-folder-open-o fa-2x" style="display: block; margin-bottom: 8px; color: #9ca3af;"></i>
+                                                  Belum ada data Isu Strategis Daerah untuk wilayah ini.
+                                              </td>
+                                          </tr>
+                                      <?php } ?>
+                                  </tbody>
                             </table>
                         </div>
 
@@ -401,10 +463,10 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
                     <!-- 1. Periode RPJMD -->
                     <div class="form-field-card">
                         <label for="TambahPeriodeRPJMD">
-                            <span>1. Periode RPJMD <span class="text-danger">*</span></span>
+                            <span class="dynamic-number">Periode RPJMD <span class="text-danger">*</span></span>
                             <span class="field-hint">Pilih periode berlaku dokumen</span>
                         </label>
-                        <select class="form-control" name="PeriodeRPJMD" id="TambahPeriodeRPJMD" required>
+                        <select class="form-control" name="PeriodeRPJMD" id="TambahPeriodeRPJMD">
                             <option value="">-- Pilih Periode --</option>
                             <?php if (!empty($Periods)) { foreach ($Periods as $p) { 
                                 $valP = $p['TahunMulai'] . '-' . $p['TahunAkhir'];
@@ -419,29 +481,92 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
 
                     <!-- 2. Isu Strategis -->
                     <div class="form-field-card">
-                        <label for="TambahNamaIsuStrategis">
-                            <span>2. Isu Strategis Daerah <span class="text-danger">*</span></span>
-                            <span class="field-hint">Rumusan isu strategis daerah</span>
+                        <label>
+                            <span class="dynamic-number">Isu Strategis Daerah <span class="text-danger">*</span></span>
                         </label>
-                        <textarea class="form-control" name="NamaIsuStrategis" id="TambahNamaIsuStrategis" placeholder="Contoh: Sumber Daya Manusia yang Belum Berdaya Saing" required></textarea>
+                        <div style="margin-bottom: 10px;">
+                            <label class="radio-inline" style="margin-right: 15px; cursor: pointer;">
+                                <input type="radio" name="mode_NamaIsuStrategis" value="pilih" checked onchange="toggleFieldMode('tambah', 'NamaIsuStrategis', this.value)"> Pilih dari Data Master
+                            </label>
+                            <label class="radio-inline" style="cursor: pointer;">
+                                <input type="radio" name="mode_NamaIsuStrategis" value="manual" onchange="toggleFieldMode('tambah', 'NamaIsuStrategis', this.value)"> Input Manual
+                            </label>
+                        </div>
+                        
+                        <div id="WrapTambahNamaIsuStrategisPilih">
+                            <span class="field-hint" style="display:block; margin-bottom: 5px;">Pilih Isu Strategis Daerah</span>
+                            <select class="select2 form-control" name="NamaIsuStrategis_pilih" id="TambahNamaIsuStrategisPilih" data-placeholder="Pilih Isu Strategis Daerah" style="width: 100%;">
+                                <option value="">-- Pilih Isu Strategis Daerah --</option>
+                                <?php foreach ($uniqueIsuStrategis as $opt) { ?>
+                                    <option value="<?= html_escape($opt) ?>"><?= html_escape($opt) ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div id="WrapTambahNamaIsuStrategisManual" style="display: none;">
+                            <span class="field-hint" style="display:block; margin-bottom: 5px;">Ketik Isu Strategis Daerah secara manual</span>
+                            <textarea class="form-control" name="NamaIsuStrategis_manual" id="TambahNamaIsuStrategisManual" placeholder="Contoh: SDM Belum Berdaya Saing"></textarea>
+                        </div>
                     </div>
 
                     <!-- 3. Permasalahan -->
                     <div class="form-field-card">
-                        <label for="TambahPermasalahan">
-                            <span>3. Permasalahan</span>
-                            <span class="field-hint">Tekan Enter untuk butir permasalahan baru</span>
+                        <label>
+                            <span class="dynamic-number">Permasalahan Pokok</span>
                         </label>
-                        <textarea class="form-control" name="permasalahan_pokok" id="TambahPermasalahan" placeholder="Contoh:&#10;Infrastruktur kesehatan penyakit menular dan tidak menular belum merata&#10;Belum meratanya jaminan Kesehatan&#10;Masih adanya kasus Stunting"></textarea>
+                        <div style="margin-bottom: 10px;">
+                            <label class="radio-inline" style="margin-right: 15px; cursor: pointer;">
+                                <input type="radio" name="mode_permasalahan_pokok" value="pilih" checked onchange="toggleFieldMode('tambah', 'permasalahan_pokok', this.value)"> Pilih dari Data Master
+                            </label>
+                            <label class="radio-inline" style="cursor: pointer;">
+                                <input type="radio" name="mode_permasalahan_pokok" value="manual" onchange="toggleFieldMode('tambah', 'permasalahan_pokok', this.value)"> Input Manual
+                            </label>
+                        </div>
+                        
+                        <div id="WrapTambahPermasalahan_pokokPilih">
+                            <span class="field-hint" style="display:block; margin-bottom: 5px;">Pilih permasalahan</span>
+                            <select class="select2 form-control" multiple="multiple" name="permasalahan_pokok_pilih[]" id="TambahPermasalahan_pokokPilih" data-placeholder="Pilih Permasalahan Pokok" style="width: 100%;">
+                                <option value="">-- Pilih Permasalahan Pokok --</option>
+                                <?php foreach ($uniquePermasalahan as $opt) { ?>
+                                    <option value="<?= html_escape($opt) ?>"><?= html_escape($opt) ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div id="WrapTambahPermasalahan_pokokManual" style="display: none;">
+                            <span class="field-hint" style="display:block; margin-bottom: 5px;">Ketik Permasalahan Pokok secara manual</span>
+                            <textarea class="form-control" name="permasalahan_pokok_manual" id="TambahPermasalahan_pokokManual" placeholder="Tekan Enter..."></textarea>
+                        </div>
                     </div>
 
                     <!-- 4. Isu KLHS -->
                     <div class="form-field-card">
-                        <label for="TambahIsuKLHS">
-                            <span>4. Isu KLHS</span>
-                            <span class="field-hint">Isu Kajian Lingkungan Hidup Strategis</span>
+                        <label>
+                            <span class="dynamic-number">Isu KLHS</span>
                         </label>
-                        <textarea class="form-control" name="isu_klhs" id="TambahIsuKLHS" placeholder="Contoh: Kualitas SDM"></textarea>
+                        <div style="margin-bottom: 10px;">
+                            <label class="radio-inline" style="margin-right: 15px; cursor: pointer;">
+                                <input type="radio" name="mode_isu_klhs" value="pilih" checked onchange="toggleFieldMode('tambah', 'isu_klhs', this.value)"> Pilih dari Data Master
+                            </label>
+                            <label class="radio-inline" style="cursor: pointer;">
+                                <input type="radio" name="mode_isu_klhs" value="manual" onchange="toggleFieldMode('tambah', 'isu_klhs', this.value)"> Input Manual
+                            </label>
+                        </div>
+                        
+                        <div id="WrapTambahIsu_klhsPilih">
+                            <span class="field-hint" style="display:block; margin-bottom: 5px;">Pilih Isu KLHS</span>
+                            <select class="select2 form-control" name="isu_klhs_pilih" id="TambahIsu_klhsPilih" data-placeholder="Pilih Isu KLHS" style="width: 100%;">
+                                <option value="">-- Pilih Isu KLHS --</option>
+                                <?php foreach ($uniqueKLHS as $opt) { ?>
+                                    <option value="<?= html_escape($opt) ?>"><?= html_escape($opt) ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div id="WrapTambahIsu_klhsManual" style="display: none;">
+                            <span class="field-hint" style="display:block; margin-bottom: 5px;">Ketik Isu KLHS secara manual</span>
+                            <textarea class="form-control" name="isu_klhs_manual" id="TambahIsu_klhsManual" placeholder="Contoh: Kualitas SDM"></textarea>
+                        </div>
                     </div>
 
                     <div class="text-center" style="margin: 10px 0;">
@@ -452,29 +577,92 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
 
                     <!-- 5. Isu Lingkungan Dinamis: Global -->
                     <div class="form-field-card">
-                        <label for="TambahIsuGlobal">
-                            <span>5. Isu Global</span>
-                            <span class="field-hint">Tekan Enter untuk butir baru</span>
+                        <label>
+                            <span class="dynamic-number">Isu Global</span>
                         </label>
-                        <textarea class="form-control" name="isu_global" id="TambahIsuGlobal" placeholder="Contoh:&#10;Persaingan Talenta Global&#10;Aging Population&#10;Transformasi Digital"></textarea>
+                        <div style="margin-bottom: 10px;">
+                            <label class="radio-inline" style="margin-right: 15px; cursor: pointer;">
+                                <input type="radio" name="mode_isu_global" value="pilih" checked onchange="toggleFieldMode('tambah', 'isu_global', this.value)"> Pilih dari Data Master
+                            </label>
+                            <label class="radio-inline" style="cursor: pointer;">
+                                <input type="radio" name="mode_isu_global" value="manual" onchange="toggleFieldMode('tambah', 'isu_global', this.value)"> Input Manual
+                            </label>
+                        </div>
+                        
+                        <div id="WrapTambahIsu_globalPilih">
+                            <span class="field-hint" style="display:block; margin-bottom: 5px;">Pilih Isu Global</span>
+                            <select class="select2 form-control" name="isu_global_pilih" id="TambahIsu_globalPilih" data-placeholder="Pilih Isu Global" style="width: 100%;">
+                                <option value="">-- Pilih Isu Global --</option>
+                                <?php foreach ($uniqueGlobal as $opt) { ?>
+                                    <option value="<?= html_escape($opt) ?>"><?= html_escape($opt) ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div id="WrapTambahIsu_globalManual" style="display: none;">
+                            <span class="field-hint" style="display:block; margin-bottom: 5px;">Ketik Isu Global secara manual</span>
+                            <textarea class="form-control" name="isu_global_manual" id="TambahIsu_globalManual" placeholder="Contoh: Persaingan"></textarea>
+                        </div>
                     </div>
 
                     <!-- 6. Isu Lingkungan Dinamis: Nasional -->
                     <div class="form-field-card">
-                        <label for="TambahIsuNasional">
-                            <span>6. Isu Nasional</span>
-                            <span class="field-hint">Tekan Enter untuk butir baru</span>
+                        <label>
+                            <span class="dynamic-number">Isu Nasional</span>
                         </label>
-                        <textarea class="form-control" name="isu_nasional" id="TambahIsuNasional" placeholder="Contoh: Rendahnya Kualitas SDM"></textarea>
+                        <div style="margin-bottom: 10px;">
+                            <label class="radio-inline" style="margin-right: 15px; cursor: pointer;">
+                                <input type="radio" name="mode_isu_nasional" value="pilih" checked onchange="toggleFieldMode('tambah', 'isu_nasional', this.value)"> Pilih dari Data Master
+                            </label>
+                            <label class="radio-inline" style="cursor: pointer;">
+                                <input type="radio" name="mode_isu_nasional" value="manual" onchange="toggleFieldMode('tambah', 'isu_nasional', this.value)"> Input Manual
+                            </label>
+                        </div>
+                        
+                        <div id="WrapTambahIsu_nasionalPilih">
+                            <span class="field-hint" style="display:block; margin-bottom: 5px;">Pilih Isu Nasional</span>
+                            <select class="select2 form-control" name="isu_nasional_pilih" id="TambahIsu_nasionalPilih" data-placeholder="Pilih Isu Nasional" style="width: 100%;">
+                                <option value="">-- Pilih Isu Nasional --</option>
+                                <?php foreach ($uniqueNasional as $opt) { ?>
+                                    <option value="<?= html_escape($opt) ?>"><?= html_escape($opt) ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div id="WrapTambahIsu_nasionalManual" style="display: none;">
+                            <span class="field-hint" style="display:block; margin-bottom: 5px;">Ketik Isu Nasional secara manual</span>
+                            <textarea class="form-control" name="isu_nasional_manual" id="TambahIsu_nasionalManual" placeholder="Contoh: Rendahnya SDM"></textarea>
+                        </div>
                     </div>
 
                     <!-- 7. Isu Lingkungan Dinamis: Regional -->
                     <div class="form-field-card">
-                        <label for="TambahIsuRegional">
-                            <span>7. Isu Regional</span>
-                            <span class="field-hint">Tekan Enter untuk butir baru</span>
+                        <label>
+                            <span class="dynamic-number">Isu Regional</span>
                         </label>
-                        <textarea class="form-control" name="isu_regional" id="TambahIsuRegional" placeholder="Contoh: Pengembangan SDM berkualitas melalui peningkatan akses pendidikan, kesehatan dan standar hidup layak"></textarea>
+                        <div style="margin-bottom: 10px;">
+                            <label class="radio-inline" style="margin-right: 15px; cursor: pointer;">
+                                <input type="radio" name="mode_isu_regional" value="pilih" checked onchange="toggleFieldMode('tambah', 'isu_regional', this.value)"> Pilih dari Data Master
+                            </label>
+                            <label class="radio-inline" style="cursor: pointer;">
+                                <input type="radio" name="mode_isu_regional" value="manual" onchange="toggleFieldMode('tambah', 'isu_regional', this.value)"> Input Manual
+                            </label>
+                        </div>
+                        
+                        <div id="WrapTambahIsu_regionalPilih">
+                            <span class="field-hint" style="display:block; margin-bottom: 5px;">Pilih Isu Regional</span>
+                            <select class="select2 form-control" name="isu_regional_pilih" id="TambahIsu_regionalPilih" data-placeholder="Pilih Isu Regional" style="width: 100%;">
+                                <option value="">-- Pilih Isu Regional --</option>
+                                <?php foreach ($uniqueRegional as $opt) { ?>
+                                    <option value="<?= html_escape($opt) ?>"><?= html_escape($opt) ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div id="WrapTambahIsu_regionalManual" style="display: none;">
+                            <span class="field-hint" style="display:block; margin-bottom: 5px;">Ketik Isu Regional secara manual</span>
+                            <textarea class="form-control" name="isu_regional_manual" id="TambahIsu_regionalManual" placeholder="Contoh: SDM"></textarea>
+                        </div>
                     </div>
 
                 </div>
@@ -506,10 +694,10 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
                     <!-- 1. Periode RPJMD -->
                     <div class="form-field-card">
                         <label for="EditPeriodeRPJMD">
-                            <span>1. Periode RPJMD <span class="text-danger">*</span></span>
+                            <span class="dynamic-number">Periode RPJMD <span class="text-danger">*</span></span>
                             <span class="field-hint">Pilih periode berlaku dokumen</span>
                         </label>
-                        <select class="form-control" name="EditPeriodeRPJMD" id="EditPeriodeRPJMD" required>
+                        <select class="form-control" name="EditPeriodeRPJMD" id="EditPeriodeRPJMD">
                             <option value="">-- Pilih Periode --</option>
                             <?php if (!empty($Periods)) { foreach ($Periods as $p) { 
                                 $valP = $p['TahunMulai'] . '-' . $p['TahunAkhir'];
@@ -524,29 +712,92 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
 
                     <!-- 2. Isu Strategis -->
                     <div class="form-field-card">
-                        <label for="EditNamaIsuStrategis">
-                            <span>2. Isu Strategis Daerah <span class="text-danger">*</span></span>
-                            <span class="field-hint">Rumusan isu strategis daerah</span>
+                        <label>
+                            <span class="dynamic-number">Isu Strategis Daerah <span class="text-danger">*</span></span>
                         </label>
-                        <textarea class="form-control" name="NamaIsuStrategis" id="EditNamaIsuStrategis" placeholder="Contoh: Sumber Daya Manusia yang Belum Berdaya Saing" required></textarea>
+                        <div style="margin-bottom: 10px;">
+                            <label class="radio-inline" style="margin-right: 15px; cursor: pointer;">
+                                <input type="radio" name="edit_mode_NamaIsuStrategis" value="pilih" checked onchange="toggleFieldMode('edit', 'NamaIsuStrategis', this.value)"> Pilih dari Data Master
+                            </label>
+                            <label class="radio-inline" style="cursor: pointer;">
+                                <input type="radio" name="edit_mode_NamaIsuStrategis" value="manual" onchange="toggleFieldMode('edit', 'NamaIsuStrategis', this.value)"> Input Manual
+                            </label>
+                        </div>
+                        
+                        <div id="WrapEditNamaIsuStrategisPilih">
+                            <span class="field-hint" style="display:block; margin-bottom: 5px;">Pilih Isu Strategis Daerah</span>
+                            <select class="select2 form-control" name="NamaIsuStrategis_pilih" id="EditNamaIsuStrategisPilih" data-placeholder="Pilih Isu Strategis Daerah" style="width: 100%;">
+                                <option value="">-- Pilih Isu Strategis Daerah --</option>
+                                <?php foreach ($uniqueIsuStrategis as $opt) { ?>
+                                    <option value="<?= html_escape($opt) ?>"><?= html_escape($opt) ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div id="WrapEditNamaIsuStrategisManual" style="display: none;">
+                            <span class="field-hint" style="display:block; margin-bottom: 5px;">Ketik Isu Strategis Daerah secara manual</span>
+                            <textarea class="form-control" name="NamaIsuStrategis_manual" id="EditNamaIsuStrategisManual" placeholder="Contoh: SDM Belum Berdaya Saing"></textarea>
+                        </div>
                     </div>
 
                     <!-- 3. Permasalahan -->
                     <div class="form-field-card">
-                        <label for="EditPermasalahan">
-                            <span>3. Permasalahan</span>
-                            <span class="field-hint">Tekan Enter untuk butir permasalahan baru</span>
+                        <label>
+                            <span class="dynamic-number">Permasalahan Pokok</span>
                         </label>
-                        <textarea class="form-control" name="permasalahan_pokok" id="EditPermasalahan" placeholder="Contoh:&#10;Infrastruktur kesehatan penyakit menular dan tidak menular belum merata&#10;Belum meratanya jaminan Kesehatan&#10;Masih adanya kasus Stunting"></textarea>
+                        <div style="margin-bottom: 10px;">
+                            <label class="radio-inline" style="margin-right: 15px; cursor: pointer;">
+                                <input type="radio" name="edit_mode_permasalahan_pokok" value="pilih" checked onchange="toggleFieldMode('edit', 'permasalahan_pokok', this.value)"> Pilih dari Data Master
+                            </label>
+                            <label class="radio-inline" style="cursor: pointer;">
+                                <input type="radio" name="edit_mode_permasalahan_pokok" value="manual" onchange="toggleFieldMode('edit', 'permasalahan_pokok', this.value)"> Input Manual
+                            </label>
+                        </div>
+                        
+                        <div id="WrapEditPermasalahan_pokokPilih">
+                            <span class="field-hint" style="display:block; margin-bottom: 5px;">Pilih permasalahan</span>
+                            <select class="select2 form-control" multiple="multiple" name="permasalahan_pokok_pilih[]" id="EditPermasalahan_pokokPilih" data-placeholder="Pilih Permasalahan Pokok" style="width: 100%;">
+                                <option value="">-- Pilih Permasalahan Pokok --</option>
+                                <?php foreach ($uniquePermasalahan as $opt) { ?>
+                                    <option value="<?= html_escape($opt) ?>"><?= html_escape($opt) ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div id="WrapEditPermasalahan_pokokManual" style="display: none;">
+                            <span class="field-hint" style="display:block; margin-bottom: 5px;">Ketik Permasalahan Pokok secara manual</span>
+                            <textarea class="form-control" name="permasalahan_pokok_manual" id="EditPermasalahan_pokokManual" placeholder="Tekan Enter..."></textarea>
+                        </div>
                     </div>
 
                     <!-- 4. Isu KLHS -->
                     <div class="form-field-card">
-                        <label for="EditIsuKLHS">
-                            <span>4. Isu KLHS</span>
-                            <span class="field-hint">Isu Kajian Lingkungan Hidup Strategis</span>
+                        <label>
+                            <span class="dynamic-number">Isu KLHS</span>
                         </label>
-                        <textarea class="form-control" name="isu_klhs" id="EditIsuKLHS" placeholder="Contoh: Kualitas SDM"></textarea>
+                        <div style="margin-bottom: 10px;">
+                            <label class="radio-inline" style="margin-right: 15px; cursor: pointer;">
+                                <input type="radio" name="edit_mode_isu_klhs" value="pilih" checked onchange="toggleFieldMode('edit', 'isu_klhs', this.value)"> Pilih dari Data Master
+                            </label>
+                            <label class="radio-inline" style="cursor: pointer;">
+                                <input type="radio" name="edit_mode_isu_klhs" value="manual" onchange="toggleFieldMode('edit', 'isu_klhs', this.value)"> Input Manual
+                            </label>
+                        </div>
+                        
+                        <div id="WrapEditIsu_klhsPilih">
+                            <span class="field-hint" style="display:block; margin-bottom: 5px;">Pilih Isu KLHS</span>
+                            <select class="select2 form-control" name="isu_klhs_pilih" id="EditIsu_klhsPilih" data-placeholder="Pilih Isu KLHS" style="width: 100%;">
+                                <option value="">-- Pilih Isu KLHS --</option>
+                                <?php foreach ($uniqueKLHS as $opt) { ?>
+                                    <option value="<?= html_escape($opt) ?>"><?= html_escape($opt) ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div id="WrapEditIsu_klhsManual" style="display: none;">
+                            <span class="field-hint" style="display:block; margin-bottom: 5px;">Ketik Isu KLHS secara manual</span>
+                            <textarea class="form-control" name="isu_klhs_manual" id="EditIsu_klhsManual" placeholder="Contoh: Kualitas SDM"></textarea>
+                        </div>
                     </div>
 
                     <div class="text-center" style="margin: 10px 0;">
@@ -557,29 +808,92 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
 
                     <!-- 5. Isu Lingkungan Dinamis: Global -->
                     <div class="form-field-card">
-                        <label for="EditIsuGlobal">
-                            <span>5. Isu Global</span>
-                            <span class="field-hint">Tekan Enter untuk butir baru</span>
+                        <label>
+                            <span class="dynamic-number">Isu Global</span>
                         </label>
-                        <textarea class="form-control" name="isu_global" id="EditIsuGlobal" placeholder="Contoh:&#10;Persaingan Talenta Global&#10;Aging Population&#10;Transformasi Digital"></textarea>
+                        <div style="margin-bottom: 10px;">
+                            <label class="radio-inline" style="margin-right: 15px; cursor: pointer;">
+                                <input type="radio" name="edit_mode_isu_global" value="pilih" checked onchange="toggleFieldMode('edit', 'isu_global', this.value)"> Pilih dari Data Master
+                            </label>
+                            <label class="radio-inline" style="cursor: pointer;">
+                                <input type="radio" name="edit_mode_isu_global" value="manual" onchange="toggleFieldMode('edit', 'isu_global', this.value)"> Input Manual
+                            </label>
+                        </div>
+                        
+                        <div id="WrapEditIsu_globalPilih">
+                            <span class="field-hint" style="display:block; margin-bottom: 5px;">Pilih Isu Global</span>
+                            <select class="select2 form-control" name="isu_global_pilih" id="EditIsu_globalPilih" data-placeholder="Pilih Isu Global" style="width: 100%;">
+                                <option value="">-- Pilih Isu Global --</option>
+                                <?php foreach ($uniqueGlobal as $opt) { ?>
+                                    <option value="<?= html_escape($opt) ?>"><?= html_escape($opt) ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div id="WrapEditIsu_globalManual" style="display: none;">
+                            <span class="field-hint" style="display:block; margin-bottom: 5px;">Ketik Isu Global secara manual</span>
+                            <textarea class="form-control" name="isu_global_manual" id="EditIsu_globalManual" placeholder="Contoh: Persaingan"></textarea>
+                        </div>
                     </div>
 
                     <!-- 6. Isu Lingkungan Dinamis: Nasional -->
                     <div class="form-field-card">
-                        <label for="EditIsuNasional">
-                            <span>6. Isu Nasional</span>
-                            <span class="field-hint">Tekan Enter untuk butir baru</span>
+                        <label>
+                            <span class="dynamic-number">Isu Nasional</span>
                         </label>
-                        <textarea class="form-control" name="isu_nasional" id="EditIsuNasional" placeholder="Contoh: Rendahnya Kualitas SDM"></textarea>
+                        <div style="margin-bottom: 10px;">
+                            <label class="radio-inline" style="margin-right: 15px; cursor: pointer;">
+                                <input type="radio" name="edit_mode_isu_nasional" value="pilih" checked onchange="toggleFieldMode('edit', 'isu_nasional', this.value)"> Pilih dari Data Master
+                            </label>
+                            <label class="radio-inline" style="cursor: pointer;">
+                                <input type="radio" name="edit_mode_isu_nasional" value="manual" onchange="toggleFieldMode('edit', 'isu_nasional', this.value)"> Input Manual
+                            </label>
+                        </div>
+                        
+                        <div id="WrapEditIsu_nasionalPilih">
+                            <span class="field-hint" style="display:block; margin-bottom: 5px;">Pilih Isu Nasional</span>
+                            <select class="select2 form-control" name="isu_nasional_pilih" id="EditIsu_nasionalPilih" data-placeholder="Pilih Isu Nasional" style="width: 100%;">
+                                <option value="">-- Pilih Isu Nasional --</option>
+                                <?php foreach ($uniqueNasional as $opt) { ?>
+                                    <option value="<?= html_escape($opt) ?>"><?= html_escape($opt) ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div id="WrapEditIsu_nasionalManual" style="display: none;">
+                            <span class="field-hint" style="display:block; margin-bottom: 5px;">Ketik Isu Nasional secara manual</span>
+                            <textarea class="form-control" name="isu_nasional_manual" id="EditIsu_nasionalManual" placeholder="Contoh: Rendahnya SDM"></textarea>
+                        </div>
                     </div>
 
                     <!-- 7. Isu Lingkungan Dinamis: Regional -->
                     <div class="form-field-card">
-                        <label for="EditIsuRegional">
-                            <span>7. Isu Regional</span>
-                            <span class="field-hint">Tekan Enter untuk butir baru</span>
+                        <label>
+                            <span class="dynamic-number">Isu Regional</span>
                         </label>
-                        <textarea class="form-control" name="isu_regional" id="EditIsuRegional" placeholder="Contoh: Pengembangan SDM berkualitas melalui peningkatan akses pendidikan, kesehatan dan standar hidup layak"></textarea>
+                        <div style="margin-bottom: 10px;">
+                            <label class="radio-inline" style="margin-right: 15px; cursor: pointer;">
+                                <input type="radio" name="edit_mode_isu_regional" value="pilih" checked onchange="toggleFieldMode('edit', 'isu_regional', this.value)"> Pilih dari Data Master
+                            </label>
+                            <label class="radio-inline" style="cursor: pointer;">
+                                <input type="radio" name="edit_mode_isu_regional" value="manual" onchange="toggleFieldMode('edit', 'isu_regional', this.value)"> Input Manual
+                            </label>
+                        </div>
+                        
+                        <div id="WrapEditIsu_regionalPilih">
+                            <span class="field-hint" style="display:block; margin-bottom: 5px;">Pilih Isu Regional</span>
+                            <select class="select2 form-control" name="isu_regional_pilih" id="EditIsu_regionalPilih" data-placeholder="Pilih Isu Regional" style="width: 100%;">
+                                <option value="">-- Pilih Isu Regional --</option>
+                                <?php foreach ($uniqueRegional as $opt) { ?>
+                                    <option value="<?= html_escape($opt) ?>"><?= html_escape($opt) ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div id="WrapEditIsu_regionalManual" style="display: none;">
+                            <span class="field-hint" style="display:block; margin-bottom: 5px;">Ketik Isu Regional secara manual</span>
+                            <textarea class="form-control" name="isu_regional_manual" id="EditIsu_regionalManual" placeholder="Contoh: SDM"></textarea>
+                        </div>
                     </div>
 
                 </div>
@@ -594,12 +908,51 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
     </div>
 </div>
 
+
+<style>
+  #FormTambahIsuStrategis { counter-reset: form-counter; }
+  #FormEditIsuStrategis { counter-reset: form-counter; }
+  .dynamic-number::before {
+      counter-increment: form-counter;
+      content: counter(form-counter) ". ";
+  }
+</style>
+
+<!-- Select2 CSS and JS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     var BaseURL = "<?= base_url() ?>";
     var CurrentKodeWilayah = "<?= $KodeWilayah ?>";
 
     $(document).ready(function() {
+
+        window.toggleFieldMode = function(mode, field, type) {
+            var prefix = (mode === 'tambah') ? 'Tambah' : 'Edit';
+            var fCap = field.charAt(0).toUpperCase() + field.slice(1);
+            if (type === 'pilih') {
+                $('#Wrap' + prefix + fCap + 'Pilih').show();
+                $('#Wrap' + prefix + fCap + 'Manual').hide();
+            } else {
+                $('#Wrap' + prefix + fCap + 'Pilih').hide();
+                $('#Wrap' + prefix + fCap + 'Manual').show();
+            }
+        };
+
+        $('#ModalTambahIsuStrategis').on('shown.bs.modal', function () {
+            $('#TambahNamaIsuStrategisPilih, #TambahPermasalahan_pokokPilih, #TambahIsu_klhsPilih, #TambahIsu_globalPilih, #TambahIsu_nasionalPilih, #TambahIsu_regionalPilih').select2({
+                tags: true, width: '100%', dropdownParent: $('#ModalTambahIsuStrategis'), tokenSeparators: [',', '\n']
+            });
+        });
+
+        $('#ModalEditIsuStrategis').on('shown.bs.modal', function () {
+            $('#EditNamaIsuStrategisPilih, #EditPermasalahan_pokokPilih, #EditIsu_klhsPilih, #EditIsu_globalPilih, #EditIsu_nasionalPilih, #EditIsu_regionalPilih').select2({
+                tags: true, width: '100%', dropdownParent: $('#ModalEditIsuStrategis'), tokenSeparators: [',', '\n']
+            });
+        });
+
 
         // Filter Wilayah (Provinsi -> Kab/Kota)
         $('#Provinsi').on('change', function() {
@@ -667,6 +1020,16 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
         // Buka Modal Tambah
         $('#BtnTambahIsuStrategis').on('click', function() {
             $('#FormTambahIsuStrategis')[0].reset();
+
+            // Reset radio to pilih and trigger change for UI toggle
+            $('input[name^="mode_"][value="pilih"]').prop('checked', true).trigger('change');
+            
+            // Reset all select2 values in Tambah
+            $('#TambahNamaIsuStrategisPilih, #TambahPermasalahan_pokokPilih, #TambahIsu_klhsPilih, #TambahIsu_globalPilih, #TambahIsu_nasionalPilih, #TambahIsu_regionalPilih').val(null).trigger('change');
+            
+            // Reset manual textareas
+            $('#FormTambahIsuStrategis textarea').val('');
+
             var curPeriode = $('#FilterPeriode').val();
             if (curPeriode) {
                 $('#TambahPeriodeRPJMD').val(curPeriode);
@@ -739,12 +1102,71 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
                             $('#EditPeriodeRPJMD').append('<option value="' + perVal + '" selected>' + d.TahunMulai + ' - ' + d.TahunAkhir + '</option>');
                         }
 
-                        $('#EditNamaIsuStrategis').val(d.NamaIsuStrategis);
-                        $('#EditPermasalahan').val(d.permasalahan_pokok);
-                        $('#EditIsuKLHS').val(d.isu_klhs);
-                        $('#EditIsuGlobal').val(d.isu_global || '');
-                        $('#EditIsuNasional').val(d.isu_nasional || '');
-                        $('#EditIsuRegional').val(d.isu_regional || '');
+                        
+                        // Helper to set field
+                        function setFieldEdit(field, dbVal) {
+                            var fCap = field.charAt(0).toUpperCase() + field.slice(1);
+                            var selId = '#Edit' + fCap + 'Pilih';
+                            var manId = '#Edit' + fCap + 'Manual';
+                            var rdoName = 'edit_mode_' + field;
+                            
+                            $('input[name="' + rdoName + '"][value="pilih"]').prop('checked', true).trigger('change');
+                            $(manId).val('');
+                            
+                            if (dbVal) {
+                                var exists = false;
+                                $(selId + ' option').each(function() {
+                                    if (this.value.toLowerCase() == dbVal.toLowerCase()) {
+                                        dbVal = this.value; // Use the properly cased option value for Select2
+                                        exists = true;
+                                        return false;
+                                    }
+                                });
+                                
+                                var isMultiple = $(selId).prop('multiple');
+                                if (isMultiple) {
+                                    var vals = dbVal.split(/[\n,]/).map(function(s){return s.trim();}).filter(function(s){return s !== '';});
+                                    var matched = [];
+                                    var unmatched = [];
+                                    vals.forEach(function(v) {
+                                        var found = false;
+                                        $(selId + ' option').each(function() {
+                                            if (this.value.toLowerCase() == v.toLowerCase()) {
+                                                matched.push(this.value);
+                                                found = true;
+                                                return false;
+                                            }
+                                        });
+                                        if (!found) unmatched.push(v);
+                                    });
+                                    if (unmatched.length > 0) {
+                                        $('input[name="' + rdoName + '"][value="manual"]').prop('checked', true).trigger('change');
+                                        $(manId).val(dbVal);
+                                        $(selId).val(null).trigger('change');
+                                    } else {
+                                        $(selId).val(matched).trigger('change');
+                                    }
+                                } else {
+                                    if (exists) {
+                                        $(selId).val(dbVal).trigger('change');
+                                    } else {
+                                        $('input[name="' + rdoName + '"][value="manual"]').prop('checked', true).trigger('change');
+                                        $(manId).val(dbVal);
+                                        $(selId).val(null).trigger('change');
+                                    }
+                                }
+                            } else {
+                                $(selId).val(null).trigger('change');
+                            }
+                        }
+
+                        setFieldEdit('NamaIsuStrategis', d.NamaIsuStrategis);
+                        setFieldEdit('permasalahan_pokok', d.permasalahan_pokok);
+                        setFieldEdit('isu_klhs', d.isu_klhs);
+                        setFieldEdit('isu_global', d.isu_global);
+                        setFieldEdit('isu_nasional', d.isu_nasional);
+                        setFieldEdit('isu_regional', d.isu_regional);
+
 
                         $('#ModalEditIsuStrategis').modal('show');
                     } else {
@@ -766,8 +1188,18 @@ $canManage = ($userLevel === 0 || $userLevel === 3);
         });
 
         // Submit Form Edit
+        
         $('#FormEditIsuStrategis').on('submit', function(e) {
             e.preventDefault();
+            
+            // Validate Isu Strategis Daerah
+            var mode_isu = $('input[name="edit_mode_NamaIsuStrategis"]:checked').val();
+            var val_isu = (mode_isu === 'pilih') ? $('#EditNamaIsuStrategisPilih').val() : $('#EditNamaIsuStrategisManual').val();
+            if (!val_isu || val_isu.trim() === '') {
+                Swal.fire({icon: 'warning', title: 'Peringatan', text: 'Isu Strategis Daerah wajib diisi!'});
+                return;
+            }
+
             var formData = $(this).serialize();
 
             $('#BtnSimpanEdit').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
