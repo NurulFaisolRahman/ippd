@@ -1,11 +1,17 @@
 <?php 
 $this->load->view('Kementerian/Sidebar'); 
+?>
+<div class="main-content">
+<?php
+// Proteksi Sesi Ketat
+$isLoggedInVal    = isset($isLoggedIn) ? (bool)$isLoggedIn : (bool)($this->session->userdata('isLoggedIn') ?? ($_SESSION['isLoggedIn'] ?? false));
+$rawLevel         = isset($userLevel) ? $userLevel : ($this->session->userdata('userLevel') ?? ($this->session->userdata('Level') ?? ($_SESSION['userLevel'] ?? ($_SESSION['Level'] ?? null))));
+$userLevelNum     = ($isLoggedInVal && $rawLevel !== null && $rawLevel !== '') ? (int)$rawLevel : null;
+$sessionKemenId   = isset($idKementerian) ? $idKementerian : ($this->session->userdata('IdKementerian') ?? ($_SESSION['IdKementerian'] ?? null));
 
-$userLevel = isset($_SESSION['Level']) ? (int)$_SESSION['Level'] : (isset($_SESSION['userLevel']) ? (int)$_SESSION['userLevel'] : null);
-$isSuperAdmin = ($userLevel === 0);
-$isKemen = ($userLevel === 1 && !empty($_SESSION['IdKementerian']));
-$canCrud = $isSuperAdmin || $isKemen;
-$sessionKemenId = $_SESSION['IdKementerian'] ?? null;
+$isSuperAdmin     = ($isLoggedInVal && $userLevelNum === 0);
+$isKemen          = ($isLoggedInVal && $userLevelNum === 1 && !empty($sessionKemenId));
+$canCrud          = ($isSuperAdmin || $isKemen);
 ?>
 
 <style>
@@ -163,11 +169,11 @@ $sessionKemenId = $_SESSION['IdKementerian'] ?? null;
         <div class="row">
             <div class="col-lg-12">
                 <div class="data-table-list">
-                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 1): ?>
+                    <?php if ((isset($_SESSION['Level']) && $_SESSION['Level'] == 1) || (isset($userLevelNum) && $userLevelNum === 1) || (!empty($isKemen))): ?>
                     <div class="alert alert-info" style="margin-bottom:15px;">
                         <i class="notika-icon notika-info"></i>
-                        <b>Kementerian :</b> <?= htmlspecialchars($UserKementerianName ?? '-') ?><br>
-                        <b>Periode :</b> <?= htmlspecialchars($UserPeriode ?? '-') ?>
+                        <b>Kementerian :</b> <?= htmlspecialchars($UserKementerianName ?? ($_SESSION['NamaKementerian'] ?? '-')) ?><br>
+                        <b>Periode :</b> <?= str_replace('|', ' - ', htmlspecialchars($UserPeriode ?? (($_SESSION['TahunMulai'] ?? '-') . ' - ' . ($_SESSION['TahunAkhir'] ?? '-')))) ?>
                     </div>
                     <?php endif; ?>
 
@@ -648,3 +654,4 @@ $(document).ready(function() {
     });
 });
 </script>
+</div>
