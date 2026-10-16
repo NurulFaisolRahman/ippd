@@ -275,16 +275,16 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Level']) && $_SESSI
                         <table class="table table-bordered table-cascading" id="TableCascadingPermasalahan">
                             <thead>
                                 <tr>
-                                    <th style="width: 32%;">Permasalahan</th>
-                                    <th style="width: 32%;">Isu Strategis</th>
-                                    <th style="width: 26%;">Program Prioritas</th>
+                                    <th style="width: 38%; text-align: center;">Permasalahan</th>
+                                    <th style="width: 32%; text-align: center;">Isu Strategis</th>
+                                    <th style="width: 22%; text-align: center;">Program Prioritas</th>
                                     <?php if ($isDaerah) { ?>
-                                        <th style="width: 10%;">Aksi</th>
+                                        <th style="width: 8%; text-align: center;">Aksi</th>
                                     <?php } ?>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php if (empty($CascadingGrouped)) { ?>
+                                <?php if (empty($CascadingGroupedByIsu)) { ?>
                                     <tr>
                                         <td colspan="<?= $isDaerah ? '4' : '3' ?>" class="text-center" style="padding: 40px !important; color: #64748b;">
                                             <div style="font-size: 38px; color: #cbd5e1; margin-bottom: 12px;">
@@ -300,69 +300,81 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Level']) && $_SESSI
                                     </tr>
                                 <?php } else { 
                                     $noMasalah = 1;
-                                    foreach ($CascadingGrouped as $masalahKey => $group) {
-                                        // Hitung total baris untuk Permasalahan ini
-                                        $totalMasalahRows = 0;
-                                        foreach ($group['IsuList'] as $isuItem) {
-                                            $totalMasalahRows += max(1, count($isuItem['Programs']));
-                                        }
+                                    foreach ($CascadingGroupedByIsu as $isuKey => $group) {
+                                        $totalRows = count($group['Items']);
+                                        $isFirstRow = true;
 
-                                        $isFirstMasalahRow = true;
-
-                                        foreach ($group['IsuList'] as $isuKey => $isuItem) {
-                                            $totalIsuRows = max(1, count($isuItem['Programs']));
-                                            $isFirstIsuRow = true;
-
-                                            foreach ($isuItem['Programs'] as $progRow) {
-                                                ?>
-                                                <tr>
-                                                    <!-- Kolom 1: Permasalahan (Hierarchical Rowspan) -->
-                                                    <?php if ($isFirstMasalahRow) { ?>
-                                                        <td rowspan="<?= $totalMasalahRows ?>">
-                                                            <div style="font-weight: 600; color: #0f172a;">
-                                                                <?= nl2br(html_escape($masalahKey)) ?>
-                                                            </div>
-                                                        </td>
-                                                    <?php $isFirstMasalahRow = false; } ?>
-
-                                                    <!-- Kolom 2: Isu Strategis (Hierarchical Rowspan) -->
-                                                    <?php if ($isFirstIsuRow) { ?>
-                                                        <td rowspan="<?= $totalIsuRows ?>">
-                                                            <div style="font-weight: 500; color: #334155;">
-                                                                <?= nl2br(html_escape($isuKey)) ?>
-                                                            </div>
-                                                        </td>
-                                                    <?php $isFirstIsuRow = false; } ?>
-
-                                                    <!-- Kolom 3: Program Prioritas (dari Prioritas Daerah Tema Pembangunan) -->
-                                                    <td>
-                                                        <div style="font-weight: 600; color: #0369a1;">
-                                                            <?= nl2br(html_escape($progRow['ProgramPrioritas'])) ?>
+                                        foreach ($group['Items'] as $item) {
+                                            ?>
+                                            <tr>
+                                                <!-- Kolom 1: Permasalahan (1 baris per permasalahan dengan nomor urut: 1., 2., 3., dst.) -->
+                                                <td style="vertical-align: top;">
+                                                    <div style="display: flex; gap: 8px; align-items: flex-start;">
+                                                        <span style="font-weight: 700; color: #0f172a; min-width: 22px;"><?= $noMasalah ?>.</span>
+                                                        <div style="font-weight: 500; color: #0f172a; line-height: 1.5; flex: 1;">
+                                                            <?= nl2br(html_escape($item['Permasalahan'])) ?>
                                                         </div>
-                                                    </td>
+                                                    </div>
+                                                </td>
 
-                                                    <!-- Kolom 4: Aksi (Edit & Hapus) -->
-                                                    <?php if ($isDaerah) { ?>
-                                                        <td class="text-center" style="vertical-align: middle !important;">
-                                                            <div style="display: flex; gap: 6px; justify-content: center;">
-                                                                <button type="button" class="btn-action-custom btn-edit-act btn-edit-cascading" 
-                                                                        data-id="<?= $progRow['Id'] ?>" 
-                                                                        title="Edit Data">
+                                                <!-- Kolom 2: Isu Strategis (Merged Vertikal / Rowspan untuk seluruh permasalahan di bawah Isu ini) -->
+                                                <?php if ($isFirstRow) { ?>
+                                                    <td rowspan="<?= $totalRows ?>" style="vertical-align: middle; background: #fff;">
+                                                        <div style="font-weight: 600; color: #1e293b; line-height: 1.5;">
+                                                            <?= nl2br(html_escape($isuKey)) ?>
+                                                        </div>
+                                                        <?php if ($isDaerah) { ?>
+                                                            <div style="margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap;">
+                                                                <button type="button" class="btn btn-xs btn-edit-cascading" 
+                                                                        data-isustrategis="<?= html_escape($isuKey) ?>"
+                                                                        data-kodewilayah="<?= html_escape($KodeWilayah) ?>"
+                                                                        data-tahun="<?= html_escape($SelectedTahun) ?>"
+                                                                        title="Edit Isu Strategis beserta Permasalahan terkait"
+                                                                        style="font-size: 11px; padding: 3px 8px; border: 1px solid #d97706; color: #fff; background: #f59e0b; border-radius: 4px; font-weight: 600;">
                                                                     <i class="fa fa-pencil"></i> Edit
                                                                 </button>
-                                                                <button type="button" class="btn-action-custom btn-del-act btn-hapus-cascading" 
-                                                                        data-id="<?= $progRow['Id'] ?>" 
-                                                                        title="Hapus Data">
-                                                                    <i class="fa fa-trash"></i> Hapus
+                                                                <button type="button" class="btn btn-xs btn-tambah-masalah-inline" 
+                                                                        data-isustrategis="<?= html_escape($isuKey) ?>"
+                                                                        title="Tambah Permasalahan untuk Isu Strategis ini"
+                                                                        style="font-size: 11px; padding: 3px 8px; border: 1px solid #0284c7; color: #0284c7; background: #f0f9ff; border-radius: 4px; font-weight: 600;">
+                                                                    <i class="fa fa-plus"></i> Tambah Permasalahan
                                                                 </button>
                                                             </div>
-                                                        </td>
-                                                    <?php } ?>
-                                                </tr>
-                                                <?php
-                                            }
+                                                        <?php } ?>
+                                                    </td>
+                                                <?php $isFirstRow = false; } ?>
+
+                                                <!-- Kolom 3: Program Prioritas (Sejajar dengan masing-masing permasalahan) -->
+                                                <td style="vertical-align: top;">
+                                                    <div style="font-weight: 600; color: #0369a1; line-height: 1.5;">
+                                                        <?= nl2br(html_escape($item['ProgramPrioritas'])) ?>
+                                                    </div>
+                                                </td>
+
+                                                <!-- Kolom 4: Aksi (Edit & Hapus per baris) -->
+                                                <?php if ($isDaerah) { ?>
+                                                    <td class="text-center" style="vertical-align: middle !important;">
+                                                        <div style="display: flex; gap: 4px; justify-content: center;">
+                                                            <button type="button" class="btn-action-custom btn-edit-act btn-edit-cascading" 
+                                                                    data-id="<?= $item['Id'] ?>" 
+                                                                    data-isustrategis="<?= html_escape($isuKey) ?>"
+                                                                    data-kodewilayah="<?= html_escape($KodeWilayah) ?>"
+                                                                    data-tahun="<?= html_escape($SelectedTahun) ?>"
+                                                                    title="Edit Data">
+                                                                <i class="fa fa-pencil"></i> Edit
+                                                            </button>
+                                                            <button type="button" class="btn-action-custom btn-del-act btn-hapus-cascading" 
+                                                                    data-id="<?= $item['Id'] ?>" 
+                                                                    title="Hapus Data">
+                                                                <i class="fa fa-trash"></i> Hapus
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                <?php } ?>
+                                            </tr>
+                                            <?php
+                                            $noMasalah++;
                                         }
-                                        $noMasalah++;
                                     }
                                 } ?>
                             </tbody>
@@ -409,45 +421,47 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Level']) && $_SESSI
                         </select>
                     </div>
 
-                    <!-- 1. Permasalahan (Input Manual) -->
-                    <div class="form-group-custom">
-                        <label for="Input_Permasalahan">
-                            1. Permasalahan Pembangunan <span class="text-danger">*</span>
-                        </label>
-                        <textarea id="Input_Permasalahan" class="form-control" rows="3" placeholder="Tuliskan uraian permasalahan pembangunan daerah..." style="border-radius: 6px; font-size: 13px; border: 1.5px solid #cbd5e1;"></textarea>
-                        <span class="field-hint">Uraian permasalahan pokok/mendasar pembangunan daerah yang dihadapi (input manual).</span>
-                    </div>
-
-                    <!-- 2. Isu Strategis (Input Manual) -->
+                    <!-- 1. Isu Strategis Daerah -->
                     <div class="form-group-custom">
                         <label for="Input_IsuStrategis">
-                            2. Isu Strategis Daerah <span class="text-danger">*</span>
+                            1. Isu Strategis Daerah <span class="text-danger">*</span>
                         </label>
-                        <textarea id="Input_IsuStrategis" class="form-control" rows="3" placeholder="Tuliskan uraian isu strategis yang berkaitan..." style="border-radius: 6px; font-size: 13px; border: 1.5px solid #cbd5e1;"></textarea>
-                        <span class="field-hint">Isu strategis yang timbul atau relevan dengan permasalahan di atas (input manual).</span>
+                        <textarea id="Input_IsuStrategis" class="form-control" rows="3" placeholder="Tuliskan uraian isu strategis daerah (misal: Pemantapan Pertumbuhan dan Pemerataan Ekonomi Daerah)..." style="border-radius: 6px; font-size: 13px; border: 1.5px solid #cbd5e1;"></textarea>
+                        <span class="field-hint">Uraian isu strategis daerah yang memayungi permasalahan pembangunan.</span>
                     </div>
 
-                    <!-- 3. Program Prioritas (Dropdown Mengambil dari Prioritas Daerah Tema Pembangunan) -->
-                    <div class="form-group-custom">
-                        <label for="Input_IdPrioritasDaerah">
-                            3. Program Prioritas (Dari Prioritas Daerah Tema Pembangunan) <span class="text-danger">*</span>
-                        </label>
-                        <select id="Input_IdPrioritasDaerah" class="form-control select2-modal" style="width: 100%;">
-                            <option value="">-- Pilih Program Prioritas --</option>
-                            <?php if (!empty($PrioritasDaerah)) { 
-                                foreach ($PrioritasDaerah as $pd) { ?>
-                                    <option value="<?= $pd['id'] ?>" data-prioritas="<?= html_escape($pd['prioritas']) ?>">
-                                        <?= html_escape($pd['prioritas']) ?>
-                                    </option>
-                                <?php } 
-                            } ?>
-                        </select>
+                    <!-- 2 & 3. Permasalahan & Program Prioritas (Bisa Lebih Dari Satu) -->
+                    <div style="margin-top: 18px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 8px;">
+                        <div>
+                            <label style="font-weight: 700; color: #0f172a; margin-bottom: 2px;">
+                                2 & 3. Permasalahan Pembangunan & Program Prioritas <span class="text-danger">*</span>
+                            </label>
+                            <div style="font-size: 12px; color: #64748b;">1 Isu Strategis dapat mencakup beberapa Permasalahan & Program Prioritas.</div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-info" id="BtnTambahMasalahInput" style="font-weight: 700; border-radius: 5px;">
+                            <i class="fa fa-plus"></i> Tambah Permasalahan
+                        </button>
+                    </div>
 
-                        <!-- Notifikasi jika Prioritas Daerah di Tema Pembangunan belum ada -->
-                        <div id="AlertPrioritasKosong" class="alert alert-warning" style="<?= !empty($PrioritasDaerah) ? 'display:none;' : '' ?> margin-top: 10px; font-size: 12.5px; padding: 10px 14px; border-radius: 6px;">
-                            <i class="fa fa-exclamation-triangle"></i> 
-                            Belum ada data <strong>Prioritas Daerah</strong> pada <strong>Tema Pembangunan</strong> untuk tahun ini. 
-                            Silakan input terlebih dahulu pada menu <a href="<?= base_url('Daerah/TemaPembangunan') ?>" target="_blank" style="font-weight: 700; text-decoration: underline;">Tema Pembangunan</a>.
+                    <div id="ContainerMasalahInput">
+                        <div class="masalah-repeater-box" style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 14px; margin-bottom: 12px; position: relative;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <span class="badge-masalah-number" style="background: #0284c7; color: #fff; font-weight: bold; font-size: 11px; padding: 3px 8px; border-radius: 4px;">
+                                    Permasalahan #1
+                                </span>
+                                <button type="button" class="btn btn-xs btn-danger btn-remove-masalah" title="Hapus Permasalahan" style="display: none; padding: 2px 7px; font-size: 11px;">
+                                    <i class="fa fa-times"></i> Hapus
+                                </button>
+                            </div>
+                            <div class="form-group-custom" style="margin-bottom: 10px;">
+                                <label style="font-size: 12.5px; font-weight: 600; color: #334155;">Permasalahan Pembangunan <span class="text-danger">*</span></label>
+                                <textarea class="form-control field-permasalahan" rows="2" placeholder="Tuliskan uraian permasalahan pembangunan daerah..." style="border-radius: 6px; font-size: 13px; border: 1.5px solid #cbd5e1;"></textarea>
+                            </div>
+                            <div class="form-group-custom" style="margin-bottom: 0;">
+                                <label style="font-size: 12.5px; font-weight: 600; color: #334155;">Program Prioritas Daerah <span class="text-danger">*</span></label>
+                                <textarea class="form-control field-program-prioritas" rows="2" placeholder="Input uraian Program Prioritas di sini..." style="border-radius: 6px; font-size: 13px; border: 1.5px solid #cbd5e1;"></textarea>
+                                <span class="field-hint" style="color: #0284c7;">* Program prioritas yang diinput di sini akan menjadi pilihan dropdown pada menu Tema Pembangunan.</span>
+                            </div>
                         </div>
                     </div>
 
@@ -479,39 +493,34 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Level']) && $_SESSI
                 <div id="AlertEdit" class="alert alert-warning" style="display:none; padding: 12px 16px; border-radius: 6px; font-size: 13px;"></div>
 
                 <form id="FormEditCascading">
-                    <input type="hidden" id="Edit_Id">
+                    <input type="hidden" id="Edit_OldIsuStrategis">
+                    <input type="hidden" id="Edit_KodeWilayah" value="<?= html_escape($KodeWilayah) ?>">
+                    <input type="hidden" id="Edit_Tahun" value="<?= html_escape($SelectedTahun) ?>">
 
-                    <!-- Permasalahan (Input Manual) -->
-                    <div class="form-group-custom">
-                        <label for="Edit_Permasalahan">
-                            1. Permasalahan Pembangunan <span class="text-danger">*</span>
-                        </label>
-                        <textarea id="Edit_Permasalahan" class="form-control" rows="3" style="border-radius: 6px; font-size: 13px; border: 1.5px solid #cbd5e1;"></textarea>
-                    </div>
-
-                    <!-- Isu Strategis (Input Manual) -->
+                    <!-- 1. Isu Strategis Daerah -->
                     <div class="form-group-custom">
                         <label for="Edit_IsuStrategis">
-                            2. Isu Strategis Daerah <span class="text-danger">*</span>
+                            1. Isu Strategis Daerah <span class="text-danger">*</span>
                         </label>
-                        <textarea id="Edit_IsuStrategis" class="form-control" rows="3" style="border-radius: 6px; font-size: 13px; border: 1.5px solid #cbd5e1;"></textarea>
+                        <textarea id="Edit_IsuStrategis" class="form-control" rows="3" placeholder="Tuliskan uraian isu strategis daerah..." style="border-radius: 6px; font-size: 13px; border: 1.5px solid #cbd5e1;"></textarea>
+                        <span class="field-hint">Uraian isu strategis daerah yang memayungi permasalahan pembangunan.</span>
                     </div>
 
-                    <!-- Program Prioritas (Dropdown dari Prioritas Daerah Tema Pembangunan) -->
-                    <div class="form-group-custom">
-                        <label for="Edit_IdPrioritasDaerah">
-                            3. Program Prioritas (Dari Prioritas Daerah Tema Pembangunan) <span class="text-danger">*</span>
-                        </label>
-                        <select id="Edit_IdPrioritasDaerah" class="form-control select2-modal" style="width: 100%;">
-                            <option value="">-- Pilih Program Prioritas --</option>
-                            <?php if (!empty($PrioritasDaerah)) { 
-                                foreach ($PrioritasDaerah as $pd) { ?>
-                                    <option value="<?= $pd['id'] ?>" data-prioritas="<?= html_escape($pd['prioritas']) ?>">
-                                        <?= html_escape($pd['prioritas']) ?>
-                                    </option>
-                                <?php } 
-                            } ?>
-                        </select>
+                    <!-- 2 & 3. Permasalahan & Program Prioritas (Bisa Lebih Dari Satu / Sesuai Yang Ditambahkan) -->
+                    <div style="margin-top: 18px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 8px;">
+                        <div>
+                            <label style="font-weight: 700; color: #0f172a; margin-bottom: 2px;">
+                                2 & 3. Permasalahan Pembangunan & Program Prioritas <span class="text-danger">*</span>
+                            </label>
+                            <div style="font-size: 12px; color: #64748b;">Daftar Permasalahan dan Program Prioritas di bawah Isu Strategis ini.</div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-info" id="BtnTambahMasalahEdit" style="font-weight: 700; border-radius: 5px;">
+                            <i class="fa fa-plus"></i> Tambah Permasalahan
+                        </button>
+                    </div>
+
+                    <div id="ContainerMasalahEdit">
+                        <!-- Diisi secara dinamis via JavaScript saat modal edit dibuka -->
                     </div>
 
                 </form>
@@ -575,40 +584,139 @@ $(document).ready(function() {
         });
     });
 
-    // Buka Modal Input
-    $('#BtnBukaModalInput').on('click', function() {
+    // Function untuk refresh nomor badge dan tombol hapus pada repeater Permasalahan
+    function refreshMasalahRepeater() {
+        var count = $('#ContainerMasalahInput .masalah-repeater-box').length;
+        $('#ContainerMasalahInput .masalah-repeater-box').each(function(index) {
+            $(this).find('.badge-masalah-number').text('Permasalahan #' + (index + 1));
+            if (count > 1) {
+                $(this).find('.btn-remove-masalah').show();
+            } else {
+                $(this).find('.btn-remove-masalah').hide();
+            }
+        });
+    }
+
+    // Tambah Baris Permasalahan di Modal Input
+    $('#BtnTambahMasalahInput').on('click', function() {
+        var html = `
+            <div class="masalah-repeater-box" style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 14px; margin-bottom: 12px; position: relative;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span class="badge-masalah-number" style="background: #0284c7; color: #fff; font-weight: bold; font-size: 11px; padding: 3px 8px; border-radius: 4px;">
+                        Permasalahan
+                    </span>
+                    <button type="button" class="btn btn-xs btn-danger btn-remove-masalah" title="Hapus Permasalahan" style="padding: 2px 7px; font-size: 11px;">
+                        <i class="fa fa-times"></i> Hapus
+                    </button>
+                </div>
+                <div class="form-group-custom" style="margin-bottom: 10px;">
+                    <label style="font-size: 12.5px; font-weight: 600; color: #334155;">Permasalahan Pembangunan <span class="text-danger">*</span></label>
+                    <textarea class="form-control field-permasalahan" rows="2" placeholder="Tuliskan uraian permasalahan pembangunan..." style="border-radius: 6px; font-size: 13px; border: 1.5px solid #cbd5e1;"></textarea>
+                </div>
+                <div class="form-group-custom" style="margin-bottom: 0;">
+                    <label style="font-size: 12.5px; font-weight: 600; color: #334155;">Program Prioritas Daerah <span class="text-danger">*</span></label>
+                    <textarea class="form-control field-program-prioritas" rows="2" placeholder="Input uraian Program Prioritas di sini..." style="border-radius: 6px; font-size: 13px; border: 1.5px solid #cbd5e1;"></textarea>
+                    <span class="field-hint" style="color: #0284c7;">* Program prioritas yang diinput di sini akan menjadi pilihan dropdown pada menu Tema Pembangunan.</span>
+                </div>
+            </div>
+        `;
+        $('#ContainerMasalahInput').append(html);
+        refreshMasalahRepeater();
+    });
+
+    // Hapus Baris Permasalahan
+    $(document).on('click', '.btn-remove-masalah', function() {
+        if ($('#ContainerMasalahInput .masalah-repeater-box').length > 1) {
+            $(this).closest('.masalah-repeater-box').remove();
+            refreshMasalahRepeater();
+        }
+    });
+
+    // Reset Form Input Modal
+    function resetInputModal() {
         $('#FormInputCascading')[0].reset();
-        $('#Input_Tahun').val('<?= html_escape($SelectedTahun) ?>').trigger('change');
-        $('#Input_Permasalahan').val('');
+        $('#Input_Tahun').val('<?= html_escape($SelectedTahun) ?>');
         $('#Input_IsuStrategis').val('');
-        $('#Input_IdPrioritasDaerah').val('').trigger('change');
+        $('#ContainerMasalahInput').html(`
+            <div class="masalah-repeater-box" style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 14px; margin-bottom: 12px; position: relative;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span class="badge-masalah-number" style="background: #0284c7; color: #fff; font-weight: bold; font-size: 11px; padding: 3px 8px; border-radius: 4px;">
+                        Permasalahan #1
+                    </span>
+                    <button type="button" class="btn btn-xs btn-danger btn-remove-masalah" title="Hapus Permasalahan" style="display: none; padding: 2px 7px; font-size: 11px;">
+                        <i class="fa fa-times"></i> Hapus
+                    </button>
+                </div>
+                <div class="form-group-custom" style="margin-bottom: 10px;">
+                    <label style="font-size: 12.5px; font-weight: 600; color: #334155;">Permasalahan Pembangunan <span class="text-danger">*</span></label>
+                    <textarea class="form-control field-permasalahan" rows="2" placeholder="Tuliskan uraian permasalahan pembangunan..." style="border-radius: 6px; font-size: 13px; border: 1.5px solid #cbd5e1;"></textarea>
+                </div>
+                <div class="form-group-custom" style="margin-bottom: 0;">
+                    <label style="font-size: 12.5px; font-weight: 600; color: #334155;">Program Prioritas Daerah <span class="text-danger">*</span></label>
+                    <textarea class="form-control field-program-prioritas" rows="2" placeholder="Input uraian Program Prioritas di sini..." style="border-radius: 6px; font-size: 13px; border: 1.5px solid #cbd5e1;"></textarea>
+                    <span class="field-hint" style="color: #0284c7;">* Program prioritas yang diinput di sini akan menjadi pilihan dropdown pada menu Tema Pembangunan.</span>
+                </div>
+            </div>
+        `);
+        refreshMasalahRepeater();
         $('#AlertInput').hide();
+    }
+
+    // Buka Modal Input (Tombol Utama)
+    $('#BtnBukaModalInput').on('click', function() {
+        resetInputModal();
         $('#ModalInputCascading').modal('show');
     });
 
-    // Simpan Data Baru (AJAX)
+    // Buka Modal Input dari tombol inline di tabel ("+ Tambah Permasalahan")
+    $(document).on('click', '.btn-tambah-masalah-inline', function() {
+        resetInputModal();
+        var isuStrategis = $(this).data('isustrategis');
+        $('#Input_IsuStrategis').val(isuStrategis);
+        $('#ModalInputCascading').modal('show');
+    });
+
+    // Simpan Data Baru (AJAX) - Mendukung 1 Isu Strategis dengan Beberapa Permasalahan
     $('#BtnSimpanCascading').on('click', function() {
         var kodeWilayah = $('#Input_KodeWilayah').val();
         var tahun = $('#Input_Tahun').val();
-        var permasalahan = $.trim($('#Input_Permasalahan').val());
         var isuStrategis = $.trim($('#Input_IsuStrategis').val());
-        var idPrioritas = $('#Input_IdPrioritasDaerah').val();
-        var selectedOpt = $('#Input_IdPrioritasDaerah option:selected');
-        var programPrioritas = selectedOpt.data('prioritas') || selectedOpt.text();
 
-        if (!permasalahan) {
-            $('#AlertInput').html('Uraian Permasalahan pembangunan wajib diisi!').show();
-            $('#Input_Permasalahan').focus();
-            return;
-        }
         if (!isuStrategis) {
             $('#AlertInput').html('Uraian Isu Strategis daerah wajib diisi!').show();
             $('#Input_IsuStrategis').focus();
             return;
         }
-        if (!idPrioritas) {
-            $('#AlertInput').html('Program Prioritas wajib dipilih!').show();
-            $('#Input_IdPrioritasDaerah').focus();
+
+        var permasalahanList = [];
+        var isValid = true;
+        var errorMessage = '';
+
+        $('#ContainerMasalahInput .masalah-repeater-box').each(function(index) {
+            var masalah = $.trim($(this).find('.field-permasalahan').val());
+            var prog = $.trim($(this).find('.field-program-prioritas').val());
+
+            if (!masalah) {
+                isValid = false;
+                errorMessage = 'Uraian Permasalahan #' + (index + 1) + ' wajib diisi!';
+                $(this).find('.field-permasalahan').focus();
+                return false;
+            }
+            if (!prog) {
+                isValid = false;
+                errorMessage = 'Uraian Program Prioritas pada Permasalahan #' + (index + 1) + ' wajib diisi!';
+                $(this).find('.field-program-prioritas').focus();
+                return false;
+            }
+
+            permasalahanList.push({
+                Permasalahan: masalah,
+                ProgramPrioritas: prog
+            });
+        });
+
+        if (!isValid) {
+            $('#AlertInput').html(errorMessage).show();
             return;
         }
 
@@ -622,10 +730,8 @@ $(document).ready(function() {
             data: {
                 KodeWilayah: kodeWilayah,
                 Tahun: tahun,
-                Permasalahan: permasalahan,
                 IsuStrategis: isuStrategis,
-                IdPrioritasDaerah: idPrioritas,
-                ProgramPrioritas: programPrioritas
+                PermasalahanList: permasalahanList
             },
             success: function(res) {
                 btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan Data');
@@ -643,57 +749,180 @@ $(document).ready(function() {
         });
     });
 
-    // Buka Modal Edit
+    var deletedMasalahIds = [];
+
+    // Function untuk refresh nomor badge dan tombol hapus pada repeater Permasalahan di Modal Edit
+    function refreshMasalahEditRepeater() {
+        var count = $('#ContainerMasalahEdit .masalah-edit-box').length;
+        $('#ContainerMasalahEdit .masalah-edit-box').each(function(index) {
+            $(this).find('.badge-masalah-edit-number').text('Permasalahan #' + (index + 1));
+            if (count > 1) {
+                $(this).find('.btn-remove-masalah-edit').show();
+            } else {
+                $(this).find('.btn-remove-masalah-edit').hide();
+            }
+        });
+    }
+
+    // Tambah Baris Permasalahan di Modal Edit
+    $('#BtnTambahMasalahEdit').on('click', function() {
+        var html = `
+            <div class="masalah-edit-box" style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 14px; margin-bottom: 12px; position: relative;">
+                <input type="hidden" class="field-id" value="">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span class="badge-masalah-edit-number" style="background: #f59e0b; color: #fff; font-weight: bold; font-size: 11px; padding: 3px 8px; border-radius: 4px;">
+                        Permasalahan
+                    </span>
+                    <button type="button" class="btn btn-xs btn-danger btn-remove-masalah-edit" title="Hapus Permasalahan" style="padding: 2px 7px; font-size: 11px;">
+                        <i class="fa fa-times"></i> Hapus
+                    </button>
+                </div>
+                <div class="form-group-custom" style="margin-bottom: 10px;">
+                    <label style="font-size: 12.5px; font-weight: 600; color: #334155;">Permasalahan Pembangunan <span class="text-danger">*</span></label>
+                    <textarea class="form-control field-permasalahan" rows="2" placeholder="Tuliskan uraian permasalahan pembangunan..." style="border-radius: 6px; font-size: 13px; border: 1.5px solid #cbd5e1;"></textarea>
+                </div>
+                <div class="form-group-custom" style="margin-bottom: 0;">
+                    <label style="font-size: 12.5px; font-weight: 600; color: #334155;">Program Prioritas Daerah <span class="text-danger">*</span></label>
+                    <textarea class="form-control field-program-prioritas" rows="2" placeholder="Input uraian Program Prioritas di sini..." style="border-radius: 6px; font-size: 13px; border: 1.5px solid #cbd5e1;"></textarea>
+                    <span class="field-hint" style="color: #0284c7;">* Program prioritas yang diinput di sini akan menjadi pilihan dropdown pada menu Tema Pembangunan.</span>
+                </div>
+            </div>
+        `;
+        $('#ContainerMasalahEdit').append(html);
+        refreshMasalahEditRepeater();
+    });
+
+    // Hapus Baris Permasalahan di Modal Edit
+    $(document).on('click', '.btn-remove-masalah-edit', function() {
+        if ($('#ContainerMasalahEdit .masalah-edit-box').length > 1) {
+            var box = $(this).closest('.masalah-edit-box');
+            var id = box.find('.field-id').val();
+            if (id) {
+                deletedMasalahIds.push(id);
+            }
+            box.remove();
+            refreshMasalahEditRepeater();
+        }
+    });
+
+    // Buka Modal Edit (Bisa dipanggil dari Kolom Isu Strategis maupun Kolom Aksi per baris)
     $(document).on('click', '.btn-edit-cascading', function() {
         var id = $(this).data('id');
+        var isuStrategis = $(this).data('isustrategis') || '';
+        var kodeWilayah = $(this).data('kodewilayah') || $('#Input_KodeWilayah').val() || '';
+        var tahun = $(this).data('tahun') || $('#FilterTahun').val() || '';
+
         $('#AlertEdit').hide();
+        deletedMasalahIds = [];
+        $('#ContainerMasalahEdit').empty();
 
         $.ajax({
-            url: BaseURL + 'Daerah/GetCascadingPermasalahanById',
+            url: BaseURL + 'Daerah/GetCascadingByIsuStrategis',
             type: 'POST',
             dataType: 'json',
-            data: { Id: id },
+            data: {
+                Id: id,
+                IsuStrategis: isuStrategis,
+                KodeWilayah: kodeWilayah,
+                Tahun: tahun
+            },
             success: function(res) {
-                if (res.status === 'success' && res.data) {
-                    var d = res.data;
-                    $('#Edit_Id').val(d.Id);
-                    $('#Edit_Permasalahan').val(d.Permasalahan);
-                    $('#Edit_IsuStrategis').val(d.IsuStrategis);
-                    $('#Edit_IdPrioritasDaerah').val(d.IdPrioritasDaerah || '').trigger('change');
+                if (res.status === 'success' && res.items && res.items.length > 0) {
+                    $('#Edit_OldIsuStrategis').val(res.isuStrategis);
+                    $('#Edit_IsuStrategis').val(res.isuStrategis);
+                    $('#Edit_KodeWilayah').val(res.kodeWilayah || kodeWilayah);
+                    $('#Edit_Tahun').val(res.tahun || tahun);
 
+                    res.items.forEach(function(item, idx) {
+                        var html = `
+                            <div class="masalah-edit-box" style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 14px; margin-bottom: 12px; position: relative;">
+                                <input type="hidden" class="field-id" value="` + item.Id + `">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                    <span class="badge-masalah-edit-number" style="background: #f59e0b; color: #fff; font-weight: bold; font-size: 11px; padding: 3px 8px; border-radius: 4px;">
+                                        Permasalahan #` + (idx + 1) + `
+                                    </span>
+                                    <button type="button" class="btn btn-xs btn-danger btn-remove-masalah-edit" title="Hapus Permasalahan" style="padding: 2px 7px; font-size: 11px;">
+                                        <i class="fa fa-times"></i> Hapus
+                                    </button>
+                                </div>
+                                <div class="form-group-custom" style="margin-bottom: 10px;">
+                                    <label style="font-size: 12.5px; font-weight: 600; color: #334155;">Permasalahan Pembangunan <span class="text-danger">*</span></label>
+                                    <textarea class="form-control field-permasalahan" rows="2" placeholder="Tuliskan uraian permasalahan pembangunan..." style="border-radius: 6px; font-size: 13px; border: 1.5px solid #cbd5e1;"></textarea>
+                                </div>
+                                <div class="form-group-custom" style="margin-bottom: 0;">
+                                    <label style="font-size: 12.5px; font-weight: 600; color: #334155;">Program Prioritas Daerah <span class="text-danger">*</span></label>
+                                    <textarea class="form-control field-program-prioritas" rows="2" placeholder="Input uraian Program Prioritas di sini..." style="border-radius: 6px; font-size: 13px; border: 1.5px solid #cbd5e1;"></textarea>
+                                    <span class="field-hint" style="color: #0284c7;">* Program prioritas yang diinput di sini akan menjadi pilihan dropdown pada menu Tema Pembangunan.</span>
+                                </div>
+                            </div>
+                        `;
+                        var el = $(html);
+                        el.find('.field-permasalahan').val(item.Permasalahan || '');
+                        el.find('.field-program-prioritas').val(item.ProgramPrioritas || '');
+                        $('#ContainerMasalahEdit').append(el);
+                    });
+
+                    refreshMasalahEditRepeater();
                     $('#ModalEditCascading').modal('show');
                 } else {
                     alert('Gagal mengambil data: ' + (res.message || 'Data tidak ditemukan'));
                 }
             },
             error: function(xhr, status, err) {
-                alert('Terjadi kesalahan: ' + err);
+                alert('Terjadi kesalahan server: ' + err);
             }
         });
     });
 
-    // Simpan Perubahan (Update AJAX)
+    // Simpan Perubahan (Update Group AJAX)
     $('#BtnUpdateCascading').on('click', function() {
-        var id = $('#Edit_Id').val();
-        var permasalahan = $.trim($('#Edit_Permasalahan').val());
-        var isuStrategis = $.trim($('#Edit_IsuStrategis').val());
-        var idPrioritas = $('#Edit_IdPrioritasDaerah').val();
-        var selectedOpt = $('#Edit_IdPrioritasDaerah option:selected');
-        var programPrioritas = selectedOpt.data('prioritas') || selectedOpt.text();
+        var oldIsu = $('#Edit_OldIsuStrategis').val();
+        var newIsu = $.trim($('#Edit_IsuStrategis').val());
+        var kodeWilayah = $('#Edit_KodeWilayah').val();
+        var tahun = $('#Edit_Tahun').val();
 
-        if (!permasalahan) {
-            $('#AlertEdit').html('Uraian Permasalahan wajib diisi!').show();
-            $('#Edit_Permasalahan').focus();
-            return;
-        }
-        if (!isuStrategis) {
-            $('#AlertEdit').html('Uraian Isu Strategis wajib diisi!').show();
+        if (!newIsu) {
+            $('#AlertEdit').html('Uraian Isu Strategis daerah wajib diisi!').show();
             $('#Edit_IsuStrategis').focus();
             return;
         }
-        if (!idPrioritas) {
-            $('#AlertEdit').html('Program Prioritas wajib dipilih!').show();
-            $('#Edit_IdPrioritasDaerah').focus();
+
+        var permasalahanList = [];
+        var isValid = true;
+        var errorMessage = '';
+
+        $('#ContainerMasalahEdit .masalah-edit-box').each(function(index) {
+            var id = $(this).find('.field-id').val();
+            var masalah = $.trim($(this).find('.field-permasalahan').val());
+            var prog = $.trim($(this).find('.field-program-prioritas').val());
+
+            if (!masalah) {
+                isValid = false;
+                errorMessage = 'Uraian Permasalahan #' + (index + 1) + ' wajib diisi!';
+                $(this).find('.field-permasalahan').focus();
+                return false;
+            }
+            if (!prog) {
+                isValid = false;
+                errorMessage = 'Uraian Program Prioritas pada Permasalahan #' + (index + 1) + ' wajib diisi!';
+                $(this).find('.field-program-prioritas').focus();
+                return false;
+            }
+
+            permasalahanList.push({
+                Id: id,
+                Permasalahan: masalah,
+                ProgramPrioritas: prog
+            });
+        });
+
+        if (!isValid) {
+            $('#AlertEdit').html(errorMessage).show();
+            return;
+        }
+
+        if (permasalahanList.length === 0) {
+            $('#AlertEdit').html('Minimal harus ada 1 Permasalahan & Program Prioritas!').show();
             return;
         }
 
@@ -701,15 +930,16 @@ $(document).ready(function() {
         btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
 
         $.ajax({
-            url: BaseURL + 'Daerah/EditCascadingPermasalahan',
+            url: BaseURL + 'Daerah/UpdateCascadingPermasalahanGroup',
             type: 'POST',
             dataType: 'json',
             data: {
-                Id: id,
-                Permasalahan: permasalahan,
-                IsuStrategis: isuStrategis,
-                IdPrioritasDaerah: idPrioritas,
-                ProgramPrioritas: programPrioritas
+                OldIsuStrategis: oldIsu,
+                IsuStrategis: newIsu,
+                KodeWilayah: kodeWilayah,
+                Tahun: tahun,
+                PermasalahanList: permasalahanList,
+                DeletedIds: deletedMasalahIds
             },
             success: function(res) {
                 btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan Perubahan');

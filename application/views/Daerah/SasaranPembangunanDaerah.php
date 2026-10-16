@@ -30,8 +30,41 @@ $can_edit = isset($_SESSION['Level']) && $_SESSION['Level'] == 3;
 
 <!-- Dependencies -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<!-- Select2 CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 
 <style>
+    /* Select2 Customization */
+    .select2-container {
+        width: 100% !important;
+    }
+    .select2-container--default .select2-selection--single {
+        height: 38px !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 6px !important;
+        padding-top: 4px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 28px !important;
+        font-size: 13px !important;
+        color: #1e293b !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px !important;
+    }
+    .select2-dropdown {
+        border: 1.5px solid #94a3b8 !important;
+        border-radius: 6px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+        z-index: 999999999 !important;
+        font-size: 13px !important;
+    }
+    .select2-search--dropdown .select2-search__field {
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 4px !important;
+        padding: 5px 8px !important;
+    }
+
     .sasaran-card {
         background: #ffffff;
         border-radius: 8px;
@@ -717,6 +750,8 @@ MODAL TAMBAH INDIKATOR SASARAN
 <script src="<?= base_url('js/vendor/jquery-1.12.4.min.js'); ?>"></script>
 <script src="<?= base_url('js/bootstrap.min.js'); ?>"></script>
 <script src="<?= base_url('js/main.js'); ?>"></script>
+<!-- Select2 JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
 <script>
 var BaseURL = '<?= base_url() ?>';
@@ -726,6 +761,49 @@ var SelectedTahun = '<?= $SelectedTahun ?>';
 var KodeWilayah = '<?= $KodeWilayah ?>';
 
 $(document).ready(function() {
+    // Inisialisasi Select2 Filter Wilayah
+    $('#Provinsi, #KabKota').select2({
+        width: '100%'
+    });
+
+    // Filter Provinsi/KabKota
+    $('#Provinsi').on('change', function() {
+        var kodeProv = $(this).val();
+        if (kodeProv) {
+            $.ajax({
+                url: BaseURL + 'Daerah/GetKabKota',
+                type: 'POST',
+                data: {
+                    Kode: kodeProv,
+                    [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
+                },
+                dataType: 'json',
+                success: function(res) {
+                    var html = '<option value="">Pilih Kab/Kota</option>';
+                    $.each(res, function(i, item) {
+                        html += '<option value="' + item.Kode + '">' + item.Nama + '</option>';
+                    });
+                    $('#KabKota').html(html).trigger('change.select2');
+                }
+            });
+        } else {
+            $('#KabKota').html('<option value="">Pilih Kab/Kota</option>').trigger('change.select2');
+        }
+    });
+
+    $('#Filter').on('click', function() {
+        var prov = $('#Provinsi').val();
+        var kabKota = $('#KabKota').val();
+        var kode = kabKota ? kabKota : prov;
+        if (!kode) {
+            alert('Pilih Provinsi atau Kab/Kota terlebih dahulu!');
+            return;
+        }
+        var url = new URL(window.location.href);
+        url.searchParams.set('kode_wilayah', kode);
+        window.location.href = url.toString();
+    });
+
     // Filter Tahun
     $('#FilterTahun').on('change', function() {
         var tahun = $(this).val();

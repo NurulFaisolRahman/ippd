@@ -38,10 +38,42 @@ if (!empty($KeterkaitanList)) {
 ?>
 
 <!-- Dependencies -->
-<!-- Dependencies -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<!-- Select2 CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 
 <style>
+    /* Select2 Customization */
+    .select2-container {
+        width: 100% !important;
+    }
+    .select2-container--default .select2-selection--single {
+        height: 38px !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 6px !important;
+        padding-top: 4px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 28px !important;
+        font-size: 13px !important;
+        color: #1e293b !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px !important;
+    }
+    .select2-dropdown {
+        border: 1.5px solid #94a3b8 !important;
+        border-radius: 6px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+        z-index: 999999999 !important;
+        font-size: 13px !important;
+    }
+    .select2-search--dropdown .select2-search__field {
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 4px !important;
+        padding: 5px 8px !important;
+    }
+
     /* Custom Multiselect Dropdown */
     .custom-multiselect-box {
         position: relative;
@@ -567,7 +599,7 @@ MODAL TAMBAH KETERKAITAN INDIKATOR
                         <!-- PN (Prioritas Nasional) -->
                         <div class="form-group">
                             <label><b>Prioritas Nasional (PN)</b> <span class="text-danger">*</span>:</label>
-                            <select class="form-control" id="InputIdPN" style="color: #000; font-weight: 500;">
+                            <select class="form-control select2-modal" id="InputIdPN" style="width: 100%;">
                                 <option value="">-- Pilih Prioritas Nasional (PN) --</option>
                                 <?php foreach ($PNMaster as $pn) { ?>
                                     <option value="<?= $pn['Id'] ?>">
@@ -585,7 +617,7 @@ MODAL TAMBAH KETERKAITAN INDIKATOR
                                     <input type="text" class="form-control" id="InputKodeSasNas" placeholder="Kode (misal: S1)" style="color: #000;">
                                 </div>
                                 <div class="col-md-9">
-                                    <select class="form-control" id="SelectSasaranNasional" style="color: #000;">
+                                    <select class="form-control select2-modal" id="SelectSasaranNasional" style="width: 100%;">
                                         <option value="">-- Pilih Sasaran Nasional (atau Ketik Manual) --</option>
                                     </select>
                                 </div>
@@ -630,6 +662,9 @@ MODAL TAMBAH KETERKAITAN INDIKATOR
                                             <a href="javascript:void(0)" id="BtnClearPDaerah" style="font-size: 11px; font-weight: bold; color: #d9534f;">Kosongkan</a>
                                         </div>
                                     </div>
+                                    <div style="padding: 2px 0 6px 0;">
+                                        <input type="text" class="form-control input-sm search-multiselect" placeholder="Cari Prioritas Daerah..." style="height: 30px; font-size: 12px; padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1;">
+                                    </div>
                                     <div id="ListPDaerahOptions">
                                         <?php if (!empty($PrioritasDaerahList)) { ?>
                                             <?php foreach ($PrioritasDaerahList as $pItem) { ?>
@@ -656,7 +691,7 @@ MODAL TAMBAH KETERKAITAN INDIKATOR
                                     <input type="text" class="form-control" id="InputKodeSasDaerah" placeholder="Kode (misal: S1)" style="color: #000;">
                                 </div>
                                 <div class="col-md-9">
-                                    <select class="form-control" id="SelectSasaranDaerah" style="color: #000;">
+                                    <select class="form-control select2-modal" id="SelectSasaranDaerah" style="width: 100%;">
                                         <option value="">-- Pilih dari Sasaran Pembangunan Daerah --</option>
                                         <?php foreach ($SasaranDaerahList as $sasDae) { ?>
                                             <option value="<?= $sasDae['id'] ?>" data-kode="<?= html_escape($sasDae['kode']) ?>" data-sasaran="<?= html_escape($sasDae['sasaran']) ?>">
@@ -690,6 +725,9 @@ MODAL TAMBAH KETERKAITAN INDIKATOR
                                             <a href="javascript:void(0)" id="BtnSelectAllIndikatorDaerah" style="font-size: 11px; font-weight: bold; color: #0284c7; margin-right: 10px;">Pilih Semua</a>
                                             <a href="javascript:void(0)" id="BtnClearIndikatorDaerah" style="font-size: 11px; font-weight: bold; color: #d9534f;">Kosongkan</a>
                                         </div>
+                                    </div>
+                                    <div style="padding: 2px 0 6px 0;">
+                                        <input type="text" class="form-control input-sm search-multiselect" placeholder="Cari Indikator Daerah..." style="height: 30px; font-size: 12px; padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1;">
                                     </div>
                                     <div id="ListIndikatorDaerahOptions">
                                         <?php if (!empty($IndikatorDaerahMaster)) { ?>
@@ -758,7 +796,7 @@ MODAL EDIT KETERKAITAN INDIKATOR
                     <div class="panel-body">
                         <div class="form-group">
                             <label><b>Prioritas Nasional (PN)</b> <span class="text-danger">*</span>:</label>
-                            <select class="form-control" id="EditIdPN" style="color: #000; font-weight: 500;">
+                            <select class="form-control select2-modal" id="EditIdPN" style="width: 100%;">
                                 <option value="">-- Pilih Prioritas Nasional (PN) --</option>
                                 <?php foreach ($PNMaster as $pn) { ?>
                                     <option value="<?= $pn['Id'] ?>">
@@ -775,7 +813,7 @@ MODAL EDIT KETERKAITAN INDIKATOR
                                     <input type="text" class="form-control" id="EditKodeSasNas" placeholder="Kode (misal: S1)" style="color: #000;">
                                 </div>
                                 <div class="col-md-9">
-                                    <select class="form-control" id="EditSelectSasaranNasional" style="color: #000;">
+                                    <select class="form-control select2-modal" id="EditSelectSasaranNasional" style="width: 100%;">
                                         <option value="">-- Pilih Sasaran Nasional (atau Ketik Manual) --</option>
                                     </select>
                                 </div>
@@ -818,6 +856,9 @@ MODAL EDIT KETERKAITAN INDIKATOR
                                             <a href="javascript:void(0)" id="EditBtnClearPDaerah" style="font-size: 11px; font-weight: bold; color: #d9534f;">Kosongkan</a>
                                         </div>
                                     </div>
+                                    <div style="padding: 2px 0 6px 0;">
+                                        <input type="text" class="form-control input-sm search-multiselect" placeholder="Cari Prioritas Daerah..." style="height: 30px; font-size: 12px; padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1;">
+                                    </div>
                                     <div id="EditListPDaerahOptions">
                                         <?php if (!empty($PrioritasDaerahList)) { ?>
                                             <?php foreach ($PrioritasDaerahList as $pItem) { ?>
@@ -839,7 +880,7 @@ MODAL EDIT KETERKAITAN INDIKATOR
                                     <input type="text" class="form-control" id="EditKodeSasDaerah" placeholder="Kode (misal: S1)" style="color: #000;">
                                 </div>
                                 <div class="col-md-9">
-                                    <select class="form-control" id="EditSelectSasaranDaerah" style="color: #000;">
+                                    <select class="form-control select2-modal" id="EditSelectSasaranDaerah" style="width: 100%;">
                                         <option value="">-- Pilih dari Sasaran Pembangunan Daerah --</option>
                                         <?php foreach ($SasaranDaerahList as $sasDae) { ?>
                                             <option value="<?= $sasDae['id'] ?>" data-kode="<?= html_escape($sasDae['kode']) ?>" data-sasaran="<?= html_escape($sasDae['sasaran']) ?>">
@@ -872,6 +913,9 @@ MODAL EDIT KETERKAITAN INDIKATOR
                                             <a href="javascript:void(0)" id="EditBtnSelectAllIndikatorDaerah" style="font-size: 11px; font-weight: bold; color: #0284c7; margin-right: 10px;">Pilih Semua</a>
                                             <a href="javascript:void(0)" id="EditBtnClearIndikatorDaerah" style="font-size: 11px; font-weight: bold; color: #d9534f;">Kosongkan</a>
                                         </div>
+                                    </div>
+                                    <div style="padding: 2px 0 6px 0;">
+                                        <input type="text" class="form-control input-sm search-multiselect" placeholder="Cari Indikator Daerah..." style="height: 30px; font-size: 12px; padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1;">
                                     </div>
                                     <div id="EditListIndikatorDaerahOptions">
                                         <?php if (!empty($IndikatorDaerahMaster)) { ?>
@@ -919,6 +963,9 @@ MODAL EDIT KETERKAITAN INDIKATOR
     </div>
 </div>
 
+<!-- Select2 JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
 <script>
 var BaseURL = '<?= base_url() ?>';
 var CSRF_TOKEN_NAME = '<?= $this->security->get_csrf_token_name() ?>';
@@ -927,6 +974,37 @@ var SelectedTahun = '<?= $SelectedTahun ?>';
 var KodeWilayah = '<?= $KodeWilayah ?>';
 
 $(document).ready(function() {
+    // Inisialisasi Select2 Filter Wilayah
+    $('#Provinsi, #KabKota').select2({
+        width: '100%'
+    });
+
+    // Inisialisasi Select2 di Modal saat modal ditampilkan
+    $('#ModalInputKeterkaitan, #ModalEditKeterkaitan').on('shown.bs.modal', function () {
+        $(this).find('.select2-modal').select2({
+            dropdownParent: $(this),
+            width: '100%'
+        });
+    });
+
+    // Live search di dalam custom multiselect dropdown
+    $(document).on('keyup', '.search-multiselect', function() {
+        var q = $(this).val().toLowerCase().trim();
+        var $menu = $(this).closest('.custom-multiselect-menu');
+        $menu.find('.custom-multiselect-item').each(function() {
+            var t = $(this).text().toLowerCase();
+            if (t.indexOf(q) !== -1) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    });
+
+    $(document).on('click', '.search-multiselect', function(e) {
+        e.stopPropagation();
+    });
+
     // Filter Tahun
     $('#FilterTahun').on('change', function() {
         var tahun = $(this).val();
@@ -955,7 +1033,7 @@ $(document).ready(function() {
                         html += '<option value="' + item.id + '" data-kode="' + item.kode + '" data-sasaran="' + item.sasaran + '">' + item.label + '</option>';
                     });
                 }
-                targetSelect.html(html);
+                targetSelect.html(html).trigger('change.select2');
                 if (callback) callback(res);
             }
         });
@@ -1225,8 +1303,12 @@ $(document).ready(function() {
         $('.custom-multiselect-menu').hide();
         $('.custom-multiselect-toggle').removeClass('active');
         $('#InputKodeSasDaerah').val('');
-        $('#SelectSasaranDaerah').val('');
+        $('#SelectSasaranDaerah').val('').trigger('change.select2');
         $('#InputSasaranDaerahCustom').val('');
+        $('#InputIdPN').val('').trigger('change.select2');
+        $('#SelectSasaranNasional').html('<option value="">-- Pilih Sasaran Nasional (atau Ketik Manual) --</option>').trigger('change.select2');
+        $('.search-multiselect').val('');
+        $('.custom-multiselect-item').show();
         $('#ModalInputKeterkaitan').modal('show');
     });
 
@@ -1422,6 +1504,11 @@ $(document).ready(function() {
         }
         updateIndikatorDaerahDisplay(true);
         $('#EditInputIndikatorDaerahCustom').val(unhandledIndikator.join('\n'));
+        $('.search-multiselect').val('');
+        $('.custom-multiselect-item').show();
+
+        $('#EditIdPN').trigger('change.select2');
+        $('#EditSelectSasaranDaerah').trigger('change.select2');
 
         $('#ModalEditKeterkaitan').modal('show');
     });
@@ -1598,11 +1685,11 @@ $(document).ready(function() {
                     $.each(res, function(i, item) {
                         html += '<option value="' + item.Kode + '">' + item.Nama + '</option>';
                     });
-                    $('#KabKota').html(html);
+                    $('#KabKota').html(html).trigger('change.select2');
                 }
             });
         } else {
-            $('#KabKota').html('<option value="">Pilih Kab/Kota</option>');
+            $('#KabKota').html('<option value="">Pilih Kab/Kota</option>').trigger('change.select2');
         }
     });
 

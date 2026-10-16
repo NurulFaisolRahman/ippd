@@ -24,8 +24,41 @@ if (!empty($DukunganList)) {
 
 <!-- Dependencies -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<!-- Select2 CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 
 <style>
+    /* Select2 Customization */
+    .select2-container {
+        width: 100% !important;
+    }
+    .select2-container--default .select2-selection--single {
+        height: 38px !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 6px !important;
+        padding-top: 4px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 28px !important;
+        font-size: 13px !important;
+        color: #1e293b !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px !important;
+    }
+    .select2-dropdown {
+        border: 1.5px solid #94a3b8 !important;
+        border-radius: 6px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+        z-index: 999999999 !important;
+        font-size: 13px !important;
+    }
+    .select2-search--dropdown .select2-search__field {
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 4px !important;
+        padding: 5px 8px !important;
+    }
+
     .dukungan-card {
         background: #ffffff;
         border-radius: 8px;
@@ -525,7 +558,7 @@ if (!empty($DukunganList)) {
                                 <label style="font-weight: 700; color: #0f172a;">
                                     Prioritas Nasional (PN) <span class="text-danger">*</span>
                                 </label>
-                                <select class="form-control" id="Input_IdPN" name="IdPN" required style="font-size: 13px;">
+                                <select class="form-control select2-modal" id="Input_IdPN" name="IdPN" required style="width: 100%;">
                                     <option value="">-- Pilih Prioritas Nasional --</option>
                                     <?php foreach ($PNMaster as $pn) { ?>
                                         <option value="<?= $pn['Id'] ?>">
@@ -543,7 +576,7 @@ if (!empty($DukunganList)) {
                             Program Prioritas Nasional (Kolom 2) <span class="text-danger">*</span>
                         </label>
                         <input type="hidden" id="Input_ProgramNasional" name="ProgramNasional" value="">
-                        <select class="form-control" id="Input_SelectProgramNasional" name="IdProgramNasional" required style="font-size: 13px;">
+                        <select class="form-control select2-modal" id="Input_SelectProgramNasional" name="IdProgramNasional" required style="width: 100%;">
                             <option value="">-- Pilih Program Prioritas Nasional --</option>
                         </select>
                     </div>
@@ -560,7 +593,7 @@ if (!empty($DukunganList)) {
                         </div>
                         <div id="ContainerKegiatanInput">
                             <div class="repeater-kegiatan-item" style="display: flex; gap: 8px; margin-bottom: 6px; align-items: center;">
-                                <select class="form-control select-kegiatan-item" name="KegiatanNasional[]" style="font-size: 13px;">
+                                <select class="form-control select-kegiatan-item select2-modal" name="KegiatanNasional[]" style="width: 100%;">
                                     <option value="">-- Pilih Kegiatan Prioritas Nasional --</option>
                                 </select>
                                 <button type="button" class="btn btn-sm btn-danger btn-remove-kegiatan" title="Hapus"><i class="fa fa-times"></i></button>
@@ -576,7 +609,7 @@ if (!empty($DukunganList)) {
                             Prioritas Pembangunan Daerah (Kolom 4) <span class="text-danger">*</span>
                         </label>
                         <input type="hidden" id="Input_PrioritasDaerah" name="PrioritasDaerah" value="">
-                        <select class="form-control" id="Input_IdPrioritasDaerah" name="IdPrioritasDaerah" required style="font-size: 13px;">
+                        <select class="form-control select2-modal" id="Input_IdPrioritasDaerah" name="IdPrioritasDaerah" required style="width: 100%;">
                             <option value="">-- Pilih Prioritas Pembangunan Daerah --</option>
                             <?php foreach ($PrioritasDaerahList as $p) { ?>
                                 <option value="<?= $p['id'] ?>" data-kode="<?= html_escape($p['kode']) ?>" data-prioritas="<?= html_escape($p['prioritas']) ?>">
@@ -622,7 +655,7 @@ if (!empty($DukunganList)) {
                                 <tbody>
                                     <tr>
                                         <td>
-                                            <select class="form-control select-dukungan-rpjmd" name="DukunganProgram[0][dukungan_program]" style="font-size: 13px;" required>
+                                            <select class="form-control select-dukungan-rpjmd select2-modal" name="DukunganProgram[0][dukungan_program]" style="width: 100%;" required>
                                                 <option value="">-- Pilih Program Prioritas RPJMD --</option>
                                                 <?php foreach ($DukunganProgramOptions as $dOpt) { ?>
                                                     <option value="<?= html_escape($dOpt) ?>"><?= html_escape($dOpt) ?></option>
@@ -688,7 +721,7 @@ if (!empty($DukunganList)) {
                                 <label style="font-weight: 700; color: #0f172a;">
                                     Prioritas Nasional (PN) <span class="text-danger">*</span>
                                 </label>
-                                <select class="form-control" id="Edit_IdPN" name="IdPN" required style="font-size: 13px;">
+                                <select class="form-control select2-modal" id="Edit_IdPN" name="IdPN" required style="width: 100%;">
                                     <option value="">-- Pilih Prioritas Nasional --</option>
                                     <?php foreach ($PNMaster as $pn) { ?>
                                         <option value="<?= $pn['Id'] ?>">
@@ -706,7 +739,7 @@ if (!empty($DukunganList)) {
                             Program Prioritas Nasional (Kolom 2) <span class="text-danger">*</span>
                         </label>
                         <input type="hidden" id="Edit_ProgramNasional" name="ProgramNasional" value="">
-                        <select class="form-control" id="Edit_SelectProgramNasional" name="IdProgramNasional" required style="font-size: 13px;">
+                        <select class="form-control select2-modal" id="Edit_SelectProgramNasional" name="IdProgramNasional" required style="width: 100%;">
                             <option value="">-- Pilih Program Prioritas Nasional --</option>
                         </select>
                     </div>
@@ -734,7 +767,7 @@ if (!empty($DukunganList)) {
                             Prioritas Pembangunan Daerah (Kolom 4) <span class="text-danger">*</span>
                         </label>
                         <input type="hidden" id="Edit_PrioritasDaerah" name="PrioritasDaerah" value="">
-                        <select class="form-control" id="Edit_IdPrioritasDaerah" name="IdPrioritasDaerah" required style="font-size: 13px;">
+                        <select class="form-control select2-modal" id="Edit_IdPrioritasDaerah" name="IdPrioritasDaerah" required style="width: 100%;">
                             <option value="">-- Pilih Prioritas Pembangunan Daerah --</option>
                             <?php foreach ($PrioritasDaerahList as $p) { ?>
                                 <option value="<?= $p['id'] ?>" data-kode="<?= html_escape($p['kode']) ?>" data-prioritas="<?= html_escape($p['prioritas']) ?>">
@@ -796,6 +829,9 @@ if (!empty($DukunganList)) {
     </div>
 </div>
 
+<!-- Select2 JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
 <script>
 $(document).ready(function() {
     var CSRF_TOKEN_NAME = '<?= $this->security->get_csrf_token_name() ?>';
@@ -832,13 +868,33 @@ $(document).ready(function() {
 
 
 
+    // Inisialisasi Select2 Filter Wilayah
+    $('#Provinsi, #KabKota').select2({
+        width: '100%'
+    });
+
+    // Inisialisasi Select2 di Modal saat modal ditampilkan
+    $('#ModalInputDukungan').on('shown.bs.modal', function () {
+        $(this).find('.select2-modal').select2({
+            dropdownParent: $('#ModalInputDukungan'),
+            width: '100%'
+        });
+    });
+
+    $('#ModalEditDukungan').on('shown.bs.modal', function () {
+        $(this).find('.select2-modal').select2({
+            dropdownParent: $('#ModalEditDukungan'),
+            width: '100%'
+        });
+    });
+
     // Buka Modal Tambah
     $('#BtnBukaModalTambah, #BtnTambahEmpty').on('click', function() {
         $('#FormInputDukungan')[0].reset();
         CURRENT_KEGIATAN_OPTIONS_INPUT = '<option value="">-- Pilih Kegiatan Prioritas Nasional --</option>';
         $('#ContainerKegiatanInput').html(`
             <div class="repeater-kegiatan-item" style="display: flex; gap: 8px; margin-bottom: 6px; align-items: center;">
-                <select class="form-control select-kegiatan-item" name="KegiatanNasional[]" style="font-size: 13px;">
+                <select class="form-control select-kegiatan-item select2-modal" name="KegiatanNasional[]" style="width: 100%;">
                     ` + CURRENT_KEGIATAN_OPTIONS_INPUT + `
                 </select>
                 <button type="button" class="btn btn-sm btn-danger btn-remove-kegiatan" title="Hapus"><i class="fa fa-times"></i></button>
@@ -847,7 +903,7 @@ $(document).ready(function() {
         $('#TableDukunganInput tbody').html(`
             <tr>
                 <td>
-                    <select class="form-control select-dukungan-rpjmd" name="DukunganProgram[0][dukungan_program]" style="font-size: 13px;" required>
+                    <select class="form-control select-dukungan-rpjmd select2-modal" name="DukunganProgram[0][dukungan_program]" style="width: 100%;" required>
                         <option value="">-- Pilih Program Prioritas RPJMD --</option>
                         ` + DUKUNGAN_RPJMD_OPTIONS + `
                     </select>
@@ -863,6 +919,7 @@ $(document).ready(function() {
         $('#Input_SelectProgramNasional').html('<option value="">-- Pilih Program Prioritas Nasional --</option>');
         $('#Input_ProgramNasional').val('');
         $('#Input_PrioritasDaerah').val('');
+        $('#ModalInputDukungan .select2-modal').val('').trigger('change.select2');
         $('#ModalInputDukungan').modal('show');
     });
 
@@ -872,20 +929,24 @@ $(document).ready(function() {
     $('#BtnTambahKegiatanInput').on('click', function() {
         var html = `
             <div class="repeater-kegiatan-item" style="display: flex; gap: 8px; margin-bottom: 6px; align-items: center;">
-                <select class="form-control select-kegiatan-item" name="KegiatanNasional[]" style="font-size: 13px;">
+                <select class="form-control select-kegiatan-item select2-modal" name="KegiatanNasional[]" style="width: 100%;">
                     ` + CURRENT_KEGIATAN_OPTIONS_INPUT + `
                 </select>
                 <button type="button" class="btn btn-sm btn-danger btn-remove-kegiatan" title="Hapus"><i class="fa fa-times"></i></button>
             </div>
         `;
         $('#ContainerKegiatanInput').append(html);
+        $('#ContainerKegiatanInput .select-kegiatan-item:last').select2({
+            dropdownParent: $('#ModalInputDukungan'),
+            width: '100%'
+        });
     });
 
     $(document).on('click', '.btn-remove-kegiatan', function() {
         if ($('#ContainerKegiatanInput .repeater-kegiatan-item').length > 1 || $('#ContainerKegiatanEdit .repeater-kegiatan-item').length > 1) {
             $(this).closest('.repeater-kegiatan-item').remove();
         } else {
-            $(this).closest('.repeater-kegiatan-item').find('select, input').val('');
+            $(this).closest('.repeater-kegiatan-item').find('select').val('').trigger('change.select2');
         }
     });
 
@@ -895,7 +956,7 @@ $(document).ready(function() {
         var html = `
             <tr>
                 <td>
-                    <select class="form-control select-dukungan-rpjmd" name="DukunganProgram[` + idx + `][dukungan_program]" style="font-size: 13px;" required>
+                    <select class="form-control select-dukungan-rpjmd select2-modal" name="DukunganProgram[` + idx + `][dukungan_program]" style="width: 100%;" required>
                         <option value="">-- Pilih Program Prioritas RPJMD --</option>
                         ` + DUKUNGAN_RPJMD_OPTIONS + `
                     </select>
@@ -909,6 +970,10 @@ $(document).ready(function() {
             </tr>
         `;
         $('#TableDukunganInput tbody').append(html);
+        $('#TableDukunganInput tbody tr:last .select-dukungan-rpjmd').select2({
+            dropdownParent: $('#ModalInputDukungan'),
+            width: '100%'
+        });
     });
 
     $(document).on('click', '.btn-remove-dukungan', function() {
@@ -916,7 +981,8 @@ $(document).ready(function() {
         if (tbody.find('tr').length > 1) {
             $(this).closest('tr').remove();
         } else {
-            $(this).closest('tr').find('input, textarea').val('');
+            $(this).closest('tr').find('select').val('').trigger('change.select2');
+            $(this).closest('tr').find('textarea').val('');
         }
     });
 
@@ -941,7 +1007,7 @@ $(document).ready(function() {
                             opt += '<option value="' + item.id + '" data-program="' + item.program + '">' + item.program + '</option>';
                         });
                     }
-                    $('#Input_SelectProgramNasional').html(opt);
+                    $('#Input_SelectProgramNasional').html(opt).trigger('change.select2');
                 }
             });
 
@@ -961,11 +1027,12 @@ $(document).ready(function() {
                         var curr = $(this).val();
                         $(this).html(CURRENT_KEGIATAN_OPTIONS_INPUT);
                         if (curr) $(this).val(curr);
+                        $(this).trigger('change.select2');
                     });
                 }
             });
         } else {
-            $('#Input_SelectProgramNasional').html('<option value="">-- Pilih Program Prioritas Nasional --</option>');
+            $('#Input_SelectProgramNasional').html('<option value="">-- Pilih Program Prioritas Nasional --</option>').trigger('change.select2');
         }
     });
 
@@ -992,6 +1059,7 @@ $(document).ready(function() {
                         var curr = $(this).val();
                         $(this).html(CURRENT_KEGIATAN_OPTIONS_INPUT);
                         if (curr) $(this).val(curr);
+                        $(this).trigger('change.select2');
                     });
                 }
             });
@@ -1041,13 +1109,17 @@ $(document).ready(function() {
     $('#BtnTambahKegiatanEdit').on('click', function() {
         var html = `
             <div class="repeater-kegiatan-item" style="display: flex; gap: 8px; margin-bottom: 6px; align-items: center;">
-                <select class="form-control select-kegiatan-item" name="KegiatanNasional[]" style="font-size: 13px;">
+                <select class="form-control select-kegiatan-item select2-modal" name="KegiatanNasional[]" style="width: 100%;">
                     ` + CURRENT_KEGIATAN_OPTIONS_EDIT + `
                 </select>
                 <button type="button" class="btn btn-sm btn-danger btn-remove-kegiatan" title="Hapus"><i class="fa fa-times"></i></button>
             </div>
         `;
         $('#ContainerKegiatanEdit').append(html);
+        $('#ContainerKegiatanEdit .select-kegiatan-item:last').select2({
+            dropdownParent: $('#ModalEditDukungan'),
+            width: '100%'
+        });
     });
 
     $('#BtnTambahDukunganEdit').on('click', function() {
@@ -1055,7 +1127,7 @@ $(document).ready(function() {
         var html = `
             <tr>
                 <td>
-                    <select class="form-control select-dukungan-rpjmd" name="DukunganProgram[` + idx + `][dukungan_program]" style="font-size: 13px;" required>
+                    <select class="form-control select-dukungan-rpjmd select2-modal" name="DukunganProgram[` + idx + `][dukungan_program]" style="width: 100%;" required>
                         <option value="">-- Pilih Program Prioritas RPJMD --</option>
                         ` + DUKUNGAN_RPJMD_OPTIONS + `
                     </select>
@@ -1069,6 +1141,10 @@ $(document).ready(function() {
             </tr>
         `;
         $('#TableDukunganEdit tbody').append(html);
+        $('#TableDukunganEdit tbody tr:last .select-dukungan-rpjmd').select2({
+            dropdownParent: $('#ModalEditDukungan'),
+            width: '100%'
+        });
     });
 
     $(document).on('click', '.BtnEditDukungan', function() {
@@ -1114,7 +1190,7 @@ $(document).ready(function() {
                             opt += '<option value="' + item.id + '" data-program="' + item.program + '" ' + isSel + '>' + item.program + '</option>';
                         });
                     }
-                    $('#Edit_SelectProgramNasional').html(opt);
+                    $('#Edit_SelectProgramNasional').html(opt).trigger('change.select2');
 
                     // Fetch kegiatan for matched program or PN
                     $.ajax({
@@ -1136,7 +1212,7 @@ $(document).ready(function() {
                                 $.each(kList, function(i, kegItem) {
                                     kHtml += `
                                         <div class="repeater-kegiatan-item" style="display: flex; gap: 8px; margin-bottom: 6px; align-items: center;">
-                                            <select class="form-control select-kegiatan-item" name="KegiatanNasional[]" style="font-size: 13px;">
+                                            <select class="form-control select-kegiatan-item select2-modal" name="KegiatanNasional[]" style="width: 100%;">
                                                 ` + CURRENT_KEGIATAN_OPTIONS_EDIT + `
                                             </select>
                                             <button type="button" class="btn btn-sm btn-danger btn-remove-kegiatan" title="Hapus"><i class="fa fa-times"></i></button>
@@ -1146,7 +1222,7 @@ $(document).ready(function() {
                             } else {
                                 kHtml = `
                                     <div class="repeater-kegiatan-item" style="display: flex; gap: 8px; margin-bottom: 6px; align-items: center;">
-                                        <select class="form-control select-kegiatan-item" name="KegiatanNasional[]" style="font-size: 13px;">
+                                        <select class="form-control select-kegiatan-item select2-modal" name="KegiatanNasional[]" style="width: 100%;">
                                             ` + CURRENT_KEGIATAN_OPTIONS_EDIT + `
                                         </select>
                                         <button type="button" class="btn btn-sm btn-danger btn-remove-kegiatan" title="Hapus"><i class="fa fa-times"></i></button>
@@ -1175,6 +1251,11 @@ $(document).ready(function() {
                                     }
                                 });
                             }
+
+                            $('#ContainerKegiatanEdit .select-kegiatan-item').select2({
+                                dropdownParent: $('#ModalEditDukungan'),
+                                width: '100%'
+                            });
                         }
                     });
                 }
@@ -1195,7 +1276,7 @@ $(document).ready(function() {
                 dHtml += `
                     <tr>
                         <td>
-                            <select class="form-control select-dukungan-rpjmd" name="DukunganProgram[` + i + `][dukungan_program]" style="font-size: 13px;" required>
+                            <select class="form-control select-dukungan-rpjmd select2-modal" name="DukunganProgram[` + i + `][dukungan_program]" style="width: 100%;" required>
                                 <option value="">-- Pilih Program Prioritas RPJMD --</option>
                                 ` + DUKUNGAN_RPJMD_OPTIONS + `
                             </select>
@@ -1214,7 +1295,7 @@ $(document).ready(function() {
             dHtml = `
                 <tr>
                     <td>
-                        <select class="form-control select-dukungan-rpjmd" name="DukunganProgram[0][dukungan_program]" style="font-size: 13px;" required>
+                        <select class="form-control select-dukungan-rpjmd select2-modal" name="DukunganProgram[0][dukungan_program]" style="width: 100%;" required>
                             <option value="">-- Pilih Program Prioritas RPJMD --</option>
                             ` + DUKUNGAN_RPJMD_OPTIONS + `
                         </select>
@@ -1252,6 +1333,14 @@ $(document).ready(function() {
             });
         }
 
+        $('#TableDukunganEdit .select-dukungan-rpjmd').select2({
+            dropdownParent: $('#ModalEditDukungan'),
+            width: '100%'
+        });
+
+        $('#Edit_IdPN').trigger('change.select2');
+        $('#Edit_IdPrioritasDaerah').trigger('change.select2');
+
         $('#ModalEditDukungan').modal('show');
     });
 
@@ -1275,7 +1364,7 @@ $(document).ready(function() {
                             opt += '<option value="' + item.id + '" data-program="' + item.program + '">' + item.program + '</option>';
                         });
                     }
-                    $('#Edit_SelectProgramNasional').html(opt);
+                    $('#Edit_SelectProgramNasional').html(opt).trigger('change.select2');
                 }
             });
 
@@ -1295,11 +1384,12 @@ $(document).ready(function() {
                         var curr = $(this).val();
                         $(this).html(CURRENT_KEGIATAN_OPTIONS_EDIT);
                         if (curr) $(this).val(curr);
+                        $(this).trigger('change.select2');
                     });
                 }
             });
         } else {
-            $('#Edit_SelectProgramNasional').html('<option value="">-- Pilih Program Prioritas Nasional --</option>');
+            $('#Edit_SelectProgramNasional').html('<option value="">-- Pilih Program Prioritas Nasional --</option>').trigger('change.select2');
         }
     });
 
@@ -1326,6 +1416,7 @@ $(document).ready(function() {
                         var curr = $(this).val();
                         $(this).html(CURRENT_KEGIATAN_OPTIONS_EDIT);
                         if (curr) $(this).val(curr);
+                        $(this).trigger('change.select2');
                     });
                 }
             });
@@ -1414,11 +1505,11 @@ $(document).ready(function() {
                     $.each(res, function(i, item) {
                         html += '<option value="' + item.Kode + '">' + item.Nama + '</option>';
                     });
-                    $('#KabKota').html(html);
+                    $('#KabKota').html(html).trigger('change.select2');
                 }
             });
         } else {
-            $('#KabKota').html('<option value="">Pilih Kab/Kota</option>');
+            $('#KabKota').html('<option value="">Pilih Kab/Kota</option>').trigger('change.select2');
         }
     });
 

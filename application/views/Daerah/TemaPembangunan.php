@@ -1,6 +1,9 @@
 <?php $this->load->view('Daerah/sidebar'); ?>
 <?php $this->load->view('Daerah/Cssumum'); ?>
 
+<!-- Select2 CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
 <!-- Main Content -->
 <div class="main-content">
     <div class="data-table-area">
@@ -229,35 +232,45 @@
                                                 <td>&nbsp;</td>
                                             </tr>
                                             <tr class="header-prioritas">
-                                                <th style="vertical-align: middle; position: relative; text-align: center;">
-                                                    <span>Prioritas Pembangunan Nasional (PN)</span>
-                                                    <?php if ($can_edit) { ?>
-                                                        <button type="button" class="btn btn-xs btn-primary tambah-prioritas-kolom"
-                                                                data-tema_id="<?= $tema['id'] ?>"
-                                                                data-tema_nasional="<?= html_escape($tema['tema_nasional']) ?>"
-                                                                data-id_pn=""
-                                                                data-pn_text=""
-                                                                data-jenis="nasional"
-                                                                data-label="PN"
-                                                                title="Tambah PN"
-                                                                style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 11px; font-weight: bold; padding: 2px 8px; text-transform: none;">
-                                                            <i class="fa fa-plus"></i> Tambah PN
-                                                        </button>
-                                                    <?php } ?>
+                                                <th style="vertical-align: middle; padding: 10px 14px;">
+                                                    <div style="display: flex; align-items: center; justify-content: space-between; position: relative;">
+                                                        <!-- Spacer penyeimbang di sisi kiri agar judul benar-benar berada di tengah cell -->
+                                                        <div style="visibility: hidden; flex-shrink: 0; min-width: 95px;" aria-hidden="true">
+                                                            <button type="button" class="btn btn-xs" style="padding: 3px 10px; font-size: 11px;">+ Tambah PN</button>
+                                                        </div>
+
+                                                        <!-- Judul Tepat di Tengah Cell -->
+                                                        <span style="font-weight: 700; text-align: center; flex: 1; margin: 0 12px;">
+                                                            Prioritas Pembangunan Nasional (PN)
+                                                        </span>
+
+                                                        <!-- Tombol di Sisi Kanan dengan Jarak Aman -->
+                                                        <?php if ($can_edit) { ?>
+                                                            <div style="flex-shrink: 0; min-width: 95px; text-align: right;">
+                                                                <button type="button" class="btn btn-xs btn-primary tambah-prioritas-kolom"
+                                                                        data-tema_id="<?= $tema['id'] ?>"
+                                                                        data-tahun="<?= $tema['tahun'] ?>"
+                                                                        data-tema_nasional="<?= html_escape($tema['tema_nasional']) ?>"
+                                                                        data-id_pn=""
+                                                                        data-pn_text=""
+                                                                        data-jenis="nasional"
+                                                                        data-label="PN"
+                                                                        title="Tambah PN"
+                                                                        style="font-size: 11px; font-weight: bold; padding: 3px 10px; border-radius: 4px; text-transform: none; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+                                                                    <i class="fa fa-plus"></i> Tambah PN
+                                                                </button>
+                                                            </div>
+                                                        <?php } else { ?>
+                                                            <div style="flex-shrink: 0; min-width: 95px;"></div>
+                                                        <?php } ?>
+                                                    </div>
                                                 </th>
-                                                <th style="vertical-align: middle; position: relative; text-align: center;">
-                                                    <span>Prioritas Pembangunan Provinsi (PP)</span>
-                                                    <?php if ($can_edit) { ?>
-                                                        <button type="button" class="btn btn-xs btn-info TarikPrioritasProvinsiBtn"
-                                                                data-tema_id="<?= $tema['id'] ?>"
-                                                                data-tahun="<?= $tema['tahun'] ?>"
-                                                                title="Tarik Prioritas Provinsi dari akun Provinsi sesuai parent wilayah"
-                                                                style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 11px; font-weight: bold; padding: 2px 8px; text-transform: none; background-color: #17a2b8; border-color: #17a2b8; color: #fff;">
-                                                            <i class="fa fa-cloud-download"></i> Tarik PP Provinsi
-                                                        </button>
-                                                    <?php } ?>
+                                                <th style="vertical-align: middle; text-align: center; padding: 10px 14px;">
+                                                    <span style="font-weight: 700;">Prioritas Pembangunan Provinsi (PP)</span>
                                                 </th>
-                                                <th style="vertical-align: middle; text-align: center;">Prioritas Pembangunan Daerah (PD)</th>
+                                                <th style="vertical-align: middle; text-align: center; padding: 10px 14px;">
+                                                    <span style="font-weight: 700;">Prioritas Pembangunan Daerah (PD)</span>
+                                                </th>
                                             </tr>
                                             <?php foreach ($prioritas_rows as $row) { 
                                                 $pn = $row['pn'];
@@ -277,6 +290,7 @@
                                                                     <button type="button" class="btn btn-xs btn-warning EditPrioritas" 
                                                                             data-id="<?= $pn['id'] ?>" 
                                                                             data-tema_id="<?= $tema['id'] ?>" 
+                                                                            data-tahun="<?= $tema['tahun'] ?>"
                                                                             data-prioritas="<?= html_escape($pn['prioritas']) ?>" 
                                                                             data-jenis="nasional" 
                                                                             data-label="PN" 
@@ -309,6 +323,7 @@
                                                                         <button type="button" class="btn btn-xs btn-warning EditPrioritas" 
                                                                                 data-id="<?= $p['id'] ?>" 
                                                                                 data-tema_id="<?= $tema['id'] ?>" 
+                                                                                data-tahun="<?= $tema['tahun'] ?>"
                                                                                 data-prioritas="<?= html_escape($p['prioritas']) ?>" 
                                                                                 data-jenis="provinsi" 
                                                                                 data-label="PP" 
@@ -329,6 +344,7 @@
                                                         <div>
                                                             <button type="button" class="btn-add-inline tambah-prioritas-kolom"
                                                                     data-tema_id="<?= $tema['id'] ?>"
+                                                                    data-tahun="<?= $tema['tahun'] ?>"
                                                                     data-tema_nasional="<?= html_escape($tema['tema_nasional']) ?>"
                                                                     data-id_pn="<?= !empty($pn) ? $pn['id'] : '' ?>"
                                                                     data-pn_text="<?= !empty($pn) ? html_escape($pn['prioritas']) : '' ?>"
@@ -351,6 +367,7 @@
                                                                         <button type="button" class="btn btn-xs btn-warning EditPrioritas" 
                                                                                 data-id="<?= $p['id'] ?>" 
                                                                                 data-tema_id="<?= $tema['id'] ?>" 
+                                                                                data-tahun="<?= $tema['tahun'] ?>"
                                                                                 data-prioritas="<?= html_escape($p['prioritas']) ?>" 
                                                                                 data-jenis="daerah" 
                                                                                 data-label="PD" 
@@ -371,6 +388,7 @@
                                                         <div>
                                                             <button type="button" class="btn-add-inline tambah-prioritas-kolom"
                                                                     data-tema_id="<?= $tema['id'] ?>"
+                                                                    data-tahun="<?= $tema['tahun'] ?>"
                                                                     data-tema_nasional="<?= html_escape($tema['tema_nasional']) ?>"
                                                                     data-id_pn="<?= !empty($pn) ? $pn['id'] : '' ?>"
                                                                     data-pn_text="<?= !empty($pn) ? html_escape($pn['prioritas']) : '' ?>"
@@ -482,12 +500,7 @@ MODAL INPUT TEMA - TAHUN INPUT MANUAL, TEMA NASIONAL AUTO REFRESH
                                         </div>
                                         <div class="col-lg-8">
                                             <div class="nk-int-st">
-                                                <div style="display: flex; gap: 8px; align-items: flex-start;">
-                                                    <textarea class="form-control" id="TemaProvinsi" rows="2" placeholder="Tema Pembangunan Provinsi" style="color: #000; flex: 1;"></textarea>
-                                                    <button type="button" class="btn btn-info notika-btn-info" id="BtnTarikTemaProvinsiInput" title="Tarik Tema Provinsi dari akun Provinsi sesuai parent wilayah" style="white-space: nowrap; padding: 6px 12px; font-size: 11px;">
-                                                        <i class="fa fa-cloud-download"></i> Tarik dari Provinsi
-                                                    </button>
-                                                </div>
+                                                <textarea class="form-control" id="TemaProvinsi" rows="2" placeholder="Tema Pembangunan Provinsi" style="color: #000;"></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -603,12 +616,7 @@ MODAL EDIT TEMA - TAHUN INPUT MANUAL, TEMA NASIONAL AUTO REFRESH
                                         </div>
                                         <div class="col-lg-8">
                                             <div class="nk-int-st">
-                                                <div style="display: flex; gap: 8px; align-items: flex-start;">
-                                                    <textarea class="form-control" id="EditTemaProvinsi" rows="2" style="color: #000; flex: 1;"></textarea>
-                                                    <button type="button" class="btn btn-info notika-btn-info" id="BtnTarikTemaProvinsiEdit" title="Tarik Tema Provinsi dari akun Provinsi sesuai parent wilayah" style="white-space: nowrap; padding: 6px 12px; font-size: 11px;">
-                                                        <i class="fa fa-cloud-download"></i> Tarik dari Provinsi
-                                                    </button>
-                                                </div>
+                                                <textarea class="form-control" id="EditTemaProvinsi" rows="2" style="color: #000;"></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -665,6 +673,7 @@ MODAL TAMBAH PRIORITAS - PN DARI DROPDOWN RPJMN
                         <div class="form-example-wrap" style="padding: 5px;">
                             
                             <input type="hidden" id="InputPrioritasTemaIdKolom">
+                            <input type="hidden" id="InputPrioritasTahunKolom">
                             <input type="hidden" id="InputPrioritasJenisKolom">
                             <input type="hidden" id="InputPrioritasLabelKolom">
                             <input type="hidden" id="InputPrioritasIdPN">
@@ -743,7 +752,33 @@ MODAL TAMBAH PRIORITAS - PN DARI DROPDOWN RPJMN
                                 </div>
                             </div>
 
-                            <!-- INPUT MANUAL UNTUK PP DAN PD -->
+                            <!-- DROPDOWN PRIORITAS DAERAH DARI CASCADING RKPD - KHUSUS PD -->
+                            <div class="dropdown-group" id="DropdownCascadingPDContainer" style="display: none;">
+                                <div class="form-example-int form-horizental">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-lg-3">
+                                                <label class="hrzn-fm">
+                                                    <b>Program Prioritas</b> <span class="text-danger">*</span>
+                                                    <span class="badge" style="background:#28a745; color:#fff; font-size:10px; padding:2px 6px; border-radius:3px;">Cascading</span>
+                                                </label>
+                                            </div>
+                                            <div class="col-lg-8">
+                                                <div class="nk-int-st">
+                                                    <select class="form-control select2-modal" id="InputProgramPrioritasCascadingId" style="width: 100%;">
+                                                        <option value="">-- Pilih Program Prioritas (Dari Cascading RKPD) --</option>
+                                                    </select>
+                                                    <small class="text-muted" style="display: block; margin-top: 5px;">
+                                                        * Diambil dari Program Prioritas di menu Cascading Permasalahan RKPD.
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- INPUT MANUAL UNTUK PP -->
                             <div class="form-example-int form-horizental" id="InputManualContainer">
                                 <div class="form-group">
                                     <div class="row">
@@ -794,6 +829,7 @@ MODAL EDIT PRIORITAS - SAMA DENGAN INPUT
                             
                             <input type="hidden" id="EditPrioritasId">
                             <input type="hidden" id="EditPrioritasTemaId">
+                            <input type="hidden" id="EditPrioritasTahunHidden">
                             <input type="hidden" id="EditPrioritasJenisHidden">
                             <input type="hidden" id="EditPrioritasLabelHidden">
                             
@@ -855,7 +891,33 @@ MODAL EDIT PRIORITAS - SAMA DENGAN INPUT
                                 </div>
                             </div>
 
-                            <!-- INPUT MANUAL UNTUK PP DAN PD (EDIT) -->
+                            <!-- DROPDOWN PRIORITAS DAERAH DARI CASCADING RKPD - KHUSUS PD (EDIT) -->
+                            <div class="dropdown-group" id="EditDropdownCascadingPDContainer" style="display: none;">
+                                <div class="form-example-int form-horizental">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-lg-3">
+                                                <label class="hrzn-fm">
+                                                    <b>Program Prioritas</b> <span class="text-danger">*</span>
+                                                    <span class="badge" style="background:#28a745; color:#fff; font-size:10px; padding:2px 6px; border-radius:3px;">Cascading</span>
+                                                </label>
+                                            </div>
+                                            <div class="col-lg-8">
+                                                <div class="nk-int-st">
+                                                    <select class="form-control select2-modal" id="EditProgramPrioritasCascadingId" style="width: 100%;">
+                                                        <option value="">-- Pilih Program Prioritas (Dari Cascading RKPD) --</option>
+                                                    </select>
+                                                    <small class="text-muted" style="display: block; margin-top: 5px;">
+                                                        * Diambil dari Program Prioritas di menu Cascading Permasalahan RKPD.
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- INPUT MANUAL UNTUK PP (EDIT) -->
                             <div class="form-example-int form-horizental" id="EditInputManualContainer">
                                 <div class="form-group">
                                     <div class="row">
@@ -889,6 +951,37 @@ MODAL EDIT PRIORITAS - SAMA DENGAN INPUT
 </div>
 
 <style>
+    /* Select2 Customization */
+    .select2-container {
+        width: 100% !important;
+    }
+    .select2-container--default .select2-selection--single {
+        height: 38px !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 6px !important;
+        padding-top: 4px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 28px !important;
+        font-size: 13px !important;
+        color: #1e293b !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px !important;
+    }
+    .select2-dropdown {
+        border: 1.5px solid #94a3b8 !important;
+        border-radius: 6px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+        z-index: 999999999 !important;
+        font-size: 13px !important;
+    }
+    .select2-search--dropdown .select2-search__field {
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 4px !important;
+        padding: 5px 8px !important;
+    }
+
     .form-control, .form-control option {
         color: #000 !important;
     }
@@ -1229,6 +1322,8 @@ MODAL EDIT PRIORITAS - SAMA DENGAN INPUT
 <script src="<?= base_url('js/data-table/jquery.dataTables.min.js'); ?>"></script>
 <script src="<?= base_url('js/data-table/data-table-act.js'); ?>"></script>
 <script src="<?= base_url('js/main.js'); ?>"></script>
+<!-- Select2 JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
 <script>
 var BaseURL = '<?= base_url() ?>';
@@ -1791,11 +1886,77 @@ $("#UpdateTema").click(function() {
     });
 
     // ============================================================
+    // HELPER LOAD PROGRAM PRIORITAS CASCADING RKPD
+    // ============================================================
+    function loadCascadingProgramPrioritas(selectElement, targetTahun, selectedValue) {
+        var $el = $(selectElement);
+        $el.empty().append('<option value="">-- Sedang memuat Program Prioritas... --</option>');
+        
+        $.ajax({
+            url: BaseURL + "Daerah/GetProgramPrioritasFromCascading",
+            type: "POST",
+            dataType: "json",
+            data: {
+                Tahun: targetTahun,
+                [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
+            },
+            success: function(list) {
+                $el.empty().append('<option value="">-- Pilih Program Prioritas (Dari Cascading RKPD) --</option>');
+                var found = false;
+                if (list && list.length > 0) {
+                    list.forEach(function(item) {
+                        var pp = (item.ProgramPrioritas || '').trim();
+                        if (pp) {
+                            var isSelected = (selectedValue && pp === selectedValue) ? true : false;
+                            if (isSelected) found = true;
+                            $el.append($('<option>', {
+                                value: pp,
+                                text: pp,
+                                selected: isSelected
+                            }));
+                        }
+                    });
+                } else {
+                    $el.append('<option value="" disabled>-- Tidak ada Program Prioritas di Cascading RKPD tahun ' + (targetTahun || '') + ' --</option>');
+                }
+                
+                if (selectedValue && !found) {
+                    $el.append($('<option>', {
+                        value: selectedValue,
+                        text: selectedValue + ' (Tersimpan sebelumnya)',
+                        selected: true
+                    }));
+                }
+                $el.trigger('change');
+            },
+            error: function() {
+                $el.empty().append('<option value="">-- Gagal memuat data --</option>');
+            }
+        });
+    }
+
+    // Inisialisasi Select2 untuk Modal Prioritas
+    $('#InputProgramPrioritasCascadingId').select2({
+        dropdownParent: $('#ModalInputPrioritasKolom'),
+        width: '100%',
+        placeholder: '-- Pilih Program Prioritas (Dari Cascading RKPD) --',
+        allowClear: true
+    });
+
+    $('#EditProgramPrioritasCascadingId').select2({
+        dropdownParent: $('#ModalEditPrioritas'),
+        width: '100%',
+        placeholder: '-- Pilih Program Prioritas (Dari Cascading RKPD) --',
+        allowClear: true
+    });
+
+    // ============================================================
     // TAMBAH PRIORITAS DARI KOLOM
     // ============================================================
     $(document).on("click", ".tambah-prioritas-kolom", function(e) {
         e.preventDefault();
         var temaId = $(this).data('tema_id');
+        var tahun = $(this).data('tahun') || '';
         var temaNasional = $(this).data('tema_nasional');
         var jenis = $(this).data('jenis');
         var label = $(this).data('label');
@@ -1808,6 +1969,7 @@ $("#UpdateTema").click(function() {
         else if (jenis === 'daerah') labelJenis = 'PD - Prioritas Daerah';
         
         $("#InputPrioritasTemaIdKolom").val(temaId);
+        $("#InputPrioritasTahunKolom").val(tahun);
         $("#InputPrioritasJenisKolom").val(jenis);
         $("#InputPrioritasLabelKolom").val(label);
         $("#InputPrioritasIdPN").val(idPn);
@@ -1816,6 +1978,7 @@ $("#UpdateTema").click(function() {
         $("#JenisInfoKolom").text(labelJenis);
         $("#InputPrioritasKolom").val('');
         $("#InputPrioritasRPJMNId").val('');
+        $("#InputProgramPrioritasCascadingId").val('').trigger('change');
         
         if (idPn && pnText) {
             $("#PnInfoKolom").text(pnText);
@@ -1827,9 +1990,16 @@ $("#UpdateTema").click(function() {
         
         if (jenis === 'nasional') {
             $('#DropdownRPJMNContainer').show();
+            $('#DropdownCascadingPDContainer').hide();
             $('#InputManualContainer').hide();
+        } else if (jenis === 'daerah') {
+            $('#DropdownRPJMNContainer').hide();
+            $('#DropdownCascadingPDContainer').show();
+            $('#InputManualContainer').hide();
+            loadCascadingProgramPrioritas('#InputProgramPrioritasCascadingId', tahun, '');
         } else {
             $('#DropdownRPJMNContainer').hide();
+            $('#DropdownCascadingPDContainer').hide();
             $('#InputManualContainer').show();
         }
         
@@ -1855,6 +2025,12 @@ $("#UpdateTema").click(function() {
         }
         prioritas = $("#InputPrioritasRPJMNId option:selected").text();
         rpjmnText = prioritas;
+    } else if (jenis === 'daerah') {
+        prioritas = ($("#InputProgramPrioritasCascadingId").val() || '').trim();
+        if (prioritas === "") {
+            alert('Pilih Program Prioritas dari Cascading Permasalahan RKPD!');
+            return;
+        }
     } else {
         prioritas = $("#InputPrioritasKolom").val().trim();
         if (prioritas === "") {
@@ -1925,6 +2101,7 @@ $("#UpdateTema").click(function() {
         e.stopPropagation();
         var id = $(this).data('id');
         var temaId = $(this).data('tema_id');
+        var tahun = $(this).data('tahun') || '';
         var prioritas = $(this).data('prioritas');
         var jenis = $(this).data('jenis');
         var label = $(this).data('label') || '';
@@ -1943,6 +2120,7 @@ $("#UpdateTema").click(function() {
         
         $("#EditPrioritasId").val(id);
         $("#EditPrioritasTemaId").val(temaId);
+        $("#EditPrioritasTahunHidden").val(tahun);
         $("#EditPrioritasJenisHidden").val(jenis);
         $("#EditPrioritasLabelHidden").val(label);
         $("#EditPrioritasText").val(prioritas);
@@ -1951,6 +2129,7 @@ $("#UpdateTema").click(function() {
         
         if (jenis === 'nasional') {
             $('#EditDropdownRPJMNContainer').show();
+            $('#EditDropdownCascadingPDContainer').hide();
             $('#EditInputManualContainer').hide();
             var foundId = '';
             <?php foreach ($PrioritasNasionalRPJMN as $p) { ?>
@@ -1959,8 +2138,14 @@ $("#UpdateTema").click(function() {
                 }
             <?php } ?>
             $('#EditPrioritasRPJMNId').val(foundId);
+        } else if (jenis === 'daerah') {
+            $('#EditDropdownRPJMNContainer').hide();
+            $('#EditDropdownCascadingPDContainer').show();
+            $('#EditInputManualContainer').hide();
+            loadCascadingProgramPrioritas('#EditProgramPrioritasCascadingId', tahun, prioritas);
         } else {
             $('#EditDropdownRPJMNContainer').hide();
+            $('#EditDropdownCascadingPDContainer').hide();
             $('#EditInputManualContainer').show();
         }
         
@@ -1982,6 +2167,12 @@ $("#UpdateTema").click(function() {
         }
         prioritas = $("#EditPrioritasRPJMNId option:selected").text();
         rpjmnText = prioritas;
+    } else if (jenis === 'daerah') {
+        prioritas = ($("#EditProgramPrioritasCascadingId").val() || '').trim();
+        if (prioritas === "") {
+            alert('Pilih Program Prioritas dari Cascading Permasalahan RKPD!');
+            return;
+        }
     } else {
         prioritas = $("#EditPrioritasText").val().trim();
         if (prioritas === "") {
@@ -2165,17 +2356,20 @@ $("#UpdateTema").click(function() {
 
     $('#ModalInputPrioritasKolom').on('hidden.bs.modal', function() {
         $("#InputPrioritasTemaIdKolom").val('');
+        $("#InputPrioritasTahunKolom").val('');
         $("#InputPrioritasJenisKolom").val('');
         $("#InputPrioritasLabelKolom").val('');
         $("#InputPrioritasIdPN").val('');
         $("#InputPrioritasKolom").val('');
         $("#InputPrioritasRPJMNId").val('');
+        $("#InputProgramPrioritasCascadingId").val('').trigger('change');
         $("#LabelTemaPrioritasKolom").text('');
         $("#TemaInfoKolom").text('');
         $("#JenisInfoKolom").text('');
         $("#PnInfoKolom").text('');
         $("#PnInfoContainer").hide();
         $('#DropdownRPJMNContainer').hide();
+        $('#DropdownCascadingPDContainer').hide();
         $('#InputManualContainer').show();
         $("#SimpanPrioritasKolom").prop('disabled', false).html('<b>SIMPAN</b>');
     });
@@ -2183,13 +2377,16 @@ $("#UpdateTema").click(function() {
     $('#ModalEditPrioritas').on('hidden.bs.modal', function() {
         $("#EditPrioritasId").val('');
         $("#EditPrioritasTemaId").val('');
+        $("#EditPrioritasTahunHidden").val('');
         $("#EditPrioritasJenisHidden").val('');
         $("#EditPrioritasLabelHidden").val('');
         $("#EditPrioritasText").val('');
         $("#EditPrioritasRPJMNId").val('');
+        $("#EditProgramPrioritasCascadingId").val('').trigger('change');
         $("#EditTemaInfo").text('');
         $("#EditJenisInfo").text('');
         $('#EditDropdownRPJMNContainer').hide();
+        $('#EditDropdownCascadingPDContainer').hide();
         $('#EditInputManualContainer').show();
         $("#UpdatePrioritas").prop('disabled', false).html('<b>UPDATE</b>');
     });
