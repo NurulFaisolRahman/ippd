@@ -542,52 +542,26 @@
                     <i class="fa fa-chevron-down"></i>
                 </a>
                 <div class="sidebar-submenu">
-                    <!-- Rancangan Awal -->
-                    <div class="sidebar-dropdown">
-                        <a href="#">
-                            <span>Rancangan Awal</span>
-                            <i class="fa fa-chevron-down"></i>
-                        </a>
-                        <div class="sidebar-submenu">
-                            <a href="<?=base_url('Daerah/TemaPembangunan')?>">Tema Pembangunan</a>
-                            <a href="<?=base_url('Daerah/CascadingPermasalahan')?>">Cascading Permasalahan</a>
-                            <a href="<?=base_url('Daerah/ProgramKegiatanPrioritas')?>">Program dan Kegiatan Prioritas</a>
-                            <a href="<?=base_url('Daerah/PaguUrusan')?>">Input Pagu Anggaran</a>
-                            <a href="<?=base_url('Daerah/IKDTahunBerjalan')?>">Data IKD Tahun Berjalan</a>
-                            <a href="<?=base_url('Daerah/RanwalRKPD')?>">Rancangan Awal RKPD</a>
-                        </div>
-                    </div>
+                    <a href="<?=base_url('Daerah/TemaPembangunan')?>">Tema Pembangunan</a>
+                    <a href="<?=base_url('Daerah/CascadingPermasalahan')?>">Cascading Permasalahan</a>
+                    <a href="<?=base_url('Daerah/ProgramKegiatanPrioritas')?>">Program dan Kegiatan Prioritas</a>
+                    <a href="<?=base_url('Daerah/SasaranPembangunanDaerah')?>">Sasaran Pembangunan Daerah</a>
+                    <a href="<?=base_url('Daerah/KeterkaitanIndikatorPembangunan')?>">Keterkaitan Indikator Pembangunan Daerah</a>
+                    <a href="<?=base_url('Daerah/DukunganPrioritasPembangunan')?>">Dukungan Prioritas Pembangunan</a>
+                    <a href="<?=base_url('Daerah/IKDTahunBerjalan')?>">Data IKD Tahun Berjalan</a>
+                    <a href="<?=base_url('Daerah/PaguUrusan')?>">Input Pagu Anggaran</a>
+                    <a href="<?=base_url('Daerah/PaguUrusanRankhir')?>">Pagu Urusan Rankhir RKPD</a>
 
-                    <!-- Rancangan RKPD -->
+                    <!-- Tabulasi RKPD -->
                     <div class="sidebar-dropdown">
                         <a href="#">
-                            <span>Rancangan RKPD</span>
+                            <span>Tabulasi RKPD</span>
                             <i class="fa fa-chevron-down"></i>
                         </a>
                         <div class="sidebar-submenu">
-                            <a href="<?=base_url('Daerah/RancanganRKPD')?>">Rancangan RKPD</a>
-                        </div>
-                    </div>
-
-                    <!-- Rancangan Akhir -->
-                    <div class="sidebar-dropdown">
-                        <a href="#">
-                            <span>Rancangan Akhir</span>
-                            <i class="fa fa-chevron-down"></i>
-                        </a>
-                        <div class="sidebar-submenu">
-                            <a href="<?=base_url('Daerah/RankhirRKPD')?>">Rancangan Akhir RKPD</a>
-                            <a href="<?=base_url('Daerah/PaguUrusanRankhir')?>">Pagu Urusan Rankhir RKPD</a>
-                        </div>
-                    </div>
-
-                    <!-- Perubahan RKPD -->
-                    <div class="sidebar-dropdown">
-                        <a href="#">
-                            <span>Perubahan RKPD</span>
-                            <i class="fa fa-chevron-down"></i>
-                        </a>
-                        <div class="sidebar-submenu">
+                            <a href="<?=base_url('Daerah/RanwalRKPD')?>">Rancangan Awal</a>
+                            <a href="<?=base_url('Daerah/RancanganRKPD')?>">Rancangan</a>
+                            <a href="<?=base_url('Daerah/RankhirRKPD')?>">Rancangan Akhir</a>
                             <a href="<?=base_url('Daerah/PerubahanRKPD')?>">Perubahan RKPD</a>
                         </div>
                     </div>

@@ -54,241 +54,330 @@
                                 <?php } ?>
                             <?php } ?>
 
-                            <div class="button-icon-btn sm-res-mg-t-30" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                <!-- Tombol Tambah Tema -->
-                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputTema">
-                                    <i class="notika-icon bi-plus-lg"></i> <b>Tambah Tema</b>
-                                </button>
-                                <?php } ?>
+                            <div class="basic-tb-hd" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                    <?php if (!empty($TemaPembangunan)) { 
+                                        $tahun_options = array_unique(array_column($TemaPembangunan, 'tahun'));
+                                        rsort($tahun_options);
+                                    ?>
+                                        <div style="display: inline-flex; align-items: center; gap: 8px;">
+                                            <label for="FilterTahunTema" style="margin: 0; font-size: 13px; font-weight: bold; color: #333;">Tahun:</label>
+                                            <select id="FilterTahunTema" class="form-control" style="width: 140px; display: inline-block; height: 34px; padding: 4px 8px; font-size: 13px; color: #000;">
+                                                <option value="">Semua Tahun</option>
+                                                <?php foreach ($tahun_options as $th) { ?>
+                                                    <option value="<?= html_escape($th) ?>"><?= html_escape($th) ?></option>
+                                                <?php } ?>
+                                            </select>
+                                        </div>
+                                    <?php } ?>
+                                </div>
+
+                                <div class="button-icon-btn" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                                    <!-- Tombol Tambah Tema -->
+                                    <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputTema">
+                                        <i class="notika-icon bi-plus-lg"></i> <b>Tambah Tema</b>
+                                    </button>
+                                    <?php } ?>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="table-responsive" style="margin-top: 10px;">
-                            <table class="table table-bordered table-striped" style="font-size: 13px;">
-                                <thead>
-                                    <tr style="background-color: #f0f0f0; color: #333; text-align: center;">
-                                        <th style="width: 3%; vertical-align: middle; text-align: center; border: 1px solid #ddd;">No</th>
-                                        <th style="width: 18%; vertical-align: middle; text-align: center; border: 1px solid #ddd;">
-                                            <span style="font-size: 14px; font-weight: bold;">TEMA PEMBANGUNAN NASIONAL</span>
-                                            <div style="font-size: 10px; font-weight: normal; color: #666; margin-top: 3px;">
-                                            </div>
-                                        </th>
-                                        <th style="width: 18%; vertical-align: middle; text-align: center; border: 1px solid #ddd;">
-                                            <span style="font-size: 14px; font-weight: bold;">TEMA PEMBANGUNAN PROVINSI</span>
-                                            <div style="font-size: 10px; font-weight: normal; color: #666; margin-top: 3px;">
-                                            </div>
-                                        </th>
-                                        <th style="width: 18%; vertical-align: middle; text-align: center; border: 1px solid #ddd;">
-                                            <span style="font-size: 14px; font-weight: bold;">TEMA PEMBANGUNAN DAERAH</span>
-                                            <div style="font-size: 10px; font-weight: normal; color: #666; margin-top: 3px;">
-                                            </div>
-                                        </th>
-                                        <th style="width: 7%; vertical-align: middle; text-align: center; border: 1px solid #ddd;">Tahun</th>
-                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                        <th style="width: 11%; vertical-align: middle; text-align: center; border: 1px solid #ddd;">Aksi Tema</th>
+                        <?php if (empty($TemaPembangunan)) { ?>
+                            <div class="alert alert-info text-center" style="padding: 30px; margin-top: 15px;">
+                                <i class="fa fa-info-circle fa-2x" style="vertical-align: middle; margin-right: 8px;"></i>
+                                <span style="font-size: 14px;">Belum ada data Tema Pembangunan.</span>
+                                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                                    <div style="margin-top: 12px;">
+                                        <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputTema">
+                                            <i class="notika-icon bi-plus-lg"></i> <b>Tambah Tema Sekarang</b>
+                                        </button>
+                                    </div>
+                                <?php } ?>
+                            </div>
+                        <?php } else { ?>
+                            <?php 
+                            $can_edit = isset($_SESSION['Level']) && $_SESSION['Level'] == 3;
+                            foreach ($TemaPembangunan as $tema) { 
+                                $pn_list = $tema['prioritas_nasional'] ?? [];
+                                $pp_list = $tema['prioritas_provinsi'] ?? [];
+                                $pd_list = $tema['prioritas_daerah'] ?? [];
+
+                                // Kelompokkan PP dan PD berdasarkan id_pn
+                                $pp_by_pn = [];
+                                $pd_by_pn = [];
+                                $pp_unlinked = [];
+                                $pd_unlinked = [];
+
+                                foreach ($pp_list as $pp) {
+                                    if (!empty($pp['id_pn'])) {
+                                        $pp_by_pn[$pp['id_pn']][] = $pp;
+                                    } else {
+                                        $pp_unlinked[] = $pp;
+                                    }
+                                }
+
+                                foreach ($pd_list as $pd) {
+                                    if (!empty($pd['id_pn'])) {
+                                        $pd_by_pn[$pd['id_pn']][] = $pd;
+                                    } else {
+                                        $pd_unlinked[] = $pd;
+                                    }
+                                }
+
+                                $prioritas_rows = [];
+                                if (!empty($pn_list)) {
+                                    foreach ($pn_list as $idx => $pn) {
+                                        $pn_id = $pn['id'];
+                                        $cur_pp = isset($pp_by_pn[$pn_id]) ? $pp_by_pn[$pn_id] : [];
+                                        $cur_pd = isset($pd_by_pn[$pn_id]) ? $pd_by_pn[$pn_id] : [];
+
+                                        if (empty($cur_pp) && isset($pp_unlinked[$idx])) {
+                                            $cur_pp = [$pp_unlinked[$idx]];
+                                            unset($pp_unlinked[$idx]);
+                                        }
+                                        if (empty($cur_pd) && isset($pd_unlinked[$idx])) {
+                                            $cur_pd = [$pd_unlinked[$idx]];
+                                            unset($pd_unlinked[$idx]);
+                                        }
+
+                                        $prioritas_rows[] = [
+                                            'pn' => $pn,
+                                            'pp' => $cur_pp,
+                                            'pd' => $cur_pd
+                                        ];
+                                    }
+                                }
+
+                                $max_extra = max(count($pp_unlinked), count($pd_unlinked));
+                                if ($max_extra > 0) {
+                                    $pp_rem = array_values($pp_unlinked);
+                                    $pd_rem = array_values($pd_unlinked);
+                                    for ($i = 0; $i < $max_extra; $i++) {
+                                        $prioritas_rows[] = [
+                                            'pn' => null,
+                                            'pp' => isset($pp_rem[$i]) ? [$pp_rem[$i]] : [],
+                                            'pd' => isset($pd_rem[$i]) ? [$pd_rem[$i]] : []
+                                        ];
+                                    }
+                                }
+
+                                if (empty($prioritas_rows)) {
+                                    $prioritas_rows[] = [
+                                        'pn' => null,
+                                        'pp' => [],
+                                        'pd' => []
+                                    ];
+                                }
+                            ?>
+                            <div class="tema-card-wrapper" data-tahun="<?= html_escape($tema['tahun']) ?>" style="margin-bottom: 35px;">
+                                <!-- Card Header Toolbar -->
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 6px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span class="label label-primary" style="font-size: 12px; padding: 4px 8px;">Tahun <?= html_escape($tema['tahun']) ?></span>
+                                        <?php if (!empty($tema['tema_rkp_text'])) { ?>
+                                            <span class="text-muted" style="font-size: 11px;"><i class="fa fa-bookmark"></i> RKP: <?= html_escape($tema['tema_rkp_text']) ?></span>
                                         <?php } ?>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php if (empty($TemaPembangunan)) { ?>
-                                    <tr>
-                                        <td colspan="6" class="text-center text-muted" style="padding: 30px 0;">
-                                            <i class="fa fa-info-circle"></i> Belum ada data Tema Pembangunan
-                                        </td>
-                                    </tr>
-                                    <?php } else { ?>
-                                    <?php $No = 1; foreach ($TemaPembangunan as $tema) { 
-                                        $totalPrioritas = count($tema['prioritas_nasional']) + count($tema['prioritas_provinsi']) + count($tema['prioritas_daerah']);
-                                        $rowspan = max(1, $totalPrioritas);
-                                    ?>
-                                    <tr>
-                                        <td class="text-center" style="vertical-align: middle; background-color: #f9f9f9; border: 1px solid #ddd;">
-                                            <strong><?= $No++ ?></strong>
-                                        </td>
-                                        
-                                        <!-- KOLOM NASIONAL -->
-                                        <td style="vertical-align: top; padding: 8px; border: 1px solid #ddd; background-color: #fff;">
-                                            <div style="font-weight: bold; font-size: 14px; color: #333; border-bottom: 2px solid #ccc; padding-bottom: 6px; margin-bottom: 8px;">
-                                                <?= html_escape($tema['tema_nasional']) ?>
-                                            </div>
-                                            <?php if (!empty($tema['tema_rkp_text'])) { ?>
-                                            <div style="font-size: 10px; color: #17a2b8; margin-bottom: 8px; background: #e7f5ff; padding: 2px 8px; border-radius: 3px;">
-                                                <i class="fa fa-bookmark"></i> Tema RKP: <?= html_escape($tema['tema_rkp_text']) ?>
-                                            </div>
-                                            <?php } ?>
-                                            <div style="font-size: 11px; color: #555; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; border-left: 3px solid #999; padding-left: 6px;">
-                                                <span class="badge-pn">PN</span> PRIORITAS NASIONAL
-                                            </div>
-                                            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                            <button class="btn btn-xs btn-primary tambah-prioritas-kolom" 
-                                                    data-tema_id="<?= $tema['id'] ?>"
-                                                    data-tema_nasional="<?= html_escape($tema['tema_nasional']) ?>"
-                                                    data-jenis="nasional"
-                                                    data-label="PN"
-                                                    style="margin-bottom: 5px; padding: 2px 8px; font-size: 10px;">
-                                                <i class="notika-icon notika-plus"></i> Tambah PN
-                                            </button>
-                                            <?php } ?>
-                                            <div class="prioritas-list">
-                                                <?php if (!empty($tema['prioritas_nasional'])) { ?>
-                                                    <?php foreach ($tema['prioritas_nasional'] as $idx => $p) { ?>
-                                                        <div class="prioritas-item" style="display: flex; align-items: center; gap: 4px; padding: 2px 0; border-bottom: 1px dashed #eee;">
-                                                            <span style="font-size: 11px; color: #777; min-width: 20px;"><?= ($idx + 1) ?>.</span>
-                                                            <span style="font-size: 12px; color: #333; flex: 1;"><?= html_escape($p['prioritas']) ?></span>
-                                                            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                                                <button class="btn btn-xs btn-primary EditPrioritas" 
-                                                                        data-id="<?= $p['id'] ?>"
-                                                                        data-tema_id="<?= $tema['id'] ?>"
-                                                                        data-prioritas="<?= html_escape($p['prioritas']) ?>"
-                                                                        data-jenis="nasional"
-                                                                        data-label="PN"
-                                                                        style="padding: 1px 4px; font-size: 9px;">
-                                                                    <i class="notika-icon notika-edit" style="font-size: 9px;"></i>
-                                                                </button>
-                                                                <button class="btn btn-xs btn-danger HapusPrioritas" 
-                                                                        data-id="<?= $p['id'] ?>"
-                                                                        style="padding: 1px 4px; font-size: 9px;">
-                                                                    <i class="notika-icon notika-close" style="font-size: 9px;"></i>
-                                                                </button>
-                                                            <?php } ?>
-                                                        </div>
-                                                    <?php } ?>
-                                                <?php } else { ?>
-                                                    <div class="text-muted" style="font-size: 11px; font-style: italic; padding: 3px 0;">Belum ada prioritas</div>
-                                                <?php } ?>
-                                            </div>
-                                        </td>
-                                        
-                                        <!-- KOLOM PROVINSI -->
-                                        <td style="vertical-align: top; padding: 8px; border: 1px solid #ddd; background-color: #fff;">
-                                            <div style="font-weight: bold; font-size: 14px; color: #333; border-bottom: 2px solid #ccc; padding-bottom: 6px; margin-bottom: 8px;">
-                                                <?= html_escape($tema['tema_provinsi']) ?>
-                                            </div>
-                                            <div style="font-size: 11px; color: #555; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; border-left: 3px solid #999; padding-left: 6px;">
-                                                <span class="badge-pp">PP</span> PRIORITAS PROVINSI
-                                            </div>
-                                            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                            <button class="btn btn-xs btn-primary tambah-prioritas-kolom" 
-                                                    data-tema_id="<?= $tema['id'] ?>"
-                                                    data-tema_nasional="<?= html_escape($tema['tema_nasional']) ?>"
-                                                    data-jenis="provinsi"
-                                                    data-label="PP"
-                                                    style="margin-bottom: 5px; padding: 2px 8px; font-size: 10px;">
-                                                <i class="notika-icon notika-plus"></i> Tambah PP
-                                            </button>
-                                            <?php } ?>
-                                            <div class="prioritas-list">
-                                                <?php if (!empty($tema['prioritas_provinsi'])) { ?>
-                                                    <?php foreach ($tema['prioritas_provinsi'] as $idx => $p) { ?>
-                                                        <div class="prioritas-item" style="display: flex; align-items: center; gap: 4px; padding: 2px 0; border-bottom: 1px dashed #eee;">
-                                                            <span style="font-size: 11px; color: #777; min-width: 20px;"><?= ($idx + 1) ?>.</span>
-                                                            <span style="font-size: 12px; color: #333; flex: 1;"><?= html_escape($p['prioritas']) ?></span>
-                                                            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                                                <button class="btn btn-xs btn-primary EditPrioritas" 
-                                                                        data-id="<?= $p['id'] ?>"
-                                                                        data-tema_id="<?= $tema['id'] ?>"
-                                                                        data-prioritas="<?= html_escape($p['prioritas']) ?>"
-                                                                        data-jenis="provinsi"
-                                                                        data-label="PP"
-                                                                        style="padding: 1px 4px; font-size: 9px;">
-                                                                    <i class="notika-icon notika-edit" style="font-size: 9px;"></i>
-                                                                </button>
-                                                                <button class="btn btn-xs btn-danger HapusPrioritas" 
-                                                                        data-id="<?= $p['id'] ?>"
-                                                                        style="padding: 1px 4px; font-size: 9px;">
-                                                                    <i class="notika-icon notika-close" style="font-size: 9px;"></i>
-                                                                </button>
-                                                            <?php } ?>
-                                                        </div>
-                                                    <?php } ?>
-                                                <?php } else { ?>
-                                                    <div class="text-muted" style="font-size: 11px; font-style: italic; padding: 3px 0;">Belum ada prioritas</div>
-                                                <?php } ?>
-                                            </div>
-                                        </td>
-                                        
-                                        <!-- KOLOM DAERAH -->
-                                        <td style="vertical-align: top; padding: 8px; border: 1px solid #ddd; background-color: #fff;" >
-                                            <div style="font-weight: bold; font-size: 14px; color: #333; border-bottom: 2px solid #ccc; padding-bottom: 6px; margin-bottom: 8px;">
-                                                <?= html_escape($tema['tema_daerah']) ?>
-                                            </div>
-                                            <div style="font-size: 11px; color: #555; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; border-left: 3px solid #999; padding-left: 6px;">
-                                                <span class="badge-pd">PD</span> PRIORITAS DAERAH
-                                            </div>
-                                            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                            <button class="btn btn-xs btn-primary tambah-prioritas-kolom" 
-                                                    data-tema_id="<?= $tema['id'] ?>"
-                                                    data-tema_nasional="<?= html_escape($tema['tema_nasional']) ?>"
-                                                    data-jenis="daerah"
-                                                    data-label="PD"
-                                                    style="margin-bottom: 5px; padding: 2px 8px; font-size: 10px;">
-                                                <i class="notika-icon notika-plus"></i> Tambah PD
-                                            </button>
-                                            <?php } ?>
-                                            <div class="prioritas-list">
-                                                <?php if (!empty($tema['prioritas_daerah'])) { ?>
-                                                    <?php foreach ($tema['prioritas_daerah'] as $idx => $p) { ?>
-                                                        <div class="prioritas-item" style="display: flex; align-items: center; gap: 4px; padding: 2px 0; border-bottom: 1px dashed #eee;">
-                                                            <span style="font-size: 11px; color: #777; min-width: 20px;"><?= ($idx + 1) ?>.</span>
-                                                            <span style="font-size: 12px; color: #333; flex: 1;"><?= html_escape($p['prioritas']) ?></span>
-                                                            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                                                <button class="btn btn-xs btn-primary EditPrioritas" 
-                                                                        data-id="<?= $p['id'] ?>"
-                                                                        data-tema_id="<?= $tema['id'] ?>"
-                                                                        data-prioritas="<?= html_escape($p['prioritas']) ?>"
-                                                                        data-jenis="daerah"
-                                                                        data-label="PD"
-                                                                        style="padding: 1px 4px; font-size: 9px;">
-                                                                    <i class="notika-icon notika-edit" style="font-size: 9px;"></i>
-                                                                </button>
-                                                                <button class="btn btn-xs btn-danger HapusPrioritas" 
-                                                                        data-id="<?= $p['id'] ?>"
-                                                                        style="padding: 1px 4px; font-size: 9px;">
-                                                                    <i class="notika-icon notika-close" style="font-size: 9px;"></i>
-                                                                </button>
-                                                            <?php } ?>
-                                                        </div>
-                                                    <?php } ?>
-                                                <?php } else { ?>
-                                                    <div class="text-muted" style="font-size: 11px; font-style: italic; padding: 3px 0;">Belum ada prioritas</div>
-                                                <?php } ?>
-                                            </div>
-                                        </td>
-                                        
-                                        <td class="text-center" style="vertical-align: middle; background-color: #f9f9f9; border: 1px solid #ddd;">
-                                            <strong><?= html_escape($tema['tahun']) ?></strong>
-                                        </td>
-                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                        <td class="text-center" style="vertical-align: middle; background-color: #f9f9f9; border: 1px solid #ddd;" >
-                                            <div class="btn-group" style="display: inline-flex; gap: 3px; flex-direction: row; flex-wrap: wrap; justify-content: center;">
-                                                <!-- Di dalam tabel, pada tombol Edit -->
-                                                    <button class="btn btn-sm btn-warning EditTema" 
-                                                        data-id="<?= $tema['id'] ?>"
-                                                        data-tahun="<?= html_escape($tema['tahun']) ?>"
-                                                        data-tema_nasional="<?= html_escape($tema['tema_nasional']) ?>"
-                                                        data-tema_provinsi="<?= html_escape($tema['tema_provinsi']) ?>"
-                                                        data-tema_daerah="<?= html_escape($tema['tema_daerah']) ?>"
-                                                        data-tema_rkp_id="<?= $tema['tema_rkp_id'] ?? '' ?>"
-                                                        title="Edit Tema"
-                                                        style="padding: 2px 8px; font-size: 11px; background-color: #f0ad4e; border-color: #eea236; color: #fff; border-radius: 3px;">
-                                                        <i class="notika-icon notika-settings"></i> Edit
-                                                    </button>
-                                                <button class="btn btn-sm btn-danger HapusTema" 
-                                                        data-id="<?= $tema['id'] ?>"
-                                                        title="Hapus Tema"
-                                                        style="padding: 2px 8px; font-size: 11px; border-radius: 3px;">
-                                                    <i class="notika-icon notika-trash"></i> Hapus
-                                                </button>
-                                            </div>
-                                            <?php } ?>
-                                        </td>
-                                    </tr>
+                                    </div>
+                                    <?php if ($can_edit) { ?>
+                                    <div style="display: flex; gap: 6px; align-items: center;">
+                                        <button type="button" class="btn btn-xs btn-warning EditTema" 
+                                            data-id="<?= $tema['id'] ?>"
+                                            data-tahun="<?= html_escape($tema['tahun']) ?>"
+                                            data-tema_nasional="<?= html_escape($tema['tema_nasional']) ?>"
+                                            data-tema_provinsi="<?= html_escape($tema['tema_provinsi']) ?>"
+                                            data-tema_daerah="<?= html_escape($tema['tema_daerah']) ?>"
+                                            data-tema_rkp_id="<?= $tema['tema_rkp_id'] ?? '' ?>"
+                                            title="Edit Tema"
+                                            style="padding: 4px 10px; font-size: 11px; font-weight: bold;">
+                                            <i class="fa fa-pencil"></i> Edit Tema
+                                        </button>
+                                        <button type="button" class="btn btn-xs btn-danger HapusTema" 
+                                            data-id="<?= $tema['id'] ?>"
+                                            title="Hapus Tema"
+                                            style="padding: 4px 10px; font-size: 11px; font-weight: bold;">
+                                            <i class="fa fa-trash"></i> Hapus Tema
+                                        </button>
+                                    </div>
                                     <?php } ?>
-                                    <?php } ?>
-                                </tbody>
-                            </table>
-                        </div>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table-tema-pembangunan">
+                                        <thead>
+                                            <tr class="header-tema">
+                                                <th style="width: 33.33%;">
+                                                    TEMA PEMBANGUNAN NASIONAL<br>TAHUN <?= html_escape($tema['tahun']) ?>
+                                                </th>
+                                                <th style="width: 33.33%;">
+                                                    TEMA PEMBANGUNAN PROVINSI TAHUN<br><?= html_escape($tema['tahun']) ?>
+                                                </th>
+                                                <th style="width: 33.34%;">
+                                                    TEMA PEMBANGUNAN DAERAH TAHUN<br><?= html_escape($tema['tahun']) ?>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="row-tema-value">
+                                                <td><?= nl2br(html_escape($tema['tema_nasional'])) ?></td>
+                                                <td><?= nl2br(html_escape($tema['tema_provinsi'])) ?></td>
+                                                <td><?= nl2br(html_escape($tema['tema_daerah'])) ?></td>
+                                            </tr>
+                                            <tr class="row-separator">
+                                                <td>&nbsp;</td>
+                                                <td>&nbsp;</td>
+                                                <td>&nbsp;</td>
+                                            </tr>
+                                            <tr class="header-prioritas">
+                                                <th style="vertical-align: middle; position: relative; text-align: center;">
+                                                    <span>Prioritas Pembangunan Nasional (PN)</span>
+                                                    <?php if ($can_edit) { ?>
+                                                        <button type="button" class="btn btn-xs btn-primary tambah-prioritas-kolom"
+                                                                data-tema_id="<?= $tema['id'] ?>"
+                                                                data-tema_nasional="<?= html_escape($tema['tema_nasional']) ?>"
+                                                                data-id_pn=""
+                                                                data-pn_text=""
+                                                                data-jenis="nasional"
+                                                                data-label="PN"
+                                                                title="Tambah PN"
+                                                                style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 11px; font-weight: bold; padding: 2px 8px; text-transform: none;">
+                                                            <i class="fa fa-plus"></i> Tambah PN
+                                                        </button>
+                                                    <?php } ?>
+                                                </th>
+                                                <th style="vertical-align: middle; text-align: center;">Prioritas Pembangunan Provinsi (PP)</th>
+                                                <th style="vertical-align: middle; text-align: center;">Prioritas Pembangunan Daerah (PD)</th>
+                                            </tr>
+                                            <?php foreach ($prioritas_rows as $row) { 
+                                                $pn = $row['pn'];
+                                                $pps = $row['pp'];
+                                                $pds = $row['pd'];
+                                            ?>
+                                            <tr class="row-prioritas-data">
+                                                <!-- Kolom PN -->
+                                                <td>
+                                                    <?php if (!empty($pn)) { ?>
+                                                        <div class="pn-box">
+                                                            <div class="pn-text" style="font-weight: 500; color: #111; margin-bottom: 6px;">
+                                                                <?= html_escape(ltrim(trim($pn['prioritas']), "•*- \t\n\r\0\x0B")) ?>
+                                                            </div>
+                                                            <?php if ($can_edit) { ?>
+                                                                <div class="item-actions-group" style="display: inline-flex; gap: 4px;">
+                                                                    <button type="button" class="btn btn-xs btn-warning EditPrioritas" 
+                                                                            data-id="<?= $pn['id'] ?>" 
+                                                                            data-tema_id="<?= $tema['id'] ?>" 
+                                                                            data-prioritas="<?= html_escape($pn['prioritas']) ?>" 
+                                                                            data-jenis="nasional" 
+                                                                            data-label="PN" 
+                                                                            title="Edit PN" style="padding: 2px 7px; font-size: 11px; font-weight: 600;">
+                                                                        <i class="fa fa-pencil"></i> Edit
+                                                                    </button>
+                                                                    <button type="button" class="btn btn-xs btn-danger HapusPrioritas" 
+                                                                            data-id="<?= $pn['id'] ?>" 
+                                                                            title="Hapus PN" style="padding: 2px 7px; font-size: 11px; font-weight: 600;">
+                                                                        <i class="fa fa-trash"></i> Hapus
+                                                                    </button>
+                                                                </div>
+                                                            <?php } ?>
+                                                        </div>
+                                                    <?php } else { ?>
+                                                        <?php if ($can_edit) { ?>
+                                                            <span class="text-muted" style="font-size: 11px; font-style: italic;">(Belum ada PN pada baris ini)</span>
+                                                        <?php } ?>
+                                                    <?php } ?>
+                                                </td>
+
+                                                <!-- Kolom PP -->
+                                                <td>
+                                                    <?php if (!empty($pps)) { ?>
+                                                        <?php foreach ($pps as $p) { ?>
+                                                            <div class="prioritas-item-box" style="margin-bottom: 8px; line-height: 1.45; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                                                                <span class="pp-text">&bull; <?= html_escape(ltrim(trim($p['prioritas']), "•*- \t\n\r\0\x0B")) ?></span>
+                                                                <?php if ($can_edit) { ?>
+                                                                    <span class="item-actions-group" style="display: inline-flex; gap: 3px; flex-shrink: 0; margin-top: 1px;">
+                                                                        <button type="button" class="btn btn-xs btn-warning EditPrioritas" 
+                                                                                data-id="<?= $p['id'] ?>" 
+                                                                                data-tema_id="<?= $tema['id'] ?>" 
+                                                                                data-prioritas="<?= html_escape($p['prioritas']) ?>" 
+                                                                                data-jenis="provinsi" 
+                                                                                data-label="PP" 
+                                                                                title="Edit PP" style="padding: 2px 6px; font-size: 10px; font-weight: 600;">
+                                                                            <i class="fa fa-pencil"></i> Edit
+                                                                        </button>
+                                                                        <button type="button" class="btn btn-xs btn-danger HapusPrioritas" 
+                                                                                data-id="<?= $p['id'] ?>" 
+                                                                                title="Hapus PP" style="padding: 2px 6px; font-size: 10px; font-weight: 600;">
+                                                                            <i class="fa fa-trash"></i> Hapus
+                                                                        </button>
+                                                                    </span>
+                                                                <?php } ?>
+                                                            </div>
+                                                        <?php } ?>
+                                                    <?php } ?>
+                                                    <?php if ($can_edit) { ?>
+                                                        <div>
+                                                            <button type="button" class="btn-add-inline tambah-prioritas-kolom"
+                                                                    data-tema_id="<?= $tema['id'] ?>"
+                                                                    data-tema_nasional="<?= html_escape($tema['tema_nasional']) ?>"
+                                                                    data-id_pn="<?= !empty($pn) ? $pn['id'] : '' ?>"
+                                                                    data-pn_text="<?= !empty($pn) ? html_escape($pn['prioritas']) : '' ?>"
+                                                                    data-jenis="provinsi"
+                                                                    data-label="PP">
+                                                                <i class="fa fa-plus"></i> Tambah PP
+                                                            </button>
+                                                        </div>
+                                                    <?php } ?>
+                                                </td>
+
+                                                <!-- Kolom PD -->
+                                                <td>
+                                                    <?php if (!empty($pds)) { ?>
+                                                        <?php foreach ($pds as $p) { ?>
+                                                            <div class="prioritas-item-box" style="margin-bottom: 8px; line-height: 1.45; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                                                                <span class="pd-text">&bull; <?= html_escape(ltrim(trim($p['prioritas']), "•*- \t\n\r\0\x0B")) ?></span>
+                                                                <?php if ($can_edit) { ?>
+                                                                    <span class="item-actions-group" style="display: inline-flex; gap: 3px; flex-shrink: 0; margin-top: 1px;">
+                                                                        <button type="button" class="btn btn-xs btn-warning EditPrioritas" 
+                                                                                data-id="<?= $p['id'] ?>" 
+                                                                                data-tema_id="<?= $tema['id'] ?>" 
+                                                                                data-prioritas="<?= html_escape($p['prioritas']) ?>" 
+                                                                                data-jenis="daerah" 
+                                                                                data-label="PD" 
+                                                                                title="Edit PD" style="padding: 2px 6px; font-size: 10px; font-weight: 600;">
+                                                                            <i class="fa fa-pencil"></i> Edit
+                                                                        </button>
+                                                                        <button type="button" class="btn btn-xs btn-danger HapusPrioritas" 
+                                                                                data-id="<?= $p['id'] ?>" 
+                                                                                title="Hapus PD" style="padding: 2px 6px; font-size: 10px; font-weight: 600;">
+                                                                            <i class="fa fa-trash"></i> Hapus
+                                                                        </button>
+                                                                    </span>
+                                                                <?php } ?>
+                                                            </div>
+                                                        <?php } ?>
+                                                    <?php } ?>
+                                                    <?php if ($can_edit) { ?>
+                                                        <div>
+                                                            <button type="button" class="btn-add-inline tambah-prioritas-kolom"
+                                                                    data-tema_id="<?= $tema['id'] ?>"
+                                                                    data-tema_nasional="<?= html_escape($tema['tema_nasional']) ?>"
+                                                                    data-id_pn="<?= !empty($pn) ? $pn['id'] : '' ?>"
+                                                                    data-pn_text="<?= !empty($pn) ? html_escape($pn['prioritas']) : '' ?>"
+                                                                    data-jenis="daerah"
+                                                                    data-label="PD">
+                                                                <i class="fa fa-plus"></i> Tambah PD
+                                                            </button>
+                                                        </div>
+                                                    <?php } ?>
+                                                </td>
+                                            </tr>
+                                            <?php } ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <?php } ?>
+                        <?php } ?>
 
                     </div>
                 </div>
@@ -557,6 +646,7 @@ MODAL TAMBAH PRIORITAS - PN DARI DROPDOWN RPJMN
                             <input type="hidden" id="InputPrioritasTemaIdKolom">
                             <input type="hidden" id="InputPrioritasJenisKolom">
                             <input type="hidden" id="InputPrioritasLabelKolom">
+                            <input type="hidden" id="InputPrioritasIdPN">
                             
                             <!-- TEMA INFO -->
                             <div class="form-example-int form-horizental">
@@ -568,6 +658,22 @@ MODAL TAMBAH PRIORITAS - PN DARI DROPDOWN RPJMN
                                         <div class="col-lg-8">
                                             <div class="nk-int-st">
                                                 <p class="form-control-static" id="TemaInfoKolom" style="font-weight: bold; color: #333;"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SELARAS PN INFO -->
+                            <div class="form-example-int form-horizental" id="PnInfoContainer" style="display: none;">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-lg-3">
+                                            <label class="hrzn-fm"><b>Selaras PN</b></label>
+                                        </div>
+                                        <div class="col-lg-8">
+                                            <div class="nk-int-st">
+                                                <p class="form-control-static" id="PnInfoKolom" style="font-size: 12px; color: #0d6efd; background: #e7f1ff; border: 1px solid #b6d4fe; border-radius: 4px; padding: 6px 10px; margin-bottom: 0;"></p>
                                             </div>
                                         </div>
                                     </div>
@@ -941,6 +1047,152 @@ MODAL EDIT PRIORITAS - SAMA DENGAN INPUT
         margin-bottom: 0;
         font-weight: bold;
         color: #333;
+    }
+
+    /* Styling Tabel Tema & Prioritas Pembangunan Sesuai Gambar */
+    .table-tema-pembangunan {
+        width: 100%;
+        border-collapse: collapse !important;
+        border: 1.5px solid #000 !important;
+        background-color: #fff;
+        margin-bottom: 10px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .table-tema-pembangunan th,
+    .table-tema-pembangunan td {
+        border: 1px solid #000 !important;
+        color: #000 !important;
+    }
+    .table-tema-pembangunan thead th {
+        text-align: center;
+        vertical-align: middle;
+        font-size: 13.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 10px 14px;
+        line-height: 1.35;
+        background-color: #fff;
+        color: #000 !important;
+        letter-spacing: 0.2px;
+    }
+    .table-tema-pembangunan .row-tema-value td {
+        text-align: center;
+        vertical-align: middle;
+        font-style: italic;
+        font-size: 13px;
+        line-height: 1.45;
+        padding: 12px 16px;
+        background-color: #fff;
+        color: #000 !important;
+    }
+    .table-tema-pembangunan .row-separator td {
+        height: 18px;
+        padding: 0;
+        background-color: #fff;
+        border-top: 1px solid #000 !important;
+        border-bottom: 1px solid #000 !important;
+    }
+    .table-tema-pembangunan .header-prioritas th {
+        text-align: center;
+        vertical-align: middle;
+        font-size: 13.5px;
+        font-weight: 700;
+        padding: 8px 12px;
+        background-color: #fff;
+        color: #000 !important;
+    }
+    .table-tema-pembangunan .row-prioritas-data td {
+        vertical-align: top;
+        padding: 12px 14px;
+        font-size: 13px;
+        line-height: 1.5;
+        background-color: #fff;
+        color: #000 !important;
+    }
+    .table-tema-pembangunan .prioritas-bullet-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    .table-tema-pembangunan .prioritas-bullet-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 6px;
+        margin-bottom: 8px;
+        line-height: 1.45;
+    }
+    .table-tema-pembangunan .prioritas-bullet-item:last-child {
+        margin-bottom: 0;
+    }
+    .table-tema-pembangunan .prioritas-bullet-item .bullet {
+        font-size: 15px;
+        line-height: 1.2;
+        flex-shrink: 0;
+        color: #000;
+    }
+    .table-tema-pembangunan .prioritas-bullet-item .item-text {
+        flex: 1;
+        color: #000;
+    }
+    .table-tema-pembangunan .item-actions-group,
+    .table-tema-pembangunan .item-actions-hover {
+        display: inline-flex;
+        gap: 4px;
+        opacity: 1 !important;
+        margin-left: 6px;
+        flex-shrink: 0;
+        vertical-align: middle;
+    }
+    .table-tema-pembangunan .EditPrioritas {
+        background-color: #f0ad4e !important;
+        border: 1px solid #eea236 !important;
+        color: #ffffff !important;
+        font-weight: 600 !important;
+        opacity: 1 !important;
+        border-radius: 3px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+        transition: all 0.15s ease-in-out;
+    }
+    .table-tema-pembangunan .EditPrioritas:hover {
+        background-color: #ec971f !important;
+        border-color: #d58512 !important;
+        color: #ffffff !important;
+    }
+    .table-tema-pembangunan .HapusPrioritas {
+        background-color: #d9534f !important;
+        border: 1px solid #d43f3a !important;
+        color: #ffffff !important;
+        font-weight: 600 !important;
+        opacity: 1 !important;
+        border-radius: 3px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+        transition: all 0.15s ease-in-out;
+    }
+    .table-tema-pembangunan .HapusPrioritas:hover {
+        background-color: #c9302c !important;
+        border-color: #ac2925 !important;
+        color: #ffffff !important;
+    }
+    .table-tema-pembangunan .btn-add-inline {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 9px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #0b62a4;
+        background: #f0f7fd;
+        border: 1px solid #bce8f1;
+        border-radius: 3px;
+        margin-top: 6px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.15s ease-in-out;
+    }
+    .table-tema-pembangunan .btn-add-inline:hover {
+        background: #0b62a4;
+        color: #ffffff;
+        border-color: #0b62a4;
     }
 </style>
 
@@ -1384,6 +1636,25 @@ $("#UpdateTema").click(function() {
     });
 
     // ============================================================
+    // FILTER TAHUN TEMA (CLIENT-SIDE SNAPPY FILTER)
+    // ============================================================
+    $('#FilterTahunTema').on('change', function() {
+        var selectedTh = $(this).val();
+        if (!selectedTh || selectedTh === '') {
+            $('.tema-card-wrapper').show();
+        } else {
+            $('.tema-card-wrapper').each(function() {
+                var th = $(this).data('tahun');
+                if (String(th) === String(selectedTh)) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        }
+    });
+
+    // ============================================================
     // TAMBAH PRIORITAS DARI KOLOM
     // ============================================================
     $(document).on("click", ".tambah-prioritas-kolom", function(e) {
@@ -1392,6 +1663,8 @@ $("#UpdateTema").click(function() {
         var temaNasional = $(this).data('tema_nasional');
         var jenis = $(this).data('jenis');
         var label = $(this).data('label');
+        var idPn = $(this).data('id_pn') || '';
+        var pnText = $(this).data('pn_text') || '';
         
         var labelJenis = '';
         if (jenis === 'nasional') labelJenis = 'PN - Prioritas Nasional';
@@ -1401,11 +1674,20 @@ $("#UpdateTema").click(function() {
         $("#InputPrioritasTemaIdKolom").val(temaId);
         $("#InputPrioritasJenisKolom").val(jenis);
         $("#InputPrioritasLabelKolom").val(label);
+        $("#InputPrioritasIdPN").val(idPn);
         $("#LabelTemaPrioritasKolom").text(temaNasional);
         $("#TemaInfoKolom").text(temaNasional);
         $("#JenisInfoKolom").text(labelJenis);
         $("#InputPrioritasKolom").val('');
         $("#InputPrioritasRPJMNId").val('');
+        
+        if (idPn && pnText) {
+            $("#PnInfoKolom").text(pnText);
+            $("#PnInfoContainer").show();
+        } else {
+            $("#PnInfoKolom").text('');
+            $("#PnInfoContainer").hide();
+        }
         
         if (jenis === 'nasional') {
             $('#DropdownRPJMNContainer').show();
@@ -1424,6 +1706,7 @@ $("#UpdateTema").click(function() {
     $("#SimpanPrioritasKolom").click(function() {
     var temaId = $("#InputPrioritasTemaIdKolom").val();
     var jenis = $("#InputPrioritasJenisKolom").val();
+    var idPn = $("#InputPrioritasIdPN").val() || '';
     var prioritas = '';
     var rpjmnId = '';
     var rpjmnText = '';
@@ -1457,6 +1740,7 @@ $("#UpdateTema").click(function() {
         TemaId: temaId,
         Jenis: jenis,
         Prioritas: prioritas,
+        IdPN: idPn,
         PrioritasNasionalId: rpjmnId || '',
         PrioritasNasionalText: rpjmnText || '',
         [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
@@ -1747,11 +2031,14 @@ $("#UpdateTema").click(function() {
         $("#InputPrioritasTemaIdKolom").val('');
         $("#InputPrioritasJenisKolom").val('');
         $("#InputPrioritasLabelKolom").val('');
+        $("#InputPrioritasIdPN").val('');
         $("#InputPrioritasKolom").val('');
         $("#InputPrioritasRPJMNId").val('');
         $("#LabelTemaPrioritasKolom").text('');
         $("#TemaInfoKolom").text('');
         $("#JenisInfoKolom").text('');
+        $("#PnInfoKolom").text('');
+        $("#PnInfoContainer").hide();
         $('#DropdownRPJMNContainer').hide();
         $('#InputManualContainer').show();
         $("#SimpanPrioritasKolom").prop('disabled', false).html('<b>SIMPAN</b>');
