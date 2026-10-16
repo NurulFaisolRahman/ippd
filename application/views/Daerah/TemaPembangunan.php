@@ -169,14 +169,23 @@
                                                 <span class="badge-pp">PP</span> PRIORITAS PROVINSI
                                             </div>
                                             <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                            <button class="btn btn-xs btn-primary tambah-prioritas-kolom" 
-                                                    data-tema_id="<?= $tema['id'] ?>"
-                                                    data-tema_nasional="<?= html_escape($tema['tema_nasional']) ?>"
-                                                    data-jenis="provinsi"
-                                                    data-label="PP"
-                                                    style="margin-bottom: 5px; padding: 2px 8px; font-size: 10px;">
-                                                <i class="notika-icon notika-plus"></i> Tambah PP
-                                            </button>
+                                            <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 5px;">
+                                                <button class="btn btn-xs btn-primary tambah-prioritas-kolom" 
+                                                        data-tema_id="<?= $tema['id'] ?>"
+                                                        data-tema_nasional="<?= html_escape($tema['tema_nasional']) ?>"
+                                                        data-jenis="provinsi"
+                                                        data-label="PP"
+                                                        style="padding: 2px 8px; font-size: 10px;">
+                                                    <i class="notika-icon notika-plus"></i> Tambah PP
+                                                </button>
+                                                <button class="btn btn-xs btn-info TarikPrioritasProvinsiBtn" 
+                                                        data-tema_id="<?= $tema['id'] ?>"
+                                                        data-tahun="<?= $tema['tahun'] ?>"
+                                                        title="Tarik Prioritas Provinsi dari akun Provinsi sesuai parent wilayah"
+                                                        style="padding: 2px 8px; font-size: 10px; background-color: #17a2b8; border-color: #17a2b8; color: #fff;">
+                                                    <i class="fa fa-cloud-download"></i> Tarik PP Provinsi
+                                                </button>
+                                            </div>
                                             <?php } ?>
                                             <div class="prioritas-list">
                                                 <?php if (!empty($tema['prioritas_provinsi'])) { ?>
@@ -382,7 +391,12 @@ MODAL INPUT TEMA - TAHUN INPUT MANUAL, TEMA NASIONAL AUTO REFRESH
                                         </div>
                                         <div class="col-lg-8">
                                             <div class="nk-int-st">
-                                                <textarea class="form-control" id="TemaProvinsi" rows="2" placeholder="Tema Pembangunan Provinsi" style="color: #000;"></textarea>
+                                                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                                                    <textarea class="form-control" id="TemaProvinsi" rows="2" placeholder="Tema Pembangunan Provinsi" style="color: #000; flex: 1;"></textarea>
+                                                    <button type="button" class="btn btn-info notika-btn-info" id="BtnTarikTemaProvinsiInput" title="Tarik Tema Provinsi dari akun Provinsi sesuai parent wilayah" style="white-space: nowrap; padding: 6px 12px; font-size: 11px;">
+                                                        <i class="fa fa-cloud-download"></i> Tarik dari Provinsi
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -498,7 +512,12 @@ MODAL EDIT TEMA - TAHUN INPUT MANUAL, TEMA NASIONAL AUTO REFRESH
                                         </div>
                                         <div class="col-lg-8">
                                             <div class="nk-int-st">
-                                                <textarea class="form-control" id="EditTemaProvinsi" rows="2" style="color: #000;"></textarea>
+                                                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                                                    <textarea class="form-control" id="EditTemaProvinsi" rows="2" style="color: #000; flex: 1;"></textarea>
+                                                    <button type="button" class="btn btn-info notika-btn-info" id="BtnTarikTemaProvinsiEdit" title="Tarik Tema Provinsi dari akun Provinsi sesuai parent wilayah" style="white-space: nowrap; padding: 6px 12px; font-size: 11px;">
+                                                        <i class="fa fa-cloud-download"></i> Tarik dari Provinsi
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1205,6 +1224,121 @@ $('#EditTahunTemaRKP').on('change', function() {
         }
     });
 });
+
+    // ============================================================
+    // TARIK TEMA DARI PROVINSI (MODAL INPUT)
+    // ============================================================
+    $("#BtnTarikTemaProvinsiInput").click(function() {
+        var tahun = $("#Tahun").val();
+        if (!tahun) {
+            alert("Silakan masukkan Tahun terlebih dahulu!");
+            return;
+        }
+
+        var btn = $(this);
+        btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menarik...');
+
+        $.ajax({
+            url: BaseURL + "Daerah/TarikTemaProvinsi",
+            type: "POST",
+            data: {
+                Tahun: tahun,
+                [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
+            },
+            dataType: "json",
+            success: function(res) {
+                if (res.status === 'success') {
+                    $("#TemaProvinsi").val(res.tema_provinsi);
+                    alert("Berhasil menarik Tema Provinsi dari " + res.nama_provinsi + "!");
+                } else {
+                    alert(res.message || "Data tidak ditemukan!");
+                }
+            },
+            error: function(xhr) {
+                alert("Gagal menghubungi server: " + xhr.statusText);
+            },
+            complete: function() {
+                btn.prop('disabled', false).html('<i class="fa fa-cloud-download"></i> Tarik dari Provinsi');
+            }
+        });
+    });
+
+    // ============================================================
+    // TARIK TEMA DARI PROVINSI (MODAL EDIT)
+    // ============================================================
+    $("#BtnTarikTemaProvinsiEdit").click(function() {
+        var tahun = $("#EditTahun").val();
+        if (!tahun) {
+            alert("Silakan masukkan Tahun terlebih dahulu!");
+            return;
+        }
+
+        var btn = $(this);
+        btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menarik...');
+
+        $.ajax({
+            url: BaseURL + "Daerah/TarikTemaProvinsi",
+            type: "POST",
+            data: {
+                Tahun: tahun,
+                [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
+            },
+            dataType: "json",
+            success: function(res) {
+                if (res.status === 'success') {
+                    $("#EditTemaProvinsi").val(res.tema_provinsi);
+                    alert("Berhasil menarik Tema Provinsi dari " + res.nama_provinsi + "!");
+                } else {
+                    alert(res.message || "Data tidak ditemukan!");
+                }
+            },
+            error: function(xhr) {
+                alert("Gagal menghubungi server: " + xhr.statusText);
+            },
+            complete: function() {
+                btn.prop('disabled', false).html('<i class="fa fa-cloud-download"></i> Tarik dari Provinsi');
+            }
+        });
+    });
+
+    // ============================================================
+    // TARIK PRIORITAS PROVINSI (PP) DARI TABEL DAERAH
+    // ============================================================
+    $(document).on("click", ".TarikPrioritasProvinsiBtn", function() {
+        var temaId = $(this).data('tema_id');
+        var tahun = $(this).data('tahun');
+
+        if (!confirm("Tarik dan sinkronkan Prioritas Provinsi untuk tahun " + tahun + " dari akun Provinsi ke daerah ini?")) {
+            return;
+        }
+
+        var btn = $(this);
+        btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menarik...');
+
+        $.ajax({
+            url: BaseURL + "Daerah/TarikPrioritasProvinsi",
+            type: "POST",
+            data: {
+                tema_id: temaId,
+                tahun: tahun,
+                [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
+            },
+            dataType: "json",
+            success: function(res) {
+                if (res.status === 'success') {
+                    alert(res.message);
+                    window.location.reload();
+                } else {
+                    alert(res.message || "Gagal menarik data prioritas provinsi!");
+                    btn.prop('disabled', false).html('<i class="fa fa-cloud-download"></i> Tarik PP Provinsi');
+                }
+            },
+            error: function(xhr) {
+                alert("Terjadi kesalahan: " + xhr.statusText);
+                btn.prop('disabled', false).html('<i class="fa fa-cloud-download"></i> Tarik PP Provinsi');
+            }
+        });
+    });
 
     // ============================================================
 // EDIT TEMA - Tampilkan data yang sudah tersimpan

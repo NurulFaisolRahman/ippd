@@ -15138,6 +15138,198 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             echo json_encode($data);
         }
 
+        /**
+         * TARIK TEMA DARI PROVINSI
+         * Mengambil data tema pembangunan dari tabel tema_pembangunan_provinsi
+         * berdasarkan parent kode wilayah kota/kabupaten (2 digit pertama) dan tahun
+         */
+        public function TarikTemaProvinsi() {
+            if (!$this->input->is_ajax_request()) {
+                show_404();
+                return;
+            }
+
+            try {
+                $kodeWilayah = $this->_getKodeWilayah();
+                if (empty($kodeWilayah)) {
+                    echo json_encode(['status' => 'error', 'message' => 'Kode Wilayah tidak ditemukan!']);
+                    return;
+                }
+
+                $tahun = trim($this->input->post('Tahun', TRUE));
+                if (empty($tahun)) {
+                    echo json_encode(['status' => 'error', 'message' => 'Tahun harus ditentukan!']);
+                    return;
+                }
+
+                // Ambil parent kode wilayah (2 digit pertama)
+                $parentKode = substr($kodeWilayah, 0, 2);
+                $provinsiRow = $this->db->where('Kode', $parentKode)->get('kodewilayah')->row_array();
+                $namaProvinsi = $provinsiRow ? $provinsiRow['Nama'] : 'Provinsi';
+
+                // Cari data di tema_pembangunan_provinsi
+                $provTema = $this->db
+                    ->where('kode_wilayah', $parentKode)
+                    ->where('tahun', $tahun)
+                    ->where('deleted_at IS NULL')
+                    ->order_by('id', 'DESC')
+                    ->get('tema_pembangunan_provinsi')
+                    ->row_array();
+
+                if (!$provTema) {
+                    echo json_encode([
+                        'status' => 'not_found',
+                        'message' => 'Data Tema Pembangunan Provinsi untuk tahun ' . $tahun . ' di ' . $namaProvinsi . ' (Kode: ' . $parentKode . ') belum diisi atau tidak ditemukan.'
+                    ]);
+                    return;
+                }
+
+                // Ambil juga prioritas provinsi jika ada
+                $provPrioritas = $this->db
+                    ->where('tema_id', $provTema['id'])
+                    ->where('kode_wilayah', $parentKode)
+                    ->where('jenis', 'provinsi')
+                    ->where('deleted_at IS NULL')
+                    ->order_by('id', 'ASC')
+                    ->get('prioritas_pembangunan_provinsi')
+                    ->result_array();
+
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Berhasil menarik data Tema Provinsi dari ' . $namaProvinsi,
+                    'parent_kode' => $parentKode,
+                    'nama_provinsi' => $namaProvinsi,
+                    'tema_provinsi' => $provTema['tema_provinsi'],
+                    'tema_nasional' => $provTema['tema_nasional'],
+                    'tema_rkp_id' => $provTema['tema_rkp_id'],
+                    'tahun' => $provTema['tahun'],
+                    'prioritas_provinsi' => $provPrioritas
+                ]);
+
+            } catch (Exception $e) {
+                log_message('error', 'TarikTemaProvinsi: ' . $e->getMessage());
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                ]);
+            }
+        }
+
+        /**
+         * TARIK PRIORITAS PROVINSI KE DAERAH
+         * Menarik list Prioritas Provinsi (PP) dari prioritas_pembangunan_provinsi ke prioritas_pembangunan daerah
+         */
+        public function TarikPrioritasProvinsi() {
+            if (!$this->input->is_ajax_request()) {
+                show_404();
+                return;
+            }
+
+            try {
+                $kodeWilayah = $this->_checkSessionWilayah();
+                if (!$kodeWilayah) {
+                    return;
+                }
+
+                $temaId = (int)$this->input->post('tema_id', TRUE);
+                $tahun = trim($this->input->post('tahun', TRUE));
+
+                if ($temaId <= 0) {
+                    echo json_encode(['status' => 'error', 'message' => 'Tema ID daerah tidak valid!']);
+                    return;
+                }
+
+                $parentKode = substr($kodeWilayah, 0, 2);
+                $provinsiRow = $this->db->where('Kode', $parentKode)->get('kodewilayah')->row_array();
+                $namaProvinsi = $provinsiRow ? $provinsiRow['Nama'] : 'Provinsi';
+
+                // Cari tema provinsi untuk tahun ini
+                $provTema = $this->db
+                    ->where('kode_wilayah', $parentKode)
+                    ->where('tahun', $tahun)
+                    ->where('deleted_at IS NULL')
+                    ->order_by('id', 'DESC')
+                    ->get('tema_pembangunan_provinsi')
+                    ->row_array();
+
+                if (!$provTema) {
+                    echo json_encode([
+                        'status' => 'error',
+                        'message' => 'Data Tema Pembangunan Provinsi untuk tahun ' . $tahun . ' di ' . $namaProvinsi . ' tidak ditemukan!'
+                    ]);
+                    return;
+                }
+
+                // Ambil prioritas provinsi
+                $provPrioritas = $this->db
+                    ->where('tema_id', $provTema['id'])
+                    ->where('kode_wilayah', $parentKode)
+                    ->where('jenis', 'provinsi')
+                    ->where('deleted_at IS NULL')
+                    ->order_by('id', 'ASC')
+                    ->get('prioritas_pembangunan_provinsi')
+                    ->result_array();
+
+                if (empty($provPrioritas)) {
+                    echo json_encode([
+                        'status' => 'warning',
+                        'message' => 'Tidak ada Prioritas Provinsi yang tersimpan di akun Provinsi ' . $namaProvinsi . ' untuk tahun ' . $tahun . '.'
+                    ]);
+                    return;
+                }
+
+                // Masukkan ke prioritas_pembangunan daerah
+                $insertedCount = 0;
+                foreach ($provPrioritas as $pp) {
+                    $val = trim($pp['prioritas']);
+                    if (empty($val)) continue;
+
+                    // Cek apakah sudah ada di tema daerah ini
+                    $exists = $this->db
+                        ->where('tema_id', $temaId)
+                        ->where('kode_wilayah', $kodeWilayah)
+                        ->where('jenis', 'provinsi')
+                        ->where('prioritas', $val)
+                        ->where('deleted_at IS NULL')
+                        ->get('prioritas_pembangunan')
+                        ->num_rows();
+
+                    if ($exists == 0) {
+                        $this->db->insert('prioritas_pembangunan', [
+                            'tema_id' => $temaId,
+                            'kode_wilayah' => $kodeWilayah,
+                            'jenis' => 'provinsi',
+                            'prioritas' => $val,
+                            'created_at' => date('Y-m-d H:i:s')
+                        ]);
+                        $insertedCount++;
+                    }
+                }
+
+                // Update juga tema_provinsi di tabel tema_pembangunan daerah jika masih kosong
+                $currentTema = $this->db->where('id', $temaId)->get('tema_pembangunan')->row_array();
+                if ($currentTema && empty($currentTema['tema_provinsi']) && !empty($provTema['tema_provinsi'])) {
+                    $this->db->where('id', $temaId)->update('tema_pembangunan', [
+                        'tema_provinsi' => $provTema['tema_provinsi'],
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+                }
+
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Berhasil menarik ' . $insertedCount . ' Prioritas Provinsi dari akun ' . $namaProvinsi . '!',
+                    'inserted' => $insertedCount
+                ]);
+
+            } catch (Exception $e) {
+                log_message('error', 'TarikPrioritasProvinsi: ' . $e->getMessage());
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                ]);
+            }
+        }
+
         // ============================================================
         // PAGU URUSAN - CRUD
         // ============================================================
@@ -16217,6 +16409,25 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 foreach ($rpjmn_pn as $rpn) {
                     if (!empty($rpn['PrioritasNasional']) && !in_array(trim($rpn['PrioritasNasional']), $pn_list)) {
                         $pn_list[] = trim($rpn['PrioritasNasional']);
+                    }
+                }
+            }
+
+            if (empty($pp_list) && !empty($KodeWilayah)) {
+                $parentKode = substr($KodeWilayah, 0, 2);
+                $prov_rows = $this->db->select('pp.prioritas')
+                    ->from('prioritas_pembangunan_provinsi pp')
+                    ->join('tema_pembangunan_provinsi tp', 'pp.tema_id = tp.id', 'left')
+                    ->where('pp.kode_wilayah', $parentKode)
+                    ->where('pp.jenis', 'provinsi')
+                    ->where('pp.deleted_at IS NULL')
+                    ->where('(tp.tahun = ' . (int)$tahun . ' OR tp.tahun IS NULL)')
+                    ->order_by('pp.id', 'ASC')
+                    ->get()
+                    ->result_array();
+                foreach ($prov_rows as $prv) {
+                    if (!empty($prv['prioritas']) && !in_array(trim($prv['prioritas']), $pp_list)) {
+                        $pp_list[] = trim($prv['prioritas']);
                     }
                 }
             }
