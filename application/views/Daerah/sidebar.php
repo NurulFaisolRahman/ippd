@@ -490,6 +490,7 @@
                 </a>
                 <div class="sidebar-submenu">
                     <a href="<?=base_url('Daerah/VisiRPJMD')?>">VMTS</a>
+                    <a href="<?=base_url('Daerah/ProgramPrioritasRPJMD')?>">Program Prioritas RPJMD</a>
                     <a href="<?=base_url('Daerah/DukunganKegiatanPrioritas')?>">Dukungan Kegiatan Prioritas Utama</a>
                     <!-- <a href="<?=base_url('Daerah/MisiRPJMD')?>">Misi</a> -->
                     <!-- <a href="<?=base_url('Daerah/TujuanRPJMD')?>">Tujuan</a> -->
@@ -549,6 +550,8 @@
                         </a>
                         <div class="sidebar-submenu">
                             <a href="<?=base_url('Daerah/TemaPembangunan')?>">Tema Pembangunan</a>
+                            <a href="<?=base_url('Daerah/CascadingPermasalahan')?>">Cascading Permasalahan</a>
+                            <a href="<?=base_url('Daerah/ProgramKegiatanPrioritas')?>">Program dan Kegiatan Prioritas</a>
                             <a href="<?=base_url('Daerah/PaguUrusan')?>">Input Pagu Anggaran</a>
                             <a href="<?=base_url('Daerah/IKDTahunBerjalan')?>">Data IKD Tahun Berjalan</a>
                             <a href="<?=base_url('Daerah/RanwalRKPD')?>">Rancangan Awal RKPD</a>
