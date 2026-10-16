@@ -660,14 +660,14 @@
         <div class="sidebar-content">
             <ul class="sidebar-menu">
                 <br>
-                <!-- RPJMD -->
-                <div class="sidebar-dropdown">
+                <!-- RPJPD -->
+                <div class="sidebar-dropdown <?= (!isset($Halaman) || $Halaman == 'RPJPD' || strpos($Halaman, 'RPJPD') !== false) ? 'active' : '' ?>">
                     <a href="#">
                         <i class="menu-icon fa fa-line-chart"></i>
                         <span>RPJPD</span>
-                        <i class="fa fa-chevron-down"></i>
+                        <i class="fa fa-chevron-down" style="<?= (!isset($Halaman) || $Halaman == 'RPJPD' || strpos($Halaman, 'RPJPD') !== false) ? 'transform: rotate(180deg);' : '' ?>"></i>
                     </a>
-                    <div class="sidebar-submenu" style="display: block;">
+                    <div class="sidebar-submenu" style="<?= (!isset($Halaman) || $Halaman == 'RPJPD' || strpos($Halaman, 'RPJPD') !== false) ? 'max-height: 500px; display: block; padding: 10px 15px;' : '' ?>">
                         <a href="<?=base_url('Provinsi/VisiRPJPD')?>">VMTS</a>
                         <a href="<?=base_url('Provinsi/TahapanRPJPD')?>">Tahapan</a>
                         <a href="<?=base_url('Provinsi/IUPRPJPD')?>">Indikator Utama Pembangunan</a>
@@ -675,17 +675,30 @@
                     </div>
                 </div>
 
-                <!-- RPJPD -->
-                <div class="sidebar-dropdown">
+                <!-- RPJMD -->
+                <div class="sidebar-dropdown <?= (isset($Halaman) && strpos($Halaman, 'RPJMD') !== false) ? 'active' : '' ?>">
                     <a href="#">
                     <i class="menu-icon fa fa-area-chart"></i>
                     <span>RPJMD</span>
-                    <i class="fa fa-chevron-down"></i>
+                    <i class="fa fa-chevron-down" style="<?= (isset($Halaman) && strpos($Halaman, 'RPJMD') !== false) ? 'transform: rotate(180deg);' : '' ?>"></i>
                     </a>
-                    <div class="sidebar-submenu">
+                    <div class="sidebar-submenu" style="<?= (isset($Halaman) && strpos($Halaman, 'RPJMD') !== false) ? 'max-height: 500px; display: block; padding: 10px 15px;' : '' ?>">
                         <a href="<?=base_url('Provinsi/VisiRPJMD')?>">VMTS</a>
                         <a href="<?=base_url('Provinsi/TahapanRPJMD')?>">Tahapan</a>
                         <a href="<?=base_url('Provinsi/IUPRPJMD')?>">Indikator Utama Pembangunan</a>
+                        <br>
+                    </div>
+                </div>
+
+                <!-- RKPD -->
+                <div class="sidebar-dropdown <?= (isset($Halaman) && ($Halaman == 'Tema Pembangunan' || strpos($Halaman, 'RKPD') !== false)) ? 'active' : '' ?>">
+                    <a href="#">
+                        <i class="menu-icon fa fa-file-text-o"></i>
+                        <span>RKPD</span>
+                        <i class="fa fa-chevron-down" style="<?= (isset($Halaman) && ($Halaman == 'Tema Pembangunan' || strpos($Halaman, 'RKPD') !== false)) ? 'transform: rotate(180deg);' : '' ?>"></i>
+                    </a>
+                    <div class="sidebar-submenu" style="<?= (isset($Halaman) && ($Halaman == 'Tema Pembangunan' || strpos($Halaman, 'RKPD') !== false)) ? 'max-height: 500px; display: block; padding: 10px 15px;' : '' ?>">
+                        <a href="<?=base_url('Provinsi/TemaPembangunan')?>" <?= (isset($Halaman) && $Halaman == 'Tema Pembangunan') ? 'style="color: #20c997; font-weight: bold;"' : '' ?>>Tema Pembangunan</a>
                         <br>
                     </div>
                 </div>
@@ -843,7 +856,8 @@
                                 submenu.style.padding = '0 15px';
                                 dropdown.classList.remove('active');
                             } else {
-                                submenu.style.maxHeight = submenu.scrollHeight + 'px';
+                                submenu.style.display = 'block';
+                                submenu.style.maxHeight = '500px';
                                 submenu.style.padding = '10px 15px';
                                 dropdown.classList.add('active');
                             }
@@ -860,15 +874,17 @@
             
             // Highlight active menu item based on current URL
             const currentUrl = window.location.pathname;
+            const fullUrl = window.location.href;
             document.querySelectorAll('.sidebar-submenu a').forEach(link => {
-                if (link.getAttribute('href') === currentUrl) {
+                const href = link.getAttribute('href');
+                if (href && (href === currentUrl || link.href === fullUrl || fullUrl.indexOf(href) !== -1)) {
                     link.style.color = '#20c997';
                     link.style.fontWeight = 'bold';
                     
                     // Expand parent menus
                     let parent = link.closest('.sidebar-submenu');
                     while (parent) {
-                        parent.style.maxHeight = parent.scrollHeight + 'px';
+                        parent.style.maxHeight = '1000px';
                         parent.style.padding = '10px 15px';
                         const parentDropdown = parent.previousElementSibling;
                         if (parentDropdown) {

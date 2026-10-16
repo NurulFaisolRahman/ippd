@@ -879,7 +879,639 @@ class Provinsi extends CI_Controller {
       echo 'Gagal Hapus Data!';
     }
   }
+
+  // ============================================================
+  // TEMA PEMBANGUNAN PROVINSI - HELPER & CRUD
+  // ============================================================
+
+  private function _getKodeWilayah() {
+    $kode = '';
+    if (isset($_SESSION['KodeWilayah']) && !empty($_SESSION['KodeWilayah'])) {
+      $kode = $_SESSION['KodeWilayah'];
+    } elseif ($this->session->userdata('KodeWilayah')) {
+      $kode = $this->session->userdata('KodeWilayah');
+    } elseif ($this->session->userdata('TempKodeWilayah')) {
+      $kode = $this->session->userdata('TempKodeWilayah');
+    } elseif ($this->input->get('KodeWilayah', TRUE)) {
+      $kode = $this->input->get('KodeWilayah', TRUE);
+    }
+    if (!empty($kode) && strlen($kode) > 2 && strpos($kode, '.') !== false) {
+      $kode = substr($kode, 0, 2);
+    }
+    return $kode;
+  }
+
+  private function _checkSessionWilayah() {
+    if (!isset($_SESSION['Level']) || !in_array((int)$_SESSION['Level'], [0, 1, 2])) {
+      echo json_encode(['status' => 'error', 'message' => 'Unauthorized access']);
+      return false;
+    }
+    $kodeWilayah = $this->_getKodeWilayah();
+    if (empty($kodeWilayah)) {
+      $kodeWilayah = $this->input->post('KodeWilayah', TRUE);
+    }
+    if (empty($kodeWilayah)) {
+      echo json_encode(['status' => 'error', 'message' => 'Kode Wilayah tidak ditemukan!']);
+      return false;
+    }
+    if (strlen($kodeWilayah) > 2 && strpos($kodeWilayah, '.') !== false) {
+      $kodeWilayah = substr($kodeWilayah, 0, 2);
+    }
+    return $kodeWilayah;
+  }
+
+  public function TemaPembangunan() {
+    $Header['Halaman'] = 'Tema Pembangunan';
+    
+    // Ambil daftar provinsi untuk filter (jika belum login atau superadmin)
+    $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
+
+    $KodeWilayah = $this->_getKodeWilayah();
+
+    if ($KodeWilayah) {
+      $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+      if ($wilayah) {
+        $Data['KodeWilayah'] = $KodeWilayah;
+        $Data['NamaWilayah'] = $wilayah['Nama'];
+        
+        // Ambil data Tema Provinsi
+        $temas = $this->db
+          ->where('kode_wilayah', $KodeWilayah)
+          ->where('deleted_at IS NULL')
+          ->order_by('tahun', 'DESC')
+          ->order_by('id', 'ASC')
+          ->get('tema_pembangunan_provinsi')
+          ->result_array();
+        
+        // Ambil prioritas (nasional & provinsi) untuk setiap tema
+        foreach ($temas as &$tema) {
+          $tema['prioritas_nasional'] = $this->db
+            ->where('tema_id', $tema['id'])
+            ->where('kode_wilayah', $KodeWilayah)
+            ->where('jenis', 'nasional')
+            ->where('deleted_at IS NULL')
+            ->order_by('id', 'ASC')
+            ->get('prioritas_pembangunan_provinsi')
+            ->result_array();
+          
+          $tema['prioritas_provinsi'] = $this->db
+            ->where('tema_id', $tema['id'])
+            ->where('kode_wilayah', $KodeWilayah)
+            ->where('jenis', 'provinsi')
+            ->where('deleted_at IS NULL')
+            ->order_by('id', 'ASC')
+            ->get('prioritas_pembangunan_provinsi')
+            ->result_array();
+        }
+        
+        $Data['TemaPembangunan'] = $temas;
+      } else {
+        $Data['KodeWilayah'] = '';
+        $Data['NamaWilayah'] = '';
+        $Data['TemaPembangunan'] = [];
+      }
+    } else {
+      $Data['KodeWilayah'] = '';
+      $Data['NamaWilayah'] = '';
+      $Data['TemaPembangunan'] = [];
+    }
+
+    // Data untuk dropdown Tema RKP
+    $Data['TahunTemaRKP'] = $this->db
+      ->distinct()
+      ->select('Tahun')
+      ->where('deleted_at IS NULL')
+      ->order_by('Tahun', 'DESC')
+      ->get('temarkp')
+      ->result_array();
+    
+    // Data prioritas nasional RPJMN
+    $Data['PrioritasNasionalRPJMN'] = $this->db
+      ->select('Id, PrioritasNasional')
+      ->where('deleted_at IS NULL')
+      ->order_by('PrioritasNasional', 'ASC')
+      ->get('prioritas_nasional_rpjmn')
+      ->result_array();
+
+    $this->load->view('Provinsi/header', $Header);
+    $this->load->view('Provinsi/TemaPembangunan', $Data);
+  }
+
+  public function InputTemaPembangunan() {
+    if (!$this->input->is_ajax_request()) {
+      show_404();
+      return;
+    }
+    
+    try {
+      $kodeWilayah = $this->_checkSessionWilayah();
+      if (!$kodeWilayah) {
+        return;
+      }
+      
+      $tahun = trim($this->input->post('Tahun', TRUE));
+      $temaRKPId = $this->input->post('TemaRKPId', TRUE);
+      $temaNasionalText = trim($this->input->post('TemaNasionalText', TRUE));
+      $temaProvinsi = trim($this->input->post('TemaProvinsi', TRUE));
+      
+      if (empty($tahun) || !is_numeric($tahun) || strlen($tahun) != 4) {
+        echo json_encode(['status' => 'error', 'message' => 'Tahun tidak valid!']);
+        return;
+      }
+      
+      if (!empty($temaRKPId)) {
+        $temaRKP = $this->db
+          ->select('TemaRKP')
+          ->where('Id', $temaRKPId)
+          ->where('deleted_at IS NULL')
+          ->get('temarkp')
+          ->row_array();
+        
+        if ($temaRKP) {
+          $temaNasionalText = $temaRKP['TemaRKP'];
+        }
+      }
+      
+      if (empty($temaNasionalText)) {
+        echo json_encode([
+          'status' => 'error',
+          'message' => 'Tema Nasional harus diisi!'
+        ]);
+        return;
+      }
+      
+      // Cek duplikat tahun pada provinsi yang sama
+      $exists = $this->db
+        ->where('kode_wilayah', $kodeWilayah)
+        ->where('tahun', $tahun)
+        ->where('deleted_at IS NULL')
+        ->get('tema_pembangunan_provinsi')
+        ->num_rows();
+      
+      if ($exists > 0) {
+        echo json_encode([
+          'status' => 'warning',
+          'message' => 'Tema Provinsi untuk tahun ' . $tahun . ' sudah ada!'
+        ]);
+        return;
+      }
+      
+      $data = [
+        'kode_wilayah'  => $kodeWilayah,
+        'tahun'         => $tahun,
+        'tema_nasional' => $temaNasionalText,
+        'tema_rkp_id'   => !empty($temaRKPId) ? $temaRKPId : null,
+        'tema_provinsi' => $temaProvinsi,
+        'created_at'    => date('Y-m-d H:i:s')
+      ];
+      
+      $this->db->insert('tema_pembangunan_provinsi', $data);
+      $temaId = $this->db->insert_id();
+      
+      if ($temaId > 0) {
+        echo json_encode([
+          'status' => 'success',
+          'message' => 'Tema Pembangunan Provinsi berhasil disimpan!',
+          'tema_id' => $temaId
+        ]);
+      } else {
+        echo json_encode([
+          'status' => 'error',
+          'message' => 'Gagal menyimpan tema pembangunan provinsi!'
+        ]);
+      }
+      
+    } catch (Exception $e) {
+      log_message('error', 'Provinsi InputTemaPembangunan: ' . $e->getMessage());
+      echo json_encode([
+        'status' => 'error',
+        'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+      ]);
+    }
+  }
+
+  public function UpdateTemaPembangunan() {
+    if (!$this->input->is_ajax_request()) {
+      show_404();
+      return;
+    }
+    
+    try {
+      $kodeWilayah = $this->_checkSessionWilayah();
+      if (!$kodeWilayah) {
+        return;
+      }
+      
+      $id = (int)$this->input->post('Id', TRUE);
+      $tahun = trim($this->input->post('Tahun', TRUE));
+      $temaRKPId = $this->input->post('TemaRKPId', TRUE);
+      $temaNasionalText = trim($this->input->post('TemaNasionalText', TRUE));
+      $temaProvinsi = trim($this->input->post('TemaProvinsi', TRUE));
+      
+      if ($id <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+      }
+      
+      if (empty($tahun) || !is_numeric($tahun) || strlen($tahun) != 4) {
+        echo json_encode(['status' => 'error', 'message' => 'Tahun tidak valid!']);
+        return;
+      }
+      
+      if (!empty($temaRKPId)) {
+        $temaRKP = $this->db
+          ->select('TemaRKP')
+          ->where('Id', $temaRKPId)
+          ->where('deleted_at IS NULL')
+          ->get('temarkp')
+          ->row_array();
+        
+        if ($temaRKP) {
+          $temaNasionalText = $temaRKP['TemaRKP'];
+        }
+      }
+      
+      if (empty($temaNasionalText)) {
+        echo json_encode([
+          'status' => 'error',
+          'message' => 'Tema Nasional harus diisi!'
+        ]);
+        return;
+      }
+      
+      $exists = $this->db
+        ->where('id', $id)
+        ->where('kode_wilayah', $kodeWilayah)
+        ->where('deleted_at IS NULL')
+        ->get('tema_pembangunan_provinsi')
+        ->num_rows();
+      
+      if ($exists == 0) {
+        echo json_encode([
+          'status' => 'error',
+          'message' => 'Data tidak ditemukan!'
+        ]);
+        return;
+      }
+      
+      $data = [
+        'tahun'         => $tahun,
+        'tema_nasional' => $temaNasionalText,
+        'tema_rkp_id'   => !empty($temaRKPId) ? $temaRKPId : null,
+        'tema_provinsi' => $temaProvinsi,
+        'updated_at'    => date('Y-m-d H:i:s')
+      ];
+      
+      $this->db->where('id', $id);
+      $this->db->where('kode_wilayah', $kodeWilayah);
+      $this->db->update('tema_pembangunan_provinsi', $data);
+      
+      $affected = $this->db->affected_rows();
+      echo json_encode([
+        'status' => 'success',
+        'message' => $affected > 0 ? 'Tema berhasil diupdate!' : 'Tidak ada perubahan data'
+      ]);
+      
+    } catch (Exception $e) {
+      log_message('error', 'Provinsi UpdateTemaPembangunan: ' . $e->getMessage());
+      echo json_encode([
+        'status' => 'error',
+        'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+      ]);
+    }
+  }
+
+  public function DeleteTemaPembangunan() {
+    if (!$this->input->is_ajax_request()) {
+      show_404();
+      return;
+    }
+    
+    try {
+      $kodeWilayah = $this->_checkSessionWilayah();
+      if (!$kodeWilayah) {
+        return;
+      }
+      
+      $id = (int)$this->input->post('Id', TRUE);
+      if ($id <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+      }
+      
+      $exists = $this->db
+        ->where('id', $id)
+        ->where('kode_wilayah', $kodeWilayah)
+        ->where('deleted_at IS NULL')
+        ->get('tema_pembangunan_provinsi')
+        ->num_rows();
+      
+      if ($exists == 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
+        return;
+      }
+      
+      $this->db->trans_start();
+      
+      $this->db->where('id', $id);
+      $this->db->where('kode_wilayah', $kodeWilayah);
+      $this->db->update('tema_pembangunan_provinsi', [
+        'deleted_at' => date('Y-m-d H:i:s')
+      ]);
+      
+      $this->db->where('tema_id', $id);
+      $this->db->where('kode_wilayah', $kodeWilayah);
+      $this->db->update('prioritas_pembangunan_provinsi', [
+        'deleted_at' => date('Y-m-d H:i:s')
+      ]);
+      
+      $this->db->trans_complete();
+      
+      if ($this->db->trans_status() === FALSE) {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus data!']);
+      } else {
+        echo json_encode(['status' => 'success', 'message' => 'Data berhasil dihapus!']);
+      }
+      
+    } catch (Exception $e) {
+      $this->db->trans_rollback();
+      log_message('error', 'Provinsi DeleteTemaPembangunan: ' . $e->getMessage());
+      echo json_encode([
+        'status' => 'error',
+        'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+      ]);
+    }
+  }
+
+  public function InputPrioritasPembangunan() {
+    if (!$this->input->is_ajax_request()) {
+      show_404();
+      return;
+    }
+    
+    try {
+      $kodeWilayah = $this->_checkSessionWilayah();
+      if (!$kodeWilayah) {
+        return;
+      }
+      
+      $temaId = (int)$this->input->post('TemaId', TRUE);
+      $jenis = $this->input->post('Jenis', TRUE);
+      $prioritas = trim($this->input->post('Prioritas', TRUE));
+      
+      if ($temaId <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Tema tidak valid!']);
+        return;
+      }
+      
+      if (!in_array($jenis, ['nasional', 'provinsi'])) {
+        echo json_encode(['status' => 'error', 'message' => 'Jenis prioritas tidak valid!']);
+        return;
+      }
+      
+      if (empty($prioritas)) {
+        echo json_encode(['status' => 'error', 'message' => 'Prioritas harus diisi!']);
+        return;
+      }
+      
+      $temaExists = $this->db
+        ->where('id', $temaId)
+        ->where('kode_wilayah', $kodeWilayah)
+        ->where('deleted_at IS NULL')
+        ->get('tema_pembangunan_provinsi')
+        ->num_rows();
+      
+      if ($temaExists == 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Tema tidak ditemukan!']);
+        return;
+      }
+      
+      $data = [
+        'tema_id'      => $temaId,
+        'kode_wilayah' => $kodeWilayah,
+        'jenis'        => $jenis,
+        'prioritas'    => $prioritas,
+        'created_at'   => date('Y-m-d H:i:s')
+      ];
+      
+      $this->db->insert('prioritas_pembangunan_provinsi', $data);
+      
+      if ($this->db->affected_rows() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Prioritas berhasil ditambahkan!']);
+      } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan prioritas!']);
+      }
+      
+    } catch (Exception $e) {
+      log_message('error', 'Provinsi InputPrioritasPembangunan: ' . $e->getMessage());
+      echo json_encode([
+        'status' => 'error',
+        'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+      ]);
+    }
+  }
+
+  public function UpdatePrioritasPembangunan() {
+    if (!$this->input->is_ajax_request()) {
+      show_404();
+      return;
+    }
+    
+    try {
+      $kodeWilayah = $this->_checkSessionWilayah();
+      if (!$kodeWilayah) {
+        return;
+      }
+      
+      $id = (int)$this->input->post('Id', TRUE);
+      $prioritas = trim($this->input->post('Prioritas', TRUE));
+      
+      if ($id <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+      }
+      
+      if (empty($prioritas)) {
+        echo json_encode(['status' => 'error', 'message' => 'Prioritas harus diisi!']);
+        return;
+      }
+      
+      $exists = $this->db
+        ->where('id', $id)
+        ->where('kode_wilayah', $kodeWilayah)
+        ->where('deleted_at IS NULL')
+        ->get('prioritas_pembangunan_provinsi')
+        ->num_rows();
+      
+      if ($exists == 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
+        return;
+      }
+      
+      $data = [
+        'prioritas'  => $prioritas,
+        'updated_at' => date('Y-m-d H:i:s')
+      ];
+      
+      $this->db->where('id', $id);
+      $this->db->where('kode_wilayah', $kodeWilayah);
+      $this->db->update('prioritas_pembangunan_provinsi', $data);
+      
+      $affected = $this->db->affected_rows();
+      echo json_encode([
+        'status' => 'success',
+        'message' => $affected > 0 ? 'Prioritas berhasil diupdate!' : 'Tidak ada perubahan data'
+      ]);
+      
+    } catch (Exception $e) {
+      log_message('error', 'Provinsi UpdatePrioritasPembangunan: ' . $e->getMessage());
+      echo json_encode([
+        'status' => 'error',
+        'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+      ]);
+    }
+  }
+
+  public function DeletePrioritasPembangunan() {
+    if (!$this->input->is_ajax_request()) {
+      show_404();
+      return;
+    }
+    
+    try {
+      $kodeWilayah = $this->_checkSessionWilayah();
+      if (!$kodeWilayah) {
+        return;
+      }
+      
+      $id = (int)$this->input->post('Id', TRUE);
+      if ($id <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+        return;
+      }
+      
+      $exists = $this->db
+        ->where('id', $id)
+        ->where('kode_wilayah', $kodeWilayah)
+        ->where('deleted_at IS NULL')
+        ->get('prioritas_pembangunan_provinsi')
+        ->num_rows();
+      
+      if ($exists == 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
+        return;
+      }
+      
+      $this->db->where('id', $id);
+      $this->db->where('kode_wilayah', $kodeWilayah);
+      $this->db->update('prioritas_pembangunan_provinsi', [
+        'deleted_at' => date('Y-m-d H:i:s')
+      ]);
+      
+      if ($this->db->affected_rows() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Prioritas berhasil dihapus!']);
+      } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus prioritas!']);
+      }
+      
+    } catch (Exception $e) {
+      log_message('error', 'Provinsi DeletePrioritasPembangunan: ' . $e->getMessage());
+      echo json_encode([
+        'status' => 'error',
+        'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+      ]);
+    }
+  }
+
+  public function GetTemaRKPById() {
+    if (!$this->input->is_ajax_request()) {
+      show_404();
+      return;
+    }
+    
+    $id = (int)$this->input->post('id', TRUE);
+    if ($id <= 0) {
+      echo json_encode([]);
+      return;
+    }
+    
+    $data = $this->db
+      ->select('Id, TemaRKP, Tahun')
+      ->where('Id', $id)
+      ->where('deleted_at IS NULL')
+      ->get('temarkp')
+      ->row_array();
+    
+    echo json_encode($data);
+  }
+
+  public function GetPrioritasByTemaJenis() {
+    if (!$this->input->is_ajax_request()) {
+      show_404();
+      return;
+    }
+    
+    $temaId = (int)$this->input->post('tema_id', TRUE);
+    $jenis = $this->input->post('jenis', TRUE);
+    $kodeWilayah = $this->_getKodeWilayah();
+    
+    if ($temaId <= 0 || empty($kodeWilayah) || !in_array($jenis, ['nasional', 'provinsi'])) {
+      echo json_encode([]);
+      return;
+    }
+    
+    $data = $this->db
+      ->where('tema_id', $temaId)
+      ->where('kode_wilayah', $kodeWilayah)
+      ->where('jenis', $jenis)
+      ->where('deleted_at IS NULL')
+      ->order_by('id', 'ASC')
+      ->get('prioritas_pembangunan_provinsi')
+      ->result_array();
+    
+    echo json_encode($data);
+  }
+
+  public function GetTemaRKPByTahun() {
+    if (!$this->input->is_ajax_request()) {
+      show_404();
+      return;
+    }
+    
+    $tahun = (int)$this->input->post('tahun', TRUE);
+    if ($tahun <= 0) {
+      echo json_encode([]);
+      return;
+    }
+    
+    $data = $this->db
+      ->select('Id, TemaRKP')
+      ->where('Tahun', $tahun)
+      ->where('deleted_at IS NULL')
+      ->order_by('TemaRKP', 'ASC')
+      ->get('temarkp')
+      ->result_array();
+    
+    echo json_encode($data);
+  }
+
+  public function GetPrioritasNasionalRPJMN() {
+    if (!$this->input->is_ajax_request()) {
+      show_404();
+      return;
+    }
+    
+    $data = $this->db
+      ->select('Id, PrioritasNasional')
+      ->where('deleted_at IS NULL')
+      ->order_by('PrioritasNasional', 'ASC')
+      ->get('prioritas_nasional_rpjmn')
+      ->result_array();
+    
+    echo json_encode($data);
+  }
 }
+
 
 
 
