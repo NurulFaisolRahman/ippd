@@ -17685,18 +17685,29 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             }
             $Data['IsProvinsi'] = $isProvinsi;
 
-            // Ambil daftar tahun dari tema_pembangunan (atau default)
-            $tahunRows = [];
+            // Ambil daftar tahun dari cascading_rkpd_prioritas & tema_pembangunan (atau default)
+            $listTahun = [];
             if (!empty($KodeWilayah)) {
-                $tahunRows = $this->db->distinct()->select('tahun')
+                $t1 = $this->db->distinct()->select('tahun')
                     ->where('kode_wilayah', $KodeWilayah)
                     ->where('deleted_at IS NULL')
-                    ->order_by('tahun', 'DESC')
+                    ->get('cascading_rkpd_prioritas')
+                    ->result_array();
+
+                $t2 = $this->db->distinct()->select('tahun')
+                    ->where('kode_wilayah', $KodeWilayah)
+                    ->where('deleted_at IS NULL')
                     ->get('tema_pembangunan')
                     ->result_array();
+
+                $tahunMerged = array_unique(array_filter(array_merge(
+                    array_column($t1, 'tahun'),
+                    array_column($t2, 'tahun')
+                )));
+                rsort($tahunMerged);
+                $listTahun = array_values($tahunMerged);
             }
 
-            $listTahun = array_filter(array_column($tahunRows, 'tahun'));
             if (empty($listTahun)) {
                 $curY = (int)date('Y');
                 $listTahun = [(string)($curY), (string)($curY + 1), (string)($curY - 1)];
@@ -17717,43 +17728,44 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $Data['TahunTarget2'] = $selTahunInt;
             $Data['TahunTarget3'] = $selTahunInt + 1;
 
-            // 1. Ambil Master Prioritas Daerah dari Tema Pembangunan (untuk pilihan dropdown)
+            // 1. Ambil Master Prioritas Daerah dari Permasalahan Daerah (cascading_rkpd_prioritas)
             $prioritasDaerahMaster = [];
             if (!empty($KodeWilayah)) {
-                $prioritasDaerahMaster = $this->db->select('p.id, p.prioritas, t.tahun, t.tema_daerah')
-                    ->from('prioritas_pembangunan p')
-                    ->join('tema_pembangunan t', 'p.tema_id = t.id', 'left')
-                    ->where('p.kode_wilayah', $KodeWilayah)
-                    ->where('p.jenis', 'daerah')
-                    ->where('p.deleted_at IS NULL')
-                    ->where('(t.tahun = ' . (int)$selectedTahun . ' OR t.tahun IS NULL)')
-                    ->order_by('p.id', 'ASC')
+                $prioritasDaerahMaster = $this->db->select('id, prioritas_daerah AS prioritas, tahun')
+                    ->from('cascading_rkpd_prioritas')
+                    ->where('kode_wilayah', $KodeWilayah)
+                    ->where('tahun', (string)$selectedTahun)
+                    ->where('deleted_at IS NULL')
+                    ->order_by('id', 'ASC')
                     ->get()
                     ->result_array();
             }
             $Data['PrioritasDaerahMaster'] = $prioritasDaerahMaster;
 
-            // Otomatis sinkronisasi Prioritas Pembangunan Daerah dari Tema Pembangunan (tanpa perlu tombol tarik manual)
+            // Otomatis sinkronisasi Prioritas Pembangunan Daerah dari Permasalahan Daerah (tanpa perlu tombol tarik manual)
             if (!empty($KodeWilayah)) {
                 if (!empty($prioritasDaerahMaster)) {
                     $activeMasterIds = [];
                     foreach ($prioritasDaerahMaster as $m) {
                         $activeMasterIds[] = $m['id'];
                         $existing = $this->db->where('kode_wilayah', $KodeWilayah)
-                            ->where('tahun', $selectedTahun)
+                            ->where('tahun', (string)$selectedTahun)
                             ->where('id_prioritas_daerah', $m['id'])
                             ->get('rkpd_sasaran_prioritas')
                             ->row_array();
 
+                        $targetPrioritasId = null;
                         if (!$existing) {
                             $this->db->insert('rkpd_sasaran_prioritas', [
                                 'kode_wilayah' => $KodeWilayah,
-                                'tahun' => $selectedTahun,
+                                'tahun' => (string)$selectedTahun,
                                 'id_prioritas_daerah' => $m['id'],
                                 'prioritas_pembangunan' => $m['prioritas'],
                                 'created_at' => date('Y-m-d H:i:s')
                             ]);
+                            $targetPrioritasId = $this->db->insert_id();
                         } else {
+                            $targetPrioritasId = $existing['id'];
                             $updateData = [];
                             if ($existing['prioritas_pembangunan'] !== $m['prioritas']) {
                                 $updateData['prioritas_pembangunan'] = $m['prioritas'];
@@ -17766,10 +17778,45 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 $this->db->where('id', $existing['id'])->update('rkpd_sasaran_prioritas', $updateData);
                             }
                         }
+
+                        // Sinkronkan juga Isu Strategis yang terhubung ke Prioritas ini di Permasalahan Daerah
+                        if ($targetPrioritasId) {
+                            $linkedIsus = $this->db->select('i.id, i.isu_strategis')
+                                ->from('cascading_rkpd_isu i')
+                                ->join('cascading_rkpd_prioritas_isu pi', 'pi.isu_id = i.id', 'inner')
+                                ->where('pi.prioritas_id', $m['id'])
+                                ->where('i.deleted_at IS NULL')
+                                ->order_by('i.id', 'ASC')
+                                ->get()
+                                ->result_array();
+
+                            foreach ($linkedIsus as $lIsu) {
+                                $isuText = trim($lIsu['isu_strategis']);
+                                if (!empty($isuText)) {
+                                    $existingIsu = $this->db->where('prioritas_id', $targetPrioritasId)
+                                        ->where('isu_strategis', $isuText)
+                                        ->get('rkpd_sasaran_isu')
+                                        ->row_array();
+
+                                    if (!$existingIsu) {
+                                        $this->db->insert('rkpd_sasaran_isu', [
+                                            'prioritas_id' => $targetPrioritasId,
+                                            'isu_strategis' => $isuText,
+                                            'created_at' => date('Y-m-d H:i:s')
+                                        ]);
+                                    } else if (!empty($existingIsu['deleted_at'])) {
+                                        $this->db->where('id', $existingIsu['id'])->update('rkpd_sasaran_isu', [
+                                            'deleted_at' => NULL,
+                                            'updated_at' => date('Y-m-d H:i:s')
+                                        ]);
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     $this->db->where('kode_wilayah', $KodeWilayah)
-                        ->where('tahun', $selectedTahun)
+                        ->where('tahun', (string)$selectedTahun)
                         ->where('deleted_at IS NULL')
                         ->where_not_in('id_prioritas_daerah', $activeMasterIds)
                         ->where('id_prioritas_daerah IS NOT NULL')
@@ -17778,7 +17825,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         ]);
                 } else {
                     $this->db->where('kode_wilayah', $KodeWilayah)
-                        ->where('tahun', $selectedTahun)
+                        ->where('tahun', (string)$selectedTahun)
                         ->where('deleted_at IS NULL')
                         ->where('id_prioritas_daerah IS NOT NULL')
                         ->update('rkpd_sasaran_prioritas', [
@@ -17790,12 +17837,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             // 2. Ambil list referensi Isu Strategis Daerah
             $listIsuRef = [];
             if (!empty($KodeWilayah)) {
-                $listIsuRef = $this->db->select('Id, NamaIsuStrategis')
+                $isu1 = $this->db->select('NamaIsuStrategis as text')
                     ->where('KodeWilayah', $KodeWilayah)
                     ->where('deleted_at IS NULL')
-                    ->order_by('NamaIsuStrategis', 'ASC')
                     ->get('isustrategisdaerah')
                     ->result_array();
+
+                $isu2 = $this->db->select('isu_strategis as text')
+                    ->where('kode_wilayah', $KodeWilayah)
+                    ->where('tahun', (string)$selectedTahun)
+                    ->where('deleted_at IS NULL')
+                    ->get('cascading_rkpd_isu')
+                    ->result_array();
+
+                $mergedIsu = array_unique(array_filter(array_merge(
+                    array_column($isu1, 'text'),
+                    array_column($isu2, 'text')
+                )));
+                sort($mergedIsu);
+                foreach ($mergedIsu as $mText) {
+                    $listIsuRef[] = ['NamaIsuStrategis' => $mText];
+                }
             }
             $Data['ListIsuRef'] = $listIsuRef;
 
@@ -17863,9 +17925,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 return;
             }
 
-            $pRow = $this->db->where('id', $idPrioritasDaerah)->get('prioritas_pembangunan')->row_array();
+            $pRow = $this->db->where('id', $idPrioritasDaerah)->get('cascading_rkpd_prioritas')->row_array();
             if (!$pRow) {
-                echo json_encode(['status' => 'error', 'message' => 'Data Prioritas Daerah tidak ditemukan di Tema Pembangunan!']);
+                echo json_encode(['status' => 'error', 'message' => 'Data Prioritas Daerah tidak ditemukan di Permasalahan Daerah!']);
                 return;
             }
 
@@ -17885,7 +17947,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 'kode_wilayah' => $KodeWilayah,
                 'tahun' => $tahun,
                 'id_prioritas_daerah' => $idPrioritasDaerah,
-                'prioritas_pembangunan' => $pRow['prioritas'],
+                'prioritas_pembangunan' => $pRow['prioritas_daerah'],
                 'created_at' => date('Y-m-d H:i:s')
             ]);
 
@@ -17910,18 +17972,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 return;
             }
 
-            $master = $this->db->select('p.id, p.prioritas')
-                ->from('prioritas_pembangunan p')
-                ->join('tema_pembangunan t', 'p.tema_id = t.id', 'left')
-                ->where('p.kode_wilayah', $KodeWilayah)
-                ->where('p.jenis', 'daerah')
-                ->where('p.deleted_at IS NULL')
-                ->where('(t.tahun = ' . (int)$tahun . ' OR t.tahun IS NULL)')
+            $master = $this->db->select('id, prioritas_daerah AS prioritas')
+                ->from('cascading_rkpd_prioritas')
+                ->where('kode_wilayah', $KodeWilayah)
+                ->where('tahun', (string)$tahun)
+                ->where('deleted_at IS NULL')
                 ->get()
                 ->result_array();
 
             if (empty($master)) {
-                echo json_encode(['status' => 'error', 'message' => 'Belum ada Prioritas Pembangunan Daerah di Tema Pembangunan untuk tahun ' . $tahun . '!']);
+                echo json_encode(['status' => 'error', 'message' => 'Belum ada Prioritas Pembangunan Daerah di Permasalahan Daerah untuk tahun ' . $tahun . '!']);
                 return;
             }
 
@@ -17946,7 +18006,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 }
             }
 
-            echo json_encode(['status' => 'success', 'message' => $count . ' Prioritas Pembangunan Daerah berhasil ditarik dari Tema Pembangunan!']);
+            echo json_encode(['status' => 'success', 'message' => $count . ' Prioritas Pembangunan Daerah berhasil ditarik dari Permasalahan Daerah!']);
         }
 
         public function HapusSasaranPrioritas()
@@ -18267,17 +18327,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 ->result_array();
             $Data['PNMaster'] = $pnMaster;
 
-            // 2. Ambil Master Prioritas Daerah untuk tahun aktif (P1, P2, P3...)
+            // 2. Ambil Master Prioritas Daerah untuk tahun aktif (P1, P2, P3...) dari menu Sasaran Pembangunan Daerah
             $prioritasDaerahList = [];
             if (!empty($KodeWilayah)) {
-                $pRows = $this->db->select('p.id, p.prioritas')
-                    ->from('prioritas_pembangunan p')
-                    ->join('tema_pembangunan t', 'p.tema_id = t.id', 'left')
-                    ->where('p.kode_wilayah', $KodeWilayah)
-                    ->where('p.jenis', 'daerah')
-                    ->where('p.deleted_at IS NULL')
-                    ->where('(t.tahun = ' . (int)$selectedTahun . ' OR t.tahun IS NULL)')
-                    ->order_by('p.id', 'ASC')
+                $pRows = $this->db->select('id, prioritas_pembangunan AS prioritas')
+                    ->from('rkpd_sasaran_prioritas')
+                    ->where('kode_wilayah', $KodeWilayah)
+                    ->where('tahun', (string)$selectedTahun)
+                    ->where('deleted_at IS NULL')
+                    ->order_by('id', 'ASC')
                     ->get()
                     ->result_array();
 
@@ -18315,7 +18373,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         'id' => $sr['id'],
                         'kode' => $kodeS,
                         'sasaran' => $sr['sasaran'],
-                        'label' => $kodeS . '. ' . $sr['sasaran']
+                        'label' => $kodeS . '. ' . $sr['sasaran'],
+                        'prioritas_id' => $sr['prioritas_id'],
+                        'prioritas_pembangunan' => $sr['prioritas_pembangunan']
                     ];
                 }
             }
@@ -18323,22 +18383,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
             // 4. Ambil Master Indikator Sasaran Pembangunan Daerah untuk tahun aktif
             $indikatorDaerahMaster = [];
-            if (!empty($KodeWilayah)) {
-                $indRows = $this->db->select('ind.id, ind.sasaran_id, ind.indikator, s.sasaran')
-                    ->from('rkpd_sasaran_indikator ind')
-                    ->join('rkpd_sasaran_daerah s', 'ind.sasaran_id = s.id', 'inner')
-                    ->join('rkpd_sasaran_isu i', 's.isu_id = i.id', 'inner')
-                    ->join('rkpd_sasaran_prioritas p', 'i.prioritas_id = p.id', 'inner')
-                    ->where('p.kode_wilayah', $KodeWilayah)
-                    ->where('p.tahun', $selectedTahun)
-                    ->where('ind.deleted_at IS NULL')
-                    ->where('s.deleted_at IS NULL')
-                    ->where('i.deleted_at IS NULL')
-                    ->where('p.deleted_at IS NULL')
-                    ->order_by('ind.id', 'ASC')
-                    ->get()
-                    ->result_array();
-                $indikatorDaerahMaster = $indRows;
+            if (!empty($sasaranDaerahList)) {
+                $sasIds = array_column($sasaranDaerahList, 'id');
+                if (!empty($sasIds)) {
+                    $indRows = $this->db->select('ind.id, ind.sasaran_id, ind.indikator, s.sasaran')
+                        ->from('rkpd_sasaran_indikator ind')
+                        ->join('rkpd_sasaran_daerah s', 'ind.sasaran_id = s.id', 'inner')
+                        ->where_in('ind.sasaran_id', $sasIds)
+                        ->where('ind.deleted_at IS NULL')
+                        ->where('s.deleted_at IS NULL')
+                        ->order_by('ind.id', 'ASC')
+                        ->get()
+                        ->result_array();
+                    $indikatorDaerahMaster = $indRows;
+                }
             }
             $Data['IndikatorDaerahMaster'] = $indikatorDaerahMaster;
 
@@ -18375,11 +18433,29 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $res = [];
             foreach ($list as $idx => $item) {
                 $kode = 'S' . ($idx + 1);
+
+                // Ambil indikator untuk sasaran ini dari indikator_sasaran_prioritas_rpjmn
+                $indRows = $this->db->where('_Id', $item['Id'])
+                    ->where('deleted_at IS NULL')
+                    ->order_by('Id', 'ASC')
+                    ->get('indikator_sasaran_prioritas_rpjmn')
+                    ->result_array();
+
+                $indikatorList = [];
+                foreach ($indRows as $ir) {
+                    $txt = trim($ir['IndikatorSasaranPrioritasRPJMN']);
+                    if (!empty($txt)) {
+                        $indikatorList[] = $txt;
+                    }
+                }
+
                 $res[] = [
                     'id' => $item['Id'],
                     'kode' => $kode,
                     'sasaran' => $item['SasaranPrioritasRPJMN'],
-                    'label' => $kode . '. ' . $item['SasaranPrioritasRPJMN']
+                    'label' => $kode . '. ' . $item['SasaranPrioritasRPJMN'],
+                    'indikator' => $indikatorList,
+                    'indikator_text' => implode("\n", $indikatorList)
                 ];
             }
             echo json_encode($res);
@@ -18387,23 +18463,42 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
         public function GetIndikatorBySasaranDaerah()
         {
-            $sasaranId = (int)$this->input->get('sasaran_id', TRUE);
-            if ($sasaranId <= 0) {
+            $sasaranId = $this->input->get('sasaran_id', TRUE);
+            $sasaranIds = $this->input->get('sasaran_ids', TRUE);
+
+            $ids = [];
+            if (!empty($sasaranIds)) {
+                if (is_array($sasaranIds)) {
+                    $ids = array_map('intval', $sasaranIds);
+                } else {
+                    $ids = array_map('intval', explode(',', $sasaranIds));
+                }
+            } else if (!empty($sasaranId)) {
+                $ids = [(int)$sasaranId];
+            }
+
+            $ids = array_filter($ids);
+            if (empty($ids)) {
                 echo json_encode([]);
                 return;
             }
 
-            $list = $this->db->where('sasaran_id', $sasaranId)
-                ->where('deleted_at IS NULL')
-                ->order_by('id', 'ASC')
-                ->get('rkpd_sasaran_indikator')
+            $list = $this->db->select('ind.id, ind.sasaran_id, ind.indikator, s.sasaran')
+                ->from('rkpd_sasaran_indikator ind')
+                ->join('rkpd_sasaran_daerah s', 'ind.sasaran_id = s.id', 'left')
+                ->where_in('ind.sasaran_id', $ids)
+                ->where('ind.deleted_at IS NULL')
+                ->order_by('ind.sasaran_id ASC, ind.id ASC')
+                ->get()
                 ->result_array();
 
             $res = [];
             foreach ($list as $item) {
                 $res[] = [
                     'id' => $item['id'],
-                    'indikator' => $item['indikator']
+                    'sasaran_id' => $item['sasaran_id'],
+                    'indikator' => $item['indikator'],
+                    'sasaran' => $item['sasaran'] ?? ''
                 ];
             }
             echo json_encode($res);
@@ -18422,12 +18517,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $tahun = trim($this->input->post('Tahun', TRUE));
 
             $idPn = (int)$this->input->post('IdPN', TRUE);
-            $idSasaranNasional = (int)$this->input->post('IdSasaranNasional', TRUE);
-            $sasaranNasionalCustom = trim($this->input->post('SasaranNasionalCustom', TRUE));
-            $indikatorNasional = trim($this->input->post('IndikatorNasional', TRUE));
             $pDaerahIds = $this->input->post('PDaerahIds', TRUE);
             $idSasaranDaerah = (int)$this->input->post('IdSasaranDaerah', TRUE);
             $indikatorDaerah = $this->input->post('IndikatorDaerah', TRUE);
+            $sasaranNasionalList = $this->input->post('SasaranNasionalList');
+            $sasaranDaerahListPost = $this->input->post('SasaranDaerahList');
 
             if (empty($KodeWilayah) || empty($tahun) || $idPn <= 0) {
                 echo json_encode(['status' => 'error', 'message' => 'Prioritas Nasional wajib dipilih!']);
@@ -18443,36 +18537,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $kodePn = 'PN ' . $idPn;
             $namaPn = $pnRow['PrioritasNasional'];
 
-            // 2. Data Sasaran Nasional
-            $kodeSasNas = '';
-            $namaSasNas = '';
-            if ($idSasaranNasional > 0) {
-                $sasNasRow = $this->db->where('Id', $idSasaranNasional)->get('sasaran_prioritas_rpjmn')->row_array();
-                if ($sasNasRow) {
-                    $namaSasNas = $sasNasRow['SasaranPrioritasRPJMN'];
-                    $kodeSasNas = trim($this->input->post('KodeSasaranNasional', TRUE));
-                    if (empty($kodeSasNas)) $kodeSasNas = 'S1';
-                }
-            }
-            if (empty($namaSasNas)) {
-                $namaSasNas = $sasaranNasionalCustom;
-                $kodeSasNas = trim($this->input->post('KodeSasaranNasional', TRUE));
-                if (empty($kodeSasNas)) $kodeSasNas = 'S1';
-            }
-            if (empty($namaSasNas)) {
-                echo json_encode(['status' => 'error', 'message' => 'Sasaran Prioritas Pembangunan Nasional wajib diisi!']);
-                return;
-            }
-
-            // 3. Data P Daerah
+            // 2. Data P Daerah (dari menu Sasaran Pembangunan Daerah: rkpd_sasaran_prioritas)
             $pDaerahArray = [];
             if (!empty($pDaerahIds) && is_array($pDaerahIds)) {
-                $allPRows = $this->db->select('id, prioritas')
+                $allPRows = $this->db->select('id, prioritas_pembangunan AS prioritas')
                     ->where('kode_wilayah', $KodeWilayah)
-                    ->where('jenis', 'daerah')
+                    ->where('tahun', (string)$tahun)
                     ->where('deleted_at IS NULL')
                     ->order_by('id', 'ASC')
-                    ->get('prioritas_pembangunan')
+                    ->get('rkpd_sasaran_prioritas')
                     ->result_array();
 
                 $pKodeMap = [];
@@ -18482,65 +18555,143 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
                 foreach ($pDaerahIds as $pId) {
                     $pId = (int)$pId;
-                    $pRow = $this->db->where('id', $pId)->get('prioritas_pembangunan')->row_array();
+                    $pRow = $this->db->where('id', $pId)->where('deleted_at IS NULL')->get('rkpd_sasaran_prioritas')->row_array();
                     if ($pRow) {
                         $kd = isset($pKodeMap[$pId]) ? $pKodeMap[$pId] : 'P';
                         $pDaerahArray[] = [
                             'id' => $pId,
                             'kode' => $kd,
-                            'prioritas' => $pRow['prioritas'],
-                            'display' => $kd . ': ' . $pRow['prioritas']
+                            'prioritas' => $pRow['prioritas_pembangunan'],
+                            'display' => $kd . ': ' . $pRow['prioritas_pembangunan']
                         ];
                     }
                 }
             }
 
-            // 4. Data Sasaran Daerah
-            $namaSasDaerah = '';
-            $kodeSasDaerah = '';
-            if ($idSasaranDaerah > 0) {
-                $sasDaeRow = $this->db->where('id', $idSasaranDaerah)->get('rkpd_sasaran_daerah')->row_array();
-                if ($sasDaeRow) {
-                    $namaSasDaerah = $sasDaeRow['sasaran'];
-                    $kodeSasDaerah = trim($this->input->post('KodeSasaranDaerah', TRUE));
+            // 3. Data Sasaran Daerah (Dukungan multiple sasaran daerah)
+            $parsedSasDaerahList = [];
+            if (!empty($sasaranDaerahListPost)) {
+                if (is_string($sasaranDaerahListPost)) {
+                    $parsedSasDaerahList = json_decode($sasaranDaerahListPost, true);
+                } else if (is_array($sasaranDaerahListPost)) {
+                    $parsedSasDaerahList = $sasaranDaerahListPost;
                 }
             }
-            if (empty($namaSasDaerah)) {
-                $namaSasDaerah = trim($this->input->post('SasaranDaerahCustom', TRUE));
-            }
-            if (empty($namaSasDaerah)) {
-                echo json_encode(['status' => 'error', 'message' => 'Sasaran Pembangunan Daerah wajib dipilih!']);
-                return;
-            }
 
-            // 5. Data Indikator Daerah
-            $indikatorDaerahArray = [];
-            if (!empty($indikatorDaerah) && is_array($indikatorDaerah)) {
-                foreach ($indikatorDaerah as $indItem) {
-                    $indItem = trim($indItem);
-                    if (!empty($indItem)) {
-                        $indikatorDaerahArray[] = $indItem;
+            if (empty($parsedSasDaerahList)) {
+                $namaSasDaerah = '';
+                $kodeSasDaerah = '';
+                if ($idSasaranDaerah > 0) {
+                    $sasDaeRow = $this->db->where('id', $idSasaranDaerah)->get('rkpd_sasaran_daerah')->row_array();
+                    if ($sasDaeRow) {
+                        $namaSasDaerah = $sasDaeRow['sasaran'];
+                        $kodeSasDaerah = trim($this->input->post('KodeSasaranDaerah', TRUE));
                     }
                 }
+                if (empty($namaSasDaerah)) {
+                    $namaSasDaerah = trim($this->input->post('SasaranDaerahCustom', TRUE));
+                }
+                if (empty($namaSasDaerah)) {
+                    echo json_encode(['status' => 'error', 'message' => 'Sasaran Pembangunan Daerah wajib dipilih!']);
+                    return;
+                }
+
+                $indikatorDaerahArray = [];
+                if (!empty($indikatorDaerah)) {
+                    if (is_array($indikatorDaerah)) {
+                        foreach ($indikatorDaerah as $indItem) {
+                            $indItem = trim($indItem);
+                            if (!empty($indItem)) {
+                                $indikatorDaerahArray[] = $indItem;
+                            }
+                        }
+                    } else if (is_string($indikatorDaerah)) {
+                        $lines = explode("\n", $indikatorDaerah);
+                        foreach ($lines as $line) {
+                            $cleanLine = trim(preg_replace('/^([•\-\*]|\d+\.)\s*/u', '', trim($line)));
+                            if (!empty($cleanLine)) {
+                                $indikatorDaerahArray[] = $cleanLine;
+                            }
+                        }
+                    }
+                }
+
+                $parsedSasDaerahList[] = [
+                    'id' => $idSasaranDaerah > 0 ? $idSasaranDaerah : NULL,
+                    'kode' => $kodeSasDaerah,
+                    'sasaran' => $namaSasDaerah,
+                    'indikator' => $indikatorDaerahArray
+                ];
             }
 
-            $this->db->insert('rkpd_keterkaitan_indikator', [
-                'kode_wilayah' => $KodeWilayah,
-                'tahun' => $tahun,
-                'id_pn' => $idPn,
-                'kode_pn' => $kodePn,
-                'nama_pn' => $namaPn,
-                'id_sasaran_nasional' => $idSasaranNasional > 0 ? $idSasaranNasional : NULL,
-                'kode_sasaran_nasional' => $kodeSasNas,
-                'sasaran_nasional' => $namaSasNas,
-                'indikator_nasional' => $indikatorNasional,
-                'p_daerah_json' => !empty($pDaerahArray) ? json_encode($pDaerahArray, JSON_UNESCAPED_UNICODE) : NULL,
-                'id_sasaran_daerah' => $idSasaranDaerah > 0 ? $idSasaranDaerah : NULL,
-                'kode_sasaran_daerah' => $kodeSasDaerah,
-                'sasaran_daerah' => $namaSasDaerah,
-                'indikator_daerah_json' => !empty($indikatorDaerahArray) ? json_encode($indikatorDaerahArray, JSON_UNESCAPED_UNICODE) : NULL,
-                'created_at' => date('Y-m-d H:i:s')
-            ]);
+            // 4. Data Sasaran Nasional (Dukungan multiple sasaran nasional)
+            $parsedNasList = [];
+            if (!empty($sasaranNasionalList)) {
+                if (is_string($sasaranNasionalList)) {
+                    $parsedNasList = json_decode($sasaranNasionalList, true);
+                } else if (is_array($sasaranNasionalList)) {
+                    $parsedNasList = $sasaranNasionalList;
+                }
+            }
+
+            if (empty($parsedNasList)) {
+                $idSasaranNasional = (int)$this->input->post('IdSasaranNasional', TRUE);
+                $sasaranNasionalCustom = trim($this->input->post('SasaranNasionalCustom', TRUE));
+                $indikatorNasional = trim($this->input->post('IndikatorNasional', TRUE));
+                $kodeSasNas = trim($this->input->post('KodeSasaranNasional', TRUE));
+                if (empty($kodeSasNas)) $kodeSasNas = 'S1';
+
+                if (empty($sasaranNasionalCustom)) {
+                    echo json_encode(['status' => 'error', 'message' => 'Sasaran Prioritas Pembangunan Nasional wajib diisi!']);
+                    return;
+                }
+
+                $parsedNasList[] = [
+                    'id' => $idSasaranNasional > 0 ? $idSasaranNasional : NULL,
+                    'kode' => $kodeSasNas,
+                    'sasaran' => $sasaranNasionalCustom,
+                    'indikator' => $indikatorNasional
+                ];
+            }
+
+            // Simpan setiap kombinasi Sasaran Daerah dan Sasaran Nasional
+            foreach ($parsedSasDaerahList as $sd) {
+                $sdId = !empty($sd['id']) ? (int)$sd['id'] : NULL;
+                $sdKode = !empty($sd['kode']) ? trim($sd['kode']) : '';
+                $sdSasaran = !empty($sd['sasaran']) ? trim($sd['sasaran']) : '';
+                $sdIndikator = !empty($sd['indikator']) ? $sd['indikator'] : [];
+
+                if (empty($sdSasaran)) continue;
+
+                foreach ($parsedNasList as $sn) {
+                    $snId = !empty($sn['id']) ? (int)$sn['id'] : NULL;
+                    $snKode = !empty($sn['kode']) ? trim($sn['kode']) : 'S1';
+                    $snSasaran = !empty($sn['sasaran']) ? trim($sn['sasaran']) : '';
+                    $snIndikator = !empty($sn['indikator']) 
+                        ? (is_array($sn['indikator']) ? implode("\n", $sn['indikator']) : trim($sn['indikator'])) 
+                        : '';
+
+                    if (empty($snSasaran)) continue;
+
+                    $this->db->insert('rkpd_keterkaitan_indikator', [
+                        'kode_wilayah' => $KodeWilayah,
+                        'tahun' => $tahun,
+                        'id_pn' => $idPn,
+                        'kode_pn' => $kodePn,
+                        'nama_pn' => $namaPn,
+                        'id_sasaran_nasional' => $snId,
+                        'kode_sasaran_nasional' => $snKode,
+                        'sasaran_nasional' => $snSasaran,
+                        'indikator_nasional' => $snIndikator,
+                        'p_daerah_json' => !empty($pDaerahArray) ? json_encode($pDaerahArray, JSON_UNESCAPED_UNICODE) : NULL,
+                        'id_sasaran_daerah' => $sdId,
+                        'kode_sasaran_daerah' => $sdKode,
+                        'sasaran_daerah' => $sdSasaran,
+                        'indikator_daerah_json' => !empty($sdIndikator) ? json_encode($sdIndikator, JSON_UNESCAPED_UNICODE) : NULL,
+                        'created_at' => date('Y-m-d H:i:s')
+                    ]);
+                }
+            }
 
             echo json_encode(['status' => 'success', 'message' => 'Data Keterkaitan Indikator berhasil ditambahkan!']);
         }
@@ -18564,12 +18715,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $tahun = trim($this->input->post('Tahun', TRUE));
 
             $idPn = (int)$this->input->post('IdPN', TRUE);
-            $idSasaranNasional = (int)$this->input->post('IdSasaranNasional', TRUE);
-            $sasaranNasionalCustom = trim($this->input->post('SasaranNasionalCustom', TRUE));
-            $indikatorNasional = trim($this->input->post('IndikatorNasional', TRUE));
             $pDaerahIds = $this->input->post('PDaerahIds', TRUE);
             $idSasaranDaerah = (int)$this->input->post('IdSasaranDaerah', TRUE);
             $indikatorDaerah = $this->input->post('IndikatorDaerah', TRUE);
+            $sasaranNasionalList = $this->input->post('SasaranNasionalList');
+            $sasaranDaerahListPost = $this->input->post('SasaranDaerahList');
 
             if ($idPn <= 0) {
                 echo json_encode(['status' => 'error', 'message' => 'Prioritas Nasional wajib dipilih!']);
@@ -18584,34 +18734,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $kodePn = 'PN ' . $idPn;
             $namaPn = $pnRow['PrioritasNasional'];
 
-            $kodeSasNas = '';
-            $namaSasNas = '';
-            if ($idSasaranNasional > 0) {
-                $sasNasRow = $this->db->where('Id', $idSasaranNasional)->get('sasaran_prioritas_rpjmn')->row_array();
-                if ($sasNasRow) {
-                    $namaSasNas = $sasNasRow['SasaranPrioritasRPJMN'];
-                    $kodeSasNas = trim($this->input->post('KodeSasaranNasional', TRUE));
-                    if (empty($kodeSasNas)) $kodeSasNas = 'S1';
-                }
-            }
-            if (empty($namaSasNas)) {
-                $namaSasNas = $sasaranNasionalCustom;
-                $kodeSasNas = trim($this->input->post('KodeSasaranNasional', TRUE));
-                if (empty($kodeSasNas)) $kodeSasNas = 'S1';
-            }
-            if (empty($namaSasNas)) {
-                echo json_encode(['status' => 'error', 'message' => 'Sasaran Prioritas Pembangunan Nasional wajib diisi!']);
-                return;
-            }
-
+            // P Daerah
             $pDaerahArray = [];
             if (!empty($pDaerahIds) && is_array($pDaerahIds)) {
-                $allPRows = $this->db->select('id, prioritas')
+                $allPRows = $this->db->select('id, prioritas_pembangunan AS prioritas')
                     ->where('kode_wilayah', $KodeWilayah)
-                    ->where('jenis', 'daerah')
+                    ->where('tahun', (string)$tahun)
                     ->where('deleted_at IS NULL')
                     ->order_by('id', 'ASC')
-                    ->get('prioritas_pembangunan')
+                    ->get('rkpd_sasaran_prioritas')
                     ->result_array();
 
                 $pKodeMap = [];
@@ -18621,61 +18752,162 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
                 foreach ($pDaerahIds as $pId) {
                     $pId = (int)$pId;
-                    $pRow = $this->db->where('id', $pId)->get('prioritas_pembangunan')->row_array();
+                    $pRow = $this->db->where('id', $pId)->where('deleted_at IS NULL')->get('rkpd_sasaran_prioritas')->row_array();
                     if ($pRow) {
                         $kd = isset($pKodeMap[$pId]) ? $pKodeMap[$pId] : 'P';
                         $pDaerahArray[] = [
                             'id' => $pId,
                             'kode' => $kd,
-                            'prioritas' => $pRow['prioritas'],
-                            'display' => $kd . ': ' . $pRow['prioritas']
+                            'prioritas' => $pRow['prioritas_pembangunan'],
+                            'display' => $kd . ': ' . $pRow['prioritas_pembangunan']
                         ];
                     }
                 }
             }
 
-            $namaSasDaerah = '';
-            $kodeSasDaerah = '';
-            if ($idSasaranDaerah > 0) {
-                $sasDaeRow = $this->db->where('id', $idSasaranDaerah)->get('rkpd_sasaran_daerah')->row_array();
-                if ($sasDaeRow) {
-                    $namaSasDaerah = $sasDaeRow['sasaran'];
-                    $kodeSasDaerah = trim($this->input->post('KodeSasaranDaerah', TRUE));
+            // Sasaran Daerah
+            $parsedSasDaerahList = [];
+            if (!empty($sasaranDaerahListPost)) {
+                if (is_string($sasaranDaerahListPost)) {
+                    $parsedSasDaerahList = json_decode($sasaranDaerahListPost, true);
+                } else if (is_array($sasaranDaerahListPost)) {
+                    $parsedSasDaerahList = $sasaranDaerahListPost;
                 }
             }
-            if (empty($namaSasDaerah)) {
-                $namaSasDaerah = trim($this->input->post('SasaranDaerahCustom', TRUE));
-            }
-            if (empty($namaSasDaerah)) {
-                echo json_encode(['status' => 'error', 'message' => 'Sasaran Pembangunan Daerah wajib dipilih!']);
-                return;
+
+            if (empty($parsedSasDaerahList)) {
+                $namaSasDaerah = '';
+                $kodeSasDaerah = '';
+                if ($idSasaranDaerah > 0) {
+                    $sasDaeRow = $this->db->where('id', $idSasaranDaerah)->get('rkpd_sasaran_daerah')->row_array();
+                    if ($sasDaeRow) {
+                        $namaSasDaerah = $sasDaeRow['sasaran'];
+                        $kodeSasDaerah = trim($this->input->post('KodeSasaranDaerah', TRUE));
+                    }
+                }
+                if (empty($namaSasDaerah)) {
+                    $namaSasDaerah = trim($this->input->post('SasaranDaerahCustom', TRUE));
+                }
+                if (empty($namaSasDaerah)) {
+                    echo json_encode(['status' => 'error', 'message' => 'Sasaran Pembangunan Daerah wajib dipilih!']);
+                    return;
+                }
+
+                $indikatorDaerahArray = [];
+                if (!empty($indikatorDaerah)) {
+                    if (is_array($indikatorDaerah)) {
+                        foreach ($indikatorDaerah as $indItem) {
+                            $indItem = trim($indItem);
+                            if (!empty($indItem)) {
+                                $indikatorDaerahArray[] = $indItem;
+                            }
+                        }
+                    } else if (is_string($indikatorDaerah)) {
+                        $lines = explode("\n", $indikatorDaerah);
+                        foreach ($lines as $line) {
+                            $cleanLine = trim(preg_replace('/^([•\-\*]|\d+\.)\s*/u', '', trim($line)));
+                            if (!empty($cleanLine)) {
+                                $indikatorDaerahArray[] = $cleanLine;
+                            }
+                        }
+                    }
+                }
+
+                $parsedSasDaerahList[] = [
+                    'id' => $idSasaranDaerah > 0 ? $idSasaranDaerah : NULL,
+                    'kode' => $kodeSasDaerah,
+                    'sasaran' => $namaSasDaerah,
+                    'indikator' => $indikatorDaerahArray
+                ];
             }
 
-            $indikatorDaerahArray = [];
-            if (!empty($indikatorDaerah) && is_array($indikatorDaerah)) {
-                foreach ($indikatorDaerah as $indItem) {
-                    $indItem = trim($indItem);
-                    if (!empty($indItem)) {
-                        $indikatorDaerahArray[] = $indItem;
+            // Sasaran Nasional
+            $parsedNasList = [];
+            if (!empty($sasaranNasionalList)) {
+                if (is_string($sasaranNasionalList)) {
+                    $parsedNasList = json_decode($sasaranNasionalList, true);
+                } else if (is_array($sasaranNasionalList)) {
+                    $parsedNasList = $sasaranNasionalList;
+                }
+            }
+
+            if (empty($parsedNasList)) {
+                $idSasaranNasional = (int)$this->input->post('IdSasaranNasional', TRUE);
+                $sasaranNasionalCustom = trim($this->input->post('SasaranNasionalCustom', TRUE));
+                $indikatorNasional = trim($this->input->post('IndikatorNasional', TRUE));
+                $kodeSasNas = trim($this->input->post('KodeSasaranNasional', TRUE));
+                if (empty($kodeSasNas)) $kodeSasNas = 'S1';
+
+                if (empty($sasaranNasionalCustom)) {
+                    echo json_encode(['status' => 'error', 'message' => 'Sasaran Prioritas Pembangunan Nasional wajib diisi!']);
+                    return;
+                }
+
+                $parsedNasList[] = [
+                    'id' => $idSasaranNasional > 0 ? $idSasaranNasional : NULL,
+                    'kode' => $kodeSasNas,
+                    'sasaran' => $sasaranNasionalCustom,
+                    'indikator' => $indikatorNasional
+                ];
+            }
+
+            $firstUpdated = false;
+            foreach ($parsedSasDaerahList as $sd) {
+                $sdId = !empty($sd['id']) ? (int)$sd['id'] : NULL;
+                $sdKode = !empty($sd['kode']) ? trim($sd['kode']) : '';
+                $sdSasaran = !empty($sd['sasaran']) ? trim($sd['sasaran']) : '';
+                $sdIndikator = !empty($sd['indikator']) ? $sd['indikator'] : [];
+
+                if (empty($sdSasaran)) continue;
+
+                foreach ($parsedNasList as $sn) {
+                    $snId = !empty($sn['id']) ? (int)$sn['id'] : NULL;
+                    $snKode = !empty($sn['kode']) ? trim($sn['kode']) : 'S1';
+                    $snSasaran = !empty($sn['sasaran']) ? trim($sn['sasaran']) : '';
+                    $snIndikator = !empty($sn['indikator']) 
+                        ? (is_array($sn['indikator']) ? implode("\n", $sn['indikator']) : trim($sn['indikator'])) 
+                        : '';
+
+                    if (empty($snSasaran)) continue;
+
+                    if (!$firstUpdated) {
+                        $this->db->where('id', $id)->update('rkpd_keterkaitan_indikator', [
+                            'id_pn' => $idPn,
+                            'kode_pn' => $kodePn,
+                            'nama_pn' => $namaPn,
+                            'id_sasaran_nasional' => $snId,
+                            'kode_sasaran_nasional' => $snKode,
+                            'sasaran_nasional' => $snSasaran,
+                            'indikator_nasional' => $snIndikator,
+                            'p_daerah_json' => !empty($pDaerahArray) ? json_encode($pDaerahArray, JSON_UNESCAPED_UNICODE) : NULL,
+                            'id_sasaran_daerah' => $sdId,
+                            'kode_sasaran_daerah' => $sdKode,
+                            'sasaran_daerah' => $sdSasaran,
+                            'indikator_daerah_json' => !empty($sdIndikator) ? json_encode($sdIndikator, JSON_UNESCAPED_UNICODE) : NULL,
+                            'updated_at' => date('Y-m-d H:i:s')
+                        ]);
+                        $firstUpdated = true;
+                    } else {
+                        $this->db->insert('rkpd_keterkaitan_indikator', [
+                            'kode_wilayah' => $KodeWilayah,
+                            'tahun' => $tahun,
+                            'id_pn' => $idPn,
+                            'kode_pn' => $kodePn,
+                            'nama_pn' => $namaPn,
+                            'id_sasaran_nasional' => $snId,
+                            'kode_sasaran_nasional' => $snKode,
+                            'sasaran_nasional' => $snSasaran,
+                            'indikator_nasional' => $snIndikator,
+                            'p_daerah_json' => !empty($pDaerahArray) ? json_encode($pDaerahArray, JSON_UNESCAPED_UNICODE) : NULL,
+                            'id_sasaran_daerah' => $sdId,
+                            'kode_sasaran_daerah' => $sdKode,
+                            'sasaran_daerah' => $sdSasaran,
+                            'indikator_daerah_json' => !empty($sdIndikator) ? json_encode($sdIndikator, JSON_UNESCAPED_UNICODE) : NULL,
+                            'created_at' => date('Y-m-d H:i:s')
+                        ]);
                     }
                 }
             }
-
-            $this->db->where('id', $id)->update('rkpd_keterkaitan_indikator', [
-                'id_pn' => $idPn,
-                'kode_pn' => $kodePn,
-                'nama_pn' => $namaPn,
-                'id_sasaran_nasional' => $idSasaranNasional > 0 ? $idSasaranNasional : NULL,
-                'kode_sasaran_nasional' => $kodeSasNas,
-                'sasaran_nasional' => $namaSasNas,
-                'indikator_nasional' => $indikatorNasional,
-                'p_daerah_json' => !empty($pDaerahArray) ? json_encode($pDaerahArray, JSON_UNESCAPED_UNICODE) : NULL,
-                'id_sasaran_daerah' => $idSasaranDaerah > 0 ? $idSasaranDaerah : NULL,
-                'kode_sasaran_daerah' => $kodeSasDaerah,
-                'sasaran_daerah' => $namaSasDaerah,
-                'indikator_daerah_json' => !empty($indikatorDaerahArray) ? json_encode($indikatorDaerahArray, JSON_UNESCAPED_UNICODE) : NULL,
-                'updated_at' => date('Y-m-d H:i:s')
-            ]);
 
             echo json_encode(['status' => 'success', 'message' => 'Data Keterkaitan Indikator berhasil diperbarui!']);
         }

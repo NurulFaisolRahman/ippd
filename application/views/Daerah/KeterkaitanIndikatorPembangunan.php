@@ -137,6 +137,87 @@ if (!empty($KeterkaitanList)) {
         cursor: pointer;
     }
 
+    /* ============================================================
+       MODAL SCROLLABLE & VIEWPORT FIX
+       Mengatasi modal yang tidak bisa di-scroll akibat benturan
+       vertical centering (:before) di header & konten form yang panjang
+       ============================================================ */
+    #ModalInputKeterkaitan,
+    #ModalEditKeterkaitan {
+        z-index: 105000 !important;
+        overflow-y: auto !important;
+        padding-right: 0 !important;
+    }
+    .modal-backdrop {
+        z-index: 104990 !important;
+    }
+    #ModalInputKeterkaitan:before,
+    #ModalEditKeterkaitan:before {
+        display: none !important;
+        height: 0 !important;
+        content: none !important;
+    }
+    #ModalInputKeterkaitan .modal-dialog,
+    #ModalEditKeterkaitan .modal-dialog {
+        display: block !important;
+        margin: 20px auto !important;
+        max-width: 96vw !important;
+        width: 96% !important;
+        vertical-align: top !important;
+    }
+    #ModalInputKeterkaitan .modal-content,
+    #ModalEditKeterkaitan .modal-content {
+        max-height: calc(100vh - 60px) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.25) !important;
+    }
+    #ModalInputKeterkaitan .modal-header,
+    #ModalEditKeterkaitan .modal-header {
+        flex-shrink: 0 !important;
+        background: #f8fafc !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        padding: 15px 20px !important;
+    }
+    #ModalInputKeterkaitan .modal-body,
+    #ModalEditKeterkaitan .modal-body {
+        flex: 1 1 auto !important;
+        overflow-y: auto !important;
+        max-height: calc(100vh - 180px) !important;
+        padding: 20px !important;
+        background: #fdfdfd !important;
+    }
+    #ModalInputKeterkaitan .modal-footer,
+    #ModalEditKeterkaitan .modal-footer {
+        flex-shrink: 0 !important;
+        background: #f8fafc !important;
+        border-top: 1px solid #e2e8f0 !important;
+        padding: 12px 20px !important;
+        margin-top: 0 !important;
+    }
+
+    /* Styling Scrollbar Modal Body */
+    #ModalInputKeterkaitan .modal-body::-webkit-scrollbar,
+    #ModalEditKeterkaitan .modal-body::-webkit-scrollbar {
+        width: 8px;
+    }
+    #ModalInputKeterkaitan .modal-body::-webkit-scrollbar-track,
+    #ModalEditKeterkaitan .modal-body::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+    }
+    #ModalInputKeterkaitan .modal-body::-webkit-scrollbar-thumb,
+    #ModalEditKeterkaitan .modal-body::-webkit-scrollbar-thumb {
+        background: #0284c7;
+        border-radius: 4px;
+    }
+    #ModalInputKeterkaitan .modal-body::-webkit-scrollbar-thumb:hover,
+    #ModalEditKeterkaitan .modal-body::-webkit-scrollbar-thumb:hover {
+        background: #0369a1;
+    }
+
     .keterkaitan-card {
         background: #ffffff;
         border-radius: 8px;
@@ -207,25 +288,31 @@ if (!empty($KeterkaitanList)) {
     }
 
     .action-group {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
+        display: inline-flex;
+        flex-direction: row;
+        gap: 6px;
         align-items: center;
         justify-content: center;
+        white-space: nowrap;
     }
     .btn-action-custom {
-        padding: 4px 8px;
-        font-size: 11px;
-        font-weight: 600;
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        font-size: 13px;
         border-radius: 4px;
         cursor: pointer;
         opacity: 1 !important;
         transition: all 0.15s ease-in-out;
         border: none;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         text-align: center;
-        width: 100%;
-        max-width: 60px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .btn-action-custom i {
+        pointer-events: none;
     }
     .btn-action-edit {
         background: #f0ad4e !important;
@@ -235,6 +322,7 @@ if (!empty($KeterkaitanList)) {
     .btn-action-edit:hover {
         background: #ec971f !important;
         color: #ffffff !important;
+        transform: translateY(-1px);
     }
     .btn-action-delete {
         background: #d9534f !important;
@@ -244,6 +332,7 @@ if (!empty($KeterkaitanList)) {
     .btn-action-delete:hover {
         background: #c9302c !important;
         color: #ffffff !important;
+        transform: translateY(-1px);
     }
 
     .indikator-nasional-container {
@@ -359,7 +448,7 @@ if (!empty($KeterkaitanList)) {
 
                                 <?php if ($can_edit) { ?>
                                 <div>
-                                    <button type="button" class="btn btn-sm btn-success notika-btn-success" id="BtnBukaModalTambah">
+                                    <button type="button" class="btn btn-sm btn-success notika-btn-success" id="BtnBukaModalTambah" data-toggle="modal" data-target="#ModalInputKeterkaitan">
                                         <i class="fa fa-plus"></i> <b>Tambah Keterkaitan Indikator</b>
                                     </button>
                                 </div>
@@ -385,7 +474,7 @@ if (!empty($KeterkaitanList)) {
                                             <th style="width: 25%;">Sasaran Pembangunan Daerah</th>
                                             <th style="width: <?= $can_edit ? '20%' : '25%' ?>;">Indikator Sasaran Pembangunan Daerah</th>
                                             <?php if ($can_edit) { ?>
-                                                <th style="width: 5%; text-align: center;">Aksi</th>
+                                                <th style="width: 75px; text-align: center;">Aksi</th>
                                             <?php } ?>
                                         </tr>
                                     </thead>
@@ -397,7 +486,7 @@ if (!empty($KeterkaitanList)) {
                                                         Belum ada data Keterkaitan Indikator Pembangunan Daerah untuk Tahun <?= html_escape($SelectedTahun) ?>.<br>
                                                         <?php if ($can_edit) { ?>
                                                             <div style="margin-top: 14px;">
-                                                                <button type="button" class="btn btn-sm btn-success notika-btn-success" id="BtnTambahEmpty">
+                                                                <button type="button" class="btn btn-sm btn-success notika-btn-success" id="BtnTambahEmpty" data-toggle="modal" data-target="#ModalInputKeterkaitan">
                                                                     <i class="fa fa-plus"></i> Tambah Keterkaitan Baru
                                                                 </button>
                                                             </div>
@@ -428,56 +517,31 @@ if (!empty($KeterkaitanList)) {
                                                 </tr>
 
                                                 <!-- Baris-Baris Keterkaitan di bawah subheader ini -->
-                                                <?php foreach ($g['rows'] as $r) { 
-                                                    // Parse Indikator Nasional
-                                                    $indNasText = trim($r['indikator_nasional'] ?? '');
-                                                    $indNasLines = [];
-                                                    if (!empty($indNasText)) {
-                                                        $rawLines = preg_split('/\r\n|\r|\n/', $indNasText);
-                                                        $hasNumberedPattern = false;
-                                                        foreach ($rawLines as $l) {
-                                                            if (preg_match('/^\s*\d+[\.\)]\s+/', $l)) {
-                                                                $hasNumberedPattern = true;
-                                                                break;
-                                                            }
-                                                        }
-
-                                                        if ($hasNumberedPattern) {
-                                                            $currentItem = '';
-                                                            foreach ($rawLines as $l) {
-                                                                $lTrim = trim($l);
-                                                                if (empty($lTrim)) continue;
-                                                                if (preg_match('/^\s*(\d+)[\.\)]\s*(.*)$/', $lTrim, $matches)) {
-                                                                    if (!empty($currentItem)) {
-                                                                        $indNasLines[] = $currentItem;
-                                                                    }
-                                                                    $currentItem = $matches[2];
-                                                                } else {
-                                                                    if (!empty($currentItem)) {
-                                                                        $currentItem .= ' ' . $lTrim;
-                                                                    } else {
-                                                                        $currentItem = $lTrim;
-                                                                    }
-                                                                }
-                                                            }
-                                                            if (!empty($currentItem)) {
-                                                                $indNasLines[] = $currentItem;
-                                                            }
-                                                        } else {
-                                                            foreach ($rawLines as $l) {
-                                                                $lTrim = trim($l);
-                                                                $lClean = preg_replace('/^\s*[\-\•\*\d+\.\)]\s*/', '', $lTrim);
-                                                                if (!empty($lClean)) {
-                                                                    $indNasLines[] = $lClean;
-                                                                }
-                                                            }
-                                                        }
+                                                <?php 
+                                                // Kelompokkan baris berdasarkan Sasaran Daerah & Indikator Daerah agar cell dapat di-merge jika sama
+                                                $daerahSubgroups = [];
+                                                foreach ($g['rows'] as $r) {
+                                                    $dKey = (!empty($r['id_sasaran_daerah']) ? $r['id_sasaran_daerah'] : trim($r['sasaran_daerah']))
+                                                          . '|||' . trim($r['indikator_daerah_json'] ?? '');
+                                                    if (!isset($daerahSubgroups[$dKey])) {
+                                                        $daerahSubgroups[$dKey] = [
+                                                            'id_sasaran_daerah'     => $r['id_sasaran_daerah'] ?? '',
+                                                            'kode_sasaran_daerah'   => $r['kode_sasaran_daerah'] ?? '',
+                                                            'sasaran_daerah'        => $r['sasaran_daerah'] ?? '',
+                                                            'indikator_daerah_json' => $r['indikator_daerah_json'] ?? '',
+                                                            'rows'                  => []
+                                                        ];
                                                     }
+                                                    $daerahSubgroups[$dKey]['rows'][] = $r;
+                                                }
 
-                                                    // Parse Indikator Daerah
+                                                foreach ($daerahSubgroups as $dGroup) { 
+                                                    $dRowCount = count($dGroup['rows']);
+
+                                                    // Parse Indikator Daerah untuk grup ini
                                                     $indDaeLines = [];
-                                                    if (!empty($r['indikator_daerah_json'])) {
-                                                        $indDaeArr = json_decode($r['indikator_daerah_json'], true);
+                                                    if (!empty($dGroup['indikator_daerah_json'])) {
+                                                        $indDaeArr = json_decode($dGroup['indikator_daerah_json'], true);
                                                         if (is_array($indDaeArr)) {
                                                             foreach ($indDaeArr as $idItem) {
                                                                 $itemTxt = is_array($idItem) ? ($idItem['indikator'] ?? '') : $idItem;
@@ -487,6 +551,52 @@ if (!empty($KeterkaitanList)) {
                                                             }
                                                         }
                                                     }
+
+                                                    foreach ($dGroup['rows'] as $idx => $r) {
+                                                        // Parse Indikator Nasional
+                                                        $indNasText = trim($r['indikator_nasional'] ?? '');
+                                                        $indNasLines = [];
+                                                        if (!empty($indNasText)) {
+                                                            $rawLines = preg_split('/\r\n|\r|\n/', $indNasText);
+                                                            $hasNumberedPattern = false;
+                                                            foreach ($rawLines as $l) {
+                                                                if (preg_match('/^\s*\d+[\.\)]\s+/', $l)) {
+                                                                    $hasNumberedPattern = true;
+                                                                    break;
+                                                                }
+                                                            }
+
+                                                            if ($hasNumberedPattern) {
+                                                                $currentItem = '';
+                                                                foreach ($rawLines as $l) {
+                                                                    $lTrim = trim($l);
+                                                                    if (empty($lTrim)) continue;
+                                                                    if (preg_match('/^\s*(\d+)[\.\)]\s*(.*)$/', $lTrim, $matches)) {
+                                                                        if (!empty($currentItem)) {
+                                                                            $indNasLines[] = $currentItem;
+                                                                        }
+                                                                        $currentItem = $matches[2];
+                                                                    } else {
+                                                                        if (!empty($currentItem)) {
+                                                                            $currentItem .= ' ' . $lTrim;
+                                                                        } else {
+                                                                            $currentItem = $lTrim;
+                                                                        }
+                                                                    }
+                                                                }
+                                                                if (!empty($currentItem)) {
+                                                                    $indNasLines[] = $currentItem;
+                                                                }
+                                                            } else {
+                                                                foreach ($rawLines as $l) {
+                                                                    $lTrim = trim($l);
+                                                                    $lClean = preg_replace('/^\s*[\-\•\*\d+\.\)]\s*/', '', $lTrim);
+                                                                    if (!empty($lClean)) {
+                                                                        $indNasLines[] = $lClean;
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
                                                 ?>
                                                     <tr>
                                                         <!-- Kolom 1: Sasaran Prioritas Pembangunan Nasional -->
@@ -501,9 +611,9 @@ if (!empty($KeterkaitanList)) {
                                                         <td style="padding: 0 !important; vertical-align: top !important;">
                                                             <?php if (!empty($indNasLines)) { ?>
                                                                 <div class="indikator-nasional-container">
-                                                                    <?php foreach ($indNasLines as $idx => $indNas) { ?>
+                                                                    <?php foreach ($indNasLines as $nIdx => $indNas) { ?>
                                                                         <div class="indikator-nasional-item">
-                                                                            <?= ($idx + 1) ?>. <?= html_escape($indNas) ?>
+                                                                            <?= ($nIdx + 1) ?>. <?= html_escape($indNas) ?>
                                                                         </div>
                                                                     <?php } ?>
                                                                 </div>
@@ -514,32 +624,37 @@ if (!empty($KeterkaitanList)) {
                                                             <?php } ?>
                                                         </td>
 
-                                                        <!-- Kolom 3: Sasaran Pembangunan Daerah -->
-                                                        <td style="font-weight: 600;">
-                                                            <div>
-                                                                <?= !empty($r['kode_sasaran_daerah']) ? html_escape($r['kode_sasaran_daerah']) . '. ' : '' ?>
-                                                                <?= html_escape($r['sasaran_daerah']) ?>
-                                                            </div>
-                                                        </td>
+                                                        <!-- Kolom 3 & 4: Sasaran Pembangunan Daerah & Indikator Sasaran Pembangunan Daerah (Dijadikan 1 jika masih sama) -->
+                                                        <?php if ($idx === 0) { ?>
+                                                            <!-- Kolom 3: Sasaran Pembangunan Daerah -->
+                                                            <td style="font-weight: 600;<?= ($dRowCount > 1) ? ' vertical-align: middle !important;' : '' ?>" <?= ($dRowCount > 1) ? 'rowspan="' . $dRowCount . '"' : '' ?>>
+                                                                <div>
+                                                                    <?= !empty($dGroup['kode_sasaran_daerah']) ? html_escape($dGroup['kode_sasaran_daerah']) . '. ' : '' ?>
+                                                                    <?= html_escape($dGroup['sasaran_daerah']) ?>
+                                                                </div>
+                                                            </td>
 
-                                                        <!-- Kolom 4: Indikator Sasaran Pembangunan Daerah -->
-                                                        <td>
-                                                            <?php if (!empty($indDaeLines)) { ?>
-                                                                <?php foreach ($indDaeLines as $indDae) { ?>
-                                                                    <div style="margin-bottom: 5px; line-height: 1.4;">
-                                                                        <?= html_escape($indDae) ?>
-                                                                    </div>
+                                                            <!-- Kolom 4: Indikator Sasaran Pembangunan Daerah -->
+                                                            <td <?= ($dRowCount > 1) ? 'style="vertical-align: middle !important;" rowspan="' . $dRowCount . '"' : '' ?>>
+                                                                <?php if (!empty($indDaeLines)) { ?>
+                                                                    <?php foreach ($indDaeLines as $indDae) { ?>
+                                                                        <div style="margin-bottom: 5px; line-height: 1.4;">
+                                                                            <?= html_escape($indDae) ?>
+                                                                        </div>
+                                                                    <?php } ?>
+                                                                <?php } else { ?>
+                                                                    <span class="text-muted" style="font-style: italic;">-</span>
                                                                 <?php } ?>
-                                                            <?php } else { ?>
-                                                                <span class="text-muted" style="font-style: italic;">-</span>
-                                                            <?php } ?>
-                                                        </td>
+                                                            </td>
+                                                        <?php } ?>
 
                                                         <!-- Kolom 5: Aksi -->
                                                         <?php if ($can_edit) { ?>
                                                             <td class="text-center" style="vertical-align: middle !important;">
                                                                 <div class="action-group">
                                                                     <button type="button" class="btn-action-custom btn-action-edit BtnEditKeterkaitan" 
+                                                                        data-toggle="modal"
+                                                                        data-target="#ModalEditKeterkaitan"
                                                                         data-id="<?= $r['id'] ?>"
                                                                         data-id_pn="<?= $r['id_pn'] ?>"
                                                                         data-id_sasaran_nasional="<?= $r['id_sasaran_nasional'] ?? '' ?>"
@@ -552,18 +667,19 @@ if (!empty($KeterkaitanList)) {
                                                                         data-sasaran_daerah="<?= html_escape($r['sasaran_daerah']) ?>"
                                                                         data-indikator_daerah='<?= html_escape($r['indikator_daerah_json'] ?? '[]') ?>'
                                                                         title="Edit Data">
-                                                                        Edit
+                                                                        <i class="fa fa-pencil"></i>
                                                                     </button>
                                                                     <button type="button" class="btn-action-custom btn-action-delete BtnHapusKeterkaitan" 
                                                                         data-id="<?= $r['id'] ?>" 
                                                                         title="Hapus Data">
-                                                                        Hapus
+                                                                        <i class="fa fa-trash"></i>
                                                                     </button>
                                                                 </div>
                                                             </td>
                                                         <?php } ?>
                                                     </tr>
                                                 <?php } ?>
+                                            <?php } ?>
                                             <?php } ?>
                                         <?php } ?>
                                     </tbody>
@@ -589,70 +705,53 @@ MODAL TAMBAH KETERKAITAN INDIKATOR
                 <h4 class="modal-title"><b>Tambah Keterkaitan Indikator Pembangunan</b></h4>
             </div>
             <div class="modal-body">
-                
-                <!-- BAGIAN 1: SISI NASIONAL -->
-                <div class="panel panel-default" style="border-left: 4px solid #1b4f72;">
-                    <div class="panel-heading" style="background: #f1f5f9; font-weight: bold; color: #1b4f72;">
-                        <i class="fa fa-landmark"></i> 1. Keterkaitan Prioritas & Sasaran Nasional
-                    </div>
-                    <div class="panel-body">
-                        <!-- PN (Prioritas Nasional) -->
-                        <div class="form-group">
-                            <label><b>Prioritas Nasional (PN)</b> <span class="text-danger">*</span>:</label>
-                            <select class="form-control select2-modal" id="InputIdPN" style="width: 100%;">
-                                <option value="">-- Pilih Prioritas Nasional (PN) --</option>
-                                <?php foreach ($PNMaster as $pn) { ?>
-                                    <option value="<?= $pn['Id'] ?>">
-                                        PN <?= $pn['Id'] ?>: <?= html_escape($pn['PrioritasNasional']) ?>
-                                    </option>
-                                <?php } ?>
-                            </select>
-                        </div>
-
-                        <!-- Sasaran Prioritas Pembangunan Nasional -->
-                        <div class="form-group">
-                            <label><b>Sasaran Prioritas Pembangunan Nasional</b> <span class="text-danger">*</span>:</label>
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <input type="text" class="form-control" id="InputKodeSasNas" placeholder="Kode (misal: S1)" style="color: #000;">
-                                </div>
-                                <div class="col-md-9">
-                                    <select class="form-control select2-modal" id="SelectSasaranNasional" style="width: 100%;">
-                                        <option value="">-- Pilih Sasaran Nasional (atau Ketik Manual) --</option>
+                <div class="row">
+                    <!-- KOLOM KIRI: 1. KETERKAITAN PRIORITAS & SASARAN NASIONAL -->
+                    <div class="col-md-6 col-xs-12">
+                        <div class="panel panel-default" style="border-left: 4px solid #1b4f72; margin-bottom: 15px;">
+                            <div class="panel-heading" style="background: #f1f5f9; font-weight: bold; color: #1b4f72;">
+                                <i class="fa fa-landmark"></i> 1. Keterkaitan Prioritas & Sasaran Nasional
+                            </div>
+                            <div class="panel-body">
+                                <!-- PN (Prioritas Nasional) -->
+                                <div class="form-group">
+                                    <label><b>Prioritas Nasional (PN)</b> <span class="text-danger">*</span>:</label>
+                                    <select class="form-control select2-modal" id="InputIdPN" style="width: 100%;">
+                                        <option value="">-- Pilih Prioritas Nasional (PN) --</option>
+                                        <?php foreach ($PNMaster as $pn) { ?>
+                                            <option value="<?= $pn['Id'] ?>">
+                                                PN <?= $pn['Id'] ?>: <?= html_escape($pn['PrioritasNasional']) ?>
+                                            </option>
+                                        <?php } ?>
                                     </select>
                                 </div>
-                            </div>
-                            <div style="margin-top: 8px;">
-                                <textarea class="form-control" id="InputSasaranNasionalCustom" rows="2" placeholder="Atau ketik/edit rumusan sasaran prioritas pembangunan nasional di sini..." style="color: #000;"></textarea>
+
+                                <!-- Container Sasaran & Indikator Nasional (Dipisah dengan Checkbox jika > 1) -->
+                                <div id="ContainerSasaranNasional">
+                                    <div class="alert alert-info" style="margin-bottom: 0; padding: 10px 14px; font-size: 13px;">
+                                        <i class="fa fa-info-circle"></i> Silakan pilih <b>Prioritas Nasional (PN)</b> di atas untuk memunculkan Sasaran dan Indikator Nasional secara otomatis.
+                                    </div>
+                                </div>
                             </div>
                         </div>
-
-                        <!-- Indikator Sasaran Prioritas Pembangunan Nasional (Input Manual) -->
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <label><b>Indikator Sasaran Prioritas Pembangunan Nasional</b> (Input Manual):</label>
-                            <small class="text-muted" style="display: block; margin-bottom: 5px;">
-                                * Ketik setiap indikator pada baris baru (tekan Enter). Di tabel akan otomatis ditampilkan bernomor urut 1, 2, 3...
-                            </small>
-                            <textarea class="form-control" id="InputIndikatorNasional" rows="4" placeholder="Contoh:&#10;Indeks Demokrasi Indonesia Aspek Kebebasan&#10;Indeks Aktualisasi Pancasila Aspek Rumah Tangga&#10;Indeks Kemerdekaan Pers" style="color: #000;"></textarea>
-                        </div>
                     </div>
-                </div>
 
-                <!-- BAGIAN 2: SISI DAERAH -->
-                <div class="panel panel-default" style="border-left: 4px solid #0369a1;">
-                    <div class="panel-heading" style="background: #f1f5f9; font-weight: bold; color: #0369a1;">
-                        <i class="fa fa-map-marker-alt"></i> 2. Keterkaitan Prioritas & Sasaran Pembangunan Daerah
-                    </div>
-                    <div class="panel-body">
+                    <!-- KOLOM KANAN: 2. KETERKAITAN PRIORITAS & SASARAN PEMBANGUNAN DAERAH -->
+                    <div class="col-md-6 col-xs-12">
+                        <div class="panel panel-default" style="border-left: 4px solid #0369a1; margin-bottom: 15px;">
+                            <div class="panel-heading" style="background: #f1f5f9; font-weight: bold; color: #0369a1;">
+                                <i class="fa fa-map-marker-alt"></i> 2. Keterkaitan Prioritas & Sasaran Pembangunan Daerah
+                            </div>
+                            <div class="panel-body">
                         <!-- Prioritas Pembangunan Daerah (P) -->
                         <div class="form-group">
                             <label><b>Prioritas Pembangunan Daerah (P)</b> (Bisa Pilih Lebih Dari Satu):</label>
                             <div class="custom-multiselect-box" id="BoxPDaerah">
                                 <div class="custom-multiselect-toggle" id="TogglePDaerah">
-                                    <span id="LabelPDaerahSelected" style="color: #64748b; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 90%;">
+                                    <span id="LabelPDaerahSelected" style="color: #64748b; font-size: 13px; flex: 1; min-width: 0; line-height: 1.4; padding: 2px 0;">
                                         -- Pilih Prioritas Pembangunan Daerah (Bisa Pilih Lebih Dari Satu) --
                                     </span>
-                                    <i class="fa fa-chevron-down" id="CaretPDaerah" style="color: #64748b; font-size: 11px; transition: transform 0.2s;"></i>
+                                    <i class="fa fa-chevron-down" id="CaretPDaerah" style="color: #64748b; font-size: 11px; transition: transform 0.2s; margin-left: 8px; flex-shrink: 0;"></i>
                                 </div>
                                 <div class="custom-multiselect-menu" id="MenuPDaerah">
                                     <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0;">
@@ -675,7 +774,7 @@ MODAL TAMBAH KETERKAITAN INDIKATOR
                                             <?php } ?>
                                         <?php } else { ?>
                                             <span class="text-danger" style="font-size: 12px; display: block; padding: 4px;">
-                                                <i class="fa fa-exclamation-circle"></i> Belum ada data Prioritas Pembangunan Daerah pada menu Tema Pembangunan tahun <?= html_escape($SelectedTahun) ?>.
+                                                <i class="fa fa-exclamation-circle"></i> Belum ada data Prioritas Pembangunan Daerah pada menu Sasaran Pembangunan Daerah tahun <?= html_escape($SelectedTahun) ?>.
                                             </span>
                                         <?php } ?>
                                     </div>
@@ -683,90 +782,63 @@ MODAL TAMBAH KETERKAITAN INDIKATOR
                             </div>
                         </div>
 
-                        <!-- Sasaran Pembangunan Daerah -->
+                        <!-- Sasaran Pembangunan Daerah (Bisa Pilih Lebih Dari Satu) -->
                         <div class="form-group">
-                            <label><b>Sasaran Pembangunan Daerah</b> <span class="text-danger">*</span>:</label>
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <input type="text" class="form-control" id="InputKodeSasDaerah" placeholder="Kode (misal: S1)" style="color: #000;">
-                                </div>
-                                <div class="col-md-9">
-                                    <select class="form-control select2-modal" id="SelectSasaranDaerah" style="width: 100%;">
-                                        <option value="">-- Pilih dari Sasaran Pembangunan Daerah --</option>
-                                        <?php foreach ($SasaranDaerahList as $sasDae) { ?>
-                                            <option value="<?= $sasDae['id'] ?>" data-kode="<?= html_escape($sasDae['kode']) ?>" data-sasaran="<?= html_escape($sasDae['sasaran']) ?>">
-                                                <?= html_escape($sasDae['label']) ?>
-                                            </option>
-                                        <?php } ?>
-                                    </select>
-                                </div>
-                            </div>
-                            <div style="margin-top: 8px;">
-                                <textarea class="form-control" id="InputSasaranDaerahCustom" rows="2" placeholder="Atau ketik/edit rumusan sasaran pembangunan daerah di sini..." style="color: #000;"></textarea>
-                            </div>
-                        </div>
-
-                        <!-- Indikator Sasaran Pembangunan Daerah -->
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <label><b>Indikator Sasaran Pembangunan Daerah</b> (Diambil dari Menu Sasaran Pembangunan):</label>
-                            
-                            <!-- Custom Multiselect Dropdown Indikator Daerah -->
-                            <div class="custom-multiselect-box" id="BoxIndikatorDaerah" style="margin-bottom: 8px;">
-                                <div class="custom-multiselect-toggle" id="ToggleIndikatorDaerah">
-                                    <span id="LabelIndikatorDaerahSelected" style="color: #64748b; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 90%;">
-                                        -- Pilih Indikator Sasaran Daerah (Bisa Pilih Lebih Dari Satu) --
+                            <label><b>Sasaran Pembangunan Daerah</b> <span class="text-danger">*</span> (Bisa Pilih Lebih Dari Satu):</label>
+                            <div class="custom-multiselect-box" id="BoxSasDaerah">
+                                <div class="custom-multiselect-toggle" id="ToggleSasDaerah">
+                                    <span id="LabelSasDaerahSelected" style="color: #64748b; font-size: 13px; flex: 1; min-width: 0; line-height: 1.4; padding: 2px 0;">
+                                        -- Pilih Sasaran Pembangunan Daerah (Bisa Pilih Lebih Dari Satu) --
                                     </span>
-                                    <i class="fa fa-chevron-down" id="CaretIndikatorDaerah" style="color: #64748b; font-size: 11px; transition: transform 0.2s;"></i>
+                                    <i class="fa fa-chevron-down" id="CaretSasDaerah" style="color: #64748b; font-size: 11px; transition: transform 0.2s; margin-left: 8px; flex-shrink: 0;"></i>
                                 </div>
-                                <div class="custom-multiselect-menu" id="MenuIndikatorDaerah" style="max-height: 250px;">
+                                <div class="custom-multiselect-menu" id="MenuSasDaerah">
                                     <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0;">
-                                        <span style="font-size: 11px; font-weight: 700; color: #64748b;">PILIH INDIKATOR:</span>
+                                        <span style="font-size: 11px; font-weight: 700; color: #64748b;">PILIH SATU ATAU LEBIH:</span>
                                         <div>
-                                            <a href="javascript:void(0)" id="BtnSelectAllIndikatorDaerah" style="font-size: 11px; font-weight: bold; color: #0284c7; margin-right: 10px;">Pilih Semua</a>
-                                            <a href="javascript:void(0)" id="BtnClearIndikatorDaerah" style="font-size: 11px; font-weight: bold; color: #d9534f;">Kosongkan</a>
+                                            <a href="javascript:void(0)" id="BtnSelectAllSasDaerah" style="font-size: 11px; font-weight: bold; color: #0284c7; margin-right: 10px;">Pilih Semua</a>
+                                            <a href="javascript:void(0)" id="BtnClearSasDaerah" style="font-size: 11px; font-weight: bold; color: #d9534f;">Kosongkan</a>
                                         </div>
                                     </div>
                                     <div style="padding: 2px 0 6px 0;">
-                                        <input type="text" class="form-control input-sm search-multiselect" placeholder="Cari Indikator Daerah..." style="height: 30px; font-size: 12px; padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1;">
+                                        <input type="text" class="form-control input-sm search-multiselect" placeholder="Cari Sasaran Daerah..." style="height: 30px; font-size: 12px; padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1;">
                                     </div>
-                                    <div id="ListIndikatorDaerahOptions">
-                                        <?php if (!empty($IndikatorDaerahMaster)) { ?>
-                                            <?php foreach ($IndikatorDaerahMaster as $indItem) { ?>
-                                                <label class="custom-multiselect-item item-ind-daerah" data-sasaran-id="<?= $indItem['sasaran_id'] ?>">
-                                                    <input type="checkbox" class="CheckIndikatorDaerah" value="<?= html_escape($indItem['indikator']) ?>" data-sasaran-id="<?= $indItem['sasaran_id'] ?>" data-indikator="<?= html_escape($indItem['indikator']) ?>">
-                                                    <span>
-                                                        <b><?= html_escape($indItem['indikator']) ?></b>
-                                                        <span class="text-muted" style="font-size: 11px; display: block;">Sasaran: <?= html_escape($indItem['sasaran']) ?></span>
-                                                    </span>
+                                    <div id="ListSasDaerahOptions">
+                                        <?php if (!empty($SasaranDaerahList)) { ?>
+                                            <?php foreach ($SasaranDaerahList as $sasDae) { ?>
+                                                <label class="custom-multiselect-item">
+                                                    <input type="checkbox" class="CheckSasDaerah" value="<?= $sasDae['id'] ?>" data-kode="<?= html_escape($sasDae['kode']) ?>" data-sasaran="<?= html_escape($sasDae['sasaran']) ?>" data-prioritas-id="<?= $sasDae['prioritas_id'] ?? '' ?>">
+                                                    <span><b style="color: #0369a1;"><?= html_escape($sasDae['kode']) ?>:</b> <?= html_escape($sasDae['sasaran']) ?></span>
                                                 </label>
                                             <?php } ?>
                                         <?php } else { ?>
-                                            <span class="text-muted" style="font-size: 12px; display: block; padding: 6px;">
-                                                <i class="fa fa-info-circle"></i> Belum ada data indikator pada Menu Sasaran Pembangunan Daerah tahun <?= html_escape($SelectedTahun) ?>.
+                                            <span class="text-danger" style="font-size: 12px; display: block; padding: 4px;">
+                                                <i class="fa fa-exclamation-circle"></i> Belum ada data Sasaran Pembangunan Daerah pada tahun <?= html_escape($SelectedTahun) ?>.
                                             </span>
                                         <?php } ?>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- Daftar Indikator Terpilih & Input Tambahan -->
-                            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; padding: 10px;">
-                                <label style="font-size: 11.5px; font-weight: 700; color: #475569; margin-bottom: 4px; display: block;">
-                                    Daftar Indikator Sasaran Terpilih:
-                                </label>
-                                <div id="BadgesIndikatorDaerah" style="display: flex; flex-wrap: wrap; gap: 6px; min-height: 28px; margin-bottom: 6px;">
-                                    <span class="text-muted" style="font-style: italic; font-size: 12px; padding: 4px 0;">Belum ada indikator yang dipilih dari dropdown di atas.</span>
+                        <!-- Indikator Sasaran Pembangunan Daerah (Tampil perihal per sasaran sama dengan 1. Keterkaitan Prioritas & Sasaran Nasional) -->
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label><b>Indikator Sasaran Pembangunan Daerah</b> (Diambil dari Menu Sasaran Pembangunan):</label>
+                            <small class="text-muted" style="display: block; margin-bottom: 6px;">
+                                * Otomatis muncul per Sasaran Daerah terpilih (apabila lebih dari 1 dapat dipilih salah satu atau semuanya).
+                            </small>
+                            <div id="ContainerIndikatorDaerah">
+                                <div class="alert alert-info" style="margin-bottom: 0; padding: 10px 14px; font-size: 13px;">
+                                    <i class="fa fa-info-circle"></i> Silakan pilih <b>Sasaran Pembangunan Daerah</b> pada dropdown di atas untuk memunculkan indikatornya secara otomatis.
                                 </div>
-                                <small class="text-muted" style="display: block; margin-bottom: 4px;">
-                                    * Anda juga dapat mengetik indikator tambahan pada baris baru di bawah ini jika diperlukan:
-                                </small>
-                                <textarea class="form-control" id="InputIndikatorDaerahCustom" rows="2" placeholder="Ketik indikator tambahan di sini (jika ada)..." style="color: #000; font-size: 12px;"></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
+            <!-- END ROW BERDAMPINGAN -->
+            </div>
+            </div> <!-- /.modal-body -->
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
                 <button type="button" class="btn btn-primary" id="BtnSimpanKeterkaitan"><b>Simpan</b></button>
@@ -787,66 +859,52 @@ MODAL EDIT KETERKAITAN INDIKATOR
             </div>
             <div class="modal-body">
                 <input type="hidden" id="EditKeterkaitanId">
-
-                <!-- BAGIAN 1: SISI NASIONAL -->
-                <div class="panel panel-default" style="border-left: 4px solid #1b4f72;">
-                    <div class="panel-heading" style="background: #f1f5f9; font-weight: bold; color: #1b4f72;">
-                        <i class="fa fa-landmark"></i> 1. Keterkaitan Prioritas & Sasaran Nasional
-                    </div>
-                    <div class="panel-body">
-                        <div class="form-group">
-                            <label><b>Prioritas Nasional (PN)</b> <span class="text-danger">*</span>:</label>
-                            <select class="form-control select2-modal" id="EditIdPN" style="width: 100%;">
-                                <option value="">-- Pilih Prioritas Nasional (PN) --</option>
-                                <?php foreach ($PNMaster as $pn) { ?>
-                                    <option value="<?= $pn['Id'] ?>">
-                                        PN <?= $pn['Id'] ?>: <?= html_escape($pn['PrioritasNasional']) ?>
-                                    </option>
-                                <?php } ?>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label><b>Sasaran Prioritas Pembangunan Nasional</b> <span class="text-danger">*</span>:</label>
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <input type="text" class="form-control" id="EditKodeSasNas" placeholder="Kode (misal: S1)" style="color: #000;">
-                                </div>
-                                <div class="col-md-9">
-                                    <select class="form-control select2-modal" id="EditSelectSasaranNasional" style="width: 100%;">
-                                        <option value="">-- Pilih Sasaran Nasional (atau Ketik Manual) --</option>
+                <div class="row">
+                    <!-- KOLOM KIRI: 1. KETERKAITAN PRIORITAS & SASARAN NASIONAL -->
+                    <div class="col-md-6 col-xs-12">
+                        <div class="panel panel-default" style="border-left: 4px solid #1b4f72; margin-bottom: 15px;">
+                            <div class="panel-heading" style="background: #f1f5f9; font-weight: bold; color: #1b4f72;">
+                                <i class="fa fa-landmark"></i> 1. Keterkaitan Prioritas & Sasaran Nasional
+                            </div>
+                            <div class="panel-body">
+                                <div class="form-group">
+                                    <label><b>Prioritas Nasional (PN)</b> <span class="text-danger">*</span>:</label>
+                                    <select class="form-control select2-modal" id="EditIdPN" style="width: 100%;">
+                                        <option value="">-- Pilih Prioritas Nasional (PN) --</option>
+                                        <?php foreach ($PNMaster as $pn) { ?>
+                                            <option value="<?= $pn['Id'] ?>">
+                                                PN <?= $pn['Id'] ?>: <?= html_escape($pn['PrioritasNasional']) ?>
+                                            </option>
+                                        <?php } ?>
                                     </select>
                                 </div>
-                            </div>
-                            <div style="margin-top: 8px;">
-                                <textarea class="form-control" id="EditSasaranNasionalCustom" rows="2" style="color: #000;"></textarea>
+
+                                <!-- Container Sasaran & Indikator Nasional Edit -->
+                                <div id="EditContainerSasaranNasional">
+                                    <div class="alert alert-info" style="margin-bottom: 0; padding: 10px 14px; font-size: 13px;">
+                                        <i class="fa fa-info-circle"></i> Silakan pilih <b>Prioritas Nasional (PN)</b> di atas untuk memunculkan Sasaran dan Indikator Nasional secara otomatis.
+                                    </div>
+                                </div>
                             </div>
                         </div>
-
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <label><b>Indikator Sasaran Prioritas Pembangunan Nasional</b> (Input Manual):</label>
-                            <small class="text-muted" style="display: block; margin-bottom: 5px;">
-                                * Ketik setiap indikator pada baris baru (tekan Enter). Di tabel akan otomatis ditampilkan bernomor urut 1, 2, 3...
-                            </small>
-                            <textarea class="form-control" id="EditIndikatorNasional" rows="4" style="color: #000;"></textarea>
-                        </div>
                     </div>
-                </div>
 
-                <!-- BAGIAN 2: SISI DAERAH -->
-                <div class="panel panel-default" style="border-left: 4px solid #0369a1;">
-                    <div class="panel-heading" style="background: #f1f5f9; font-weight: bold; color: #0369a1;">
-                        <i class="fa fa-map-marker-alt"></i> 2. Keterkaitan Prioritas & Sasaran Pembangunan Daerah
-                    </div>
-                    <div class="panel-body">
+                    <!-- KOLOM KANAN: 2. KETERKAITAN PRIORITAS & SASARAN PEMBANGUNAN DAERAH -->
+                    <div class="col-md-6 col-xs-12">
+                        <div class="panel panel-default" style="border-left: 4px solid #0369a1; margin-bottom: 15px;">
+                            <div class="panel-heading" style="background: #f1f5f9; font-weight: bold; color: #0369a1;">
+                                <i class="fa fa-map-marker-alt"></i> 2. Keterkaitan Prioritas & Sasaran Pembangunan Daerah
+                            </div>
+                            <div class="panel-body">
+                        <!-- Prioritas Daerah (Edit) -->
                         <div class="form-group">
                             <label><b>Prioritas Pembangunan Daerah (P)</b> (Bisa Pilih Lebih Dari Satu):</label>
                             <div class="custom-multiselect-box" id="EditBoxPDaerah">
                                 <div class="custom-multiselect-toggle" id="EditTogglePDaerah">
-                                    <span id="EditLabelPDaerahSelected" style="color: #64748b; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 90%;">
+                                    <span id="EditLabelPDaerahSelected" style="color: #64748b; font-size: 13px; flex: 1; min-width: 0; line-height: 1.4; padding: 2px 0;">
                                         -- Pilih Prioritas Pembangunan Daerah (Bisa Pilih Lebih Dari Satu) --
                                     </span>
-                                    <i class="fa fa-chevron-down" id="EditCaretPDaerah" style="color: #64748b; font-size: 11px; transition: transform 0.2s;"></i>
+                                    <i class="fa fa-chevron-down" id="EditCaretPDaerah" style="color: #64748b; font-size: 11px; transition: transform 0.2s; margin-left: 8px; flex-shrink: 0;"></i>
                                 </div>
                                 <div class="custom-multiselect-menu" id="EditMenuPDaerah">
                                     <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0;">
@@ -873,88 +931,59 @@ MODAL EDIT KETERKAITAN INDIKATOR
                             </div>
                         </div>
 
+                        <!-- Sasaran Daerah (Edit) -->
                         <div class="form-group">
-                            <label><b>Sasaran Pembangunan Daerah</b> <span class="text-danger">*</span>:</label>
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <input type="text" class="form-control" id="EditKodeSasDaerah" placeholder="Kode (misal: S1)" style="color: #000;">
-                                </div>
-                                <div class="col-md-9">
-                                    <select class="form-control select2-modal" id="EditSelectSasaranDaerah" style="width: 100%;">
-                                        <option value="">-- Pilih dari Sasaran Pembangunan Daerah --</option>
-                                        <?php foreach ($SasaranDaerahList as $sasDae) { ?>
-                                            <option value="<?= $sasDae['id'] ?>" data-kode="<?= html_escape($sasDae['kode']) ?>" data-sasaran="<?= html_escape($sasDae['sasaran']) ?>">
-                                                <?= html_escape($sasDae['label']) ?>
-                                            </option>
-                                        <?php } ?>
-                                    </select>
-                                </div>
-                            </div>
-                            <div style="margin-top: 8px;">
-                                <textarea class="form-control" id="EditSasaranDaerahCustom" rows="2" style="color: #000;"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <label><b>Indikator Sasaran Pembangunan Daerah</b> (Diambil dari Menu Sasaran Pembangunan):</label>
-                            
-                            <!-- Custom Multiselect Dropdown Indikator Daerah (Edit) -->
-                            <div class="custom-multiselect-box" id="EditBoxIndikatorDaerah" style="margin-bottom: 8px;">
-                                <div class="custom-multiselect-toggle" id="EditToggleIndikatorDaerah">
-                                    <span id="EditLabelIndikatorDaerahSelected" style="color: #64748b; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 90%;">
-                                        -- Pilih Indikator Sasaran Daerah (Bisa Pilih Lebih Dari Satu) --
+                            <label><b>Sasaran Pembangunan Daerah</b> <span class="text-danger">*</span> (Bisa Pilih Lebih Dari Satu):</label>
+                            <div class="custom-multiselect-box" id="EditBoxSasDaerah">
+                                <div class="custom-multiselect-toggle" id="EditToggleSasDaerah">
+                                    <span id="EditLabelSasDaerahSelected" style="color: #64748b; font-size: 13px; flex: 1; min-width: 0; line-height: 1.4; padding: 2px 0;">
+                                        -- Pilih Sasaran Pembangunan Daerah (Bisa Pilih Lebih Dari Satu) --
                                     </span>
-                                    <i class="fa fa-chevron-down" id="EditCaretIndikatorDaerah" style="color: #64748b; font-size: 11px; transition: transform 0.2s;"></i>
+                                    <i class="fa fa-chevron-down" id="EditCaretSasDaerah" style="color: #64748b; font-size: 11px; transition: transform 0.2s; margin-left: 8px; flex-shrink: 0;"></i>
                                 </div>
-                                <div class="custom-multiselect-menu" id="EditMenuIndikatorDaerah" style="max-height: 250px;">
+                                <div class="custom-multiselect-menu" id="EditMenuSasDaerah">
                                     <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0;">
-                                        <span style="font-size: 11px; font-weight: 700; color: #64748b;">PILIH INDIKATOR:</span>
+                                        <span style="font-size: 11px; font-weight: 700; color: #64748b;">PILIH SATU ATAU LEBIH:</span>
                                         <div>
-                                            <a href="javascript:void(0)" id="EditBtnSelectAllIndikatorDaerah" style="font-size: 11px; font-weight: bold; color: #0284c7; margin-right: 10px;">Pilih Semua</a>
-                                            <a href="javascript:void(0)" id="EditBtnClearIndikatorDaerah" style="font-size: 11px; font-weight: bold; color: #d9534f;">Kosongkan</a>
+                                            <a href="javascript:void(0)" id="EditBtnSelectAllSasDaerah" style="font-size: 11px; font-weight: bold; color: #0284c7; margin-right: 10px;">Pilih Semua</a>
+                                            <a href="javascript:void(0)" id="EditBtnClearSasDaerah" style="font-size: 11px; font-weight: bold; color: #d9534f;">Kosongkan</a>
                                         </div>
                                     </div>
                                     <div style="padding: 2px 0 6px 0;">
-                                        <input type="text" class="form-control input-sm search-multiselect" placeholder="Cari Indikator Daerah..." style="height: 30px; font-size: 12px; padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1;">
+                                        <input type="text" class="form-control input-sm search-multiselect" placeholder="Cari Sasaran Daerah..." style="height: 30px; font-size: 12px; padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1;">
                                     </div>
-                                    <div id="EditListIndikatorDaerahOptions">
-                                        <?php if (!empty($IndikatorDaerahMaster)) { ?>
-                                            <?php foreach ($IndikatorDaerahMaster as $indItem) { ?>
-                                                <label class="custom-multiselect-item edit-item-ind-daerah" data-sasaran-id="<?= $indItem['sasaran_id'] ?>">
-                                                    <input type="checkbox" class="EditCheckIndikatorDaerah" value="<?= html_escape($indItem['indikator']) ?>" data-sasaran-id="<?= $indItem['sasaran_id'] ?>" data-indikator="<?= html_escape($indItem['indikator']) ?>">
-                                                    <span>
-                                                        <b><?= html_escape($indItem['indikator']) ?></b>
-                                                        <span class="text-muted" style="font-size: 11px; display: block;">Sasaran: <?= html_escape($indItem['sasaran']) ?></span>
-                                                    </span>
+                                    <div id="EditListSasDaerahOptions">
+                                        <?php if (!empty($SasaranDaerahList)) { ?>
+                                            <?php foreach ($SasaranDaerahList as $sasDae) { ?>
+                                                <label class="custom-multiselect-item">
+                                                    <input type="checkbox" class="EditCheckSasDaerah" value="<?= $sasDae['id'] ?>" data-kode="<?= html_escape($sasDae['kode']) ?>" data-sasaran="<?= html_escape($sasDae['sasaran']) ?>" data-prioritas-id="<?= $sasDae['prioritas_id'] ?? '' ?>">
+                                                    <span><b style="color: #0369a1;"><?= html_escape($sasDae['kode']) ?>:</b> <?= html_escape($sasDae['sasaran']) ?></span>
                                                 </label>
                                             <?php } ?>
-                                        <?php } else { ?>
-                                            <span class="text-muted" style="font-size: 12px; display: block; padding: 6px;">
-                                                <i class="fa fa-info-circle"></i> Belum ada data indikator pada Menu Sasaran Pembangunan Daerah tahun <?= html_escape($SelectedTahun) ?>.
-                                            </span>
                                         <?php } ?>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- Daftar Indikator Terpilih & Input Tambahan (Edit) -->
-                            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; padding: 10px;">
-                                <label style="font-size: 11.5px; font-weight: 700; color: #475569; margin-bottom: 4px; display: block;">
-                                    Daftar Indikator Sasaran Terpilih:
-                                </label>
-                                <div id="EditBadgesIndikatorDaerah" style="display: flex; flex-wrap: wrap; gap: 6px; min-height: 28px; margin-bottom: 6px;">
-                                    <span class="text-muted" style="font-style: italic; font-size: 12px; padding: 4px 0;">Belum ada indikator yang dipilih dari dropdown di atas.</span>
+                        <!-- Indikator Sasaran Daerah (Edit) -->
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label><b>Indikator Sasaran Pembangunan Daerah</b> (Diambil dari Menu Sasaran Pembangunan):</label>
+                            <small class="text-muted" style="display: block; margin-bottom: 6px;">
+                                * Otomatis muncul per Sasaran Daerah terpilih (apabila lebih dari 1 dapat dipilih salah satu atau semuanya).
+                            </small>
+                            <div id="EditContainerIndikatorDaerah">
+                                <div class="alert alert-info" style="margin-bottom: 0; padding: 10px 14px; font-size: 13px;">
+                                    <i class="fa fa-info-circle"></i> Silakan pilih <b>Sasaran Pembangunan Daerah</b> pada dropdown di atas untuk memunculkan indikatornya secara otomatis.
                                 </div>
-                                <small class="text-muted" style="display: block; margin-bottom: 4px;">
-                                    * Anda juga dapat mengetik indikator tambahan pada baris baru di bawah ini jika diperlukan:
-                                </small>
-                                <textarea class="form-control" id="EditInputIndikatorDaerahCustom" rows="2" placeholder="Ketik indikator tambahan di sini (jika ada)..." style="color: #000; font-size: 12px;"></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
+            <!-- END ROW BERDAMPINGAN -->
+            </div>
+            </div> <!-- /.modal-body -->
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
                 <button type="button" class="btn btn-primary" id="BtnUpdateKeterkaitan"><b>Update</b></button>
@@ -972,6 +1001,8 @@ var CSRF_TOKEN_NAME = '<?= $this->security->get_csrf_token_name() ?>';
 var CSRF_TOKEN_VALUE = '<?= $this->security->get_csrf_hash() ?>';
 var SelectedTahun = '<?= $SelectedTahun ?>';
 var KodeWilayah = '<?= $KodeWilayah ?>';
+var IndikatorDaerahMaster = <?= json_encode($IndikatorDaerahMaster ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+var SasaranDaerahList = <?= json_encode($SasaranDaerahList ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
 
 $(document).ready(function() {
     // Inisialisasi Select2 Filter Wilayah
@@ -1013,13 +1044,116 @@ $(document).ready(function() {
         window.location.href = url.toString();
     });
 
-    // Helper: Load Sasaran Nasional by PN
-    function loadSasaranNasional(idPn, targetSelect, callback) {
-        if (!idPn) {
-            targetSelect.html('<option value="">-- Pilih Sasaran Nasional (atau Ketik Manual) --</option>');
-            if (callback) callback();
+    // ============================================================
+    // RENDER SASARAN & INDIKATOR NASIONAL DENGAN CHECKBOX
+    // ============================================================
+    function renderSasaranNasional(container, list, isEdit, preSelectedSasNasId, preSelectedIndNasText) {
+        if (!list || list.length === 0) {
+            container.html('<div class="alert alert-warning" style="margin-bottom: 0; font-size: 13px;"><i class="fa fa-exclamation-triangle"></i> Belum ada data Sasaran Prioritas pada PN ini.</div>');
             return;
         }
+
+        var checkSasClass = isEdit ? 'EditCheckSasNasItem' : 'CheckSasNasItem';
+        var checkIndClass = isEdit ? 'EditCheckIndNasItem' : 'CheckIndNasItem';
+        var cardClass = isEdit ? 'edit-sas-nas-card' : 'sas-nas-card';
+
+        var html = '';
+
+        // Jika lebih dari 1 sasaran, tampilkan toolbar Pilih Semua / Kosongkan Sasaran
+        if (list.length > 1) {
+            html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 7px 12px; background: #e0f2fe; border: 1px solid #bae6fd; border-radius: 6px;">' +
+                '<span style="font-size: 12px; font-weight: 700; color: #0369a1;">' +
+                    '<i class="fa fa-list-check"></i> ' + list.length + ' Sasaran Prioritas Nasional (Dapat dipilih salah 1 atau semuanya):' +
+                '</span>' +
+                '<div>' +
+                    '<a href="javascript:void(0)" class="' + (isEdit ? 'EditBtnSelectAllSasNas' : 'BtnSelectAllSasNas') + '" style="font-size: 11px; font-weight: bold; color: #0284c7; margin-right: 10px;">Pilih Semua</a>' +
+                    '<a href="javascript:void(0)" class="' + (isEdit ? 'EditBtnClearSasNas' : 'BtnClearSasNas') + '" style="font-size: 11px; font-weight: bold; color: #d9534f;">Kosongkan</a>' +
+                '</div>' +
+            '</div>';
+        }
+
+        $.each(list, function(i, item) {
+            var kd = item.kode || ('S' + (i + 1));
+            var safeSas = (item.sasaran || '').replace(/"/g, '&quot;');
+            
+            var isSasChecked = true;
+            if (isEdit && preSelectedSasNasId) {
+                isSasChecked = (item.id == preSelectedSasNasId);
+            }
+
+            html += '<div class="panel panel-default ' + cardClass + '" data-sasaran-id="' + item.id + '" style="margin-bottom: 14px; border: 1.5px solid #cbd5e1; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">' +
+                '<div class="panel-heading" style="background: #f8fafc; padding: 10px 14px; display: flex; align-items: flex-start; gap: 10px;">';
+
+            if (list.length > 1) {
+                html += '<input type="checkbox" class="' + checkSasClass + '" value="' + item.id + '" data-kode="' + kd + '" data-sasaran="' + safeSas + '" ' + (isSasChecked ? 'checked' : '') + ' style="margin-top: 3px; cursor: pointer; width: 16px; height: 16px;">';
+            } else {
+                html += '<input type="checkbox" class="' + checkSasClass + '" value="' + item.id + '" data-kode="' + kd + '" data-sasaran="' + safeSas + '" checked style="display: none;">';
+            }
+
+            html += '<div style="flex: 1;">' +
+                        '<b style="color: #1b4f72; font-size: 13px;">' + kd + '. ' + item.sasaran + '</b>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="panel-body ' + (isEdit ? 'edit-sas-nas-body' : 'sas-nas-body') + '" style="padding: 12px 14px; background: #ffffff;' + (!isSasChecked ? ' opacity: 0.5;' : '') + '">' +
+                    '<div class="form-group" style="margin-bottom: 0;">';
+
+            var indList = item.indikator || [];
+            var numInd = indList.length;
+
+            if (numInd > 1) {
+                html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">' +
+                            '<label style="font-size: 12px; color: #334155; margin-bottom: 0;">' +
+                                '<b>Indikator Sasaran Prioritas (' + kd + ')</b> <small class="text-muted">(Pilih salah 1 atau semuanya)</small>:' +
+                            '</label>' +
+                            '<div>' +
+                                '<a href="javascript:void(0)" class="btn-check-all-ind-item" style="font-size: 11px; font-weight: bold; color: #0284c7; margin-right: 8px;">Pilih Semua</a>' +
+                                '<a href="javascript:void(0)" class="btn-clear-ind-item" style="font-size: 11px; font-weight: bold; color: #d9534f;">Kosongkan</a>' +
+                            '</div>' +
+                        '</div>';
+            } else {
+                html += '<label style="font-size: 12px; color: #334155; margin-bottom: 6px;"><b>Indikator Sasaran Prioritas (' + kd + '):</b></label>';
+            }
+
+            if (numInd > 0) {
+                html += '<div class="list-ind-items-container" style="display: flex; flex-direction: column; gap: 6px;">';
+                $.each(indList, function(idx, indText) {
+                    var safeInd = indText.replace(/"/g, '&quot;');
+                    var isIndChecked = true;
+                    if (isEdit && preSelectedIndNasText) {
+                        isIndChecked = (preSelectedIndNasText.indexOf(indText) !== -1);
+                    }
+
+                    html += '<label style="margin: 0; font-weight: normal; cursor: pointer; display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; padding: 6px 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px;">';
+                    if (numInd > 1) {
+                        html += '<input type="checkbox" class="' + checkIndClass + '" value="' + safeInd + '" data-sasaran-id="' + item.id + '" ' + (isIndChecked ? 'checked' : '') + ' style="margin-top: 2px; cursor: pointer;">';
+                    } else {
+                        html += '<input type="checkbox" class="' + checkIndClass + '" value="' + safeInd + '" data-sasaran-id="' + item.id + '" checked style="display: none;">';
+                    }
+                    html += '<span><b>' + (idx + 1) + '.</b> ' + indText + '</span>' +
+                    '</label>';
+                });
+                html += '</div>';
+            } else {
+                html += '<div style="color: #64748b; font-size: 12px; font-style: italic;">(Belum ada data indikator)</div>';
+            }
+
+            html += '</div>' +
+                '</div>' +
+            '</div>';
+        });
+
+        container.html(html);
+    }
+
+    // Helper: Load Sasaran & Indikator Nasional by PN
+    function loadSasaranNasional(idPn, isEdit, preSelectedSasNasId, preSelectedIndNasText) {
+        var container = isEdit ? $('#EditContainerSasaranNasional') : $('#ContainerSasaranNasional');
+        if (!idPn) {
+            container.html('<div class="alert alert-info" style="margin-bottom: 0; padding: 10px 14px; font-size: 13px;"><i class="fa fa-info-circle"></i> Silakan pilih <b>Prioritas Nasional (PN)</b> di atas untuk memunculkan Sasaran dan Indikator Nasional secara otomatis.</div>');
+            return;
+        }
+
+        container.html('<div class="text-muted" style="padding: 10px; font-size: 13px;"><i class="fa fa-spinner fa-spin"></i> Memuat Sasaran & Indikator Nasional...</div>');
 
         $.ajax({
             url: BaseURL + 'Daerah/GetSasaranNasionalByPN',
@@ -1027,69 +1161,225 @@ $(document).ready(function() {
             data: { id_pn: idPn },
             dataType: 'json',
             success: function(res) {
-                var html = '<option value="">-- Pilih Sasaran Nasional (atau Ketik Manual) --</option>';
-                if (res && res.length > 0) {
-                    $.each(res, function(i, item) {
-                        html += '<option value="' + item.id + '" data-kode="' + item.kode + '" data-sasaran="' + item.sasaran + '">' + item.label + '</option>';
-                    });
-                }
-                targetSelect.html(html).trigger('change.select2');
-                if (callback) callback(res);
+                renderSasaranNasional(container, res, isEdit, preSelectedSasNasId, preSelectedIndNasText);
+            },
+            error: function() {
+                container.html('<div class="alert alert-danger" style="margin-bottom: 0; font-size: 13px;"><i class="fa fa-exclamation-triangle"></i> Gagal memuat data dari server.</div>');
             }
         });
     }
+    // ============================================================
+    // RENDER INDIKATOR DAERAH PER SASARAN TERPILIH (PERSIS BAGIAN 1)
+    // ============================================================
+    function renderIndikatorDaerahPerSasaran(isEdit, preSelectedIndDaerahArr) {
+        var checkSasClass = isEdit ? '.EditCheckSasDaerah:checked' : '.CheckSasDaerah:checked';
+        var container = isEdit ? $('#EditContainerIndikatorDaerah') : $('#ContainerIndikatorDaerah');
+        var checkIndClass = isEdit ? 'EditCheckIndDaerahItem' : 'CheckIndDaerahItem';
+        var cardClass = isEdit ? 'edit-sas-dae-card' : 'sas-dae-card';
+        var bodyClass = isEdit ? 'edit-sas-dae-body' : 'sas-dae-body';
 
-    // Helper: Load Indikator Daerah by Sasaran ID
-    function loadIndikatorDaerah(sasaranId, targetContainer, checkedItems) {
-        if (!sasaranId) {
-            targetContainer.html('<span class="text-muted" style="font-style: italic; font-size: 12px;">Pilih Sasaran Pembangunan Daerah di atas untuk memuat daftar indikator terkait...</span>');
+        var checkedSas = $(checkSasClass);
+        if (checkedSas.length === 0) {
+            container.html('<div class="alert alert-info" style="margin-bottom: 0; padding: 10px 14px; font-size: 13px;"><i class="fa fa-info-circle"></i> Silakan pilih <b>Sasaran Pembangunan Daerah</b> pada dropdown di atas untuk memunculkan indikatornya secara otomatis.</div>');
             return;
         }
 
-        targetContainer.html('<span class="text-muted"><i class="fa fa-spinner fa-spin"></i> Memuat indikator...</span>');
+        var html = '';
 
-        $.ajax({
-            url: BaseURL + 'Daerah/GetIndikatorBySasaranDaerah',
-            type: 'GET',
-            data: { sasaran_id: sasaranId },
-            dataType: 'json',
-            success: function(res) {
-                if (res && res.length > 0) {
-                    var html = '';
-                    $.each(res, function(i, item) {
-                        var isChecked = false;
-                        if (checkedItems && checkedItems.length > 0) {
-                            if (checkedItems.indexOf(item.indikator) !== -1 || checkedItems.indexOf(String(item.id)) !== -1) {
-                                isChecked = true;
-                            }
-                        } else {
-                            // Default checked all
-                            isChecked = true;
-                        }
+        checkedSas.each(function(i, sasElem) {
+            var sid = $(sasElem).val();
+            var kd = $(sasElem).data('kode') || ('S' + (i + 1));
+            var sasTitle = $(sasElem).data('sasaran') || '';
 
-                        html += '<div class="checkbox" style="margin-top: 4px; margin-bottom: 6px;">';
-                        html += '<label style="font-weight: normal; color: #1e293b;">';
-                        html += '<input type="checkbox" class="CheckIndikatorDaerahItem" value="' + item.indikator.replace(/"/g, '&quot;') + '" ' + (isChecked ? 'checked' : '') + '>';
-                        html += ' ' + item.indikator;
-                        html += '</label>';
-                        html += '</div>';
-                    });
-                    targetContainer.html(html);
-                } else {
-                    targetContainer.html('<span class="text-warning" style="font-size: 12px;"><i class="fa fa-info-circle"></i> Sasaran ini belum memiliki indikator di menu Sasaran Pembangunan Daerah.</span>');
-                }
+            // Cari indikator untuk sasaran ini
+            var indList = [];
+            if (IndikatorDaerahMaster && IndikatorDaerahMaster.length > 0) {
+                $.each(IndikatorDaerahMaster, function(idx, ind) {
+                    if (parseInt(ind.sasaran_id) === parseInt(sid)) {
+                        indList.push(ind.indikator);
+                    }
+                });
             }
+
+            var numInd = indList.length;
+
+            // Render card panel per sasaran terpilih persis seperti Bagian 1 (Sasaran Nasional)
+            html += '<div class="panel panel-default ' + cardClass + '" data-sasaran-id="' + sid + '" style="margin-bottom: 14px; border: 1.5px solid #cbd5e1; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">' +
+                '<div class="panel-heading" style="background: #f8fafc; padding: 10px 14px; display: flex; align-items: center; gap: 8px;">' +
+                    '<span class="badge" style="background: #0284c7; font-size: 11px;">' + kd + '</span>' +
+                    '<b style="color: #0369a1; font-size: 13px;">' + kd + '. ' + sasTitle + '</b>' +
+                '</div>' +
+                '<div class="panel-body ' + bodyClass + '" style="padding: 12px 14px; background: #ffffff;">' +
+                    '<div class="form-group" style="margin-bottom: 0;">';
+
+            if (numInd > 1) {
+                html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">' +
+                            '<label style="font-size: 12px; color: #334155; margin-bottom: 0;">' +
+                                '<b>Indikator Sasaran Daerah (' + kd + ')</b> <small class="text-muted">(Pilih salah 1 atau semuanya)</small>:' +
+                            '</label>' +
+                            '<div>' +
+                                '<a href="javascript:void(0)" class="btn-check-all-ind-dae-item" style="font-size: 11px; font-weight: bold; color: #0284c7; margin-right: 8px;">Pilih Semua</a>' +
+                                '<a href="javascript:void(0)" class="btn-clear-ind-dae-item" style="font-size: 11px; font-weight: bold; color: #d9534f;">Kosongkan</a>' +
+                            '</div>' +
+                        '</div>';
+            } else {
+                html += '<label style="font-size: 12px; color: #334155; margin-bottom: 6px;"><b>Indikator Sasaran Daerah (' + kd + '):</b></label>';
+            }
+
+            if (numInd > 0) {
+                html += '<div class="list-ind-dae-items-container" style="display: flex; flex-direction: column; gap: 6px;">';
+                $.each(indList, function(idx, indText) {
+                    var safeInd = indText.replace(/"/g, '&quot;');
+                    var isIndChecked = true;
+                    if (isEdit && preSelectedIndDaerahArr && preSelectedIndDaerahArr.length > 0) {
+                        isIndChecked = false;
+                        $.each(preSelectedIndDaerahArr, function(pi, pVal) {
+                            var pText = typeof pVal === 'object' ? (pVal.indikator || '') : pVal;
+                            if ((pText || '').trim() === (indText || '').trim()) {
+                                isIndChecked = true;
+                                return false;
+                            }
+                        });
+                    }
+
+                    html += '<label style="margin: 0; font-weight: normal; cursor: pointer; display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; padding: 6px 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px;">';
+                    if (numInd > 1) {
+                        html += '<input type="checkbox" class="' + checkIndClass + '" value="' + safeInd + '" data-sasaran-id="' + sid + '" ' + (isIndChecked ? 'checked' : '') + ' style="margin-top: 2px; cursor: pointer;">';
+                    } else {
+                        html += '<input type="checkbox" class="' + checkIndClass + '" value="' + safeInd + '" data-sasaran-id="' + sid + '" checked style="display: none;">';
+                    }
+                    html += '<span><b>' + (idx + 1) + '.</b> ' + indText + '</span>' +
+                    '</label>';
+                });
+                html += '</div>';
+            } else {
+                html += '<div style="color: #64748b; font-size: 12px; font-style: italic;">(Belum ada data indikator pada sasaran ini)</div>';
+            }
+
+            html += '</div>' +
+                '</div>' +
+            '</div>';
         });
+
+        container.html(html);
+    }
+
+    // Helper: Update label dropdown Sasaran Daerah (Menampilkan kode & perihal)
+    function updateSasDaerahDisplay(isEdit, preSelectedIndDaerahArr) {
+        var checkClass = isEdit ? '.EditCheckSasDaerah' : '.CheckSasDaerah';
+        var labelElem = isEdit ? $('#EditLabelSasDaerahSelected') : $('#LabelSasDaerahSelected');
+
+        var checked = $(checkClass + ':checked');
+        if (checked.length === 0) {
+            labelElem.html('<span style="color: #64748b;">-- Pilih Sasaran Pembangunan Daerah (Bisa Pilih Lebih Dari Satu) --</span>');
+        } else if (checked.length === 1) {
+            var first = checked.first();
+            var kd = first.data('kode') || '';
+            var sas = first.data('sasaran') || '';
+            labelElem.html('<div style="display: flex; align-items: flex-start; gap: 6px; line-height: 1.4;"><span class="label label-primary" style="font-size: 10.5px; margin-top: 2px; flex-shrink: 0;">' + kd + '</span> <span style="color: #0f172a; font-weight: 600; font-size: 12.5px;">' + sas + '</span></div>');
+            labelElem.attr('title', kd + ': ' + sas);
+        } else {
+            var itemsHtml = '';
+            var itemsPlain = [];
+            checked.each(function() {
+                var kd = $(this).data('kode') || '';
+                var sas = $(this).data('sasaran') || '';
+                if (kd) {
+                    itemsHtml += '<div style="display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; margin-top: 4px;">' +
+                        '<span class="label label-primary" style="font-size: 10.5px; margin-top: 2px; flex-shrink: 0;">' + kd + '</span>' +
+                        '<span style="color: #0f172a; font-weight: 600; font-size: 12.5px;">' + sas + '</span>' +
+                    '</div>';
+                    itemsPlain.push(kd + ': ' + sas);
+                }
+            });
+            var fullHtml = '<div style="display: flex; flex-direction: column; width: 100%;">' +
+                '<div><span class="badge" style="background: #0284c7; font-size: 11px;">' + checked.length + ' Dipilih:</span></div>' +
+                itemsHtml +
+            '</div>';
+            labelElem.html(fullHtml);
+            labelElem.attr('title', itemsPlain.join(' | '));
+        }
+
+        renderIndikatorDaerahPerSasaran(isEdit, preSelectedIndDaerahArr);
     }
 
     // ============================================================
+    // CUSTOM MULTISELECT DROPDOWN SASARAN DAERAH
+    // ============================================================
+    $(document).on('click', '#ToggleSasDaerah', function(e) {
+        e.stopPropagation();
+        var menu = $('#MenuSasDaerah');
+        var isVisible = menu.is(':visible');
+        $('.custom-multiselect-menu').hide();
+        $('.custom-multiselect-toggle').removeClass('active');
+        $('.custom-multiselect-toggle i').css('transform', 'rotate(0deg)');
+        if (!isVisible) {
+            menu.show();
+            $(this).addClass('active');
+            $('#CaretSasDaerah').css('transform', 'rotate(180deg)');
+        }
+    });
+
+    $(document).on('click', '#EditToggleSasDaerah', function(e) {
+        e.stopPropagation();
+        var menu = $('#EditMenuSasDaerah');
+        var isVisible = menu.is(':visible');
+        $('.custom-multiselect-menu').hide();
+        $('.custom-multiselect-toggle').removeClass('active');
+        $('.custom-multiselect-toggle i').css('transform', 'rotate(0deg)');
+        if (!isVisible) {
+            menu.show();
+            $(this).addClass('active');
+            $('#EditCaretSasDaerah').css('transform', 'rotate(180deg)');
+        }
+    });
+
+    // Event Checkbox Sasaran Daerah change
+    $(document).on('change', '.CheckSasDaerah', function() {
+        updateSasDaerahDisplay(false);
+    });
+    $(document).on('change', '.EditCheckSasDaerah', function() {
+        updateSasDaerahDisplay(true);
+    });
+
+    // Toolbar Sasaran Daerah Tambah
+    $(document).on('click', '#BtnSelectAllSasDaerah', function(e) {
+        e.preventDefault();
+        $('.CheckSasDaerah').prop('checked', true);
+        updateSasDaerahDisplay(false);
+    });
+    $(document).on('click', '#BtnClearSasDaerah', function(e) {
+        e.preventDefault();
+        $('.CheckSasDaerah').prop('checked', false);
+        updateSasDaerahDisplay(false);
+    });
+
+    // Toolbar Sasaran Daerah Edit
+    $(document).on('click', '#EditBtnSelectAllSasDaerah', function(e) {
+        e.preventDefault();
+        $('.EditCheckSasDaerah').prop('checked', true);
+        updateSasDaerahDisplay(true);
+    });
+    $(document).on('click', '#EditBtnClearSasDaerah', function(e) {
+        e.preventDefault();
+        $('.EditCheckSasDaerah').prop('checked', false);
+        updateSasDaerahDisplay(true);
+    });
+
+    // Toolbar Indikator per Sasaran Daerah
+    $(document).on('click', '.btn-check-all-ind-dae-item', function(e) {
+        e.preventDefault();
+        $(this).closest('.panel-body').find('input[type="checkbox"]').prop('checked', true);
+    });
+    $(document).on('click', '.btn-clear-ind-dae-item', function(e) {
+        e.preventDefault();
+        $(this).closest('.panel-body').find('input[type="checkbox"]').prop('checked', false);
+    });
+
+    // ============================================================
     // CUSTOM MULTISELECT DROPDOWN PRIORITAS DAERAH (P)
     // ============================================================
-    // ============================================================
-    // CUSTOM MULTISELECT DROPDOWN PRIORITAS DAERAH (P)
-    // ============================================================
-    // Toggle Menu Tambah (P Daerah)
-    $('#TogglePDaerah').on('click', function(e) {
+    $(document).on('click', '#TogglePDaerah', function(e) {
         e.stopPropagation();
         var menu = $('#MenuPDaerah');
         var isVisible = menu.is(':visible');
@@ -1103,8 +1393,7 @@ $(document).ready(function() {
         }
     });
 
-    // Toggle Menu Edit (P Daerah)
-    $('#EditTogglePDaerah').on('click', function(e) {
+    $(document).on('click', '#EditTogglePDaerah', function(e) {
         e.stopPropagation();
         var menu = $('#EditMenuPDaerah');
         var isVisible = menu.is(':visible');
@@ -1118,52 +1407,17 @@ $(document).ready(function() {
         }
     });
 
-    // ============================================================
-    // CUSTOM MULTISELECT DROPDOWN INDIKATOR DAERAH
-    // ============================================================
-    // Toggle Menu Tambah (Indikator Daerah)
-    $('#ToggleIndikatorDaerah').on('click', function(e) {
-        e.stopPropagation();
-        var menu = $('#MenuIndikatorDaerah');
-        var isVisible = menu.is(':visible');
-        $('.custom-multiselect-menu').hide();
-        $('.custom-multiselect-toggle').removeClass('active');
-        $('.custom-multiselect-toggle i').css('transform', 'rotate(0deg)');
-        if (!isVisible) {
-            menu.show();
-            $(this).addClass('active');
-            $('#CaretIndikatorDaerah').css('transform', 'rotate(180deg)');
-        }
-    });
-
-    // Toggle Menu Edit (Indikator Daerah)
-    $('#EditToggleIndikatorDaerah').on('click', function(e) {
-        e.stopPropagation();
-        var menu = $('#EditMenuIndikatorDaerah');
-        var isVisible = menu.is(':visible');
-        $('.custom-multiselect-menu').hide();
-        $('.custom-multiselect-toggle').removeClass('active');
-        $('.custom-multiselect-toggle i').css('transform', 'rotate(0deg)');
-        if (!isVisible) {
-            menu.show();
-            $(this).addClass('active');
-            $('#EditCaretIndikatorDaerah').css('transform', 'rotate(180deg)');
-        }
-    });
-
-    // Cegah penutupan saat klik di dalam menu
-    $('.custom-multiselect-menu').on('click', function(e) {
+    $(document).on('click', '.custom-multiselect-menu', function(e) {
         e.stopPropagation();
     });
 
-    // Tutup saat klik di luar
     $(document).on('click', function() {
         $('.custom-multiselect-menu').hide();
         $('.custom-multiselect-toggle').removeClass('active');
         $('.custom-multiselect-toggle i').css('transform', 'rotate(0deg)');
     });
 
-    // Update Label Tampilan P Daerah
+    // Update P Daerah Display
     function updatePDaerahDisplay(isEdit) {
         var checkClass = isEdit ? '.EditCheckPDaerah' : '.CheckPDaerah';
         var labelElem = isEdit ? $('#EditLabelPDaerahSelected') : $('#LabelPDaerahSelected');
@@ -1175,191 +1429,122 @@ $(document).ready(function() {
             var first = checked.first();
             var kd = first.data('kode') || '';
             var pri = first.data('prioritas') || '';
-            labelElem.html('<span class="label label-primary" style="font-size: 11px; margin-right: 5px;">' + kd + '</span> <span style="color: #0f172a; font-weight: 600;">' + pri + '</span>');
+            labelElem.html('<div style="display: flex; align-items: flex-start; gap: 6px; line-height: 1.4;"><span class="label label-primary" style="font-size: 10.5px; margin-top: 2px; flex-shrink: 0;">' + kd + '</span> <span style="color: #0f172a; font-weight: 600; font-size: 12.5px;">' + pri + '</span></div>');
+            labelElem.attr('title', kd + ': ' + pri);
         } else {
-            var kodes = [];
+            var itemsHtml = '';
+            var itemsPlain = [];
             checked.each(function() {
-                var kd = $(this).data('kode');
-                if (kd) kodes.push(kd);
+                var kd = $(this).data('kode') || '';
+                var pri = $(this).data('prioritas') || '';
+                if (kd) {
+                    itemsHtml += '<div style="display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; margin-top: 4px;">' +
+                        '<span class="label label-primary" style="font-size: 10.5px; margin-top: 2px; flex-shrink: 0;">' + kd + '</span>' +
+                        '<span style="color: #0f172a; font-weight: 600; font-size: 12.5px;">' + pri + '</span>' +
+                    '</div>';
+                    itemsPlain.push(kd + ': ' + pri);
+                }
             });
-            labelElem.html('<span class="badge" style="background: #0284c7; margin-right: 6px;">' + checked.length + ' Dipilih:</span> <span style="color: #0f172a; font-weight: 600;">' + kodes.join(', ') + '</span>');
+            var fullHtml = '<div style="display: flex; flex-direction: column; width: 100%;">' +
+                '<div><span class="badge" style="background: #0284c7; font-size: 11px;">' + checked.length + ' Dipilih:</span></div>' +
+                itemsHtml +
+            '</div>';
+            labelElem.html(fullHtml);
+            labelElem.attr('title', itemsPlain.join(' | '));
+        }
+    }
+
+    function filterSasaranDaerahOptions(isEdit) {
+        var checkPClass = isEdit ? '.EditCheckPDaerah:checked' : '.CheckPDaerah:checked';
+        var listContainer = isEdit ? $('#EditListSasDaerahOptions') : $('#ListSasDaerahOptions');
+        var checkedP = $(checkPClass);
+
+        if (checkedP.length === 0) {
+            listContainer.find('.custom-multiselect-item').show();
+        } else {
+            var selectedPIds = [];
+            checkedP.each(function() {
+                selectedPIds.push($(this).val().toString());
+            });
+            listContainer.find('.custom-multiselect-item').each(function() {
+                var $chk = $(this).find('input[type="checkbox"]');
+                var pId = ($chk.data('prioritas-id') || '').toString();
+                if (pId && selectedPIds.indexOf(pId) !== -1) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
         }
     }
 
     $(document).on('change', '.CheckPDaerah', function() {
         updatePDaerahDisplay(false);
+        filterSasaranDaerahOptions(false);
     });
     $(document).on('change', '.EditCheckPDaerah', function() {
         updatePDaerahDisplay(true);
+        filterSasaranDaerahOptions(true);
     });
 
-    $('#BtnSelectAllPDaerah').on('click', function(e) {
+    $(document).on('click', '#BtnSelectAllPDaerah', function(e) {
         e.preventDefault();
         $('.CheckPDaerah').prop('checked', true);
         updatePDaerahDisplay(false);
+        filterSasaranDaerahOptions(false);
     });
-
-    $('#BtnClearPDaerah').on('click', function(e) {
+    $(document).on('click', '#BtnClearPDaerah', function(e) {
         e.preventDefault();
         $('.CheckPDaerah').prop('checked', false);
         updatePDaerahDisplay(false);
+        filterSasaranDaerahOptions(false);
     });
 
-    $('#EditBtnSelectAllPDaerah').on('click', function(e) {
+    $(document).on('click', '#EditBtnSelectAllPDaerah', function(e) {
         e.preventDefault();
         $('.EditCheckPDaerah').prop('checked', true);
         updatePDaerahDisplay(true);
+        filterSasaranDaerahOptions(true);
     });
-
-    $('#EditBtnClearPDaerah').on('click', function(e) {
+    $(document).on('click', '#EditBtnClearPDaerah', function(e) {
         e.preventDefault();
         $('.EditCheckPDaerah').prop('checked', false);
         updatePDaerahDisplay(true);
-    });
-
-    // Update Tampilan Indikator Daerah (Dropdown & Badges)
-    function updateIndikatorDaerahDisplay(isEdit) {
-        var checkClass = isEdit ? '.EditCheckIndikatorDaerah' : '.CheckIndikatorDaerah';
-        var labelElem = isEdit ? $('#EditLabelIndikatorDaerahSelected') : $('#LabelIndikatorDaerahSelected');
-        var badgesElem = isEdit ? $('#EditBadgesIndikatorDaerah') : $('#BadgesIndikatorDaerah');
-
-        var checked = $(checkClass + ':checked');
-        if (checked.length === 0) {
-            labelElem.html('<span style="color: #64748b;">-- Pilih Indikator Sasaran Daerah (Bisa Pilih Lebih Dari Satu) --</span>');
-            badgesElem.html('<span class="text-muted" style="font-style: italic; font-size: 12px; padding: 4px 0;">Belum ada indikator yang dipilih dari dropdown di atas.</span>');
-        } else {
-            var items = [];
-            var badgesHtml = '';
-            checked.each(function() {
-                var val = $(this).val();
-                items.push(val);
-                var removeClass = isEdit ? 'remove-badge-edit-ind' : 'remove-badge-ind';
-                badgesHtml += '<span class="label label-info" style="font-size: 11.5px; padding: 5px 8px; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; margin-bottom: 2px;">' +
-                    '• ' + val +
-                    ' <i class="fa fa-times ' + removeClass + '" data-val="' + val.replace(/"/g, '&quot;') + '" style="cursor: pointer; margin-left: 4px;" title="Hapus"></i>' +
-                    '</span> ';
-            });
-            labelElem.html('<span class="badge" style="background: #0284c7; margin-right: 6px;">' + checked.length + ' Dipilih:</span> <span style="color: #0f172a; font-weight: 600;">' + items.join(', ') + '</span>');
-            badgesElem.html(badgesHtml);
-        }
-    }
-
-    $(document).on('change', '.CheckIndikatorDaerah', function() {
-        updateIndikatorDaerahDisplay(false);
-    });
-    $(document).on('change', '.EditCheckIndikatorDaerah', function() {
-        updateIndikatorDaerahDisplay(true);
-    });
-
-    $(document).on('click', '.remove-badge-ind', function() {
-        var val = $(this).data('val');
-        $('.CheckIndikatorDaerah[value="' + val + '"]').prop('checked', false);
-        updateIndikatorDaerahDisplay(false);
-    });
-
-    $(document).on('click', '.remove-badge-edit-ind', function() {
-        var val = $(this).data('val');
-        $('.EditCheckIndikatorDaerah[value="' + val + '"]').prop('checked', false);
-        updateIndikatorDaerahDisplay(true);
-    });
-
-    $('#BtnSelectAllIndikatorDaerah').on('click', function(e) {
-        e.preventDefault();
-        $('#ListIndikatorDaerahOptions .item-ind-daerah:visible .CheckIndikatorDaerah').prop('checked', true);
-        updateIndikatorDaerahDisplay(false);
-    });
-
-    $('#BtnClearIndikatorDaerah').on('click', function(e) {
-        e.preventDefault();
-        $('.CheckIndikatorDaerah').prop('checked', false);
-        updateIndikatorDaerahDisplay(false);
-    });
-
-    $('#EditBtnSelectAllIndikatorDaerah').on('click', function(e) {
-        e.preventDefault();
-        $('#EditListIndikatorDaerahOptions .edit-item-ind-daerah:visible .EditCheckIndikatorDaerah').prop('checked', true);
-        updateIndikatorDaerahDisplay(true);
-    });
-
-    $('#EditBtnClearIndikatorDaerah').on('click', function(e) {
-        e.preventDefault();
-        $('.EditCheckIndikatorDaerah').prop('checked', false);
-        updateIndikatorDaerahDisplay(true);
+        filterSasaranDaerahOptions(true);
     });
 
     // Buka Modal Tambah
-    $('#BtnBukaModalTambah, #BtnTambahEmpty').on('click', function() {
-        $('#InputIdPN').val('');
-        $('#InputKodeSasNas').val('');
-        $('#SelectSasaranNasional').html('<option value="">-- Pilih Sasaran Nasional (atau Ketik Manual) --</option>');
-        $('#InputSasaranNasionalCustom').val('');
-        $('#InputIndikatorNasional').val('');
-        $('.CheckPDaerah').prop('checked', false);
-        updatePDaerahDisplay(false);
-        $('.CheckIndikatorDaerah').prop('checked', false);
-        $('#ListIndikatorDaerahOptions .item-ind-daerah').show();
-        updateIndikatorDaerahDisplay(false);
-        $('#InputIndikatorDaerahCustom').val('');
-        $('.custom-multiselect-menu').hide();
-        $('.custom-multiselect-toggle').removeClass('active');
-        $('#InputKodeSasDaerah').val('');
-        $('#SelectSasaranDaerah').val('').trigger('change.select2');
-        $('#InputSasaranDaerahCustom').val('');
-        $('#InputIdPN').val('').trigger('change.select2');
-        $('#SelectSasaranNasional').html('<option value="">-- Pilih Sasaran Nasional (atau Ketik Manual) --</option>').trigger('change.select2');
-        $('.search-multiselect').val('');
-        $('.custom-multiselect-item').show();
+    $(document).on('click', '#BtnBukaModalTambah, #BtnTambahEmpty', function() {
+        try {
+            $('#InputIdPN').val('').trigger('change.select2');
+            $('#ContainerSasaranNasional').html('<div class="alert alert-info" style="margin-bottom: 0; padding: 10px 14px; font-size: 13px;"><i class="fa fa-info-circle"></i> Silakan pilih <b>Prioritas Nasional (PN)</b> di atas untuk memunculkan Sasaran dan Indikator Nasional secara otomatis.</div>');
+            
+            $('.CheckPDaerah').prop('checked', false);
+            updatePDaerahDisplay(false);
+            filterSasaranDaerahOptions(false);
+
+            $('.CheckSasDaerah').prop('checked', false);
+            updateSasDaerahDisplay(false);
+
+            $('.custom-multiselect-menu').hide();
+            $('.custom-multiselect-toggle').removeClass('active');
+            $('.search-multiselect').val('');
+            $('.custom-multiselect-item').show();
+        } catch(e) {
+            console.error('Error pre-opening modal tambah:', e);
+        }
         $('#ModalInputKeterkaitan').modal('show');
     });
 
     // Event saat PN dipilih (Tambah)
     $('#InputIdPN').on('change', function() {
         var idPn = $(this).val();
-        loadSasaranNasional(idPn, $('#SelectSasaranNasional'));
-    });
-
-    // Event saat Sasaran Nasional dipilih dari dropdown (Tambah)
-    $('#SelectSasaranNasional').on('change', function() {
-        var opt = $(this).find(':selected');
-        var sasText = opt.data('sasaran');
-        var kode = opt.data('kode');
-        if (sasText) {
-            $('#InputSasaranNasionalCustom').val(sasText);
-            if (kode && !$('#InputKodeSasNas').val()) {
-                $('#InputKodeSasNas').val(kode);
-            }
-        }
-    });
-
-    // Event saat Sasaran Daerah dipilih (Tambah)
-    $('#SelectSasaranDaerah').on('change', function() {
-        var sasId = $(this).val();
-        var opt = $(this).find(':selected');
-        var sasText = opt.data('sasaran');
-        var kode = opt.data('kode');
-
-        if (sasText) {
-            $('#InputSasaranDaerahCustom').val(sasText);
-            $('#InputKodeSasDaerah').val(kode || '');
-        }
-
-        // Filter dan otomatis pilih indikator yang sesuai dengan sasaran daerah tersebut
-        if (sasId) {
-            var matching = $('#ListIndikatorDaerahOptions .item-ind-daerah[data-sasaran-id="' + sasId + '"]');
-            if (matching.length > 0) {
-                matching.find('.CheckIndikatorDaerah').prop('checked', true);
-            }
-        }
-        updateIndikatorDaerahDisplay(false);
+        loadSasaranNasional(idPn, false);
     });
 
     // Simpan Keterkaitan (Tambah)
-    $('#BtnSimpanKeterkaitan').on('click', function() {
+    $(document).on('click', '#BtnSimpanKeterkaitan', function() {
         var idPn = $('#InputIdPN').val();
-        var idSasNas = $('#SelectSasaranNasional').val();
-        var kodeSasNas = $('#InputKodeSasNas').val().trim();
-        var sasNasCustom = $('#InputSasaranNasionalCustom').val().trim();
-        var indNas = $('#InputIndikatorNasional').val().trim();
 
         // P Daerah
         var pDaerahIds = [];
@@ -1367,40 +1552,58 @@ $(document).ready(function() {
             pDaerahIds.push($(this).val());
         });
 
-        // Sasaran Daerah
-        var idSasDae = $('#SelectSasaranDaerah').val();
-        var kodeSasDae = $('#InputKodeSasDaerah').val().trim();
-        var sasDaeCustom = $('#InputSasaranDaerahCustom').val().trim();
+        // Sasaran Nasional & Indikator Nasional
+        var sasaranNasListToSubmit = [];
+        $('.CheckSasNasItem:checked').each(function() {
+            var sId = $(this).val();
+            var sKode = $(this).data('kode');
+            var sText = $(this).data('sasaran');
 
-        // Indikator Daerah (Dropdown Checked + Custom Textarea)
-        var indDaerah = [];
-        $('.CheckIndikatorDaerah:checked').each(function() {
-            var val = $(this).val().trim();
-            if (val && indDaerah.indexOf(val) === -1) {
-                indDaerah.push(val);
-            }
-        });
-        var customInd = $('#InputIndikatorDaerahCustom').val();
-        if (customInd) {
-            var lines = customInd.split('\n');
-            $.each(lines, function(i, l) {
-                var lTrim = l.trim();
-                if (lTrim && indDaerah.indexOf(lTrim) === -1) {
-                    indDaerah.push(lTrim);
-                }
+            var indChecked = [];
+            $(this).closest('.sas-nas-card').find('.CheckIndNasItem:checked').each(function() {
+                var indVal = $(this).val().trim();
+                if (indVal) indChecked.push(indVal);
             });
-        }
+
+            sasaranNasListToSubmit.push({
+                id: sId,
+                kode: sKode,
+                sasaran: sText,
+                indikator: indChecked
+            });
+        });
+
+        // Sasaran Daerah & Indikator Daerah
+        var sasaranDaeListToSubmit = [];
+        $('.CheckSasDaerah:checked').each(function() {
+            var sdId = $(this).val();
+            var sdKode = $(this).data('kode');
+            var sdText = $(this).data('sasaran');
+
+            var indDaeChecked = [];
+            $('.CheckIndDaerahItem:checked[data-sasaran-id="' + sdId + '"]').each(function() {
+                var indVal = $(this).val().trim();
+                if (indVal) indDaeChecked.push(indVal);
+            });
+
+            sasaranDaeListToSubmit.push({
+                id: sdId,
+                kode: sdKode,
+                sasaran: sdText,
+                indikator: indDaeChecked
+            });
+        });
 
         if (!idPn) {
             alert('Prioritas Nasional (PN) wajib dipilih!');
             return;
         }
-        if (!sasNasCustom) {
-            alert('Sasaran Prioritas Pembangunan Nasional wajib diisi!');
+        if (sasaranNasListToSubmit.length === 0) {
+            alert('Minimal pilih salah satu Sasaran Prioritas Pembangunan Nasional!');
             return;
         }
-        if (!sasDaeCustom) {
-            alert('Sasaran Pembangunan Daerah wajib dipilih atau diisi!');
+        if (sasaranDaeListToSubmit.length === 0) {
+            alert('Minimal pilih salah satu Sasaran Pembangunan Daerah!');
             return;
         }
 
@@ -1414,15 +1617,9 @@ $(document).ready(function() {
                 Tahun: SelectedTahun,
                 KodeWilayah: KodeWilayah,
                 IdPN: idPn,
-                IdSasaranNasional: idSasNas,
-                KodeSasaranNasional: kodeSasNas,
-                SasaranNasionalCustom: sasNasCustom,
-                IndikatorNasional: indNas,
+                SasaranNasionalList: JSON.stringify(sasaranNasListToSubmit),
+                SasaranDaerahList: JSON.stringify(sasaranDaeListToSubmit),
                 PDaerahIds: pDaerahIds,
-                IdSasaranDaerah: idSasDae,
-                KodeSasaranDaerah: kodeSasDae,
-                SasaranDaerahCustom: sasDaeCustom,
-                IndikatorDaerah: indDaerah,
                 [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
             },
             dataType: 'json',
@@ -1435,7 +1632,7 @@ $(document).ready(function() {
                     btn.prop('disabled', false).text('Simpan');
                 }
             },
-            error: function(xhr) {
+            error: function() {
                 alert('Terjadi kesalahan koneksi server!');
                 btn.prop('disabled', false).text('Simpan');
             }
@@ -1445,157 +1642,140 @@ $(document).ready(function() {
     // ============================================================
     // EDIT KETERKAITAN
     // ============================================================
+    var isEditModalOpening = false;
+
     $(document).on('click', '.BtnEditKeterkaitan', function() {
-        var id = $(this).data('id');
-        var idPn = $(this).data('id_pn');
-        var idSasNas = $(this).data('id_sasaran_nasional');
-        var kodeSasNas = $(this).data('kode_sasaran_nasional');
-        var sasNas = $(this).data('sasaran_nasional');
-        var indNas = $(this).data('indikator_nasional');
-        var pDaerahJson = $(this).data('p_daerah');
-        var idSasDae = $(this).data('id_sasaran_daerah');
-        var kodeSasDae = $(this).data('kode_sasaran_daerah');
-        var sasDae = $(this).data('sasaran_daerah');
-        var indDaeJson = $(this).data('indikator_daerah');
+        try {
+            var id = $(this).data('id');
+            var idPn = $(this).data('id_pn');
+            var idSasNas = $(this).data('id_sasaran_nasional');
+            var indNas = $(this).data('indikator_nasional');
+            var pDaerahJson = $(this).data('p_daerah');
+            var idSasDae = $(this).data('id_sasaran_daerah');
+            var indDaeJson = $(this).data('indikator_daerah');
 
-        $('#EditKeterkaitanId').val(id);
-        $('#EditIdPN').val(idPn);
-        $('#EditKodeSasNas').val(kodeSasNas);
-        $('#EditSasaranNasionalCustom').val(sasNas);
-        $('#EditIndikatorNasional').val(indNas);
-
-        // Set P Daerah di Multiselect
-        $('.EditCheckPDaerah').prop('checked', false);
-        if (pDaerahJson && pDaerahJson.length > 0) {
-            $.each(pDaerahJson, function(i, p) {
-                $('.EditCheckPDaerah[value="' + p.id + '"]').prop('checked', true);
-            });
-        }
-        updatePDaerahDisplay(true);
-        $('.custom-multiselect-menu').hide();
-        $('.custom-multiselect-toggle').removeClass('active');
-
-        // Sasaran Daerah
-        $('#EditKodeSasDaerah').val(kodeSasDae);
-        $('#EditSelectSasaranDaerah').val(idSasDae || '');
-        $('#EditSasaranDaerahCustom').val(sasDae);
-
-        // Load Sasaran Nasional
-        loadSasaranNasional(idPn, $('#EditSelectSasaranNasional'), function() {
-            if (idSasNas) {
-                $('#EditSelectSasaranNasional').val(idSasNas);
+            // Aman parsing JSON jika tipe data adalah string
+            if (typeof pDaerahJson === 'string') {
+                try { pDaerahJson = JSON.parse(pDaerahJson); } catch(e) { pDaerahJson = []; }
             }
-        });
+            if (!Array.isArray(pDaerahJson)) {
+                pDaerahJson = [];
+            }
 
-        // Set Indikator Daerah di Multiselect
-        $('.EditCheckIndikatorDaerah').prop('checked', false);
-        var unhandledIndikator = [];
-        if (indDaeJson && indDaeJson.length > 0) {
-            $.each(indDaeJson, function(i, item) {
-                var indText = typeof item === 'object' ? (item.indikator || '') : item;
-                indText = indText.trim();
-                var foundCb = $('.EditCheckIndikatorDaerah[value="' + indText + '"]');
-                if (foundCb.length > 0) {
-                    foundCb.prop('checked', true);
-                } else if (indText) {
-                    unhandledIndikator.push(indText);
-                }
-            });
+            if (typeof indDaeJson === 'string') {
+                try { indDaeJson = JSON.parse(indDaeJson); } catch(e) { indDaeJson = []; }
+            }
+            if (!Array.isArray(indDaeJson)) {
+                indDaeJson = [];
+            }
+
+            isEditModalOpening = true;
+
+            $('#EditKeterkaitanId').val(id);
+            $('#EditIdPN').val(idPn).trigger('change.select2');
+
+            // P Daerah
+            $('.EditCheckPDaerah').prop('checked', false);
+            if (pDaerahJson && pDaerahJson.length > 0) {
+                $.each(pDaerahJson, function(i, p) {
+                    if (p && p.id) {
+                        $('.EditCheckPDaerah[value="' + p.id + '"]').prop('checked', true);
+                    }
+                });
+            }
+            updatePDaerahDisplay(true);
+
+            // Sasaran Daerah
+            $('.EditCheckSasDaerah').prop('checked', false);
+            if (idSasDae) {
+                $('.EditCheckSasDaerah[value="' + idSasDae + '"]').prop('checked', true);
+            }
+            updateSasDaerahDisplay(true, indDaeJson);
+            filterSasaranDaerahOptions(true);
+
+            // Muat Sasaran & Indikator Nasional
+            loadSasaranNasional(idPn, true, idSasNas, indNas);
+
+            $('.custom-multiselect-menu').hide();
+            $('.custom-multiselect-toggle').removeClass('active');
+            $('.search-multiselect').val('');
+            $('.custom-multiselect-item').show();
+
+            isEditModalOpening = false;
+        } catch(err) {
+            console.error('Error pre-opening modal edit:', err);
+            isEditModalOpening = false;
         }
-        updateIndikatorDaerahDisplay(true);
-        $('#EditInputIndikatorDaerahCustom').val(unhandledIndikator.join('\n'));
-        $('.search-multiselect').val('');
-        $('.custom-multiselect-item').show();
-
-        $('#EditIdPN').trigger('change.select2');
-        $('#EditSelectSasaranDaerah').trigger('change.select2');
-
         $('#ModalEditKeterkaitan').modal('show');
     });
 
     $('#EditIdPN').on('change', function() {
+        if (isEditModalOpening) return;
         var idPn = $(this).val();
-        loadSasaranNasional(idPn, $('#EditSelectSasaranNasional'));
+        loadSasaranNasional(idPn, true);
     });
 
-    $('#EditSelectSasaranNasional').on('change', function() {
-        var opt = $(this).find(':selected');
-        var sasText = opt.data('sasaran');
-        var kode = opt.data('kode');
-        if (sasText) {
-            $('#EditSasaranNasionalCustom').val(sasText);
-            if (kode && !$('#EditKodeSasNas').val()) {
-                $('#EditKodeSasNas').val(kode);
-            }
-        }
-    });
-
-    $('#EditSelectSasaranDaerah').on('change', function() {
-        var sasId = $(this).val();
-        var opt = $(this).find(':selected');
-        var sasText = opt.data('sasaran');
-        var kode = opt.data('kode');
-
-        if (sasText) {
-            $('#EditSasaranDaerahCustom').val(sasText);
-            $('#EditKodeSasDaerah').val(kode || '');
-        }
-
-        if (sasId) {
-            var matching = $('#EditListIndikatorDaerahOptions .edit-item-ind-daerah[data-sasaran-id="' + sasId + '"]');
-            if (matching.length > 0) {
-                matching.find('.EditCheckIndikatorDaerah').prop('checked', true);
-            }
-        }
-        updateIndikatorDaerahDisplay(true);
-    });
-
-    $('#BtnUpdateKeterkaitan').on('click', function() {
+    $(document).on('click', '#BtnUpdateKeterkaitan', function() {
         var id = $('#EditKeterkaitanId').val();
         var idPn = $('#EditIdPN').val();
-        var idSasNas = $('#EditSelectSasaranNasional').val();
-        var kodeSasNas = $('#EditKodeSasNas').val().trim();
-        var sasNasCustom = $('#EditSasaranNasionalCustom').val().trim();
-        var indNas = $('#EditIndikatorNasional').val().trim();
 
         var pDaerahIds = [];
         $('.EditCheckPDaerah:checked').each(function() {
             pDaerahIds.push($(this).val());
         });
 
-        var idSasDae = $('#EditSelectSasaranDaerah').val();
-        var kodeSasDae = $('#EditKodeSasDaerah').val().trim();
-        var sasDaeCustom = $('#EditSasaranDaerahCustom').val().trim();
+        // Sasaran Nasional & Indikator Nasional
+        var sasaranNasListToSubmit = [];
+        $('.EditCheckSasNasItem:checked').each(function() {
+            var sId = $(this).val();
+            var sKode = $(this).data('kode');
+            var sText = $(this).data('sasaran');
 
-        // Indikator Daerah (Dropdown Checked + Custom Textarea)
-        var indDaerah = [];
-        $('.EditCheckIndikatorDaerah:checked').each(function() {
-            var val = $(this).val().trim();
-            if (val && indDaerah.indexOf(val) === -1) {
-                indDaerah.push(val);
-            }
-        });
-        var customInd = $('#EditInputIndikatorDaerahCustom').val();
-        if (customInd) {
-            var lines = customInd.split('\n');
-            $.each(lines, function(i, l) {
-                var lTrim = l.trim();
-                if (lTrim && indDaerah.indexOf(lTrim) === -1) {
-                    indDaerah.push(lTrim);
-                }
+            var indChecked = [];
+            $(this).closest('.edit-sas-nas-card').find('.EditCheckIndNasItem:checked').each(function() {
+                var indVal = $(this).val().trim();
+                if (indVal) indChecked.push(indVal);
             });
-        }
+
+            sasaranNasListToSubmit.push({
+                id: sId,
+                kode: sKode,
+                sasaran: sText,
+                indikator: indChecked
+            });
+        });
+
+        // Sasaran Daerah & Indikator Daerah
+        var sasaranDaeListToSubmit = [];
+        $('.EditCheckSasDaerah:checked').each(function() {
+            var sdId = $(this).val();
+            var sdKode = $(this).data('kode');
+            var sdText = $(this).data('sasaran');
+
+            var indDaeChecked = [];
+            $('.EditCheckIndDaerahItem:checked[data-sasaran-id="' + sdId + '"]').each(function() {
+                var indVal = $(this).val().trim();
+                if (indVal) indDaeChecked.push(indVal);
+            });
+
+            sasaranDaeListToSubmit.push({
+                id: sdId,
+                kode: sdKode,
+                sasaran: sdText,
+                indikator: indDaeChecked
+            });
+        });
 
         if (!idPn) {
             alert('Prioritas Nasional (PN) wajib dipilih!');
             return;
         }
-        if (!sasNasCustom) {
-            alert('Sasaran Prioritas Pembangunan Nasional wajib diisi!');
+        if (sasaranNasListToSubmit.length === 0) {
+            alert('Minimal pilih salah satu Sasaran Prioritas Pembangunan Nasional!');
             return;
         }
-        if (!sasDaeCustom) {
-            alert('Sasaran Pembangunan Daerah wajib dipilih atau diisi!');
+        if (sasaranDaeListToSubmit.length === 0) {
+            alert('Minimal pilih salah satu Sasaran Pembangunan Daerah!');
             return;
         }
 
@@ -1610,15 +1790,9 @@ $(document).ready(function() {
                 Tahun: SelectedTahun,
                 KodeWilayah: KodeWilayah,
                 IdPN: idPn,
-                IdSasaranNasional: idSasNas,
-                KodeSasaranNasional: kodeSasNas,
-                SasaranNasionalCustom: sasNasCustom,
-                IndikatorNasional: indNas,
+                SasaranNasionalList: JSON.stringify(sasaranNasListToSubmit),
+                SasaranDaerahList: JSON.stringify(sasaranDaeListToSubmit),
                 PDaerahIds: pDaerahIds,
-                IdSasaranDaerah: idSasDae,
-                KodeSasaranDaerah: kodeSasDae,
-                SasaranDaerahCustom: sasDaeCustom,
-                IndikatorDaerah: indDaerah,
                 [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
             },
             dataType: 'json',
@@ -1631,7 +1805,7 @@ $(document).ready(function() {
                     btn.prop('disabled', false).text('Update');
                 }
             },
-            error: function(xhr) {
+            error: function() {
                 alert('Terjadi kesalahan koneksi server!');
                 btn.prop('disabled', false).text('Update');
             }

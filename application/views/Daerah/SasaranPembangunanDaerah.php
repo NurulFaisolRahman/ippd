@@ -278,11 +278,11 @@ $can_edit = isset($_SESSION['Level']) && $_SESSION['Level'] == 3;
                                                 <td colspan="8" class="text-center" style="padding: 40px !important;">
                                                     <div style="color: #64748b; font-size: 14px;">
                                                         <i class="fa fa-info-circle fa-2x" style="margin-bottom: 8px; color: #0284c7;"></i><br>
-                                                        Belum ada data Prioritas Pembangunan Daerah pada menu <b>Tema Pembangunan</b> untuk Tahun <?= html_escape($SelectedTahun) ?>.<br>
-                                                        <span style="font-size: 12.5px; color: #94a3b8;">Data Prioritas Pembangunan Daerah akan otomatis muncul di sini setelah diinput pada menu Tema Pembangunan.</span>
+                                                        Belum ada data Prioritas Pembangunan Daerah pada menu <b>Permasalahan Daerah</b> untuk Tahun <?= html_escape($SelectedTahun) ?>.<br>
+                                                        <span style="font-size: 12.5px; color: #94a3b8;">Data Prioritas Pembangunan Daerah akan otomatis muncul di sini setelah diinput pada menu Permasalahan Daerah.</span>
                                                         <div style="margin-top: 15px;">
-                                                            <a href="<?= base_url('Daerah/TemaPembangunan?tahun=' . html_escape($SelectedTahun)) ?>" class="btn btn-sm btn-primary">
-                                                                <i class="fa fa-arrow-right"></i> Buka Menu Tema Pembangunan
+                                                            <a href="<?= base_url('Daerah/CascadingPermasalahan?tahun=' . html_escape($SelectedTahun)) ?>" class="btn btn-sm btn-primary">
+                                                                <i class="fa fa-arrow-right"></i> Buka Menu Permasalahan Daerah
                                                             </a>
                                                         </div>
                                                     </div>
@@ -562,6 +562,19 @@ MODAL TAMBAH ISU STRATEGIS
             </div>
             <div class="modal-body">
                 <input type="hidden" id="InputIsuPrioritasId">
+                <?php if (!empty($ListIsuRef)) { ?>
+                    <div class="form-group">
+                        <label><b>Pilih dari Isu Strategis Permasalahan Daerah</b> (Opsional):</label>
+                        <select class="form-control" id="SelectIsuRef" style="color: #000; margin-bottom: 10px;">
+                            <option value="">-- Ketik manual atau pilih referensi isu --</option>
+                            <?php foreach ($ListIsuRef as $ir) { ?>
+                                <option value="<?= html_escape($ir['NamaIsuStrategis']) ?>">
+                                    <?= html_escape($ir['NamaIsuStrategis']) ?>
+                                </option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                <?php } ?>
                 <div class="form-group">
                     <label><b>Nama Isu Strategis</b> <span class="text-danger">*</span>:</label>
                     <textarea class="form-control" id="InputIsuText" rows="3" placeholder="Masukkan isu strategis..." style="color: #000;"></textarea>
@@ -816,8 +829,16 @@ $(document).ready(function() {
     $(document).on('click', '.BtnTambahIsu', function() {
         var pId = $(this).data('prioritas_id');
         $('#InputIsuPrioritasId').val(pId);
+        $('#SelectIsuRef').val('');
         $('#InputIsuText').val('');
         $('#ModalInputIsu').modal('show');
+    });
+
+    $('#SelectIsuRef').on('change', function() {
+        var val = $(this).val();
+        if (val) {
+            $('#InputIsuText').val(val);
+        }
     });
 
     $('#BtnSimpanIsu').on('click', function() {
