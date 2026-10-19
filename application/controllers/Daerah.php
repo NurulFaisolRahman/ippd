@@ -15521,22 +15521,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         {
             $Header['Halaman'] = 'RKPD';
 
-            // Auto create table jika belum ada
-            $this->db->query("CREATE TABLE IF NOT EXISTS `cascading_permasalahan_rkpd` (
-                `Id` INT(11) NOT NULL AUTO_INCREMENT,
-                `KodeWilayah` VARCHAR(50) NOT NULL,
-                `Tahun` VARCHAR(10) NOT NULL,
-                `Permasalahan` TEXT NOT NULL,
-                `IsuStrategis` TEXT NOT NULL,
-                `IdPrioritasDaerah` INT(11) DEFAULT NULL,
-                `ProgramPrioritas` TEXT NOT NULL,
-                `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-                `updated_at` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-                `deleted_at` DATETIME DEFAULT NULL,
-                PRIMARY KEY (`Id`),
-                KEY `idx_wilayah_tahun` (`KodeWilayah`, `Tahun`),
-                KEY `idx_prioritas_daerah` (`IdPrioritasDaerah`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+            // Auto create tables jika belum ada
+            $this->_initCascadingTables();
 
             // Provinsi (untuk filter wilayah jika belum ada di session)
             $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
@@ -15649,7 +15635,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
             $Data['CascadingGroupedByIsu'] = $groupedByIsu;
             $Data['CascadingRaw'] = $cascadingRaw;
-            $Data['IsDaerah'] = (isset($_SESSION['Level']) && $_SESSION['Level'] == 3);
+            $Data['CascadingState'] = $this->_getCascadingState($KodeWilayah, $selectedTahun);
+            $Data['IsDaerah'] = isset($_SESSION['Username']) || isset($_SESSION['Level']);
 
             $this->load->view('Daerah/header', $Header);
             $this->load->view('Daerah/CascadingPermasalahan', $Data);
@@ -15947,6 +15934,612 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             ]);
 
             echo json_encode(['status' => 'success', 'message' => 'Data Cascading Permasalahan berhasil dihapus!']);
+        }
+
+        // ============================================================
+        // ENDPOINTS CASCADING PERMASALAHAN RKPD BARU (BERURUTAN)
+        // 1. Tambah Permasalahan
+        // 2. Tambah Isu Strategis
+        // 3. Tambah Prioritas Pembangunan Daerah
+        // ============================================================
+
+        public function GetCascadingData()
+        {
+            $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
+                        ($this->input->post('KodeWilayah', TRUE) ?: $this->input->get('KodeWilayah', TRUE)));
+            $tahun = trim($this->input->post('Tahun', TRUE) ?: $this->input->get('Tahun', TRUE));
+
+            $data = $this->_getCascadingState($kodeWilayah, $tahun);
+            echo json_encode(['status' => 'success', 'data' => $data]);
+        }
+
+        public function SavePermasalahan()
+        {
+            if (!isset($_SESSION['Level']) && !isset($_SESSION['Username'])) {
+                echo json_encode(['status' => 'error', 'message' => 'Silakan login terlebih dahulu!']);
+                return;
+            }
+
+            $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
+                        $this->input->post('KodeWilayah', TRUE));
+            $tahun = trim($this->input->post('Tahun', TRUE));
+            $lines = $this->input->post('lines');
+
+            if (empty($kodeWilayah) || empty($tahun)) {
+                echo json_encode(['status' => 'error', 'message' => 'Wilayah dan Tahun wajib dipilih!']);
+                return;
+            }
+
+            if (!is_array($lines)) {
+                $raw = $this->input->post('text', TRUE);
+                $lines = preg_split('/\r\n|\r|\n/', (string)$raw);
+            }
+
+            $inserted = 0;
+            $now = date('Y-m-d H:i:s');
+            foreach ($lines as $line) {
+                $t = trim($line);
+                if ($t !== '') {
+                    $this->db->insert('cascading_rkpd_permasalahan', [
+                        'kode_wilayah' => $kodeWilayah,
+                        'tahun'        => $tahun,
+                        'permasalahan' => $t,
+                        'isu_id'       => NULL,
+                        'created_at'   => $now
+                    ]);
+                    $inserted++;
+                }
+            }
+
+            if ($inserted > 0) {
+                $this->_syncCascadingPermasalahanRkpd($kodeWilayah, $tahun);
+                echo json_encode(['status' => 'success', 'message' => $inserted . ' permasalahan berhasil disimpan.']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Isi permasalahan terlebih dahulu.']);
+            }
+        }
+
+        public function SaveIsuStrategis()
+        {
+            if (!isset($_SESSION['Level']) && !isset($_SESSION['Username'])) {
+                echo json_encode(['status' => 'error', 'message' => 'Silakan login terlebih dahulu!']);
+                return;
+            }
+
+            $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
+                        $this->input->post('KodeWilayah', TRUE));
+            $tahun = trim($this->input->post('Tahun', TRUE));
+            $text = trim($this->input->post('text', TRUE));
+            $permIds = $this->input->post('permIds');
+
+            if (empty($kodeWilayah) || empty($tahun)) {
+                echo json_encode(['status' => 'error', 'message' => 'Wilayah dan Tahun wajib dipilih!']);
+                return;
+            }
+
+            if (empty($text)) {
+                echo json_encode(['status' => 'error', 'message' => 'Isi isu strategis terlebih dahulu.']);
+                return;
+            }
+
+            if (!is_array($permIds) || empty($permIds)) {
+                echo json_encode(['status' => 'error', 'message' => 'Pilih minimal satu permasalahan untuk isu ini.']);
+                return;
+            }
+
+            $now = date('Y-m-d H:i:s');
+            $this->db->insert('cascading_rkpd_isu', [
+                'kode_wilayah'  => $kodeWilayah,
+                'tahun'         => $tahun,
+                'isu_strategis' => $text,
+                'created_at'    => $now
+            ]);
+            $isuId = $this->db->insert_id();
+
+            // Hubungkan permasalahan yang dipilih ke isu strategis ini
+            $cleanIds = array_map('intval', $permIds);
+            if (!empty($cleanIds)) {
+                $this->db->where_in('id', $cleanIds)
+                    ->where('kode_wilayah', $kodeWilayah)
+                    ->where('tahun', $tahun)
+                    ->update('cascading_rkpd_permasalahan', [
+                        'isu_id'     => $isuId,
+                        'updated_at' => $now
+                    ]);
+            }
+
+            $this->_syncCascadingPermasalahanRkpd($kodeWilayah, $tahun);
+
+            echo json_encode([
+                'status'  => 'success',
+                'message' => 'Isu strategis berhasil disimpan.',
+                'isuId'   => $isuId
+            ]);
+        }
+
+        public function SavePrioritasDaerah()
+        {
+            if (!isset($_SESSION['Level']) && !isset($_SESSION['Username'])) {
+                echo json_encode(['status' => 'error', 'message' => 'Silakan login terlebih dahulu!']);
+                return;
+            }
+
+            $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
+                        $this->input->post('KodeWilayah', TRUE));
+            $tahun = trim($this->input->post('Tahun', TRUE));
+            $text = trim($this->input->post('text', TRUE));
+            $isuIds = $this->input->post('isuIds');
+
+            if (empty($kodeWilayah) || empty($tahun)) {
+                echo json_encode(['status' => 'error', 'message' => 'Wilayah dan Tahun wajib dipilih!']);
+                return;
+            }
+
+            if (!is_array($isuIds) || empty($isuIds)) {
+                echo json_encode(['status' => 'error', 'message' => 'Pilih minimal satu isu strategis.']);
+                return;
+            }
+
+            if (empty($text)) {
+                echo json_encode(['status' => 'error', 'message' => 'Isi prioritas pembangunan daerah terlebih dahulu.']);
+                return;
+            }
+
+            $now = date('Y-m-d H:i:s');
+            $this->db->insert('cascading_rkpd_prioritas', [
+                'kode_wilayah'     => $kodeWilayah,
+                'tahun'            => $tahun,
+                'prioritas_daerah' => $text,
+                'created_at'       => $now
+            ]);
+            $prioId = $this->db->insert_id();
+
+            foreach ($isuIds as $isuId) {
+                $isuId = (int)$isuId;
+                if ($isuId > 0) {
+                    $this->db->insert('cascading_rkpd_prioritas_isu', [
+                        'prioritas_id' => $prioId,
+                        'isu_id'       => $isuId
+                    ]);
+                }
+            }
+
+            $this->_syncCascadingPermasalahanRkpd($kodeWilayah, $tahun);
+
+            echo json_encode([
+                'status'  => 'success',
+                'message' => 'Prioritas pembangunan daerah berhasil disimpan.',
+                'prioId'  => $prioId
+            ]);
+        }
+
+        public function UpdateCascadingItem()
+        {
+            if (!isset($_SESSION['Level']) && !isset($_SESSION['Username'])) {
+                echo json_encode(['status' => 'error', 'message' => 'Silakan login terlebih dahulu!']);
+                return;
+            }
+
+            $type = trim($this->input->post('type', TRUE));
+            $id = (int)$this->input->post('id', TRUE);
+            $text = trim($this->input->post('text', TRUE));
+            $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
+                        $this->input->post('KodeWilayah', TRUE));
+            $tahun = trim($this->input->post('Tahun', TRUE));
+
+            if ($id <= 0 || empty($text)) {
+                echo json_encode(['status' => 'error', 'message' => 'Data tidak boleh kosong!']);
+                return;
+            }
+
+            $now = date('Y-m-d H:i:s');
+            if ($type === 'perm') {
+                $this->db->where('id', $id)->update('cascading_rkpd_permasalahan', [
+                    'permasalahan' => $text,
+                    'updated_at'   => $now
+                ]);
+            } elseif ($type === 'isu') {
+                $this->db->where('id', $id)->update('cascading_rkpd_isu', [
+                    'isu_strategis' => $text,
+                    'updated_at'    => $now
+                ]);
+            } elseif ($type === 'prog') {
+                $this->db->where('id', $id)->update('cascading_rkpd_prioritas', [
+                    'prioritas_daerah' => $text,
+                    'updated_at'       => $now
+                ]);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Tipe tidak valid!']);
+                return;
+            }
+
+            $this->_syncCascadingPermasalahanRkpd($kodeWilayah, $tahun);
+            echo json_encode(['status' => 'success', 'message' => 'Data berhasil diupdate.']);
+        }
+
+        public function DeleteCascadingItem()
+        {
+            if (!isset($_SESSION['Level']) && !isset($_SESSION['Username'])) {
+                echo json_encode(['status' => 'error', 'message' => 'Silakan login terlebih dahulu!']);
+                return;
+            }
+
+            $type = trim($this->input->post('type', TRUE));
+            $id = (int)$this->input->post('id', TRUE);
+            $isuId = (int)$this->input->post('isuId', TRUE);
+            $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
+                        $this->input->post('KodeWilayah', TRUE));
+            $tahun = trim($this->input->post('Tahun', TRUE));
+
+            if ($id <= 0) {
+                echo json_encode(['status' => 'error', 'message' => 'ID tidak valid!']);
+                return;
+            }
+
+            $now = date('Y-m-d H:i:s');
+            if ($type === 'perm') {
+                $this->db->where('id', $id)->update('cascading_rkpd_permasalahan', [
+                    'deleted_at' => $now
+                ]);
+            } elseif ($type === 'isu') {
+                $this->db->where('id', $id)->update('cascading_rkpd_isu', [
+                    'deleted_at' => $now
+                ]);
+                $this->db->where('isu_id', $id)->update('cascading_rkpd_permasalahan', [
+                    'isu_id'     => NULL,
+                    'updated_at' => $now
+                ]);
+                $this->db->where('isu_id', $id)->delete('cascading_rkpd_prioritas_isu');
+            } elseif ($type === 'prog') {
+                if ($isuId > 0) {
+                    $this->db->where('prioritas_id', $id)->where('isu_id', $isuId)->delete('cascading_rkpd_prioritas_isu');
+                    $cnt = $this->db->where('prioritas_id', $id)->count_all_results('cascading_rkpd_prioritas_isu');
+                    if ($cnt == 0) {
+                        $this->db->where('id', $id)->update('cascading_rkpd_prioritas', ['deleted_at' => $now]);
+                    }
+                } else {
+                    $this->db->where('prioritas_id', $id)->delete('cascading_rkpd_prioritas_isu');
+                    $this->db->where('id', $id)->update('cascading_rkpd_prioritas', ['deleted_at' => $now]);
+                }
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Tipe tidak valid!']);
+                return;
+            }
+
+            $this->_syncCascadingPermasalahanRkpd($kodeWilayah, $tahun);
+            echo json_encode(['status' => 'success', 'message' => 'Data berhasil dihapus.']);
+        }
+
+        public function UpdateKeterkaitanPermasalahan()
+        {
+            if (!isset($_SESSION['Level']) && !isset($_SESSION['Username'])) {
+                echo json_encode(['status' => 'error', 'message' => 'Silakan login terlebih dahulu!']);
+                return;
+            }
+
+            $id = (int)$this->input->post('id', TRUE);
+            $text = trim($this->input->post('text', TRUE));
+            $isuId = $this->input->post('isuId', TRUE);
+            $isuId = ($isuId !== '' && $isuId !== null && $isuId !== '0') ? (int)$isuId : NULL;
+
+            $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
+                        $this->input->post('KodeWilayah', TRUE));
+            $tahun = trim($this->input->post('Tahun', TRUE));
+
+            if ($id <= 0 || empty($text)) {
+                echo json_encode(['status' => 'error', 'message' => 'Uraian permasalahan tidak boleh kosong!']);
+                return;
+            }
+
+            $now = date('Y-m-d H:i:s');
+            $this->db->where('id', $id)->update('cascading_rkpd_permasalahan', [
+                'permasalahan' => $text,
+                'isu_id'       => $isuId,
+                'updated_at'   => $now
+            ]);
+
+            $this->_syncCascadingPermasalahanRkpd($kodeWilayah, $tahun);
+            echo json_encode(['status' => 'success', 'message' => 'Permasalahan dan keterkaitan berhasil diperbarui.']);
+        }
+
+        public function UpdateKeterkaitanIsu()
+        {
+            if (!isset($_SESSION['Level']) && !isset($_SESSION['Username'])) {
+                echo json_encode(['status' => 'error', 'message' => 'Silakan login terlebih dahulu!']);
+                return;
+            }
+
+            $id = (int)$this->input->post('id', TRUE);
+            $text = trim($this->input->post('text', TRUE));
+            $permIds = $this->input->post('permIds');
+            $permIds = is_array($permIds) ? array_map('intval', $permIds) : [];
+
+            $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
+                        $this->input->post('KodeWilayah', TRUE));
+            $tahun = trim($this->input->post('Tahun', TRUE));
+
+            if ($id <= 0 || empty($text)) {
+                echo json_encode(['status' => 'error', 'message' => 'Uraian isu strategis tidak boleh kosong!']);
+                return;
+            }
+
+            $now = date('Y-m-d H:i:s');
+            // 1. Update text isu
+            $this->db->where('id', $id)->update('cascading_rkpd_isu', [
+                'isu_strategis' => $text,
+                'updated_at'    => $now
+            ]);
+
+            // 2. Unmap any permasalahan that was previously mapped to this isu but now unchecked
+            $this->db->where('isu_id', $id);
+            if (!empty($permIds)) {
+                $this->db->where_not_in('id', $permIds);
+            }
+            $this->db->update('cascading_rkpd_permasalahan', [
+                'isu_id'     => NULL,
+                'updated_at' => $now
+            ]);
+
+            // 3. Map selected permasalahan to this isu
+            if (!empty($permIds)) {
+                $this->db->where_in('id', $permIds)
+                    ->update('cascading_rkpd_permasalahan', [
+                        'isu_id'     => $id,
+                        'updated_at' => $now
+                    ]);
+            }
+
+            $this->_syncCascadingPermasalahanRkpd($kodeWilayah, $tahun);
+            echo json_encode(['status' => 'success', 'message' => 'Isu strategis dan keterkaitan permasalahan berhasil diperbarui.']);
+        }
+
+        public function UpdateKeterkaitanPrioritas()
+        {
+            if (!isset($_SESSION['Level']) && !isset($_SESSION['Username'])) {
+                echo json_encode(['status' => 'error', 'message' => 'Silakan login terlebih dahulu!']);
+                return;
+            }
+
+            $id = (int)$this->input->post('id', TRUE);
+            $text = trim($this->input->post('text', TRUE));
+            $isuIds = $this->input->post('isuIds');
+            $isuIds = is_array($isuIds) ? array_map('intval', $isuIds) : [];
+
+            $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
+                        (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
+                        $this->input->post('KodeWilayah', TRUE));
+            $tahun = trim($this->input->post('Tahun', TRUE));
+
+            if ($id <= 0 || empty($text)) {
+                echo json_encode(['status' => 'error', 'message' => 'Uraian prioritas daerah tidak boleh kosong!']);
+                return;
+            }
+
+            if (empty($isuIds)) {
+                echo json_encode(['status' => 'error', 'message' => 'Pilih minimal satu isu strategis yang terkait!']);
+                return;
+            }
+
+            $now = date('Y-m-d H:i:s');
+            // 1. Update text prioritas
+            $this->db->where('id', $id)->update('cascading_rkpd_prioritas', [
+                'prioritas_daerah' => $text,
+                'updated_at'       => $now
+            ]);
+
+            // 2. Refresh prioritas_isu relations
+            $this->db->where('prioritas_id', $id)->delete('cascading_rkpd_prioritas_isu');
+            foreach ($isuIds as $isuId) {
+                if ($isuId > 0) {
+                    $this->db->insert('cascading_rkpd_prioritas_isu', [
+                        'prioritas_id' => $id,
+                        'isu_id'       => $isuId
+                    ]);
+                }
+            }
+
+            $this->_syncCascadingPermasalahanRkpd($kodeWilayah, $tahun);
+            echo json_encode(['status' => 'success', 'message' => 'Prioritas daerah dan keterkaitan isu berhasil diperbarui.']);
+        }
+
+        private function _initCascadingTables()
+        {
+            $this->db->query("CREATE TABLE IF NOT EXISTS `cascading_permasalahan_rkpd` (
+                `Id` INT(11) NOT NULL AUTO_INCREMENT,
+                `KodeWilayah` VARCHAR(50) NOT NULL,
+                `Tahun` VARCHAR(10) NOT NULL,
+                `Permasalahan` TEXT NOT NULL,
+                `IsuStrategis` TEXT NOT NULL,
+                `IdPrioritasDaerah` INT(11) DEFAULT NULL,
+                `ProgramPrioritas` TEXT NOT NULL,
+                `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+                `updated_at` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+                `deleted_at` DATETIME DEFAULT NULL,
+                PRIMARY KEY (`Id`),
+                KEY `idx_wilayah_tahun` (`KodeWilayah`, `Tahun`),
+                KEY `idx_prioritas_daerah` (`IdPrioritasDaerah`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
+            $this->db->query("CREATE TABLE IF NOT EXISTS `cascading_rkpd_isu` (
+                `id` INT(11) NOT NULL AUTO_INCREMENT,
+                `kode_wilayah` VARCHAR(50) NOT NULL,
+                `tahun` VARCHAR(10) NOT NULL,
+                `isu_strategis` TEXT NOT NULL,
+                `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+                `updated_at` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+                `deleted_at` DATETIME DEFAULT NULL,
+                PRIMARY KEY (`id`),
+                KEY `idx_wilayah_tahun` (`kode_wilayah`, `tahun`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
+            $this->db->query("CREATE TABLE IF NOT EXISTS `cascading_rkpd_permasalahan` (
+                `id` INT(11) NOT NULL AUTO_INCREMENT,
+                `kode_wilayah` VARCHAR(50) NOT NULL,
+                `tahun` VARCHAR(10) NOT NULL,
+                `permasalahan` TEXT NOT NULL,
+                `isu_id` INT(11) DEFAULT NULL,
+                `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+                `updated_at` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+                `deleted_at` DATETIME DEFAULT NULL,
+                PRIMARY KEY (`id`),
+                KEY `idx_wilayah_tahun` (`kode_wilayah`, `tahun`),
+                KEY `idx_isu_id` (`isu_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
+            $this->db->query("CREATE TABLE IF NOT EXISTS `cascading_rkpd_prioritas` (
+                `id` INT(11) NOT NULL AUTO_INCREMENT,
+                `kode_wilayah` VARCHAR(50) NOT NULL,
+                `tahun` VARCHAR(10) NOT NULL,
+                `prioritas_daerah` TEXT NOT NULL,
+                `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+                `updated_at` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+                `deleted_at` DATETIME DEFAULT NULL,
+                PRIMARY KEY (`id`),
+                KEY `idx_wilayah_tahun` (`kode_wilayah`, `tahun`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
+            $this->db->query("CREATE TABLE IF NOT EXISTS `cascading_rkpd_prioritas_isu` (
+                `id` INT(11) NOT NULL AUTO_INCREMENT,
+                `prioritas_id` INT(11) NOT NULL,
+                `isu_id` INT(11) NOT NULL,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `idx_prioritas_isu` (`prioritas_id`, `isu_id`),
+                KEY `idx_isu` (`isu_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+        }
+
+        private function _getCascadingState($kodeWilayah, $tahun)
+        {
+            $state = ['perm' => [], 'isu' => [], 'prog' => []];
+            if (empty($kodeWilayah) || empty($tahun)) {
+                return $state;
+            }
+
+            // Isu
+            $isuRows = $this->db->select('id, isu_strategis as text')
+                ->where('kode_wilayah', $kodeWilayah)
+                ->where('tahun', $tahun)
+                ->where('deleted_at IS NULL')
+                ->order_by('id', 'ASC')
+                ->get('cascading_rkpd_isu')
+                ->result_array();
+
+            foreach ($isuRows as &$i) {
+                $i['id'] = (int)$i['id'];
+            }
+            $state['isu'] = $isuRows;
+
+            // Permasalahan
+            $permRows = $this->db->select('id, permasalahan as text, isu_id as isuId')
+                ->where('kode_wilayah', $kodeWilayah)
+                ->where('tahun', $tahun)
+                ->where('deleted_at IS NULL')
+                ->order_by('id', 'ASC')
+                ->get('cascading_rkpd_permasalahan')
+                ->result_array();
+
+            foreach ($permRows as &$p) {
+                $p['id'] = (int)$p['id'];
+                $p['isuId'] = !empty($p['isuId']) ? (int)$p['isuId'] : null;
+            }
+            $state['perm'] = $permRows;
+
+            // Prioritas
+            $progRows = $this->db->select('id, prioritas_daerah as text')
+                ->where('kode_wilayah', $kodeWilayah)
+                ->where('tahun', $tahun)
+                ->where('deleted_at IS NULL')
+                ->order_by('id', 'ASC')
+                ->get('cascading_rkpd_prioritas')
+                ->result_array();
+
+            if (!empty($progRows)) {
+                $progIds = array_column($progRows, 'id');
+                $relRows = $this->db->select('prioritas_id, isu_id')
+                    ->where_in('prioritas_id', $progIds)
+                    ->get('cascading_rkpd_prioritas_isu')
+                    ->result_array();
+
+                $relMap = [];
+                foreach ($relRows as $r) {
+                    $relMap[(int)$r['prioritas_id']][] = (int)$r['isu_id'];
+                }
+
+                foreach ($progRows as &$pr) {
+                    $pr['id'] = (int)$pr['id'];
+                    $pr['isuIds'] = isset($relMap[$pr['id']]) ? $relMap[$pr['id']] : [];
+                }
+            }
+            $state['prog'] = $progRows;
+
+            return $state;
+        }
+
+        private function _syncCascadingPermasalahanRkpd($kodeWilayah, $tahun)
+        {
+            if (empty($kodeWilayah) || empty($tahun)) return;
+
+            $now = date('Y-m-d H:i:s');
+            // Soft delete existing rows in cascading_permasalahan_rkpd
+            $this->db->where('KodeWilayah', $kodeWilayah)
+                ->where('Tahun', $tahun)
+                ->where('deleted_at IS NULL')
+                ->update('cascading_permasalahan_rkpd', ['deleted_at' => $now]);
+
+            $state = $this->_getCascadingState($kodeWilayah, $tahun);
+
+            foreach ($state['isu'] as $i) {
+                $isuId = $i['id'];
+                $isuText = $i['text'];
+
+                $pList = array_values(array_filter($state['perm'], function($p) use ($isuId) {
+                    return $p['isuId'] === $isuId;
+                }));
+
+                $rList = array_values(array_filter($state['prog'], function($r) use ($isuId) {
+                    return in_array($isuId, $r['isuIds'] ?: []);
+                }));
+
+                $count = max(count($pList), count($rList), 1);
+                for ($k = 0; $k < $count; $k++) {
+                    $perm = isset($pList[$k]) ? $pList[$k]['text'] : '';
+                    $prog = isset($rList[$k]) ? $rList[$k]['text'] : '';
+
+                    if (!empty($perm) || !empty($prog)) {
+                        $this->db->insert('cascading_permasalahan_rkpd', [
+                            'KodeWilayah'      => $kodeWilayah,
+                            'Tahun'            => $tahun,
+                            'Permasalahan'     => $perm,
+                            'IsuStrategis'     => $isuText,
+                            'ProgramPrioritas' => $prog,
+                            'created_at'       => $now
+                        ]);
+                    }
+                }
+            }
+
+            // Unmapped
+            $unmapped = array_filter($state['perm'], function($p) {
+                return empty($p['isuId']);
+            });
+            foreach ($unmapped as $u) {
+                $this->db->insert('cascading_permasalahan_rkpd', [
+                    'KodeWilayah'      => $kodeWilayah,
+                    'Tahun'            => $tahun,
+                    'Permasalahan'     => $u['text'],
+                    'IsuStrategis'     => '',
+                    'ProgramPrioritas' => '',
+                    'created_at'       => $now
+                ]);
+            }
         }
 
         public function GetPrioritasDaerahByTahun()

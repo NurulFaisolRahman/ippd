@@ -280,16 +280,6 @@ function calcPrioritasRows($pd) {
                     </form>
                 </div>
 
-                <!-- Info Banner -->
-                <?php if (!empty($KodeWilayah)) { ?>
-                    <div class="alert alert-info" style="border-radius: 8px; font-size: 13px; background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; margin-bottom: 20px;">
-                        <i class="fa fa-info-circle"></i> 
-                        <strong>Wilayah:</strong> <?= html_escape($NamaWilayah) ?> (Kode: <?= html_escape($KodeWilayah) ?>) | 
-                        <strong>Tahun Perencanaan:</strong> <?= html_escape($SelectedTahun) ?> | 
-                        <strong>Prioritas Pembangunan Tersedia:</strong> <?= count($PrioritasDaerah) ?> item dari Tema Pembangunan
-                    </div>
-                <?php } ?>
-
                 <!-- Card Utama: Tabel Program dan Kegiatan Prioritas -->
                 <div class="prog-card">
                     <div class="prog-card-header">
