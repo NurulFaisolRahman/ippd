@@ -278,7 +278,7 @@ function calcPrioritasRows($pd) {
 
                         </div>
                     </form>
-                </div>
+                </div>      
 
                 <!-- Card Utama: Tabel Program dan Kegiatan Prioritas -->
                 <div class="prog-card">
@@ -364,7 +364,7 @@ function calcPrioritasRows($pd) {
                                                                     data-id="<?= $pd['id'] ?>" 
                                                                     data-id-prioritas-daerah="<?= $pd['id_prioritas_daerah'] ?>"
                                                                     title="Edit Prioritas Pembangunan">
-                                                                <i class="fa fa-pencil"></i> Edit
+                                                                <i class="fa fa-pencil"></i>
                                                             </button>
                                                             <button type="button" class="btn-xs-custom btn-del-level btn-hapus-prioritas" 
                                                                     data-id="<?= $pd['id'] ?>"
@@ -418,7 +418,7 @@ function calcPrioritasRows($pd) {
                                                                             data-id="<?= $pd['id'] ?>" 
                                                                             data-id-prioritas-daerah="<?= $pd['id_prioritas_daerah'] ?>"
                                                                             title="Edit Prioritas Pembangunan">
-                                                                        <i class="fa fa-pencil"></i> Edit
+                                                                        <i class="fa fa-pencil"></i>
                                                                     </button>
                                                                     <button type="button" class="btn-xs-custom btn-del-level btn-hapus-prioritas" 
                                                                             data-id="<?= $pd['id'] ?>"
@@ -495,7 +495,7 @@ function calcPrioritasRows($pd) {
                                                                                 data-id="<?= $pd['id'] ?>" 
                                                                                 data-id-prioritas-daerah="<?= $pd['id_prioritas_daerah'] ?>"
                                                                                 title="Edit Prioritas Pembangunan">
-                                                                            <i class="fa fa-pencil"></i> Edit
+                                                                            <i class="fa fa-pencil"></i>
                                                                         </button>
                                                                         <button type="button" class="btn-xs-custom btn-del-level btn-hapus-prioritas" 
                                                                                 data-id="<?= $pd['id'] ?>"
@@ -600,7 +600,7 @@ function calcPrioritasRows($pd) {
                                                                                     data-id="<?= $pd['id'] ?>" 
                                                                                     data-id-prioritas-daerah="<?= $pd['id_prioritas_daerah'] ?>"
                                                                                     title="Edit Prioritas Pembangunan">
-                                                                                <i class="fa fa-pencil"></i> Edit
+                                                                                <i class="fa fa-pencil"></i>
                                                                             </button>
                                                                             <button type="button" class="btn-xs-custom btn-del-level btn-hapus-prioritas" 
                                                                                     data-id="<?= $pd['id'] ?>"
@@ -727,7 +727,7 @@ function calcPrioritasRows($pd) {
                                                                                     data-id="<?= $pd['id'] ?>" 
                                                                                     data-id-prioritas-daerah="<?= $pd['id_prioritas_daerah'] ?>"
                                                                                     title="Edit Prioritas Pembangunan">
-                                                                                <i class="fa fa-pencil"></i> Edit
+                                                                                <i class="fa fa-pencil"></i>
                                                                             </button>
                                                                             <button type="button" class="btn-xs-custom btn-del-level btn-hapus-prioritas" 
                                                                                     data-id="<?= $pd['id'] ?>"
@@ -926,14 +926,17 @@ function calcPrioritasRows($pd) {
                     <input type="hidden" id="PrioritasRKPD_KodeWilayah" value="<?= html_escape($KodeWilayah) ?>">
 
                     <div class="form-group-custom">
-                        <label for="PrioritasRKPD_IdPrioritasDaerah">Pilih Prioritas Pembangunan <span class="text-danger">*</span></label>
+                        <label for="PrioritasRKPD_IdPrioritasDaerah">Pilih Prioritas Pembangunan Daerah <span class="text-danger">*</span></label>
                         <select id="PrioritasRKPD_IdPrioritasDaerah" class="form-control select2-modal" style="width: 100%;">
-                            <option value="">-- Pilih Prioritas Pembangunan --</option>
+                            <option value="">-- Pilih Prioritas Pembangunan Daerah --</option>
                             <?php foreach ($PrioritasDaerah as $pd) { ?>
                                 <option value="<?= $pd['id'] ?>"><?= html_escape($pd['prioritas']) ?></option>
                             <?php } ?>
                         </select>
-                        <span class="field-hint">Mengambil data dari Prioritas Daerah pada Tema Pembangunan Tahun <?= html_escape($SelectedTahun) ?>.</span>
+                        <span class="field-hint">
+                            <i class="fa fa-info-circle" style="color: #15803d; margin-right: 3px;"></i>
+                            Mengambil data dari tabel Prioritas Pembangunan Daerah pada menu Cascading Permasalahan RKPD Tahun <?= html_escape($SelectedTahun) ?>.
+                        </span>
                     </div>
                 </form>
             </div>
@@ -1195,12 +1198,44 @@ $(document).ready(function() {
     // ============================================================
     // 0. HANDLER PRIORITAS PEMBANGUNAN RKPD (LEVEL 0)
     // ============================================================
+    function refreshPrioritasDaerahOptions(selectedId, callback) {
+        var tahun = $('#PrioritasRKPD_Tahun').val();
+        var kodeWilayah = $('#PrioritasRKPD_KodeWilayah').val();
+        $.ajax({
+            url: BaseURL + 'Daerah/GetPrioritasDaerahByTahun',
+            type: 'POST',
+            dataType: 'json',
+            data: { Tahun: tahun, KodeWilayah: kodeWilayah },
+            success: function(list) {
+                var sel = $('#PrioritasRKPD_IdPrioritasDaerah');
+                sel.empty();
+                sel.append('<option value="">-- Pilih Prioritas Pembangunan Daerah --</option>');
+                if (list && list.length > 0) {
+                    list.forEach(function(item) {
+                        var opt = $('<option></option>').val(item.id).text(item.prioritas);
+                        sel.append(opt);
+                    });
+                }
+                if (selectedId) {
+                    sel.val(selectedId).trigger('change');
+                } else {
+                    sel.val('').trigger('change');
+                }
+                if (typeof callback === 'function') callback(list);
+            }
+        });
+    }
+
     $('#BtnBukaModalPrioritas, #BtnBukaModalPrioritasEmpty').on('click', function() {
         $('#FormPrioritasRKPD')[0].reset();
         $('#PrioritasRKPD_IdEdit').val('');
-        $('#PrioritasRKPD_IdPrioritasDaerah').val('').trigger('change');
         $('#AlertPrioritasRKPD').hide();
         $('#ModalTitlePrioritasRKPD').html('<i class="fa fa-plus-circle"></i> Tambah Prioritas Pembangunan');
+        refreshPrioritasDaerahOptions('', function(list) {
+            if (!list || list.length === 0) {
+                $('#AlertPrioritasRKPD').html('<i class="fa fa-info-circle"></i> Belum ada Prioritas Pembangunan Daerah pada menu <b>Cascading Permasalahan RKPD</b> untuk Tahun ' + $('#PrioritasRKPD_Tahun').val() + '. Silakan tambahkan terlebih dahulu di menu Cascading Permasalahan.').show();
+            }
+        });
         $('#ModalPrioritasRKPD').modal('show');
     });
 
@@ -1215,7 +1250,7 @@ $(document).ready(function() {
             success: function(res) {
                 if (res.status === 'success' && res.data) {
                     $('#PrioritasRKPD_IdEdit').val(res.data.id);
-                    $('#PrioritasRKPD_IdPrioritasDaerah').val(res.data.id_prioritas_daerah).trigger('change');
+                    refreshPrioritasDaerahOptions(res.data.id_prioritas_daerah);
                     $('#ModalTitlePrioritasRKPD').html('<i class="fa fa-pencil"></i> Edit Prioritas Pembangunan');
                     $('#ModalPrioritasRKPD').modal('show');
                 } else {

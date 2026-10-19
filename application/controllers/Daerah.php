@@ -16025,10 +16025,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 return;
             }
 
-            if (!is_array($permIds) || empty($permIds)) {
-                echo json_encode(['status' => 'error', 'message' => 'Pilih minimal satu permasalahan untuk isu ini.']);
-                return;
-            }
+            $permIds = is_array($permIds) ? $permIds : [];
 
             $now = date('Y-m-d H:i:s');
             $this->db->insert('cascading_rkpd_isu', [
@@ -16197,16 +16194,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 ]);
                 $this->db->where('isu_id', $id)->delete('cascading_rkpd_prioritas_isu');
             } elseif ($type === 'prog') {
-                if ($isuId > 0) {
-                    $this->db->where('prioritas_id', $id)->where('isu_id', $isuId)->delete('cascading_rkpd_prioritas_isu');
-                    $cnt = $this->db->where('prioritas_id', $id)->count_all_results('cascading_rkpd_prioritas_isu');
-                    if ($cnt == 0) {
-                        $this->db->where('id', $id)->update('cascading_rkpd_prioritas', ['deleted_at' => $now]);
-                    }
-                } else {
-                    $this->db->where('prioritas_id', $id)->delete('cascading_rkpd_prioritas_isu');
-                    $this->db->where('id', $id)->update('cascading_rkpd_prioritas', ['deleted_at' => $now]);
-                }
+                $this->db->where('prioritas_id', $id)->delete('cascading_rkpd_prioritas_isu');
+                $this->db->where('id', $id)->update('cascading_rkpd_prioritas', ['deleted_at' => $now]);
             } else {
                 echo json_encode(['status' => 'error', 'message' => 'Tipe tidak valid!']);
                 return;
@@ -16225,8 +16214,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
             $id = (int)$this->input->post('id', TRUE);
             $text = trim($this->input->post('text', TRUE));
-            $isuId = $this->input->post('isuId', TRUE);
-            $isuId = ($isuId !== '' && $isuId !== null && $isuId !== '0') ? (int)$isuId : NULL;
 
             $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
                         (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
@@ -16239,14 +16226,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             }
 
             $now = date('Y-m-d H:i:s');
-            $this->db->where('id', $id)->update('cascading_rkpd_permasalahan', [
+            $updateData = [
                 'permasalahan' => $text,
-                'isu_id'       => $isuId,
                 'updated_at'   => $now
-            ]);
+            ];
+
+            // Hanya perbarui isu_id jika parameter isuId secara eksplisit dikirimkan
+            if ($this->input->post('isuId') !== null) {
+                $isuId = $this->input->post('isuId', TRUE);
+                $updateData['isu_id'] = ($isuId !== '' && $isuId !== null && $isuId !== '0') ? (int)$isuId : NULL;
+            }
+
+            $this->db->where('id', $id)->update('cascading_rkpd_permasalahan', $updateData);
 
             $this->_syncCascadingPermasalahanRkpd($kodeWilayah, $tahun);
-            echo json_encode(['status' => 'success', 'message' => 'Permasalahan dan keterkaitan berhasil diperbarui.']);
+            echo json_encode(['status' => 'success', 'message' => 'Permasalahan berhasil diperbarui.']);
         }
 
         public function UpdateKeterkaitanIsu()
@@ -16544,21 +16538,22 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
         public function GetPrioritasDaerahByTahun()
         {
-            $tahun = (int)$this->input->post('Tahun', TRUE);
+            $tahun = trim($this->input->post('Tahun', TRUE));
             $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
                         (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
                         ($this->input->post('KodeWilayah', TRUE) ?: ''));
 
-            $prioritasDaerah = $this->db->select('p.id, p.prioritas, t.tahun, t.tema_daerah')
-                ->from('prioritas_pembangunan p')
-                ->join('tema_pembangunan t', 'p.tema_id = t.id', 'left')
-                ->where('p.kode_wilayah', $KodeWilayah)
-                ->where('p.jenis', 'daerah')
-                ->where('p.deleted_at IS NULL')
-                ->where('(t.tahun = ' . $tahun . ' OR t.tahun IS NULL)')
-                ->order_by('p.id', 'ASC')
-                ->get()
-                ->result_array();
+            $prioritasDaerah = [];
+            if (!empty($KodeWilayah)) {
+                $prioritasDaerah = $this->db->select('id, prioritas_daerah AS prioritas, tahun')
+                    ->from('cascading_rkpd_prioritas')
+                    ->where('kode_wilayah', $KodeWilayah)
+                    ->where('tahun', (string)$tahun)
+                    ->where('deleted_at IS NULL')
+                    ->order_by('id', 'ASC')
+                    ->get()
+                    ->result_array();
+            }
 
             echo json_encode($prioritasDaerah);
         }
@@ -16828,17 +16823,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             }
             $Data['SelectedTahun'] = $selectedTahun;
 
-            // 1. Ambil Master Prioritas Daerah dari Tema Pembangunan (untuk pilihan dropdown)
+            // 1. Ambil Master Prioritas Pembangunan Daerah dari Cascading Permasalahan (untuk pilihan dropdown)
             $prioritasDaerah = [];
             if (!empty($KodeWilayah)) {
-                $prioritasDaerah = $this->db->select('p.id, p.prioritas, t.tahun, t.tema_daerah')
-                    ->from('prioritas_pembangunan p')
-                    ->join('tema_pembangunan t', 'p.tema_id = t.id', 'left')
-                    ->where('p.kode_wilayah', $KodeWilayah)
-                    ->where('p.jenis', 'daerah')
-                    ->where('p.deleted_at IS NULL')
-                    ->where('(t.tahun = ' . (int)$selectedTahun . ' OR t.tahun IS NULL)')
-                    ->order_by('p.id', 'ASC')
+                $prioritasDaerah = $this->db->select('id, prioritas_daerah AS prioritas, tahun')
+                    ->from('cascading_rkpd_prioritas')
+                    ->where('kode_wilayah', $KodeWilayah)
+                    ->where('tahun', (string)$selectedTahun)
+                    ->where('deleted_at IS NULL')
+                    ->order_by('id', 'ASC')
                     ->get()
                     ->result_array();
             }
@@ -16881,10 +16874,22 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             }
 
             foreach ($userPrioritasRows as $uPri) {
+                // Sinkronkan nama terbaru jika id_prioritas_daerah ada di cascading_rkpd_prioritas
+                $prioritasText = $uPri['prioritas_pembangunan'];
+                if (!empty($uPri['id_prioritas_daerah'])) {
+                    $cPri = $this->db->where('id', $uPri['id_prioritas_daerah'])
+                        ->where('deleted_at IS NULL')
+                        ->get('cascading_rkpd_prioritas')
+                        ->row_array();
+                    if ($cPri && !empty($cPri['prioritas_daerah'])) {
+                        $prioritasText = $cPri['prioritas_daerah'];
+                    }
+                }
+
                 $pdItem = [
                     'id' => $uPri['id'],
                     'id_prioritas_daerah' => $uPri['id_prioritas_daerah'],
-                    'prioritas' => $uPri['prioritas_pembangunan'],
+                    'prioritas' => $prioritasText,
                     'arah_list' => []
                 ];
 
@@ -16987,9 +16992,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 return;
             }
 
-            $pRow = $this->db->where('id', $idPrioritasDaerah)->get('prioritas_pembangunan')->row_array();
+            $pRow = $this->db->where('id', $idPrioritasDaerah)
+                ->where('deleted_at IS NULL')
+                ->get('cascading_rkpd_prioritas')
+                ->row_array();
+
             if (!$pRow) {
-                echo json_encode(['status' => 'error', 'message' => 'Data Prioritas Daerah tidak ditemukan!']);
+                echo json_encode(['status' => 'error', 'message' => 'Data Prioritas Pembangunan Daerah pada Cascading Permasalahan tidak ditemukan!']);
                 return;
             }
 
@@ -17010,7 +17019,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 'kode_wilayah' => $KodeWilayah,
                 'tahun' => $tahun,
                 'id_prioritas_daerah' => $idPrioritasDaerah,
-                'prioritas_pembangunan' => $pRow['prioritas'],
+                'prioritas_pembangunan' => $pRow['prioritas_daerah'],
                 'created_at' => date('Y-m-d H:i:s')
             ]);
 
@@ -17043,23 +17052,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 return;
             }
 
-            $pRow = $this->db->where('id', $idPrioritasDaerah)->get('prioritas_pembangunan')->row_array();
+            $pRow = $this->db->where('id', $idPrioritasDaerah)
+                ->where('deleted_at IS NULL')
+                ->get('cascading_rkpd_prioritas')
+                ->row_array();
+
             if (!$pRow) {
-                echo json_encode(['status' => 'error', 'message' => 'Data Prioritas Daerah tidak ditemukan!']);
+                echo json_encode(['status' => 'error', 'message' => 'Data Prioritas Pembangunan Daerah pada Cascading Permasalahan tidak ditemukan!']);
                 return;
             }
 
             $now = date('Y-m-d H:i:s');
             $this->db->where('id', $id)->update('rkpd_prioritas_pembangunan', [
                 'id_prioritas_daerah' => $idPrioritasDaerah,
-                'prioritas_pembangunan' => $pRow['prioritas'],
+                'prioritas_pembangunan' => $pRow['prioritas_daerah'],
                 'updated_at' => $now
             ]);
 
             // Sinkronkan nama dan id prioritas di tabel arah_kebijakan turunannya
             $this->db->where('prioritas_id', $id)->update('rkpd_arah_kebijakan', [
                 'id_prioritas_daerah' => $idPrioritasDaerah,
-                'prioritas_pembangunan' => $pRow['prioritas'],
+                'prioritas_pembangunan' => $pRow['prioritas_daerah'],
                 'updated_at' => $now
             ]);
 

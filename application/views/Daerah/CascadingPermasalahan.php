@@ -200,7 +200,8 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Username']) || isse
         background: #f8fafc;
         border-color: #cbd5e1;
     }
-    .chk input[type="checkbox"] {
+    .chk input[type="checkbox"],
+    .chk input[type="radio"] {
         margin-top: 3px;
         cursor: pointer;
     }
@@ -414,7 +415,7 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Username']) || isse
             </div>
             <div class="modal-body" style="padding: 22px; max-height: calc(85vh - 120px); overflow-y: auto;">
                 <label style="font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 6px; display: block;">
-                    Isu strategis <span style="font-size: 11.5px; font-weight: normal; color: #64748b;">(boleh pilih lebih dari satu)</span>
+                    Isu strategis <span class="text-danger">*</span>
                 </label>
                 <div id="pickI" style="max-height: 200px; overflow-y: auto; padding: 2px;"></div>
 
@@ -441,21 +442,14 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Username']) || isse
             <div class="modal-header" style="background: #15803d; color: #fff; padding: 16px 20px;">
                 <button type="button" class="close" data-dismiss="modal" style="color: #fff; opacity: 0.9; font-size: 24px;">&times;</button>
                 <h4 class="modal-title" style="font-weight: 800; color: #fff;">
-                    <i class="fa fa-pencil" style="margin-right: 6px;"></i> Edit Permasalahan & Keterkaitan Isu
+                    <i class="fa fa-pencil" style="margin-right: 6px;"></i> Edit Permasalahan
                 </h4>
             </div>
             <div class="modal-body" style="padding: 22px;">
                 <input type="hidden" id="editPermId">
                 <div class="form-group" style="margin-bottom: 16px;">
                     <label for="editPermText" style="font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 6px; display: block;">Uraian Permasalahan <span class="text-danger">*</span></label>
-                    <textarea id="editPermText" class="form-control" rows="3" style="border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 13px;"></textarea>
-                </div>
-                <div class="form-group" style="margin-bottom: 10px;">
-                    <label for="editPermIsuId" style="font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 6px; display: block;">Dipetakan ke Isu Strategis</label>
-                    <select id="editPermIsuId" class="form-control" style="height: 40px; border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 13px;"></select>
-                    <p class="hint" style="margin: 4px 0 0; font-size: 12px; color: #64748b;">
-                        Pilih Isu Strategis yang memayungi permasalahan ini, atau pilih "Belum Dipetakan" untuk melepaskannya.
-                    </p>
+                    <textarea id="editPermText" class="form-control" rows="4" style="border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 13px;"></textarea>
                 </div>
                 <p class="err-msg" id="editPermErr"></p>
             </div>
@@ -522,7 +516,7 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Username']) || isse
                 <input type="hidden" id="editProgId">
                 <div class="form-group" style="margin-bottom: 16px;">
                     <label style="font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 6px; display: block;">
-                        Isu Strategis yang Terkait <span style="font-size: 11.5px; font-weight: normal; color: #64748b;">(boleh pilih lebih dari satu)</span> <span class="text-danger">*</span>
+                        Isu Strategis yang Terkait <span class="text-danger">*</span>
                     </label>
                     <div id="editProgIsuContainer" style="max-height: 200px; overflow-y: auto; padding: 2px;"></div>
                 </div>
@@ -595,6 +589,7 @@ $(document).ready(function() {
     function groups() {
         var g = [];
         var processedIsu = {};
+        var processedProg = {};
 
         (S.perm || []).forEach(function(p) {
             if (p.isuId) {
@@ -606,7 +601,15 @@ $(document).ready(function() {
                         g.push({
                             isu: isuObj,
                             P: (S.perm || []).filter(function(x) { return String(x.isuId) === isuKey; }),
-                            R: (S.prog || []).filter(function(r) { return (r.isuIds || []).map(String).indexOf(isuKey) > -1; })
+                            R: (S.prog || []).filter(function(r) {
+                                if (processedProg[r.id]) return false;
+                                var match = (r.isuIds || []).map(String).indexOf(isuKey) > -1;
+                                if (match) {
+                                    processedProg[r.id] = true;
+                                    return true;
+                                }
+                                return false;
+                            })
                         });
                     }
                 }
@@ -633,10 +636,34 @@ $(document).ready(function() {
                 g.push({
                     isu: i,
                     P: [],
-                    R: (S.prog || []).filter(function(r) { return (r.isuIds || []).map(String).indexOf(isuKey) > -1; })
+                    R: (S.prog || []).filter(function(r) {
+                        if (processedProg[r.id]) return false;
+                        var match = (r.isuIds || []).map(String).indexOf(isuKey) > -1;
+                        if (match) {
+                            processedProg[r.id] = true;
+                            return true;
+                        }
+                        return false;
+                    })
                 });
             }
         });
+
+        // Masukkan prioritas yang belum terpetakan ke grup manapun jika ada
+        var unmappedProg = (S.prog || []).filter(function(r) {
+            return !processedProg[r.id];
+        });
+        if (unmappedProg.length > 0) {
+            if (g.length > 0 && g[g.length - 1].isu === null) {
+                g[g.length - 1].R = g[g.length - 1].R.concat(unmappedProg);
+            } else {
+                g.push({
+                    isu: null,
+                    P: [],
+                    R: unmappedProg
+                });
+            }
+        }
 
         return g;
     }
@@ -708,7 +735,7 @@ $(document).ready(function() {
                 e.preventDefault();
                 e.stopPropagation();
                 captureScroll();
-                openEditModal(type, obj);
+                openEditModal(type, obj, isuContext);
             };
 
             // Tombol Hapus
@@ -724,7 +751,7 @@ $(document).ready(function() {
 
                 var msg = type === 'perm' ? 'Apakah Anda yakin ingin menghapus permasalahan ini?' :
                          (type === 'isu' ? 'Apakah Anda yakin ingin menghapus isu strategis ini?\n(Permasalahan terkait akan kembali berstatus belum dipetakan)' :
-                         'Apakah Anda yakin ingin menghapus prioritas ini dari isu ini?');
+                         'Apakah Anda yakin ingin menghapus prioritas pembangunan daerah ini?');
                 if (!confirm(msg)) return;
 
                 $.ajax({
@@ -989,19 +1016,23 @@ $(document).ready(function() {
             $('#eI').text('');
             var pk = $('#pickP');
             pk.empty();
-            var un = (S.perm || []).filter(function(p) { return !p.isuId; });
-            $('#sI').prop('disabled', !un.length);
 
-            if (!un.length) {
-                pk.html('<div class="empty-msg">Semua permasalahan sudah dipetakan. Tambahkan permasalahan baru terlebih dahulu.</div>');
+            if (!S.perm || !S.perm.length) {
+                pk.html('<div class="empty-msg">Belum ada permasalahan yang tersedia. (Anda tetap dapat menyimpan isu strategis ini dan memetakannya nanti)</div>');
             } else {
-                un.forEach(function(p) {
+                S.perm.forEach(function(p, idx) {
+                    var isChecked = !p.isuId;
+                    var otherIsu = (!isChecked && p.isuId) ? (S.isu || []).find(function(x) { return String(x.id) === String(p.isuId); }) : null;
+                    var badge = !p.isuId ? '<span class="label label-default" style="margin-left: 6px;">Belum dipetakan</span>' :
+                               (otherIsu ? '<span class="label label-warning" style="margin-left: 6px;">Isu: ' + $('<div>').text(otherIsu.text).html() + '</span>' : '');
                     var l = $('<label class="chk"></label>');
                     var inp = $('<input type="checkbox">').val(p.id);
-                    l.append(inp).append($('<span></span>').text(p.text));
+                    var num = (idx + 1) + '. ';
+                    l.append(inp).append($('<span></span>').html('<strong>' + num + '</strong>' + $('<div>').text(p.text).html() + ' ' + badge));
                     pk.append(l);
                 });
             }
+            $('#sI').prop('disabled', false);
             $('#dI').modal('show');
             setTimeout(function() { $('#inI').focus(); }, 350);
         });
@@ -1016,10 +1047,6 @@ $(document).ready(function() {
             if (!t) {
                 $('#eI').text('Isi isu strategis terlebih dahulu.');
                 $('#inI').focus();
-                return;
-            }
-            if (!ids.length) {
-                $('#eI').text('Pilih minimal satu permasalahan untuk isu ini.');
                 return;
             }
 
@@ -1066,15 +1093,13 @@ $(document).ready(function() {
                 $('#sR').prop('disabled', true);
             } else {
                 $('#sR').prop('disabled', false);
-                S.isu.forEach(function(i) {
+                S.isu.forEach(function(i, idx) {
                     var l = $('<label class="chk"></label>');
-                    var c = $('<input type="checkbox">').val(i.id);
+                    var c = $('<input type="radio" name="pickIsuRadio">').val(i.id);
+                    if (idx === 0) c.prop('checked', true);
                     l.append(c).append($('<span></span>').text(i.text));
                     pk.append(l);
                 });
-                if (S.isu.length === 1) {
-                    pk.find('input').prop('checked', true);
-                }
             }
             $('#dR').modal('show');
             setTimeout(function() { $('#inR').focus(); }, 350);
@@ -1082,13 +1107,11 @@ $(document).ready(function() {
 
         $('#sR').on('click', function() {
             var t = $.trim($('#inR').val());
-            var ids = [];
-            $('#pickI input:checked').each(function() {
-                ids.push($(this).val());
-            });
+            var selectedIsuId = $('#pickI input[name="pickIsuRadio"]:checked').val();
+            var ids = selectedIsuId ? [selectedIsuId] : [];
 
             if (!ids.length) {
-                $('#eR').text('Pilih minimal satu isu strategis.');
+                $('#eR').text('Pilih isu strategis.');
                 return;
             }
             if (!t) {
@@ -1131,19 +1154,12 @@ $(document).ready(function() {
         // MODAL EDIT KETERKAITAN (Permasalahan, Isu, Prioritas)
         // ============================================================
 
-        function openEditModal(type, obj) {
+        function openEditModal(type, obj, isuContext) {
             captureScroll();
             if (type === 'perm') {
                 $('#editPermId').val(obj.id);
                 $('#editPermText').val(obj.text);
                 $('#editPermErr').text('');
-
-                var optHtml = '<option value="">-- Belum Dipetakan ke Isu Strategis --</option>';
-                (S.isu || []).forEach(function(i) {
-                    var sel = (String(obj.isuId) === String(i.id)) ? 'selected' : '';
-                    optHtml += '<option value="' + i.id + '" ' + sel + '>' + $('<div>').text(i.text).html() + '</option>';
-                });
-                $('#editPermIsuId').html(optHtml);
                 $('#ModalEditPermasalahan').modal('show');
                 setTimeout(function() { $('#editPermText').focus(); }, 350);
 
@@ -1185,10 +1201,13 @@ $(document).ready(function() {
                 if (!S.isu || !S.isu.length) {
                     ctn.html('<div class="empty-msg">Belum ada isu strategis.</div>');
                 } else {
-                    S.isu.forEach(function(i) {
-                        var isChecked = (obj.isuIds || []).map(String).indexOf(String(i.id)) > -1;
+                    var activeIsuId = (isuContext && isuContext.id) ? String(isuContext.id) : 
+                                     ((obj.isuIds && obj.isuIds.length) ? String(obj.isuIds[0]) : '');
+
+                    S.isu.forEach(function(i, idx) {
+                        var isChecked = activeIsuId ? (String(i.id) === activeIsuId) : (idx === 0);
                         var l = $('<label class="chk"></label>');
-                        var inp = $('<input type="checkbox">').val(i.id).prop('checked', isChecked);
+                        var inp = $('<input type="radio" name="editProgIsuRadio">').val(i.id).prop('checked', isChecked);
                         l.append(inp).append($('<span></span>').text(i.text));
                         ctn.append(l);
                     });
@@ -1198,11 +1217,10 @@ $(document).ready(function() {
             }
         }
 
-        // Simpan Edit Permasalahan & Keterkaitan Isu
+        // Simpan Edit Permasalahan
         $('#btnSaveEditPerm').on('click', function() {
             var id = $('#editPermId').val();
             var text = $.trim($('#editPermText').val());
-            var isuId = $('#editPermIsuId').val();
 
             if (!text) {
                 $('#editPermErr').text('Uraian permasalahan wajib diisi!');
@@ -1221,7 +1239,6 @@ $(document).ready(function() {
                 data: {
                     id: id,
                     text: text,
-                    isuId: isuId,
                     KodeWilayah: kodeWilayah,
                     Tahun: tahun
                 },
@@ -1291,10 +1308,8 @@ $(document).ready(function() {
         $('#btnSaveEditProg').on('click', function() {
             var id = $('#editProgId').val();
             var text = $.trim($('#editProgText').val());
-            var isuIds = [];
-            $('#editProgIsuContainer input:checked').each(function() {
-                isuIds.push($(this).val());
-            });
+            var selectedIsuId = $('#editProgIsuContainer input[name="editProgIsuRadio"]:checked').val();
+            var isuIds = selectedIsuId ? [selectedIsuId] : [];
 
             if (!text) {
                 $('#editProgErr').text('Uraian prioritas daerah wajib diisi!');
@@ -1302,7 +1317,7 @@ $(document).ready(function() {
                 return;
             }
             if (!isuIds.length) {
-                $('#editProgErr').text('Pilih minimal satu isu strategis yang terkait!');
+                $('#editProgErr').text('Pilih isu strategis yang terkait!');
                 return;
             }
 
