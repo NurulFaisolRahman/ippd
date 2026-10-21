@@ -18320,11 +18320,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             }
             $Data['SelectedTahun'] = $selectedTahun;
 
-            // 1. Ambil Master Prioritas Nasional dari prioritas_nasional_rpjmn
-            $pnMaster = $this->db->where('deleted_at IS NULL')
-                ->order_by('Id', 'ASC')
-                ->get('prioritas_nasional_rpjmn')
-                ->result_array();
+            // 1. Ambil Master Prioritas Nasional: jika tahun 2026 ambil dari rkp_ps_prioritas_nasional (RKP Nasional - Menu Matriks Pembangunan)
+            if ((string)$selectedTahun === '2026' && $this->db->table_exists('rkp_ps_prioritas_nasional')) {
+                $pnMaster = $this->db->where('deleted_at IS NULL')
+                    ->order_by('Id', 'ASC')
+                    ->get('rkp_ps_prioritas_nasional')
+                    ->result_array();
+            } else {
+                $pnMaster = $this->db->where('deleted_at IS NULL')
+                    ->order_by('Id', 'ASC')
+                    ->get('prioritas_nasional_rpjmn')
+                    ->result_array();
+            }
             $Data['PNMaster'] = $pnMaster;
 
             // 2. Ambil Master Prioritas Daerah untuk tahun aktif (P1, P2, P3...) dari menu Sasaran Pembangunan Daerah
@@ -18419,8 +18426,52 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         public function GetSasaranNasionalByPN()
         {
             $idPn = (int)$this->input->get('id_pn', TRUE);
+            $tahun = trim($this->input->get('tahun', TRUE));
             if ($idPn <= 0) {
                 echo json_encode([]);
+                return;
+            }
+
+            // Jika tahun 2026, ambil dari data RKP Nasional Menu Matriks Pembangunan (rkp_ps_pn_sasaran & rkp_ps_pn_indikator)
+            if ((string)$tahun === '2026' && $this->db->table_exists('rkp_ps_pn_sasaran')) {
+                $list = $this->db->where('_IdPN', $idPn)
+                    ->where('deleted_at IS NULL')
+                    ->order_by('Id', 'ASC')
+                    ->get('rkp_ps_pn_sasaran')
+                    ->result_array();
+
+                $res = [];
+                foreach ($list as $idx => $item) {
+                    $kode = 'S' . ($idx + 1);
+
+                    // Ambil indikator untuk sasaran ini dari rkp_ps_pn_indikator
+                    $indRows = [];
+                    if ($this->db->table_exists('rkp_ps_pn_indikator')) {
+                        $indRows = $this->db->where('_IdSasaranPN', $item['Id'])
+                            ->where('deleted_at IS NULL')
+                            ->order_by('Id', 'ASC')
+                            ->get('rkp_ps_pn_indikator')
+                            ->result_array();
+                    }
+
+                    $indikatorList = [];
+                    foreach ($indRows as $ir) {
+                        $txt = trim($ir['Indikator']);
+                        if (!empty($txt)) {
+                            $indikatorList[] = $txt;
+                        }
+                    }
+
+                    $res[] = [
+                        'id' => $item['Id'],
+                        'kode' => $kode,
+                        'sasaran' => $item['Sasaran'],
+                        'label' => $kode . '. ' . $item['Sasaran'],
+                        'indikator' => $indikatorList,
+                        'indikator_text' => implode("\n", $indikatorList)
+                    ];
+                }
+                echo json_encode($res);
                 return;
             }
 
@@ -18529,7 +18580,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             }
 
             // 1. Data PN
-            $pnRow = $this->db->where('Id', $idPn)->get('prioritas_nasional_rpjmn')->row_array();
+            if ((string)$tahun === '2026' && $this->db->table_exists('rkp_ps_prioritas_nasional')) {
+                $pnRow = $this->db->where('Id', $idPn)->where('deleted_at IS NULL')->get('rkp_ps_prioritas_nasional')->row_array();
+            } else {
+                $pnRow = $this->db->where('Id', $idPn)->get('prioritas_nasional_rpjmn')->row_array();
+            }
             if (!$pnRow) {
                 echo json_encode(['status' => 'error', 'message' => 'Prioritas Nasional tidak ditemukan!']);
                 return;
@@ -18726,7 +18781,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 return;
             }
 
-            $pnRow = $this->db->where('Id', $idPn)->get('prioritas_nasional_rpjmn')->row_array();
+            // 1. Data PN
+            if ((string)$tahun === '2026' && $this->db->table_exists('rkp_ps_prioritas_nasional')) {
+                $pnRow = $this->db->where('Id', $idPn)->where('deleted_at IS NULL')->get('rkp_ps_prioritas_nasional')->row_array();
+            } else {
+                $pnRow = $this->db->where('Id', $idPn)->get('prioritas_nasional_rpjmn')->row_array();
+            }
             if (!$pnRow) {
                 echo json_encode(['status' => 'error', 'message' => 'Prioritas Nasional tidak ditemukan!']);
                 return;
@@ -18984,26 +19044,57 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             }
             $Data['SelectedTahun'] = $selectedTahun;
 
-            // 1. Ambil Master Prioritas Nasional dari prioritas_nasional_rpjmn
-            $pnMaster = $this->db->where('deleted_at IS NULL')
-                ->order_by('Id', 'ASC')
-                ->get('prioritas_nasional_rpjmn')
-                ->result_array();
+            // 1. Ambil Master Prioritas Nasional: jika tahun 2026 ambil dari rkp_ps_prioritas_nasional (RKP Nasional - Menu Matriks Pembangunan)
+            if ((string)$selectedTahun === '2026' && $this->db->table_exists('rkp_ps_prioritas_nasional')) {
+                $pnMaster = $this->db->where('deleted_at IS NULL')
+                    ->order_by('Id', 'ASC')
+                    ->get('rkp_ps_prioritas_nasional')
+                    ->result_array();
+            } else {
+                $pnMaster = $this->db->where('deleted_at IS NULL')
+                    ->order_by('Id', 'ASC')
+                    ->get('prioritas_nasional_rpjmn')
+                    ->result_array();
+            }
             $Data['PNMaster'] = $pnMaster;
 
-            // 2. Ambil Master Prioritas Daerah untuk tahun aktif (P1, P2, P3...)
+            // 2. Ambil Master Prioritas Daerah untuk tahun aktif (P1, P2, P3...) dari Permasalahan Daerah (cascading_rkpd_prioritas)
             $prioritasDaerahList = [];
             if (!empty($KodeWilayah)) {
-                $pRows = $this->db->select('p.id, p.prioritas')
-                    ->from('prioritas_pembangunan p')
-                    ->join('tema_pembangunan t', 'p.tema_id = t.id', 'left')
-                    ->where('p.kode_wilayah', $KodeWilayah)
-                    ->where('p.jenis', 'daerah')
-                    ->where('p.deleted_at IS NULL')
-                    ->where('(t.tahun = ' . (int)$selectedTahun . ' OR t.tahun IS NULL)')
-                    ->order_by('p.id', 'ASC')
+                $pRows = $this->db->select('id, prioritas_daerah AS prioritas')
+                    ->from('cascading_rkpd_prioritas')
+                    ->where('kode_wilayah', $KodeWilayah)
+                    ->where('tahun', (string)$selectedTahun)
+                    ->where('deleted_at IS NULL')
+                    ->order_by('id', 'ASC')
                     ->get()
                     ->result_array();
+
+                // Fallback jika belum diinput di cascading_rkpd_prioritas, ambil dari rkpd_sasaran_prioritas
+                if (empty($pRows)) {
+                    $pRows = $this->db->select('id, prioritas_pembangunan AS prioritas')
+                        ->from('rkpd_sasaran_prioritas')
+                        ->where('kode_wilayah', $KodeWilayah)
+                        ->where('tahun', (string)$selectedTahun)
+                        ->where('deleted_at IS NULL')
+                        ->order_by('id', 'ASC')
+                        ->get()
+                        ->result_array();
+                }
+
+                // Fallback kedua jika masih belum ada, ambil dari prioritas_pembangunan
+                if (empty($pRows)) {
+                    $pRows = $this->db->select('p.id, p.prioritas')
+                        ->from('prioritas_pembangunan p')
+                        ->join('tema_pembangunan t', 'p.tema_id = t.id', 'left')
+                        ->where('p.kode_wilayah', $KodeWilayah)
+                        ->where('p.jenis', 'daerah')
+                        ->where('p.deleted_at IS NULL')
+                        ->where('(t.tahun = ' . (int)$selectedTahun . ' OR t.tahun IS NULL)')
+                        ->order_by('p.id', 'ASC')
+                        ->get()
+                        ->result_array();
+                }
 
                 foreach ($pRows as $idx => $pr) {
                     $kodeP = 'P' . ($idx + 1);
@@ -19132,6 +19223,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     ->order_by('id_pn ASC, CAST(nomor_ppn AS UNSIGNED) ASC, id ASC')
                     ->get('rkpd_dukungan_prioritas')
                     ->result_array();
+
+                if (!empty($dukunganList) && !empty($prioritasDaerahList)) {
+                    $pMap = [];
+                    foreach ($prioritasDaerahList as $pItem) {
+                        $pMap[$pItem['id']] = $pItem;
+                    }
+                    foreach ($dukunganList as &$duk) {
+                        if (!empty($duk['id_prioritas_daerah']) && isset($pMap[$duk['id_prioritas_daerah']])) {
+                            $duk['kode_prioritas_daerah'] = $pMap[$duk['id_prioritas_daerah']]['kode'];
+                            $duk['prioritas_daerah'] = $pMap[$duk['id_prioritas_daerah']]['prioritas'];
+                        }
+                    }
+                    unset($duk);
+                }
             }
             $Data['DukunganList'] = $dukunganList;
 
@@ -19142,8 +19247,30 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         public function GetProgramNasionalByPN()
         {
             $idPn = (int)$this->input->get('id_pn', TRUE);
+            $tahun = trim($this->input->get('tahun', TRUE));
             if ($idPn <= 0) {
                 echo json_encode([]);
+                return;
+            }
+
+            // Jika tahun 2026, ambil dari data RKP Nasional Menu Matriks Pembangunan (rkp_ps_program_prioritas)
+            if ((string)$tahun === '2026' && $this->db->table_exists('rkp_ps_program_prioritas')) {
+                $rows = $this->db->where('_IdPN', $idPn)
+                    ->where('deleted_at IS NULL')
+                    ->order_by('Id', 'ASC')
+                    ->get('rkp_ps_program_prioritas')
+                    ->result_array();
+
+                $res = [];
+                foreach ($rows as $r) {
+                    $res[] = [
+                        'id' => $r['Id'],
+                        'program' => $r['ProgramPrioritas'],
+                        'sasaran' => $r['ProgramPrioritas'],
+                        'label' => $r['ProgramPrioritas']
+                    ];
+                }
+                echo json_encode($res);
                 return;
             }
 
@@ -19169,6 +19296,43 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         {
             $idProgram = (int)$this->input->get('id_program', TRUE);
             $idPn = (int)$this->input->get('id_pn', TRUE);
+            $tahun = trim($this->input->get('tahun', TRUE));
+
+            // Jika tahun 2026, ambil dari data RKP Nasional Menu Matriks Pembangunan (rkp_ps_kegiatan_prioritas)
+            if ((string)$tahun === '2026' && $this->db->table_exists('rkp_ps_kegiatan_prioritas')) {
+                if ($idProgram > 0) {
+                    $rows = $this->db->where('_IdPP', $idProgram)
+                        ->where('deleted_at IS NULL')
+                        ->order_by('Id', 'ASC')
+                        ->get('rkp_ps_kegiatan_prioritas')
+                        ->result_array();
+                } elseif ($idPn > 0) {
+                    $rows = $this->db->select('kp.*')
+                        ->from('rkp_ps_kegiatan_prioritas kp')
+                        ->join('rkp_ps_program_prioritas pp', 'kp._IdPP = pp.Id', 'inner')
+                        ->where('pp._IdPN', $idPn)
+                        ->where('kp.deleted_at IS NULL')
+                        ->where('pp.deleted_at IS NULL')
+                        ->order_by('kp.Id', 'ASC')
+                        ->get()
+                        ->result_array();
+                } else {
+                    echo json_encode([]);
+                    return;
+                }
+
+                $res = [];
+                foreach ($rows as $r) {
+                    $res[] = [
+                        'id' => $r['Id'],
+                        'kegiatan' => $r['KegiatanPrioritas'],
+                        'sasaran' => $r['KegiatanPrioritas'],
+                        'label' => $r['KegiatanPrioritas']
+                    ];
+                }
+                echo json_encode($res);
+                return;
+            }
 
             $this->db->where('deleted_at IS NULL');
             if ($idProgram > 0) {
@@ -19222,7 +19386,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             }
 
             // Data PN
-            $pnRow = $this->db->where('Id', $idPn)->get('prioritas_nasional_rpjmn')->row_array();
+            if ((string)$tahun === '2026' && $this->db->table_exists('rkp_ps_prioritas_nasional')) {
+                $pnRow = $this->db->where('Id', $idPn)->where('deleted_at IS NULL')->get('rkp_ps_prioritas_nasional')->row_array();
+            } else {
+                $pnRow = $this->db->where('Id', $idPn)->get('prioritas_nasional_rpjmn')->row_array();
+            }
             if (!$pnRow) {
                 echo json_encode(['status' => 'error', 'message' => 'Prioritas Nasional tidak ditemukan!']);
                 return;
@@ -19232,7 +19400,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
             // Program Nasional
             if (empty($programNasional) && $idProgramNasional > 0) {
-                $progRow = $this->db->where('Id', $idProgramNasional)->get('program_prioritas_rpjmn')->row_array();
+                if ((string)$tahun === '2026' && $this->db->table_exists('rkp_ps_program_prioritas')) {
+                    $progRow = $this->db->where('Id', $idProgramNasional)->where('deleted_at IS NULL')->get('rkp_ps_program_prioritas')->row_array();
+                } else {
+                    $progRow = $this->db->where('Id', $idProgramNasional)->get('program_prioritas_rpjmn')->row_array();
+                }
                 if ($progRow) $programNasional = $progRow['ProgramPrioritas'];
             }
             if (empty($programNasional)) {
@@ -19255,16 +19427,37 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 }
             }
 
-            // Prioritas Daerah
+            // Prioritas Daerah dari Permasalahan Daerah (cascading_rkpd_prioritas)
             $kodePrioritasDaerah = '';
             if ($idPrioritasDaerah > 0) {
-                $allPRows = $this->db->select('id, prioritas')
+                $allPRows = $this->db->select('id, prioritas_daerah AS prioritas')
                     ->where('kode_wilayah', $KodeWilayah)
-                    ->where('jenis', 'daerah')
+                    ->where('tahun', (string)$tahun)
                     ->where('deleted_at IS NULL')
                     ->order_by('id', 'ASC')
-                    ->get('prioritas_pembangunan')
+                    ->get('cascading_rkpd_prioritas')
                     ->result_array();
+
+                if (empty($allPRows)) {
+                    $allPRows = $this->db->select('id, prioritas_pembangunan AS prioritas')
+                        ->where('kode_wilayah', $KodeWilayah)
+                        ->where('tahun', (string)$tahun)
+                        ->where('deleted_at IS NULL')
+                        ->order_by('id', 'ASC')
+                        ->get('rkpd_sasaran_prioritas')
+                        ->result_array();
+                }
+
+                if (empty($allPRows)) {
+                    $allPRows = $this->db->select('id, prioritas')
+                        ->where('kode_wilayah', $KodeWilayah)
+                        ->where('jenis', 'daerah')
+                        ->where('deleted_at IS NULL')
+                        ->order_by('id', 'ASC')
+                        ->get('prioritas_pembangunan')
+                        ->result_array();
+                }
+
                 foreach ($allPRows as $k => $p) {
                     if ($p['id'] == $idPrioritasDaerah) {
                         $kodePrioritasDaerah = 'P' . ($k + 1);
@@ -19299,7 +19492,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 'id_pn' => $idPn,
                 'kode_pn' => $kodePn,
                 'nama_pn' => $namaPn,
-                'nomor_ppn' => !empty($nomorPpn) ? $nomorPpn : '1',
+                'nomor_ppn' => !empty($nomorPpn) ? $nomorPpn : NULL,
                 'id_program_nasional' => $idProgramNasional > 0 ? $idProgramNasional : NULL,
                 'program_nasional' => $programNasional,
                 'kegiatan_nasional_json' => !empty($kegiatanArray) ? json_encode($kegiatanArray, JSON_UNESCAPED_UNICODE) : NULL,
@@ -19330,6 +19523,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 return;
             }
 
+            $tahun = trim($this->input->post('Tahun', TRUE));
+            if (empty($tahun)) {
+                $rowCurrent = $this->db->where('id', $id)->get('rkpd_dukungan_prioritas')->row_array();
+                if ($rowCurrent && !empty($rowCurrent['tahun'])) {
+                    $tahun = $rowCurrent['tahun'];
+                }
+            }
+
             $idPn = (int)$this->input->post('IdPN', TRUE);
             $nomorPpn = trim($this->input->post('NomorPPN', TRUE));
             $idProgramNasional = (int)$this->input->post('IdProgramNasional', TRUE);
@@ -19346,7 +19547,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 return;
             }
 
-            $pnRow = $this->db->where('Id', $idPn)->get('prioritas_nasional_rpjmn')->row_array();
+            if ((string)$tahun === '2026' && $this->db->table_exists('rkp_ps_prioritas_nasional')) {
+                $pnRow = $this->db->where('Id', $idPn)->where('deleted_at IS NULL')->get('rkp_ps_prioritas_nasional')->row_array();
+            } else {
+                $pnRow = $this->db->where('Id', $idPn)->get('prioritas_nasional_rpjmn')->row_array();
+            }
             if (!$pnRow) {
                 echo json_encode(['status' => 'error', 'message' => 'Prioritas Nasional tidak ditemukan!']);
                 return;
@@ -19355,7 +19560,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $namaPn = $pnRow['PrioritasNasional'];
 
             if (empty($programNasional) && $idProgramNasional > 0) {
-                $progRow = $this->db->where('Id', $idProgramNasional)->get('program_prioritas_rpjmn')->row_array();
+                if ((string)$tahun === '2026' && $this->db->table_exists('rkp_ps_program_prioritas')) {
+                    $progRow = $this->db->where('Id', $idProgramNasional)->where('deleted_at IS NULL')->get('rkp_ps_program_prioritas')->row_array();
+                } else {
+                    $progRow = $this->db->where('Id', $idProgramNasional)->get('program_prioritas_rpjmn')->row_array();
+                }
                 if ($progRow) $programNasional = $progRow['ProgramPrioritas'];
             }
             if (empty($programNasional)) {
@@ -19377,15 +19586,37 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 }
             }
 
+            // Prioritas Daerah dari Permasalahan Daerah (cascading_rkpd_prioritas)
             $kodePrioritasDaerah = '';
             if ($idPrioritasDaerah > 0) {
-                $allPRows = $this->db->select('id, prioritas')
+                $allPRows = $this->db->select('id, prioritas_daerah AS prioritas')
                     ->where('kode_wilayah', $KodeWilayah)
-                    ->where('jenis', 'daerah')
+                    ->where('tahun', (string)$tahun)
                     ->where('deleted_at IS NULL')
                     ->order_by('id', 'ASC')
-                    ->get('prioritas_pembangunan')
+                    ->get('cascading_rkpd_prioritas')
                     ->result_array();
+
+                if (empty($allPRows)) {
+                    $allPRows = $this->db->select('id, prioritas_pembangunan AS prioritas')
+                        ->where('kode_wilayah', $KodeWilayah)
+                        ->where('tahun', (string)$tahun)
+                        ->where('deleted_at IS NULL')
+                        ->order_by('id', 'ASC')
+                        ->get('rkpd_sasaran_prioritas')
+                        ->result_array();
+                }
+
+                if (empty($allPRows)) {
+                    $allPRows = $this->db->select('id, prioritas')
+                        ->where('kode_wilayah', $KodeWilayah)
+                        ->where('jenis', 'daerah')
+                        ->where('deleted_at IS NULL')
+                        ->order_by('id', 'ASC')
+                        ->get('prioritas_pembangunan')
+                        ->result_array();
+                }
+
                 foreach ($allPRows as $k => $p) {
                     if ($p['id'] == $idPrioritasDaerah) {
                         $kodePrioritasDaerah = 'P' . ($k + 1);
@@ -19417,7 +19648,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 'id_pn' => $idPn,
                 'kode_pn' => $kodePn,
                 'nama_pn' => $namaPn,
-                'nomor_ppn' => !empty($nomorPpn) ? $nomorPpn : '1',
+                'nomor_ppn' => !empty($nomorPpn) ? $nomorPpn : NULL,
                 'id_program_nasional' => $idProgramNasional > 0 ? $idProgramNasional : NULL,
                 'program_nasional' => $programNasional,
                 'kegiatan_nasional_json' => !empty($kegiatanArray) ? json_encode($kegiatanArray, JSON_UNESCAPED_UNICODE) : NULL,
@@ -20252,9 +20483,30 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
         /**
          * Halaman IKD Tahun Berjalan
+         * Mengambil data otomatis dari IKD RPJMD (tabel ikd),
+         * dikelompokkan ke dalam 4 Aspek (Geografi, Kesejahteraan, Daya Saing, Pelayanan),
+         * dan difilter berdasarkan Tahun Berjalan yang dipilih melalui Dropdown Tahun.
          */
         public function IKDTahunBerjalan() {
             $Header['Halaman'] = 'IKD Tahun Berjalan';
+            
+            // Auto create tabel ikd_tahun_berjalan jika belum ada
+            if (!$this->db->table_exists('ikd_tahun_berjalan')) {
+                $this->db->query("CREATE TABLE IF NOT EXISTS `ikd_tahun_berjalan` (
+                    `id` INT(11) NOT NULL AUTO_INCREMENT,
+                    `kode_wilayah` VARCHAR(10) NOT NULL,
+                    `ikd_id` INT(11) NOT NULL,
+                    `indikator_kinerja_daerah` TEXT NOT NULL,
+                    `target` VARCHAR(100) DEFAULT NULL,
+                    `tahun` INT(4) NOT NULL,
+                    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    `updated_at` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+                    `deleted_at` DATETIME DEFAULT NULL,
+                    PRIMARY KEY (`id`),
+                    KEY `idx_wilayah_tahun` (`kode_wilayah`, `tahun`),
+                    KEY `idx_ikd_id` (`ikd_id`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+            }
             
             $kodeWilayah = $this->session->userdata('KodeWilayah') 
                         ?? $this->session->userdata('TempKodeWilayah') 
@@ -20269,40 +20521,242 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $Data['KodeWilayah'] = $kodeWilayah;
             $Data['NamaWilayah'] = '';
             
+            // Definisi 4 Aspek seperti di IKD RPJMD
+            $aspekDef = [
+                'geografi' => [
+                    'code' => 'I',
+                    'name' => 'ASPEK GEOGRAFI DAN DEMOGRAFI',
+                    'cardClass' => 'card-geografi',
+                    'badgeClass' => 'badge-geografi',
+                    'icon' => 'fa-globe',
+                    'items' => []
+                ],
+                'kesejahteraan' => [
+                    'code' => 'II',
+                    'name' => 'ASPEK KESEJAHTERAAN MASYARAKAT',
+                    'cardClass' => 'card-kesejahteraan',
+                    'badgeClass' => 'badge-kesejahteraan',
+                    'icon' => 'fa-heartbeat',
+                    'items' => []
+                ],
+                'dayasaing' => [
+                    'code' => 'III',
+                    'name' => 'ASPEK DAYA SAING',
+                    'cardClass' => 'card-dayasaing',
+                    'badgeClass' => 'badge-dayasaing',
+                    'icon' => 'fa-line-chart',
+                    'items' => []
+                ],
+                'pelayanan' => [
+                    'code' => 'IV',
+                    'name' => 'ASPEK PELAYANAN UMUM',
+                    'cardClass' => 'card-pelayanan',
+                    'badgeClass' => 'badge-pelayanan',
+                    'icon' => 'fa-building',
+                    'items' => []
+                ]
+            ];
+            
+            $listTahun = [];
+            $selectedTahun = '';
+            $totalIndikator = 0;
+            
             if (!empty($kodeWilayah)) {
                 $wilayah = $this->db->where('Kode', $kodeWilayah)->get('kodewilayah')->row_array();
                 if ($wilayah) {
                     $Data['NamaWilayah'] = $wilayah['Nama'];
                 }
                 
-                // ================================================================
-                // PERBAIKAN: Ganti 'kode_wilayah' menjadi 'kodewilayah'
-                // AMBIL DAFTAR PERIODE UNIK DARI TABEL IKD
-                // ================================================================
-                $Data['PeriodeList'] = $this->db
-                    ->distinct()
-                    ->select('tahun_mulai, tahun_akhir, CONCAT(tahun_mulai, " - ", tahun_akhir) as periode')
-                    ->where('kodewilayah', $kodeWilayah)  // PERBAIKAN: kodewilayah
+                // Ambil periode dari visirpjmd
+                $visi = $this->db
+                    ->where('KodeWilayah', $kodeWilayah)
                     ->where('deleted_at IS NULL')
-                    ->order_by('tahun_mulai', 'DESC')
+                    ->order_by('TahunMulai', 'DESC')
+                    ->get('visirpjmd')
+                    ->row_array();
+
+                $yearsCollected = [];
+                $rpjmdMulai = 2025; // default tahun awal RPJMD
+                $rpjmdAkhir = 2030; // default tahun akhir RPJMD
+
+                if ($visi && !empty($visi['TahunMulai'])) {
+                    $rpjmdMulai = (int)$visi['TahunMulai'];
+                    $rpjmdAkhir = !empty($visi['TahunAkhir']) ? (int)$visi['TahunAkhir'] : ($rpjmdMulai + 5);
+                }
+
+                // Masukkan rentang tahun RPJMD ke daftar tahun dropdown (2025 - 2030)
+                $endYearRange = max($rpjmdAkhir, $rpjmdMulai + 5, 2030);
+                for ($y = $rpjmdMulai; $y <= $endYearRange; $y++) {
+                    $yearsCollected[] = (string)$y;
+                }
+
+                // Ambil juga jika ada periode khusus di tabel ikd
+                $ikdPeriods = $this->db
+                    ->distinct()
+                    ->select('tahun_mulai, tahun_akhir')
+                    ->where('kodewilayah', $kodeWilayah)
+                    ->where('deleted_at IS NULL')
+                    ->get('ikd')
+                    ->result_array();
+                    
+                foreach ($ikdPeriods as $p) {
+                    $m = (int)($p['tahun_mulai'] ?? 0);
+                    $a = (int)($p['tahun_akhir'] ?? 0);
+                    if ($m > 1900 && $a >= $m) {
+                        for ($y = $m; $y <= $a; $y++) {
+                            $yearsCollected[] = (string)$y;
+                        }
+                    }
+                }
+                
+                // Ambil juga tahun dari tema_pembangunan jika ada
+                if ($this->db->table_exists('tema_pembangunan')) {
+                    $thTema = $this->db->distinct()->select('tahun')
+                        ->where('kode_wilayah', $kodeWilayah)
+                        ->where('deleted_at IS NULL')
+                        ->get('tema_pembangunan')
+                        ->result_array();
+                    foreach ($thTema as $t) {
+                        if (!empty($t['tahun'])) $yearsCollected[] = (string)$t['tahun'];
+                    }
+                }
+                
+                // Ambil juga tahun dari cascading_rkpd_prioritas jika ada
+                if ($this->db->table_exists('cascading_rkpd_prioritas')) {
+                    $thCas = $this->db->distinct()->select('tahun')
+                        ->where('kode_wilayah', $kodeWilayah)
+                        ->where('deleted_at IS NULL')
+                        ->get('cascading_rkpd_prioritas')
+                        ->result_array();
+                    foreach ($thCas as $t) {
+                        if (!empty($t['tahun'])) $yearsCollected[] = (string)$t['tahun'];
+                    }
+                }
+                
+                // Ambil juga tahun dari ikd_tahun_berjalan jika ada
+                $thTb = $this->db->distinct()->select('tahun')
+                    ->where('kode_wilayah', $kodeWilayah)
+                    ->where('deleted_at IS NULL')
+                    ->get('ikd_tahun_berjalan')
+                    ->result_array();
+                foreach ($thTb as $t) {
+                    if (!empty($t['tahun'])) $yearsCollected[] = (string)$t['tahun'];
+                }
+                
+                $yearsCollected = array_values(array_unique(array_filter($yearsCollected)));
+                sort($yearsCollected, SORT_NUMERIC);
+                $listTahun = $yearsCollected;
+                
+                if (empty($listTahun)) {
+                    $curY = (int)date('Y');
+                    $listTahun = [(string)($curY - 1), (string)($curY), (string)($curY + 1), (string)($curY + 2), (string)($curY + 3)];
+                }
+                
+                // Tentukan SelectedTahun
+                $reqTahun = $this->input->get('tahun', TRUE);
+                if (!empty($reqTahun) && in_array((string)$reqTahun, $listTahun)) {
+                    $selectedTahun = (string)$reqTahun;
+                } else {
+                    $curYStr = (string)date('Y');
+                    if (in_array($curYStr, $listTahun)) {
+                        $selectedTahun = $curYStr;
+                    } else {
+                        $selectedTahun = (string)$listTahun[0];
+                    }
+                }
+                
+                // AMBIL DATA IKD OTOMATIS DARI RPJMD (tabel ikd)
+                $ikdList = $this->db
+                    ->where('kodewilayah', $kodeWilayah)
+                    ->where('deleted_at IS NULL')
+                    ->order_by('id', 'ASC')
                     ->get('ikd')
                     ->result_array();
                 
-                // ================================================================
-                // AMBIL SEMUA DATA IKD TAHUN BERJALAN (TABEL TERPISAH)
-                // ================================================================
-                $Data['IKDData'] = $this->db
-                    ->select('id, indikator_kinerja_daerah, target, tahun, ikd_id')
+                $totalIndikator = count($ikdList);
+                
+                // Ambil data override di ikd_tahun_berjalan untuk tahun aktif
+                $tbList = $this->db
                     ->where('kode_wilayah', $kodeWilayah)
+                    ->where('tahun', (int)$selectedTahun)
                     ->where('deleted_at IS NULL')
-                    ->order_by('tahun', 'DESC')
-                    ->order_by('id', 'ASC')
                     ->get('ikd_tahun_berjalan')
                     ->result_array();
+                
+                $tbMap = [];
+                foreach ($tbList as $tb) {
+                    $tbMap[$tb['ikd_id']] = $tb;
+                }
+                
+                // Proses setiap indikator dan masukkan ke 4 Aspek
+                foreach ($ikdList as $row) {
+                    // Tentukan tahun acuan awal RPJMD (default 2025)
+                    $baseYear = 2025;
+                    if (!empty($row['tahun_mulai']) && (int)$row['tahun_mulai'] > 1900) {
+                        $baseYear = (int)$row['tahun_mulai'];
+                    } elseif (!empty($rpjmdMulai) && $rpjmdMulai > 1900) {
+                        $baseYear = $rpjmdMulai;
+                    }
+                    
+                    $th = (int)$selectedTahun;
+                    $targetRpjmd = '';
+                    
+                    // Direct mapping target dari master IKD RPJMD sesuai tahun
+                    if ($th == 2025) {
+                        $targetRpjmd = $row['target_1'] ?? $row['target_2025'] ?? '';
+                    } elseif ($th == 2026) {
+                        $targetRpjmd = $row['target_2'] ?? $row['target_2026'] ?? '';
+                    } elseif ($th == 2027) {
+                        $targetRpjmd = $row['target_3'] ?? $row['target_2027'] ?? '';
+                    } elseif ($th == 2028) {
+                        $targetRpjmd = $row['target_4'] ?? $row['target_2028'] ?? '';
+                    } elseif ($th == 2029) {
+                        $targetRpjmd = $row['target_5'] ?? $row['target_2029'] ?? '';
+                    } elseif ($th == 2030) {
+                        $targetRpjmd = $row['target_6'] ?? $row['target_2030'] ?? '';
+                    } else {
+                        // Offset dinamis jika tahun berbeda dari standar 2025-2030
+                        $offset = $th - $baseYear + 1;
+                        if ($offset >= 1 && $offset <= 6 && isset($row['target_' . $offset])) {
+                            $targetRpjmd = $row['target_' . $offset];
+                        } elseif (isset($row['target_' . $th])) {
+                            $targetRpjmd = $row['target_' . $th];
+                        }
+                    }
+                    
+                    // Target Tahun Berjalan otomatis terisi dari target IKD RPJMD
+                    $isCustom = false;
+                    $tbId = null;
+                    if (isset($tbMap[$row['id']]) && !empty($tbMap[$row['id']]['target']) && $tbMap[$row['id']]['target'] !== '-') {
+                        $targetBerjalan = $tbMap[$row['id']]['target'];
+                        $isCustom = true;
+                        $tbId = $tbMap[$row['id']]['id'];
+                    } else {
+                        $targetBerjalan = $targetRpjmd;
+                    }
+                    
+                    $row['target_rpjmd_tahun'] = $targetRpjmd;
+                    $row['target_berjalan'] = $targetBerjalan;
+                    $row['is_custom'] = $isCustom;
+                    $row['tb_id'] = $tbId;
+                    
+                    $asp = !empty($row['aspek']) ? strtolower(trim($row['aspek'])) : 'geografi';
+                    if (isset($aspekDef[$asp])) {
+                        $aspekDef[$asp]['items'][] = $row;
+                    } else {
+                        $aspekDef['geografi']['items'][] = $row;
+                    }
+                }
             } else {
-                $Data['PeriodeList'] = [];
-                $Data['IKDData'] = [];
+                $curY = (int)date('Y');
+                $listTahun = [(string)$curY];
+                $selectedTahun = (string)$curY;
             }
+            
+            $Data['ListTahun'] = $listTahun;
+            $Data['SelectedTahun'] = $selectedTahun;
+            $Data['AspekDef'] = $aspekDef;
+            $Data['TotalIndikator'] = $totalIndikator;
             
             $this->load->view('Daerah/header', $Header);
             $this->load->view('Daerah/IKDTahunBerjalan', $Data);
@@ -20415,6 +20869,94 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         // ================================================================
         // CRUD IKD TAHUN BERJALAN
         // ================================================================
+
+        /**
+         * Simpan / Update / Reset Target IKD Tahun Berjalan (AJAX)
+         */
+        public function SimpanTargetIKDTahunBerjalan() {
+            if (!$this->input->is_ajax_request()) {
+                show_404();
+                return;
+            }
+            
+            try {
+                $kodeWilayah = $this->session->userdata('KodeWilayah') 
+                            ?? $this->session->userdata('TempKodeWilayah');
+                
+                if (empty($kodeWilayah)) {
+                    echo json_encode(['status' => 'error', 'message' => 'Wilayah belum dipilih!']);
+                    return;
+                }
+                
+                if (!isset($_SESSION['Level']) || $_SESSION['Level'] != 3) {
+                    echo json_encode(['status' => 'error', 'message' => 'Anda tidak memiliki hak akses untuk mengubah target!']);
+                    return;
+                }
+                
+                $ikdId = (int)$this->input->post('ikd_id', TRUE);
+                $indikator = trim($this->input->post('indikator', TRUE));
+                $target = trim($this->input->post('target', TRUE));
+                $tahun = (int)$this->input->post('tahun', TRUE);
+                $action = $this->input->post('action', TRUE); // 'save' atau 'reset'
+                
+                if ($ikdId <= 0 || $tahun <= 0) {
+                    echo json_encode(['status' => 'error', 'message' => 'Parameter IKD dan Tahun tidak valid!']);
+                    return;
+                }
+                
+                // Cari data di ikd_tahun_berjalan
+                $existing = $this->db
+                    ->where('kode_wilayah', $kodeWilayah)
+                    ->where('ikd_id', $ikdId)
+                    ->where('tahun', $tahun)
+                    ->where('deleted_at IS NULL')
+                    ->get('ikd_tahun_berjalan')
+                    ->row_array();
+                
+                if ($action === 'reset') {
+                    if ($existing) {
+                        $this->db->where('id', $existing['id'])->update('ikd_tahun_berjalan', [
+                            'deleted_at' => date('Y-m-d H:i:s')
+                        ]);
+                    }
+                    echo json_encode([
+                        'status' => 'success',
+                        'message' => 'Target berhasil dikembalikan ke nilai Target RPJMD!'
+                    ]);
+                    return;
+                }
+                
+                if (empty($target) && $target !== '0') {
+                    echo json_encode(['status' => 'error', 'message' => 'Target tahun berjalan tidak boleh kosong!']);
+                    return;
+                }
+                
+                if ($existing) {
+                    $this->db->where('id', $existing['id'])->update('ikd_tahun_berjalan', [
+                        'target' => $target,
+                        'indikator_kinerja_daerah' => $indikator,
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+                } else {
+                    $this->db->insert('ikd_tahun_berjalan', [
+                        'kode_wilayah' => $kodeWilayah,
+                        'ikd_id' => $ikdId,
+                        'indikator_kinerja_daerah' => $indikator,
+                        'target' => $target,
+                        'tahun' => $tahun,
+                        'created_at' => date('Y-m-d H:i:s')
+                    ]);
+                }
+                
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Target IKD Tahun Berjalan berhasil disimpan!'
+                ]);
+            } catch (Exception $e) {
+                log_message('error', 'SimpanTargetIKDTahunBerjalan: ' . $e->getMessage());
+                echo json_encode(['status' => 'error', 'message' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+            }
+        }
 
         /**
          * INPUT IKD TAHUN BERJALAN

@@ -461,7 +461,7 @@ if (!empty($KeterkaitanList)) {
                             <div class="keterkaitan-card-header">
                                 <div class="keterkaitan-title">
                                     <h3>Keterkaitan Indikator Pembangunan Daerah (Tahun <?= html_escape($SelectedTahun) ?>)</h3>
-                                    <p>Penyelarasan Sasaran & Indikator Prioritas Pembangunan Nasional (PN) dengan Prioritas & Sasaran Pembangunan Daerah</p>
+                                    <p>Penyelarasan Sasaran & Indikator Prioritas Pembangunan Nasional (<?= ($SelectedTahun == '2026') ? 'RKP Nasional - Menu Matriks Pembangunan' : 'RPJMN' ?>) dengan Prioritas & Sasaran Pembangunan Daerah</p>
                                 </div>
                             </div>
 
@@ -709,8 +709,13 @@ MODAL TAMBAH KETERKAITAN INDIKATOR
                     <!-- KOLOM KIRI: 1. KETERKAITAN PRIORITAS & SASARAN NASIONAL -->
                     <div class="col-md-6 col-xs-12">
                         <div class="panel panel-default" style="border-left: 4px solid #1b4f72; margin-bottom: 15px;">
-                            <div class="panel-heading" style="background: #f1f5f9; font-weight: bold; color: #1b4f72;">
-                                <i class="fa fa-landmark"></i> 1. Keterkaitan Prioritas & Sasaran Nasional
+                            <div class="panel-heading" style="background: #f1f5f9; font-weight: bold; color: #1b4f72; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                                <span><i class="fa fa-landmark"></i> 1. Keterkaitan Prioritas & Sasaran Nasional</span>
+                                <?php if ($SelectedTahun == '2026') { ?>
+                                    <span class="label label-info" style="font-size: 11px; font-weight: normal; background-color: #0284c7;">
+                                        <i class="fa fa-table"></i> RKP Nasional (Matriks Pembangunan)
+                                    </span>
+                                <?php } ?>
                             </div>
                             <div class="panel-body">
                                 <!-- PN (Prioritas Nasional) -->
@@ -863,8 +868,13 @@ MODAL EDIT KETERKAITAN INDIKATOR
                     <!-- KOLOM KIRI: 1. KETERKAITAN PRIORITAS & SASARAN NASIONAL -->
                     <div class="col-md-6 col-xs-12">
                         <div class="panel panel-default" style="border-left: 4px solid #1b4f72; margin-bottom: 15px;">
-                            <div class="panel-heading" style="background: #f1f5f9; font-weight: bold; color: #1b4f72;">
-                                <i class="fa fa-landmark"></i> 1. Keterkaitan Prioritas & Sasaran Nasional
+                            <div class="panel-heading" style="background: #f1f5f9; font-weight: bold; color: #1b4f72; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                                <span><i class="fa fa-landmark"></i> 1. Keterkaitan Prioritas & Sasaran Nasional</span>
+                                <?php if ($SelectedTahun == '2026') { ?>
+                                    <span class="label label-info" style="font-size: 11px; font-weight: normal; background-color: #0284c7;">
+                                        <i class="fa fa-table"></i> RKP Nasional (Matriks Pembangunan)
+                                    </span>
+                                <?php } ?>
                             </div>
                             <div class="panel-body">
                                 <div class="form-group">
@@ -1047,7 +1057,7 @@ $(document).ready(function() {
     // ============================================================
     // RENDER SASARAN & INDIKATOR NASIONAL DENGAN CHECKBOX
     // ============================================================
-    function renderSasaranNasional(container, list, isEdit, preSelectedSasNasId, preSelectedIndNasText) {
+    function renderSasaranNasional(container, list, isEdit, preSelectedSasNasId, preSelectedIndNasText, preSelectedSasNasText) {
         if (!list || list.length === 0) {
             container.html('<div class="alert alert-warning" style="margin-bottom: 0; font-size: 13px;"><i class="fa fa-exclamation-triangle"></i> Belum ada data Sasaran Prioritas pada PN ini.</div>');
             return;
@@ -1077,8 +1087,9 @@ $(document).ready(function() {
             var safeSas = (item.sasaran || '').replace(/"/g, '&quot;');
             
             var isSasChecked = true;
-            if (isEdit && preSelectedSasNasId) {
-                isSasChecked = (item.id == preSelectedSasNasId);
+            if (isEdit && (preSelectedSasNasId || preSelectedSasNasText)) {
+                isSasChecked = (item.id == preSelectedSasNasId) || 
+                               (preSelectedSasNasText && item.sasaran && item.sasaran.trim().toLowerCase() === preSelectedSasNasText.trim().toLowerCase());
             }
 
             html += '<div class="panel panel-default ' + cardClass + '" data-sasaran-id="' + item.id + '" style="margin-bottom: 14px; border: 1.5px solid #cbd5e1; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">' +
@@ -1146,7 +1157,7 @@ $(document).ready(function() {
     }
 
     // Helper: Load Sasaran & Indikator Nasional by PN
-    function loadSasaranNasional(idPn, isEdit, preSelectedSasNasId, preSelectedIndNasText) {
+    function loadSasaranNasional(idPn, isEdit, preSelectedSasNasId, preSelectedIndNasText, preSelectedSasNasText) {
         var container = isEdit ? $('#EditContainerSasaranNasional') : $('#ContainerSasaranNasional');
         if (!idPn) {
             container.html('<div class="alert alert-info" style="margin-bottom: 0; padding: 10px 14px; font-size: 13px;"><i class="fa fa-info-circle"></i> Silakan pilih <b>Prioritas Nasional (PN)</b> di atas untuk memunculkan Sasaran dan Indikator Nasional secara otomatis.</div>');
@@ -1158,10 +1169,10 @@ $(document).ready(function() {
         $.ajax({
             url: BaseURL + 'Daerah/GetSasaranNasionalByPN',
             type: 'GET',
-            data: { id_pn: idPn },
+            data: { id_pn: idPn, tahun: SelectedTahun },
             dataType: 'json',
             success: function(res) {
-                renderSasaranNasional(container, res, isEdit, preSelectedSasNasId, preSelectedIndNasText);
+                renderSasaranNasional(container, res, isEdit, preSelectedSasNasId, preSelectedIndNasText, preSelectedSasNasText);
             },
             error: function() {
                 container.html('<div class="alert alert-danger" style="margin-bottom: 0; font-size: 13px;"><i class="fa fa-exclamation-triangle"></i> Gagal memuat data dari server.</div>');
@@ -1649,6 +1660,7 @@ $(document).ready(function() {
             var id = $(this).data('id');
             var idPn = $(this).data('id_pn');
             var idSasNas = $(this).data('id_sasaran_nasional');
+            var sasNas = $(this).data('sasaran_nasional');
             var indNas = $(this).data('indikator_nasional');
             var pDaerahJson = $(this).data('p_daerah');
             var idSasDae = $(this).data('id_sasaran_daerah');
@@ -1694,7 +1706,7 @@ $(document).ready(function() {
             filterSasaranDaerahOptions(true);
 
             // Muat Sasaran & Indikator Nasional
-            loadSasaranNasional(idPn, true, idSasNas, indNas);
+            loadSasaranNasional(idPn, true, idSasNas, indNas, sasNas);
 
             $('.custom-multiselect-menu').hide();
             $('.custom-multiselect-toggle').removeClass('active');

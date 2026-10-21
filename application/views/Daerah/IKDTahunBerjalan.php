@@ -1,5 +1,528 @@
+<?php
+if (!function_exists('format_rumus_rpjmd')) {
+    function format_rumus_rpjmd($rumus) {
+        if (empty($rumus)) return '';
+        $escaped = htmlspecialchars($rumus, ENT_QUOTES, 'UTF-8');
+        $formatted = str_replace(
+            ['&lt;sup&gt;', '&lt;/sup&gt;', '&lt;sub&gt;', '&lt;/sub&gt;'],
+            ['<sup>', '</sup>', '<sub>', '</sub>'],
+            $escaped
+        );
+        $formatted = preg_replace('/\^\{([^\}]+)\}/', '<sup>$1</sup>', $formatted);
+        $formatted = preg_replace('/\^\(([^\)]+)\)/', '<sup>$1</sup>', $formatted);
+        $formatted = preg_replace('/\^([0-9a-zA-Z\+\-\*\/]+)/', '<sup>$1</sup>', $formatted);
+        $formatted = preg_replace('/\_\{([^\}]+)\}/', '<sub>$1</sub>', $formatted);
+        $formatted = preg_replace('/\_\(([^\)]+)\)/', '<sub>$1</sub>', $formatted);
+        $formatted = preg_replace('/\_([a-zA-Z0-9\+\-]+)/', '<sub>$1</sub>', $formatted);
+        return nl2br($formatted);
+    }
+}
+
+if (!function_exists('fmtIkdVal')) {
+    function fmtIkdVal($v) {
+        if ($v === null || $v === '') return '-';
+        $str = trim((string)$v);
+        if ($str === '' || $str === '-') return '-';
+        $clean = str_replace(',', '.', $str);
+        if (is_numeric($clean)) {
+            $formatted = (string)(float)$clean;
+            return str_replace('.', ',', $formatted);
+        }
+        return html_escape($str);
+    }
+}
+?>
 <?php $this->load->view('Daerah/sidebar'); ?>
 <?php $this->load->view('Daerah/Cssumum'); ?>
+
+<style>
+/* ============================================================
+   STYLING MODERN & ELEGAN - IKD TAHUN BERJALAN (4 BAGIAN RPJMD)
+   ============================================================ */
+
+/* Card Wrapper Tabel */
+.data-table-list {
+    border-radius: 14px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid #f1f5f9;
+    overflow: hidden;
+    background: #ffffff;
+    padding: 24px !important;
+    margin-bottom: 25px;
+}
+
+/* Toolbar Dropdown Tahun Berjalan */
+.toolbar-tahun-wrapper {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 18px 22px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+    border: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+.toolbar-left {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.filter-tahun-label {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+.filter-tahun-select {
+    width: 160px !important;
+    height: 40px !important;
+    padding: 6px 14px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    background-color: #ffffff !important;
+    border: 2px solid #00c292 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 6px rgba(0, 194, 146, 0.15) !important;
+    cursor: pointer;
+    outline: none !important;
+    transition: all 0.2s ease;
+}
+.filter-tahun-select:focus {
+    box-shadow: 0 0 0 4px rgba(0, 194, 146, 0.22) !important;
+}
+.badge-tahun-active {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #00c292, #00a87e);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 20px;
+    box-shadow: 0 2px 6px rgba(0, 194, 146, 0.25);
+}
+.badge-wilayah-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f1f5f9;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 12px;
+    border-radius: 20px;
+    border: 1px solid #cbd5e1;
+}
+.btn-nav-rpjmd {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #f0fdf4;
+    color: #15803d;
+    border: 1.5px solid #86efac;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none !important;
+    transition: all 0.2s ease;
+}
+.btn-nav-rpjmd:hover {
+    background: #dcfce7;
+    color: #166534;
+    border-color: #4ade80;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+}
+
+/* 4 Counter Cards (Hitungan per Aspek) */
+.ikd-counter-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: -10px;
+    margin-right: -10px;
+    margin-bottom: 22px;
+}
+.ikd-counter-col {
+    display: flex;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 15px;
+}
+.ikd-counter-box {
+    background: #fff;
+    border-radius: 14px !important;
+    padding: 18px 20px;
+    margin-bottom: 0;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+    border-left: 5px solid #00c292;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 98px;
+    transition: all 0.25s ease;
+}
+.ikd-counter-box:hover {
+    box-shadow: 0 8px 22px rgba(0,0,0,0.09);
+    transform: translateY(-2px);
+}
+.ikd-counter-box.card-geografi { border-left-color: #00c292; }
+.ikd-counter-box.card-kesejahteraan { border-left-color: #fb9678; }
+.ikd-counter-box.card-dayasaing { border-left-color: #03a9f3; }
+.ikd-counter-box.card-pelayanan { border-left-color: #ab8ce4; }
+
+.ikd-counter-box .counter-info {
+    flex: 1;
+    min-width: 0;
+    padding-right: 10px;
+}
+.ikd-counter-box .counter-info h4 {
+    margin: 0 0 4px 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.2;
+}
+.ikd-counter-box .counter-info p {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    line-height: 1.35;
+    word-break: break-word;
+}
+.ikd-counter-box .counter-icon {
+    font-size: 28px;
+    opacity: 0.35;
+    flex-shrink: 0;
+}
+.ikd-counter-box.card-geografi .counter-icon { color: #00c292; }
+.ikd-counter-box.card-kesejahteraan .counter-icon { color: #fb9678; }
+.ikd-counter-box.card-dayasaing .counter-icon { color: #03a9f3; }
+.ikd-counter-box.card-pelayanan .counter-icon { color: #ab8ce4; }
+
+/* Header Aspek */
+.aspek-header-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-bottom: 14px;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #f1f5f9;
+}
+.aspek-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.aspek-title .badge-aspek {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    line-height: 1.2;
+    color: #fff;
+    display: inline-block;
+}
+.badge-geografi { background-color: #00c292; }
+.badge-kesejahteraan { background-color: #fb9678; }
+.badge-dayasaing { background-color: #03a9f3; }
+.badge-pelayanan { background-color: #ab8ce4; }
+
+/* Header & Cell Tabel */
+table.dataTable thead th,
+table.dataTable thead td,
+.table-ikd-aspek thead th,
+.table thead th {
+    background-color: #f8fafc;
+    color: #334155;
+    font-weight: 600;
+    text-align: center;
+    vertical-align: middle !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    padding: 12px 8px !important;
+    line-height: 1.4 !important;
+    background-image: none !important;
+    cursor: default !important;
+}
+.table-ikd-aspek tbody td {
+    vertical-align: middle;
+    padding: 10px 8px;
+}
+
+/* Tombol Aksi */
+.btn-action-ikd {
+    width: 26px !important;
+    height: 26px !important;
+    padding: 0 !important;
+    font-size: 11px !important;
+    line-height: 26px !important;
+    border-radius: 6px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 1px !important;
+    transition: all 0.2s ease;
+    border: none !important;
+}
+.btn-action-ikd:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 7px rgba(0,0,0,0.15);
+}
+
+/* Badges Target & Rumus */
+.rumus-tag-wrapper {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 3px solid #03a9f3;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    color: #334155;
+    line-height: 1.4;
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 7px;
+    max-width: 100%;
+    word-break: break-word;
+}
+.definisi-text-wrapper {
+    font-size: 12px;
+    color: #334155;
+    line-height: 1.45;
+    word-break: break-word;
+}
+.rumus-badge-icon {
+    color: #03a9f3;
+    font-size: 12px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.target-badge-rpjmd {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #1e293b;
+    background-color: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+}
+.target-badge-berjalan {
+    display: inline-block;
+    padding: 4px 12px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #ffffff;
+    background: linear-gradient(135deg, #00c292, #00a87e);
+    border-radius: 6px;
+    box-shadow: 0 2px 5px rgba(0, 194, 146, 0.25);
+}
+.target-badge-custom {
+    background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+    box-shadow: 0 2px 5px rgba(2, 132, 199, 0.25) !important;
+}
+
+.tag-auto-rpjmd {
+    display: block;
+    font-size: 10px;
+    color: #64748b;
+    margin-top: 3px;
+    font-weight: 500;
+}
+.tag-custom-tb {
+    display: block;
+    font-size: 10px;
+    color: #0284c7;
+    margin-top: 3px;
+    font-weight: 700;
+}
+
+/* Hilangkan Icon Panah Sort pada DataTables */
+table.dataTable thead th,
+table.dataTable thead td,
+.table-ikd-aspek thead th,
+table.dataTable thead .sorting,
+table.dataTable thead .sorting_asc,
+table.dataTable thead .sorting_desc {
+    background-image: none !important;
+    cursor: default !important;
+}
+
+/* Pagination & Search DataTables */
+.dataTables_wrapper .dataTables_paginate .paginate_button.previous:before,
+.dataTables_wrapper .dataTables_paginate .paginate_button.next:before {
+    display: none !important;
+    content: "" !important;
+}
+.dataTables_wrapper .dataTables_paginate {
+    margin-top: 20px !important;
+    padding-top: 6px !important;
+    float: right;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    min-width: 28px !important;
+    height: 28px !important;
+    line-height: 26px !important;
+    padding: 0 6px !important;
+    text-align: center !important;
+    font-size: 12px !important;
+    border-radius: 6px !important;
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    border: 1px solid #e2e8f0 !important;
+    margin: 0 2px !important;
+    display: inline-block !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: #00c292 !important;
+    border-color: #00c292 !important;
+    color: #ffffff !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: #00c292 !important;
+    border-color: #00c292 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+.dataTables_wrapper .dataTables_info {
+    font-size: 12px !important;
+    margin-top: 20px !important;
+    padding-top: 8px !important;
+    float: left;
+    color: #64748b;
+}
+.dataTables_filter label:after,
+.dataTables_filter label::after,
+.dataTables_wrapper .dataTables_filter label:after,
+.dataTables_wrapper .dataTables_filter label::after {
+    display: none !important;
+    content: none !important;
+}
+.dataTables_wrapper .dataTables_filter {
+    float: right;
+    text-align: right;
+    margin-bottom: 14px;
+}
+.dataTables_wrapper .dataTables_filter input {
+    height: 36px;
+    padding: 6px 14px !important;
+    font-size: 13px;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+    border-radius: 20px;
+    outline: none;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    transition: all 0.2s ease;
+    min-width: 210px;
+}
+.dataTables_wrapper .dataTables_filter input:focus {
+    border-color: #00c292;
+    box-shadow: 0 0 0 3px rgba(0, 194, 146, 0.18);
+}
+.dataTables_wrapper .dataTables_length {
+    float: left;
+    margin-bottom: 14px;
+}
+.dataTables_wrapper .dataTables_length select {
+    height: 36px;
+    padding: 4px 10px;
+    font-size: 13px;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background-color: #ffffff;
+    cursor: pointer;
+}
+
+/* Modal Dialog Edit Target */
+.modal-target-dialog {
+    width: 92%;
+    max-width: 600px;
+    margin: 40px auto !important;
+}
+.modal-target-content {
+    border-radius: 14px;
+    border: none;
+    box-shadow: 0 20px 45px rgba(0,0,0,0.22);
+    overflow: hidden;
+}
+.modal-target-header {
+    background: #ffffff;
+    padding: 18px 22px;
+    border-bottom: 1px solid #eef2f6;
+    position: relative;
+}
+.modal-target-title {
+    color: #1e293b;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+.modal-target-title-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(0, 194, 146, 0.12);
+    color: #00c292;
+    font-size: 15px;
+}
+.modal-target-body {
+    padding: 22px;
+    background-color: #ffffff;
+}
+.form-label-target {
+    font-size: 12px;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 6px;
+    display: block;
+}
+.form-control-target {
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 14px;
+    color: #0f172a;
+    font-weight: 600;
+    background-color: #fff;
+    width: 100%;
+    transition: all 0.2s;
+}
+.form-control-target:focus {
+    border-color: #00c292;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 194, 146, 0.18);
+}
+</style>
 
 <!-- Main Content -->
 <div class="main-content">
@@ -7,21 +530,20 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <div class="data-table-list">
-                        <div class="basic-tb-hd">
-                            
-                            <!-- ============================================================
-                            FILTER WILAYAH - HANYA UNTUK YANG BELUM LOGIN
-                            ============================================================ -->
-                            <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-                            <div class="form-example-wrap" style="margin-bottom: 20px;">
+
+                    <!-- ============================================================
+                    FILTER WILAYAH - HANYA UNTUK USER YANG BELUM LOGIN
+                    ============================================================ -->
+                    <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
+                        <div class="data-table-list" style="margin-bottom: 20px; padding: 18px 24px !important;">
+                            <div class="form-example-wrap">
                                 <div class="form-example-int form-horizental">
                                     <div class="form-group">
                                         <div class="row filter-row">
                                             <div class="col-lg-3 col-md-6">
                                                 <div class="filter-group">
-                                                    <label for="Provinsi"><b>Provinsi</b></label>
-                                                    <select class="form-control filter-select" id="Provinsi">
+                                                    <label for="Provinsi" style="font-weight: 600; margin-bottom: 4px;">Provinsi</label>
+                                                    <select class="form-control" id="Provinsi" style="height: 38px; border-radius: 6px;">
                                                         <option value="">Pilih Provinsi</option>
                                                         <?php foreach ($Provinsi as $prov) { ?>
                                                             <option value="<?= html_escape($prov['Kode']) ?>">
@@ -33,16 +555,16 @@
                                             </div>
                                             <div class="col-lg-3 col-md-6">
                                                 <div class="filter-group">
-                                                    <label for="KabKota"><b>Kab/Kota</b></label>
-                                                    <select class="form-control filter-select" id="KabKota">
+                                                    <label for="KabKota" style="font-weight: 600; margin-bottom: 4px;">Kab/Kota</label>
+                                                    <select class="form-control" id="KabKota" style="height: 38px; border-radius: 6px;">
                                                         <option value="">Pilih Kab/Kota</option>
                                                     </select>
                                                 </div>
                                             </div>
-                                            <div class="col-lg-2 col-md-6">
-                                                <div class="filter-group" style="margin-top: 28px;">
-                                                    <button class="btn btn-primary notika-btn-primary btn-block" id="Filter">
-                                                        <b>Filter</b>
+                                            <div class="col-lg-2 col-md-4">
+                                                <div class="filter-group" style="margin-top: 24px;">
+                                                    <button class="btn btn-primary notika-btn-primary btn-block" id="Filter" style="height: 38px; border-radius: 6px; font-weight: 700;">
+                                                        Filter Wilayah
                                                     </button>
                                                 </div>
                                             </div>
@@ -50,101 +572,141 @@
                                     </div>
                                 </div>
                             </div>
-                            <?php } ?>
+                        </div>
+                    <?php } ?>
 
-                            <!-- ============================================================
-                            INFO WILAYAH
-                            ============================================================ -->
-                            <?php if (!empty($KodeWilayah)) { ?>
-                            <div class="alert alert-info" style="margin-bottom: 20px;">
-                                <strong>Wilayah:</strong> <?= html_escape($NamaWilayah) ?>
-                            </div>
-                            <?php } ?>
-
-                            <!-- ============================================================
-                            TOMBOL TAMBAH - HANYA UNTUK LEVEL 3
-                            ============================================================ -->
-                            <div class="button-icon-btn sm-res-mg-t-30" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                <?php if (!empty($KodeWilayah) && isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputIKD">
-                                    <i class="notika-icon bi-plus-lg"></i> <b>Tambah IKD Tahun Berjalan</b>
-                                </button>
+                    <!-- ============================================================
+                    TOOLBAR ATAS: DROPDOWN TAHUN BERJALAN & STATUS
+                    ============================================================ -->
+                    <div class="toolbar-tahun-wrapper">
+                        <div class="toolbar-left">
+                            <label for="FilterTahun" class="filter-tahun-label">
+                                <i class="fa fa-calendar-check-o text-success" style="font-size: 16px;"></i>
+                                Tahun Berjalan:
+                            </label>
+                            <select id="FilterTahun" class="filter-tahun-select" title="Pilih Tahun Berjalan yang Sedang Dikerjakan">
+                                <?php foreach ($ListTahun as $th) { ?>
+                                    <option value="<?= html_escape($th) ?>" <?= ($th == $SelectedTahun) ? 'selected' : '' ?>>
+                                        Tahun <?= html_escape($th) ?>
+                                    </option>
                                 <?php } ?>
-                            </div>
+                            </select>
 
-                            <?php if (empty($IKDData)) { ?>
-                            <div class="alert alert-warning" style="margin-bottom: 20px; margin-top: 20px;">
-                                <i class="fa fa-info-circle"></i> Belum ada data IKD Tahun Berjalan untuk wilayah ini.
-                            </div>
-                            <?php } ?>
-
+                            <span class="badge-tahun-active">
+                                <i class="fa fa-pencil-square-o"></i> Sedang Mengerjakan Tahun <?= html_escape($SelectedTahun) ?>
+                            </span>
                         </div>
+                    </div>
 
-                        <!-- ============================================================
-                        TABEL DATA IKD TAHUN BERJALAN
-                        ============================================================ -->
-                        <div class="table-responsive" style="margin-top: 10px;">
-                            <table class="table table-bordered table-striped" style="font-size: 13px;">
-                                <thead>
-                                    <tr style="background-color: #f0f0f0; color: #333; text-align: center;">
-                                        <th style="width: 5%; vertical-align: middle; text-align: center; border: 1px solid #ddd;">No</th>
-                                        <th style="width: 40%; vertical-align: middle; text-align: center; border: 1px solid #ddd;">Indikator Kinerja Daerah</th>
-                                        <th style="width: 20%; vertical-align: middle; text-align: center; border: 1px solid #ddd;">Target</th>
-                                        <th style="width: 10%; vertical-align: middle; text-align: center; border: 1px solid #ddd;">Tahun</th>
-                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                        <th style="width: 25%; vertical-align: middle; text-align: center; border: 1px solid #ddd;">Aksi</th>
-                                        <?php } ?>
-                                    </tr>
-                                </thead>
-                                <tbody id="IKDTableBody">
-                                    <?php if (empty($IKDData)) { ?>
-                                    <tr>
-                                        <td colspan="5" class="text-center text-muted" style="padding: 30px 0;">
-                                            <i class="fa fa-info-circle"></i> Belum ada data IKD Tahun Berjalan
-                                        </td>
-                                    </tr>
-                                    <?php } else { ?>
-                                    <?php $No = 1; foreach ($IKDData as $row) { ?>
-                                    <tr>
-                                        <td class="text-center" style="vertical-align: middle; border: 1px solid #ddd;"><?= $No++ ?></td>
-                                        <td style="vertical-align: middle; padding: 8px; border: 1px solid #ddd;">
-                                            <strong><?= html_escape($row['indikator_kinerja_daerah']) ?></strong>
-                                        </td>
-                                        <td style="vertical-align: middle; padding: 8px; border: 1px solid #ddd; text-align: center;">
-                                            <span class="target-badge"><?= html_escape($row['target']) ?></span>
-                                        </td>
-                                        <td class="text-center" style="vertical-align: middle; border: 1px solid #ddd;">
-                                            <span class="label label-primary"><?= html_escape($row['tahun']) ?></span>
-                                        </td>
-                                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                        <td class="text-center" style="vertical-align: middle; border: 1px solid #ddd;">
-                                         
-                                            <button class="btn btn-sm btn-warning EditIKD" 
-                                                    data-id="<?= $row['id'] ?>"
-                                                    data-ikd_id="<?= $row['ikd_id'] ?? '' ?>"
-                                                    data-indikator="<?= html_escape($row['indikator_kinerja_daerah']) ?>"
-                                                    data-target="<?= html_escape($row['target']) ?>"
-                                                    data-tahun="<?= html_escape($row['tahun']) ?>"
-                                                    title="Edit"
-                                                    style="padding: 2px 8px; font-size: 11px; background-color: #f0ad4e; border-color: #eea236; color: #fff; border-radius: 3px;">
-                                                <i class="notika-icon notika-settings"></i> Edit
-                                            </button>
-                                            <button class="btn btn-sm btn-danger HapusIKD" 
-                                                    data-id="<?= $row['id'] ?>"
-                                                    title="Hapus"
-                                                    style="padding: 2px 8px; font-size: 11px; border-radius: 3px;">
-                                                <i class="notika-icon notika-trash"></i> Hapus
-                                            </button>
+                    <!-- ============================================================
+                    COUNTER CARDS: HITUNGAN PER ASPEK (4 BAGIAN SEPERTI RPJMD)
+                    ============================================================ -->
+                    <div class="row ikd-counter-row">
+                        <?php foreach ($AspekDef as $key => $asp) { ?>
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12 ikd-counter-col">
+                                <div class="ikd-counter-box <?= $asp['cardClass'] ?>">
+                                    <div class="counter-info">
+                                        <h4><?= count($asp['items']) ?></h4>
+                                        <p><?= $asp['code'] ?>. <?= html_escape($asp['name']) ?></p>
+                                    </div>
+                                    <div class="counter-icon">
+                                        <i class="fa <?= $asp['icon'] ?>"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php } ?>
+                    </div>
+
+                    <?php if (empty($KodeWilayah)) { ?>
+                        <div class="alert alert-warning" style="border-radius: 10px;">
+                            <i class="fa fa-exclamation-triangle"></i> Silakan pilih wilayah terlebih dahulu untuk melihat data IKD Tahun Berjalan.
+                        </div>
+                    <?php } elseif ($TotalIndikator == 0) { ?>
+                        <div class="alert alert-info" style="border-radius: 10px; padding: 20px;">
+                            <h4><i class="fa fa-info-circle"></i> Belum Ada Data IKD RPJMD</h4>
+                            <p style="margin-bottom: 12px;">Data IKD Tahun Berjalan ditarik otomatis dari <b>IKD RPJMD</b>. Saat ini belum ada data IKD pada RPJMD wilayah ini.</p>
+                        </div>
+                    <?php } ?>
+
+                    <!-- ============================================================
+                    TABEL DATA: 4 BAGIAN PER ASPEK (SEPERTI IKD RPJMD)
+                    ============================================================ -->
+                    <?php foreach ($AspekDef as $key => $asp) { ?>
+                        <div class="data-table-list" id="card-aspek-<?= $key ?>">
+                            <div class="aspek-header-wrap">
+                                <h3 class="aspek-title">
+                                    <span class="badge-aspek <?= $asp['badgeClass'] ?>"><?= $asp['code'] ?></span>
+                                    <?= html_escape($asp['name']) ?>
+                                    <span class="label label-default" style="font-size: 11px; margin-left: 6px; border-radius: 4px; background: #e2e8f0; color: #334155;">
+                                        <?= count($asp['items']) ?> Indikator
+                                    </span>
+                                </h3>
+
+                                <div style="font-size: 12px; color: #64748b; font-weight: 600;">
+                                    <i class="fa fa-calendar text-success"></i> Periode Target: Tahun <?= html_escape($SelectedTahun) ?>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered table-ikd-aspek table-data-aspek" id="table-aspek-<?= $key ?>">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center" style="width: 4%; vertical-align: middle !important;">No</th>
+                                            <th style="width: 45%; text-align: left; vertical-align: middle !important;">Indikator Sasaran (IKD)</th>
+                                            <th class="text-center" style="width: 10%; vertical-align: middle !important;">Satuan</th>
+                                            <th class="text-center" style="width: 12%; vertical-align: middle !important;">Target <br><small><?= html_escape($SelectedTahun) ?></small></th>
+                                            <th style="width: 23%; text-align: left; vertical-align: middle !important;">Perangkat Daerah Pengampu</th>
+                                            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                                                <th class="text-center" style="width: 6%; vertical-align: middle !important;">Aksi</th>
                                             <?php } ?>
-                                        </td>
-                                    </tr>
-                                    <?php } ?>
-                                    <?php } ?>
-                                </tbody>
-                            </table>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (!empty($asp['items'])) { ?>
+                                            <?php $noAspek = 1; foreach ($asp['items'] as $row) { ?>
+                                                <tr id="row-ikd-<?= $row['id'] ?>">
+                                                    <td class="text-center"><?= $noAspek++ ?></td>
+                                                    <td style="font-weight: 600; color: #1e293b;">
+                                                        <?= html_escape($row['indikator_sasaran']) ?>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge" style="background-color: #f1f5f9; color: #475569; font-weight: normal; border: 1px solid #e2e8f0;">
+                                                            <?= !empty($row['satuan']) ? html_escape($row['satuan']) : '-' ?>
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-center" style="font-weight: 600; color: #1e293b;">
+                                                        <?= fmtIkdVal($row['target_berjalan']) ?>
+                                                    </td>
+                                                    <td style="font-size: 12px; color: #4b5563;">
+                                                        <?= !empty($row['pd_penanggung_jawab']) ? html_escape($row['pd_penanggung_jawab']) : '<em class="text-muted">Belum ditentukan</em>' ?>
+                                                    </td>
+                                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                                                        <td class="text-center">
+                                                            <button type="button" class="btn btn-warning btn-action-ikd BtnEditTarget" 
+                                                                    style="background-color: #f59e0b !important; color: #ffffff !important;"
+                                                                    data-id="<?= $row['id'] ?>"
+                                                                    data-aspek="<?= html_escape($row['aspek'] ?? $key) ?>"
+                                                                    data-nama="<?= html_escape($row['indikator_sasaran']) ?>"
+                                                                    data-satuan="<?= html_escape($row['satuan'] ?? '-') ?>"
+                                                                    data-opd="<?= html_escape($row['pd_penanggung_jawab'] ?? '-') ?>"
+                                                                    data-target-rpjmd="<?= html_escape(fmtIkdVal($row['target_rpjmd_tahun'])) ?>"
+                                                                    data-target-berjalan="<?= html_escape(str_replace('.', ',', (string)$row['target_berjalan'])) ?>"
+                                                                    data-is-custom="<?= $row['is_custom'] ? '1' : '0' ?>"
+                                                                    data-tahun="<?= html_escape($SelectedTahun) ?>"
+                                                                    title="Sesuaikan Target Tahun <?= html_escape($SelectedTahun) ?>">
+                                                                <i class="notika-icon notika-edit"></i>
+                                                            </button>
+                                                        </td>
+                                                    <?php } ?>
+                                                </tr>
+                                            <?php } ?>
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
+                    <?php } ?>
 
-                    </div>
                 </div>
             </div>
         </div>
@@ -152,380 +714,133 @@
 </div>
 
 <!-- ============================================================
-MODAL INPUT IKD TAHUN BERJALAN
+MODAL SESUAIKAN TARGET IKD TAHUN BERJALAN
 ============================================================ -->
-<div class="modal fade" id="ModalInputIKD" role="dialog">
-    <div class="modal-dialog" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">×</button>
-                <h4 class="modal-title"><b>Tambah IKD Tahun Berjalan</b></h4>
+<div class="modal fade" id="ModalEditTarget" role="dialog">
+    <div class="modal-dialog modal-target-dialog">
+        <div class="modal-content modal-target-content">
+            <div class="modal-header modal-target-header">
+                <button type="button" class="close" data-dismiss="modal" title="Tutup">&times;</button>
+                <h4 class="modal-target-title">
+                    <span class="modal-target-title-icon"><i class="fa fa-sliders"></i></span>
+                    Sesuaikan Target IKD Tahun Berjalan (<span id="ModalTahunLabel"><?= html_escape($SelectedTahun) ?></span>)
+                </h4>
             </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="form-example-wrap" style="padding: 5px;">
-                            
-                            <!-- PERIODE -->
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-3">
-                                            <label class="hrzn-fm"><b>Periode IKD</b> <span class="text-danger">*</span></label>
-                                        </div>
-                                        <div class="col-lg-8">
-                                            <div class="nk-int-st">
-                                                <select class="form-control" id="InputPeriode" style="color: #000;">
-                                                    <option value="">-- Pilih Periode --</option>
-                                                    <?php foreach ($PeriodeList as $periode) { ?>
-                                                        <option value="<?= html_escape($periode['tahun_mulai']) ?>|<?= html_escape($periode['tahun_akhir']) ?>">
-                                                            <?= html_escape($periode['periode']) ?>
-                                                        </option>
-                                                    <?php } ?>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+            <div class="modal-body modal-target-body">
+                <form id="FormEditTarget">
+                    <input type="hidden" id="ModalIKDId" name="ikd_id">
+                    <input type="hidden" id="ModalTahun" name="tahun" value="<?= html_escape($SelectedTahun) ?>">
 
-                            <!-- IKD -->
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-3">
-                                            <label class="hrzn-fm"><b>Indikator IKD</b> <span class="text-danger">*</span></label>
-                                        </div>
-                                        <div class="col-lg-8">
-                                            <div class="nk-int-st">
-                                                <select class="form-control" id="InputIKD" style="color: #000;">
-                                                    <option value="">-- Pilih IKD --</option>
-                                                </select>
-                                                <input type="hidden" id="InputIKDId">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- TARGET (INPUT MANUAL) -->
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-3">
-                                            <label class="hrzn-fm"><b>Target</b> <span class="text-danger">*</span></label>
-                                        </div>
-                                        <div class="col-lg-8">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control" id="InputTarget" 
-                                                       placeholder="Contoh: 5.2%" style="color: #000;">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- TAHUN (INPUT MANUAL) -->
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-3">
-                                            <label class="hrzn-fm"><b>Tahun</b> <span class="text-danger">*</span></label>
-                                        </div>
-                                        <div class="col-lg-8">
-                                            <div class="nk-int-st">
-                                                <input type="number" class="form-control" id="InputTahun" 
-                                                       placeholder="Contoh: 2025" min="2000" max="2100" style="color: #000;" value="<?= date('Y') ?>">
-                                                <small class="text-muted" style="display: block; margin-top: 4px;">
-                                                    <i class="fa fa-info-circle"></i> Tahun 4 digit (contoh: 2025)
-                                                </small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-example-int" style="margin-top: 15px;">
-                                <div class="row">
-                                    <div class="col-lg-3"></div>
-                                    <div class="col-lg-8">
-                                        <button class="btn btn-success notika-btn-success" id="SimpanIKD">
-                                            <b>SIMPAN</b>
-                                        </button>
-                                        <button type="button" class="btn btn-default" data-dismiss="modal" style="margin-left: 10px;">
-                                            Batal
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; margin-bottom: 18px;">
+                        <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">Indikator Kinerja Daerah (IKD):</div>
+                        <div style="font-size: 13.5px; font-weight: 700; color: #0f172a; margin-top: 3px;" id="ModalIndikatorNama">-</div>
+                        
+                        <div style="display: flex; gap: 12px; margin-top: 8px; font-size: 12px; color: #475569;">
+                            <div><i class="fa fa-tag text-muted"></i> Satuan: <b id="ModalSatuanLabel">-</b></div>
+                            <div><i class="fa fa-building text-muted"></i> OPD: <b id="ModalOpdLabel">-</b></div>
                         </div>
                     </div>
-                </div>
+
+                    <div class="form-group">
+                        <label class="form-label-target">Target <span class="ModalTahunText"><?= html_escape($SelectedTahun) ?></span> <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control-target" id="ModalTargetBerjalan" name="target" placeholder="Contoh: 75,5 atau 80%" required>
+                        <input type="hidden" id="ModalTargetRpjmd">
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 22px; padding-top: 15px; border-top: 1px solid #eef2f6;">
+                        <div>
+                            <button type="button" class="btn btn-default" id="BtnResetTarget" style="font-size: 12px; border-radius: 6px; color: #dc2626; border-color: #fca5a5; display: none;">
+                                <i class="fa fa-undo"></i> Kembalikan ke Target RPJMD
+                            </button>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 6px;">Batal</button>
+                            <button type="submit" class="btn btn-success notika-btn-success" id="BtnSimpanTarget" style="border-radius: 6px; font-weight: 700;">
+                                <i class="fa fa-save"></i> Simpan Target
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
-
-<!-- ============================================================
-MODAL EDIT IKD TAHUN BERJALAN
-============================================================ -->
-<div class="modal fade" id="ModalEditIKD" role="dialog">
-    <div class="modal-dialog" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">×</button>
-                <h4 class="modal-title"><b>Edit IKD Tahun Berjalan</b></h4>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="form-example-wrap" style="padding: 5px;">
-                            
-                            <input type="hidden" id="EditId">
-                            <input type="hidden" id="EditIKDIdHidden" value="">
-                            
-                            <!-- PERIODE -->
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-3">
-                                            <label class="hrzn-fm"><b>Periode IKD</b> <span class="text-danger">*</span></label>
-                                        </div>
-                                        <div class="col-lg-8">
-                                            <div class="nk-int-st">
-                                                <select class="form-control" id="EditPeriode" style="color: #000;">
-                                                    <option value="">-- Pilih Periode --</option>
-                                                    <?php foreach ($PeriodeList as $periode) { ?>
-                                                        <option value="<?= html_escape($periode['tahun_mulai']) ?>|<?= html_escape($periode['tahun_akhir']) ?>">
-                                                            <?= html_escape($periode['periode']) ?>
-                                                        </option>
-                                                    <?php } ?>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- IKD -->
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-3">
-                                            <label class="hrzn-fm"><b>Indikator IKD</b> <span class="text-danger">*</span></label>
-                                        </div>
-                                        <div class="col-lg-8">
-                                            <div class="nk-int-st">
-                                                <select class="form-control" id="EditIKD" style="color: #000;">
-                                                    <option value="">-- Pilih IKD --</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- TARGET (INPUT MANUAL) -->
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-3">
-                                            <label class="hrzn-fm"><b>Target</b> <span class="text-danger">*</span></label>
-                                        </div>
-                                        <div class="col-lg-8">
-                                            <div class="nk-int-st">
-                                                <input type="text" class="form-control" id="EditTarget" 
-                                                       placeholder="Contoh: 5.2%" style="color: #000;">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- TAHUN (INPUT MANUAL) -->
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-3">
-                                            <label class="hrzn-fm"><b>Tahun</b> <span class="text-danger">*</span></label>
-                                        </div>
-                                        <div class="col-lg-8">
-                                            <div class="nk-int-st">
-                                                <input type="number" class="form-control" id="EditTahun" 
-                                                       placeholder="Contoh: 2025" min="2000" max="2100" style="color: #000;">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-example-int" style="margin-top: 15px;">
-                                <div class="row">
-                                    <div class="col-lg-3"></div>
-                                    <div class="col-lg-8">
-                                        <button class="btn btn-success notika-btn-success" id="UpdateIKD">
-                                            <b>UPDATE</b>
-                                        </button>
-                                        <button type="button" class="btn btn-default" data-dismiss="modal" style="margin-left: 10px;">
-                                            Batal
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Styles -->
-<style>
-    .form-control, .form-control option {
-        color: #000 !important;
-    }
-    .modal-content {
-        color: #000;
-    }
-    .text-danger {
-        color: #dc3545 !important;
-    }
-    
-    .filter-row {
-        display: flex;
-        align-items: flex-end;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-    .filter-group {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    .filter-group label {
-        font-size: 14px;
-        margin-bottom: 5px;
-    }
-    .filter-select {
-        width: 260px;
-        font-size: 14px;
-        padding: 5px 8px;
-    }
-    
-    .target-badge {
-        display: inline-block;
-        background-color: #28a745;
-        color: #fff;
-        padding: 4px 15px;
-        border-radius: 20px;
-        font-size: 13px;
-        font-weight: bold;
-    }
-    
-    .label {
-        display: inline-block;
-        padding: 3px 10px;
-        font-size: 12px;
-        font-weight: bold;
-        border-radius: 3px;
-    }
-    .label-primary {
-        background-color: #007bff;
-        color: #fff;
-    }
-    
-    .btn-warning {
-        background-color: #f0ad4e;
-        border-color: #eea236;
-        color: #fff;
-    }
-    .btn-warning:hover {
-        background-color: #ec971f;
-        border-color: #d58512;
-        color: #fff;
-    }
-    
-    .form-control-static {
-        padding: 6px 12px;
-        margin-bottom: 0;
-        font-weight: bold;
-        color: #333;
-    }
-    
-    .spinner-border-sm {
-        display: inline-block;
-        width: 16px;
-        height: 16px;
-        border: 2px solid currentColor;
-        border-right-color: transparent;
-        border-radius: 50%;
-        animation: spinner-border .75s linear infinite;
-        vertical-align: middle;
-        margin-right: 5px;
-    }
-    @keyframes spinner-border {
-        to { transform: rotate(360deg); }
-    }
-    
-    @media (max-width: 768px) {
-        .filter-row {
-            flex-direction: column;
-            gap: 15px;
-        }
-        .filter-select {
-            width: 100%;
-        }
-        .table-responsive {
-            overflow-x: auto;
-        }
-    }
-</style>
 
 <!-- Scripts -->
 <script src="<?= base_url('js/vendor/jquery-1.12.4.min.js'); ?>"></script>
 <script src="<?= base_url('js/bootstrap.min.js'); ?>"></script>
-<script src="<?= base_url('js/wow.min.js'); ?>"></script>
-<script src="<?= base_url('js/jquery-price-slider.js'); ?>"></script>
-<script src="<?= base_url('js/owl.carousel.min.js'); ?>"></script>
-<script src="<?= base_url('js/jquery.scrollUp.min.js'); ?>"></script>
-<script src="<?= base_url('js/meanmenu/jquery.meanmenu.js'); ?>"></script>
-<script src="<?= base_url('js/scrollbar/jquery.mCustomScrollbar.concat.min.js'); ?>"></script>
 <script src="<?= base_url('js/data-table/jquery.dataTables.min.js'); ?>"></script>
-<script src="<?= base_url('js/data-table/data-table-act.js'); ?>"></script>
-<script src="<?= base_url('js/main.js'); ?>"></script>
 
 <script>
 var BaseURL = '<?= base_url() ?>';
 var CSRF_TOKEN_NAME = '<?= $this->security->get_csrf_token_name() ?>';
 var CSRF_TOKEN_VALUE = '<?= $this->security->get_csrf_hash() ?>';
+var SelectedTahun = '<?= $SelectedTahun ?>';
 
 jQuery(document).ready(function($) {
 
     // ============================================================
-    // FILTER WILAYAH - HANYA UNTUK YANG BELUM LOGIN
+    // DROPDOWN FILTER TAHUN BERJALAN
+    // ============================================================
+    $('#FilterTahun').on('change', function() {
+        var tahunDipilih = $(this).val();
+        if (tahunDipilih && tahunDipilih !== SelectedTahun) {
+            window.location.href = BaseURL + 'Daerah/IKDTahunBerjalan?tahun=' + tahunDipilih;
+        }
+    });
+
+    // ============================================================
+    // INISIALISASI DATATABLES PADA SETIAP ASPEK
+    // ============================================================
+    $('.table-data-aspek').each(function() {
+        var table = $(this);
+        table.DataTable({
+            "ordering": false,
+            "pageLength": 10,
+            "lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Semua"]],
+            "language": {
+                "search": "",
+                "searchPlaceholder": "Cari indikator...",
+                "lengthMenu": "Tampilkan _MENU_ entri",
+                "info": "Menampilkan _START_ - _END_ dari _TOTAL_ indikator",
+                "infoEmpty": "Menampilkan 0 dari 0 indikator",
+                "infoFiltered": "(disaring dari _MAX_ total indikator)",
+                "zeroRecords": "Tidak ada indikator yang sesuai",
+                "paginate": {
+                    "first": '<i class="fa fa-angle-double-left"></i>',
+                    "last": '<i class="fa fa-angle-double-right"></i>',
+                    "next": '<i class="fa fa-angle-right"></i>',
+                    "previous": '<i class="fa fa-angle-left"></i>'
+                }
+            }
+        });
+    });
+
+    // ============================================================
+    // FILTER PROVINSI & KAB/KOTA (UNTUK YANG BELUM LOGIN)
     // ============================================================
     <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
         $("#Provinsi").change(function() {
-            if ($(this).val() === "") {
+            var provKode = $(this).val();
+            if (provKode === "") {
                 $("#KabKota").html('<option value="">Pilih Kab/Kota</option>');
                 return;
             }
             $.ajax({
                 url: BaseURL + "Daerah/GetListKabKota",
                 type: "POST",
-                data: { Kode: $(this).val(), [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE },
+                data: { Kode: provKode, [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE },
                 beforeSend: function() { $("#KabKota").prop('disabled', true); },
                 success: function(Respon) {
                     try {
                         var Data = JSON.parse(Respon);
-                        var KabKota = '<option value="">Pilih Kab/Kota</option>';
+                        var opt = '<option value="">Pilih Kab/Kota</option>';
                         if (Data.length > 0) {
                             for (let i = 0; i < Data.length; i++) {
-                                KabKota += '<option value="' + Data[i].Kode + '">' + Data[i].Nama + '</option>';
+                                opt += '<option value="' + Data[i].Kode + '">' + Data[i].Nama + '</option>';
                             }
                         }
-                        $("#KabKota").html(KabKota).prop('disabled', false);
+                        $("#KabKota").html(opt).prop('disabled', false);
                     } catch (e) {
                         alert("Gagal memuat data Kab/Kota");
                         $("#KabKota").prop('disabled', false);
@@ -559,431 +874,138 @@ jQuery(document).ready(function($) {
                             window.location.href = BaseURL + "Daerah/IKDTahunBerjalan";
                         } else {
                             alert(Respon || "Gagal menyimpan filter wilayah!");
-                            $("#Filter").prop('disabled', false).text('Filter');
+                            $("#Filter").prop('disabled', false).text('Filter Wilayah');
                         }
                     } catch (e) {
                         alert("Gagal memproses respons server!");
-                        $("#Filter").prop('disabled', false).text('Filter');
+                        $("#Filter").prop('disabled', false).text('Filter Wilayah');
                     }
                 },
                 error: function() {
                     alert("Gagal menghubungi server!");
-                    $("#Filter").prop('disabled', false).text('Filter');
+                    $("#Filter").prop('disabled', false).text('Filter Wilayah');
                 }
             });
         });
     <?php } ?>
 
     // ============================================================
-    // LOAD IKD UNTUK MODAL INPUT
+    // BUKA MODAL SESUAIKAN TARGET TAHUN BERJALAN
     // ============================================================
-    $("#InputPeriode").change(function() {
-        var value = $(this).val();
-        if (value === "") {
-            $("#InputIKD").html('<option value="">-- Pilih IKD --</option>');
-            $("#InputIKDId").val('');
-            return;
-        }
-        
-        var parts = value.split('|');
-        var tahunMulai = parts[0];
-        var tahunAkhir = parts[1];
-        
-        $("#InputIKD").html('<option value="">Memuat...</option>').prop('disabled', true);
-        
-        $.ajax({
-            url: BaseURL + "Daerah/GetIKDByPeriode",
-            type: "POST",
-            data: {
-                tahun_mulai: tahunMulai,
-                tahun_akhir: tahunAkhir,
-                [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
-            },
-            dataType: 'json',
-            success: function(response) {
-                if (response.status === 'success') {
-                    var options = '<option value="">-- Pilih IKD --</option>';
-                    if (response.data && response.data.length > 0) {
-                        for (var i = 0; i < response.data.length; i++) {
-                            options += '<option value="' + response.data[i].id + '">' + 
-                                       response.data[i].indikator_sasaran + '</option>';
-                        }
-                    } else {
-                        options = '<option value="">Tidak ada data IKD</option>';
-                    }
-                    $("#InputIKD").html(options).prop('disabled', false);
-                } else {
-                    alert('Gagal memuat data: ' + response.message);
-                    $("#InputIKD").html('<option value="">-- Error --</option>').prop('disabled', false);
-                }
-            },
-            error: function() {
-                alert('Gagal menghubungi server!');
-                $("#InputIKD").html('<option value="">-- Error --</option>').prop('disabled', false);
-            }
-        });
-    });
-
-    // ============================================================
-    // SET IKD ID SAAT DIPILIH (INPUT)
-    // ============================================================
-    $("#InputIKD").change(function() {
-        $("#InputIKDId").val($(this).val());
-    });
-
-    // ============================================================
-    // SIMPAN IKD TAHUN BERJALAN
-    // ============================================================
-    $("#SimpanIKD").click(function() {
-        var ikdId = $("#InputIKDId").val();
-        var indikator = $("#InputIKD option:selected").text();
-        var target = $("#InputTarget").val().trim();
-        var tahun = $("#InputTahun").val().trim();
-        
-        if (!ikdId || ikdId === "") {
-            alert('Pilih Indikator IKD terlebih dahulu!');
-            return;
-        }
-        
-        if (indikator === "Memuat..." || indikator === "-- Pilih IKD --" || indikator === "") {
-            alert('Pilih Indikator IKD terlebih dahulu!');
-            return;
-        }
-        
-        if (target === "") {
-            alert('Target harus diisi!');
-            return;
-        }
-        
-        if (tahun === "" || tahun.length !== 4 || isNaN(tahun)) {
-            alert('Tahun harus 4 digit angka!');
-            return;
-        }
-        
-        var Data = {
-            ikd_id: ikdId,
-            indikator: indikator,
-            target: target,
-            tahun: tahun,
-            [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
-        };
-        
-        $.ajax({
-            url: BaseURL + "Daerah/InputIKDTahunBerjalan",
-            type: "POST",
-            data: Data,
-            beforeSend: function() {
-                $("#SimpanIKD").prop('disabled', true).html('<span class="spinner-border-sm"></span> Menyimpan...');
-            },
-            success: function(Respon) {
-                try {
-                    var result = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
-                    if (result.status === 'success') {
-                        $('#ModalInputIKD').modal('hide');
-                        location.reload();
-                    } else {
-                        alert('✗ ' + result.message);
-                        $("#SimpanIKD").prop('disabled', false).html('<b>SIMPAN</b>');
-                    }
-                } catch(e) {
-                    if (Respon === '1' || Respon.trim() === '1') {
-                        $('#ModalInputIKD').modal('hide');
-                        location.reload();
-                    } else {
-                        alert('✗ ' + Respon);
-                        $("#SimpanIKD").prop('disabled', false).html('<b>SIMPAN</b>');
-                    }
-                }
-            },
-            error: function(xhr) {
-                alert("Terjadi kesalahan: " + xhr.statusText);
-                $("#SimpanIKD").prop('disabled', false).html('<b>SIMPAN</b>');
-            }
-        });
-    });
-
-    // ============================================================
-    // EDIT IKD TAHUN BERJALAN
-    // ============================================================
-    $(document).on("click", ".EditIKD", function() {
+    $(document).on('click', '.BtnEditTarget', function() {
         var id = $(this).data('id');
-        var ikdId = $(this).data('ikd_id') || '';
-        var indikator = $(this).data('indikator');
-        var target = $(this).data('target');
+        var nama = $(this).data('nama');
+        var satuan = $(this).data('satuan');
+        var opd = $(this).data('opd');
+        var targetRpjmd = $(this).data('target-rpjmd');
+        var targetBerjalan = $(this).data('target-berjalan');
+        var isCustom = $(this).data('is-custom') == '1';
         var tahun = $(this).data('tahun');
-        
-        // Set ID
-        $("#EditId").val(id);
-        $("#EditIKDIdHidden").val(ikdId);
-        $("#EditTarget").val(target);
-        $("#EditTahun").val(tahun);
-        
-        // Reset dropdown
-        $("#EditPeriode").val('');
-        $("#EditIKD").html('<option value="">-- Pilih IKD --</option>');
-        
-        // ============================================================
-        // CARI PERIODE DARI IKD ID
-        // ============================================================
-        if (ikdId) {
-            $.ajax({
-                url: BaseURL + "Daerah/GetPeriodeByIKDId",
-                type: "POST",
-                data: {
-                    ikd_id: ikdId,
-                    [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
-                },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.status === 'success' && response.data) {
-                        var periodeValue = response.data.tahun_mulai + '|' + response.data.tahun_akhir;
-                        $("#EditPeriode").val(periodeValue);
-                        
-                        // Trigger change untuk load IKD
-                        $("#EditPeriode").trigger('change');
-                    } else {
-                        // Jika tidak ditemukan, coba load semua IKD
-                        loadAllIKDForEdit(ikdId);
-                    }
-                },
-                error: function() {
-                    // Fallback: coba load semua IKD
-                    loadAllIKDForEdit(ikdId);
-                }
-            });
+
+        $('#ModalIKDId').val(id);
+        $('#ModalTahun').val(tahun);
+        $('#ModalTahunLabel').text(tahun);
+        $('.ModalTahunText').text(tahun);
+        $('#ModalIndikatorNama').text(nama);
+        $('#ModalSatuanLabel').text(satuan || '-');
+        $('#ModalOpdLabel').text(opd || '-');
+        $('#ModalTargetRpjmd').val(targetRpjmd);
+        $('#ModalTargetBerjalan').val(targetBerjalan);
+
+        if (isCustom) {
+            $('#BtnResetTarget').show();
         } else {
-            // Jika tidak ada ikd_id, reset
-            $("#EditPeriode").val('');
-            $("#EditIKD").html('<option value="">-- Pilih IKD --</option>');
+            $('#BtnResetTarget').hide();
         }
-        
-        $('#ModalEditIKD').modal("show");
+
+        $('#ModalEditTarget').modal('show');
     });
 
     // ============================================================
-    // FUNGSI LOAD ALL IKD UNTUK EDIT (FALLBACK)
+    // SIMPAN TARGET TAHUN BERJALAN (AJAX)
     // ============================================================
-    function loadAllIKDForEdit(selectedId) {
-        $.ajax({
-            url: BaseURL + "Daerah/GetAllIKD",
-            type: "POST",
-            data: {
-                [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
-            },
-            dataType: 'json',
-            success: function(response) {
-                if (response.status === 'success') {
-                    var options = '<option value="">-- Pilih IKD --</option>';
-                    if (response.data && response.data.length > 0) {
-                        for (var i = 0; i < response.data.length; i++) {
-                            var selected = (response.data[i].id == selectedId) ? 'selected' : '';
-                            options += '<option value="' + response.data[i].id + '" ' + selected + '>' + 
-                                       response.data[i].indikator_sasaran + '</option>';
-                        }
-                    }
-                    $("#EditIKD").html(options);
-                }
-            }
-        });
-    }
+    $('#FormEditTarget').on('submit', function(e) {
+        e.preventDefault();
 
-    // ============================================================
-    // LOAD IKD UNTUK MODAL EDIT (SAAT PERIODE BERUBAH)
-    // ============================================================
-    $("#EditPeriode").change(function() {
-        var value = $(this).val();
-        if (value === "") {
-            $("#EditIKD").html('<option value="">-- Pilih IKD --</option>');
+        var ikdId = $('#ModalIKDId').val();
+        var indikator = $('#ModalIndikatorNama').text().trim();
+        var target = $('#ModalTargetBerjalan').val().trim();
+        var tahun = $('#ModalTahun').val();
+
+        if (target === '') {
+            alert('Target tidak boleh kosong!');
             return;
         }
-        
-        var parts = value.split('|');
-        var tahunMulai = parts[0];
-        var tahunAkhir = parts[1];
-        
-        var selectedId = $("#EditIKDIdHidden").val();
-        
-        $("#EditIKD").html('<option value="">Memuat...</option>').prop('disabled', true);
-        
+
+        var btn = $('#BtnSimpanTarget');
+        btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Menyimpan...');
+
         $.ajax({
-            url: BaseURL + "Daerah/GetIKDByPeriode",
-            type: "POST",
+            url: BaseURL + 'Daerah/SimpanTargetIKDTahunBerjalan',
+            type: 'POST',
             data: {
-                tahun_mulai: tahunMulai,
-                tahun_akhir: tahunAkhir,
+                ikd_id: ikdId,
+                indikator: indikator,
+                target: target,
+                tahun: tahun,
+                action: 'save',
                 [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
             },
             dataType: 'json',
-            success: function(response) {
-                if (response.status === 'success') {
-                    var options = '<option value="">-- Pilih IKD --</option>';
-                    if (response.data && response.data.length > 0) {
-                        for (var i = 0; i < response.data.length; i++) {
-                            var selected = (response.data[i].id == selectedId) ? 'selected' : '';
-                            options += '<option value="' + response.data[i].id + '" ' + selected + '>' + 
-                                       response.data[i].indikator_sasaran + '</option>';
-                        }
-                    } else {
-                        options = '<option value="">Tidak ada data IKD</option>';
-                    }
-                    $("#EditIKD").html(options).prop('disabled', false);
+            success: function(resp) {
+                btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan Target');
+                if (resp.status === 'success') {
+                    $('#ModalEditTarget').modal('hide');
+                    // Update tampilan baris langsung & reload untuk konsistensi
+                    location.reload();
                 } else {
-                    alert('Gagal memuat data: ' + response.message);
-                    $("#EditIKD").html('<option value="">-- Error --</option>').prop('disabled', false);
+                    alert('Gagal: ' + (resp.message || 'Terjadi kesalahan!'));
                 }
             },
             error: function() {
+                btn.prop('disabled', false).html('<i class="fa fa-save"></i> Simpan Target');
                 alert('Gagal menghubungi server!');
-                $("#EditIKD").html('<option value="">-- Error --</option>').prop('disabled', false);
             }
         });
     });
 
     // ============================================================
-    // UPDATE IKD TAHUN BERJALAN
+    // RESET TARGET KE RPJMD (AJAX)
     // ============================================================
-    $("#UpdateIKD").click(function() {
-        var id = $("#EditId").val();
-        var ikdId = $("#EditIKD").val();
-        var indikator = $("#EditIKD option:selected").text();
-        var target = $("#EditTarget").val().trim();
-        var tahun = $("#EditTahun").val().trim();
-        
-        if (!ikdId || ikdId === "") {
-            alert('Pilih Indikator IKD terlebih dahulu!');
+    $('#BtnResetTarget').on('click', function() {
+        if (!confirm('Apakah Anda yakin ingin mengembalikan Target Tahun Berjalan ke nilai Baseline RPJMD?')) {
             return;
         }
-        
-        if (indikator === "Memuat..." || indikator === "-- Pilih IKD --" || indikator === "") {
-            alert('Pilih Indikator IKD terlebih dahulu!');
-            return;
-        }
-        
-        if (target === "") {
-            alert('Target harus diisi!');
-            return;
-        }
-        
-        if (tahun === "" || tahun.length !== 4 || isNaN(tahun)) {
-            alert('Tahun harus 4 digit angka!');
-            return;
-        }
-        
-        var Data = {
-            id: id,
-            ikd_id: ikdId,
-            indikator: indikator,
-            target: target,
-            tahun: tahun,
-            [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
-        };
-        
+
+        var ikdId = $('#ModalIKDId').val();
+        var tahun = $('#ModalTahun').val();
+        var btn = $(this);
+        btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Mengembalikan...');
+
         $.ajax({
-            url: BaseURL + "Daerah/EditIKDTahunBerjalan",
-            type: "POST",
-            data: Data,
-            beforeSend: function() {
-                $("#UpdateIKD").prop('disabled', true).html('<span class="spinner-border-sm"></span> Menyimpan...');
+            url: BaseURL + 'Daerah/SimpanTargetIKDTahunBerjalan',
+            type: 'POST',
+            data: {
+                ikd_id: ikdId,
+                tahun: tahun,
+                action: 'reset',
+                [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
             },
-            success: function(Respon) {
-                try {
-                    var result = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
-                    if (result.status === 'success') {
-                        $('#ModalEditIKD').modal('hide');
-                        location.reload();
-                    } else {
-                        alert('✗ ' + result.message);
-                        $("#UpdateIKD").prop('disabled', false).html('<b>UPDATE</b>');
-                    }
-                } catch(e) {
-                    if (Respon === '1' || Respon.trim() === '1') {
-                        $('#ModalEditIKD').modal('hide');
-                        location.reload();
-                    } else {
-                        alert('✗ ' + Respon);
-                        $("#UpdateIKD").prop('disabled', false).html('<b>UPDATE</b>');
-                    }
+            dataType: 'json',
+            success: function(resp) {
+                btn.prop('disabled', false).html('<i class="fa fa-undo"></i> Kembalikan ke Target RPJMD');
+                if (resp.status === 'success') {
+                    $('#ModalEditTarget').modal('hide');
+                    location.reload();
+                } else {
+                    alert('Gagal: ' + (resp.message || 'Terjadi kesalahan!'));
                 }
             },
-            error: function(xhr) {
-                alert("Terjadi kesalahan: " + xhr.statusText);
-                $("#UpdateIKD").prop('disabled', false).html('<b>UPDATE</b>');
+            error: function() {
+                btn.prop('disabled', false).html('<i class="fa fa-undo"></i> Kembalikan ke Target RPJMD');
+                alert('Gagal menghubungi server!');
             }
         });
-    });
-
-    // ============================================================
-    // HAPUS IKD TAHUN BERJALAN
-    // ============================================================
-    $(document).on("click", ".HapusIKD", function() {
-        if (confirm("Apakah Anda yakin ingin menghapus data ini?")) {
-            var id = $(this).data('id');
-            var btn = $(this);
-            
-            $.ajax({
-                url: BaseURL + "Daerah/HapusIKDTahunBerjalan",
-                type: "POST",
-                data: { 
-                    id: id,
-                    [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE 
-                },
-                beforeSend: function() {
-                    btn.prop('disabled', true).html('<span class="spinner-border-sm"></span>');
-                },
-                success: function(Respon) {
-                    try {
-                        var result = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
-                        if (result.status === 'success') {
-                            location.reload();
-                        } else {
-                            alert('✗ ' + result.message);
-                            btn.prop('disabled', false).html('<i class="notika-icon notika-trash"></i> Hapus');
-                        }
-                    } catch(e) {
-                        if (Respon === '1' || Respon.trim() === '1') {
-                            location.reload();
-                        } else {
-                            alert('✗ ' + Respon);
-                            btn.prop('disabled', false).html('<i class="notika-icon notika-trash"></i> Hapus');
-                        }
-                    }
-                },
-                error: function(xhr) {
-                    alert("Terjadi kesalahan: " + xhr.statusText);
-                    btn.prop('disabled', false).html('<i class="notika-icon notika-trash"></i> Hapus');
-                }
-            });
-        }
-    });
-
-    // ============================================================
-    // RESET FORM SAAT MODAL DITUTUP
-    // ============================================================
-    $('#ModalInputIKD').on('hidden.bs.modal', function() {
-        $("#InputPeriode").val('');
-        $("#InputIKD").html('<option value="">-- Pilih IKD --</option>');
-        $("#InputIKDId").val('');
-        $("#InputTarget").val('');
-        $("#InputTahun").val('');
-        $("#SimpanIKD").prop('disabled', false).html('<b>SIMPAN</b>');
-    });
-
-    $('#ModalEditIKD').on('hidden.bs.modal', function() {
-        $("#EditId").val('');
-        $("#EditIKDIdHidden").val('');
-        $("#EditPeriode").val('');
-        $("#EditIKD").html('<option value="">-- Pilih IKD --</option>');
-        $("#EditTarget").val('');
-        $("#EditTahun").val('');
-        $("#UpdateIKD").prop('disabled', false).html('<b>UPDATE</b>');
-    });
-
-    // ============================================================
-    // CLEAN MODAL BACKDROP
-    // ============================================================
-    $(document).on("hidden.bs.modal", ".modal", function() {
-        $(".modal-backdrop").remove();
-        $("body").removeClass("modal-open");
     });
 
 });
