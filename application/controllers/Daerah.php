@@ -384,6 +384,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             ->join('kodewilayah k', 'v.KodeWilayah = k.Kode', 'left')
                             ->where('v.KodeWilayah', $KodeWilayah)
                             ->where('v.deleted_at IS NULL')
+                            ->group_by('v.Id')
                             ->get()->result_array();
                         
                         // Data periode untuk dropdown referensi
@@ -465,6 +466,29 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             // KONVERSI KE FORMAT && UNTUK MULTI-PILIH
             $visiRPJPDPValue = $this->convertToMultipleFormat($visiRPJPDP);
             $visiRPJPNValue = $this->convertToMultipleFormat($visiRPJPN);
+
+            // Cek duplikasi Visi atau Periode pada wilayah yang sama
+            $cekDuplikat = $this->db
+                ->where('KodeWilayah', $_SESSION['KodeWilayah'])
+                ->where('deleted_at IS NULL')
+                ->group_start()
+                    ->where('LOWER(TRIM(Visi)) =', strtolower($visi))
+                    ->or_group_start()
+                        ->where('TahunMulai', $tahunMulai)
+                        ->where('TahunAkhir', $tahunAkhir)
+                    ->group_end()
+                ->group_end()
+                ->get('visirpjpd')
+                ->row_array();
+
+            if ($cekDuplikat) {
+                if (strtolower(trim($cekDuplikat['Visi'])) === strtolower($visi)) {
+                    echo 'Data Visi tersebut sudah ada (duplikat)!';
+                } else {
+                    echo "Visi untuk periode {$tahunMulai} - {$tahunAkhir} sudah ada!";
+                }
+                return;
+            }
             
             $data = [
                 'KodeWilayah' => $_SESSION['KodeWilayah'],
@@ -505,6 +529,32 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     ->get('visirpjpd')->row_array();
                     
                 if (!$existing) throw new Exception('Data Visi tidak ditemukan');
+
+                // Cek duplikasi dengan Visi lain pada wilayah yang sama
+                $cekDuplikat = $this->db
+                    ->where('KodeWilayah', $_SESSION['KodeWilayah'])
+                    ->where('Id !=', $id)
+                    ->where('LOWER(TRIM(Visi)) =', strtolower($visi))
+                    ->where('deleted_at IS NULL')
+                    ->get('visirpjpd')
+                    ->row_array();
+
+                if ($cekDuplikat) {
+                    throw new Exception('Data Visi tersebut sudah ada (duplikat)!');
+                }
+
+                $cekPeriode = $this->db
+                    ->where('KodeWilayah', $_SESSION['KodeWilayah'])
+                    ->where('Id !=', $id)
+                    ->where('TahunMulai', $tahunMulai)
+                    ->where('TahunAkhir', $tahunAkhir)
+                    ->where('deleted_at IS NULL')
+                    ->get('visirpjpd')
+                    ->row_array();
+
+                if ($cekPeriode) {
+                    throw new Exception("Periode {$tahunMulai} - {$tahunAkhir} sudah digunakan oleh data Visi lain!");
+                }
 
                 // KONVERSI KE FORMAT && UNTUK MULTI-PILIH
                 $visiRPJPDPValue = $this->convertToMultipleFormat($visiRPJPDP);
@@ -722,6 +772,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 
                 if ($visiId <= 0) throw new Exception('Visi harus dipilih');
                 if (empty($misi)) throw new Exception('Misi harus diisi');
+
+                // Cek duplikasi Misi pada Visi yang sama
+                $cekDuplikat = $this->db
+                    ->where('KodeWilayah', $_SESSION['KodeWilayah'])
+                    ->where('_Id', $visiId)
+                    ->where('LOWER(TRIM(Misi)) =', strtolower($misi))
+                    ->where('deleted_at IS NULL')
+                    ->get('misirpjpd')
+                    ->row_array();
+
+                if ($cekDuplikat) {
+                    throw new Exception('Data Misi tersebut sudah ada pada Visi ini (duplikat)!');
+                }
                 
                 $rpjpnValue = is_array($rpjpn) ? implode('$', $rpjpn) : $rpjpn;
                 $rpjpdpValue = is_array($rpjpdp) ? implode('$', $rpjpdp) : $rpjpdp;
@@ -749,7 +812,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             }
         }
             
-            public function EditMisiRPJPD(){  
+        public function EditMisiRPJPD(){  
             try {
                 $id = (int)$this->input->post('Id', TRUE);
                 $visiId = (int)$this->input->post('_Id', TRUE);
@@ -774,6 +837,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     
                 if (!$existing) {
                     throw new Exception('Data tidak ditemukan');
+                }
+
+                // Cek duplikasi Misi pada data lain di Visi yang sama
+                $cekDuplikat = $this->db
+                    ->where('KodeWilayah', $_SESSION['KodeWilayah'])
+                    ->where('_Id', $visiId)
+                    ->where('Id !=', $id)
+                    ->where('LOWER(TRIM(Misi)) =', strtolower($misi))
+                    ->where('deleted_at IS NULL')
+                    ->get('misirpjpd')
+                    ->row_array();
+
+                if ($cekDuplikat) {
+                    throw new Exception('Data Misi tersebut sudah ada pada Visi ini (duplikat)!');
                 }
                 
                 // Konversi array ke string dengan separator
@@ -885,21 +962,49 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
         public function InputTujuanRPJPD(){  
             $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
+            $tujuan = isset($_POST['Tujuan']) ? trim($_POST['Tujuan']) : '';
+            $misiId = isset($_POST['_Id']) ? (int)$_POST['_Id'] : 0;
+            if (!empty($tujuan) && $misiId > 0) {
+                $cek = $this->db->where('KodeWilayah', $_POST['KodeWilayah'])
+                    ->where('_Id', $misiId)
+                    ->where('LOWER(TRIM(Tujuan)) =', strtolower($tujuan))
+                    ->where('deleted_at IS NULL')
+                    ->get('tujuanrpjpd')->row_array();
+                if ($cek) {
+                    echo 'Data Tujuan tersebut sudah ada pada Misi ini (duplikat)!';
+                    return;
+                }
+            }
             $this->db->insert('tujuanrpjpd',$_POST);
             if ($this->db->affected_rows()){
-            echo '1';
+                echo '1';
             } else {
-            echo 'Gagal Menyimpan Data!';
+                echo 'Gagal Menyimpan Data!';
             }
-            }
+        }
             
-            public function EditTujuanRPJPD(){  
-                $this->db->where('Id',$_POST['Id']); 
-                $this->db->update('tujuanrpjpd', $_POST);
+        public function EditTujuanRPJPD(){  
+            $id = isset($_POST['Id']) ? (int)$_POST['Id'] : 0;
+            $tujuan = isset($_POST['Tujuan']) ? trim($_POST['Tujuan']) : '';
+            $misiId = isset($_POST['_Id']) ? (int)$_POST['_Id'] : 0;
+            if (!empty($tujuan) && $id > 0) {
+                $this->db->where('KodeWilayah', $_SESSION['KodeWilayah'])
+                    ->where('Id !=', $id)
+                    ->where('LOWER(TRIM(Tujuan)) =', strtolower($tujuan))
+                    ->where('deleted_at IS NULL');
+                if ($misiId > 0) $this->db->where('_Id', $misiId);
+                $cek = $this->db->get('tujuanrpjpd')->row_array();
+                if ($cek) {
+                    echo 'Data Tujuan tersebut sudah ada pada Misi ini (duplikat)!';
+                    return;
+                }
+            }
+            $this->db->where('Id',$_POST['Id']); 
+            $this->db->update('tujuanrpjpd', $_POST);
             if ($this->db->affected_rows()){
-            echo '1';
+                echo '1';
             } else {
-            echo 'Gagal Update Data!';
+                echo 'Gagal Update Data!';
             }
         }
 
@@ -990,21 +1095,49 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
         public function InputSasaranRPJPD(){  
             $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
+            $sasaran = isset($_POST['Sasaran']) ? trim($_POST['Sasaran']) : '';
+            $tujuanId = isset($_POST['_Id']) ? (int)$_POST['_Id'] : 0;
+            if (!empty($sasaran) && $tujuanId > 0) {
+                $cek = $this->db->where('KodeWilayah', $_POST['KodeWilayah'])
+                    ->where('_Id', $tujuanId)
+                    ->where('LOWER(TRIM(Sasaran)) =', strtolower($sasaran))
+                    ->where('deleted_at IS NULL')
+                    ->get('sasaranrpjpd')->row_array();
+                if ($cek) {
+                    echo 'Data Sasaran tersebut sudah ada pada Tujuan ini (duplikat)!';
+                    return;
+                }
+            }
             $this->db->insert('sasaranrpjpd',$_POST);
             if ($this->db->affected_rows()){
-            echo '1';
+                echo '1';
             } else {
-            echo 'Gagal Menyimpan Data!';
+                echo 'Gagal Menyimpan Data!';
             }
-            }
+        }
             
-            public function EditSasaranRPJPD(){  
-                $this->db->where('Id',$_POST['Id']); 
-                $this->db->update('sasaranrpjpd', $_POST);
+        public function EditSasaranRPJPD(){  
+            $id = isset($_POST['Id']) ? (int)$_POST['Id'] : 0;
+            $sasaran = isset($_POST['Sasaran']) ? trim($_POST['Sasaran']) : '';
+            $tujuanId = isset($_POST['_Id']) ? (int)$_POST['_Id'] : 0;
+            if (!empty($sasaran) && $id > 0) {
+                $this->db->where('KodeWilayah', $_SESSION['KodeWilayah'])
+                    ->where('Id !=', $id)
+                    ->where('LOWER(TRIM(Sasaran)) =', strtolower($sasaran))
+                    ->where('deleted_at IS NULL');
+                if ($tujuanId > 0) $this->db->where('_Id', $tujuanId);
+                $cek = $this->db->get('sasaranrpjpd')->row_array();
+                if ($cek) {
+                    echo 'Data Sasaran tersebut sudah ada pada Tujuan ini (duplikat)!';
+                    return;
+                }
+            }
+            $this->db->where('Id',$_POST['Id']); 
+            $this->db->update('sasaranrpjpd', $_POST);
             if ($this->db->affected_rows()){
-            echo '1';
+                echo '1';
             } else {
-            echo 'Gagal Update Data!';
+                echo 'Gagal Update Data!';
             }
         }
 
@@ -2348,6 +2481,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         ->join('kodewilayah k', 'v.KodeWilayah = k.Kode', 'left')
                         ->where('v.KodeWilayah', $KodeWilayah)
                         ->where('v.deleted_at IS NULL')
+                        ->group_by('v.Id')
                         ->order_by('v.TahunMulai', 'DESC')
                         ->get()
                         ->result_array();
@@ -2549,6 +2683,29 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 echo json_encode(['status' => 'error', 'message' => 'Visi harus diisi!']);
                 return;
             }
+
+            // Cek duplikasi Visi pada wilayah dan periode yang sama
+            $cekDuplikat = $this->db
+                ->where('KodeWilayah', $kodeWilayah)
+                ->where('deleted_at IS NULL')
+                ->group_start()
+                    ->where('LOWER(TRIM(Visi)) =', strtolower($visi))
+                    ->or_group_start()
+                        ->where('TahunMulai', $tahunMulai)
+                        ->where('TahunAkhir', $tahunAkhir)
+                    ->group_end()
+                ->group_end()
+                ->get('visirpjmd')
+                ->row_array();
+
+            if ($cekDuplikat) {
+                if (strtolower(trim($cekDuplikat['Visi'])) === strtolower($visi)) {
+                    echo json_encode(['status' => 'error', 'message' => 'Data Visi tersebut sudah ada (duplikat)!']);
+                } else {
+                    echo json_encode(['status' => 'error', 'message' => "Visi untuk periode {$tahunMulai} - {$tahunAkhir} sudah ada!"]);
+                }
+                return;
+            }
             
             $data = [
                 'KodeWilayah' => $kodeWilayah,
@@ -2591,6 +2748,35 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             if (empty($visi)) {
                 echo json_encode(['status' => 'error', 'message' => 'Visi harus diisi!']);
                 return;
+            }
+
+            // Cek duplikasi dengan Visi lain pada wilayah yang sama
+            $cekDuplikat = $this->db
+                ->where('KodeWilayah', $kodeWilayah)
+                ->where('Id !=', $id)
+                ->where('LOWER(TRIM(Visi)) =', strtolower($visi))
+                ->where('deleted_at IS NULL')
+                ->get('visirpjmd')
+                ->row_array();
+
+            if ($cekDuplikat) {
+                echo json_encode(['status' => 'error', 'message' => 'Data Visi tersebut sudah ada (duplikat)!']);
+                return;
+            }
+
+            if (!empty($tahunMulai) && !empty($tahunAkhir)) {
+                $cekPeriode = $this->db
+                    ->where('KodeWilayah', $kodeWilayah)
+                    ->where('Id !=', $id)
+                    ->where('TahunMulai', $tahunMulai)
+                    ->where('TahunAkhir', $tahunAkhir)
+                    ->where('deleted_at IS NULL')
+                    ->get('visirpjmd')
+                    ->row_array();
+                if ($cekPeriode) {
+                    echo json_encode(['status' => 'error', 'message' => "Periode {$tahunMulai} - {$tahunAkhir} sudah digunakan oleh Visi lain!"]);
+                    return;
+                }
             }
             
             $data = [
@@ -2783,6 +2969,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 echo json_encode(['status' => 'error', 'message' => 'Visi tidak ditemukan!']);
                 return;
             }
+
+            // Cek duplikasi Misi pada Visi yang sama
+            $cekDuplikat = $this->db
+                ->where('KodeWilayah', $kodeWilayah)
+                ->where('_Id', $visiId)
+                ->where('LOWER(TRIM(Misi)) =', strtolower($misi))
+                ->where('deleted_at IS NULL')
+                ->get('misirpjmd')
+                ->row_array();
+
+            if ($cekDuplikat) {
+                echo json_encode(['status' => 'error', 'message' => 'Data Misi tersebut sudah ada pada Visi ini (duplikat)!']);
+                return;
+            }
             
             $data = [
                 'KodeWilayah' => $kodeWilayah,
@@ -2834,6 +3034,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $periode = $this->_getPeriodeFromVisi($visiId);
             if (!$periode) {
                 echo json_encode(['status' => 'error', 'message' => 'Visi tidak ditemukan!']);
+                return;
+            }
+
+            // Cek duplikasi Misi pada data lain di Visi yang sama
+            $cekDuplikat = $this->db
+                ->where('KodeWilayah', $kodeWilayah)
+                ->where('_Id', $visiId)
+                ->where('Id !=', $id)
+                ->where('LOWER(TRIM(Misi)) =', strtolower($misi))
+                ->where('deleted_at IS NULL')
+                ->get('misirpjmd')
+                ->row_array();
+
+            if ($cekDuplikat) {
+                echo json_encode(['status' => 'error', 'message' => 'Data Misi tersebut sudah ada pada Visi ini (duplikat)!']);
                 return;
             }
             
@@ -3017,6 +3232,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 echo json_encode(['status' => 'error', 'message' => 'Misi tidak ditemukan!']);
                 return;
             }
+
+            // Cek duplikasi Tujuan pada Misi yang sama
+            $cekDuplikat = $this->db
+                ->where('KodeWilayah', $kodeWilayah)
+                ->where('_Id', $misiId)
+                ->where('LOWER(TRIM(Tujuan)) =', strtolower($tujuan))
+                ->where('deleted_at IS NULL')
+                ->get('tujuanrpjmd')
+                ->row_array();
+
+            if ($cekDuplikat) {
+                echo json_encode(['status' => 'error', 'message' => 'Data Tujuan tersebut sudah ada pada Misi ini (duplikat)!']);
+                return;
+            }
             
             $data = [
                 'KodeWilayah' => $kodeWilayah,
@@ -3077,6 +3306,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             
             if (!$misi) {
                 echo json_encode(['status' => 'error', 'message' => 'Misi tidak ditemukan!']);
+                return;
+            }
+
+            // Cek duplikasi Tujuan pada data lain di Misi yang sama
+            $cekDuplikat = $this->db
+                ->where('KodeWilayah', $kodeWilayah)
+                ->where('_Id', $misiId)
+                ->where('Id !=', $id)
+                ->where('LOWER(TRIM(Tujuan)) =', strtolower($tujuan))
+                ->where('deleted_at IS NULL')
+                ->get('tujuanrpjmd')
+                ->row_array();
+
+            if ($cekDuplikat) {
+                echo json_encode(['status' => 'error', 'message' => 'Data Tujuan tersebut sudah ada pada Misi ini (duplikat)!']);
                 return;
             }
             
@@ -3297,6 +3541,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 echo json_encode(['status' => 'error', 'message' => 'Tujuan tidak ditemukan!']);
                 return;
             }
+
+            // Cek duplikasi Sasaran pada Tujuan yang sama
+            $cekDuplikat = $this->db
+                ->where('KodeWilayah', $kodeWilayah)
+                ->where('_Id', $tujuanId)
+                ->where('LOWER(TRIM(Sasaran)) =', strtolower($sasaran))
+                ->where('deleted_at IS NULL')
+                ->get('sasaranrpjmd')
+                ->row_array();
+
+            if ($cekDuplikat) {
+                echo json_encode(['status' => 'error', 'message' => 'Data Sasaran tersebut sudah ada pada Tujuan ini (duplikat)!']);
+                return;
+            }
             
             $data = [
                 'KodeWilayah' => $kodeWilayah,
@@ -3357,6 +3615,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             
             if (!$tujuan) {
                 echo json_encode(['status' => 'error', 'message' => 'Tujuan tidak ditemukan!']);
+                return;
+            }
+
+            // Cek duplikasi Sasaran pada data lain di Tujuan yang sama
+            $cekDuplikat = $this->db
+                ->where('KodeWilayah', $kodeWilayah)
+                ->where('_Id', $tujuanId)
+                ->where('Id !=', $id)
+                ->where('LOWER(TRIM(Sasaran)) =', strtolower($sasaran))
+                ->where('deleted_at IS NULL')
+                ->get('sasaranrpjmd')
+                ->row_array();
+
+            if ($cekDuplikat) {
+                echo json_encode(['status' => 'error', 'message' => 'Data Sasaran tersebut sudah ada pada Tujuan ini (duplikat)!']);
                 return;
             }
             
@@ -3485,6 +3758,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 echo json_encode(['status' => 'error', 'message' => 'Indikator harus diisi!']);
                 return;
             }
+
+            // Cek duplikasi Indikator pada Tujuan yang sama
+            $cekIndikator = $this->db
+                ->where('tujuan_id', $tujuanId)
+                ->where('LOWER(TRIM(indikator)) =', strtolower($indikator))
+                ->where('deleted_at IS NULL')
+                ->get('indikator_tujuan')
+                ->row_array();
+
+            if ($cekIndikator) {
+                echo json_encode(['status' => 'error', 'message' => 'Indikator Tujuan tersebut sudah ada (duplikat)!']);
+                return;
+            }
             
             // Validasi PD yang dipilih
             $pdPengampuhValue = '';
@@ -3584,6 +3870,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 
                 if (!$existing) {
                     echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
+                    return;
+                }
+
+                // Cek duplikasi dengan Indikator lain pada Tujuan yang sama
+                $cekIndikator = $this->db
+                    ->where('tujuan_id', $existing['tujuan_id'])
+                    ->where('id !=', $id)
+                    ->where('LOWER(TRIM(indikator)) =', strtolower($indikator))
+                    ->where('deleted_at IS NULL')
+                    ->get('indikator_tujuan')
+                    ->row_array();
+
+                if ($cekIndikator) {
+                    echo json_encode(['status' => 'error', 'message' => 'Indikator Tujuan tersebut sudah ada (duplikat)!']);
                     return;
                 }
                 
@@ -3766,6 +4066,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 echo json_encode(['status' => 'error', 'message' => 'Indikator harus diisi!']);
                 return;
             }
+
+            // Cek duplikasi Indikator pada Sasaran yang sama
+            $cekIndikator = $this->db
+                ->where('sasaran_id', $sasaranId)
+                ->where('LOWER(TRIM(indikator)) =', strtolower($indikator))
+                ->where('deleted_at IS NULL')
+                ->get('indikator_sasaran')
+                ->row_array();
+
+            if ($cekIndikator) {
+                echo json_encode(['status' => 'error', 'message' => 'Indikator Sasaran tersebut sudah ada (duplikat)!']);
+                return;
+            }
             
             // Validasi PD yang dipilih
             $pdPengampuhValue = '';
@@ -3881,6 +4194,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 
                 if (!$existing) {
                     echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan!']);
+                    return;
+                }
+
+                // Cek duplikasi dengan Indikator lain pada Sasaran yang sama
+                $cekIndikator = $this->db
+                    ->where('sasaran_id', $existing['sasaran_id'])
+                    ->where('id !=', $id)
+                    ->where('LOWER(TRIM(indikator)) =', strtolower($indikator))
+                    ->where('deleted_at IS NULL')
+                    ->get('indikator_sasaran')
+                    ->row_array();
+
+                if ($cekIndikator) {
+                    echo json_encode(['status' => 'error', 'message' => 'Indikator Sasaran tersebut sudah ada (duplikat)!']);
                     return;
                 }
                 
@@ -32206,13 +32533,24 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     }
 
     // ============================================================
-    // MENU RAPBD (Rancangan APBD)
+    // MENU RAPBD (Rancangan APBD) - TABEL 1 & TABEL 2
     // ============================================================
     public function RAPBD() {
-        $Header['Halaman'] = 'RAPBD';
+        $queryString = !empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '';
+        redirect('Daerah/RAPBDTabel1' . $queryString);
+    }
+
+    public function RAPBDTabel1() {
+        $Header['Halaman'] = 'RAPBD Tabel 1';
         
         $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
-        $KodeWilayah = $this->_getKodeWilayah();
+        $KodeWilayah = $this->input->get('kodewilayah', TRUE);
+        if (empty($KodeWilayah)) {
+            $KodeWilayah = $this->_getKodeWilayah();
+        }
+        if (empty($KodeWilayah)) {
+            $KodeWilayah = '35.10';
+        }
 
         $tahun = $this->input->get('tahun', TRUE);
         if (empty($tahun)) {
@@ -32231,10 +32569,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $Data['KodeWilayah'] = $KodeWilayah;
             $Data['NamaWilayah'] = $wilayah['Nama'] ?? '';
             
+            // Data RAPBD Tabel 1 murni dari input pengguna (tanpa auto-seed)
             $Data['RAPBDList'] = $this->db
                 ->where('kodewilayah', $KodeWilayah)
                 ->where('tahun', $Data['SelectedTahun'])
                 ->where('deleted_at IS NULL')
+                ->group_start()
+                    ->where('keterangan', 'tabel_1')
+                    ->or_where('keterangan', '')
+                    ->or_where('keterangan IS NULL', NULL, FALSE)
+                    ->or_where("keterangan NOT LIKE 'tabel_2%'", NULL, FALSE)
+                ->group_end()
                 ->order_by('kode', 'ASC')
                 ->order_by('id', 'ASC')
                 ->get('rapbd')
@@ -32245,6 +32590,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 ->where('kodewilayah', $KodeWilayah)
                 ->where('tahun', $Data['SelectedTahun'])
                 ->where('deleted_at IS NULL')
+                ->group_start()
+                    ->where('keterangan', 'tabel_1')
+                    ->or_where('keterangan', '')
+                    ->or_where('keterangan IS NULL', NULL, FALSE)
+                    ->or_where("keterangan NOT LIKE 'tabel_2%'", NULL, FALSE)
+                ->group_end()
                 ->get('rapbd')
                 ->row_array();
             $Data['TotalJumlah'] = $total['jumlah'] ?? 0;
@@ -32256,7 +32607,844 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         }
 
         $this->load->view('Daerah/header', $Header);
-        $this->load->view('Daerah/RAPBD', $Data);
+        $this->load->view('Daerah/RAPBDTabel1', $Data);
+    }
+
+    public function RAPBDTabel2() {
+        $Header['Halaman'] = 'RAPBD Tabel 2';
+        
+        $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
+        $KodeWilayah = $this->input->get('kodewilayah', TRUE);
+        if (empty($KodeWilayah)) {
+            $KodeWilayah = $this->_getKodeWilayah();
+        }
+        if (empty($KodeWilayah)) {
+            $KodeWilayah = '32.09';
+        }
+
+        $tahun = $this->input->get('tahun', TRUE);
+        if (empty($tahun)) {
+            $tahun = date('Y');
+        }
+        $Data['SelectedTahun'] = (int)$tahun;
+
+        // Daftar tahun untuk filter
+        $daftarTahunDb = $this->db->distinct()->select('tahun')->where('kodewilayah', $KodeWilayah)->where('deleted_at IS NULL')->order_by('tahun', 'DESC')->get('rapbd_tabel2')->result_array();
+        $tahunList = array_unique(array_merge([date('Y'), date('Y')+1, 2024, 2025, 2026, 2027], array_column($daftarTahunDb, 'tahun')));
+        rsort($tahunList);
+        $Data['TahunList'] = $tahunList;
+
+        if ($KodeWilayah) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            $Data['KodeWilayah'] = $KodeWilayah;
+            $Data['NamaWilayah'] = $wilayah['Nama'] ?? '';
+            
+            // Cek apakah ada data di rapbd_tabel2
+            $countData = $this->db->where('kodewilayah', $KodeWilayah)->where('tahun', $Data['SelectedTahun'])->where('deleted_at IS NULL')->count_all_results('rapbd_tabel2');
+            
+            // Jika belum ada data, otomatis inisialisasi / sinkronkan dari daftar instansi
+            if ($countData == 0) {
+                $this->_syncInstansiToRAPBD2($KodeWilayah, $Data['SelectedTahun']);
+            }
+
+            // Ambil data RAPBD Tabel 2
+            $rawRows = $this->db
+                ->where('kodewilayah', $KodeWilayah)
+                ->where('tahun', $Data['SelectedTahun'])
+                ->where('deleted_at IS NULL')
+                ->order_by('CAST(kode_urusan AS UNSIGNED)', 'ASC')
+                ->order_by('kode_bidang', 'ASC')
+                ->order_by('kode_organisasi', 'ASC')
+                ->order_by('urutan', 'ASC')
+                ->order_by('id', 'ASC')
+                ->get('rapbd_tabel2')
+                ->result_array();
+
+            // Hitung roll-up: jumlah_belanja otomatis dan total roll-up
+            $calculated = $this->_calculateRAPBD2Rollup($rawRows);
+            $Data['RAPBDList'] = $calculated['rows'];
+            $Data['TotalSum'] = $calculated['total'];
+
+            // Ambil daftar instansi untuk modal tambah/edit (dropdown auto-fill)
+            $Data['DaftarInstansi'] = $this->db
+                ->where('kodewilayah', $KodeWilayah)
+                ->where('deleted_at IS NULL')
+                ->order_by('kode_instansi', 'ASC')
+                ->get('akun_instansi')
+                ->result_array();
+        } else {
+            $Data['KodeWilayah'] = '';
+            $Data['NamaWilayah'] = '';
+            $Data['RAPBDList'] = [];
+            $Data['TotalSum'] = ['pendapatan' => 0, 'belanja_operasi' => 0, 'belanja_modal' => 0, 'belanja_tidak_terduga' => 0, 'belanja_transfer' => 0, 'jumlah_belanja' => 0];
+            $Data['DaftarInstansi'] = [];
+        }
+
+        $this->load->view('Daerah/header', $Header);
+        $this->load->view('Daerah/RAPBDTabel2', $Data);
+    }
+
+    private function _syncInstansiToRAPBD2($KodeWilayah, $tahun) {
+        $instansiList = $this->db
+            ->where('kodewilayah', $KodeWilayah)
+            ->where('deleted_at IS NULL')
+            ->order_by('kode_instansi', 'ASC')
+            ->get('akun_instansi')
+            ->result_array();
+
+        if (empty($instansiList)) {
+            return;
+        }
+
+        // Cache nomenklatur untuk urusan dan bidang urusan
+        $nomenUrusan = [];
+        $uRows = $this->db->query("SELECT TRIM(Kode) as Kode, TRIM(Nomenklatur) as Nomenklatur FROM nomenklaturprovinsi WHERE Kode NOT LIKE '%.%'")->result_array();
+        foreach ($uRows as $ur) $nomenUrusan[$ur['Kode']] = $ur['Nomenklatur'];
+
+        $nomenBidang = [];
+        $bRows = $this->db->query("SELECT TRIM(Kode) as Kode, TRIM(Nomenklatur) as Nomenklatur FROM nomenklaturprovinsi WHERE (LENGTH(Kode) - LENGTH(REPLACE(Kode, '.', ''))) = 1")->result_array();
+        foreach ($bRows as $br) $nomenBidang[$br['Kode']] = $br['Nomenklatur'];
+
+        $existing = $this->db->where('kodewilayah', $KodeWilayah)->where('tahun', $tahun)->where('deleted_at IS NULL')->get('rapbd_tabel2')->result_array();
+        $existingKeys = [];
+        foreach ($existing as $ex) {
+            $key = $ex['tipe'] . '|' . $ex['kode_urusan'] . '|' . $ex['kode_bidang'] . '|' . $ex['kode_organisasi'];
+            $existingKeys[$key] = true;
+        }
+
+        $insertedUrusan = [];
+        $insertedBidang = [];
+
+        foreach ($instansiList as $inst) {
+            $kodeInstansi = trim($inst['kode_instansi']);
+            $namaInstansi = trim($inst['nama']);
+            $parts = explode('.', $kodeInstansi);
+            $kodeUrusan = $parts[0] ?? '1';
+            $kodeBidang = $parts[1] ?? '01';
+            $kodeBidangFull = $kodeUrusan . '.' . $kodeBidang;
+
+            // 1. Urusan (Level 1)
+            $keyUrusan = 'urusan|' . $kodeUrusan . '||';
+            if (!isset($existingKeys[$keyUrusan]) && !isset($insertedUrusan[$kodeUrusan])) {
+                $namaUrusan = $nomenUrusan[$kodeUrusan] ?? 'URUSAN PEMERINTAHAN ' . $kodeUrusan;
+                $this->db->insert('rapbd_tabel2', [
+                    'kodewilayah' => $KodeWilayah,
+                    'tahun' => $tahun,
+                    'tipe' => 'urusan',
+                    'kode_urusan' => $kodeUrusan,
+                    'kode_bidang' => '',
+                    'kode_organisasi' => '',
+                    'uraian' => $namaUrusan,
+                    'pendapatan' => 0,
+                    'belanja_operasi' => 0,
+                    'belanja_modal' => 0,
+                    'belanja_tidak_terduga' => 0,
+                    'belanja_transfer' => 0,
+                    'jumlah_belanja' => 0,
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+                $insertedUrusan[$kodeUrusan] = true;
+                $existingKeys[$keyUrusan] = true;
+            }
+
+            // 2. Bidang Urusan (Level 2)
+            $keyBidang = 'bidang|' . $kodeUrusan . '|' . $kodeBidang . '|';
+            if (!isset($existingKeys[$keyBidang]) && !isset($insertedBidang[$kodeBidangFull])) {
+                $namaBidang = $nomenBidang[$kodeBidangFull] ?? 'URUSAN PEMERINTAHAN BIDANG ' . $kodeBidang;
+                $this->db->insert('rapbd_tabel2', [
+                    'kodewilayah' => $KodeWilayah,
+                    'tahun' => $tahun,
+                    'tipe' => 'bidang',
+                    'kode_urusan' => $kodeUrusan,
+                    'kode_bidang' => $kodeBidang,
+                    'kode_organisasi' => '',
+                    'uraian' => $namaBidang,
+                    'pendapatan' => 0,
+                    'belanja_operasi' => 0,
+                    'belanja_modal' => 0,
+                    'belanja_tidak_terduga' => 0,
+                    'belanja_transfer' => 0,
+                    'jumlah_belanja' => 0,
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+                $insertedBidang[$kodeBidangFull] = true;
+                $existingKeys[$keyBidang] = true;
+            }
+
+            // 3. Dinas / Instansi (Level 3)
+            $keyInst = 'instansi|' . $kodeUrusan . '|' . $kodeBidang . '|' . $kodeInstansi;
+            if (!isset($existingKeys[$keyInst])) {
+                $this->db->insert('rapbd_tabel2', [
+                    'kodewilayah' => $KodeWilayah,
+                    'tahun' => $tahun,
+                    'tipe' => 'instansi',
+                    'kode_urusan' => $kodeUrusan,
+                    'kode_bidang' => $kodeBidang,
+                    'kode_organisasi' => $kodeInstansi,
+                    'uraian' => $namaInstansi,
+                    'pendapatan' => 0,
+                    'belanja_operasi' => 0,
+                    'belanja_modal' => 0,
+                    'belanja_tidak_terduga' => 0,
+                    'belanja_transfer' => 0,
+                    'jumlah_belanja' => 0,
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+                $existingKeys[$keyInst] = true;
+            }
+
+            // 4. Sub Unit jika ada
+            $subUnits = $this->db
+                ->where('instansi_id', $inst['id'])
+                ->where('deleted_at IS NULL')
+                ->order_by('urutan', 'ASC')
+                ->order_by('id', 'ASC')
+                ->get('sub_unit')
+                ->result_array();
+            foreach ($subUnits as $su) {
+                $unitCode = $kodeInstansi . '.' . sprintf('%04d', $su['urutan'] > 0 ? $su['urutan'] : $su['id']);
+                $keyUnit = 'unit|' . $kodeUrusan . '|' . $kodeBidang . '|' . $unitCode;
+                if (!isset($existingKeys[$keyUnit])) {
+                    $this->db->insert('rapbd_tabel2', [
+                        'kodewilayah' => $KodeWilayah,
+                        'tahun' => $tahun,
+                        'tipe' => 'unit',
+                        'kode_urusan' => $kodeUrusan,
+                        'kode_bidang' => $kodeBidang,
+                        'kode_organisasi' => $unitCode,
+                        'uraian' => trim($su['nama_sub_unit']),
+                        'pendapatan' => 0,
+                        'belanja_operasi' => 0,
+                        'belanja_modal' => 0,
+                        'belanja_tidak_terduga' => 0,
+                        'belanja_transfer' => 0,
+                        'jumlah_belanja' => 0,
+                        'created_at' => date('Y-m-d H:i:s')
+                    ]);
+                    $existingKeys[$keyUnit] = true;
+                }
+            }
+        }
+    }
+
+    private function _calculateRAPBD2Rollup($rows) {
+        $bidangSums = [];
+        $urusanSums = [];
+        $totalSum = ['pendapatan' => 0, 'belanja_operasi' => 0, 'belanja_modal' => 0, 'belanja_tidak_terduga' => 0, 'belanja_transfer' => 0, 'jumlah_belanja' => 0];
+
+        // First pass: sum instansi and units
+        foreach ($rows as &$r) {
+            $jb = floatval($r['belanja_operasi']) + floatval($r['belanja_modal']) + floatval($r['belanja_tidak_terduga']) + floatval($r['belanja_transfer']);
+            $r['jumlah_belanja'] = $jb;
+
+            if ($r['tipe'] === 'instansi' || $r['tipe'] === 'unit') {
+                $bidKey = $r['kode_urusan'] . '.' . $r['kode_bidang'];
+                if (!isset($bidangSums[$bidKey])) {
+                    $bidangSums[$bidKey] = ['pendapatan' => 0, 'belanja_operasi' => 0, 'belanja_modal' => 0, 'belanja_tidak_terduga' => 0, 'belanja_transfer' => 0, 'jumlah_belanja' => 0, 'count' => 0];
+                }
+                $bidangSums[$bidKey]['pendapatan'] += floatval($r['pendapatan']);
+                $bidangSums[$bidKey]['belanja_operasi'] += floatval($r['belanja_operasi']);
+                $bidangSums[$bidKey]['belanja_modal'] += floatval($r['belanja_modal']);
+                $bidangSums[$bidKey]['belanja_tidak_terduga'] += floatval($r['belanja_tidak_terduga']);
+                $bidangSums[$bidKey]['belanja_transfer'] += floatval($r['belanja_transfer']);
+                $bidangSums[$bidKey]['jumlah_belanja'] += $jb;
+                $bidangSums[$bidKey]['count']++;
+            }
+        }
+        unset($r);
+
+        // Second pass: roll-up into bidang urusan
+        foreach ($rows as &$r) {
+            if ($r['tipe'] === 'bidang') {
+                $bidKey = $r['kode_urusan'] . '.' . $r['kode_bidang'];
+                if (isset($bidangSums[$bidKey]) && $bidangSums[$bidKey]['count'] > 0) {
+                    $r['pendapatan'] = $bidangSums[$bidKey]['pendapatan'];
+                    $r['belanja_operasi'] = $bidangSums[$bidKey]['belanja_operasi'];
+                    $r['belanja_modal'] = $bidangSums[$bidKey]['belanja_modal'];
+                    $r['belanja_tidak_terduga'] = $bidangSums[$bidKey]['belanja_tidak_terduga'];
+                    $r['belanja_transfer'] = $bidangSums[$bidKey]['belanja_transfer'];
+                    $r['jumlah_belanja'] = $bidangSums[$bidKey]['jumlah_belanja'];
+                }
+
+                $urKey = $r['kode_urusan'];
+                if (!isset($urusanSums[$urKey])) {
+                    $urusanSums[$urKey] = ['pendapatan' => 0, 'belanja_operasi' => 0, 'belanja_modal' => 0, 'belanja_tidak_terduga' => 0, 'belanja_transfer' => 0, 'jumlah_belanja' => 0, 'count' => 0];
+                }
+                $urusanSums[$urKey]['pendapatan'] += floatval($r['pendapatan']);
+                $urusanSums[$urKey]['belanja_operasi'] += floatval($r['belanja_operasi']);
+                $urusanSums[$urKey]['belanja_modal'] += floatval($r['belanja_modal']);
+                $urusanSums[$urKey]['belanja_tidak_terduga'] += floatval($r['belanja_tidak_terduga']);
+                $urusanSums[$urKey]['belanja_transfer'] += floatval($r['belanja_transfer']);
+                $urusanSums[$urKey]['jumlah_belanja'] += floatval($r['jumlah_belanja']);
+                $urusanSums[$urKey]['count']++;
+            }
+        }
+        unset($r);
+
+        // Third pass: roll-up into urusan & total
+        foreach ($rows as &$r) {
+            if ($r['tipe'] === 'urusan') {
+                $urKey = $r['kode_urusan'];
+                if (isset($urusanSums[$urKey]) && $urusanSums[$urKey]['count'] > 0) {
+                    $r['pendapatan'] = $urusanSums[$urKey]['pendapatan'];
+                    $r['belanja_operasi'] = $urusanSums[$urKey]['belanja_operasi'];
+                    $r['belanja_modal'] = $urusanSums[$urKey]['belanja_modal'];
+                    $r['belanja_tidak_terduga'] = $urusanSums[$urKey]['belanja_tidak_terduga'];
+                    $r['belanja_transfer'] = $urusanSums[$urKey]['belanja_transfer'];
+                    $r['jumlah_belanja'] = $urusanSums[$urKey]['jumlah_belanja'];
+                }
+
+                $totalSum['pendapatan'] += floatval($r['pendapatan']);
+                $totalSum['belanja_operasi'] += floatval($r['belanja_operasi']);
+                $totalSum['belanja_modal'] += floatval($r['belanja_modal']);
+                $totalSum['belanja_tidak_terduga'] += floatval($r['belanja_tidak_terduga']);
+                $totalSum['belanja_transfer'] += floatval($r['belanja_transfer']);
+                $totalSum['jumlah_belanja'] += floatval($r['jumlah_belanja']);
+            }
+        }
+        unset($r);
+
+        return [
+            'rows' => $rows,
+            'total' => $totalSum
+        ];
+    }
+
+    public function InputRAPBDTabel2() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+
+        $kodeWilayah = $this->input->post('kodewilayah', TRUE);
+        if (empty($kodeWilayah)) {
+            $kodeWilayah = $this->_getKodeWilayah();
+        }
+        $tahun = (int)$this->input->post('tahun', TRUE);
+        if ($tahun <= 0) $tahun = date('Y');
+
+        $tipe = $this->input->post('tipe', TRUE) ?? 'instansi';
+        $kodeUrusan = trim($this->input->post('kode_urusan', TRUE) ?? '');
+        $kodeBidang = trim($this->input->post('kode_bidang', TRUE) ?? '');
+        $kodeOrganisasi = trim($this->input->post('kode_organisasi', TRUE) ?? '');
+        $uraian = trim($this->input->post('uraian', TRUE) ?? '');
+
+        $pendapatan = $this->_cleanCurrencyInput($this->input->post('pendapatan', TRUE));
+        $belanjaOperasi = $this->_cleanCurrencyInput($this->input->post('belanja_operasi', TRUE));
+        $belanjaModal = $this->_cleanCurrencyInput($this->input->post('belanja_modal', TRUE));
+        $belanjaTidakTerduga = $this->_cleanCurrencyInput($this->input->post('belanja_tidak_terduga', TRUE));
+        $belanjaTransfer = $this->_cleanCurrencyInput($this->input->post('belanja_transfer', TRUE));
+        
+        // Jumlah Belanja TERISI OTOMATIS
+        $jumlahBelanja = $belanjaOperasi + $belanjaModal + $belanjaTidakTerduga + $belanjaTransfer;
+
+        if (empty($uraian)) {
+            echo json_encode(['status' => 'error', 'message' => 'Uraian wajib diisi!']);
+            return;
+        }
+
+        $insertData = [
+            'kodewilayah' => $kodeWilayah,
+            'tahun' => $tahun,
+            'tipe' => $tipe,
+            'kode_urusan' => $kodeUrusan,
+            'kode_bidang' => $kodeBidang,
+            'kode_organisasi' => $kodeOrganisasi,
+            'uraian' => $uraian,
+            'pendapatan' => $pendapatan,
+            'belanja_operasi' => $belanjaOperasi,
+            'belanja_modal' => $belanjaModal,
+            'belanja_tidak_terduga' => $belanjaTidakTerduga,
+            'belanja_transfer' => $belanjaTransfer,
+            'jumlah_belanja' => $jumlahBelanja,
+            'created_at' => date('Y-m-d H:i:s')
+        ];
+
+        $this->db->insert('rapbd_tabel2', $insertData);
+        if ($this->db->affected_rows() > 0) {
+            echo json_encode(['status' => 'success', 'message' => 'Baris data RAPBD Tabel 2 berhasil ditambahkan!']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data ke database.']);
+        }
+    }
+
+    public function GetRAPBDTabel2ById() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+
+        $id = (int)$this->input->post('id', TRUE);
+        $row = $this->db->where('id', $id)->where('deleted_at IS NULL')->get('rapbd_tabel2')->row_array();
+        if ($row) {
+            echo json_encode(['status' => 'success', 'data' => $row]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak ditemukan']);
+        }
+    }
+
+    public function UpdateRAPBDTabel2() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+
+        $id = (int)$this->input->post('id', TRUE);
+        if ($id <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'ID data tidak valid!']);
+            return;
+        }
+
+        $pendapatan = $this->_cleanCurrencyInput($this->input->post('pendapatan', TRUE));
+        $belanjaOperasi = $this->_cleanCurrencyInput($this->input->post('belanja_operasi', TRUE));
+        $belanjaModal = $this->_cleanCurrencyInput($this->input->post('belanja_modal', TRUE));
+        $belanjaTidakTerduga = $this->_cleanCurrencyInput($this->input->post('belanja_tidak_terduga', TRUE));
+        $belanjaTransfer = $this->_cleanCurrencyInput($this->input->post('belanja_transfer', TRUE));
+        
+        // Jumlah Belanja TERISI OTOMATIS = Operasi + Modal + Tidak Terduga + Transfer
+        $jumlahBelanja = $belanjaOperasi + $belanjaModal + $belanjaTidakTerduga + $belanjaTransfer;
+
+        // Yang hanya bisa diedit: PENDAPATAN, BELANJA (OPERASI, MODAL, TIDAK TERDUGA, TRANSFER)
+        // KODE dan URUSAN ditarik otomatis dari Daftar Instansi dan tidak dapat diubah
+        $updateData = [
+            'pendapatan' => $pendapatan,
+            'belanja_operasi' => $belanjaOperasi,
+            'belanja_modal' => $belanjaModal,
+            'belanja_tidak_terduga' => $belanjaTidakTerduga,
+            'belanja_transfer' => $belanjaTransfer,
+            'jumlah_belanja' => $jumlahBelanja,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        $this->db->where('id', $id)->update('rapbd_tabel2', $updateData);
+        echo json_encode(['status' => 'success', 'message' => 'Nominal anggaran berhasil diperbarui!']);
+    }
+
+    public function DeleteRAPBDTabel2() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+
+        $id = (int)$this->input->post('id', TRUE);
+        if ($id <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'ID data tidak valid!']);
+            return;
+        }
+
+        $this->db->where('id', $id)->update('rapbd_tabel2', ['deleted_at' => date('Y-m-d H:i:s')]);
+        echo json_encode(['status' => 'success', 'message' => 'Baris data berhasil dihapus!']);
+    }
+
+    public function SyncRAPBDTabel2() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+
+        $kodeWilayah = $this->input->post('kodewilayah', TRUE);
+        if (empty($kodeWilayah)) {
+            $kodeWilayah = $this->_getKodeWilayah();
+        }
+        $tahun = (int)$this->input->post('tahun', TRUE);
+        if ($tahun <= 0) $tahun = date('Y');
+
+        $this->_syncInstansiToRAPBD2($kodeWilayah, $tahun);
+        echo json_encode(['status' => 'success', 'message' => 'Sinkronisasi dari Daftar Instansi berhasil diselesaikan!']);
+    }
+
+    public function ClearRAPBDTabel2() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+
+        $kodeWilayah = $this->input->post('kodewilayah', TRUE);
+        if (empty($kodeWilayah)) {
+            $kodeWilayah = $this->_getKodeWilayah();
+        }
+        $tahun = (int)$this->input->post('tahun', TRUE);
+        if ($tahun <= 0) $tahun = date('Y');
+
+        $this->db
+            ->where('kodewilayah', $kodeWilayah)
+            ->where('tahun', $tahun)
+            ->where('deleted_at IS NULL')
+            ->update('rapbd_tabel2', ['deleted_at' => date('Y-m-d H:i:s')]);
+
+        echo json_encode(['status' => 'success', 'message' => 'Semua data Tabel 2 tahun ' . $tahun . ' berhasil dikosongkan!']);
+    }
+
+    public function ResetContohRAPBDTabel2() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+
+        $kodeWilayah = $this->input->post('kodewilayah', TRUE);
+        if (empty($kodeWilayah)) {
+            $kodeWilayah = $this->_getKodeWilayah();
+        }
+        $tahun = (int)$this->input->post('tahun', TRUE);
+        if ($tahun <= 0) $tahun = date('Y');
+
+        // Soft delete data tahun berjalan
+        $this->db
+            ->where('kodewilayah', $kodeWilayah)
+            ->where('tahun', $tahun)
+            ->where('deleted_at IS NULL')
+            ->update('rapbd_tabel2', ['deleted_at' => date('Y-m-d H:i:s')]);
+
+        // Muat 16 baris contoh persis seperti dokumen gambar pengguna
+        $sampleRows = [
+            [
+                'tipe' => 'urusan',
+                'kode_urusan' => '1',
+                'kode_bidang' => '',
+                'kode_organisasi' => '',
+                'uraian' => 'URUSAN PEMERINTAHAN WAJIB YANG BERKAITAN DENGAN PELAYANAN DASAR',
+                'pendapatan' => 189404759691.00,
+                'belanja_operasi' => 1096667760767.00,
+                'belanja_modal' => 163188235581.00,
+                'belanja_tidak_terduga' => 0.00,
+                'belanja_transfer' => 0.00,
+                'jumlah_belanja' => 1259855996348.00,
+                'urutan' => 10
+            ],
+            [
+                'tipe' => 'bidang',
+                'kode_urusan' => '1',
+                'kode_bidang' => '01',
+                'kode_organisasi' => '',
+                'uraian' => 'URUSAN PEMERINTAHAN BIDANG PENDIDIKAN',
+                'pendapatan' => 3000000.00,
+                'belanja_operasi' => 575252528247.00,
+                'belanja_modal' => 26880054623.00,
+                'belanja_tidak_terduga' => 0.00,
+                'belanja_transfer' => 0.00,
+                'jumlah_belanja' => 602132582870.00,
+                'urutan' => 20
+            ],
+            [
+                'tipe' => 'instansi',
+                'kode_urusan' => '1',
+                'kode_bidang' => '01',
+                'kode_organisasi' => '1.01.0.00.0.00.01.0000',
+                'uraian' => 'DINAS PENDIDIKAN',
+                'pendapatan' => 3000000.00,
+                'belanja_operasi' => 575252528247.00,
+                'belanja_modal' => 26880054623.00,
+                'belanja_tidak_terduga' => 0.00,
+                'belanja_transfer' => 0.00,
+                'jumlah_belanja' => 602132582870.00,
+                'urutan' => 30
+            ],
+            [
+                'tipe' => 'bidang',
+                'kode_urusan' => '1',
+                'kode_bidang' => '02',
+                'kode_organisasi' => '',
+                'uraian' => 'URUSAN PEMERINTAHAN BIDANG KESEHATAN',
+                'pendapatan' => 185091702025.00,
+                'belanja_operasi' => 438241270754.00,
+                'belanja_modal' => 18615672162.00,
+                'belanja_tidak_terduga' => 0.00,
+                'belanja_transfer' => 0.00,
+                'jumlah_belanja' => 456856942916.00,
+                'urutan' => 40
+            ],
+            [
+                'tipe' => 'instansi',
+                'kode_urusan' => '1',
+                'kode_bidang' => '02',
+                'kode_organisasi' => '1.02.0.00.0.00.01.0000',
+                'uraian' => 'DINAS KESEHATAN',
+                'pendapatan' => 32520000.00,
+                'belanja_operasi' => 238933632466.00,
+                'belanja_modal' => 7484208450.00,
+                'belanja_tidak_terduga' => 0.00,
+                'belanja_transfer' => 0.00,
+                'jumlah_belanja' => 246417840916.00,
+                'urutan' => 50
+            ],
+            [
+                'tipe' => 'unit',
+                'kode_urusan' => '1',
+                'kode_bidang' => '02',
+                'kode_organisasi' => '1.02.0.00.0.00.01.0001',
+                'uraian' => 'RSUD dr. MURJANI',
+                'pendapatan' => 148901540504.00,
+                'belanja_operasi' => 142446540504.00,
+                'belanja_modal' => 6500000000.00,
+                'belanja_tidak_terduga' => 0.00,
+                'belanja_transfer' => 0.00,
+                'jumlah_belanja' => 148946540504.00,
+                'urutan' => 60
+            ],
+            [
+                'tipe' => 'unit',
+                'kode_urusan' => '1',
+                'kode_bidang' => '02',
+                'kode_organisasi' => '1.02.0.00.0.00.01.0002',
+                'uraian' => 'RSUD PARENGGEAN',
+                'pendapatan' => 2489573897.00,
+                'belanja_operasi' => 5012279558.00,
+                'belanja_modal' => 1164825000.00,
+                'belanja_tidak_terduga' => 0.00,
+                'belanja_transfer' => 0.00,
+                'jumlah_belanja' => 6177104558.00,
+                'urutan' => 70
+            ],
+            [
+                'tipe' => 'unit',
+                'kode_urusan' => '1',
+                'kode_bidang' => '02',
+                'kode_organisasi' => '1.02.0.00.0.00.01.0003',
+                'uraian' => 'RSUD SAMUDA',
+                'pendapatan' => 1189547134.00,
+                'belanja_operasi' => 3433770500.00,
+                'belanja_modal' => 1421431500.00,
+                'belanja_tidak_terduga' => 0.00,
+                'belanja_transfer' => 0.00,
+                'jumlah_belanja' => 4855202000.00,
+                'urutan' => 80
+            ],
+            [
+                'tipe' => 'unit',
+                'kode_urusan' => '1',
+                'kode_bidang' => '02',
+                'kode_organisasi' => '1.02.0.00.0.00.01.0004',
+                'uraian' => 'Puskesmas Ujung Pandaran',
+                'pendapatan' => 701013135.00,
+                'belanja_operasi' => 1182093037.00,
+                'belanja_modal' => 33150000.00,
+                'belanja_tidak_terduga' => 0.00,
+                'belanja_transfer' => 0.00,
+                'jumlah_belanja' => 1215243037.00,
+                'urutan' => 90
+            ],
+            [
+                'tipe' => 'unit',
+                'kode_urusan' => '1',
+                'kode_bidang' => '02',
+                'kode_organisasi' => '1.02.0.00.0.00.01.0005',
+                'uraian' => 'Puskesmas Bapenang',
+                'pendapatan' => 938625323.00,
+                'belanja_operasi' => 1536065000.00,
+                'belanja_modal' => 118500000.00,
+                'belanja_tidak_terduga' => 0.00,
+                'belanja_transfer' => 0.00,
+                'jumlah_belanja' => 1654565000.00,
+                'urutan' => 100
+            ],
+            [
+                'tipe' => 'unit',
+                'kode_urusan' => '1',
+                'kode_bidang' => '02',
+                'kode_organisasi' => '1.02.0.00.0.00.01.0006',
+                'uraian' => 'Puskesmas Samuda',
+                'pendapatan' => 1617194997.00,
+                'belanja_operasi' => 2045778988.00,
+                'belanja_modal' => 150000000.00,
+                'belanja_tidak_terduga' => 0.00,
+                'belanja_transfer' => 0.00,
+                'jumlah_belanja' => 2195778988.00,
+                'urutan' => 110
+            ],
+            [
+                'tipe' => 'unit',
+                'kode_urusan' => '1',
+                'kode_bidang' => '02',
+                'kode_organisasi' => '1.02.0.00.0.00.01.0007',
+                'uraian' => 'Puskesmas Bagendang',
+                'pendapatan' => 1465953173.00,
+                'belanja_operasi' => 1959755972.00,
+                'belanja_modal' => 40000000.00,
+                'belanja_tidak_terduga' => 0.00,
+                'belanja_transfer' => 0.00,
+                'jumlah_belanja' => 1999755972.00,
+                'urutan' => 120
+            ],
+            [
+                'tipe' => 'unit',
+                'kode_urusan' => '1',
+                'kode_bidang' => '02',
+                'kode_organisasi' => '1.02.0.00.0.00.01.0008',
+                'uraian' => 'Puskesmas Ketapang-I',
+                'pendapatan' => 1954627061.00,
+                'belanja_operasi' => 2466015000.00,
+                'belanja_modal' => 50000000.00,
+                'belanja_tidak_terduga' => 0.00,
+                'belanja_transfer' => 0.00,
+                'jumlah_belanja' => 2516015000.00,
+                'urutan' => 130
+            ],
+            [
+                'tipe' => 'unit',
+                'kode_urusan' => '1',
+                'kode_bidang' => '02',
+                'kode_organisasi' => '1.02.0.00.0.00.01.0009',
+                'uraian' => 'Puskesmas Ketapang-II',
+                'pendapatan' => 3086709209.00,
+                'belanja_operasi' => 3362001720.00,
+                'belanja_modal' => 200000000.00,
+                'belanja_tidak_terduga' => 0.00,
+                'belanja_transfer' => 0.00,
+                'jumlah_belanja' => 3562001720.00,
+                'urutan' => 140
+            ],
+            [
+                'tipe' => 'unit',
+                'kode_urusan' => '1',
+                'kode_bidang' => '02',
+                'kode_organisasi' => '1.02.0.00.0.00.01.0010',
+                'uraian' => 'Puskesmas Pasir Putih',
+                'pendapatan' => 1020340227.00,
+                'belanja_operasi' => 1423432900.00,
+                'belanja_modal' => 85500000.00,
+                'belanja_tidak_terduga' => 0.00,
+                'belanja_transfer' => 0.00,
+                'jumlah_belanja' => 1508932900.00,
+                'urutan' => 150
+            ],
+            [
+                'tipe' => 'unit',
+                'kode_urusan' => '1',
+                'kode_bidang' => '02',
+                'kode_organisasi' => '1.02.0.00.0.00.01.0011',
+                'uraian' => 'Puskesmas Baamang-I',
+                'pendapatan' => 2302319873.00,
+                'belanja_operasi' => 2734518804.00,
+                'belanja_modal' => 72500000.00,
+                'belanja_tidak_terduga' => 0.00,
+                'belanja_transfer' => 0.00,
+                'jumlah_belanja' => 2807018804.00,
+                'urutan' => 160
+            ]
+        ];
+
+        foreach ($sampleRows as $sr) {
+            $sr['kodewilayah'] = $kodeWilayah;
+            $sr['tahun'] = $tahun;
+            $sr['created_at'] = date('Y-m-d H:i:s');
+            $this->db->insert('rapbd_tabel2', $sr);
+        }
+
+        echo json_encode(['status' => 'success', 'message' => 'Contoh data gambar RAPBD Tabel 2 berhasil dimuat!']);
+    }
+
+    private function _cleanCurrencyInput($val) {
+        if ($val === null || $val === '') return 0.00;
+        $str = (string)$val;
+        $isNegative = (strpos($str, '-') !== false || (strpos($str, '(') !== false && strpos($str, ')') !== false));
+        // Jika ada format rupiah 1.000.000,00 -> pisahkan sen
+        $parts = explode(',', $str);
+        $cleanInteger = preg_replace('/[^0-9]/', '', $parts[0]);
+        $cleanDecimal = isset($parts[1]) ? preg_replace('/[^0-9]/', '', substr($parts[1], 0, 2)) : '00';
+        $finalNum = floatval($cleanInteger . '.' . str_pad($cleanDecimal, 2, '0'));
+        return $isNegative ? (-1 * $finalNum) : $finalNum;
+    }
+
+    public function ResetRAPBDTabel1() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        $kodeWilayah = $this->input->post('kodewilayah', TRUE);
+        if (empty($kodeWilayah)) {
+            $kodeWilayah = $this->_getKodeWilayah();
+        }
+        $tahun = (int)$this->input->post('tahun', TRUE);
+        if ($tahun <= 0) $tahun = date('Y');
+
+        // Soft delete existing tabel_1
+        $this->db
+            ->where('kodewilayah', $kodeWilayah)
+            ->where('tahun', $tahun)
+            ->where('deleted_at IS NULL')
+            ->group_start()
+                ->where('keterangan', 'tabel_1')
+                ->or_where('keterangan', '')
+                ->or_where('keterangan IS NULL', NULL, FALSE)
+                ->or_where("keterangan NOT LIKE 'tabel_2%'", NULL, FALSE)
+            ->group_end()
+            ->update('rapbd', ['deleted_at' => date('Y-m-d H:i:s')]);
+
+        // Re-seed from standard image
+        $seedData = [
+            ['kode' => '4', 'uraian' => 'PENDAPATAN DAERAH', 'jumlah' => 0],
+            ['kode' => '4.1', 'uraian' => 'PENDAPATAN ASLI DAERAH (PAD)', 'jumlah' => 466887264180.00],
+            ['kode' => '4.1.01', 'uraian' => 'Pajak Daerah', 'jumlah' => 265385306768.00],
+            ['kode' => '4.1.02', 'uraian' => 'Retribusi Daerah', 'jumlah' => 18203509925.00],
+            ['kode' => '4.1.03', 'uraian' => 'Hasil Pengelolaan Kekayaan Daerah yang Dipisahkan', 'jumlah' => 5363260387.00],
+            ['kode' => '4.1.04', 'uraian' => 'Lain-lain PAD yang Sah', 'jumlah' => 177935187100.00],
+            ['kode' => '4.2', 'uraian' => 'PENDAPATAN TRANSFER', 'jumlah' => 1481032583120.00],
+            ['kode' => '4.2.01', 'uraian' => 'Pendapatan Transfer Pemerintah Pusat', 'jumlah' => 1380092944000.00],
+            ['kode' => '4.2.02', 'uraian' => 'Pendapatan Transfer Antar Daerah', 'jumlah' => 100939639120.00],
+            ['kode' => '5', 'uraian' => 'BELANJA DAERAH', 'jumlah' => 0],
+            ['kode' => '5.1', 'uraian' => 'BELANJA OPERASI', 'jumlah' => 1533164504209.00],
+            ['kode' => '5.1.01', 'uraian' => 'Belanja Pegawai', 'jumlah' => 881291712057.00],
+            ['kode' => '5.1.02', 'uraian' => 'Belanja Barang dan Jasa', 'jumlah' => 586500718545.00],
+            ['kode' => '5.1.05', 'uraian' => 'Belanja Hibah', 'jumlah' => 65043619927.00],
+            ['kode' => '5.1.06', 'uraian' => 'Belanja Bantuan Sosial', 'jumlah' => 328453680.00],
+            ['kode' => '5.2', 'uraian' => 'BELANJA MODAL', 'jumlah' => 181721766583.00],
+            ['kode' => '5.2.01', 'uraian' => 'Belanja Modal Tanah', 'jumlah' => 66300000.00],
+            ['kode' => '5.2.02', 'uraian' => 'Belanja Modal Peralatan dan Mesin', 'jumlah' => 31914321128.00],
+            ['kode' => '5.2.03', 'uraian' => 'Belanja Modal Gedung dan Bangunan', 'jumlah' => 37263096908.00],
+            ['kode' => '5.2.04', 'uraian' => 'Belanja Modal Jalan, Jaringan, dan Irigasi', 'jumlah' => 110474902524.00],
+            ['kode' => '5.2.05', 'uraian' => 'Belanja Modal Aset Tetap Lainnya', 'jumlah' => 2003146023.00],
+            ['kode' => '5.3', 'uraian' => 'BELANJA TIDAK TERDUGA', 'jumlah' => 5000000000.00],
+            // === PEMBIAYAAN DAERAH (GAMBAR LANJUTAN) ===
+            ['kode' => '6', 'uraian' => 'PEMBIAYAAN DAERAH', 'jumlah' => 0],
+            ['kode' => '6.1', 'uraian' => 'PENERIMAAN PEMBIAYAAN', 'jumlah' => 48197094550.00],
+            ['kode' => '6.1.01', 'uraian' => 'Sisa Lebih Perhitungan Anggaran Tahun Sebelumnya', 'jumlah' => 48197094550.00],
+            ['kode' => '6.2', 'uraian' => 'PENGELUARAN PEMBIAYAAN', 'jumlah' => 14500000000.00],
+            ['kode' => '6.2.02', 'uraian' => 'Penyertaan Modal Daerah', 'jumlah' => 14500000000.00],
+            ['kode' => '6.3', 'uraian' => 'Sisa Lebih Pembiayaan Anggaran Daerah Tahun Berkenaan (SILPA)', 'jumlah' => 0.00]
+        ];
+
+        $now = date('Y-m-d H:i:s');
+        $batch = [];
+        foreach ($seedData as $item) {
+            $batch[] = [
+                'kodewilayah' => $kodeWilayah,
+                'tahun' => $tahun,
+                'kode' => $item['kode'],
+                'uraian' => $item['uraian'],
+                'jumlah' => $item['jumlah'],
+                'keterangan' => 'tabel_1',
+                'created_at' => $now
+            ];
+        }
+        $this->db->insert_batch('rapbd', $batch);
+        echo json_encode(['status' => 'success', 'message' => 'Data contoh Tabel 1 berhasil dimuat sesuai dokumen gambar!']);
+    }
+
+    public function ClearRAPBDTabel1() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        $kodeWilayah = $this->input->post('kodewilayah', TRUE);
+        if (empty($kodeWilayah)) {
+            $kodeWilayah = $this->_getKodeWilayah();
+        }
+        $tahun = (int)$this->input->post('tahun', TRUE);
+        if ($tahun <= 0) $tahun = date('Y');
+
+        $this->db
+            ->where('kodewilayah', $kodeWilayah)
+            ->where('tahun', $tahun)
+            ->where('deleted_at IS NULL')
+            ->group_start()
+                ->where('keterangan', 'tabel_1')
+                ->or_where('keterangan', '')
+                ->or_where('keterangan IS NULL', NULL, FALSE)
+                ->or_where("keterangan NOT LIKE 'tabel_2%'", NULL, FALSE)
+            ->group_end()
+            ->update('rapbd', ['deleted_at' => date('Y-m-d H:i:s')]);
+
+        echo json_encode(['status' => 'success', 'message' => 'Semua data Tabel 1 tahun ' . $tahun . ' berhasil dikosongkan!']);
     }
 
     public function InputRAPBD() {
@@ -32271,15 +33459,25 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         }
 
         $tahun = (int)$this->input->post('tahun', TRUE);
-        $kode = trim($this->input->post('kode', TRUE));
-        $uraian = trim($this->input->post('uraian', TRUE));
-        $jumlahRaw = $this->input->post('jumlah', TRUE);
-        $jumlah = floatval(preg_replace('/[^0-9]/', '', $jumlahRaw));
+        $kode = trim($this->input->post('kode', TRUE) ?? '');
+        $uraian = trim($this->input->post('uraian', TRUE) ?? '');
+        $jumlahRaw = (string)$this->input->post('jumlah', TRUE);
+        $isNegative = (strpos($jumlahRaw, '-') !== false || (strpos($jumlahRaw, '(') !== false && strpos($jumlahRaw, ')') !== false));
+        $cleanStr = str_replace(['.', ' '], '', $jumlahRaw);
+        $parts = explode(',', $cleanStr);
+        $intPart = preg_replace('/[^0-9]/', '', $parts[0]);
+        $decPart = isset($parts[1]) ? substr(preg_replace('/[^0-9]/', '', $parts[1]), 0, 2) : '00';
+        $cleanNum = floatval(($intPart !== '' ? $intPart : '0') . '.' . str_pad($decPart, 2, '0'));
+        $jumlah = $isNegative ? (-1 * $cleanNum) : $cleanNum;
 
-        if (empty($kode) || empty($uraian)) {
-            echo json_encode(['status' => 'error', 'message' => 'Kode dan Uraian wajib diisi!']);
+        if (empty($uraian)) {
+            echo json_encode(['status' => 'error', 'message' => 'Uraian wajib diisi!']);
             return;
         }
+
+        $tabel = $this->input->post('tabel', TRUE) ?? 'tabel_1';
+        $ketInput = trim($this->input->post('keterangan', TRUE) ?? '');
+        $keterangan = ($tabel === 'tabel_2') ? ('tabel_2' . (!empty($ketInput) ? ': ' . $ketInput : '')) : ('tabel_1' . (!empty($ketInput) ? ': ' . $ketInput : ''));
 
         $dataInsert = [
             'kodewilayah' => $kodeWilayah,
@@ -32287,7 +33485,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             'kode' => $kode,
             'uraian' => $uraian,
             'jumlah' => $jumlah,
-            'keterangan' => $this->input->post('keterangan', TRUE) ?? '',
+            'keterangan' => $keterangan,
             'created_at' => date('Y-m-d H:i:s')
         ];
 
@@ -32321,14 +33519,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         }
 
         $id = (int)$this->input->post('id', TRUE);
-        $kode = trim($this->input->post('kode', TRUE));
-        $uraian = trim($this->input->post('uraian', TRUE));
+        $kode = trim($this->input->post('kode', TRUE) ?? '');
+        $uraian = trim($this->input->post('uraian', TRUE) ?? '');
         $tahun = (int)$this->input->post('tahun', TRUE);
-        $jumlahRaw = $this->input->post('jumlah', TRUE);
-        $jumlah = floatval(preg_replace('/[^0-9]/', '', $jumlahRaw));
+        $jumlahRaw = (string)$this->input->post('jumlah', TRUE);
+        $isNegative = (strpos($jumlahRaw, '-') !== false || (strpos($jumlahRaw, '(') !== false && strpos($jumlahRaw, ')') !== false));
+        $cleanStr = str_replace(['.', ' '], '', $jumlahRaw);
+        $parts = explode(',', $cleanStr);
+        $intPart = preg_replace('/[^0-9]/', '', $parts[0]);
+        $decPart = isset($parts[1]) ? substr(preg_replace('/[^0-9]/', '', $parts[1]), 0, 2) : '00';
+        $cleanNum = floatval(($intPart !== '' ? $intPart : '0') . '.' . str_pad($decPart, 2, '0'));
+        $jumlah = $isNegative ? (-1 * $cleanNum) : $cleanNum;
 
-        if (empty($kode) || empty($uraian) || $id <= 0) {
-            echo json_encode(['status' => 'error', 'message' => 'Data tidak valid!']);
+        if (empty($uraian) || $id <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak valid! Uraian wajib diisi.']);
             return;
         }
 
@@ -32337,9 +33541,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             'uraian' => $uraian,
             'tahun' => $tahun > 0 ? $tahun : date('Y'),
             'jumlah' => $jumlah,
-            'keterangan' => $this->input->post('keterangan', TRUE) ?? '',
             'updated_at' => date('Y-m-d H:i:s')
         ];
+
+        $tabel = $this->input->post('tabel', TRUE);
+        $ketInput = trim($this->input->post('keterangan', TRUE) ?? '');
+        if (!empty($tabel)) {
+            $dataUpdate['keterangan'] = ($tabel === 'tabel_2') ? ('tabel_2' . (!empty($ketInput) ? ': ' . $ketInput : '')) : ('tabel_1' . (!empty($ketInput) ? ': ' . $ketInput : ''));
+        }
 
         $this->db->where('id', $id)->update('rapbd', $dataUpdate);
         echo json_encode(['status' => 'success', 'message' => 'Data RAPBD berhasil diperbarui!']);

@@ -20411,6 +20411,278 @@ public function updateStatusPerjanjianKinerja() {
     }
 
     // ================================================================
+    // GET PAGU RENJA PER TAHAPAN (RANWAL S/D PERUBAHAN) UNTUK SUB KEGIATAN
+    // ================================================================
+
+    public function GetPaguRenjaTahapan() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+
+        header('Content-Type: application/json');
+
+        $kode_sub_kegiatan = trim($this->input->post('kode_sub_kegiatan', TRUE) ?: '');
+        $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: $this->get_instansi_id());
+        $is_role_4 = $this->is_role_4();
+        if ($is_role_4 && $this->get_instansi_id()) {
+            $instansi_id = (int)$this->get_instansi_id();
+        }
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: date('Y'));
+        $KodeWilayah = $this->get_kode_wilayah();
+        if (empty($KodeWilayah) && !empty($instansi_id)) {
+            $instRow = $this->db->select('kodewilayah')->where('id', $instansi_id)->get('akun_instansi')->row_array();
+            if ($instRow && !empty($instRow['kodewilayah'])) {
+                $KodeWilayah = trim($instRow['kodewilayah']);
+            }
+        }
+
+        $result = [
+            'ranwal' => 0,
+            'rancangan' => 0,
+            'rankhir' => 0,
+            'perubahan' => 0,
+            'nama_sub_kegiatan' => '',
+            'tahun' => $tahun,
+            'kode_sub_kegiatan' => $kode_sub_kegiatan
+        ];
+
+        if (empty($kode_sub_kegiatan)) {
+            echo json_encode(['status' => 'success', 'data' => $result]);
+            return;
+        }
+
+        // Variasi kode sub kegiatan (misal 1.01.02.1.01.0001 vs 1.01.02.2.01.0001)
+        $kodes = [$kode_sub_kegiatan];
+        $parts = explode('.', $kode_sub_kegiatan);
+        if (count($parts) >= 6) {
+            $altParts = $parts;
+            if ($altParts[3] === '1') $altParts[3] = '2';
+            else if ($altParts[3] === '2') $altParts[3] = '1';
+            $altKode = implode('.', $altParts);
+            if (!in_array($altKode, $kodes)) {
+                $kodes[] = $altKode;
+            }
+        }
+
+        // 1. Ambil data sub kegiatan dari renstra_sub_kegiatan
+        $hasAnggaranCol = $this->db->field_exists('anggaran_' . $tahun, 'renstra_sub_kegiatan');
+        $selCols = 'rsk.id, rsk.nama, rsk.kode_nomenklatur' . ($hasAnggaranCol ? ', rsk.anggaran_' . $tahun : '');
+        $selPlain = 'id, nama, kode_nomenklatur' . ($hasAnggaranCol ? ', anggaran_' . $tahun : '');
+
+        $rsk = null;
+        if (!empty($instansi_id)) {
+            $rsk = $this->db->select($selCols)
+                ->from('renstra_sub_kegiatan rsk')
+                ->join('renstra_kegiatan rk', 'rk.id = rsk.kegiatan_id')
+                ->join('renstra_program rp', 'rp.id = rk.program_id')
+                ->join('renstra_sasaran rs', 'rs.id = rp.sasaran_id')
+                ->join('renstra_tujuan rt', 'rt.id = rs.tujuan_id')
+                ->where('rt.id_instansi', $instansi_id)
+                ->where_in('rsk.kode_nomenklatur', $kodes)
+                ->where('rsk.deleted_at IS NULL')
+                ->order_by('rsk.id', 'DESC')
+                ->get()
+                ->row_array();
+        }
+
+        if (!$rsk) {
+            $rsk = $this->db->select($selPlain)
+                ->from('renstra_sub_kegiatan')
+                ->where_in('kode_nomenklatur', $kodes)
+                ->where('deleted_at IS NULL')
+                ->order_by('id', 'DESC')
+                ->get()
+                ->row_array();
+        }
+
+        if (!$rsk && count($parts) >= 6) {
+            $suffix = '.' . $parts[count($parts)-2] . '.' . $parts[count($parts)-1];
+            $rsk = $this->db->select($selPlain)
+                ->from('renstra_sub_kegiatan')
+                ->like('kode_nomenklatur', $suffix, 'before')
+                ->where('deleted_at IS NULL')
+                ->order_by('id', 'DESC')
+                ->get()
+                ->row_array();
+        }
+
+        $skId = $rsk ? $rsk['id'] : null;
+        if ($rsk && !empty($rsk['nama'])) {
+            $result['nama_sub_kegiatan'] = $rsk['nama'];
+        }
+
+        $renstraPagu = ($rsk && isset($rsk['anggaran_' . $tahun])) ? (float)$rsk['anggaran_' . $tahun] : 0;
+        if ($renstraPagu == 0 && $skId) {
+            $skind = $this->db->where('sub_kegiatan_id', $skId)->where('deleted_at IS NULL')->order_by('urutan', 'ASC')->get('renstra_sub_kegiatan_indikator')->row_array();
+            if ($skind && isset($skind['anggaran_' . $tahun])) {
+                $renstraPagu = (float)$skind['anggaran_' . $tahun];
+            }
+        }
+
+        // 2. Tahap: Ranwal (renja_sub_kegiatan_data)
+        if ($skId) {
+            $qRanwal = $this->db->where('sub_kegiatan_id', $skId)
+                ->where('tahun', $tahun)
+                ->where('deleted_at IS NULL');
+            if (!empty($instansi_id)) $qRanwal->where('id_instansi', $instansi_id);
+            $rowRanwal = $qRanwal->get('renja_sub_kegiatan_data')->row_array();
+            if ($rowRanwal && isset($rowRanwal['anggaran']) && $rowRanwal['anggaran'] > 0) {
+                $result['ranwal'] = (float)$rowRanwal['anggaran'];
+            }
+        }
+
+        // 3. Tahap: Rancangan (rancangan_renja_sub_kegiatan_data)
+        if ($skId) {
+            $qRancangan = $this->db->where('sub_kegiatan_id', $skId)
+                ->where('tahun', $tahun)
+                ->where('deleted_at IS NULL');
+            if (!empty($instansi_id)) $qRancangan->where('id_instansi', $instansi_id);
+            $rowRancangan = $qRancangan->get('rancangan_renja_sub_kegiatan_data')->row_array();
+            if ($rowRancangan && isset($rowRancangan['anggaran']) && $rowRancangan['anggaran'] > 0) {
+                $result['rancangan'] = (float)$rowRancangan['anggaran'];
+            }
+        }
+
+        // 4. Tahap: Rankhir / Penetapan (rancangan_akhir_renja_sub_kegiatan_data)
+        if ($skId) {
+            $qRankhir = $this->db->where('sub_kegiatan_id', $skId)
+                ->where('tahun', $tahun)
+                ->where('deleted_at IS NULL');
+            if (!empty($instansi_id)) $qRankhir->where('id_instansi', $instansi_id);
+            $rowRankhir = $qRankhir->get('rancangan_akhir_renja_sub_kegiatan_data')->row_array();
+            if ($rowRankhir && isset($rowRankhir['anggaran']) && $rowRankhir['anggaran'] > 0) {
+                $result['rankhir'] = (float)$rowRankhir['anggaran'];
+            }
+        }
+
+        // 5. Tahap: Perubahan (perubahan_renja_sub_kegiatan_data)
+        if ($skId) {
+            $qPerubahan = $this->db->where('sub_kegiatan_id', $skId)
+                ->where('tahun', $tahun)
+                ->where('deleted_at IS NULL');
+            if (!empty($instansi_id)) $qPerubahan->where('id_instansi', $instansi_id);
+            $rowPerubahan = $qPerubahan->get('perubahan_renja_sub_kegiatan_data')->row_array();
+            if ($rowPerubahan && isset($rowPerubahan['anggaran']) && $rowPerubahan['anggaran'] > 0) {
+                $result['perubahan'] = (float)$rowPerubahan['anggaran'];
+            }
+        }
+
+        // 6. Cek juga dari rancangan_akhir_renja_header / rancangan_akhir_renja_detail
+        if ($this->db->table_exists('rancangan_akhir_renja_header') && $this->db->table_exists('rancangan_akhir_renja_detail')) {
+            $qRanhir = $this->db->select('d.ranhir_rp, d.renja_rp, h.sub_kegiatan')
+                ->from('rancangan_akhir_renja_header h')
+                ->join('rancangan_akhir_renja_detail d', 'd.header_id = h.id')
+                ->where_in('h.kode_rekening', $kodes)
+                ->where('h.tahun', $tahun)
+                ->where('h.deleted_at IS NULL')
+                ->where('d.deleted_at IS NULL');
+            if (!empty($instansi_id)) $qRanhir->where('h.id_instansi', $instansi_id);
+            $rowRanhir = $qRanhir->get()->row_array();
+            if ($rowRanhir) {
+                if (empty($result['nama_sub_kegiatan']) && !empty($rowRanhir['sub_kegiatan'])) {
+                    $result['nama_sub_kegiatan'] = $rowRanhir['sub_kegiatan'];
+                }
+                if ($result['rankhir'] == 0 && (!empty($rowRanhir['ranhir_rp']) || !empty($rowRanhir['renja_rp']))) {
+                    $result['rankhir'] = (float)($rowRanhir['ranhir_rp'] ?: $rowRanhir['renja_rp']);
+                }
+            }
+        }
+
+        // 7. Cek juga dari rancangan_renja_header / rancangan_renja_detail
+        if ($this->db->table_exists('rancangan_renja_header') && $this->db->table_exists('rancangan_renja_detail')) {
+            $qRanc = $this->db->select('d.rancangan_rp, h.sub_kegiatan')
+                ->from('rancangan_renja_header h')
+                ->join('rancangan_renja_detail d', 'd.header_id = h.id')
+                ->where_in('h.kode_rekening', $kodes)
+                ->where('h.tahun', $tahun)
+                ->where('h.deleted_at IS NULL')
+                ->where('d.deleted_at IS NULL');
+            if (!empty($instansi_id)) $qRanc->where('h.id_instansi', $instansi_id);
+            $rowRanc = $qRanc->get()->row_array();
+            if ($rowRanc) {
+                if (empty($result['nama_sub_kegiatan']) && !empty($rowRanc['sub_kegiatan'])) {
+                    $result['nama_sub_kegiatan'] = $rowRanc['sub_kegiatan'];
+                }
+                if ($result['rancangan'] == 0 && !empty($rowRanc['rancangan_rp'])) {
+                    $result['rancangan'] = (float)$rowRanc['rancangan_rp'];
+                }
+            }
+        }
+
+        // 8. Cek juga dari renja_pd_detail / renja_pd_header
+        if ($this->db->table_exists('renja_pd_header') && $this->db->table_exists('renja_pd_detail')) {
+            $qDetail = $this->db->select('d.ranwal_rp, d.rancangan_rp, d.ranhir_rp, d.renja_rp, d.dpa_murni_rp, d.dpa_perubahan_rp, h.sub_kegiatan')
+                ->from('renja_pd_header h')
+                ->join('renja_pd_detail d', 'd.header_id = h.id')
+                ->where_in('h.kode_rekening', $kodes)
+                ->where('h.tahun', $tahun)
+                ->where('h.deleted_at IS NULL')
+                ->where('d.deleted_at IS NULL');
+            if (!empty($instansi_id)) $qDetail->where('h.id_instansi', $instansi_id);
+            $rowDetail = $qDetail->get()->row_array();
+
+            if ($rowDetail) {
+                if (empty($result['nama_sub_kegiatan']) && !empty($rowDetail['sub_kegiatan'])) {
+                    $result['nama_sub_kegiatan'] = $rowDetail['sub_kegiatan'];
+                }
+                if ($result['ranwal'] == 0 && !empty($rowDetail['ranwal_rp'])) {
+                    $result['ranwal'] = (float)$rowDetail['ranwal_rp'];
+                }
+                if ($result['rancangan'] == 0 && !empty($rowDetail['rancangan_rp'])) {
+                    $result['rancangan'] = (float)$rowDetail['rancangan_rp'];
+                }
+                if ($result['rankhir'] == 0 && (!empty($rowDetail['ranhir_rp']) || !empty($rowDetail['renja_rp']))) {
+                    $result['rankhir'] = (float)($rowDetail['ranhir_rp'] ?: $rowDetail['renja_rp']);
+                }
+                if ($result['perubahan'] == 0 && (!empty($rowDetail['dpa_perubahan_rp']) || !empty($rowDetail['renja_rp']))) {
+                    $result['perubahan'] = (float)($rowDetail['dpa_perubahan_rp'] ?: $rowDetail['renja_rp']);
+                }
+            }
+        }
+
+        // 9. Cek juga dari laporan_anggaran_rekap
+        if ($this->db->table_exists('laporan_anggaran_rekap')) {
+            $qLap = $this->db->select('anggaran_murni, anggaran_perubahan, nama_sub_kegiatan')
+                ->from('laporan_anggaran_rekap')
+                ->where_in('kode_rekening', $kodes)
+                ->where('tahun', $tahun);
+            if (!empty($instansi_id)) $qLap->where('id_instansi', $instansi_id);
+            $rowLap = $qLap->get()->row_array();
+            if ($rowLap) {
+                if (empty($result['nama_sub_kegiatan']) && !empty($rowLap['nama_sub_kegiatan'])) {
+                    $result['nama_sub_kegiatan'] = $rowLap['nama_sub_kegiatan'];
+                }
+                if ($result['ranwal'] == 0 && !empty($rowLap['anggaran_murni'])) {
+                    $result['ranwal'] = (float)$rowLap['anggaran_murni'];
+                }
+                if ($result['rankhir'] == 0 && !empty($rowLap['anggaran_murni'])) {
+                    $result['rankhir'] = (float)$rowLap['anggaran_murni'];
+                }
+                if ($result['perubahan'] == 0 && !empty($rowLap['anggaran_perubahan'])) {
+                    $result['perubahan'] = (float)$rowLap['anggaran_perubahan'];
+                }
+            }
+        }
+
+        // Fallback berjenjang dari renstra/ranwal jika belum di-set pada tahapan berikutnya
+        if ($result['ranwal'] == 0 && $renstraPagu > 0) {
+            $result['ranwal'] = $renstraPagu;
+        }
+        if ($result['rancangan'] == 0 && $result['ranwal'] > 0) {
+            $result['rancangan'] = $result['ranwal'];
+        }
+        if ($result['rankhir'] == 0 && $result['rancangan'] > 0) {
+            $result['rankhir'] = $result['rancangan'];
+        }
+        if ($result['perubahan'] == 0 && $result['rankhir'] > 0) {
+            $result['perubahan'] = $result['rankhir'];
+        }
+
+        echo json_encode(['status' => 'success', 'data' => $result]);
+    }
+
+    // ================================================================
     // GET BELANJA BY ID (UNTUK EDIT & DETAIL)
     // ================================================================
 
@@ -20740,7 +21012,7 @@ public function updateStatusPerjanjianKinerja() {
     }
 
     // ================================================================
-    // GET STANDAR HARGA (HSPK & ASB)
+    // GET STANDAR HARGA (SSH, HSPK, ASB, SBU/REGIONAL)
     // ================================================================
 
     public function GetStandarHarga() {
@@ -20750,12 +21022,21 @@ public function updateStatusPerjanjianKinerja() {
         }
         header('Content-Type: application/json');
 
-        $type = strtolower($this->input->post('type', TRUE) ?: 'hspk');
+        $type = strtolower($this->input->post('type', TRUE) ?: 'ssh');
         $q = trim($this->input->post('q', TRUE) ?: '');
         $kode_rekening = trim($this->input->post('kode_rekening', TRUE) ?: '');
         $limit = (int)($this->input->post('limit', TRUE) ?: 50);
 
-        $table = ($type === 'asb') ? 'asb_kab_banyuwangi' : 'hspk_kab_banyuwangi';
+        $tableMap = [
+            'ssh' => 'ssh_kab_banyuwangi',
+            'hspk' => 'hspk_kab_banyuwangi',
+            'asb' => 'asb_kab_banyuwangi',
+            'sbu' => 'sbu_kab_banyuwangi',
+            'regional' => 'sbu_kab_banyuwangi',
+            'shsr' => 'sbu_kab_banyuwangi'
+        ];
+
+        $table = isset($tableMap[$type]) ? $tableMap[$type] : 'ssh_kab_banyuwangi';
 
         $this->db->select('id_standar_harga, kode_barang, uraian_barang, spesifikasi, satuan, harga_satuan, kode_rekening, uraian_kelompok_barang')
             ->from($table)
@@ -20799,7 +21080,38 @@ public function updateStatusPerjanjianKinerja() {
                 ->group_end();
         }
         $items = $this->db->order_by('kode_rekening', 'ASC')->get()->result_array();
-        echo json_encode(['status' => 'success', 'data' => $items]);
+
+        // Ambil objek belanja (level 3 berformat 5.X.XX seperti 5.1.01, 5.1.02, dsb.)
+        $objek_belanja = $this->db
+            ->select('kode_rekening, nama_rekening')
+            ->from('master_rekening')
+            ->where('level', 3)
+            ->like('kode_rekening', '5', 'after')
+            ->order_by('kode_rekening', 'ASC')
+            ->get()
+            ->result_array();
+
+        // Node names map untuk rendering pohon rekening
+        $nodes = $this->db
+            ->select('kode_rekening, nama_rekening')
+            ->from('master_rekening')
+            ->where('level <=', 5)
+            ->like('kode_rekening', '5', 'after')
+            ->order_by('kode_rekening', 'ASC')
+            ->get()
+            ->result_array();
+
+        $node_map = [];
+        foreach ($nodes as $n) {
+            $node_map[$n['kode_rekening']] = $n['nama_rekening'];
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'data' => $items,
+            'objek_belanja' => $objek_belanja,
+            'node_names' => $node_map
+        ]);
     }
 
     // ================================================================

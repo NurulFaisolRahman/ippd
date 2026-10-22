@@ -489,23 +489,24 @@
                     <i class="fa fa-chevron-down"></i>
                 </a>
                 <div class="sidebar-submenu">
-                    <a href="<?=base_url('Daerah/VisiRPJMD')?>">VMTS</a>
-                    <a href="<?=base_url('Daerah/ProgramPrioritasRPJMD')?>">Program Prioritas RPJMD</a>
-                    <a href="<?=base_url('Daerah/DukunganKegiatanPrioritas')?>">Dukungan Kegiatan Prioritas Utama</a>
-                    <!-- <a href="<?=base_url('Daerah/MisiRPJMD')?>">Misi</a> -->
-                    <!-- <a href="<?=base_url('Daerah/TujuanRPJMD')?>">Tujuan</a> -->
-                    <!-- <a href="<?=base_url('Daerah/SasaranRPJMD')?>">Sasaran</a> -->
-                    <a href="<?=base_url('Daerah/ProgramPD')?>">Program</a>
-                    <a href="<?=base_url('Daerah/ArahKebijakanRPJMD')?>">Arah Kebijakan</a>
                     <a href="<?=base_url('Daerah/IsuStrategisDaerah')?>">Isu Strategis Daerah</a>
+                    <a href="<?=base_url('Daerah/VisiRPJMD')?>">VMTS</a>
                     <a href="<?=base_url('Daerah/TabelKeselarasan')?>">Tabel Keselarasan</a>
-                    <a href="<?=base_url('Daerah/TahapanRPJMD')?>">Tahapan</a>
+                    <a href="<?=base_url('Daerah/DukunganKegiatanPrioritas')?>">Dukungan Kegiatan Prioritas</a>
+                    <a href="<?=base_url('Daerah/ProgramPrioritasRPJMD')?>">Program Prioritas RPJMD</a>
+                    <a href="<?=base_url('Daerah/ProgramPD')?>">Program</a>
                     <a href="<?=base_url('Daerah/Iku')?>">IKU</a>
                     <a href="<?=base_url('Daerah/Ikd')?>">IKD</a>
-                    <a href="<?=base_url('Daerah/cascade')?>">Cascade</a>
-                    <a href="<?=base_url('Daerah/PotensiDaerah')?>">Potensi Daerah</a>
-                    <a href="<?=base_url('Daerah/PermasalahanPokok')?>">Permasalahan Pokok</a>
                     <a href="<?=base_url('Daerah/SPM')?>">SPM</a>
+
+                    <!-- // <a href="<?=base_url('Daerah/ArahKebijakanRPJMD')?>">Arah Kebijakan</a> -->
+                    <!-- // <a href="<?=base_url('Daerah/TahapanRPJMD')?>">Tahapan</a> -->
+                    <!-- // <a href="<?=base_url('Daerah/cascade')?>">Cascade</a> -->
+                    <!-- // <a href="<?=base_url('Daerah/PotensiDaerah')?>">Potensi Daerah</a> -->
+                    <!-- // <a href="<?=base_url('Daerah/PermasalahanPokok')?>">Permasalahan Pokok</a> -->
+                    <!-- // <a href="<?=base_url('Daerah/MisiRPJMD')?>">Misi</a> -->
+                    <!-- // <a href="<?=base_url('Daerah/TujuanRPJMD')?>">Tujuan</a> -->
+                    <!-- // <a href="<?=base_url('Daerah/SasaranRPJMD')?>">Sasaran</a> -->
                 </div>
             </li>
 
@@ -583,7 +584,7 @@
                 </div>
             </li>
 
-            <!-- Konsistensi/Keselarasan RKPD -->
+            <!-- // Konsistensi/Keselarasan RKPD
             <li class="sidebar-dropdown">
                 <a href="#">
                     <i class="menu-icon fa fa-repeat"></i>
@@ -600,6 +601,7 @@
                     <a href="<?=base_url('Daerah/KeselarasanIntervensi')?>">Keselarasan Intervensi Kewilayahan</a>
                 </div>
             </li>
+            -->
 
             <!-- Rencana Aksi -->
             <li class="sidebar-dropdown">
@@ -677,7 +679,17 @@
                     <i class="fa fa-chevron-down"></i>
                 </a>
                 <div class="sidebar-submenu">
-                    <a href="<?=base_url('Daerah/RAPBD')?>">RAPBD</a>
+                    <!-- RAPBD Dropdown -->
+                    <div class="sidebar-dropdown">
+                        <a href="#">
+                            <span>RAPBD</span>
+                            <i class="fa fa-chevron-down"></i>
+                        </a>
+                        <div class="sidebar-submenu">
+                            <a href="<?=base_url('Daerah/RAPBDTabel1')?>">Tabel 1</a>
+                            <a href="<?=base_url('Daerah/RAPBDTabel2')?>">Tabel 2</a>
+                        </div>
+                    </div>
                     <a href="<?=base_url('Daerah/APBD')?>">APBD</a>
                 </div>
             </li>
