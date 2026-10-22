@@ -36,6 +36,26 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             redirect('Instansi/BelanjaSubKegiatan');
         }
 
+        public function Pendapatan() {
+            $qs = $this->input->server('QUERY_STRING') ? '?' . $this->input->server('QUERY_STRING') : '';
+            redirect('Instansi/Pendapatan' . $qs);
+        }
+
+        public function Pembiayaan() {
+            $qs = $this->input->server('QUERY_STRING') ? '?' . $this->input->server('QUERY_STRING') : '';
+            redirect('Instansi/Pembiayaan' . $qs);
+        }
+
+        public function PembiayaanPenerimaan() {
+            $qs = $this->input->server('QUERY_STRING') ? '?' . $this->input->server('QUERY_STRING') : '';
+            redirect('Instansi/PembiayaanPenerimaan' . $qs);
+        }
+
+        public function PembiayaanPengeluaran() {
+            $qs = $this->input->server('QUERY_STRING') ? '?' . $this->input->server('QUERY_STRING') : '';
+            redirect('Instansi/PembiayaanPengeluaran' . $qs);
+        }
+
         public function GetVisiRPJPD()
         {
             if (!$this->input->is_ajax_request()) show_404();

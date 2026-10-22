@@ -671,6 +671,31 @@
                 </div>
             </li>
 
+            <!-- Pendapatan -->
+            <li class="sidebar-dropdown">
+                <a href="#">
+                    <i class="menu-icon fa fa-credit-card"></i>
+                    <span>Pendapatan</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Instansi/Pendapatan')?>">Pendapatan</a>
+                </div>
+            </li>
+
+            <!-- Pembiayaan -->
+            <li class="sidebar-dropdown">
+                <a href="#">
+                    <i class="menu-icon fa fa-exchange"></i>
+                    <span>Pembiayaan</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Instansi/PembiayaanPenerimaan')?>">Penerimaan</a>
+                    <a href="<?=base_url('Instansi/PembiayaanPengeluaran')?>">Pengeluaran</a>
+                </div>
+            </li>
+
             <!-- Anggaran -->
             <li class="sidebar-dropdown">
                 <a href="#">
@@ -886,36 +911,35 @@ document.querySelectorAll('.sidebar-dropdown > a').forEach(a => {
 });
 
   // Highlight menu aktif berdasarkan URL
-  const currentPath = window.location.pathname.replace(/\/+$/, '');
+  const currentPath = window.location.pathname.toLowerCase().replace(/\/+$/, '');
   document.querySelectorAll('.sidebar-submenu a').forEach(link => {
     const href = link.getAttribute('href');
     if (!href) return;
 
-    const linkPath = new URL(href, window.location.origin).pathname.replace(/\/+$/, '');
-    const isCurrent = linkPath === currentPath;
-    const isBab3_4Active = linkPath.toLowerCase().endsWith('/instansi/bab3_4') && (
-      currentPath.toLowerCase().endsWith('/instansi/bab3_4') || 
-      currentPath.toLowerCase().endsWith('/instansi/bab3_4a') || 
-      currentPath.toLowerCase().endsWith('/instansi/bab3_4b')
+    const linkPath = new URL(href, window.location.origin).pathname.toLowerCase().replace(/\/+$/, '');
+    const isCurrent = (linkPath === currentPath);
+    const isBab3_4Active = linkPath.endsWith('/instansi/bab3_4') && (
+      currentPath.endsWith('/instansi/bab3_4') || 
+      currentPath.endsWith('/instansi/bab3_4a') || 
+      currentPath.endsWith('/instansi/bab3_4b')
     );
-    const isBab3_5Active = linkPath.toLowerCase().endsWith('/instansi/bab3_5') && (
-      currentPath.toLowerCase().endsWith('/instansi/bab3_5') ||
-      currentPath.toLowerCase().endsWith('/instansi/pengisianpenghargaan')
+    const isBab3_5Active = linkPath.endsWith('/instansi/bab3_5') && (
+      currentPath.endsWith('/instansi/bab3_5') ||
+      currentPath.endsWith('/instansi/pengisianpenghargaan')
     );
+    const isPembiayaanDefault = currentPath.endsWith('/instansi/pembiayaan') && linkPath.endsWith('/instansi/pembiayaanpenerimaan');
 
-    if (isCurrent || isBab3_4Active || isBab3_5Active) {
+    if (isCurrent || isBab3_4Active || isBab3_5Active || isPembiayaanDefault) {
       link.style.color = '#20c997';
       link.style.fontWeight = 'bold';
 
       // open parent dropdown
       let parent = link.closest('.sidebar-dropdown');
-
-while (parent) {
-    openDropdown(parent);
-
-    const next = parent.parentElement.closest('.sidebar-dropdown');
-    parent = next;
-}
+      while (parent) {
+        openDropdown(parent);
+        const next = parent.parentElement.closest('.sidebar-dropdown');
+        parent = next;
+      }
     }
   });
 });
