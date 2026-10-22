@@ -911,6 +911,7 @@ document.querySelectorAll('.sidebar-dropdown > a').forEach(a => {
 });
 
   // Highlight menu aktif berdasarkan URL
+  let activeLink = null;
   const currentPath = window.location.pathname.toLowerCase().replace(/\/+$/, '');
   document.querySelectorAll('.sidebar-submenu a').forEach(link => {
     const href = link.getAttribute('href');
@@ -932,6 +933,7 @@ document.querySelectorAll('.sidebar-dropdown > a').forEach(a => {
     if (isCurrent || isBab3_4Active || isBab3_5Active || isPembiayaanDefault) {
       link.style.color = '#20c997';
       link.style.fontWeight = 'bold';
+      activeLink = link;
 
       // open parent dropdown
       let parent = link.closest('.sidebar-dropdown');
@@ -942,6 +944,39 @@ document.querySelectorAll('.sidebar-dropdown > a').forEach(a => {
       }
     }
   });
+
+  // Simpan & Pulihkan posisi scroll sidebar agar tetap di tempatnya dan tidak ke atas saat refresh / navigasi
+  const sidebarWrapper = document.querySelector('.sidebar-wrapper');
+  if (sidebarWrapper) {
+    sidebarWrapper.addEventListener('scroll', function() {
+      sessionStorage.setItem('sidebar_scroll_top', this.scrollTop);
+    });
+
+    document.querySelectorAll('.sidebar-wrapper a').forEach(a => {
+      a.addEventListener('click', function() {
+        sessionStorage.setItem('sidebar_scroll_top', sidebarWrapper.scrollTop);
+      });
+    });
+
+    window.addEventListener('beforeunload', function() {
+      sessionStorage.setItem('sidebar_scroll_top', sidebarWrapper.scrollTop);
+    });
+
+    const savedScrollTop = sessionStorage.getItem('sidebar_scroll_top');
+    if (savedScrollTop !== null) {
+      sidebarWrapper.scrollTop = parseInt(savedScrollTop, 10);
+      setTimeout(() => {
+        sidebarWrapper.scrollTop = parseInt(savedScrollTop, 10);
+      }, 50);
+      setTimeout(() => {
+        sidebarWrapper.scrollTop = parseInt(savedScrollTop, 10);
+      }, 250);
+    } else if (activeLink) {
+      setTimeout(() => {
+        activeLink.scrollIntoView({ block: 'center', behavior: 'auto' });
+      }, 100);
+    }
+  }
 });
 </script>
 </html>
