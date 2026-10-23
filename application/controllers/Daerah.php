@@ -7099,11 +7099,37 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             return;
         }
 
+        // Pastikan entitas Kepala Daerah (Bupati, Wakil Bupati, Walikota, Wakil Walikota) tersedia
+        $pimpinanDaerah = ['Bupati', 'Wakil Bupati', 'Walikota', 'Wakil Walikota'];
+        foreach ($pimpinanDaerah as $pd) {
+            $cek = $this->db->where('kodewilayah', $KodeWilayah)
+                ->where('LOWER(TRIM(nama))', strtolower($pd))
+                ->where('deleted_at IS NULL', null, false)
+                ->count_all_results('akun_instansi');
+            if ($cek == 0) {
+                $this->db->insert('akun_instansi', [
+                    'kodewilayah' => $KodeWilayah,
+                    'nama' => $pd,
+                    'password' => password_hash('123456', PASSWORD_DEFAULT),
+                    'Level' => 4,
+                    'tahun_mulai' => 2025,
+                    'tahun_akhir' => 2030,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s')
+                ]);
+            }
+        }
+
         $Data['DaftarDinas'] = $this->db
             ->select('id, nama, tahun_mulai, tahun_akhir')
             ->where('kodewilayah', $KodeWilayah)
             ->where('deleted_at IS NULL', null, false)
-            ->order_by('nama', 'ASC')
+            ->order_by("CASE 
+                WHEN LOWER(TRIM(nama)) = 'bupati' THEN 1
+                WHEN LOWER(TRIM(nama)) = 'wakil bupati' THEN 2
+                WHEN LOWER(TRIM(nama)) = 'walikota' THEN 3
+                WHEN LOWER(TRIM(nama)) = 'wakil walikota' THEN 4
+                ELSE 5 END, nama", "ASC", false)
             ->get('akun_instansi')
             ->result_array();
 
@@ -7116,8 +7142,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             ->result_array();
 
         $mapDinas = [];
+        $pimpinanIdsMap = [];
         foreach ($Data['DaftarDinas'] as $d) {
             $mapDinas[$d['id']] = $d['nama'];
+            if (in_array(strtolower(trim($d['nama'])), ['bupati', 'wakil bupati', 'walikota', 'wakil walikota'])) {
+                $pimpinanIdsMap[$d['id']] = $d['nama'];
+            }
         }
 
         foreach ($Data['Karyawan'] as &$k) {
@@ -7126,13 +7156,29 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 $ids = array_filter(array_map('trim', explode(',', $k['dinas_id'])));
             }
 
-            $names = [];
+            // Cek apakah ada ID pimpinan daerah di dinas_id
+            $pimpinanFound = [];
+            $pimpinanFoundIds = [];
             foreach ($ids as $id) {
-                if (isset($mapDinas[$id])) {
-                    $names[] = $mapDinas[$id];
+                if (isset($pimpinanIdsMap[$id])) {
+                    $pimpinanFound[] = $pimpinanIdsMap[$id];
+                    $pimpinanFoundIds[] = $id;
                 }
             }
-            $k['dinas_nama'] = !empty($names) ? implode(', ', $names) : '-';
+
+            if (!empty($pimpinanFound)) {
+                $k['dinas_nama'] = implode(', ', $pimpinanFound) . ' <span class="label label-primary" style="font-size:10px; margin-left:4px;">Semua Dinas</span>';
+                $k['edit_dinas_ids'] = implode(',', $pimpinanFoundIds);
+            } else {
+                $names = [];
+                foreach ($ids as $id) {
+                    if (isset($mapDinas[$id])) {
+                        $names[] = $mapDinas[$id];
+                    }
+                }
+                $k['dinas_nama'] = !empty($names) ? implode(', ', $names) : '-';
+                $k['edit_dinas_ids'] = implode(',', $ids);
+            }
         }
         unset($k);
 
@@ -7220,14 +7266,35 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             return;
         }
 
+        // Cek jika memilih Pimpinan Daerah (Bupati, Wakil Bupati, Walikota, Wakil Walikota)
+        $pimpinanDinas = $this->db->select('id')
+            ->where('kodewilayah', $KodeWilayah)
+            ->where_in('LOWER(TRIM(nama))', ['bupati', 'wakil bupati', 'walikota', 'wakil walikota'])
+            ->where('deleted_at IS NULL', null, false)
+            ->get('akun_instansi')
+            ->result_array();
+        $pimpinanIds = array_map('intval', array_column($pimpinanDinas, 'id'));
+
+        if (count(array_intersect($dinasArr, $pimpinanIds)) > 0) {
+            // Memilih Pimpinan Daerah sama dengan memilih seluruh Perangkat Daerah / Dinas di wilayah tersebut
+            $allDinas = $this->db->select('id')
+                ->where('kodewilayah', $KodeWilayah)
+                ->where('deleted_at IS NULL', null, false)
+                ->get('akun_instansi')
+                ->result_array();
+            $allDinasIds = array_map('intval', array_column($allDinas, 'id'));
+            $dinasArr = array_values(array_unique(array_merge($dinasArr, $allDinasIds)));
+            sort($dinasArr);
+        }
+
         $data = [
             'kodewilayah'   => $KodeWilayah,
             'nama'          => $nama,
             'nip'           => $nip,
-            'eselon'        => $eselon ?: null,
+            'eselon'        => ($eselon !== '') ? $eselon : null,
             'jabatan'       => $jabatan,
-            'satuan_unit_kerja' => $satuan_unit_kerja,
-            'bidang_sub_koordinator' => $bidang_sub_koordinator ?: null,
+            'satuan_unit_kerja' => ($satuan_unit_kerja !== '') ? $satuan_unit_kerja : null,
+            'bidang_sub_koordinator' => ($bidang_sub_koordinator !== '') ? $bidang_sub_koordinator : null,
             'password'      => password_hash($pwd, PASSWORD_DEFAULT),
             'tahun_mulai'   => $tahunMulai,
             'tahun_akhir'   => $tahunAkhir,
@@ -7334,13 +7401,34 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             return;
         }
 
+        // Cek jika memilih Pimpinan Daerah (Bupati, Wakil Bupati, Walikota, Wakil Walikota)
+        $pimpinanDinas = $this->db->select('id')
+            ->where('kodewilayah', $KodeWilayah)
+            ->where_in('LOWER(TRIM(nama))', ['bupati', 'wakil bupati', 'walikota', 'wakil walikota'])
+            ->where('deleted_at IS NULL', null, false)
+            ->get('akun_instansi')
+            ->result_array();
+        $pimpinanIds = array_map('intval', array_column($pimpinanDinas, 'id'));
+
+        if (count(array_intersect($dinasArr, $pimpinanIds)) > 0) {
+            // Memilih Pimpinan Daerah sama dengan memilih seluruh Perangkat Daerah / Dinas di wilayah tersebut
+            $allDinas = $this->db->select('id')
+                ->where('kodewilayah', $KodeWilayah)
+                ->where('deleted_at IS NULL', null, false)
+                ->get('akun_instansi')
+                ->result_array();
+            $allDinasIds = array_map('intval', array_column($allDinas, 'id'));
+            $dinasArr = array_values(array_unique(array_merge($dinasArr, $allDinasIds)));
+            sort($dinasArr);
+        }
+
         $data = [
             'nama'          => $nama,
             'nip'           => $nip,
-            'eselon'        => $eselon ?: null,
+            'eselon'        => ($eselon !== '') ? $eselon : null,
             'jabatan'       => $jabatan,
-            'satuan_unit_kerja' => $satuan_unit_kerja,
-            'bidang_sub_koordinator' => $bidang_sub_koordinator ?: null,
+            'satuan_unit_kerja' => ($satuan_unit_kerja !== '') ? $satuan_unit_kerja : null,
+            'bidang_sub_koordinator' => ($bidang_sub_koordinator !== '') ? $bidang_sub_koordinator : null,
             'tahun_mulai'   => $tahunMulai,
             'tahun_akhir'   => $tahunAkhir,
             'dinas_id'      => implode(',', $dinasArr),

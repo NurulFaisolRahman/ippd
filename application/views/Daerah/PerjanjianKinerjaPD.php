@@ -925,10 +925,24 @@
       ];
   }, $PegawaiList ?? [])) ?>;
 
+  var atasanEmployees = <?= json_encode(array_map(function($p) {
+      return [
+          'id' => (int)$p['id'],
+          'nip' => $p['nip'] ?? '',
+          'nama' => $p['nama'] ?? '',
+          'jabatan' => $p['jabatan'] ?? '',
+          'eselon' => $p['eselon'] ?? '-',
+          'satuanUnitKerja' => $p['satuan_unit_kerja'] ?? ''
+      ];
+  }, $AtasanList ?? [])) ?>;
+
   function findByNip(nip){
     nip = (nip || "").trim();
     for (var i=0; i<employees.length; i++){
       if (employees[i].nip === nip) return employees[i];
+    }
+    for (var k=0; k<atasanEmployees.length; k++){
+      if (atasanEmployees[k].nip === nip) return atasanEmployees[k];
     }
     return null;
   }
@@ -937,18 +951,22 @@
     for (var i=0; i<employees.length; i++){
       if (employees[i].id === id) return employees[i];
     }
+    for (var k=0; k<atasanEmployees.length; k++){
+      if (atasanEmployees[k].id === id) return atasanEmployees[k];
+    }
     return null;
   }
 
   function defaultAtasanOf(emp){
     if (!emp) return null;
-    for (var i=0; i<employees.length; i++){
-      if (employees[i].id !== emp.id && (employees[i].eselon.indexOf('II') > -1 || employees[i].eselon.indexOf('III') > -1 || employees[i].jabatan.toLowerCase().indexOf('kepala') > -1)) {
-        return employees[i];
+    for (var i=0; i<atasanEmployees.length; i++){
+      var at = atasanEmployees[i];
+      if (at.id !== emp.id && (at.jabatan.toLowerCase().indexOf('bupati') > -1 || at.jabatan.toLowerCase().indexOf('walikota') > -1 || at.eselon.indexOf('II') > -1 || at.eselon.indexOf('III') > -1 || at.jabatan.toLowerCase().indexOf('kepala') > -1)) {
+        return at;
       }
     }
-    for (var j=0; j<employees.length; j++){
-      if (employees[j].id !== emp.id) return employees[j];
+    for (var j=0; j<atasanEmployees.length; j++){
+      if (atasanEmployees[j].id !== emp.id) return atasanEmployees[j];
     }
     return null;
   }
@@ -1271,7 +1289,7 @@
     if (!atasanList) return;
     var q = (query || "").trim().toLowerCase();
 
-    var matches = employees.filter(function(emp){
+    var matches = atasanEmployees.filter(function(emp){
       if (modalState.selectedEmployee && emp.id === modalState.selectedEmployee.id) return false;
       if (!q) return true;
       return emp.nama.toLowerCase().indexOf(q) > -1 ||

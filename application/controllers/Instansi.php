@@ -18792,19 +18792,61 @@ public function PerjanjianKinerjaPD() {
         $data['PerjanjianKinerja'] = $this->db->order_by('pk.id', 'ASC')->get()->result_array();
     }
     
-    // Data untuk dropdown pegawai pengampu
+    // Data untuk dropdown pegawai pengampu & atasan
     $data['PegawaiList'] = [];
     if ($KodeWilayah) {
+        $target_instansi = ($is_role_4 && $instansi_id) ? $instansi_id : (!empty($filter_instansi_id) ? (int)$filter_instansi_id : 0);
+
+        // Ambil ID Pimpinan Daerah TERLEBIH DAHULU sebelum memulai query akun_karyawan
+        $pimpinanIds = [];
+        if ($target_instansi) {
+            $pimpinanDinas = $this->db->select('id')
+                ->where('kodewilayah', $KodeWilayah)
+                ->where_in('LOWER(TRIM(nama))', ['bupati', 'wakil bupati', 'walikota', 'wakil walikota'])
+                ->where('deleted_at IS NULL', null, false)
+                ->get('akun_instansi')
+                ->result_array();
+            $pimpinanIds = array_column($pimpinanDinas, 'id');
+        }
+
+        // Sekarang bangun query akun_karyawan
         $this->db->select('id, nama, nip, jabatan, eselon, satuan_unit_kerja, dinas_id')
             ->from('akun_karyawan')
             ->where('kodewilayah', $KodeWilayah)
             ->where('deleted_at IS NULL');
-        if ($is_role_4 && $instansi_id) {
-            $this->db->where('dinas_id', $instansi_id);
+
+        if ($target_instansi) {
+            $conds = ["FIND_IN_SET('$target_instansi', dinas_id) > 0"];
+            foreach ($pimpinanIds as $pId) {
+                $conds[] = "FIND_IN_SET('$pId', dinas_id) > 0";
+            }
+            $this->db->where('(' . implode(' OR ', $conds) . ')');
         }
-        $data['PegawaiList'] = $this->db->order_by('nama', 'ASC')->get()->result_array();
+        $allPegawai = $this->db->order_by('nama', 'ASC')->get()->result_array();
+        $data['AtasanList'] = $allPegawai;
+
+        // Pegawai Pengampu: Jangan tampilkan Pimpinan Daerah (Bupati, Wakil Bupati, Walikota, Wakil Walikota)
+        $pimpinanKeywords = ['bupati', 'wakil bupati', 'walikota', 'wakil walikota'];
+        $pegawaiOnly = [];
+        foreach ($allPegawai as $p) {
+            $jabatanClean = strtolower(trim($p['jabatan'] ?? ''));
+            $isPimpinan = in_array($jabatanClean, $pimpinanKeywords);
+
+            if (!$isPimpinan && !empty($p['dinas_id']) && !empty($pimpinanIds)) {
+                $dIds = array_filter(array_map('trim', explode(',', $p['dinas_id'])));
+                if (count(array_intersect($dIds, $pimpinanIds)) > 0) {
+                    $isPimpinan = true;
+                }
+            }
+
+            if (!$isPimpinan) {
+                $pegawaiOnly[] = $p;
+            }
+        }
+        $data['PegawaiList'] = $pegawaiOnly;
+    } else {
+        $data['AtasanList'] = [];
     }
-    $data['AtasanList'] = $data['PegawaiList'];
     
     $this->load->view('Daerah/header', $Header);
     $this->load->view('Daerah/PerjanjianKinerjaPD', $data);
