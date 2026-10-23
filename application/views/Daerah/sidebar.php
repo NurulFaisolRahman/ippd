@@ -711,8 +711,8 @@
                             <i class="fa fa-chevron-down"></i>
                         </a>
                         <div class="sidebar-submenu">
-                            <a href="<?=base_url('Daerah/RAPBDTabel1')?>">Tabel 1</a>
-                            <a href="<?=base_url('Daerah/RAPBDTabel2')?>">Tabel 2</a>
+                            <a href="<?=base_url('Daerah/RAPBDTabel1')?>">Ringkasan RAPBD</a>
+                            <a href="<?=base_url('Daerah/RAPBDTabel2')?>">RAPBD per Urusan</a>
                         </div>
                     </div>
                     <a href="<?=base_url('Daerah/APBD')?>">APBD</a>

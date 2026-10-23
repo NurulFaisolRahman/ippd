@@ -32561,7 +32561,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     }
 
     public function RAPBDTabel1() {
-        $Header['Halaman'] = 'RAPBD Tabel 1';
+        $Header['Halaman'] = 'Ringkasan RAPBD';
         
         $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
         $KodeWilayah = $this->input->get('kodewilayah', TRUE);
@@ -32569,7 +32569,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $KodeWilayah = $this->_getKodeWilayah();
         }
         if (empty($KodeWilayah)) {
-            $KodeWilayah = '35.10';
+            $rowWil = $this->db->select('kode_wilayah')->where('deleted_at IS NULL')->limit(1)->get('belanja_sub_kegiatan_header')->row_array();
+            $KodeWilayah = !empty($rowWil['kode_wilayah']) ? $rowWil['kode_wilayah'] : '32.09';
         }
 
         $tahun = $this->input->get('tahun', TRUE);
@@ -32578,53 +32579,237 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         }
         $Data['SelectedTahun'] = (int)$tahun;
 
-        // Daftar tahun untuk filter
-        $daftarTahunDb = $this->db->distinct()->select('tahun')->where('kodewilayah', $KodeWilayah)->where('deleted_at IS NULL')->order_by('tahun', 'DESC')->get('rapbd')->result_array();
-        $tahunList = array_unique(array_merge([date('Y'), date('Y')+1, 2024, 2025, 2026, 2027], array_column($daftarTahunDb, 'tahun')));
+        // Ambil daftar tahun dari data yang ada di database
+        $thn1 = $this->db->distinct()->select('tahun')->where('deleted_at IS NULL')->get('anggaran_pendapatan')->result_array();
+        $thn2 = $this->db->distinct()->select('tahun')->where('deleted_at IS NULL')->get('belanja_sub_kegiatan_header')->result_array();
+        $thn3 = $this->db->distinct()->select('tahun')->where('deleted_at IS NULL')->get('anggaran_pembiayaan_penerimaan')->result_array();
+        $thn4 = $this->db->distinct()->select('tahun')->where('deleted_at IS NULL')->get('anggaran_pembiayaan_pengeluaran')->result_array();
+        $allTahun = array_merge(
+            [date('Y'), date('Y')+1, 2024, 2025, 2026, 2027],
+            array_column($thn1, 'tahun'),
+            array_column($thn2, 'tahun'),
+            array_column($thn3, 'tahun'),
+            array_column($thn4, 'tahun')
+        );
+        $tahunList = array_unique(array_filter($allTahun));
         rsort($tahunList);
         $Data['TahunList'] = $tahunList;
 
-        if ($KodeWilayah) {
-            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-            $Data['KodeWilayah'] = $KodeWilayah;
-            $Data['NamaWilayah'] = $wilayah['Nama'] ?? '';
-            
-            // Data RAPBD Tabel 1 murni dari input pengguna (tanpa auto-seed)
-            $Data['RAPBDList'] = $this->db
-                ->where('kodewilayah', $KodeWilayah)
-                ->where('tahun', $Data['SelectedTahun'])
-                ->where('deleted_at IS NULL')
-                ->group_start()
-                    ->where('keterangan', 'tabel_1')
-                    ->or_where('keterangan', '')
-                    ->or_where('keterangan IS NULL', NULL, FALSE)
-                    ->or_where("keterangan NOT LIKE 'tabel_2%'", NULL, FALSE)
-                ->group_end()
-                ->order_by('kode', 'ASC')
-                ->order_by('id', 'ASC')
-                ->get('rapbd')
-                ->result_array();
+        $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+        $Data['KodeWilayah'] = $KodeWilayah;
+        $Data['NamaWilayah'] = $wilayah['Nama'] ?? '';
 
-            $total = $this->db
-                ->select_sum('jumlah')
-                ->where('kodewilayah', $KodeWilayah)
-                ->where('tahun', $Data['SelectedTahun'])
-                ->where('deleted_at IS NULL')
-                ->group_start()
-                    ->where('keterangan', 'tabel_1')
-                    ->or_where('keterangan', '')
-                    ->or_where('keterangan IS NULL', NULL, FALSE)
-                    ->or_where("keterangan NOT LIKE 'tabel_2%'", NULL, FALSE)
-                ->group_end()
-                ->get('rapbd')
-                ->row_array();
-            $Data['TotalJumlah'] = $total['jumlah'] ?? 0;
-        } else {
-            $Data['KodeWilayah'] = '';
-            $Data['NamaWilayah'] = '';
-            $Data['RAPBDList'] = [];
-            $Data['TotalJumlah'] = 0;
+        // 1. Master Rekening Dictionary untuk nama resmi akun
+        $masterRek = $this->db->select('kode_rekening, nama_rekening')->order_by('kode_rekening', 'ASC')->get('master_rekening')->result_array();
+        $masterMap = [];
+        foreach ($masterRek as $mr) {
+            $masterMap[trim($mr['kode_rekening'])] = trim($mr['nama_rekening']);
         }
+
+        // 2. Data PENDAPATAN DAERAH (Akun 4) dari anggaran_pendapatan (semua OPD)
+        $pendapatanRows = $this->db->query("
+            SELECT 
+                SUBSTRING_INDEX(kode_rekening, '.', 3) as rek3,
+                uraian,
+                SUM(nilai) as total
+            FROM anggaran_pendapatan
+            WHERE kodewilayah = ? AND tahun = ? AND deleted_at IS NULL
+            GROUP BY rek3
+        ", [$KodeWilayah, $Data['SelectedTahun']])->result_array();
+
+        $pendapatanAgg = [];
+        foreach ($pendapatanRows as $r) {
+            $k = trim($r['rek3']);
+            $pendapatanAgg[$k] = [
+                'kode' => $k,
+                'uraian' => $masterMap[$k] ?? trim($r['uraian']),
+                'total' => floatval($r['total'])
+            ];
+        }
+
+        // 3. Data BELANJA DAERAH (Akun 5) dari Belanja Sub Kegiatan (semua OPD)
+        $belanjaRows = $this->db->query("
+            SELECT 
+                SUBSTRING_INDEX(r.kode_rekening, '.', 3) as rek3,
+                r.uraian_rekening,
+                SUM(
+                    COALESCE(
+                        (SELECT SUM(ri.jumlah) FROM belanja_rincian ri WHERE ri.rekening_id = r.id AND ri.deleted_at IS NULL),
+                        r.total,
+                        0
+                    )
+                ) as total
+            FROM belanja_rekening r
+            JOIN belanja_sub_kegiatan_header h ON h.id = r.header_id
+            WHERE h.kode_wilayah = ? AND h.tahun = ? 
+              AND r.deleted_at IS NULL AND h.deleted_at IS NULL
+            GROUP BY rek3
+        ", [$KodeWilayah, $Data['SelectedTahun']])->result_array();
+
+        $belanjaAgg = [];
+        foreach ($belanjaRows as $r) {
+            $k = trim($r['rek3']);
+            if (strpos($k, '5') !== 0) continue;
+            $belanjaAgg[$k] = [
+                'kode' => $k,
+                'uraian' => $masterMap[$k] ?? trim($r['uraian_rekening']),
+                'total' => floatval($r['total'])
+            ];
+        }
+
+        // 4. Data PEMBIAYAAN DAERAH (Akun 6) dari Penerimaan & Pengeluaran (semua OPD)
+        $terimaRows = $this->db->query("
+            SELECT 
+                SUBSTRING_INDEX(kode_rekening, '.', 3) as rek3,
+                uraian,
+                SUM(nilai) as total
+            FROM anggaran_pembiayaan_penerimaan
+            WHERE kodewilayah = ? AND tahun = ? AND deleted_at IS NULL
+            GROUP BY rek3
+        ", [$KodeWilayah, $Data['SelectedTahun']])->result_array();
+
+        $terimaAgg = [];
+        foreach ($terimaRows as $r) {
+            $k = trim($r['rek3']);
+            $terimaAgg[$k] = [
+                'kode' => $k,
+                'uraian' => $masterMap[$k] ?? trim($r['uraian']),
+                'total' => floatval($r['total'])
+            ];
+        }
+
+        $keluarRows = $this->db->query("
+            SELECT 
+                SUBSTRING_INDEX(kode_rekening, '.', 3) as rek3,
+                uraian,
+                SUM(nilai) as total
+            FROM anggaran_pembiayaan_pengeluaran
+            WHERE kodewilayah = ? AND tahun = ? AND deleted_at IS NULL
+            GROUP BY rek3
+        ", [$KodeWilayah, $Data['SelectedTahun']])->result_array();
+
+        $keluarAgg = [];
+        foreach ($keluarRows as $r) {
+            $k = trim($r['rek3']);
+            $keluarAgg[$k] = [
+                'kode' => $k,
+                'uraian' => $masterMap[$k] ?? trim($r['uraian']),
+                'total' => floatval($r['total'])
+            ];
+        }
+
+        // Susun Struktur Hierarki Sesuai Format Ringkasan RAPBD
+        $Ringkasan = [
+            '4' => [
+                'kode' => '4',
+                'uraian' => $masterMap['4'] ?? 'PENDAPATAN DAERAH',
+                'groups' => [
+                    '4.1' => ['kode' => '4,1', 'uraian' => $masterMap['4.1'] ?? 'PENDAPATAN ASLI DAERAH (PAD)', 'items' => []],
+                    '4.2' => ['kode' => '4,2', 'uraian' => $masterMap['4.2'] ?? 'PENDAPATAN TRANSFER', 'items' => []],
+                    '4.3' => ['kode' => '4,3', 'uraian' => $masterMap['4.3'] ?? 'LAIN-LAIN PENDAPATAN DAERAH YANG SAH', 'items' => []],
+                ]
+            ],
+            '5' => [
+                'kode' => '5',
+                'uraian' => $masterMap['5'] ?? 'BELANJA DAERAH',
+                'groups' => [
+                    '5.1' => ['kode' => '5,1', 'uraian' => $masterMap['5.1'] ?? 'BELANJA OPERASI', 'items' => []],
+                    '5.2' => ['kode' => '5,2', 'uraian' => $masterMap['5.2'] ?? 'BELANJA MODAL', 'items' => []],
+                    '5.3' => ['kode' => '5,3', 'uraian' => $masterMap['5.3'] ?? 'BELANJA TIDAK TERDUGA', 'items' => []],
+                    '5.4' => ['kode' => '5,4', 'uraian' => $masterMap['5.4'] ?? 'BELANJA TRANSFER', 'items' => []],
+                ]
+            ],
+            '6' => [
+                'kode' => '6',
+                'uraian' => $masterMap['6'] ?? 'PEMBIAYAAN DAERAH',
+                'groups' => [
+                    '6.1' => ['kode' => '6,1', 'uraian' => $masterMap['6.1'] ?? 'PENERIMAAN PEMBIAYAAN', 'items' => []],
+                    '6.2' => ['kode' => '6,2', 'uraian' => $masterMap['6.2'] ?? 'PENGELUARAN PEMBIAYAAN', 'items' => []],
+                ]
+            ]
+        ];
+
+        // Masukkan Pendapatan ke dalam kelompok
+        foreach ($pendapatanAgg as $rek3 => $row) {
+            $p2 = substr($rek3, 0, 3);
+            if (!isset($Ringkasan['4']['groups'][$p2])) {
+                $Ringkasan['4']['groups'][$p2] = [
+                    'kode' => str_replace('.', ',', $p2),
+                    'uraian' => $masterMap[$p2] ?? $row['uraian'],
+                    'items' => []
+                ];
+            }
+            $Ringkasan['4']['groups'][$p2]['items'][$rek3] = $row;
+        }
+
+        // Masukkan Belanja ke dalam kelompok
+        foreach ($belanjaAgg as $rek3 => $row) {
+            $p2 = substr($rek3, 0, 3);
+            if ($p2 === '5.0') {
+                $p2 = '5.1';
+            }
+            if (!isset($Ringkasan['5']['groups'][$p2])) {
+                $Ringkasan['5']['groups'][$p2] = [
+                    'kode' => str_replace('.', ',', $p2),
+                    'uraian' => $masterMap[$p2] ?? ($masterMap['5.1'] ?? 'BELANJA OPERASI'),
+                    'items' => []
+                ];
+            }
+            $Ringkasan['5']['groups'][$p2]['items'][$rek3] = $row;
+        }
+
+        // Masukkan Pembiayaan Penerimaan (6.1)
+        foreach ($terimaAgg as $rek3 => $row) {
+            $Ringkasan['6']['groups']['6.1']['items'][$rek3] = $row;
+        }
+
+        // Masukkan Pembiayaan Pengeluaran (6.2)
+        foreach ($keluarAgg as $rek3 => $row) {
+            $Ringkasan['6']['groups']['6.2']['items'][$rek3] = $row;
+        }
+
+        // Hitung Subtotal dan Total
+        $totPendapatan = 0;
+        foreach ($Ringkasan['4']['groups'] as $gKey => &$gVal) {
+            ksort($gVal['items']);
+            $gTot = 0;
+            foreach ($gVal['items'] as $it) $gTot += $it['total'];
+            $gVal['subtotal'] = $gTot;
+            $totPendapatan += $gTot;
+        }
+
+        $totBelanja = 0;
+        foreach ($Ringkasan['5']['groups'] as $gKey => &$gVal) {
+            ksort($gVal['items']);
+            $gTot = 0;
+            foreach ($gVal['items'] as $it) $gTot += $it['total'];
+            $gVal['subtotal'] = $gTot;
+            $totBelanja += $gTot;
+        }
+
+        $surplusDefisit = $totPendapatan - $totBelanja;
+
+        $totTerima = 0;
+        ksort($Ringkasan['6']['groups']['6.1']['items']);
+        foreach ($Ringkasan['6']['groups']['6.1']['items'] as $it) $totTerima += $it['total'];
+        $Ringkasan['6']['groups']['6.1']['subtotal'] = $totTerima;
+
+        $totKeluar = 0;
+        ksort($Ringkasan['6']['groups']['6.2']['items']);
+        foreach ($Ringkasan['6']['groups']['6.2']['items'] as $it) $totKeluar += $it['total'];
+        $Ringkasan['6']['groups']['6.2']['subtotal'] = $totKeluar;
+
+        $pembiayaanNetto = $totTerima - $totKeluar;
+        $silpa = $surplusDefisit + $pembiayaanNetto;
+
+        $Data['Ringkasan'] = $Ringkasan;
+        $Data['TotPendapatan'] = $totPendapatan;
+        $Data['TotBelanja'] = $totBelanja;
+        $Data['SurplusDefisit'] = $surplusDefisit;
+        $Data['TotPenerimaan'] = $totTerima;
+        $Data['TotPengeluaran'] = $totKeluar;
+        $Data['PembiayaanNetto'] = $pembiayaanNetto;
+        $Data['SiLPA'] = $silpa;
 
         $this->load->view('Daerah/header', $Header);
         $this->load->view('Daerah/RAPBDTabel1', $Data);
@@ -32648,9 +32833,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         }
         $Data['SelectedTahun'] = (int)$tahun;
 
-        // Daftar tahun untuk filter
-        $daftarTahunDb = $this->db->distinct()->select('tahun')->where('kodewilayah', $KodeWilayah)->where('deleted_at IS NULL')->order_by('tahun', 'DESC')->get('rapbd_tabel2')->result_array();
-        $tahunList = array_unique(array_merge([date('Y'), date('Y')+1, 2024, 2025, 2026, 2027], array_column($daftarTahunDb, 'tahun')));
+        // Daftar tahun untuk filter diambil dari data aktual di database
+        $thn1 = $this->db->distinct()->select('tahun')->where('deleted_at IS NULL')->get('anggaran_pendapatan')->result_array();
+        $thn2 = $this->db->distinct()->select('tahun')->where('deleted_at IS NULL')->get('belanja_sub_kegiatan_header')->result_array();
+        $allTahun = array_merge(
+            [date('Y'), date('Y')+1, 2024, 2025, 2026, 2027],
+            array_column($thn1, 'tahun'),
+            array_column($thn2, 'tahun')
+        );
+        $tahunList = array_unique(array_filter($allTahun));
         rsort($tahunList);
         $Data['TahunList'] = $tahunList;
 
@@ -32658,46 +32849,305 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
             $Data['KodeWilayah'] = $KodeWilayah;
             $Data['NamaWilayah'] = $wilayah['Nama'] ?? '';
-            
-            // Cek apakah ada data di rapbd_tabel2
-            $countData = $this->db->where('kodewilayah', $KodeWilayah)->where('tahun', $Data['SelectedTahun'])->where('deleted_at IS NULL')->count_all_results('rapbd_tabel2');
-            
-            // Jika belum ada data, otomatis inisialisasi / sinkronkan dari daftar instansi
-            if ($countData == 0) {
-                $this->_syncInstansiToRAPBD2($KodeWilayah, $Data['SelectedTahun']);
+
+            // 1. Nomenklatur Urusan Resmi
+            $nomenUrusan = [
+                '1' => 'URUSAN PEMERINTAHAN WAJIB YANG BERKAITAN DENGAN PELAYANAN DASAR',
+                '2' => 'URUSAN PEMERINTAHAN WAJIB YANG TIDAK BERKAITAN DENGAN PELAYANAN DASAR',
+                '3' => 'URUSAN PEMERINTAHAN PILIHAN',
+                '4' => 'UNSUR PENDUKUNG URUSAN PEMERINTAHAN',
+                '5' => 'UNSUR PENUNJANG URUSAN PEMERINTAHAN',
+                '6' => 'UNSUR PENGAWASAN URUSAN PEMERINTAHAN',
+                '7' => 'UNSUR KEWILAYAHAN',
+                '8' => 'UNSUR PEMERINTAHAN UMUM',
+            ];
+            $uRows = $this->db->query("SELECT TRIM(Kode) as Kode, TRIM(Nomenklatur) as Nomenklatur FROM nomenklaturkabupaten WHERE Kode REGEXP '^[0-9]+$'")->result_array();
+            foreach ($uRows as $ur) $nomenUrusan[trim($ur['Kode'])] = trim($ur['Nomenklatur']);
+            $upRows = $this->db->query("SELECT TRIM(Kode) as Kode, TRIM(Nomenklatur) as Nomenklatur FROM nomenklaturprovinsi WHERE Kode NOT LIKE '%.%'")->result_array();
+            foreach ($upRows as $ur) {
+                if (!isset($nomenUrusan[trim($ur['Kode'])])) $nomenUrusan[trim($ur['Kode'])] = trim($ur['Nomenklatur']);
             }
 
-            // Ambil data RAPBD Tabel 2
-            $rawRows = $this->db
-                ->where('kodewilayah', $KodeWilayah)
-                ->where('tahun', $Data['SelectedTahun'])
-                ->where('deleted_at IS NULL')
-                ->order_by('CAST(kode_urusan AS UNSIGNED)', 'ASC')
-                ->order_by('kode_bidang', 'ASC')
-                ->order_by('kode_organisasi', 'ASC')
-                ->order_by('urutan', 'ASC')
-                ->order_by('id', 'ASC')
-                ->get('rapbd_tabel2')
-                ->result_array();
+            // 1b. Nomenklatur Bidang Urusan
+            $nomenBidang = [];
+            $bRows = $this->db->query("SELECT TRIM(Kode) as Kode, TRIM(Nomenklatur) as Nomenklatur FROM nomenklaturkabupaten WHERE Kode REGEXP '^[0-9]+\\.[0-9]{2}$'")->result_array();
+            foreach ($bRows as $br) {
+                $nomenBidang[trim($br['Kode'])] = trim($br['Nomenklatur']);
+            }
+            $bpRows = $this->db->query("SELECT TRIM(Kode) as Kode, TRIM(Nomenklatur) as Nomenklatur FROM nomenklaturprovinsi WHERE Kode REGEXP '^[0-9]+\\.[0-9]{2}$'")->result_array();
+            foreach ($bpRows as $br) {
+                if (!isset($nomenBidang[trim($br['Kode'])])) {
+                    $nomenBidang[trim($br['Kode'])] = trim($br['Nomenklatur']);
+                }
+            }
 
-            // Hitung roll-up: jumlah_belanja otomatis dan total roll-up
-            $calculated = $this->_calculateRAPBD2Rollup($rawRows);
-            $Data['RAPBDList'] = $calculated['rows'];
-            $Data['TotalSum'] = $calculated['total'];
-
-            // Ambil daftar instansi untuk modal tambah/edit (dropdown auto-fill)
-            $Data['DaftarInstansi'] = $this->db
+            // 2. Daftar Instansi
+            $instansiList = $this->db
+                ->select('id, nama, kode_instansi')
                 ->where('kodewilayah', $KodeWilayah)
                 ->where('deleted_at IS NULL')
                 ->order_by('kode_instansi', 'ASC')
+                ->order_by('id', 'ASC')
                 ->get('akun_instansi')
                 ->result_array();
+
+            // 3. Data PENDAPATAN DAERAH dari menu anggaran_pendapatan per instansi
+            $pRows = $this->db
+                ->select('id_instansi, SUM(nilai) as total')
+                ->where('kodewilayah', $KodeWilayah)
+                ->where('tahun', $Data['SelectedTahun'])
+                ->where('deleted_at IS NULL')
+                ->group_by('id_instansi')
+                ->get('anggaran_pendapatan')
+                ->result_array();
+
+            $pendapatanMap = [];
+            foreach ($pRows as $p) {
+                $pendapatanMap[(int)$p['id_instansi']] = floatval($p['total']);
+            }
+
+            // 4. Data BELANJA DAERAH dari menu Belanja Sub Kegiatan per instansi
+            $bHeaders = $this->db
+                ->select('id, id_instansi, total_belanja')
+                ->where('kode_wilayah', $KodeWilayah)
+                ->where('tahun', $Data['SelectedTahun'])
+                ->where('deleted_at IS NULL')
+                ->get('belanja_sub_kegiatan_header')
+                ->result_array();
+
+            $belanjaMap = [];
+            foreach ($bHeaders as $h) {
+                $instId = (int)$h['id_instansi'];
+                if (!isset($belanjaMap[$instId])) {
+                    $belanjaMap[$instId] = [
+                        'operasi' => 0.0,
+                        'modal' => 0.0,
+                        'tidak_terduga' => 0.0,
+                        'transfer' => 0.0,
+                        'jumlah' => 0.0
+                    ];
+                }
+
+                $hid = (int)$h['id'];
+                $reks = $this->db
+                    ->select('kode_rekening, total')
+                    ->where('header_id', $hid)
+                    ->where('deleted_at IS NULL')
+                    ->get('belanja_rekening')
+                    ->result_array();
+
+                if (empty($reks)) {
+                    $tot = floatval($h['total_belanja']);
+                    $belanjaMap[$instId]['operasi'] += $tot;
+                    $belanjaMap[$instId]['jumlah'] += $tot;
+                    continue;
+                }
+
+                $hasLevel2 = false;
+                foreach ($reks as $r) {
+                    if (in_array(trim($r['kode_rekening']), ['5.1', '5.2', '5.3', '5.4'])) {
+                        $hasLevel2 = true;
+                        break;
+                    }
+                }
+
+                $hOp = 0.0; $hMod = 0.0; $hTt = 0.0; $hTr = 0.0;
+                if ($hasLevel2) {
+                    foreach ($reks as $r) {
+                        $k = trim($r['kode_rekening']);
+                        if ($k === '5.1') $hOp += floatval($r['total']);
+                        elseif ($k === '5.2') $hMod += floatval($r['total']);
+                        elseif ($k === '5.3') $hTt += floatval($r['total']);
+                        elseif ($k === '5.4') $hTr += floatval($r['total']);
+                    }
+                } else {
+                    $kodes = array_column($reks, 'kode_rekening');
+                    foreach ($reks as $r) {
+                        $k = trim($r['kode_rekening']);
+                        $isParent = false;
+                        foreach ($kodes as $otherK) {
+                            if ($otherK !== $k && strpos($otherK, $k . '.') === 0) {
+                                $isParent = true;
+                                break;
+                            }
+                        }
+                        if (!$isParent) {
+                            if (strpos($k, '5.1') === 0 || strpos($k, '5.0') === 0 || $k === 'a') $hOp += floatval($r['total']);
+                            elseif (strpos($k, '5.2') === 0) $hMod += floatval($r['total']);
+                            elseif (strpos($k, '5.3') === 0) $hTt += floatval($r['total']);
+                            elseif (strpos($k, '5.4') === 0) $hTr += floatval($r['total']);
+                        }
+                    }
+                }
+
+                $hTot = $hOp + $hMod + $hTt + $hTr;
+                if ($hTot <= 0 && floatval($h['total_belanja']) > 0) {
+                    $hOp = floatval($h['total_belanja']);
+                    $hTot = $hOp;
+                }
+
+                $belanjaMap[$instId]['operasi'] += $hOp;
+                $belanjaMap[$instId]['modal'] += $hMod;
+                $belanjaMap[$instId]['tidak_terduga'] += $hTt;
+                $belanjaMap[$instId]['transfer'] += $hTr;
+                $belanjaMap[$instId]['jumlah'] += $hTot;
+            }
+
+            // 5. Susun Hierarki Pohon: Urusan -> Bidang Urusan -> Dinas / Instansi
+            $tree = [];
+            foreach ($instansiList as $inst) {
+                $rawKode = trim($inst['kode_instansi'] ?? '');
+                $nama = trim($inst['nama'] ?? '');
+                $parts = explode('.', $rawKode);
+                $kdUrusan = $parts[0] ?? '';
+                $kdBidang = $parts[1] ?? '01';
+
+                // Normalisasi instansi khusus atau tanpa kode standar
+                if (empty($kdUrusan) || $rawKode === '100.01.0.00.0..0.1' || $rawKode === '5.051') {
+                    if (stripos($nama, 'bapelitbang') !== false || stripos($nama, 'bappeda') !== false) {
+                        $kdUrusan = '5';
+                        $kdBidang = '01';
+                    } elseif (stripos($nama, 'bkpsdm') !== false || stripos($nama, 'kepegawaian') !== false) {
+                        $kdUrusan = '5';
+                        $kdBidang = '04';
+                    } elseif (stripos($nama, 'komunikasi') !== false || stripos($nama, 'kominfo') !== false) {
+                        $kdUrusan = '2';
+                        $kdBidang = '16';
+                    } else {
+                        $kdUrusan = '5';
+                        $kdBidang = '01';
+                    }
+                }
+
+                $kdUrusan = (string)intval($kdUrusan);
+                if ($kdUrusan === '0') $kdUrusan = '1';
+                $kdBidang = str_pad(ltrim($kdBidang, '0'), 2, '0', STR_PAD_LEFT);
+                if ($kdBidang === '00') $kdBidang = '01';
+
+                $instId = (int)$inst['id'];
+                $pend = $pendapatanMap[$instId] ?? 0.0;
+                $bData = $belanjaMap[$instId] ?? ['operasi' => 0.0, 'modal' => 0.0, 'tidak_terduga' => 0.0, 'transfer' => 0.0, 'jumlah' => 0.0];
+
+                $tree[$kdUrusan][$kdBidang][] = [
+                    'tipe' => 'instansi',
+                    'instansi_id' => $instId,
+                    'kode_urusan' => $kdUrusan,
+                    'kode_bidang' => $kdBidang,
+                    'kode_organisasi' => $rawKode,
+                    'uraian' => $nama,
+                    'pendapatan' => $pend,
+                    'belanja_operasi' => $bData['operasi'],
+                    'belanja_modal' => $bData['modal'],
+                    'belanja_tidak_terduga' => $bData['tidak_terduga'],
+                    'belanja_transfer' => $bData['transfer'],
+                    'jumlah_belanja' => $bData['jumlah'],
+                ];
+            }
+
+            // 6. Urutkan Urusan secara numerik: 1, 2, 3, 4, 5, dst. (pasti urut, tidak acak)
+            uksort($tree, function($a, $b) {
+                return intval($a) - intval($b);
+            });
+
+            // 7. Buat Flat List Hierarkis: Urusan -> Bidang Urusan -> Dinas/Instansi
+            $finalRows = [];
+            $totalSum = ['pendapatan' => 0.0, 'belanja_operasi' => 0.0, 'belanja_modal' => 0.0, 'belanja_tidak_terduga' => 0.0, 'belanja_transfer' => 0.0, 'jumlah_belanja' => 0.0];
+
+            foreach ($tree as $kdUrusan => $bidangList) {
+                // Urutkan Bidang Urusan secara numerik di dalam Urusan
+                uksort($bidangList, function($a, $b) {
+                    return intval($a) - intval($b);
+                });
+
+                $uPend = 0.0; $uOp = 0.0; $uMod = 0.0; $uTt = 0.0; $uTr = 0.0; $uJb = 0.0;
+                $urusanRows = [];
+
+                foreach ($bidangList as $kdBidang => $dinasList) {
+                    // Urutkan dinas di dalam bidang berdasarkan kode_organisasi
+                    usort($dinasList, function($a, $b) {
+                        return strcmp($a['kode_organisasi'], $b['kode_organisasi']);
+                    });
+
+                    $bPend = 0.0; $bOp = 0.0; $bMod = 0.0; $bTt = 0.0; $bTr = 0.0; $bJb = 0.0;
+                    foreach ($dinasList as $d) {
+                        $bPend += $d['pendapatan'];
+                        $bOp   += $d['belanja_operasi'];
+                        $bMod  += $d['belanja_modal'];
+                        $bTt   += $d['belanja_tidak_terduga'];
+                        $bTr   += $d['belanja_transfer'];
+                        $bJb   += $d['jumlah_belanja'];
+                    }
+
+                    $bidangFull = $kdUrusan . '.' . $kdBidang;
+                    $namaBidang = $nomenBidang[$bidangFull] ?? ('URUSAN PEMERINTAHAN BIDANG ' . $bidangFull);
+                    $namaBidang = preg_replace('/BIDANG([A-Za-z])/', 'BIDANG $1', $namaBidang);
+
+                    // Baris Bidang Urusan
+                    $urusanRows[] = [
+                        'tipe' => 'bidang',
+                        'instansi_id' => null,
+                        'kode_urusan' => $kdUrusan,
+                        'kode_bidang' => $kdBidang,
+                        'kode_organisasi' => '',
+                        'uraian' => $namaBidang,
+                        'pendapatan' => $bPend,
+                        'belanja_operasi' => $bOp,
+                        'belanja_modal' => $bMod,
+                        'belanja_tidak_terduga' => $bTt,
+                        'belanja_transfer' => $bTr,
+                        'jumlah_belanja' => $bJb
+                    ];
+
+                    // Baris Dinas di bawah Bidang
+                    foreach ($dinasList as $d) {
+                        $urusanRows[] = $d;
+                    }
+
+                    $uPend += $bPend;
+                    $uOp   += $bOp;
+                    $uMod  += $bMod;
+                    $uTt   += $bTt;
+                    $uTr   += $bTr;
+                    $uJb   += $bJb;
+                }
+
+                $namaUrusan = $nomenUrusan[$kdUrusan] ?? ('URUSAN PEMERINTAHAN ' . $kdUrusan);
+
+                // Baris Urusan
+                $finalRows[] = [
+                    'tipe' => 'urusan',
+                    'instansi_id' => null,
+                    'kode_urusan' => $kdUrusan,
+                    'kode_bidang' => '',
+                    'kode_organisasi' => '',
+                    'uraian' => $namaUrusan,
+                    'pendapatan' => $uPend,
+                    'belanja_operasi' => $uOp,
+                    'belanja_modal' => $uMod,
+                    'belanja_tidak_terduga' => $uTt,
+                    'belanja_transfer' => $uTr,
+                    'jumlah_belanja' => $uJb
+                ];
+
+                foreach ($urusanRows as $r) {
+                    $finalRows[] = $r;
+                }
+
+                $totalSum['pendapatan'] += $uPend;
+                $totalSum['belanja_operasi'] += $uOp;
+                $totalSum['belanja_modal'] += $uMod;
+                $totalSum['belanja_tidak_terduga'] += $uTt;
+                $totalSum['belanja_transfer'] += $uTr;
+                $totalSum['jumlah_belanja'] += $uJb;
+            }
+
+            $Data['RAPBDList'] = $finalRows;
+            $Data['TotalSum'] = $totalSum;
         } else {
             $Data['KodeWilayah'] = '';
             $Data['NamaWilayah'] = '';
             $Data['RAPBDList'] = [];
             $Data['TotalSum'] = ['pendapatan' => 0, 'belanja_operasi' => 0, 'belanja_modal' => 0, 'belanja_tidak_terduga' => 0, 'belanja_transfer' => 0, 'jumlah_belanja' => 0];
-            $Data['DaftarInstansi'] = [];
         }
 
         $this->load->view('Daerah/header', $Header);
@@ -32716,14 +33166,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             return;
         }
 
-        // Cache nomenklatur untuk urusan dan bidang urusan
+        // Cache nomenklatur untuk urusan
         $nomenUrusan = [];
         $uRows = $this->db->query("SELECT TRIM(Kode) as Kode, TRIM(Nomenklatur) as Nomenklatur FROM nomenklaturprovinsi WHERE Kode NOT LIKE '%.%'")->result_array();
         foreach ($uRows as $ur) $nomenUrusan[$ur['Kode']] = $ur['Nomenklatur'];
-
-        $nomenBidang = [];
-        $bRows = $this->db->query("SELECT TRIM(Kode) as Kode, TRIM(Nomenklatur) as Nomenklatur FROM nomenklaturprovinsi WHERE (LENGTH(Kode) - LENGTH(REPLACE(Kode, '.', ''))) = 1")->result_array();
-        foreach ($bRows as $br) $nomenBidang[$br['Kode']] = $br['Nomenklatur'];
 
         $existing = $this->db->where('kodewilayah', $KodeWilayah)->where('tahun', $tahun)->where('deleted_at IS NULL')->get('rapbd_tabel2')->result_array();
         $existingKeys = [];
@@ -32733,7 +33179,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         }
 
         $insertedUrusan = [];
-        $insertedBidang = [];
 
         foreach ($instansiList as $inst) {
             $kodeInstansi = trim($inst['kode_instansi']);
@@ -32741,7 +33186,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $parts = explode('.', $kodeInstansi);
             $kodeUrusan = $parts[0] ?? '1';
             $kodeBidang = $parts[1] ?? '01';
-            $kodeBidangFull = $kodeUrusan . '.' . $kodeBidang;
 
             // 1. Urusan (Level 1)
             $keyUrusan = 'urusan|' . $kodeUrusan . '||';
@@ -32767,31 +33211,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 $existingKeys[$keyUrusan] = true;
             }
 
-            // 2. Bidang Urusan (Level 2)
-            $keyBidang = 'bidang|' . $kodeUrusan . '|' . $kodeBidang . '|';
-            if (!isset($existingKeys[$keyBidang]) && !isset($insertedBidang[$kodeBidangFull])) {
-                $namaBidang = $nomenBidang[$kodeBidangFull] ?? 'URUSAN PEMERINTAHAN BIDANG ' . $kodeBidang;
-                $this->db->insert('rapbd_tabel2', [
-                    'kodewilayah' => $KodeWilayah,
-                    'tahun' => $tahun,
-                    'tipe' => 'bidang',
-                    'kode_urusan' => $kodeUrusan,
-                    'kode_bidang' => $kodeBidang,
-                    'kode_organisasi' => '',
-                    'uraian' => $namaBidang,
-                    'pendapatan' => 0,
-                    'belanja_operasi' => 0,
-                    'belanja_modal' => 0,
-                    'belanja_tidak_terduga' => 0,
-                    'belanja_transfer' => 0,
-                    'jumlah_belanja' => 0,
-                    'created_at' => date('Y-m-d H:i:s')
-                ]);
-                $insertedBidang[$kodeBidangFull] = true;
-                $existingKeys[$keyBidang] = true;
-            }
-
-            // 3. Dinas / Instansi (Level 3)
+            // 2. Dinas / Instansi (Hanya Tampilkan Instansinya Saja, Tanpa Bidang)
             $keyInst = 'instansi|' . $kodeUrusan . '|' . $kodeBidang . '|' . $kodeInstansi;
             if (!isset($existingKeys[$keyInst])) {
                 $this->db->insert('rapbd_tabel2', [
@@ -32812,83 +33232,61 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 ]);
                 $existingKeys[$keyInst] = true;
             }
-
-            // 4. Sub Unit jika ada
-            $subUnits = $this->db
-                ->where('instansi_id', $inst['id'])
-                ->where('deleted_at IS NULL')
-                ->order_by('urutan', 'ASC')
-                ->order_by('id', 'ASC')
-                ->get('sub_unit')
-                ->result_array();
-            foreach ($subUnits as $su) {
-                $unitCode = $kodeInstansi . '.' . sprintf('%04d', $su['urutan'] > 0 ? $su['urutan'] : $su['id']);
-                $keyUnit = 'unit|' . $kodeUrusan . '|' . $kodeBidang . '|' . $unitCode;
-                if (!isset($existingKeys[$keyUnit])) {
-                    $this->db->insert('rapbd_tabel2', [
-                        'kodewilayah' => $KodeWilayah,
-                        'tahun' => $tahun,
-                        'tipe' => 'unit',
-                        'kode_urusan' => $kodeUrusan,
-                        'kode_bidang' => $kodeBidang,
-                        'kode_organisasi' => $unitCode,
-                        'uraian' => trim($su['nama_sub_unit']),
-                        'pendapatan' => 0,
-                        'belanja_operasi' => 0,
-                        'belanja_modal' => 0,
-                        'belanja_tidak_terduga' => 0,
-                        'belanja_transfer' => 0,
-                        'jumlah_belanja' => 0,
-                        'created_at' => date('Y-m-d H:i:s')
-                    ]);
-                    $existingKeys[$keyUnit] = true;
-                }
-            }
         }
     }
 
     private function _calculateRAPBD2Rollup($rows) {
-        $bidangSums = [];
         $urusanSums = [];
         $totalSum = ['pendapatan' => 0, 'belanja_operasi' => 0, 'belanja_modal' => 0, 'belanja_tidak_terduga' => 0, 'belanja_transfer' => 0, 'jumlah_belanja' => 0];
 
-        // First pass: sum instansi and units
+        // 1. Hitung jumlah belanja per baris
         foreach ($rows as &$r) {
             $jb = floatval($r['belanja_operasi']) + floatval($r['belanja_modal']) + floatval($r['belanja_tidak_terduga']) + floatval($r['belanja_transfer']);
             $r['jumlah_belanja'] = $jb;
-
-            if ($r['tipe'] === 'instansi' || $r['tipe'] === 'unit') {
-                $bidKey = $r['kode_urusan'] . '.' . $r['kode_bidang'];
-                if (!isset($bidangSums[$bidKey])) {
-                    $bidangSums[$bidKey] = ['pendapatan' => 0, 'belanja_operasi' => 0, 'belanja_modal' => 0, 'belanja_tidak_terduga' => 0, 'belanja_transfer' => 0, 'jumlah_belanja' => 0, 'count' => 0];
-                }
-                $bidangSums[$bidKey]['pendapatan'] += floatval($r['pendapatan']);
-                $bidangSums[$bidKey]['belanja_operasi'] += floatval($r['belanja_operasi']);
-                $bidangSums[$bidKey]['belanja_modal'] += floatval($r['belanja_modal']);
-                $bidangSums[$bidKey]['belanja_tidak_terduga'] += floatval($r['belanja_tidak_terduga']);
-                $bidangSums[$bidKey]['belanja_transfer'] += floatval($r['belanja_transfer']);
-                $bidangSums[$bidKey]['jumlah_belanja'] += $jb;
-                $bidangSums[$bidKey]['count']++;
-            }
         }
         unset($r);
 
-        // Second pass: roll-up into bidang urusan
-        foreach ($rows as &$r) {
-            if ($r['tipe'] === 'bidang') {
-                $bidKey = $r['kode_urusan'] . '.' . $r['kode_bidang'];
-                if (isset($bidangSums[$bidKey]) && $bidangSums[$bidKey]['count'] > 0) {
-                    $r['pendapatan'] = $bidangSums[$bidKey]['pendapatan'];
-                    $r['belanja_operasi'] = $bidangSums[$bidKey]['belanja_operasi'];
-                    $r['belanja_modal'] = $bidangSums[$bidKey]['belanja_modal'];
-                    $r['belanja_tidak_terduga'] = $bidangSums[$bidKey]['belanja_tidak_terduga'];
-                    $r['belanja_transfer'] = $bidangSums[$bidKey]['belanja_transfer'];
-                    $r['jumlah_belanja'] = $bidangSums[$bidKey]['jumlah_belanja'];
-                }
+        // 2. Map instansi jika ada data sub-unit lama yang perlu di-rollup ke induk instansi
+        $instansiMap = [];
+        foreach ($rows as $idx => $r) {
+            if ($r['tipe'] === 'instansi') {
+                $baseOrg = preg_replace('/\.\d{4}$/', '', trim($r['kode_organisasi']));
+                $instansiMap[$r['kode_urusan'] . '|' . $r['kode_bidang'] . '|' . $baseOrg] = $idx;
+                $instansiMap[$r['kode_urusan'] . '|' . $r['kode_bidang']] = $idx;
+            }
+        }
 
-                $urKey = $r['kode_urusan'];
+        foreach ($rows as $r) {
+            if ($r['tipe'] === 'unit') {
+                $baseOrg = preg_replace('/\.\d{4}$/', '', trim($r['kode_organisasi']));
+                $key = $r['kode_urusan'] . '|' . $r['kode_bidang'] . '|' . $baseOrg;
+                $fallbackKey = $r['kode_urusan'] . '|' . $r['kode_bidang'];
+                $targetIdx = $instansiMap[$key] ?? ($instansiMap[$fallbackKey] ?? null);
+                if ($targetIdx !== null) {
+                    $rows[$targetIdx]['pendapatan'] += floatval($r['pendapatan']);
+                    $rows[$targetIdx]['belanja_operasi'] += floatval($r['belanja_operasi']);
+                    $rows[$targetIdx]['belanja_modal'] += floatval($r['belanja_modal']);
+                    $rows[$targetIdx]['belanja_tidak_terduga'] += floatval($r['belanja_tidak_terduga']);
+                    $rows[$targetIdx]['belanja_transfer'] += floatval($r['belanja_transfer']);
+                    $rows[$targetIdx]['jumlah_belanja'] += floatval($r['jumlah_belanja']);
+                }
+            }
+        }
+
+        // 3. Roll-up dana dari instansi langsung ke Urusan
+        foreach ($rows as $r) {
+            if ($r['tipe'] === 'instansi') {
+                $urKey = trim($r['kode_urusan']);
                 if (!isset($urusanSums[$urKey])) {
-                    $urusanSums[$urKey] = ['pendapatan' => 0, 'belanja_operasi' => 0, 'belanja_modal' => 0, 'belanja_tidak_terduga' => 0, 'belanja_transfer' => 0, 'jumlah_belanja' => 0, 'count' => 0];
+                    $urusanSums[$urKey] = [
+                        'pendapatan' => 0, 
+                        'belanja_operasi' => 0, 
+                        'belanja_modal' => 0, 
+                        'belanja_tidak_terduga' => 0, 
+                        'belanja_transfer' => 0, 
+                        'jumlah_belanja' => 0, 
+                        'count' => 0
+                    ];
                 }
                 $urusanSums[$urKey]['pendapatan'] += floatval($r['pendapatan']);
                 $urusanSums[$urKey]['belanja_operasi'] += floatval($r['belanja_operasi']);
@@ -32899,12 +33297,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 $urusanSums[$urKey]['count']++;
             }
         }
-        unset($r);
 
-        // Third pass: roll-up into urusan & total
+        // 4. Masukkan akumulasi ke baris Urusan dan hitung Grand TOTAL
+        // Hanya tampilkan Urusan dan Dinas Instansi (tanpa bidang dan unit)
+        $finalRows = [];
         foreach ($rows as &$r) {
             if ($r['tipe'] === 'urusan') {
-                $urKey = $r['kode_urusan'];
+                $urKey = trim($r['kode_urusan']);
                 if (isset($urusanSums[$urKey]) && $urusanSums[$urKey]['count'] > 0) {
                     $r['pendapatan'] = $urusanSums[$urKey]['pendapatan'];
                     $r['belanja_operasi'] = $urusanSums[$urKey]['belanja_operasi'];
@@ -32920,12 +33319,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 $totalSum['belanja_tidak_terduga'] += floatval($r['belanja_tidak_terduga']);
                 $totalSum['belanja_transfer'] += floatval($r['belanja_transfer']);
                 $totalSum['jumlah_belanja'] += floatval($r['jumlah_belanja']);
+
+                $finalRows[] = $r;
+            } elseif ($r['tipe'] === 'instansi') {
+                $finalRows[] = $r;
             }
         }
         unset($r);
 
         return [
-            'rows' => $rows,
+            'rows' => $finalRows,
             'total' => $totalSum
         ];
     }
