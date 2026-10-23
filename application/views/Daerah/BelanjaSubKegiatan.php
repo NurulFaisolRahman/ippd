@@ -1736,9 +1736,20 @@
         </div>
 
         <div class="form-field">
-          <label>Uraian Pengelompokan Belanja / Paket Pekerjaan</label>
-          <input id="fUraianPengelompokan" list="uraianList" placeholder="Pilih atau masukkan uraian (opsional)">
-          <datalist id="uraianList"></datalist>
+          <div style="display:flex; align-items:center; margin-bottom:6px;">
+            <label for="fUraianPengelompokan" style="margin:0;">Uraian Pengelompokan Belanja / Paket Pekerjaan</label>
+            <button type="button" id="btnToggleUraianMode" class="btn btn-xs btn-default" style="margin-left:10px; font-size:11.5px; padding:2px 8px; border-radius:4px; border:1px solid #cbd5e1; background:#f8fafc; color:#0284c7; cursor:pointer; font-weight:600;" title="Beralih antara pilihan rekomendasi atau ketik manual">
+              <i class="fa fa-pencil"></i> Ketik Manual
+            </button>
+          </div>
+          <div id="wrapUraianSelect" style="width:100%;">
+            <select id="fUraianPengelompokan" style="width:100%;">
+              <option value="">-- Cari atau ketik Uraian Pengelompokan Belanja / Paket Pekerjaan... --</option>
+            </select>
+          </div>
+          <div id="wrapUraianManual" style="width:100%; display:none;">
+            <input type="text" id="fUraianManual" class="form-control" style="width:100%; border:1px solid var(--ui-border); border-radius:6px; padding:9px 12px; font-size:13.5px; background:#ffffff;" placeholder="Ketik uraian pengelompokan secara manual...">
+          </div>
         </div>
 
         <div class="form-field">
@@ -1923,9 +1934,11 @@
   var hasKodeWilayah = <?= !empty($KodeWilayah) ? 'true' : 'false' ?>;
   var activeInstansiId = <?= json_encode($ActiveInstansiId) ?>;
   var canCrud = <?= !empty($CanCrud) ? 'true' : 'false' ?>;
+  var instansiUraianList = <?= json_encode(!empty($InstansiUraianList) ? $InstansiUraianList : []) ?>;
 
   /* ---------------- Master data ---------------- */
-  var NODE_NAMES = {
+  var serverNodeNames = <?= json_encode(!empty($MasterNodeNames) ? $MasterNodeNames : (object)[]) ?>;
+  var NODE_NAMES = $.extend({
     "5": "BELANJA DAERAH",
     "5.1": "BELANJA OPERASI",
     "5.1.01": "Belanja Pegawai",
@@ -1941,7 +1954,43 @@
     "5.2.02": "Belanja Modal Peralatan dan Mesin",
     "5.2.03": "Belanja Modal Gedung dan Bangunan",
     "5.2.04": "Belanja Modal Jalan, Jaringan, dan Irigasi"
-  };
+  }, serverNodeNames);
+
+  function normalizeCode(c){
+    if(!c) return "";
+    return String(c).split(".").map(function(p){
+      var n = parseInt(p, 10);
+      return isNaN(n) ? p.trim() : String(n);
+    }).join(".");
+  }
+
+  function isCodeLike(s){
+    if(!s) return true;
+    var str = String(s).trim();
+    return /^[0-9]+(\.[0-9]+)*$/.test(str);
+  }
+
+  function registerRekeningName(kode, nama, level){
+    if(!kode || !nama) return;
+    NODE_NAMES[kode] = nama;
+    var norm = normalizeCode(kode);
+    NODE_NAMES[norm] = nama;
+    var found = false;
+    for(var i=0; i<REKENING_OPTIONS.length; i++){
+      if(REKENING_OPTIONS[i].kode === kode){
+        REKENING_OPTIONS[i].nama = nama;
+        found = true;
+        break;
+      }
+    }
+    if(!found){
+      REKENING_OPTIONS.push({
+        kode: kode,
+        nama: nama,
+        level: level || 6
+      });
+    }
+  }
 
   var REKENING_OPTIONS = [];
   var OBJEK_BELANJA_OPTIONS = [];
@@ -1971,6 +2020,9 @@
       // Convert nested rekening and rincian into items list
       if (h.rekening && h.rekening.length > 0) {
         $.each(h.rekening, function(rIdx, rek) {
+          if (rek.kode_rekening && rek.uraian_rekening) {
+            registerRekeningName(rek.kode_rekening, rek.uraian_rekening, rek.level_rekening || 6);
+          }
           if (rek.rincian && rek.rincian.length > 0) {
             var parts = (rek.kode_rekening || "").split('.');
             var objKode = parts.slice(0, 3).join('.');
@@ -2208,13 +2260,100 @@
     return {map:map, order:order};
   }
   function findRekening(kode){
-    for(var i=0;i<REKENING_OPTIONS.length;i++){ if(REKENING_OPTIONS[i].kode===kode) return REKENING_OPTIONS[i]; }
+    if(!kode) return null;
+    for(var i=0; i<REKENING_OPTIONS.length; i++){
+      if(REKENING_OPTIONS[i].kode === kode) return REKENING_OPTIONS[i];
+    }
+    var norm = normalizeCode(kode);
+    for(var j=0; j<REKENING_OPTIONS.length; j++){
+      if(normalizeCode(REKENING_OPTIONS[j].kode) === norm) return REKENING_OPTIONS[j];
+    }
+    for(var k=0; k<items.length; k++){
+      if(items[k].rekeningKode === kode || normalizeCode(items[k].rekeningKode) === norm){
+        if(items[k].rekeningNama && !isCodeLike(items[k].rekeningNama)){
+          return { kode: kode, nama: items[k].rekeningNama };
+        }
+      }
+    }
     return null;
   }
-  function deriveGroupLabel(kode){
-    var r = findRekening(kode);
-    var nama = r ? r.nama : (NODE_NAMES[kode] || kode);
-    var parts = nama.split("-");
+
+  function getNodeName(code, fallbackItems){
+    if(!code) return "";
+    
+    // 1. Direct match in NODE_NAMES
+    if(NODE_NAMES[code] && !isCodeLike(NODE_NAMES[code])){
+      return NODE_NAMES[code];
+    }
+
+    // 2. Normalized match in NODE_NAMES
+    var norm = normalizeCode(code);
+    if(NODE_NAMES[norm] && !isCodeLike(NODE_NAMES[norm])){
+      return NODE_NAMES[norm];
+    }
+
+    // 3. Match in REKENING_OPTIONS
+    var r = findRekening(code);
+    if(r && r.nama && !isCodeLike(r.nama)){
+      return r.nama;
+    }
+
+    // 4. Match in fallbackItems (items of this node)
+    if(fallbackItems && fallbackItems.length > 0){
+      for(var k=0; k<fallbackItems.length; k++){
+        if(fallbackItems[k].rekeningNama && !isCodeLike(fallbackItems[k].rekeningNama)){
+          if(fallbackItems[k].rekeningKode === code || normalizeCode(fallbackItems[k].rekeningKode) === norm){
+            return fallbackItems[k].rekeningNama;
+          }
+        }
+      }
+      if(code.split('.').length >= 6 && fallbackItems[0].rekeningNama && !isCodeLike(fallbackItems[0].rekeningNama)){
+        return fallbackItems[0].rekeningNama;
+      }
+    }
+
+    // 5. Match in global items
+    for(var i=0; i<items.length; i++){
+      if(items[i].rekeningNama && !isCodeLike(items[i].rekeningNama)){
+        if(items[i].rekeningKode === code || normalizeCode(items[i].rekeningKode) === norm){
+          return items[i].rekeningNama;
+        }
+      }
+    }
+
+    // 6. Match in rawBelanjaHeaders
+    if(typeof rawBelanjaHeaders !== 'undefined' && rawBelanjaHeaders){
+      for(var h=0; h<rawBelanjaHeaders.length; h++){
+        var reks = rawBelanjaHeaders[h].rekening || [];
+        for(var rk=0; rk<reks.length; rk++){
+          if(reks[rk].uraian_rekening && !isCodeLike(reks[rk].uraian_rekening)){
+            if(reks[rk].kode_rekening === code || normalizeCode(reks[rk].kode_rekening) === norm){
+              return reks[rk].uraian_rekening;
+            }
+          }
+        }
+      }
+    }
+
+    return code;
+  }
+
+  function deriveGroupLabel(kode, itemsArr){
+    var nama = getNodeName(kode, itemsArr);
+    if(isCodeLike(nama)){
+      if(itemsArr && itemsArr.length > 0){
+        for(var i=0; i<itemsArr.length; i++){
+          if(itemsArr[i].rekeningNama && !isCodeLike(itemsArr[i].rekeningNama)){
+            nama = itemsArr[i].rekeningNama;
+            break;
+          }
+        }
+      }
+    }
+    if(!nama || isCodeLike(nama)){
+      return "Belanja " + (kode || "");
+    }
+    var parts = nama.split(/\s+[-–]\s+/);
     return parts.length>1 ? parts[parts.length-1].trim() : nama;
   }
 
@@ -2259,9 +2398,10 @@
   function levelRow(code, name, level, total, hasChildren){
     var collapsed = collapsedSet.has(code);
     var pad = 10 + (level-1)*18;
+    var displayName = (name && !isCodeLike(name)) ? name : getNodeName(code);
     return '<tr class="row-lvl'+level+'">'+
       '<td class="font-mono">'+esc(code)+'</td>'+
-      '<td><div class="cell-label" style="padding-left:'+pad+'px;">'+toggleBtn(code,collapsed,hasChildren)+'<span class="txt">'+esc(name)+'</span></div></td>'+
+      '<td><div class="cell-label" style="padding-left:'+pad+'px;">'+toggleBtn(code,collapsed,hasChildren)+'<span class="txt">'+esc(displayName)+'</span></div></td>'+
       '<td></td><td></td><td></td>'+
       '<td class="num">'+formatMoney(total)+'</td>'+
       (canCrud ? '<td></td>' : '')+
@@ -2270,9 +2410,10 @@
   function accountRow(code, name, level, total, hasChildren){
     var collapsed = collapsedSet.has(code);
     var pad = 10 + (level-1)*18;
+    var displayName = (name && !isCodeLike(name)) ? name : getNodeName(code);
     return '<tr class="row-account">'+
       '<td class="font-mono">'+esc(code)+'</td>'+
-      '<td><div class="cell-label" style="padding-left:'+pad+'px;">'+toggleBtn(code,collapsed,hasChildren)+'<span class="txt">'+esc(name)+'</span></div></td>'+
+      '<td><div class="cell-label" style="padding-left:'+pad+'px;">'+toggleBtn(code,collapsed,hasChildren)+'<span class="txt">'+esc(displayName)+'</span></div></td>'+
       '<td></td><td></td><td></td>'+
       '<td class="num">'+formatMoney(total)+'</td>'+
       (canCrud ? '<td></td>' : '')+
@@ -2281,10 +2422,11 @@
   function groupRow(key, label, sumberDana, level, total, hasChildren){
     var collapsed = collapsedSet.has(key);
     var pad = 10 + (level-1)*18;
+    var displayLabel = (label && !isCodeLike(label)) ? label : getNodeName(label);
     return '<tr class="row-group">'+
       '<td></td>'+
       '<td><div class="cell-label" style="padding-left:'+pad+'px;">'+toggleBtn(key,collapsed,hasChildren)+
-        '<span class="txt"><span class="tag">[ # ] '+esc(label)+'</span>'+
+        '<span class="txt"><span class="tag">[ + ] '+esc(displayLabel)+'</span>'+
         (sumberDana ? '<span class="sub-label">Sumber Dana: '+esc(sumberDana)+'</span>' : '')+
         '</span></div></td>'+
       '<td></td><td></td><td></td>'+
@@ -2295,9 +2437,10 @@
   function subgroupRow(key, label, level, total, hasChildren){
     var collapsed = collapsedSet.has(key);
     var pad = 10 + (level-1)*18;
+    var displayLabel = (label && label.trim() !== '') ? label : '-';
     return '<tr class="row-subgroup">'+
       '<td></td>'+
-      '<td><div class="cell-label" style="padding-left:'+pad+'px;">'+toggleBtn(key,collapsed,hasChildren)+'<span class="txt">[ - ] '+esc(label)+'</span></div></td>'+
+      '<td><div class="cell-label" style="padding-left:'+pad+'px;">'+toggleBtn(key,collapsed,hasChildren)+'<span class="txt">[ - ] '+esc(displayLabel)+'</span></div></td>'+
       '<td></td><td></td><td></td>'+
       '<td class="num">'+formatMoney(total)+'</td>'+
       (canCrud ? '<td></td>' : '')+
@@ -2311,7 +2454,6 @@
         '<span class="toggle" style="visibility:hidden;">'+ICON_CHEVRON+'</span>'+
         '<span class="txt"><span class="komponen">'+esc(it.komponen)+'</span>'+
         (it.spesifikasi ? '<span class="spesifikasi">Spesifikasi: '+esc(it.spesifikasi)+'</span>' : '')+
-        (it.keterangan ? '<span class="keterangan">'+esc(it.keterangan)+'</span>' : '')+
         '</span></div></td>'+
       '<td class="num font-mono">'+esc(it.koefisien)+' '+esc(it.satuan)+'</td>'+
       '<td class="num">'+formatMoney(it.hargaSatuan)+'</td>'+
@@ -2326,7 +2468,7 @@
 
   /* ---------------- Main render ---------------- */
   function renderLevelNode(code, node, level, hidden, out){
-    var name = NODE_NAMES[code] || (findRekening(code)? findRekening(code).nama : code);
+    var name = getNodeName(code, node.items);
     var total = sumNode(node);
     var isAccount = !!findRekening(code) || (code.split('.').length >= 6);
     var hasChildren = node.order.length>0 || node.items.length>0;
@@ -2346,30 +2488,49 @@
   }
 
   function renderItemGroups(accountCode, itemsArr, level, hidden, out){
-    var autoLabel = deriveGroupLabel(accountCode);
-    var bySD = groupBy(itemsArr, function(it){ return it.sumberDana || "-"; });
-    bySD.order.forEach(function(sd){
-      var sdItems = bySD.map[sd];
-      var sdKey = accountCode+"::SD::"+sd;
-      var sdCollapsed = collapsedSet.has(sdKey);
-      var sdTotal = sdItems.reduce(function(s,it){return s+calcJumlah(it);},0);
-      if(!hidden){
-        out.push(groupRow(sdKey, autoLabel, sd==="-"?"":sd, level, sdTotal, true));
-      }
-      var urHidden = hidden || sdCollapsed;
+    var autoLabel = deriveGroupLabel(accountCode, itemsArr);
+    
+    // Group Level 1: [ + ] Uraian Pengelompokan Belanja / Paket Pekerjaan (+ Sumber Dana)
+    var byUR = groupBy(itemsArr, function(it){
+      var u = (it.uraianPengelompokan && it.uraianPengelompokan.trim() !== '') ? it.uraianPengelompokan.trim() : autoLabel;
+      var sd = (it.sumberDana && it.sumberDana.trim() !== '') ? it.sumberDana.trim() : '-';
+      return u + "____SD____" + sd;
+    });
 
-      var byUR = groupBy(sdItems, function(it){ return it.uraianPengelompokan || autoLabel; });
-      byUR.order.forEach(function(ur){
-        var urItems = byUR.map[ur];
-        var urKey = sdKey+"::UR::"+ur;
-        var urCollapsed = collapsedSet.has(urKey);
-        var urTotal = urItems.reduce(function(s,it){return s+calcJumlah(it);},0);
+    byUR.order.forEach(function(uKey){
+      var uItems = byUR.map[uKey];
+      var parts = uKey.split("____SD____");
+      var uraianLabel = parts[0] || autoLabel;
+      var sdLabel = (parts[1] && parts[1] !== '-') ? parts[1] : '';
+
+      var gKey = accountCode + "::UR::" + uKey;
+      var gCollapsed = collapsedSet.has(gKey);
+      var gTotal = uItems.reduce(function(s,it){ return s + calcJumlah(it); }, 0);
+
+      if(!hidden){
+        out.push(groupRow(gKey, uraianLabel, sdLabel, level, gTotal, true));
+      }
+      var urHidden = hidden || gCollapsed;
+
+      // Group Level 2: [ - ] Mengambil dari Keterangan
+      var byKet = groupBy(uItems, function(it){
+        return (it.keterangan && it.keterangan.trim() !== '') ? it.keterangan.trim() : '-';
+      });
+
+      byKet.order.forEach(function(ket){
+        var ketItems = byKet.map[ket];
+        var ketKey = gKey + "::KET::" + ket;
+        var ketCollapsed = collapsedSet.has(ketKey);
+        var ketTotal = ketItems.reduce(function(s,it){ return s + calcJumlah(it); }, 0);
+
         if(!urHidden){
-          out.push(subgroupRow(urKey, ur, level+1, urTotal, true));
+          out.push(subgroupRow(ketKey, ket, level + 1, ketTotal, true));
         }
-        var itHidden = urHidden || urCollapsed;
+        var itHidden = urHidden || ketCollapsed;
         if(!itHidden){
-          urItems.forEach(function(it){ out.push(itemRow(it, level+2)); });
+          ketItems.forEach(function(it){
+            out.push(itemRow(it, level + 2));
+          });
         }
       });
     });
@@ -2415,15 +2576,96 @@
     renderPaguCards();
   }
 
-  function refreshDatalists(scopeItems){
-    var uraianSet = new Set(), komponenSet = new Set();
-    (scopeItems||items).forEach(function(it){
-      if(it.uraianPengelompokan) uraianSet.add(it.uraianPengelompokan);
-      if(it.komponen) komponenSet.add(it.komponen);
+  function populateUraianSelect(selectedVal){
+    var $sel = $('#fUraianPengelompokan');
+    if (!$sel.length) return;
+    var curVal = selectedVal !== undefined ? selectedVal : ($sel.val() || '');
+
+    var html = '<option value="">-- Cari atau ketik Uraian Pengelompokan Belanja / Paket Pekerjaan... --</option>';
+    var list = [];
+    if (Array.isArray(instansiUraianList)) {
+      list = instansiUraianList.filter(function(u){
+        return u && typeof u === 'string' && u.trim() !== '' && !isCodeLike(u);
+      });
+    }
+
+    var uniqueList = Array.from(new Set(list));
+
+    if (curVal && uniqueList.indexOf(curVal) === -1) {
+      uniqueList.unshift(curVal);
+    }
+
+    uniqueList.forEach(function(u){
+      html += '<option value="' + esc(u) + '">' + esc(u) + '</option>';
     });
-    document.getElementById("uraianList").innerHTML = Array.from(uraianSet).map(function(v){ return '<option value="'+esc(v)+'">'; }).join("");
-    document.getElementById("komponenList").innerHTML = Array.from(komponenSet).map(function(v){ return '<option value="'+esc(v)+'">'; }).join("");
+
+    $sel.html(html);
+    if (curVal) {
+      $sel.val(curVal);
+    } else {
+      $sel.val('');
+    }
+    if ($sel.hasClass('select2-hidden-accessible')) {
+      $sel.trigger('change.select2');
+    }
   }
+
+  function refreshDatalists(scopeItems){
+    populateUraianSelect();
+    var komponenSet = new Set();
+    (scopeItems||items).forEach(function(it){
+      if(it.komponen && it.komponen.trim() !== '') komponenSet.add(it.komponen.trim());
+    });
+    var kompEl = document.getElementById("komponenList");
+    if (kompEl) {
+      kompEl.innerHTML = Array.from(komponenSet).map(function(v){ return '<option value="'+esc(v)+'">'; }).join("");
+    }
+  }
+
+  var isUraianManualMode = false;
+
+  function getUraianValue(){
+    if (isUraianManualMode) {
+      return ($('#fUraianManual').val() || '').trim();
+    }
+    var selVal = ($('#fUraianPengelompokan').val() || '').trim();
+    var typedVal = ($('#fUraianPengelompokan').data('current-typed') || '').trim();
+    return selVal || typedVal || '';
+  }
+
+  function setUraianValue(val){
+    val = val || '';
+    $('#fUraianManual').val(val);
+    populateUraianSelect(val);
+    if (val && !$('#fUraianPengelompokan option[value="' + val + '"]').length) {
+      var newOpt = new Option(val, val, true, true);
+      $('#fUraianPengelompokan').append(newOpt).trigger('change');
+    } else {
+      $('#fUraianPengelompokan').val(val).trigger('change');
+    }
+  }
+
+  function setUraianMode(manual){
+    isUraianManualMode = !!manual;
+    var curVal = getUraianValue();
+    if (isUraianManualMode) {
+      $('#wrapUraianSelect').hide();
+      $('#wrapUraianManual').show();
+      $('#fUraianManual').val(curVal);
+      $('#btnToggleUraianMode').html('<i class="fa fa-list"></i> Pilih Rekomendasi');
+      setTimeout(function(){ $('#fUraianManual').focus(); }, 50);
+    } else {
+      $('#wrapUraianManual').hide();
+      $('#wrapUraianSelect').show();
+      setUraianValue(curVal);
+      $('#btnToggleUraianMode').html('<i class="fa fa-pencil"></i> Ketik Manual');
+    }
+  }
+
+  $(document).on('click', '#btnToggleUraianMode', function(e){
+    e.preventDefault();
+    setUraianMode(!isUraianManualMode);
+  });
 
   /* ---------------- Modal Form Logic ---------------- */
   var overlay = document.getElementById("modalOverlay");
@@ -2455,6 +2697,10 @@
         if (res && res.status === 'success') {
           if (res.node_names) {
             $.extend(NODE_NAMES, res.node_names);
+            Object.keys(res.node_names).forEach(function(k){
+              var nk = normalizeCode(k);
+              if(!NODE_NAMES[nk]) NODE_NAMES[nk] = res.node_names[k];
+            });
           }
           if (res.objek_belanja && res.objek_belanja.length > 0) {
             OBJEK_BELANJA_OPTIONS = res.objek_belanja.map(function(o) {
@@ -2465,6 +2711,13 @@
           if (res.data && res.data.length > 0) {
             REKENING_OPTIONS = res.data.map(function(r) {
               return { kode: r.kode_rekening, nama: r.nama_rekening, level: r.level };
+            });
+            (rawBelanjaHeaders || []).forEach(function(h){
+              (h.rekening || []).forEach(function(rek){
+                if(rek.kode_rekening && rek.uraian_rekening){
+                  registerRekeningName(rek.kode_rekening, rek.uraian_rekening, rek.level_rekening || 6);
+                }
+              });
             });
           }
         }
@@ -2504,6 +2757,7 @@
 
         populateObjekBelanjaSelect();
         populateRekeningSelect();
+        render();
       }
     });
   }
@@ -2581,6 +2835,38 @@
       });
     }
 
+    if (!$('#fUraianPengelompokan').hasClass('select2-hidden-accessible')) {
+      $('#fUraianPengelompokan').select2({
+        dropdownParent: $('#modalOverlay'),
+        width: '100%',
+        placeholder: '-- Cari atau ketik Uraian Pengelompokan Belanja / Paket Pekerjaan... --',
+        allowClear: true,
+        tags: true,
+        createTag: function (params) {
+          var term = $.trim(params.term);
+          if (term === '') return null;
+          return {
+            id: term,
+            text: term,
+            newTag: true
+          };
+        }
+      });
+
+      $('#fUraianPengelompokan').on('select2:closing', function() {
+        var typed = $('#fUraianPengelompokan').data('current-typed');
+        if (typed && typed.trim() !== '') {
+          typed = typed.trim();
+          if (!$('#fUraianPengelompokan option[value="' + typed + '"]').length) {
+            var newOpt = new Option(typed, typed, true, true);
+            $('#fUraianPengelompokan').append(newOpt);
+          }
+          $('#fUraianPengelompokan').val(typed).trigger('change');
+          $('#fUraianPengelompokan').data('current-typed', '');
+        }
+      });
+    }
+
     if (!$('#fSumberDana').hasClass('select2-hidden-accessible')) {
       $('#fSumberDana').select2({
         dropdownParent: $('#modalOverlay'),
@@ -2590,6 +2876,13 @@
       });
     }
   }
+
+  $(document).on('input keyup', '.select2-container--open .select2-search__field', function() {
+    if ($('#fUraianPengelompokan').data('select2') && $('#fUraianPengelompokan').data('select2').isOpen()) {
+      var val = $(this).val();
+      $('#fUraianPengelompokan').data('current-typed', val);
+    }
+  });
 
   $(document).on('select2:open', function() {
     setTimeout(function() {
@@ -2622,12 +2915,6 @@
         var objKode = parts.slice(0, 3).join('.');
         if (OBJEK_MAP[objKode] && f.objek.value !== objKode) {
           f.objek.value = objKode;
-        }
-      }
-      if (!f.uraian.value || f.uraian.value.trim() === '') {
-        var rOpt = findRekening(val);
-        if (rOpt && rOpt.nama) {
-          f.uraian.value = rOpt.nama;
         }
       }
     }
@@ -2693,7 +2980,9 @@
       f.rekening.value = rekKode;
       $('#fRekeningAkun').val(rekKode).trigger('change');
       f.tipe.value = item.pengelompokanTipe || "Pengelompokan Belanja";
-      f.uraian.value = item.uraianPengelompokan || "";
+      var curUraian = item.uraianPengelompokan || "";
+      setUraianValue(curUraian);
+      setUraianMode(false);
       f.sumberDana.value = item.sumberDana || "";
       $('#fSumberDana').val(item.sumberDana || '').trigger('change');
       f.jsh.value = item.jenisStandarHarga || "";
@@ -2728,7 +3017,12 @@
     f.rekening.value = "";
     $('#fRekeningAkun').val('').trigger('change');
     f.tipe.value = "Pengelompokan Belanja";
-    f.uraian.value = "";
+    setUraianValue("");
+    if (!instansiUraianList || instansiUraianList.length === 0) {
+      setUraianMode(true);
+    } else {
+      setUraianMode(false);
+    }
     f.sumberDana.value = "";
     $('#fSumberDana').val('').trigger('change');
     f.jsh.value = "";
@@ -2800,7 +3094,7 @@
       rekening_level: 6,
       objek_belanja: (f.objek && f.objek.selectedIndex >= 0 && f.objek.options[f.objek.selectedIndex].value) ? f.objek.options[f.objek.selectedIndex].text : (OBJEK_MAP[f.objek.value] ? (f.objek.value + ' - ' + OBJEK_MAP[f.objek.value]) : (f.objek.value || "")),
       pengelompokan_tipe: f.tipe.value,
-      uraian_pengelompokan: f.uraian.value.trim() || (rOpt ? rOpt.nama : "Belanja"),
+      uraian_pengelompokan: getUraianValue() || (rOpt ? rOpt.nama : "Belanja"),
       sumber_dana: f.sumberDana.value,
       jenis_standar_harga: f.jsh.value,
       komponen: f.komponen.value.trim(),
@@ -2850,6 +3144,14 @@
             if (idx > -1) items[idx] = itemObj;
           } else {
             items.push(itemObj);
+          }
+
+          if (payload.uraian_pengelompokan && payload.uraian_pengelompokan.trim() !== '') {
+            var trimmedU = payload.uraian_pengelompokan.trim();
+            if (Array.isArray(instansiUraianList) && instansiUraianList.indexOf(trimmedU) === -1) {
+              instansiUraianList.push(trimmedU);
+            }
+            populateUraianSelect(trimmedU);
           }
 
           closeModal();
@@ -3227,6 +3529,19 @@
       }
 
       $.ajax({
+        url: ControllerURL + "GetUraianPengelompokanRekomendasi",
+        type: "POST",
+        data: { instansi_id: newInstId },
+        dataType: "json",
+        success: function(uRes) {
+          if (uRes.status === 'success' && Array.isArray(uRes.data)) {
+            instansiUraianList = uRes.data;
+            refreshDatalists();
+          }
+        }
+      });
+
+      $.ajax({
         url: ControllerURL + "GetSubUnitsByInstansi",
         type: "POST",
         data: { instansi_id: newInstId },
@@ -3452,8 +3767,8 @@
         populateRekeningSelect(kRek);
       }
       f.rekening.value = kRek;
-      $('#fRekeningAkun').val(kRek).trigger('change');
-      f.uraian.value = item.uraian_kelompok_barang || "";
+      var uKb = item.uraian_kelompok_barang || "";
+      setUraianValue(uKb);
     }
 
     updateTotalPreview();
@@ -3530,6 +3845,21 @@
         success: function(res) {
           if (res.status === 'success') {
             items = items.filter(function(x){ return x.id!==did; });
+            var targetInst = activeInstansiId || (currentInstansi ? currentInstansi.id : '');
+            if (targetInst) {
+              $.ajax({
+                url: ControllerURL + "GetUraianPengelompokanRekomendasi",
+                type: "POST",
+                data: { instansi_id: targetInst },
+                dataType: "json",
+                success: function(uRes) {
+                  if (uRes.status === 'success' && Array.isArray(uRes.data)) {
+                    instansiUraianList = uRes.data;
+                    populateUraianSelect();
+                  }
+                }
+              });
+            }
             render();
             if (typeof Swal !== 'undefined') {
               Swal.fire({

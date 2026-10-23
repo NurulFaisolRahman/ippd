@@ -19676,6 +19676,67 @@ public function updateStatusPerjanjianKinerja() {
             }
         }
         
+        // Master node names map untuk rendering pohon rekening
+        $allMasterRek = $this->db
+            ->select('kode_rekening, nama_rekening')
+            ->from('master_rekening')
+            ->like('kode_rekening', '5', 'after')
+            ->order_by('kode_rekening', 'ASC')
+            ->get()
+            ->result_array();
+
+        $node_map = [];
+        foreach ($allMasterRek as $mr) {
+            $node_map[$mr['kode_rekening']] = $mr['nama_rekening'];
+            $parts = explode('.', $mr['kode_rekening']);
+            $normParts = array_map(function($p) { return is_numeric($p) ? (int)$p : $p; }, $parts);
+            $node_map[implode('.', $normParts)] = $mr['nama_rekening'];
+        }
+
+        if (!empty($rekenings)) {
+            foreach ($rekenings as $r) {
+                if (!empty($r['kode_rekening']) && !empty($r['uraian_rekening'])) {
+                    $node_map[$r['kode_rekening']] = $r['uraian_rekening'];
+                    $parts = explode('.', $r['kode_rekening']);
+                    $normParts = array_map(function($p) { return is_numeric($p) ? (int)$p : $p; }, $parts);
+                    $node_map[implode('.', $normParts)] = $r['uraian_rekening'];
+                }
+            }
+        }
+
+        // Ambil riwayat rekomendasi Uraian Pengelompokan Belanja khusus instansi aktif ini
+        $targetInstId = !empty($active_instansi_id) ? (int)$active_instansi_id : (!empty($instansi_id) ? (int)$instansi_id : 0);
+        $instansiUraianList = [];
+        if ($targetInstId > 0) {
+            $uraianRows = $this->db
+                ->select('DISTINCT(r.uraian) as uraian', FALSE)
+                ->from('belanja_rincian r')
+                ->join('belanja_rekening b', 'b.id = r.rekening_id')
+                ->join('belanja_sub_kegiatan_header h', 'h.id = b.header_id')
+                ->where('h.id_instansi', $targetInstId)
+                ->where('r.deleted_at IS NULL')
+                ->where('b.deleted_at IS NULL')
+                ->where('h.deleted_at IS NULL')
+                ->where('(r.deleted_at IS NULL OR r.deleted_at = "0000-00-00 00:00:00")')
+                ->where('(b.deleted_at IS NULL OR b.deleted_at = "0000-00-00 00:00:00")')
+                ->where('(h.deleted_at IS NULL OR h.deleted_at = "0000-00-00 00:00:00")')
+                ->where('r.uraian IS NOT NULL')
+                ->where("TRIM(r.uraian) != ''")
+                ->order_by('r.uraian', 'ASC')
+                ->get()
+                ->result_array();
+            $filteredUraian = [];
+            foreach ($uraianRows as $row) {
+                $u = trim($row['uraian']);
+                if ($u !== '' && !preg_match('/^5(\.\d+)+$/', $u)) {
+                    $filteredUraian[] = $u;
+                }
+            }
+            $instansiUraianList = array_values(array_unique($filteredUraian));
+        }
+        $Data['InstansiUraianList'] = $instansiUraianList;
+
+        $Data['MasterNodeNames'] = $node_map;
         $Data['BelanjaData'] = $belanjaData;
         
         $this->load->view('Daerah/header', $Header);
@@ -19770,6 +19831,55 @@ public function updateStatusPerjanjianKinerja() {
             }
         }
         
+        echo json_encode(['status' => 'success', 'data' => $data]);
+    }
+
+    // ================================================================
+    // GET REKOMENDASI URAIAN PENGELOMPOKAN BELANJA (AJAX - KHUSUS INSTANSI)
+    // ================================================================
+    public function GetUraianPengelompokanRekomendasi() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: $this->input->get('instansi_id', TRUE));
+        if ($this->is_role_4() && $this->get_instansi_id()) {
+            $instansi_id = $this->get_instansi_id();
+        }
+
+        if ($instansi_id <= 0) {
+            echo json_encode(['status' => 'success', 'data' => []]);
+            return;
+        }
+
+        $uraianRows = $this->db
+            ->select('DISTINCT(r.uraian) as uraian', FALSE)
+            ->from('belanja_rincian r')
+            ->join('belanja_rekening b', 'b.id = r.rekening_id')
+            ->join('belanja_sub_kegiatan_header h', 'h.id = b.header_id')
+            ->where('h.id_instansi', $instansi_id)
+            ->where('r.deleted_at IS NULL')
+            ->where('b.deleted_at IS NULL')
+            ->where('h.deleted_at IS NULL')
+            ->where('(r.deleted_at IS NULL OR r.deleted_at = "0000-00-00 00:00:00")')
+            ->where('(b.deleted_at IS NULL OR b.deleted_at = "0000-00-00 00:00:00")')
+            ->where('(h.deleted_at IS NULL OR h.deleted_at = "0000-00-00 00:00:00")')
+            ->where('r.uraian IS NOT NULL')
+            ->where("TRIM(r.uraian) != ''")
+            ->order_by('r.uraian', 'ASC')
+            ->get()
+            ->result_array();
+
+        $data = [];
+        foreach ($uraianRows as $row) {
+            $u = trim($row['uraian']);
+            if ($u !== '' && !preg_match('/^5(\.\d+)+$/', $u)) {
+                $data[] = $u;
+            }
+        }
+        $data = array_values(array_unique($data));
         echo json_encode(['status' => 'success', 'data' => $data]);
     }
 
@@ -21095,7 +21205,6 @@ public function updateStatusPerjanjianKinerja() {
         $nodes = $this->db
             ->select('kode_rekening, nama_rekening')
             ->from('master_rekening')
-            ->where('level <=', 5)
             ->like('kode_rekening', '5', 'after')
             ->order_by('kode_rekening', 'ASC')
             ->get()
@@ -21104,6 +21213,27 @@ public function updateStatusPerjanjianKinerja() {
         $node_map = [];
         foreach ($nodes as $n) {
             $node_map[$n['kode_rekening']] = $n['nama_rekening'];
+            $parts = explode('.', $n['kode_rekening']);
+            $normParts = array_map(function($p) { return is_numeric($p) ? (int)$p : $p; }, $parts);
+            $node_map[implode('.', $normParts)] = $n['nama_rekening'];
+        }
+
+        // Sertakan juga dari belanja_rekening yang sudah pernah diinput
+        $rekBelanja = $this->db
+            ->select('DISTINCT(kode_rekening), uraian_rekening', FALSE)
+            ->from('belanja_rekening')
+            ->where('deleted_at IS NULL')
+            ->where('kode_rekening IS NOT NULL')
+            ->where("kode_rekening != ''")
+            ->get()
+            ->result_array();
+        foreach ($rekBelanja as $rb) {
+            if (!empty($rb['uraian_rekening'])) {
+                $node_map[$rb['kode_rekening']] = $rb['uraian_rekening'];
+                $parts = explode('.', $rb['kode_rekening']);
+                $normParts = array_map(function($p) { return is_numeric($p) ? (int)$p : $p; }, $parts);
+                $node_map[implode('.', $normParts)] = $rb['uraian_rekening'];
+            }
         }
 
         echo json_encode([
