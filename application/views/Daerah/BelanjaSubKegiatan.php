@@ -1024,6 +1024,205 @@
     .context-row .colon { display: none; }
     .context-row .control-wrap { width: 100%; }
   }
+  /* ---------- Header Tahapan Renja (Pemisah diatas Tabel Rincian Belanja) ---------- */
+  .renja-stage-header {
+    background: var(--ui-card-bg);
+    border: 1px solid var(--ui-border-light);
+    border-radius: 10px;
+    padding: 11px 18px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  }
+  .renja-stage-left {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .renja-stage-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ui-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .renja-stage-title svg {
+    color: var(--notika-green);
+  }
+  .renja-stage-tabs {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 8px;
+    border: 1px solid var(--ui-border-light);
+  }
+  .stage-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #475569;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .stage-tab:hover {
+    color: #0f172a;
+    background: rgba(255,255,255,0.7);
+  }
+  .stage-tab.active {
+    background: var(--notika-green);
+    color: #ffffff;
+    box-shadow: 0 1px 2px rgba(0, 194, 146, 0.3);
+  }
+  .stage-tab .stage-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #94a3b8;
+  }
+  .stage-tab.active .stage-dot {
+    background: #ffffff;
+  }
+  .renja-stage-right {
+    display: flex;
+    align-items: center;
+  }
+  .stage-badge-info {
+    font-size: 12.5px;
+    color: var(--ui-text-muted);
+    background: var(--ui-bg);
+    padding: 4px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--ui-border-light);
+  }
+  .stage-badge-info b {
+    color: var(--notika-green-dark);
+  }
+
+  /* ---------- Kartu Pagu & Realisasi Ringkasan (Notika Style) ---------- */
+  .pagu-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    background: var(--ui-card-bg);
+    border: 1px solid var(--ui-border-light);
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    overflow: hidden;
+  }
+  .pagu-item {
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    background: #ffffff;
+  }
+  .pagu-item + .pagu-item {
+    border-left: 1px solid var(--ui-border-light);
+  }
+  .pagu-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .pagu-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+  .pagu-icon.icon-pagu {
+    background: var(--notika-green);
+    color: #ffffff;
+  }
+  .pagu-icon.icon-input {
+    background: var(--notika-green-light);
+    color: var(--notika-green-dark);
+  }
+  .pagu-icon.icon-selisih {
+    background: #fffbeb;
+    color: #d97706;
+  }
+  .pagu-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .pagu-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+  }
+  .pagu-value {
+    font-size: 18.5px;
+    font-weight: 800;
+    color: #0f172a;
+    white-space: nowrap;
+    font-family: 'Roboto', "Inter", sans-serif;
+    letter-spacing: -0.2px;
+  }
+  .pagu-sub {
+    font-size: 11.5px;
+    color: #64748b;
+  }
+
+  /* Status Colors untuk Selisih Pagu */
+  .pagu-item.status-balanced .pagu-icon.icon-selisih {
+    background: var(--notika-green-light);
+    color: var(--notika-green-dark);
+  }
+  .pagu-item.status-balanced .pagu-value {
+    color: var(--notika-green-dark);
+  }
+  .pagu-item.status-remaining .pagu-icon.icon-selisih {
+    background: #fffbeb;
+    color: #d97706;
+  }
+  .pagu-item.status-remaining .pagu-value {
+    color: #d97706;
+  }
+  .pagu-item.status-over .pagu-icon.icon-selisih {
+    background: #fef2f2;
+    color: #dc2626;
+  }
+  .pagu-item.status-over .pagu-value {
+    color: #dc2626;
+  }
+
+  @media (max-width: 992px) {
+    .pagu-cards {
+      grid-template-columns: 1fr;
+    }
+    .pagu-item {
+      padding: 10px 16px;
+    }
+    .pagu-item + .pagu-item {
+      border-left: none;
+      border-top: 1px solid var(--ui-border-light);
+    }
+  }
 </style>
 
 <div class="main-content">
@@ -1389,6 +1588,67 @@
     <div class="context-hint" id="contextHint"></div>
   </div>
 
+  <!-- ============ HEADER TAHAPAN RENJA (PEMISAH DIATAS TABEL RINCIAN BELANJA) ============ -->
+  <div class="renja-stage-header">
+    <div class="renja-stage-left">
+      <div class="renja-stage-title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span>Tahapan Renja :</span>
+      </div>
+      <div class="renja-stage-tabs" id="renjaStageTabs">
+        <button type="button" class="stage-tab active" data-stage="ranwal" title="Rancangan Awal Renja">
+          <span class="stage-dot"></span> Ranwal
+        </button>
+        <button type="button" class="stage-tab" data-stage="rancangan" title="Rancangan Renja">
+          <span class="stage-dot"></span> Rancangan
+        </button>
+        <button type="button" class="stage-tab" data-stage="rankhir" title="Rancangan Akhir / Penetapan Renja">
+          <span class="stage-dot"></span> Rankhir / Penetapan
+        </button>
+        <button type="button" class="stage-tab" data-stage="perubahan" title="Perubahan Renja">
+          <span class="stage-dot"></span> Perubahan
+        </button>
+      </div>
+    </div>
+    <div class="renja-stage-right">
+      <span class="stage-badge-info" id="stageInfoText">Pagu Sub Kegiatan: <b>Ranwal Renja</b></span>
+    </div>
+  </div>
+
+  <!-- Kartu Ringkasan Pagu & Realisasi Sub Kegiatan -->
+  <div class="pagu-cards">
+    <div class="pagu-item">
+      <div class="pagu-icon icon-pagu">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="16" height="11" rx="2"/><path d="M2 8.5h16M6.5 12.5h2"/></svg>
+      </div>
+      <div class="pagu-text">
+        <span class="pagu-label">PAGU SUB KEGIATAN (RENJA)</span>
+        <span class="pagu-value" id="paguAnggaranValue">Rp 0</span>
+        <span class="pagu-sub" id="paguAnggaranSub">Pilih Sub Kegiatan terlebih dahulu</span>
+      </div>
+    </div>
+    <div class="pagu-item">
+      <div class="pagu-icon icon-input">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5l4 4 10-10"/></svg>
+      </div>
+      <div class="pagu-text">
+        <span class="pagu-label">AKUMULASI TERINPUT (SUB KEGIATAN)</span>
+        <span class="pagu-value" id="paguTerinputValue">Rp 0</span>
+        <span class="pagu-sub" id="paguTerinputPercent">0% dari Pagu Renja</span>
+      </div>
+    </div>
+    <div class="pagu-item status-remaining" id="paguSelisihItem">
+      <div class="pagu-icon icon-selisih">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5h12M10 4.5v3M10 12.5v3"/></svg>
+      </div>
+      <div class="pagu-text">
+        <span class="pagu-label" id="paguSelisihLabel">SISA PAGU SUB KEGIATAN</span>
+        <span class="pagu-value" id="paguSelisihValue">Rp 0</span>
+        <span class="pagu-sub" id="paguSelisihSub">Pilih Sub Kegiatan terlebih dahulu</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Table card -->
   <div class="card">
     <div class="table-toolbar">
@@ -1456,11 +1716,9 @@
       <div class="form-grid">
 
         <div class="form-field full">
-          <label>Objek Belanja <span class="req">*</span></label>
-          <select id="fObjekBelanja">
-            <option>Belanja Pegawai</option>
-            <option selected>Belanja Barang Jasa dan Modal</option>
-            <option>Belanja Modal</option>
+          <label for="fObjekBelanja">Objek Belanja <span class="req">*</span> <small style="font-weight:600; color:#0284c7; background:#eff6ff; padding:2px 8px; border-radius:4px; font-size:11.5px; border:1px solid #bfdbfe; margin-left:6px;"><i class="fa fa-filter"></i> Memfilter Rekening / Akun</small></label>
+          <select id="fObjekBelanja" style="width:100%; border:1px solid var(--ui-border); border-radius:6px; padding:9px 12px; font-size:13.5px; background:#ffffff;">
+            <option value="">-- Semua / Pilih Objek Belanja --</option>
           </select>
         </div>
 
@@ -1478,9 +1736,20 @@
         </div>
 
         <div class="form-field">
-          <label>Uraian Pengelompokan Belanja / Paket Pekerjaan</label>
-          <input id="fUraianPengelompokan" list="uraianList" placeholder="Pilih atau masukkan uraian (opsional)">
-          <datalist id="uraianList"></datalist>
+          <div style="display:flex; align-items:center; margin-bottom:6px;">
+            <label for="fUraianPengelompokan" style="margin:0;">Uraian Pengelompokan Belanja / Paket Pekerjaan</label>
+            <button type="button" id="btnToggleUraianMode" class="btn btn-xs btn-default" style="margin-left:10px; font-size:11.5px; padding:2px 8px; border-radius:4px; border:1px solid #cbd5e1; background:#f8fafc; color:#0284c7; cursor:pointer; font-weight:600;" title="Beralih antara pilihan rekomendasi atau ketik manual">
+              <i class="fa fa-pencil"></i> Ketik Manual
+            </button>
+          </div>
+          <div id="wrapUraianSelect" style="width:100%;">
+            <select id="fUraianPengelompokan" style="width:100%;">
+              <option value="">-- Cari atau ketik Uraian Pengelompokan Belanja / Paket Pekerjaan... --</option>
+            </select>
+          </div>
+          <div id="wrapUraianManual" style="width:100%; display:none;">
+            <input type="text" id="fUraianManual" class="form-control" style="width:100%; border:1px solid var(--ui-border); border-radius:6px; padding:9px 12px; font-size:13.5px; background:#ffffff;" placeholder="Ketik uraian pengelompokan secara manual...">
+          </div>
         </div>
 
         <div class="form-field">
@@ -1495,27 +1764,25 @@
         </div>
 
         <div class="form-field">
-          <label>Jenis Standar Harga</label>
-          <div style="display:flex; gap:6px;">
-            <select id="fJenisStandarHarga" style="flex:1;">
-              <option value="">Pilih jenis standar harga</option>
-              <option>Harga Satuan Pokok Kegiatan (HSPK)</option>
-              <option>Analisis Standar Belanja (ASB)</option>
-              <option>Standar Satuan Harga (SSH)</option>
-              <option>Standar Harga Satuan Regional</option>
-              <option>E-Katalog</option>
-              <option>Survey Harga Pasar</option>
-            </select>
-            <button type="button" class="btn-tarik-standar" id="btnOpenStandarPicker" title="Tarik dari database HSPK/ASB">
-              <i class="fa fa-database"></i> Tarik
-            </button>
-          </div>
+          <label for="fJenisStandarHarga">Jenis Standar Harga</label>
+          <select id="fJenisStandarHarga" style="width:100%; border:1px solid var(--ui-border); border-radius:6px; padding:9px 12px; font-size:13.5px; background:#ffffff;">
+            <option value="">Pilih jenis standar harga</option>
+            <option>Standar Satuan Harga (SSH)</option>
+            <option>Harga Satuan Pokok Kegiatan (HSPK)</option>
+            <option>Analisis Standar Belanja (ASB)</option>
+            <option>Standar Harga Satuan Regional (SBU)</option>
+          </select>
         </div>
 
         <div class="form-field">
-          <label>Komponen <span class="req">*</span></label>
-          <input id="fKomponen" list="komponenList" placeholder="Nama komponen / barang">
-          <datalist id="komponenList"></datalist>
+          <label for="fKomponen">Komponen <span class="req">*</span> <small style="font-weight:600; color:#0284c7; background:#eff6ff; padding:2px 8px; border-radius:4px; font-size:11.5px; border:1px solid #bfdbfe; margin-left:6px;"><i class="fa fa-list"></i> Pilih Komponen</small></label>
+          <div style="display:flex; gap:6px;">
+            <input id="fKomponen" list="komponenList" placeholder="Nama komponen / barang" style="flex:1;">
+            <datalist id="komponenList"></datalist>
+            <button type="button" class="btn-tarik-standar" id="btnOpenStandarPicker" title="Pilih Komponen dari Standar Harga">
+              <i class="fa fa-search"></i> Pilih Komponen
+            </button>
+          </div>
         </div>
 
         <div class="form-field">
@@ -1593,16 +1860,16 @@
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
         </div>
         <div class="titles">
-          <h3 style="margin:0; font-size:16px;">Tarik Data Standar Harga Daerah</h3>
-          <p style="margin:2px 0 0; font-size:12.5px; color:rgba(255,255,255,0.75);">Pilih item standar harga dari database HSPK atau ASB.</p>
+          <h3 id="pickerModalTitle" style="margin:0; font-size:16px;">Pilih Komponen Standar Harga</h3>
+          <p id="pickerModalDesc" style="margin:2px 0 0; font-size:12.5px; color:rgba(255,255,255,0.75);">Menampilkan daftar komponen sesuai Jenis Standar Harga yang dipilih.</p>
         </div>
       </div>
       <button class="btn-back" id="btnClosePicker" type="button">&times; Tutup</button>
     </div>
     
-    <div class="picker-tabs">
-      <button type="button" class="picker-tab active" data-type="hspk">HSPK (Harga Satuan Pokok Kegiatan)</button>
-      <button type="button" class="picker-tab" data-type="asb">ASB (Analisis Standar Belanja)</button>
+    <div id="pickerActiveTypeBadge" style="padding: 10px 24px; background: #f8fafc; border-bottom: 1px solid var(--ui-border-light); font-weight: 600; color: var(--ui-text); font-size: 13.5px; display:flex; align-items:center; gap:8px;">
+      <i class="fa fa-tag" style="color:var(--notika-green);"></i>
+      <span>Jenis Standar Harga: <strong id="lblActivePickerType" style="color:var(--notika-green);">Standar Satuan Harga (SSH)</strong></span>
     </div>
 
     <div style="padding: 14px 24px; display:flex; gap:10px; background:#ffffff;">
@@ -1667,9 +1934,11 @@
   var hasKodeWilayah = <?= !empty($KodeWilayah) ? 'true' : 'false' ?>;
   var activeInstansiId = <?= json_encode($ActiveInstansiId) ?>;
   var canCrud = <?= !empty($CanCrud) ? 'true' : 'false' ?>;
+  var instansiUraianList = <?= json_encode(!empty($InstansiUraianList) ? $InstansiUraianList : []) ?>;
 
   /* ---------------- Master data ---------------- */
-  var NODE_NAMES = {
+  var serverNodeNames = <?= json_encode(!empty($MasterNodeNames) ? $MasterNodeNames : (object)[]) ?>;
+  var NODE_NAMES = $.extend({
     "5": "BELANJA DAERAH",
     "5.1": "BELANJA OPERASI",
     "5.1.01": "Belanja Pegawai",
@@ -1685,9 +1954,47 @@
     "5.2.02": "Belanja Modal Peralatan dan Mesin",
     "5.2.03": "Belanja Modal Gedung dan Bangunan",
     "5.2.04": "Belanja Modal Jalan, Jaringan, dan Irigasi"
-  };
+  }, serverNodeNames);
+
+  function normalizeCode(c){
+    if(!c) return "";
+    return String(c).split(".").map(function(p){
+      var n = parseInt(p, 10);
+      return isNaN(n) ? p.trim() : String(n);
+    }).join(".");
+  }
+
+  function isCodeLike(s){
+    if(!s) return true;
+    var str = String(s).trim();
+    return /^[0-9]+(\.[0-9]+)*$/.test(str);
+  }
+
+  function registerRekeningName(kode, nama, level){
+    if(!kode || !nama) return;
+    NODE_NAMES[kode] = nama;
+    var norm = normalizeCode(kode);
+    NODE_NAMES[norm] = nama;
+    var found = false;
+    for(var i=0; i<REKENING_OPTIONS.length; i++){
+      if(REKENING_OPTIONS[i].kode === kode){
+        REKENING_OPTIONS[i].nama = nama;
+        found = true;
+        break;
+      }
+    }
+    if(!found){
+      REKENING_OPTIONS.push({
+        kode: kode,
+        nama: nama,
+        level: level || 6
+      });
+    }
+  }
 
   var REKENING_OPTIONS = [];
+  var OBJEK_BELANJA_OPTIONS = [];
+  var OBJEK_MAP = {};
   var MASTER = {
     subUnit: [],
     bidangUrusan: [],
@@ -1701,7 +2008,7 @@
   var collapsedSet = new Set();
   var editingItem = null;
   var currentSubKegiatanKode = null;
-  var currentPickerType = 'hspk';
+  var currentPickerType = 'ssh';
 
   /* ---------------- Init Master Data from Database ---------------- */
   function buildMasterFromDatabase() {
@@ -1713,14 +2020,22 @@
       // Convert nested rekening and rincian into items list
       if (h.rekening && h.rekening.length > 0) {
         $.each(h.rekening, function(rIdx, rek) {
+          if (rek.kode_rekening && rek.uraian_rekening) {
+            registerRekeningName(rek.kode_rekening, rek.uraian_rekening, rek.level_rekening || 6);
+          }
           if (rek.rincian && rek.rincian.length > 0) {
+            var parts = (rek.kode_rekening || "").split('.');
+            var objKode = parts.slice(0, 3).join('.');
+            var objNama = OBJEK_MAP[objKode] || (NODE_NAMES[objKode] ? (objKode + " - " + NODE_NAMES[objKode]) : objKode);
+
             $.each(rek.rincian, function(iIdx, rinc) {
               allItems.push({
                 id: parseInt(rinc.id, 10),
                 headerId: h.id,
                 rekeningId: rek.id,
                 subKegiatanKode: skKode,
-                objekBelanja: "Belanja Barang Jasa dan Modal",
+                objekBelanja: objKode || "5.1.02",
+                objekBelanjaNama: objNama,
                 rekeningKode: rek.kode_rekening,
                 rekeningNama: rek.uraian_rekening,
                 pengelompokanTipe: "Pengelompokan Belanja",
@@ -1747,6 +2062,163 @@
   }
 
   /* ---------------- Helpers ---------------- */
+  /* ---------------- Helpers ---------------- */
+  /* ---------------- Pagu & Tahapan Renja Summary ---------------- */
+  var currentRenjaStage = 'ranwal';
+  var cachedPaguTahapan = null;
+
+  function fmtRp(n){
+    n = Number(n) || 0;
+    return "Rp " + Math.round(n).toLocaleString("id-ID");
+  }
+
+  function renderPaguCards(){
+    var thnVal = (el("ctxTahun") ? el("ctxTahun").value : '<?= $TahunAktif ?>') || '<?= $TahunAktif ?>';
+    if(el("paguTahunLabel")){
+      el("paguTahunLabel").textContent = thnVal;
+    }
+
+    var stageNames = {
+      'ranwal': 'Ranwal Renja',
+      'rancangan': 'Rancangan Renja',
+      'rankhir': 'Rankhir / Penetapan Renja',
+      'perubahan': 'Perubahan Renja'
+    };
+    var stgLbl = stageNames[currentRenjaStage] || 'Ranwal Renja';
+
+    var visibleItems = currentSubKegiatanKode ? 
+      items.filter(function(it){ return it.subKegiatanKode === currentSubKegiatanKode; }) : 
+      [];
+    var terinput = visibleItems.reduce(function(s, it){ return s + calcJumlah(it); }, 0);
+
+    var pagu = 0;
+    var hasSubKegPagu = false;
+    if(cachedPaguTahapan && currentSubKegiatanKode){
+      var valTahap = parseFloat(cachedPaguTahapan[currentRenjaStage]);
+      if(!isNaN(valTahap) && valTahap > 0){
+        pagu = valTahap;
+        hasSubKegPagu = true;
+      }
+    }
+
+    // Pagu yang tampil HANYA pagu per sub kegiatan dari Renja, bukan pagu total PD
+    var selisih = pagu - terinput;
+    var persen = pagu > 0 ? (Math.round((terinput / pagu) * 1000) / 10) : 0;
+
+    if(el("paguAnggaranValue")){
+      el("paguAnggaranValue").textContent = fmtRp(pagu);
+    }
+    if(el("paguAnggaranSub")){
+      if(!currentSubKegiatanKode){
+        el("paguAnggaranSub").textContent = 'Pilih Sub Kegiatan terlebih dahulu';
+      } else if(hasSubKegPagu){
+        el("paguAnggaranSub").innerHTML = 'Pagu Sub Kegiatan Renja (<b>' + esc(stgLbl) + '</b>) TA <b>' + esc(thnVal) + '</b>';
+      } else {
+        el("paguAnggaranSub").innerHTML = '<span style="color:#d97706;"><i class="fa fa-info-circle"></i> Belum ada alokasi di ' + esc(stgLbl) + ' TA ' + esc(thnVal) + '</span>';
+      }
+    }
+
+    if(el("paguTerinputValue")){
+      el("paguTerinputValue").textContent = fmtRp(terinput);
+    }
+    if(el("paguTerinputPercent")){
+      if(!currentSubKegiatanKode){
+        el("paguTerinputPercent").textContent = 'Pilih Sub Kegiatan terlebih dahulu';
+      } else if(pagu > 0){
+        el("paguTerinputPercent").textContent = persen + '% dari Pagu Renja Sub Kegiatan';
+      } else {
+        el("paguTerinputPercent").textContent = 'Total rincian belanja terinput';
+      }
+    }
+
+    var selisihItem = el("paguSelisihItem");
+    if(el("paguSelisihValue")){
+      el("paguSelisihValue").textContent = fmtRp(Math.abs(selisih));
+    }
+    if(selisihItem && el("paguSelisihLabel") && el("paguSelisihSub")){
+      selisihItem.classList.remove('status-balanced', 'status-remaining', 'status-over');
+      if(!currentSubKegiatanKode){
+        el("paguSelisihLabel").textContent = 'SISA PAGU SUB KEGIATAN';
+        el("paguSelisihSub").textContent = 'Pilih Sub Kegiatan terlebih dahulu';
+        selisihItem.classList.add('status-remaining');
+      } else if(pagu === 0 && terinput === 0){
+        el("paguSelisihLabel").textContent = 'SISA PAGU SUB KEGIATAN';
+        el("paguSelisihSub").textContent = 'Pagu Renja belum dialokasikan';
+        selisihItem.classList.add('status-remaining');
+      } else if(selisih > 0){
+        el("paguSelisihLabel").textContent = 'SISA PAGU BELUM TERINPUT';
+        el("paguSelisihSub").textContent = 'Tersisa untuk rincian Sub Kegiatan ini';
+        selisihItem.classList.add('status-remaining');
+      } else if(selisih === 0){
+        el("paguSelisihLabel").textContent = 'PAGU PAS / SESUAI';
+        el("paguSelisihSub").textContent = 'Total rincian tepat 100% dari Pagu Renja';
+        selisihItem.classList.add('status-balanced');
+      } else {
+        el("paguSelisihLabel").textContent = 'LEBIH INPUT DARI PAGU';
+        el("paguSelisihSub").innerHTML = '<span style="color:#dc2626; font-weight:600;"><i class="fa fa-exclamation-triangle"></i> Melebihi Pagu Renja Sub Kegiatan</span>';
+        selisihItem.classList.add('status-over');
+      }
+    }
+  }
+
+  function fetchPaguTahapan(skKode){
+    if(!skKode){
+      cachedPaguTahapan = null;
+      renderPaguCards();
+      return;
+    }
+    var instId = activeInstansiId || (currentInstansi ? currentInstansi.id : 0);
+    var thnVal = (el("ctxTahun") ? el("ctxTahun").value : '<?= $TahunAktif ?>') || '<?= $TahunAktif ?>';
+
+    $.ajax({
+      url: ControllerURL + "GetPaguRenjaTahapan",
+      type: "POST",
+      data: {
+        kode_sub_kegiatan: skKode,
+        instansi_id: instId,
+        tahun: thnVal
+      },
+      dataType: "json",
+      success: function(res){
+        if(res && res.status === 'success' && res.data){
+          cachedPaguTahapan = res.data;
+        } else {
+          cachedPaguTahapan = null;
+        }
+        renderPaguCards();
+      },
+      error: function(){
+        cachedPaguTahapan = null;
+        renderPaguCards();
+      }
+    });
+  }
+
+  function initRenjaStageEvents(){
+    var stageTabs = document.querySelectorAll('#renjaStageTabs .stage-tab');
+    stageTabs.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        stageTabs.forEach(function(b){ b.classList.remove('active'); });
+        this.classList.add('active');
+        currentRenjaStage = this.getAttribute('data-stage') || 'ranwal';
+
+        var stageNames = {
+          'ranwal': 'Ranwal Renja',
+          'rancangan': 'Rancangan Renja',
+          'rankhir': 'Rankhir / Penetapan Renja',
+          'perubahan': 'Perubahan Renja'
+        };
+        var lbl = stageNames[currentRenjaStage] || 'Ranwal Renja';
+        var infoEl = el("stageInfoText");
+        if(infoEl){
+          infoEl.innerHTML = 'Pagu Sub Kegiatan: <b>' + esc(lbl) + '</b>';
+        }
+
+        renderPaguCards();
+      });
+    });
+  }
+
   function rupiah(n){
     n = n || 0;
     return "Rp " + n.toLocaleString("id-ID",{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1788,13 +2260,100 @@
     return {map:map, order:order};
   }
   function findRekening(kode){
-    for(var i=0;i<REKENING_OPTIONS.length;i++){ if(REKENING_OPTIONS[i].kode===kode) return REKENING_OPTIONS[i]; }
+    if(!kode) return null;
+    for(var i=0; i<REKENING_OPTIONS.length; i++){
+      if(REKENING_OPTIONS[i].kode === kode) return REKENING_OPTIONS[i];
+    }
+    var norm = normalizeCode(kode);
+    for(var j=0; j<REKENING_OPTIONS.length; j++){
+      if(normalizeCode(REKENING_OPTIONS[j].kode) === norm) return REKENING_OPTIONS[j];
+    }
+    for(var k=0; k<items.length; k++){
+      if(items[k].rekeningKode === kode || normalizeCode(items[k].rekeningKode) === norm){
+        if(items[k].rekeningNama && !isCodeLike(items[k].rekeningNama)){
+          return { kode: kode, nama: items[k].rekeningNama };
+        }
+      }
+    }
     return null;
   }
-  function deriveGroupLabel(kode){
-    var r = findRekening(kode);
-    var nama = r ? r.nama : (NODE_NAMES[kode] || kode);
-    var parts = nama.split("-");
+
+  function getNodeName(code, fallbackItems){
+    if(!code) return "";
+    
+    // 1. Direct match in NODE_NAMES
+    if(NODE_NAMES[code] && !isCodeLike(NODE_NAMES[code])){
+      return NODE_NAMES[code];
+    }
+
+    // 2. Normalized match in NODE_NAMES
+    var norm = normalizeCode(code);
+    if(NODE_NAMES[norm] && !isCodeLike(NODE_NAMES[norm])){
+      return NODE_NAMES[norm];
+    }
+
+    // 3. Match in REKENING_OPTIONS
+    var r = findRekening(code);
+    if(r && r.nama && !isCodeLike(r.nama)){
+      return r.nama;
+    }
+
+    // 4. Match in fallbackItems (items of this node)
+    if(fallbackItems && fallbackItems.length > 0){
+      for(var k=0; k<fallbackItems.length; k++){
+        if(fallbackItems[k].rekeningNama && !isCodeLike(fallbackItems[k].rekeningNama)){
+          if(fallbackItems[k].rekeningKode === code || normalizeCode(fallbackItems[k].rekeningKode) === norm){
+            return fallbackItems[k].rekeningNama;
+          }
+        }
+      }
+      if(code.split('.').length >= 6 && fallbackItems[0].rekeningNama && !isCodeLike(fallbackItems[0].rekeningNama)){
+        return fallbackItems[0].rekeningNama;
+      }
+    }
+
+    // 5. Match in global items
+    for(var i=0; i<items.length; i++){
+      if(items[i].rekeningNama && !isCodeLike(items[i].rekeningNama)){
+        if(items[i].rekeningKode === code || normalizeCode(items[i].rekeningKode) === norm){
+          return items[i].rekeningNama;
+        }
+      }
+    }
+
+    // 6. Match in rawBelanjaHeaders
+    if(typeof rawBelanjaHeaders !== 'undefined' && rawBelanjaHeaders){
+      for(var h=0; h<rawBelanjaHeaders.length; h++){
+        var reks = rawBelanjaHeaders[h].rekening || [];
+        for(var rk=0; rk<reks.length; rk++){
+          if(reks[rk].uraian_rekening && !isCodeLike(reks[rk].uraian_rekening)){
+            if(reks[rk].kode_rekening === code || normalizeCode(reks[rk].kode_rekening) === norm){
+              return reks[rk].uraian_rekening;
+            }
+          }
+        }
+      }
+    }
+
+    return code;
+  }
+
+  function deriveGroupLabel(kode, itemsArr){
+    var nama = getNodeName(kode, itemsArr);
+    if(isCodeLike(nama)){
+      if(itemsArr && itemsArr.length > 0){
+        for(var i=0; i<itemsArr.length; i++){
+          if(itemsArr[i].rekeningNama && !isCodeLike(itemsArr[i].rekeningNama)){
+            nama = itemsArr[i].rekeningNama;
+            break;
+          }
+        }
+      }
+    }
+    if(!nama || isCodeLike(nama)){
+      return "Belanja " + (kode || "");
+    }
+    var parts = nama.split(/\s+[-–]\s+/);
     return parts.length>1 ? parts[parts.length-1].trim() : nama;
   }
 
@@ -1839,9 +2398,10 @@
   function levelRow(code, name, level, total, hasChildren){
     var collapsed = collapsedSet.has(code);
     var pad = 10 + (level-1)*18;
+    var displayName = (name && !isCodeLike(name)) ? name : getNodeName(code);
     return '<tr class="row-lvl'+level+'">'+
       '<td class="font-mono">'+esc(code)+'</td>'+
-      '<td><div class="cell-label" style="padding-left:'+pad+'px;">'+toggleBtn(code,collapsed,hasChildren)+'<span class="txt">'+esc(name)+'</span></div></td>'+
+      '<td><div class="cell-label" style="padding-left:'+pad+'px;">'+toggleBtn(code,collapsed,hasChildren)+'<span class="txt">'+esc(displayName)+'</span></div></td>'+
       '<td></td><td></td><td></td>'+
       '<td class="num">'+formatMoney(total)+'</td>'+
       (canCrud ? '<td></td>' : '')+
@@ -1850,9 +2410,10 @@
   function accountRow(code, name, level, total, hasChildren){
     var collapsed = collapsedSet.has(code);
     var pad = 10 + (level-1)*18;
+    var displayName = (name && !isCodeLike(name)) ? name : getNodeName(code);
     return '<tr class="row-account">'+
       '<td class="font-mono">'+esc(code)+'</td>'+
-      '<td><div class="cell-label" style="padding-left:'+pad+'px;">'+toggleBtn(code,collapsed,hasChildren)+'<span class="txt">'+esc(name)+'</span></div></td>'+
+      '<td><div class="cell-label" style="padding-left:'+pad+'px;">'+toggleBtn(code,collapsed,hasChildren)+'<span class="txt">'+esc(displayName)+'</span></div></td>'+
       '<td></td><td></td><td></td>'+
       '<td class="num">'+formatMoney(total)+'</td>'+
       (canCrud ? '<td></td>' : '')+
@@ -1861,10 +2422,11 @@
   function groupRow(key, label, sumberDana, level, total, hasChildren){
     var collapsed = collapsedSet.has(key);
     var pad = 10 + (level-1)*18;
+    var displayLabel = (label && !isCodeLike(label)) ? label : getNodeName(label);
     return '<tr class="row-group">'+
       '<td></td>'+
       '<td><div class="cell-label" style="padding-left:'+pad+'px;">'+toggleBtn(key,collapsed,hasChildren)+
-        '<span class="txt"><span class="tag">[ # ] '+esc(label)+'</span>'+
+        '<span class="txt"><span class="tag">[ + ] '+esc(displayLabel)+'</span>'+
         (sumberDana ? '<span class="sub-label">Sumber Dana: '+esc(sumberDana)+'</span>' : '')+
         '</span></div></td>'+
       '<td></td><td></td><td></td>'+
@@ -1875,9 +2437,10 @@
   function subgroupRow(key, label, level, total, hasChildren){
     var collapsed = collapsedSet.has(key);
     var pad = 10 + (level-1)*18;
+    var displayLabel = (label && label.trim() !== '') ? label : '-';
     return '<tr class="row-subgroup">'+
       '<td></td>'+
-      '<td><div class="cell-label" style="padding-left:'+pad+'px;">'+toggleBtn(key,collapsed,hasChildren)+'<span class="txt">[ - ] '+esc(label)+'</span></div></td>'+
+      '<td><div class="cell-label" style="padding-left:'+pad+'px;">'+toggleBtn(key,collapsed,hasChildren)+'<span class="txt">[ - ] '+esc(displayLabel)+'</span></div></td>'+
       '<td></td><td></td><td></td>'+
       '<td class="num">'+formatMoney(total)+'</td>'+
       (canCrud ? '<td></td>' : '')+
@@ -1891,7 +2454,6 @@
         '<span class="toggle" style="visibility:hidden;">'+ICON_CHEVRON+'</span>'+
         '<span class="txt"><span class="komponen">'+esc(it.komponen)+'</span>'+
         (it.spesifikasi ? '<span class="spesifikasi">Spesifikasi: '+esc(it.spesifikasi)+'</span>' : '')+
-        (it.keterangan ? '<span class="keterangan">'+esc(it.keterangan)+'</span>' : '')+
         '</span></div></td>'+
       '<td class="num font-mono">'+esc(it.koefisien)+' '+esc(it.satuan)+'</td>'+
       '<td class="num">'+formatMoney(it.hargaSatuan)+'</td>'+
@@ -1906,7 +2468,7 @@
 
   /* ---------------- Main render ---------------- */
   function renderLevelNode(code, node, level, hidden, out){
-    var name = NODE_NAMES[code] || (findRekening(code)? findRekening(code).nama : code);
+    var name = getNodeName(code, node.items);
     var total = sumNode(node);
     var isAccount = !!findRekening(code) || (code.split('.').length >= 6);
     var hasChildren = node.order.length>0 || node.items.length>0;
@@ -1926,30 +2488,49 @@
   }
 
   function renderItemGroups(accountCode, itemsArr, level, hidden, out){
-    var autoLabel = deriveGroupLabel(accountCode);
-    var bySD = groupBy(itemsArr, function(it){ return it.sumberDana || "-"; });
-    bySD.order.forEach(function(sd){
-      var sdItems = bySD.map[sd];
-      var sdKey = accountCode+"::SD::"+sd;
-      var sdCollapsed = collapsedSet.has(sdKey);
-      var sdTotal = sdItems.reduce(function(s,it){return s+calcJumlah(it);},0);
-      if(!hidden){
-        out.push(groupRow(sdKey, autoLabel, sd==="-"?"":sd, level, sdTotal, true));
-      }
-      var urHidden = hidden || sdCollapsed;
+    var autoLabel = deriveGroupLabel(accountCode, itemsArr);
+    
+    // Group Level 1: [ + ] Uraian Pengelompokan Belanja / Paket Pekerjaan (+ Sumber Dana)
+    var byUR = groupBy(itemsArr, function(it){
+      var u = (it.uraianPengelompokan && it.uraianPengelompokan.trim() !== '') ? it.uraianPengelompokan.trim() : autoLabel;
+      var sd = (it.sumberDana && it.sumberDana.trim() !== '') ? it.sumberDana.trim() : '-';
+      return u + "____SD____" + sd;
+    });
 
-      var byUR = groupBy(sdItems, function(it){ return it.uraianPengelompokan || autoLabel; });
-      byUR.order.forEach(function(ur){
-        var urItems = byUR.map[ur];
-        var urKey = sdKey+"::UR::"+ur;
-        var urCollapsed = collapsedSet.has(urKey);
-        var urTotal = urItems.reduce(function(s,it){return s+calcJumlah(it);},0);
+    byUR.order.forEach(function(uKey){
+      var uItems = byUR.map[uKey];
+      var parts = uKey.split("____SD____");
+      var uraianLabel = parts[0] || autoLabel;
+      var sdLabel = (parts[1] && parts[1] !== '-') ? parts[1] : '';
+
+      var gKey = accountCode + "::UR::" + uKey;
+      var gCollapsed = collapsedSet.has(gKey);
+      var gTotal = uItems.reduce(function(s,it){ return s + calcJumlah(it); }, 0);
+
+      if(!hidden){
+        out.push(groupRow(gKey, uraianLabel, sdLabel, level, gTotal, true));
+      }
+      var urHidden = hidden || gCollapsed;
+
+      // Group Level 2: [ - ] Mengambil dari Keterangan
+      var byKet = groupBy(uItems, function(it){
+        return (it.keterangan && it.keterangan.trim() !== '') ? it.keterangan.trim() : '-';
+      });
+
+      byKet.order.forEach(function(ket){
+        var ketItems = byKet.map[ket];
+        var ketKey = gKey + "::KET::" + ket;
+        var ketCollapsed = collapsedSet.has(ketKey);
+        var ketTotal = ketItems.reduce(function(s,it){ return s + calcJumlah(it); }, 0);
+
         if(!urHidden){
-          out.push(subgroupRow(urKey, ur, level+1, urTotal, true));
+          out.push(subgroupRow(ketKey, ket, level + 1, ketTotal, true));
         }
-        var itHidden = urHidden || urCollapsed;
+        var itHidden = urHidden || ketCollapsed;
         if(!itHidden){
-          urItems.forEach(function(it){ out.push(itemRow(it, level+2)); });
+          ketItems.forEach(function(it){
+            out.push(itemRow(it, level + 2));
+          });
         }
       });
     });
@@ -1967,6 +2548,7 @@
         '<p>Pilih Sub Unit, Bidang Urusan, Program, Kegiatan dan Sub Kegiatan di atas terlebih dahulu untuk menampilkan rincian belanja.</p></div></td></tr>';
       document.getElementById("grandTotal").innerHTML = formatMoney(0);
       refreshDatalists(visibleItems);
+      renderPaguCards();
       return;
     }
 
@@ -1991,17 +2573,99 @@
     document.getElementById("grandTotal").innerHTML = formatMoney(grand);
 
     refreshDatalists(visibleItems);
+    renderPaguCards();
+  }
+
+  function populateUraianSelect(selectedVal){
+    var $sel = $('#fUraianPengelompokan');
+    if (!$sel.length) return;
+    var curVal = selectedVal !== undefined ? selectedVal : ($sel.val() || '');
+
+    var html = '<option value="">-- Cari atau ketik Uraian Pengelompokan Belanja / Paket Pekerjaan... --</option>';
+    var list = [];
+    if (Array.isArray(instansiUraianList)) {
+      list = instansiUraianList.filter(function(u){
+        return u && typeof u === 'string' && u.trim() !== '' && !isCodeLike(u);
+      });
+    }
+
+    var uniqueList = Array.from(new Set(list));
+
+    if (curVal && uniqueList.indexOf(curVal) === -1) {
+      uniqueList.unshift(curVal);
+    }
+
+    uniqueList.forEach(function(u){
+      html += '<option value="' + esc(u) + '">' + esc(u) + '</option>';
+    });
+
+    $sel.html(html);
+    if (curVal) {
+      $sel.val(curVal);
+    } else {
+      $sel.val('');
+    }
+    if ($sel.hasClass('select2-hidden-accessible')) {
+      $sel.trigger('change.select2');
+    }
   }
 
   function refreshDatalists(scopeItems){
-    var uraianSet = new Set(), komponenSet = new Set();
+    populateUraianSelect();
+    var komponenSet = new Set();
     (scopeItems||items).forEach(function(it){
-      if(it.uraianPengelompokan) uraianSet.add(it.uraianPengelompokan);
-      if(it.komponen) komponenSet.add(it.komponen);
+      if(it.komponen && it.komponen.trim() !== '') komponenSet.add(it.komponen.trim());
     });
-    document.getElementById("uraianList").innerHTML = Array.from(uraianSet).map(function(v){ return '<option value="'+esc(v)+'">'; }).join("");
-    document.getElementById("komponenList").innerHTML = Array.from(komponenSet).map(function(v){ return '<option value="'+esc(v)+'">'; }).join("");
+    var kompEl = document.getElementById("komponenList");
+    if (kompEl) {
+      kompEl.innerHTML = Array.from(komponenSet).map(function(v){ return '<option value="'+esc(v)+'">'; }).join("");
+    }
   }
+
+  var isUraianManualMode = false;
+
+  function getUraianValue(){
+    if (isUraianManualMode) {
+      return ($('#fUraianManual').val() || '').trim();
+    }
+    var selVal = ($('#fUraianPengelompokan').val() || '').trim();
+    var typedVal = ($('#fUraianPengelompokan').data('current-typed') || '').trim();
+    return selVal || typedVal || '';
+  }
+
+  function setUraianValue(val){
+    val = val || '';
+    $('#fUraianManual').val(val);
+    populateUraianSelect(val);
+    if (val && !$('#fUraianPengelompokan option[value="' + val + '"]').length) {
+      var newOpt = new Option(val, val, true, true);
+      $('#fUraianPengelompokan').append(newOpt).trigger('change');
+    } else {
+      $('#fUraianPengelompokan').val(val).trigger('change');
+    }
+  }
+
+  function setUraianMode(manual){
+    isUraianManualMode = !!manual;
+    var curVal = getUraianValue();
+    if (isUraianManualMode) {
+      $('#wrapUraianSelect').hide();
+      $('#wrapUraianManual').show();
+      $('#fUraianManual').val(curVal);
+      $('#btnToggleUraianMode').html('<i class="fa fa-list"></i> Pilih Rekomendasi');
+      setTimeout(function(){ $('#fUraianManual').focus(); }, 50);
+    } else {
+      $('#wrapUraianManual').hide();
+      $('#wrapUraianSelect').show();
+      setUraianValue(curVal);
+      $('#btnToggleUraianMode').html('<i class="fa fa-pencil"></i> Ketik Manual');
+    }
+  }
+
+  $(document).on('click', '#btnToggleUraianMode', function(e){
+    e.preventDefault();
+    setUraianMode(!isUraianManualMode);
+  });
 
   /* ---------------- Modal Form Logic ---------------- */
   var overlay = document.getElementById("modalOverlay");
@@ -2030,11 +2694,55 @@
       type: "POST",
       dataType: "json",
       success: function(res) {
-        if (res.status === 'success' && res.data && res.data.length > 0) {
-          REKENING_OPTIONS = res.data.map(function(r) {
-            return { kode: r.kode_rekening, nama: r.nama_rekening };
-          });
+        if (res && res.status === 'success') {
+          if (res.node_names) {
+            $.extend(NODE_NAMES, res.node_names);
+            Object.keys(res.node_names).forEach(function(k){
+              var nk = normalizeCode(k);
+              if(!NODE_NAMES[nk]) NODE_NAMES[nk] = res.node_names[k];
+            });
+          }
+          if (res.objek_belanja && res.objek_belanja.length > 0) {
+            OBJEK_BELANJA_OPTIONS = res.objek_belanja.map(function(o) {
+              OBJEK_MAP[o.kode_rekening] = o.nama_rekening;
+              return { kode: o.kode_rekening, nama: o.nama_rekening };
+            });
+          }
+          if (res.data && res.data.length > 0) {
+            REKENING_OPTIONS = res.data.map(function(r) {
+              return { kode: r.kode_rekening, nama: r.nama_rekening, level: r.level };
+            });
+            (rawBelanjaHeaders || []).forEach(function(h){
+              (h.rekening || []).forEach(function(rek){
+                if(rek.kode_rekening && rek.uraian_rekening){
+                  registerRekeningName(rek.kode_rekening, rek.uraian_rekening, rek.level_rekening || 6);
+                }
+              });
+            });
+          }
         }
+
+        if (OBJEK_BELANJA_OPTIONS.length === 0) {
+          OBJEK_BELANJA_OPTIONS = [
+            {kode:"5.1.01", nama:"Belanja Pegawai"},
+            {kode:"5.1.02", nama:"Belanja Barang dan Jasa"},
+            {kode:"5.1.03", nama:"Belanja Bunga"},
+            {kode:"5.1.04", nama:"Belanja Subsidi"},
+            {kode:"5.1.05", nama:"Belanja Hibah"},
+            {kode:"5.1.06", nama:"Belanja Bantuan Sosial"},
+            {kode:"5.2.01", nama:"Belanja Modal Tanah"},
+            {kode:"5.2.02", nama:"Belanja Modal Peralatan dan Mesin"},
+            {kode:"5.2.03", nama:"Belanja Modal Gedung dan Bangunan"},
+            {kode:"5.2.04", nama:"Belanja Modal Jalan, Jaringan, dan Irigasi"},
+            {kode:"5.2.05", nama:"Belanja Modal Aset Tetap Lainnya"},
+            {kode:"5.2.06", nama:"Belanja Modal Aset Lainnya"},
+            {kode:"5.3.01", nama:"Belanja Tidak Terduga"},
+            {kode:"5.4.01", nama:"Belanja Bagi Hasil"},
+            {kode:"5.4.02", nama:"Belanja Bantuan Keuangan"}
+          ];
+          OBJEK_BELANJA_OPTIONS.forEach(function(o){ OBJEK_MAP[o.kode] = o.nama; });
+        }
+
         if (REKENING_OPTIONS.length === 0) {
           REKENING_OPTIONS = [
             {kode:"5.1.02.01.001.0024", nama:"Belanja Alat/Bahan untuk Kegiatan Kantor - Alat Tulis Kantor"},
@@ -2046,9 +2754,25 @@
             {kode:"5.2.03.01.001.00001", nama:"Belanja Modal Bangunan Gedung Kantor"}
           ];
         }
+
+        populateObjekBelanjaSelect();
         populateRekeningSelect();
+        render();
       }
     });
+  }
+
+  function populateObjekBelanjaSelect(selectedKode) {
+    if (!f.objek) return;
+    var html = '<option value="">-- Semua / Pilih Objek Belanja --</option>';
+    OBJEK_BELANJA_OPTIONS.forEach(function(o) {
+      var isSel = (selectedKode && (selectedKode === o.kode || selectedKode.indexOf(o.kode) === 0)) ? ' selected' : '';
+      html += '<option value="' + esc(o.kode) + '"' + isSel + '>' + esc(o.kode) + ' - ' + esc(o.nama) + '</option>';
+    });
+    f.objek.innerHTML = html;
+    if (selectedKode) {
+      f.objek.value = selectedKode;
+    }
   }
 
   function matchCustom(params, data) {
@@ -2111,6 +2835,38 @@
       });
     }
 
+    if (!$('#fUraianPengelompokan').hasClass('select2-hidden-accessible')) {
+      $('#fUraianPengelompokan').select2({
+        dropdownParent: $('#modalOverlay'),
+        width: '100%',
+        placeholder: '-- Cari atau ketik Uraian Pengelompokan Belanja / Paket Pekerjaan... --',
+        allowClear: true,
+        tags: true,
+        createTag: function (params) {
+          var term = $.trim(params.term);
+          if (term === '') return null;
+          return {
+            id: term,
+            text: term,
+            newTag: true
+          };
+        }
+      });
+
+      $('#fUraianPengelompokan').on('select2:closing', function() {
+        var typed = $('#fUraianPengelompokan').data('current-typed');
+        if (typed && typed.trim() !== '') {
+          typed = typed.trim();
+          if (!$('#fUraianPengelompokan option[value="' + typed + '"]').length) {
+            var newOpt = new Option(typed, typed, true, true);
+            $('#fUraianPengelompokan').append(newOpt);
+          }
+          $('#fUraianPengelompokan').val(typed).trigger('change');
+          $('#fUraianPengelompokan').data('current-typed', '');
+        }
+      });
+    }
+
     if (!$('#fSumberDana').hasClass('select2-hidden-accessible')) {
       $('#fSumberDana').select2({
         dropdownParent: $('#modalOverlay'),
@@ -2121,6 +2877,13 @@
     }
   }
 
+  $(document).on('input keyup', '.select2-container--open .select2-search__field', function() {
+    if ($('#fUraianPengelompokan').data('select2') && $('#fUraianPengelompokan').data('select2').isOpen()) {
+      var val = $(this).val();
+      $('#fUraianPengelompokan').data('current-typed', val);
+    }
+  });
+
   $(document).on('select2:open', function() {
     setTimeout(function() {
       var searchField = document.querySelector('.select2-container--open .select2-search__field');
@@ -2130,22 +2893,61 @@
     }, 50);
   });
 
+  $('#fObjekBelanja').on('change', function() {
+    var objVal = $(this).val();
+    var curRek = $('#fRekeningAkun').val();
+    var keepRek = '';
+    if (curRek && objVal) {
+      var prefix = objVal + '.';
+      if (curRek.indexOf(prefix) === 0) {
+        keepRek = curRek;
+      }
+    }
+    populateRekeningSelect(keepRek, objVal);
+    $('#fRekeningAkun').val(keepRek).trigger('change');
+  });
+
   $('#fRekeningAkun').on('change', function() {
     var val = $(this).val();
-    if (val && (!f.uraian.value || f.uraian.value.trim() === '')) {
-      var rOpt = findRekening(val);
-      if (rOpt && rOpt.nama) {
-        f.uraian.value = rOpt.nama;
+    if (val) {
+      var parts = val.split('.');
+      if (parts.length >= 3) {
+        var objKode = parts.slice(0, 3).join('.');
+        if (OBJEK_MAP[objKode] && f.objek.value !== objKode) {
+          f.objek.value = objKode;
+        }
       }
     }
   });
 
-  function populateRekeningSelect(selectedKode){
+  function populateRekeningSelect(selectedKode, filterObjekKode){
+    var curObj = filterObjekKode !== undefined ? filterObjekKode : (f.objek ? f.objek.value : '');
+
     var list = REKENING_OPTIONS.filter(function(r){
-      return (r.kode && r.kode.indexOf('5') === 0) || (selectedKode && r.kode === selectedKode);
+      if (!r.kode) return false;
+      if (curObj) {
+        var prefix = curObj.indexOf('.') > -1 ? curObj + '.' : curObj;
+        if (r.kode.indexOf(prefix) !== 0 && r.kode !== selectedKode) {
+          return false;
+        }
+      } else {
+        if (r.kode.indexOf('5') !== 0 && r.kode !== selectedKode) {
+          return false;
+        }
+      }
+      return true;
     });
-    if (list.length === 0) list = REKENING_OPTIONS;
-    f.rekening.innerHTML = '<option value="">-- Pilih Rekening / Akun Belanja --</option>' + list.map(function(r){
+
+    if (list.length === 0 && selectedKode) {
+      var exist = findRekening(selectedKode);
+      if (exist) list = [exist];
+    }
+
+    var placeholder = curObj ? 
+      ('-- Pilih Rekening (' + (OBJEK_MAP[curObj] ? (curObj + ' - ' + OBJEK_MAP[curObj]) : curObj) + ') --') : 
+      '-- Ketik kode atau nama rekening belanja --';
+
+    f.rekening.innerHTML = '<option value="">' + esc(placeholder) + '</option>' + list.map(function(r){
       return '<option value="'+esc(r.kode)+'">'+esc(r.kode)+' - '+esc(r.nama)+'</option>';
     }).join("");
 
@@ -2161,11 +2963,26 @@
     initModalSelect2();
 
     if(item){
-      f.objek.value = item.objekBelanja || "Belanja Barang Jasa dan Modal";
-      f.rekening.value = item.rekeningKode;
-      $('#fRekeningAkun').val(item.rekeningKode).trigger('change');
+      var rekKode = item.rekeningKode || "";
+      var objKode = "";
+      if (rekKode) {
+        var parts = rekKode.split('.');
+        objKode = parts.slice(0, 3).join('.');
+      }
+      if (!objKode && item.objekBelanja) {
+        objKode = item.objekBelanja;
+      }
+
+      populateObjekBelanjaSelect(objKode);
+      populateRekeningSelect(rekKode, objKode);
+
+      f.objek.value = objKode || "";
+      f.rekening.value = rekKode;
+      $('#fRekeningAkun').val(rekKode).trigger('change');
       f.tipe.value = item.pengelompokanTipe || "Pengelompokan Belanja";
-      f.uraian.value = item.uraianPengelompokan || "";
+      var curUraian = item.uraianPengelompokan || "";
+      setUraianValue(curUraian);
+      setUraianMode(false);
       f.sumberDana.value = item.sumberDana || "";
       $('#fSumberDana').val(item.sumberDana || '').trigger('change');
       f.jsh.value = item.jenisStandarHarga || "";
@@ -2194,11 +3011,18 @@
     editingItem = null;
   }
   function resetForm(){
-    f.objek.value = "Belanja Barang Jasa dan Modal";
+    populateObjekBelanjaSelect("");
+    populateRekeningSelect("");
+    f.objek.value = "";
     f.rekening.value = "";
     $('#fRekeningAkun').val('').trigger('change');
     f.tipe.value = "Pengelompokan Belanja";
-    f.uraian.value = "";
+    setUraianValue("");
+    if (!instansiUraianList || instansiUraianList.length === 0) {
+      setUraianMode(true);
+    } else {
+      setUraianMode(false);
+    }
     f.sumberDana.value = "";
     $('#fSumberDana').val('').trigger('change');
     f.jsh.value = "";
@@ -2268,9 +3092,9 @@
       rekening_kode: f.rekening.value,
       rekening_nama: rOpt ? rOpt.nama : "",
       rekening_level: 6,
-      objek_belanja: f.objek.value,
+      objek_belanja: (f.objek && f.objek.selectedIndex >= 0 && f.objek.options[f.objek.selectedIndex].value) ? f.objek.options[f.objek.selectedIndex].text : (OBJEK_MAP[f.objek.value] ? (f.objek.value + ' - ' + OBJEK_MAP[f.objek.value]) : (f.objek.value || "")),
       pengelompokan_tipe: f.tipe.value,
-      uraian_pengelompokan: f.uraian.value.trim() || (rOpt ? rOpt.nama : "Belanja"),
+      uraian_pengelompokan: getUraianValue() || (rOpt ? rOpt.nama : "Belanja"),
       sumber_dana: f.sumberDana.value,
       jenis_standar_harga: f.jsh.value,
       komponen: f.komponen.value.trim(),
@@ -2296,7 +3120,8 @@
             headerId: res.header_id,
             rekeningId: res.rekening_id,
             subKegiatanKode: currentSubKegiatanKode,
-            objekBelanja: payload.objek_belanja,
+            objekBelanja: f.objek.value || (payload.rekening_kode ? payload.rekening_kode.split('.').slice(0, 3).join('.') : ''),
+            objekBelanjaNama: payload.objek_belanja,
             rekeningKode: payload.rekening_kode,
             rekeningNama: payload.rekening_nama,
             pengelompokanTipe: payload.pengelompokan_tipe,
@@ -2319,6 +3144,14 @@
             if (idx > -1) items[idx] = itemObj;
           } else {
             items.push(itemObj);
+          }
+
+          if (payload.uraian_pengelompokan && payload.uraian_pengelompokan.trim() !== '') {
+            var trimmedU = payload.uraian_pengelompokan.trim();
+            if (Array.isArray(instansiUraianList) && instansiUraianList.indexOf(trimmedU) === -1) {
+              instansiUraianList.push(trimmedU);
+            }
+            populateUraianSelect(trimmedU);
           }
 
           closeModal();
@@ -2548,6 +3381,8 @@
     if (!el("ctxSubKegiatan")) return;
     el("ctxSubKegiatan").innerHTML = '<option value="">Memuat sub kegiatan...</option>';
     currentSubKegiatanKode = null;
+    cachedPaguTahapan = null;
+    renderPaguCards();
     updateTambahState();
 
     if (!kegKode) {
@@ -2590,14 +3425,20 @@
           }
           el("ctxSubKegiatan").value = targetVal;
           currentSubKegiatanKode = targetVal;
+          fetchPaguTahapan(currentSubKegiatanKode);
         } else {
           currentSubKegiatanKode = null;
+          cachedPaguTahapan = null;
+          renderPaguCards();
         }
         updateTambahState();
         render();
       },
       error: function() {
         if (el("ctxSubKegiatan")) el("ctxSubKegiatan").innerHTML = '<option value="">Gagal memuat</option>';
+        currentSubKegiatanKode = null;
+        cachedPaguTahapan = null;
+        renderPaguCards();
         updateTambahState();
         render();
       }
@@ -2688,6 +3529,19 @@
       }
 
       $.ajax({
+        url: ControllerURL + "GetUraianPengelompokanRekomendasi",
+        type: "POST",
+        data: { instansi_id: newInstId },
+        dataType: "json",
+        success: function(uRes) {
+          if (uRes.status === 'success' && Array.isArray(uRes.data)) {
+            instansiUraianList = uRes.data;
+            refreshDatalists();
+          }
+        }
+      });
+
+      $.ajax({
         url: ControllerURL + "GetSubUnitsByInstansi",
         type: "POST",
         data: { instansi_id: newInstId },
@@ -2754,6 +3608,7 @@
     el("ctxSubKegiatan").addEventListener("change", function(){
       currentSubKegiatanKode = this.value || null;
       updateTambahState();
+      fetchPaguTahapan(currentSubKegiatanKode);
       render();
     });
   }
@@ -2761,21 +3616,62 @@
   /* ---------------- Standar Harga Picker ---------------- */
   var pickerOverlay = document.getElementById("pickerOverlay");
 
-  document.getElementById("btnOpenStandarPicker").addEventListener("click", function() {
+  function getPickerTypeFromJsh(val) {
+    if (!val) return '';
+    if (val.indexOf('SSH') > -1 || (val.indexOf('Satuan Harga') > -1 && val.indexOf('Regional') === -1)) return 'ssh';
+    if (val.indexOf('HSPK') > -1 || val.indexOf('Pokok') > -1) return 'hspk';
+    if (val.indexOf('ASB') > -1 || val.indexOf('Analisis') > -1) return 'asb';
+    if (val.indexOf('Regional') > -1 || val.indexOf('SBU') > -1) return 'sbu';
+    return '';
+  }
+
+  function getJshLabel(type) {
+    var jshMap = {
+      'ssh': 'Standar Satuan Harga (SSH)',
+      'hspk': 'Harga Satuan Pokok Kegiatan (HSPK)',
+      'asb': 'Analisis Standar Belanja (ASB)',
+      'sbu': 'Standar Harga Satuan Regional (SBU)'
+    };
+    return jshMap[type] || 'Standar Satuan Harga (SSH)';
+  }
+
+  function openPickerModalForCurrentJsh() {
+    var selJsh = f.jsh ? f.jsh.value : '';
+    var pType = getPickerTypeFromJsh(selJsh);
+    if (!pType) {
+      alert("Silakan pilih Jenis Standar Harga terlebih dahulu.");
+      if (f.jsh) f.jsh.focus();
+      return;
+    }
+
+    currentPickerType = pType;
+    var typeLabel = getJshLabel(pType);
+
+    var titleEl = document.getElementById("pickerModalTitle");
+    if (titleEl) titleEl.textContent = "Pilih Komponen: " + typeLabel;
+    var descEl = document.getElementById("pickerModalDesc");
+    if (descEl) descEl.textContent = "Menampilkan daftar komponen khusus untuk " + typeLabel;
+    var lblEl = document.getElementById("lblActivePickerType");
+    if (lblEl) lblEl.textContent = typeLabel;
+
     pickerOverlay.classList.remove("hidden");
     document.getElementById("inputSearchStandar").value = "";
     loadStandarHargaItems(currentPickerType, "");
+  }
+
+  $('#fJenisStandarHarga').on('change', function() {
+    var val = $(this).val();
+    if (val) {
+      currentPickerType = getPickerTypeFromJsh(val);
+    }
+  });
+
+  document.getElementById("btnOpenStandarPicker").addEventListener("click", function() {
+    openPickerModalForCurrentJsh();
   });
 
   document.getElementById("btnClosePicker").addEventListener("click", function() {
     pickerOverlay.classList.add("hidden");
-  });
-
-  $('.picker-tab').click(function() {
-    $('.picker-tab').removeClass('active');
-    $(this).addClass('active');
-    currentPickerType = $(this).data('type');
-    loadStandarHargaItems(currentPickerType, document.getElementById("inputSearchStandar").value);
   });
 
   document.getElementById("btnDoSearchStandar").addEventListener("click", function() {
@@ -2821,7 +3717,7 @@
           });
           $tbody.html(html);
         } else {
-          $tbody.html('<tr><td colspan="6" class="center" style="padding:24px; color:var(--ui-text-muted);">Tidak ada data standar harga yang sesuai.</td></tr>');
+          $tbody.html('<tr><td colspan="6" class="center" style="padding:24px; color:var(--ui-text-muted);">Tidak ada data komponen ' + esc(getJshLabel(type)) + ' yang sesuai.</td></tr>');
         }
       },
       error: function() {
@@ -2848,18 +3744,31 @@
     f.koefisien.value = 1;
     f.volume.value = 1;
     f.koefKet.value = "1 " + (item.satuan || "Unit");
-    f.jsh.value = (currentPickerType === 'asb') ? "Analisis Standar Belanja (ASB)" : "Harga Satuan Pokok Kegiatan (HSPK)";
+    var jshMap = {
+      'ssh': 'Standar Satuan Harga (SSH)',
+      'hspk': 'Harga Satuan Pokok Kegiatan (HSPK)',
+      'asb': 'Analisis Standar Belanja (ASB)',
+      'sbu': 'Standar Harga Satuan Regional (SBU)'
+    };
+    f.jsh.value = jshMap[currentPickerType] || "Standar Satuan Harga (SSH)";
     
     if (item.kode_rekening) {
       var kRek = item.kode_rekening.split(',')[0].trim();
       var found = REKENING_OPTIONS.some(function(r){ return r.kode === kRek; });
       if (!found) {
         REKENING_OPTIONS.unshift({ kode: kRek, nama: item.uraian_kelompok_barang || "Belanja Rekening" });
-        populateRekeningSelect();
+      }
+      var pParts = kRek.split('.');
+      var pObj = pParts.slice(0, 3).join('.');
+      if (pObj && OBJEK_MAP[pObj]) {
+        f.objek.value = pObj;
+        populateRekeningSelect(kRek, pObj);
+      } else {
+        populateRekeningSelect(kRek);
       }
       f.rekening.value = kRek;
-      $('#fRekeningAkun').val(kRek).trigger('change');
-      f.uraian.value = item.uraian_kelompok_barang || "";
+      var uKb = item.uraian_kelompok_barang || "";
+      setUraianValue(uKb);
     }
 
     updateTotalPreview();
@@ -2936,6 +3845,21 @@
         success: function(res) {
           if (res.status === 'success') {
             items = items.filter(function(x){ return x.id!==did; });
+            var targetInst = activeInstansiId || (currentInstansi ? currentInstansi.id : '');
+            if (targetInst) {
+              $.ajax({
+                url: ControllerURL + "GetUraianPengelompokanRekomendasi",
+                type: "POST",
+                data: { instansi_id: targetInst },
+                dataType: "json",
+                success: function(uRes) {
+                  if (uRes.status === 'success' && Array.isArray(uRes.data)) {
+                    instansiUraianList = uRes.data;
+                    populateUraianSelect();
+                  }
+                }
+              });
+            }
             render();
             if (typeof Swal !== 'undefined') {
               Swal.fire({
@@ -2969,6 +3893,7 @@
   buildMasterFromDatabase();
   loadMasterRekening();
   initSubUnits(initialSubUnits);
+  initRenjaStageEvents();
 })();
 </script>
 </body>

@@ -1,0 +1,271 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="http://localhost/ippd/css/bootstrap.min.css">
+<link rel="stylesheet" href="http://localhost/ippd/css/font-awesome.min.css">
+<link rel="stylesheet" href="http://localhost/ippd/css/wave/button.css">
+<style>
+  /* Styling Tabel RAPBD Sesuai Tema Menu Lain (Notika / VisiRPJMD) */
+  .table-rapbd {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    margin-top: 15px;
+    font-size: 13px;
+    border: 1px solid #cbd5e1;
+  }
+  .table-rapbd th, 
+  .table-rapbd td {
+    border: 1px solid #e2e8f0;
+    padding: 8px 12px;
+    vertical-align: middle;
+  }
+  .table-rapbd thead th {
+    background-color: #f1f5f9;
+    color: #334155;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.3px;
+    border: 1px solid #cbd5e1;
+  }
+  .table-rapbd thead tr.sub-header th {
+    background-color: #f8fafc;
+    color: #64748b;
+    padding: 4px 8px;
+    font-weight: 700;
+    text-align: center;
+    font-size: 11px;
+    border: 1px solid #cbd5e1;
+  }
+  .table-rapbd td.kode-col {
+    width: 12%;
+    text-align: left;
+    white-space: nowrap;
+    padding-left: 12px;
+    font-weight: 600;
+  }
+  .table-rapbd td.uraian-col {
+    width: 52%;
+    text-align: left;
+  }
+  .table-rapbd td.jumlah-col {
+    width: 24%;
+    text-align: center;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+  .table-rapbd td.aksi-col {
+    width: 18%;
+    text-align: center;
+    white-space: nowrap;
+  }
+  /* Baris Judul (Level 1: 4, 5, 6) - Hijau lembut elegan seperti baris Visi */
+  .table-rapbd tr.row-judul {
+    background-color: #eef7ee !important;
+    font-weight: 700;
+    color: #1b5e20;
+  }
+  .table-rapbd tr.row-judul td {
+    border-left: 4px solid #4caf50 !important;
+    font-size: 13.5px;
+  }
+  /* Baris Sub Judul (Level 2: 4.1, 4.2, 5.1, 6.1, 6.2) - Cyan lembut elegan seperti baris Misi */
+  .table-rapbd tr.row-sub-judul {
+    background-color: #e6f7fa !important;
+    font-weight: 700;
+    color: #006064;
+  }
+  .table-rapbd tr.row-sub-judul td {
+    border-left: 4px solid #00bcd4 !important;
+    font-size: 13px;
+  }
+  /* Baris Isi (Level 3: 4.1.01, 6.1.01, dll) */
+  .table-rapbd tr.row-isi {
+    background-color: #ffffff;
+    color: #334155;
+  }
+  .table-rapbd tr.row-isi td.uraian-col {
+    padding-left: 30px;
+    font-weight: normal;
+  }
+  /* Baris Jumlah Total per Judul */
+  .table-rapbd tr.row-total-judul {
+    background-color: #f1f5f9 !important;
+    font-weight: 700;
+    color: #1e293b;
+  }
+  .table-rapbd tr.row-total-judul td {
+    border-top: 2px solid #cbd5e1 !important;
+    border-bottom: 2px solid #cbd5e1 !important;
+  }
+  /* Baris SURPLUS / (DEFISIT) - Amber/oranye lembut elegan seperti Tujuan */
+  .table-rapbd tr.row-surplus-defisit {
+    background-color: #fff8eb !important;
+    font-weight: 800;
+    color: #9a3412;
+  }
+  .table-rapbd tr.row-surplus-defisit td {
+    border-left: 4px solid #ff9800 !important;
+    border-top: 2px solid #fdba74 !important;
+    border-bottom: 2px solid #fdba74 !important;
+  }
+  /* Baris Pembiayaan Netto - Ungu/Indigo lembut elegan */
+  .table-rapbd tr.row-pembiayaan-netto {
+    background-color: #f5f3ff !important;
+    font-weight: 800;
+    color: #5b21b6;
+  }
+  .table-rapbd tr.row-pembiayaan-netto td {
+    border-left: 4px solid #8b5cf6 !important;
+    border-top: 2px solid #ddd6fe !important;
+    border-bottom: 2px solid #ddd6fe !important;
+  }
+  /* Baris SILPA - Biru lembut elegan */
+  .table-rapbd tr.row-silpa {
+    background-color: #eef2ff !important;
+    font-weight: 700;
+    color: #3730a3;
+  }
+  .table-rapbd tr.row-silpa td {
+    border-left: 4px solid #6366f1 !important;
+  }
+  .table-rapbd tbody tr {
+    transition: filter 0.15s ease;
+  }
+  .table-rapbd tbody tr:hover {
+    filter: brightness(0.97);
+  }
+
+  /* Styling Seragam dan Presisi untuk Tombol Kolom AKSI */
+  .table-rapbd td.aksi-col {
+    width: 18%;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    padding: 5px 8px !important;
+  }
+
+  .table-rapbd .btn-action {
+    display: inline-block !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    height: 26px !important;
+    line-height: 26px !important;
+    padding: 0 8px !important;
+    margin: 1px 2px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    border-radius: 4px !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12) !important;
+    transition: all 0.15s ease !important;
+    box-sizing: border-box !important;
+  }
+
+  .table-rapbd .btn-action:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.18) !important;
+    filter: brightness(0.94);
+  }
+
+  /* Ukuran & Bentuk Seragam untuk Tombol Tambah (Sub Judul, Isi, Rekapitulasi) */
+  .table-rapbd .btn-action-tambah {
+    width: 96px !important;
+    min-width: 96px !important;
+    padding: 0 6px !important;
+    line-height: 26px !important;
+    font-size: 10px !important;
+    white-space: nowrap !important;
+  }
+
+  .table-rapbd .btn-action-tambah i {
+    margin-right: 4px !important;
+    line-height: 26px !important;
+    vertical-align: middle !important;
+  }
+
+  /* Ukuran & Bentuk Seragam untuk Tombol Ikon Kotak (Edit & Hapus) */
+  .table-rapbd .btn-action-icon {
+    width: 28px !important;
+    min-width: 28px !important;
+    padding: 0 !important;
+    line-height: 26px !important;
+    font-size: 11px !important;
+  }
+
+  .table-rapbd .btn-action-icon i {
+    line-height: 26px !important;
+    vertical-align: middle !important;
+  }
+
+  /* Warna Tombol Solid dan Konsisten */
+  .table-rapbd .btn-action.btn-success {
+    background-color: #00c292 !important;
+    color: #ffffff !important;
+  }
+  .table-rapbd .btn-action.btn-info {
+    background-color: #00bcd4 !important;
+    color: #ffffff !important;
+  }
+  .table-rapbd .btn-action.btn-warning {
+    background-color: #ff9800 !important;
+    color: #ffffff !important;
+  }
+  .table-rapbd .btn-action.btn-danger {
+    background-color: #f44336 !important;
+    color: #ffffff !important;
+  }
+
+  @media print {
+    .no-print, .sidebar-wrapper, .header-top-area, .footer-copyright-area, .btn {
+      display: none !important;
+    }
+    .main-content {
+      margin-left: 0 !important;
+      padding: 0 !important;
+    }
+    .table-rapbd th, .table-rapbd td {
+      border: 1px solid #000 !important;
+    }
+  }
+</style>
+</head>
+<body style="padding: 50px; background: #f4f6f9;">
+  <table class="table table-bordered table-rapbd" style="width: 800px; background: white;">
+    <tr class="row-total-judul">
+      <td class="kode-col"></td>
+      <td class="uraian-col font-weight-bold">Jumlah Pendapatan</td>
+      <td class="jumlah-col font-weight-bold">1.000.000,00</td>
+      <td class="no-print aksi-col">
+        <button type="button" class="btn btn-xs btn-warning btn-action btn-action-icon btn-edit-rapbd" data-id="1" title="Edit Baris">
+          <i class="fa fa-pencil"></i>
+        </button>
+        <button type="button" class="btn btn-xs btn-danger btn-action btn-action-icon btn-hapus-rapbd" data-id="1" data-uraian="Jumlah Pendapatan" title="Hapus Baris">
+          <i class="fa fa-trash"></i>
+        </button>
+      </td>
+    </tr>
+    <tr class="row-isi">
+      <td class="kode-col">1.1.1</td>
+      <td class="uraian-col">Contoh Isi</td>
+      <td class="jumlah-col">1.000.000,00</td>
+      <td class="no-print aksi-col">
+        <button type="button" class="btn btn-xs btn-info notika-btn-info btn-action btn-action-tambah btn-tambah-rekap" title="Tambah Kategori Rekapitulasi">
+          <i class="fa fa-calculator"></i> Rekapitulasi
+        </button>
+        <button type="button" class="btn btn-xs btn-warning btn-action btn-action-icon btn-edit-rapbd" data-id="1" title="Edit Baris">
+          <i class="fa fa-pencil"></i>
+        </button>
+        <button type="button" class="btn btn-xs btn-danger btn-action btn-action-icon btn-hapus-rapbd" data-id="1" data-uraian="Contoh Isi" title="Hapus Baris">
+          <i class="fa fa-trash"></i>
+        </button>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

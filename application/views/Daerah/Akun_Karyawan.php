@@ -150,7 +150,7 @@
                                                             data-bidang-sub-koordinator="<?= htmlspecialchars($key['bidang_sub_koordinator'] ?? '', ENT_QUOTES) ?>"
                                                             data-tahun-mulai="<?= $key['tahun_mulai'] ?>"
                                                             data-tahun-akhir="<?= $key['tahun_akhir'] ?>"
-                                                            data-dinas-ids="<?= isset($key['dinas_id']) ? htmlspecialchars($key['dinas_id'], ENT_QUOTES) : '' ?>">
+                                                            data-dinas-ids="<?= isset($key['edit_dinas_ids']) ? htmlspecialchars($key['edit_dinas_ids'], ENT_QUOTES) : (isset($key['dinas_id']) ? htmlspecialchars($key['dinas_id'], ENT_QUOTES) : '') ?>">
                                                             <i class="notika-icon notika-edit"></i>
                                                         </button>
 
@@ -609,18 +609,77 @@
     function buildDinasSelect(nameAttr, selectedId) {
         var html = '<div class="dinas-row">';
         html += '<select class="form-control input-sm dinas-select" name="' + nameAttr + '[]" style="flex:1;">';
-        html += '<option value="">-- Pilih Dinas --</option>';
+        html += '<option value="">-- Pilih Dinas / Pimpinan Daerah --</option>';
+
+        var pimpinan = [];
+        var dinasLain = [];
+        var pimpinanNames = ['bupati', 'wakil bupati', 'walikota', 'wakil walikota'];
 
         DINAS_LIST.forEach(function(d) {
-            var sel = (selectedId && String(selectedId) === String(d.id)) ? 'selected' : '';
-            var tahunInfo = (d.tahun_mulai && d.tahun_akhir) ? ' (' + d.tahun_mulai + '-' + d.tahun_akhir + ')' : '';
-            html += '<option value="' + d.id + '" ' + sel + '>' + d.nama + tahunInfo + '</option>';
+            var namaClean = (d.nama || '').toLowerCase().trim();
+            if (pimpinanNames.indexOf(namaClean) !== -1) {
+                pimpinan.push(d);
+            } else {
+                dinasLain.push(d);
+            }
         });
+
+        // Urutkan Pimpinan Daerah sesuai urutan standar
+        pimpinan.sort(function(a, b) {
+            var idxA = pimpinanNames.indexOf((a.nama || '').toLowerCase().trim());
+            var idxB = pimpinanNames.indexOf((b.nama || '').toLowerCase().trim());
+            return idxA - idxB;
+        });
+
+        if (pimpinan.length > 0) {
+            html += '<optgroup label="Pimpinan Daerah">';
+            pimpinan.forEach(function(d) {
+                var sel = (selectedId && String(selectedId) === String(d.id)) ? 'selected' : '';
+                html += '<option value="' + d.id + '" ' + sel + '>' + d.nama + '</option>';
+            });
+            html += '</optgroup>';
+        }
+
+        if (dinasLain.length > 0) {
+            html += '<optgroup label="Perangkat Daerah / Dinas">';
+            dinasLain.forEach(function(d) {
+                var sel = (selectedId && String(selectedId) === String(d.id)) ? 'selected' : '';
+                var tahunInfo = (d.tahun_mulai && d.tahun_akhir) ? ' (' + d.tahun_mulai + '-' + d.tahun_akhir + ')' : '';
+                html += '<option value="' + d.id + '" ' + sel + '>' + d.nama + tahunInfo + '</option>';
+            });
+            html += '</optgroup>';
+        }
 
         html += '</select>';
         html += '<button type="button" class="btn btn-danger btn-sm remove-dinas">Hapus</button>';
         html += '</div>';
         return html;
+    }
+
+    function checkPimpinanNotice(containerId) {
+        var pimpinanNames = ['bupati', 'wakil bupati', 'walikota', 'wakil walikota'];
+        var selectedPimpinan = [];
+
+        $('#' + containerId + ' select.dinas-select').each(function() {
+            var val = $(this).val();
+            if (val) {
+                var found = DINAS_LIST.find(function(d) { return String(d.id) === String(val); });
+                if (found && pimpinanNames.indexOf((found.nama || '').toLowerCase().trim()) !== -1) {
+                    if (selectedPimpinan.indexOf(found.nama) === -1) {
+                        selectedPimpinan.push(found.nama);
+                    }
+                }
+            }
+        });
+
+        var noticeId = containerId + '_pimpinanNotice';
+        $('#' + noticeId).remove();
+        if (selectedPimpinan.length > 0) {
+            var noticeHtml = '<div id="' + noticeId + '" class="alert alert-info" style="margin-top:8px; margin-bottom:8px; padding:8px 12px; font-size:12px; line-height:1.4;">' +
+                '<i class="fa fa-info-circle"></i> <b>' + selectedPimpinan.join(', ') + ' terpilih:</b> Otomatis terhubung dengan <b>seluruh Perangkat Daerah / Dinas</b> di wilayah ini (dapat dipanggil di semua dinas).' +
+                '</div>';
+            $('#' + containerId).after(noticeHtml);
+        }
     }
 
     function initDinasContainer(containerId, nameAttr, selectedIds) {
@@ -633,6 +692,7 @@
                 $c.append(buildDinasSelect(nameAttr, id));
             });
         }
+        checkPimpinanNotice(containerId);
     }
 
     function collectDinas(containerId) {
@@ -721,14 +781,29 @@
         // ============================================================
         $(document).on('click', '#addDinasRowAdd', function() {
             $('#dinasContainerAdd').append(buildDinasSelect('dinas_id', null));
+            checkPimpinanNotice('dinasContainerAdd');
         });
 
         $(document).on('click', '#addDinasRowEdit', function() {
             $('#dinasContainerEdit').append(buildDinasSelect('dinas_id', null));
+            checkPimpinanNotice('dinasContainerEdit');
         });
 
         $(document).on('click', '.remove-dinas', function() {
+            var $container = $(this).closest('[id^="dinasContainer"]');
+            var containerId = $container.attr('id');
             $(this).closest('.dinas-row').remove();
+            if (containerId) {
+                checkPimpinanNotice(containerId);
+            }
+        });
+
+        $(document).on('change', '.dinas-select', function() {
+            var $container = $(this).closest('[id^="dinasContainer"]');
+            var containerId = $container.attr('id');
+            if (containerId) {
+                checkPimpinanNotice(containerId);
+            }
         });
 
         // ============================================================

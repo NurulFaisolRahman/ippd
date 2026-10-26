@@ -136,15 +136,18 @@ class Home extends CI_Controller {
 				} else if ($level == '4') {
 					$kodeWilayah = isset($akun['KodeWilayah']) ? $akun['KodeWilayah'] : '';
 					$Session = array(
-						'isLoggedIn'   => true,
-						'Admin'        => true, 
-						'Level'        => 4, 
-						'userLevel'    => 4,
-						'IsVerifikator'=> true,
-						'KodeWilayah'  => $kodeWilayah,
-						'Username'     => $akun['Username'],
-						'Nama'         => $akun['Username'],
-						'IdAkun'       => isset($akun['Id']) ? (int)$akun['Id'] : (isset($akun['id']) ? (int)$akun['id'] : null)
+						'isLoggedIn'    => true,
+						'Admin'         => true, 
+						'Instansi'      => true, 
+						'Level'         => 4, 
+						'userLevel'     => 4,
+						'IsVerifikator' => true,
+						'KodeWilayah'   => $kodeWilayah,
+						'Username'      => $akun['Username'],
+						'Nama'          => $akun['Username'],
+						'NamaInstansi'  => $akun['Username'],
+						'IdKementerian' => isset($akun['IdKementerian']) ? $akun['IdKementerian'] : '',
+						'IdAkun'        => isset($akun['Id']) ? (int)$akun['Id'] : (isset($akun['id']) ? (int)$akun['id'] : null)
 					);
 					if (!empty($kodeWilayah)) {
 						$wil = $this->db->where('Kode', $kodeWilayah)->get('kodewilayah')->row_array();
@@ -157,7 +160,7 @@ class Home extends CI_Controller {
 					foreach ($Session as $sk => $sv) {
 						$_SESSION[$sk] = $sv;
 					}
-					echo '4';
+					echo (stripos($akun['Username'], 'verif') !== false) ? 'verifikator' : '4';
 					return;
 				}
 			}

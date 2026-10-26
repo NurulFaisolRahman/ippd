@@ -154,24 +154,27 @@ if (!empty($DukunganList)) {
 
     .action-group {
         display: flex;
-        flex-direction: column;
-        gap: 5px;
+        flex-direction: row;
+        gap: 6px;
         align-items: center;
         justify-content: center;
+        flex-wrap: nowrap;
     }
     .btn-action-custom {
-        padding: 4px 8px;
-        font-size: 11px;
-        font-weight: 600;
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        font-size: 13px;
         border-radius: 4px;
         cursor: pointer;
         opacity: 1 !important;
         transition: all 0.15s ease-in-out;
         border: none;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         text-align: center;
-        width: 100%;
-        max-width: 65px;
+        line-height: 1;
     }
     .btn-action-edit {
         background: #f0ad4e !important;
@@ -181,6 +184,8 @@ if (!empty($DukunganList)) {
     .btn-action-edit:hover {
         background: #ec971f !important;
         color: #ffffff !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(240, 173, 78, 0.4);
     }
     .btn-action-delete {
         background: #d9534f !important;
@@ -190,6 +195,8 @@ if (!empty($DukunganList)) {
     .btn-action-delete:hover {
         background: #c9302c !important;
         color: #ffffff !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(217, 83, 79, 0.4);
     }
 
     /* Modal Styling */
@@ -316,7 +323,7 @@ if (!empty($DukunganList)) {
                             <div class="dukungan-card-header">
                                 <div class="dukungan-title">
                                     <h3>Dukungan Prioritas Pembangunan (Tahun <?= html_escape($SelectedTahun) ?>)</h3>
-                                    <p>Matriks Penyelarasan Program & Kegiatan Prioritas Nasional dengan Program Prioritas & Dukungan Program Pembangunan Daerah</p>
+                                    <p>Matriks Penyelarasan Program & Kegiatan Prioritas Nasional (<?= ($SelectedTahun == '2026') ? 'RKP Nasional - Menu Matriks Pembangunan' : 'RPJMN' ?>) dengan Program Prioritas & Dukungan Program Pembangunan Daerah</p>
                                 </div>
                             </div>
 
@@ -333,7 +340,7 @@ if (!empty($DukunganList)) {
                                             <th style="width: 16%;">Dukungan Program Pembangunan Daerah</th>
                                             <th style="width: 16%;">Indikator Kinerja</th>
                                             <?php if ($can_edit) { ?>
-                                                <th style="width: 5%; text-align: center;">Aksi</th>
+                                                <th style="width: 85px; min-width: 85px; text-align: center;">Aksi</th>
                                             <?php } ?>
                                         </tr>
                                         <!-- Header Baris 2: Penomoran Kolom Sesuai Referensi (1-7) -->
@@ -420,7 +427,7 @@ if (!empty($DukunganList)) {
                                                             <?php if ($idx === 0) { ?>
                                                                 <!-- Kolom 1: No (Nomor PPN) -->
                                                                 <td rowspan="<?= $totalSubrows ?>" style="text-align: center; font-weight: 600;">
-                                                                    <?= html_escape($row['nomor_ppn']) ?>
+                                                                    <?= !empty($row['nomor_ppn']) ? html_escape($row['nomor_ppn']) : '-' ?>
                                                                 </td>
 
                                                                 <!-- Kolom 2: Program Prioritas Nasional -->
@@ -496,13 +503,13 @@ if (!empty($DukunganList)) {
                                                                                 data-program_prioritas_daerah="<?= html_escape($row['program_prioritas_daerah']) ?>"
                                                                                 data-dukungan_json="<?= html_escape($row['dukungan_program_json'] ?? '[]') ?>"
                                                                                 title="Edit Data">
-                                                                            <i class="fa fa-pencil-alt"></i> Edit
+                                                                            <i class="fa fa-pencil-alt"></i>
                                                                         </button>
                                                                         <button type="button" 
                                                                                 class="btn-action-custom btn-action-delete BtnHapusDukungan"
                                                                                 data-id="<?= $row['id'] ?>"
                                                                                 title="Hapus Data">
-                                                                            <i class="fa fa-trash"></i> Hapus
+                                                                            <i class="fa fa-trash"></i>
                                                                         </button>
                                                                     </div>
                                                                 </td>
@@ -532,8 +539,13 @@ if (!empty($DukunganList)) {
         <div class="modal-content">
             <div class="modal-header" style="background: #1b4f72; color: #ffffff;">
                 <button type="button" class="close" data-dismiss="modal" style="color: #ffffff; opacity: 0.8;">&times;</button>
-                <h4 class="modal-title" style="color: #ffffff; font-weight: 700;">
-                    <i class="fa fa-plus-circle"></i> Tambah Dukungan Prioritas Pembangunan
+                <h4 class="modal-title" style="color: #ffffff; font-weight: 700; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                    <span><i class="fa fa-plus-circle"></i> Tambah Dukungan Prioritas Pembangunan</span>
+                    <?php if ($SelectedTahun == '2026') { ?>
+                        <span class="label label-info" style="font-size: 11px; font-weight: normal; background-color: #0284c7;">
+                            <i class="fa fa-table"></i> RKP Nasional (Matriks Pembangunan)
+                        </span>
+                    <?php } ?>
                 </h4>
             </div>
             <form id="FormInputDukungan">
@@ -548,9 +560,9 @@ if (!empty($DukunganList)) {
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label style="font-weight: 700; color: #0f172a;">
-                                    No. (Kolom 1) <span class="text-danger">*</span>
+                                    No. (Kolom 1) <small class="text-muted">(Opsional)</small>
                                 </label>
-                                <input type="text" class="form-control" id="Input_NomorPPN" name="NomorPPN" value="1" placeholder="Contoh: 1 atau 9" required>
+                                <input type="text" class="form-control" id="Input_NomorPPN" name="NomorPPN" value="" placeholder="Contoh: 1 atau 9">
                             </div>
                         </div>
                         <div class="col-md-9">
@@ -602,19 +614,26 @@ if (!empty($DukunganList)) {
                     </div>
 
                     <hr style="border-top: 1px dashed #cbd5e1; margin: 18px 0;">
-
+                    
                     <!-- Baris 4: Prioritas Pembangunan Daerah -->
                     <div class="form-group">
-                        <label style="font-weight: 700; color: #0f172a;">
+                        <label style="font-weight: 700; color: #0f172a; margin-bottom: 2px;">
                             Prioritas Pembangunan Daerah (Kolom 4) <span class="text-danger">*</span>
                         </label>
+                        <small class="text-muted" style="display: block; font-weight: normal; margin-bottom: 5px;">
+                            <i class="fa fa-info-circle text-info"></i> Mengambil data dari menu Permasalahan Daerah (Tahun <?= html_escape($SelectedTahun) ?>)
+                        </small>
                         <input type="hidden" id="Input_PrioritasDaerah" name="PrioritasDaerah" value="">
                         <select class="form-control select2-modal" id="Input_IdPrioritasDaerah" name="IdPrioritasDaerah" required style="width: 100%;">
                             <option value="">-- Pilih Prioritas Pembangunan Daerah --</option>
-                            <?php foreach ($PrioritasDaerahList as $p) { ?>
-                                <option value="<?= $p['id'] ?>" data-kode="<?= html_escape($p['kode']) ?>" data-prioritas="<?= html_escape($p['prioritas']) ?>">
-                                    <?= html_escape($p['label']) ?>
-                                </option>
+                            <?php if (!empty($PrioritasDaerahList)) { ?>
+                                <?php foreach ($PrioritasDaerahList as $p) { ?>
+                                    <option value="<?= $p['id'] ?>" data-kode="<?= html_escape($p['kode']) ?>" data-prioritas="<?= html_escape($p['prioritas']) ?>">
+                                        <?= html_escape($p['label']) ?>
+                                    </option>
+                                <?php } ?>
+                            <?php } else { ?>
+                                <option value="" disabled>Belum ada data di menu Permasalahan Daerah</option>
                             <?php } ?>
                         </select>
                     </div>
@@ -694,8 +713,13 @@ if (!empty($DukunganList)) {
         <div class="modal-content">
             <div class="modal-header" style="background: #f0ad4e; color: #ffffff;">
                 <button type="button" class="close" data-dismiss="modal" style="color: #ffffff; opacity: 0.8;">&times;</button>
-                <h4 class="modal-title" style="color: #ffffff; font-weight: 700;">
-                    <i class="fa fa-pencil-alt"></i> Edit Dukungan Prioritas Pembangunan
+                <h4 class="modal-title" style="color: #ffffff; font-weight: 700; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                    <span><i class="fa fa-pencil-alt"></i> Edit Dukungan Prioritas Pembangunan</span>
+                    <?php if ($SelectedTahun == '2026') { ?>
+                        <span class="label label-info" style="font-size: 11px; font-weight: normal; background-color: #0284c7;">
+                            <i class="fa fa-table"></i> RKP Nasional (Matriks Pembangunan)
+                        </span>
+                    <?php } ?>
                 </h4>
             </div>
             <form id="FormEditDukungan">
@@ -711,9 +735,9 @@ if (!empty($DukunganList)) {
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label style="font-weight: 700; color: #0f172a;">
-                                    No. (Kolom 1) <span class="text-danger">*</span>
+                                    No. (Kolom 1) <small class="text-muted">(Opsional)</small>
                                 </label>
-                                <input type="text" class="form-control" id="Edit_NomorPPN" name="NomorPPN" required>
+                                <input type="text" class="form-control" id="Edit_NomorPPN" name="NomorPPN" placeholder="Contoh: 1 atau 9">
                             </div>
                         </div>
                         <div class="col-md-9">
@@ -763,16 +787,23 @@ if (!empty($DukunganList)) {
 
                     <!-- Baris 4: Prioritas Pembangunan Daerah -->
                     <div class="form-group">
-                        <label style="font-weight: 700; color: #0f172a;">
+                        <label style="font-weight: 700; color: #0f172a; margin-bottom: 2px;">
                             Prioritas Pembangunan Daerah (Kolom 4) <span class="text-danger">*</span>
                         </label>
+                        <small class="text-muted" style="display: block; font-weight: normal; margin-bottom: 5px;">
+                            <i class="fa fa-info-circle text-info"></i> Mengambil data dari menu Permasalahan Daerah (Tahun <?= html_escape($SelectedTahun) ?>)
+                        </small>
                         <input type="hidden" id="Edit_PrioritasDaerah" name="PrioritasDaerah" value="">
                         <select class="form-control select2-modal" id="Edit_IdPrioritasDaerah" name="IdPrioritasDaerah" required style="width: 100%;">
                             <option value="">-- Pilih Prioritas Pembangunan Daerah --</option>
-                            <?php foreach ($PrioritasDaerahList as $p) { ?>
-                                <option value="<?= $p['id'] ?>" data-kode="<?= html_escape($p['kode']) ?>" data-prioritas="<?= html_escape($p['prioritas']) ?>">
-                                    <?= html_escape($p['label']) ?>
-                                </option>
+                            <?php if (!empty($PrioritasDaerahList)) { ?>
+                                <?php foreach ($PrioritasDaerahList as $p) { ?>
+                                    <option value="<?= $p['id'] ?>" data-kode="<?= html_escape($p['kode']) ?>" data-prioritas="<?= html_escape($p['prioritas']) ?>">
+                                        <?= html_escape($p['label']) ?>
+                                    </option>
+                                <?php } ?>
+                            <?php } else { ?>
+                                <option value="" disabled>Belum ada data di menu Permasalahan Daerah</option>
                             <?php } ?>
                         </select>
                     </div>
@@ -837,6 +868,7 @@ $(document).ready(function() {
     var CSRF_TOKEN_NAME = '<?= $this->security->get_csrf_token_name() ?>';
     var CSRF_TOKEN_VALUE = '<?= $this->security->get_csrf_hash() ?>';
     var BaseURL = '<?= base_url() ?>';
+    var SelectedTahun = '<?= $SelectedTahun ?>';
     var DUKUNGAN_RPJMD_OPTIONS = `<?php foreach ($DukunganProgramOptions as $dOpt) { ?><option value="<?= html_escape($dOpt) ?>"><?= html_escape($dOpt) ?></option><?php } ?>`;
     var PROGRAM_INDIKATOR_MAP = <?= json_encode(!empty($ProgramToIndikatorMap) ? $ProgramToIndikatorMap : new stdClass()) ?>;
     var CURRENT_KEGIATAN_OPTIONS_INPUT = '<option value="">-- Pilih Kegiatan Prioritas Nasional --</option>';
@@ -989,7 +1021,7 @@ $(document).ready(function() {
     // Dynamic fetch Program & Kegiatan saat PN dipilih (Modal Tambah)
     $('#Input_IdPN').on('change', function() {
         var idPn = $(this).val();
-        $('#Input_SelectProgramNasional').html('<option value="">Memuat program RPJMN...</option>');
+        $('#Input_SelectProgramNasional').html('<option value="">Memuat program' + (SelectedTahun === '2026' ? ' RKP...' : ' RPJMN...') + '</option>');
         $('#Input_ProgramNasional').val('');
         CURRENT_KEGIATAN_OPTIONS_INPUT = '<option value="">-- Pilih Kegiatan Prioritas Nasional --</option>';
         $('#ContainerKegiatanInput .select-kegiatan-item').html(CURRENT_KEGIATAN_OPTIONS_INPUT);
@@ -998,7 +1030,7 @@ $(document).ready(function() {
             $.ajax({
                 url: BaseURL + 'Daerah/GetProgramNasionalByPN',
                 type: 'GET',
-                data: { id_pn: idPn },
+                data: { id_pn: idPn, tahun: SelectedTahun },
                 dataType: 'json',
                 success: function(res) {
                     var opt = '<option value="">-- Pilih Program Prioritas Nasional --</option>';
@@ -1014,7 +1046,7 @@ $(document).ready(function() {
             $.ajax({
                 url: BaseURL + 'Daerah/GetKegiatanNasionalByProgram',
                 type: 'GET',
-                data: { id_pn: idPn },
+                data: { id_pn: idPn, tahun: SelectedTahun },
                 dataType: 'json',
                 success: function(res) {
                     CURRENT_KEGIATAN_OPTIONS_INPUT = '<option value="">-- Pilih Kegiatan Prioritas Nasional --</option>';
@@ -1046,7 +1078,7 @@ $(document).ready(function() {
             $.ajax({
                 url: BaseURL + 'Daerah/GetKegiatanNasionalByProgram',
                 type: 'GET',
-                data: { id_program: progId, id_pn: idPn },
+                data: { id_program: progId, id_pn: idPn, tahun: SelectedTahun },
                 dataType: 'json',
                 success: function(res) {
                     CURRENT_KEGIATAN_OPTIONS_INPUT = '<option value="">-- Pilih Kegiatan Prioritas Nasional --</option>';
@@ -1162,7 +1194,18 @@ $(document).ready(function() {
         $('#Edit_IdPN').val(idPn);
         $('#Edit_NomorPPN').val(nomorPpn);
         $('#Edit_ProgramNasional').val(programNas);
-        $('#Edit_IdPrioritasDaerah').val(idPrioritasDaerah);
+        var matchedPriVal = '';
+        $('#Edit_IdPrioritasDaerah option').each(function() {
+            if ($(this).val() == idPrioritasDaerah || ($(this).data('prioritas') && $(this).data('prioritas') == prioritasDaerah)) {
+                matchedPriVal = $(this).val();
+                return false;
+            }
+        });
+        if (matchedPriVal) {
+            $('#Edit_IdPrioritasDaerah').val(matchedPriVal);
+        } else {
+            $('#Edit_IdPrioritasDaerah').val(idPrioritasDaerah);
+        }
         $('#Edit_PrioritasDaerah').val(prioritasDaerah);
         $('#Edit_ProgramPrioritasDaerah').val(programPrioritasDaerah);
 
@@ -1178,7 +1221,7 @@ $(document).ready(function() {
             $.ajax({
                 url: BaseURL + 'Daerah/GetProgramNasionalByPN',
                 type: 'GET',
-                data: { id_pn: idPn },
+                data: { id_pn: idPn, tahun: SelectedTahun },
                 dataType: 'json',
                 success: function(res) {
                     var opt = '<option value="">-- Pilih Program Prioritas Nasional --</option>';
@@ -1196,7 +1239,7 @@ $(document).ready(function() {
                     $.ajax({
                         url: BaseURL + 'Daerah/GetKegiatanNasionalByProgram',
                         type: 'GET',
-                        data: { id_program: matchedProgId, id_pn: idPn },
+                        data: { id_program: matchedProgId, id_pn: idPn, tahun: SelectedTahun },
                         dataType: 'json',
                         success: function(kRes) {
                             CURRENT_KEGIATAN_OPTIONS_EDIT = '<option value="">-- Pilih Kegiatan Prioritas Nasional --</option>';
@@ -1346,7 +1389,7 @@ $(document).ready(function() {
 
     $('#Edit_IdPN').on('change', function() {
         var idPn = $(this).val();
-        $('#Edit_SelectProgramNasional').html('<option value="">Memuat program RPJMN...</option>');
+        $('#Edit_SelectProgramNasional').html('<option value="">Memuat program' + (SelectedTahun === '2026' ? ' RKP...' : ' RPJMN...') + '</option>');
         $('#Edit_ProgramNasional').val('');
         CURRENT_KEGIATAN_OPTIONS_EDIT = '<option value="">-- Pilih Kegiatan Prioritas Nasional --</option>';
         $('#ContainerKegiatanEdit .select-kegiatan-item').html(CURRENT_KEGIATAN_OPTIONS_EDIT);
@@ -1355,7 +1398,7 @@ $(document).ready(function() {
             $.ajax({
                 url: BaseURL + 'Daerah/GetProgramNasionalByPN',
                 type: 'GET',
-                data: { id_pn: idPn },
+                data: { id_pn: idPn, tahun: SelectedTahun },
                 dataType: 'json',
                 success: function(res) {
                     var opt = '<option value="">-- Pilih Program Prioritas Nasional --</option>';
@@ -1371,7 +1414,7 @@ $(document).ready(function() {
             $.ajax({
                 url: BaseURL + 'Daerah/GetKegiatanNasionalByProgram',
                 type: 'GET',
-                data: { id_pn: idPn },
+                data: { id_pn: idPn, tahun: SelectedTahun },
                 dataType: 'json',
                 success: function(res) {
                     CURRENT_KEGIATAN_OPTIONS_EDIT = '<option value="">-- Pilih Kegiatan Prioritas Nasional --</option>';
@@ -1403,7 +1446,7 @@ $(document).ready(function() {
             $.ajax({
                 url: BaseURL + 'Daerah/GetKegiatanNasionalByProgram',
                 type: 'GET',
-                data: { id_program: progId, id_pn: idPn },
+                data: { id_program: progId, id_pn: idPn, tahun: SelectedTahun },
                 dataType: 'json',
                 success: function(res) {
                     CURRENT_KEGIATAN_OPTIONS_EDIT = '<option value="">-- Pilih Kegiatan Prioritas Nasional --</option>';

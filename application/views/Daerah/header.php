@@ -369,6 +369,9 @@ $isVerifikator = (
   } elseif (!empty($_SESSION['Username'])) {
     $LoginInfo = $_SESSION['Username'];
   }
+
+  $isVerifikator = !empty($_SESSION['IsVerifikator']) || 
+                   (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 4 && strtolower($_SESSION['Username'] ?? '') === 'verifikator');
 ?>
 
 
@@ -412,7 +415,7 @@ $isVerifikator = (
 
     <div class="navbar-menu">
 
-      <?php if (!$isVerifikator): ?>
+      <?php if (!$isVerifikator) { ?>
       <div class="dropdown">
         <a href="#" class="navbar-item">Laporan<i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
         <div class="dropdown-content">
@@ -469,7 +472,7 @@ $isVerifikator = (
 
         </div>
       </div>
-      <?php endif; ?>
+      <?php } ?>
 
       <?php if (isset($_SESSION['Level']) && ((int)$_SESSION['Level'] === 3 || (int)$_SESSION['Level'] === 4)) { ?>
         <button class="logout-btn" onclick="logout()" type="button">

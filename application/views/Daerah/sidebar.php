@@ -1,4 +1,8 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<?php 
+defined('BASEPATH') OR exit('No direct script access allowed'); 
+$isVerifikator = !empty($_SESSION['IsVerifikator']) || 
+                 (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 4 && strtolower($_SESSION['Username'] ?? '') === 'verifikator');
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -467,7 +471,6 @@ $isVerifikator = (
                 </div>
             </li>
         <?php else: ?>
-
             <!-- DAFTAR AKUN -->
             <li class="sidebar-header header-pengaturan">
                 <span class="header-icon-box"><i class="fa fa-users"></i></span>
@@ -520,23 +523,24 @@ $isVerifikator = (
                     <i class="fa fa-chevron-down"></i>
                 </a>
                 <div class="sidebar-submenu">
-                    <a href="<?=base_url('Daerah/VisiRPJMD')?>">VMTS</a>
-                    <a href="<?=base_url('Daerah/ProgramPrioritasRPJMD')?>">Program Prioritas RPJMD</a>
-                    <a href="<?=base_url('Daerah/DukunganKegiatanPrioritas')?>">Dukungan Kegiatan Prioritas Utama</a>
-                    <!-- <a href="<?=base_url('Daerah/MisiRPJMD')?>">Misi</a> -->
-                    <!-- <a href="<?=base_url('Daerah/TujuanRPJMD')?>">Tujuan</a> -->
-                    <!-- <a href="<?=base_url('Daerah/SasaranRPJMD')?>">Sasaran</a> -->
-                    <a href="<?=base_url('Daerah/ProgramPD')?>">Program</a>
-                    <a href="<?=base_url('Daerah/ArahKebijakanRPJMD')?>">Arah Kebijakan</a>
                     <a href="<?=base_url('Daerah/IsuStrategisDaerah')?>">Isu Strategis Daerah</a>
+                    <a href="<?=base_url('Daerah/VisiRPJMD')?>">VMTS</a>
                     <a href="<?=base_url('Daerah/TabelKeselarasan')?>">Tabel Keselarasan</a>
                     <a href="<?=base_url('Daerah/TahapanRPJMD')?>">Tahapan</a>
+                    <a href="<?=base_url('Daerah/DukunganKegiatanPrioritas')?>">Dukungan Kegiatan Prioritas</a>
+                    <a href="<?=base_url('Daerah/ProgramPrioritasRPJMD')?>">Program Prioritas RPJMD</a>
+                    <a href="<?=base_url('Daerah/ProgramPD')?>">Program</a>
                     <a href="<?=base_url('Daerah/Iku')?>">IKU</a>
                     <a href="<?=base_url('Daerah/Ikd')?>">IKD</a>
-                    <a href="<?=base_url('Daerah/cascade')?>">Cascade</a>
-                    <a href="<?=base_url('Daerah/PotensiDaerah')?>">Potensi Daerah</a>
-                    <a href="<?=base_url('Daerah/PermasalahanPokok')?>">Permasalahan Pokok</a>
                     <a href="<?=base_url('Daerah/SPM')?>">SPM</a>
+
+                    <!-- // <a href="<?=base_url('Daerah/ArahKebijakanRPJMD')?>">Arah Kebijakan</a> -->
+                    <!-- // <a href="<?=base_url('Daerah/cascade')?>">Cascade</a> -->
+                    <!-- // <a href="<?=base_url('Daerah/PotensiDaerah')?>">Potensi Daerah</a> -->
+                    <!-- // <a href="<?=base_url('Daerah/PermasalahanPokok')?>">Permasalahan Pokok</a> -->
+                    <!-- // <a href="<?=base_url('Daerah/MisiRPJMD')?>">Misi</a> -->
+                    <!-- // <a href="<?=base_url('Daerah/TujuanRPJMD')?>">Tujuan</a> -->
+                    <!-- // <a href="<?=base_url('Daerah/SasaranRPJMD')?>">Sasaran</a> -->
                 </div>
             </li>
 
@@ -614,7 +618,7 @@ $isVerifikator = (
                 </div>
             </li>
 
-            <!-- Konsistensi/Keselarasan RKPD -->
+            <!-- // Konsistensi/Keselarasan RKPD
             <li class="sidebar-dropdown">
                 <a href="#">
                     <i class="menu-icon fa fa-repeat"></i>
@@ -631,6 +635,7 @@ $isVerifikator = (
                     <a href="<?=base_url('Daerah/KeselarasanIntervensi')?>">Keselarasan Intervensi Kewilayahan</a>
                 </div>
             </li>
+            -->
 
             <!-- Rencana Aksi -->
             <li class="sidebar-dropdown">
@@ -700,6 +705,31 @@ $isVerifikator = (
                 </div>
             </li>
 
+            <!-- Pendapatan -->
+            <li class="sidebar-dropdown">
+                <a href="#">
+                    <i class="menu-icon fa fa-credit-card"></i>
+                    <span>Pendapatan</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Instansi/Pendapatan')?>">Pendapatan</a>
+                </div>
+            </li>
+
+            <!-- Pembiayaan -->
+            <li class="sidebar-dropdown">
+                <a href="#">
+                    <i class="menu-icon fa fa-exchange"></i>
+                    <span>Pembiayaan</span>
+                    <i class="fa fa-chevron-down"></i>
+                </a>
+                <div class="sidebar-submenu">
+                    <a href="<?=base_url('Instansi/PembiayaanPenerimaan')?>">Penerimaan</a>
+                    <a href="<?=base_url('Instansi/PembiayaanPengeluaran')?>">Pengeluaran</a>
+                </div>
+            </li>
+
             <!-- Anggaran -->
             <li class="sidebar-dropdown">
                 <a href="#">
@@ -708,7 +738,17 @@ $isVerifikator = (
                     <i class="fa fa-chevron-down"></i>
                 </a>
                 <div class="sidebar-submenu">
-                    <a href="<?=base_url('Daerah/RAPBD')?>">RAPBD</a>
+                    <!-- RAPBD Dropdown -->
+                    <div class="sidebar-dropdown">
+                        <a href="#">
+                            <span>RAPBD</span>
+                            <i class="fa fa-chevron-down"></i>
+                        </a>
+                        <div class="sidebar-submenu">
+                            <a href="<?=base_url('Daerah/RAPBDTabel1')?>">Ringkasan RAPBD</a>
+                            <a href="<?=base_url('Daerah/RAPBDTabel2')?>">RAPBD per Urusan</a>
+                        </div>
+                    </div>
                     <a href="<?=base_url('Daerah/APBD')?>">APBD</a>
                 </div>
             </li>
@@ -808,7 +848,6 @@ $isVerifikator = (
                 </div>
             </li>
         <?php endif; ?>
-
         </ul>
     </div>
 </div>
@@ -906,38 +945,72 @@ document.querySelectorAll('.sidebar-dropdown > a').forEach(a => {
 });
 
   // Highlight menu aktif berdasarkan URL
-  const currentPath = window.location.pathname.replace(/\/+$/, '');
+  let activeLink = null;
+  const currentPath = window.location.pathname.toLowerCase().replace(/\/+$/, '');
   document.querySelectorAll('.sidebar-submenu a').forEach(link => {
     const href = link.getAttribute('href');
     if (!href) return;
 
-    const linkPath = new URL(href, window.location.origin).pathname.replace(/\/+$/, '');
-    const isCurrent = linkPath === currentPath;
-    const isBab3_4Active = linkPath.toLowerCase().endsWith('/instansi/bab3_4') && (
-      currentPath.toLowerCase().endsWith('/instansi/bab3_4') || 
-      currentPath.toLowerCase().endsWith('/instansi/bab3_4a') || 
-      currentPath.toLowerCase().endsWith('/instansi/bab3_4b')
+    const linkPath = new URL(href, window.location.origin).pathname.toLowerCase().replace(/\/+$/, '');
+    const isCurrent = (linkPath === currentPath);
+    const isBab3_4Active = linkPath.endsWith('/instansi/bab3_4') && (
+      currentPath.endsWith('/instansi/bab3_4') || 
+      currentPath.endsWith('/instansi/bab3_4a') || 
+      currentPath.endsWith('/instansi/bab3_4b')
     );
-    const isBab3_5Active = linkPath.toLowerCase().endsWith('/instansi/bab3_5') && (
-      currentPath.toLowerCase().endsWith('/instansi/bab3_5') ||
-      currentPath.toLowerCase().endsWith('/instansi/pengisianpenghargaan')
+    const isBab3_5Active = linkPath.endsWith('/instansi/bab3_5') && (
+      currentPath.endsWith('/instansi/bab3_5') ||
+      currentPath.endsWith('/instansi/pengisianpenghargaan')
     );
+    const isPembiayaanDefault = currentPath.endsWith('/instansi/pembiayaan') && linkPath.endsWith('/instansi/pembiayaanpenerimaan');
 
-    if (isCurrent || isBab3_4Active || isBab3_5Active) {
+    if (isCurrent || isBab3_4Active || isBab3_5Active || isPembiayaanDefault) {
       link.style.color = '#20c997';
       link.style.fontWeight = 'bold';
+      activeLink = link;
 
       // open parent dropdown
       let parent = link.closest('.sidebar-dropdown');
-
-while (parent) {
-    openDropdown(parent);
-
-    const next = parent.parentElement.closest('.sidebar-dropdown');
-    parent = next;
-}
+      while (parent) {
+        openDropdown(parent);
+        const next = parent.parentElement.closest('.sidebar-dropdown');
+        parent = next;
+      }
     }
   });
+
+  // Simpan & Pulihkan posisi scroll sidebar agar tetap di tempatnya dan tidak ke atas saat refresh / navigasi
+  const sidebarWrapper = document.querySelector('.sidebar-wrapper');
+  if (sidebarWrapper) {
+    sidebarWrapper.addEventListener('scroll', function() {
+      sessionStorage.setItem('sidebar_scroll_top', this.scrollTop);
+    });
+
+    document.querySelectorAll('.sidebar-wrapper a').forEach(a => {
+      a.addEventListener('click', function() {
+        sessionStorage.setItem('sidebar_scroll_top', sidebarWrapper.scrollTop);
+      });
+    });
+
+    window.addEventListener('beforeunload', function() {
+      sessionStorage.setItem('sidebar_scroll_top', sidebarWrapper.scrollTop);
+    });
+
+    const savedScrollTop = sessionStorage.getItem('sidebar_scroll_top');
+    if (savedScrollTop !== null) {
+      sidebarWrapper.scrollTop = parseInt(savedScrollTop, 10);
+      setTimeout(() => {
+        sidebarWrapper.scrollTop = parseInt(savedScrollTop, 10);
+      }, 50);
+      setTimeout(() => {
+        sidebarWrapper.scrollTop = parseInt(savedScrollTop, 10);
+      }, 250);
+    } else if (activeLink) {
+      setTimeout(() => {
+        activeLink.scrollIntoView({ block: 'center', behavior: 'auto' });
+      }, 100);
+    }
+  }
 });
 </script>
 </html>

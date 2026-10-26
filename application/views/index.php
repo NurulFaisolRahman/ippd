@@ -1556,6 +1556,8 @@
               } else {
                 window.location = BaseURL + "Instansi/PermasalahanPD";
               }
+            } else if (Respon === 'verifikator') {
+              window.location = BaseURL + "Instansi/TabelIPPD";
             } else {
               showAlert(Respon || 'Username atau Password salah!');
               btn.prop('disabled', false);

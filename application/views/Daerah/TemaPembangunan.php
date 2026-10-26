@@ -507,16 +507,47 @@ MODAL INPUT TEMA - TAHUN INPUT MANUAL, TEMA NASIONAL AUTO REFRESH
                                 </div>
                             </div>
 
-                            <!-- TEMA DAERAH -->
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-3">
-                                            <label class="hrzn-fm"><b>Tema Daerah</b></label>
-                                        </div>
-                                        <div class="col-lg-8">
-                                            <div class="nk-int-st">
-                                                <textarea class="form-control" id="TemaDaerah" rows="2" placeholder="Tema Pembangunan Daerah" style="color: #000;"></textarea>
+                            <!-- ========================================== -->
+                            <!-- DROPDOWN TEMA DAERAH (TAHAPAN RPJMD) -->
+                            <!-- ========================================== -->
+                            <div class="dropdown-group">
+                                <div class="form-example-int form-horizental">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-lg-3">
+                                                <label class="hrzn-fm">
+                                                    <b>Tema Daerah</b>
+                                                </label>
+                                            </div>
+                                            <div class="col-lg-8">
+                                                <div class="nk-int-st">
+                                                    <!-- Pilih Tahun Tahapan RPJMD - Auto Refresh -->
+                                                    <div style="margin-bottom: 8px;">
+                                                        <select class="form-control" id="TahunTahapanRPJMD" style="color: #000;">
+                                                            <option value="">-- Pilih Tahun Tahapan RPJMD --</option>
+                                                            <?php if (!empty($TahunTahapanRPJMD)) { 
+                                                                foreach ($TahunTahapanRPJMD as $th) { ?>
+                                                                    <option value="<?= $th['Tahun'] ?>">Tahun <?= $th['Tahun'] ?></option>
+                                                            <?php } } else { ?>
+                                                                <option value="2026">Tahun 2026</option>
+                                                                <option value="2027">Tahun 2027</option>
+                                                                <option value="2028">Tahun 2028</option>
+                                                                <option value="2029">Tahun 2029</option>
+                                                                <option value="2030">Tahun 2030</option>
+                                                            <?php } ?>
+                                                        </select>
+                                                        <small class="text-muted" style="display: block; margin-top: 4px;">
+                                                            <i class="fa fa-info-circle"></i> Tema Tahapan RPJMD akan otomatis dimuat saat memilih tahun
+                                                        </small>
+                                                    </div>
+                                                    <!-- Dropdown Tema Daerah (Tahapan RPJMD) -->
+                                                    <select class="form-control" id="TemaDaerah" style="color: #000;">
+                                                        <option value="">-- Pilih Tahun Tahapan Terlebih Dahulu --</option>
+                                                    </select>
+                                                    <span class="tema-rkp-loading" id="tema-daerah-loading">
+                                                        <span class="spinner-border-sm"></span> Memuat...
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -623,16 +654,47 @@ MODAL EDIT TEMA - TAHUN INPUT MANUAL, TEMA NASIONAL AUTO REFRESH
                                 </div>
                             </div>
 
-                            <!-- TEMA DAERAH -->
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-lg-3">
-                                            <label class="hrzn-fm"><b>Tema Daerah</b></label>
-                                        </div>
-                                        <div class="col-lg-8">
-                                            <div class="nk-int-st">
-                                                <textarea class="form-control" id="EditTemaDaerah" rows="2" style="color: #000;"></textarea>
+                            <!-- ========================================== -->
+                            <!-- DROPDOWN TEMA DAERAH (TAHAPAN RPJMD) EDIT -->
+                            <!-- ========================================== -->
+                            <div class="dropdown-group">
+                                <div class="form-example-int form-horizental">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-lg-3">
+                                                <label class="hrzn-fm">
+                                                    <b>Tema Daerah</b>
+                                                </label>
+                                            </div>
+                                            <div class="col-lg-8">
+                                                <div class="nk-int-st">
+                                                    <!-- Pilih Tahun Tahapan RPJMD - Auto Refresh -->
+                                                    <div style="margin-bottom: 8px;">
+                                                        <select class="form-control" id="EditTahunTahapanRPJMD" style="color: #000;">
+                                                            <option value="">-- Pilih Tahun Tahapan RPJMD --</option>
+                                                            <?php if (!empty($TahunTahapanRPJMD)) { 
+                                                                foreach ($TahunTahapanRPJMD as $th) { ?>
+                                                                    <option value="<?= $th['Tahun'] ?>">Tahun <?= $th['Tahun'] ?></option>
+                                                            <?php } } else { ?>
+                                                                <option value="2026">Tahun 2026</option>
+                                                                <option value="2027">Tahun 2027</option>
+                                                                <option value="2028">Tahun 2028</option>
+                                                                <option value="2029">Tahun 2029</option>
+                                                                <option value="2030">Tahun 2030</option>
+                                                            <?php } ?>
+                                                        </select>
+                                                        <small class="text-muted" style="display: block; margin-top: 4px;">
+                                                            <i class="fa fa-info-circle"></i> Tema Tahapan RPJMD akan otomatis dimuat saat memilih tahun
+                                                        </small>
+                                                    </div>
+                                                    <!-- Dropdown Tema Daerah (Tahapan RPJMD) -->
+                                                    <select class="form-control" id="EditTemaDaerah" style="color: #000;">
+                                                        <option value="">-- Pilih Tahun Tahapan Terlebih Dahulu --</option>
+                                                    </select>
+                                                    <span class="tema-rkp-loading" id="edit-tema-daerah-loading">
+                                                        <span class="spinner-border-sm"></span> Memuat...
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1495,20 +1557,122 @@ jQuery(document).ready(function($) {
         }
     });
 
-   // ============================================================
-// AUTO REFRESH SAAT PILIH TAHUN TEMA RKP
-// ============================================================
-$('#EditTahunTemaRKP').on('change', function() {
-    var tahun = $(this).val();
-    if (tahun && tahun.length === 4) {
-        // Ambil selected ID yang tersimpan
-        var selectedId = $('#EditTemaNasionalId').data('selected') || null;
-        $('#EditTemaNasionalId').html('<option value="">Memuat data...</option>');
-        loadTemaRKP(tahun, 'EditTemaNasionalId', selectedId);
-    } else {
-        $('#EditTemaNasionalId').html('<option value="">-- Pilih Tahun Tema RKP Terlebih Dahulu --</option>');
+    // ============================================================
+    // AUTO REFRESH SAAT PILIH TAHUN TEMA RKP
+    // ============================================================
+    $('#EditTahunTemaRKP').on('change', function() {
+        var tahun = $(this).val();
+        if (tahun && tahun.length === 4) {
+            // Ambil selected ID yang tersimpan
+            var selectedId = $('#EditTemaNasionalId').data('selected') || null;
+            $('#EditTemaNasionalId').html('<option value="">Memuat data...</option>');
+            loadTemaRKP(tahun, 'EditTemaNasionalId', selectedId);
+        } else {
+            $('#EditTemaNasionalId').html('<option value="">-- Pilih Tahun Tema RKP Terlebih Dahulu --</option>');
+        }
+    });
+
+    // ============================================================
+    // FUNGSI UNTUK MEMUAT TEMA TAHAPAN RPJMD BERDASARKAN TAHUN
+    // ============================================================
+    function loadTemaTahapanRPJMD(tahun, targetId, selectedText, targetTextareaId) {
+        if (!tahun || isNaN(tahun)) {
+            $('#' + targetId).html('<option value="">-- Pilih Tahun Tahapan RPJMD Terlebih Dahulu --</option>');
+            return;
+        }
+        
+        var loadingId = (targetId === 'TemaDaerah') ? '#tema-daerah-loading' : '#edit-tema-daerah-loading';
+        $(loadingId).addClass('active');
+        
+        $.ajax({
+            url: BaseURL + "Daerah/GetTemaTahapanRPJMDByTahun",
+            type: "POST",
+            data: { 
+                tahun: tahun,
+                [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE 
+            },
+            success: function(Respon) {
+                try {
+                    var Data = typeof Respon === 'string' ? JSON.parse(Respon) : Respon;
+                    var options = '<option value="">-- Pilih Tema Daerah (Tahapan RPJMD) --</option>';
+                    var matched = false;
+                    
+                    if (Data && Data.length > 0) {
+                        for (var i = 0; i < Data.length; i++) {
+                            var temaText = Data[i].Tema.trim();
+                            var isSelected = (selectedText && temaText === selectedText.trim());
+                            if (isSelected) matched = true;
+                            var selAttr = isSelected ? 'selected' : '';
+                            options += '<option value="' + temaText.replace(/"/g, '&quot;') + '" ' + selAttr + '>' + temaText + '</option>';
+                        }
+                    }
+                    
+                    // Jika ada data tersimpan sebelumnya namun tidak ada di list RPJMD, tetap pertahankan sebagai pilihan
+                    if (selectedText && selectedText.trim() !== '' && !matched) {
+                        options += '<option value="' + selectedText.trim().replace(/"/g, '&quot;') + '" selected>' + selectedText.trim() + '</option>';
+                    }
+                    
+                    if (!Data || Data.length === 0) {
+                        if (!selectedText) {
+                            options = '<option value="">Tidak ada data Tahapan RPJMD untuk tahun ' + tahun + '</option>';
+                        }
+                    }
+                    
+                    $('#' + targetId).html(options);
+
+                    // Jika hanya ada 1 pilihan tema dan belum ada nilai terpilih, otomatis pilih
+                    if (!selectedText && Data && Data.length === 1) {
+                        $('#' + targetId).val(Data[0].Tema.trim());
+                    }
+                } catch(e) {
+                    console.error('Error parsing Tema Tahapan RPJMD:', e);
+                    $('#' + targetId).html('<option value="">Error memuat data</option>');
+                }
+                $(loadingId).removeClass('active');
+            },
+            error: function(xhr) {
+                console.error('Error loading Tema Tahapan RPJMD:', xhr);
+                $('#' + targetId).html('<option value="">Error memuat data</option>');
+                $(loadingId).removeClass('active');
+            }
+        });
     }
-});
+
+    // Event listener saat memilih tahun tahapan RPJMD (Modal Tambah)
+    $('#TahunTahapanRPJMD').on('change', function() {
+        var tahun = $(this).val();
+        if (tahun) {
+            $('#TemaDaerah').html('<option value="">Memuat data...</option>');
+            loadTemaTahapanRPJMD(tahun, 'TemaDaerah');
+        } else {
+            $('#TemaDaerah').html('<option value="">-- Pilih Tahun Tahapan RPJMD Terlebih Dahulu --</option>');
+        }
+    });
+
+    // Event listener saat memilih tahun tahapan RPJMD (Modal Edit)
+    $('#EditTahunTahapanRPJMD').on('change', function() {
+        var tahun = $(this).val();
+        if (tahun) {
+            var selectedText = $('#EditTemaDaerah').val() || $('#EditTemaDaerah').data('selected');
+            $('#EditTemaDaerah').html('<option value="">Memuat data...</option>');
+            loadTemaTahapanRPJMD(tahun, 'EditTemaDaerah', selectedText);
+        } else {
+            $('#EditTemaDaerah').html('<option value="">-- Pilih Tahun Tahapan RPJMD Terlebih Dahulu --</option>');
+        }
+    });
+
+    // Auto sinkronisasi dropdown saat input Tahun diketik
+    $('#Tahun').on('input change', function() {
+        var inputTahun = $(this).val().trim();
+        if (inputTahun && inputTahun.length === 4) {
+            if ($('#TahunTemaRKP option[value="' + inputTahun + '"]').length > 0) {
+                $('#TahunTemaRKP').val(inputTahun).trigger('change');
+            }
+            if ($('#TahunTahapanRPJMD option[value="' + inputTahun + '"]').length > 0) {
+                $('#TahunTahapanRPJMD').val(inputTahun).trigger('change');
+            }
+        }
+    });
 
     // ============================================================
     // INPUT TEMA
@@ -1533,8 +1697,8 @@ $('#EditTahunTemaRKP').on('change', function() {
         Tahun: tahun,
         TemaRKPId: temaRKPId,
         TemaNasionalText: temaNasionalText,
-        TemaProvinsi: $("#TemaProvinsi").val().trim(),
-        TemaDaerah: $("#TemaDaerah").val().trim(),
+        TemaProvinsi: ($("#TemaProvinsi").val() || '').trim(),
+        TemaDaerah: ($("#TemaDaerah").val() || '').trim(),
         [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
     };
     
@@ -1743,6 +1907,18 @@ $(document).on("click", ".EditTema", function() {
         $('#EditTemaNasionalId').html('<option value="">-- Pilih Tahun Tema RKP Terlebih Dahulu --</option>');
     }
     
+    // =============================================
+    // SET DROPDOWN TEMA DAERAH (TAHAPAN RPJMD)
+    // =============================================
+    if (tahun) {
+        $('#EditTemaDaerah').data('selected', temaDaerah);
+        $('#EditTahunTahapanRPJMD').val(tahun);
+        loadTemaTahapanRPJMD(tahun, 'EditTemaDaerah', temaDaerah);
+    } else {
+        $('#EditTahunTahapanRPJMD').val('');
+        $('#EditTemaDaerah').html('<option value="">-- Pilih Tahun Tahapan RPJMD Terlebih Dahulu --</option>');
+    }
+    
     $('#ModalEditTema').modal("show");
 });
 
@@ -1813,8 +1989,8 @@ $("#UpdateTema").click(function() {
         Tahun: tahun,
         TemaRKPId: temaRKPId,
         TemaNasionalText: temaNasionalText,
-        TemaProvinsi: $("#EditTemaProvinsi").val().trim(),
-        TemaDaerah: $("#EditTemaDaerah").val().trim(),
+        TemaProvinsi: ($("#EditTemaProvinsi").val() || '').trim(),
+        TemaDaerah: ($("#EditTemaDaerah").val() || '').trim(),
         [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
     };
     
@@ -2336,10 +2512,12 @@ $("#UpdateTema").click(function() {
         $("#Tahun").val('');
         $("#TahunTemaRKP").val('');
         $("#TemaNasionalId").html('<option value="">-- Pilih Tahun Tema RKP Terlebih Dahulu --</option>');
+        $("#TahunTahapanRPJMD").val('');
+        $("#TemaDaerah").html('<option value="">-- Pilih Tahun Tahapan Terlebih Dahulu --</option>');
         $("#TemaProvinsi").val('');
-        $("#TemaDaerah").val('');
         $("#InputTema").prop('disabled', false).html('<b>SIMPAN</b>');
         $('#tema-rkp-loading').removeClass('active');
+        $('#tema-daerah-loading').removeClass('active');
     });
 
     $('#ModalEditTema').on('hidden.bs.modal', function() {
@@ -2348,10 +2526,13 @@ $("#UpdateTema").click(function() {
         $("#EditTahunTemaRKP").val('');
         $("#EditTemaNasionalId").html('<option value="">-- Pilih Tahun Tema RKP Terlebih Dahulu --</option>');
         $("#EditTemaNasionalId").data('selected', '');
+        $("#EditTahunTahapanRPJMD").val('');
+        $("#EditTemaDaerah").html('<option value="">-- Pilih Tahun Tahapan Terlebih Dahulu --</option>');
+        $("#EditTemaDaerah").data('selected', '');
         $("#EditTemaProvinsi").val('');
-        $("#EditTemaDaerah").val('');
         $("#UpdateTema").prop('disabled', false).html('<b>UPDATE</b>');
         $('#edit-tema-rkp-loading').removeClass('active');
+        $('#edit-tema-daerah-loading').removeClass('active');
     });
 
     $('#ModalInputPrioritasKolom').on('hidden.bs.modal', function() {

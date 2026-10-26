@@ -12,6 +12,37 @@ class Instansi extends CI_Controller {
         if (!isset($this->db)) {
             $this->load->database();
         }
+
+        // Cek jika akun verifikator: hanya izinkan akses ke menu/fitur IPPD
+        $isVerifikator = !empty($_SESSION['IsVerifikator']) || 
+                         (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 4 && strtolower($_SESSION['Username'] ?? '') === 'verifikator');
+        
+        if ($isVerifikator) {
+            $method = strtolower($this->router->fetch_method());
+            $allowed_methods = [
+                'tabelippd',
+                'ippd',
+                'getippddata',
+                'saveippdverifikator',
+                'uploadbuktiippd',
+                'saveippdscore',
+                'saveallippdscore',
+                'resetippddata',
+                'settempkodewilayah',
+                'resettempfilter',
+                'logout'
+            ];
+            if (!in_array($method, $allowed_methods)) {
+                if ($this->input->is_ajax_request()) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Verifikator hanya dapat mengakses menu IPPD.']);
+                    exit;
+                } else {
+                    redirect(base_url('Instansi/TabelIPPD'));
+                    exit;
+                }
+            }
+        }
     }
 
     public function Logout() {
@@ -18826,19 +18857,61 @@ public function PerjanjianKinerjaPD() {
         $data['PerjanjianKinerja'] = $this->db->order_by('pk.id', 'ASC')->get()->result_array();
     }
     
-    // Data untuk dropdown pegawai pengampu
+    // Data untuk dropdown pegawai pengampu & atasan
     $data['PegawaiList'] = [];
     if ($KodeWilayah) {
+        $target_instansi = ($is_role_4 && $instansi_id) ? $instansi_id : (!empty($filter_instansi_id) ? (int)$filter_instansi_id : 0);
+
+        // Ambil ID Pimpinan Daerah TERLEBIH DAHULU sebelum memulai query akun_karyawan
+        $pimpinanIds = [];
+        if ($target_instansi) {
+            $pimpinanDinas = $this->db->select('id')
+                ->where('kodewilayah', $KodeWilayah)
+                ->where_in('LOWER(TRIM(nama))', ['bupati', 'wakil bupati', 'walikota', 'wakil walikota'])
+                ->where('deleted_at IS NULL', null, false)
+                ->get('akun_instansi')
+                ->result_array();
+            $pimpinanIds = array_column($pimpinanDinas, 'id');
+        }
+
+        // Sekarang bangun query akun_karyawan
         $this->db->select('id, nama, nip, jabatan, eselon, satuan_unit_kerja, dinas_id')
             ->from('akun_karyawan')
             ->where('kodewilayah', $KodeWilayah)
             ->where('deleted_at IS NULL');
-        if ($is_role_4 && $instansi_id) {
-            $this->db->where('dinas_id', $instansi_id);
+
+        if ($target_instansi) {
+            $conds = ["FIND_IN_SET('$target_instansi', dinas_id) > 0"];
+            foreach ($pimpinanIds as $pId) {
+                $conds[] = "FIND_IN_SET('$pId', dinas_id) > 0";
+            }
+            $this->db->where('(' . implode(' OR ', $conds) . ')');
         }
-        $data['PegawaiList'] = $this->db->order_by('nama', 'ASC')->get()->result_array();
+        $allPegawai = $this->db->order_by('nama', 'ASC')->get()->result_array();
+        $data['AtasanList'] = $allPegawai;
+
+        // Pegawai Pengampu: Jangan tampilkan Pimpinan Daerah (Bupati, Wakil Bupati, Walikota, Wakil Walikota)
+        $pimpinanKeywords = ['bupati', 'wakil bupati', 'walikota', 'wakil walikota'];
+        $pegawaiOnly = [];
+        foreach ($allPegawai as $p) {
+            $jabatanClean = strtolower(trim($p['jabatan'] ?? ''));
+            $isPimpinan = in_array($jabatanClean, $pimpinanKeywords);
+
+            if (!$isPimpinan && !empty($p['dinas_id']) && !empty($pimpinanIds)) {
+                $dIds = array_filter(array_map('trim', explode(',', $p['dinas_id'])));
+                if (count(array_intersect($dIds, $pimpinanIds)) > 0) {
+                    $isPimpinan = true;
+                }
+            }
+
+            if (!$isPimpinan) {
+                $pegawaiOnly[] = $p;
+            }
+        }
+        $data['PegawaiList'] = $pegawaiOnly;
+    } else {
+        $data['AtasanList'] = [];
     }
-    $data['AtasanList'] = $data['PegawaiList'];
     
     $this->load->view('Daerah/header', $Header);
     $this->load->view('Daerah/PerjanjianKinerjaPD', $data);
@@ -19710,6 +19783,67 @@ public function updateStatusPerjanjianKinerja() {
             }
         }
         
+        // Master node names map untuk rendering pohon rekening
+        $allMasterRek = $this->db
+            ->select('kode_rekening, nama_rekening')
+            ->from('master_rekening')
+            ->like('kode_rekening', '5', 'after')
+            ->order_by('kode_rekening', 'ASC')
+            ->get()
+            ->result_array();
+
+        $node_map = [];
+        foreach ($allMasterRek as $mr) {
+            $node_map[$mr['kode_rekening']] = $mr['nama_rekening'];
+            $parts = explode('.', $mr['kode_rekening']);
+            $normParts = array_map(function($p) { return is_numeric($p) ? (int)$p : $p; }, $parts);
+            $node_map[implode('.', $normParts)] = $mr['nama_rekening'];
+        }
+
+        if (!empty($rekenings)) {
+            foreach ($rekenings as $r) {
+                if (!empty($r['kode_rekening']) && !empty($r['uraian_rekening'])) {
+                    $node_map[$r['kode_rekening']] = $r['uraian_rekening'];
+                    $parts = explode('.', $r['kode_rekening']);
+                    $normParts = array_map(function($p) { return is_numeric($p) ? (int)$p : $p; }, $parts);
+                    $node_map[implode('.', $normParts)] = $r['uraian_rekening'];
+                }
+            }
+        }
+
+        // Ambil riwayat rekomendasi Uraian Pengelompokan Belanja khusus instansi aktif ini
+        $targetInstId = !empty($active_instansi_id) ? (int)$active_instansi_id : (!empty($instansi_id) ? (int)$instansi_id : 0);
+        $instansiUraianList = [];
+        if ($targetInstId > 0) {
+            $uraianRows = $this->db
+                ->select('DISTINCT(r.uraian) as uraian', FALSE)
+                ->from('belanja_rincian r')
+                ->join('belanja_rekening b', 'b.id = r.rekening_id')
+                ->join('belanja_sub_kegiatan_header h', 'h.id = b.header_id')
+                ->where('h.id_instansi', $targetInstId)
+                ->where('r.deleted_at IS NULL')
+                ->where('b.deleted_at IS NULL')
+                ->where('h.deleted_at IS NULL')
+                ->where('(r.deleted_at IS NULL OR r.deleted_at = "0000-00-00 00:00:00")')
+                ->where('(b.deleted_at IS NULL OR b.deleted_at = "0000-00-00 00:00:00")')
+                ->where('(h.deleted_at IS NULL OR h.deleted_at = "0000-00-00 00:00:00")')
+                ->where('r.uraian IS NOT NULL')
+                ->where("TRIM(r.uraian) != ''")
+                ->order_by('r.uraian', 'ASC')
+                ->get()
+                ->result_array();
+            $filteredUraian = [];
+            foreach ($uraianRows as $row) {
+                $u = trim($row['uraian']);
+                if ($u !== '' && !preg_match('/^5(\.\d+)+$/', $u)) {
+                    $filteredUraian[] = $u;
+                }
+            }
+            $instansiUraianList = array_values(array_unique($filteredUraian));
+        }
+        $Data['InstansiUraianList'] = $instansiUraianList;
+
+        $Data['MasterNodeNames'] = $node_map;
         $Data['BelanjaData'] = $belanjaData;
         
         $this->load->view('Daerah/header', $Header);
@@ -19804,6 +19938,55 @@ public function updateStatusPerjanjianKinerja() {
             }
         }
         
+        echo json_encode(['status' => 'success', 'data' => $data]);
+    }
+
+    // ================================================================
+    // GET REKOMENDASI URAIAN PENGELOMPOKAN BELANJA (AJAX - KHUSUS INSTANSI)
+    // ================================================================
+    public function GetUraianPengelompokanRekomendasi() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: $this->input->get('instansi_id', TRUE));
+        if ($this->is_role_4() && $this->get_instansi_id()) {
+            $instansi_id = $this->get_instansi_id();
+        }
+
+        if ($instansi_id <= 0) {
+            echo json_encode(['status' => 'success', 'data' => []]);
+            return;
+        }
+
+        $uraianRows = $this->db
+            ->select('DISTINCT(r.uraian) as uraian', FALSE)
+            ->from('belanja_rincian r')
+            ->join('belanja_rekening b', 'b.id = r.rekening_id')
+            ->join('belanja_sub_kegiatan_header h', 'h.id = b.header_id')
+            ->where('h.id_instansi', $instansi_id)
+            ->where('r.deleted_at IS NULL')
+            ->where('b.deleted_at IS NULL')
+            ->where('h.deleted_at IS NULL')
+            ->where('(r.deleted_at IS NULL OR r.deleted_at = "0000-00-00 00:00:00")')
+            ->where('(b.deleted_at IS NULL OR b.deleted_at = "0000-00-00 00:00:00")')
+            ->where('(h.deleted_at IS NULL OR h.deleted_at = "0000-00-00 00:00:00")')
+            ->where('r.uraian IS NOT NULL')
+            ->where("TRIM(r.uraian) != ''")
+            ->order_by('r.uraian', 'ASC')
+            ->get()
+            ->result_array();
+
+        $data = [];
+        foreach ($uraianRows as $row) {
+            $u = trim($row['uraian']);
+            if ($u !== '' && !preg_match('/^5(\.\d+)+$/', $u)) {
+                $data[] = $u;
+            }
+        }
+        $data = array_values(array_unique($data));
         echo json_encode(['status' => 'success', 'data' => $data]);
     }
 
@@ -20445,6 +20628,278 @@ public function updateStatusPerjanjianKinerja() {
     }
 
     // ================================================================
+    // GET PAGU RENJA PER TAHAPAN (RANWAL S/D PERUBAHAN) UNTUK SUB KEGIATAN
+    // ================================================================
+
+    public function GetPaguRenjaTahapan() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+
+        header('Content-Type: application/json');
+
+        $kode_sub_kegiatan = trim($this->input->post('kode_sub_kegiatan', TRUE) ?: '');
+        $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: $this->get_instansi_id());
+        $is_role_4 = $this->is_role_4();
+        if ($is_role_4 && $this->get_instansi_id()) {
+            $instansi_id = (int)$this->get_instansi_id();
+        }
+        $tahun = (int)($this->input->post('tahun', TRUE) ?: date('Y'));
+        $KodeWilayah = $this->get_kode_wilayah();
+        if (empty($KodeWilayah) && !empty($instansi_id)) {
+            $instRow = $this->db->select('kodewilayah')->where('id', $instansi_id)->get('akun_instansi')->row_array();
+            if ($instRow && !empty($instRow['kodewilayah'])) {
+                $KodeWilayah = trim($instRow['kodewilayah']);
+            }
+        }
+
+        $result = [
+            'ranwal' => 0,
+            'rancangan' => 0,
+            'rankhir' => 0,
+            'perubahan' => 0,
+            'nama_sub_kegiatan' => '',
+            'tahun' => $tahun,
+            'kode_sub_kegiatan' => $kode_sub_kegiatan
+        ];
+
+        if (empty($kode_sub_kegiatan)) {
+            echo json_encode(['status' => 'success', 'data' => $result]);
+            return;
+        }
+
+        // Variasi kode sub kegiatan (misal 1.01.02.1.01.0001 vs 1.01.02.2.01.0001)
+        $kodes = [$kode_sub_kegiatan];
+        $parts = explode('.', $kode_sub_kegiatan);
+        if (count($parts) >= 6) {
+            $altParts = $parts;
+            if ($altParts[3] === '1') $altParts[3] = '2';
+            else if ($altParts[3] === '2') $altParts[3] = '1';
+            $altKode = implode('.', $altParts);
+            if (!in_array($altKode, $kodes)) {
+                $kodes[] = $altKode;
+            }
+        }
+
+        // 1. Ambil data sub kegiatan dari renstra_sub_kegiatan
+        $hasAnggaranCol = $this->db->field_exists('anggaran_' . $tahun, 'renstra_sub_kegiatan');
+        $selCols = 'rsk.id, rsk.nama, rsk.kode_nomenklatur' . ($hasAnggaranCol ? ', rsk.anggaran_' . $tahun : '');
+        $selPlain = 'id, nama, kode_nomenklatur' . ($hasAnggaranCol ? ', anggaran_' . $tahun : '');
+
+        $rsk = null;
+        if (!empty($instansi_id)) {
+            $rsk = $this->db->select($selCols)
+                ->from('renstra_sub_kegiatan rsk')
+                ->join('renstra_kegiatan rk', 'rk.id = rsk.kegiatan_id')
+                ->join('renstra_program rp', 'rp.id = rk.program_id')
+                ->join('renstra_sasaran rs', 'rs.id = rp.sasaran_id')
+                ->join('renstra_tujuan rt', 'rt.id = rs.tujuan_id')
+                ->where('rt.id_instansi', $instansi_id)
+                ->where_in('rsk.kode_nomenklatur', $kodes)
+                ->where('rsk.deleted_at IS NULL')
+                ->order_by('rsk.id', 'DESC')
+                ->get()
+                ->row_array();
+        }
+
+        if (!$rsk) {
+            $rsk = $this->db->select($selPlain)
+                ->from('renstra_sub_kegiatan')
+                ->where_in('kode_nomenklatur', $kodes)
+                ->where('deleted_at IS NULL')
+                ->order_by('id', 'DESC')
+                ->get()
+                ->row_array();
+        }
+
+        if (!$rsk && count($parts) >= 6) {
+            $suffix = '.' . $parts[count($parts)-2] . '.' . $parts[count($parts)-1];
+            $rsk = $this->db->select($selPlain)
+                ->from('renstra_sub_kegiatan')
+                ->like('kode_nomenklatur', $suffix, 'before')
+                ->where('deleted_at IS NULL')
+                ->order_by('id', 'DESC')
+                ->get()
+                ->row_array();
+        }
+
+        $skId = $rsk ? $rsk['id'] : null;
+        if ($rsk && !empty($rsk['nama'])) {
+            $result['nama_sub_kegiatan'] = $rsk['nama'];
+        }
+
+        $renstraPagu = ($rsk && isset($rsk['anggaran_' . $tahun])) ? (float)$rsk['anggaran_' . $tahun] : 0;
+        if ($renstraPagu == 0 && $skId) {
+            $skind = $this->db->where('sub_kegiatan_id', $skId)->where('deleted_at IS NULL')->order_by('urutan', 'ASC')->get('renstra_sub_kegiatan_indikator')->row_array();
+            if ($skind && isset($skind['anggaran_' . $tahun])) {
+                $renstraPagu = (float)$skind['anggaran_' . $tahun];
+            }
+        }
+
+        // 2. Tahap: Ranwal (renja_sub_kegiatan_data)
+        if ($skId) {
+            $qRanwal = $this->db->where('sub_kegiatan_id', $skId)
+                ->where('tahun', $tahun)
+                ->where('deleted_at IS NULL');
+            if (!empty($instansi_id)) $qRanwal->where('id_instansi', $instansi_id);
+            $rowRanwal = $qRanwal->get('renja_sub_kegiatan_data')->row_array();
+            if ($rowRanwal && isset($rowRanwal['anggaran']) && $rowRanwal['anggaran'] > 0) {
+                $result['ranwal'] = (float)$rowRanwal['anggaran'];
+            }
+        }
+
+        // 3. Tahap: Rancangan (rancangan_renja_sub_kegiatan_data)
+        if ($skId) {
+            $qRancangan = $this->db->where('sub_kegiatan_id', $skId)
+                ->where('tahun', $tahun)
+                ->where('deleted_at IS NULL');
+            if (!empty($instansi_id)) $qRancangan->where('id_instansi', $instansi_id);
+            $rowRancangan = $qRancangan->get('rancangan_renja_sub_kegiatan_data')->row_array();
+            if ($rowRancangan && isset($rowRancangan['anggaran']) && $rowRancangan['anggaran'] > 0) {
+                $result['rancangan'] = (float)$rowRancangan['anggaran'];
+            }
+        }
+
+        // 4. Tahap: Rankhir / Penetapan (rancangan_akhir_renja_sub_kegiatan_data)
+        if ($skId) {
+            $qRankhir = $this->db->where('sub_kegiatan_id', $skId)
+                ->where('tahun', $tahun)
+                ->where('deleted_at IS NULL');
+            if (!empty($instansi_id)) $qRankhir->where('id_instansi', $instansi_id);
+            $rowRankhir = $qRankhir->get('rancangan_akhir_renja_sub_kegiatan_data')->row_array();
+            if ($rowRankhir && isset($rowRankhir['anggaran']) && $rowRankhir['anggaran'] > 0) {
+                $result['rankhir'] = (float)$rowRankhir['anggaran'];
+            }
+        }
+
+        // 5. Tahap: Perubahan (perubahan_renja_sub_kegiatan_data)
+        if ($skId) {
+            $qPerubahan = $this->db->where('sub_kegiatan_id', $skId)
+                ->where('tahun', $tahun)
+                ->where('deleted_at IS NULL');
+            if (!empty($instansi_id)) $qPerubahan->where('id_instansi', $instansi_id);
+            $rowPerubahan = $qPerubahan->get('perubahan_renja_sub_kegiatan_data')->row_array();
+            if ($rowPerubahan && isset($rowPerubahan['anggaran']) && $rowPerubahan['anggaran'] > 0) {
+                $result['perubahan'] = (float)$rowPerubahan['anggaran'];
+            }
+        }
+
+        // 6. Cek juga dari rancangan_akhir_renja_header / rancangan_akhir_renja_detail
+        if ($this->db->table_exists('rancangan_akhir_renja_header') && $this->db->table_exists('rancangan_akhir_renja_detail')) {
+            $qRanhir = $this->db->select('d.ranhir_rp, d.renja_rp, h.sub_kegiatan')
+                ->from('rancangan_akhir_renja_header h')
+                ->join('rancangan_akhir_renja_detail d', 'd.header_id = h.id')
+                ->where_in('h.kode_rekening', $kodes)
+                ->where('h.tahun', $tahun)
+                ->where('h.deleted_at IS NULL')
+                ->where('d.deleted_at IS NULL');
+            if (!empty($instansi_id)) $qRanhir->where('h.id_instansi', $instansi_id);
+            $rowRanhir = $qRanhir->get()->row_array();
+            if ($rowRanhir) {
+                if (empty($result['nama_sub_kegiatan']) && !empty($rowRanhir['sub_kegiatan'])) {
+                    $result['nama_sub_kegiatan'] = $rowRanhir['sub_kegiatan'];
+                }
+                if ($result['rankhir'] == 0 && (!empty($rowRanhir['ranhir_rp']) || !empty($rowRanhir['renja_rp']))) {
+                    $result['rankhir'] = (float)($rowRanhir['ranhir_rp'] ?: $rowRanhir['renja_rp']);
+                }
+            }
+        }
+
+        // 7. Cek juga dari rancangan_renja_header / rancangan_renja_detail
+        if ($this->db->table_exists('rancangan_renja_header') && $this->db->table_exists('rancangan_renja_detail')) {
+            $qRanc = $this->db->select('d.rancangan_rp, h.sub_kegiatan')
+                ->from('rancangan_renja_header h')
+                ->join('rancangan_renja_detail d', 'd.header_id = h.id')
+                ->where_in('h.kode_rekening', $kodes)
+                ->where('h.tahun', $tahun)
+                ->where('h.deleted_at IS NULL')
+                ->where('d.deleted_at IS NULL');
+            if (!empty($instansi_id)) $qRanc->where('h.id_instansi', $instansi_id);
+            $rowRanc = $qRanc->get()->row_array();
+            if ($rowRanc) {
+                if (empty($result['nama_sub_kegiatan']) && !empty($rowRanc['sub_kegiatan'])) {
+                    $result['nama_sub_kegiatan'] = $rowRanc['sub_kegiatan'];
+                }
+                if ($result['rancangan'] == 0 && !empty($rowRanc['rancangan_rp'])) {
+                    $result['rancangan'] = (float)$rowRanc['rancangan_rp'];
+                }
+            }
+        }
+
+        // 8. Cek juga dari renja_pd_detail / renja_pd_header
+        if ($this->db->table_exists('renja_pd_header') && $this->db->table_exists('renja_pd_detail')) {
+            $qDetail = $this->db->select('d.ranwal_rp, d.rancangan_rp, d.ranhir_rp, d.renja_rp, d.dpa_murni_rp, d.dpa_perubahan_rp, h.sub_kegiatan')
+                ->from('renja_pd_header h')
+                ->join('renja_pd_detail d', 'd.header_id = h.id')
+                ->where_in('h.kode_rekening', $kodes)
+                ->where('h.tahun', $tahun)
+                ->where('h.deleted_at IS NULL')
+                ->where('d.deleted_at IS NULL');
+            if (!empty($instansi_id)) $qDetail->where('h.id_instansi', $instansi_id);
+            $rowDetail = $qDetail->get()->row_array();
+
+            if ($rowDetail) {
+                if (empty($result['nama_sub_kegiatan']) && !empty($rowDetail['sub_kegiatan'])) {
+                    $result['nama_sub_kegiatan'] = $rowDetail['sub_kegiatan'];
+                }
+                if ($result['ranwal'] == 0 && !empty($rowDetail['ranwal_rp'])) {
+                    $result['ranwal'] = (float)$rowDetail['ranwal_rp'];
+                }
+                if ($result['rancangan'] == 0 && !empty($rowDetail['rancangan_rp'])) {
+                    $result['rancangan'] = (float)$rowDetail['rancangan_rp'];
+                }
+                if ($result['rankhir'] == 0 && (!empty($rowDetail['ranhir_rp']) || !empty($rowDetail['renja_rp']))) {
+                    $result['rankhir'] = (float)($rowDetail['ranhir_rp'] ?: $rowDetail['renja_rp']);
+                }
+                if ($result['perubahan'] == 0 && (!empty($rowDetail['dpa_perubahan_rp']) || !empty($rowDetail['renja_rp']))) {
+                    $result['perubahan'] = (float)($rowDetail['dpa_perubahan_rp'] ?: $rowDetail['renja_rp']);
+                }
+            }
+        }
+
+        // 9. Cek juga dari laporan_anggaran_rekap
+        if ($this->db->table_exists('laporan_anggaran_rekap')) {
+            $qLap = $this->db->select('anggaran_murni, anggaran_perubahan, nama_sub_kegiatan')
+                ->from('laporan_anggaran_rekap')
+                ->where_in('kode_rekening', $kodes)
+                ->where('tahun', $tahun);
+            if (!empty($instansi_id)) $qLap->where('id_instansi', $instansi_id);
+            $rowLap = $qLap->get()->row_array();
+            if ($rowLap) {
+                if (empty($result['nama_sub_kegiatan']) && !empty($rowLap['nama_sub_kegiatan'])) {
+                    $result['nama_sub_kegiatan'] = $rowLap['nama_sub_kegiatan'];
+                }
+                if ($result['ranwal'] == 0 && !empty($rowLap['anggaran_murni'])) {
+                    $result['ranwal'] = (float)$rowLap['anggaran_murni'];
+                }
+                if ($result['rankhir'] == 0 && !empty($rowLap['anggaran_murni'])) {
+                    $result['rankhir'] = (float)$rowLap['anggaran_murni'];
+                }
+                if ($result['perubahan'] == 0 && !empty($rowLap['anggaran_perubahan'])) {
+                    $result['perubahan'] = (float)$rowLap['anggaran_perubahan'];
+                }
+            }
+        }
+
+        // Fallback berjenjang dari renstra/ranwal jika belum di-set pada tahapan berikutnya
+        if ($result['ranwal'] == 0 && $renstraPagu > 0) {
+            $result['ranwal'] = $renstraPagu;
+        }
+        if ($result['rancangan'] == 0 && $result['ranwal'] > 0) {
+            $result['rancangan'] = $result['ranwal'];
+        }
+        if ($result['rankhir'] == 0 && $result['rancangan'] > 0) {
+            $result['rankhir'] = $result['rancangan'];
+        }
+        if ($result['perubahan'] == 0 && $result['rankhir'] > 0) {
+            $result['perubahan'] = $result['rankhir'];
+        }
+
+        echo json_encode(['status' => 'success', 'data' => $result]);
+    }
+
+    // ================================================================
     // GET BELANJA BY ID (UNTUK EDIT & DETAIL)
     // ================================================================
 
@@ -20774,7 +21229,7 @@ public function updateStatusPerjanjianKinerja() {
     }
 
     // ================================================================
-    // GET STANDAR HARGA (HSPK & ASB)
+    // GET STANDAR HARGA (SSH, HSPK, ASB, SBU/REGIONAL)
     // ================================================================
 
     public function GetStandarHarga() {
@@ -20784,12 +21239,21 @@ public function updateStatusPerjanjianKinerja() {
         }
         header('Content-Type: application/json');
 
-        $type = strtolower($this->input->post('type', TRUE) ?: 'hspk');
+        $type = strtolower($this->input->post('type', TRUE) ?: 'ssh');
         $q = trim($this->input->post('q', TRUE) ?: '');
         $kode_rekening = trim($this->input->post('kode_rekening', TRUE) ?: '');
         $limit = (int)($this->input->post('limit', TRUE) ?: 50);
 
-        $table = ($type === 'asb') ? 'asb_kab_banyuwangi' : 'hspk_kab_banyuwangi';
+        $tableMap = [
+            'ssh' => 'ssh_kab_banyuwangi',
+            'hspk' => 'hspk_kab_banyuwangi',
+            'asb' => 'asb_kab_banyuwangi',
+            'sbu' => 'sbu_kab_banyuwangi',
+            'regional' => 'sbu_kab_banyuwangi',
+            'shsr' => 'sbu_kab_banyuwangi'
+        ];
+
+        $table = isset($tableMap[$type]) ? $tableMap[$type] : 'ssh_kab_banyuwangi';
 
         $this->db->select('id_standar_harga, kode_barang, uraian_barang, spesifikasi, satuan, harga_satuan, kode_rekening, uraian_kelompok_barang')
             ->from($table)
@@ -20833,7 +21297,58 @@ public function updateStatusPerjanjianKinerja() {
                 ->group_end();
         }
         $items = $this->db->order_by('kode_rekening', 'ASC')->get()->result_array();
-        echo json_encode(['status' => 'success', 'data' => $items]);
+
+        // Ambil objek belanja (level 3 berformat 5.X.XX seperti 5.1.01, 5.1.02, dsb.)
+        $objek_belanja = $this->db
+            ->select('kode_rekening, nama_rekening')
+            ->from('master_rekening')
+            ->where('level', 3)
+            ->like('kode_rekening', '5', 'after')
+            ->order_by('kode_rekening', 'ASC')
+            ->get()
+            ->result_array();
+
+        // Node names map untuk rendering pohon rekening
+        $nodes = $this->db
+            ->select('kode_rekening, nama_rekening')
+            ->from('master_rekening')
+            ->like('kode_rekening', '5', 'after')
+            ->order_by('kode_rekening', 'ASC')
+            ->get()
+            ->result_array();
+
+        $node_map = [];
+        foreach ($nodes as $n) {
+            $node_map[$n['kode_rekening']] = $n['nama_rekening'];
+            $parts = explode('.', $n['kode_rekening']);
+            $normParts = array_map(function($p) { return is_numeric($p) ? (int)$p : $p; }, $parts);
+            $node_map[implode('.', $normParts)] = $n['nama_rekening'];
+        }
+
+        // Sertakan juga dari belanja_rekening yang sudah pernah diinput
+        $rekBelanja = $this->db
+            ->select('DISTINCT(kode_rekening), uraian_rekening', FALSE)
+            ->from('belanja_rekening')
+            ->where('deleted_at IS NULL')
+            ->where('kode_rekening IS NOT NULL')
+            ->where("kode_rekening != ''")
+            ->get()
+            ->result_array();
+        foreach ($rekBelanja as $rb) {
+            if (!empty($rb['uraian_rekening'])) {
+                $node_map[$rb['kode_rekening']] = $rb['uraian_rekening'];
+                $parts = explode('.', $rb['kode_rekening']);
+                $normParts = array_map(function($p) { return is_numeric($p) ? (int)$p : $p; }, $parts);
+                $node_map[implode('.', $normParts)] = $rb['uraian_rekening'];
+            }
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'data' => $items,
+            'objek_belanja' => $objek_belanja,
+            'node_names' => $node_map
+        ]);
     }
 
     // ================================================================
@@ -21118,6 +21633,692 @@ public function updateStatusPerjanjianKinerja() {
         }
         
         $this->load->view('Daerah/PrintBelanja', $Data);
+    }
+
+    // ================================================================
+    // PENDAPATAN & PEMBIAYAAN (ANGGARAN)
+    // ================================================================
+
+    private function _parse_currency($val) {
+        if (is_numeric($val)) return (float)$val;
+        if (empty($val)) return 0.0;
+        $clean = trim(str_ireplace(['rp', ' '], '', (string)$val));
+        if (strpos($clean, ',') !== false && strpos($clean, '.') !== false) {
+            $clean = str_replace('.', '', $clean);
+            $clean = str_replace(',', '.', $clean);
+        } elseif (strpos($clean, '.') !== false && substr_count($clean, '.') > 1) {
+            $clean = str_replace('.', '', $clean);
+        } elseif (strpos($clean, ',') !== false) {
+            $clean = str_replace(',', '.', $clean);
+        }
+        return (float)preg_replace('/[^0-9.]/', '', $clean);
+    }
+
+    private function _init_anggaran_tables($active_instansi_id = null, $kodewilayah = null, $tahun = null) {
+        $this->db->query("CREATE TABLE IF NOT EXISTS `anggaran_pendapatan` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` varchar(50) NOT NULL,
+            `tahun` int(4) NOT NULL,
+            `id_instansi` int(11) NOT NULL,
+            `kode_rekening` varchar(100) NOT NULL,
+            `uraian` text NOT NULL,
+            `keterangan` text DEFAULT NULL,
+            `nilai` decimal(20,2) NOT NULL DEFAULT 0.00,
+            `created_at` datetime DEFAULT NULL,
+            `updated_at` datetime DEFAULT NULL,
+            `deleted_at` datetime DEFAULT NULL,
+            PRIMARY KEY (`id`),
+            KEY `idx_instansi` (`id_instansi`),
+            KEY `idx_wilayah_tahun` (`kodewilayah`, `tahun`),
+            KEY `idx_rekening` (`kode_rekening`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+        // Tabel Terpisah 1: Penerimaan Pembiayaan (Akun 6.1)
+        $this->db->query("CREATE TABLE IF NOT EXISTS `anggaran_pembiayaan_penerimaan` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` varchar(50) NOT NULL,
+            `tahun` int(4) NOT NULL,
+            `id_instansi` int(11) NOT NULL,
+            `kode_rekening` varchar(100) NOT NULL,
+            `uraian` text NOT NULL,
+            `keterangan` text DEFAULT NULL,
+            `nilai` decimal(20,2) NOT NULL DEFAULT 0.00,
+            `created_at` datetime DEFAULT NULL,
+            `updated_at` datetime DEFAULT NULL,
+            `deleted_at` datetime DEFAULT NULL,
+            PRIMARY KEY (`id`),
+            KEY `idx_instansi` (`id_instansi`),
+            KEY `idx_wilayah_tahun` (`kodewilayah`, `tahun`),
+            KEY `idx_rekening` (`kode_rekening`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+        // Tabel Terpisah 2: Pengeluaran Pembiayaan (Akun 6.2)
+        $this->db->query("CREATE TABLE IF NOT EXISTS `anggaran_pembiayaan_pengeluaran` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `kodewilayah` varchar(50) NOT NULL,
+            `tahun` int(4) NOT NULL,
+            `id_instansi` int(11) NOT NULL,
+            `kode_rekening` varchar(100) NOT NULL,
+            `uraian` text NOT NULL,
+            `keterangan` text DEFAULT NULL,
+            `nilai` decimal(20,2) NOT NULL DEFAULT 0.00,
+            `created_at` datetime DEFAULT NULL,
+            `updated_at` datetime DEFAULT NULL,
+            `deleted_at` datetime DEFAULT NULL,
+            PRIMARY KEY (`id`),
+            KEY `idx_instansi` (`id_instansi`),
+            KEY `idx_wilayah_tahun` (`kodewilayah`, `tahun`),
+            KEY `idx_rekening` (`kode_rekening`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+        // Migrasi data jika sebelumnya berada di tabel anggaran_pembiayaan
+        $hasOldTable = $this->db->query("SHOW TABLES LIKE 'anggaran_pembiayaan'")->num_rows() > 0;
+        if ($hasOldTable) {
+            $cntPen = $this->db->count_all('anggaran_pembiayaan_penerimaan');
+            if ($cntPen == 0) {
+                $this->db->query("INSERT INTO `anggaran_pembiayaan_penerimaan` (`id`, `kodewilayah`, `tahun`, `id_instansi`, `kode_rekening`, `uraian`, `keterangan`, `nilai`, `created_at`, `updated_at`, `deleted_at`)
+                    SELECT `id`, `kodewilayah`, `tahun`, `id_instansi`, `kode_rekening`, `uraian`, `keterangan`, `nilai`, `created_at`, `updated_at`, `deleted_at`
+                    FROM `anggaran_pembiayaan` WHERE `tipe` = 'penerimaan'");
+            }
+            $cntPeng = $this->db->count_all('anggaran_pembiayaan_pengeluaran');
+            if ($cntPeng == 0) {
+                $this->db->query("INSERT INTO `anggaran_pembiayaan_pengeluaran` (`id`, `kodewilayah`, `tahun`, `id_instansi`, `kode_rekening`, `uraian`, `keterangan`, `nilai`, `created_at`, `updated_at`, `deleted_at`)
+                    SELECT `id`, `kodewilayah`, `tahun`, `id_instansi`, `kode_rekening`, `uraian`, `keterangan`, `nilai`, `created_at`, `updated_at`, `deleted_at`
+                    FROM `anggaran_pembiayaan` WHERE `tipe` = 'pengeluaran'");
+            }
+        }
+
+        // Seed initial data if tables are empty
+        $cntPendapatan = $this->db->where('deleted_at IS NULL')->count_all_results('anggaran_pendapatan');
+        if ($cntPendapatan == 0 && !empty($active_instansi_id)) {
+            $now = date('Y-m-d H:i:s');
+            $seedThn = !empty($tahun) ? (int)$tahun : (int)date('Y');
+            $seedKw = !empty($kodewilayah) ? $kodewilayah : '';
+            $samplePendapatan = [
+                ['kodewilayah' => $seedKw, 'tahun' => $seedThn, 'id_instansi' => $active_instansi_id, 'kode_rekening' => '4.1.01.07.02.0001', 'uraian' => 'Pajak Rumah Makan dan Sejenisnya', 'keterangan' => '1 Tahun', 'nilai' => 1000000000.00, 'created_at' => $now],
+                ['kodewilayah' => $seedKw, 'tahun' => $seedThn, 'id_instansi' => $active_instansi_id, 'kode_rekening' => '4.1.01.07.07.0001', 'uraian' => 'Pajak Jasa Boga/Katering dan Sejenisnya', 'keterangan' => '1 Tahun', 'nilai' => 3000000000.00, 'created_at' => $now],
+                ['kodewilayah' => $seedKw, 'tahun' => $seedThn, 'id_instansi' => $active_instansi_id, 'kode_rekening' => '4.1.01.08.02.0001', 'uraian' => 'Pajak Pagelaran Kesenian/Musik/Tari/ Busana', 'keterangan' => '1 Tahun', 'nilai' => 20000000.00, 'created_at' => $now],
+                ['kodewilayah' => $seedKw, 'tahun' => $seedThn, 'id_instansi' => $active_instansi_id, 'kode_rekening' => '4.1.01.08.05.0001', 'uraian' => 'Pajak Diskotik, Karaoke, Klub Malam, dan Sejenisnya', 'keterangan' => '1 Tahun', 'nilai' => 170000000.00, 'created_at' => $now],
+                ['kodewilayah' => $seedKw, 'tahun' => $seedThn, 'id_instansi' => $active_instansi_id, 'kode_rekening' => '4.1.01.06.01.0001', 'uraian' => 'Pajak Hotel', 'keterangan' => '1 Tahun', 'nilai' => 2000000000.00, 'created_at' => $now],
+            ];
+            $this->db->insert_batch('anggaran_pendapatan', $samplePendapatan);
+        }
+
+        $cntPenerimaan = $this->db->where('deleted_at IS NULL')->count_all_results('anggaran_pembiayaan_penerimaan');
+        if ($cntPenerimaan == 0 && !empty($active_instansi_id)) {
+            $now = date('Y-m-d H:i:s');
+            $seedThn = !empty($tahun) ? (int)$tahun : (int)date('Y');
+            $seedKw = !empty($kodewilayah) ? $kodewilayah : '';
+            $samplePenerimaan = [
+                ['kodewilayah' => $seedKw, 'tahun' => $seedThn, 'id_instansi' => $active_instansi_id, 'kode_rekening' => '6.1.02.01.01.0001', 'uraian' => 'Pencairan Dana Cadangan', 'keterangan' => '1 Tahun', 'nilai' => 20000000000.00, 'created_at' => $now],
+            ];
+            $this->db->insert_batch('anggaran_pembiayaan_penerimaan', $samplePenerimaan);
+        }
+
+        $cntPengeluaran = $this->db->where('deleted_at IS NULL')->count_all_results('anggaran_pembiayaan_pengeluaran');
+        if ($cntPengeluaran == 0 && !empty($active_instansi_id)) {
+            $now = date('Y-m-d H:i:s');
+            $seedThn = !empty($tahun) ? (int)$tahun : (int)date('Y');
+            $seedKw = !empty($kodewilayah) ? $kodewilayah : '';
+            $samplePengeluaran = [
+                ['kodewilayah' => $seedKw, 'tahun' => $seedThn, 'id_instansi' => $active_instansi_id, 'kode_rekening' => '6.2.03.03.05.0001', 'uraian' => 'Pembayaran Pinjaman dari Lembaga Keuangan Bank (LKB)-BUMD-Jangka Menengah', 'keterangan' => '1 Tahun', 'nilai' => 50000000000.00, 'created_at' => $now],
+            ];
+            $this->db->insert_batch('anggaran_pembiayaan_pengeluaran', $samplePengeluaran);
+        }
+    }
+
+    public function Pendapatan() {
+        $Header['Halaman'] = 'Pendapatan';
+
+        $KodeWilayah = $this->get_kode_wilayah();
+        $instansi_id = $this->get_instansi_id();
+        $is_role_4 = $this->is_role_4();
+        $tahun = $this->input->get('tahun', TRUE);
+        $filter_instansi = $this->input->get('instansi_id', TRUE);
+
+        if ($is_role_4 && $instansi_id) {
+            $filter_instansi = (int)$instansi_id;
+        }
+
+        $Data['Provinsi'] = $this->db
+            ->where("Kode LIKE '__'")
+            ->order_by('Nama')
+            ->get('kodewilayah')
+            ->result_array();
+
+        $is_logged_in = $this->is_logged_in();
+        $Data['IsLoggedIn'] = $is_logged_in;
+        $Data['KodeWilayah'] = $KodeWilayah;
+        $Data['NamaWilayah'] = '';
+        $Data['IsRole4'] = $is_role_4;
+        $Data['IsDaerah'] = $is_logged_in && !$is_role_4;
+        $Data['CanCrud'] = $is_role_4;
+        $Data['InstansiId'] = $instansi_id;
+        $Data['FilterInstansi'] = $filter_instansi;
+        $Data['ControllerName'] = 'Instansi';
+
+        if (!empty($KodeWilayah)) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            $Data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
+        }
+
+        $Data['ListInstansi'] = [];
+        if (!empty($KodeWilayah)) {
+            $provKode = substr($KodeWilayah, 0, 2);
+            $Data['ListInstansi'] = $this->db
+                ->select('id, nama, kode_instansi')
+                ->from('akun_instansi')
+                ->where("(kodewilayah = " . $this->db->escape($KodeWilayah) . " OR kodewilayah = " . $this->db->escape($provKode) . ")")
+                ->where('deleted_at IS NULL')
+                ->order_by('nama', 'ASC')
+                ->get()
+                ->result_array();
+        } else {
+            $Data['ListInstansi'] = $this->db
+                ->select('id, nama, kode_instansi')
+                ->from('akun_instansi')
+                ->where('deleted_at IS NULL')
+                ->order_by('nama', 'ASC')
+                ->get()
+                ->result_array();
+        }
+
+        $active_instansi_id = null;
+        if ($is_role_4 && !empty($instansi_id)) {
+            $active_instansi_id = (int)$instansi_id;
+        } elseif (!empty($filter_instansi)) {
+            $active_instansi_id = (int)$filter_instansi;
+        } elseif (!empty($instansi_id)) {
+            $active_instansi_id = (int)$instansi_id;
+        } elseif ($is_logged_in && !empty($Data['ListInstansi'])) {
+            $active_instansi_id = (int)$Data['ListInstansi'][0]['id'];
+        } elseif (!$is_logged_in && !empty($KodeWilayah) && !empty($Data['ListInstansi'])) {
+            $active_instansi_id = (int)$Data['ListInstansi'][0]['id'];
+        }
+
+        $currentInstansi = null;
+        if (!empty($active_instansi_id)) {
+            $currentInstansi = $this->db->where('id', $active_instansi_id)->where('deleted_at IS NULL')->get('akun_instansi')->row_array();
+        }
+        $Data['CurrentInstansi'] = $currentInstansi;
+        $Data['ActiveInstansiId'] = $active_instansi_id;
+
+        // Tahun
+        $currentY = (int)date('Y');
+        $listTahun = [];
+        for ($y = $currentY + 1; $y >= $currentY - 4; $y--) {
+            $listTahun[] = $y;
+        }
+        $Data['ListTahun'] = $listTahun;
+        if (empty($tahun)) {
+            $tahun = $currentY;
+        }
+        $Data['TahunAktif'] = $tahun;
+
+        // Init tables & seed demo data if applicable
+        $this->_init_anggaran_tables($active_instansi_id, $KodeWilayah, $tahun);
+
+        // Ambil Data Pendapatan
+        $this->db->select('*')
+            ->from('anggaran_pendapatan')
+            ->where('deleted_at IS NULL');
+        if (!empty($active_instansi_id)) {
+            $this->db->where('id_instansi', $active_instansi_id);
+        }
+        if (!empty($tahun)) {
+            $this->db->where('tahun', $tahun);
+        }
+        $dataPendapatan = $this->db->order_by('kode_rekening', 'ASC')->get()->result_array();
+        $Data['DataPendapatan'] = $dataPendapatan;
+
+        $totalPendapatan = 0;
+        foreach ($dataPendapatan as $row) {
+            $totalPendapatan += (float)$row['nilai'];
+        }
+        $Data['TotalPendapatan'] = $totalPendapatan;
+
+        $this->load->view('Daerah/header', $Header);
+        $this->load->view('Daerah/Pendapatan', $Data);
+    }
+
+    public function Pembiayaan($subtipe = 'all') {
+        $Header['Halaman'] = 'Pembiayaan';
+
+        $KodeWilayah = $this->get_kode_wilayah();
+        $instansi_id = $this->get_instansi_id();
+        $is_role_4 = $this->is_role_4();
+        $tahun = $this->input->get('tahun', TRUE);
+        $filter_instansi = $this->input->get('instansi_id', TRUE);
+
+        if ($is_role_4 && $instansi_id) {
+            $filter_instansi = (int)$instansi_id;
+        }
+
+        $Data['Provinsi'] = $this->db
+            ->where("Kode LIKE '__'")
+            ->order_by('Nama')
+            ->get('kodewilayah')
+            ->result_array();
+
+        $is_logged_in = $this->is_logged_in();
+        $Data['IsLoggedIn'] = $is_logged_in;
+        $Data['KodeWilayah'] = $KodeWilayah;
+        $Data['NamaWilayah'] = '';
+        $Data['IsRole4'] = $is_role_4;
+        $Data['IsDaerah'] = $is_logged_in && !$is_role_4;
+        $Data['CanCrud'] = $is_role_4;
+        $Data['InstansiId'] = $instansi_id;
+        $Data['FilterInstansi'] = $filter_instansi;
+        $Data['ControllerName'] = 'Instansi';
+
+        if (!empty($KodeWilayah)) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            $Data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
+        }
+
+        $Data['ListInstansi'] = [];
+        if (!empty($KodeWilayah)) {
+            $provKode = substr($KodeWilayah, 0, 2);
+            $Data['ListInstansi'] = $this->db
+                ->select('id, nama, kode_instansi')
+                ->from('akun_instansi')
+                ->where("(kodewilayah = " . $this->db->escape($KodeWilayah) . " OR kodewilayah = " . $this->db->escape($provKode) . ")")
+                ->where('deleted_at IS NULL')
+                ->order_by('nama', 'ASC')
+                ->get()
+                ->result_array();
+        } else {
+            $Data['ListInstansi'] = $this->db
+                ->select('id, nama, kode_instansi')
+                ->from('akun_instansi')
+                ->where('deleted_at IS NULL')
+                ->order_by('nama', 'ASC')
+                ->get()
+                ->result_array();
+        }
+
+        $active_instansi_id = null;
+        if ($is_role_4 && !empty($instansi_id)) {
+            $active_instansi_id = (int)$instansi_id;
+        } elseif (!empty($filter_instansi)) {
+            $active_instansi_id = (int)$filter_instansi;
+        } elseif (!empty($instansi_id)) {
+            $active_instansi_id = (int)$instansi_id;
+        } elseif ($is_logged_in && !empty($Data['ListInstansi'])) {
+            $active_instansi_id = (int)$Data['ListInstansi'][0]['id'];
+        } elseif (!$is_logged_in && !empty($KodeWilayah) && !empty($Data['ListInstansi'])) {
+            $active_instansi_id = (int)$Data['ListInstansi'][0]['id'];
+        }
+
+        $currentInstansi = null;
+        if (!empty($active_instansi_id)) {
+            $currentInstansi = $this->db->where('id', $active_instansi_id)->where('deleted_at IS NULL')->get('akun_instansi')->row_array();
+        }
+        $Data['CurrentInstansi'] = $currentInstansi;
+        $Data['ActiveInstansiId'] = $active_instansi_id;
+
+        // Tahun
+        $currentY = (int)date('Y');
+        $listTahun = [];
+        for ($y = $currentY + 1; $y >= $currentY - 4; $y--) {
+            $listTahun[] = $y;
+        }
+        $Data['ListTahun'] = $listTahun;
+        if (empty($tahun)) {
+            $tahun = $currentY;
+        }
+        $Data['TahunAktif'] = $tahun;
+
+        // Init tables & seed demo data if applicable
+        $this->_init_anggaran_tables($active_instansi_id, $KodeWilayah, $tahun);
+
+        // Ambil Data Penerimaan Pembiayaan (Akun 6.1)
+        $this->db->select('*')
+            ->from('anggaran_pembiayaan_penerimaan')
+            ->where('deleted_at IS NULL');
+        if (!empty($active_instansi_id)) {
+            $this->db->where('id_instansi', $active_instansi_id);
+        }
+        if (!empty($tahun)) {
+            $this->db->where('tahun', $tahun);
+        }
+        $dataPenerimaan = $this->db->order_by('kode_rekening', 'ASC')->get()->result_array();
+        $totalPenerimaan = 0;
+        foreach ($dataPenerimaan as $row) {
+            $totalPenerimaan += (float)$row['nilai'];
+        }
+
+        // Ambil Data Pengeluaran Pembiayaan (Akun 6.2)
+        $this->db->select('*')
+            ->from('anggaran_pembiayaan_pengeluaran')
+            ->where('deleted_at IS NULL');
+        if (!empty($active_instansi_id)) {
+            $this->db->where('id_instansi', $active_instansi_id);
+        }
+        if (!empty($tahun)) {
+            $this->db->where('tahun', $tahun);
+        }
+        $dataPengeluaran = $this->db->order_by('kode_rekening', 'ASC')->get()->result_array();
+        $totalPengeluaran = 0;
+        foreach ($dataPengeluaran as $row) {
+            $totalPengeluaran += (float)$row['nilai'];
+        }
+
+        $Data['DataPenerimaan'] = $dataPenerimaan;
+        $Data['TotalPenerimaan'] = $totalPenerimaan;
+        $Data['DataPengeluaran'] = $dataPengeluaran;
+        $Data['TotalPengeluaran'] = $totalPengeluaran;
+        $Data['ActiveTipe'] = $subtipe;
+
+        if ($subtipe === 'pengeluaran') {
+            $Header['Halaman'] = 'Pengeluaran Pembiayaan';
+            $this->load->view('Daerah/header', $Header);
+            $this->load->view('Daerah/PembiayaanPengeluaran', $Data);
+        } else {
+            $Header['Halaman'] = 'Penerimaan Pembiayaan';
+            $this->load->view('Daerah/header', $Header);
+            $this->load->view('Daerah/PembiayaanPenerimaan', $Data);
+        }
+    }
+
+    public function PembiayaanPenerimaan() {
+        $this->Pembiayaan('penerimaan');
+    }
+
+    public function PembiayaanPengeluaran() {
+        $this->Pembiayaan('pengeluaran');
+    }
+
+    // ================================================================
+    // REKENING & CRUD AJAX
+    // ================================================================
+
+    public function SearchRekening() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $tipe = strtolower(trim($this->input->get_post('tipe') ?: 'pendapatan'));
+        $q = trim($this->input->get_post('q') ?: '');
+        $limit = 60;
+
+        $prefix = '4';
+        if ($tipe === 'penerimaan') {
+            $prefix = '6.1';
+        } elseif ($tipe === 'pengeluaran') {
+            $prefix = '6.2';
+        }
+
+        $this->db->select('id, kode_rekening, nama_rekening, level')
+                 ->from('master_rekening')
+                 ->like('kode_rekening', $prefix, 'after');
+
+        if (!empty($q)) {
+            $this->db->group_start()
+                     ->like('kode_rekening', $q)
+                     ->or_like('nama_rekening', $q)
+                     ->group_end();
+        } else {
+            $this->db->where('level', 6);
+        }
+
+        $rows = $this->db->order_by('kode_rekening', 'ASC')->limit($limit)->get()->result_array();
+
+        if (empty($rows) && empty($q)) {
+            $this->db->select('id, kode_rekening, nama_rekening, level')
+                     ->from('master_rekening')
+                     ->like('kode_rekening', $prefix, 'after');
+            $rows = $this->db->order_by('kode_rekening', 'ASC')->limit($limit)->get()->result_array();
+        }
+
+        $results = [];
+        foreach ($rows as $r) {
+            $results[] = [
+                'id' => $r['kode_rekening'],
+                'text' => $r['kode_rekening'] . ' - ' . $r['nama_rekening'],
+                'kode' => $r['kode_rekening'],
+                'uraian' => $r['nama_rekening'],
+                'level' => $r['level']
+            ];
+        }
+
+        echo json_encode(['results' => $results]);
+    }
+
+    public function GetRekeningByKode() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        $kode = trim($this->input->get_post('kode_rekening') ?: '');
+        if (empty($kode)) {
+            echo json_encode(['status' => 'error', 'message' => 'Kode rekening kosong']);
+            return;
+        }
+
+        $row = $this->db->select('kode_rekening, nama_rekening')
+                        ->from('master_rekening')
+                        ->where('kode_rekening', $kode)
+                        ->get()
+                        ->row_array();
+
+        if ($row) {
+            echo json_encode(['status' => 'success', 'data' => $row]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Rekening tidak ditemukan']);
+        }
+    }
+
+    public function SavePendapatan() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        if (!$this->is_role_4()) {
+            echo json_encode(['status' => 'error', 'message' => 'Hanya akun instansi yang memiliki hak akses untuk menambah atau mengubah data anggaran.']);
+            return;
+        }
+
+        $id = (int)$this->input->post('id', TRUE);
+        $id_instansi = (int)$this->input->post('id_instansi', TRUE);
+        $tahun = (int)$this->input->post('tahun', TRUE);
+        $kode_rekening = trim($this->input->post('kode_rekening', TRUE) ?: '');
+        $uraian = trim($this->input->post('uraian', TRUE) ?: '');
+        $keterangan = trim($this->input->post('keterangan', TRUE) ?: '');
+        $raw_nilai = $this->input->post('nilai', TRUE);
+        $nilai = $this->_parse_currency($raw_nilai);
+
+        if (empty($kode_rekening)) {
+            echo json_encode(['status' => 'error', 'message' => 'Nomor rekening harus dipilih']);
+            return;
+        }
+
+        if (substr($kode_rekening, 0, 1) !== '4') {
+            echo json_encode(['status' => 'error', 'message' => 'Rekening Pendapatan harus diawali dengan angka 4']);
+            return;
+        }
+
+        if (empty($uraian)) {
+            $mRek = $this->db->select('nama_rekening')->where('kode_rekening', $kode_rekening)->get('master_rekening')->row_array();
+            if ($mRek) {
+                $uraian = $mRek['nama_rekening'];
+            }
+        }
+
+        $KodeWilayah = $this->get_kode_wilayah();
+        if (empty($id_instansi)) {
+            $id_instansi = $this->get_instansi_id() ?: 0;
+        }
+        if (empty($tahun)) {
+            $tahun = (int)date('Y');
+        }
+
+        $now = date('Y-m-d H:i:s');
+        $saveData = [
+            'kodewilayah' => $KodeWilayah ?: '',
+            'tahun' => $tahun,
+            'id_instansi' => $id_instansi,
+            'kode_rekening' => $kode_rekening,
+            'uraian' => $uraian,
+            'keterangan' => $keterangan,
+            'nilai' => $nilai,
+            'updated_at' => $now
+        ];
+
+        if ($id > 0) {
+            $this->db->where('id', $id)->update('anggaran_pendapatan', $saveData);
+            $msg = 'Data Pendapatan berhasil diperbarui.';
+        } else {
+            $saveData['created_at'] = $now;
+            $this->db->insert('anggaran_pendapatan', $saveData);
+            $id = $this->db->insert_id();
+            $msg = 'Data Pendapatan berhasil ditambahkan.';
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'message' => $msg,
+            'id' => $id
+        ]);
+    }
+
+    public function DeletePendapatan() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        if (!$this->is_role_4()) {
+            echo json_encode(['status' => 'error', 'message' => 'Hanya akun instansi yang memiliki hak akses untuk menghapus data anggaran.']);
+            return;
+        }
+
+        $id = (int)$this->input->post('id', TRUE);
+        if ($id <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'ID data tidak valid']);
+            return;
+        }
+
+        $this->db->where('id', $id)->update('anggaran_pendapatan', ['deleted_at' => date('Y-m-d H:i:s')]);
+        echo json_encode(['status' => 'success', 'message' => 'Data Pendapatan berhasil dihapus.']);
+    }
+
+    public function SavePembiayaan() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        if (!$this->is_role_4()) {
+            echo json_encode(['status' => 'error', 'message' => 'Hanya akun instansi yang memiliki hak akses untuk menambah atau mengubah data anggaran.']);
+            return;
+        }
+
+        $id = (int)$this->input->post('id', TRUE);
+        $tipe = strtolower(trim($this->input->post('tipe', TRUE) ?: 'penerimaan'));
+        if (!in_array($tipe, ['penerimaan', 'pengeluaran'])) {
+            $tipe = 'penerimaan';
+        }
+        $id_instansi = (int)$this->input->post('id_instansi', TRUE);
+        $tahun = (int)$this->input->post('tahun', TRUE);
+        $kode_rekening = trim($this->input->post('kode_rekening', TRUE) ?: '');
+        $uraian = trim($this->input->post('uraian', TRUE) ?: '');
+        $keterangan = trim($this->input->post('keterangan', TRUE) ?: '');
+        $raw_nilai = $this->input->post('nilai', TRUE);
+        $nilai = $this->_parse_currency($raw_nilai);
+
+        if (empty($kode_rekening)) {
+            echo json_encode(['status' => 'error', 'message' => 'Nomor rekening harus dipilih']);
+            return;
+        }
+
+        if ($tipe === 'penerimaan' && strpos($kode_rekening, '6.1') !== 0) {
+            echo json_encode(['status' => 'error', 'message' => 'Rekening Penerimaan Pembiayaan harus diawali dengan nomor 6.1']);
+            return;
+        }
+        if ($tipe === 'pengeluaran' && strpos($kode_rekening, '6.2') !== 0) {
+            echo json_encode(['status' => 'error', 'message' => 'Rekening Pengeluaran Pembiayaan harus diawali dengan nomor 6.2']);
+            return;
+        }
+
+        if (empty($uraian)) {
+            $mRek = $this->db->select('nama_rekening')->where('kode_rekening', $kode_rekening)->get('master_rekening')->row_array();
+            if ($mRek) {
+                $uraian = $mRek['nama_rekening'];
+            }
+        }
+
+        $KodeWilayah = $this->get_kode_wilayah();
+        if (empty($id_instansi)) {
+            $id_instansi = $this->get_instansi_id() ?: 0;
+        }
+        if (empty($tahun)) {
+            $tahun = (int)date('Y');
+        }
+
+        $now = date('Y-m-d H:i:s');
+        $targetTable = ($tipe === 'pengeluaran') ? 'anggaran_pembiayaan_pengeluaran' : 'anggaran_pembiayaan_penerimaan';
+        $saveData = [
+            'kodewilayah' => $KodeWilayah ?: '',
+            'tahun' => $tahun,
+            'id_instansi' => $id_instansi,
+            'kode_rekening' => $kode_rekening,
+            'uraian' => $uraian,
+            'keterangan' => $keterangan,
+            'nilai' => $nilai,
+            'updated_at' => $now
+        ];
+
+        $labelTipe = ($tipe === 'penerimaan') ? 'Penerimaan' : 'Pengeluaran';
+
+        if ($id > 0) {
+            $this->db->where('id', $id)->update($targetTable, $saveData);
+            $msg = 'Data ' . $labelTipe . ' Pembiayaan berhasil diperbarui.';
+        } else {
+            $saveData['created_at'] = $now;
+            $this->db->insert($targetTable, $saveData);
+            $id = $this->db->insert_id();
+            $msg = 'Data ' . $labelTipe . ' Pembiayaan berhasil ditambahkan.';
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'message' => $msg,
+            'id' => $id
+        ]);
+    }
+
+    public function DeletePembiayaan() {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+        header('Content-Type: application/json');
+
+        if (!$this->is_role_4()) {
+            echo json_encode(['status' => 'error', 'message' => 'Hanya akun instansi yang memiliki hak akses untuk menghapus data anggaran.']);
+            return;
+        }
+
+        $id = (int)$this->input->post('id', TRUE);
+        $tipe = strtolower(trim($this->input->post('tipe', TRUE) ?: 'penerimaan'));
+        $targetTable = ($tipe === 'pengeluaran') ? 'anggaran_pembiayaan_pengeluaran' : 'anggaran_pembiayaan_penerimaan';
+
+        if ($id <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'ID data tidak valid']);
+            return;
+        }
+
+        $this->db->where('id', $id)->update($targetTable, ['deleted_at' => date('Y-m-d H:i:s')]);
+        echo json_encode(['status' => 'success', 'message' => 'Data Pembiayaan berhasil dihapus.']);
     }
 
     // ================================================================
