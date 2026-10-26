@@ -5,11 +5,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             
             public function __construct() {
                 parent::__construct();
-            // if (!isset($_SESSION['KodeWilayah'])) {
-            //   redirect(base_url());
-            // }
-            date_default_timezone_set("Asia/Jakarta");
-        }
+                date_default_timezone_set("Asia/Jakarta");
+
+                // Batasi akses akun verifikator
+                $isVerifikator = !empty($_SESSION['IsVerifikator']) || 
+                                 (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 4 && strtolower($_SESSION['Username'] ?? '') === 'verifikator');
+                if ($isVerifikator) {
+                    $method = strtolower($this->router->fetch_method());
+                    if ($method !== 'logout') {
+                        redirect(base_url('Instansi/TabelIPPD'));
+                        exit;
+                    }
+                }
+            }
 
         public function SetTempKodeWilayah() {
             // Ambil KodeWilayah dari POST
@@ -15954,6 +15962,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
         public function CascadingPermasalahan()
         {
+            $this->output->set_header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+            $this->output->set_header('Cache-Control: post-check=0, pre-check=0', false);
+            $this->output->set_header('Pragma: no-cache');
+
             $Header['Halaman'] = 'RKPD';
 
             // Auto create tables jika belum ada
@@ -16412,6 +16424,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 $lines = preg_split('/\r\n|\r|\n/', (string)$raw);
             }
 
+            $isuIds = $this->input->post('isuIds');
+            if (!is_array($isuIds)) {
+                $isuIds = !empty($isuIds) ? [$isuIds] : [];
+            }
+            $isuIds = array_values(array_filter(array_map('intval', $isuIds)));
+            if (count($isuIds) > 2) {
+                echo json_encode(['status' => 'error', 'message' => 'Maksimal 2 Isu Strategis yang dapat diampu.']);
+                return;
+            }
+            $primaryIsuId = !empty($isuIds) ? $isuIds[0] : NULL;
+
             $inserted = 0;
             $now = date('Y-m-d H:i:s');
             foreach ($lines as $line) {
@@ -16421,9 +16444,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         'kode_wilayah' => $kodeWilayah,
                         'tahun'        => $tahun,
                         'permasalahan' => $t,
-                        'isu_id'       => NULL,
+                        'isu_id'       => $primaryIsuId,
                         'created_at'   => $now
                     ]);
+                    $newPermId = $this->db->insert_id();
+                    foreach ($isuIds as $iId) {
+                        if ($iId > 0) {
+                            $this->db->insert('cascading_rkpd_permasalahan_isu', [
+                                'permasalahan_id' => $newPermId,
+                                'isu_id'          => $iId
+                            ]);
+                        }
+                    }
                     $inserted++;
                 }
             }
@@ -16460,7 +16492,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 return;
             }
 
-            $permIds = is_array($permIds) ? $permIds : [];
+            $permIds = is_array($permIds) ? array_map('intval', $permIds) : [];
 
             $now = date('Y-m-d H:i:s');
             $this->db->insert('cascading_rkpd_isu', [
@@ -16471,16 +16503,25 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             ]);
             $isuId = $this->db->insert_id();
 
-            // Hubungkan permasalahan yang dipilih ke isu strategis ini
-            $cleanIds = array_map('intval', $permIds);
-            if (!empty($cleanIds)) {
-                $this->db->where_in('id', $cleanIds)
-                    ->where('kode_wilayah', $kodeWilayah)
-                    ->where('tahun', $tahun)
-                    ->update('cascading_rkpd_permasalahan', [
-                        'isu_id'     => $isuId,
-                        'updated_at' => $now
-                    ]);
+            // Hubungkan permasalahan yang dipilih ke isu strategis ini (Many-to-Many)
+            // Pertahankan relasi isu lainnya yang telah di-input sebelumnya (jangan hapus relasi lama)
+            foreach ($permIds as $pId) {
+                if ($pId > 0) {
+                    $exists = $this->db->where('permasalahan_id', $pId)
+                        ->where('isu_id', $isuId)
+                        ->count_all_results('cascading_rkpd_permasalahan_isu');
+                    if (!$exists) {
+                        $this->db->insert('cascading_rkpd_permasalahan_isu', [
+                            'permasalahan_id' => $pId,
+                            'isu_id'          => $isuId
+                        ]);
+                    }
+                }
+            }
+
+            // Kompatibilitas mundur kolom isu_id pada cascading_rkpd_permasalahan (hanya isi jika masih NULL)
+            if (!empty($permIds)) {
+                $this->db->query("UPDATE cascading_rkpd_permasalahan SET isu_id = COALESCE(isu_id, ?) WHERE id IN (" . implode(',', $permIds) . ")", [$isuId]);
             }
 
             $this->_syncCascadingPermasalahanRkpd($kodeWilayah, $tahun);
@@ -16513,6 +16554,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
             if (!is_array($isuIds) || empty($isuIds)) {
                 echo json_encode(['status' => 'error', 'message' => 'Pilih minimal satu isu strategis.']);
+                return;
+            }
+
+            if (count($isuIds) > 2) {
+                echo json_encode(['status' => 'error', 'message' => 'Maksimal 2 isu strategis yang dapat diampu.']);
+                return;
+            }
+
+            $adjCheck = $this->_validateAdjacentIsus($isuIds, $kodeWilayah, $tahun);
+            if (!$adjCheck['valid']) {
+                echo json_encode(['status' => 'error', 'message' => $adjCheck['message']]);
                 return;
             }
 
@@ -16619,6 +16671,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 $this->db->where('id', $id)->update('cascading_rkpd_permasalahan', [
                     'deleted_at' => $now
                 ]);
+                $this->db->where('permasalahan_id', $id)->delete('cascading_rkpd_permasalahan_isu');
             } elseif ($type === 'isu') {
                 $this->db->where('id', $id)->update('cascading_rkpd_isu', [
                     'deleted_at' => $now
@@ -16627,6 +16680,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     'isu_id'     => NULL,
                     'updated_at' => $now
                 ]);
+                $this->db->where('isu_id', $id)->delete('cascading_rkpd_permasalahan_isu');
                 $this->db->where('isu_id', $id)->delete('cascading_rkpd_prioritas_isu');
             } elseif ($type === 'prog') {
                 $this->db->where('prioritas_id', $id)->delete('cascading_rkpd_prioritas_isu');
@@ -16649,6 +16703,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
             $id = (int)$this->input->post('id', TRUE);
             $text = trim($this->input->post('text', TRUE));
+            $isuIds = $this->input->post('isuIds');
 
             $kodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
                         (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
@@ -16666,10 +16721,41 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 'updated_at'   => $now
             ];
 
-            // Hanya perbarui isu_id jika parameter isuId secara eksplisit dikirimkan
-            if ($this->input->post('isuId') !== null) {
-                $isuId = $this->input->post('isuId', TRUE);
-                $updateData['isu_id'] = ($isuId !== '' && $isuId !== null && $isuId !== '0') ? (int)$isuId : NULL;
+            // Update keterkaitan isu jika isuIds dikirimkan (Many-to-Many)
+            if ($isuIds !== null) {
+                $isuIds = is_array($isuIds) ? array_values(array_filter(array_map('intval', $isuIds))) : [];
+                if (count($isuIds) > 2) {
+                    echo json_encode(['status' => 'error', 'message' => 'Maksimal 2 isu strategis yang dapat diampu.']);
+                    return;
+                }
+                $adjCheck = $this->_validateAdjacentIsus($isuIds, $kodeWilayah, $tahun);
+                if (!$adjCheck['valid']) {
+                    echo json_encode(['status' => 'error', 'message' => $adjCheck['message']]);
+                    return;
+                }
+                $updateData['isu_id'] = !empty($isuIds) ? $isuIds[0] : NULL;
+
+                $this->db->where('permasalahan_id', $id)->delete('cascading_rkpd_permasalahan_isu');
+                foreach ($isuIds as $isuId) {
+                    if ($isuId > 0) {
+                        $this->db->insert('cascading_rkpd_permasalahan_isu', [
+                            'permasalahan_id' => $id,
+                            'isu_id'          => $isuId
+                        ]);
+                    }
+                }
+            } elseif ($this->input->post('isuId') !== null) {
+                $singleIsuId = $this->input->post('isuId', TRUE);
+                $singleIsuId = ($singleIsuId !== '' && $singleIsuId !== null && $singleIsuId !== '0') ? (int)$singleIsuId : NULL;
+                $updateData['isu_id'] = $singleIsuId;
+
+                $this->db->where('permasalahan_id', $id)->delete('cascading_rkpd_permasalahan_isu');
+                if (!empty($singleIsuId)) {
+                    $this->db->insert('cascading_rkpd_permasalahan_isu', [
+                        'permasalahan_id' => $id,
+                        'isu_id'          => $singleIsuId
+                    ]);
+                }
             }
 
             $this->db->where('id', $id)->update('cascading_rkpd_permasalahan', $updateData);
@@ -16707,23 +16793,47 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 'updated_at'    => $now
             ]);
 
-            // 2. Unmap any permasalahan that was previously mapped to this isu but now unchecked
-            $this->db->where('isu_id', $id);
-            if (!empty($permIds)) {
-                $this->db->where_not_in('id', $permIds);
+            // 2. Refresh hubungan Many-to-Many di cascading_rkpd_permasalahan_isu untuk isu ini saja
+            $this->db->where('isu_id', $id)->delete('cascading_rkpd_permasalahan_isu');
+            foreach ($permIds as $permId) {
+                if ($permId > 0) {
+                    $currCount = $this->db->where('permasalahan_id', $permId)
+                        ->count_all_results('cascading_rkpd_permasalahan_isu');
+                    if ($currCount < 2) {
+                        $this->db->insert('cascading_rkpd_permasalahan_isu', [
+                            'permasalahan_id' => $permId,
+                            'isu_id'          => $id
+                        ]);
+                    }
+                }
             }
-            $this->db->update('cascading_rkpd_permasalahan', [
-                'isu_id'     => NULL,
-                'updated_at' => $now
-            ]);
 
-            // 3. Map selected permasalahan to this isu
+            // 3. Kompatibilitas mundur kolom isu_id di cascading_rkpd_permasalahan tanpa merusak isu lainnya
             if (!empty($permIds)) {
-                $this->db->where_in('id', $permIds)
-                    ->update('cascading_rkpd_permasalahan', [
-                        'isu_id'     => $id,
+                $this->db->query("UPDATE cascading_rkpd_permasalahan SET isu_id = COALESCE(isu_id, ?) WHERE id IN (" . implode(',', $permIds) . ")", [$id]);
+            }
+
+            // Untuk permasalahan yang dulunya punya isu_id = $id tapi sekarang tidak ada di permIds:
+            // Cek apakah masih memiliki isu lain di cascading_rkpd_permasalahan_isu sebelum mengeset NULL
+            $unlinkedRows = $this->db->select('id')
+                ->where('isu_id', $id)
+                ->get('cascading_rkpd_permasalahan')
+                ->result_array();
+
+            foreach ($unlinkedRows as $uRow) {
+                $uId = (int)$uRow['id'];
+                if (!in_array($uId, $permIds)) {
+                    $otherIsu = $this->db->select('isu_id')
+                        ->where('permasalahan_id', $uId)
+                        ->order_by('id', 'ASC')
+                        ->get('cascading_rkpd_permasalahan_isu')
+                        ->row_array();
+                    $newIsuId = !empty($otherIsu) ? (int)$otherIsu['isu_id'] : NULL;
+                    $this->db->where('id', $uId)->update('cascading_rkpd_permasalahan', [
+                        'isu_id'     => $newIsuId,
                         'updated_at' => $now
                     ]);
+                }
             }
 
             $this->_syncCascadingPermasalahanRkpd($kodeWilayah, $tahun);
@@ -16754,6 +16864,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
             if (empty($isuIds)) {
                 echo json_encode(['status' => 'error', 'message' => 'Pilih minimal satu isu strategis yang terkait!']);
+                return;
+            }
+
+            if (count($isuIds) > 2) {
+                echo json_encode(['status' => 'error', 'message' => 'Maksimal 2 isu strategis yang dapat diampu.']);
+                return;
+            }
+
+            $adjCheck = $this->_validateAdjacentIsus($isuIds, $kodeWilayah, $tahun);
+            if (!$adjCheck['valid']) {
+                echo json_encode(['status' => 'error', 'message' => $adjCheck['message']]);
                 return;
             }
 
@@ -16823,6 +16944,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 KEY `idx_isu_id` (`isu_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
 
+            $this->db->query("CREATE TABLE IF NOT EXISTS `cascading_rkpd_permasalahan_isu` (
+                `id` INT(11) NOT NULL AUTO_INCREMENT,
+                `permasalahan_id` INT(11) NOT NULL,
+                `isu_id` INT(11) NOT NULL,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `idx_permasalahan_isu` (`permasalahan_id`, `isu_id`),
+                KEY `idx_isu` (`isu_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
             $this->db->query("CREATE TABLE IF NOT EXISTS `cascading_rkpd_prioritas` (
                 `id` INT(11) NOT NULL AUTO_INCREMENT,
                 `kode_wilayah` VARCHAR(50) NOT NULL,
@@ -16843,6 +16973,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 UNIQUE KEY `idx_prioritas_isu` (`prioritas_id`, `isu_id`),
                 KEY `idx_isu` (`isu_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
+            // Sinkronisasi data lama dari cascading_rkpd_permasalahan ke tabel relasi jika belum ada
+            $this->db->query("INSERT IGNORE INTO `cascading_rkpd_permasalahan_isu` (`permasalahan_id`, `isu_id`)
+                SELECT `id`, `isu_id` FROM `cascading_rkpd_permasalahan` 
+                WHERE `isu_id` IS NOT NULL AND `isu_id` > 0 AND `deleted_at` IS NULL");
         }
 
         private function _getCascadingState($kodeWilayah, $tahun)
@@ -16861,10 +16996,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 ->get('cascading_rkpd_isu')
                 ->result_array();
 
+            $isuIds = [];
             foreach ($isuRows as &$i) {
                 $i['id'] = (int)$i['id'];
+                $i['permIds'] = [];
+                $isuIds[] = $i['id'];
             }
-            $state['isu'] = $isuRows;
+            unset($i);
 
             // Permasalahan
             $permRows = $this->db->select('id, permasalahan as text, isu_id as isuId')
@@ -16875,10 +17013,52 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 ->get('cascading_rkpd_permasalahan')
                 ->result_array();
 
+            $permIds = [];
             foreach ($permRows as &$p) {
                 $p['id'] = (int)$p['id'];
                 $p['isuId'] = !empty($p['isuId']) ? (int)$p['isuId'] : null;
+                $p['isuIds'] = [];
+                $permIds[] = $p['id'];
             }
+            unset($p);
+
+            // Hubungan Many-to-Many Permasalahan <-> Isu
+            if (!empty($permIds) && !empty($isuIds)) {
+                $permRelRows = $this->db->select('permasalahan_id, isu_id')
+                    ->where_in('permasalahan_id', $permIds)
+                    ->where_in('isu_id', $isuIds)
+                    ->get('cascading_rkpd_permasalahan_isu')
+                    ->result_array();
+
+                $permIsuMap = [];
+                $isuPermMap = [];
+                foreach ($permRelRows as $r) {
+                    $pId = (int)$r['permasalahan_id'];
+                    $iId = (int)$r['isu_id'];
+                    $permIsuMap[$pId][] = $iId;
+                    $isuPermMap[$iId][] = $pId;
+                }
+
+                foreach ($permRows as &$p) {
+                    if (isset($permIsuMap[$p['id']])) {
+                        $p['isuIds'] = $permIsuMap[$p['id']];
+                        $p['isuId'] = $p['isuIds'][0];
+                    } elseif (!empty($p['isuId']) && in_array($p['isuId'], $isuIds)) {
+                        $p['isuIds'] = [$p['isuId']];
+                    } else {
+                        $p['isuIds'] = [];
+                        $p['isuId'] = null;
+                    }
+                }
+                unset($p);
+
+                foreach ($isuRows as &$i) {
+                    $i['permIds'] = isset($isuPermMap[$i['id']]) ? $isuPermMap[$i['id']] : [];
+                }
+                unset($i);
+            }
+
+            $state['isu'] = $isuRows;
             $state['perm'] = $permRows;
 
             // Prioritas
@@ -16890,10 +17070,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 ->get('cascading_rkpd_prioritas')
                 ->result_array();
 
-            if (!empty($progRows)) {
+            if (!empty($progRows) && !empty($isuIds)) {
                 $progIds = array_column($progRows, 'id');
                 $relRows = $this->db->select('prioritas_id, isu_id')
                     ->where_in('prioritas_id', $progIds)
+                    ->where_in('isu_id', $isuIds)
                     ->get('cascading_rkpd_prioritas_isu')
                     ->result_array();
 
@@ -16906,10 +17087,135 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     $pr['id'] = (int)$pr['id'];
                     $pr['isuIds'] = isset($relMap[$pr['id']]) ? $relMap[$pr['id']] : [];
                 }
+                unset($pr);
+            } else {
+                foreach ($progRows as &$pr) {
+                    $pr['id'] = (int)$pr['id'];
+                    $pr['isuIds'] = [];
+                }
+                unset($pr);
             }
             $state['prog'] = $progRows;
 
             return $state;
+        }
+
+        private function _getOrderedIsus($kodeWilayah, $tahun)
+        {
+            $state = $this->_getCascadingState($kodeWilayah, $tahun);
+            $isus = $state['isu'];
+            $perms = $state['perm'];
+            $progs = $state['prog'];
+
+            if (count($isus) <= 2) {
+                return $isus;
+            }
+
+            if (count($isus) > 6) {
+                return $isus;
+            }
+
+            $permute = function($arr) use (&$permute) {
+                if (count($arr) <= 1) return [$arr];
+                $result = [];
+                for ($i = 0; $i < count($arr); $i++) {
+                    $curr = $arr[$i];
+                    $rem = array_merge(array_slice($arr, 0, $i), array_slice($arr, $i + 1));
+                    foreach ($permute($rem) as $p) {
+                        $result[] = array_merge([$curr], $p);
+                    }
+                }
+                return $result;
+            };
+
+            $allPerms = $permute($isus);
+            $bestScore = 99999999;
+            $bestOrder = $isus;
+
+            foreach ($allPerms as $cand) {
+                $tIdx = [];
+                foreach ($cand as $idx => $isu) $tIdx[strval($isu['id'])] = $idx;
+
+                $score = 0;
+                foreach ($perms as $p) {
+                    $ids = array_map('strval', $p['isuIds']);
+                    $matched = [];
+                    foreach ($ids as $id) if (isset($tIdx[$id])) $matched[] = $tIdx[$id];
+                    sort($matched);
+                    $cnt = count($matched);
+                    if ($cnt > 1) {
+                        $span = $matched[$cnt - 1] - $matched[0];
+                        $score += $span;
+                        if ($span !== $cnt - 1) $score += 1000;
+                    }
+                }
+
+                foreach ($progs as $r) {
+                    $ids = array_map('strval', $r['isuIds']);
+                    $matched = [];
+                    foreach ($ids as $id) if (isset($tIdx[$id])) $matched[] = $tIdx[$id];
+                    sort($matched);
+                    $cnt = count($matched);
+                    if ($cnt > 1) {
+                        $span = $matched[$cnt - 1] - $matched[0];
+                        $score += $span;
+                        if ($span !== $cnt - 1) $score += 1000;
+                    }
+                }
+
+                $avgPositions = [];
+                foreach ($perms as $p) {
+                    $ids = array_map('strval', $p['isuIds']);
+                    $matched = [];
+                    foreach ($ids as $id) if (isset($tIdx[$id])) $matched[] = $tIdx[$id];
+                    $avgPositions[] = count($matched) > 0 ? (array_sum($matched) / count($matched)) : 0;
+                }
+
+                for ($i = 0; $i < count($avgPositions); $i++) {
+                    for ($j = $i + 1; $j < count($avgPositions); $j++) {
+                        if ($avgPositions[$i] > $avgPositions[$j]) $score += 100;
+                        if ($avgPositions[$i] === $avgPositions[$j]) $score += 50;
+                    }
+                }
+
+                if ($score < $bestScore) {
+                    $bestScore = $score;
+                    $bestOrder = $cand;
+                }
+            }
+
+            return $bestOrder;
+        }
+
+        private function _validateAdjacentIsus($isuIds, $kodeWilayah, $tahun)
+        {
+            if (!is_array($isuIds) || count($isuIds) !== 2) {
+                return ['valid' => true];
+            }
+
+            $ordered = $this->_getOrderedIsus($kodeWilayah, $tahun);
+            $idMap = [];
+            foreach ($ordered as $idx => $isu) {
+                $idMap[(int)$isu['id']] = $idx;
+            }
+
+            $id1 = (int)$isuIds[0];
+            $id2 = (int)$isuIds[1];
+            if (isset($idMap[$id1]) && isset($idMap[$id2])) {
+                $diff = abs($idMap[$id1] - $idMap[$id2]);
+                if ($diff > 1) {
+                    $minIdx = min($idMap[$id1], $idMap[$id2]);
+                    $maxIdx = max($idMap[$id1], $idMap[$id2]);
+                    $first = $ordered[$minIdx]['text'];
+                    $second = $ordered[$maxIdx]['text'];
+                    $skipped = $ordered[$minIdx + 1]['text'];
+                    return [
+                        'valid'   => false,
+                        'message' => "Pilihan Isu Strategis harus berurutan / berdampingan (tidak bisa memilih {$first} dan {$second} karena melewati {$skipped})."
+                    ];
+                }
+            }
+            return ['valid' => true];
         }
 
         private function _syncCascadingPermasalahanRkpd($kodeWilayah, $tahun)
@@ -16930,7 +17236,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 $isuText = $i['text'];
 
                 $pList = array_values(array_filter($state['perm'], function($p) use ($isuId) {
-                    return $p['isuId'] === $isuId;
+                    return in_array($isuId, $p['isuIds'] ?: []);
                 }));
 
                 $rList = array_values(array_filter($state['prog'], function($r) use ($isuId) {
@@ -16957,7 +17263,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
             // Unmapped
             $unmapped = array_filter($state['perm'], function($p) {
-                return empty($p['isuId']);
+                return empty($p['isuIds']);
             });
             foreach ($unmapped as $u) {
                 $this->db->insert('cascading_permasalahan_rkpd', [

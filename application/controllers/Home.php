@@ -120,6 +120,22 @@ class Home extends CI_Controller {
 					$this->session->set_userdata($Session);
 					echo $level;
 					return;
+
+				} else if ($level == '4') {
+					$Session = array(
+						'isLoggedIn'    => true,
+						'Admin'         => true, 
+						'Instansi'      => true, 
+						'Level'         => 4, 
+						'IsVerifikator' => true,
+						'KodeWilayah'   => isset($akun['KodeWilayah']) ? $akun['KodeWilayah'] : '',
+						'Username'      => $akun['Username'],
+						'NamaInstansi'  => $akun['Username'],
+						'IdKementerian' => isset($akun['IdKementerian']) ? $akun['IdKementerian'] : ''
+					);
+					$this->session->set_userdata($Session);
+					echo 'verifikator';
+					return;
 				}
 			}
 		}

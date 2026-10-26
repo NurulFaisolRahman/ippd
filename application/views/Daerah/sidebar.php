@@ -1,4 +1,8 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<?php 
+defined('BASEPATH') OR exit('No direct script access allowed'); 
+$isVerifikator = !empty($_SESSION['IsVerifikator']) || 
+                 (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 4 && strtolower($_SESSION['Username'] ?? '') === 'verifikator');
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -437,6 +441,20 @@
     <div class="sidebar-content">
         <ul class="sidebar-menu">
 
+        <?php if ($isVerifikator): ?>
+            <!-- MENU KHUSUS VERIFIKATOR -->
+            <li class="sidebar-header header-evaluasi" style="color: #0d9488;">
+                <span class="header-icon-box" style="background: rgba(13, 148, 136, 0.15); color: #0d9488;"><i class="fa fa-shield"></i></span>
+                <span class="header-text">Menu Verifikator</span>
+            </li>
+
+            <li class="sidebar-dropdown active" style="margin-top: 5px;">
+                <a href="<?=base_url('Instansi/TabelIPPD')?>" style="background: rgba(13, 148, 136, 0.08); border-left: 3px solid #0d9488; color: #0d9488; font-weight: 600;">
+                    <i class="menu-icon fa fa-bar-chart" style="color: #0d9488;"></i>
+                    <span>Tabel IPPD</span>
+                </a>
+            </li>
+        <?php else: ?>
             <!-- DAFTAR AKUN -->
             <li class="sidebar-header header-pengaturan">
                 <span class="header-icon-box"><i class="fa fa-users"></i></span>
@@ -814,6 +832,7 @@
                 </div>
             </li>
 
+        <?php endif; ?>
         </ul>
     </div>
 </div>

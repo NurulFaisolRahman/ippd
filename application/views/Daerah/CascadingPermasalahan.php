@@ -70,11 +70,18 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Username']) || isse
         color: #1e293b;
         background-color: #ffffff;
     }
+    .table-cascading tbody tr {
+        height: 48px;
+    }
     .table-cascading tbody tr:hover td {
         background-color: #fbfdfb;
     }
-    td.mid {
-        vertical-align: middle !important;
+    td.mid,
+    .table-cascading tbody td.mid {
+        vertical-align: top !important;
+    }
+    .table-cascading tbody td.mid .item {
+        align-items: flex-start;
     }
 
     /* Item & Action Buttons serasi dengan ProgramKegiatanPrioritas */
@@ -325,7 +332,7 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Username']) || isse
                     <div style="padding: 14px 24px 6px;">
                         <p class="hint" style="margin: 0; font-size: 13px; color: #166534; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px 14px; border-radius: 6px;">
                             <i class="fa fa-info-circle" style="color: #15803d; margin-right: 4px;"></i>
-                            Tambahkan berurutan: <strong>permasalahan</strong>, <strong>isu strategis</strong>, lalu <strong>prioritas pembangunan daerah</strong>. Klik teks untuk mengubah langsung, atau klik tombol <span class="btn-xs-custom btn-edit-level" style="width:20px; height:20px; font-size:10px;"><i class="fa fa-pencil"></i></span> di sebelah kanan untuk mengubah keterkaitannya, serta tombol <span class="btn-xs-custom btn-del-level" style="width:20px; height:20px; font-size:10px;"><i class="fa fa-trash"></i></span> untuk menghapus butir.
+                            Tambahkan berurutan: <strong>permasalahan</strong>, <strong>isu strategis</strong>, lalu <strong>prioritas pembangunan daerah</strong>. Satu prioritas pembangunan daerah dapat mengampu 1 hingga 2 isu strategis. Klik tombol <span class="btn-xs-custom btn-edit-level" style="width:20px; height:20px; font-size:10px;"><i class="fa fa-pencil"></i></span> di sebelah kanan untuk mengubah uraian &amp; keterkaitannya, serta tombol <span class="btn-xs-custom btn-del-level" style="width:20px; height:20px; font-size:10px;"><i class="fa fa-trash"></i></span> untuk menghapus butir.
                         </p>
                     </div>
 
@@ -353,8 +360,8 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Username']) || isse
                     <i class="fa fa-plus-circle" style="margin-right: 6px;"></i> Tambah Permasalahan
                 </h4>
             </div>
-            <div class="modal-body" style="padding: 22px;">
-                <label for="inP" style="font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 6px; display: block;">Permasalahan</label>
+            <div class="modal-body" style="padding: 22px; max-height: calc(85vh - 120px); overflow-y: auto;">
+                <label for="inP" style="font-weight: 700; font-size: 13px; color: #1e293b; margin: 0 0 6px; display: block;">Permasalahan <span class="text-danger">*</span></label>
                 <textarea id="inP" class="form-control" rows="4" placeholder="Contoh: Rendahnya produktivitas dan nilai tambah sumber daya lokal" style="border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 13px;"></textarea>
                 <p class="hint" style="margin: 6px 0 0; font-size: 12px; color: #64748b;">
                     <i class="fa fa-lightbulb-o" style="color: #f59e0b;"></i> Untuk menambah banyak sekaligus, tulis satu permasalahan per baris.
@@ -384,11 +391,15 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Username']) || isse
                 </h4>
             </div>
             <div class="modal-body" style="padding: 22px; max-height: calc(85vh - 120px); overflow-y: auto;">
-                <label for="inI" style="font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 6px; display: block;">Isu strategis</label>
-                <textarea id="inI" class="form-control" rows="3" placeholder="Contoh: Pemantapan pertumbuhan dan pemerataan ekonomi daerah" style="border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 13px;"></textarea>
-
-                <label style="font-weight: 700; font-size: 13px; color: #1e293b; margin: 16px 0 6px; display: block;">Permasalahan yang tercakup dalam isu ini</label>
+                <label style="font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 6px; display: block;">Permasalahan yang tercakup dalam isu ini</label>
+                <div style="position: relative; margin-bottom: 8px;">
+                    <i class="fa fa-search" style="position: absolute; left: 10px; top: 9px; color: #94a3b8; font-size: 12px;"></i>
+                    <input type="text" id="searchPickP" class="form-control input-sm" placeholder="Cari permasalahan..." autocomplete="off" style="padding-left: 28px; border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 12.5px;">
+                </div>
                 <div id="pickP" style="max-height: 220px; overflow-y: auto; padding: 2px;"></div>
+
+                <label for="inI" style="font-weight: 700; font-size: 13px; color: #1e293b; margin: 16px 0 6px; display: block;">Isu strategis <span class="text-danger">*</span></label>
+                <textarea id="inI" class="form-control" rows="3" placeholder="Contoh: Pemantapan pertumbuhan dan pemerataan ekonomi daerah" style="border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 13px;"></textarea>
                 <p class="err-msg" id="eI"></p>
             </div>
             <div class="modal-footer" style="padding: 14px 20px; background: #f8fafc; border-top: 1px solid #e2e8f0;">
@@ -416,7 +427,12 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Username']) || isse
             <div class="modal-body" style="padding: 22px; max-height: calc(85vh - 120px); overflow-y: auto;">
                 <label style="font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 6px; display: block;">
                     Isu strategis <span class="text-danger">*</span>
+                    <span class="text-muted" style="font-size: 11.5px; font-weight: normal; margin-left: 4px;">(Dapat memilih 1 atau 2 isu strategis)</span>
                 </label>
+                <div style="position: relative; margin-bottom: 8px;">
+                    <i class="fa fa-search" style="position: absolute; left: 10px; top: 9px; color: #94a3b8; font-size: 12px;"></i>
+                    <input type="text" id="searchPickI" class="form-control input-sm" placeholder="Cari isu strategis..." autocomplete="off" style="padding-left: 28px; border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 12.5px;">
+                </div>
                 <div id="pickI" style="max-height: 200px; overflow-y: auto; padding: 2px;"></div>
 
                 <label for="inR" style="font-weight: 700; font-size: 13px; color: #1e293b; margin: 16px 0 6px; display: block;">Prioritas pembangunan daerah</label>
@@ -437,16 +453,27 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Username']) || isse
 <!-- 4. MODAL EDIT PERMASALAHAN & KETERKAITAN ISU -->
 <!-- ============================================================ -->
 <div class="modal fade" id="ModalEditPermasalahan" role="dialog" data-backdrop="static">
-    <div class="modal-dialog" style="margin-top: 60px; max-width: 560px;">
+    <div class="modal-dialog" style="margin-top: 60px; max-width: 580px;">
         <div class="modal-content" style="border-radius: 10px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
             <div class="modal-header" style="background: #15803d; color: #fff; padding: 16px 20px;">
                 <button type="button" class="close" data-dismiss="modal" style="color: #fff; opacity: 0.9; font-size: 24px;">&times;</button>
                 <h4 class="modal-title" style="font-weight: 800; color: #fff;">
-                    <i class="fa fa-pencil" style="margin-right: 6px;"></i> Edit Permasalahan
+                    <i class="fa fa-pencil" style="margin-right: 6px;"></i> Edit Permasalahan & Keterkaitan Isu
                 </h4>
             </div>
-            <div class="modal-body" style="padding: 22px;">
+            <div class="modal-body" style="padding: 22px; max-height: calc(85vh - 120px); overflow-y: auto;">
                 <input type="hidden" id="editPermId">
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 6px; display: block;">
+                        Isu Strategis yang Mengampu Permasalahan Ini
+                        <span class="text-muted" style="font-size: 11.5px; font-weight: normal; margin-left: 4px;">(Dapat memilih 1 atau 2 isu strategis)</span>
+                    </label>
+                    <div style="position: relative; margin-bottom: 8px;">
+                        <i class="fa fa-search" style="position: absolute; left: 10px; top: 9px; color: #94a3b8; font-size: 12px;"></i>
+                        <input type="text" id="searchEditPermIsu" class="form-control input-sm" placeholder="Cari isu strategis..." autocomplete="off" style="padding-left: 28px; border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 12.5px;">
+                    </div>
+                    <div id="editPermIsuContainer" style="max-height: 200px; overflow-y: auto; padding: 2px;"></div>
+                </div>
                 <div class="form-group" style="margin-bottom: 16px;">
                     <label for="editPermText" style="font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 6px; display: block;">Uraian Permasalahan <span class="text-danger">*</span></label>
                     <textarea id="editPermText" class="form-control" rows="4" style="border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 13px;"></textarea>
@@ -478,15 +505,19 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Username']) || isse
             <div class="modal-body" style="padding: 22px; max-height: calc(85vh - 120px); overflow-y: auto;">
                 <input type="hidden" id="editIsuId">
                 <div class="form-group" style="margin-bottom: 16px;">
-                    <label for="editIsuText" style="font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 6px; display: block;">Uraian Isu Strategis <span class="text-danger">*</span></label>
-                    <textarea id="editIsuText" class="form-control" rows="3" style="border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 13px;"></textarea>
-                </div>
-                <div class="form-group" style="margin-bottom: 10px;">
                     <label style="font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 6px; display: block;">Permasalahan yang Tercakup dalam Isu Ini</label>
                     <p class="hint" style="margin: 0 0 8px; font-size: 12px; color: #64748b;">
                         Centang permasalahan untuk memetakannya ke isu ini, atau hilangkan centang untuk melepasnya.
                     </p>
+                    <div style="position: relative; margin-bottom: 8px;">
+                        <i class="fa fa-search" style="position: absolute; left: 10px; top: 9px; color: #94a3b8; font-size: 12px;"></i>
+                        <input type="text" id="searchEditIsuPerm" class="form-control input-sm" placeholder="Cari permasalahan..." autocomplete="off" style="padding-left: 28px; border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 12.5px;">
+                    </div>
                     <div id="editIsuPermContainer" style="max-height: 220px; overflow-y: auto; padding: 2px;"></div>
+                </div>
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <label for="editIsuText" style="font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 6px; display: block;">Uraian Isu Strategis <span class="text-danger">*</span></label>
+                    <textarea id="editIsuText" class="form-control" rows="3" style="border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 13px;"></textarea>
                 </div>
                 <p class="err-msg" id="editIsuErr"></p>
             </div>
@@ -517,7 +548,12 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Username']) || isse
                 <div class="form-group" style="margin-bottom: 16px;">
                     <label style="font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 6px; display: block;">
                         Isu Strategis yang Terkait <span class="text-danger">*</span>
+                        <span class="text-muted" style="font-size: 11.5px; font-weight: normal; margin-left: 4px;">(Dapat memilih 1 atau 2 isu strategis)</span>
                     </label>
+                    <div style="position: relative; margin-bottom: 8px;">
+                        <i class="fa fa-search" style="position: absolute; left: 10px; top: 9px; color: #94a3b8; font-size: 12px;"></i>
+                        <input type="text" id="searchEditProgIsu" class="form-control input-sm" placeholder="Cari isu strategis..." autocomplete="off" style="padding-left: 28px; border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 12.5px;">
+                    </div>
                     <div id="editProgIsuContainer" style="max-height: 200px; overflow-y: auto; padding: 2px;"></div>
                 </div>
                 <div class="form-group" style="margin-bottom: 10px;">
@@ -586,86 +622,335 @@ $(document).ready(function() {
         return e;
     }
 
-    function groups() {
-        var g = [];
-        var processedIsu = {};
-        var processedProg = {};
-
-        (S.perm || []).forEach(function(p) {
-            if (p.isuId) {
-                var isuKey = String(p.isuId);
-                if (!processedIsu[isuKey]) {
-                    processedIsu[isuKey] = true;
-                    var isuObj = (S.isu || []).find(function(i) { return String(i.id) === isuKey; });
-                    if (isuObj) {
-                        g.push({
-                            isu: isuObj,
-                            P: (S.perm || []).filter(function(x) { return String(x.isuId) === isuKey; }),
-                            R: (S.prog || []).filter(function(r) {
-                                if (processedProg[r.id]) return false;
-                                var match = (r.isuIds || []).map(String).indexOf(isuKey) > -1;
-                                if (match) {
-                                    processedProg[r.id] = true;
-                                    return true;
-                                }
-                                return false;
-                            })
-                        });
-                    }
-                }
-            } else {
-                // Permasalahan belum dipetakan ke isu strategis
-                // Pertahankan urutannya sesuai posisi permasalahan dalam daftar
-                if (g.length > 0 && g[g.length - 1].isu === null) {
-                    g[g.length - 1].P.push(p);
-                } else {
-                    g.push({
-                        isu: null,
-                        P: [p],
-                        R: []
-                    });
-                }
-            }
-        });
-
-        // Masukkan isu strategis yang belum memiliki permasalahan sama sekali (jika ada)
+    function clusters() {
+        var isuMap = {};
         (S.isu || []).forEach(function(i) {
-            var isuKey = String(i.id);
-            if (!processedIsu[isuKey]) {
-                processedIsu[isuKey] = true;
-                g.push({
-                    isu: i,
-                    P: [],
-                    R: (S.prog || []).filter(function(r) {
-                        if (processedProg[r.id]) return false;
-                        var match = (r.isuIds || []).map(String).indexOf(isuKey) > -1;
-                        if (match) {
-                            processedProg[r.id] = true;
-                            return true;
-                        }
-                        return false;
-                    })
-                });
-            }
+            isuMap[String(i.id)] = i;
         });
 
-        // Masukkan prioritas yang belum terpetakan ke grup manapun jika ada
-        var unmappedProg = (S.prog || []).filter(function(r) {
-            return !processedProg[r.id];
-        });
-        if (unmappedProg.length > 0) {
-            if (g.length > 0 && g[g.length - 1].isu === null) {
-                g[g.length - 1].R = g[g.length - 1].R.concat(unmappedProg);
-            } else {
-                g.push({
-                    isu: null,
-                    P: [],
-                    R: unmappedProg
-                });
+        // 1. Temukan isu yang berbagi prioritas ATAU berbagi permasalahan
+        var parent = {};
+        function find(x) {
+            if (!parent[x]) parent[x] = x;
+            if (parent[x] === x) return x;
+            parent[x] = find(parent[x]);
+            return parent[x];
+        }
+        function union(a, b) {
+            var rootA = find(a);
+            var rootB = find(b);
+            if (rootA !== rootB) {
+                parent[rootB] = rootA;
             }
         }
 
-        return g;
+        (S.isu || []).forEach(function(i) {
+            find(String(i.id));
+        });
+
+        // Hubungkan isu jika ada Prioritas yang memilih > 1 isu
+        (S.prog || []).forEach(function(r) {
+            var validIsuIds = (r.isuIds || []).map(String).filter(function(id) {
+                return !!isuMap[id];
+            });
+            if (validIsuIds.length > 1) {
+                for (var idx = 1; idx < validIsuIds.length; idx++) {
+                    union(validIsuIds[0], validIsuIds[idx]);
+                }
+            }
+        });
+
+        // Hubungkan isu jika ada Permasalahan yang diampu oleh > 1 isu
+        (S.perm || []).forEach(function(p) {
+            var validIsuIds = (p.isuIds || (p.isuId ? [p.isuId] : [])).map(String).filter(function(id) {
+                return !!isuMap[id];
+            });
+            if (validIsuIds.length > 1) {
+                for (var idx = 1; idx < validIsuIds.length; idx++) {
+                    union(validIsuIds[0], validIsuIds[idx]);
+                }
+            }
+        });
+
+        // Urutkan isu berdasarkan urutan input aslinya (S.isu) agar urutan baris tidak pernah teracak/berubah
+        var isuGroupsByRoot = {};
+        var isuOrder = [];
+        (S.isu || []).forEach(function(i) {
+            isuOrder.push(String(i.id));
+        });
+
+        isuOrder.forEach(function(isuId) {
+            var root = find(isuId);
+            if (!isuGroupsByRoot[root]) isuGroupsByRoot[root] = [];
+            isuGroupsByRoot[root].push(isuMap[isuId]);
+        });
+
+        var clusterList = [];
+        var seenRoots = {};
+        var allMappedProgIds = {};
+        var allMappedPermIds = {};
+
+        isuOrder.forEach(function(isuId) {
+            var root = find(isuId);
+            if (!seenRoots[root]) {
+                seenRoots[root] = true;
+                var isus = isuGroupsByRoot[root] || [];
+                var clusterIsuIdSet = {};
+                isus.forEach(function(isu) {
+                    clusterIsuIdSet[String(isu.id)] = true;
+                });
+
+                var progs = (S.prog || []).filter(function(r) {
+                    var ids = (r.isuIds || []).map(String);
+                    for (var m = 0; m < ids.length; m++) {
+                        if (clusterIsuIdSet[ids[m]]) return true;
+                    }
+                    return false;
+                });
+                progs.forEach(function(r) {
+                    allMappedProgIds[String(r.id)] = true;
+                });
+
+                var perms = (S.perm || []).filter(function(p) {
+                    var ids = (p.isuIds || (p.isuId ? [p.isuId] : [])).map(String);
+                    for (var m = 0; m < ids.length; m++) {
+                        if (clusterIsuIdSet[ids[m]]) return true;
+                    }
+                    return false;
+                });
+                perms.forEach(function(p) {
+                    allMappedPermIds[String(p.id)] = true;
+                });
+
+                // Bangun graf rantai linier antar-isu yang saling terhubung agar semua pasangan isu multi-isu selalu bersebelahan
+                var adj = {};
+                isus.forEach(function(isu) { adj[String(isu.id)] = []; });
+
+                var addEdge = function(id1, id2) {
+                    if (id1 && id2 && id1 !== id2 && adj[id1] && adj[id2]) {
+                        if (adj[id1].indexOf(id2) === -1) adj[id1].push(id2);
+                        if (adj[id2].indexOf(id1) === -1) adj[id2].push(id1);
+                    }
+                };
+
+                progs.forEach(function(r) {
+                    var v = (r.isuIds || []).map(String).filter(function(id) { return !!adj[id]; });
+                    if (v.length === 2) addEdge(v[0], v[1]);
+                });
+
+                perms.forEach(function(p) {
+                    var v = (p.isuIds || (p.isuId ? [p.isuId] : [])).map(String).filter(function(id) { return !!adj[id]; });
+                    if (v.length === 2) addEdge(v[0], v[1]);
+                });
+
+                // Cari simpul ujung (degree <= 1)
+                var endpoints = [];
+                isus.forEach(function(isu) {
+                    var id = String(isu.id);
+                    if (adj[id] && adj[id].length <= 1) endpoints.push(id);
+                });
+
+                var buildChain = function(startId) {
+                    var visited = {};
+                    var chain = [];
+                    var queue = [startId];
+                    visited[startId] = true;
+                    while (queue.length > 0) {
+                        var curr = queue.shift();
+                        if (isuMap[curr]) chain.push(isuMap[curr]);
+                        (adj[curr] || []).forEach(function(nbr) {
+                            if (!visited[nbr]) {
+                                visited[nbr] = true;
+                                queue.push(nbr);
+                            }
+                        });
+                    }
+                    isus.forEach(function(isu) {
+                        var id = String(isu.id);
+                        if (!visited[id]) {
+                            visited[id] = true;
+                            chain.push(isu);
+                        }
+                    });
+                    return chain;
+                };
+
+                var candidateIsus = isus.slice();
+                if (isus.length > 1 && isus.length <= 6) {
+                    var permute = function(arr) {
+                        if (arr.length <= 1) return [arr];
+                        var result = [];
+                        for (var i = 0; i < arr.length; i++) {
+                            var current = arr[i];
+                            var remaining = arr.slice(0, i).concat(arr.slice(i + 1));
+                            var remainingPerms = permute(remaining);
+                            for (var j = 0; j < remainingPerms.length; j++) {
+                                result.push([current].concat(remainingPerms[j]));
+                            }
+                        }
+                        return result;
+                    };
+
+                    var allPerms = permute(isus);
+                    var bestScore = 99999999;
+                    var bestOrder = candidateIsus;
+
+                    allPerms.forEach(function(cand) {
+                        var tIdx = {};
+                        cand.forEach(function(isu, idx) { tIdx[String(isu.id)] = idx; });
+
+                        var score = 0;
+                        perms.forEach(function(p) {
+                            var ids = (p.isuIds || (p.isuId ? [p.isuId] : [])).map(String);
+                            var matched = [];
+                            ids.forEach(function(id) {
+                                if (tIdx[id] !== undefined) matched.push(tIdx[id]);
+                            });
+                            matched.sort(function(a, b) { return a - b; });
+                            var cnt = matched.length;
+                            if (cnt > 1) {
+                                var span = matched[cnt - 1] - matched[0];
+                                score += span;
+                                if (span !== cnt - 1) score += 1000;
+                            }
+                        });
+
+                        progs.forEach(function(r) {
+                            var ids = (r.isuIds || []).map(String);
+                            var matched = [];
+                            ids.forEach(function(id) {
+                                if (tIdx[id] !== undefined) matched.push(tIdx[id]);
+                            });
+                            matched.sort(function(a, b) { return a - b; });
+                            var cnt = matched.length;
+                            if (cnt > 1) {
+                                var span = matched[cnt - 1] - matched[0];
+                                score += span;
+                                if (span !== cnt - 1) score += 1000;
+                            }
+                        });
+
+                        var avgPositions = [];
+                        perms.forEach(function(p) {
+                            var ids = (p.isuIds || (p.isuId ? [p.isuId] : [])).map(String);
+                            var matched = [];
+                            ids.forEach(function(id) {
+                                if (tIdx[id] !== undefined) matched.push(tIdx[id]);
+                            });
+                            avgPositions.push(matched.length > 0 ? (matched.reduce(function(a, b){ return a + b; }, 0) / matched.length) : 0);
+                        });
+
+                        for (var i = 0; i < avgPositions.length; i++) {
+                            for (var j = i + 1; j < avgPositions.length; j++) {
+                                if (avgPositions[i] > avgPositions[j]) score += 100;
+                                if (avgPositions[i] === avgPositions[j]) score += 50;
+                            }
+                        }
+
+                        if (score < bestScore) {
+                            bestScore = score;
+                            bestOrder = cand;
+                        }
+                    });
+
+                    candidateIsus = bestOrder;
+                } else if (endpoints.length >= 2) {
+                    var cand1 = buildChain(endpoints[0]);
+                    candidateIsus = cand1;
+                }
+
+                var orderedIsus = candidateIsus;
+
+                clusterList.push({
+                    type: 'chain',
+                    isus: orderedIsus,
+                    perms: perms,
+                    progs: progs
+                });
+            }
+        });
+
+        // Tangani permasalahan dan prioritas yang belum dipetakan
+        var unmappedPerms = (S.perm || []).filter(function(p) {
+            return !allMappedPermIds[String(p.id)];
+        });
+        var unmappedProgs = (S.prog || []).filter(function(r) {
+            return !allMappedProgIds[String(r.id)];
+        });
+
+        if (unmappedPerms.length > 0 || unmappedProgs.length > 0) {
+            clusterList.push({
+                type: 'unmapped',
+                P: unmappedPerms,
+                R: unmappedProgs
+            });
+        }
+
+        return clusterList;
+    }
+
+    function getOrderedIsus() {
+        var cls = clusters();
+        var ordered = [];
+        var seen = {};
+        cls.forEach(function(c) {
+            if (c.isus) {
+                c.isus.forEach(function(isu) {
+                    var id = String(isu.id);
+                    if (!seen[id]) {
+                        seen[id] = true;
+                        ordered.push(isu);
+                    }
+                });
+            }
+        });
+        (S.isu || []).forEach(function(isu) {
+            var id = String(isu.id);
+            if (!seen[id]) {
+                seen[id] = true;
+                ordered.push(isu);
+            }
+        });
+        return ordered;
+    }
+
+    function validateAdjacentSelection(selectedIds, allOrderedItems, labelType) {
+        if (!selectedIds || selectedIds.length <= 1) return { valid: true };
+        labelType = labelType || 'kategori';
+        if (selectedIds.length > 2) {
+            return {
+                valid: false,
+                message: 'Maksimal 2 ' + labelType + ' yang dapat diampu.'
+            };
+        }
+
+        var itemIdx = {};
+        (allOrderedItems || []).forEach(function(item, idx) {
+            itemIdx[String(item.id)] = idx;
+        });
+
+        var idxs = [];
+        selectedIds.forEach(function(id) {
+            if (itemIdx[String(id)] !== undefined) {
+                idxs.push(itemIdx[String(id)]);
+            }
+        });
+
+        if (idxs.length === 2) {
+            var diff = Math.abs(idxs[0] - idxs[1]);
+            if (diff > 1) {
+                var minIdx = Math.min(idxs[0], idxs[1]);
+                var maxIdx = Math.max(idxs[0], idxs[1]);
+                var first = allOrderedItems[minIdx].text;
+                var second = allOrderedItems[maxIdx].text;
+                var skipped = allOrderedItems[minIdx + 1].text;
+                return {
+                    valid: false,
+                    message: 'Pilihan ' + labelType + ' harus berurutan / berdampingan (tidak bisa memilih ' + first + ' dan ' + second + ' karena melewati ' + skipped + ').'
+                };
+            }
+        }
+        return { valid: true };
     }
 
     function editable(list, obj, type, isuContext) {
@@ -674,59 +959,9 @@ $(document).ready(function() {
         box.setAttribute('data-id', obj.id);
 
         if (isDaerah && kodeWilayah) {
-            t.contentEditable = 'true';
-            t.spellcheck = false;
-            t.title = 'Klik untuk mengubah teks langsung';
-
-            t.onblur = function() {
-                var v = t.textContent.trim();
-                if (v && v !== obj.text) {
-                    var oldText = obj.text;
-                    obj.text = v;
-                    $.ajax({
-                        url: BaseURL + 'Daerah/UpdateCascadingItem',
-                        type: 'POST',
-                        dataType: 'json',
-                        data: {
-                            type: type,
-                            id: obj.id,
-                            text: v,
-                            KodeWilayah: kodeWilayah,
-                            Tahun: tahun
-                        },
-                        success: function(res) {
-                            if (res.status !== 'success') {
-                                obj.text = oldText;
-                                t.textContent = oldText;
-                                alert(res.message || 'Gagal menyimpan perubahan.');
-                            } else {
-                                box.classList.add('highlight-edited');
-                                setTimeout(function() {
-                                    box.classList.remove('highlight-edited');
-                                }, 2200);
-                            }
-                        },
-                        error: function() {
-                            obj.text = oldText;
-                            t.textContent = oldText;
-                            alert('Gagal menghubungi server.');
-                        }
-                    });
-                } else {
-                    t.textContent = obj.text;
-                }
-            };
-
-            t.onkeydown = function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    t.blur();
-                }
-            };
-
             var actions = el('span', 'item-actions');
 
-            // Tombol Edit Keterkaitan
+            // Tombol Edit (Hanya dapat diedit saat tombol edit ditekan)
             var pencil = el('button', 'btn-xs-custom btn-edit-level', '');
             pencil.type = 'button';
             pencil.title = 'Edit uraian & keterkaitannya';
@@ -793,6 +1028,20 @@ $(document).ready(function() {
         return c;
     }
 
+    function getDistribution(itemCount, totalRows) {
+        if (itemCount <= 0 || totalRows <= 0) return {};
+        var base = Math.floor(totalRows / itemCount);
+        var rem = totalRows % itemCount;
+        var res = {};
+        var curr = 0;
+        for (var i = 0; i < itemCount; i++) {
+            var span = base + (i < rem ? 1 : 0);
+            res[curr] = { idx: i, span: span };
+            curr += span;
+        }
+        return res;
+    }
+
     function renderTable(targetType, targetId) {
         var T = byId('tbl');
         if (!T) return;
@@ -815,8 +1064,8 @@ $(document).ready(function() {
         th.appendChild(hr);
         T.appendChild(th);
 
-        var tb = el('tbody'), n = 0, gs = groups();
-        if (!gs.length) {
+        var tb = el('tbody'), permNum = 0, cls = clusters();
+        if (!cls.length) {
             var r = el('tr');
             var emptyTxt = kodeWilayah ? 'Belum ada data. Klik "Tambah permasalahan" untuk memulai.' : 'Silakan pilih Provinsi dan Kabupaten / Kota terlebih dahulu.';
             var c = el('td', 'empty-msg', emptyTxt);
@@ -824,62 +1073,288 @@ $(document).ready(function() {
             r.appendChild(c);
             tb.appendChild(r);
         }
-        gs.forEach(function(g) {
-            var rows = Math.max(g.P.length, g.R.length, 1);
-            for (var k = 0; k < rows; k++) {
-                var tr = el('tr');
-                if (g.P.length === 0) {
-                    if (k === 0) {
-                        var c0 = cell(rows);
-                        c0.appendChild(el('span', 'na', 'Belum ada permasalahan'));
-                        tr.appendChild(c0);
-                    }
-                } else if (k < g.P.length) {
-                    var c1 = cell(k === g.P.length - 1 ? rows - k : 1);
-                    n++;
-                    var w = el('div', 'item-wrapper');
-                    w.style.display = 'flex';
-                    w.style.alignItems = 'flex-start';
-                    w.style.gap = '8px';
-                    w.style.width = '100%';
 
-                    var num = el('span', 'item-num', n + '.');
-                    num.style.fontWeight = '700';
-                    num.style.color = '#15803d';
-                    num.style.minWidth = '20px';
-                    num.style.paddingTop = '3px';
-                    num.style.fontSize = '13px';
-                    w.appendChild(num);
+        cls.forEach(function(cluster) {
+            if (cluster.type === 'chain') {
+                var isus = cluster.isus;
+                var perms = cluster.perms || [];
+                var progs = cluster.progs || [];
+                var K = isus.length;
 
-                    var ed = editable(S.perm, g.P[k], 'perm', null);
-                    ed.style.flex = '1';
-                    w.appendChild(ed);
-                    c1.appendChild(w);
-                    tr.appendChild(c1);
+                var isuIdx = {};
+                isus.forEach(function(isu, idx) {
+                    isuIdx[String(isu.id)] = idx;
+                });
+
+                // 1. Kumpulkan permasalahan dan prioritas per Isu
+                var p_per_isu = [];
+                var r_per_isu = [];
+                for (var i = 0; i < K; i++) {
+                    p_per_isu.push([]);
+                    r_per_isu.push([]);
                 }
 
-                if (k === 0) {
-                    var c2 = cell(rows, 'mid');
-                    if (g.isu) {
-                        c2.appendChild(editable(S.isu, g.isu, 'isu', null));
+                perms.forEach(function(p) {
+                    var ids = (p.isuIds || (p.isuId ? [p.isuId] : [])).map(String);
+                    var matched = [];
+                    ids.forEach(function(id) {
+                        if (isuIdx[id] !== undefined) matched.push(isuIdx[id]);
+                    });
+                    matched.sort(function(a, b) { return a - b; });
+                    matched.forEach(function(idx) {
+                        p_per_isu[idx].push(p);
+                    });
+                });
+
+                progs.forEach(function(r) {
+                    var ids = (r.isuIds || []).map(String);
+                    var matched = [];
+                    ids.forEach(function(id) {
+                        if (isuIdx[id] !== undefined) matched.push(isuIdx[id]);
+                    });
+                    matched.sort(function(a, b) { return a - b; });
+                    matched.forEach(function(idx) {
+                        r_per_isu[idx].push(r);
+                    });
+                });
+
+                // Urutkan item di dalam Isu berdasarkan arah koneksi agar baris kontinu teratur:
+                // Kategori 0: Item yang menyambung dari Isu di atasnya (min < isuIndex) -> ditempatkan di paling ATAS
+                // Kategori 1: Item yang khusus/eksklusif pada Isu ini (min == isuIndex && max == isuIndex) -> di TENGAH
+                // Kategori 2: Item yang menyambung ke Isu di bawahnya (max > isuIndex) -> ditempatkan di paling BAWAH
+                function sortItemsInIsu(items, isuIndex) {
+                    return items.slice().sort(function(a, b) {
+                        var aIds = (a.isuIds || (a.isuId ? [a.isuId] : [])).map(String).map(function(id) { return isuIdx[id]; }).filter(function(x){ return x !== undefined; });
+                        var bIds = (b.isuIds || (b.isuId ? [b.isuId] : [])).map(String).map(function(id) { return isuIdx[id]; }).filter(function(x){ return x !== undefined; });
+
+                        var aMin = aIds.length > 0 ? Math.min.apply(null, aIds) : isuIndex;
+                        var aMax = aIds.length > 0 ? Math.max.apply(null, aIds) : isuIndex;
+                        var bMin = bIds.length > 0 ? Math.min.apply(null, bIds) : isuIndex;
+                        var bMax = bIds.length > 0 ? Math.max.apply(null, bIds) : isuIndex;
+
+                        var aCat = (aMin < isuIndex) ? 0 : ((aMax > isuIndex) ? 2 : 1);
+                        var bCat = (bMin < isuIndex) ? 0 : ((bMax > isuIndex) ? 2 : 1);
+
+                        if (aCat !== bCat) return aCat - bCat;
+                        return String(a.id).localeCompare(String(b.id));
+                    });
+                }
+
+                for (var i = 0; i < K; i++) {
+                    p_per_isu[i] = sortItemsInIsu(p_per_isu[i], i);
+                    r_per_isu[i] = sortItemsInIsu(r_per_isu[i], i);
+                }
+
+                // 2. Hitung tinggi (baris) yang dibutuhkan masing-masing Isu
+                var H = [];
+                for (var i = 0; i < K; i++) {
+                    var m = p_per_isu[i].length;
+                    var rCount = r_per_isu[i].length;
+                    H.push(Math.max(1, m, rCount));
+                }
+
+                var col1Items = {};
+                var col2Items = {};
+                var col3Items = {};
+
+                var p_span = {};
+                var p_start = {};
+                var r_span = {};
+                var r_start = {};
+
+                var currRow = 0;
+                for (var i = 0; i < K; i++) {
+                    var isuStart = currRow;
+                    var isuHeight = H[i];
+                    col2Items[isuStart] = { isu: isus[i], span: isuHeight };
+
+                    // Distribusikan baris untuk Permasalahan yang melintasi Isu i
+                    var m = p_per_isu[i].length;
+                    if (m > 0) {
+                        var base = Math.floor(isuHeight / m);
+                        var rem = isuHeight % m;
+                        var rOffset = isuStart;
+                        for (var k = 0; k < m; k++) {
+                            var p = p_per_isu[i][k];
+                            var pid = String(p.id);
+                            var s = base + (k < rem ? 1 : 0);
+                            if (p_start[pid] === undefined) {
+                                p_start[pid] = rOffset;
+                                p_span[pid] = 0;
+                            }
+                            p_span[pid] += s;
+                            rOffset += s;
+                        }
                     } else {
-                        c2.appendChild(el('span', 'na', 'Belum dipetakan ke isu strategis'));
+                        col1Items[isuStart] = { item: null, span: isuHeight };
                     }
-                    tr.appendChild(c2);
+
+                    // Distribusikan baris untuk Prioritas yang melintasi Isu i
+                    var rCount = r_per_isu[i].length;
+                    if (rCount > 0) {
+                        var base = Math.floor(isuHeight / rCount);
+                        var rem = isuHeight % rCount;
+                        var rOffset = isuStart;
+                        for (var k = 0; k < rCount; k++) {
+                            var r = r_per_isu[i][k];
+                            var rid = String(r.id);
+                            var s = base + (k < rem ? 1 : 0);
+                            if (r_start[rid] === undefined) {
+                                r_start[rid] = rOffset;
+                                r_span[rid] = 0;
+                            }
+                            r_span[rid] += s;
+                            rOffset += s;
+                        }
+                    } else {
+                        col3Items[isuStart] = { item: null, span: isuHeight, isuContext: isus[i] };
+                    }
+
+                    currRow += isuHeight;
                 }
 
-                if (g.R.length === 0) {
-                    if (k === 0) {
-                        var c3 = cell(rows);
-                        c3.appendChild(el('span', 'na', g.isu ? 'Belum ada prioritas pembangunan daerah' : '—'));
+                var totalClusterRows = currRow;
+
+                // Masukkan Permasalahan ke col1Items pada baris awalnya dengan total span kontinu
+                perms.forEach(function(p) {
+                    var pid = String(p.id);
+                    if (p_start[pid] !== undefined) {
+                        col1Items[p_start[pid]] = { item: p, span: p_span[pid] };
+                    }
+                });
+
+                // Masukkan Prioritas ke col3Items pada baris awalnya dengan total span kontinu
+                progs.forEach(function(r) {
+                    var rid = String(r.id);
+                    if (r_start[rid] !== undefined) {
+                        var matchedIsu = isus[0];
+                        for (var ui = 0; ui < isus.length; ui++) {
+                            if ((r.isuIds || []).map(String).indexOf(String(isus[ui].id)) !== -1) {
+                                matchedIsu = isus[ui];
+                                break;
+                            }
+                        }
+                        col3Items[r_start[rid]] = { item: r, span: r_span[rid], isuContext: matchedIsu };
+                    }
+                });
+
+                // 6. Buat baris <tr> dan sel <td> untuk cluster ini
+                for (var rIdx = 0; rIdx < totalClusterRows; rIdx++) {
+                    var tr = el('tr');
+
+                    // Kolom 1: Permasalahan
+                    if (col1Items[rIdx]) {
+                        var pInfo = col1Items[rIdx];
+                        var c1 = cell(pInfo.span);
+                        if (pInfo.item) {
+                            permNum++;
+                            var w = el('div', 'item-wrapper');
+                            w.style.display = 'flex';
+                            w.style.alignItems = 'flex-start';
+                            w.style.gap = '8px';
+                            w.style.width = '100%';
+
+                            var num = el('span', 'item-num', permNum + '.');
+                            num.style.fontWeight = '700';
+                            num.style.color = '#15803d';
+                            num.style.minWidth = '20px';
+                            num.style.paddingTop = '3px';
+                            num.style.fontSize = '13px';
+                            w.appendChild(num);
+
+                            var ed = editable(S.perm, pInfo.item, 'perm', null);
+                            ed.style.flex = '1';
+                            w.appendChild(ed);
+                            c1.appendChild(w);
+                        } else {
+                            c1.appendChild(el('span', 'na', 'Belum ada permasalahan'));
+                        }
+                        tr.appendChild(c1);
+                    }
+
+                    // Kolom 2: Isu Strategis
+                    if (col2Items[rIdx]) {
+                        var iInfo = col2Items[rIdx];
+                        var c2 = cell(iInfo.span);
+                        c2.appendChild(editable(S.isu, iInfo.isu, 'isu', null));
+                        tr.appendChild(c2);
+                    }
+
+                    // Kolom 3: Prioritas Pembangunan Daerah
+                    if (col3Items[rIdx]) {
+                        var rInfo = col3Items[rIdx];
+                        var c3 = cell(rInfo.span);
+                        if (rInfo.item) {
+                            c3.appendChild(editable(S.prog, rInfo.item, 'prog', rInfo.isuContext));
+                        } else {
+                            c3.appendChild(el('span', 'na', 'Belum ada prioritas pembangunan daerah'));
+                        }
                         tr.appendChild(c3);
                     }
-                } else if (k < g.R.length) {
-                    var c4 = cell(k === g.R.length - 1 ? rows - k : 1);
-                    c4.appendChild(editable(S.prog, g.R[k], 'prog', g.isu));
-                    tr.appendChild(c4);
+
+                    tb.appendChild(tr);
                 }
-                tb.appendChild(tr);
+
+            } else if (cluster.type === 'unmapped') {
+                var P = cluster.P || [];
+                var R = cluster.R || [];
+                var rows = Math.max(P.length, R.length, 1);
+                for (var k = 0; k < rows; k++) {
+                    var tr = el('tr');
+
+                    // Kolom 1: Permasalahan belum dipetakan
+                    if (P.length === 0) {
+                        if (k === 0) {
+                            var c0 = cell(rows);
+                            c0.appendChild(el('span', 'na', '—'));
+                            tr.appendChild(c0);
+                        }
+                    } else if (k < P.length) {
+                        var c1 = cell(k === P.length - 1 ? (rows - k) : 1);
+                        permNum++;
+                        var w = el('div', 'item-wrapper');
+                        w.style.display = 'flex';
+                        w.style.alignItems = 'flex-start';
+                        w.style.gap = '8px';
+                        w.style.width = '100%';
+
+                        var num = el('span', 'item-num', permNum + '.');
+                        num.style.fontWeight = '700';
+                        num.style.color = '#15803d';
+                        num.style.minWidth = '20px';
+                        num.style.paddingTop = '3px';
+                        num.style.fontSize = '13px';
+                        w.appendChild(num);
+
+                        var ed = editable(S.perm, P[k], 'perm', null);
+                        ed.style.flex = '1';
+                        w.appendChild(ed);
+                        c1.appendChild(w);
+                        tr.appendChild(c1);
+                    }
+
+                    // Kolom 2: Keterangan belum dipetakan
+                    if (k === 0) {
+                        var c2 = cell(rows);
+                        c2.appendChild(el('span', 'na', 'Belum dipetakan ke isu strategis'));
+                        tr.appendChild(c2);
+                    }
+
+                    // Kolom 3: Prioritas belum dipetakan
+                    if (R.length === 0) {
+                        if (k === 0) {
+                            var c3 = cell(rows);
+                            c3.appendChild(el('span', 'na', '—'));
+                            tr.appendChild(c3);
+                        }
+                    } else if (k < R.length) {
+                        var c4 = cell(k === R.length - 1 ? (rows - k) : 1);
+                        c4.appendChild(editable(S.prog, R[k], 'prog', null));
+                        tr.appendChild(c4);
+                    }
+
+                    tb.appendChild(tr);
+                }
             }
         });
         T.appendChild(tb);
@@ -920,7 +1395,10 @@ $(document).ready(function() {
     function clean() {
         var ids = {};
         (S.isu || []).forEach(function(i) { ids[String(i.id)] = 1; });
-        (S.perm || []).forEach(function(p) { if (p.isuId && !ids[String(p.isuId)]) p.isuId = null; });
+        (S.perm || []).forEach(function(p) {
+            p.isuIds = (p.isuIds || (p.isuId ? [p.isuId] : [])).filter(function(id) { return ids[String(id)]; });
+            p.isuId = p.isuIds.length ? p.isuIds[0] : null;
+        });
         (S.prog || []).forEach(function(r) {
             r.isuIds = (r.isuIds || []).filter(function(id) { return ids[String(id)]; });
         });
@@ -947,9 +1425,11 @@ $(document).ready(function() {
             url: BaseURL + 'Daerah/GetCascadingData',
             type: 'POST',
             dataType: 'json',
+            cache: false,
             data: {
                 KodeWilayah: kodeWilayah,
-                Tahun: tahun
+                Tahun: tahun,
+                _t: new Date().getTime()
             },
             success: function(res) {
                 if (res.status === 'success' && res.data) {
@@ -975,6 +1455,7 @@ $(document).ready(function() {
         $('#sP').on('click', function() {
             var raw = $('#inP').val();
             var lines = raw.split('\n').map(function(s) { return s.trim(); }).filter(Boolean);
+
             if (!lines.length) {
                 $('#eP').text('Isi permasalahan terlebih dahulu.');
                 $('#inP').focus();
@@ -1014,21 +1495,38 @@ $(document).ready(function() {
             captureScroll();
             $('#inI').val('');
             $('#eI').text('');
+            $('#searchPickP').val('');
             var pk = $('#pickP');
             pk.empty();
 
             if (!S.perm || !S.perm.length) {
                 pk.html('<div class="empty-msg">Belum ada permasalahan yang tersedia. (Anda tetap dapat menyimpan isu strategis ini dan memetakannya nanti)</div>');
             } else {
-                S.perm.forEach(function(p, idx) {
-                    var isChecked = !p.isuId;
-                    var otherIsu = (!isChecked && p.isuId) ? (S.isu || []).find(function(x) { return String(x.id) === String(p.isuId); }) : null;
-                    var badge = !p.isuId ? '<span class="label label-default" style="margin-left: 6px;">Belum dipetakan</span>' :
-                               (otherIsu ? '<span class="label label-warning" style="margin-left: 6px;">Isu: ' + $('<div>').text(otherIsu.text).html() + '</span>' : '');
+                S.perm.forEach(function(p) {
                     var l = $('<label class="chk"></label>');
                     var inp = $('<input type="checkbox">').val(p.id);
-                    var num = (idx + 1) + '. ';
-                    l.append(inp).append($('<span></span>').html('<strong>' + num + '</strong>' + $('<div>').text(p.text).html() + ' ' + badge));
+
+                    inp.on('change', function() {
+                        var checkedBoxes = pk.find('input:checked');
+                        var checkedIds = [];
+                        checkedBoxes.each(function() { checkedIds.push($(this).val()); });
+
+                        if (checkedIds.length > 2) {
+                            $(this).prop('checked', false);
+                            $('#eI').text('Maksimal 2 Permasalahan yang dapat diampu.');
+                            return;
+                        }
+
+                        var adjCheck = validateAdjacentSelection(checkedIds, S.perm, 'Permasalahan');
+                        if (!adjCheck.valid) {
+                            $(this).prop('checked', false);
+                            $('#eI').text(adjCheck.message);
+                        } else {
+                            $('#eI').text('');
+                        }
+                    });
+
+                    l.append(inp).append($('<span></span>').text(p.text));
                     pk.append(l);
                 });
             }
@@ -1047,6 +1545,17 @@ $(document).ready(function() {
             if (!t) {
                 $('#eI').text('Isi isu strategis terlebih dahulu.');
                 $('#inI').focus();
+                return;
+            }
+
+            if (ids.length > 2) {
+                $('#eI').text('Maksimal 2 Permasalahan yang dapat diampu.');
+                return;
+            }
+
+            var adjCheck = validateAdjacentSelection(ids, S.perm, 'Permasalahan');
+            if (!adjCheck.valid) {
+                $('#eI').text(adjCheck.message);
                 return;
             }
 
@@ -1085,18 +1594,40 @@ $(document).ready(function() {
             captureScroll();
             $('#inR').val('');
             $('#eR').text('');
+            $('#searchPickI').val('');
             var pk = $('#pickI');
             pk.empty();
 
-            if (!S.isu || !S.isu.length) {
+            var orderedIsus = getOrderedIsus();
+            if (!orderedIsus || !orderedIsus.length) {
                 pk.html('<div class="empty-msg">Belum ada isu strategis. Tambahkan isu strategis terlebih dahulu.</div>');
                 $('#sR').prop('disabled', true);
             } else {
                 $('#sR').prop('disabled', false);
-                S.isu.forEach(function(i, idx) {
+                orderedIsus.forEach(function(i, idx) {
                     var l = $('<label class="chk"></label>');
-                    var c = $('<input type="radio" name="pickIsuRadio">').val(i.id);
-                    if (idx === 0) c.prop('checked', true);
+                    var c = $('<input type="checkbox" name="pickIsuChk">').val(i.id);
+
+                    c.on('change', function() {
+                        var checkedBoxes = pk.find('input[name="pickIsuChk"]:checked');
+                        var checkedIds = [];
+                        checkedBoxes.each(function() { checkedIds.push($(this).val()); });
+
+                        if (checkedIds.length > 2) {
+                            $(this).prop('checked', false);
+                            $('#eR').text('Maksimal 2 Isu Strategis yang dapat diampu.');
+                            return;
+                        }
+
+                        var adjCheck = validateAdjacentSelection(checkedIds, orderedIsus, 'Isu Strategis');
+                        if (!adjCheck.valid) {
+                            $(this).prop('checked', false);
+                            $('#eR').text(adjCheck.message);
+                        } else {
+                            $('#eR').text('');
+                        }
+                    });
+
                     l.append(c).append($('<span></span>').text(i.text));
                     pk.append(l);
                 });
@@ -1107,11 +1638,23 @@ $(document).ready(function() {
 
         $('#sR').on('click', function() {
             var t = $.trim($('#inR').val());
-            var selectedIsuId = $('#pickI input[name="pickIsuRadio"]:checked').val();
-            var ids = selectedIsuId ? [selectedIsuId] : [];
+            var ids = [];
+            $('#pickI input[name="pickIsuChk"]:checked').each(function() {
+                ids.push($(this).val());
+            });
 
             if (!ids.length) {
-                $('#eR').text('Pilih isu strategis.');
+                $('#eR').text('Pilih minimal 1 isu strategis.');
+                return;
+            }
+            if (ids.length > 2) {
+                $('#eR').text('Maksimal 2 Isu Strategis yang dapat diampu.');
+                return;
+            }
+            var orderedIsus = getOrderedIsus();
+            var adjCheck = validateAdjacentSelection(ids, orderedIsus, 'Isu Strategis');
+            if (!adjCheck.valid) {
+                $('#eR').text(adjCheck.message);
                 return;
             }
             if (!t) {
@@ -1157,16 +1700,62 @@ $(document).ready(function() {
         function openEditModal(type, obj, isuContext) {
             captureScroll();
             if (type === 'perm') {
-                $('#editPermId').val(obj.id);
-                $('#editPermText').val(obj.text);
+                var curPerm = (S.perm || []).find(function(p) { return String(p.id) === String(obj.id); }) || obj;
+                $('#editPermId').val(curPerm.id);
+                $('#editPermText').val(curPerm.text);
                 $('#editPermErr').text('');
+                $('#searchEditPermIsu').val('');
+
+                var ctn = $('#editPermIsuContainer');
+                ctn.empty();
+
+                var orderedIsus = getOrderedIsus();
+                if (!orderedIsus || !orderedIsus.length) {
+                    ctn.html('<div class="empty-msg">Belum ada isu strategis.</div>');
+                } else {
+                    var activeIsuIds = (curPerm.isuIds && curPerm.isuIds.length) 
+                        ? curPerm.isuIds.map(String) 
+                        : (curPerm.isuId ? [String(curPerm.isuId)] : ((isuContext && isuContext.id) ? [String(isuContext.id)] : []));
+
+                    orderedIsus.forEach(function(i, idx) {
+                        var isChecked = activeIsuIds.indexOf(String(i.id)) > -1;
+                        var l = $('<label class="chk"></label>');
+                        var inp = $('<input type="checkbox" name="editPermIsuChk">').val(i.id).prop('checked', isChecked);
+
+                        inp.on('change', function() {
+                            var checkedBoxes = ctn.find('input[name="editPermIsuChk"]:checked');
+                            var checkedIds = [];
+                            checkedBoxes.each(function() { checkedIds.push($(this).val()); });
+
+                            if (checkedIds.length > 2) {
+                                $(this).prop('checked', false);
+                                $('#editPermErr').text('Maksimal 2 Isu Strategis yang dapat diampu.');
+                                return;
+                            }
+
+                            var adjCheck = validateAdjacentSelection(checkedIds, orderedIsus, 'Isu Strategis');
+                            if (!adjCheck.valid) {
+                                $(this).prop('checked', false);
+                                $('#editPermErr').text(adjCheck.message);
+                            } else {
+                                $('#editPermErr').text('');
+                            }
+                        });
+
+                        l.append(inp).append($('<span></span>').text(i.text));
+                        ctn.append(l);
+                    });
+                }
+
                 $('#ModalEditPermasalahan').modal('show');
                 setTimeout(function() { $('#editPermText').focus(); }, 350);
 
             } else if (type === 'isu') {
-                $('#editIsuId').val(obj.id);
-                $('#editIsuText').val(obj.text);
+                var curIsu = (S.isu || []).find(function(i) { return String(i.id) === String(obj.id); }) || obj;
+                $('#editIsuId').val(curIsu.id);
+                $('#editIsuText').val(curIsu.text);
                 $('#editIsuErr').text('');
+                $('#searchEditIsuPerm').val('');
 
                 var ctn = $('#editIsuPermContainer');
                 ctn.empty();
@@ -1174,16 +1763,34 @@ $(document).ready(function() {
                 if (!S.perm || !S.perm.length) {
                     ctn.html('<div class="empty-msg">Belum ada permasalahan yang tersedia.</div>');
                 } else {
-                    S.perm.forEach(function(p, idx) {
-                        var isChecked = String(p.isuId) === String(obj.id);
-                        var otherIsu = (!isChecked && p.isuId) ? (S.isu || []).find(function(x) { return String(x.id) === String(p.isuId); }) : null;
-                        var badge = isChecked ? '<span class="label label-success" style="margin-left: 6px;">Terhubung</span>' :
-                                   (otherIsu ? '<span class="label label-warning" style="margin-left: 6px;">Isu: ' + $('<div>').text(otherIsu.text).html() + '</span>' :
-                                              '<span class="label label-default" style="margin-left: 6px;">Belum dipetakan</span>');
+                    S.perm.forEach(function(p) {
+                        var pIsuIds = (p.isuIds || (p.isuId ? [p.isuId] : [])).map(String);
+                        var isChecked = pIsuIds.indexOf(String(curIsu.id)) > -1;
+
                         var l = $('<label class="chk"></label>');
                         var inp = $('<input type="checkbox">').val(p.id).prop('checked', isChecked);
-                        var num = (idx + 1) + '. ';
-                        l.append(inp).append($('<span></span>').html('<strong>' + num + '</strong>' + $('<div>').text(p.text).html() + ' ' + badge));
+
+                        inp.on('change', function() {
+                            var checkedBoxes = ctn.find('input:checked');
+                            var checkedIds = [];
+                            checkedBoxes.each(function() { checkedIds.push($(this).val()); });
+
+                            if (checkedIds.length > 2) {
+                                $(this).prop('checked', false);
+                                $('#editIsuErr').text('Maksimal 2 Permasalahan yang dapat diampu.');
+                                return;
+                            }
+
+                            var adjCheck = validateAdjacentSelection(checkedIds, S.perm, 'Permasalahan');
+                            if (!adjCheck.valid) {
+                                $(this).prop('checked', false);
+                                $('#editIsuErr').text(adjCheck.message);
+                            } else {
+                                $('#editIsuErr').text('');
+                            }
+                        });
+
+                        l.append(inp).append($('<span></span>').text(p.text));
                         ctn.append(l);
                     });
                 }
@@ -1191,23 +1798,48 @@ $(document).ready(function() {
                 setTimeout(function() { $('#editIsuText').focus(); }, 350);
 
             } else if (type === 'prog') {
-                $('#editProgId').val(obj.id);
-                $('#editProgText').val(obj.text);
+                var curProg = (S.prog || []).find(function(r) { return String(r.id) === String(obj.id); }) || obj;
+                $('#editProgId').val(curProg.id);
+                $('#editProgText').val(curProg.text);
                 $('#editProgErr').text('');
+                $('#searchEditProgIsu').val('');
 
                 var ctn = $('#editProgIsuContainer');
                 ctn.empty();
 
-                if (!S.isu || !S.isu.length) {
+                var orderedIsus = getOrderedIsus();
+                if (!orderedIsus || !orderedIsus.length) {
                     ctn.html('<div class="empty-msg">Belum ada isu strategis.</div>');
                 } else {
-                    var activeIsuId = (isuContext && isuContext.id) ? String(isuContext.id) : 
-                                     ((obj.isuIds && obj.isuIds.length) ? String(obj.isuIds[0]) : '');
+                    var activeIsuIds = (curProg.isuIds && curProg.isuIds.length) 
+                        ? curProg.isuIds.map(String) 
+                        : (isuContext && isuContext.id ? [String(isuContext.id)] : []);
 
-                    S.isu.forEach(function(i, idx) {
-                        var isChecked = activeIsuId ? (String(i.id) === activeIsuId) : (idx === 0);
+                    orderedIsus.forEach(function(i, idx) {
+                        var isChecked = activeIsuIds.indexOf(String(i.id)) > -1;
                         var l = $('<label class="chk"></label>');
-                        var inp = $('<input type="radio" name="editProgIsuRadio">').val(i.id).prop('checked', isChecked);
+                        var inp = $('<input type="checkbox" name="editProgIsuChk">').val(i.id).prop('checked', isChecked);
+
+                        inp.on('change', function() {
+                            var checkedBoxes = ctn.find('input[name="editProgIsuChk"]:checked');
+                            var checkedIds = [];
+                            checkedBoxes.each(function() { checkedIds.push($(this).val()); });
+
+                            if (checkedIds.length > 2) {
+                                $(this).prop('checked', false);
+                                $('#editProgErr').text('Maksimal 2 Isu Strategis yang dapat diampu.');
+                                return;
+                            }
+
+                            var adjCheck = validateAdjacentSelection(checkedIds, orderedIsus, 'Isu Strategis');
+                            if (!adjCheck.valid) {
+                                $(this).prop('checked', false);
+                                $('#editProgErr').text(adjCheck.message);
+                            } else {
+                                $('#editProgErr').text('');
+                            }
+                        });
+
                         l.append(inp).append($('<span></span>').text(i.text));
                         ctn.append(l);
                     });
@@ -1221,10 +1853,25 @@ $(document).ready(function() {
         $('#btnSaveEditPerm').on('click', function() {
             var id = $('#editPermId').val();
             var text = $.trim($('#editPermText').val());
+            var isuIds = [];
+            $('#editPermIsuContainer input[name="editPermIsuChk"]:checked').each(function() {
+                isuIds.push($(this).val());
+            });
 
             if (!text) {
                 $('#editPermErr').text('Uraian permasalahan wajib diisi!');
                 $('#editPermText').focus();
+                return;
+            }
+
+            if (isuIds.length > 2) {
+                $('#editPermErr').text('Maksimal 2 Isu Strategis yang dapat diampu.');
+                return;
+            }
+            var orderedIsus = getOrderedIsus();
+            var adjCheck = validateAdjacentSelection(isuIds, orderedIsus, 'Isu Strategis');
+            if (!adjCheck.valid) {
+                $('#editPermErr').text(adjCheck.message);
                 return;
             }
 
@@ -1239,6 +1886,7 @@ $(document).ready(function() {
                 data: {
                     id: id,
                     text: text,
+                    isuIds: isuIds,
                     KodeWilayah: kodeWilayah,
                     Tahun: tahun
                 },
@@ -1270,6 +1918,16 @@ $(document).ready(function() {
             if (!text) {
                 $('#editIsuErr').text('Uraian isu strategis wajib diisi!');
                 $('#editIsuText').focus();
+                return;
+            }
+
+            if (permIds.length > 2) {
+                $('#editIsuErr').text('Maksimal 2 Permasalahan yang dapat diampu.');
+                return;
+            }
+            var adjCheck = validateAdjacentSelection(permIds, S.perm, 'Permasalahan');
+            if (!adjCheck.valid) {
+                $('#editIsuErr').text(adjCheck.message);
                 return;
             }
 
@@ -1308,8 +1966,10 @@ $(document).ready(function() {
         $('#btnSaveEditProg').on('click', function() {
             var id = $('#editProgId').val();
             var text = $.trim($('#editProgText').val());
-            var selectedIsuId = $('#editProgIsuContainer input[name="editProgIsuRadio"]:checked').val();
-            var isuIds = selectedIsuId ? [selectedIsuId] : [];
+            var isuIds = [];
+            $('#editProgIsuContainer input[name="editProgIsuChk"]:checked').each(function() {
+                isuIds.push($(this).val());
+            });
 
             if (!text) {
                 $('#editProgErr').text('Uraian prioritas daerah wajib diisi!');
@@ -1317,7 +1977,17 @@ $(document).ready(function() {
                 return;
             }
             if (!isuIds.length) {
-                $('#editProgErr').text('Pilih isu strategis yang terkait!');
+                $('#editProgErr').text('Pilih minimal 1 isu strategis yang terkait!');
+                return;
+            }
+            if (isuIds.length > 2) {
+                $('#editProgErr').text('Maksimal 2 Isu Strategis yang dapat diampu.');
+                return;
+            }
+            var orderedIsus = getOrderedIsus();
+            var adjCheck = validateAdjacentSelection(isuIds, orderedIsus, 'Isu Strategis');
+            if (!adjCheck.valid) {
+                $('#editProgErr').text(adjCheck.message);
                 return;
             }
 
@@ -1350,6 +2020,45 @@ $(document).ready(function() {
                     $('#editProgErr').text('Terjadi kesalahan server: ' + err);
                 }
             });
+        });
+
+        // Filter Pencarian Real-Time pada Checkbox Modal
+        function bindSearchFilter(inputId, containerId) {
+            $('#' + inputId).on('input keyup', function() {
+                var q = $(this).val().toLowerCase().trim();
+                var $container = $('#' + containerId);
+                var $items = $container.find('label.chk');
+                var matchCount = 0;
+
+                $items.each(function() {
+                    var txt = $(this).text().toLowerCase();
+                    var isMatch = !q || txt.indexOf(q) > -1;
+                    $(this).css('display', isMatch ? 'flex' : 'none');
+                    if (isMatch) matchCount++;
+                });
+
+                var $noMatch = $container.find('.search-no-match');
+                if (q && matchCount === 0 && $items.length > 0) {
+                    if (!$noMatch.length) {
+                        $container.append('<div class="search-no-match empty-msg" style="padding: 10px; margin-top: 4px; font-size: 12px;">Tidak ditemukan data yang sesuai dengan pencarian "' + $('<div>').text(q).html() + '"</div>');
+                    } else {
+                        $noMatch.html('Tidak ditemukan data yang sesuai dengan pencarian "' + $('<div>').text(q).html() + '"').show();
+                    }
+                } else {
+                    $noMatch.hide();
+                }
+            });
+        }
+
+        bindSearchFilter('searchPickP', 'pickP');
+        bindSearchFilter('searchPickI', 'pickI');
+        bindSearchFilter('searchEditPermIsu', 'editPermIsuContainer');
+        bindSearchFilter('searchEditIsuPerm', 'editIsuPermContainer');
+        bindSearchFilter('searchEditProgIsu', 'editProgIsuContainer');
+
+        // Reset pencarian saat modal ditutup
+        $('#dP, #dI, #dR, #ModalEditPermasalahan, #ModalEditIsu, #ModalEditPrioritas').on('hidden.bs.modal', function() {
+            $(this).find('input[id^="search"]').val('');
         });
 
     }

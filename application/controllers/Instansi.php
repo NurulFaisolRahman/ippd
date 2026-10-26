@@ -12,6 +12,37 @@ class Instansi extends CI_Controller {
         if (!isset($this->db)) {
             $this->load->database();
         }
+
+        // Cek jika akun verifikator: hanya izinkan akses ke menu/fitur IPPD
+        $isVerifikator = !empty($_SESSION['IsVerifikator']) || 
+                         (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 4 && strtolower($_SESSION['Username'] ?? '') === 'verifikator');
+        
+        if ($isVerifikator) {
+            $method = strtolower($this->router->fetch_method());
+            $allowed_methods = [
+                'tabelippd',
+                'ippd',
+                'getippddata',
+                'saveippdverifikator',
+                'uploadbuktiippd',
+                'saveippdscore',
+                'saveallippdscore',
+                'resetippddata',
+                'settempkodewilayah',
+                'resettempfilter',
+                'logout'
+            ];
+            if (!in_array($method, $allowed_methods)) {
+                if ($this->input->is_ajax_request()) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['status' => 'error', 'message' => 'Akses ditolak: Akun Verifikator hanya dapat mengakses menu IPPD.']);
+                    exit;
+                } else {
+                    redirect(base_url('Instansi/TabelIPPD'));
+                    exit;
+                }
+            }
+        }
     }
 
     public function Logout() {
