@@ -510,6 +510,7 @@ $isVerifikator = !empty($_SESSION['IsVerifikator']) ||
                     <a href="<?=base_url('Daerah/IsuStrategisDaerah')?>">Isu Strategis Daerah</a>
                     <a href="<?=base_url('Daerah/VisiRPJMD')?>">VMTS</a>
                     <a href="<?=base_url('Daerah/TabelKeselarasan')?>">Tabel Keselarasan</a>
+                    <a href="<?=base_url('Daerah/TahapanRPJMD')?>">Tahapan</a>
                     <a href="<?=base_url('Daerah/DukunganKegiatanPrioritas')?>">Dukungan Kegiatan Prioritas</a>
                     <a href="<?=base_url('Daerah/ProgramPrioritasRPJMD')?>">Program Prioritas RPJMD</a>
                     <a href="<?=base_url('Daerah/ProgramPD')?>">Program</a>
@@ -518,7 +519,6 @@ $isVerifikator = !empty($_SESSION['IsVerifikator']) ||
                     <a href="<?=base_url('Daerah/SPM')?>">SPM</a>
 
                     <!-- // <a href="<?=base_url('Daerah/ArahKebijakanRPJMD')?>">Arah Kebijakan</a> -->
-                    <!-- // <a href="<?=base_url('Daerah/TahapanRPJMD')?>">Tahapan</a> -->
                     <!-- // <a href="<?=base_url('Daerah/cascade')?>">Cascade</a> -->
                     <!-- // <a href="<?=base_url('Daerah/PotensiDaerah')?>">Potensi Daerah</a> -->
                     <!-- // <a href="<?=base_url('Daerah/PermasalahanPokok')?>">Permasalahan Pokok</a> -->

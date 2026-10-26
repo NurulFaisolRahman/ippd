@@ -4534,61 +4534,284 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     if ($wilayah) {
                         $Data['KodeWilayah'] = $KodeWilayah;
                         $Data['NamaWilayah'] = $wilayah['Nama'];
-                        $Data['Visi'] = $this->db->where('KodeWilayah', $KodeWilayah)
+                        // Ambil 1 data tahapan saja (single record) untuk wilayah ini
+                        $Data['Tahapan'] = $this->db->where('KodeWilayah', $KodeWilayah)
                             ->where('deleted_at IS NULL')
-                            ->get('visirpjmd')->result_array();
-                        $Data['Tahapan'] = $this->db->select('v.Id as IdVisi, v.TahunMulai, v.TahunAkhir, t.*')
-                            ->from('visirpjmd v')
-                            ->join('tahapanrpjmd t', 't._Id = v.Id')
-                            ->where('t.KodeWilayah', $KodeWilayah)
-                            ->where('t.deleted_at IS NULL')
-                            ->get()->result_array();
+                            ->order_by('Id', 'DESC')
+                            ->get('tahapanrpjmd')->row_array();
                     } else {
                         $Data['KodeWilayah'] = '';
                         $Data['NamaWilayah'] = '';
-                        $Data['Visi'] = [];
-                        $Data['Tahapan'] = [];
+                        $Data['Tahapan'] = null;
                         log_message('error', 'KodeWilayah ' . $KodeWilayah . ' tidak ditemukan di tabel kodewilayah');
                     }
                 } else {
                     $Data['KodeWilayah'] = '';
                     $Data['NamaWilayah'] = '';
-                    $Data['Visi'] = [];
-                    $Data['Tahapan'] = [];
+                    $Data['Tahapan'] = null;
                 }
 
-                log_message('debug', 'Jumlah provinsi: ' . count($Data['Provinsi']));
                 $this->load->view('Daerah/header', $Header);
                 $this->load->view('Daerah/TahapanRPJMD', $Data);
             }
 
-        public function InputTahapanRPJMD(){  
-            $_POST['KodeWilayah'] = $_SESSION['KodeWilayah'];
-            $this->db->insert('tahapanrpjmd',$_POST);
-            if ($this->db->affected_rows()){
-            echo '1';
+        public function GetTahapanRPJMDById() {
+            $id = $this->input->post('Id', TRUE) ?: $this->input->get('Id', TRUE);
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) && !empty($_SESSION['KodeWilayah']) 
+                ? $_SESSION['KodeWilayah'] 
+                : (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+
+            if ($id) {
+                $data = $this->db->where('Id', $id)->where('deleted_at IS NULL')->get('tahapanrpjmd')->row_array();
+            } else if ($KodeWilayah) {
+                $data = $this->db->where('KodeWilayah', $KodeWilayah)->where('deleted_at IS NULL')->order_by('Id', 'DESC')->get('tahapanrpjmd')->row_array();
             } else {
-            echo 'Gagal Menyimpan Data!';
+                $data = [];
             }
-            }
+            header('Content-Type: application/json');
+            echo json_encode($data ?: []);
+        }
+
+        /**
+         * AMBIL TEMA DAERAH DARI TAHAPAN RPJMD BERDASARKAN TAHUN
+         */
+        public function GetTemaDaerahFromTahapanRPJMD() {
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) && !empty($_SESSION['KodeWilayah']) 
+                ? $_SESSION['KodeWilayah'] 
+                : (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : $this->input->post('KodeWilayah', TRUE));
             
-            public function EditTahapanRPJMD(){  
-                $this->db->where('Id',$_POST['Id']); 
-                $this->db->update('tahapanrpjmd', $_POST);
-            if ($this->db->affected_rows()){
-            echo '1';
+            $tahun = trim($this->input->post('Tahun', TRUE) ?: $this->input->get('Tahun', TRUE));
+
+            if (empty($KodeWilayah) || empty($tahun)) {
+                echo json_encode(['status' => 'error', 'message' => 'Kode Wilayah atau Tahun belum ditentukan!', 'tema_daerah' => '']);
+                return;
+            }
+
+            $colTahun = 'tahun_' . $tahun;
+            $tahapan = $this->db->where('KodeWilayah', $KodeWilayah)
+                ->where('deleted_at IS NULL')
+                ->order_by('Id', 'DESC')
+                ->get('tahapanrpjmd')
+                ->row_array();
+
+            if ($tahapan && isset($tahapan[$colTahun]) && !empty($tahapan[$colTahun])) {
+                echo json_encode([
+                    'status' => 'success',
+                    'tahun' => $tahun,
+                    'tema_daerah' => $tahapan[$colTahun],
+                    'message' => 'Berhasil mengambil tema dari Tahapan RPJMD Tahun ' . $tahun
+                ]);
             } else {
-            echo 'Gagal Update Data!';
+                echo json_encode([
+                    'status' => 'empty',
+                    'tahun' => $tahun,
+                    'tema_daerah' => '',
+                    'message' => 'Data Tahapan RPJMD untuk tahun ' . $tahun . ' belum diisi.'
+                ]);
             }
         }
 
-        public function HapusTahapanRPJMD(){  
-                $_POST['deleted_at'] = date('Y-m-d H:i:s');
-                $this->db->where('Id',$_POST['Id'])->update('tahapanrpjmd', $_POST);
-            if ($this->db->affected_rows()){
-            echo '1';
+        public function InputTahapanRPJMD() {  
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) && !empty($_SESSION['KodeWilayah']) 
+                ? $_SESSION['KodeWilayah'] 
+                : (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : $this->input->post('KodeWilayah', TRUE));
+
+            $id = (int)$this->input->post('Id', TRUE);
+
+            // Cek apakah sudah ada data untuk wilayah ini jika Id tidak dikirim
+            if (!$id && $KodeWilayah) {
+                $existing = $this->db->where('KodeWilayah', $KodeWilayah)->where('deleted_at IS NULL')->order_by('Id', 'DESC')->get('tahapanrpjmd')->row_array();
+                if ($existing) {
+                    $id = (int)$existing['Id'];
+                }
+            }
+
+            $t2026 = trim($this->input->post('tahun_2026', TRUE) ?: $this->input->post('tahun_1', TRUE));
+            $t2027 = trim($this->input->post('tahun_2027', TRUE) ?: $this->input->post('tahun_2', TRUE));
+            $t2028 = trim($this->input->post('tahun_2028', TRUE) ?: $this->input->post('tahun_3', TRUE));
+            $t2029 = trim($this->input->post('tahun_2029', TRUE) ?: $this->input->post('tahun_4', TRUE));
+            $t2030 = trim($this->input->post('tahun_2030', TRUE) ?: $this->input->post('tahun_5', TRUE));
+
+            $payload = [
+                'KodeWilayah' => $KodeWilayah,
+                'tahun_2026'  => $t2026,
+                'tahun_2027'  => $t2027,
+                'tahun_2028'  => $t2028,
+                'tahun_2029'  => $t2029,
+                'tahun_2030'  => $t2030,
+                'updated_at'  => date('Y-m-d H:i:s')
+            ];
+
+            if ($id) {
+                $this->db->where('Id', $id)->update('tahapanrpjmd', $payload);
+                $sukses = true;
             } else {
-            echo 'Gagal Hapus Data!';
+                $payload['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('tahapanrpjmd', $payload);
+                $sukses = ($this->db->affected_rows() > 0);
+            }
+
+            if ($sukses) {
+                // Sinkronkan ke tema_pembangunan untuk tahun 2026 - 2030
+                $syncYears = [
+                    2026 => $t2026,
+                    2027 => $t2027,
+                    2028 => $t2028,
+                    2029 => $t2029,
+                    2030 => $t2030
+                ];
+                foreach ($syncYears as $sYear => $sVal) {
+                    if ($sVal !== '') {
+                        $this->db->where('kode_wilayah', $KodeWilayah)
+                            ->where('tahun', $sYear)
+                            ->where('deleted_at IS NULL')
+                            ->update('tema_pembangunan', [
+                                'tema_daerah' => $sVal,
+                                'updated_at'  => date('Y-m-d H:i:s')
+                            ]);
+                    }
+                }
+                echo '1';
+            } else {
+                echo 'Gagal Menyimpan Data!';
+            }
+        }
+            
+        public function EditTahapanRPJMD() {  
+            // Panggil logika yang sama (Upsert)
+            $this->InputTahapanRPJMD();
+        }
+
+        public function EditTahapanRPJMDPerTahun() {
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) && !empty($_SESSION['KodeWilayah']) 
+                ? $_SESSION['KodeWilayah'] 
+                : (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : $this->input->post('KodeWilayah', TRUE));
+
+            $tahun_ke = (int)$this->input->post('tahun_ke', TRUE);
+            $isi = trim($this->input->post('isi', TRUE));
+
+            // Konversi ke tahun 2026 - 2030 jika dikirim 1 s/d 5
+            if ($tahun_ke >= 1 && $tahun_ke <= 5) {
+                $tahun = 2025 + $tahun_ke;
+            } else if ($tahun_ke >= 2026 && $tahun_ke <= 2030) {
+                $tahun = $tahun_ke;
+            } else {
+                echo 'Tahun tidak valid!';
+                return;
+            }
+
+            $col = 'tahun_' . $tahun;
+            $existing = $this->db->where('KodeWilayah', $KodeWilayah)->where('deleted_at IS NULL')->order_by('Id', 'DESC')->get('tahapanrpjmd')->row_array();
+
+            if ($existing) {
+                $update = [
+                    $col => $isi,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+                $this->db->where('Id', $existing['Id'])->update('tahapanrpjmd', $update);
+                
+                // Sinkronkan ke tema_pembangunan untuk tahun terkait
+                $this->db->where('kode_wilayah', $KodeWilayah)
+                    ->where('tahun', $tahun)
+                    ->where('deleted_at IS NULL')
+                    ->update('tema_pembangunan', [
+                        'tema_daerah' => $isi,
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+
+                echo '1';
+            } else {
+                $insert = [
+                    'KodeWilayah' => $KodeWilayah,
+                    $col => $isi,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+                $this->db->insert('tahapanrpjmd', $insert);
+                if ($this->db->affected_rows()) {
+                    // Sinkronkan ke tema_pembangunan untuk tahun terkait
+                    $this->db->where('kode_wilayah', $KodeWilayah)
+                        ->where('tahun', $tahun)
+                        ->where('deleted_at IS NULL')
+                        ->update('tema_pembangunan', [
+                            'tema_daerah' => $isi,
+                            'updated_at' => date('Y-m-d H:i:s')
+                        ]);
+
+                    echo '1';
+                } else {
+                    echo 'Gagal Menyimpan Data!';
+                }
+            }
+        }
+
+        public function HapusTahapanRPJMDPerTahun() {
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) && !empty($_SESSION['KodeWilayah']) 
+                ? $_SESSION['KodeWilayah'] 
+                : (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : $this->input->post('KodeWilayah', TRUE));
+
+            $tahun_ke = (int)$this->input->post('tahun_ke', TRUE);
+            if ($tahun_ke >= 1 && $tahun_ke <= 5) {
+                $tahun = 2025 + $tahun_ke;
+            } else if ($tahun_ke >= 2026 && $tahun_ke <= 2030) {
+                $tahun = $tahun_ke;
+            } else {
+                echo 'Tahun tidak valid!';
+                return;
+            }
+
+            $col = 'tahun_' . $tahun;
+            $existing = $this->db->where('KodeWilayah', $KodeWilayah)->where('deleted_at IS NULL')->order_by('Id', 'DESC')->get('tahapanrpjmd')->row_array();
+
+            if ($existing) {
+                $update = [
+                    $col => null,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+                $this->db->where('Id', $existing['Id'])->update('tahapanrpjmd', $update);
+
+                // Cek apakah seluruh tahun sekarang kosong
+                $check = $this->db->where('Id', $existing['Id'])->get('tahapanrpjmd')->row_array();
+                $allEmpty = empty($check['tahun_2026']) && empty($check['tahun_2027']) && empty($check['tahun_2028']) && empty($check['tahun_2029']) && empty($check['tahun_2030']);
+                if ($allEmpty) {
+                    $this->db->where('Id', $existing['Id'])->update('tahapanrpjmd', [
+                        'deleted_at' => date('Y-m-d H:i:s')
+                    ]);
+                }
+
+                // Kosongkan tema_daerah di tema_pembangunan untuk tahun terkait
+                $this->db->where('kode_wilayah', $KodeWilayah)
+                    ->where('tahun', $tahun)
+                    ->where('deleted_at IS NULL')
+                    ->update('tema_pembangunan', [
+                        'tema_daerah' => null,
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+
+                echo '1';
+            } else {
+                echo 'Data tidak ditemukan!';
+            }
+        }
+
+        public function HapusTahapanRPJMD() {  
+            $id = $this->input->post('Id', TRUE);
+            $KodeWilayah = isset($_SESSION['KodeWilayah']) && !empty($_SESSION['KodeWilayah']) 
+                ? $_SESSION['KodeWilayah'] 
+                : (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : '');
+
+            if ($id) {
+                $this->db->where('Id', $id)->update('tahapanrpjmd', [
+                    'deleted_at' => date('Y-m-d H:i:s')
+                ]);
+                echo '1';
+            } else if ($KodeWilayah) {
+                $this->db->where('KodeWilayah', $KodeWilayah)->where('deleted_at IS NULL')->update('tahapanrpjmd', [
+                    'deleted_at' => date('Y-m-d H:i:s')
+                ]);
+                echo '1';
+            } else {
+                echo 'ID atau Kode Wilayah tidak valid!';
             }
         }
 
@@ -15380,8 +15603,32 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             ->get('tema_pembangunan')
                             ->result_array();
                         
+                        // Ambil data Tahapan RPJMD untuk wilayah ini
+                        $tahapanRpjmd = $this->db
+                            ->where('KodeWilayah', $KodeWilayah)
+                            ->where('deleted_at IS NULL')
+                            ->order_by('Id', 'DESC')
+                            ->get('tahapanrpjmd')
+                            ->row_array();
+
                         // Ambil prioritas untuk setiap tema
                         foreach ($temas as &$tema) {
+                            // Samakan Tema Pembangunan Daerah dengan Tahapan RPJMD sesuai tahunnya
+                            $thn = (string)$tema['tahun'];
+                            $colTahun = 'tahun_' . $thn;
+                            if ($tahapanRpjmd && !empty($tahapanRpjmd[$colTahun])) {
+                                $isiTahapan = trim($tahapanRpjmd[$colTahun]);
+                                if (!empty($isiTahapan)) {
+                                    if (trim((string)$tema['tema_daerah']) !== $isiTahapan) {
+                                        $this->db->where('id', $tema['id'])->update('tema_pembangunan', [
+                                            'tema_daerah' => $isiTahapan,
+                                            'updated_at' => date('Y-m-d H:i:s')
+                                        ]);
+                                    }
+                                    $tema['tema_daerah'] = $isiTahapan;
+                                }
+                            }
+
                             // Prioritas Nasional
                             $tema['prioritas_nasional'] = $this->db
                                 ->where('tema_id', $tema['id'])
@@ -15433,6 +15680,30 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     ->order_by('Tahun', 'DESC')
                     ->get('temarkp')
                     ->result_array();
+
+                // Data untuk dropdown Tema Daerah (dari tabel tahapanrpjmd wilayah ini)
+                $Data['TahapanRPJMD'] = null;
+                $Data['TahunTahapanRPJMD'] = [];
+                if (!empty($KodeWilayah)) {
+                    $tahapanRow = $this->db
+                        ->where('KodeWilayah', $KodeWilayah)
+                        ->where('deleted_at IS NULL')
+                        ->order_by('Id', 'DESC')
+                        ->get('tahapanrpjmd')
+                        ->row_array();
+                    $Data['TahapanRPJMD'] = $tahapanRow;
+                    if ($tahapanRow) {
+                        for ($y = 2026; $y <= 2030; $y++) {
+                            $col = 'tahun_' . $y;
+                            if (!empty($tahapanRow[$col])) {
+                                $Data['TahunTahapanRPJMD'][] = [
+                                    'Tahun' => $y,
+                                    'Tema' => trim($tahapanRow[$col])
+                                ];
+                            }
+                        }
+                    }
+                }
                 
                 // Data prioritas nasional RPJMN untuk dropdown
                 $Data['PrioritasNasionalRPJMN'] = $this->db
@@ -15546,6 +15817,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     return;
                 }
                 
+                // Jika Tema Daerah kosong, coba ambil otomatis dari Tahapan RPJMD
+                if (empty($temaDaerah)) {
+                    $colTahun = 'tahun_' . $tahun;
+                    $tahapanRow = $this->db->where('KodeWilayah', $kodeWilayah)->where('deleted_at IS NULL')->order_by('Id', 'DESC')->get('tahapanrpjmd')->row_array();
+                    if ($tahapanRow && !empty($tahapanRow[$colTahun])) {
+                        $temaDaerah = trim($tahapanRow[$colTahun]);
+                    }
+                }
+
                 // === PERBAIKAN: Simpan tema_rkp_id ===
                 $data = [
                     'kode_wilayah' => $kodeWilayah,
@@ -15653,6 +15933,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     return;
                 }
                 
+                // Jika Tema Daerah kosong, coba ambil otomatis dari Tahapan RPJMD
+                if (empty($temaDaerah)) {
+                    $colTahun = 'tahun_' . $tahun;
+                    $tahapanRow = $this->db->where('KodeWilayah', $kodeWilayah)->where('deleted_at IS NULL')->order_by('Id', 'DESC')->get('tahapanrpjmd')->row_array();
+                    if ($tahapanRow && !empty($tahapanRow[$colTahun])) {
+                        $temaDaerah = trim($tahapanRow[$colTahun]);
+                    }
+                }
+
                 // === PERBAIKAN: Simpan tema_rkp_id ===
                 $data = [
                     'tahun' => $tahun,
@@ -20506,6 +20795,56 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 ->order_by('TemaRKP', 'ASC')
                 ->get('temarkp')
                 ->result_array();
+            
+            echo json_encode($data);
+        }
+
+        /**
+         * GET TEMA TAHAPAN RPJMD BERDASARKAN TAHUN
+         * Untuk dropdown Tema Daerah di form Tema Pembangunan (sama seperti GetTemaRKPByTahun)
+         */
+        public function GetTemaTahapanRPJMDByTahun() {
+            if (!$this->input->is_ajax_request()) {
+                show_404();
+                return;
+            }
+            
+            $kodeWilayah = $this->session->userdata('KodeWilayah') ?: $this->session->userdata('TempKodeWilayah');
+            $tahun = (int)$this->input->post('tahun', TRUE);
+            
+            if (empty($kodeWilayah)) {
+                echo json_encode([]);
+                return;
+            }
+            
+            $row = $this->db->where('KodeWilayah', $kodeWilayah)
+                ->where('deleted_at IS NULL')
+                ->order_by('Id', 'DESC')
+                ->get('tahapanrpjmd')
+                ->row_array();
+            
+            $data = [];
+            if ($row) {
+                if ($tahun >= 2026 && $tahun <= 2030) {
+                    $col = 'tahun_' . $tahun;
+                    if (!empty($row[$col])) {
+                        $data[] = [
+                            'Tahun' => $tahun,
+                            'Tema' => trim($row[$col])
+                        ];
+                    }
+                } else if ($tahun <= 0) {
+                    for ($y = 2026; $y <= 2030; $y++) {
+                        $col = 'tahun_' . $y;
+                        if (!empty($row[$col])) {
+                            $data[] = [
+                                'Tahun' => $y,
+                                'Tema' => trim($row[$col])
+                            ];
+                        }
+                    }
+                }
+            }
             
             echo json_encode($data);
         }
